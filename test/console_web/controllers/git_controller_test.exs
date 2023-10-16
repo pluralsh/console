@@ -23,7 +23,7 @@ defmodule ConsoleWeb.GitControllerTest do
 
       %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
       assert error.source == "git"
-      assert error.message == "error: pathspec 'doesnt-exist' did not match any file(s) known to git\n"
+      assert error.message == "could not resolve ref doesnt-exist"
     end
 
     test "non-permitted tokens are 403'ed", %{conn: conn} do

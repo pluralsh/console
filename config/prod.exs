@@ -39,7 +39,8 @@ config :console, :watchers, [
   # Console.Watchers.Plural,
   Console.Watchers.Upgrade,
   Console.Watchers.Pod,
-  Console.Watchers.Postgres
+  Console.Watchers.Postgres,
+  Console.Watchers.Secret,
 ]
 
 config :console,

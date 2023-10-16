@@ -3,17 +3,32 @@ defmodule Console.Deployments.Clusters do
   use Nebulex.Caching
   import Console.Deployments.Policies
   alias Console.PubSub
+  alias Console.Commands.{Tee, Command}
   alias Console.Deployments.{Services, Git}
   alias Console.Services.Users
+  alias Kazan.Apis.Core.V1, as: Core
   alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken, ClusterRevision, ProviderCredential}
   require Logger
 
   @cache_adapter Console.conf(:cache_adapter)
-  @ttl :timer.minutes(45)
+  @local_adapter Console.conf(:local_cache)
+  @ttl :timer.minutes(1)
+  @node_ttl :timer.minutes(2)
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
   @type credential_resp :: {:ok, ProviderCredential.t} | Console.error
+
+  def find!(identifier) do
+    case Uniq.UUID.parse(identifier) do
+      {:ok, _} -> get_cluster!(identifier)
+      _ -> get_cluster_by_handle!(identifier)
+    end
+  end
+
+  def get_cluster!(id), do: Console.Repo.get!(Cluster, id)
+
+  def get_provider!(id), do: Console.Repo.get!(ClusterProvider, id)
 
   def get_cluster(id), do: Console.Repo.get(Cluster, id)
 
@@ -36,7 +51,7 @@ defmodule Console.Deployments.Clusters do
     end
   end
 
-  defp kubeconfig(%Cluster{name: name} = cluster) do
+  def kubeconfig(%Cluster{name: name} = cluster) do
     with ns when is_binary(ns) <- namespace(cluster),
          {:ok, %{data: %{"value" => value}}} <- Kube.Utils.get_secret(ns, "#{name}-kubeconfig"),
       do: Base.decode64(value)
@@ -54,10 +69,77 @@ defmodule Console.Deployments.Clusters do
   end
 
   @doc """
+  Fetches the nodes for a cluster, this query is heavily cached for performance
+  """
+  @spec nodes(Cluster.t) :: {:ok, term} | Console.error
+  @decorate cacheable(cache: @local_adapter, key: {:nodes, id}, ttl: @node_ttl)
+  def nodes(%Cluster{id: id} = cluster) do
+    with %Kazan.Server{} = server <- control_plane(cluster),
+         _ <- Kube.Utils.save_kubeconfig(server),
+         {:ok, %{items: items}} <- Core.list_node!() |> Kube.Utils.run() do
+      {:ok, items}
+    else
+      _ -> {:ok, []}
+    end
+  end
+
+  @doc """
+  Fetches the node metrics for a cluster, this query is heavily cached for performance
+  """
+  @spec node_metrics(Cluster.t) :: {:ok, term} | Console.error
+  @decorate cacheable(cache: @local_adapter, key: {:node_metrics, id}, ttl: @node_ttl)
+  def node_metrics(%Cluster{id: id} = cluster) do
+    with %Kazan.Server{} = server <- control_plane(cluster),
+         _ <- Kube.Utils.save_kubeconfig(server),
+         {:ok, %{items: items}} <- Kube.Client.list_metrics() do
+      {:ok, items}
+    else
+      _ -> {:ok, []}
+    end
+  end
+
+  @doc """
+  the duration for the node cache to live
+  """
+  @spec node_ttl() :: integer
+  def node_ttl(), do: @node_ttl
+
+  @doc """
+  removes all cache entries for this cluster
+  """
+  @spec flush_cache(Cluster.t) :: :ok
+  def flush_cache(%Cluster{id: id}) do
+    @local_adapter.delete({:node_metrics, id})
+    @local_adapter.delete({:nodes, id})
+  end
+
+  @doc """
+  Refreshes the kubeconfig cache for all clusters matching a given ns/name pair
+  """
+  @spec refresh_kubeconfig(binary, binary) :: :ok
+  def refresh_kubeconfig(ns, name) do
+    Cluster.for_namespace(ns)
+    |> Cluster.for_name(name)
+    |> Repo.all()
+    |> Enum.each(&__MODULE__.refresh_kubeconfig/1) # call on self module to allow for mocking
+  end
+
+  @doc """
+  Regenerates and caches kubeconfig for a cluster
+  """
+  @spec refresh_kubeconfig(Cluster.t) :: term
+  def refresh_kubeconfig(%Cluster{id: id} = cluster) do
+    @cache_adapter.delete({:control_plane, id})
+    control_plane(cluster)
+  end
+
+  @doc """
   Installs the operator on this cluster using the plural cd command
   """
   @spec install(Cluster.t) :: cluster_resp
   def install(%Cluster{id: id, deploy_token: token} = cluster) do
+    tee = Tee.new()
+    Command.set_build(tee)
     url = Services.api_url("gql")
     cluster = Repo.preload(cluster, [:provider, :credential])
     with {:ok, %Kube.Cluster{status: %Kube.Cluster.Status{control_plane_ready: true}}} <- cluster_crd(cluster),
@@ -68,14 +150,26 @@ defmodule Console.Deployments.Clusters do
       |> Cluster.changeset(%{installed: true, service_errors: []})
       |> Repo.update()
     else
-      {:error, msg} = err ->
-        add_errors(cluster, [%{source: "bootstrap", message: msg}])
+      {:error, out} = err ->
+        add_errors(cluster, [%{source: "bootstrap", message: Tee.output(out)}])
         err
       pass ->
         Logger.info "could not install operator to cluster: #{inspect(pass)}"
         {:error, :unready}
     end
   end
+
+  @doc """
+  checks if a user can access a given cluster
+  """
+  @spec authorized(binary, Cluster.t | User.t) :: cluster_resp
+  def authorized(%Cluster{} = cluster, %User{} = user), do: allow(cluster, user, :read)
+  def authorized(cluster_id, actor) when is_binary(cluster_id) do
+    get_cluster(cluster_id)
+    |> Repo.preload([:provider, :credential])
+    |> authorized(actor)
+  end
+  def authorized(_, _), do: {:error, "could not find cluster"}
 
   @doc """
   Get the namespace this cluster will reside in
@@ -88,17 +182,6 @@ defmodule Console.Deployments.Clusters do
       _ -> nil
     end
   end
-
-  def find!(identifier) do
-    case Uniq.UUID.parse(identifier) do
-      {:ok, _} -> get_cluster!(identifier)
-      _ -> get_cluster_by_handle!(identifier)
-    end
-  end
-
-  def get_cluster!(id), do: Console.Repo.get!(Cluster, id)
-
-  def get_provider!(id), do: Console.Repo.get!(ClusterProvider, id)
 
   def revisions(%Cluster{id: id}) do
     ClusterRevision.for_cluster(id)
@@ -143,6 +226,7 @@ defmodule Console.Deployments.Clusters do
     end)
     |> add_operation(:cluster_service, fn %{cluster: cluster} ->
       case Console.Repo.preload(cluster, [:provider, :credential]) do
+        %{self: true} -> {:ok, cluster}
         %{provider: %ClusterProvider{}} = cluster -> cluster_service(cluster, tmp_admin(user))
         _ -> {:ok, cluster}
       end
@@ -174,6 +258,7 @@ defmodule Console.Deployments.Clusters do
     end)
     |> add_revision()
     |> add_operation(:svc, fn
+      %{cluster: %{self: true} = cluster} -> {:ok, cluster}
       %{cluster: %{service_id: id} = cluster} when is_binary(id) ->
         cluster_service(cluster, user)
       %{cluster: cluster} -> {:ok, cluster}
@@ -265,7 +350,7 @@ defmodule Console.Deployments.Clusters do
     start_transaction()
     |> add_operation(:create, fn _ ->
       %ClusterProvider{}
-      |> ClusterProvider.changeset(Console.dedupe(attrs, :repository_id, fn -> Git.artifacts_repo!().id end))
+      |> ClusterProvider.changeset(attrs)
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
@@ -281,6 +366,17 @@ defmodule Console.Deployments.Clusters do
     end)
     |> execute(extract: :rewire)
     |> notify(:create, user)
+  end
+
+  @doc """
+  It can delete a CAPI provider, will throw if there are clusters still attached
+  """
+  @spec delete_provider(binary, User.t) :: cluster_provider_resp
+  def delete_provider(id, %User{} = user) do
+    get_provider!(id)
+    |> allow(user, :create)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
   end
 
   @doc """
@@ -363,7 +459,7 @@ defmodule Console.Deployments.Clusters do
     Console.Repo.preload(cluster, [:node_pools])
     |> cluster_attributes()
     |> Map.merge(%{
-      repository_id: provider.repository_id,
+      repository_id: provider.repository_id || Git.artifacts_repo!().id,
       name: name,
       namespace: ns,
       git: Map.take(provider.git, ~w(ref folder)a),
@@ -371,9 +467,9 @@ defmodule Console.Deployments.Clusters do
     |> Services.create_service(local_cluster().id, user)
   end
   defp cluster_service(%Cluster{service_id: id} = cluster, %User{} = user) do
-    Console.Repo.preload(cluster, [:node_pools, :credential])
-    |> cluster_attributes()
-    |> Services.update_service(id, user)
+    %{configuration: config} = Console.Repo.preload(cluster, [:node_pools, :credential])
+                               |> cluster_attributes()
+    Services.merge_service(config, id, user)
   end
 
   defp namespace_name(%Cluster{name: n, provider: %ClusterProvider{} = provider, credential: %ProviderCredential{} = cred}),
@@ -453,6 +549,8 @@ defmodule Console.Deployments.Clusters do
     do: handle_notify(PubSub.ProviderCreated, prov, actor: user)
   defp notify({:ok, %ClusterProvider{} = prov}, :update, user),
     do: handle_notify(PubSub.ProviderUpdated, prov, actor: user)
+  defp notify({:ok, %ClusterProvider{} = prov}, :delete, user),
+    do: handle_notify(PubSub.ProviderDeleted, prov, actor: user)
 
   defp notify({:ok, %ProviderCredential{} = prov}, :create, user),
     do: handle_notify(PubSub.ProviderCredentialCreated, prov, actor: user)

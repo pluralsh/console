@@ -269,7 +269,7 @@ defmodule Console.Deployments.ClustersTest do
 
       assert provider.name == "aws-sandbox"
       assert provider.namespace == "plrl-capi-aws-sandbox"
-      assert provider.repository_id == settings.artifact_repository_id
+      refute provider.repository_id
       assert provider.git.folder == "capi/clusters/aws"
       assert provider.git.ref == "main"
 
@@ -403,6 +403,25 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "#refresh_kubeconfig/2" do
+    test "it will refresh for base capi clusters" do
+      provider = insert(:cluster_provider)
+      %{id: id} = cluster = insert(:cluster, provider: provider)
+      expect(Clusters, :refresh_kubeconfig, fn %{id: ^id} -> :ok end)
+
+      :ok = Clusters.refresh_kubeconfig(provider.namespace, cluster.name)
+    end
+
+    test "it will refresh for clusters created with credentials" do
+      provider = insert(:cluster_provider)
+      credential = insert(:provider_credential)
+      %{id: id} = cluster = insert(:cluster, provider: provider, credential: credential)
+      expect(Clusters, :refresh_kubeconfig, fn %{id: ^id} -> :ok end)
+
+      :ok = Clusters.refresh_kubeconfig(credential.namespace, cluster.name)
+    end
+  end
+
   describe "#install/1" do
     test "it can install the operator in a ready cluster" do
       %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =
@@ -412,7 +431,12 @@ defmodule Console.Deployments.ClustersTest do
       expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
         {:ok, %{data: %{"value" => Base.encode64("kubeconfig")}}}
       end)
-      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:ok, "yay"} end)
+      expect(Console.Commands.Command, :cmd, fn "plural", ["deployments", "install", "--url", _, "--token", ^t], _, [{"KUBECONFIG", f}] ->
+        case File.read(f) do
+          {:ok, "kubeconfig"} -> {:ok, "yay"}
+          err -> {:error, err}
+        end
+      end)
 
       {:ok, installed} = Clusters.install(cluster)
 
@@ -429,7 +453,9 @@ defmodule Console.Deployments.ClustersTest do
       expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
         {:ok, %{data: %{"value" => Base.encode64("kubeconfig")}}}
       end)
-      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:error, "helm failure"} end)
+      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" ->
+        {:error, %Console.Commands.Tee{stdo: ["helm failure"]}}
+      end)
 
       {:error, _} = Clusters.install(cluster)
 

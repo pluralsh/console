@@ -1,4 +1,5 @@
 import {
+  Breadcrumb,
   ClusterIcon,
   ListBoxItem,
   Select,
@@ -7,19 +8,15 @@ import {
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
-import { CLUSTER_BASE_PATH } from 'routes/cdRoutes'
+import {
+  CD_BASE_PATH,
+  CLUSTERS_PATH,
+  CLUSTER_BASE_PATH,
+} from 'routes/cdRoutesConsts'
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
 
@@ -28,31 +25,12 @@ import {
   useClustersTinyQuery,
 } from '../../../generated/graphql'
 
+import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
+
+import ProviderIcon from '../../utils/Provider'
+
 import ClusterPermissions from './ClusterPermissions'
-import ClusterMetadata from './ClusterMetadata'
-
-const ClusterContext = createContext<
-  { setHeaderContent: (content: ReactNode) => void } | undefined
->(undefined)
-
-export const useSetClusterHeaderContent = (headerContent?: ReactNode) => {
-  const ctx = useContext(ClusterContext)
-
-  if (!ctx) {
-    console.warn(
-      'useSetClusterHeaderContent() must be used within a ClusterContext'
-    )
-  }
-  const { setHeaderContent } = ctx || {}
-
-  useLayoutEffect(() => {
-    setHeaderContent?.(headerContent)
-
-    return () => {
-      setHeaderContent?.(null)
-    }
-  }, [setHeaderContent, headerContent])
-}
+import ClusterMetadataPanel from './ClusterMetadataPanel'
 
 const directory = [
   { path: 'services', label: 'Services' },
@@ -64,17 +42,32 @@ const POLL_INTERVAL = 10 * 1000
 
 export default function Cluster() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
-  const tab = useMatch(`/${CLUSTER_BASE_PATH}/:tab`)?.params?.tab || ''
-  const path = `/${CLUSTER_BASE_PATH}/${tab}`
   const { clusterId }: { clusterId?: string } = useParams()
+  const tab = useMatch(`/${CLUSTER_BASE_PATH}/:tab`)?.params?.tab || ''
+
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
-  const [selectedClusterId, setSelectedClusterId] = useState(clusterId)
   const currentTab = directory.find(({ path }) => path === tab)
-  const crumbs = useMemo(
-    () => (path ? [{ label: tab, path }] : []),
-    [path, tab]
-  )
+  const crumbs: Breadcrumb[] = useMemo(() => {
+    const clustersPath = `/${CD_BASE_PATH}/${CLUSTERS_PATH}`
+    const clusterPath = `${clustersPath}/${clusterId}`
+    const tabPath = `${clusterPath}/${tab}`
+
+    return [
+      ...CD_BASE_CRUMBS,
+      { label: 'clusters', url: clustersPath },
+      ...(clusterId
+        ? [
+            {
+              label: clusterId,
+              url: clusterPath,
+            },
+            { label: tab, url: tabPath },
+          ]
+        : []),
+    ]
+  }, [clusterId, tab])
 
   useSetBreadcrumbs(crumbs)
 
@@ -88,7 +81,7 @@ export default function Cluster() {
 
   return (
     <ResponsivePageFullWidth
-      scrollable={false}
+      scrollable
       headingContent={
         <>
           {clusterEdges && !isEmpty(clusterEdges) && (
@@ -103,14 +96,26 @@ export default function Cluster() {
                     Cluster
                   </div>
                 }
-                selectedKey={selectedClusterId}
-                onSelectionChange={(key) => setSelectedClusterId(key as any)}
+                leftContent={
+                  <ProviderIcon
+                    provider={data?.cluster?.provider?.cloud || ''}
+                    width={16}
+                  />
+                }
+                selectedKey={clusterId}
+                onSelectionChange={(key) => navigate(`/cd/clusters/${key}`)} // TODO: Keep the same view on switch.
               >
                 {clusterEdges.map((edge) => (
                   <ListBoxItem
                     key={edge?.node?.id}
                     label={edge?.node?.name}
                     textValue={edge?.node?.name}
+                    leftContent={
+                      <ProviderIcon
+                        provider={edge?.node?.provider?.cloud || ''}
+                        width={16}
+                      />
+                    }
                   />
                 ))}
               </Select>
@@ -152,7 +157,7 @@ export default function Cluster() {
             }}
           >
             <ClusterPermissions />
-            <ClusterMetadata cluster={data?.cluster} />
+            <ClusterMetadataPanel cluster={data?.cluster} />
           </div>
         </>
       }
@@ -161,7 +166,7 @@ export default function Cluster() {
         css={{ height: '100%' }}
         stateRef={tabStateRef}
       >
-        <Outlet />
+        <Outlet context={{ cluster: data?.cluster }} />
       </TabPanel>
     </ResponsivePageFullWidth>
   )

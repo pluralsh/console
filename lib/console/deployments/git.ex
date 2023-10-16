@@ -15,7 +15,7 @@ defmodule Console.Deployments.Git do
 
   def deploy_url(), do: "https://github.com/pluralsh/deployment-operator.git"
 
-  def artifacts_url(), do: "https://github.com/pluralsh/plural-artifacts.git"
+  def artifacts_url(), do: "https://github.com/pluralsh/scaffolds.git"
 
   def deploy_repo!() do
     case Settings.fetch_consistent() do

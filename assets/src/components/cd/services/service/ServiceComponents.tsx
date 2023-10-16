@@ -1,35 +1,96 @@
 import {
   type Breadcrumb,
   Callout,
+  EmptyState,
+  Modal,
+  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useMemo } from 'react'
+import { ComponentProps, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { CD_BASE_PATH, SERVICE_PARAM_NAME } from 'routes/cdRoutes'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useComponentKindSelect } from 'components/apps/app/components/Components'
-import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
-import { ComponentList } from 'components/apps/app/components/ComponentList'
-
+import isEmpty from 'lodash/isEmpty'
 import { useTheme } from 'styled-components'
 
+import {
+  ServiceDeploymentComponentFragment,
+  useServiceDeploymentComponentsQuery,
+} from 'generated/graphql'
+
+import {
+  SERVICE_PARAM_CLUSTER,
+  SERVICE_PARAM_ID,
+  getServiceComponentPath,
+  getServiceDetailsPath,
+} from 'routes/cdRoutesConsts'
+import { isNonNullable } from 'utils/isNonNullable'
+
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useComponentKindSelect } from 'components/apps/app/components/Components'
+
+import { ComponentList } from 'components/apps/app/components/ComponentList'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { deprecationsColumns } from 'components/cd/clusters/deprecationsColumns'
+
 import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
-import { countDeprecations } from './countDeprecations'
+import { collectDeprecations, countDeprecations } from './deprecationUtils'
+
+export const getServiceComponentsBreadcrumbs = ({
+  serviceId,
+  clusterName,
+}: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => [
+  ...getServiceDetailsBreadcrumbs({ clusterName, serviceId }),
+  {
+    label: 'components',
+    url: `${getServiceDetailsPath({
+      clusterName,
+      serviceId,
+    })}/components`,
+  },
+]
+
+function DeprecationsModal({
+  components,
+  ...props
+}: {
+  components: ServiceDeploymentComponentFragment[]
+} & ComponentProps<typeof Modal>) {
+  const deprecations =
+    useMemo(() => collectDeprecations(components), [components]) || []
+
+  return (
+    <Modal
+      header="Deprecated Resources"
+      size="large"
+      maxWidth={1024}
+      portal
+      {...props}
+    >
+      {isEmpty(deprecations) ? (
+        <EmptyState message="No deprecated resources" />
+      ) : (
+        <Table
+          data={deprecations || []}
+          columns={deprecationsColumns}
+          css={{
+            maxHeight: 500,
+            height: '100%',
+          }}
+        />
+      )}
+    </Modal>
+  )
+}
 
 export default function ServiceComponents() {
   const theme = useTheme()
-  const serviceId = useParams()[SERVICE_PARAM_NAME]
+  const serviceId = useParams()[SERVICE_PARAM_ID]
+  const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
+  const [showDeprecations, setShowDeprecations] = useState(false)
 
   const breadcrumbs: Breadcrumb[] = useMemo(
-    () => [
-      ...getServiceDetailsBreadcrumbs({ serviceId }),
-      {
-        label: 'components',
-        url: `${CD_BASE_PATH}/services/${serviceId}/components`,
-      },
-    ],
-    [serviceId]
+    () => getServiceComponentsBreadcrumbs({ clusterName, serviceId }),
+    [clusterName, serviceId]
   )
 
   const { data, error } = useServiceDeploymentComponentsQuery({
@@ -38,10 +99,15 @@ export default function ServiceComponents() {
 
   useSetBreadcrumbs(breadcrumbs)
   const { kindSelector, selectedKinds } = useComponentKindSelect(
-    data?.serviceDeployment?.components
+    data?.serviceDeployment?.components,
+    { width: 320 }
   )
   const deprecationCount = useMemo(
     () => countDeprecations(data?.serviceDeployment?.components),
+    [data?.serviceDeployment?.components]
+  )
+  const components = useMemo(
+    () => data?.serviceDeployment?.components?.filter(isNonNullable) || [],
     [data?.serviceDeployment?.components]
   )
 
@@ -58,6 +124,13 @@ export default function ServiceComponents() {
       heading="Components"
       headingContent={kindSelector}
     >
+      <ModalMountTransition open>
+        <DeprecationsModal
+          open={showDeprecations}
+          onClose={() => setShowDeprecations(false)}
+          components={components}
+        />
+      </ModalMountTransition>
       <div
         css={{
           display: 'flex',
@@ -71,12 +144,10 @@ export default function ServiceComponents() {
             title={`Using ${
               deprecationCount > 1 ? '' : 'an '
             } outdated k8s version${deprecationCount > 1 ? 's' : ''}`}
-            // TODO: Add link to review deprecations once the url scheme is known
-            // buttonProps={{
-            //   as: Link,
-            //   to: '{{deprecations-link}}',
-            //   children: 'Review deprecations',
-            // }}
+            buttonProps={{
+              onClick: () => setShowDeprecations(true),
+              children: 'Review deprecations',
+            }}
           >
             This service is using {deprecationCount > 1 ? '' : 'a '}deprecated
             k8s resource{deprecationCount > 1 ? 's' : ''}.{' '}
@@ -85,14 +156,20 @@ export default function ServiceComponents() {
           </Callout>
         )}
         <ComponentList
-          setUrl={(c) =>
-            c?.name && c?.kind
-              ? `${CD_BASE_PATH}/services/${serviceId}/components/${c.kind.toLowerCase()}/${
-                  c.name
-                }`
+          setUrl={(c) => {
+            const params = new URLSearchParams()
+
+            return c?.name && c?.kind
+              ? `${getServiceComponentPath({
+                  clusterName,
+                  serviceId,
+                  componentKind: c.kind.toLocaleLowerCase(),
+                  componentName: c.name.toLowerCase(),
+                  componentVersion: c.version,
+                })}?${params.toString()}`
               : undefined
-          }
-          components={data.serviceDeployment?.components || []}
+          }}
+          components={components}
           selectedKinds={selectedKinds}
         />
       </div>

@@ -1,10 +1,13 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   CaretRightIcon,
+  CheckRoundedIcon,
   ClusterIcon,
   EmptyState,
   IconFrame,
   Table,
+  Tooltip,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
 import { useMemo } from 'react'
@@ -15,14 +18,25 @@ import { A } from 'honorable'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { providerToURL } from 'components/utils/ProviderIcon'
+import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
+import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
 
-import { useSetCDHeaderContent } from '../ContinuousDeployment'
+import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
+import {
+  cpuFormat,
+  cpuParser,
+  memoryFormat,
+  memoryParser,
+} from '../../../utils/kubernetes'
+import { UsageBar } from '../../cluster/nodes/UsageBar'
+import { TableText } from '../../cluster/TableElements'
 
 import CreateCluster from './create/CreateCluster'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
+
+const POLL_INTERVAL = 10 * 1000
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -56,9 +70,12 @@ export const columns = [
 
       return (
         <ColWithIcon
-          icon={providerToURL(provider?.cloud ?? '', theme.mode === 'dark')}
+          icon={getProviderIconURL(
+            provider?.cloud ?? '',
+            theme.mode === 'dark'
+          )}
         >
-          {provider?.name ?? 'BYOK'}
+          {getProviderName(provider?.name)}
         </ColWithIcon>
       )
     },
@@ -107,17 +124,90 @@ export const columns = [
   //     />
   //   ),
   // }),
-  // TODO: Add both once resource data is available.
-  // columnHelper.accessor(({ node }) => node?.nodePools, {
-  //   id: 'cpu',
-  //   header: 'CPU',
-  //   cell: () => <div>TODO</div>,
-  // }),
-  // columnHelper.accessor(({ node }) => node?.nodePools, {
-  //   id: 'memory',
-  //   header: 'Memory',
-  //   cell: () => <div>TODO</div>,
-  // }),
+  columnHelper.accessor(({ node }) => node, {
+    id: 'cpu',
+    header: 'CPU',
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+      const usage = cluster?.nodeMetrics?.reduce(
+        (acc, current) => acc + (cpuParser(current?.usage?.cpu) ?? 0),
+        0
+      )
+      const capacity = cluster?.nodes?.reduce(
+        (acc, current) =>
+          // @ts-ignore
+          acc + (cpuParser(current?.status?.capacity?.cpu) ?? 0),
+        0
+      )
+      const display = `${usage ? cpuFormat(usage) : '—'} / ${
+        capacity ? cpuFormat(capacity) : '—'
+      }`
+
+      return usage !== undefined && !!capacity ? (
+        <Tooltip
+          label={display}
+          placement="top"
+        >
+          <TableText>
+            <UsageBar
+              usage={usage / capacity}
+              width={120}
+            />
+          </TableText>
+        </Tooltip>
+      ) : (
+        display
+      )
+    },
+  }),
+  columnHelper.accessor(({ node }) => node, {
+    id: 'memory',
+    header: 'Memory',
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+      const usage = cluster?.nodeMetrics?.reduce(
+        (acc, current) => acc + (memoryParser(current?.usage?.memory) ?? 0),
+        0
+      )
+      const capacity = cluster?.nodes?.reduce(
+        (acc, current) =>
+          // @ts-ignore
+          acc + (memoryParser(current?.status?.capacity?.memory) ?? 0),
+        0
+      )
+
+      const display = `${usage ? memoryFormat(usage) : '—'} / ${
+        capacity ? memoryFormat(capacity) : '—'
+      }`
+
+      return usage !== undefined && !!capacity ? (
+        <Tooltip
+          label={display}
+          placement="top"
+        >
+          <TableText>
+            <UsageBar
+              usage={usage / capacity}
+              width={120}
+            />
+          </TableText>
+        </Tooltip>
+      ) : (
+        display
+      )
+    },
+  }),
+  columnHelper.accessor(({ node }) => node?.self, {
+    id: 'mgmt',
+    header: 'Mgmt',
+    cell: ({ getValue }) =>
+      getValue() && (
+        <IconFrame
+          icon={<CheckRoundedIcon color="icon-success" />}
+          type="floating"
+        />
+      ),
+  }),
   columnHelper.accessor(({ node }) => node, {
     id: 'status',
     header: 'Status',
@@ -158,11 +248,20 @@ export const columns = [
   }),
 ]
 
+export const CLUSTERS_CRUMBS = [
+  ...CD_BASE_CRUMBS,
+  { label: 'clusters', url: `/${CD_BASE_PATH}/${CLUSTERS_PATH}` },
+]
+
 export default function Clusters() {
-  const { data } = useClustersQuery()
+  const { data } = useClustersQuery({
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
   const headerActions = useMemo(() => <CreateCluster />, [])
 
   useSetCDHeaderContent(headerActions)
+  useSetBreadcrumbs(CLUSTERS_CRUMBS)
 
   if (!data) {
     return <LoadingIndicator />
@@ -171,6 +270,7 @@ export default function Clusters() {
   return !isEmpty(data?.clusters?.edges) ? (
     <FullHeightTableWrap>
       <Table
+        loose
         data={data?.clusters?.edges || []}
         columns={columns}
         css={{

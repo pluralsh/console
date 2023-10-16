@@ -1,0 +1,35 @@
+fragment Service on Service {
+  metadata {
+    ...Metadata
+  }
+  status {
+    loadBalancer {
+      ingress {
+        ip
+      }
+    }
+  }
+  spec {
+    type
+    clusterIp
+    ports {
+      name
+      protocol
+      port
+      targetPort
+    }
+  }
+  raw
+}
+
+query Service($name: String!, $namespace: String!, $serviceId: ID) {
+  service(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Service
+    pods {
+      ...Pod
+    }
+    events {
+      ...Event
+    }
+  }
+}

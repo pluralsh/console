@@ -1,0 +1,47 @@
+fragment ClusterProvider on ClusterProvider {
+  id
+  name
+  namespace
+  cloud
+  editable
+  git {
+    folder
+    ref
+  }
+  repository {
+    id
+    url
+  }
+  service {
+    id
+    name
+    namespace
+  }
+  insertedAt
+  updatedAt
+}
+
+query ClusterProviders {
+  clusterProviders(first: 100) {
+    edges {
+      node {
+        ...ClusterProvider
+      }
+    }
+  }
+}
+
+mutation CreateClusterProvider($attributes: ClusterProviderAttributes!) {
+  createClusterProvider(attributes: $attributes) {
+    ...ClusterProvider
+  }
+}
+
+mutation UpdateClusterProvider(
+  $id: ID!
+  $attributes: ClusterProviderUpdateAttributes!
+) {
+  updateClusterProvider(id: $id, attributes: $attributes) {
+    ...ClusterProvider
+  }
+}

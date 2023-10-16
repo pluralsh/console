@@ -33,15 +33,17 @@ function FilterFooter({ allSelected = true, ...props }) {
   )
 }
 
-const FilterTrigger = styled(SelectButton)({
-  width: 220,
-  '&, *': {
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    flexShrink: 1,
-  },
-})
+const FilterTrigger = styled(SelectButton)<{ $width?: number }>(
+  ({ $width }) => ({
+    width: $width || 220,
+    '&, *': {
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
+      flexShrink: 1,
+    },
+  })
+)
 
 const ORDER = {
   deployment: 1,
@@ -68,7 +70,8 @@ export function useComponentKindSelect(
   components:
     | ({ kind: string | null | undefined } | null | undefined)[]
     | null
-    | undefined
+    | undefined,
+  config?: { width?: number }
 ): {
   selectedKinds: Set<string>
   kindSelector: ReactElement
@@ -87,6 +90,7 @@ export function useComponentKindSelect(
       selectedKinds,
       kindSelector: (
         <ComponentKindSelect
+          {...config}
           {...{
             selectedKinds,
             setSelectedKinds,
@@ -95,7 +99,7 @@ export function useComponentKindSelect(
         />
       ),
     }),
-    [kinds, selectedKinds]
+    [config, kinds, selectedKinds]
   )
 }
 
@@ -117,10 +121,12 @@ function ComponentKindSelect({
   selectedKinds,
   setSelectedKinds,
   kinds,
+  width,
 }: {
   selectedKinds: Set<string>
   setSelectedKinds: (kinds: Set<string>) => void
   kinds: string[]
+  width?: number
 }) {
   const sortedSelectedKinds = Array.from(selectedKinds).sort()
   const allSelected = sortedSelectedKinds.length >= kinds.length
@@ -129,7 +135,7 @@ function ComponentKindSelect({
     <Select
       label="All components"
       triggerButton={
-        <FilterTrigger>
+        <FilterTrigger $width={width}>
           {allSelected
             ? 'All components'
             : sortedSelectedKinds.length === 0

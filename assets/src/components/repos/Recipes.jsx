@@ -5,7 +5,7 @@ import { Box, Text } from 'grommet'
 import { chunk } from 'lodash'
 
 import { RECIPES_Q } from '../graphql/plural'
-import ProviderIcon from '../utils/ProviderIcon'
+import ProviderIcon from '../utils/Provider'
 
 import { MODAL_WIDTH, PROVIDER_WIDTH } from './constants'
 import { Container } from './Container'

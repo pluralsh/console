@@ -41,7 +41,7 @@ defmodule Console.Deployments.Settings do
   Updates global deployment settings and busts cache
   """
   @spec update(map, User.t) :: settings_resp
-  @decorate cache_evict(cache: @cache_adapter, keys: [:deployment_settings])
+  @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def update(attrs, %User{} = user) do
     fetch()
     |> DeploymentSettings.changeset(attrs)
@@ -51,7 +51,7 @@ defmodule Console.Deployments.Settings do
   end
 
   @spec enable(User.t) :: settings_resp
-  @decorate cache_evict(cache: @cache_adapter, keys: [:deployment_settings])
+  @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def enable(%User{} = user) do
     case fetch() do
       %DeploymentSettings{enabled: true} = enabled -> {:ok, enabled}

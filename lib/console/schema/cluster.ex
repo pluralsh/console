@@ -97,6 +97,19 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: c.id not in ^ids)
   end
 
+  def for_namespace(query \\ __MODULE__, ns) do
+    from(c in query,
+      left_join: p in assoc(c, :provider),
+      left_join: cred in assoc(c, :credential),
+      where: (not is_nil(cred.id) and cred.namespace == ^ns) or (is_nil(cred.id) and not is_nil(p.id) and p.namespace == ^ns),
+      distinct: true
+    )
+  end
+
+  def for_name(query \\ __MODULE__, name) do
+    from(c in query, where: c.name == ^name)
+  end
+
   def target(query \\ __MODULE__, %GlobalService{} = global) do
     Map.take(global, [:provider_id, :tags])
     |> Enum.reduce(query, fn
@@ -178,6 +191,7 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:service)
     |> foreign_key_constraint(:provider_id)
     |> foreign_key_constraint(:credential_id)
+    |> unique_constraint(:handle)
     |> unique_constraint([:name, :provider_id, :credential_id])
     |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(30)}" end)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)

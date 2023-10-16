@@ -32,6 +32,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :version,        non_null(:string)
     field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :service,        :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
+    field :kubeconfig,     :kubeconfig_attributes
     field :node_pools,     list_of(:node_pool_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
@@ -138,6 +139,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :tags,        list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter clusters"
     field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments), description: "all api deprecations for all services in this cluster"
     field :servic_errors, list_of(:service_error), resolve: dataloader(Deployments), description: "any errors which might have occurred during the bootstrap process"
+
+    field :nodes, list_of(:node), description: "list cached nodes for a cluster, this can be stale up to 5m",
+      resolve: &Deployments.list_nodes/3
+    field :node_metrics, list_of(:node_metric), description: "list the cached node metrics for a cluster, can also be stale up to 5m",
+      resolve: &Deployments.list_node_metrics/3
 
     field :status, :cluster_status,
       description: "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null",

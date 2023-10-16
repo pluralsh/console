@@ -36,6 +36,18 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
+  def cache_warm() do
+    Cluster.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn cluster ->
+      Logger.info "warming node caches for cluster"
+      Clusters.flush_cache(cluster)
+      Clusters.nodes(cluster)
+      Clusters.node_metrics(cluster)
+    end)
+    |> Stream.run()
+  end
+
   def install_clusters() do
     Logger.info "attempting to install operator on dangling clusters"
     Cluster.uninstalled()

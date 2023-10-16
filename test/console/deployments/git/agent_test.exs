@@ -20,6 +20,8 @@ defmodule Console.Deployments.Git.AgentTest do
       assert git.pulled_at
 
       assert refetch(svc).sha
+
+      assert Process.alive?(pid)
     end
   end
 

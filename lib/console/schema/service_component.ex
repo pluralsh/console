@@ -29,5 +29,6 @@ defmodule Console.Schema.ServiceComponent do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:service)
+    |> validate_required([:kind, :name])
   end
 end

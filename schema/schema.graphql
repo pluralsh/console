@@ -57,7 +57,7 @@ type RootQueryType {
 
   secrets(namespace: String!): [Secret]
 
-  kubernetesRaw(group: String!, version: String!, kind: String!, namespace: String!, name: String!, serviceId: ID): KubernetesRaw
+  unstructuredResource(group: String, version: String!, kind: String!, namespace: String, name: String!, serviceId: ID): KubernetesUnstructured
 
   service(namespace: String!, name: String!, serviceId: ID): Service
 
@@ -79,9 +79,9 @@ type RootQueryType {
 
   certificate(namespace: String!, name: String!, serviceId: ID): Certificate
 
-  pod(namespace: String!, name: String!, serviceId: ID): Pod
+  pod(namespace: String!, name: String!, serviceId: ID, clusterId: ID): Pod
 
-  pods(after: String, first: Int, before: String, last: Int, namespaces: [String]): PodConnection
+  pods(after: String, first: Int, before: String, last: Int, namespace: String, namespaces: [String], clusterId: ID): PodConnection
 
   wireguardPeers: [WireguardPeer]
 
@@ -91,13 +91,13 @@ type RootQueryType {
 
   cachedPods(namespaces: [String]): [Pod]
 
-  namespaces: [Namespace]
+  namespaces(clusterId: ID): [Namespace]
 
   logFilters(namespace: String!): [LogFilter]
 
-  nodeMetrics: [NodeMetric]
+  nodeMetrics(clusterId: ID): [NodeMetric]
 
-  nodeMetric(name: String!): NodeMetric
+  nodeMetric(name: String!, clusterId: ID): NodeMetric
 
   configurationOverlays(namespace: String!): [ConfigurationOverlay]
 
@@ -313,6 +313,9 @@ type RootMutationType {
 
   deleteServiceDeployment(id: ID!): ServiceDeployment
 
+  "merges configuration for a service"
+  mergeService(id: ID!, configuration: [ConfigAttributes]): ServiceDeployment
+
   "rewires this service to use the given revision id"
   rollbackService(
     id: ID
@@ -478,7 +481,7 @@ input DiffNormalizerAttributes {
 
 input ServiceUpdateAttributes {
   version: String
-  git: GitRefAttributes!
+  git: GitRefAttributes
   configuration: [ConfigAttributes]
 }
 
@@ -495,7 +498,7 @@ input GitRefAttributes {
 
 input ConfigAttributes {
   name: String!
-  value: String!
+  value: String
 }
 
 input ComponentAttributes {
@@ -809,6 +812,8 @@ input ClusterUpdateAttributes {
   "if you optionally want to reconfigure the git repository for the cluster service"
   service: ClusterServiceAttributes
 
+  kubeconfig: KubeconfigAttributes
+
   nodePools: [NodePoolAttributes]
 
   readBindings: [PolicyBindingAttributes]
@@ -962,6 +967,12 @@ type Cluster {
 
   "any errors which might have occurred during the bootstrap process"
   servicErrors: [ServiceError]
+
+  "list cached nodes for a cluster, this can be stale up to 5m"
+  nodes: [Node]
+
+  "list the cached node metrics for a cluster, can also be stale up to 5m"
+  nodeMetrics: [NodeMetric]
 
   "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
   status: ClusterStatus
@@ -1617,7 +1628,7 @@ type ResourceSpec {
   memory: String
 }
 
-type KubernetesRaw {
+type KubernetesUnstructured {
   raw: Map
   events: [Event]
 }

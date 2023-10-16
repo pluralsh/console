@@ -12,21 +12,61 @@ import ServiceComponents from 'components/cd/services/service/ServiceComponents'
 
 import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
 
+import ServiceComponent from 'components/cd/services/component/ServiceComponent'
+
+import ComponentInfo from 'components/component/ComponentInfo'
+import ComponentEvents from 'components/component/ComponentEvents'
+import ComponentRaw from 'components/component/ComponentRaw'
+import ComponentMetrics from 'components/component/ComponentMetrics'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
 import ClusterPods from '../components/cd/cluster/ClusterPods'
 
-export const CD_BASE_PATH = 'cd'
-export const CLUSTERS_PATH = 'clusters'
-export const SERVICES_PATH = 'services'
+import {
+  CD_BASE_PATH,
+  CLUSTERS_PATH,
+  CLUSTER_BASE_PATH,
+  CLUSTER_SERVICES_PATH,
+  SERVICE_BASE_PATH,
+  SERVICE_COMPONENTS_PATH,
+  SERVICE_COMPONENT_PATH_MATCHER_REL,
+  SERVICE_PARAM_CLUSTER,
+} from './cdRoutesConsts'
 
-export const CLUSTER_BASE_PATH = `${CD_BASE_PATH}/${CLUSTERS_PATH}/:clusterId`
-const CLUSTER_SERVICES_PATH = 'services'
-
-export const SERVICE_PARAM_NAME = 'serviceId' as const
-export const SERVICE_BASE_PATH = `${CD_BASE_PATH}/${SERVICES_PATH}/:${SERVICE_PARAM_NAME}`
-const SERVICE_COMPONENTS_PATH = 'components'
+export const componentRoutes = [
+  <Route
+    path={SERVICE_COMPONENT_PATH_MATCHER_REL}
+    element={<ServiceComponent />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="info"
+        />
+      }
+    />
+    <Route
+      path="info"
+      element={<ComponentInfo />}
+    />
+    <Route
+      path="metrics"
+      element={<ComponentMetrics />}
+    />
+    <Route
+      path="events"
+      element={<ComponentEvents />}
+    />
+    <Route
+      path="raw"
+      element={<ComponentRaw />}
+    />
+  </Route>,
+]
 
 export const cdRoutes = [
   /* Root */
@@ -48,10 +88,9 @@ export const cdRoutes = [
       element={<Clusters />}
     />
     <Route
-      path="services"
+      path={`services/:${SERVICE_PARAM_CLUSTER}?`}
       element={<Services />}
     />
-
     {/* <Route
       path="pipelines"
       element={<Pipelines />}
@@ -126,4 +165,7 @@ export const cdRoutes = [
       />
     </Route>
   </Route>,
+
+  // Service component
+  ...componentRoutes,
 ]

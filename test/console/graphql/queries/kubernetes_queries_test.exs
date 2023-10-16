@@ -319,7 +319,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
 
   describe "nodeMetrics" do
     test "it can list metrics" do
-      user = insert(:user)
+      user = admin_user()
       expect(Kazan, :run, fn _ -> {:ok, %{items: [node_metrics("node-1")]}} end)
 
       {:ok, %{data: %{"nodeMetrics" => [node]}}} = run_query("""
@@ -333,7 +333,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
 
   describe "nodeMetric" do
     test "it can fetch metrics for a node" do
-      user = insert(:user)
+      user = admin_user()
       expect(Kazan, :run, fn _ -> {:ok, node_metrics("node-1")} end)
 
       {:ok, %{data: %{"nodeMetric" => node}}} = run_query("""
@@ -364,7 +364,6 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
 
   describe "namespaces" do
     test "it will fetch all namespaces" do
-      user = insert(:user)
       expect(Console, :namespaces, fn -> [namespace_scaffold("test")] end)
 
       {:ok, %{data: %{"namespaces" => [namespace]}}} = run_query("""
@@ -375,7 +374,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
             spec { finalizers }
           }
         }
-      """, %{}, %{current_user: user})
+      """, %{}, %{current_user: admin_user()})
 
       assert namespace["metadata"]["name"] == "test"
       assert namespace["status"]["phase"] == "Created"

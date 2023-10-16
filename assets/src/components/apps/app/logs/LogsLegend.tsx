@@ -1,6 +1,6 @@
-import Prop from 'components/utils/Prop'
-import { PropsContainer } from 'components/utils/PropsContainer'
 import styled from 'styled-components'
+
+import { Prop, PropsContainer } from '@pluralsh/design-system'
 
 import { useBorderColor } from './LogLine'
 import { Level } from './misc'

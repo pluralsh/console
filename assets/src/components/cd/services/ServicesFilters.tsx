@@ -19,6 +19,12 @@ import {
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 
+import { useNavigate, useParams } from 'react-router-dom'
+
+import { SERVICE_PARAM_CLUSTER } from 'routes/cdRoutesConsts'
+
+import ProviderIcon from 'components/utils/Provider'
+
 import {
   serviceStatusToLabel,
   serviceStatusToSeverity,
@@ -64,11 +70,18 @@ export function ServicesFilters({
     filters: Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   ) => void
 }) {
+  const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
+  const navigate = useNavigate()
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 100)
   const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
+  const cluster = useMemo(
+    () => clusters && clusters.find(({ name }) => name === clusterName),
+    [clusters, clusterName]
+  )
+
   const counts = useMemo(() => {
     const c: Record<string, number | undefined> = {
       ALL: data?.serviceDeployments?.edges?.length,
@@ -86,7 +99,6 @@ export function ServicesFilters({
 
     return c
   }, [data?.serviceDeployments?.edges])
-  const [selectedClusterId, setSelectedClusterId] = useState('')
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
 
   const tableFilters: Partial<
@@ -103,17 +115,17 @@ export function ServicesFilters({
               },
             ]
           : []),
-        ...(selectedClusterId
+        ...(clusterName
           ? [
               {
                 id: 'cluster',
-                value: selectedClusterId,
+                value: clusterName,
               },
             ]
           : []),
       ],
     }),
-    [debouncedFilterString, selectedClusterId, statusFilterKey]
+    [clusterName, debouncedFilterString, statusFilterKey]
   )
 
   useEffect(() => {
@@ -128,32 +140,51 @@ export function ServicesFilters({
             isOpen={clusterSelectIsOpen}
             onOpenChange={setClusterSelectIsOpen}
             label="Filter by cluster"
+            leftContent={
+              cluster && (
+                <ProviderIcon
+                  provider={cluster.provider?.cloud || ''}
+                  width={16}
+                />
+              )
+            }
             titleContent={
               <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
                 <ClusterIcon />
                 Cluster
               </div>
             }
-            dropdownFooterFixed={
-              <ListBoxFooter
-                onClick={() => {
-                  setClusterSelectIsOpen(false)
-                  setSelectedClusterId('')
-                }}
-              >
-                Show all
-              </ListBoxFooter>
-            }
-            selectedKey={selectedClusterId}
+            {...(clusterName
+              ? {
+                  dropdownFooterFixed: (
+                    <ListBoxFooter
+                      onClick={() => {
+                        setClusterSelectIsOpen(false)
+                        navigate(`/cd/services`)
+                      }}
+                      leftContent={<ClusterIcon />}
+                    >
+                      Show all clusters
+                    </ListBoxFooter>
+                  ),
+                }
+              : {})}
+            selectedKey={clusterName || ''}
             onSelectionChange={(key) => {
-              setSelectedClusterId(key as any)
+              navigate(`/cd/services${key ? `/${key}` : ''}`)
             }}
           >
             {clusters.map((cluster) => (
               <ListBoxItem
-                key={cluster.id}
+                key={cluster.name}
                 label={cluster.name}
                 textValue={cluster.name}
+                leftContent={
+                  <ProviderIcon
+                    provider={cluster.provider?.cloud || ''}
+                    width={16}
+                  />
+                }
               />
             ))}
           </Select>

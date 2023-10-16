@@ -1,0 +1,232 @@
+import { Card } from '@pluralsh/design-system'
+import { useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { DURATIONS } from 'utils/time'
+import { filesize } from 'filesize'
+import { isNonNullable } from 'utils/isNonNullable'
+import { useTheme } from 'styled-components'
+
+import { MetricResponseFragment, useUsageQuery } from 'generated/graphql'
+
+import RangePicker from 'components/utils/RangePicker'
+import { Graph } from 'components/utils/Graph'
+import GraphHeader from 'components/utils/GraphHeader'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import { POLL_INTERVAL } from '../cluster/constants'
+
+const convertVals = (values) =>
+  values.map(({ timestamp, value }) => ({
+    x: new Date(timestamp * 1000),
+    y: parseFloat(value),
+  }))
+
+function Graphs({
+  cpu: [cpu],
+  mem: [mem],
+}: {
+  cpu: MetricResponseFragment[]
+  mem: MetricResponseFragment[]
+}) {
+  const theme = useTheme()
+  const { cpuValues, memValues } = useMemo(
+    () => ({
+      cpuValues: convertVals(cpu.values),
+      memValues: convertVals(mem.values),
+    }),
+    [cpu, mem]
+  )
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        gap: theme.spacing.large,
+        flexGrow: 1,
+        height: 320,
+        padding: theme.spacing.large,
+      }}
+    >
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+        }}
+      >
+        <GraphHeader title="Overall CPU Usage" />
+        <Graph
+          data={[{ id: 'cpu', data: cpuValues }]}
+          yFormat={undefined}
+          tickRotation={undefined}
+        />
+      </div>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+        }}
+      >
+        <GraphHeader title="Overall Memory Usage" />
+        <Graph
+          data={[{ id: 'memory', data: memValues }]}
+          yFormat={filesize}
+          tickRotation={undefined}
+        />
+      </div>
+    </div>
+  )
+}
+
+function PodGraphs({
+  cpu,
+  mem,
+}: {
+  cpu: MetricResponseFragment[]
+  mem: MetricResponseFragment[]
+}) {
+  const theme = useTheme()
+  const { cpuGraph, memGraph } = useMemo(() => {
+    const cpuGraph = cpu.map(({ metric, values }) => ({
+      id: (metric as any)?.pod,
+      data: convertVals(values),
+    }))
+    const memGraph = mem.map(({ metric, values }) => ({
+      id: (metric as any)?.pod,
+      data: convertVals(values),
+    }))
+
+    return { cpuGraph, memGraph }
+  }, [cpu, mem])
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        gap: theme.spacing.large,
+        flexGrow: 1,
+        height: 320,
+        padding: theme.spacing.large,
+      }}
+    >
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+        }}
+      >
+        <GraphHeader title="Pod CPU Usage" />
+        <Graph
+          data={cpuGraph}
+          yFormat={undefined}
+          tickRotation={undefined}
+        />
+      </div>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+        }}
+      >
+        <GraphHeader title="Pod Memory Usage" />
+        <Graph
+          data={memGraph}
+          yFormat={filesize}
+          tickRotation={undefined}
+        />
+      </div>
+    </div>
+  )
+}
+
+function Metric({
+  name,
+  namespace,
+  regex,
+  duration: { step, offset },
+  ...props
+}) {
+  const { data } = useUsageQuery({
+    variables: {
+      cpu: `sum(rate(container_cpu_usage_seconds_total{namespace="${namespace}",pod=~"${name}${regex}"}[5m]))`,
+      mem: `sum(container_memory_working_set_bytes{namespace="${namespace}",pod=~"${name}${regex}"})`,
+      podCpu: `sum(rate(container_cpu_usage_seconds_total{namespace="${namespace}",pod=~"${name}${regex}"}[5m])) by (pod)`,
+      podMem: `sum(container_memory_working_set_bytes{namespace="${namespace}",pod=~"${name}${regex}"}) by (pod)`,
+      step,
+      offset,
+    },
+    pollInterval: POLL_INTERVAL,
+  })
+
+  const { cpu, mem, podCpu, podMem } = useMemo(() => {
+    const { cpu, mem, podCpu, podMem } = data || {}
+
+    return {
+      cpu: (cpu || []).filter(isNonNullable),
+      mem: (mem || []).filter(isNonNullable),
+      podCpu: (podCpu || []).filter(isNonNullable),
+      podMem: (podMem || []).filter(isNonNullable),
+    }
+  }, [data])
+
+  if (!data) return <LoadingIndicator />
+
+  return (
+    <Card
+      overflow="auto"
+      padding="medium"
+      gap="small"
+      {...props}
+    >
+      <Graphs
+        cpu={cpu}
+        mem={mem}
+      />
+      <PodGraphs
+        cpu={podCpu}
+        mem={podMem}
+      />
+    </Card>
+  )
+}
+
+const kindToRegex = {
+  deployment: '-[a-z0-9]+-[a-z0-9]+',
+  statefulset: '-[0-9]+',
+}
+
+export default function ComponentMetrics() {
+  const theme = useTheme()
+  const { appName, componentKind = '', componentName } = useParams()
+  const [duration, setDuration] = useState<any>(DURATIONS[0])
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.medium,
+        height: '100%',
+        overflow: 'hidden',
+      }}
+    >
+      <RangePicker
+        duration={duration}
+        setDuration={setDuration}
+        position="sticky"
+        top={0}
+      />
+      <Metric
+        namespace={appName}
+        name={componentName}
+        regex={kindToRegex[componentKind]}
+        duration={duration}
+        maxHeight="100%"
+        overflowY="auto"
+      />
+    </div>
+  )
+}

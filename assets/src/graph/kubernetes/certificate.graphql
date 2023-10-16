@@ -1,0 +1,29 @@
+fragment Certificate on Certificate {
+  metadata {
+    ...Metadata
+  }
+  status {
+    renewalTime
+    notBefore
+    notAfter
+  }
+  spec {
+    dnsNames
+    secretName
+    issuerRef {
+      group
+      kind
+      name
+    }
+  }
+  raw
+}
+
+query Certificate($name: String!, $namespace: String!, $serviceId: ID) {
+  certificate(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Certificate
+    events {
+      ...Event
+    }
+  }
+}

@@ -10,6 +10,7 @@ defmodule Console.PubSub.ClusterDeleted, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.ProviderCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ProviderUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.ProviderDeleted, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.ProviderCredentialCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ProviderCredentialDeleted, do: use Piazza.PubSub.Event

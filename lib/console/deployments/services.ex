@@ -71,7 +71,8 @@ defmodule Console.Deployments.Services do
 
   def update_operator_service(%Cluster{id: id} = cluster, %User{} = user) do
     case get_service_by_name(id, "deploy-operator") do
-      %Service{} = svc -> update_service(%{configuration: operator_configuration(cluster)}, svc.id, user)
+      %Service{} = svc ->
+        merge_service(operator_configuration(cluster), svc.id, user)
       _ -> {:ok, nil}
     end
   end
@@ -131,6 +132,27 @@ defmodule Console.Deployments.Services do
   def accessible(_, _), do: {:error, "forbidden"}
 
   @doc """
+  It will merge in new configuration for a service (and nothing else)
+  """
+  @spec merge_service(list, binary, User.t) :: service_resp
+  def merge_service(config, service_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:source, fn _ ->
+      get_service!(service_id)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:config, fn %{source: source} ->
+      with {:ok, secrets} <- configuration(source),
+        do: {:ok, merge_configuration(secrets, config)}
+    end)
+    |> add_operation(:update, fn %{source: source, config: config} ->
+      update_service(%{configuration: config}, source)
+    end)
+    |> execute(extract: :update)
+    |> notify(:update, user)
+  end
+
+  @doc """
   Will copy a service, and apply any user specified attributes on top.
 
   This will also merge user specified configuration into the services base config (allowing you not to have to specify the full set)
@@ -140,7 +162,7 @@ defmodule Console.Deployments.Services do
     start_transaction()
     |> add_operation(:source, fn _ ->
       get_service!(service_id)
-      |> allow(user, :read)
+      |> allow(user, :write)
     end)
     |> add_operation(:config, fn %{source: source} ->
       with {:ok, secrets} <- configuration(source),
@@ -431,7 +453,10 @@ defmodule Console.Deployments.Services do
   end
 
   defp merge_configuration(secrets, [_ | _] = config) do
-    Enum.reduce(config, secrets, fn %{name: k, value: v}, acc -> Map.put(acc, k, v) end)
+    Enum.reduce(config, secrets, fn
+      %{name: k, value: nil}, acc -> Map.delete(acc, k)
+      %{name: k, value: v}, acc -> Map.put(acc, k, v)
+    end)
     |> merge_configuration(nil)
   end
   defp merge_configuration(secrets, _), do: Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)

@@ -7,15 +7,15 @@ defmodule Console.GraphQl.Deployments.Service do
   ecto_enum :service_deployment_status, Service.Status
 
   input_object :service_deployment_attributes do
-    field :name,          non_null(:string)
-    field :namespace,     non_null(:string)
-    field :version,       :string
-    field :docs_path,     :string
-    field :sync_config,   :sync_config_attributes
-    field :repository_id, non_null(:id)
-    field :git,           non_null(:git_ref_attributes)
-    field :configuration, list_of(:config_attributes)
-    field :read_bindings, list_of(:policy_binding_attributes)
+    field :name,           non_null(:string)
+    field :namespace,      non_null(:string)
+    field :version,        :string
+    field :docs_path,      :string
+    field :sync_config,    :sync_config_attributes
+    field :repository_id,  non_null(:id)
+    field :git,            non_null(:git_ref_attributes)
+    field :configuration,  list_of(:config_attributes)
+    field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
   end
 
@@ -39,7 +39,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   input_object :service_update_attributes do
     field :version,       :string
-    field :git,           non_null(:git_ref_attributes)
+    field :git,           :git_ref_attributes
     field :configuration, list_of(:config_attributes)
   end
 
@@ -56,7 +56,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   input_object :config_attributes do
     field :name,  non_null(:string)
-    field :value, non_null(:string)
+    field :value, :string
   end
 
   input_object :component_attributes do
@@ -299,6 +299,15 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_service/2
+    end
+
+    @desc "merges configuration for a service"
+    field :merge_service, :service_deployment do
+      middleware Authenticated
+      arg :id,            non_null(:id)
+      arg :configuration, list_of(:config_attributes)
+
+      resolve &Deployments.merge_service/2
     end
 
     @desc "rewires this service to use the given revision id"
