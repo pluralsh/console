@@ -1,42 +1,18 @@
-import { useQuery } from '@apollo/client'
-import { useParams } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import { Flex } from 'honorable'
-import { Event, NodeMetric, Node as NodeT, Pod } from 'generated/graphql'
+import { Node } from 'generated/graphql'
 import { nodeStatusToReadiness } from 'utils/status'
 import { MetadataGrid, MetadataItem } from 'components/utils/Metadata'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { StatusChip } from '../../../cluster/TableElements'
 import { LabelsAnnotations } from '../../../cluster/LabelsAnnotations'
-import { POLL_INTERVAL } from '../../../cluster/constants'
-import { NODE_Q } from '../../../cluster/queries'
-
-export const podContainers = (pods) =>
-  pods
-    .filter(({ status: { phase } }) => phase !== 'Succeeded')
-    .map(({ spec: { containers } }) => containers)
-    .flat()
 
 export default function NodeMetadata() {
-  const { name } = useParams()
+  const { node } = useOutletContext() as { node: Node }
 
-  const { data } = useQuery<{
-    node: NodeT & {
-      raw?: string
-      pods?: Pod[]
-      events?: Event[]
-    }
-    nodeMetric: NodeMetric
-  }>(NODE_Q, {
-    variables: { name },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
+  if (!node) return <LoadingIndicator />
 
-  if (!data) return <LoadingIndicator />
-
-  const { node } = data
   const readiness = nodeStatusToReadiness(node?.status)
 
   return (

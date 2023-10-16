@@ -1,49 +1,32 @@
 import { useMemo } from 'react'
-import { useQuery } from '@apollo/client'
-import { useParams } from 'react-router-dom'
-
+import { useOutletContext, useParams } from 'react-router-dom'
 import { Card } from '@pluralsh/design-system'
 import { Flex } from 'honorable'
-
-import { Event, NodeMetric, Node as NodeT, Pod } from 'generated/graphql'
-
+import { Node, NodeMetric } from 'generated/graphql'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import { isEmpty } from 'lodash'
 
 import { SubTitle } from '../../../cluster/nodes/SubTitle'
 import { NodeGraphs } from '../../../cluster/nodes/NodeGraphs'
 import {
-  ColActions,
   ColContainers,
   ColCpuReservation,
   ColMemoryReservation,
   ColName,
   ColRestarts,
+  PodWithId,
   PodsList,
 } from '../../../cluster/pods/PodsList'
-import { NODE_Q } from '../../../cluster/queries'
-import { POLL_INTERVAL } from '../../../cluster/constants'
-
-export const podContainers = (pods) =>
-  pods
-    .filter(({ status: { phase } }) => phase !== 'Succeeded')
-    .map(({ spec: { containers } }) => containers)
-    .flat()
+import { NODE_PARAM_NAME } from '../../../../routes/cdRoutesConsts'
 
 export default function NodeInfo() {
-  const { name } = useParams()
-
-  const { data, refetch } = useQuery<{
-    node: NodeT & {
-      raw?: string
-      pods?: Pod[]
-      events?: Event[]
-    }
+  const params = useParams()
+  const nodeName = params[NODE_PARAM_NAME] as string
+  const { node, nodeMetric } = useOutletContext() as {
+    node: Node
     nodeMetric: NodeMetric
-  }>(NODE_Q, {
-    variables: { name },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
+  }
 
   const columns = useMemo(
     () => [
@@ -52,14 +35,23 @@ export default function NodeInfo() {
       ColCpuReservation,
       ColRestarts,
       ColContainers,
-      ColActions(refetch),
+      // ColActions(refetch), // TODO: Update delete and details page.
     ],
-    [refetch]
+    []
   )
 
-  if (!data) return <LoadingIndicator />
+  const pods = useMemo(() => {
+    if (isEmpty(node?.pods)) {
+      return undefined
+    }
+    const pods = node?.pods
+      ?.map((pod) => ({ id: pod?.metadata?.namespace, ...pod }) as PodWithId)
+      ?.filter((pod?: PodWithId): pod is PodWithId => !!pod) as PodWithId[]
 
-  const { node, nodeMetric } = data
+    return pods || []
+  }, [node])
+
+  if (!node) return <LoadingIndicator />
 
   return (
     <Flex
@@ -71,8 +63,8 @@ export default function NodeInfo() {
         <Card padding="medium">
           <NodeGraphs
             status={node.status}
-            pods={node.pods}
-            name={name}
+            pods={pods}
+            name={nodeName}
             usage={nodeMetric.usage}
           />
         </Card>
@@ -81,7 +73,7 @@ export default function NodeInfo() {
         <SubTitle>Pods</SubTitle>
         <PodsList
           columns={columns}
-          pods={node.pods}
+          pods={pods}
         />
       </section>
     </Flex>

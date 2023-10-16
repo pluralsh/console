@@ -20,6 +20,7 @@ import {
   getNodeDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
 import { CD_BASE_CRUMBS } from '../../ContinuousDeployment'
+import { useClusterQuery } from '../../../../generated/graphql'
 
 export const getNodeDetailsBreadcrumbs = ({
   clusterId,
@@ -48,6 +49,8 @@ const DIRECTORY = [
   { path: 'raw', label: 'Raw' },
   { path: 'metadata', label: 'Metadata' },
 ] as const
+
+const POLL_INTERVAL = 10 * 1000
 
 function HeadingTabList({ tabStateRef, currentTab }: any) {
   return (
@@ -78,7 +81,6 @@ export default function Node() {
   const nodeName = params[NODE_PARAM_NAME] as string
   const clusterId = params[NODE_PARAM_CLUSTER] as string
 
-  const { name } = useParams()
   const tabStateRef = useRef<any>()
   const subpath = useMatch(NODE_BASE_PATH)?.params?.subpath || ''
 
@@ -92,6 +94,26 @@ export default function Node() {
 
   useEffect(() => setBreadcrumbs(breadcrumbs), [setBreadcrumbs, breadcrumbs])
 
+  // TODO: Use dedicated query once its available.
+  const { data } = useClusterQuery({
+    variables: { id: clusterId || '' },
+    pollInterval: POLL_INTERVAL,
+  })
+
+  const node: any = useMemo(
+    () =>
+      data?.cluster?.nodes?.find((node) => node?.metadata?.name === nodeName),
+    [data?.cluster?.nodes, nodeName]
+  )
+
+  const nodeMetric: any = useMemo(
+    () =>
+      data?.cluster?.nodeMetrics?.find(
+        (nodeMetric) => nodeMetric?.metadata?.name === nodeName
+      ),
+    [data?.cluster?.nodeMetrics, nodeName]
+  )
+
   return (
     <TabPanel
       stateRef={tabStateRef}
@@ -101,7 +123,7 @@ export default function Node() {
             (currentTab?.label ?? 'Info') === 'Info' ||
             currentTab?.label === 'Metadata'
           }
-          heading={name}
+          heading={nodeName}
           headingContent={
             <HeadingTabList
               tabStateRef={tabStateRef}
@@ -109,7 +131,7 @@ export default function Node() {
             />
           }
           // eslint-disable-next-line react/no-children-prop
-          children={<Outlet />}
+          children={<Outlet context={{ node, nodeMetric }} />}
         />
       }
     />

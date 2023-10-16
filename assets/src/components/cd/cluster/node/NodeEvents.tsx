@@ -1,30 +1,17 @@
-import { useQuery } from '@apollo/client'
-import { useParams } from 'react-router-dom'
-import type { Event } from 'generated/graphql'
+import { useOutletContext } from 'react-router-dom'
 import { Flex } from 'honorable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import { Node } from 'generated/graphql'
+
 import EventsTable from '../../../utils/EventsTable'
-import { NODE_EVENTS_Q } from '../../../cluster/queries'
-import { POLL_INTERVAL } from '../../../cluster/constants'
 
 export default function NodeEvents() {
-  const { name } = useParams()
-  const { data, refetch: _refetch } = useQuery<{
-    node: {
-      events?: Event[]
-    }
-  }>(NODE_EVENTS_Q, {
-    variables: { name },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
+  const { node } = useOutletContext() as { node: Node }
 
-  if (!data) return <LoadingIndicator />
+  if (!node) return <LoadingIndicator />
 
-  const {
-    node: { events },
-  } = data
+  const { events } = node
 
   return (
     <Flex
@@ -32,7 +19,7 @@ export default function NodeEvents() {
       height="100%"
       overflow="hidden"
     >
-      <EventsTable events={events} />
+      <EventsTable events={events || []} />
     </Flex>
   )
 }
