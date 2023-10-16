@@ -71,6 +71,32 @@ defmodule Console.Deployments.ClustersTest do
       assert length(revision.node_pools) == length(cluster.node_pools)
     end
 
+    test "it can create a gcp cluster with cloud specific configs" do
+      user = admin_user()
+      provider = insert(:cluster_provider, cloud: "gcp")
+      insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25",
+        provider_id: provider.id,
+        cloud_settings: %{gcp: %{project: "test-project", network: "test", region: "us-east1"}},
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      assert cluster.name == "test"
+      assert cluster.version == "1.25"
+
+      %{service: svc} = Console.Repo.preload(cluster, [:service])
+      {:ok, secrets} = Services.configuration(svc)
+      assert secrets["project"] == "test-project"
+      assert secrets["network"] == "test"
+      assert secrets["region"] == "us-east1"
+    end
+
     test "it can create a new cluster record with a provider credential" do
       user = admin_user()
       provider = insert(:cluster_provider)

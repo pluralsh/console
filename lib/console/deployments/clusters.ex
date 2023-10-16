@@ -4,7 +4,7 @@ defmodule Console.Deployments.Clusters do
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Commands.{Tee, Command}
-  alias Console.Deployments.{Services, Git}
+  alias Console.Deployments.{Services, Git, Providers.Configuration}
   alias Console.Services.Users
   alias Kazan.Apis.Core.V1, as: Core
   alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken, ClusterRevision, ProviderCredential}
@@ -275,8 +275,8 @@ defmodule Console.Deployments.Clusters do
       %ClusterRevision{cluster_id: cluster.id}
       |> ClusterRevision.changeset(%{
         version: cluster.version,
-        cloud_settings: cluster.cloud_settings,
-        node_pools: Enum.map(cluster.node_pools, &Piazza.Ecto.Schema.mapify/1)
+        cloud_settings: Console.mapify(cluster.cloud_settings),
+        node_pools: Console.mapify(cluster.node_pools)
       })
       |> Repo.insert()
     end)
@@ -484,7 +484,7 @@ defmodule Console.Deployments.Clusters do
         %{name: "clusterName", value: cluster.name},
         %{name: "version", value: cluster.version},
         %{name: "nodePools", value: Jason.encode!(node_pools)}
-        | credential_config(cluster)
+        | credential_config(cluster) ++ Configuration.conf(cluster)
       ]
     }
   end

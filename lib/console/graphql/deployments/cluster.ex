@@ -61,10 +61,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   input_object :cloud_settings_attributes do
     field :aws, :aws_cloud_attributes
+    field :gcp, :gcp_cloud_attributes
   end
 
   input_object :aws_cloud_attributes do
-    field :launch_template_id, :string
+    field :region, :string
+  end
+
+  input_object :gcp_cloud_attributes do
+    field :project, :string
+    field :network, :string
+    field :region,  :string
   end
 
   input_object :cluster_provider_attributes do

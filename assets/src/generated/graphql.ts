@@ -247,7 +247,7 @@ export type AwsCloud = {
 };
 
 export type AwsCloudAttributes = {
-  launchTemplateId?: InputMaybe<Scalars['String']['input']>;
+  region?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type AwsSettingsAttributes = {
@@ -384,6 +384,7 @@ export type CloudSettings = {
 
 export type CloudSettingsAttributes = {
   aws?: InputMaybe<AwsCloudAttributes>;
+  gcp?: InputMaybe<GcpCloudAttributes>;
 };
 
 /** a representation of a cluster you can deploy to */
@@ -937,6 +938,12 @@ export type FileContent = {
   __typename?: 'FileContent';
   content?: Maybe<Scalars['String']['output']>;
   path?: Maybe<Scalars['String']['output']>;
+};
+
+export type GcpCloudAttributes = {
+  network?: InputMaybe<Scalars['String']['input']>;
+  project?: InputMaybe<Scalars['String']['input']>;
+  region?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GcpSettingsAttributes = {
