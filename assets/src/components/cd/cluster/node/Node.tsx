@@ -20,7 +20,7 @@ import {
   getNodeDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
 import { CD_BASE_CRUMBS } from '../../ContinuousDeployment'
-import { useClusterQuery } from '../../../../generated/graphql'
+import { useNodeMetricQuery, useNodeQuery } from '../../../../generated/graphql'
 
 export const getNodeDetailsBreadcrumbs = ({
   clusterId,
@@ -94,25 +94,15 @@ export default function Node() {
 
   useEffect(() => setBreadcrumbs(breadcrumbs), [setBreadcrumbs, breadcrumbs])
 
-  // TODO: Use dedicated query once its available.
-  const { data } = useClusterQuery({
-    variables: { id: clusterId || '' },
+  const { data } = useNodeQuery({
+    variables: { name: nodeName, clusterId: clusterId || '' },
     pollInterval: POLL_INTERVAL,
   })
 
-  const node: any = useMemo(
-    () =>
-      data?.cluster?.nodes?.find((node) => node?.metadata?.name === nodeName),
-    [data?.cluster?.nodes, nodeName]
-  )
-
-  const nodeMetric: any = useMemo(
-    () =>
-      data?.cluster?.nodeMetrics?.find(
-        (nodeMetric) => nodeMetric?.metadata?.name === nodeName
-      ),
-    [data?.cluster?.nodeMetrics, nodeName]
-  )
+  const { data: nodeMetricData } = useNodeMetricQuery({
+    variables: { name: nodeName, clusterId: clusterId || '' },
+    pollInterval: POLL_INTERVAL,
+  })
 
   return (
     <TabPanel
@@ -131,7 +121,14 @@ export default function Node() {
             />
           }
           // eslint-disable-next-line react/no-children-prop
-          children={<Outlet context={{ node, nodeMetric }} />}
+          children={
+            <Outlet
+              context={{
+                node: data?.node,
+                nodeMetric: nodeMetricData?.nodeMetric,
+              }}
+            />
+          }
         />
       }
     />

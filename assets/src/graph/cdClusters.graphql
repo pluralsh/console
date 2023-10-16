@@ -97,14 +97,6 @@ fragment Cluster on Cluster {
   name
   nodes {
     ...NodeFragment
-    # TODO: raw pods and events were added as there is no node query at the moment.
-    raw
-    pods {
-      ...Pod
-    }
-    events {
-      ...Event
-    }
   }
   nodeMetrics {
     ...NodeMetricFragment
