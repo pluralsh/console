@@ -2575,6 +2575,7 @@ export type RootQueryTypeNamespacesArgs = {
 
 
 export type RootQueryTypeNodeArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
 };
 
