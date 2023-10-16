@@ -154,8 +154,8 @@ defmodule Console.Deployments.CronTest do
       insert(:cluster, installed: true)
       kubeconf_secret = "#{n}-kubeconfig"
       expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
-      expect(Console.Cached.Secret, :get, fn ^ns, ^kubeconf_secret ->
-        %Core.Secret{data: %{"value" => Base.encode64("kubeconfig")}}
+      expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
+        {:ok, %Core.Secret{data: %{"value" => Base.encode64("kubeconfig")}}}
       end)
       expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:ok, "yay"} end)
 

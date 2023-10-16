@@ -51,7 +51,7 @@ defmodule Console.Deployments.Clusters do
 
   def kubeconfig(%Cluster{name: name} = cluster) do
     with ns when is_binary(ns) <- namespace(cluster),
-         %Core.Secret{data: %{"value" => value}} <- Console.Cached.Secret.get(ns, "#{name}-kubeconfig"),
+         {:ok, %Core.Secret{data: %{"value" => value}}} <- Kube.Utils.get_secret(ns, "#{name}-kubeconfig"),
       do: Base.decode64(value)
   end
 

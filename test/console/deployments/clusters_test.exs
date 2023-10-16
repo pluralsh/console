@@ -310,8 +310,8 @@ defmodule Console.Deployments.ClustersTest do
 
     test "it can use a kubeconfig in a CAPI cluster secret" do
       cluster = insert(:cluster, name: "cluster", provider: build(:cluster_provider, namespace: "test-provider"))
-      expect(Console.Cached.Secret, :get, fn "test-provider", "cluster-kubeconfig" ->
-        %CoreV1.Secret{data: %{"value" => Base.encode64(Console.conf(:test_kubeconfig))}}
+      expect(Kube.Utils, :get_secret, fn "test-provider", "cluster-kubeconfig" ->
+        {:ok, %CoreV1.Secret{data: %{"value" => Base.encode64(Console.conf(:test_kubeconfig))}}}
       end)
 
       assert Clusters.control_plane(cluster) == Kazan.Server.from_kubeconfig_raw(Console.conf(:test_kubeconfig))
@@ -428,8 +428,8 @@ defmodule Console.Deployments.ClustersTest do
           insert(:cluster, provider: insert(:cluster_provider))
       kubeconf_secret = "#{n}-kubeconfig"
       expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
-      expect(Console.Cached.Secret, :get, fn ^ns, ^kubeconf_secret ->
-        %CoreV1.Secret{data: %{"value" => Base.encode64("kubeconfig")}}
+      expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
+        {:ok, %CoreV1.Secret{data: %{"value" => Base.encode64("kubeconfig")}}}
       end)
       expect(Console.Commands.Command, :cmd, fn "plural", ["deployments", "install", "--url", _, "--token", ^t], _, [{"KUBECONFIG", f}] ->
         case File.read(f) do
@@ -450,8 +450,8 @@ defmodule Console.Deployments.ClustersTest do
         insert(:cluster, provider: insert(:cluster_provider))
       kubeconf_secret = "#{n}-kubeconfig"
       expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
-      expect(Console.Cached.Secret, :get, fn ^ns, ^kubeconf_secret ->
-        %CoreV1.Secret{data: %{"value" => Base.encode64("kubeconfig")}}
+      expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
+        {:ok, %CoreV1.Secret{data: %{"value" => Base.encode64("kubeconfig")}}}
       end)
       expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" ->
         {:error, %Console.Commands.Tee{stdo: ["helm failure"]}}
