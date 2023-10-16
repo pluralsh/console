@@ -2,7 +2,11 @@ import {
   Breadcrumb,
   Button,
   EmptyState,
+  EyeClosedIcon,
+  EyeIcon,
   FormField,
+  GearTrainIcon,
+  IconFrame,
   Input,
   SearchIcon,
   Table,
@@ -35,6 +39,12 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import ModalAlt from 'components/cd/ModalAlt'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { useUpdateState } from 'components/hooks/useUpdateState'
+
+import CopyButton from 'components/utils/CopyButton'
+
+import { ObscuredToken } from 'components/profile/ObscuredToken'
+
+import { InputRevealer } from 'components/cd/providers/InputRevealer'
 
 import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
 
@@ -197,7 +207,7 @@ function SecretEditModal({
         />
       </FormField>
       <FormField label="Value">
-        <Input
+        <InputRevealer
           value={value}
           onChange={(e) => {
             update({ value: e.target.value })
@@ -223,13 +233,14 @@ function ChangeSecret({
 
   return (
     <>
-      <Button
-        floating
-        small
-        onClick={() => setOpen(true)}
-      >
-        Edit
-      </Button>
+      <div className="icon">
+        <IconFrame
+          tooltip="Edit secret"
+          clickable
+          icon={<GearTrainIcon />}
+          onClick={() => setOpen(true)}
+        />
+      </div>
       <ModalMountTransition open={open}>
         <SecretEditModal
           open={open}
@@ -253,12 +264,53 @@ const ColName = secretsColumnHelper.accessor((row) => row.name, {
   meta: { truncate: true },
   cell: ({ getValue }) => getValue(),
 })
+
+const SecretValueSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
+  '.icon': {
+    flexGrow: 0,
+    width: 32,
+    height: 32,
+    '*': {
+      width: 'unset',
+      overflow: 'unset',
+      whiteSpace: 'unset',
+    },
+  },
+}))
+
+function SecretValue({ children }: { children: string }) {
+  const [reveal, setReveal] = useState(false)
+
+  return (
+    <SecretValueSC>
+      <IconFrame
+        className="icon"
+        size="medium"
+        clickable
+        tooltip={reveal ? 'Hide value' : 'Reveal value'}
+        icon={reveal ? <EyeIcon /> : <EyeClosedIcon />}
+        onClick={() => {
+          setReveal((reveal) => !reveal)
+        }}
+      />
+      <ObscuredToken
+        token={children}
+        length={20}
+        reveal={reveal}
+      />
+    </SecretValueSC>
+  )
+}
+
 const ColValue = secretsColumnHelper.accessor((row) => row.value, {
   id: 'value',
   header: 'Value',
   enableGlobalFilter: true,
   meta: { truncate: true },
-  cell: ({ getValue }) => getValue(),
+  cell: ({ getValue }) => <SecretValue>{getValue()}</SecretValue>,
 })
 
 const ColActionsSC = styled.div(({ theme }) => ({
@@ -279,6 +331,11 @@ const ColActions = ({
       <ColActionsSC>
         {serviceDeploymentId && (
           <>
+            <CopyButton
+              text={original.value || ''}
+              tooltip="Copy value"
+              type="secondary"
+            />
             <ChangeSecret
               key={serviceDeploymentId}
               serviceDeploymentId={serviceDeploymentId}

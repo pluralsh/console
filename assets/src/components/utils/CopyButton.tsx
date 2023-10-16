@@ -4,10 +4,11 @@ import { CheckIcon, CopyIcon, IconFrame } from '@pluralsh/design-system'
 type CopyButtonProps = {
   text?: string | null | undefined
   type?: 'secondary' | 'tertiary' | 'floating'
+  tooltip?: string
 }
 
 function CopyButtonRef(
-  { text, type = 'floating' }: CopyButtonProps,
+  { text, type = 'floating', tooltip }: CopyButtonProps,
   ref: Ref<any>
 ) {
   const [copied, setCopied] = useState(false)
@@ -35,7 +36,7 @@ function CopyButtonRef(
       onClick={() => handleCopy()}
       ref={ref}
       textValue={text ?? undefined}
-      tooltip
+      tooltip={tooltip !== undefined ? tooltip : true}
       type={type}
     />
   )
