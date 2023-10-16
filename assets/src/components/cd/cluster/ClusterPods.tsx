@@ -42,15 +42,15 @@ const searchOptions = {
 
 export default function ClusterPods() {
   const { clusterId } = useParams()
-  const { data, error, refetch } = useClusterPodsQuery({
-    variables: { clusterId }, // TODO: Set namespace as param.
-    pollInterval: POLL_INTERVAL,
-  })
+  const [namespace, setNamespace] = useState<string>('')
   const { data: namespacesData } = useClusterNamespacesQuery({
     variables: { clusterId },
     pollInterval: POLL_INTERVAL,
   })
-
+  const { data, error, refetch } = useClusterPodsQuery({
+    variables: { clusterId, namespace },
+    pollInterval: POLL_INTERVAL,
+  })
   const columns = useMemo(
     () => [
       ColNamespace,
@@ -65,7 +65,6 @@ export default function ClusterPods() {
     [refetch]
   )
   const theme = useTheme()
-  const [namespace, setNamespace] = useState<string>('')
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 300)
 
@@ -102,19 +101,15 @@ export default function ClusterPods() {
     if (isEmpty(data?.pods?.edges)) {
       return undefined
     }
-    let pods = data?.pods?.edges
+    const pods = data?.pods?.edges
       ?.map(
         (edge) =>
           ({ id: edge?.node?.metadata?.namespace, ...edge?.node }) as PodWithId
       )
       ?.filter((pod?: PodWithId): pod is PodWithId => !!pod) as PodWithId[]
 
-    if (!isEmpty(namespace)) {
-      pods = pods?.filter((pod) => pod?.metadata?.namespace === namespace)
-    }
-
     return pods || []
-  }, [data, namespace])
+  }, [data])
 
   const reactTableOptions = useMemo(
     () => ({

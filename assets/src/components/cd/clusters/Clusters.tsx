@@ -106,24 +106,6 @@ export const columns = [
       )
     },
   }),
-  // TODO: Add once VPC ID is available.
-  // columnHelper.accessor(({ node }) => node?.version, {
-  //   id: 'vpc',
-  //   header: 'VPC ID',
-  //   cell: () => 'TODO',
-  // }),
-  // TODO: Add once owner is available.
-  // columnHelper.accessor(({ node }) => node?.version, {
-  //   id: 'owner',
-  //   header: 'Owner',
-  //   cell: () => (
-  //     <UserDetails
-  //       name="TODO"
-  //       avatar={null}
-  //       email="todo@todo.todo"
-  //     />
-  //   ),
-  // }),
   columnHelper.accessor(({ node }) => node, {
     id: 'cpu',
     header: 'CPU',
