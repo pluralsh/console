@@ -236,7 +236,7 @@ export function NodesList({
   nodes: (Node | null)[]
   nodeMetrics: (NodeMetric | null)[]
   columns: ColumnDef<TableData, any>[]
-  linkBasePath: string
+  linkBasePath?: string
 }) {
   const navigate = useNavigate()
   const metrics: Record<string, { cpu?: number; memory?: number }> =

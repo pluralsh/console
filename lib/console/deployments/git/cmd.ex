@@ -17,7 +17,7 @@ defmodule Console.Deployments.Git.Cmd do
 
   def possibly_pull(repo) do
     case git(repo, "symbolic-ref", ["--short", "HEAD"]) do
-      {:ok, _} -> git(repo, ["pull", "--all", "--rebase"])
+      {:ok, _} -> git(repo, "pull", ["--all", "--rebase"])
       _ -> {:ok, :ignore}
     end
   end
