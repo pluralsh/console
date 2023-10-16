@@ -35,6 +35,7 @@ import { TableText } from '../../cluster/TableElements'
 import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
+import { roundToTwoPlaces } from 'components/cluster/utils'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -121,7 +122,7 @@ export const columns = [
           acc + (cpuParser(current?.status?.capacity?.cpu) ?? 0),
         0
       )
-      const display = `${usage ? cpuFormat(usage) : '—'} / ${
+      const display = `${usage ? cpuFormat(roundToTwoPlaces(usage)) : '—'} / ${
         capacity ? cpuFormat(capacity) : '—'
       }`
 
