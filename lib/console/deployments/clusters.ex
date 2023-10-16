@@ -12,7 +12,6 @@ defmodule Console.Deployments.Clusters do
 
   @cache_adapter Console.conf(:cache_adapter)
   @local_adapter Console.conf(:local_cache)
-  @ttl :timer.minutes(1)
   @node_ttl :timer.minutes(2)
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
