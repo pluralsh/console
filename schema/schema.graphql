@@ -71,7 +71,7 @@ type RootQueryType {
 
   nodes: [Node]
 
-  node(name: String!): Node
+  node(name: String!, clusterId: ID): Node
 
   cronJob(namespace: String!, name: String!, serviceId: ID): CronJob
 
