@@ -38,7 +38,6 @@ defmodule Console.Deployments.Clusters do
 
   def get_cluster_by_handle!(handle), do: Console.Repo.get_by!(Cluster, handle: handle)
 
-  @decorate cacheable(cache: @cache_adapter, key: {:control_plane, id}, opts: [ttl: @ttl])
   def control_plane(%Cluster{id: id, self: true}), do: Kazan.Server.in_cluster()
   def control_plane(%Cluster{id: id, kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
   def control_plane(%Cluster{id: id} = cluster) do
@@ -53,7 +52,7 @@ defmodule Console.Deployments.Clusters do
 
   def kubeconfig(%Cluster{name: name} = cluster) do
     with ns when is_binary(ns) <- namespace(cluster),
-         {:ok, %{data: %{"value" => value}}} <- Kube.Utils.get_secret(ns, "#{name}-kubeconfig"),
+         %Core.Secret{data: %{"value" => value}} <- Console.Cached.Secret.get(ns, "#{name}-kubeconfig"),
       do: Base.decode64(value)
   end
 
