@@ -23,6 +23,9 @@ import {
   NODE_PARAM_NAME,
   getPodDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
+import { columnHelper } from '../../../cluster/nodes/NodesList'
+import { TableCaretLink } from '../../../cluster/TableElements'
+import { ColActions } from '../ClusterPods'
 
 export default function NodeInfo() {
   const params = useParams()
@@ -40,7 +43,7 @@ export default function NodeInfo() {
       ColCpuReservation,
       ColRestarts,
       ColContainers,
-      // ColActions(refetch), // TODO: Update delete and details page.
+      ColActions(clusterId),
     ],
     []
   )
