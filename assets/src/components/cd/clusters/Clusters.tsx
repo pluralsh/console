@@ -34,7 +34,7 @@ import {
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { TableText } from '../../cluster/TableElements'
 
-import ClusterCreate from './ClusterCreate'
+import CreateCluster from './create/CreateCluster'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
 
@@ -95,15 +95,20 @@ export const columns = [
 
       return (
         <div>
-          <div>Current: v{node?.currentVersion}</div>
-          <div
-            css={{
-              ...theme.partials.text.caption,
-              color: theme.colors['text-xlight'],
-            }}
-          >
-            Target: v{node?.version}
-          </div>
+          {node?.currentVersion && (
+            <>
+              <div>Current: v{node?.currentVersion}</div>
+              <div
+                css={{
+                  ...theme.partials.text.caption,
+                  color: theme.colors['text-xlight'],
+                }}
+              >
+                Target: v{node?.version}
+              </div>
+            </>
+          )}
+          {!node?.currentVersion && <>-</>}
         </div>
       )
     },
@@ -242,7 +247,7 @@ export default function Clusters() {
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-  const headerActions = useMemo(() => <ClusterCreate />, [])
+  const headerActions = useMemo(() => <CreateCluster />, [])
 
   useSetCDHeaderContent(headerActions)
   useSetBreadcrumbs(CLUSTERS_CRUMBS)
