@@ -1,3 +1,5 @@
+import * as cluster from 'cluster'
+
 import { useParams } from 'react-router-dom'
 import {
   ComboBox,
@@ -15,7 +17,6 @@ import Fuse from 'fuse.js'
 
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
-  ColActions,
   ColContainers,
   ColCpuReservation,
   ColImages,
@@ -32,6 +33,12 @@ import {
 } from '../../../generated/graphql'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { NamespaceListFooter } from '../../cluster/pods/Pods'
+import { columnHelper } from '../../cluster/nodes/NodesList'
+import { TableCaretLink } from '../../cluster/TableElements'
+import {
+  getNodeDetailsPath,
+  getPodDetailsPath,
+} from '../../../routes/cdRoutesConsts'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -40,8 +47,35 @@ const searchOptions = {
   threshold: 0.25,
 }
 
+export const ColActions = (clusterId: string) =>
+  columnHelper.display({
+    id: 'actions',
+    cell: ({ row: { original } }: any) => (
+      <Flex
+        flexDirection="row"
+        gap="xxsmall"
+      >
+        {/* TODO */}
+        {/* <DeletePod */}
+        {/*  name={original.name} */}
+        {/*  namespace={original.namespace} */}
+        {/*  refetch={refetch} */}
+        {/* /> */}
+        <TableCaretLink
+          to={getPodDetailsPath({
+            clusterId,
+            name: original?.name,
+            namespace: original?.namespace,
+          })}
+          textValue={`View pod ${original?.name}`}
+        />
+      </Flex>
+    ),
+    header: '',
+  })
+
 export default function ClusterPods() {
-  const { clusterId } = useParams()
+  const { clusterId = '' } = useParams()
   const [namespace, setNamespace] = useState<string>('')
   const { data: namespacesData } = useClusterNamespacesQuery({
     variables: { clusterId },
@@ -60,7 +94,7 @@ export default function ClusterPods() {
       ColRestarts,
       ColContainers,
       ColImages,
-      ColActions(refetch), // TODO: Update delete and details page.
+      ColActions(clusterId),
     ],
     [refetch]
   )
@@ -184,6 +218,10 @@ export default function ClusterPods() {
             reactTableOptions={reactTableOptions}
             maxHeight="unset"
             height="100%"
+            linkBasePath={getPodDetailsPath({
+              clusterId,
+              isRelative: false,
+            })}
           />
         </FullHeightTableWrap>
       )}

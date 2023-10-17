@@ -24,20 +24,20 @@ import { useNodeMetricQuery, useNodeQuery } from '../../../../generated/graphql'
 
 export const getNodeDetailsBreadcrumbs = ({
   clusterId,
-  nodeName,
+  name,
 }: {
-  clusterId: string | null | undefined
-  nodeName: string | null | undefined
+  clusterId?: string | null
+  name?: string | null
 }) => [
   ...CD_BASE_CRUMBS,
   { label: 'clusters', url: `${CD_BASE_PATH}/clusters` },
   { label: clusterId || '', url: `${CD_BASE_PATH}/clusters/${clusterId}` },
   { label: 'nodes', url: `${CD_BASE_PATH}/clusters/${clusterId}/nodes` },
-  ...(clusterId && nodeName
+  ...(clusterId && name
     ? [
         {
-          label: nodeName,
-          url: getNodeDetailsPath({ clusterId, nodeName }),
+          label: name,
+          url: getNodeDetailsPath({ clusterId, name }),
         },
       ]
     : []),
@@ -78,8 +78,8 @@ function HeadingTabList({ tabStateRef, currentTab }: any) {
 
 export default function Node() {
   const params = useParams()
-  const nodeName = params[NODE_PARAM_NAME] as string
-  const clusterId = params[NODE_PARAM_CLUSTER] as string
+  const name = (params[NODE_PARAM_NAME] as string) || ''
+  const clusterId = (params[NODE_PARAM_CLUSTER] as string) || ''
 
   const tabStateRef = useRef<any>()
   const tab = useMatch(`${NODE_BASE_PATH}/:tab`)?.params?.tab || ''
@@ -88,19 +88,19 @@ export default function Node() {
   const { setBreadcrumbs } = useBreadcrumbs()
 
   const breadcrumbs: Breadcrumb[] = useMemo(
-    () => [...getNodeDetailsBreadcrumbs({ clusterId, nodeName })],
-    [clusterId, nodeName]
+    () => [...getNodeDetailsBreadcrumbs({ clusterId, name })],
+    [clusterId, name]
   )
 
   useEffect(() => setBreadcrumbs(breadcrumbs), [setBreadcrumbs, breadcrumbs])
 
   const { data } = useNodeQuery({
-    variables: { name: nodeName, clusterId: clusterId || '' },
+    variables: { name, clusterId },
     pollInterval: POLL_INTERVAL,
   })
 
   const { data: nodeMetricData } = useNodeMetricQuery({
-    variables: { name: nodeName, clusterId: clusterId || '' },
+    variables: { name, clusterId },
     pollInterval: POLL_INTERVAL,
   })
 
@@ -113,7 +113,7 @@ export default function Node() {
             (currentTab?.label ?? 'Info') === 'Info' ||
             currentTab?.label === 'Metadata'
           }
-          heading={nodeName}
+          heading={name}
           headingContent={
             <HeadingTabList
               tabStateRef={tabStateRef}

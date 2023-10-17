@@ -1,28 +1,16 @@
 import { Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Pod } from 'generated/graphql'
 import { A } from 'honorable'
-import { useQuery } from '@apollo/client'
-import { Link, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { podStatusToReadiness } from 'utils/status'
 
-import { POLL_INTERVAL } from '../constants'
-import { POD_INFO_Q } from '../queries'
 import { StatusChip } from '../TableElements'
 
-export default function NodeSidecar() {
-  const { name, namespace } = useParams()
-  const { data } = useQuery<{
-    pod: Pod
-  }>(POD_INFO_Q, {
-    variables: { name, namespace },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
-
-  if (!data) {
+export default function PodSidecar({ pod }: { pod?: Pod | null }) {
+  if (!pod) {
     return null
   }
-  const { pod } = data
+
   const readiness = podStatusToReadiness(pod?.status)
 
   return (

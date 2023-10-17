@@ -250,7 +250,7 @@ export const ColActions = (refetch) =>
         />
         <TableCaretLink
           to={`/pods/${original.namespace}/${original.name}`}
-          textValue={`View node ${original?.name}`}
+          textValue={`View pod ${original?.name}`}
         />
       </Flex>
     ),
@@ -277,6 +277,7 @@ type PodListProps = Omit<ComponentProps<typeof Table>, 'data'> & {
   pods?: Maybe<PodWithId>[] & PodWithId[]
   applications?: Maybe<Maybe<Application>[]>
   columns: any[]
+  linkBasePath?: string
 }
 
 function getRestarts(status: Pod['status']) {
@@ -304,7 +305,13 @@ function getPodImages(spec: Pod['spec']) {
 }
 
 export const PodsList = memo(
-  ({ pods, applications, columns, ...props }: PodListProps) => {
+  ({
+    pods,
+    applications,
+    columns,
+    linkBasePath = `/pods/`,
+    ...props
+  }: PodListProps) => {
     const navigate = useNavigate()
     const tableData: PodTableRow[] = useMemo(
       () =>
@@ -355,7 +362,7 @@ export const PodsList = memo(
         virtualizeRows
         {...props}
         onRowClick={(_e, { original }: Row<PodTableRow>) =>
-          navigate(`/pods/${original.namespace}/${original.name}`)
+          navigate(`${linkBasePath}${original.namespace}/${original.name}`)
         }
       />
     )

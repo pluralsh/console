@@ -71,6 +71,7 @@ export default function NodeInfo() {
       </section>
       <section>
         <SubTitle>Pods</SubTitle>
+        {/* TODO: Update links to pod details. */}
         <PodsList
           columns={columns}
           pods={pods}
