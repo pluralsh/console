@@ -448,6 +448,7 @@ export type ClusterRevisionsArgs = {
 };
 
 export type ClusterAttributes = {
+  cloudSettings?: InputMaybe<CloudSettingsAttributes>;
   /** a cloud credential to use when provisioning this cluster */
   credentialId?: InputMaybe<Scalars['ID']['input']>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */

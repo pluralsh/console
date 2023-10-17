@@ -9,6 +9,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :credential_id,  :id, description: "a cloud credential to use when provisioning this cluster"
     field :version,        non_null(:string)
     field :kubeconfig,     :kubeconfig_attributes
+    field :cloud_settings, :cloud_settings_attributes
     field :node_pools,     list_of(:node_pool_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
