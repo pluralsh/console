@@ -31,12 +31,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import ModalAlt from '../ModalAlt'
 
-import {
-  AwsSettings,
-  AzureSettings,
-  GcpSettings,
-  PROVIDER_KEYS,
-} from './ProviderSettings'
+import { AwsSettings, GcpSettings, PROVIDER_KEYS } from './ProviderSettings'
 
 // TODO: Replace when api updated
 export type CloudProviderSettingsAttributes = SettingsTemp & {
@@ -90,10 +85,10 @@ export function CreateProviderModal({
     case 'gcp':
       disabled = disabled || !providerSettings.gcp?.applicationCredentials
       break
-    case 'azure':
-      //  TODO: Add disabled conditions once azure support is added to api
-      disabled = true
-      break
+    // case 'azure':
+    //   //  TODO: Add disabled conditions once azure support is added to api
+    //   disabled = true
+    //   break
   }
 
   const [mutation, { loading, error }] = useCreateClusterProviderMutation({
@@ -146,16 +141,16 @@ export function CreateProviderModal({
         />
       )
       break
-    case 'azure':
-      settings = (
-        <AzureSettings
-          settings={providerSettings.azure}
-          updateSettings={(settings) =>
-            updateProviderSettings({ azure: settings })
-          }
-        />
-      )
-      break
+    // case 'azure':
+    //   settings = (
+    //     <AzureSettings
+    //       settings={providerSettings.azure}
+    //       updateSettings={(settings) =>
+    //         updateProviderSettings({ azure: settings })
+    //       }
+    //     />
+    //   )
+    //   break
   }
 
   useEffect(() => {

@@ -26,7 +26,7 @@ import { getProviderName } from 'components/utils/Provider'
 
 import ModalAlt from '../ModalAlt'
 
-import { AwsSettings, AzureSettings, GcpSettings } from './ProviderSettings'
+import { AwsSettings, GcpSettings } from './ProviderSettings'
 
 // TODO: Replace when api updated
 type CloudProviderSettingsAttributes = SettingsTemp & {
@@ -133,16 +133,16 @@ export function UpdateProviderModal({
         />
       )
       break
-    case 'azure':
-      settings = (
-        <AzureSettings
-          settings={providerSettings.azure}
-          updateSettings={(settings) =>
-            updateProviderSettings({ azure: settings })
-          }
-        />
-      )
-      break
+    // case 'azure':
+    //   settings = (
+    //     <AzureSettings
+    //       settings={providerSettings.azure}
+    //       updateSettings={(settings) =>
+    //         updateProviderSettings({ azure: settings })
+    //       }
+    //     />
+    //   )
+    //   break
   }
 
   useEffect(() => {
