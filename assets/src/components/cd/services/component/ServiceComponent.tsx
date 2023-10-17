@@ -104,9 +104,6 @@ export default function ServiceComponent() {
     },
   })
 
-  console.log('error', error)
-  console.log('data', data)
-
   const serviceName = data?.serviceDeployment?.name
   const components = data?.serviceDeployment?.components
 

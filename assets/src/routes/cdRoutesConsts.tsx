@@ -1,3 +1,7 @@
+function encodeSlashes(str: string) {
+  return str.replaceAll('/', '%2F')
+}
+
 export const CD_BASE_PATH = 'cd' as const
 export const CLUSTERS_PATH = 'clusters' as const
 export const SERVICES_PATH = 'services' as const
@@ -58,7 +62,9 @@ export function getServiceDetailsPath({
 }) {
   return `${
     isRelative ? '' : '/'
-  }${CD_BASE_PATH}/${SERVICES_PATH}/${clusterName}/${serviceId}`
+  }${CD_BASE_PATH}/${SERVICES_PATH}/${encodeSlashes(
+    clusterName || ''
+  )}/${encodeSlashes(serviceId || '')}`
 }
 
 export function getServiceComponentPath({
@@ -73,7 +79,11 @@ export function getServiceComponentPath({
 }) {
   return `${getServiceDetailsPath({
     ...props,
-  })}/${SERVICE_COMPONENTS_PATH}/${componentKind}/${componentName}/${componentVersion}`
+  })}/${SERVICE_COMPONENTS_PATH}/${encodeSlashes(
+    componentKind || ''
+  )}/${encodeSlashes(componentName || '')}/${encodeSlashes(
+    componentVersion || ''
+  )}`
 }
 
 export function getNodeDetailsPath({
