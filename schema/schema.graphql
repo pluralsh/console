@@ -921,6 +921,9 @@ type ClusterProvider {
   "the kubernetes versions this provider currently supports"
   supportedVersions: [String]
 
+  "the region names this provider can deploy to"
+  regions: [String]
+
   "whether the current user can edit this resource"
   editable: Boolean
 

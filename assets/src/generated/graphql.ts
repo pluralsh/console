@@ -516,6 +516,8 @@ export type ClusterProvider = {
   name: Scalars['String']['output'];
   /** the namespace the CAPI resources are deployed into */
   namespace: Scalars['String']['output'];
+  /** the region names this provider can deploy to */
+  regions?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the repository used to serve cluster manifests */
   repository?: Maybe<GitRepository>;
   /** the service of the CAPI controller itself */

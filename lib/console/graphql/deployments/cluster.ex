@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Deployments.Cluster do
   use Console.GraphQl.Schema.Base
+  alias Console.Schema.ClusterProvider
   alias Console.GraphQl.Resolvers.{Deployments}
 
   input_object :cluster_attributes do
@@ -118,7 +119,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :credentials, list_of(:provider_credential), resolve: dataloader(ProviderCredential), description: "a list of credentials eligible for this provider"
 
     field :supported_versions, list_of(:string), description: "the kubernetes versions this provider currently supports",
-      resolve: fn provider, _, _ -> {:ok, Console.Schema.ClusterProvider.supported_versions(provider)} end
+      resolve: fn provider, _, _ -> {:ok, ClusterProvider.supported_versions(provider)} end
+
+    field :regions, list_of(:string), description: "the region names this provider can deploy to",
+      resolve: fn provider, _, _ -> {:ok, ClusterProvider.regions(provider)} end
 
     field :editable,    :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this resource"
 

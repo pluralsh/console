@@ -2,9 +2,9 @@ defmodule Console.Deployments.Providers.Versions do
   alias Console.Schema.Cluster
   import Console.Deployments.Providers.Parsers
 
-  @eks File.read!("k8s-versions/eks.json") |> String.split(~r/\R/)
-  @aks File.read!("k8s-versions/aks.json") |> Jason.decode!() |> parse_aks()
-  @gke File.read!("k8s-versions/gke.json") |> Jason.decode!() |> parse_gke()
+  @eks File.read!("static/k8s-versions/eks.json") |> String.split(~r/\R/)
+  @aks File.read!("static/k8s-versions/aks.json") |> Jason.decode!() |> parse_aks()
+  @gke File.read!("static/k8s-versions/gke.json") |> Jason.decode!() |> parse_gke()
 
   def versions("gcp"), do: gke()
   def versions("aws"), do: eks()
