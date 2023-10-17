@@ -37,9 +37,9 @@ import { TableText } from '../../cluster/TableElements'
 
 import { nextSupportedVersion } from '../../../utils/semver'
 
-import CreateCluster from './CreateCluster'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
+import CreateCluster from './create/CreateCluster'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
