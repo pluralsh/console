@@ -10,18 +10,23 @@ import { getProviderIconURL } from 'components/utils/Provider'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
+import DecoratedName from './DecoratedName'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
-export const ColServiceDeployment = columnHelper.accessor(
-  ({ node }) => node?.name,
-  {
-    id: 'deployment',
-    header: 'Deployment',
-    enableSorting: true,
-    cell: ({ getValue }) => getValue(),
-  }
-)
+export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
+  id: 'deployment',
+  header: 'Deployment',
+  enableSorting: true,
+  cell: ({ getValue }) => {
+    const node = getValue()
+    return (
+      node && (
+        <DecoratedName deletedAt={node.deletedAt}>{node.name}</DecoratedName>
+      )
+    )
+  },
+})
 
 export const ColCluster = columnHelper.accessor(
   ({ node }) => node?.cluster?.name,

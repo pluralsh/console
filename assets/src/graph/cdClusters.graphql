@@ -73,6 +73,7 @@ fragment ClustersRow on Cluster {
     }
   }
   pingedAt
+  deletedAt
   provider {
     id
     cloud

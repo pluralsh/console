@@ -24,7 +24,5 @@ defmodule Console.Deployments.Providers.Versions do
     end
   end
   def validate?(%Cluster{provider: nil}), do: true
-  def validate?(%Cluster{} = cluster) do
-    Console.Repo.preload(cluster, [:provider])
-  end
+  def validate?(%Cluster{} = cluster), do: Console.Repo.preload(cluster, [:provider])
 end

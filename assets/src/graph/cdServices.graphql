@@ -1,6 +1,7 @@
 fragment ServiceDeploymentRevision on Revision {
   id
   version
+  message
   updatedAt
   insertedAt
   git {
@@ -12,6 +13,7 @@ fragment ServiceDeploymentRevision on Revision {
 fragment ServiceDeploymentsRow on ServiceDeployment {
   id
   name
+  message
   cluster {
     id
     name
@@ -26,6 +28,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   }
   insertedAt
   updatedAt
+  deletedAt
   componentStatus
   status
 }
