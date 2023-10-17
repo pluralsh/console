@@ -24,8 +24,6 @@ import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
 
 import { roundToTwoPlaces } from 'components/cluster/utils'
 
-import semver from 'semver'
-
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 import {
   cpuFormat,

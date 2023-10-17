@@ -1,5 +1,3 @@
-import * as cluster from 'cluster'
-
 import { useParams } from 'react-router-dom'
 import {
   ComboBox,
@@ -35,10 +33,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { NamespaceListFooter } from '../../cluster/pods/Pods'
 import { columnHelper } from '../../cluster/nodes/NodesList'
 import { TableCaretLink } from '../../cluster/TableElements'
-import {
-  getNodeDetailsPath,
-  getPodDetailsPath,
-} from '../../../routes/cdRoutesConsts'
+import { getPodDetailsPath } from '../../../routes/cdRoutesConsts'
 
 const POLL_INTERVAL = 10 * 1000
 
