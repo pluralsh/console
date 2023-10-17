@@ -201,12 +201,15 @@ export const columns = [
     header: 'Status',
     cell: ({ getValue }) => {
       const cluster = getValue()
+      const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
       const upgrade = nextSupportedVersion(
         cluster?.version,
         cluster?.provider?.supportedVersions
       )
 
-      return !!upgrade && <ClusterUpgrade cluster={cluster} />
+      return (
+        (!!upgrade || hasDeprecations) && <ClusterUpgrade cluster={cluster} />
+      )
     },
   }),
   columnHelper.accessor(({ node }) => node?.pingedAt, {

@@ -18,6 +18,7 @@ import { ClusterFragment } from '../../../generated/graphql'
 import CopyButton from '../../utils/CopyButton'
 import ProviderIcon from '../../utils/Provider'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
+import { nextSupportedVersion } from '../../../utils/semver'
 
 export default function ClusterMetadataPanel({
   cluster,
@@ -27,7 +28,10 @@ export default function ClusterMetadataPanel({
   const theme = useTheme()
   const [open, setOpen] = useState(false)
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
-  const hasUpgrade = true // TODO
+  const upgrade = nextSupportedVersion(
+    cluster?.version,
+    cluster?.provider?.supportedVersions
+  )
 
   return (
     <>
@@ -39,7 +43,7 @@ export default function ClusterMetadataPanel({
               color="icon-danger"
               width={16}
             />
-          ) : hasUpgrade ? (
+          ) : upgrade ? (
             <WarningIcon
               color="icon-warning"
               width={16}
@@ -70,7 +74,7 @@ export default function ClusterMetadataPanel({
             title="Warnings"
             margin={0}
           >
-            {hasUpgrade || hasDeprecations ? (
+            {upgrade || hasDeprecations ? (
               <ClusterUpgrade cluster={cluster} />
             ) : (
               '-'
