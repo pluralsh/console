@@ -62,6 +62,7 @@ export function ServicesFilters({
   setTableFilters,
   searchString,
   setSearchString,
+  showClusterSelect = true,
 }: {
   serviceDeployments: NonNullable<
     ReturnType<typeof useServiceDeploymentsQuery>['data']
@@ -71,6 +72,7 @@ export function ServicesFilters({
   setTableFilters: (
     filters: Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   ) => void
+  showClusterSelect: boolean
 }) {
   const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
   const navigate = useNavigate()
@@ -78,7 +80,7 @@ export function ServicesFilters({
   const tabStateRef = useRef<any>(null)
   const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
 
-  const { data } = useClustersTinyQuery()
+  const { data } = useClustersTinyQuery({ skip: !showClusterSelect })
   const clusters = useMemo(
     () => mapExistingNodes(data?.clusters),
     [data?.clusters]
@@ -133,61 +135,63 @@ export function ServicesFilters({
 
   return (
     <ServiceFiltersSC>
-      <div css={{ width: 360 }}>
-        <Select
-          isDisabled={!data}
-          isOpen={clusterSelectIsOpen}
-          onOpenChange={setClusterSelectIsOpen}
-          label={!data ? 'Loading clusters..' : 'Filter by cluster'}
-          leftContent={
-            selectedCluster && (
-              <ProviderIcon
-                provider={selectedCluster.provider?.cloud || ''}
-                width={16}
-              />
-            )
-          }
-          titleContent={
-            <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-              <ClusterIcon />
-              Cluster
-            </div>
-          }
-          {...(clusterName
-            ? {
-                dropdownFooterFixed: (
-                  <ListBoxFooter
-                    onClick={() => {
-                      setClusterSelectIsOpen(false)
-                      navigate(`/cd/services`)
-                    }}
-                    leftContent={<ClusterIcon />}
-                  >
-                    Show all clusters
-                  </ListBoxFooter>
-                ),
-              }
-            : {})}
-          selectedKey={clusterName || ''}
-          onSelectionChange={(key) => {
-            navigate(`/cd/services${key ? `/${key}` : ''}`)
-          }}
-        >
-          {(clusters || []).map((cluster) => (
-            <ListBoxItem
-              key={cluster.name}
-              label={cluster.name}
-              textValue={cluster.name}
-              leftContent={
+      {showClusterSelect && (
+        <div css={{ width: 360 }}>
+          <Select
+            isDisabled={!data}
+            isOpen={clusterSelectIsOpen}
+            onOpenChange={setClusterSelectIsOpen}
+            label={!data ? 'Loading clusters..' : 'Filter by cluster'}
+            leftContent={
+              selectedCluster && (
                 <ProviderIcon
-                  provider={cluster.provider?.cloud || ''}
+                  provider={selectedCluster.provider?.cloud || ''}
                   width={16}
                 />
-              }
-            />
-          ))}
-        </Select>
-      </div>
+              )
+            }
+            titleContent={
+              <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+                <ClusterIcon />
+                Cluster
+              </div>
+            }
+            {...(clusterName
+              ? {
+                  dropdownFooterFixed: (
+                    <ListBoxFooter
+                      onClick={() => {
+                        setClusterSelectIsOpen(false)
+                        navigate(`/cd/services`)
+                      }}
+                      leftContent={<ClusterIcon />}
+                    >
+                      Show all clusters
+                    </ListBoxFooter>
+                  ),
+                }
+              : {})}
+            selectedKey={clusterName || ''}
+            onSelectionChange={(key) => {
+              navigate(`/cd/services${key ? `/${key}` : ''}`)
+            }}
+          >
+            {(clusters || []).map((cluster) => (
+              <ListBoxItem
+                key={cluster.name}
+                label={cluster.name}
+                textValue={cluster.name}
+                leftContent={
+                  <ProviderIcon
+                    provider={cluster.provider?.cloud || ''}
+                    width={16}
+                  />
+                }
+              />
+            ))}
+          </Select>
+        </div>
+      )}
       <Input
         placeholder="Search"
         startIcon={<SearchIcon />}

@@ -8,9 +8,11 @@ import { useTheme } from 'styled-components'
 
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
+import { useDebounce } from '@react-hooks-library/core'
+
 import {
   ServiceDeploymentsRowFragment,
-  useClusterServiceDeploymentsQuery,
+  useServiceDeploymentsQuery,
 } from '../../../generated/graphql'
 import {
   ColCluster,
@@ -32,10 +34,13 @@ export default function ClusterServices() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { clusterId } = useParams()
-  const { data, error, refetch } = useClusterServiceDeploymentsQuery({
-    variables: { id: clusterId || '' },
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useDebounce(searchString, 100)
+  const { data, error, refetch } = useServiceDeploymentsQuery({
+    variables: { clusterId: clusterId || '', q: debouncedSearchString },
     pollInterval: POLL_INTERVAL,
   })
+
   const columns = useMemo(
     () => [
       ColServiceDeployment,
@@ -89,8 +94,11 @@ export default function ClusterServices() {
         }}
       >
         <ServicesFilters
-          serviceDeploymentsData={data}
+          serviceDeployments={data?.serviceDeployments}
           setTableFilters={setTableFilters}
+          showClusterSelect={false}
+          searchString={searchString}
+          setSearchString={setSearchString}
         />
         <DeployService refetch={refetch} />
       </div>

@@ -310,7 +310,7 @@ const ColValue = secretsColumnHelper.accessor((row) => row.value, {
   header: 'Value',
   enableGlobalFilter: true,
   meta: { truncate: true },
-  cell: ({ getValue }) => <SecretValue>{getValue()}</SecretValue>,
+  cell: ({ getValue }) => <SecretValue>{getValue() || ''}</SecretValue>,
 })
 
 const ColActionsSC = styled.div(({ theme }) => ({

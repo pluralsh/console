@@ -220,6 +220,7 @@ export default function Services() {
         setTableFilters={setTableFilters}
         searchString={searchString}
         setSearchString={setSearchString}
+        showClusterSelect
       />
       {!data ? (
         <LoadingIndicator />
