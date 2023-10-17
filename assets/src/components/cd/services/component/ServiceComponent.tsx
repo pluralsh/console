@@ -5,9 +5,7 @@ import { useParams } from 'react-router-dom'
 import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
 
 import {
-  COMPONENT_PARAM_KIND,
-  COMPONENT_PARAM_NAME,
-  COMPONENT_PARAM_VERSION,
+  COMPONENT_PARAM_ID,
   SERVICE_COMPONENT_PATH_MATCHER_ABS,
   SERVICE_PARAM_CLUSTER,
   SERVICE_PARAM_ID,
@@ -25,24 +23,20 @@ import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
 export const getServiceComponentBreadcrumbs = ({
   serviceId,
   clusterName,
-  componentKind,
   componentName,
-  componentVersion,
+  componentId,
   ...props
 }: Parameters<typeof getServiceComponentsBreadcrumbs>[0] & {
-  componentKind: string | null | undefined
   componentName: string | null | undefined
-  componentVersion: string | null | undefined
+  componentId: string | null | undefined
 }) => [
   ...getServiceComponentsBreadcrumbs({ clusterName, serviceId, ...props }),
   {
-    label: componentName ?? '',
+    label: componentName || componentId || '',
     url: getServiceComponentPath({
       clusterName,
       serviceId,
-      componentKind,
-      componentName,
-      componentVersion,
+      componentId,
     }),
   },
 ]
@@ -51,17 +45,16 @@ function BreadcrumbWrapper({
   clusterName,
   serviceId,
   serviceName,
+  componentId,
   componentName,
-  componentKind,
-  componentVersion,
   children,
 }: {
   clusterName: string
   serviceId: string
   serviceName: string | undefined
+  componentId: string | undefined
   componentName: string | undefined
-  componentKind: string | undefined
-  componentVersion: string | undefined
+
   children: ReactNode
 }) {
   useSetBreadcrumbs(
@@ -71,18 +64,10 @@ function BreadcrumbWrapper({
           clusterName,
           serviceId,
           serviceName,
+          componentId,
           componentName,
-          componentKind,
-          componentVersion,
         }),
-      [
-        clusterName,
-        serviceId,
-        serviceName,
-        componentName,
-        componentKind,
-        componentVersion,
-      ]
+      [clusterName, serviceId, serviceName, componentId, componentName]
     )
   )
 
@@ -92,10 +77,8 @@ function BreadcrumbWrapper({
 
 export default function ServiceComponent() {
   const params = useParams()
-  const componentKind = params[COMPONENT_PARAM_KIND]!
-  const componentName = params[COMPONENT_PARAM_NAME]!
+  const componentId = params[COMPONENT_PARAM_ID]
   const clusterName = params[SERVICE_PARAM_CLUSTER]!
-  const componentVersion = params[COMPONENT_PARAM_VERSION]!
   const serviceId = params[SERVICE_PARAM_ID]!
 
   const { data, error } = useServiceDeploymentComponentsQuery({
@@ -108,19 +91,16 @@ export default function ServiceComponent() {
   const components = data?.serviceDeployment?.components
 
   const component = components?.find(
-    (component) =>
-      component?.name?.toLowerCase() === componentName?.toLowerCase() &&
-      component?.kind?.toLowerCase() === componentKind?.toLowerCase() &&
-      (component?.version || '') === (componentVersion || '')
+    (component) => component?.id === componentId
   )
+  const componentName = component?.name
 
   const breadcrumbProps = {
     clusterName,
     serviceId,
     serviceName,
-    componentKind,
+    componentId,
     componentName,
-    componentVersion,
   }
 
   if (error) {

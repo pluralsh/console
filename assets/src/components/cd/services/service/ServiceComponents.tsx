@@ -162,19 +162,15 @@ export default function ServiceComponents() {
           </Callout>
         )}
         <ComponentList
-          setUrl={(c) => {
-            const params = new URLSearchParams()
-
-            return c?.name && c?.kind
+          setUrl={(c) =>
+            c?.name && c?.kind
               ? `${getServiceComponentPath({
                   clusterName,
                   serviceId,
-                  componentKind: c.kind.toLocaleLowerCase(),
-                  componentName: c.name.toLowerCase(),
-                  componentVersion: c.version,
-                })}?${params.toString()}`
+                  componentId: c.id,
+                })}`
               : undefined
-          }}
+          }
           components={components}
           selectedKinds={selectedKinds}
         />

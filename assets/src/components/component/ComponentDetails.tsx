@@ -52,7 +52,6 @@ export function ComponentDetails({
   pathMatchString: string
   serviceId?: string
 }) {
-  console.log('klink')
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
