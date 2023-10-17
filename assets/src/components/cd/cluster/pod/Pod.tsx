@@ -15,6 +15,8 @@ import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPa
 
 import {
   CD_BASE_PATH,
+  CLUSTERS_PATH,
+  CLUSTER_PODS_PATH,
   POD_BASE_PATH,
   POD_PARAM_CLUSTER,
   POD_PARAM_NAME,
@@ -25,7 +27,7 @@ import { usePodQuery } from '../../../../generated/graphql'
 import PodSidecar from '../../../cluster/pods/PodSidecar'
 import { useNamespaceIsApp } from '../../../hooks/useNamespaceIsApp'
 import { LinkTabWrap } from '../../../utils/Tabs'
-import { CD_BASE_CRUMBS } from '../../ContinuousDeployment'
+import { CD_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
 
 const useGetDirectory = (namespace = '') => {
   const namespaceIsApp = useNamespaceIsApp(namespace)
@@ -82,13 +84,15 @@ export default function Pod() {
   useSetBreadcrumbs(
     useMemo(
       () => [
-        ...CD_BASE_CRUMBS,
-        { label: 'clusters', url: `${CD_BASE_PATH}/clusters` },
+        ...CD_CLUSTERS_BASE_CRUMBS,
         {
-          label: clusterId || '',
-          url: `${CD_BASE_PATH}/clusters/${clusterId}`,
+          label: clusterId,
+          url: `${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}`,
         },
-        { label: 'pods', url: `${CD_BASE_PATH}/clusters/${clusterId}/pods` },
+        {
+          label: 'pods',
+          url: `${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}/${CLUSTER_PODS_PATH}`,
+        },
         ...(clusterId && name && namespace
           ? [
               {

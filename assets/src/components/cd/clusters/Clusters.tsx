@@ -1,5 +1,6 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
+  Breadcrumb,
   CaretRightIcon,
   CheckRoundedIcon,
   ClusterIcon,
@@ -24,7 +25,7 @@ import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
 
 import { roundToTwoPlaces } from 'components/cluster/utils'
 
-import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
+import { useSetCDHeaderContent } from '../ContinuousDeployment'
 import {
   cpuFormat,
   cpuParser,
@@ -40,7 +41,10 @@ import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
 
-const POLL_INTERVAL = 10 * 1000
+export const CD_CLUSTERS_BASE_CRUMBS = [
+  { label: 'cd', url: '/cd' },
+  { label: 'clusters', url: `${CD_BASE_PATH}/${CLUSTERS_PATH}` },
+] as const satisfies readonly Breadcrumb[]
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -240,20 +244,15 @@ export const columns = [
   }),
 ]
 
-export const CLUSTERS_CRUMBS = [
-  ...CD_BASE_CRUMBS,
-  { label: 'clusters', url: `/${CD_BASE_PATH}/${CLUSTERS_PATH}` },
-]
-
 export default function Clusters() {
   const { data } = useClustersQuery({
-    pollInterval: POLL_INTERVAL,
+    pollInterval: 10 * 1000,
     fetchPolicy: 'cache-and-network',
   })
   const headerActions = useMemo(() => <ClusterCreate />, [])
 
   useSetCDHeaderContent(headerActions)
-  useSetBreadcrumbs(CLUSTERS_CRUMBS)
+  useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)
 
   if (!data) {
     return <LoadingIndicator />

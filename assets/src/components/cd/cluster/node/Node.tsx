@@ -13,13 +13,15 @@ import { LinkTabWrap } from 'components/utils/Tabs'
 
 import {
   CD_BASE_PATH,
+  CLUSTERS_PATH,
+  CLUSTER_NODES_PATH,
   NODE_BASE_PATH,
   NODE_PARAM_CLUSTER,
   NODE_PARAM_NAME,
   getNodeDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
-import { CD_BASE_CRUMBS } from '../../ContinuousDeployment'
 import { useNodeMetricQuery, useNodeQuery } from '../../../../generated/graphql'
+import { CD_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -65,13 +67,15 @@ export default function Node() {
   useSetBreadcrumbs(
     useMemo(
       () => [
-        ...CD_BASE_CRUMBS,
-        { label: 'clusters', url: `${CD_BASE_PATH}/clusters` },
+        ...CD_CLUSTERS_BASE_CRUMBS,
         {
           label: clusterId || '',
-          url: `${CD_BASE_PATH}/clusters/${clusterId}`,
+          url: `${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}`,
         },
-        { label: 'nodes', url: `${CD_BASE_PATH}/clusters/${clusterId}/nodes` },
+        {
+          label: 'nodes',
+          url: `${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}/${CLUSTER_NODES_PATH}`,
+        },
         ...(clusterId && name
           ? [
               {
