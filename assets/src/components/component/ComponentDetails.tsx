@@ -44,7 +44,7 @@ export function ComponentDetails({
 }: {
   component: {
     name: string
-    namespace: string
+    namespace?: string | null | undefined
     kind: string
     version?: string | null | undefined
     group?: string | null | undefined
@@ -75,16 +75,11 @@ export function ComponentDetails({
       : {}),
   }
 
-  console.log('vars', vars)
-  console.log('query', query)
-
   const { data, loading, refetch, error } = useQuery(query, {
     variables: vars,
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-
-  console.log({ data, loading, error })
 
   const kind: ScalingType =
     ScalingTypes[(componentKind ?? '')?.toUpperCase()] ??
