@@ -76,7 +76,7 @@ export default function ClusterPods() {
     variables: { clusterId },
     pollInterval: POLL_INTERVAL,
   })
-  const { data, error, refetch } = useClusterPodsQuery({
+  const { data, error } = useClusterPodsQuery({
     variables: { clusterId, namespace },
     pollInterval: POLL_INTERVAL,
   })
@@ -91,7 +91,7 @@ export default function ClusterPods() {
       ColImages,
       ColActions(clusterId),
     ],
-    [refetch]
+    [clusterId]
   )
   const theme = useTheme()
   const [filterString, setFilterString] = useState('')

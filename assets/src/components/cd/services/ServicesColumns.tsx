@@ -20,6 +20,7 @@ export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
   enableSorting: true,
   cell: ({ getValue }) => {
     const node = getValue()
+
     return (
       node && (
         <DecoratedName deletedAt={node.deletedAt}>{node.name}</DecoratedName>

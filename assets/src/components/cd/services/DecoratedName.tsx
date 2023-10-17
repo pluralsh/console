@@ -3,6 +3,7 @@ import { useTheme } from 'styled-components'
 
 export default function DecoratedName({ deletedAt, children }) {
   const theme = useTheme()
+
   return (
     <div
       css={{
