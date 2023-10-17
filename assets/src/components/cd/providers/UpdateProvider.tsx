@@ -26,7 +26,7 @@ import { getProviderName } from 'components/utils/Provider'
 
 import ModalAlt from '../ModalAlt'
 
-import { AwsSettings, AzureSettings, GcpSettings } from './PROVIDER_KEYS'
+import { AwsSettings, AzureSettings, GcpSettings } from './ProviderSettings'
 
 // TODO: Replace when api updated
 type CloudProviderSettingsAttributes = SettingsTemp & {

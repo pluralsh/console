@@ -36,7 +36,7 @@ import {
   AzureSettings,
   GcpSettings,
   PROVIDER_KEYS,
-} from './PROVIDER_KEYS'
+} from './ProviderSettings'
 
 // TODO: Replace when api updated
 export type CloudProviderSettingsAttributes = SettingsTemp & {
