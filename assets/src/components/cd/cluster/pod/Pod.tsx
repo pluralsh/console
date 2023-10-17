@@ -25,31 +25,19 @@ import {
 } from '../../../../routes/cdRoutesConsts'
 import { usePodQuery } from '../../../../generated/graphql'
 import PodSidecar from '../../../cluster/pods/PodSidecar'
-import { useNamespaceIsApp } from '../../../hooks/useNamespaceIsApp'
 import { LinkTabWrap } from '../../../utils/Tabs'
 import { CD_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
 
-const useGetDirectory = (namespace = '') => {
-  const namespaceIsApp = useNamespaceIsApp(namespace)
-
-  return useMemo(() => {
-    const showLogs = !namespaceIsApp
-
-    return [
-      { path: '', label: 'Info' },
-      { path: 'events', label: 'Events' },
-      { path: 'raw', label: 'Raw' },
-      ...(showLogs ? [{ path: 'logs', label: 'Logs' }] : []),
-    ]
-  }, [namespaceIsApp])
-}
+const DIRECTORY = [
+  { path: '', label: 'Info' },
+  { path: 'events', label: 'Events' },
+  { path: 'raw', label: 'Raw' },
+  // TODO: { path: 'logs', label: 'Logs' }
+]
 
 function Sidenav({ tabStateRef = {} }: any) {
-  const params = useParams()
-  const namespace = (params[POD_PARAM_NAMESPACE] as string) || ''
-  const directory = useGetDirectory(namespace)
   const tab = useMatch(`${POD_BASE_PATH}:tab`)?.params?.tab || ''
-  const currentTab = directory.find(({ path }) => path === tab)
+  const currentTab = DIRECTORY.find(({ path }) => path === tab)
 
   return (
     <TabList
@@ -59,7 +47,7 @@ function Sidenav({ tabStateRef = {} }: any) {
         selectedKey: currentTab?.path,
       }}
     >
-      {directory.map(({ label, path }) => (
+      {DIRECTORY.map(({ label, path }) => (
         <LinkTabWrap
           key={path}
           textValue={label}
