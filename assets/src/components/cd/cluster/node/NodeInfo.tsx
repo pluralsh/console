@@ -23,8 +23,6 @@ import {
   NODE_PARAM_NAME,
   getPodDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
-import { columnHelper } from '../../../cluster/nodes/NodesList'
-import { TableCaretLink } from '../../../cluster/TableElements'
 import { ColActions } from '../ClusterPods'
 
 export default function NodeInfo() {
@@ -45,7 +43,7 @@ export default function NodeInfo() {
       ColContainers,
       ColActions(clusterId),
     ],
-    []
+    [clusterId]
   )
 
   const pods = useMemo(() => {
