@@ -18,7 +18,7 @@ import {
   useUpdateClusterMutation,
 } from 'generated/graphql'
 
-import { incPatchVersion } from '../../../utils/semver'
+import { nextSupportedVersion } from '../../../utils/semver'
 
 import { deprecationsColumns } from './deprecationsColumns'
 
@@ -86,27 +86,37 @@ const upgradeColumns = [
     header: 'Version',
     cell: ({ getValue }) => <div>v{getValue()}</div>,
   }),
-  columnHelperUpgrade.accessor((cluster) => cluster?.version, {
+  columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'nextK8sRelease',
     header: 'Next K8s release',
-    cell: ({ getValue }) => (
-      <ColWithIcon icon={ProviderIcons.GENERIC}>
-        {incPatchVersion(getValue())}
-      </ColWithIcon>
-    ),
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+
+      return (
+        <ColWithIcon icon={ProviderIcons.GENERIC}>
+          {nextSupportedVersion(
+            cluster?.version,
+            cluster?.provider?.supportedVersions
+          )}
+        </ColWithIcon>
+      )
+    },
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
     header: '',
     cell: ({ getValue }) => {
       const cluster = getValue()
-      const targetVersion = incPatchVersion(cluster?.version)
+      const upgrade = nextSupportedVersion(
+        cluster?.version,
+        cluster?.provider?.supportedVersions
+      )
 
       return (
-        targetVersion && (
+        upgrade && (
           <ClustersUpgradeNow
             cluster={cluster}
-            targetVersion={targetVersion}
+            targetVersion={upgrade}
           />
         )
       )

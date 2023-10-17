@@ -24,6 +24,8 @@ import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
 
 import { roundToTwoPlaces } from 'components/cluster/utils'
 
+import semver from 'semver'
+
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 import {
   cpuFormat,
@@ -33,6 +35,8 @@ import {
 } from '../../../utils/kubernetes'
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { TableText } from '../../cluster/TableElements'
+
+import { nextSupportedVersion } from '../../../utils/semver'
 
 import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
@@ -197,9 +201,12 @@ export const columns = [
     header: 'Status',
     cell: ({ getValue }) => {
       const cluster = getValue()
-      const hasUpgrade = true // TODO
+      const upgrade = nextSupportedVersion(
+        cluster?.version,
+        cluster?.provider?.supportedVersions
+      )
 
-      return hasUpgrade && <ClusterUpgrade cluster={cluster} />
+      return !!upgrade && <ClusterUpgrade cluster={cluster} />
     },
   }),
   columnHelper.accessor(({ node }) => node?.pingedAt, {
