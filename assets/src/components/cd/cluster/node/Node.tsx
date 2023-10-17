@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
 import {
-  Breadcrumb,
   SubTab,
   TabList,
   TabPanel,
-  useBreadcrumbs,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
@@ -14,34 +13,15 @@ import { LinkTabWrap } from 'components/utils/Tabs'
 
 import {
   CD_BASE_PATH,
+  CLUSTERS_PATH,
+  CLUSTER_NODES_PATH,
   NODE_BASE_PATH,
   NODE_PARAM_CLUSTER,
   NODE_PARAM_NAME,
   getNodeDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
-import { CD_BASE_CRUMBS } from '../../ContinuousDeployment'
 import { useNodeMetricQuery, useNodeQuery } from '../../../../generated/graphql'
-
-export const getNodeDetailsBreadcrumbs = ({
-  clusterId,
-  nodeName,
-}: {
-  clusterId: string | null | undefined
-  nodeName: string | null | undefined
-}) => [
-  ...CD_BASE_CRUMBS,
-  { label: 'clusters', url: `${CD_BASE_PATH}/clusters` },
-  { label: clusterId || '', url: `${CD_BASE_PATH}/clusters/${clusterId}` },
-  { label: 'nodes', url: `${CD_BASE_PATH}/clusters/${clusterId}/nodes` },
-  ...(clusterId && nodeName
-    ? [
-        {
-          label: nodeName,
-          url: getNodeDetailsPath({ clusterId, nodeName }),
-        },
-      ]
-    : []),
-]
+import { CD_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -49,8 +29,6 @@ const DIRECTORY = [
   { path: 'raw', label: 'Raw' },
   { path: 'metadata', label: 'Metadata' },
 ] as const
-
-const POLL_INTERVAL = 10 * 1000
 
 function HeadingTabList({ tabStateRef, currentTab }: any) {
   return (
@@ -78,30 +56,53 @@ function HeadingTabList({ tabStateRef, currentTab }: any) {
 
 export default function Node() {
   const params = useParams()
-  const nodeName = params[NODE_PARAM_NAME] as string
-  const clusterId = params[NODE_PARAM_CLUSTER] as string
-
+  const name = (params[NODE_PARAM_NAME] as string) || ''
+  const clusterId = (params[NODE_PARAM_CLUSTER] as string) || ''
   const tabStateRef = useRef<any>()
   const tab = useMatch(`${NODE_BASE_PATH}/:tab`)?.params?.tab || ''
-
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
-  const { setBreadcrumbs } = useBreadcrumbs()
 
-  const breadcrumbs: Breadcrumb[] = useMemo(
-    () => [...getNodeDetailsBreadcrumbs({ clusterId, nodeName })],
-    [clusterId, nodeName]
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...CD_CLUSTERS_BASE_CRUMBS,
+        {
+          label: clusterId || '',
+          url: `${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}`,
+        },
+        {
+          label: 'nodes',
+          url: `${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}/${CLUSTER_NODES_PATH}`,
+        },
+        ...(clusterId && name
+          ? [
+              {
+                label: name,
+                url: getNodeDetailsPath({ clusterId, name }),
+              },
+              ...(tab
+                ? [
+                    {
+                      label: tab,
+                      url: '',
+                    },
+                  ]
+                : []),
+            ]
+          : []),
+      ],
+      [clusterId, name, tab]
+    )
   )
 
-  useEffect(() => setBreadcrumbs(breadcrumbs), [setBreadcrumbs, breadcrumbs])
-
   const { data } = useNodeQuery({
-    variables: { name: nodeName, clusterId: clusterId || '' },
-    pollInterval: POLL_INTERVAL,
+    variables: { name, clusterId },
+    pollInterval: 10 * 1000,
   })
 
   const { data: nodeMetricData } = useNodeMetricQuery({
-    variables: { name: nodeName, clusterId: clusterId || '' },
-    pollInterval: POLL_INTERVAL,
+    variables: { name, clusterId },
+    pollInterval: 10 * 1000,
   })
 
   return (
@@ -113,7 +114,7 @@ export default function Node() {
             (currentTab?.label ?? 'Info') === 'Info' ||
             currentTab?.label === 'Metadata'
           }
-          heading={nodeName}
+          heading={name}
           headingContent={
             <HeadingTabList
               tabStateRef={tabStateRef}

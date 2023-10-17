@@ -32,7 +32,7 @@ export const ColActions = (clusterId: string) =>
       <TableCaretLink
         to={getNodeDetailsPath({
           clusterId,
-          nodeName: original?.name,
+          name: original?.name,
         })}
         textValue={`View node ${original?.name}`}
       />
@@ -97,7 +97,7 @@ export default function ClusterNodes() {
         columns={columns}
         linkBasePath={getNodeDetailsPath({
           clusterId: cluster?.id,
-          nodeName: '',
+          name: '',
           isRelative: false,
         })}
       />

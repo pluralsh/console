@@ -1,5 +1,6 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
+  Breadcrumb,
   CaretRightIcon,
   CheckRoundedIcon,
   ClusterIcon,
@@ -24,7 +25,7 @@ import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
 
 import { roundToTwoPlaces } from 'components/cluster/utils'
 
-import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
+import { useSetCDHeaderContent } from '../ContinuousDeployment'
 import {
   cpuFormat,
   cpuParser,
@@ -34,11 +35,16 @@ import {
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { TableText } from '../../cluster/TableElements'
 
-import CreateCluster from './create/CreateCluster'
+import { nextSupportedVersion } from '../../../utils/semver'
+
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
+import CreateCluster from './create/CreateCluster'
 
-const POLL_INTERVAL = 10 * 1000
+export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
+  { label: 'cd', url: '/cd' },
+  { label: 'clusters', url: `${CD_BASE_PATH}/${CLUSTERS_PATH}` },
+]
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -202,9 +208,15 @@ export const columns = [
     header: 'Status',
     cell: ({ getValue }) => {
       const cluster = getValue()
-      const hasUpgrade = true // TODO
+      const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
+      const upgrade = nextSupportedVersion(
+        cluster?.version,
+        cluster?.provider?.supportedVersions
+      )
 
-      return hasUpgrade && <ClusterUpgrade cluster={cluster} />
+      return (
+        (!!upgrade || hasDeprecations) && <ClusterUpgrade cluster={cluster} />
+      )
     },
   }),
   columnHelper.accessor(({ node }) => node?.pingedAt, {
@@ -237,20 +249,15 @@ export const columns = [
   }),
 ]
 
-export const CLUSTERS_CRUMBS = [
-  ...CD_BASE_CRUMBS,
-  { label: 'clusters', url: `/${CD_BASE_PATH}/${CLUSTERS_PATH}` },
-]
-
 export default function Clusters() {
   const { data } = useClustersQuery({
-    pollInterval: POLL_INTERVAL,
+    pollInterval: 10 * 1000,
     fetchPolicy: 'cache-and-network',
   })
   const headerActions = useMemo(() => <CreateCluster />, [])
 
   useSetCDHeaderContent(headerActions)
-  useSetBreadcrumbs(CLUSTERS_CRUMBS)
+  useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)
 
   if (!data) {
     return <LoadingIndicator />

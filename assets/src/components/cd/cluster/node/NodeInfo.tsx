@@ -18,11 +18,17 @@ import {
   PodWithId,
   PodsList,
 } from '../../../cluster/pods/PodsList'
-import { NODE_PARAM_NAME } from '../../../../routes/cdRoutesConsts'
+import {
+  NODE_PARAM_CLUSTER,
+  NODE_PARAM_NAME,
+  getPodDetailsPath,
+} from '../../../../routes/cdRoutesConsts'
+import { ColActions } from '../ClusterPods'
 
 export default function NodeInfo() {
   const params = useParams()
   const nodeName = params[NODE_PARAM_NAME] as string
+  const clusterId = params[NODE_PARAM_CLUSTER] as string
   const { node, nodeMetric } = useOutletContext() as {
     node: Node
     nodeMetric: NodeMetric
@@ -35,9 +41,9 @@ export default function NodeInfo() {
       ColCpuReservation,
       ColRestarts,
       ColContainers,
-      // ColActions(refetch), // TODO: Update delete and details page.
+      ColActions(clusterId),
     ],
-    []
+    [clusterId]
   )
 
   const pods = useMemo(() => {
@@ -51,7 +57,7 @@ export default function NodeInfo() {
     return pods || []
   }, [node])
 
-  if (!node) return <LoadingIndicator />
+  if (!node || !nodeMetric) return <LoadingIndicator />
 
   return (
     <Flex
@@ -74,6 +80,10 @@ export default function NodeInfo() {
         <PodsList
           columns={columns}
           pods={pods}
+          linkBasePath={getPodDetailsPath({
+            clusterId,
+            isRelative: false,
+          })}
         />
       </section>
     </Flex>

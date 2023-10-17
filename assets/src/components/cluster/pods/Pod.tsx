@@ -10,8 +10,14 @@ import { ResponsiveLayoutContentContainer } from 'components/utils/layout/Respon
 
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
-import Sidecar from './PodSidecar'
+import { useQuery } from '@apollo/client'
+
+import { Pod } from '../../../generated/graphql'
+import { POD_INFO_Q } from '../queries'
+import { POLL_INTERVAL } from '../constants'
+
 import SideNav from './PodSideNav'
+import Sidecar from './PodSidecar'
 
 export default function Node() {
   const tabStateRef = useRef<any>()
@@ -35,6 +41,14 @@ export default function Node() {
 
   useSetBreadcrumbs(breadcrumbs)
 
+  const { data } = useQuery<{
+    pod: Pod
+  }>(POD_INFO_Q, {
+    variables: { name, namespace },
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
+
   return (
     <ResponsiveLayoutPage>
       <ResponsiveLayoutSidenavContainer paddingTop={40 + theme.spacing.medium}>
@@ -49,7 +63,7 @@ export default function Node() {
       </TabPanel>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer>
-        <Sidecar />
+        <Sidecar pod={data?.pod} />
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>
   )

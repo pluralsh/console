@@ -1,9 +1,12 @@
 import semver from 'semver'
 
-export function incPatchVersion(
-  version: string | null | undefined
+export function nextSupportedVersion(
+  version?: string | null,
+  supportedVersions?: (string | null)[] | null
 ): string | null {
-  const parsed = semver.valid(semver.coerce(version))
+  const supported = supportedVersions
+    ? supportedVersions.filter((v): v is string => !!v)
+    : []
 
-  return parsed ? semver.inc(parsed, 'patch') : null
+  return semver.minSatisfying(supported, `>${version}`)
 }

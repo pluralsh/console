@@ -77,6 +77,7 @@ fragment ClustersRow on Cluster {
     cloud
     name
     namespace
+    supportedVersions
   }
   self
   service {
@@ -107,6 +108,7 @@ fragment Cluster on Cluster {
     cloud
     name
     namespace
+    supportedVersions
   }
   self
   service {
