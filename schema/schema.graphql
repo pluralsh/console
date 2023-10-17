@@ -783,6 +783,8 @@ input ClusterAttributes {
 
   kubeconfig: KubeconfigAttributes
 
+  cloudSettings: CloudSettingsAttributes
+
   nodePools: [NodePoolAttributes]
 
   readBindings: [PolicyBindingAttributes]
