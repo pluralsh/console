@@ -79,7 +79,7 @@ defmodule Console.Deployments.ClustersTest do
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",
-        version: "1.25",
+        version: "1.25.12",
         provider_id: provider.id,
         cloud_settings: %{gcp: %{project: "test-project", network: "test", region: "us-east1"}},
         node_pools: [
@@ -88,13 +88,30 @@ defmodule Console.Deployments.ClustersTest do
       }, user)
 
       assert cluster.name == "test"
-      assert cluster.version == "1.25"
+      assert cluster.version == "1.25.12"
 
       %{service: svc} = Console.Repo.preload(cluster, [:service])
       {:ok, secrets} = Services.configuration(svc)
       assert secrets["project"] == "test-project"
       assert secrets["network"] == "test"
       assert secrets["region"] == "us-east1"
+    end
+
+    test "it will correctly validate provider-specific k8s versions" do
+      user = admin_user()
+      provider = insert(:cluster_provider, cloud: "gcp")
+      insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:error, _} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25.2",
+        provider_id: provider.id,
+        cloud_settings: %{gcp: %{project: "test-project", network: "test", region: "us-east1"}},
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
     end
 
     test "it can create a new cluster record with a provider credential" do
@@ -228,6 +245,36 @@ defmodule Console.Deployments.ClustersTest do
           %{name: "pool", min_size: 2, max_size: 5, instance_type: "t5.large"}
         ]
       }, cluster.id, insert(:user))
+    end
+
+    test "it will validate that version changes don't exceed 1 minor version" do
+      user = admin_user()
+      provider = insert(:cluster_provider)
+      insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25",
+        provider_id: provider.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      {:ok, cluster} = Clusters.update_cluster(%{
+        version: "1.26",
+        node_pools: [
+          %{name: "pool", min_size: 2, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, cluster.id, user)
+
+      {:error, _} = Clusters.update_cluster(%{
+        version: "1.28",
+        node_pools: [
+          %{name: "pool", min_size: 2, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, cluster.id, user)
     end
   end
 

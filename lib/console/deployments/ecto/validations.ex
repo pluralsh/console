@@ -13,6 +13,15 @@ defmodule Console.Deployments.Ecto.Validations do
 
   def bump_minor(%Version{minor: minor} = vsn), do: %{vsn | minor: minor + 1, patch: 0, pre: []}
 
+  def next_version?(vsn, vsn2) do
+    with {:ok, %{major: m, minor: mn}} <- Version.parse(clean_version(vsn)),
+         {:ok, %{major: ^m, minor: mn2}} <- Version.parse(clean_version(vsn2)) do
+      mn - mn2 <= 1 && mn >= mn2
+    else
+      _ -> false
+    end
+  end
+
   def clean_version(vsn) do
     vsn = String.trim_leading(vsn, "v")
     case Regex.match?(@semver, vsn) do

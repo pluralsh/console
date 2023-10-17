@@ -5,6 +5,7 @@ defmodule Console.Deployments.Clusters do
   alias Console.PubSub
   alias Console.Commands.{Tee, Command}
   alias Console.Deployments.{Services, Git, Providers.Configuration}
+  alias Console.Deployments.Providers.Versions
   alias Console.Services.Users
   alias Kazan.Apis.Core.V1, as: Core
   alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken, ClusterRevision, ProviderCredential}
@@ -219,6 +220,7 @@ defmodule Console.Deployments.Clusters do
       |> when_ok(:insert)
     end)
     |> add_revision()
+    |> validate_version()
     |> add_operation(:service, fn %{cluster: cluster} ->
       Services.operator_service(cluster, tmp_admin(user))
     end)
@@ -255,6 +257,7 @@ defmodule Console.Deployments.Clusters do
       |> when_ok(:update)
     end)
     |> add_revision()
+    |> validate_version()
     |> add_operation(:svc, fn
       %{cluster: %{self: true} = cluster} -> {:ok, cluster}
       %{cluster: %{service_id: id} = cluster} when is_binary(id) ->
@@ -279,6 +282,16 @@ defmodule Console.Deployments.Clusters do
         node_pools: Console.mapify(cluster.node_pools)
       })
       |> Repo.insert()
+    end)
+  end
+
+  defp validate_version(xact) do
+    add_operation(xact, :validate, fn %{cluster: cluster} ->
+      cluster = Repo.preload(cluster, [:provider])
+      case Versions.validate?(cluster) do
+        true -> {:ok, cluster}
+        false -> {:error, "invalid version #{cluster.version} for provider #{cluster.provider.name}"}
+      end
     end)
   end
 

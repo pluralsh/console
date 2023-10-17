@@ -213,8 +213,10 @@ defmodule Console.Schema.Cluster do
     |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(30)}" end)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
+    |> backfill_handle()
+    |> validate_vsn()
     |> update_vsn()
-    |> validate_required(~w(name version)a)
+    |> validate_required(~w(name version handle)a)
   end
 
   def update_changeset(model, attrs \\ %{}) do
@@ -233,6 +235,23 @@ defmodule Console.Schema.Cluster do
     |> cast(attrs, [])
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+  end
+
+  defp backfill_handle(cs) do
+    case {get_field(cs, :handle), get_field(cs, :name)} do
+      {nil, n} -> put_change(cs, :handle, n)
+      _ -> cs
+    end
+  end
+
+  defp validate_vsn(cs) do
+    case {get_change(cs, :version), cs.data.version} do
+      {v, prev} when is_binary(v) and is_binary(prev) ->
+        if next_version?(v, prev),
+          do: cs,
+          else: add_error(cs, :version, "version #{v} is not one minor vsn or less higher than #{prev}")
+      _ -> cs
+    end
   end
 
   defp update_vsn(cs) do
