@@ -1,4 +1,5 @@
 import {
+  ComponentType,
   Dispatch,
   Key,
   MutableRefObject,
@@ -21,6 +22,7 @@ import {
   TabPanel,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
+import { IconProps } from 'honorable'
 
 import {
   CloudSettingsAttributes,
@@ -75,7 +77,7 @@ function ProviderSelector({ onProviderChange, children }): ReactElement {
         }}
       >
         {Object.values(Provider).map((p) => {
-          const Logo = ProviderToLogo[p]
+          const Logo: ComponentType<IconProps> = ProviderToLogo[p]
 
           return (
             <SubTab
