@@ -83,8 +83,20 @@ fragment ServiceDeploymentRevisions on ServiceDeployment {
   }
 }
 
-query ServiceDeployments {
-  serviceDeployments(first: 100) {
+query ServiceDeployments(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $cluster: String
+  $clusterId: ID
+) {
+  serviceDeployments(
+    first: $first
+    after: $after
+    q: $q
+    cluster: $cluster
+    clusterId: $clusterId
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -192,18 +204,5 @@ mutation DeleteServiceDeployment($id: ID!) {
 mutation RollbackService($id: ID, $revisionId: ID!) {
   rollbackService(id: $id, revisionId: $revisionId) {
     ...ServiceDeploymentsRow
-  }
-}
-
-query ClusterServiceDeployments($id: ID!) {
-  serviceDeployments(first: 100, clusterId: $id) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...ServiceDeploymentsRow
-      }
-    }
   }
 }

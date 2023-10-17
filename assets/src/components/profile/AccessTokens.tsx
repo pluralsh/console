@@ -50,21 +50,7 @@ import LoadingIndicator from '../utils/LoadingIndicator'
 
 import { DateTimeCol } from '../utils/table/DateTimeCol'
 
-export function ObscuredToken({ token }: { token: string | null | undefined }) {
-  const theme = useTheme()
-
-  if (typeof token !== 'string') {
-    return null
-  }
-  const prefix = token.substring(0, 13)
-
-  return (
-    <span css={{ ...theme.partials.text.code }}>
-      {prefix}
-      <span css={{ opacity: 0.5 }}>{'·'.repeat(25)}</span>
-    </span>
-  )
-}
+import { ObscuredToken } from './ObscuredToken'
 
 const TOOLTIP =
   'Access tokens allow you to access the Plural API for automation and active Plural clusters.'
@@ -257,8 +243,13 @@ const tokenColumns = [
   tokenColumnHelper.accessor((row) => row.token, {
     id: 'token',
     header: 'Token',
-    cell: ({ getValue }) => <ObscuredToken token={getValue()} />,
-    // maxSize: 30,
+    cell: ({ getValue }) => (
+      <ObscuredToken
+        showFirst={13}
+        token={getValue()}
+        // reveal
+      />
+    ),
     meta: { truncate: true },
   }),
   tokenColumnHelper.accessor((row) => row.insertedAt, {

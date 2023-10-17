@@ -8,8 +8,8 @@ import {
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row, TableState } from '@tanstack/react-table'
-import uniqBy from 'lodash/uniqBy'
 import isEmpty from 'lodash/isEmpty'
+import { useDebounce } from '@react-hooks-library/core'
 
 import {
   AuthMethod,
@@ -35,6 +35,8 @@ import { DeleteIconButton } from 'components/utils/IconButtons'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { useParams } from 'react-router-dom'
+
+import { GqlError } from 'components/utils/Alert'
 
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
@@ -67,7 +69,7 @@ export function DeleteService({
   const theme = useTheme()
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading, error }] = useDeleteServiceDeploymentMutation({
-    variables: { id: service.id ?? '' },
+    variables: { id: service.id },
     update: (cache, { data }) =>
       updateCache(cache, {
         query: ServiceDeploymentsDocument,
@@ -135,9 +137,23 @@ export default function Services() {
   const theme = useTheme()
   const navigate = useNavigate()
   const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
-  const { data, error, refetch } = useServiceDeploymentsQuery({
+  const [searchString, setSearchString] = useState()
+  const debouncedSearchString = useDebounce(searchString, 100)
+
+  const {
+    data: currentData,
+    error,
+    refetch,
+    previousData,
+  } = useServiceDeploymentsQuery({
+    variables: {
+      ...(clusterName ? { cluster: clusterName } : {}),
+      q: debouncedSearchString,
+    },
     pollInterval: POLL_INTERVAL,
   })
+  const data = currentData || previousData
+
   const columns = useMemo(
     () => [
       ColServiceDeployment,
@@ -148,17 +164,6 @@ export default function Services() {
       getColActions({ refetch }),
     ],
     [refetch]
-  )
-  const clusters = useMemo(
-    () =>
-      uniqBy(data?.serviceDeployments?.edges, (edge) => edge?.node?.cluster?.id)
-        .map((edge) => edge?.node?.cluster)
-        .filter(
-          (
-            cluster: ServiceDeploymentsRowFragment['cluster']
-          ): cluster is ServicesCluster => !!cluster
-        ),
-    [data?.serviceDeployments?.edges]
   )
 
   useSetBreadcrumbs(
@@ -195,9 +200,7 @@ export default function Services() {
     )
 
   if (error) {
-    return (
-      <EmptyState message="Looks like you don't have any service deployments yet." />
-    )
+    return <GqlError error={error} />
   }
   if (!data) {
     return <LoadingIndicator />
@@ -213,11 +216,15 @@ export default function Services() {
       }}
     >
       <ServicesFilters
-        data={data}
-        clusters={clusters}
+        serviceDeployments={data?.serviceDeployments}
         setTableFilters={setTableFilters}
+        searchString={searchString}
+        setSearchString={setSearchString}
+        showClusterSelect
       />
-      {!isEmpty(data?.serviceDeployments?.edges) ? (
+      {!data ? (
+        <LoadingIndicator />
+      ) : !isEmpty(data?.serviceDeployments?.edges) ? (
         <FullHeightTableWrap>
           <Table
             data={data?.serviceDeployments?.edges || []}
@@ -241,7 +248,13 @@ export default function Services() {
           />
         </FullHeightTableWrap>
       ) : (
-        <EmptyState message="Looks like you don't have any service deployments yet." />
+        <div css={{ height: '100%' }}>
+          {searchString || clusterName ? (
+            <EmptyState message="No service deployments match your query." />
+          ) : (
+            <EmptyState message="Looks like you don't have any service deployments yet." />
+          )}
+        </div>
       )}
     </div>
   )

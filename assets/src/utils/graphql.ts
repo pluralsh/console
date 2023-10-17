@@ -1,6 +1,8 @@
 import isString from 'lodash/isString'
 import uniqWith from 'lodash/uniqWith'
 
+import { isNonNullable } from './isNonNullable'
+
 export function updateFragment(cache, { fragment, id, update, fragmentName }) {
   const current = cache.readFragment({ id, fragment, fragmentName })
 
@@ -108,7 +110,5 @@ export function mapExistingNodes<N>(connection?: Connection<N> | null) {
   }
   const { edges } = connection
 
-  return (edges || [])
-    .map((edge) => edge?.node)
-    .filter((node): node is N => !!node)
+  return (edges || []).map((edge) => edge?.node).filter(isNonNullable)
 }

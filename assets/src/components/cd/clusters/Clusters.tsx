@@ -22,6 +22,8 @@ import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
 import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
 
+import { roundToTwoPlaces } from 'components/cluster/utils'
+
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 import {
   cpuFormat,
@@ -35,7 +37,6 @@ import { TableText } from '../../cluster/TableElements'
 import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
-import { roundToTwoPlaces } from 'components/cluster/utils'
 
 const POLL_INTERVAL = 10 * 1000
 

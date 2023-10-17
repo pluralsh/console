@@ -12,16 +12,15 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { Key, useEffect, useMemo, useRef, useState } from 'react'
 import { type TableState } from '@tanstack/react-table'
-import { useDebounce } from '@react-hooks-library/core'
 import {
   ServiceDeploymentStatus,
+  useClustersTinyQuery,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
-import isEmpty from 'lodash/isEmpty'
-
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { SERVICE_PARAM_CLUSTER } from 'routes/cdRoutesConsts'
+import { mapExistingNodes } from 'utils/graphql'
 
 import ProviderIcon from 'components/utils/Provider'
 
@@ -29,7 +28,6 @@ import {
   serviceStatusToLabel,
   serviceStatusToSeverity,
 } from './ServiceStatusChip'
-import { ServicesCluster } from './Services'
 
 type StatusTabKey = ServiceDeploymentStatus | 'ALL'
 export const statusTabs = Object.entries({
@@ -60,52 +58,63 @@ const ServiceFiltersSC = styled.div(({ theme }) => ({
 }))
 
 export function ServicesFilters({
-  data,
-  clusters,
+  serviceDeployments,
   setTableFilters,
+  searchString,
+  setSearchString,
+  showClusterSelect = true,
 }: {
-  data: ReturnType<typeof useServiceDeploymentsQuery>['data']
-  clusters?: ServicesCluster[]
+  serviceDeployments: NonNullable<
+    ReturnType<typeof useServiceDeploymentsQuery>['data']
+  >['serviceDeployments']
+  searchString
+  setSearchString: (string) => void
   setTableFilters: (
     filters: Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   ) => void
+  showClusterSelect: boolean
 }) {
   const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
   const navigate = useNavigate()
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
-  const [filterString, setFilterString] = useState('')
-  const debouncedFilterString = useDebounce(filterString, 100)
   const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
-  const cluster = useMemo(
-    () => clusters && clusters.find(({ name }) => name === clusterName),
+
+  const { data } = useClustersTinyQuery({ skip: !showClusterSelect })
+  const clusters = useMemo(
+    () => mapExistingNodes(data?.clusters),
+    [data?.clusters]
+  )
+  const selectedCluster = useMemo(
+    () => clusters && clusters.find((cluster) => cluster.name === clusterName),
     [clusters, clusterName]
   )
 
+  console.log('selectedClusterName', selectedCluster)
+
   const counts = useMemo(() => {
     const c: Record<string, number | undefined> = {
-      ALL: data?.serviceDeployments?.edges?.length,
+      ALL: serviceDeployments?.edges?.length,
       HEALTHY: 0,
       SYNCED: 0,
       STALE: 0,
       FAILED: 0,
     }
 
-    data?.serviceDeployments?.edges?.forEach((edge) => {
+    serviceDeployments?.edges?.forEach((edge) => {
       if (edge?.node?.status) {
         c[edge?.node?.status] = (c[edge?.node?.status] ?? 0) + 1
       }
     })
 
     return c
-  }, [data?.serviceDeployments?.edges])
+  }, [serviceDeployments?.edges])
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
 
   const tableFilters: Partial<
     Pick<TableState, 'globalFilter' | 'columnFilters'>
   > = useMemo(
     () => ({
-      globalFilter: debouncedFilterString,
       columnFilters: [
         ...(statusFilterKey !== 'ALL'
           ? [
@@ -115,17 +124,9 @@ export function ServicesFilters({
               },
             ]
           : []),
-        ...(clusterName
-          ? [
-              {
-                id: 'cluster',
-                value: clusterName,
-              },
-            ]
-          : []),
       ],
     }),
-    [clusterName, debouncedFilterString, statusFilterKey]
+    [statusFilterKey]
   )
 
   useEffect(() => {
@@ -134,16 +135,17 @@ export function ServicesFilters({
 
   return (
     <ServiceFiltersSC>
-      {clusters && !isEmpty(clusters) && (
+      {showClusterSelect && (
         <div css={{ width: 360 }}>
           <Select
+            isDisabled={!data}
             isOpen={clusterSelectIsOpen}
             onOpenChange={setClusterSelectIsOpen}
-            label="Filter by cluster"
+            label={!data ? 'Loading clusters..' : 'Filter by cluster'}
             leftContent={
-              cluster && (
+              selectedCluster && (
                 <ProviderIcon
-                  provider={cluster.provider?.cloud || ''}
+                  provider={selectedCluster.provider?.cloud || ''}
                   width={16}
                 />
               )
@@ -174,7 +176,7 @@ export function ServicesFilters({
               navigate(`/cd/services${key ? `/${key}` : ''}`)
             }}
           >
-            {clusters.map((cluster) => (
+            {(clusters || []).map((cluster) => (
               <ListBoxItem
                 key={cluster.name}
                 label={cluster.name}
@@ -193,9 +195,9 @@ export function ServicesFilters({
       <Input
         placeholder="Search"
         startIcon={<SearchIcon />}
-        value={filterString}
+        value={searchString}
         onChange={(e) => {
-          setFilterString(e.currentTarget.value)
+          setSearchString?.(e.currentTarget.value)
         }}
         css={{ flexGrow: 1 }}
       />

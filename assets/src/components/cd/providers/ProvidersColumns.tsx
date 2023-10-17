@@ -1,15 +1,13 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import {
-  GearTrainIcon,
-  GitHubLogoIcon,
-  IconFrame,
-} from '@pluralsh/design-system'
+import { GitHubLogoIcon } from '@pluralsh/design-system'
 import { ClusterProviderFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { useTheme } from 'styled-components'
 
 import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
+
+import { UpdateProvider } from './UpdateProvider'
 
 const columnHelper = createColumnHelper<Edge<ClusterProviderFragment>>()
 
@@ -38,7 +36,7 @@ export const ColName = columnHelper.accessor(({ node }) => node?.name, {
   header: 'Name',
   enableSorting: true,
   enableGlobalFilter: true,
-  //   meta: { truncate: true },
+  meta: { truncate: true },
   cell: ({ getValue }) => getValue(),
 })
 
@@ -85,14 +83,9 @@ export const getColActions = ({ refetch }: { refetch: () => void }) =>
             }}
           >
             {node.editable && (
-              <IconFrame
-                clickable
-                tooltip="Configure provider"
-                icon={<GearTrainIcon />}
-                onClick={() => {
-                  alert('config cloud')
-                  refetch()
-                }}
+              <UpdateProvider
+                provider={node}
+                refetch={refetch}
               />
             )}
           </div>

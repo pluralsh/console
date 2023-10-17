@@ -3590,7 +3590,13 @@ export type ServiceDeploymentComponentFragment = { __typename?: 'ServiceComponen
 
 export type ServiceDeploymentRevisionsFragment = { __typename?: 'ServiceDeployment', revision?: { __typename?: 'Revision', id: string, version: string, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null, revisions?: { __typename?: 'RevisionConnection', edges?: Array<{ __typename?: 'RevisionEdge', node?: { __typename?: 'Revision', id: string, version: string, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null } | null> | null } | null };
 
-export type ServiceDeploymentsQueryVariables = Exact<{ [key: string]: never; }>;
+export type ServiceDeploymentsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
 export type ServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null } | null> | null } | null };
@@ -3667,13 +3673,6 @@ export type RollbackServiceMutationVariables = Exact<{
 
 
 export type RollbackServiceMutation = { __typename?: 'RootMutationType', rollbackService?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null };
-
-export type ClusterServiceDeploymentsQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type ClusterServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null } | null> | null } | null };
 
 export type DatabaseTableRowFragment = { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null };
 
@@ -5497,8 +5496,14 @@ export type UpdateClusterProviderMutationHookResult = ReturnType<typeof useUpdat
 export type UpdateClusterProviderMutationResult = Apollo.MutationResult<UpdateClusterProviderMutation>;
 export type UpdateClusterProviderMutationOptions = Apollo.BaseMutationOptions<UpdateClusterProviderMutation, UpdateClusterProviderMutationVariables>;
 export const ServiceDeploymentsDocument = gql`
-    query ServiceDeployments {
-  serviceDeployments(first: 100) {
+    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID) {
+  serviceDeployments(
+    first: $first
+    after: $after
+    q: $q
+    cluster: $cluster
+    clusterId: $clusterId
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -5524,6 +5529,11 @@ ${ServiceDeploymentsRowFragmentDoc}`;
  * @example
  * const { data, loading, error } = useServiceDeploymentsQuery({
  *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      q: // value for 'q'
+ *      cluster: // value for 'cluster'
+ *      clusterId: // value for 'clusterId'
  *   },
  * });
  */
@@ -5914,49 +5924,6 @@ export function useRollbackServiceMutation(baseOptions?: Apollo.MutationHookOpti
 export type RollbackServiceMutationHookResult = ReturnType<typeof useRollbackServiceMutation>;
 export type RollbackServiceMutationResult = Apollo.MutationResult<RollbackServiceMutation>;
 export type RollbackServiceMutationOptions = Apollo.BaseMutationOptions<RollbackServiceMutation, RollbackServiceMutationVariables>;
-export const ClusterServiceDeploymentsDocument = gql`
-    query ClusterServiceDeployments($id: ID!) {
-  serviceDeployments(first: 100, clusterId: $id) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...ServiceDeploymentsRow
-      }
-    }
-  }
-}
-    ${PageInfoFragmentDoc}
-${ServiceDeploymentsRowFragmentDoc}`;
-
-/**
- * __useClusterServiceDeploymentsQuery__
- *
- * To run a query within a React component, call `useClusterServiceDeploymentsQuery` and pass it any options that fit your needs.
- * When your component renders, `useClusterServiceDeploymentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useClusterServiceDeploymentsQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useClusterServiceDeploymentsQuery(baseOptions: Apollo.QueryHookOptions<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>(ClusterServiceDeploymentsDocument, options);
-      }
-export function useClusterServiceDeploymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>(ClusterServiceDeploymentsDocument, options);
-        }
-export type ClusterServiceDeploymentsQueryHookResult = ReturnType<typeof useClusterServiceDeploymentsQuery>;
-export type ClusterServiceDeploymentsLazyQueryHookResult = ReturnType<typeof useClusterServiceDeploymentsLazyQuery>;
-export type ClusterServiceDeploymentsQueryResult = Apollo.QueryResult<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>;
 export const RestorePostgresDocument = gql`
     mutation RestorePostgres($clone: CloneAttributes, $name: String!, $namespace: String!, $timestamp: DateTime!) {
   restorePostgres(
@@ -7040,7 +7007,6 @@ export const namedOperations = {
     ServiceDeploymentComponents: 'ServiceDeploymentComponents',
     ServiceDeploymentSecrets: 'ServiceDeploymentSecrets',
     ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
-    ClusterServiceDeployments: 'ClusterServiceDeployments',
     PostgresDatabases: 'PostgresDatabases',
     PostgresDatabase: 'PostgresDatabase',
     Groups: 'Groups',
