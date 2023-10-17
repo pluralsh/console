@@ -36,7 +36,7 @@ export default function Providers() {
     pollInterval: POLL_INTERVAL,
   })
   const columns = useMemo(
-    () => [ColProvider, ColName, ColRepo, getColActions({ refetch })],
+    () => [ColProvider, ColName, getColActions({ refetch })],
     [refetch]
   )
 

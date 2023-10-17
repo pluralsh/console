@@ -36,7 +36,7 @@ export const ColName = columnHelper.accessor(({ node }) => node?.name, {
   header: 'Name',
   enableSorting: true,
   enableGlobalFilter: true,
-  //   meta: { truncate: true },
+  meta: { truncate: true },
   cell: ({ getValue }) => getValue(),
 })
 
