@@ -58,10 +58,8 @@ export default function Node() {
   const params = useParams()
   const name = (params[NODE_PARAM_NAME] as string) || ''
   const clusterId = (params[NODE_PARAM_CLUSTER] as string) || ''
-
   const tabStateRef = useRef<any>()
   const tab = useMatch(`${NODE_BASE_PATH}/:tab`)?.params?.tab || ''
-
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
 
   useSetBreadcrumbs(
@@ -82,10 +80,18 @@ export default function Node() {
                 label: name,
                 url: getNodeDetailsPath({ clusterId, name }),
               },
+              ...(tab
+                ? [
+                    {
+                      label: tab,
+                      url: '',
+                    },
+                  ]
+                : []),
             ]
           : []),
       ],
-      [clusterId, name]
+      [clusterId, name, tab]
     )
   )
 
