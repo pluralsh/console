@@ -295,9 +295,10 @@ defmodule Console.Deployments.Services do
   def update_components(attrs, %Service{} = service) do
     start_transaction()
     |> add_operation(:service, fn _ ->
-      service
-      |> Console.Repo.preload([:components, :errors])
-      |> Service.changeset(attrs)
+      svc = Console.Repo.preload(service, [:components, :errors])
+
+      svc
+      |> Service.changeset(stabilize(attrs, svc))
       |> Console.Repo.update()
     end)
     |> add_operation(:deprecations, fn %{service: svc} -> add_deprecations(svc) end)
@@ -325,6 +326,15 @@ defmodule Console.Deployments.Services do
     with {:ok, svc} <- authorized(service_id, cluster),
       do: update_components(attrs, svc)
   end
+
+  defp stabilize(%{components: new_components} = attrs, %{components: components} = svc) do
+    components = Map.new(components, fn %{id: id} = comp -> {component_key(comp), id} end)
+    new_components = Enum.map(new_components, &Map.put(&1, :id, components[component_key(&1)]))
+    Map.put(attrs, :components, new_components)
+  end
+  defp stabilize(attrs, _), do: attrs
+
+  defp component_key(%{group: g, version: v, kind: k, namespace: ns, name: n}), do: {g, v, k, ns, n}
 
   @doc """
   Find and insert any deprecations for this service's components

@@ -17,7 +17,7 @@ defmodule Console.Deployments.Providers.Versions do
 
   def gke(), do: @gke
 
-  def validate?(%Cluster{version: v, provider: %{cloud: c}} = cluster) do
+  def validate?(%Cluster{version: v, provider: %{cloud: c}}) do
     case versions(c) do
       :any -> true
       versions when is_list(versions) -> Enum.member?(versions, v)

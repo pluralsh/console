@@ -468,6 +468,22 @@ defmodule Console.Deployments.ServicesTest do
       assert svc.component_status == "1 / 1"
 
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :running,
+          synced: true,
+          group: "networking.k8s.io",
+          version: "v1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api"
+        }]
+      }, service)
+
+      %{components: [updated_component]} = Console.Repo.preload(service, [:components])
+
+      assert component.id == updated_component.id
     end
 
     test "if a component is in error it will flag" do

@@ -245,12 +245,19 @@ defmodule Console.Schema.Cluster do
   end
 
   defp validate_vsn(cs) do
-    case {get_change(cs, :version), cs.data.version} do
-      {v, prev} when is_binary(v) and is_binary(prev) ->
-        if next_version?(v, prev),
-          do: cs,
-          else: add_error(cs, :version, "version #{v} is not one minor vsn or less higher than #{prev}")
+    case {get_change(cs, :version), cs.data.version, cs.data.current_version} do
+      {v, _, prev} when is_binary(v) and is_binary(prev) ->
+        validate_vsn(cs, v, prev)
+      {v, prev, _} when is_binary(v) and is_binary(prev) ->
+        validate_vsn(cs, v, prev)
       _ -> cs
+    end
+  end
+
+  defp validate_vsn(cs, v, prev) do
+    case next_version?(v, prev) do
+      true -> cs
+      _ -> add_error(cs, :version, "version #{v} is not one minor vsn or less higher than #{prev}")
     end
   end
 

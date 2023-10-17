@@ -276,6 +276,37 @@ defmodule Console.Deployments.ClustersTest do
         ]
       }, cluster.id, user)
     end
+
+    test "it will validate that version changes don't exceed 1 minor version against current_version if present" do
+      user = admin_user()
+      provider = insert(:cluster_provider)
+      insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.26",
+        current_version: "1.26",
+        provider_id: provider.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      {:ok, cluster} = Clusters.update_cluster(%{
+        version: "1.27",
+        node_pools: [
+          %{name: "pool", min_size: 2, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, cluster.id, user)
+
+      {:error, _} = Clusters.update_cluster(%{
+        version: "1.28",
+        node_pools: [
+          %{name: "pool", min_size: 2, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, cluster.id, user)
+    end
   end
 
   describe "#rotate_deploy_token/1" do
