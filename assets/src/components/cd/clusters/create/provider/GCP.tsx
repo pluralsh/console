@@ -2,6 +2,7 @@ import {
   Dispatch,
   Key,
   ReactElement,
+  SetStateAction,
   useEffect,
   useMemo,
   useState,
@@ -10,27 +11,37 @@ import { useTheme } from 'styled-components'
 import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
 
 import { RegionsForProvider } from '../helpers'
-import { Provider } from '../types'
-import { ClusterProvider } from '../../../../../generated/graphql'
-
-interface ProviderState {
-  onValidityChange: Dispatch<boolean>
-}
+import { Provider, ProviderState } from '../types'
+import {
+  CloudSettingsAttributes,
+  GcpCloudAttributes,
+} from '../../../../../generated/graphql'
 
 interface GCPProps extends ProviderState {
-  clusterProviders: Array<ClusterProvider>
+  onChange?: Dispatch<SetStateAction<CloudSettingsAttributes>>
 }
 
-export function GCP({
-  clusterProviders,
-  onValidityChange,
-}: GCPProps): ReactElement {
+export function GCP({ onValidityChange, onChange }: GCPProps): ReactElement {
   const theme = useTheme()
-  const [selectedClusterProvider, setSelectedClusterProvider] = useState<Key>()
-  const [selectedRegion, setSelectedRegion] = useState<Key>()
-  const valid = useMemo(() => !!selectedClusterProvider && !!selectedRegion, [])
+  const [region, setRegion] = useState<Key>()
+  const [project, setProject] = useState<string>()
+  const [vpc, setVPC] = useState<string>()
+  const valid = useMemo(() => !!region, [region])
+
+  const attributes = useMemo(
+    () =>
+      ({
+        gcp: {
+          project,
+          region,
+          network: vpc,
+        } as GcpCloudAttributes,
+      }) as CloudSettingsAttributes,
+    [project, region, vpc]
+  )
 
   useEffect(() => onValidityChange?.(valid), [onValidityChange, valid])
+  useEffect(() => onChange?.(attributes), [onChange, attributes])
 
   return (
     <div
@@ -40,7 +51,6 @@ export function GCP({
         gap: theme.spacing.large,
       }}
     >
-      {/* Base: name, handle, version, provider id */}
       <div
         css={{
           display: 'flex',
@@ -48,49 +58,15 @@ export function GCP({
         }}
       >
         <Input
-          width="fit-content"
-          placeholder="workload-cluster-name"
-          prefix={<div>Name*</div>}
-        />
-        <Input
-          width="fit-content"
-          placeholder="custom-name-handle"
-          prefix={<div>Handle*</div>}
-        />
-      </div>
-      <FormField
-        label="Cluster provider"
-        hint="Configured cluster provider that should be used to provision the cluster."
-        required
-      >
-        <Select
-          aria-label="cluster provider"
-          label="base-cluster-provider"
-          selectedKey={selectedClusterProvider}
-          onSelectionChange={setSelectedClusterProvider}
-        >
-          {clusterProviders.map((p) => (
-            <ListBoxItem
-              key={p.id}
-              label={p.name}
-              textValue={p.name}
-            />
-          ))}
-        </Select>
-      </FormField>
-      {/* Additional: project, region, vpc_name */}
-      <div
-        css={{
-          display: 'flex',
-          gap: theme.spacing.medium,
-        }}
-      >
-        <Input
-          placeholder="project-test-512333"
+          placeholder="project-512333"
+          value={project}
+          onChange={({ target: { value } }) => setProject(value)}
           prefix={<div>Project ID*</div>}
         />
         <Input
-          placeholder="workload-cluster-vpc"
+          placeholder="vpc-network"
+          value={vpc}
+          onChange={({ target: { value } }) => setVPC(value)}
           prefix={<div>VPC Name*</div>}
         />
       </div>
@@ -101,9 +77,8 @@ export function GCP({
       >
         <Select
           aria-label="region"
-          label="us-east1"
-          selectedKey={selectedRegion}
-          onSelectionChange={setSelectedRegion}
+          selectedKey={region}
+          onSelectionChange={setRegion}
         >
           {RegionsForProvider[Provider.GCP].map((r) => (
             <ListBoxItem

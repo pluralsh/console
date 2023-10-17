@@ -2,19 +2,33 @@ import { ReactElement, useCallback, useState } from 'react'
 import { Button, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
+import {
+  ClusterAttributes,
+  useCreateClusterMutation,
+} from '../../../../generated/graphql'
+
 import { CreateClusterContent } from './CreateClusterContent'
 
 export default function CreateCluster(): ReactElement {
   const theme = useTheme()
+
   const [isOpen, setIsOpen] = useState(false)
+  const [clusterAttributes, setClusterAttributes] = useState<ClusterAttributes>(
+    {} as ClusterAttributes
+  )
+  const [valid, setValid] = useState(false)
+
+  const [createCluster, { loading }] = useCreateClusterMutation()
+
   const onClose = useCallback(() => setIsOpen(false), [])
-
   const onSubmit = useCallback(() => {
-    // TODO
-  }, [])
-
-  const disabled = true // TODO: add logic
-  const loading = false
+    createCluster({
+      variables: {
+        attributes: clusterAttributes,
+      },
+      onCompleted: onClose,
+    })
+  }, [clusterAttributes, createCluster, onClose])
 
   return (
     <>
@@ -49,8 +63,8 @@ export default function CreateCluster(): ReactElement {
               Cancel
             </Button>
             <Button
-              type="submit"
-              disabled={disabled}
+              onClick={onSubmit}
+              disabled={!valid}
               loading={loading}
               primary
             >
@@ -59,7 +73,10 @@ export default function CreateCluster(): ReactElement {
           </div>
         }
       >
-        <CreateClusterContent />
+        <CreateClusterContent
+          onChange={setClusterAttributes}
+          onValidityChange={setValid}
+        />
       </Modal>
     </>
   )

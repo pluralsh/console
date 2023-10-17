@@ -95,15 +95,20 @@ export const columns = [
 
       return (
         <div>
-          <div>Current: v{node?.currentVersion}</div>
-          <div
-            css={{
-              ...theme.partials.text.caption,
-              color: theme.colors['text-xlight'],
-            }}
-          >
-            Target: v{node?.version}
-          </div>
+          {node?.currentVersion && (
+            <>
+              <div>Current: v{node?.currentVersion}</div>
+              <div
+                css={{
+                  ...theme.partials.text.caption,
+                  color: theme.colors['text-xlight'],
+                }}
+              >
+                Target: v{node?.version}
+              </div>
+            </>
+          )}
+          {!node?.currentVersion && <>-</>}
         </div>
       )
     },

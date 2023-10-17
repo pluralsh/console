@@ -1,7 +1,13 @@
+import { Dispatch } from 'react'
+
 enum Provider {
   AWS = 'aws',
   Azure = 'azure',
   GCP = 'gcp',
+}
+
+interface ProviderState {
+  onValidityChange?: Dispatch<boolean>
 }
 
 interface NodeGroup {
@@ -16,5 +22,5 @@ interface AWSNodeGroup extends NodeGroup {
   spotInstance: boolean
 }
 
-export type { NodeGroup, AWSNodeGroup }
+export type { NodeGroup, AWSNodeGroup, ProviderState }
 export { Provider }
