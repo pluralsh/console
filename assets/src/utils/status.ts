@@ -54,7 +54,7 @@ export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
   return Readiness.InProgress
 }
 
-export function podStatusToReadiness(status: PodStatus): ReadinessT {
+export function podStatusToReadiness(status?: PodStatus): ReadinessT {
   const ready = status?.conditions?.find(
     (condition) => condition?.type === 'Ready'
   )

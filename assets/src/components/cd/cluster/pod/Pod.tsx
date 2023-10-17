@@ -1,6 +1,8 @@
 import { useMemo, useRef } from 'react'
-import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { Link, Outlet, useMatch, useParams } from 'react-router-dom'
 import {
+  Sidecar,
+  SidecarItem,
   Tab,
   TabList,
   TabPanel,
@@ -12,6 +14,7 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { A } from 'honorable'
 
 import {
   CD_BASE_PATH,
@@ -21,12 +24,14 @@ import {
   POD_PARAM_CLUSTER,
   POD_PARAM_NAME,
   POD_PARAM_NAMESPACE,
+  getNodeDetailsPath,
   getPodDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
 import { usePodQuery } from '../../../../generated/graphql'
-import PodSidecar from '../../../cluster/pods/PodSidecar'
 import { LinkTabWrap } from '../../../utils/Tabs'
 import { CD_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
+import { podStatusToReadiness } from '../../../../utils/status'
+import { StatusChip } from '../../../cluster/TableElements'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -34,31 +39,6 @@ const DIRECTORY = [
   { path: 'raw', label: 'Raw' },
   // TODO: { path: 'logs', label: 'Logs' }
 ]
-
-function Sidenav({ tabStateRef = {} }: any) {
-  const tab = useMatch(`${POD_BASE_PATH}:tab`)?.params?.tab || ''
-  const currentTab = DIRECTORY.find(({ path }) => path === tab)
-
-  return (
-    <TabList
-      stateRef={tabStateRef}
-      stateProps={{
-        orientation: 'vertical',
-        selectedKey: currentTab?.path,
-      }}
-    >
-      {DIRECTORY.map(({ label, path }) => (
-        <LinkTabWrap
-          key={path}
-          textValue={label}
-          to={path}
-        >
-          <Tab>{label}</Tab>
-        </LinkTabWrap>
-      ))}
-    </TabList>
-  )
-}
 
 export default function Pod() {
   const params = useParams()
@@ -68,6 +48,7 @@ export default function Pod() {
   const tabStateRef = useRef<any>()
   const theme = useTheme()
   const tab = useMatch(`${POD_BASE_PATH}:tab`)?.params?.tab || ''
+  const currentTab = DIRECTORY.find(({ path }) => path === tab)
 
   useSetBreadcrumbs(
     useMemo(
@@ -108,21 +89,61 @@ export default function Pod() {
     fetchPolicy: 'cache-and-network',
   })
 
+  const pod = data?.pod
+  const readiness = podStatusToReadiness(pod?.status)
+
   return (
     <ResponsiveLayoutPage>
       <ResponsiveLayoutSidenavContainer paddingTop={40 + theme.spacing.medium}>
-        <Sidenav tabStateRef={tabStateRef} />
+        <TabList
+          stateRef={tabStateRef}
+          stateProps={{
+            orientation: 'vertical',
+            selectedKey: currentTab?.path,
+          }}
+        >
+          {DIRECTORY.map(({ label, path }) => (
+            <LinkTabWrap
+              key={path}
+              textValue={label}
+              to={path}
+            >
+              <Tab>{label}</Tab>
+            </LinkTabWrap>
+          ))}
+        </TabList>
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <TabPanel
         as={<ResponsiveLayoutContentContainer overflow="visible" />}
         stateRef={tabStateRef}
       >
-        <Outlet context={{ pod: data?.pod }} />
+        <Outlet context={{ pod }} />
       </TabPanel>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer>
-        <PodSidecar pod={data?.pod} />
+        <Sidecar heading="Metadata">
+          <SidecarItem heading="Pod name">{pod?.metadata?.name}</SidecarItem>
+          <SidecarItem heading="Namespace">
+            {pod?.metadata?.namespace}
+          </SidecarItem>
+          <SidecarItem heading="IP">{pod?.status?.podIp}</SidecarItem>
+          <SidecarItem heading="Parent node">
+            <A
+              as={Link}
+              to={getNodeDetailsPath({ clusterId, name: pod?.spec.nodeName })}
+              inline
+            >
+              {pod?.spec.nodeName}
+            </A>
+          </SidecarItem>
+          <SidecarItem heading="Service account">
+            {pod?.spec.serviceAccountName}
+          </SidecarItem>
+          <SidecarItem heading="Status">
+            <StatusChip readiness={readiness} />
+          </SidecarItem>
+        </Sidecar>
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>
   )
