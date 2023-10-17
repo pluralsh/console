@@ -1,5 +1,5 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useMemo } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
@@ -28,12 +28,13 @@ export const getServiceComponentBreadcrumbs = ({
   componentKind,
   componentName,
   componentVersion,
+  ...props
 }: Parameters<typeof getServiceComponentsBreadcrumbs>[0] & {
   componentKind: string | null | undefined
   componentName: string | null | undefined
   componentVersion: string | null | undefined
 }) => [
-  ...getServiceComponentsBreadcrumbs({ clusterName, serviceId }),
+  ...getServiceComponentsBreadcrumbs({ clusterName, serviceId, ...props }),
   {
     label: componentName ?? '',
     url: getServiceComponentPath({
@@ -45,6 +46,49 @@ export const getServiceComponentBreadcrumbs = ({
     }),
   },
 ]
+
+function BreadcrumbWrapper({
+  clusterName,
+  serviceId,
+  serviceName,
+  componentName,
+  componentKind,
+  componentVersion,
+  children,
+}: {
+  clusterName: string
+  serviceId: string
+  serviceName: string | undefined
+  componentName: string | undefined
+  componentKind: string | undefined
+  componentVersion: string | undefined
+  children: ReactNode
+}) {
+  useSetBreadcrumbs(
+    useMemo(
+      () =>
+        getServiceComponentBreadcrumbs({
+          clusterName,
+          serviceId,
+          serviceName,
+          componentName,
+          componentKind,
+          componentVersion,
+        }),
+      [
+        clusterName,
+        serviceId,
+        serviceName,
+        componentName,
+        componentKind,
+        componentVersion,
+      ]
+    )
+  )
+
+  // eslint-disable-next-line react/jsx-no-useless-fragment
+  return <>{children}</>
+}
 
 export default function ServiceComponent() {
   const params = useParams()
@@ -60,6 +104,10 @@ export default function ServiceComponent() {
     },
   })
 
+  console.log('error', error)
+  console.log('data', data)
+
+  const serviceName = data?.serviceDeployment?.name
   const components = data?.serviceDeployment?.components
 
   const component = components?.find(
@@ -69,19 +117,14 @@ export default function ServiceComponent() {
       (component?.version || '') === (componentVersion || '')
   )
 
-  useSetBreadcrumbs(
-    useMemo(
-      () =>
-        getServiceComponentBreadcrumbs({
-          clusterName,
-          serviceId,
-          componentKind,
-          componentName,
-          componentVersion,
-        }),
-      [clusterName, serviceId, componentKind, componentName, componentVersion]
-    )
-  )
+  const breadcrumbProps = {
+    clusterName,
+    serviceId,
+    serviceName,
+    componentKind,
+    componentName,
+    componentVersion,
+  }
 
   if (error) {
     return <GqlError error={error} />
@@ -94,10 +137,12 @@ export default function ServiceComponent() {
   }
 
   return (
-    <ComponentDetails
-      component={component}
-      serviceId={serviceId}
-      pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
-    />
+    <BreadcrumbWrapper {...breadcrumbProps}>
+      <ComponentDetails
+        component={component}
+        serviceId={serviceId}
+        pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
+      />
+    </BreadcrumbWrapper>
   )
 }

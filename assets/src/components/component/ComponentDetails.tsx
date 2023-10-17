@@ -52,6 +52,7 @@ export function ComponentDetails({
   pathMatchString: string
   serviceId?: string
 }) {
+  console.log('klink')
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
@@ -75,11 +76,16 @@ export function ComponentDetails({
       : {}),
   }
 
+  console.log('vars', vars)
+  console.log('query', query)
+
   const { data, loading, refetch, error } = useQuery(query, {
     variables: vars,
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
+
+  console.log({ data, loading, error })
 
   const kind: ScalingType =
     ScalingTypes[(componentKind ?? '')?.toUpperCase()] ??
