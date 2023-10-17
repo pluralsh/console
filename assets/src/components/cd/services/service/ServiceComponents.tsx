@@ -7,12 +7,13 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ComponentProps, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 import isEmpty from 'lodash/isEmpty'
 import { useTheme } from 'styled-components'
 
 import {
   ServiceDeploymentComponentFragment,
+  ServiceDeploymentDetailsFragment,
   useServiceDeploymentComponentsQuery,
 } from 'generated/graphql'
 
@@ -37,9 +38,10 @@ import { collectDeprecations, countDeprecations } from './deprecationUtils'
 
 export const getServiceComponentsBreadcrumbs = ({
   serviceId,
+  serviceName,
   clusterName,
 }: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => [
-  ...getServiceDetailsBreadcrumbs({ clusterName, serviceId }),
+  ...getServiceDetailsBreadcrumbs({ clusterName, serviceId, serviceName }),
   {
     label: 'components',
     url: `${getServiceDetailsPath({
@@ -87,15 +89,19 @@ export default function ServiceComponents() {
   const serviceId = useParams()[SERVICE_PARAM_ID]
   const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
   const [showDeprecations, setShowDeprecations] = useState(false)
-
-  const breadcrumbs: Breadcrumb[] = useMemo(
-    () => getServiceComponentsBreadcrumbs({ clusterName, serviceId }),
-    [clusterName, serviceId]
-  )
+  const outletContext = useOutletContext<{
+    service: ServiceDeploymentDetailsFragment | null | undefined
+  }>()
 
   const { data, error } = useServiceDeploymentComponentsQuery({
     variables: { id: serviceId || '' },
   })
+  const serviceName = outletContext?.service?.name
+  const breadcrumbs: Breadcrumb[] = useMemo(
+    () =>
+      getServiceComponentsBreadcrumbs({ clusterName, serviceId, serviceName }),
+    [clusterName, serviceId, serviceName]
+  )
 
   useSetBreadcrumbs(breadcrumbs)
   const { kindSelector, selectedKinds } = useComponentKindSelect(
@@ -156,19 +162,15 @@ export default function ServiceComponents() {
           </Callout>
         )}
         <ComponentList
-          setUrl={(c) => {
-            const params = new URLSearchParams()
-
-            return c?.name && c?.kind
+          setUrl={(c) =>
+            c?.name && c?.kind
               ? `${getServiceComponentPath({
                   clusterName,
                   serviceId,
-                  componentKind: c.kind.toLocaleLowerCase(),
-                  componentName: c.name.toLowerCase(),
-                  componentVersion: c.version,
-                })}?${params.toString()}`
+                  componentId: c.id,
+                })}`
               : undefined
-          }}
+          }
           components={components}
           selectedKinds={selectedKinds}
         />

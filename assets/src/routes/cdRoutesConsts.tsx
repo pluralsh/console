@@ -1,3 +1,7 @@
+function encodeSlashes(str: string) {
+  return str.replaceAll('/', '%2F')
+}
+
 export const CD_BASE_PATH = 'cd' as const
 export const CLUSTERS_PATH = 'clusters' as const
 export const SERVICES_PATH = 'services' as const
@@ -34,16 +38,12 @@ export const SERVICE_BASE_PATH = getServiceDetailsPath({
 })
 export const SERVICE_COMPONENTS_PATH = 'components'
 
-export const COMPONENT_PARAM_KIND = `componentKind` as const
-export const COMPONENT_PARAM_NAME = `componentName` as const
-export const COMPONENT_PARAM_VERSION = `componentVersion` as const
+export const COMPONENT_PARAM_ID = `componentId` as const
 export const SERVICE_COMPONENT_PATH_MATCHER_REL = getServiceComponentPath({
   isRelative: true,
   clusterName: `:${SERVICE_PARAM_CLUSTER}`,
   serviceId: `:${SERVICE_PARAM_ID}`,
-  componentKind: `:${COMPONENT_PARAM_KIND}`,
-  componentName: `:${COMPONENT_PARAM_NAME}`,
-  componentVersion: `:${COMPONENT_PARAM_VERSION}`,
+  componentId: `:${COMPONENT_PARAM_ID}`,
 })
 export const SERVICE_COMPONENT_PATH_MATCHER_ABS = `/${SERVICE_COMPONENT_PATH_MATCHER_REL}`
 
@@ -58,22 +58,20 @@ export function getServiceDetailsPath({
 }) {
   return `${
     isRelative ? '' : '/'
-  }${CD_BASE_PATH}/${SERVICES_PATH}/${clusterName}/${serviceId}`
+  }${CD_BASE_PATH}/${SERVICES_PATH}/${encodeSlashes(
+    clusterName || ''
+  )}/${encodeSlashes(serviceId || '')}`
 }
 
 export function getServiceComponentPath({
-  componentKind,
-  componentName,
-  componentVersion,
+  componentId,
   ...props
 }: Parameters<typeof getServiceDetailsPath>[0] & {
-  componentKind: string | null | undefined
-  componentName: string | null | undefined
-  componentVersion: string | null | undefined
+  componentId: string | null | undefined
 }) {
   return `${getServiceDetailsPath({
     ...props,
-  })}/${SERVICE_COMPONENTS_PATH}/${componentKind}/${componentName}/${componentVersion}`
+  })}/${SERVICE_COMPONENTS_PATH}/${componentId}`
 }
 
 export function getNodeDetailsPath({

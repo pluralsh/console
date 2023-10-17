@@ -13,6 +13,7 @@ fragment GitRepositoriesRow on GitRepository {
   insertedAt
   pulledAt
   updatedAt
+  urlFormat
 }
 
 query GitRepositories {

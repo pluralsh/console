@@ -3628,14 +3628,14 @@ export type ServiceDeploymentComponentsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceDeploymentComponentsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null } | null> | null } | null };
+export type ServiceDeploymentComponentsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', name: string, components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null } | null> | null } | null };
 
 export type ServiceDeploymentSecretsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ServiceDeploymentSecretsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null };
+export type ServiceDeploymentSecretsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', name: string, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null };
 
 export type ServiceDeploymentRevisionsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5733,6 +5733,7 @@ export type ServiceDeploymentQueryResult = Apollo.QueryResult<ServiceDeploymentQ
 export const ServiceDeploymentComponentsDocument = gql`
     query ServiceDeploymentComponents($id: ID!) {
   serviceDeployment(id: $id) {
+    name
     components {
       ...ServiceDeploymentComponent
     }
@@ -5770,6 +5771,7 @@ export type ServiceDeploymentComponentsQueryResult = Apollo.QueryResult<ServiceD
 export const ServiceDeploymentSecretsDocument = gql`
     query ServiceDeploymentSecrets($id: ID!) {
   serviceDeployment(id: $id) {
+    name
     configuration {
       name
       value

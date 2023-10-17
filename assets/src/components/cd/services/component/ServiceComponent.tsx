@@ -1,20 +1,16 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useMemo } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 
 import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
 
 import {
-  COMPONENT_PARAM_KIND,
-  COMPONENT_PARAM_NAME,
-  COMPONENT_PARAM_VERSION,
+  COMPONENT_PARAM_ID,
   SERVICE_COMPONENT_PATH_MATCHER_ABS,
   SERVICE_PARAM_CLUSTER,
   SERVICE_PARAM_ID,
   getServiceComponentPath,
 } from 'routes/cdRoutesConsts'
-
-import { hasDefined } from 'utils/hasDefined'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ComponentDetails } from 'components/component/ComponentDetails'
@@ -25,33 +21,62 @@ import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
 export const getServiceComponentBreadcrumbs = ({
   serviceId,
   clusterName,
-  componentKind,
   componentName,
-  componentVersion,
+  componentId,
+  ...props
 }: Parameters<typeof getServiceComponentsBreadcrumbs>[0] & {
-  componentKind: string | null | undefined
   componentName: string | null | undefined
-  componentVersion: string | null | undefined
+  componentId: string | null | undefined
 }) => [
-  ...getServiceComponentsBreadcrumbs({ clusterName, serviceId }),
+  ...getServiceComponentsBreadcrumbs({ clusterName, serviceId, ...props }),
   {
-    label: componentName ?? '',
+    label: componentName || componentId || '',
     url: getServiceComponentPath({
       clusterName,
       serviceId,
-      componentKind,
-      componentName,
-      componentVersion,
+      componentId,
     }),
   },
 ]
 
+function BreadcrumbWrapper({
+  clusterName,
+  serviceId,
+  serviceName,
+  componentId,
+  componentName,
+  children,
+}: {
+  clusterName: string
+  serviceId: string
+  serviceName: string | undefined
+  componentId: string | undefined
+  componentName: string | undefined
+
+  children: ReactNode
+}) {
+  useSetBreadcrumbs(
+    useMemo(
+      () =>
+        getServiceComponentBreadcrumbs({
+          clusterName,
+          serviceId,
+          serviceName,
+          componentId,
+          componentName,
+        }),
+      [clusterName, serviceId, serviceName, componentId, componentName]
+    )
+  )
+
+  // eslint-disable-next-line react/jsx-no-useless-fragment
+  return <>{children}</>
+}
+
 export default function ServiceComponent() {
   const params = useParams()
-  const componentKind = params[COMPONENT_PARAM_KIND]!
-  const componentName = params[COMPONENT_PARAM_NAME]!
+  const componentId = params[COMPONENT_PARAM_ID]
   const clusterName = params[SERVICE_PARAM_CLUSTER]!
-  const componentVersion = params[COMPONENT_PARAM_VERSION]!
   const serviceId = params[SERVICE_PARAM_ID]!
 
   const { data, error } = useServiceDeploymentComponentsQuery({
@@ -60,28 +85,23 @@ export default function ServiceComponent() {
     },
   })
 
+  const serviceName = data?.serviceDeployment?.name
   const components = data?.serviceDeployment?.components
 
   const component = components?.find(
-    (component) =>
-      component?.name?.toLowerCase() === componentName?.toLowerCase() &&
-      component?.kind?.toLowerCase() === componentKind?.toLowerCase() &&
-      (component?.version || '') === (componentVersion || '')
+    (component) => component?.id === componentId
   )
+  const componentName = component?.name
 
-  useSetBreadcrumbs(
-    useMemo(
-      () =>
-        getServiceComponentBreadcrumbs({
-          clusterName,
-          serviceId,
-          componentKind,
-          componentName,
-          componentVersion,
-        }),
-      [clusterName, serviceId, componentKind, componentName, componentVersion]
-    )
-  )
+  const breadcrumbProps = {
+    clusterName,
+    serviceId,
+    serviceName,
+    componentId,
+    componentName,
+  }
+
+  console.log({ error })
 
   if (error) {
     return <GqlError error={error} />
@@ -89,15 +109,16 @@ export default function ServiceComponent() {
   if (!component) {
     return <LoadingIndicator />
   }
-  if (!hasDefined(component, ['name', 'namespace'])) {
-    return <GqlError error="Missing component name or namespace" />
-  }
+
+  console.log('component', component)
 
   return (
-    <ComponentDetails
-      component={component}
-      serviceId={serviceId}
-      pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
-    />
+    <BreadcrumbWrapper {...breadcrumbProps}>
+      <ComponentDetails
+        component={component}
+        serviceId={serviceId}
+        pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
+      />
+    </BreadcrumbWrapper>
   )
 }

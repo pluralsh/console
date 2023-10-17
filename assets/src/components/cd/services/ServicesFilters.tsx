@@ -90,8 +90,6 @@ export function ServicesFilters({
     [clusters, clusterName]
   )
 
-  console.log('selectedClusterName', selectedCluster)
-
   const counts = useMemo(() => {
     const c: Record<string, number | undefined> = {
       ALL: serviceDeployments?.edges?.length,

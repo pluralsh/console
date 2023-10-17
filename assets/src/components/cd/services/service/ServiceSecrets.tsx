@@ -13,7 +13,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 import isEmpty from 'lodash/isEmpty'
 import styled, { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -21,6 +21,7 @@ import { useDebounce } from '@react-hooks-library/core'
 
 import {
   ConfigAttributes,
+  ServiceDeploymentDetailsFragment,
   useMergeServiceMutation,
   useServiceDeploymentSecretsQuery,
 } from 'generated/graphql'
@@ -358,25 +359,27 @@ export default function ServiceSecrets() {
   const theme = useTheme()
   const serviceId = useParams()[SERVICE_PARAM_ID]
   const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
+  const outletContext = useOutletContext<{
+    service: ServiceDeploymentDetailsFragment | null | undefined
+  }>()
 
   const [createOpen, setCreateOpen] = useState(false)
-
+  const { data, error, refetch } = useServiceDeploymentSecretsQuery({
+    variables: { id: serviceId || '' },
+  })
+  const serviceName = outletContext?.service?.name
   const breadcrumbs: Breadcrumb[] = useMemo(
     () => [
-      ...getServiceDetailsBreadcrumbs({ clusterName, serviceId }),
+      ...getServiceDetailsBreadcrumbs({ clusterName, serviceId, serviceName }),
       {
         label: 'secrets',
         url: `${CD_BASE_PATH}/services/${serviceId}/secrets`,
       },
     ],
-    [clusterName, serviceId]
+    [clusterName, serviceId, serviceName]
   )
 
   useSetBreadcrumbs(breadcrumbs)
-  const { data, error, refetch } = useServiceDeploymentSecretsQuery({
-    variables: { id: serviceId || '' },
-  })
-
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 100)
   const secretsColumns = useMemo(

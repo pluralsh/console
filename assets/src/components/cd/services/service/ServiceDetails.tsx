@@ -49,9 +49,11 @@ import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 export const getServiceDetailsBreadcrumbs = ({
   clusterName,
   serviceId,
+  serviceName,
 }: {
   clusterName: string | null | undefined
   serviceId: string | null | undefined
+  serviceName?: string | null | undefined
 }) => [
   ...CD_BASE_CRUMBS,
   { label: 'services', url: `${CD_BASE_PATH}/services` },
@@ -62,7 +64,7 @@ export const getServiceDetailsBreadcrumbs = ({
           url: `/${CD_BASE_PATH}/services/${clusterName}`,
         },
         {
-          label: serviceId,
+          label: serviceName || serviceId,
           url: getServiceDetailsPath({ clusterName, serviceId }),
         },
       ]
@@ -170,11 +172,11 @@ function ServiceDetailsBase() {
   const theme = useTheme()
   const { pathname } = useLocation()
   const params = useParams()
-  const serviceName = params[SERVICE_PARAM_ID] as string
+  const serviceId = params[SERVICE_PARAM_ID] as string
   const clusterName = params[SERVICE_PARAM_CLUSTER] as string
   const pathPrefix = getServiceDetailsPath({
     clusterName,
-    serviceId: serviceName,
+    serviceId,
   })
 
   const { data: serviceListData } = useServiceDeploymentsTinyQuery()
@@ -184,7 +186,7 @@ function ServiceDetailsBase() {
   )
 
   const { data: serviceData, error: serviceError } = useServiceDeploymentQuery({
-    variables: { id: serviceName },
+    variables: { id: serviceId },
   })
   const { serviceDeployment } = serviceData || {}
   const docs = useMemo(
@@ -234,7 +236,7 @@ function ServiceDetailsBase() {
         {serviceError ? (
           <GqlError error={serviceError} />
         ) : serviceDeployment ? (
-          <Outlet context={{ docs }} />
+          <Outlet context={{ docs, service: serviceData?.serviceDeployment }} />
         ) : (
           <LoadingIndicator />
         )}

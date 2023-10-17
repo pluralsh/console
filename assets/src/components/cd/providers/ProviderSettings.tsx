@@ -7,7 +7,7 @@ import { CloudProviderSettingsAttributes } from './CreateProvider'
 export const PROVIDER_KEYS = [
   'aws',
   'gcp',
-  'azure',
+  // 'azure',
 ] as const satisfies readonly Lowercase<Provider>[]
 
 export function AwsSettings({
@@ -62,19 +62,17 @@ export function GcpSettings({
   )
 }
 
-export function AzureSettings({
-  ...props
-}: {
-  settings: CloudProviderSettingsAttributes['azure']
-  updateSettings: (
-    update: NonNullable<Partial<CloudProviderSettingsAttributes['azure']>>
-  ) => void
-}) {
-  console.log('Azure settings props', props)
-
-  return (
-    <FormField label="Placeholder setting">
-      <InputRevealer />
-    </FormField>
-  )
-}
+// export function AzureSettings({
+//   ...props
+// }: {
+//   settings: CloudProviderSettingsAttributes['azure']
+//   updateSettings: (
+//     update: NonNullable<Partial<CloudProviderSettingsAttributes['azure']>>
+//   ) => void
+// }) {
+//   return (
+//     <FormField label="Placeholder setting">
+//       <InputRevealer />
+//     </FormField>
+//   )
+// }

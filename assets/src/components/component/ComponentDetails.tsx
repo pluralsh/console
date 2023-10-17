@@ -44,7 +44,7 @@ export function ComponentDetails({
 }: {
   component: {
     name: string
-    namespace: string
+    namespace?: string | null | undefined
     kind: string
     version?: string | null | undefined
     group?: string | null | undefined

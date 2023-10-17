@@ -137,6 +137,7 @@ query ServiceDeployment($id: ID!) {
 
 query ServiceDeploymentComponents($id: ID!) {
   serviceDeployment(id: $id) {
+    name
     components {
       ...ServiceDeploymentComponent
     }
