@@ -14,15 +14,18 @@ import { ResponsiveLayoutContentContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
 import {
+  CD_BASE_PATH,
   POD_BASE_PATH,
   POD_PARAM_CLUSTER,
   POD_PARAM_NAME,
   POD_PARAM_NAMESPACE,
+  getPodDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
 import { usePodQuery } from '../../../../generated/graphql'
 import PodSidecar from '../../../cluster/pods/PodSidecar'
 import { useNamespaceIsApp } from '../../../hooks/useNamespaceIsApp'
 import { LinkTabWrap } from '../../../utils/Tabs'
+import { CD_BASE_CRUMBS } from '../../ContinuousDeployment'
 
 const useGetDirectory = (namespace = '') => {
   const namespaceIsApp = useNamespaceIsApp(namespace)
@@ -40,13 +43,11 @@ const useGetDirectory = (namespace = '') => {
 }
 
 function Sidenav({ tabStateRef = {} }: any) {
-  const { namespace } = useParams()
-
-  const subpath =
-    useMatch('/pods/:namespace/:name/:subpath')?.params?.subpath || ''
+  const params = useParams()
+  const namespace = (params[POD_PARAM_NAMESPACE] as string) || ''
   const directory = useGetDirectory(namespace)
-
-  const currentTab = directory.find(({ path }) => path === subpath)
+  const tab = useMatch('/pods/:namespace/:name/:tab')?.params?.tab || ''
+  const currentTab = directory.find(({ path }) => path === tab)
 
   return (
     <TabList
@@ -68,37 +69,51 @@ function Sidenav({ tabStateRef = {} }: any) {
     </TabList>
   )
 }
-const POLL_INTERVAL = 10 * 1000
 
 export default function Pod() {
   const params = useParams()
   const clusterId = (params[POD_PARAM_CLUSTER] as string) || ''
   const namespace = (params[POD_PARAM_NAMESPACE] as string) || ''
   const name = (params[POD_PARAM_NAME] as string) || ''
-
   const tabStateRef = useRef<any>()
   const theme = useTheme()
   const tab = useMatch(`${POD_BASE_PATH}/:tab`)?.params?.tab || ''
 
-  const breadcrumbs = useMemo(
-    () => [
-      { label: 'pods', url: '/pods' },
-      ...(namespace ? [{ label: namespace, url: `/pods/${namespace}` }] : []),
-      ...(namespace && name
-        ? [{ label: name, url: `/pods/${namespace}/${name}` }]
-        : []),
-      ...(tab && namespace && name
-        ? [{ label: tab, url: `/pods/${namespace}/${name}/${tab}` }]
-        : []),
-    ],
-    [name, namespace, tab]
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...CD_BASE_CRUMBS,
+        { label: 'clusters', url: `${CD_BASE_PATH}/clusters` },
+        {
+          label: clusterId || '',
+          url: `${CD_BASE_PATH}/clusters/${clusterId}`,
+        },
+        { label: 'pods', url: `${CD_BASE_PATH}/clusters/${clusterId}/pods` },
+        ...(clusterId && name && namespace
+          ? [
+              {
+                label: name,
+                url: getPodDetailsPath({ clusterId, name, namespace }),
+              },
+              ...(tab
+                ? [
+                    {
+                      label: tab,
+                      url: '',
+                    },
+                  ]
+                : []),
+            ]
+          : []),
+      ],
+      [clusterId, name, namespace, tab]
+    )
   )
-
-  useSetBreadcrumbs(breadcrumbs)
 
   const { data } = usePodQuery({
     variables: { name, namespace, clusterId },
-    pollInterval: POLL_INTERVAL,
+    pollInterval: 10 * 1000,
+    fetchPolicy: 'cache-and-network',
   })
 
   return (
