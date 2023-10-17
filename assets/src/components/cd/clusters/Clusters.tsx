@@ -37,7 +37,7 @@ import { TableText } from '../../cluster/TableElements'
 
 import { nextSupportedVersion } from '../../../utils/semver'
 
-import ClusterCreate from './ClusterCreate'
+import CreateCluster from './CreateCluster'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
 
@@ -101,15 +101,20 @@ export const columns = [
 
       return (
         <div>
-          <div>Current: v{node?.currentVersion}</div>
-          <div
-            css={{
-              ...theme.partials.text.caption,
-              color: theme.colors['text-xlight'],
-            }}
-          >
-            Target: v{node?.version}
-          </div>
+          {node?.currentVersion && (
+            <>
+              <div>Current: v{node?.currentVersion}</div>
+              <div
+                css={{
+                  ...theme.partials.text.caption,
+                  color: theme.colors['text-xlight'],
+                }}
+              >
+                Target: v{node?.version}
+              </div>
+            </>
+          )}
+          {!node?.currentVersion && <>-</>}
         </div>
       )
     },
@@ -249,7 +254,7 @@ export default function Clusters() {
     pollInterval: 10 * 1000,
     fetchPolicy: 'cache-and-network',
   })
-  const headerActions = useMemo(() => <ClusterCreate />, [])
+  const headerActions = useMemo(() => <CreateCluster />, [])
 
   useSetCDHeaderContent(headerActions)
   useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)

@@ -179,3 +179,9 @@ mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
     ...ClustersRow
   }
 }
+
+mutation CreateCluster($attributes: ClusterAttributes!) {
+  createCluster(attributes: $attributes) {
+    ...Cluster
+  }
+}
