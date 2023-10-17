@@ -51,7 +51,7 @@ export default function NodeInfo() {
     return pods || []
   }, [node])
 
-  if (!node) return <LoadingIndicator />
+  if (!node || !nodeMetric) return <LoadingIndicator />
 
   return (
     <Flex
