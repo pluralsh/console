@@ -18,11 +18,16 @@ import {
   PodWithId,
   PodsList,
 } from '../../../cluster/pods/PodsList'
-import { NODE_PARAM_NAME } from '../../../../routes/cdRoutesConsts'
+import {
+  NODE_PARAM_CLUSTER,
+  NODE_PARAM_NAME,
+  getPodDetailsPath,
+} from '../../../../routes/cdRoutesConsts'
 
 export default function NodeInfo() {
   const params = useParams()
   const nodeName = params[NODE_PARAM_NAME] as string
+  const clusterId = params[NODE_PARAM_CLUSTER] as string
   const { node, nodeMetric } = useOutletContext() as {
     node: Node
     nodeMetric: NodeMetric
@@ -71,10 +76,13 @@ export default function NodeInfo() {
       </section>
       <section>
         <SubTitle>Pods</SubTitle>
-        {/* TODO: Update links to pod details. */}
         <PodsList
           columns={columns}
           pods={pods}
+          linkBasePath={getPodDetailsPath({
+            clusterId,
+            isRelative: false,
+          })}
         />
       </section>
     </Flex>
