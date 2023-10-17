@@ -1,9 +1,7 @@
-import { Link, useOutletContext } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import { Flex } from 'honorable'
-import { Button, LogsIcon } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Pod } from 'generated/graphql'
-import { asQuery } from 'components/utils/query'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
@@ -11,47 +9,46 @@ import { statusesToRecord } from 'components/cluster/pods/PodInfo'
 
 import PodConditions from '../../../cluster/pods/PodConditions'
 import Metadata from '../../../cluster/pods/PodMetadata'
-import { useNamespaceIsApp } from '../../../hooks/useNamespaceIsApp'
 import { SubTitle } from '../../../cluster/nodes/SubTitle'
 import { ContainersList } from '../../../cluster/containers/ContainersList'
 
-function useGetLogUrl({
-  name,
-  namespace,
-}: {
-  name?: string
-  namespace?: string
-}) {
-  const isApp = useNamespaceIsApp(namespace)
-
-  if (!namespace) {
-    return null
-  }
-
-  return isApp
-    ? `/apps/${namespace}/logs${name ? `?${asQuery({ pod: name })}` : ''}`
-    : name
-    ? `/pods/${namespace}/${name}/logs`
-    : null
-}
-
-function ViewLogsButton({ metadata }: any) {
-  const url = useGetLogUrl(metadata)
-
-  if (!url) return null
-
-  return (
-    <Button
-      secondary
-      fontWeight={600}
-      startIcon={<LogsIcon />}
-      as={Link}
-      to={url}
-    >
-      View logs
-    </Button>
-  )
-}
+// function useGetLogUrl({
+//   name,
+//   namespace,
+// }: {
+//   name?: string
+//   namespace?: string
+// }) {
+//   const isApp = useNamespaceIsApp(namespace)
+//
+//   if (!namespace) {
+//     return null
+//   }
+//
+//   return isApp
+//     ? `/apps/${namespace}/logs${name ? `?${asQuery({ pod: name })}` : ''}`
+//     : name
+//     ? `/pods/${namespace}/${name}/logs`
+//     : null
+// }
+//
+// function ViewLogsButton({ metadata }: any) {
+//   const url = useGetLogUrl(metadata)
+//
+//   if (!url) return null
+//
+//   return (
+//     <Button
+//       secondary
+//       fontWeight={600}
+//       startIcon={<LogsIcon />}
+//       as={Link}
+//       to={url}
+//     >
+//       View logs
+//     </Button>
+//   )
+// }
 
 export default function PodInfo() {
   const { pod } = useOutletContext() as { pod: Pod }
