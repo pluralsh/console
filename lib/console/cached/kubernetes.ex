@@ -56,14 +56,15 @@ defmodule Console.Cached.Kubernetes do
     {:noreply, state}
   end
 
-  def handle_info(%Watcher.Event{object: o, type: event} = e, %{table: table, key: key} = state) when event in [:added, :modified] do
-    callback(e, state)
-    {:noreply, %{state | table: KeyValueSet.put!(table, key.(o), o)}}
-  end
-
   def handle_info(%Watcher.Event{object: o, type: :deleted} = e, %{table: table, key: key} = state) do
     callback(e, state)
     {:noreply, %{state | table: KeyValueSet.delete!(table, key.(o))}}
+  end
+
+  def handle_info(%Watcher.Event{object: o, type: event} = e, %{table: table, key: key} = state) do
+    Logger.info "found event #{event} for #{state.model}"
+    callback(e, state)
+    {:noreply, %{state | table: KeyValueSet.put!(table, key.(o), o)}}
   end
 
   def handle_info(_, state), do: {:noreply, state}

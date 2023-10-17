@@ -3,6 +3,21 @@ defmodule Console do
 
   @chars String.codepoints("abcdefghijklmnopqrstuvwxyz0123456789")
 
+  def mapify(l) when is_list(l), do: Enum.map(l, &mapify/1)
+  def mapify(%{__schema__: _} = schema) do
+    Piazza.Ecto.Schema.mapify(schema)
+    |> mapify()
+  end
+  def mapify(%{__struct__: _} = struct) do
+    Map.from_struct(struct)
+    |> mapify()
+  end
+  def mapify(%{} = map) do
+    Enum.map(map, fn {k, v} -> {k, mapify(v)} end)
+    |> Map.new()
+  end
+  def mapify(v), do: v
+
   def url(path), do: Path.join(Console.conf(:url), path)
 
   def is_set(var) do

@@ -76,6 +76,10 @@ defmodule Console.Schema.Service do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, sq) do
+    from(s in query, where: ilike(s.name, ^"#{sq}%"))
+  end
+
   def drainable(query \\ __MODULE__) do
     from(s in query, where: s.name != "deploy-operator")
   end

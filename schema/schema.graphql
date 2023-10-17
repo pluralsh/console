@@ -71,7 +71,7 @@ type RootQueryType {
 
   nodes: [Node]
 
-  node(name: String!): Node
+  node(name: String!, clusterId: ID): Node
 
   cronJob(namespace: String!, name: String!, serviceId: ID): CronJob
 
@@ -146,7 +146,7 @@ type RootQueryType {
   gitRepositories(after: String, first: Int, before: String, last: Int): GitRepositoryConnection
 
   "a relay connection of all clusters visible to the current user"
-  clusters(after: String, first: Int, before: String, last: Int): ClusterConnection
+  clusters(after: String, first: Int, before: String, last: Int, q: String): ClusterConnection
 
   "a relay connection of all providers visible to the current user"
   clusterProviders(after: String, first: Int, before: String, last: Int): ClusterProviderConnection
@@ -167,6 +167,8 @@ type RootQueryType {
     last: Int
 
     clusterId: ID
+
+    q: String
 
     "the handle of the cluster for this service"
     cluster: String
@@ -844,10 +846,17 @@ input TaintAttributes {
 
 input CloudSettingsAttributes {
   aws: AwsCloudAttributes
+  gcp: GcpCloudAttributes
 }
 
 input AwsCloudAttributes {
-  launchTemplateId: String
+  region: String
+}
+
+input GcpCloudAttributes {
+  project: String
+  network: String
+  region: String
 }
 
 input ClusterProviderAttributes {
@@ -906,6 +915,9 @@ type ClusterProvider {
 
   "a list of credentials eligible for this provider"
   credentials: [ProviderCredential]
+
+  "the kubernetes versions this provider currently supports"
+  supportedVersions: [String]
 
   "whether the current user can edit this resource"
   editable: Boolean

@@ -14,12 +14,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
-import {
-  ColName,
-  ColProvider,
-  ColRepo,
-  getColActions,
-} from './ProvidersColumns'
+import { ColName, ColProvider, getColActions } from './ProvidersColumns'
 import { CreateProvider } from './CreateProvider'
 
 const POLL_INTERVAL = 10 * 1000
@@ -36,7 +31,7 @@ export default function Providers() {
     pollInterval: POLL_INTERVAL,
   })
   const columns = useMemo(
-    () => [ColProvider, ColName, ColRepo, getColActions({ refetch })],
+    () => [ColProvider, ColName, getColActions({ refetch })],
     [refetch]
   )
 

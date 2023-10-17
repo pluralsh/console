@@ -1,6 +1,7 @@
 defmodule Console.Schema.ClusterProvider do
   use Piazza.Ecto.Schema
   import Console.Deployments.Ecto.Validations
+  alias Console.Deployments.Providers.Versions
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{Service, GitRepository, PolicyBinding, User, ProviderCredential}
 
@@ -67,6 +68,14 @@ defmodule Console.Schema.ClusterProvider do
 
     timestamps()
   end
+
+  def supported_versions(%__MODULE__{cloud: "aws"}),
+    do: Versions.eks()
+  def supported_versions(%__MODULE__{cloud: "gcp"}),
+    do: Versions.gke()
+  def supported_versions(%__MODULE__{cloud: "azure"}),
+    do: Versions.aks()
+  def supported_versions(_), do: []
 
   def for_service(query \\ __MODULE__, service_id) do
     from(c in query, where: c.service_id == ^service_id)

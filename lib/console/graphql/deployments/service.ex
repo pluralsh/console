@@ -261,6 +261,7 @@ defmodule Console.GraphQl.Deployments.Service do
     connection field :service_deployments, node_type: :service_deployment do
       middleware Authenticated
       arg :cluster_id, :id
+      arg :q,          :string
       arg :cluster,    :string, description: "the handle of the cluster for this service"
 
       safe_resolve &Deployments.list_services/2

@@ -151,9 +151,11 @@ query Cluster($id: ID!) {
   }
 }
 
-# TODO: Add PageInfo.
-query ClusterPods($clusterId: ID) {
-  pods(first: 100, clusterId: $clusterId) {
+query ClusterPods($clusterId: ID, $namespace: String) {
+  pods(first: 100, clusterId: $clusterId, namespace: $namespace) {
+    pageInfo {
+      ...PageInfo
+    }
     edges {
       node {
         ...Pod

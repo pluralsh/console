@@ -4,7 +4,7 @@ defmodule Console.Deployments.Clusters do
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Commands.{Tee, Command}
-  alias Console.Deployments.{Services, Git}
+  alias Console.Deployments.{Services, Git, Providers.Configuration}
   alias Console.Services.Users
   alias Kazan.Apis.Core.V1, as: Core
   alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken, ClusterRevision, ProviderCredential}
@@ -12,7 +12,6 @@ defmodule Console.Deployments.Clusters do
 
   @cache_adapter Console.conf(:cache_adapter)
   @local_adapter Console.conf(:local_cache)
-  @ttl :timer.minutes(1)
   @node_ttl :timer.minutes(2)
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
@@ -38,7 +37,6 @@ defmodule Console.Deployments.Clusters do
 
   def get_cluster_by_handle!(handle), do: Console.Repo.get_by!(Cluster, handle: handle)
 
-  @decorate cacheable(cache: @cache_adapter, key: {:control_plane, id}, opts: [ttl: @ttl])
   def control_plane(%Cluster{id: id, self: true}), do: Kazan.Server.in_cluster()
   def control_plane(%Cluster{id: id, kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
   def control_plane(%Cluster{id: id} = cluster) do
@@ -53,7 +51,7 @@ defmodule Console.Deployments.Clusters do
 
   def kubeconfig(%Cluster{name: name} = cluster) do
     with ns when is_binary(ns) <- namespace(cluster),
-         {:ok, %{data: %{"value" => value}}} <- Kube.Utils.get_secret(ns, "#{name}-kubeconfig"),
+         {:ok, %Core.Secret{data: %{"value" => value}}} <- Kube.Utils.get_secret(ns, "#{name}-kubeconfig"),
       do: Base.decode64(value)
   end
 
@@ -277,8 +275,8 @@ defmodule Console.Deployments.Clusters do
       %ClusterRevision{cluster_id: cluster.id}
       |> ClusterRevision.changeset(%{
         version: cluster.version,
-        cloud_settings: cluster.cloud_settings,
-        node_pools: Enum.map(cluster.node_pools, &Piazza.Ecto.Schema.mapify/1)
+        cloud_settings: Console.mapify(cluster.cloud_settings),
+        node_pools: Console.mapify(cluster.node_pools)
       })
       |> Repo.insert()
     end)
@@ -486,7 +484,7 @@ defmodule Console.Deployments.Clusters do
         %{name: "clusterName", value: cluster.name},
         %{name: "version", value: cluster.version},
         %{name: "nodePools", value: Jason.encode!(node_pools)}
-        | credential_config(cluster)
+        | credential_config(cluster) ++ Configuration.conf(cluster)
       ]
     }
   end

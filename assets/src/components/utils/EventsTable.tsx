@@ -38,7 +38,7 @@ const columns = [
 export default function EventsTable({
   events,
   ...props
-}: { events?: EventT[] } & Partial<ComponentProps<typeof Table>>) {
+}: { events?: (EventT | null)[] } & Partial<ComponentProps<typeof Table>>) {
   if (!events || isEmpty(events)) {
     return <EmptyState message="No events available." />
   }

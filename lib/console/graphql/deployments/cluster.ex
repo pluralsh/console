@@ -61,10 +61,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   input_object :cloud_settings_attributes do
     field :aws, :aws_cloud_attributes
+    field :gcp, :gcp_cloud_attributes
   end
 
   input_object :aws_cloud_attributes do
-    field :launch_template_id, :string
+    field :region, :string
+  end
+
+  input_object :gcp_cloud_attributes do
+    field :project, :string
+    field :network, :string
+    field :region,  :string
   end
 
   input_object :cluster_provider_attributes do
@@ -108,6 +115,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :repository,  :git_repository, resolve: dataloader(Deployments), description: "the repository used to serve cluster manifests"
     field :service,     :service_deployment, resolve: dataloader(Deployments), description: "the service of the CAPI controller itself"
     field :credentials, list_of(:provider_credential), resolve: dataloader(ProviderCredential), description: "a list of credentials eligible for this provider"
+
+    field :supported_versions, list_of(:string), description: "the kubernetes versions this provider currently supports",
+      resolve: fn provider, _, _ -> {:ok, Console.Schema.ClusterProvider.supported_versions(provider)} end
 
     field :editable,    :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this resource"
 
@@ -253,6 +263,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   object :cluster_queries do
     @desc "a relay connection of all clusters visible to the current user"
     connection field :clusters, node_type: :cluster do
+      arg :q, :string
       middleware Authenticated
 
       resolve &Deployments.list_clusters/2

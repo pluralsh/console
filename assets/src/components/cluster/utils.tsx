@@ -26,7 +26,7 @@ export const roundTo = (x: number, decimalPlaces = 2) => {
   if (!Number.isInteger(decimalPlaces) || decimalPlaces < 0) {
     throw Error('decimalPlaces must be positive integer')
   }
-  const factor = 10 * Math.floor(decimalPlaces)
+  const factor = 10 ** Math.floor(decimalPlaces)
 
   return Math.round(x * factor) / factor
 }

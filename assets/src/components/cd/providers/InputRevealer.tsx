@@ -15,9 +15,10 @@ const IconFrameStyled = styled(IconFrame)(({ theme }) => ({
 
 export function InputRevealer({
   inputProps,
+  defaultRevealed = false,
   ...props
-}: ComponentProps<typeof Input>) {
-  const [showInput, setShowInput] = useState(false)
+}: { defaultRevealed?: boolean } & ComponentProps<typeof Input>) {
+  const [showInput, setShowInput] = useState(defaultRevealed)
 
   return (
     <Input

@@ -2,6 +2,7 @@ defmodule Console.Deployments.CronTest do
   use Console.DataCase, async: true
   use Mimic
   import KubernetesScaffolds
+  alias Kazan.Apis.Core.V1, as: Core
   alias Console.Deployments.{Cron, Clusters}
 
   describe "#prune_services/0" do
@@ -154,7 +155,7 @@ defmodule Console.Deployments.CronTest do
       kubeconf_secret = "#{n}-kubeconfig"
       expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
       expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
-        {:ok, %{data: %{"value" => Base.encode64("kubeconfig")}}}
+        {:ok, %Core.Secret{data: %{"value" => Base.encode64("kubeconfig")}}}
       end)
       expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:ok, "yay"} end)
 

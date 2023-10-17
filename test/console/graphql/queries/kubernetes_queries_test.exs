@@ -167,7 +167,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
             spec { providerId }
           }
         }
-      """, %{"name" => "node"}, %{current_user: insert(:user)})
+      """, %{"name" => "node"}, %{current_user: admin_user()})
 
       assert node["metadata"]["name"]
       assert node["status"]["allocatable"]["cpu"]

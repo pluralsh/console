@@ -4,6 +4,16 @@ export const SERVICES_PATH = 'services' as const
 
 export const CLUSTER_BASE_PATH = `${CD_BASE_PATH}/${CLUSTERS_PATH}/:clusterId`
 export const CLUSTER_SERVICES_PATH = 'services' as const
+export const CLUSTER_NODES_PATH = 'nodes' as const
+export const CLUSTER_PODS_PATH = 'pods' as const
+
+export const NODE_PARAM_NAME = 'nodeName' as const
+export const NODE_PARAM_CLUSTER = 'clusterId' as const
+export const NODE_BASE_PATH = getNodeDetailsPath({
+  isRelative: true,
+  clusterId: `:${NODE_PARAM_CLUSTER}`,
+  nodeName: `:${NODE_PARAM_NAME}`,
+})
 
 export const SERVICE_PARAM_ID = 'serviceId' as const
 export const SERVICE_PARAM_CLUSTER = 'clusterName' as const
@@ -54,4 +64,18 @@ export function getServiceComponentPath({
   return `${getServiceDetailsPath({
     ...props,
   })}/${SERVICE_COMPONENTS_PATH}/${componentKind}/${componentName}/${componentVersion}`
+}
+
+export function getNodeDetailsPath({
+  clusterId,
+  nodeName,
+  isRelative = false,
+}: {
+  clusterId: string | null | undefined
+  nodeName: string | null | undefined
+  isRelative?: boolean
+}) {
+  return `${
+    isRelative ? '' : '/'
+  }${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}/${CLUSTER_NODES_PATH}/${nodeName}`
 }

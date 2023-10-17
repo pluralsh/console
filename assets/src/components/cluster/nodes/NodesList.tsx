@@ -231,10 +231,12 @@ export function NodesList({
   nodes,
   nodeMetrics,
   columns,
+  linkBasePath = `/nodes/`,
 }: {
   nodes: (Node | null)[]
   nodeMetrics: (NodeMetric | null)[]
   columns: ColumnDef<TableData, any>[]
+  linkBasePath?: string
 }) {
   const navigate = useNavigate()
   const metrics: Record<string, { cpu?: number; memory?: number }> =
@@ -294,7 +296,7 @@ export function NodesList({
       data={tableData}
       columns={columns}
       onRowClick={(_e, { original }: Row<TableData>) =>
-        navigate(`/nodes/${original?.name}`)
+        navigate(`${linkBasePath}${original?.name}`)
       }
     />
   )

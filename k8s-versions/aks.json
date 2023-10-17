@@ -1,0 +1,86 @@
+{
+  "values": [
+    {
+      "capabilities": {
+        "supportPlan": [
+          "KubernetesOfficial"
+        ]
+      },
+      "isPreview": true,
+      "patchVersions": {
+        "1.28.0": {
+          "upgrades": []
+        }
+      },
+      "version": "1.28"
+    },
+    {
+      "capabilities": {
+        "supportPlan": [
+          "KubernetesOfficial",
+          "AKSLongTermSupport"
+        ]
+      },
+      "isPreview": null,
+      "patchVersions": {
+        "1.27.1": {
+          "upgrades": [
+            "1.27.3"
+          ]
+        },
+        "1.27.3": {
+          "upgrades": []
+        }
+      },
+      "version": "1.27"
+    },
+    {
+      "capabilities": {
+        "supportPlan": [
+          "KubernetesOfficial"
+        ]
+      },
+      "isPreview": null,
+      "patchVersions": {
+        "1.26.3": {
+          "upgrades": [
+            "1.27.3",
+            "1.27.1",
+            "1.26.6"
+          ]
+        },
+        "1.26.6": {
+          "upgrades": [
+            "1.27.3",
+            "1.27.1"
+          ]
+        }
+      },
+      "version": "1.26"
+    },
+    {
+      "capabilities": {
+        "supportPlan": [
+          "KubernetesOfficial"
+        ]
+      },
+      "isPreview": null,
+      "patchVersions": {
+        "1.25.11": {
+          "upgrades": [
+            "1.26.6",
+            "1.26.3"
+          ]
+        },
+        "1.25.6": {
+          "upgrades": [
+            "1.25.11",
+            "1.26.6",
+            "1.26.3"
+          ]
+        }
+      },
+      "version": "1.25"
+    }
+  ]
+}

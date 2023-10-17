@@ -22,6 +22,8 @@ import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
 import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
 
+import { roundToTwoPlaces } from 'components/cluster/utils'
+
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 import {
   cpuFormat,
@@ -106,24 +108,6 @@ export const columns = [
       )
     },
   }),
-  // TODO: Add once VPC ID is available.
-  // columnHelper.accessor(({ node }) => node?.version, {
-  //   id: 'vpc',
-  //   header: 'VPC ID',
-  //   cell: () => 'TODO',
-  // }),
-  // TODO: Add once owner is available.
-  // columnHelper.accessor(({ node }) => node?.version, {
-  //   id: 'owner',
-  //   header: 'Owner',
-  //   cell: () => (
-  //     <UserDetails
-  //       name="TODO"
-  //       avatar={null}
-  //       email="todo@todo.todo"
-  //     />
-  //   ),
-  // }),
   columnHelper.accessor(({ node }) => node, {
     id: 'cpu',
     header: 'CPU',
@@ -139,7 +123,7 @@ export const columns = [
           acc + (cpuParser(current?.status?.capacity?.cpu) ?? 0),
         0
       )
-      const display = `${usage ? cpuFormat(usage) : '—'} / ${
+      const display = `${usage ? cpuFormat(roundToTwoPlaces(usage)) : '—'} / ${
         capacity ? cpuFormat(capacity) : '—'
       }`
 

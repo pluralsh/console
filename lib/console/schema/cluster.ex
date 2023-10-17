@@ -36,18 +36,30 @@ defmodule Console.Schema.Cluster do
 
     embedded_schema do
       # just temporary until we know what of these will actually matter
+      embeds_one :gcp, Gcp, on_replace: :update do
+        field :project, :string
+        field :network, :string
+        field :region,  :string
+      end
+
       embeds_one :aws, Aws, on_replace: :update do
-        field :logging, :boolean
+        field :region, :string
       end
     end
 
     def changeset(model, attrs \\ %{}) do
       cast(model, attrs, [])
       |> cast_embed(:aws, with: &aws_changeset/2)
+      |> cast_embed(:gcp, with: &gcp_changeset/2)
     end
 
     def aws_changeset(model, attrs) do
-      cast(model, attrs, ~w(logging)a)
+      cast(model, attrs, ~w(region)a)
+    end
+
+    def gcp_changeset(model, attrs) do
+      cast(model, attrs, ~w(project network region)a)
+      |> validate_required(~w(project network region)a)
     end
   end
 
@@ -91,6 +103,10 @@ defmodule Console.Schema.Cluster do
       references: :write_policy_id
 
     timestamps()
+  end
+
+  def search(query \\ __MODULE__, sq) do
+    from(c in query, where: ilike(c.name, ^"#{sq}%"))
   end
 
   def ignore_ids(query \\ __MODULE__, ids) do
@@ -183,6 +199,7 @@ defmodule Console.Schema.Cluster do
     |> semver(:version)
     |> cast_embed(:kubeconfig)
     |> cast_embed(:resource)
+    |> cast_embed(:cloud_settings)
     |> cast_assoc(:node_pools)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
