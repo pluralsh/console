@@ -487,17 +487,12 @@ defmodule Console.Deployments.Clusters do
         %{name: "version", value: cluster.version},
         %{name: "nodePools", value: Jason.encode!(node_pools)}
         | credential_config(cluster)
-        | config_attributes(cluster)
       ]
     }
   end
 
   defp credential_config(%{credential: %ProviderCredential{} = cred}), do: [%{name: "credential", value: Jason.encode!(cred)}]
   defp credential_config(_), do: []
-
-  # TODO: map types?
-  defp config_attributes(%{config_attributes: %Cluster.ClusterConfiguration{} = cluster}), do: []
-  defp config_attributes(_), do: []
 
   defp provider_service(%ClusterProvider{service_id: nil, name: name} = provider, %User{} = user) do
     provider_attributes(provider)
