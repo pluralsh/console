@@ -41,10 +41,10 @@ import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
 
-export const CD_CLUSTERS_BASE_CRUMBS = [
+export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
   { label: 'clusters', url: `${CD_BASE_PATH}/${CLUSTERS_PATH}` },
-] as const satisfies readonly Breadcrumb[]
+]
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
