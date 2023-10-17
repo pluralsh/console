@@ -69,7 +69,7 @@ export default function PodInfo() {
   return (
     <ScrollablePage
       heading="Info"
-      headingContent={<ViewLogsButton metadata={pod?.metadata} />}
+      // TODO: headingContent={<ViewLogsButton metadata={pod?.metadata} />}
     >
       <Flex
         direction="column"
