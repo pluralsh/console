@@ -48,7 +48,7 @@ function Sidenav({ tabStateRef = {} }: any) {
   const params = useParams()
   const namespace = (params[POD_PARAM_NAMESPACE] as string) || ''
   const directory = useGetDirectory(namespace)
-  const tab = useMatch('/pods/:namespace/:name/:tab')?.params?.tab || ''
+  const tab = useMatch(`${POD_BASE_PATH}:tab`)?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 
   return (
@@ -79,7 +79,7 @@ export default function Pod() {
   const name = (params[POD_PARAM_NAME] as string) || ''
   const tabStateRef = useRef<any>()
   const theme = useTheme()
-  const tab = useMatch(`${POD_BASE_PATH}/:tab`)?.params?.tab || ''
+  const tab = useMatch(`${POD_BASE_PATH}:tab`)?.params?.tab || ''
 
   useSetBreadcrumbs(
     useMemo(
