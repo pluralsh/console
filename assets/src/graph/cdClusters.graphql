@@ -60,6 +60,7 @@ fragment ClustersRow on Cluster {
   currentVersion
   id
   name
+  handle
   nodes {
     status {
       capacity
@@ -96,6 +97,7 @@ fragment Cluster on Cluster {
   currentVersion
   id
   name
+  handle
   nodes {
     ...NodeFragment
   }

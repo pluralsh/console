@@ -62,7 +62,7 @@ export const columns = [
             to={`/cd/clusters/${cluster?.id}`}
             whiteSpace="nowrap"
           >
-            {cluster?.name}
+            {cluster?.name} (@{cluster?.handle})
           </A>
         </ColWithIcon>
       )
