@@ -12,8 +12,6 @@ import {
   getServiceComponentPath,
 } from 'routes/cdRoutesConsts'
 
-import { hasDefined } from 'utils/hasDefined'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ComponentDetails } from 'components/component/ComponentDetails'
 import { GqlError } from 'components/utils/Alert'
@@ -108,9 +106,6 @@ export default function ServiceComponent() {
   }
   if (!component) {
     return <LoadingIndicator />
-  }
-  if (!hasDefined(component, ['name', 'namespace'])) {
-    return <GqlError error="Missing component name or namespace" />
   }
 
   return (
