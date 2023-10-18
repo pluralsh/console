@@ -33,6 +33,29 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       assert stateful["status"]["currentReplicas"] == 3
       assert stateful["spec"]["serviceName"] == "name"
     end
+
+    test "it won't choke on errors" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
+      expect(Kazan, :run, fn _ -> {:error, {:http_error, 404, "an error"}} end)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query {
+          statefulSet(namespace: "namespace", name: "name") {
+            metadata { name }
+            status {
+              replicas
+              currentReplicas
+            }
+            spec {
+              replicas
+              serviceName
+            }
+          }
+        }
+      """, %{}, %{current_user: user})
+    end
   end
 
   describe "deployment" do

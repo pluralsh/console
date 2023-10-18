@@ -1022,6 +1022,9 @@ type NodePool {
   "the type of node to use (usually cloud-specific)"
   instanceType: String!
 
+  "whether this is a spot pool or not"
+  spot: Boolean
+
   "kubernetes labels to apply to the nodes in this pool, useful for node selectors"
   labels: Map
 

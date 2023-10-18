@@ -1422,6 +1422,8 @@ export type NodePool = {
   minSize: Scalars['Int']['output'];
   /** name of this node pool (must be unique) */
   name: Scalars['String']['output'];
+  /** whether this is a spot pool or not */
+  spot?: Maybe<Scalars['Boolean']['output']>;
   /** any taints you'd want to apply to a node, for eg preventing scheduling on spot instances */
   taints?: Maybe<Array<Maybe<Taint>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
