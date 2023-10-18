@@ -29,6 +29,7 @@ defmodule Console.Schema.ClusterNodePool do
     field :max_size,       :integer
     field :instance_type,  :string
     field :labels,         :map
+    field :spot,           :boolean, default: false
 
     embeds_many :taints, Taint, on_replace: :delete do
       field :key,    :string
@@ -46,7 +47,7 @@ defmodule Console.Schema.ClusterNodePool do
     from(cnp in query, where: cnp.cluster_id == ^cluster_id)
   end
 
-  @valid ~w(name min_size max_size instance_type labels cluster_id)a
+  @valid ~w(name min_size max_size instance_type labels cluster_id spot)a
 
   def changeset(model, attrs \\ %{}) do
     model

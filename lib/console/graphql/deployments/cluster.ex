@@ -190,6 +190,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :min_size,       non_null(:integer), description: "minimum number of instances in this node pool"
     field :max_size,       non_null(:integer), description: "maximum number of instances in this node pool"
     field :instance_type,  non_null(:string), description: "the type of node to use (usually cloud-specific)"
+    field :spot,           :boolean, description: "whether this is a spot pool or not"
     field :labels,         :map, description: "kubernetes labels to apply to the nodes in this pool, useful for node selectors"
     field :taints,         list_of(:taint), description: "any taints you'd want to apply to a node, for eg preventing scheduling on spot instances"
     field :cloud_settings, :cloud_settings, description: "cloud specific settings for the node groups"
