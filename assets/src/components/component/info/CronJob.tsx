@@ -101,8 +101,8 @@ export function getJobPath({
     const job = serviceComponents?.find(
       (component) =>
         component?.kind.toLowerCase() === 'job' &&
-        (component.namespace || '') === (namespace || '') &&
-        (component.name || '') === (name || '')
+        (component?.namespace || '') === (namespace || '') &&
+        (component?.name || '') === (name || '')
     )
 
     if (job && clusterName) {
@@ -132,7 +132,6 @@ function CronJobJobs({ jobs, namespace, refetch }) {
     <Table
       data={jobs}
       columns={columns}
-      // TODO: Verify links are correct when we have CronJobs to test
       onRowClick={(_e, { original }: Row<any>) => {
         const jobPath = getJobPath({
           serviceId,
@@ -142,6 +141,7 @@ function CronJobJobs({ jobs, namespace, refetch }) {
           clusterName,
         })
 
+        // TODO: Verify CD links are correct when we have CD CronJobs to test
         if (jobPath) {
           navigate(jobPath)
         }
