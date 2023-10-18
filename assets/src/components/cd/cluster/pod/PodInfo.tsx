@@ -2,9 +2,6 @@ import { useOutletContext } from 'react-router-dom'
 import { Flex } from 'honorable'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Pod } from 'generated/graphql'
-
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-
 import { statusesToRecord } from 'components/cluster/pods/PodInfo'
 
 import PodConditions from '../../../cluster/pods/PodConditions'
