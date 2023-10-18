@@ -174,38 +174,6 @@ export const PODS_SUB = gql`
   ${PodFragment}
 `
 
-export const POD_INFO_Q = gql`
-  query PodInfo($name: String!, $namespace: String!) {
-    pod(name: $name, namespace: $namespace) {
-      ...PodFragment
-    }
-  }
-  ${PodFragment}
-`
-
-export const POD_EVENTS_Q = gql`
-  query PodEvents($name: String!, $namespace: String!) {
-    pod(name: $name, namespace: $namespace) {
-      ...PodFragment
-      events {
-        ...EventFragment
-      }
-    }
-  }
-  ${PodFragment}
-  ${EventFragment}
-`
-
-export const POD_RAW_Q = gql`
-  query PodRaw($name: String!, $namespace: String!) {
-    pod(name: $name, namespace: $namespace) {
-      ...PodFragment
-      raw
-    }
-  }
-  ${PodFragment}
-`
-
 export const SCALING_RECOMMENDATION = gql`
   query Scaling(
     $name: String!

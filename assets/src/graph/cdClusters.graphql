@@ -1,4 +1,4 @@
-fragment NodeFragment on Node {
+fragment ClusterNode on Node {
   metadata {
     ...Metadata
   }
@@ -18,16 +18,12 @@ fragment NodeFragment on Node {
   }
 }
 
-fragment NodeMetricFragment on NodeMetric {
-  metadata {
-    ...Metadata
-  }
-  usage {
-    cpu
-    memory
-  }
-  timestamp
-  window
+fragment NodePool on NodePool {
+  id
+  name
+  minSize
+  maxSize
+  instanceType
 }
 
 fragment ApiDeprecation on ApiDeprecation {
@@ -99,11 +95,14 @@ fragment Cluster on Cluster {
   id
   name
   handle
+  nodePools {
+    ...NodePool
+  }
   nodes {
-    ...NodeFragment
+    ...ClusterNode
   }
   nodeMetrics {
-    ...NodeMetricFragment
+    ...NodeMetric
   }
   pingedAt
   provider {

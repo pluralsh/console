@@ -5,7 +5,6 @@ import Pods from 'components/cluster/pods/Pods'
 import Pod from 'components/cluster/pods/Pod'
 import PodInfo from 'components/cluster/pods/PodInfo'
 import PodEvents from 'components/cluster/pods/PodEvents'
-import PodRaw from 'components/cluster/pods/PodRaw'
 import PodLogs from 'components/cluster/pods/PodLogs'
 import Node from 'components/cluster/nodes/Node'
 import Nodes from 'components/cluster/nodes/Nodes'
@@ -17,6 +16,8 @@ import ContainerShell from 'components/cluster/containers/ContainerShell'
 import ContainerMetadata from 'components/cluster/containers/ContainerMetadata'
 import DatabaseManagement from 'components/db-management/DatabaseManagement'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
+
+import PodRaw from '../components/cluster/pods/PodRaw'
 
 export const clusterRoutes = [
   /* Pods */

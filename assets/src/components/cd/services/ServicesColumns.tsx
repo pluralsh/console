@@ -5,12 +5,12 @@ import { Edge } from 'utils/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-
 import { getProviderIconURL } from 'components/utils/Provider'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 import DecoratedName from './DecoratedName'
+import { DeleteService } from './DeleteService'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -131,6 +131,10 @@ export const getColActions = ({ refetch }: { refetch: () => void }) =>
               alignItems: 'center',
             }}
           >
+            <DeleteService
+              refetch={refetch}
+              serviceDeployment={node}
+            />
             <ServicesRollbackDeployment
               refetch={refetch}
               serviceDeployment={node}

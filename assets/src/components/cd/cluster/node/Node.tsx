@@ -6,9 +6,7 @@ import {
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
 import { LinkTabWrap } from 'components/utils/Tabs'
 
 import {

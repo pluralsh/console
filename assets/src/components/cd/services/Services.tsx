@@ -10,32 +10,22 @@ import { useTheme } from 'styled-components'
 import type { Row, TableState } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { useDebounce } from '@react-hooks-library/core'
-
 import {
   AuthMethod,
-  ServiceDeploymentsDocument,
   type ServiceDeploymentsRowFragment,
-  useDeleteServiceDeploymentMutation,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
-
 import {
   CD_BASE_PATH,
   SERVICES_PATH,
   SERVICE_PARAM_CLUSTER,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
-
 import { createMapperWithFallback } from 'utils/mapping'
-import { Edge, removeConnection, updateCache } from 'utils/graphql'
-
+import { Edge } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { Confirm } from 'components/utils/Confirm'
-import { DeleteIconButton } from 'components/utils/IconButtons'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-
 import { useParams } from 'react-router-dom'
-
 import { GqlError } from 'components/utils/Alert'
 
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
@@ -57,65 +47,6 @@ export type ServicesCluster = Exclude<
   ServiceDeploymentsRowFragment['cluster'],
   undefined | null
 >
-
-// Will need to update once delete mutation exists in API
-export function DeleteService({
-  service,
-  refetch,
-}: {
-  service: ServiceDeploymentsRowFragment
-  refetch: () => void
-}) {
-  const theme = useTheme()
-  const [confirm, setConfirm] = useState(false)
-  const [mutation, { loading, error }] = useDeleteServiceDeploymentMutation({
-    variables: { id: service.id },
-    update: (cache, { data }) =>
-      updateCache(cache, {
-        query: ServiceDeploymentsDocument,
-        update: (prev) =>
-          removeConnection(
-            prev,
-            data?.deleteServiceDeployment,
-            'deploymentServices'
-          ),
-      }),
-    onCompleted: () => {
-      setConfirm(false)
-      refetch?.()
-    },
-  })
-
-  return (
-    <>
-      <DeleteIconButton
-        onClick={() => setConfirm(true)}
-        tooltip
-      />
-      <Confirm
-        open={confirm}
-        title="Delete service deployment"
-        text={
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.medium,
-            }}
-          >
-            <p>Are you sure you want to delete this service deployment?"</p>
-            <p>{service.name}</p>
-          </div>
-        }
-        close={() => setConfirm(false)}
-        submit={() => mutation()}
-        loading={loading}
-        destructive
-        error={error}
-      />
-    </>
-  )
-}
 
 const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
   {

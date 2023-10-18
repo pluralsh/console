@@ -7,11 +7,8 @@ import { Navigate, Route } from 'react-router-dom'
 
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
 import ServiceDocs from 'components/cd/services/service/ServiceDocs'
-
 import ServiceComponents from 'components/cd/services/service/ServiceComponents'
-
 import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
-
 import ServiceComponent from 'components/cd/services/component/ServiceComponent'
 
 import ComponentInfo from 'components/component/ComponentInfo'
@@ -31,18 +28,18 @@ import NodeRaw from '../components/cd/cluster/node/NodeRaw'
 import NodeMetadata from '../components/cd/cluster/node/NodeMetadata'
 
 import PodLogs from '../components/cd/cluster/pod/PodLogs'
-
 import Pod from '../components/cd/cluster/pod/Pod'
-
 import PodInfo from '../components/cd/cluster/pod/PodInfo'
-import PodEvents from '../components/cd/cluster/pod/PodEvents'
+import ClusterMetadata from '../components/cd/cluster/ClusterMetadata'
+import PodRaw from '../components/cluster/pods/PodRaw'
 
-import PodRaw from '../components/cd/cluster/pod/PodRaw'
+import PodEvents from '../components/cluster/pods/PodEvents'
 
 import {
   CD_BASE_PATH,
   CLUSTERS_PATH,
   CLUSTER_BASE_PATH,
+  CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
   CLUSTER_PODS_PATH,
   CLUSTER_SERVICES_PATH,
@@ -149,6 +146,10 @@ export const cdRoutes = [
     <Route
       path={CLUSTER_PODS_PATH}
       element={<ClusterPods />}
+    />
+    <Route
+      path={CLUSTER_METADATA_PATH}
+      element={<ClusterMetadata />}
     />
   </Route>,
 

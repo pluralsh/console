@@ -10,11 +10,11 @@ import { ResponsiveLayoutContentContainer } from 'components/utils/layout/Respon
 
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
-import { useQuery } from '@apollo/client'
+import { usePodQuery } from '../../../generated/graphql'
 
-import { Pod } from '../../../generated/graphql'
-import { POD_INFO_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
+
+import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import SideNav from './PodSideNav'
 import Sidecar from './PodSidecar'
@@ -22,7 +22,7 @@ import Sidecar from './PodSidecar'
 export default function Node() {
   const tabStateRef = useRef<any>()
   const theme = useTheme()
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const { tab } = useMatch('/pods/:namespace/:name/:tab')?.params || {}
 
   const breadcrumbs = useMemo(
@@ -41,13 +41,15 @@ export default function Node() {
 
   useSetBreadcrumbs(breadcrumbs)
 
-  const { data } = useQuery<{
-    pod: Pod
-  }>(POD_INFO_Q, {
+  const { data } = usePodQuery({
     variables: { name, namespace },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
+
+  const pod = data?.pod
+
+  if (!pod) return <LoadingIndicator />
 
   return (
     <ResponsiveLayoutPage>
@@ -59,7 +61,7 @@ export default function Node() {
         as={<ResponsiveLayoutContentContainer overflow="visible" />}
         stateRef={tabStateRef}
       >
-        <Outlet />
+        <Outlet context={{ pod }} />
       </TabPanel>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer>

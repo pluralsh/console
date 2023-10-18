@@ -12,7 +12,6 @@ import {
 } from '@pluralsh/design-system'
 import { ComponentState } from 'generated/graphql'
 import { ComponentProps } from 'react'
-import { useTheme } from 'styled-components'
 
 export const statusToBorder = {
   [Readiness.Ready]: '',
@@ -103,8 +102,6 @@ export function ComponentIcon({
   kind: string | undefined
   size?: number | undefined
 }) {
-  const theme = useTheme()
-
   switch (kind?.toLowerCase()) {
     case 'service':
       return <NetworkInterfaceIcon size={size} />

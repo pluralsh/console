@@ -21,13 +21,9 @@ import {
   useState,
 } from 'react'
 import { GqlError } from 'components/utils/Alert'
-
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-
 import { mapExistingNodes } from 'utils/graphql'
-
 import moment from 'moment'
 
 import ModalAlt from '../ModalAlt'
@@ -57,7 +53,6 @@ export function ServicesRollbackDeployment({
           setIsOpen(true)
         }}
       />
-
       <ModalMountTransition open={isOpen}>
         <ModalForm
           open={isOpen}

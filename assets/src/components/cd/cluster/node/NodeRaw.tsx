@@ -11,9 +11,7 @@ export default function NodeRaw() {
 
   if (!node) return <LoadingIndicator />
 
-  const { raw } = node
-
-  const content = stringify(JSON.parse(raw))
+  const content = stringify(JSON.parse(node.raw))
 
   return (
     <Flex

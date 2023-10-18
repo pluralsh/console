@@ -16,6 +16,10 @@ import {
   CD_BASE_PATH,
   CLUSTERS_PATH,
   CLUSTER_BASE_PATH,
+  CLUSTER_METADATA_PATH,
+  CLUSTER_NODES_PATH,
+  CLUSTER_PODS_PATH,
+  CLUSTER_SERVICES_PATH,
 } from 'routes/cdRoutesConsts'
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
@@ -24,18 +28,17 @@ import {
   useClusterQuery,
   useClustersTinyQuery,
 } from '../../../generated/graphql'
-
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
-
 import ProviderIcon from '../../utils/Provider'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import ClusterPermissions from './ClusterPermissions'
-import ClusterMetadataPanel from './ClusterMetadataPanel'
 
 const directory = [
-  { path: 'services', label: 'Services' },
-  { path: 'nodes', label: 'Nodes' },
-  { path: 'pods', label: 'Pods' },
+  { path: CLUSTER_SERVICES_PATH, label: 'Services' },
+  { path: CLUSTER_NODES_PATH, label: 'Nodes' },
+  { path: CLUSTER_PODS_PATH, label: 'Pods' },
+  { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
 ] as const
 
 const POLL_INTERVAL = 10 * 1000
@@ -79,6 +82,10 @@ export default function Cluster() {
     pollInterval: POLL_INTERVAL,
   })
 
+  const cluster = data?.cluster
+
+  if (!cluster) return <LoadingIndicator />
+
   return (
     <ResponsivePageFullWidth
       scrollable
@@ -103,7 +110,9 @@ export default function Cluster() {
                   />
                 }
                 selectedKey={clusterId}
-                onSelectionChange={(key) => navigate(`/cd/clusters/${key}`)} // TODO: Keep the same view on switch.
+                onSelectionChange={(key) =>
+                  navigate(`/cd/clusters/${key}/${tab}`)
+                }
               >
                 {clusterEdges.map((edge) => (
                   <ListBoxItem
@@ -157,7 +166,6 @@ export default function Cluster() {
             }}
           >
             <ClusterPermissions />
-            <ClusterMetadataPanel cluster={data?.cluster} />
           </div>
         </>
       }
@@ -166,7 +174,7 @@ export default function Cluster() {
         css={{ height: '100%' }}
         stateRef={tabStateRef}
       >
-        <Outlet context={{ cluster: data?.cluster }} />
+        <Outlet context={{ cluster }} />
       </TabPanel>
     </ResponsivePageFullWidth>
   )

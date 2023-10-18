@@ -2,9 +2,6 @@ import { useOutletContext } from 'react-router-dom'
 import { Flex } from 'honorable'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Pod } from 'generated/graphql'
-
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-
 import { statusesToRecord } from 'components/cluster/pods/PodInfo'
 
 import PodConditions from '../../../cluster/pods/PodConditions'
@@ -52,9 +49,6 @@ import { ContainersList } from '../../../cluster/containers/ContainersList'
 
 export default function PodInfo() {
   const { pod } = useOutletContext() as { pod: Pod }
-
-  if (!pod) return <LoadingIndicator />
-
   const containers = pod.spec.containers || []
   const initContainers = pod.spec.initContainers || []
   const containerStatuses = statusesToRecord(pod.status?.containerStatuses)

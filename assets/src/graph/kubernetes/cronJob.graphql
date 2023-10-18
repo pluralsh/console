@@ -1,6 +1,6 @@
 fragment CronJob on CronJob {
   metadata {
-    ...MetadataFragment
+    ...Metadata
   }
   status {
     lastScheduleTime
