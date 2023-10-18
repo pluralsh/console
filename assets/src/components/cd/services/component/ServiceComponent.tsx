@@ -101,16 +101,12 @@ export default function ServiceComponent() {
     componentName,
   }
 
-  console.log({ error })
-
   if (error) {
     return <GqlError error={error} />
   }
   if (!component) {
     return <LoadingIndicator />
   }
-
-  console.log('component', component)
 
   return (
     <BreadcrumbWrapper {...breadcrumbProps}>

@@ -55,6 +55,7 @@ export type Component = {
   kind: string
   status?: string | null | undefined
   state?: ComponentState | null | undefined
+  synced?: boolean | null | undefined
 }
 
 export default function ComponentCard<C extends Component>({
@@ -64,8 +65,10 @@ export default function ComponentCard<C extends Component>({
   component: C
   url?: string
 }) {
-  const { name, group, kind, status, state } = component
+  const { name, group, kind, status, state, synced } = component
   const kindString = `${group || 'v1'}/${kind.toLowerCase()}`
+  const componentState =
+    state === null && synced ? ComponentState.Running : state
 
   return (
     <ComponentCardSC
@@ -101,7 +104,7 @@ export default function ComponentCard<C extends Component>({
       </div>
       {state || state === null ? (
         <ComponentStateChip
-          state={state}
+          state={componentState}
           className="status"
         />
       ) : (

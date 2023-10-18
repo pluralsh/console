@@ -3,8 +3,8 @@ import {
   BriefcaseIcon,
   CertificateIcon,
   Chip,
+  ComponentsIcon,
   DeploymentIcon,
-  HelpIcon,
   HistoryIcon,
   NetworkInIcon,
   NetworkInterfaceIcon,
@@ -121,11 +121,6 @@ export function ComponentIcon({
     case 'certificate':
       return <CertificateIcon size={size} />
     default:
-      return (
-        <HelpIcon
-          size={size}
-          color={theme.colors['icon-disabled']}
-        />
-      )
+      return <ComponentsIcon size={size} />
   }
 }
