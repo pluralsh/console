@@ -1,16 +1,21 @@
 import { Table, Tooltip } from '@pluralsh/design-system'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 import { TableText } from 'components/cluster/TableElements'
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
-
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { useMemo } from 'react'
+
+import { ServiceDeploymentComponentFragment } from 'generated/graphql'
+import { getServiceComponentPath } from 'routes/cdRoutesConsts'
+
+import { ComponentDetailsContext } from '../ComponentDetails'
 
 import { DeleteJob } from './Job'
 import { InfoSectionH2, PaddedCard, PropWideBold } from './common'
 
 const columnHelper = createColumnHelper<any>()
 
-const columns = (namespace, refetch) => [
+const getColumns = (namespace, refetch) => [
   columnHelper.accessor((row) => row?.metadata?.name, {
     id: 'name',
     cell: (props) => (
@@ -74,26 +79,81 @@ const columns = (namespace, refetch) => [
   }),
 ]
 
+export function getJobPath({
+  serviceId,
+  serviceComponents,
+  namespace,
+  name,
+  clusterName,
+}: {
+  serviceId: string | undefined
+  serviceComponents:
+    | (ServiceDeploymentComponentFragment | null | undefined)[]
+    | null
+    | undefined
+  namespace: string | null | undefined
+  name: string
+  clusterName: string | undefined
+}) {
+  let jobPath = ''
+
+  if (serviceId) {
+    const job = serviceComponents?.find(
+      (component) =>
+        component?.kind.toLowerCase() === 'job' &&
+        (component?.namespace || '') === (namespace || '') &&
+        (component?.name || '') === (name || '')
+    )
+
+    if (job && clusterName) {
+      jobPath = getServiceComponentPath({
+        serviceId,
+        clusterName,
+        componentId: job.id,
+      })
+    }
+  } else {
+    jobPath = `/apps/${namespace}/components/job/${name}`
+  }
+
+  return jobPath
+}
+
 function CronJobJobs({ jobs, namespace, refetch }) {
   const navigate = useNavigate()
+  const columns = useMemo(
+    () => getColumns(namespace, refetch),
+    [namespace, refetch]
+  )
+  const { serviceComponents, serviceId, clusterName } =
+    useOutletContext<ComponentDetailsContext>()
 
   return (
     <Table
       data={jobs}
-      columns={columns(namespace, refetch)}
-      onRowClick={(_e, { original }: Row<any>) =>
-        navigate(
-          `/apps/${namespace}/components/job/${original?.metadata?.name}`
-        )
-      }
+      columns={columns}
+      onRowClick={(_e, { original }: Row<any>) => {
+        const jobPath = getJobPath({
+          serviceId,
+          serviceComponents,
+          namespace,
+          name: original?.metadata.name,
+          clusterName,
+        })
+
+        // TODO: Verify CD links are correct when we have CD CronJobs to test
+        if (jobPath) {
+          navigate(jobPath)
+        }
+      }}
     />
   )
 }
 
 export default function CronJob() {
   const theme = useTheme()
-  const { appName } = useParams()
-  const { data, refetch } = useOutletContext<any>()
+  const { data, refetch, component } = useOutletContext<any>()
+  const namespace = component.namespace?.toLowerCase()
 
   if (!data?.cronJob) return null
 
@@ -106,7 +166,7 @@ export default function CronJob() {
       </InfoSectionH2>
       <CronJobJobs
         jobs={cronJob.jobs}
-        namespace={appName}
+        namespace={namespace}
         refetch={refetch}
       />
       <InfoSectionH2

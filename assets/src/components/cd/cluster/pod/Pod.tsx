@@ -16,6 +16,10 @@ import { ResponsiveLayoutContentContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { A } from 'honorable'
 
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import { GqlError } from 'components/utils/Alert'
+
 import {
   CD_BASE_PATH,
   CLUSTERS_PATH,
@@ -83,7 +87,7 @@ export default function Pod() {
     )
   )
 
-  const { data } = usePodQuery({
+  const { data, error } = usePodQuery({
     variables: { name, namespace, clusterId },
     pollInterval: 10 * 1000,
     fetchPolicy: 'cache-and-network',
@@ -91,6 +95,13 @@ export default function Pod() {
 
   const pod = data?.pod
   const readiness = podStatusToReadiness(pod?.status)
+
+  if (error) {
+    return <GqlError error={error} />
+  }
+  if (!pod) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResponsiveLayoutPage>

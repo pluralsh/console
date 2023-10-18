@@ -30,12 +30,12 @@ export default function AppComponent() {
 
   let component = currentApp.status.components.find(
     ({ name, kind }) =>
-      name === componentName && kind.toLowerCase() === componentKind
+      name === componentName && kind?.toLowerCase() === componentKind
   )
 
   component = {
-    ...component,
-    namespace: component.namespace || appName,
+    ...(component || {}),
+    namespace: component?.namespace || appName,
   }
 
   return (
