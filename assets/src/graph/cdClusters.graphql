@@ -30,6 +30,14 @@ fragment NodeMetricFragment on NodeMetric {
   window
 }
 
+fragment NodePoolFragment on NodePool {
+  id
+  name
+  minSize
+  maxSize
+  instanceType
+}
+
 fragment ApiDeprecation on ApiDeprecation {
   availableIn
   blocking
@@ -99,6 +107,9 @@ fragment Cluster on Cluster {
   id
   name
   handle
+  nodePools {
+    ...NodePoolFragment
+  }
   nodes {
     ...NodeFragment
   }

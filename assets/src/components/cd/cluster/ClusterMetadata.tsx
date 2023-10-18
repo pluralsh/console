@@ -1,15 +1,17 @@
 import { useOutletContext } from 'react-router-dom'
-import { Card, IconFrame, Prop, Tooltip } from '@pluralsh/design-system'
+import { Card, IconFrame, Prop, Table, Tooltip } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import moment from 'moment/moment'
 import isEmpty from 'lodash/isEmpty'
+import { createColumnHelper } from '@tanstack/react-table'
 
-import { Cluster } from '../../../generated/graphql'
+import { Cluster, NodePool } from '../../../generated/graphql'
 import { SubTitle } from '../../cluster/nodes/SubTitle'
 import ProviderIcon from '../../utils/Provider'
 import CopyButton from '../../utils/CopyButton'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { nextSupportedVersion } from '../../../utils/semver'
+import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
 function MetadataCard({ cluster }: { cluster: Cluster }) {
   const theme = useTheme()
@@ -21,7 +23,7 @@ function MetadataCard({ cluster }: { cluster: Cluster }) {
 
   return (
     <Card padding="xlarge">
-      <SubTitle>Containers</SubTitle>
+      <SubTitle>Metadata</SubTitle>
       <div css={{ display: 'flex', gap: theme.spacing.xlarge }}>
         <Prop
           title="Cluster name"
@@ -88,9 +90,30 @@ function MetadataCard({ cluster }: { cluster: Cluster }) {
   )
 }
 
+const columnHelper = createColumnHelper<NodePool>()
+
+export const columns = [
+  columnHelper.accessor((nodePool) => nodePool?.name, {
+    id: 'name',
+    header: 'Name',
+    enableSorting: true,
+    enableGlobalFilter: true,
+    meta: { truncate: true },
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor((nodePool) => nodePool?.instanceType, {
+    id: 'instanceType',
+    header: 'Instance type',
+    enableSorting: true,
+    enableGlobalFilter: true,
+    meta: { truncate: true },
+    cell: ({ getValue }) => getValue(),
+  }),
+]
+
 export default function ClusterMetadata() {
   const theme = useTheme()
-  const { cluster } = useOutletContext() as { cluster: Cluster }
+  const { cluster } = useOutletContext() as { cluster: Cluster } // TODO: Update type.
 
   return (
     <div
@@ -101,6 +124,16 @@ export default function ClusterMetadata() {
       }}
     >
       <MetadataCard cluster={cluster} />
+      {cluster.nodePools && !isEmpty(cluster.nodePools) && (
+        <Table
+          data={cluster.nodePools}
+          columns={columns}
+          css={{
+            maxHeight: 'unset',
+            height: '100%',
+          }}
+        />
+      )}
     </div>
   )
 }
