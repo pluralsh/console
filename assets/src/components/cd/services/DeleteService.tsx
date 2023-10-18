@@ -4,12 +4,10 @@ import { Div } from 'honorable'
 
 import { Confirm } from '../../utils/Confirm'
 import {
-  ServiceDeploymentsDocument,
   ServiceDeploymentsRowFragment,
   useDeleteServiceDeploymentMutation,
 } from '../../../generated/graphql'
 import { DeleteIconButton } from '../../utils/IconButtons'
-import { removeConnection, updateCache } from '../../../utils/graphql'
 
 export function DeleteService({
   serviceDeployment,
@@ -21,16 +19,6 @@ export function DeleteService({
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading, error }] = useDeleteServiceDeploymentMutation({
     variables: { id: serviceDeployment.id },
-    update: (cache, { data }) =>
-      updateCache(cache, {
-        query: ServiceDeploymentsDocument,
-        update: (prev) =>
-          removeConnection(
-            prev,
-            data?.deleteServiceDeployment,
-            'deploymentServices'
-          ),
-      }),
     onCompleted: () => {
       setConfirm(false)
       refetch?.()
