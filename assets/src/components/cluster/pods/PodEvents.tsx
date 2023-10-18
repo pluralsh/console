@@ -1,28 +1,19 @@
-import { useQuery } from '@apollo/client'
-import { useParams } from 'react-router-dom'
-import type { Event } from 'generated/graphql'
+import { useOutletContext } from 'react-router-dom'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { Pod } from 'generated/graphql'
 
-import { POD_EVENTS_Q } from '../queries'
 import EventsTable from '../../utils/EventsTable'
 
-export default function NodeEvents() {
-  const { name, namespace } = useParams()
-  const { data } = useQuery<{ pod: { events: Event[] } }>(POD_EVENTS_Q, {
-    variables: { name, namespace },
-    fetchPolicy: 'cache-and-network',
-  })
+// It's used by two different routes.
+export default function PodEvents() {
+  const { pod } = useOutletContext() as { pod: Pod }
 
-  if (!data) return <LoadingIndicator />
-
-  const {
-    pod: { events },
-  } = data
+  if (!pod) return <LoadingIndicator />
 
   return (
     <ScrollablePage heading="Events">
-      <EventsTable events={events || []} />
+      <EventsTable events={pod.events || []} />
     </ScrollablePage>
   )
 }

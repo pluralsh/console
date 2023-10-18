@@ -1,32 +1,18 @@
-import { useQuery } from '@apollo/client'
-import { useParams } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import { stringify } from 'yaml'
 import { Pod } from 'generated/graphql'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { POLL_INTERVAL } from '../constants'
-import { POD_RAW_Q } from '../queries'
 import { RawPageCode } from '../RawPageCode'
 
-export default function NodeEvents() {
-  const { name, namespace } = useParams()
-  const { data } = useQuery<{
-    pod: Pod
-  }>(POD_RAW_Q, {
-    variables: { name, namespace },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
+// It's used by two different routes.
+export default function PodRaw() {
+  const { pod } = useOutletContext() as { pod: Pod }
 
-  if (!data) return <LoadingIndicator />
+  if (!pod) return <LoadingIndicator />
 
-  const {
-    pod: { raw },
-  } = data
-
-  const content = stringify(JSON.parse(raw))
+  const content = stringify(JSON.parse(pod.raw))
 
   return (
     <ScrollablePage
