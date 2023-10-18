@@ -1,4 +1,4 @@
-fragment NodeFragment on Node {
+fragment ClusterNode on Node {
   metadata {
     ...Metadata
   }
@@ -18,19 +18,7 @@ fragment NodeFragment on Node {
   }
 }
 
-fragment NodeMetricFragment on NodeMetric {
-  metadata {
-    ...Metadata
-  }
-  usage {
-    cpu
-    memory
-  }
-  timestamp
-  window
-}
-
-fragment NodePoolFragment on NodePool {
+fragment NodePool on NodePool {
   id
   name
   minSize
@@ -108,13 +96,13 @@ fragment Cluster on Cluster {
   name
   handle
   nodePools {
-    ...NodePoolFragment
+    ...NodePool
   }
   nodes {
-    ...NodeFragment
+    ...ClusterNode
   }
   nodeMetrics {
-    ...NodeMetricFragment
+    ...NodeMetric
   }
   pingedAt
   provider {

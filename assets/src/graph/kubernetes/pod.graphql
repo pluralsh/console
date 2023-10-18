@@ -1,44 +1,12 @@
-fragment PodFragment on Pod {
-  metadata {
-    ...Metadata
-  }
-  status {
-    phase
-    podIp
-    reason
-    containerStatuses {
-      ...ContainerStatus
-    }
-    initContainerStatuses {
-      ...ContainerStatus
-    }
-    conditions {
-      lastProbeTime
-      lastTransitionTime
-      message
-      reason
-      status
-      type
-    }
-  }
-  spec {
-    nodeName
-    serviceAccountName
-    containers {
-      ...Container
-    }
-    initContainers {
-      ...Container
-    }
-  }
+fragment PodWithEvents on Pod {
+  ...Pod
   events {
     ...Event
   }
-  raw
 }
 
 query Pod($name: String!, $namespace: String!, $clusterId: ID) {
   pod(name: $name, namespace: $namespace, clusterId: $clusterId) {
-    ...PodFragment
+    ...PodWithEvents
   }
 }

@@ -1,4 +1,4 @@
-fragment CostAnalysisFragment on CostAnalysis {
+fragment CostAnalysis on CostAnalysis {
   minutes
   cpuCost
   pvCost
@@ -6,17 +6,17 @@ fragment CostAnalysisFragment on CostAnalysis {
   totalCost
 }
 
-fragment FileContentFragment on FileContent {
+fragment FileContent on FileContent {
   content
   path
 }
 
-fragment ConfigurationFragment on Configuration {
+fragment Configuration on Configuration {
   helm
   terraform
 }
 
-fragment ApplicationSpecFragment on ApplicationSpec {
+fragment ApplicationSpec on ApplicationSpec {
   descriptor {
     type
     icons
@@ -33,7 +33,7 @@ fragment ApplicationSpecFragment on ApplicationSpec {
   }
 }
 
-fragment ApplicationStatusFragment on ApplicationStatus {
+fragment ApplicationStatus on ApplicationStatus {
   components {
     group
     kind
@@ -49,35 +49,22 @@ fragment ApplicationStatusFragment on ApplicationStatus {
   componentsReady
 }
 
-fragment ApplicationFragment on Application {
+fragment Application on Application {
   name
   spec {
-    ...ApplicationSpecFragment
+    ...ApplicationSpec
   }
   status {
-    ...ApplicationStatusFragment
+    ...ApplicationStatus
   }
   cost {
-    ...CostAnalysisFragment
+    ...CostAnalysis
   }
 }
 
-fragment MetadataFragment on Metadata {
-  name
-  namespace
-  labels {
-    name
-    value
-  }
-  annotations {
-    name
-    value
-  }
-}
-
-fragment ConfigurationOverlayFragment on ConfigurationOverlay {
+fragment ConfigurationOverlay on ConfigurationOverlay {
   metadata {
-    ...MetadataFragment
+    ...Metadata
   }
   spec {
     name
@@ -98,36 +85,36 @@ query App($name: String!) {
       helm
       terraform
     }
-    ...ApplicationFragment
+    ...Application
   }
   configurationOverlays(namespace: $name) {
-    ...ConfigurationOverlayFragment
+    ...ConfigurationOverlay
   }
 }
 
 query AppInfo($name: String!) {
   application(name: $name) {
-    ...ApplicationFragment
+    ...Application
     info
   }
 }
 
-fragment RepositoryFragment on Repository {
+fragment Repository on Repository {
   id
   name
   icon
   description
   grafanaDns
   configuration {
-    ...ConfigurationFragment
+    ...Configuration
   }
   docs {
-    ...FileContentFragment
+    ...FileContent
   }
 }
 
 query Repository($name: String!) {
   repository(name: $name) {
-    ...RepositoryFragment
+    ...Repository
   }
 }

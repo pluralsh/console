@@ -1,6 +1,6 @@
 fragment StatefulSet on StatefulSet {
   metadata {
-    ...MetadataFragment
+    ...Metadata
   }
   status {
     replicas
