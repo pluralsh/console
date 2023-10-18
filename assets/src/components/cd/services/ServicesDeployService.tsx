@@ -221,8 +221,10 @@ export function DeployServiceModal({
   const configuration = useMemo(() => {
     const cfg: Record<string, string> = {}
 
-    for (const { name, value } of [...secrets].reverse()) {
-      cfg[name] = value
+    for (const { name, value } of secrets) {
+      if (name) {
+        cfg[name] = value
+      }
     }
 
     return Object.entries(cfg).map(([name, value]) => ({
