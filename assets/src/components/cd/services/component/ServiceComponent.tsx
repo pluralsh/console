@@ -112,6 +112,8 @@ export default function ServiceComponent() {
     <BreadcrumbWrapper {...breadcrumbProps}>
       <ComponentDetails
         component={component}
+        serviceComponents={components}
+        clusterName={clusterName}
         serviceId={serviceId}
         pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
       />

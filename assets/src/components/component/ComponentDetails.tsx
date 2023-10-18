@@ -20,6 +20,7 @@ import {
   DeploymentDocument,
   IngressDocument,
   JobDocument,
+  ServiceDeploymentComponentFragment,
   ServiceDocument,
   StatefulSetDocument,
   UnstructuredResourceDocument,
@@ -37,30 +38,47 @@ export const kindToQuery = {
   statefulset: StatefulSetDocument,
 } as const
 
+type DetailsComponent = {
+  name: string
+  namespace?: string | null | undefined
+  kind: string
+  version?: string | null | undefined
+  group?: string | null | undefined
+}
+
+export type ComponentDetailsContext = {
+  component: DetailsComponent
+  refetch: () => void
+  data: any
+  loading: boolean
+  clusterName?: string
+  serviceId?: string
+  serviceComponents?:
+    | (ServiceDeploymentComponentFragment | null | undefined)[]
+    | null
+    | undefined
+}
+
 export function ComponentDetails({
   component,
   pathMatchString,
+  clusterName,
   serviceId,
+  serviceComponents,
 }: {
-  component: {
-    name: string
-    namespace?: string | null | undefined
-    kind: string
-    version?: string | null | undefined
-    group?: string | null | undefined
-  }
+  component: DetailsComponent
   pathMatchString: string
+  clusterName?: string
   serviceId?: string
+  serviceComponents?: ComponentDetailsContext['serviceComponents']
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
-  const componentKind = component.kind
-  const componentName = component.name
+  const componentKind = component.kind?.toLowerCase() || ''
+  const componentName = component.name?.toLowerCase() || ''
 
-  const query =
-    kindToQuery[componentKind.toLowerCase() ?? ''] ||
-    UnstructuredResourceDocument
+  const query = kindToQuery[componentKind ?? ''] || UnstructuredResourceDocument
 
   const vars = {
     name: component.name,
@@ -93,6 +111,26 @@ export function ComponentDetails({
     [data]
   )
   const subpath = useMatch(`${pathMatchString}/:subpath`)?.params?.subpath || ''
+  const outletContext: ComponentDetailsContext = useMemo(
+    () => ({
+      component,
+      data,
+      loading,
+      refetch,
+      clusterName,
+      serviceId,
+      serviceComponents,
+    }),
+    [
+      clusterName,
+      component,
+      data,
+      loading,
+      refetch,
+      serviceComponents,
+      serviceId,
+    ]
+  )
 
   if (error) {
     return <GqlError error={error} />
@@ -146,24 +184,17 @@ export function ComponentDetails({
             componentName={componentName}
             namespace={component.namespace || ''}
           />
-          <ViewLogsButton
-            metadata={value?.metadata}
-            kind={componentKind}
-          />
+          {!serviceId && (
+            <ViewLogsButton
+              metadata={value?.metadata}
+              kind={componentKind}
+            />
+          )}
         </div>
       }
     >
       <TabPanel
-        as={
-          <Outlet
-            context={{
-              component,
-              data,
-              loading,
-              refetch,
-            }}
-          />
-        }
+        as={<Outlet context={outletContext} />}
         stateRef={tabStateRef}
       />
     </ResponsivePageFullWidth>

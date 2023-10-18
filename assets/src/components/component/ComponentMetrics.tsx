@@ -1,6 +1,6 @@
 import { Card } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import { DURATIONS } from 'utils/time'
 import { filesize } from 'filesize'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -14,6 +14,8 @@ import GraphHeader from 'components/utils/GraphHeader'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { POLL_INTERVAL } from '../cluster/constants'
+
+import { ComponentDetailsContext } from './ComponentDetails'
 
 const convertVals = (values) =>
   values.map(({ timestamp, value }) => ({
@@ -200,8 +202,11 @@ const kindToRegex = {
 
 export default function ComponentMetrics() {
   const theme = useTheme()
-  const { appName, componentKind = '', componentName } = useParams()
   const [duration, setDuration] = useState<any>(DURATIONS[0])
+  const { component } = useOutletContext<ComponentDetailsContext>()
+  const componentName = component.name?.toLowerCase()
+  const componentKind = component.kind?.toLowerCase()
+  const componentNamespace = component.namespace?.toLowerCase()
 
   return (
     <div
@@ -220,7 +225,7 @@ export default function ComponentMetrics() {
         top={0}
       />
       <Metric
-        namespace={appName}
+        namespace={componentNamespace}
         name={componentName}
         regex={kindToRegex[componentKind]}
         duration={duration}

@@ -12,6 +12,7 @@ import Ingress from './info/Ingress'
 import Deployment from './info/Deployment'
 import StatefulSet from './info/StatefulSet'
 import Metadata from './info/Metadata'
+import { ComponentDetailsContext } from './ComponentDetails'
 
 const componentsWithPods: string[] = [
   'deployment',
@@ -52,7 +53,7 @@ export default function ComponentInfo() {
   const {
     data,
     component: { kind },
-  } = useOutletContext<any>()
+  } = useOutletContext<ComponentDetailsContext>()
   const componentKind = kind.toLowerCase()
 
   // To avoid mapping between component types and fields of data returned by API
