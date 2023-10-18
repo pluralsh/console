@@ -110,7 +110,9 @@ export default function Cluster() {
                   />
                 }
                 selectedKey={clusterId}
-                onSelectionChange={(key) => navigate(`/cd/clusters/${key}`)} // TODO: Keep the same view on switch.
+                onSelectionChange={(key) =>
+                  navigate(`/cd/clusters/${key}/${tab}`)
+                }
               >
                 {clusterEdges.map((edge) => (
                   <ListBoxItem
