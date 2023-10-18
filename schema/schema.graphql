@@ -1647,6 +1647,7 @@ type ResourceSpec {
 
 type KubernetesUnstructured {
   raw: Map
+  metadata: Metadata!
   events: [Event]
 }
 

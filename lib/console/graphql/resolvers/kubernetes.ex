@@ -223,7 +223,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     path = Kube.Client.Base.path(args[:group], v, kind, args[:namespace], n)
     with {:ok, res} <- Kube.Client.raw(path),
          {:ok, res} <- Console.Deployments.Services.accessible(svc, res),
-      do: {:ok, %{raw: res}}
+      do: {:ok, %{raw: res, metadata: Kube.Utils.raw_meta(res)}}
   end
   def raw_resource(_, _), do: {:error, "forbidden"}
 

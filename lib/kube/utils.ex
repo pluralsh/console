@@ -9,6 +9,17 @@ defmodule Kube.Utils do
 
   @kubeconf :kubeconfig
 
+  def raw_meta(%{"metadata" => meta}) do
+    %MetaV1.ObjectMeta{
+      name: meta["name"],
+      namespace: meta["namespace"],
+      labels: meta["labels"] || %{},
+      annotations: meta["annotations"] || %{},
+      creation_timestamp: meta["creationTimestamp"]
+    }
+  end
+  def raw_meta(_), do: nil
+
   def identifier(%{"apiVersion" => gv, "kind" => k, "metadata" => %{"name" => n} = meta}) do
     {g, v} = group_version(gv)
     {g, v, k, Map.get(meta, "namespace"), n}
