@@ -52,9 +52,6 @@ import { ContainersList } from '../../../cluster/containers/ContainersList'
 
 export default function PodInfo() {
   const { pod } = useOutletContext() as { pod: Pod }
-
-  if (!pod) return <LoadingIndicator />
-
   const containers = pod.spec.containers || []
   const initContainers = pod.spec.initContainers || []
   const containerStatuses = statusesToRecord(pod.status?.containerStatuses)
