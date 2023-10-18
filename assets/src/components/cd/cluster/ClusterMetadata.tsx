@@ -112,7 +112,7 @@ export const columns = [
 
 export default function ClusterMetadata() {
   const theme = useTheme()
-  const { cluster } = useOutletContext() as { cluster: Cluster } // TODO: Update type.
+  const { cluster } = useOutletContext() as { cluster: Cluster }
 
   return (
     <div
@@ -123,9 +123,9 @@ export default function ClusterMetadata() {
       }}
     >
       <MetadataCard cluster={cluster} />
-      {cluster.nodePools && !isEmpty(cluster.nodePools) && (
+      {!isEmpty(cluster.nodePools) && (
         <Table
-          data={cluster.nodePools}
+          data={cluster.nodePools || []}
           columns={columns}
           css={{
             maxHeight: 'unset',

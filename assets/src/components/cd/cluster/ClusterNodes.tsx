@@ -25,7 +25,7 @@ import { cpuParser, memoryParser } from '../../../utils/kubernetes'
 import { ResourceUsage } from '../../cluster/nodes/Nodes'
 import { getNodeDetailsPath } from '../../../routes/cdRoutesConsts'
 
-export const ColActions = (clusterId: string) =>
+export const ColActions = (clusterId?: string) =>
   columnHelper.accessor(() => null, {
     id: 'actions',
     cell: ({ row: { original } }) => (

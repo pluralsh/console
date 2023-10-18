@@ -28,10 +28,9 @@ import {
   useClusterQuery,
   useClustersTinyQuery,
 } from '../../../generated/graphql'
-
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
-
 import ProviderIcon from '../../utils/Provider'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import ClusterPermissions from './ClusterPermissions'
 
@@ -82,6 +81,10 @@ export default function Cluster() {
     variables: { id: clusterId || '' },
     pollInterval: POLL_INTERVAL,
   })
+
+  const cluster = data?.cluster
+
+  if (!cluster) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth
@@ -169,7 +172,7 @@ export default function Cluster() {
         css={{ height: '100%' }}
         stateRef={tabStateRef}
       >
-        <Outlet context={{ cluster: data?.cluster }} />
+        <Outlet context={{ cluster }} />
       </TabPanel>
     </ResponsivePageFullWidth>
   )
