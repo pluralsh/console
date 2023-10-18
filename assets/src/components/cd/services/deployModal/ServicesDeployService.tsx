@@ -7,6 +7,7 @@ import {
   Select,
 } from '@pluralsh/design-system'
 import {
+  ClusterTinyFragment,
   useClustersTinyQuery,
   useCreateServiceDeploymentMutation,
   useGitRepositoriesQuery,
@@ -32,7 +33,7 @@ import { DeleteIconButton } from 'components/utils/IconButtons'
 
 import ProviderIcon from 'components/utils/Provider'
 
-import ModalAlt from '../ModalAlt'
+import ModalAlt from '../../ModalAlt'
 
 enum FormState {
   Initial = 'initial',
@@ -286,16 +287,9 @@ export function DeployServiceModal({
     [allowGoToGit, allowGoToSecrets, allowDeploy, mutation]
   )
 
-  const inputRef = useRef<HTMLInputElement>()
-
-  useEffect(() => {
-    inputRef.current?.focus?.()
-  }, [])
-
   const repos = mapExistingNodes(reposData?.gitRepositories).filter(
     (repo) => repo.health === 'PULLABLE'
   )
-  const selectedCluster = clusters.find(({ id }) => clusterId === id)
 
   const initialLoading = !repos || !clusters
 
@@ -372,60 +366,17 @@ export function DeployServiceModal({
       {initialLoading ? (
         <LoadingIndicator />
       ) : formState === FormState.Initial ? (
-        <>
-          <FormField
-            required
-            label="Service name"
-          >
-            <Input
-              inputProps={{ ref: inputRef }}
-              value={name}
-              onChange={(e) => setName(e.currentTarget.value)}
-            />
-          </FormField>
-          <FormField
-            required
-            label="Service namespace"
-          >
-            <Input
-              value={namespace}
-              onChange={(e) => setNamespace(e.currentTarget.value)}
-            />
-          </FormField>
-          <FormField
-            required
-            label="Cluster"
-          >
-            <Select
-              label="Select cluster"
-              leftContent={
-                selectedCluster && (
-                  <ProviderIcon
-                    provider={selectedCluster.provider?.cloud || ''}
-                    width={16}
-                  />
-                )
-              }
-              selectedKey={clusterId || ''}
-              onSelectionChange={(key) => {
-                setClusterId(key as any)
-              }}
-            >
-              {(clusters || []).map((cluster) => (
-                <ListBoxItem
-                  key={cluster.id}
-                  label={cluster.name}
-                  leftContent={
-                    <ProviderIcon
-                      provider={cluster.provider?.cloud || ''}
-                      width={16}
-                    />
-                  }
-                />
-              ))}
-            </Select>
-          </FormField>
-        </>
+        <BasicSettings
+          {...{
+            name,
+            setName,
+            namespace,
+            setNamespace,
+            clusterId,
+            setClusterId,
+            clusters,
+          }}
+        />
       ) : formState === FormState.Git ? (
         <GitSettings
           {...{
@@ -454,6 +405,89 @@ export function DeployServiceModal({
         </>
       )}
     </ModalAlt>
+  )
+}
+
+function BasicSettings({
+  name,
+  setName,
+  namespace,
+  setNamespace,
+  clusterId,
+  setClusterId,
+  clusters,
+}: {
+  name: string
+  setName: Dispatch<SetStateAction<string>>
+  namespace: string
+  setNamespace: Dispatch<SetStateAction<string>>
+
+  clusterId: string
+  setClusterId: Dispatch<SetStateAction<string>>
+  clusters: ClusterTinyFragment[]
+}): any {
+  const inputRef = useRef<HTMLInputElement>()
+  const selectedCluster = clusters.find(({ id }) => clusterId === id)
+
+  useEffect(() => {
+    inputRef.current?.focus?.()
+  }, [])
+
+  return (
+    <>
+      <FormField
+        required
+        label="Service name"
+      >
+        <Input
+          inputProps={{ ref: inputRef }}
+          value={name}
+          onChange={(e) => setName(e.currentTarget.value)}
+        />
+      </FormField>
+      <FormField
+        required
+        label="Service namespace"
+      >
+        <Input
+          value={namespace}
+          onChange={(e) => setNamespace(e.currentTarget.value)}
+        />
+      </FormField>
+      <FormField
+        required
+        label="Cluster"
+      >
+        <Select
+          label="Select cluster"
+          leftContent={
+            selectedCluster && (
+              <ProviderIcon
+                provider={selectedCluster.provider?.cloud || ''}
+                width={16}
+              />
+            )
+          }
+          selectedKey={clusterId || ''}
+          onSelectionChange={(key) => {
+            setClusterId(key as any)
+          }}
+        >
+          {(clusters || []).map((cluster) => (
+            <ListBoxItem
+              key={cluster.id}
+              label={cluster.name}
+              leftContent={
+                <ProviderIcon
+                  provider={cluster.provider?.cloud || ''}
+                  width={16}
+                />
+              }
+            />
+          ))}
+        </Select>
+      </FormField>
+    </>
   )
 }
 

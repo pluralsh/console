@@ -135,15 +135,19 @@ query Clusters {
   }
 }
 
+fragment ClusterTiny on Cluster {
+  id
+  name
+  provider {
+    cloud
+  }
+}
+
 query ClustersTiny {
   clusters(first: 100) {
     edges {
       node {
-        id
-        name
-        provider {
-          cloud
-        }
+        ...ClusterTiny
       }
     }
   }

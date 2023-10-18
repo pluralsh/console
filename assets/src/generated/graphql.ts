@@ -3482,6 +3482,8 @@ export type ClustersQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, deletedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Map<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null } | null } | null> | null } | null };
 
+export type ClusterTinyFragment = { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
+
 export type ClustersTinyQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -4227,6 +4229,15 @@ export const ClusterFragmentDoc = gql`
 ${NodePoolFragmentDoc}
 ${ClusterNodeFragmentDoc}
 ${NodeMetricFragmentDoc}`;
+export const ClusterTinyFragmentDoc = gql`
+    fragment ClusterTiny on Cluster {
+  id
+  name
+  provider {
+    cloud
+  }
+}
+    `;
 export const MetricResponseFragmentDoc = gql`
     fragment MetricResponse on MetricResponse {
   metric
@@ -5034,16 +5045,12 @@ export const ClustersTinyDocument = gql`
   clusters(first: 100) {
     edges {
       node {
-        id
-        name
-        provider {
-          cloud
-        }
+        ...ClusterTiny
       }
     }
   }
 }
-    `;
+    ${ClusterTinyFragmentDoc}`;
 
 /**
  * __useClustersTinyQuery__
@@ -7158,6 +7165,7 @@ export const namedOperations = {
     ApiDeprecation: 'ApiDeprecation',
     ClustersRow: 'ClustersRow',
     Cluster: 'Cluster',
+    ClusterTiny: 'ClusterTiny',
     MetricResponse: 'MetricResponse',
     GitRepositoriesRow: 'GitRepositoriesRow',
     ClusterProvider: 'ClusterProvider',

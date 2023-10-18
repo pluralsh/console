@@ -26,7 +26,7 @@ import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import { Edge } from '../../../utils/graphql'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ServicesFilters } from '../services/ServicesFilters'
-import { DeployService } from '../services/ServicesDeployService'
+import { DeployService } from '../services/deployModal/ServicesDeployService'
 
 const POLL_INTERVAL = 10 * 1000
 
