@@ -11,7 +11,6 @@ import ProviderIcon from '../../utils/Provider'
 import CopyButton from '../../utils/CopyButton'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { nextSupportedVersion } from '../../../utils/semver'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
 function MetadataCard({ cluster }: { cluster: Cluster }) {
   const theme = useTheme()

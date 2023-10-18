@@ -22,7 +22,7 @@ import {
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { createMapperWithFallback } from 'utils/mapping'
-import { Edge, removeConnection, updateCache } from 'utils/graphql'
+import { Edge } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useParams } from 'react-router-dom'
