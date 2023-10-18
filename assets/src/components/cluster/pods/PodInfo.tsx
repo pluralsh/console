@@ -1,18 +1,12 @@
-import { useQuery } from '@apollo/client'
-import { Link, useOutletContext, useParams } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { Flex } from 'honorable'
 import { Button, LogsIcon } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { ContainerStatus, Maybe, Pod } from 'generated/graphql'
 import { asQuery } from 'components/utils/query'
 
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-
-import { POLL_INTERVAL } from '../constants'
-import { POD_INFO_Q } from '../queries'
 import { SubTitle } from '../nodes/SubTitle'
 import { ContainersList } from '../containers/ContainersList'
-
 import { useNamespaceIsApp } from '../../hooks/useNamespaceIsApp'
 
 import PodMetadata from './PodMetadata'

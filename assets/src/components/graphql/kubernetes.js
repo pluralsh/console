@@ -26,14 +26,6 @@ export const EventFragment = gql`
   }
 `
 
-export const ResultStatus = gql`
-  fragment ResultStatus on ResultStatus {
-    message
-    reason
-    status
-  }
-`
-
 export const ContainerStatus = gql`
   fragment ContainerStatus on ContainerStatus {
     restartCount
@@ -206,33 +198,6 @@ export const StatefulSetFragment = gql`
   ${MetadataFragment}
 `
 
-export const ServiceFragment = gql`
-  fragment ServiceFragment on Service {
-    metadata {
-      ...MetadataFragment
-    }
-    status {
-      loadBalancer {
-        ingress {
-          ip
-        }
-      }
-    }
-    spec {
-      type
-      clusterIp
-      ports {
-        name
-        protocol
-        port
-        targetPort
-      }
-    }
-    raw
-  }
-  ${MetadataFragment}
-`
-
 export const NodeFragment = gql`
   fragment NodeFragment on Node {
     metadata {
@@ -268,24 +233,6 @@ export const NodeMetricFragment = gql`
     timestamp
     window
   }
-`
-
-export const CronJobFragment = gql`
-  fragment CronJobFragment on CronJob {
-    metadata {
-      ...MetadataFragment
-    }
-    status {
-      lastScheduleTime
-    }
-    spec {
-      schedule
-      suspend
-      concurrencyPolicy
-    }
-    raw
-  }
-  ${MetadataFragment}
 `
 
 export const JobStatus = gql`
