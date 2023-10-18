@@ -100,6 +100,22 @@ export const columns = [
     meta: { truncate: true },
     cell: ({ getValue }) => getValue(),
   }),
+  columnHelper.accessor((nodePool) => nodePool?.minSize, {
+    id: 'minSize',
+    header: 'Min size',
+    enableSorting: true,
+    enableGlobalFilter: true,
+    meta: { truncate: true },
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor((nodePool) => nodePool?.maxSize, {
+    id: 'maxSize',
+    header: 'Max size',
+    enableSorting: true,
+    enableGlobalFilter: true,
+    meta: { truncate: true },
+    cell: ({ getValue }) => getValue(),
+  }),
   columnHelper.accessor((nodePool) => nodePool?.instanceType, {
     id: 'instanceType',
     header: 'Instance type',
