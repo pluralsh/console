@@ -1,4 +1,4 @@
-import { useOutletContext, useParams } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import { useMemo } from 'react'
 
 import { useTheme } from 'styled-components'
@@ -49,8 +49,11 @@ function getInfo(kind: string): JSX.Element | undefined {
 
 export default function ComponentInfo() {
   const theme = useTheme()
-  const { componentKind = '' } = useParams()
-  const { data } = useOutletContext<any>()
+  const {
+    data,
+    component: { kind },
+  } = useOutletContext<any>()
+  const componentKind = kind.toLowerCase()
 
   // To avoid mapping between component types and fields of data returned by API
   // we are picking first available value from API object for now.
