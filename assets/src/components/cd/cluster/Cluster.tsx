@@ -16,6 +16,10 @@ import {
   CD_BASE_PATH,
   CLUSTERS_PATH,
   CLUSTER_BASE_PATH,
+  CLUSTER_METADATA_PATH,
+  CLUSTER_NODES_PATH,
+  CLUSTER_PODS_PATH,
+  CLUSTER_SERVICES_PATH,
 } from 'routes/cdRoutesConsts'
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
@@ -30,12 +34,12 @@ import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 import ProviderIcon from '../../utils/Provider'
 
 import ClusterPermissions from './ClusterPermissions'
-import ClusterMetadataPanel from './ClusterMetadataPanel'
 
 const directory = [
-  { path: 'services', label: 'Services' },
-  { path: 'nodes', label: 'Nodes' },
-  { path: 'pods', label: 'Pods' },
+  { path: CLUSTER_SERVICES_PATH, label: 'Services' },
+  { path: CLUSTER_NODES_PATH, label: 'Nodes' },
+  { path: CLUSTER_PODS_PATH, label: 'Pods' },
+  { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
 ] as const
 
 const POLL_INTERVAL = 10 * 1000
@@ -157,7 +161,6 @@ export default function Cluster() {
             }}
           >
             <ClusterPermissions />
-            <ClusterMetadataPanel cluster={data?.cluster} />
           </div>
         </>
       }

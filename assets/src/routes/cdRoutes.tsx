@@ -39,10 +39,13 @@ import PodEvents from '../components/cd/cluster/pod/PodEvents'
 
 import PodRaw from '../components/cd/cluster/pod/PodRaw'
 
+import ClusterMetadata from '../components/cd/cluster/ClusterMetadata'
+
 import {
   CD_BASE_PATH,
   CLUSTERS_PATH,
   CLUSTER_BASE_PATH,
+  CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
   CLUSTER_PODS_PATH,
   CLUSTER_SERVICES_PATH,
@@ -149,6 +152,10 @@ export const cdRoutes = [
     <Route
       path={CLUSTER_PODS_PATH}
       element={<ClusterPods />}
+    />
+    <Route
+      path={CLUSTER_METADATA_PATH}
+      element={<ClusterMetadata />}
     />
   </Route>,
 
