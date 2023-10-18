@@ -123,7 +123,7 @@ export default function ClusterMetadata() {
       }}
     >
       <MetadataCard cluster={cluster} />
-      {!isEmpty(cluster.nodePools) && (
+      {!cluster.self && !isEmpty(cluster.nodePools) && (
         <Table
           data={cluster.nodePools || []}
           columns={columns}
