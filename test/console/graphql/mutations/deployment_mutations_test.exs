@@ -241,6 +241,33 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert conf["value"] == "value"
     end
 
+    test "it can handle invalid configuration" do
+      cluster = insert(:cluster)
+      user = admin_user()
+      git = insert(:git_repository)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Create($clusterId: ID!, $attributes: ServiceDeploymentAttributes!) {
+          createServiceDeployment(clusterId: $clusterId, attributes: $attributes) {
+            name
+            namespace
+            git { ref folder }
+            repository { id }
+            configuration { name value }
+          }
+        }
+      """, %{
+        "attributes" => %{
+          "name" => "test",
+          "namespace" => "test",
+          "git" => %{"ref" => "master", "folder" => "k8s"},
+          "repositoryId" => git.id,
+          "configuration" => [%{"name" => "", "value" => ""}],
+        },
+        "clusterId" => cluster.id,
+      }, %{current_user: user})
+    end
+
     test "it can create a new service by handle" do
       cluster = insert(:cluster, handle: "test")
       user = admin_user()

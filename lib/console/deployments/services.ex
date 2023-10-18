@@ -327,7 +327,7 @@ defmodule Console.Deployments.Services do
       do: update_components(attrs, svc)
   end
 
-  defp stabilize(%{components: new_components} = attrs, %{components: components} = svc) do
+  defp stabilize(%{components: new_components} = attrs, %{components: components}) do
     components = Map.new(components, fn %{id: id} = comp -> {component_key(comp), id} end)
     new_components = Enum.map(new_components, &Map.put(&1, :id, components[component_key(&1)]))
     Map.put(attrs, :components, new_components)
