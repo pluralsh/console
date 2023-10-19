@@ -958,6 +958,9 @@ type Cluster {
   "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
   handle: String
 
+  "whether the deploy operator has been registered for this cluster"
+  installed: Boolean
+
   "a auth token to be used by the deploy operator, only readable on create"
   deployToken: String
 

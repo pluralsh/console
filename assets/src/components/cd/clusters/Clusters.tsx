@@ -68,6 +68,11 @@ export const columns = [
       )
     },
   }),
+  columnHelper.accessor(({ node }) => node?.pingedAt, {
+    id: 'health',
+    header: 'Health',
+    cell: ({ getValue }) => <ClusterHealthChip pingedAt={getValue()} />,
+  }),
   columnHelper.accessor(({ node }) => node?.provider, {
     id: 'cloud',
     header: 'Cloud',
@@ -218,11 +223,6 @@ export const columns = [
         (!!upgrade || hasDeprecations) && <ClusterUpgrade cluster={cluster} />
       )
     },
-  }),
-  columnHelper.accessor(({ node }) => node?.pingedAt, {
-    id: 'health',
-    header: 'Health',
-    cell: ({ getValue }) => <ClusterHealthChip pingedAt={getValue()} />,
   }),
   columnHelper.accessor(({ node }) => node, {
     id: 'actions',

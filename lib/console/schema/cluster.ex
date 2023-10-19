@@ -227,7 +227,7 @@ defmodule Console.Schema.Cluster do
 
   def ping_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(pinged_at current_version)a)
+    |> cast(attrs, ~w(pinged_at current_version installed)a)
   end
 
   def rbac_changeset(model, attrs \\ %{}) do

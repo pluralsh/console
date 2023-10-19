@@ -331,8 +331,9 @@ defmodule Console.Deployments.Clusters do
   """
   @spec ping(map, Cluster.t) :: cluster_resp
   def ping(attrs, %Cluster{id: id}) do
+    attrs = Map.merge(attrs, %{pinged_at: Timex.now(), installed: true})
     get_cluster(id)
-    |> Cluster.ping_changeset(Map.put(attrs, :pinged_at, Timex.now()))
+    |> Cluster.ping_changeset(attrs)
     |> Repo.update()
   end
 

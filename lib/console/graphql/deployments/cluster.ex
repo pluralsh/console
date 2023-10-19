@@ -137,6 +137,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :version,         :string, description: "desired k8s version for the cluster"
     field :current_version, :string, description: "current k8s version as told to us by the deployment operator"
     field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
+    field :installed,       :boolean, description: "whether the deploy operator has been registered for this cluster"
 
     field :deploy_token, :string,
       description: "a auth token to be used by the deploy operator, only readable on create",

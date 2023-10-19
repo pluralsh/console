@@ -405,6 +405,8 @@ export type Cluster = {
   /** internal id of this cluster */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether the deploy operator has been registered for this cluster */
+  installed?: Maybe<Scalars['Boolean']['output']>;
   /** human readable name of this cluster, will also translate to cloud k8s name */
   name: Scalars['String']['output'];
   /** list the cached node metrics for a cluster, can also be stale up to 5m */
