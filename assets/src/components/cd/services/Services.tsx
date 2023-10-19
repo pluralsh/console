@@ -82,6 +82,7 @@ export default function Services() {
       q: debouncedSearchString,
     },
     pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
   })
   const data = currentData || previousData
 
