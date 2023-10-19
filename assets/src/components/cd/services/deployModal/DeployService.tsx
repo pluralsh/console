@@ -16,6 +16,8 @@ import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { mapExistingNodes } from 'utils/graphql'
 
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
 import ModalAlt from '../../ModalAlt'
 
 import { DeployServiceSettingsGit } from './DeployServiceSettingsGit'
@@ -297,5 +299,29 @@ export function DeployServiceModal({
         )}
       </div>
     </ModalAlt>
+  )
+}
+
+export function DeployService({ refetch }: { refetch: () => void }) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        primary
+        onClick={() => {
+          setIsOpen(true)
+        }}
+      >
+        Deploy service
+      </Button>
+      <ModalMountTransition open={isOpen}>
+        <DeployServiceModal
+          refetch={refetch}
+          open={isOpen}
+          onClose={() => setIsOpen(false)}
+        />
+      </ModalMountTransition>
+    </>
   )
 }

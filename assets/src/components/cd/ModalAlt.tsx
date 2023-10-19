@@ -54,7 +54,7 @@ export default function ModalAlt({
           />
         }
       >
-        <h2 className="header">{header}</h2>
+        {header && <h2 className="header">{header}</h2>}
         {children}
         {actions && <footer className="actions">{actions}</footer>}
       </WrapWithIf>
