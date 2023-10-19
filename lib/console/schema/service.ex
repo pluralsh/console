@@ -152,7 +152,7 @@ defmodule Console.Schema.Service do
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:owner_id)
     |> foreign_key_constraint(:repository_id)
-    |> unique_constraint([:cluster_id, :name])
+    |> unique_constraint([:cluster_id, :name], message: "there is already a service with that name for this cluster")
     |> unique_constraint([:cluster_id, :owner_id])
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
