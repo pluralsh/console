@@ -3,6 +3,7 @@ import styled, { useTheme } from 'styled-components'
 import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { produce } from 'immer'
 import { DeleteIconButton } from 'components/utils/IconButtons'
+import { InputRevealer } from 'components/cd/providers/InputRevealer'
 
 export type Secret = { name: string; value: string }
 
@@ -120,7 +121,8 @@ export function DeployServiceSettingsSecrets({
                 </FormField>
               </th>
               <th>
-                <Input
+                <InputRevealer
+                  defaultRevealed={false}
                   value={secret.value}
                   inputProps={{ 'aria-label': 'Value' }}
                   onChange={(e) =>
