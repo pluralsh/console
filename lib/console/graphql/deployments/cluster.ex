@@ -266,7 +266,23 @@ defmodule Console.GraphQl.Deployments.Cluster do
     end
   end
 
+  object :public_cluster_queries do
+    @desc "tells you what cluster a deploy token points to"
+    field :my_cluster, :cluster do
+      middleware ClusterAuthenticated
+
+      safe_resolve &Deployments.my_cluster/2
+    end
+  end
+
   object :cluster_queries do
+    @desc "exchanges a kubeconfig token for user info"
+    field :token_exchange, :user do
+      arg :token, non_null(:string)
+
+      resolve &Deployments.token_exchange/2
+    end
+
     @desc "a relay connection of all clusters visible to the current user"
     connection field :clusters, node_type: :cluster do
       arg :q, :string

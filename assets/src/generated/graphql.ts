@@ -2336,6 +2336,8 @@ export type RootQueryType = {
   logs?: Maybe<Array<Maybe<LogStream>>>;
   me?: Maybe<User>;
   metric?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** tells you what cluster a deploy token points to */
+  myCluster?: Maybe<Cluster>;
   myWireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
   namespaces?: Maybe<Array<Maybe<Namespace>>>;
   node?: Maybe<Node>;
@@ -2368,6 +2370,8 @@ export type RootQueryType = {
   stack?: Maybe<Stack>;
   statefulSet?: Maybe<StatefulSet>;
   temporaryToken?: Maybe<Scalars['String']['output']>;
+  /** exchanges a kubeconfig token for user info */
+  tokenExchange?: Maybe<User>;
   unstructuredResource?: Maybe<KubernetesUnstructured>;
   upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
   users?: Maybe<UserConnection>;
@@ -2748,6 +2752,11 @@ export type RootQueryTypeStatefulSetArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeTokenExchangeArgs = {
+  token: Scalars['String']['input'];
 };
 
 
@@ -3288,6 +3297,7 @@ export type User = {
   buildTimestamp?: Maybe<Scalars['DateTime']['output']>;
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   email: Scalars['String']['output'];
+  groups?: Maybe<Array<Maybe<Group>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   jwt?: Maybe<Scalars['String']['output']>;

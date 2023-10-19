@@ -85,6 +85,23 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> all()
   end
 
+  def my_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
+
+  def token_exchange(%{token: "plrl:" <> token}, _) do
+    with [id, token] <- String.split(token, ":"),
+         {:ok, _} <- Uniq.UUID.parse(id),
+         %Cluster{} = cluster <- Clusters.get_cluster(id),
+         {:token, %User{} = user} <- {:token, Console.authed_user(token)},
+         {:ok, _} <- allow(cluster, user, :read) do
+      {:ok, user}
+    else
+      nil -> {:error, "does not exist"}
+      {:token, _} -> {:error, "unauthenticated"}
+      _ -> {:error, "invalid token"}
+    end
+  end
+  def token_exchange(_, _), do: {:error, "invalid token"}
+
   def list_revisions(%{id: id}, args, _) do
     Revision.for_service(id)
     |> Revision.ordered()

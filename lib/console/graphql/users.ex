@@ -57,6 +57,8 @@ defmodule Console.GraphQl.Users do
     field :roles,           :user_roles
     field :read_timestamp,  :datetime
     field :build_timestamp, :datetime
+
+    field :groups, list_of(:group), resolve: dataloader(User)
     field :bound_roles,     list_of(:role), resolve: fn user, _, _ ->
       {:ok, Console.Schema.User.roles(user)}
     end

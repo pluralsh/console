@@ -448,6 +448,70 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
     end
   end
 
+  describe "myCluster" do
+    test "it can fetch a cluster back by deploy token" do
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"myCluster" => found}}} = run_query("""
+        query {
+          myCluster { id }
+        }
+      """, %{}, %{cluster: cluster})
+
+      assert found["id"] == cluster.id
+    end
+  end
+
+  describe "tokenExchange" do
+    test "it can exchange a kubeconfig token for a user if they have access to the given cluster" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      token = insert(:access_token, user: user)
+
+      {:ok, %{data: %{"tokenExchange" => found}}} = run_query("""
+        query Exchange($token: String!) {
+          tokenExchange(token: $token) { id }
+        }
+      """, %{"token" => "plrl:#{cluster.id}:#{token.token}"})
+
+      assert found["id"] == user.id
+    end
+
+    test "if the user doesn't have access it will error" do
+      user = insert(:user)
+      cluster = insert(:cluster)
+      token = insert(:access_token, user: user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Exchange($token: String!) {
+          tokenExchange(token: $token) { id }
+        }
+      """, %{"token" => "plrl:#{cluster.id}:#{token.token}"})
+    end
+
+    test "if the token is invalid it will error" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Exchange($token: String!) {
+          tokenExchange(token: $token) { id }
+        }
+      """, %{"token" => "plrl:#{cluster.id}:console-bogus"})
+    end
+
+    test "if the cluster doesn't exist it will error" do
+      user = insert(:user)
+      token = insert(:access_token, user: user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Exchange($token: String!) {
+          tokenExchange(token: $token) { id }
+        }
+      """, %{"token" => "plrl:#{Ecto.UUID.generate()}:#{token.token}"})
+    end
+  end
+
   describe "serviceStatuses" do
     test "it can list the statuses counts for a service query" do
       cluster = insert(:cluster)

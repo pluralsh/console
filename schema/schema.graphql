@@ -145,6 +145,9 @@ type RootQueryType {
 
   gitRepositories(after: String, first: Int, before: String, last: Int): GitRepositoryConnection
 
+  "exchanges a kubeconfig token for user info"
+  tokenExchange(token: String!): User
+
   "a relay connection of all clusters visible to the current user"
   clusters(after: String, first: Int, before: String, last: Int, q: String): ClusterConnection
 
@@ -188,6 +191,9 @@ type RootQueryType {
 
     name: String
   ): ServiceDeployment
+
+  "tells you what cluster a deploy token points to"
+  myCluster: Cluster
 
   deploymentSettings: DeploymentSettings
 }
@@ -2292,6 +2298,7 @@ type User {
   roles: UserRoles
   readTimestamp: DateTime
   buildTimestamp: DateTime
+  groups: [Group]
   boundRoles: [Role]
   jwt: String
   unreadNotifications: Int
