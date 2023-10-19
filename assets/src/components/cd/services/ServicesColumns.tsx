@@ -57,10 +57,12 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
   meta: { truncate: true },
   cell: ({ getValue }) => {
     const svc = getValue()
+
     if (!svc) return null
     const {
       git: { ref, folder },
     } = svc
+
     return (
       <ColWithIcon
         truncateLeft
