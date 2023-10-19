@@ -14,6 +14,10 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   id
   name
   message
+  git {
+    ref
+    folder
+  }
   cluster {
     id
     name

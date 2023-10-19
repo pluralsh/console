@@ -50,23 +50,27 @@ export const ColCluster = columnHelper.accessor(
   }
 )
 
-export const ColRepo = columnHelper.accessor(
-  ({ node }) => node?.repository?.url,
-  {
-    id: 'repository',
-    header: 'Repository',
-    enableSorting: true,
-    meta: { truncate: true },
-    cell: ({ getValue }) => (
+export const ColRepo = columnHelper.accessor(({ node }) => node, {
+  id: 'repository',
+  header: 'Repository',
+  enableSorting: true,
+  meta: { truncate: true },
+  cell: ({ getValue }) => {
+    const svc = getValue()
+    if (!svc) return null
+    const {
+      git: { ref, folder },
+    } = svc
+    return (
       <ColWithIcon
         truncateLeft
         icon={<GitHubLogoIcon />}
       >
-        {getValue()}
+        {svc.repository?.url}@{ref}:{folder}
       </ColWithIcon>
-    ),
-  }
-)
+    )
+  },
+})
 
 function toDateOrUndef(d: unknown) {
   const date = new Date(d as any)
