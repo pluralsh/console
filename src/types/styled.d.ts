@@ -1,7 +1,10 @@
 // import original module declarations
 import 'styled-components'
-import type {} from 'styled-components/cssprop'
+
 import { type styledTheme } from '../theme'
+
+// Allow css prop on html elements
+import type {} from 'styled-components/cssprop'
 
 type StyledTheme = typeof styledTheme
 

@@ -87,6 +87,7 @@ function Trigger({ buttonElt, isOpen, ...props }: TriggerProps) {
   return cloneElement(buttonElt, {
     ref,
     ...buttonProps,
+    ...(buttonElt?.props?.type ? { type: buttonElt.props.type } : {}),
     isOpen,
     style: {
       appearance: 'unset',

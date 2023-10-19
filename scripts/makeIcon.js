@@ -3,7 +3,7 @@ const path = require('path')
 
 const { ESLint } = require('eslint')
 
-const makeFile = svg => `import createIcon from './createIcon'
+const makeFile = (svg) => `import createIcon from './createIcon'
 
 export default createIcon(({ size, color, ...props }) => (
   ${svg}))
@@ -21,7 +21,7 @@ async function main() {
     lines.shift()
     const name = lines.shift()
 
-    console.log(`${name}Icon`)
+    console.info(`${name}Icon`)
 
     const svg = lines.join('\n')
     const fileContent = makeFile(svg)
@@ -29,7 +29,7 @@ async function main() {
     const results = await eslint.lintText(fileContent)
 
     if (!results[0].output) {
-      console.log(results[0])
+      console.info(results[0])
 
       throw new Error('No output')
     }
@@ -41,12 +41,15 @@ async function main() {
       .replace(/stroke="#C4CAD4"/g, 'stroke={color}')
       .replace(/fill="#C4CAD4"/g, 'fill={color}')
 
-    const outputPath = path.resolve(__dirname, `../src/components/icons/${name}Icon.jsx`)
+    const outputPath = path.resolve(
+      __dirname,
+      `../src/components/icons/${name}Icon.jsx`
+    )
 
     fs.writeFileSync(outputPath, result, 'utf8')
   }
 
-  console.log('Done!')
+  console.info('Done!')
 }
 
 main()

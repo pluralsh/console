@@ -28,8 +28,6 @@ function AccordionTriggerUnstyled({
   unstyled: _unstyled,
   ...props
 }: { isOpen?: boolean; unstyled?: boolean } & ComponentProps<'div'>) {
-  console.log('props', props)
-
   return (
     <div {...props}>
       <div className="label">{children}</div>

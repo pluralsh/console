@@ -1,7 +1,7 @@
-import { type LayerPositionType } from 'grommet'
 import { Button, Flex } from 'honorable'
 import { useState } from 'react'
 
+import { type LayerPositionType } from '../components/Layer'
 import { GraphQLToast, type Severity, Toast } from '../components/Toast'
 
 export default {

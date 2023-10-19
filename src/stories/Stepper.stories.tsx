@@ -1,5 +1,3 @@
-import { Flex } from 'honorable'
-
 import Stepper from '../components/Stepper'
 import type { StepperSteps } from '../components/Stepper'
 import BrowserIcon from '../components/icons/BrowserIcon'
@@ -14,13 +12,18 @@ export default {
 
 function Template(args: any) {
   return (
-    <Flex
-      maxWidth={args.containerWidth || undefined}
-      background={args.showContainer ? 'rgba(255, 255, 255, 0.05)' : undefined}
-      overflow="auto"
+    <div
+      css={{
+        display: 'flex',
+        maxWidth: args.containerWidth || undefined,
+        background: args.showContainer
+          ? 'rgba(255, 255, 255, 0.05)'
+          : undefined,
+        overflow: 'auto',
+      }}
     >
       <Stepper {...args} />
-    </Flex>
+    </div>
   )
 }
 
@@ -51,24 +54,28 @@ export const Default = Template.bind({})
 Default.args = {
   stepIndex: 1,
   steps,
+  compact: false,
 }
 
 export const List03 = Template.bind({})
 List03.args = {
   stepIndex: 1,
   steps: steps.slice(0, 3),
+  compact: false,
 }
 
 export const List02 = Template.bind({})
 List02.args = {
   stepIndex: 1,
   steps: steps.slice(0, 2),
+  compact: false,
 }
 
 export const List01 = Template.bind({})
 List01.args = {
   stepIndex: 0,
   steps: steps.slice(0, 1),
+  compact: false,
 }
 
 export const Vertical = Template.bind({})
@@ -79,5 +86,13 @@ Vertical.args = {
   forceCollapse: false,
   showContainer: false,
   vertical: true,
+  compact: false,
   steps,
+}
+
+export const Compact = Template.bind({})
+Compact.args = {
+  stepIndex: 1,
+  steps,
+  compact: true,
 }

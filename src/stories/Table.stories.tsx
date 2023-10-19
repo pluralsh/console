@@ -301,7 +301,7 @@ Clickable.args = {
   height: '400px',
   data: repeatedData,
   columns: expandingColumns,
-  onRowClick: (e: MouseEvent, row: Row<any>) => console.log(row?.original),
+  onRowClick: (e: MouseEvent, row: Row<any>) => console.info(row?.original),
 }
 
 export const StickyColumn = Template.bind({})

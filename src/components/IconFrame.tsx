@@ -177,6 +177,7 @@ const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
           forwardedAs: (props as any).as || ButtonBase,
           tabIndex: 0,
           role: 'button',
+          type: 'button',
         })}
         {...props}
       >

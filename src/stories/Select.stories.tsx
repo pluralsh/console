@@ -1,6 +1,5 @@
-import { Flex, H4 } from 'honorable'
 import { type ComponentProps, type Key, forwardRef, useState } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import {
   AppIcon,
@@ -10,6 +9,8 @@ import {
   CheckIcon,
   Chip,
   DropdownArrowIcon,
+  HamburgerMenuIcon,
+  IconFrame,
   InfoIcon,
   ListBoxFooterPlus,
   ListBoxItem,
@@ -39,6 +40,12 @@ export default {
     },
   },
 }
+
+const H4 = styled.h4(({ theme }) => ({
+  ...theme.partials.text.subtitle1,
+  margin: 0,
+  marginBottom: 'small',
+}))
 
 const portrait = (
   <AppIcon
@@ -186,7 +193,17 @@ const CustomTriggerButton = styled(
   },
 }))
 
+const IconFrameTrigger = forwardRef((props: any, ref) => (
+  <IconFrame
+    ref={ref}
+    icon={<HamburgerMenuIcon />}
+    clickable
+    {...props}
+  />
+))
+
 function Template({ onFillLevel }: { onFillLevel: any }) {
+  const theme = useTheme()
   const [selectedKey, setSelectedKey] = useState<Key>()
   const shownStep = 4
   const [shownLimit, setShownLimit] = useState<number>(shownStep)
@@ -211,19 +228,16 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
   }
 
   return (
-    <Flex
-      flexDirection="column"
-      gap="large"
-      maxWidth={512}
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.large,
+        maxWidth: 512,
+      }}
     >
       {/* SINGLE SELECT */}
-      <H4
-        subtitle
-        margin="0"
-        marginBottom="small"
-      >
-        Single select
-      </H4>
+      <H4>Single select</H4>
       <WrapWithIf
         condition={onFillLevel > 0}
         wrapper={
@@ -318,7 +332,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
           ))}
         </Select>
 
-        <Flex justifyContent="right">
+        <div css={{ display: 'flex', justifyContent: 'right' }}>
           <Select
             label="Version"
             selectedKey={selectedKey}
@@ -363,17 +377,58 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
               />
             ))}
           </Select>
-        </Flex>
+        </div>
+
+        <div css={{ display: 'flex', justifyContent: 'right' }}>
+          <Select
+            label="Version"
+            selectedKey={selectedKey}
+            triggerButton={<IconFrameTrigger type="tertiary" />}
+            width="max-content"
+            maxHeight={197}
+            placement="right"
+            onSelectionChange={(key) => {
+              setSelectedKey(key)
+            }}
+            onFooterClick={() => setShownLimit(shownLimit + shownStep)}
+            onOpenChange={(open) => {
+              if (!open) setShownLimit(shownStep)
+            }}
+            rightContent={
+              curItem && (
+                <ListBoxItemChipList
+                  maxVisible={0}
+                  showExtra
+                  chips={curItem.chips}
+                />
+              )
+            }
+            dropdownFooter={
+              shownLimit < items.length && (
+                <ListBoxFooterPlus>View more</ListBoxFooterPlus>
+              )
+            }
+          >
+            {items.slice(0, shownLimit).map(({ key, chips, version }) => (
+              <ListBoxItem
+                key={key}
+                label={version}
+                textValue={version}
+                rightContent={
+                  <ListBoxItemChipList
+                    maxVisible={1}
+                    showExtra
+                    chips={chips}
+                  />
+                }
+              />
+            ))}
+          </Select>
+        </div>
       </WrapWithIf>
 
       {/* MULTIPLE SELECT */}
-      <H4
-        subtitle
-        margin="0"
-        marginBottom="small"
-      >
-        Multiple select
-      </H4>
+      <H4>Multiple select</H4>
       <WrapWithIf
         condition={onFillLevel > 0}
         wrapper={
@@ -467,7 +522,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
             />
           ))}
         </Select>
-        <Flex justifyContent="right">
+        <div css={{ display: 'flex', justifyContent: 'right' }}>
           <Select
             label="Version"
             selectionMode="multiple"
@@ -506,9 +561,57 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
               />
             ))}
           </Select>
-        </Flex>
+        </div>
+
+        <div css={{ display: 'flex', justifyContent: 'right' }}>
+          <Select
+            label="Version"
+            selectionMode="multiple"
+            selectedKeys={selectedKeys}
+            onSelectionChange={(keys) => {
+              setSelectedKeys(keys)
+            }}
+            triggerButton={<IconFrameTrigger type="tertiary" />}
+            width="max-content"
+            maxHeight={197}
+            placement="right"
+            onFooterClick={() => setShownLimit(shownLimit + shownStep)}
+            onOpenChange={(open) => {
+              if (!open) setShownLimit(shownStep)
+            }}
+            rightContent={
+              curItem && (
+                <ListBoxItemChipList
+                  maxVisible={0}
+                  showExtra
+                  chips={curItem.chips}
+                />
+              )
+            }
+            dropdownFooter={
+              shownLimit < items.length && (
+                <ListBoxFooterPlus>View more</ListBoxFooterPlus>
+              )
+            }
+          >
+            {items.slice(0, shownLimit).map(({ key, chips, version }) => (
+              <ListBoxItem
+                key={key}
+                label={version}
+                textValue={version}
+                rightContent={
+                  <ListBoxItemChipList
+                    maxVisible={1}
+                    showExtra
+                    chips={chips}
+                  />
+                }
+              />
+            ))}
+          </Select>
+        </div>
       </WrapWithIf>
-    </Flex>
+    </div>
   )
 }
 

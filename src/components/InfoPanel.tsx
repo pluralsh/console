@@ -1,3 +1,5 @@
+// TODO: Replace grommet Layer with semi-compatible replacement ./Layer.tsx
+// Not sure if we need to support `plain` prop
 import { Layer } from 'grommet'
 import { Div, Flex, Span } from 'honorable'
 

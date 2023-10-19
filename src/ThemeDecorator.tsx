@@ -1,4 +1,3 @@
-import { Grommet } from 'grommet'
 import { type ComponentType, useEffect } from 'react'
 import {
   CssBaseline,
@@ -29,17 +28,15 @@ function ThemeDecorator(Story: ComponentType, context: any) {
   const styledTheme = colorMode === 'light' ? styledThemeLight : styledThemeDark
 
   return (
-    <Grommet plain>
-      <HonorableThemeProvider theme={honorableTheme}>
-        <StyledThemeProvider theme={styledTheme}>
-          <CssBaseline />
-          <StyledCss />
-          <Div padding="xlarge">
-            <Story />
-          </Div>
-        </StyledThemeProvider>
-      </HonorableThemeProvider>
-    </Grommet>
+    <HonorableThemeProvider theme={honorableTheme}>
+      <StyledThemeProvider theme={styledTheme}>
+        <CssBaseline />
+        <StyledCss />
+        <Div padding="xlarge">
+          <Story />
+        </Div>
+      </StyledThemeProvider>
+    </HonorableThemeProvider>
   )
 }
 
