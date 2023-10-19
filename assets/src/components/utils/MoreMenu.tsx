@@ -1,5 +1,35 @@
 import { IconFrame, MoreIcon, Select } from '@pluralsh/design-system'
-import { useState } from 'react'
+import { ComponentProps, forwardRef, useState } from 'react'
+import { useTheme } from 'styled-components'
+
+export const MoreMenuTrigger = forwardRef(
+  (
+    {
+      disabled,
+      ...props
+    }: { disabled?: boolean } & Partial<ComponentProps<typeof IconFrame>>,
+    ref
+  ) => {
+    const theme = useTheme()
+
+    return (
+      <IconFrame
+        ref={ref}
+        textValue="Menu"
+        clickable={!disabled}
+        size="medium"
+        icon={
+          <MoreIcon
+            color={disabled ? theme.colors['icon-disabled'] : undefined}
+          />
+        }
+        {...props}
+        // Set type after ...props to ensure it's not overridden by Select component cloning
+        type="tertiary"
+      />
+    )
+  }
+)
 
 export function MoreMenu({
   children,
@@ -22,16 +52,7 @@ export function MoreMenu({
         onSelectionChange(selectedKey)
       }}
       selectedKey={null}
-      triggerButton={
-        <IconFrame
-          textValue="Menu"
-          clickable={!disabled}
-          size="medium"
-          icon={<MoreIcon color={disabled ? 'icon-disabled' : undefined} />}
-          background="transparent"
-          border="none"
-        />
-      }
+      triggerButton={<MoreMenuTrigger disabled={disabled} />}
       {...props}
     >
       {children}

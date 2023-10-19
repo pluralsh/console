@@ -5,7 +5,6 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { Box } from 'grommet'
 import { VariableSizeList } from 'react-window-reversed'
 import {
   FixedSizeList as FixedList,
@@ -158,13 +157,20 @@ const ItemWrapper = React.memo(
       >
         {({ registerChild }) => (
           <div style={style}>
-            <Box
-              classNames={refreshKey}
+            <div
+              className={refreshKey}
               ref={(ref) => {
                 registerChild(ref)
                 setRowRef(ref)
               }}
-              margin={index === 0 ? { bottom: 'small' } : null}
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                marginBottom: index === 0 ? { bottom: 'small' } : null,
+                maxWidth: '100%',
+                minWidth: 0,
+                minHeight: 0,
+              }}
             >
               <Item
                 index={index}
@@ -174,7 +180,7 @@ const ItemWrapper = React.memo(
                 placeholder={placeholder}
                 mapper={mapper}
               />
-            </Box>
+            </div>
           </div>
         )}
       </CellMeasurer>
