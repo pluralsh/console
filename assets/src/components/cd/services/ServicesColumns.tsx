@@ -131,11 +131,11 @@ export const getColActions = ({ refetch }: { refetch: () => void }) =>
               alignItems: 'center',
             }}
           >
-            <DeleteService
+            <ServicesRollbackDeployment
               refetch={refetch}
               serviceDeployment={node}
             />
-            <ServicesRollbackDeployment
+            <DeleteService
               refetch={refetch}
               serviceDeployment={node}
             />
