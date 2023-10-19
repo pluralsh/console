@@ -24,6 +24,7 @@ fragment NodePool on NodePool {
   minSize
   maxSize
   instanceType
+  spot
 }
 
 fragment ApiDeprecation on ApiDeprecation {
