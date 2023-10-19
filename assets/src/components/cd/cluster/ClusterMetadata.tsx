@@ -1,5 +1,12 @@
 import { useOutletContext } from 'react-router-dom'
-import { Card, IconFrame, Prop, Table, Tooltip } from '@pluralsh/design-system'
+import {
+  Card,
+  CheckRoundedIcon,
+  IconFrame,
+  Prop,
+  Table,
+  Tooltip,
+} from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import moment from 'moment/moment'
 import isEmpty from 'lodash/isEmpty'
@@ -102,18 +109,16 @@ export const columns = [
   }),
   columnHelper.accessor((nodePool) => nodePool?.minSize, {
     id: 'minSize',
-    header: 'Min size',
+    header: 'Minimum size',
     enableSorting: true,
     enableGlobalFilter: true,
-    meta: { truncate: true },
     cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor((nodePool) => nodePool?.maxSize, {
     id: 'maxSize',
-    header: 'Max size',
+    header: 'Maximum size',
     enableSorting: true,
     enableGlobalFilter: true,
-    meta: { truncate: true },
     cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor((nodePool) => nodePool?.instanceType, {
@@ -123,6 +128,17 @@ export const columns = [
     enableGlobalFilter: true,
     meta: { truncate: true },
     cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor((nodePool) => nodePool?.spot, {
+    id: 'spot',
+    header: 'Spot',
+    cell: ({ getValue }) =>
+      getValue() && (
+        <IconFrame
+          icon={<CheckRoundedIcon color="icon-success" />}
+          type="floating"
+        />
+      ),
   }),
 ]
 
