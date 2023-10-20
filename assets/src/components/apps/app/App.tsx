@@ -201,7 +201,7 @@ function SideNavEntries({
                 }
               : {})}
           >
-            {subpaths ? (
+            {!isEmpty(subpaths) ? (
               <SideNavEntries
                 directory={subpaths}
                 pathname={pathname}

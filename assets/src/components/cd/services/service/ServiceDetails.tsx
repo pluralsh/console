@@ -153,7 +153,7 @@ function SideNavEntries({
                 }
               : {})}
           >
-            {subpaths ? (
+            {!isEmpty(subpaths) ? (
               <SideNavEntries
                 directory={subpaths}
                 pathname={pathname}
@@ -198,8 +198,9 @@ function ServiceDetailsBase() {
     () =>
       getDirectory({
         serviceDeployment,
+        docs,
       }).filter((entry) => entry.enabled),
-    [serviceDeployment]
+    [docs, serviceDeployment]
   )
 
   return (
