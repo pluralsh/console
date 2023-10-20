@@ -3,7 +3,7 @@ import { useQuery } from '@apollo/client'
 import moment from 'moment'
 import SubscriptionContext, {
   SubscriptionContextType,
-} from 'components/contexts//SubscriptionContext'
+} from 'components/contexts/SubscriptionContext'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import styled from 'styled-components'
 
