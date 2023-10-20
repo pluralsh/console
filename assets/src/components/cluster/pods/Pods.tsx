@@ -177,7 +177,7 @@ export default function AllPods() {
       return undefined
     }
     let pods = data.cachedPods
-      .map((pod) => ({ id: pod?.metadata?.namespace, ...pod } as PodWithId))
+      .map((pod) => ({ id: pod?.metadata?.namespace, ...pod }) as PodWithId)
       .filter((pod?: PodWithId): pod is PodWithId => !!pod) as PodWithId[]
 
     if (namespace) {

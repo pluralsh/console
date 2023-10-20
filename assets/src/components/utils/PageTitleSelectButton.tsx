@@ -27,6 +27,7 @@ export const PageTitleSelectButton = styled(
             subtitle2
             _hover={{ textDecoration: 'underline' }}
           >
+            {/* @ts-ignore */}
             {props.label}
           </Div>
           <DropdownArrowIcon className="dropdownIcon" />

@@ -18,7 +18,7 @@ function PluralProvider({ children }): ReactElement {
     pollInterval: 120_000,
   })
   const context = useMemo(
-    () => ({ context: data?.pluralContext } as ContextProps),
+    () => ({ context: data?.pluralContext }) as ContextProps,
     [data]
   )
 

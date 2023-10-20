@@ -33,6 +33,7 @@ export default function Changelog() {
   )
 
   const [tool, setTool] = useState<Key>(initialTool)
+  // @ts-ignore
   const tools = useMemo(() => grouped[repo] || [], [grouped, repo])
   const currentTool = useMemo(
     () => tools.find(({ tool: t }) => t === tool),
