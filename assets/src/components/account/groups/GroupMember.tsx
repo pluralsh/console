@@ -4,11 +4,12 @@ import {
   GroupMembersDocument,
   useDeleteGroupMemberMutation,
 } from 'generated/graphql'
-import { Box } from 'grommet'
+import { useTheme } from 'styled-components'
 
 import UserInfo from '../../utils/UserInfo'
 
 export default function GroupMember({ user, group, last, edit }: any) {
+  const theme = useTheme()
   const [mutation] = useDeleteGroupMemberMutation({
     variables: { groupId: group.id, userId: user.id },
     refetchQueries: [
@@ -23,16 +24,18 @@ export default function GroupMember({ user, group, last, edit }: any) {
       last={last}
       title=""
     >
-      <Box
-        flex={false}
-        fill="horizontal"
-        direction="row"
-        align="center"
+      <div
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          width: '100%',
+          columnGap: theme.spacing.small,
+        }}
       >
         <UserInfo
           user={user}
-          fill="horizontal"
           hue="lightest"
+          css={{ width: '100%' }}
         />
         {edit && (
           <IconFrame
@@ -43,7 +46,7 @@ export default function GroupMember({ user, group, last, edit }: any) {
             onClick={() => mutation()}
           />
         )}
-      </Box>
+      </div>
     </ListItem>
   )
 }

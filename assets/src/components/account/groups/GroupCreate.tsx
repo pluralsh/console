@@ -1,5 +1,4 @@
 import { useCallback, useContext, useState } from 'react'
-import { Box } from 'grommet'
 import { Button, Modal, ValidatedInput } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 import { GroupsDocument, useCreateGroupMutation } from 'generated/graphql'
@@ -7,10 +6,13 @@ import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
 import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModal'
 
+import { useTheme } from 'styled-components'
+
 import { appendConnection, updateCache } from '../../../utils/graphql'
 import { GqlError } from '../../utils/Alert'
 
 export default function GroupCreate({ q }: { q: string }) {
+  const theme = useTheme()
   const { availableFeatures } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.userManagement
   const [createModalVisible, setCreateModalVisible] = useState(false)
@@ -71,9 +73,12 @@ export default function GroupCreate({ q }: { q: string }) {
           </>
         }
       >
-        <Box
-          width="50vw"
-          gap="small"
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.medium,
+          }}
         >
           {error && (
             <GqlError
@@ -91,7 +96,7 @@ export default function GroupCreate({ q }: { q: string }) {
             value={description}
             onChange={({ target: { value } }) => setDescription(value)}
           />
-        </Box>
+        </div>
       </Modal>
       <BillingFeatureBlockModal
         open={blockModalVisible}

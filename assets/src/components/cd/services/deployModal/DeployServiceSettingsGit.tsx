@@ -1,5 +1,4 @@
 import {
-  Button,
   ComboBox,
   FormField,
   Input,
@@ -7,9 +6,6 @@ import {
 } from '@pluralsh/design-system'
 import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import { compareItems, rankItem } from '@tanstack/match-sorter-utils'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
-import { DeployServiceModal } from './DeployService'
 
 export function DeployServiceSettingsGit({
   repos,
@@ -92,30 +88,6 @@ export function DeployServiceSettingsGit({
           onChange={(e) => setGitFolder(e.currentTarget.value)}
         />
       </FormField>
-    </>
-  )
-}
-
-export function DeployService({ refetch }: { refetch: () => void }) {
-  const [isOpen, setIsOpen] = useState(false)
-
-  return (
-    <>
-      <Button
-        primary
-        onClick={() => {
-          setIsOpen(true)
-        }}
-      >
-        Deploy service
-      </Button>
-      <ModalMountTransition open={isOpen}>
-        <DeployServiceModal
-          refetch={refetch}
-          open={isOpen}
-          onClose={() => setIsOpen(false)}
-        />
-      </ModalMountTransition>
     </>
   )
 }

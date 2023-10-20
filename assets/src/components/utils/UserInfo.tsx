@@ -1,18 +1,26 @@
-import { Box } from 'grommet'
-import { Span } from 'honorable'
 import { AppIcon } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
+import { ComponentProps } from 'react'
 
 export default function UserInfo({
   user: { email, name, avatar },
   hue = 'lighter',
-  ...box
-}: any) {
+  className,
+}: {
+  user: { email: string; name: string; avatar: string }
+  hue?: ComponentProps<typeof AppIcon>['hue']
+  className?: string
+}) {
+  const theme = useTheme()
+
   return (
-    <Box
-      {...box}
-      direction="row"
-      gap="small"
-      align="center"
+    <div
+      className={className}
+      css={{
+        display: 'flex',
+        gap: theme.spacing.small,
+        alignItems: 'center',
+      }}
     >
       <AppIcon
         url={avatar}
@@ -21,10 +29,10 @@ export default function UserInfo({
         size="xsmall"
         hue={hue}
       />
-      <Box>
-        <Span fontWeight="bold">{name}</Span>
-        <Span color="text-light">{email}</Span>
-      </Box>
-    </Box>
+      <div css={{ display: 'flex', flexDirection: 'column' }}>
+        <span css={{ fontWeight: 'bold' }}>{name}</span>
+        <span css={{ color: theme.colors['text-light'] }}>{email}</span>
+      </div>
+    </div>
   )
 }

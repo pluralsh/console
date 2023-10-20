@@ -10,11 +10,13 @@ import {
   useCreateServiceDeploymentMutation,
   useGitRepositoriesQuery,
 } from 'generated/graphql'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { mapExistingNodes } from 'utils/graphql'
+
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import ModalAlt from '../../ModalAlt'
 
@@ -31,21 +33,34 @@ enum FormState {
   Secrets = 'secrets',
 }
 
+const StepTitle = styled.div(({ theme }) => ({
+  marginRight: theme.spacing.small,
+}))
+
+const stepBase = {
+  circleSize: 32,
+  iconSize: 16,
+  vertical: true,
+}
+
 const stepperSteps = [
   {
     key: FormState.Initial,
-    stepTitle: 'Service props',
+    stepTitle: <StepTitle>Service props</StepTitle>,
     IconComponent: GearTrainIcon,
+    ...stepBase,
   },
   {
     key: FormState.Git,
-    stepTitle: 'Repository',
+    stepTitle: <StepTitle>Repository</StepTitle>,
     IconComponent: GitHubIcon,
+    ...stepBase,
   },
   {
     key: FormState.Secrets,
-    stepTitle: 'Secrets',
+    stepTitle: <StepTitle>Secrets</StepTitle>,
     IconComponent: PadlockLockedIcon,
+    ...stepBase,
   },
 ]
 
@@ -216,11 +231,13 @@ export function DeployServiceModal({
     >
       <div
         css={{
+          display: 'flex',
           paddingTop: theme.spacing.medium,
           paddingBottom: theme.spacing.large,
         }}
       >
         <Stepper
+          compact
           steps={stepperSteps}
           stepIndex={
             formState === FormState.Initial
@@ -282,5 +299,29 @@ export function DeployServiceModal({
         )}
       </div>
     </ModalAlt>
+  )
+}
+
+export function DeployService({ refetch }: { refetch: () => void }) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        primary
+        onClick={() => {
+          setIsOpen(true)
+        }}
+      >
+        Deploy service
+      </Button>
+      <ModalMountTransition open={isOpen}>
+        <DeployServiceModal
+          refetch={refetch}
+          open={isOpen}
+          onClose={() => setIsOpen(false)}
+        />
+      </ModalMountTransition>
+    </>
   )
 }

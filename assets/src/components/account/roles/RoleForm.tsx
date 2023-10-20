@@ -1,4 +1,3 @@
-import { Div, Flex, P } from 'honorable'
 import {
   BriefcaseIcon,
   Button,
@@ -6,8 +5,8 @@ import {
   Stepper,
   ValidatedInput,
 } from '@pluralsh/design-system'
-import { useState } from 'react'
-import { StepperSteps } from '@pluralsh/design-system/dist/components/Stepper'
+import { ComponentProps, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
 
 import { GqlError } from '../../utils/Alert'
 
@@ -20,16 +19,20 @@ const stepBase = {
   vertical: true,
 }
 
-const steps: StepperSteps = [
+const StepTitle = styled.div(({ theme }) => ({
+  marginRight: theme.spacing.small,
+}))
+
+const steps: ComponentProps<typeof Stepper>['steps'] = [
   {
     key: 'create-repo',
-    stepTitle: <Div marginRight="small">Role info</Div>,
+    stepTitle: <StepTitle>Role info</StepTitle>,
     IconComponent: BriefcaseIcon,
     ...stepBase,
   },
   {
     key: 'choose-cloud',
-    stepTitle: <Div marginRight="small">Bindings </Div>,
+    stepTitle: <StepTitle>Bindings</StepTitle>,
     IconComponent: PeopleIcon,
     ...stepBase,
   },
@@ -53,54 +56,72 @@ export default function RoleForm({
   bindings,
   setBindings,
 }): any {
+  const theme = useTheme()
   const [step, setStep] = useState<0 | 1>(0)
   const permissions = Object.entries(PermissionTypes)
   const len = permissions.length
 
   return (
-    <Flex
-      direction="column"
-      gap="medium"
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.large,
+      }}
     >
-      <Flex>
+      <div css={{ display: 'flex' }}>
         <Stepper
           compact
           steps={steps}
           stepIndex={step}
         />
-      </Flex>
+      </div>
 
       {/* Role info */}
       {step === 0 && (
-        <Flex
-          direction="column"
-          gap="small"
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+          }}
         >
-          <ValidatedInput
-            label="Name"
-            placeholder="Role name"
-            value={attributes.name}
-            onChange={({ target: { value } }) =>
-              setAttributes({ ...attributes, name: value })
-            }
-          />
-          <ValidatedInput
-            label="Description"
-            placeholder="Role description"
-            value={attributes.description}
-            onChange={({ target: { value } }) =>
-              setAttributes({ ...attributes, description: value })
-            }
-          />
-          <P
-            body1
-            borderTop="1px solid border"
-            fontWeight={600}
-            paddingTop="large"
+          <section
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.medium,
+            }}
           >
-            Permissions
-          </P>
+            <ValidatedInput
+              label="Name"
+              placeholder="Role name"
+              value={attributes.name}
+              onChange={({ target: { value } }) =>
+                setAttributes({ ...attributes, name: value })
+              }
+            />
+            <ValidatedInput
+              label="Description"
+              placeholder="Role description"
+              value={attributes.description}
+              onChange={({ target: { value } }) =>
+                setAttributes({ ...attributes, description: value })
+              }
+            />
+          </section>
           <section>
+            <h3
+              css={{
+                margin: 0,
+                padding: 0,
+                ...theme.partials.text.body1Bold,
+                borderTop: theme.borders.default,
+                paddingTop: theme.spacing.large,
+              }}
+            >
+              Permissions
+            </h3>
             {permissions.map(([perm, description], i) => (
               <RolePermissionToggle
                 key={perm}
@@ -112,7 +133,7 @@ export default function RoleForm({
               />
             ))}
           </section>
-        </Flex>
+        </div>
       )}
 
       {/* Bindings */}
@@ -132,9 +153,12 @@ export default function RoleForm({
         />
       )}
 
-      <Flex
-        gap="medium"
-        justify="end"
+      <div
+        css={{
+          display: 'flex',
+          gap: theme.spacing.medium,
+          justifyContent: 'end',
+        }}
       >
         {step === 0 && (
           <>
@@ -169,7 +193,7 @@ export default function RoleForm({
             </Button>
           </>
         )}
-      </Flex>
-    </Flex>
+      </div>
+    </div>
   )
 }

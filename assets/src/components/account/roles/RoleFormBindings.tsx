@@ -1,7 +1,7 @@
-import { Box } from 'grommet'
 import { ValidatedInput } from '@pluralsh/design-system'
 import { useState } from 'react'
 import { BindingInput } from 'components/utils/BindingInput'
+import { useTheme } from 'styled-components'
 
 export default function RoleFormBindings({
   attributes,
@@ -9,14 +9,18 @@ export default function RoleFormBindings({
   bindings,
   setBindings,
 }: any) {
+  const theme = useTheme()
   const [repositories, setRepositories] = useState(
     attributes?.repositories?.join(', ')
   )
 
   return (
-    <Box
-      flex={false}
-      gap="small"
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        rowGap: theme.spacing.medium,
+      }}
     >
       <ValidatedInput
         label="App bindings"
@@ -53,6 +57,6 @@ export default function RoleFormBindings({
           )
         }
       />
-    </Box>
+    </div>
   )
 }

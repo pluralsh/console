@@ -39,7 +39,7 @@ import {
   ColStatus,
   getColActions,
 } from './ServicesColumns'
-import { DeployService } from './deployModal/DeployServiceSettingsGit'
+import { DeployService } from './deployModal/DeployService'
 import { ServicesFilters } from './ServicesFilters'
 
 const POLL_INTERVAL = 10 * 1000
