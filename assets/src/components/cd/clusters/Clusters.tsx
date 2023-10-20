@@ -15,10 +15,13 @@ import { useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
-import { A } from 'honorable'
+import { A, Spinner } from 'honorable'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { ColWithIcon } from 'components/utils/table/ColWithIcon'
+import {
+  ColWithIcon,
+  ColWithOptionalIcon,
+} from 'components/utils/table/ColWithIcon'
 import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
 import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
@@ -38,7 +41,7 @@ import { TableText } from '../../cluster/TableElements'
 import { nextSupportedVersion } from '../../../utils/semver'
 
 import ClusterUpgrade from './ClusterUpgrade'
-import ClusterHealthChip from './ClusterHealthChip'
+import { ClusterHealth } from './ClusterHealthChip'
 import CreateCluster from './create/CreateCluster'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
@@ -88,10 +91,10 @@ export const columns = [
       )
     },
   }),
-  columnHelper.accessor(({ node }) => node?.pingedAt, {
+  columnHelper.accessor(({ node }) => node, {
     id: 'health',
     header: 'Health',
-    cell: ({ getValue }) => <ClusterHealthChip pingedAt={getValue()} />,
+    cell: ({ getValue }) => <ClusterHealth cluster={getValue() || undefined} />,
   }),
   columnHelper.accessor(({ node }) => node, {
     id: 'version',
@@ -103,24 +106,39 @@ export const columns = [
     }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
-
+      const different =
+        !node?.self &&
+        node?.currentVersion &&
+        node?.version &&
+        node?.currentVersion !== node?.version
       return (
-        <div>
-          {node?.currentVersion && (
-            <>
-              <div>Current: v{node?.currentVersion}</div>
-              <div
-                css={{
-                  ...theme.partials.text.caption,
-                  color: theme.colors['text-xlight'],
-                }}
-              >
-                Target: v{node?.version}
-              </div>
-            </>
-          )}
-          {!node?.currentVersion && <>-</>}
-        </div>
+        <ColWithOptionalIcon
+          icon={
+            different ? (
+              <Spinner
+                color="icon-info"
+                size={16}
+              />
+            ) : undefined
+          }
+        >
+          <div>
+            {node?.currentVersion && (
+              <>
+                <div>Current: v{node?.currentVersion}</div>
+                <div
+                  css={{
+                    ...theme.partials.text.caption,
+                    color: theme.colors['text-xlight'],
+                  }}
+                >
+                  Target: v{node?.version}
+                </div>
+              </>
+            )}
+            {!node?.currentVersion && <>-</>}
+          </div>
+        </ColWithOptionalIcon>
       )
     },
   }),

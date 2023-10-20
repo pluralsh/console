@@ -56,6 +56,7 @@ fragment ClustersRow on Cluster {
   }
   currentVersion
   id
+  self
   name
   handle
   nodes {
@@ -69,6 +70,7 @@ fragment ClustersRow on Cluster {
       memory
     }
   }
+  installed
   pingedAt
   deletedAt
   provider {
