@@ -450,6 +450,57 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "#delete_provider/2" do
+    test "it can delete a given cluster provider" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, user)
+
+      {:ok, deleted} = Clusters.delete_provider(provider.id, user)
+
+      assert deleted.id == provider.id
+      assert deleted.deleted_at
+
+      %{service: svc} = Console.Repo.preload(deleted, [:service])
+      assert svc.deleted_at
+
+      assert_receive {:event, %PubSub.ProviderDeleted{item: ^deleted}}
+    end
+
+    test "users w/o write permissions cannot delete" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, user)
+
+      {:error, _} = Clusters.delete_provider(provider.id, insert(:user))
+    end
+
+    test "it cannot delete if there are any attached clusters" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, user)
+
+      insert(:cluster, provider: provider)
+
+      {:error, _} = Clusters.delete_provider(provider.id, user)
+    end
+  end
+
   describe "#create_provider_credential/3" do
     test "you can create credentials for a cluster provider if you have write access" do
       user = insert(:user)

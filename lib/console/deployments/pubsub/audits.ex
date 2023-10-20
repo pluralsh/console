@@ -7,6 +7,7 @@ defimpl Console.PubSub.Auditable, for: [
   Console.PubSub.ClusterDeleted,
   Console.PubSub.ProviderCreated,
   Console.PubSub.ProviderUpdated,
+  Console.PubSub.ProviderDeleted,
   Console.PubSub.ProviderCredentialCreated,
   Console.PubSub.ProviderCredentialDeleted,
   Console.PubSub.GitRepositoryCreated,
@@ -21,11 +22,21 @@ defimpl Console.PubSub.Auditable, for: [
     %Audit{
       type: type,
       action: action,
-      data: item,
+      item_id: item.id,
+      data: (if embeddable?(@for), do: item, else: nil),
       actor_id: user.id
     }
   end
   def audit(_), do: :ok
+
+  def embeddable?(Console.PubSub.ServiceCreated), do: true
+  def embeddable?(Console.PubSub.ServiceUpdated), do: true
+  def embeddable?(Console.PubSub.ServiceDeleted), do: true
+  def embeddable?(Console.PubSub.ClusterCreated), do: true
+  def embeddable?(Console.PubSub.ClusterUpdated), do: true
+  def embeddable?(Console.PubSub.ClusterDeleted), do: true
+  def embeddable?(Console.PubSub.DeploymentSettingsUpdated), do: false
+  def embeddable?(_), do: false
 
   def details(Console.PubSub.ServiceCreated), do: {:service, :create}
   def details(Console.PubSub.ServiceUpdated), do: {:service, :update}
@@ -35,6 +46,7 @@ defimpl Console.PubSub.Auditable, for: [
   def details(Console.PubSub.ClusterDeleted), do: {:cluster, :delete}
   def details(Console.PubSub.ProviderCreated), do: {:cluster_provider, :create}
   def details(Console.PubSub.ProviderUpdated), do: {:cluster_provider, :update}
+  def details(Console.PubSub.ProviderDeleted), do: {:cluster_provider, :delete}
   def details(Console.PubSub.ProviderCredentialCreated), do: {:provider_credential, :create}
   def details(Console.PubSub.ProviderCredentialDeleted), do: {:provider_credential, :delete}
   def details(Console.PubSub.GitRepositoryCreated), do: {:git_repository, :create}

@@ -32,6 +32,7 @@ config :console, Console.Cron,
     {"@daily", {Console.Deployments.Cron, :rotate_deploy_tokens, []}},
     {"@daily", {Console.Deployments.Cron, :prune_revisions, []}},
     {"@daily", {Console.Cron.Jobs, :prune_notifications, []}},
+    {"@daily", {Console.Cron.Jobs, :prune_audits, []}},
   ]
 
 config :console, :watchers, [

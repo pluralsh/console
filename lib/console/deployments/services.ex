@@ -375,6 +375,13 @@ defmodule Console.Deployments.Services do
     |> notify(:delete, user)
   end
 
+  def force_delete_service(service_id, %User{} = user) do
+    get_service!(service_id)
+    |> Ecto.Changeset.change(%{deleted_at: Timex.now()})
+    |> Repo.update()
+    |> notify(:delete, user)
+  end
+
   @doc """
   permissionless service delete for internal usage
   """

@@ -255,6 +255,12 @@ export type AwsSettingsAttributes = {
   secretAccessKey: Scalars['String']['input'];
 };
 
+export type AzureSettingsAttributes = {
+  clientId: Scalars['ID']['input'];
+  clientSecret: Scalars['String']['input'];
+  tenantId: Scalars['String']['input'];
+};
+
 export type BindingAttributes = {
   groupId?: InputMaybe<Scalars['ID']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -373,6 +379,7 @@ export type CloneAttributes = {
 
 export type CloudProviderSettingsAttributes = {
   aws?: InputMaybe<AwsSettingsAttributes>;
+  azure?: InputMaybe<AzureSettingsAttributes>;
   gcp?: InputMaybe<GcpSettingsAttributes>;
 };
 
@@ -507,6 +514,8 @@ export type ClusterProvider = {
   cloud: Scalars['String']['output'];
   /** a list of credentials eligible for this provider */
   credentials?: Maybe<Array<Maybe<ProviderCredential>>>;
+  /** when the cluster provider was deleted */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** whether the current user can edit this resource */
   editable?: Maybe<Scalars['Boolean']['output']>;
   /** the details of how cluster manifests will be synced from git when created with this provider */
@@ -1887,6 +1896,7 @@ export type RootMutationType = {
   deleteAccessToken?: Maybe<AccessToken>;
   deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
   deleteCluster?: Maybe<Cluster>;
+  deleteClusterProvider?: Maybe<ClusterProvider>;
   deleteGitRepository?: Maybe<GitRepository>;
   deleteGlobalService?: Maybe<GlobalService>;
   deleteGroup?: Maybe<Group>;
@@ -2047,6 +2057,11 @@ export type RootMutationTypeDeleteCertificateArgs = {
 
 
 export type RootMutationTypeDeleteClusterArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteClusterProviderArgs = {
   id: Scalars['ID']['input'];
 };
 

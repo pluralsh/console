@@ -19,6 +19,12 @@ defmodule Console.Schema.ClusterProvider do
         field :application_credentials, EncryptedString
       end
 
+      embeds_one :azure, Azure, on_replace: :update do
+        field :tenant_id,     :string
+        field :client_id,     :string
+        field :client_secret, EncryptedString
+      end
+
       field :context, :map
     end
 
@@ -27,6 +33,7 @@ defmodule Console.Schema.ClusterProvider do
       |> cast(attrs, ~w(context)a)
       |> cast_embed(:aws, with: &aws_changeset/2)
       |> cast_embed(:gcp, with: &gcp_changeset/2)
+      |> cast_embed(:azure, with: &azure_changeset/2)
     end
 
     def aws_changeset(model, attrs \\ %{}) do
@@ -40,6 +47,12 @@ defmodule Console.Schema.ClusterProvider do
       |> cast(attrs, ~w(application_credentials)a)
       |> validate_required(~w(application_credentials)a)
     end
+
+    def azure_changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(tenant_id client_id client_secret)a)
+      |> validate_required(~w(tenant_id client_id client_secret)a)
+    end
   end
 
   schema "cluster_providers" do
@@ -49,6 +62,7 @@ defmodule Console.Schema.ClusterProvider do
     field :self,            :boolean
     field :write_policy_id, :binary_id
     field :read_policy_id,  :binary_id
+    field :deleted_at,      :utc_datetime_usec
 
     embeds_one :cloud_settings, CloudSettings, on_replace: :update
     embeds_one :git, Service.Git, on_replace: :update

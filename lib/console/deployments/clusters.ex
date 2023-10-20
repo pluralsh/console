@@ -38,6 +38,12 @@ defmodule Console.Deployments.Clusters do
 
   def get_cluster_by_handle!(handle), do: Console.Repo.get_by!(Cluster, handle: handle)
 
+  def has_cluster?(%ClusterProvider{id: id}), do: has_cluster?(id)
+  def has_cluster?(provider_id) do
+    Cluster.for_provider(provider_id)
+    |> Repo.exists?()
+  end
+
   def control_plane(%Cluster{id: id, self: true}), do: Kazan.Server.in_cluster()
   def control_plane(%Cluster{id: id, kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
   def control_plane(%Cluster{id: id} = cluster) do
@@ -381,17 +387,6 @@ defmodule Console.Deployments.Clusters do
   end
 
   @doc """
-  It can delete a CAPI provider, will throw if there are clusters still attached
-  """
-  @spec delete_provider(binary, User.t) :: cluster_provider_resp
-  def delete_provider(id, %User{} = user) do
-    get_provider!(id)
-    |> allow(user, :create)
-    |> when_ok(:delete)
-    |> notify(:delete, user)
-  end
-
-  @doc """
   It can create a new provider credential to be used for multi-tenant capi creates.
   """
   @spec create_provider_credential(map, binary, User.t) :: credential_resp
@@ -440,6 +435,33 @@ defmodule Console.Deployments.Clusters do
     end)
     |> execute(extract: :provider)
     |> notify(:update, user)
+  end
+
+  @doc """
+  Deletes a cluster provider.  This will fail if:
+  * user doesn't have write perms on the provider
+  * there are clusters tied to the provider
+  """
+  @spec delete_provider(binary, User.t) :: cluster_provider_resp
+  def delete_provider(id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:provider, fn _ ->
+      get_provider!(id)
+      |> Ecto.Changeset.change(%{deleted_at: Timex.now()})
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:exists, fn %{provider: %{id: id} = provider} ->
+      case has_cluster?(id) do
+        true -> {:error, "cannot delete providers with bound clusters"}
+        false -> {:ok, provider}
+      end
+    end)
+    |> add_operation(:svc, fn %{provider: %{service_id: svc_id}} ->
+      Services.force_delete_service(svc_id, user)
+    end)
+    |> execute(extract: :provider)
+    |> notify(:delete, user)
   end
 
   @doc """

@@ -295,6 +295,8 @@ type RootMutationType {
 
   updateClusterProvider(id: ID!, attributes: ClusterProviderUpdateAttributes!): ClusterProvider
 
+  deleteClusterProvider(id: ID!): ClusterProvider
+
   createProviderCredential(attributes: ProviderCredentialAttributes!, name: String!): ProviderCredential
 
   deleteProviderCredential(id: ID!): ProviderCredential
@@ -881,6 +883,7 @@ input ClusterProviderUpdateAttributes {
 input CloudProviderSettingsAttributes {
   aws: AwsSettingsAttributes
   gcp: GcpSettingsAttributes
+  azure: AzureSettingsAttributes
 }
 
 input ProviderCredentialAttributes {
@@ -896,6 +899,12 @@ input AwsSettingsAttributes {
 
 input GcpSettingsAttributes {
   applicationCredentials: String!
+}
+
+input AzureSettingsAttributes {
+  tenantId: String!
+  clientId: ID!
+  clientSecret: String!
 }
 
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -923,6 +932,9 @@ type ClusterProvider {
 
   "a list of credentials eligible for this provider"
   credentials: [ProviderCredential]
+
+  "when the cluster provider was deleted"
+  deletedAt: DateTime
 
   "the kubernetes versions this provider currently supports"
   supportedVersions: [String]

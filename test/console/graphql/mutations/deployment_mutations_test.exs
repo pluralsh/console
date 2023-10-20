@@ -204,6 +204,31 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "deleteClusterProvider" do
+    test "it can delete a given cluster provider" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, user)
+
+      {:ok, %{data: %{"deleteClusterProvider" => update}}} = run_query("""
+        mutation create($id: ID!) {
+          deleteClusterProvider(id: $id) {
+            id
+            deletedAt
+          }
+        }
+      """, %{"id" => provider.id}, %{current_user: user})
+
+      assert update["id"] == provider.id
+      assert update["deletedAt"]
+    end
+  end
+
   describe "createServiceDeployment" do
     test "it can create a new service" do
       cluster = insert(:cluster)

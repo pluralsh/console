@@ -40,6 +40,7 @@ config :console,
   cluster_name: "default",
   git_commit: "abd132",
   provider: :aws,
+  audit_expiry: 30,
   cache_adapter: Console.Cache,
   local_cache: Console.LocalCache,
   version: Mix.Project.config[:version]

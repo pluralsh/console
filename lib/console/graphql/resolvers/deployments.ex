@@ -194,6 +194,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def update_provider(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.update_provider(attrs, id, user)
 
+  def delete_provider(%{id: id}, %{context: %{current_user: user}}),
+    do: Clusters.delete_provider(id, user)
+
   def create_provider_credential(%{attributes: attrs, name: name}, %{context: %{current_user: user}}),
     do: Clusters.create_provider_credential(attrs, name, user)
 

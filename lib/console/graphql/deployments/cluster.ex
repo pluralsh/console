@@ -88,8 +88,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :cloud_provider_settings_attributes do
-    field :aws, :aws_settings_attributes
-    field :gcp, :gcp_settings_attributes
+    field :aws,   :aws_settings_attributes
+    field :gcp,   :gcp_settings_attributes
+    field :azure, :azure_settings_attributes
   end
 
   input_object :provider_credential_attributes do
@@ -107,6 +108,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :application_credentials, non_null(:string)
   end
 
+  input_object :azure_settings_attributes do
+    field :tenant_id,     non_null(:string)
+    field :client_id,     non_null(:id)
+    field :client_secret, non_null(:string)
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,          non_null(:id), description: "the id of this provider"
@@ -117,6 +124,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :repository,  :git_repository, resolve: dataloader(Deployments), description: "the repository used to serve cluster manifests"
     field :service,     :service_deployment, resolve: dataloader(Deployments), description: "the service of the CAPI controller itself"
     field :credentials, list_of(:provider_credential), resolve: dataloader(ProviderCredential), description: "a list of credentials eligible for this provider"
+    field :deleted_at,  :datetime, description: "when the cluster provider was deleted"
 
     field :supported_versions, list_of(:string), description: "the kubernetes versions this provider currently supports",
       resolve: fn provider, _, _ -> {:ok, ClusterProvider.supported_versions(provider)} end
@@ -353,6 +361,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :attributes, non_null(:cluster_provider_update_attributes)
 
       safe_resolve &Deployments.update_provider/2
+    end
+
+    field :delete_cluster_provider, :cluster_provider do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_provider/2
     end
 
     field :create_provider_credential, :provider_credential do
