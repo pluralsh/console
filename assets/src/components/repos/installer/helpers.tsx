@@ -136,8 +136,8 @@ const install = async (
   const promises: Array<Promise<FetchResult<any>>> = []
 
   for (const installableApp of installableApps) {
-    const dependencies = apps.filter((app) =>
-      app.dependencyOf?.has(installableApp.label!)
+    const dependencies = apps.filter(
+      (app) => app.dependencyOf?.has(installableApp.label!)
     )
     const context = [...dependencies, installableApp].reduce(
       (acc, app) => ({ ...acc, [app.label!]: app.data.context || {} }),
