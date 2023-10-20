@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { GitHubLogoIcon } from '@pluralsh/design-system'
+import { GitHubLogoIcon, Tooltip } from '@pluralsh/design-system'
 import { ServiceDeploymentsRowFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
@@ -50,9 +50,27 @@ export const ColCluster = columnHelper.accessor(
   }
 )
 
-export const ColRepo = columnHelper.accessor(({ node }) => node, {
-  id: 'repository',
-  header: 'Repository',
+export const ColRepo = columnHelper.accessor(
+  ({ node }) => node?.repository?.url,
+  {
+    id: 'repository',
+    header: 'Repository',
+    enableSorting: true,
+    meta: { truncate: true },
+    cell: ({ getValue }) => (
+      <ColWithIcon
+        truncateLeft
+        icon={<GitHubLogoIcon />}
+      >
+        {getValue()}
+      </ColWithIcon>
+    ),
+  }
+)
+
+export const ColRef = columnHelper.accessor(({ node }) => node, {
+  id: 'gitLocation',
+  header: 'Git Location',
   enableSorting: true,
   meta: { truncate: true },
   cell: ({ getValue }) => {
@@ -61,15 +79,15 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
     if (!svc) return null
     const {
       git: { ref, folder },
+      message,
     } = svc
 
     return (
-      <ColWithIcon
-        truncateLeft
-        icon={<GitHubLogoIcon />}
-      >
-        {svc.repository?.url}@{ref}:{folder}
-      </ColWithIcon>
+      <Tooltip label={message || ''}>
+        <span>
+          {ref}@{folder}
+        </span>
+      </Tooltip>
     )
   },
 })
