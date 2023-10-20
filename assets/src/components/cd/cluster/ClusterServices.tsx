@@ -17,6 +17,7 @@ import {
 import {
   ColCluster,
   ColLastActivity,
+  ColRef,
   ColRepo,
   ColServiceDeployment,
   ColStatus,
@@ -46,6 +47,7 @@ export default function ClusterServices() {
       ColServiceDeployment,
       ColCluster,
       ColRepo,
+      ColRef,
       ColLastActivity,
       ColStatus,
       getColActions({ refetch }),
