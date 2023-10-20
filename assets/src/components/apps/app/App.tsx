@@ -57,8 +57,6 @@ export function getDocsData(
     const label = headings?.[0]?.title || `Page ${i}`
     const path = `docs/${id}`
 
-    console.log('doc', doc)
-
     const subpaths = headings
       .map((heading) => {
         if (heading.level === 3 && heading.id && heading.title) {
