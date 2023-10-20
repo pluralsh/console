@@ -1,6 +1,35 @@
 import { useEffect, useState } from 'react'
 import moment from 'moment'
 import { Chip, Tooltip } from '@pluralsh/design-system'
+import { ClustersRowFragment } from 'generated/graphql'
+
+export function ClusterHealth({
+  cluster,
+  size = 'medium',
+}: {
+  cluster?: ClustersRowFragment
+  size?: 'small' | 'medium' | 'large'
+}) {
+  if (!cluster?.installed) {
+    return (
+      <Tooltip label="The deploy agent still needs to be installed in this cluster">
+        <Chip
+          severity="info"
+          size={size}
+        >
+          Pending
+        </Chip>
+      </Tooltip>
+    )
+  }
+
+  return (
+    <ClusterHealthChip
+      pingedAt={cluster.pingedAt}
+      size={size}
+    />
+  )
+}
 
 export default function ClusterHealthChip({
   pingedAt,

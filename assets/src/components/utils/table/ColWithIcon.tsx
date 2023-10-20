@@ -27,6 +27,42 @@ const ColWithIconSC = styled.div(({ theme }) => ({
   },
 }))
 
+export function ColWithOptionalIcon({
+  icon,
+  children,
+  truncateLeft = false,
+  ...props
+}: Merge<
+  ComponentProps<typeof ColWithIconSC>,
+  {
+    icon?: string | ComponentProps<typeof AppIcon>['icon']
+    truncateLeft?: boolean
+  }
+>) {
+  return (
+    <ColWithIconSC {...props}>
+      {icon && (
+        <div className="icon">
+          <AppIcon
+            spacing="padding"
+            size="xxsmall"
+            icon={typeof icon !== 'string' ? icon : undefined}
+            url={typeof icon === 'string' ? icon : undefined}
+          />
+        </div>
+      )}
+      <div className={classNames('content', { truncateLeft: 'truncateLeft' })}>
+        <WrapWithIf
+          condition={truncateLeft}
+          wrapper={<span />}
+        >
+          {children}
+        </WrapWithIf>
+      </div>
+    </ColWithIconSC>
+  )
+}
+
 export function ColWithIcon({
   icon,
   children,
