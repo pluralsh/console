@@ -17,6 +17,7 @@ config :console, :consumers, [
   Console.PubSub.Consumers.Recurse,
   Console.PubSub.Consumers.Rtc,
   Console.PubSub.Consumers.Audit,
+  Console.Deployments.PubSub.Broadcast,
 ]
 
 config :console, Console.Cron,

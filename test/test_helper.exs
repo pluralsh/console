@@ -26,6 +26,7 @@ Mimic.copy(Kube.Client)
 Mimic.copy(Console.Cached.VPN)
 Mimic.copy(Kube.Utils)
 Mimic.copy(Console.Deployments.Clusters)
+Mimic.copy(Phoenix.Channel.Server)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)

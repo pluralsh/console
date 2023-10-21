@@ -35,6 +35,10 @@ defmodule ConsoleWeb.ChannelCase do
         {:ok, token, _} = Console.Guardian.encode_and_sign(user)
         connect(ConsoleWeb.UserSocket, %{"token" => "Bearer #{token}"}, connect_info: %{})
       end
+
+      def cluster_socket(cluster) do
+        connect(ConsoleWeb.ExternalSocket, %{"token" => cluster.deploy_token}, connect_info: %{})
+      end
     end
   end
 
