@@ -13,7 +13,14 @@ export default function DecoratedName({ deletedAt, children }) {
       }}
     >
       {children}
-      {deletedAt && <Chip severity="neutral">Deleting</Chip>}
+      {deletedAt && (
+        <Chip
+          loading
+          severity="neutral"
+        >
+          Deleting
+        </Chip>
+      )}
     </div>
   )
 }

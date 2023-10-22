@@ -29,6 +29,7 @@ export default function Providers() {
   const theme = useTheme()
   const { data, error, refetch } = useClusterProvidersQuery({
     pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
   })
   const columns = useMemo(
     () => [ColProvider, ColName, getColActions({ refetch })],

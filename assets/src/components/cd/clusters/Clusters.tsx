@@ -40,6 +40,8 @@ import { TableText } from '../../cluster/TableElements'
 
 import { nextSupportedVersion } from '../../../utils/semver'
 
+import DecoratedName from '../services/DecoratedName'
+
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
 import CreateCluster from './create/CreateCluster'
@@ -51,6 +53,24 @@ export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
+function StackedText({ first, second }) {
+  const theme = useTheme()
+
+  return (
+    <>
+      <div>{first}</div>
+      <div
+        css={{
+          ...theme.partials.text.caption,
+          color: theme.colors['text-xlight'],
+        }}
+      >
+        {second}
+      </div>
+    </>
+  )
+}
+
 export const columns = [
   columnHelper.accessor(({ node }) => node, {
     id: 'cluster',
@@ -60,13 +80,22 @@ export const columns = [
 
       return (
         <ColWithIcon icon={<ClusterIcon width={16} />}>
-          <A
-            as={Link}
-            to={`/cd/clusters/${cluster?.id}`}
-            whiteSpace="nowrap"
-          >
-            {cluster?.name} (@{cluster?.handle})
-          </A>
+          <DecoratedName deletedAt={cluster?.deletedAt}>
+            <div>
+              <StackedText
+                first={
+                  <A
+                    as={Link}
+                    to={`/cd/clusters/${cluster?.id}`}
+                    whiteSpace="nowrap"
+                  >
+                    {cluster?.name}
+                  </A>
+                }
+                second={`handle: ${cluster?.handle}`}
+              />
+            </div>
+          </DecoratedName>
         </ColWithIcon>
       )
     },
@@ -105,12 +134,12 @@ export const columns = [
       },
     }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
-      const theme = useTheme()
       const different =
         !node?.self &&
         node?.currentVersion &&
         node?.version &&
         node?.currentVersion !== node?.version
+
       return (
         <ColWithOptionalIcon
           icon={
@@ -124,17 +153,10 @@ export const columns = [
         >
           <div>
             {node?.currentVersion && (
-              <>
-                <div>Current: v{node?.currentVersion}</div>
-                <div
-                  css={{
-                    ...theme.partials.text.caption,
-                    color: theme.colors['text-xlight'],
-                  }}
-                >
-                  Target: v{node?.version}
-                </div>
-              </>
+              <StackedText
+                first={`Current: v${node?.currentVersion}`}
+                second={`Target: v${node?.version}`}
+              />
             )}
             {!node?.currentVersion && <>-</>}
           </div>

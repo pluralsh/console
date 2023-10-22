@@ -7,7 +7,10 @@ import { useTheme } from 'styled-components'
 
 import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 
+import DecoratedName from '../services/DecoratedName'
+
 import { UpdateProvider } from './UpdateProvider'
+import { DeleteProvider } from './DeleteProvider'
 
 const columnHelper = createColumnHelper<Edge<ClusterProviderFragment>>()
 
@@ -31,13 +34,21 @@ export const ColProvider = columnHelper.accessor(({ node }) => node?.cloud, {
   },
 })
 
-export const ColName = columnHelper.accessor(({ node }) => node?.name, {
+export const ColName = columnHelper.accessor(({ node }) => node, {
   id: 'name',
   header: 'Name',
   enableSorting: true,
   enableGlobalFilter: true,
   meta: { truncate: true },
-  cell: ({ getValue }) => getValue(),
+  cell: ({ getValue }) => {
+    const provider = getValue()
+
+    return (
+      <DecoratedName deletedAt={provider?.deletedAt}>
+        {provider?.name}
+      </DecoratedName>
+    )
+  },
 })
 
 export const ColRepo = columnHelper.accessor(
@@ -84,6 +95,12 @@ export const getColActions = ({ refetch }: { refetch: () => void }) =>
           >
             {node.editable && (
               <UpdateProvider
+                provider={node}
+                refetch={refetch}
+              />
+            )}
+            {node.editable && (
+              <DeleteProvider
                 provider={node}
                 refetch={refetch}
               />

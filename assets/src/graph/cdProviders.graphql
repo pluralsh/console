@@ -17,6 +17,7 @@ fragment ClusterProvider on ClusterProvider {
     name
     namespace
   }
+  deletedAt
   insertedAt
   updatedAt
 }
@@ -42,6 +43,12 @@ mutation UpdateClusterProvider(
   $attributes: ClusterProviderUpdateAttributes!
 ) {
   updateClusterProvider(id: $id, attributes: $attributes) {
+    ...ClusterProvider
+  }
+}
+
+mutation DeleteClusterProvider($id: ID!) {
+  deleteClusterProvider(id: $id) {
     ...ClusterProvider
   }
 }
