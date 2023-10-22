@@ -14,6 +14,10 @@ defmodule Console.Schema.Revision do
     timestamps()
   end
 
+  def for_sha(query \\ __MODULE__, sha) do
+    from(r in query, where: r.sha == ^sha)
+  end
+
   def for_service(query \\ __MODULE__, service_id) do
     from(r in query, where: r.service_id == ^service_id)
   end
@@ -35,6 +39,7 @@ defmodule Console.Schema.Revision do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> put_change(:id, Piazza.Ecto.UUID.generate_monotonic())
     |> cast_embed(:git)
     |> cast_assoc(:configuration)
     |> validate_required(~w(version)a)

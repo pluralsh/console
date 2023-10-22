@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.Cluster
   import Console.Deployments.Policies, only: [allow: 3]
-  alias Console.Deployments.{Clusters, Services, Git, Settings, Global}
+  alias Console.Deployments.{Clusters, Services, Git, Settings, Global, Pipelines}
   alias Console.Schema.{
     Cluster,
     ClusterNodePool,
@@ -17,9 +17,23 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     User,
     ServiceError,
     ClusterRevision,
-    ProviderCredential
+    ProviderCredential,
+    Pipeline,
+    PipelineStage,
+    PipelineEdge,
+    StageService,
+    PipelinePromotion,
+    PromotionCriteria,
+    PromotionService,
   }
 
+  def query(Pipeline, _), do: Pipeline
+  def query(PipelineStage, _), do: PipelineStage
+  def query(PipelineEdge, _), do: PipelineEdge
+  def query(StageService, _), do: StageService
+  def query(PipelinePromotion, _), do: PipelinePromotion
+  def query(PromotionCriteria, _), do: PromotionCriteria
+  def query(PromotionService, _), do: PromotionService
   def query(ServiceError, _), do: ServiceError
   def query(ProviderCredential, _), do: ProviderCredential
   def query(Tag, _), do: Tag
@@ -53,6 +67,13 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> service_filters(args)
     |> maybe_search(Cluster, args)
     |> Service.ordered()
+    |> paginate(args)
+  end
+
+  def list_pipelines(args, %{context: %{current_user: user}}) do
+    Pipeline.for_user(user)
+    |> Pipeline.ordered()
+    |> maybe_search(Pipeline, args)
     |> paginate(args)
   end
 
@@ -148,6 +169,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def resolve_service(%{id: id}, ctx) do
     Services.get_service!(id)
     |> allow(actor(ctx), :read)
+  end
+
+  def resolve_pipeline(%{id: id}, %{context: %{current_user: user}}) do
+    Pipelines.get_pipeline!(id)
+    |> allow(user, :read)
   end
 
   defp actor(%{context: %{current_user: %User{} = user}}), do: user
@@ -265,6 +291,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def merge_service(%{id: id, configuration: config}, %{context: %{current_user: user}}),
     do: Services.merge_service(config, id, user)
+
+  def upsert_pipeline(%{name: name, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Pipelines.upsert(attrs, name, user)
 
   def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
 

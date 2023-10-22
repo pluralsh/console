@@ -16,6 +16,11 @@ defmodule Console.Deployments.Services do
   def get_service_by_name!(cid, name), do: Console.Repo.get_by!(Service, name: name, cluster_id: cid)
   def get_service_by_name(cid, name), do: Console.Repo.get_by(Service, name: name, cluster_id: cid)
 
+  def get_service_by_handle!(handle, name) do
+    Service.for_cluster_handle(handle)
+    |> Repo.get_by!(name: name)
+  end
+
   def get_revision!(id), do: Repo.get!(Revision, id)
 
   def tarball(%Service{id: id}), do: api_url("v1/git/tarballs?id=#{id}")
@@ -405,9 +410,10 @@ defmodule Console.Deployments.Services do
   @doc """
   Fetches a service's configuration from the configured store
   """
-  @spec configuration(Service.t) :: Store.secrets_resp
+  @spec configuration(Service.t | Revision.t) :: Store.secrets_resp
   def configuration(%Service{revision_id: nil}), do: {:ok, %{}}
   def configuration(%Service{revision_id: revision_id}), do: secret_store().fetch(revision_id)
+  def configuration(%Revision{id: id}), do: secret_store().fetch(id)
 
   @doc """
   fetches all revisions of a service
@@ -469,14 +475,14 @@ defmodule Console.Deployments.Services do
     Path.join([Console.conf(:ext_url), "ext", path])
   end
 
-  defp merge_configuration(secrets, [_ | _] = config) do
+  def merge_configuration(secrets, [_ | _] = config) do
     Enum.reduce(config, secrets, fn
       %{name: k, value: nil}, acc -> Map.delete(acc, k)
       %{name: k, value: v}, acc -> Map.put(acc, k, v)
     end)
     |> merge_configuration(nil)
   end
-  defp merge_configuration(secrets, _), do: Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
+  def merge_configuration(secrets, _), do: Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
 
   defp secret_store(), do: Console.conf(:secret_store)
 

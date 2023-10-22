@@ -817,4 +817,54 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert settings["enabled"]
     end
   end
+
+  describe "savePipeline" do
+    test "it will create a new pipeline" do
+      user = admin_user()
+      [svc, svc2] = insert_list(2, :service)
+
+      {:ok, %{data: %{"savePipeline" => pipeline}}} = run_query("""
+        mutation Save($name: String!, $attributes: PipelineAttributes!) {
+          savePipeline(name: $name, attributes: $attributes) {
+            id
+            name
+            stages {
+              name
+              services {
+                id
+                service { id }
+                criteria { source { id } secrets }
+              }
+            }
+            edges { from { id } to { id } }
+          }
+        }
+      """, %{"name" => "test", "attributes" => %{
+        "stages" => [
+          %{"name" => "dev", "services" => [%{"name" => svc.name, "handle" => svc.cluster.handle}]},
+          %{"name" => "prod", "services" => [
+            %{"name" => svc2.name, "handle" => svc2.cluster.handle, "criteria" => %{
+              "name" => svc.name,
+              "handle" => svc.cluster.handle,
+              "secrets" => ["test-secret"]
+            }}
+          ]}
+        ],
+        "edges" => [%{"from" => "dev", "to" => "prod"}]
+      }}, %{current_user: user})
+
+      assert pipeline["id"]
+      assert pipeline["name"] == "test"
+      [dev, prod] = pipeline["stages"]
+
+      assert dev["name"] == "dev"
+      assert hd(dev["services"])["service"]["id"] == svc.id
+
+      assert prod["name"] == "prod"
+      %{"services" => [service]} = prod
+      assert service["service"]["id"] == svc2.id
+      assert service["criteria"]["source"]["id"] == svc.id
+      assert service["criteria"]["secrets"] == ["test-secret"]
+    end
+  end
 end

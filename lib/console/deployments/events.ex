@@ -23,3 +23,8 @@ defmodule Console.PubSub.DeploymentSettingsUpdated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.GlobalServiceCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.GlobalServiceDeleted, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.PipelineUpserted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.PipelineDeleted, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.PromotionCreated, do: use Piazza.PubSub.Event

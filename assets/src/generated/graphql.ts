@@ -1540,6 +1540,93 @@ export enum Permission {
   Read = 'READ'
 }
 
+/** a release pipeline, composed of multiple stages each with potentially multiple services */
+export type Pipeline = {
+  __typename?: 'Pipeline';
+  /** edges linking two stages w/in the pipeline in a full DAG */
+  edges?: Maybe<Array<Maybe<PipelineStageEdge>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of the pipeline */
+  name: Scalars['String']['output'];
+  /** the stages of this pipeline */
+  stages?: Maybe<Array<Maybe<PipelineStage>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** the top level input object for creating/deleting pipelines */
+export type PipelineAttributes = {
+  edges?: InputMaybe<Array<InputMaybe<PipelineEdgeAttributes>>>;
+  stages?: InputMaybe<Array<InputMaybe<PipelineStageAttributes>>>;
+};
+
+export type PipelineConnection = {
+  __typename?: 'PipelineConnection';
+  edges?: Maybe<Array<Maybe<PipelineEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PipelineEdge = {
+  __typename?: 'PipelineEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Pipeline>;
+};
+
+/** specification of an edge between two pipeline stages */
+export type PipelineEdgeAttributes = {
+  /** the name of the pipeline stage this edge emits from */
+  from?: InputMaybe<Scalars['String']['input']>;
+  /** stage id the edge is from, can also be specified by name */
+  fromId?: InputMaybe<Scalars['ID']['input']>;
+  /** the name of the pipeline stage this edge points to */
+  to?: InputMaybe<Scalars['String']['input']>;
+  /** stage id the edge is to, can also be specified by name */
+  toId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** a representation of an individual pipeline promotion, which is a list of services/revisions and timestamps to determine promotion status */
+export type PipelinePromotion = {
+  __typename?: 'PipelinePromotion';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time this promotion was fully promoted, it's no longer pending if promoted_at > revised_at */
+  promotedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time this promotion was updated */
+  revisedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the services included in this promotion */
+  services?: Maybe<Array<Maybe<PromotionService>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** a pipeline stage, has a list of services and potentially a promotion which might be pending */
+export type PipelineStage = {
+  __typename?: 'PipelineStage';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of this stage (eg dev, prod, staging) */
+  name: Scalars['String']['output'];
+  /** a promotion which might be outstanding for this stage */
+  promotion?: Maybe<PipelinePromotion>;
+  /** the services within this stage */
+  services?: Maybe<Array<Maybe<StageService>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** specification of a stage of a pipeline */
+export type PipelineStageAttributes = {
+  name: Scalars['String']['input'];
+  services?: InputMaybe<Array<InputMaybe<StageServiceAttributes>>>;
+};
+
+export type PipelineStageEdge = {
+  __typename?: 'PipelineStageEdge';
+  from: PipelineStage;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  to: PipelineStage;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type Plan = {
   __typename?: 'Plan';
   id?: Maybe<Scalars['ID']['output']>;
@@ -1684,6 +1771,42 @@ export type PrometheusDatasource = {
   format?: Maybe<Scalars['String']['output']>;
   legend?: Maybe<Scalars['String']['output']>;
   query: Scalars['String']['output'];
+};
+
+/** how a promotion for a service will be performed */
+export type PromotionCriteria = {
+  __typename?: 'PromotionCriteria';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether you want to copy any configuration values from the source service */
+  secrets?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the source service in a prior stage to promote settings from */
+  source?: Maybe<ServiceDeployment>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** actions to perform if this stage service were promoted */
+export type PromotionCriteriaAttributes = {
+  /** the handle of the cluster for the source service */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  /** the name of the source service */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the secrets to copy over in a promotion */
+  secrets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** the id of the service to promote from */
+  sourceId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** a service to be potentially promoted */
+export type PromotionService = {
+  __typename?: 'PromotionService';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the revision of the service to promote */
+  revision?: Maybe<Revision>;
+  /** a service to promote */
+  service?: Maybe<ServiceDeployment>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 /** a cloud credential that can be used while creating new clusters */
@@ -1928,6 +2051,8 @@ export type RootMutationType = {
   restorePostgres?: Maybe<Postgresql>;
   /** rewires this service to use the given revision id */
   rollbackService?: Maybe<ServiceDeployment>;
+  /** upserts a pipeline with a given name */
+  savePipeline?: Maybe<Pipeline>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
   updateCluster?: Maybe<Cluster>;
@@ -2216,6 +2341,12 @@ export type RootMutationTypeRollbackServiceArgs = {
 };
 
 
+export type RootMutationTypeSavePipelineArgs = {
+  attributes: PipelineAttributes;
+  name: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeSignInArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -2362,6 +2493,8 @@ export type RootQueryType = {
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   nodes?: Maybe<Array<Maybe<Node>>>;
   notifications?: Maybe<NotificationConnection>;
+  pipeline?: Maybe<Pipeline>;
+  pipelines?: Maybe<PipelineConnection>;
   pluralContext?: Maybe<PluralContext>;
   pod?: Maybe<Pod>;
   pods?: Maybe<PodConnection>;
@@ -2631,6 +2764,19 @@ export type RootQueryTypeNodeMetricsArgs = {
 export type RootQueryTypeNotificationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   all?: InputMaybe<Scalars['Boolean']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypePipelineArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypePipelinesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
@@ -3177,6 +3323,29 @@ export type Stack = {
   name: Scalars['String']['output'];
   sections?: Maybe<Array<Maybe<RecipeSection>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** the configuration of a service within a pipeline stage, including optional promotion criteria */
+export type StageService = {
+  __typename?: 'StageService';
+  /** criteria for how a promotion of this service shall be performed */
+  criteria?: Maybe<PromotionCriteria>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a pointer to a service */
+  service?: Maybe<ServiceDeployment>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** the attributes of a service w/in a specific stage */
+export type StageServiceAttributes = {
+  criteria?: InputMaybe<PromotionCriteriaAttributes>;
+  /** the cluster handle of this service */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  /** the name of this service */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the name of this service */
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type StatefulSet = {

@@ -263,6 +263,54 @@ defmodule Console.Factory do
     }
   end
 
+  def pipeline_factory do
+    %Schema.Pipeline{
+      name: sequence(:pipeline, & "pipeline-#{&1}"),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate()
+    }
+  end
+
+  def pipeline_stage_factory do
+    %Schema.PipelineStage{
+      name: sequence(:pipeline_stage, & "stage-#{&1}")
+    }
+  end
+
+  def pipeline_edge_factory do
+    %Schema.PipelineEdge{
+      from: build(:pipeline_stage),
+      to: build(:pipeline_stage)
+    }
+  end
+
+  def stage_service_factory do
+    %Schema.StageService{
+      stage: build(:pipeline_stage),
+      service: build(:service),
+    }
+  end
+
+  def pipeline_promotion_factory do
+    %Schema.PipelinePromotion{
+      stage: build(:pipeline_stage),
+    }
+  end
+
+  def promotion_service_factory do
+    %Schema.PromotionService{
+      promotion: build(:pipeline_promotion),
+      service: build(:service),
+      revision: build(:revision)
+    }
+  end
+
+  def promotion_criteria_factory do
+    %Schema.PromotionCriteria{
+      source: build(:service)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

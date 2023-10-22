@@ -17,6 +17,7 @@ defmodule Console.GraphQl.Deployments do
   import_types Console.GraphQl.Deployments.Git
   import_types Console.GraphQl.Deployments.Cluster
   import_types Console.GraphQl.Deployments.Service
+  import_types Console.GraphQl.Deployments.Pipeline
 
   @desc "global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator"
   object :deployment_settings do
@@ -53,6 +54,7 @@ defmodule Console.GraphQl.Deployments do
     import_fields :git_queries
     import_fields :cluster_queries
     import_fields :service_queries
+    import_fields :pipeline_queries
     import_fields :public_service_queries
     import_fields :public_cluster_queries
 
@@ -67,6 +69,7 @@ defmodule Console.GraphQl.Deployments do
     import_fields :git_mutations
     import_fields :cluster_mutations
     import_fields :service_mutations
+    import_fields :pipeline_mutations
     import_fields :public_cluster_mutations
     import_fields :public_service_mutations
 

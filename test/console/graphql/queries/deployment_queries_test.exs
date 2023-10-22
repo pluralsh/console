@@ -529,4 +529,48 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert statuses["HEALTHY"] == 2
     end
   end
+
+  describe "pipelines" do
+    test "it will list pipelines w/ rbac in mind" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+      pipes = insert_list(3, :pipeline, read_bindings: [%{group_id: group.id}])
+      other = insert(:pipeline, write_bindings: [%{user_id: user.id}])
+      insert_list(3, :pipeline)
+
+      {:ok, %{data: %{"pipelines" => found}}} = run_query("""
+        query {
+          pipelines(first: 5) {
+            edges {
+              node { id }
+            }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([other | pipes])
+    end
+  end
+
+  describe "pipeline" do
+    test "it can fetch a pipeline by id" do
+      user = insert(:user)
+      pipe = insert(:pipeline, read_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"pipeline" => found}}} = run_query("""
+        query Pipe($id: ID!) {
+          pipeline(id: $id) { id }
+        }
+      """, %{"id" => pipe.id}, %{current_user: user})
+
+      assert found["id"] == pipe.id
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Pipe($id: ID!) {
+          pipeline(id: $id) { id }
+        }
+      """, %{"id" => pipe.id}, %{current_user: insert(:user)})
+    end
+  end
 end
