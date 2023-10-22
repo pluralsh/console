@@ -1,7 +1,8 @@
 defmodule Console.Deployments.Cron do
   use Console.Services.Base
   alias Console.Deployments.{Services, Clusters, Global}
-  alias Console.Schema.{Cluster, Service, ServiceComponent, GlobalService}
+  alias Console.Schema.{Cluster, Service, ServiceComponent, GlobalService, PipelineStage, PipelinePromotion}
+  alias Console.Deployments.Pipelines.Discovery
 
   require Logger
 
@@ -105,6 +106,26 @@ defmodule Console.Deployments.Cron do
     |> Stream.each(fn cluster ->
       Logger.info "rotating token for #{cluster.id}"
       Clusters.rotate_deploy_token(cluster)
+    end)
+    |> Stream.run()
+  end
+
+  def scan_pipeline_stages() do
+    PipelineStage.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn stage ->
+      Logger.info "attempting to promote stage #{stage.id} (#{stage.name})"
+      Discovery.stage(stage)
+    end)
+    |> Stream.run()
+  end
+
+  def scan_pending_promotions() do
+    PipelinePromotion.pending()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn promo ->
+      Logger.info "attempting to apply promotion #{promo.id}"
+      Discovery.promotion(promo)
     end)
     |> Stream.run()
   end

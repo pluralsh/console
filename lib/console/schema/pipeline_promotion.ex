@@ -12,6 +12,16 @@ defmodule Console.Schema.PipelinePromotion do
     timestamps()
   end
 
+  def pending(query \\ __MODULE__) do
+    from(pp in query, where: is_nil(pp.promoted_at) or (pp.revised_at > pp.promoted_at))
+  end
+
+  def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
+    from(s in query, order_by: ^order)
+  end
+
+  def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
+
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(promoted_at revised_at)a)
