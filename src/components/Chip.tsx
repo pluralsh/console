@@ -1,4 +1,4 @@
-import { Flex, type FlexProps } from 'honorable'
+import { type FlexProps } from 'honorable'
 import PropTypes from 'prop-types'
 import {
   type ComponentProps,
@@ -84,16 +84,43 @@ const sizeToCloseHeight = {
   large: 12,
 } as const satisfies Record<ChipSize, number>
 
-const ChipCardSC = styled(Card)(({ theme }) => ({
-  '.closeIcon': {
-    color: theme.colors['text-light'],
-  },
-  '&:hover': {
+const ChipCardSC = styled(Card)<{ $size: ChipSize; $severity: ChipSeverity }>(({
+  $size,
+  $severity,
+  theme,
+}) => {
+  const textColor =
+    theme.mode === 'light'
+      ? theme.colors['text-light']
+      : theme.colors[severityToColor[$severity]] || theme.colors.text
+
+  return {
     '.closeIcon': {
-      color: theme.colors.text,
+      color: theme.colors['text-light'],
+      paddingLeft: theme.spacing.xsmall,
     },
-  },
-}))
+    '&:hover': {
+      '.closeIcon': {
+        color: theme.colors.text,
+      },
+    },
+    '.spinner': {
+      marginRight: theme.spacing.xsmall,
+    },
+    '.icon': {
+      marginRight: theme.spacing.xsmall,
+    },
+    '.children': {
+      display: 'flex',
+      ...theme.partials.text.body2,
+      color: textColor,
+      fontSize: $size === 'small' ? 12 : 14,
+      fontWeight: $size === 'small' ? 400 : 600,
+      lineHeight: $size === 'small' ? '16px' : '20px',
+      gap: 4,
+    },
+  }
+})
 
 function ChipRef(
   {
@@ -114,8 +141,7 @@ function ChipRef(
   const theme = useTheme()
 
   hue = hue || parentFillLevelToHue[parentFillLevel]
-  const textColor =
-    theme.mode === 'light' ? 'text-light' : severityToColor[severity] || 'text'
+
   const iconCol = severityToIconColor[severity] || 'icon-default'
 
   return (
@@ -130,39 +156,30 @@ function ChipRef(
       alignItems="center"
       display="inline-flex"
       textDecoration="none"
+      $size={size}
+      $severity={severity}
       {...(as ? { forwardedAs: as } : {})}
       {...props}
     >
       {loading && (
         <Spinner
+          className="spinner"
           color={theme.colors[iconCol]}
           size={size === 'large' ? 15 : 13}
-          marginRight="xsmall"
         />
       )}
       {icon && (
         <icon.type
+          className="icon"
           size={size === 'large' ? 15 : 13}
-          marginRight="xsmall"
           color={theme.colors[iconCol]}
         />
       )}
-      <Flex
-        body2
-        color={textColor}
-        fontSize={size === 'small' ? 12 : 14}
-        fontWeight={size === 'small' ? 400 : 600}
-        lineHeight={size === 'small' ? '16px' : '20px'}
-        gap={4}
-      >
-        {children}
-      </Flex>
+      <div className="children">{children}</div>
       {closeButton && (
         <CloseIcon
           className="closeIcon"
-          paddingLeft="xsmall"
           size={sizeToCloseHeight[size]}
-          _hover={{ color: 'blue' }}
         />
       )}
     </ChipCardSC>

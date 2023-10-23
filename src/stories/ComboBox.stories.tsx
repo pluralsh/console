@@ -178,7 +178,7 @@ const ChipList = styled(ListBoxItemChipList)(({ theme }) => ({
   justifyContent: 'start',
 }))
 
-function Template({ onFillLevel }: { onFillLevel: any }) {
+function Template({ onFillLevel, ...args }: { onFillLevel: any }) {
   const [selectedKeys, setSelectedKeys] = useState(new Set<Key>())
   const [inputValue, setInputValue] = useState('')
 
@@ -242,6 +242,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
             onSelectionChange={onSelectionChange}
             onInputChange={onInputChange}
             inputProps={{ placeholder: 'Pick something' }}
+            {...args}
           >
             {searchResults.map(
               ({ item, score: _score, refIndex: _refIndex }) => (
@@ -280,7 +281,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
   )
 }
 
-function TagsTemplate() {
+function TagsTemplate({ ...args }: any) {
   const [selectedKeys, setSelectedKeys] = useState(new Set<Key>())
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
@@ -370,6 +371,7 @@ function TagsTemplate() {
           }
           maxHeight={232}
           allowsEmptyCollection={!!newKey}
+          {...args}
         >
           {searchResults.map(({ item, score: _score, refIndex: _refIndex }) => (
             <ListBoxItem
@@ -405,7 +407,11 @@ function TagsTemplate() {
 
 export const Default = Template.bind({})
 
-Default.args = {}
+Default.args = {
+  loading: false,
+}
 
 export const Tags = TagsTemplate.bind({})
-Default.args = {}
+Default.args = {
+  loading: false,
+}

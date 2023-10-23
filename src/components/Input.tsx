@@ -1,9 +1,8 @@
-import { ExtendTheme, Input as HonorableInput } from 'honorable'
+import { ExtendTheme, Input as HonorableInput, mergeTheme } from 'honorable'
 import type { InputProps as HonorableInputProps } from 'honorable'
 import { type ComponentProps, type ReactNode, forwardRef, useRef } from 'react'
 import styled from 'styled-components'
 import { mergeRefs } from 'react-merge-refs'
-
 import { mergeProps } from 'react-aria'
 
 import { simulateInputChange } from '../utils/simulateInputChange'
@@ -21,6 +20,7 @@ export type InputProps = HonorableInputProps & {
   prefix?: ReactNode
   titleContent?: ReactNode
   showClearButton?: boolean
+  themeExtension?: Record<string, any>
 }
 
 const PrefixSuffix = styled.div(({ theme }) => ({
@@ -85,6 +85,7 @@ const Input = forwardRef(
       showClearButton,
       titleContent,
       inputProps,
+      themeExtension: themeExtensionProp,
       ...props
     }: InputProps,
     ref
@@ -95,7 +96,7 @@ const Input = forwardRef(
       ...(inputProps ?? {}),
       ref: mergeRefs([inputRef, ...(inputProps?.ref ? [inputProps.ref] : [])]),
     }
-    const themeExtension: any = {
+    let themeExtension: any = {
       Input: {
         Root: [
           {
@@ -135,6 +136,9 @@ const Input = forwardRef(
         ],
       },
     }
+
+    themeExtension = mergeTheme(themeExtension, themeExtensionProp)
+
     const parentFillLevel = useFillLevel()
     const size = (props as any).large
       ? 'large'

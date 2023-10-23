@@ -1,4 +1,4 @@
-import { ExtendTheme, Spinner, mergeTheme } from 'honorable'
+import { mergeTheme } from 'honorable'
 import { omitBy } from 'lodash'
 import { isUndefined, omit, pick } from 'lodash-es'
 import {
@@ -28,6 +28,7 @@ import { useFloatingDropdown } from '../hooks/useFloatingDropdown'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import SearchIcon from './icons/SearchIcon'
 import Input, { type InputProps } from './Input'
+import { Spinner } from './Spinner'
 
 import { type ListBoxItemBaseProps } from './ListBoxItem'
 import { PopoverListBox } from './PopoverListBox'
@@ -131,21 +132,6 @@ const OpenButton = styled(
   },
 }))
 
-const StartIconButton = styled.div(({ theme }) => ({
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  paddingLeft: theme.spacing.medium,
-  paddingRight: theme.spacing.medium,
-}))
-
-const comboBoxLeftRightStyles = {
-  alignSelf: 'stretch',
-  paddingHorizontal: 0,
-  marginLeft: 0,
-  marginRight: 0,
-}
-
 const honorableInputPropNames = [
   'onChange',
   'onFocus',
@@ -213,7 +199,10 @@ function ComboBoxInput({
         Root: [{ paddingRight: 0 }],
         EndIcon: [
           {
-            ...comboBoxLeftRightStyles,
+            alignSelf: 'stretch',
+            paddingHorizontal: 0,
+            marginLeft: 0,
+            marginRight: 0,
           },
         ],
       },
@@ -221,34 +210,27 @@ function ComboBoxInput({
   }
 
   return (
-    <ExtendTheme theme={themeExtension}>
-      <Input
-        startIcon={
-          loading ? (
-            <StartIconButton>
-              <Spinner />
-            </StartIconButton>
-          ) : (
-            startIcon && <StartIconButton>{startIcon}</StartIconButton>
-          )
-        }
-        endIcon={
-          showArrow ? (
-            <OpenButton
-              isOpen={isOpen}
-              buttonRef={buttonRef}
-              buttonProps={buttonProps}
-            />
-          ) : undefined
-        }
-        inputProps={{
-          ref: inputRef,
-          onClick: onInputClick,
-          ...innerInputProps,
-        }}
-        {...outerInputProps}
-      />
-    </ExtendTheme>
+    <Input
+      themeExtension={themeExtension}
+      startIcon={
+        loading ? <Spinner color={theme.colors['icon-xlight']} /> : startIcon
+      }
+      endIcon={
+        showArrow ? (
+          <OpenButton
+            isOpen={isOpen}
+            buttonRef={buttonRef}
+            buttonProps={buttonProps}
+          />
+        ) : undefined
+      }
+      inputProps={{
+        ref: inputRef,
+        onClick: onInputClick,
+        ...innerInputProps,
+      }}
+      {...outerInputProps}
+    />
   )
 }
 
