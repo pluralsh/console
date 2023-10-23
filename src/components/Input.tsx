@@ -1,4 +1,4 @@
-import { ExtendTheme, Input as HonorableInput, mergeTheme } from 'honorable'
+import { ExtendTheme, Input as HonorableInput } from 'honorable'
 import type { InputProps as HonorableInputProps } from 'honorable'
 import { type ComponentProps, type ReactNode, forwardRef, useRef } from 'react'
 import styled from 'styled-components'
@@ -95,7 +95,46 @@ const Input = forwardRef(
       ...(inputProps ?? {}),
       ref: mergeRefs([inputRef, ...(inputProps?.ref ? [inputProps.ref] : [])]),
     }
-    let themeExtension: any = {}
+    const themeExtension: any = {
+      Input: {
+        Root: [
+          {
+            paddingLeft: 0,
+            paddingRight: 0,
+          },
+        ],
+        InputBase: [
+          {
+            paddingLeft: prefix
+              ? 'xsmall'
+              : titleContent
+              ? startIcon
+                ? 'xsmall'
+                : 'small'
+              : 'medium',
+            paddingRight: suffix
+              ? 'xsmall'
+              : showClearButton || endIcon
+              ? 'xsmall'
+              : 'medium',
+          },
+        ],
+        StartIcon: [
+          {
+            ...startEndStyles,
+            paddingLeft: prefix || titleContent ? 0 : 'medium',
+            marginRight: 0,
+          },
+        ],
+        EndIcon: [
+          {
+            ...startEndStyles,
+            paddingRight: suffix || showClearButton ? 0 : 'medium',
+            marginLeft: 0,
+          },
+        ],
+      },
+    }
     const parentFillLevel = useFillLevel()
     const size = (props as any).large
       ? 'large'
@@ -103,60 +142,39 @@ const Input = forwardRef(
       ? 'small'
       : 'medium'
 
-    if (suffix || showClearButton) {
-      themeExtension = mergeTheme(themeExtension, {
-        Input: {
-          Root: [{ paddingRight: 0 }],
-          EndIcon: [
-            { ...startEndStyles, ...{ paddingLeft: 'xsmall', gap: 0 } },
-          ],
-        },
-      })
-    }
-    if (prefix || titleContent) {
-      themeExtension = mergeTheme(themeExtension, {
-        Input: {
-          Root: [{ paddingLeft: 0 }],
-          StartIcon: [
-            {
-              ...startEndStyles,
-              ...{
-                paddingRight: titleContent && !startIcon ? 'small' : 'xsmall',
-              },
-            },
-          ],
-        },
-      })
-    }
     inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
+    const hasEndIcon = (showClearButton && props.value) || endIcon || suffix
+    const hasStartIcon = startIcon || prefix || titleContent
 
     return (
       <ExtendTheme theme={themeExtension}>
         <HonorableInput
           ref={ref}
           endIcon={
-            <>
-              {showClearButton && props.value && (
-                <ClearButton
-                  onClick={() => {
-                    const input = inputRef?.current
+            hasEndIcon && (
+              <>
+                {showClearButton && props.value && (
+                  <ClearButton
+                    onClick={() => {
+                      const input = inputRef?.current
 
-                    if (input) {
-                      simulateInputChange(input, '')
-                    }
-                  }}
-                />
-              )}
-              {endIcon || suffix ? (
-                <>
-                  {endIcon}
-                  {suffix && <PrefixSuffix>{suffix}</PrefixSuffix>}
-                </>
-              ) : undefined}
-            </>
+                      if (input) {
+                        simulateInputChange(input, '')
+                      }
+                    }}
+                  />
+                )}
+                {endIcon || suffix ? (
+                  <>
+                    {endIcon}
+                    {suffix && <PrefixSuffix>{suffix}</PrefixSuffix>}
+                  </>
+                ) : undefined}
+              </>
+            )
           }
           startIcon={
-            startIcon || prefix || titleContent ? (
+            hasStartIcon ? (
               <>
                 {(titleContent && (
                   <InputTitleContent

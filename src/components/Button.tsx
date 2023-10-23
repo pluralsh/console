@@ -23,6 +23,7 @@ function ButtonRef(
       animationName={pulse ? pulseKeyframes : undefined}
       boxShadow={pulse ? '0 0 7px 2px #fff1' : undefined}
       _hover={{ animationPlayState: 'paused' }}
+      type="button"
       {...props}
     />
   )

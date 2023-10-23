@@ -1,12 +1,8 @@
 import { type ReactNode, type Ref, forwardRef, useEffect } from 'react'
-import {
-  Div,
-  Flex,
-  H1,
-  Modal as HonorableModal,
-  type ModalProps,
-} from 'honorable'
+import { Flex, H1, Modal as HonorableModal, type ModalProps } from 'honorable'
 import PropTypes from 'prop-types'
+
+import styled, { type StyledComponentPropsWithRef } from 'styled-components'
 
 import { type ColorKey, type SeverityExt } from '../types'
 
@@ -37,6 +33,8 @@ type ModalPropsType = Omit<ModalProps, 'size'> & {
   actions?: ReactNode
   severity?: ModalSeverity
   lockBody?: boolean
+  asForm?: boolean
+  formProps?: StyledComponentPropsWithRef<'form'>
   [x: string]: unknown
 }
 
@@ -73,17 +71,38 @@ const sizeToWidth = {
   large: 608,
 } as const satisfies Record<ModalSize, number>
 
+const ModalSC = styled.div((_) => ({
+  position: 'relative',
+}))
+
+const ModalContentSC = styled.div<{ $hasActions: boolean }>(
+  ({ theme, $hasActions }) => ({
+    margin: theme.spacing.large,
+    marginBottom: $hasActions ? 0 : theme.spacing.large,
+    ...theme.partials.text.body1,
+  })
+)
+
+const ModalActionsSC = styled.div((_) => ({
+  display: 'flex',
+  position: 'sticky',
+  flexDirection: 'column',
+  bottom: '0',
+}))
+
 function ModalRef(
   {
     children,
     header,
     actions,
-    form = false,
     open = false,
+    form = false,
     size = form ? 'large' : 'medium',
     onClose,
     severity,
     lockBody = true,
+    asForm = false,
+    formProps = {},
     ...props
   }: ModalPropsType,
   ref: Ref<any>
@@ -97,6 +116,8 @@ function ModalRef(
     setBodyLocked(lockBody && open)
   }, [lockBody, open, setBodyLocked])
 
+  console.log('formprops', formProps)
+
   return (
     <HonorableModal
       open={open}
@@ -108,55 +129,52 @@ function ModalRef(
       maxWidth={sizeToWidth[size]}
       {...props}
     >
-      <Div
-        margin="large"
-        marginBottom={actions ? 0 : 'large'}
-        body1
+      <ModalSC
+        as={asForm ? 'form' : undefined}
+        {...(asForm ? formProps : {})}
       >
-        {!!header && (
-          <Flex
-            ref={ref}
-            align="center"
-            justify="start"
-            marginBottom="large"
-            gap="xsmall"
-          >
-            {HeaderIcon && (
-              <HeaderIcon
-                marginTop={-2} // optically center icon
-                color={iconColorKey}
-              />
-            )}
-            <H1
-              overline
-              color="text-xlight"
+        <ModalContentSC $hasActions={!!actions}>
+          {!!header && (
+            <Flex
+              ref={ref}
+              align="center"
+              justify="start"
+              marginBottom="large"
+              gap="xsmall"
             >
-              {header}
-            </H1>
-          </Flex>
+              {HeaderIcon && (
+                <HeaderIcon
+                  marginTop={-2} // optically center icon
+                  color={iconColorKey}
+                />
+              )}
+              <H1
+                overline
+                color="text-xlight"
+              >
+                {header}
+              </H1>
+            </Flex>
+          )}
+          {children}
+        </ModalContentSC>
+        {!!actions && (
+          <ModalActionsSC>
+            <Flex
+              background="linear-gradient(180deg, transparent 0%, fill-one 100%);"
+              height={16}
+            />
+            <Flex
+              padding="large"
+              align="center"
+              justify="flex-end"
+              backgroundColor="fill-one"
+            >
+              {actions}
+            </Flex>
+          </ModalActionsSC>
         )}
-        {children}
-      </Div>
-      {!!actions && (
-        <Flex
-          position="sticky"
-          direction="column"
-          bottom="0"
-        >
-          <Flex
-            background="linear-gradient(180deg, transparent 0%, fill-one 100%);"
-            height={16}
-          />
-          <Flex
-            padding="large"
-            align="center"
-            justify="flex-end"
-            backgroundColor="fill-one"
-          >
-            {actions}
-          </Flex>
-        </Flex>
-      )}
+      </ModalSC>
     </HonorableModal>
   )
 }

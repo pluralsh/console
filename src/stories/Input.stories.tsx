@@ -13,6 +13,28 @@ export default {
   component: Input,
 }
 
+function InputSet(props: any) {
+  return (
+    <Flex
+      direction="column"
+      gap="small"
+    >
+      <Input {...props} />
+      <Input
+        startIcon={<MagnifyingGlassIcon />}
+        endIcon={
+          <CaretDownIcon
+            size={10}
+            mt={0.333}
+            mx="3px"
+          />
+        }
+        {...props}
+      />
+    </Flex>
+  )
+}
+
 function Template(args: any) {
   const [inputVal, setInputVal] = useState('')
 
@@ -28,21 +50,17 @@ function Template(args: any) {
     <Flex
       direction="column"
       maxWidth="400px"
+      gap="large"
     >
-      <Input {...props} />
-      <Div marginTop="medium">
-        <Input
-          startIcon={<MagnifyingGlassIcon />}
-          endIcon={
-            <CaretDownIcon
-              size={10}
-              mt={0.333}
-              mx="3px"
-            />
-          }
-          {...props}
-        />
-      </Div>
+      <InputSet
+        {...props}
+        large
+      />
+      <InputSet {...props} />
+      <InputSet
+        {...props}
+        small
+      />
     </Flex>
   )
 }

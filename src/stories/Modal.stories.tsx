@@ -1,7 +1,7 @@
-import { Button, Div, H3, P } from 'honorable'
+import { Div, H3, P } from 'honorable'
 import { useState } from 'react'
 
-import { Card, FormField, Input, Modal } from '..'
+import { Button, Card, FormField, Input, Modal } from '..'
 import { SEVERITIES } from '../components/Modal'
 
 export default {
@@ -43,6 +43,7 @@ function Template(args: any) {
                 Cancel
               </Button>
               <Button
+                type="submit"
                 primary
                 destructive={!args.form}
                 marginLeft="medium"
@@ -52,6 +53,13 @@ function Template(args: any) {
             </>
           )
         }
+        asForm={!!args.form}
+        formProps={{
+          onSubmit: (e) => {
+            e.preventDefault()
+            alert('Form submitted')
+          },
+        }}
         {...args}
       >
         {!args.form && (

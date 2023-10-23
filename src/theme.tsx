@@ -580,6 +580,25 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             },
           },
       ],
+      TextArea: [
+        {
+          paddingLeft: 'medium',
+          paddingRight: 'medium',
+          lineHeight: 'inherit',
+          paddingTop: 9,
+          paddingBottom: 9,
+        },
+        ({ small }: any) =>
+          small && {
+            paddingTop: 7,
+            paddingBottom: 7,
+          },
+        ({ large }: any) =>
+          large && {
+            paddingTop: 13,
+            paddingBottom: 13,
+          },
+      ],
       StartIcon: [
         {
           marginRight: 'xsmall',
@@ -644,10 +663,10 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           backgroundColor: 'fill-one',
           border: '1px solid border',
           boxShadow: 'modal',
-          paddingTop: 'large',
-          paddingRight: 'large',
-          paddingBottom: 'large',
-          paddingLeft: 'large',
+          paddingTop: 0,
+          paddingRight: 0,
+          paddingBottom: 0,
+          paddingLeft: 0,
         },
       ],
       Backdrop: [
