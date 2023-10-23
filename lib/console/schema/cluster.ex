@@ -205,7 +205,6 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:service_errors)
     |> cast_assoc(:tags)
-    |> cast_assoc(:service)
     |> foreign_key_constraint(:provider_id)
     |> foreign_key_constraint(:credential_id)
     |> unique_constraint(:handle)

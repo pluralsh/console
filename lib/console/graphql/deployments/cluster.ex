@@ -41,8 +41,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :cluster_service_attributes do
-    field :id,  non_null(:id)
-    field :git, non_null(:git_ref_attributes)
+    field :id,            non_null(:id)
+    field :repository_id, :id
+    field :git,           non_null(:git_ref_attributes)
   end
 
   input_object :node_pool_attributes do
@@ -84,6 +85,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :cluster_provider_update_attributes do
+    field :service,        :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster provider"
     field :cloud_settings, :cloud_provider_settings_attributes
   end
 
@@ -116,15 +118,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
-    field :id,          non_null(:id), description: "the id of this provider"
-    field :name,        non_null(:string), description: "a human readable name for the provider, globally unique"
-    field :namespace,   non_null(:string), description: "the namespace the CAPI resources are deployed into"
-    field :cloud,       non_null(:string), description: "the name of the cloud service for this provider"
-    field :git,         non_null(:git_ref), description: "the details of how cluster manifests will be synced from git when created with this provider"
-    field :repository,  :git_repository, resolve: dataloader(Deployments), description: "the repository used to serve cluster manifests"
-    field :service,     :service_deployment, resolve: dataloader(Deployments), description: "the service of the CAPI controller itself"
-    field :credentials, list_of(:provider_credential), resolve: dataloader(ProviderCredential), description: "a list of credentials eligible for this provider"
-    field :deleted_at,  :datetime, description: "when the cluster provider was deleted"
+    field :id,                  non_null(:id), description: "the id of this provider"
+    field :name,                non_null(:string), description: "a human readable name for the provider, globally unique"
+    field :namespace,           non_null(:string), description: "the namespace the CAPI resources are deployed into"
+    field :cloud,               non_null(:string), description: "the name of the cloud service for this provider"
+    field :git,                 non_null(:git_ref), description: "the details of how cluster manifests will be synced from git when created with this provider"
+    field :repository,          :git_repository, resolve: dataloader(Deployments), description: "the repository used to serve cluster manifests"
+    field :provider_repository, :git_repository, resolve: dataloader(Deployments), description: "the repository for the CAPI service itself if customized"
+    field :service,             :service_deployment, resolve: dataloader(Deployments), description: "the service of the CAPI controller itself"
+    field :credentials,         list_of(:provider_credential), resolve: dataloader(ProviderCredential), description: "a list of credentials eligible for this provider"
+    field :deleted_at,          :datetime, description: "when the cluster provider was deleted"
 
     field :supported_versions, list_of(:string), description: "the kubernetes versions this provider currently supports",
       resolve: fn provider, _, _ -> {:ok, ClusterProvider.supported_versions(provider)} end
@@ -157,12 +160,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :read_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this cluster"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this cluster"
 
-    field :node_pools,  list_of(:node_pool), resolve: dataloader(Deployments), description: "list of node pool specs managed by CAPI"
-    field :provider,    :cluster_provider, resolve: dataloader(Deployments), description: "the provider we use to create this cluster (null if BYOK)"
-    field :service,     :service_deployment, resolve: dataloader(Deployments), description: "the service used to deploy the CAPI resources of this cluster"
-    field :tags,        list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter clusters"
+    field :node_pools,       list_of(:node_pool), resolve: dataloader(Deployments), description: "list of node pool specs managed by CAPI"
+    field :provider,         :cluster_provider, resolve: dataloader(Deployments), description: "the provider we use to create this cluster (null if BYOK)"
+    field :service,          :service_deployment, resolve: dataloader(Deployments), description: "the service used to deploy the CAPI resources of this cluster"
+    field :tags,             list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter clusters"
     field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments), description: "all api deprecations for all services in this cluster"
-    field :servic_errors, list_of(:service_error), resolve: dataloader(Deployments), description: "any errors which might have occurred during the bootstrap process"
+    field :service_errors,   list_of(:service_error), resolve: dataloader(Deployments), description: "any errors which might have occurred during the bootstrap process"
+    field :repository,       :git_repository, resolve: dataloader(Deployments), description: "a custom git repository if you want to define your own CAPI manifests"
 
     field :nodes, list_of(:node), description: "list cached nodes for a cluster, this can be stale up to 5m",
       resolve: &Deployments.list_nodes/3
@@ -178,7 +182,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve &Deployments.list_cluster_revisions/3
     end
 
-    field :editable,   :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this cluster"
+    field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this cluster"
 
     timestamps()
   end

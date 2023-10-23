@@ -270,6 +270,7 @@ defmodule Console.Deployments.Clusters do
         cluster_service(cluster, user)
       %{cluster: cluster} -> {:ok, cluster}
     end)
+    |> maybe_update_service(attrs, user)
     |> execute()
     |> when_ok(fn
       %{cluster: cluster, svc: %Service{} = svc} -> %{cluster | service: svc}
@@ -433,6 +434,7 @@ defmodule Console.Deployments.Clusters do
         provider_service(provider, user)
       %{provider: provider} -> {:ok, provider}
     end)
+    |> maybe_update_service(attrs, user)
     |> execute(extract: :provider)
     |> notify(:update, user)
   end
@@ -539,9 +541,18 @@ defmodule Console.Deployments.Clusters do
     |> Services.create_service(local_cluster().id, tmp_admin(user))
   end
   defp provider_service(%ClusterProvider{service_id: id} = provider, %User{} = user) do
-    provider_attributes(provider)
-    |> Services.update_service(id, tmp_admin(user))
+    %{configuration: config} = provider_attributes(provider)
+    Services.merge_service(config, id, tmp_admin(user))
   end
+
+  defp maybe_update_service(xact, %{service: %{} = service_attrs}, %User{} = user) do
+    add_operation(xact, :svc_update, fn
+      %{svc: %Service{id: id}} ->
+        Services.update_service(service_attrs, id, tmp_admin(user))
+      %{svc: svc} -> {:ok, svc}
+    end)
+  end
+  defp maybe_update_service(xact, _, _), do: xact
 
   defp provider_attributes(%ClusterProvider{cloud_settings: %{aws: %{access_key_id: aid, secret_access_key: sak}}} = prov) do
     %{

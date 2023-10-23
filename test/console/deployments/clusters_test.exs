@@ -307,6 +307,33 @@ defmodule Console.Deployments.ClustersTest do
         ]
       }, cluster.id, user)
     end
+
+    test "it can update the underlying cluster service" do
+      user = admin_user()
+      provider = insert(:cluster_provider)
+      insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.26",
+        current_version: "1.26",
+        provider_id: provider.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      new_git = insert(:git_repository, url: "https://github.com/pluralsh/custom-providers.git")
+
+      {:ok, cluster} = Clusters.update_cluster(%{
+        service: %{repository_id: new_git.id},
+      }, cluster.id, user)
+
+      %{service: svc} = Console.Repo.preload(cluster, [:service], force: true)
+
+      assert svc.repository_id == new_git.id
+    end
   end
 
   describe "#rotate_deploy_token/1" do
@@ -447,6 +474,27 @@ defmodule Console.Deployments.ClustersTest do
       {:error, _} = Clusters.update_provider(%{
         cloud_settings: %{aws: %{access_key_id: "aid2", secret_access_key: "sak2"}}
       }, provider.id, insert(:user))
+    end
+
+    test "it can update the underlying provider service if desired" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, user)
+
+      git = insert(:git_repository)
+
+      {:ok, updated} = Clusters.update_provider(%{
+        service: %{repository_id: git.id}
+      }, provider.id, user)
+
+      %{service: svc} = Console.Repo.preload(updated, [:service], force: true)
+
+      assert svc.repository_id == git.id
     end
   end
 
