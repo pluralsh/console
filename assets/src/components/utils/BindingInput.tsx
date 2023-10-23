@@ -12,11 +12,13 @@ import { useEffect, useState } from 'react'
 import { ApolloClient, useApolloClient } from '@apollo/client'
 import styled from 'styled-components'
 
-import { SEARCH_USERS } from 'components/account/users/queries'
 import {
   SearchGroupsDocument,
   SearchGroupsQuery,
   SearchGroupsQueryVariables,
+  SearchUsersDocument,
+  SearchUsersQuery,
+  SearchUsersQueryVariables,
 } from 'generated/graphql'
 
 const ICONS = {
@@ -34,16 +36,18 @@ const FETCHER = {
   group: fetchGroups,
 }
 
-export function fetchUsers(client, query, setSuggestions) {
+export function fetchUsers(client: ApolloClient<any>, query, setSuggestions) {
   client
-    .query({ query: SEARCH_USERS, variables: { q: query, all: true } })
+    .query<SearchUsersQuery, SearchUsersQueryVariables>({
+      query: SearchUsersDocument,
+      variables: { q: query },
+    })
     .then(
-      ({
-        data: {
-          users: { edges },
-        },
-      }) =>
-        edges.map(({ node }) => ({ value: node, label: userSuggestion(node) }))
+      ({ data }) =>
+        data?.users?.edges?.map((edge) => ({
+          value: edge?.node,
+          label: userSuggestion(edge?.node),
+        }))
     )
     .then(setSuggestions)
 }

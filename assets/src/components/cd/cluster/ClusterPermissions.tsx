@@ -1,8 +1,18 @@
-import { Button, FormField, Modal, PersonIcon } from '@pluralsh/design-system'
+import { Button, Modal, PersonIcon } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import isEqual from 'lodash/isEqual'
+import uniqWith from 'lodash/uniqWith'
+
+import {
+  ClusterPolicyBindingFragment,
+  ClusterTinyFragment,
+  useClusterBindingsQuery,
+} from 'generated/graphql'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import RoleFormBindings from 'components/account/roles/RoleFormBindings'
 
 import { StepBody } from '../ModalAlt'
 
@@ -17,35 +27,102 @@ const PermissionsColumnSC = styled.div(({ theme }) => ({
   rowGap: theme.spacing.medium,
 }))
 
-function ReadPermissions() {
+function ReadPermissions({
+  bindings,
+  setBindings,
+}: {
+  bindings?:
+    | (ClusterPolicyBindingFragment | null | undefined)[]
+    | null
+    | undefined
+  setBindings: any
+}) {
+  console.log('read bindings', bindings)
+
   return (
     <PermissionsColumnSC>
       <Overline>Read Permissions</Overline>
-      <FormField label="User Bindings">placeholder</FormField>
-      <FormField label="Group Bindings">placeholder</FormField>
+      <RoleFormBindings
+        bindings={bindings}
+        setBindings={setBindings}
+        hints={{
+          user: 'Users with read permissions for this cluster',
+          group: 'Groups with read permissions for this cluster',
+        }}
+      />
     </PermissionsColumnSC>
   )
 }
-function WritePermissions() {
+function WritePermissions({
+  bindings,
+  setBindings,
+}: {
+  bindings?:
+    | (ClusterPolicyBindingFragment | null | undefined)[]
+    | null
+    | undefined
+  setBindings: any
+}) {
+  console.log('write bindings', bindings)
+
   return (
     <PermissionsColumnSC>
       <Overline>Write Permissions</Overline>
-      <FormField label="User Bindings">placeholder</FormField>
-      <FormField label="Group Bindings">placeholder</FormField>
+      <RoleFormBindings
+        bindings={bindings}
+        setBindings={setBindings}
+        hints={{
+          user: 'Users with write permissions for this cluster',
+          group: 'Groups with write permissions for this cluster',
+        }}
+      />
     </PermissionsColumnSC>
   )
 }
 
 export function ClusterPermissionsModal({
+  cluster,
   open,
   onClose,
 }: {
+  cluster: ClusterTinyFragment
   open: boolean
   onClose: () => void
 }) {
   const theme = useTheme()
   const allowSubmit = false
   const mutationLoading = false
+
+  const { data, loading, error } = useClusterBindingsQuery({
+    variables: { id: cluster.id },
+    fetchPolicy: 'no-cache',
+    skip: !cluster.id,
+  })
+
+  const [readBindings, setReadBindings] = useState(data?.cluster?.readBindings)
+  const [writeBindings, setWriteBindings] = useState(
+    data?.cluster?.writeBindings
+  )
+
+  useEffect(() => {
+    setReadBindings(data?.cluster?.readBindings)
+  }, [data?.cluster?.readBindings])
+  useEffect(() => {
+    setWriteBindings(data?.cluster?.writeBindings)
+  }, [data?.cluster?.writeBindings])
+  console.log('readBindings', readBindings, data?.cluster?.readBindings)
+  console.log('writeBindings', writeBindings, data?.cluster?.writeBindings)
+
+  const uniqueReadBindings = useMemo(
+    () => uniqWith(readBindings, isEqual),
+    [readBindings]
+  )
+  const uniqueWriteBindings = useMemo(
+    () => uniqWith(writeBindings, isEqual),
+    [writeBindings]
+  )
+
+  console.log({ data, loading, error })
 
   const onSubmit = useCallback((e: FormEvent) => {
     e.preventDefault()
@@ -55,48 +132,16 @@ export function ClusterPermissionsModal({
 
   return (
     <Modal
-      header="Cluster permissions"
+      header={`Cluster permissions – ${cluster.name}`}
       open={open}
       onClose={onClose}
-      asForm={false}
+      asForm
+      formProps={{ onSubmit }}
       portal
       size="large"
       maxWidth={1024}
       width={1024}
-    >
-      <form
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          rowGap: theme.spacing.xlarge,
-        }}
-        onSubmit={onSubmit}
-      >
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            rowGap: theme.spacing.medium,
-          }}
-        >
-          <StepBody>
-            Bind users to read or write permissions for this cluster
-          </StepBody>
-        </div>
-        <div css={{ display: 'flex' }}>
-          <div
-            css={{
-              width: '50%',
-              paddingRight: theme.spacing.large,
-              borderRight: theme.borders['fill-two'],
-            }}
-          >
-            <ReadPermissions />
-          </div>
-          <div css={{ width: '50%', paddingLeft: theme.spacing.large }}>
-            <WritePermissions />
-          </div>
-        </div>
+      actions={
         <div
           css={{
             display: 'flex',
@@ -123,12 +168,61 @@ export function ClusterPermissionsModal({
             Cancel
           </Button>
         </div>
-      </form>
+      }
+    >
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          rowGap: theme.spacing.xlarge,
+        }}
+      >
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            rowGap: theme.spacing.medium,
+          }}
+        >
+          <StepBody>
+            Bind users to read or write permissions for <b>{cluster.name}</b>{' '}
+            cluster
+          </StepBody>
+        </div>
+        {!data ? (
+          <LoadingIndicator />
+        ) : (
+          <div css={{ display: 'flex' }}>
+            <div
+              css={{
+                width: '50%',
+                paddingRight: theme.spacing.large,
+                borderRight: theme.borders['fill-two'],
+              }}
+            >
+              <ReadPermissions
+                bindings={uniqueReadBindings}
+                setBindings={setReadBindings}
+              />
+            </div>
+            <div css={{ width: '50%', paddingLeft: theme.spacing.large }}>
+              <WritePermissions
+                bindings={uniqueWriteBindings}
+                setBindings={setWriteBindings}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </Modal>
   )
 }
 
-export default function ClusterPermissions() {
+export default function ClusterPermissions({
+  cluster,
+}: {
+  cluster: ClusterTinyFragment
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -142,6 +236,7 @@ export default function ClusterPermissions() {
       </Button>
       <ModalMountTransition open={isOpen}>
         <ClusterPermissionsModal
+          cluster={cluster}
           open={isOpen}
           onClose={() => setIsOpen(false)}
         />

@@ -183,6 +183,43 @@ query ClusterNamespaces($clusterId: ID) {
   }
 }
 
+fragment ClusterPolicyBinding on PolicyBinding {
+  id
+  user {
+    id
+    name
+    email
+  }
+  group {
+    id
+    name
+  }
+}
+
+fragment ClusterBindings on Cluster {
+  readBindings {
+    ...ClusterPolicyBinding
+  }
+  writeBindings {
+    ...ClusterPolicyBinding
+  }
+}
+
+query ClusterBindings($id: ID!) {
+  cluster(id: $id) {
+    ...ClusterBindings
+  }
+}
+
+mutation UpdateClusterBindings(
+  $id: ID!
+  $attributes: ClusterUpdateAttributes!
+) {
+  updateCluster(id: $id, attributes: $attributes) {
+    ...ClusterBindings
+  }
+}
+
 mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
   updateCluster(id: $id, attributes: $attributes) {
     ...ClustersRow

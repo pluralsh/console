@@ -3712,6 +3712,25 @@ export type ClusterNamespacesQueryVariables = Exact<{
 
 export type ClusterNamespacesQuery = { __typename?: 'RootQueryType', namespaces?: Array<{ __typename?: 'Namespace', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null };
 
+export type ClusterPolicyBindingFragment = { __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null };
+
+export type ClusterBindingsFragment = { __typename?: 'Cluster', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
+export type ClusterBindingsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ClusterBindingsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type UpdateClusterBindingsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ClusterUpdateAttributes;
+}>;
+
+
+export type UpdateClusterBindingsMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
 export type UpdateClusterMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   attributes: ClusterUpdateAttributes;
@@ -4166,6 +4185,22 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = { __typename?: 'RootQueryType', externalToken?: string | null, me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', vpnEnabled?: boolean | null, gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null } | null };
 
+export type UsersQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']['input']>;
+  cursor?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type UsersQuery = { __typename?: 'RootQueryType', users?: { __typename?: 'UserConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'UserEdge', node?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null> | null } | null };
+
+export type SearchUsersQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']['input']>;
+  cursor?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SearchUsersQuery = { __typename?: 'RootQueryType', users?: { __typename?: 'UserConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'UserEdge', node?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null> | null } | null };
+
 export const ApplicationSpecFragmentDoc = gql`
     fragment ApplicationSpec on ApplicationSpec {
   descriptor {
@@ -4449,6 +4484,30 @@ export const ClusterTinyFragmentDoc = gql`
   }
 }
     `;
+export const ClusterPolicyBindingFragmentDoc = gql`
+    fragment ClusterPolicyBinding on PolicyBinding {
+  id
+  user {
+    id
+    name
+    email
+  }
+  group {
+    id
+    name
+  }
+}
+    `;
+export const ClusterBindingsFragmentDoc = gql`
+    fragment ClusterBindings on Cluster {
+  readBindings {
+    ...ClusterPolicyBinding
+  }
+  writeBindings {
+    ...ClusterPolicyBinding
+  }
+}
+    ${ClusterPolicyBindingFragmentDoc}`;
 export const MetricResponseFragmentDoc = gql`
     fragment MetricResponse on MetricResponse {
   metric
@@ -5410,6 +5469,75 @@ export function useClusterNamespacesLazyQuery(baseOptions?: Apollo.LazyQueryHook
 export type ClusterNamespacesQueryHookResult = ReturnType<typeof useClusterNamespacesQuery>;
 export type ClusterNamespacesLazyQueryHookResult = ReturnType<typeof useClusterNamespacesLazyQuery>;
 export type ClusterNamespacesQueryResult = Apollo.QueryResult<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>;
+export const ClusterBindingsDocument = gql`
+    query ClusterBindings($id: ID!) {
+  cluster(id: $id) {
+    ...ClusterBindings
+  }
+}
+    ${ClusterBindingsFragmentDoc}`;
+
+/**
+ * __useClusterBindingsQuery__
+ *
+ * To run a query within a React component, call `useClusterBindingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterBindingsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useClusterBindingsQuery(baseOptions: Apollo.QueryHookOptions<ClusterBindingsQuery, ClusterBindingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterBindingsQuery, ClusterBindingsQueryVariables>(ClusterBindingsDocument, options);
+      }
+export function useClusterBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterBindingsQuery, ClusterBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterBindingsQuery, ClusterBindingsQueryVariables>(ClusterBindingsDocument, options);
+        }
+export type ClusterBindingsQueryHookResult = ReturnType<typeof useClusterBindingsQuery>;
+export type ClusterBindingsLazyQueryHookResult = ReturnType<typeof useClusterBindingsLazyQuery>;
+export type ClusterBindingsQueryResult = Apollo.QueryResult<ClusterBindingsQuery, ClusterBindingsQueryVariables>;
+export const UpdateClusterBindingsDocument = gql`
+    mutation UpdateClusterBindings($id: ID!, $attributes: ClusterUpdateAttributes!) {
+  updateCluster(id: $id, attributes: $attributes) {
+    ...ClusterBindings
+  }
+}
+    ${ClusterBindingsFragmentDoc}`;
+export type UpdateClusterBindingsMutationFn = Apollo.MutationFunction<UpdateClusterBindingsMutation, UpdateClusterBindingsMutationVariables>;
+
+/**
+ * __useUpdateClusterBindingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateClusterBindingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateClusterBindingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateClusterBindingsMutation, { data, loading, error }] = useUpdateClusterBindingsMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateClusterBindingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateClusterBindingsMutation, UpdateClusterBindingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateClusterBindingsMutation, UpdateClusterBindingsMutationVariables>(UpdateClusterBindingsDocument, options);
+      }
+export type UpdateClusterBindingsMutationHookResult = ReturnType<typeof useUpdateClusterBindingsMutation>;
+export type UpdateClusterBindingsMutationResult = Apollo.MutationResult<UpdateClusterBindingsMutation>;
+export type UpdateClusterBindingsMutationOptions = Apollo.BaseMutationOptions<UpdateClusterBindingsMutation, UpdateClusterBindingsMutationVariables>;
 export const UpdateClusterDocument = gql`
     mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
   updateCluster(id: $id, attributes: $attributes) {
@@ -7336,6 +7464,94 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const UsersDocument = gql`
+    query Users($q: String, $cursor: String) {
+  users(q: $q, first: 20, after: $cursor) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...User
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${UserFragmentDoc}`;
+
+/**
+ * __useUsersQuery__
+ *
+ * To run a query within a React component, call `useUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUsersQuery({
+ *   variables: {
+ *      q: // value for 'q'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useUsersQuery(baseOptions?: Apollo.QueryHookOptions<UsersQuery, UsersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+      }
+export function useUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UsersQuery, UsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+        }
+export type UsersQueryHookResult = ReturnType<typeof useUsersQuery>;
+export type UsersLazyQueryHookResult = ReturnType<typeof useUsersLazyQuery>;
+export type UsersQueryResult = Apollo.QueryResult<UsersQuery, UsersQueryVariables>;
+export const SearchUsersDocument = gql`
+    query SearchUsers($q: String, $cursor: String) {
+  users(q: $q, after: $cursor, first: 5) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...User
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${UserFragmentDoc}`;
+
+/**
+ * __useSearchUsersQuery__
+ *
+ * To run a query within a React component, call `useSearchUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchUsersQuery({
+ *   variables: {
+ *      q: // value for 'q'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useSearchUsersQuery(baseOptions?: Apollo.QueryHookOptions<SearchUsersQuery, SearchUsersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchUsersQuery, SearchUsersQueryVariables>(SearchUsersDocument, options);
+      }
+export function useSearchUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchUsersQuery, SearchUsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchUsersQuery, SearchUsersQueryVariables>(SearchUsersDocument, options);
+        }
+export type SearchUsersQueryHookResult = ReturnType<typeof useSearchUsersQuery>;
+export type SearchUsersLazyQueryHookResult = ReturnType<typeof useSearchUsersLazyQuery>;
+export type SearchUsersQueryResult = Apollo.QueryResult<SearchUsersQuery, SearchUsersQueryVariables>;
 export const namedOperations = {
   Query: {
     App: 'App',
@@ -7347,6 +7563,7 @@ export const namedOperations = {
     Cluster: 'Cluster',
     ClusterPods: 'ClusterPods',
     ClusterNamespaces: 'ClusterNamespaces',
+    ClusterBindings: 'ClusterBindings',
     Usage: 'Usage',
     GitRepositories: 'GitRepositories',
     ClusterProviders: 'ClusterProviders',
@@ -7374,10 +7591,13 @@ export const namedOperations = {
     UnstructuredResource: 'UnstructuredResource',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
-    Me: 'Me'
+    Me: 'Me',
+    Users: 'Users',
+    SearchUsers: 'SearchUsers'
   },
   Mutation: {
     CreateBuild: 'CreateBuild',
+    UpdateClusterBindings: 'UpdateClusterBindings',
     UpdateCluster: 'UpdateCluster',
     CreateCluster: 'CreateCluster',
     CreateGitRepository: 'CreateGitRepository',
@@ -7416,6 +7636,8 @@ export const namedOperations = {
     ClustersRow: 'ClustersRow',
     Cluster: 'Cluster',
     ClusterTiny: 'ClusterTiny',
+    ClusterPolicyBinding: 'ClusterPolicyBinding',
+    ClusterBindings: 'ClusterBindings',
     MetricResponse: 'MetricResponse',
     GitRepositoriesRow: 'GitRepositoriesRow',
     ClusterProvider: 'ClusterProvider',

@@ -147,7 +147,7 @@ export const columns = [
           icon={
             different ? (
               <Spinner
-                color="icon-info"
+                color={theme.colors['icon-info']}
                 size={16}
               />
             ) : undefined
