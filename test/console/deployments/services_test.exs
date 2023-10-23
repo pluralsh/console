@@ -586,6 +586,32 @@ defmodule Console.Deployments.ServicesTest do
       assert deprecation.blocking
     end
 
+    test "it can find non-k8s deprecations" do
+      service = insert(:service)
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :running,
+          synced: true,
+          group: "cert-manager.io",
+          version: "v1beta1",
+          kind: "Issuer",
+          namespace: "my-app",
+          name: "issuer"
+        }]
+      }, service)
+
+      %{components: [component]} = Console.Repo.preload(service, [components: :api_deprecations])
+      assert component.group == "cert-manager.io"
+      assert component.version == "v1beta1"
+
+      [deprecation] = component.api_deprecations
+      assert deprecation.deprecated_in == "v1.4.0"
+      assert deprecation.removed_in == "v1.6.0"
+      assert deprecation.replacement == "cert-manager.io/v1"
+      refute deprecation.blocking
+    end
+
     test "it will ignore api deprecations if not yet relevant" do
       cluster = insert(:cluster, version: "1.9")
       service = insert(:service, cluster: cluster)

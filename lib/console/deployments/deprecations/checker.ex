@@ -16,11 +16,12 @@ defmodule Console.Deployments.Deprecations.Checker do
     end
   end
 
-  def eligible(vsn, %Table.Entry{deprecated_in: deprecated, removed_in: removed}) when is_binary(vsn) do
+  def eligible(vsn, %Table.Entry{deprecated_in: deprecated, removed_in: removed, component: "k8s"}) when is_binary(vsn) do
     with {:ok, vsn} <- Version.parse(clean_version(vsn)),
          {:ok, deprecated} <- Version.parse(clean_version(deprecated)),
          {:ok, removed} <- Version.parse(clean_version(removed)),
       do: {at_least(vsn, deprecated), at_least(bump_minor(vsn), removed)}
   end
-  def eligible(_, _), do: :pass
+  def eligible(_, %Table.Entry{component: "k8s"}), do: :pass
+  def eligible(_, _), do: {true, false}
 end

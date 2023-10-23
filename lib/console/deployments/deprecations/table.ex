@@ -13,7 +13,7 @@ defmodule Console.Deployments.Deprecations.Table do
   end
 
   defmodule Entry do
-    defstruct [:group, :version, :kind, :deprecated_in, :removed_in, :replacement, :available_in]
+    defstruct [:group, :version, :kind, :deprecated_in, :removed_in, :replacement, :available_in, :component]
   end
 
   def name(%{group: g, version: v, kind: k}), do: "#{g}/#{v}.#{k}"
@@ -50,8 +50,7 @@ defmodule Console.Deployments.Deprecations.Table do
   defp fetch_and_parse(url) do
     with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url),
          {:ok, %{"deprecated-versions" => deprecated}} <- YamlElixir.read_from_string(body) do
-      Enum.filter(deprecated, & &1["component"] == "k8s")
-      |> Enum.map(&to_entry/1)
+      Enum.map(deprecated, &to_entry/1)
     end
   end
 
@@ -64,7 +63,8 @@ defmodule Console.Deployments.Deprecations.Table do
       deprecated_in: entry["deprecated-in"],
       removed_in: entry["removed-in"],
       replacement: entry["replacement-api"],
-      available_in: entry["available-in"]
+      available_in: entry["available-in"],
+      component: entry["component"]
     }
   end
 
