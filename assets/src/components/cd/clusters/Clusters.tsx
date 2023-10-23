@@ -59,14 +59,16 @@ function StackedText({ first, second }) {
   return (
     <>
       <div>{first}</div>
-      <div
-        css={{
-          ...theme.partials.text.caption,
-          color: theme.colors['text-xlight'],
-        }}
-      >
-        {second}
-      </div>
+      {second && (
+        <div
+          css={{
+            ...theme.partials.text.caption,
+            color: theme.colors['text-xlight'],
+          }}
+        >
+          {second}
+        </div>
+      )}
     </>
   )
 }
@@ -155,7 +157,7 @@ export const columns = [
             {node?.currentVersion && (
               <StackedText
                 first={`Current: v${node?.currentVersion}`}
-                second={`Target: v${node?.version}`}
+                second={node?.self ? null : `Target: v${node?.version}`}
               />
             )}
             {!node?.currentVersion && <>-</>}
@@ -260,7 +262,8 @@ export const columns = [
       )
 
       return (
-        (!!upgrade || hasDeprecations) && <ClusterUpgrade cluster={cluster} />
+        (!!upgrade || hasDeprecations) &&
+        !cluster?.self && <ClusterUpgrade cluster={cluster} />
       )
     },
   }),
