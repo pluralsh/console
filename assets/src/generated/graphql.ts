@@ -428,14 +428,16 @@ export type Cluster = {
   provider?: Maybe<ClusterProvider>;
   /** read policy for this cluster */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** a custom git repository if you want to define your own CAPI manifests */
+  repository?: Maybe<GitRepository>;
   /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
   revisions?: Maybe<RevisionConnection>;
   /** whether this is the management cluster itself */
   self?: Maybe<Scalars['Boolean']['output']>;
-  /** any errors which might have occurred during the bootstrap process */
-  servicErrors?: Maybe<Array<Maybe<ServiceError>>>;
   /** the service used to deploy the CAPI resources of this cluster */
   service?: Maybe<ServiceDeployment>;
+  /** any errors which might have occurred during the bootstrap process */
+  serviceErrors?: Maybe<Array<Maybe<ServiceError>>>;
   /** the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null */
   status?: Maybe<ClusterStatus>;
   /** key/value tags to filter clusters */
@@ -527,6 +529,8 @@ export type ClusterProvider = {
   name: Scalars['String']['output'];
   /** the namespace the CAPI resources are deployed into */
   namespace: Scalars['String']['output'];
+  /** the repository for the CAPI service itself if customized */
+  providerRepository?: Maybe<GitRepository>;
   /** the region names this provider can deploy to */
   regions?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the repository used to serve cluster manifests */
@@ -559,11 +563,14 @@ export type ClusterProviderEdge = {
 
 export type ClusterProviderUpdateAttributes = {
   cloudSettings?: InputMaybe<CloudProviderSettingsAttributes>;
+  /** if you optionally want to reconfigure the git repository for the cluster provider */
+  service?: InputMaybe<ClusterServiceAttributes>;
 };
 
 export type ClusterServiceAttributes = {
   git: GitRefAttributes;
   id: Scalars['ID']['input'];
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** the crd status of the cluster as seen by the CAPI operator */

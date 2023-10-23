@@ -1010,6 +1010,7 @@ input ClusterUpdateAttributes {
 
 input ClusterServiceAttributes {
   id: ID!
+  repositoryId: ID
   git: GitRefAttributes!
 }
 
@@ -1052,6 +1053,9 @@ input ClusterProviderAttributes {
 }
 
 input ClusterProviderUpdateAttributes {
+  "if you optionally want to reconfigure the git repository for the cluster provider"
+  service: ClusterServiceAttributes
+
   cloudSettings: CloudProviderSettingsAttributes
 }
 
@@ -1101,6 +1105,9 @@ type ClusterProvider {
 
   "the repository used to serve cluster manifests"
   repository: GitRepository
+
+  "the repository for the CAPI service itself if customized"
+  providerRepository: GitRepository
 
   "the service of the CAPI controller itself"
   service: ServiceDeployment
@@ -1179,7 +1186,10 @@ type Cluster {
   apiDeprecations: [ApiDeprecation]
 
   "any errors which might have occurred during the bootstrap process"
-  servicErrors: [ServiceError]
+  serviceErrors: [ServiceError]
+
+  "a custom git repository if you want to define your own CAPI manifests"
+  repository: GitRepository
 
   "list cached nodes for a cluster, this can be stale up to 5m"
   nodes: [Node]
