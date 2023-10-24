@@ -53,7 +53,10 @@ defmodule Console.Deployments.Git.AgentTest do
 
     @tag :skip
     test "it can fetch from https private repos" do
-      git = insert(:git_repository, auth_method: :basic, url: "https://github.com/pluralsh/test-repo.git", password: System.get_env("GITHUB_PAT"))
+      git = insert(:git_repository, auth_method: :basic, url: "https://gitlab.com/mjg3/a-test-repo.git",
+                    password: System.get_env("GITLAB_PAT"),
+                    username: "mjg3"
+            )
       svc = insert(:service, repository: git, git: %{ref: "main", folder: "/"})
 
       {:ok, pid} = Discovery.start(git)

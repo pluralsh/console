@@ -18,7 +18,15 @@ config :goth,
 
 config :piazza_core, aes_key: "1HdFP1DuK7xkkcEBne41yAwUY8NSfJnYfGVylYYCS2U="
 
+
 secrets_path = __ENV__.file |> Path.dirname() |> Path.join("secrets")
+binfile = fn p ->
+  __ENV__.file
+  |> Path.dirname()
+  |> Path.dirname()
+  |> Path.join("bin")
+  |> Path.join(p)
+end
 
 config :console,
   workspace_root: secrets_path,
@@ -27,6 +35,8 @@ config :console,
   forge_config: "/Users/michaelguarino/.forge",
   webhook_secret: "webhook_secret",
   piazza_secret: "webhook_secret",
+  git_askpass: binfile.(".git-askpass"),
+  ssh_askpass: binfile.(".ssh-askpass"),
   git_ssh_key: :pass,
   cache_adapter: Console.TestCache,
   local_cache: Console.TestCache,

@@ -75,9 +75,9 @@ defmodule Console.Deployments.Git.Cmd do
     end
   end
 
-  def url(%GitRepository{auth_method: :http, username: nil, password: pwd} = git) when is_binary(pwd),
+  def url(%GitRepository{auth_method: :basic, username: nil, password: pwd} = git) when is_binary(pwd),
     do: url(%{git | username: "apikey"})
-  def url(%GitRepository{auth_method: :http, username: username, url: url}) when is_binary(username) do
+  def url(%GitRepository{auth_method: :basic, username: username, url: url}) when is_binary(username) do
     uri = URI.parse(url)
     URI.to_string(%{uri | userinfo: username})
   end
@@ -85,15 +85,18 @@ defmodule Console.Deployments.Git.Cmd do
 
   defp opts(%GitRepository{dir: dir} = repo), do: [env: env(repo), cd: dir, stderr_to_stdout: true]
 
-  defp env(%GitRepository{auth_method: :http, password: password}) when is_binary(password),
-    do: [{"GIT_ACCESS_TOKEN", password}, {"GIT_ASKPASS", "/root/bin/.git-askpass"}]
+  defp env(%GitRepository{auth_method: :basic, password: password}) when is_binary(password),
+    do: [{"GIT_ACCESS_TOKEN", password}, {"GIT_ASKPASS", git_askpass()}]
   defp env(%GitRepository{auth_method: :ssh, private_key_file: pk_file} = git) when is_binary(pk_file),
     do: [{"GIT_SSH_COMMAND", ssh_command(pk_file)}] ++ passphrase(git)
   defp env(_), do: []
 
   defp passphrase(%GitRepository{passphrase: pass}) when is_binary(pass),
-    do: [{"SSH_PASSPHRASE", pass}, {"SSH_ASKPASS", "/root/bin/.ssh-askpass"}, {"DISPLAY", "1"}, {"SSH_ASKPASS_REQUIRE", "force"}]
+    do: [{"SSH_PASSPHRASE", pass}, {"SSH_ASKPASS", ssh_askpass()}, {"DISPLAY", "1"}, {"SSH_ASKPASS_REQUIRE", "force"}]
   defp passphrase(_), do: []
+
+  defp git_askpass(), do: Console.conf(:git_askpass)
+  defp ssh_askpass(), do: Console.conf(:ssh_askpass)
 
   defp ssh_command(pk_file), do: "ssh -i #{pk_file} -F /dev/null -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 end

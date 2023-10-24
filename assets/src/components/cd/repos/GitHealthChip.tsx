@@ -1,4 +1,4 @@
-import { Chip } from '@pluralsh/design-system'
+import { Chip, Tooltip } from '@pluralsh/design-system'
 import { GitHealth } from 'generated/graphql'
 import { ComponentProps } from 'react'
 import { createMapperWithFallback } from 'utils/mapping'
@@ -29,12 +29,14 @@ export function GitHealthChip({
   health: GitHealth | null | undefined
   error?: string | null | undefined
 }) {
-  return (
-    <Chip
-      tooltip={error || undefined}
-      severity={gitHealthToSeverity(health)}
-    >
+  const chip = (
+    <Chip severity={gitHealthToSeverity(health)}>
       {gitHealthToLabel(health)}
     </Chip>
   )
+  if (error) {
+    return <Tooltip label={error}>{chip}</Tooltip>
+  }
+
+  return chip
 }

@@ -70,6 +70,8 @@ end
 
 config :console,
   workspace_root: "/root",
+  git_askpass: "/root/bin/.git-askpass",
+  ssh_askpass: "/root/bin/.ssh-askpass",
   git_url: get_env("GIT_URL"),
   branch: get_env("BRANCH_NAME") || "master",
   repo_root: get_env("REPO_ROOT"),
