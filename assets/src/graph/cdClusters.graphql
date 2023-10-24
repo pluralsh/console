@@ -211,13 +211,8 @@ query ClusterBindings($id: ID!) {
   }
 }
 
-mutation UpdateClusterBindings(
-  $id: ID!
-  $attributes: ClusterUpdateAttributes!
-) {
-  updateCluster(id: $id, attributes: $attributes) {
-    ...ClusterBindings
-  }
+mutation UpdateClusterBindings($id: ID!, $rbac: RbacAttributes!) {
+  updateRbac(clusterId: $id, rbac: $rbac)
 }
 
 mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {

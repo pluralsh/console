@@ -3725,11 +3725,11 @@ export type ClusterBindingsQuery = { __typename?: 'RootQueryType', cluster?: { _
 
 export type UpdateClusterBindingsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
-  attributes: ClusterUpdateAttributes;
+  rbac: RbacAttributes;
 }>;
 
 
-export type UpdateClusterBindingsMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type UpdateClusterBindingsMutation = { __typename?: 'RootMutationType', updateRbac?: boolean | null };
 
 export type UpdateClusterMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5505,12 +5505,10 @@ export type ClusterBindingsQueryHookResult = ReturnType<typeof useClusterBinding
 export type ClusterBindingsLazyQueryHookResult = ReturnType<typeof useClusterBindingsLazyQuery>;
 export type ClusterBindingsQueryResult = Apollo.QueryResult<ClusterBindingsQuery, ClusterBindingsQueryVariables>;
 export const UpdateClusterBindingsDocument = gql`
-    mutation UpdateClusterBindings($id: ID!, $attributes: ClusterUpdateAttributes!) {
-  updateCluster(id: $id, attributes: $attributes) {
-    ...ClusterBindings
-  }
+    mutation UpdateClusterBindings($id: ID!, $rbac: RbacAttributes!) {
+  updateRbac(clusterId: $id, rbac: $rbac)
 }
-    ${ClusterBindingsFragmentDoc}`;
+    `;
 export type UpdateClusterBindingsMutationFn = Apollo.MutationFunction<UpdateClusterBindingsMutation, UpdateClusterBindingsMutationVariables>;
 
 /**
@@ -5527,7 +5525,7 @@ export type UpdateClusterBindingsMutationFn = Apollo.MutationFunction<UpdateClus
  * const [updateClusterBindingsMutation, { data, loading, error }] = useUpdateClusterBindingsMutation({
  *   variables: {
  *      id: // value for 'id'
- *      attributes: // value for 'attributes'
+ *      rbac: // value for 'rbac'
  *   },
  * });
  */

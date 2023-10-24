@@ -126,7 +126,6 @@ export function BindingInput({
       hint={hint}
       icon={type ? ICONS[type] : null}
       label={label}
-      round="xsmall"
       width="100%"
       suggestions={suggestions}
       items={bindings}

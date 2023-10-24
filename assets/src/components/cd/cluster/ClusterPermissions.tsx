@@ -5,16 +5,24 @@ import isEqual from 'lodash/isEqual'
 import uniqWith from 'lodash/uniqWith'
 
 import {
+  ClusterFragment,
   ClusterPolicyBindingFragment,
-  ClusterTinyFragment,
   useClusterBindingsQuery,
+  useUpdateClusterBindingsMutation,
 } from 'generated/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import RoleFormBindings from 'components/account/roles/RoleFormBindings'
 
+import { bindingToBindingAttributes } from 'components/account/roles/misc'
+
+import { GqlError } from 'components/utils/Alert'
+
 import { StepBody } from '../ModalAlt'
+
+type Cluster = Pick<ClusterFragment, 'id' | 'name' | 'version'>
 
 const Overline = styled.h3(({ theme }) => ({
   ...theme.partials.text.overline,
@@ -37,8 +45,6 @@ function ReadPermissions({
     | undefined
   setBindings: any
 }) {
-  console.log('read bindings', bindings)
-
   return (
     <PermissionsColumnSC>
       <Overline>Read Permissions</Overline>
@@ -53,6 +59,7 @@ function ReadPermissions({
     </PermissionsColumnSC>
   )
 }
+
 function WritePermissions({
   bindings,
   setBindings,
@@ -63,8 +70,6 @@ function WritePermissions({
     | undefined
   setBindings: any
 }) {
-  console.log('write bindings', bindings)
-
   return (
     <PermissionsColumnSC>
       <Overline>Write Permissions</Overline>
@@ -85,15 +90,13 @@ export function ClusterPermissionsModal({
   open,
   onClose,
 }: {
-  cluster: ClusterTinyFragment
+  cluster: Cluster
   open: boolean
   onClose: () => void
 }) {
   const theme = useTheme()
-  const allowSubmit = false
-  const mutationLoading = false
 
-  const { data, loading, error } = useClusterBindingsQuery({
+  const { data } = useClusterBindingsQuery({
     variables: { id: cluster.id },
     fetchPolicy: 'no-cache',
     skip: !cluster.id,
@@ -110,8 +113,6 @@ export function ClusterPermissionsModal({
   useEffect(() => {
     setWriteBindings(data?.cluster?.writeBindings)
   }, [data?.cluster?.writeBindings])
-  console.log('readBindings', readBindings, data?.cluster?.readBindings)
-  console.log('writeBindings', writeBindings, data?.cluster?.writeBindings)
 
   const uniqueReadBindings = useMemo(
     () => uniqWith(readBindings, isEqual),
@@ -121,14 +122,35 @@ export function ClusterPermissionsModal({
     () => uniqWith(writeBindings, isEqual),
     [writeBindings]
   )
+  const [mutation, { loading: mutationLoading, error: mutationError }] =
+    useUpdateClusterBindingsMutation({
+      onCompleted: () => {
+        onClose()
+      },
+    })
+  const allowSubmit = readBindings && writeBindings
 
-  console.log({ data, loading, error })
-
-  const onSubmit = useCallback((e: FormEvent) => {
-    e.preventDefault()
-
-    console.log('Submit form')
-  }, [])
+  const onSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault()
+      if (cluster.version && readBindings && writeBindings) {
+        mutation({
+          variables: {
+            id: cluster.id,
+            rbac: {
+              readBindings: readBindings
+                ?.filter(isNonNullable)
+                .map(bindingToBindingAttributes),
+              writeBindings: writeBindings
+                ?.filter(isNonNullable)
+                .map(bindingToBindingAttributes),
+            },
+          },
+        })
+      }
+    },
+    [cluster.id, cluster.version, mutation, readBindings, writeBindings]
+  )
 
   return (
     <Modal
@@ -213,16 +235,13 @@ export function ClusterPermissionsModal({
             </div>
           </div>
         )}
+        {mutationError && <GqlError error={mutationError} />}
       </div>
     </Modal>
   )
 }
 
-export default function ClusterPermissions({
-  cluster,
-}: {
-  cluster: ClusterTinyFragment
-}) {
+export default function ClusterPermissions({ cluster }: { cluster: Cluster }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (

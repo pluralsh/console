@@ -136,6 +136,7 @@ export const columns = [
       },
     }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
       const different =
         !node?.self &&
         node?.currentVersion &&
