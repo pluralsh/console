@@ -60,14 +60,12 @@ function ConsoleContent() {
   return (
     <Flex
       position="relative"
-      width="100vw"
-      maxWidth="100vw"
-      height="100vh"
-      minWidth="0"
+      height="100%"
       minHeight="0"
       maxHeight="100vh"
       overflow="hidden"
       flexDirection="column"
+      flexGrow={1}
     >
       {isProduction && (
         <WithApplicationUpdate>
@@ -95,6 +93,7 @@ function ConsoleContent() {
         minWidth={0}
         minHeight={0}
         flexGrow={1}
+        alignItems="stretch"
       >
         <Sidebar />
         <Flex

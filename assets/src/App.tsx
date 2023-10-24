@@ -47,7 +47,7 @@ export default function App() {
                 <GlobalStyle />
                 <DocSearchStyles />
                 <Grommet
-                  full
+                  className="grommet-root"
                   // @ts-ignore
                   theme={mergedStyledTheme}
                   themeMode="dark"

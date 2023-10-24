@@ -99,7 +99,14 @@ function isActiveMenuItem(
   )
 }
 
-const SidebarSC = styled(DSSidebar).attrs(() => ({ variant: 'console' }))``
+const SidebarSC = styled(DSSidebar).attrs(() => ({ variant: 'console' }))(
+  (_) => ({
+    flexGrow: 1,
+    minHeight: 0,
+    height: 'auto',
+  })
+)
+
 const NotificationsCountSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
