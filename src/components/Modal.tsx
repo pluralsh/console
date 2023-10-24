@@ -116,8 +116,6 @@ function ModalRef(
     setBodyLocked(lockBody && open)
   }, [lockBody, open, setBodyLocked])
 
-  console.log('formprops', formProps)
-
   return (
     <HonorableModal
       open={open}

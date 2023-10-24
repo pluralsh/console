@@ -232,6 +232,7 @@ const Card = forwardRef(
           {...(clickable && {
             cursor: 'pointer',
             as: 'button',
+            type: 'button',
           })}
           {...(clickable &&
             !selected &&

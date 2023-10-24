@@ -111,6 +111,7 @@ export { DatePicker } from './components/DatePicker'
 export { Switch } from './components/Switch'
 export { LightDarkSwitch } from './components/LightDarkSwitch'
 export { AnimatedDiv } from './components/AnimatedDiv'
+export { Spinner } from './components/Spinner'
 
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'
