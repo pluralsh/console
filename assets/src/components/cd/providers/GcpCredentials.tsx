@@ -1,64 +1,61 @@
 import { useCallback, useState } from 'react'
-import { Div } from 'honorable'
 import { FormField } from '@pluralsh/design-system'
-import { FileInput } from 'grommet'
-import { ThemeContext } from 'grommet/contexts'
+import { FileDrop, FileDropFile } from 'components/utils/FileDrop'
 
-import styled, { useTheme } from 'styled-components'
+import { DropzoneOptions } from 'react-dropzone'
 
-import { fileInputTheme } from './fileInputTheme'
+import { isEmpty } from 'lodash'
 
 enum FileError {
   InvalidFormat = 'Invalid file format. Expected JSON.',
   InvalidContent = "Invalid file content. Could not find 'project_id'.",
 }
 
-const FileNameSC = styled.span(({ theme }) => ({
-  margin: theme.spacing.small,
-  color: theme.colors['text-light'],
-}))
-
 function GcpCredentials({
-  creds,
   setCreds,
 }: {
-  creds: string | undefined
+  // eslint-disable-next-line react/no-unused-prop-types
+  creds?: string | undefined
   setCreds: (creds: string | undefined) => void
 }) {
-  const theme = useTheme()
-
-  console.log('credszzzz', creds)
-
   const [fileName, setFileName] = useState<string | undefined>()
   const [fileError, setFileError] = useState<FileError>()
 
-  const fileSelected = !!creds
+  const readFile = useCallback<NonNullable<DropzoneOptions['onDrop']>>(
+    async (files) => {
+      if (isEmpty(files)) {
+        return
+      }
+      const file = files?.[0]
 
-  const readFile = useCallback(
-    async (files: FileList | undefined | null) => {
-      setFileError(undefined)
-      setFileName(undefined)
-      setCreds(undefined)
-
-      if (files?.length === 0) return
-
-      const file = files?.item(0)
+      setFileName(file.name)
 
       if (file?.type !== 'application/json') {
         setFileError(FileError.InvalidFormat)
+        setCreds('')
 
         return
       }
-
       const content = await file?.text()
-      const credentials = JSON.parse(content)
+      let credentials
 
-      if (!credentials.project_id) {
-        setFileError(FileError.InvalidContent)
+      try {
+        credentials = JSON.parse(content)
+      } catch (e) {
+        setFileError(FileError.InvalidFormat)
+        setCreds('')
 
         return
       }
 
+      if (!credentials?.project_id) {
+        setFileError(FileError.InvalidContent)
+        setFileName(file.name)
+        setCreds('')
+
+        return
+      }
+      setFileError(undefined)
       setCreds(content)
       setFileName(file.name)
     },
@@ -69,33 +66,30 @@ function GcpCredentials({
     <FormField
       label="Application credentials"
       required
+      error={!!fileError}
+      hint={fileError}
     >
-      <ThemeContext.Extend
-        value={fileInputTheme({
-          selected: fileSelected,
-          error: !!fileError,
-          theme,
-        })}
-      >
-        <FileInput
-          value={fileName || undefined}
-          messages={{
-            dropPrompt: 'Drop your service account credentials file here',
-            browse: 'Select file',
-          }}
-          onChange={(event) => readFile(event?.target?.files)}
-          renderFile={(file) => <FileNameSC>{file?.name}</FileNameSC>}
-        />
-      </ThemeContext.Extend>
-      {!!fileError && (
-        <Div
-          marginTop="xxsmall"
-          fontSize="small"
-          color="error"
-        >
-          {fileError}
-        </Div>
-      )}
+      <FileDrop
+        accept={{ 'application/json': [] }}
+        onDrop={readFile}
+        messages={{
+          default: 'Drop your GCP credentials file here',
+          reject: 'File must be JSON format',
+        }}
+        error={!!fileError}
+        files={
+          !!fileName && [
+            <FileDropFile
+              key="file"
+              label={fileName}
+              onClear={() => {
+                setFileName(undefined)
+                setFileError(undefined)
+              }}
+            />,
+          ]
+        }
+      />
     </FormField>
   )
 }
