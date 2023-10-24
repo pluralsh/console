@@ -6,7 +6,7 @@ import isEqual from 'lodash/isEqual'
 
 import pick from 'lodash/pick'
 
-import { sanitize } from './misc'
+import { bindingToBindingAttributes } from './misc'
 
 import { UPDATE_ROLE } from './queries'
 
@@ -24,7 +24,10 @@ export default function RoleEdit({ role, open, setOpen }: any) {
   const [mutation, { loading, error }] = useMutation(UPDATE_ROLE, {
     variables: {
       id: role.id,
-      attributes: { ...attributes, roleBindings: roleBindings.map(sanitize) },
+      attributes: {
+        ...attributes,
+        roleBindings: roleBindings.map(bindingToBindingAttributes),
+      },
     },
     onCompleted: () => setOpen(false),
   })

@@ -74,3 +74,29 @@ query Me {
     }
   }
 }
+
+query Users($q: String, $cursor: String) {
+  users(q: $q, first: 20, after: $cursor) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...User
+      }
+    }
+  }
+}
+
+query SearchUsers($q: String, $cursor: String) {
+  users(q: $q, after: $cursor, first: 5) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...User
+      }
+    }
+  }
+}

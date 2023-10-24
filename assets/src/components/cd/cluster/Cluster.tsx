@@ -165,7 +165,7 @@ export default function Cluster() {
               gap: theme.spacing.large,
             }}
           >
-            <ClusterPermissions />
+            <ClusterPermissions cluster={cluster} />
           </div>
         </>
       }

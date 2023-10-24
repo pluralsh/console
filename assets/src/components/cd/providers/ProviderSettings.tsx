@@ -3,6 +3,7 @@ import { Provider } from 'generated/graphql-plural'
 
 import { InputRevealer } from './InputRevealer'
 import { CloudProviderSettingsAttributes } from './CreateProvider'
+import GcpCredentials from './GcpCredentials'
 
 export const PROVIDER_KEYS = [
   'aws',
@@ -51,14 +52,12 @@ export function GcpSettings({
   ) => void
 }) {
   return (
-    <FormField label="Access key ID">
-      <InputRevealer
-        value={settings?.applicationCredentials}
-        onChange={(e) => {
-          updateSettings({ applicationCredentials: e.currentTarget.value })
-        }}
-      />
-    </FormField>
+    <GcpCredentials
+      creds={settings?.applicationCredentials}
+      setCreds={(creds) => {
+        updateSettings({ applicationCredentials: creds })
+      }}
+    />
   )
 }
 

@@ -9,7 +9,7 @@ import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModa
 
 import { appendConnection, updateCache } from '../../../utils/graphql'
 
-import { sanitize } from './misc'
+import { bindingToBindingAttributes } from './misc'
 import { CREATE_ROLE, ROLES_Q } from './queries'
 import RoleForm from './RoleForm'
 
@@ -38,7 +38,10 @@ export default function RoleCreate({ q }: any) {
   }, [])
   const [mutation, { loading, error }] = useMutation(CREATE_ROLE, {
     variables: {
-      attributes: { ...attributes, roleBindings: roleBindings.map(sanitize) },
+      attributes: {
+        ...attributes,
+        roleBindings: roleBindings.map(bindingToBindingAttributes),
+      },
     },
     update: (cache, { data: { createRole } }) =>
       updateCache(cache, {

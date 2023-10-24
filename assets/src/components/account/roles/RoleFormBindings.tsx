@@ -1,18 +1,63 @@
 import { ValidatedInput } from '@pluralsh/design-system'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { BindingInput } from 'components/utils/BindingInput'
 import { useTheme } from 'styled-components'
+import groupBy from 'lodash/groupBy'
+
+type Binding = {
+  user:
+    | {
+        id: string
+        email?: string
+      }
+    | null
+    | undefined
+  group:
+    | {
+        id: string
+        name?: string
+      }
+    | null
+    | undefined
+}
+
+function splitBindings(bindings: (Binding | null | undefined)[]) {
+  return groupBy(bindings, (binding) => {
+    if (binding?.group) {
+      return 'groupBindings'
+    }
+    if (binding?.user) {
+      return 'userBindings'
+    }
+  }) as { groupBindings?: Binding[]; userBindings?: Binding[] }
+}
 
 export default function RoleFormBindings({
   attributes,
   setAttributes,
   bindings,
   setBindings,
-}: any) {
+  hints,
+}: {
+  attributes?: any
+  setAttributes?: any
+  bindings: any
+  setBindings: any
+  hints?: { app?: string; user?: string; group?: string }
+}) {
   const theme = useTheme()
   const [repositories, setRepositories] = useState(
     attributes?.repositories?.join(', ')
   )
+
+  const { userBindings, groupBindings } = useMemo(() => {
+    const { userBindings, groupBindings } = splitBindings(bindings)
+
+    return {
+      userBindings: (userBindings || []).map(({ user }) => user?.email),
+      groupBindings: (groupBindings || []).map(({ group }) => group?.name),
+    }
+  }, [bindings])
 
   return (
     <div
@@ -22,21 +67,21 @@ export default function RoleFormBindings({
         rowGap: theme.spacing.medium,
       }}
     >
-      <ValidatedInput
-        label="App bindings"
-        hint="Target applications using a regex expression, e.g. “*” to select all."
-        value={repositories}
-        onChange={({ target: { value } }) => {
-          setRepositories(value)
-          setAttributes({ ...attributes, repositories: value.split(',') })
-        }}
-      />
+      {attributes && (
+        <ValidatedInput
+          label="App bindings"
+          hint="Target applications using a regex expression, e.g. “*” to select all."
+          value={repositories}
+          onChange={({ target: { value } }) => {
+            setRepositories(value)
+            setAttributes({ ...attributes, repositories: value.split(',') })
+          }}
+        />
+      )}
       <BindingInput
         type="user"
-        hint="Users that will receive this role"
-        bindings={bindings
-          .filter(({ user }) => !!user)
-          .map(({ user: { email } }) => email)}
+        hint={hints?.user || 'Users that will receive this role'}
+        bindings={userBindings}
         add={(user) => setBindings([...bindings, { user }])}
         remove={(email) =>
           setBindings(
@@ -46,10 +91,8 @@ export default function RoleFormBindings({
       />
       <BindingInput
         type="group"
-        hint="Groups that will receive this role"
-        bindings={bindings
-          .filter(({ group }) => !!group)
-          .map(({ group: { name } }) => name)}
+        hint={hints?.group || 'Groups that will receive this role'}
+        bindings={groupBindings}
         add={(group) => setBindings([...bindings, { group }])}
         remove={(name) =>
           setBindings(
