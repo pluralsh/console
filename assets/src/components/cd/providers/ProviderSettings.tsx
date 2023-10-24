@@ -55,7 +55,6 @@ export function GcpSettings({
     <GcpCredentials
       creds={settings?.applicationCredentials}
       setCreds={(creds) => {
-        console.log('set creds', creds)
         updateSettings({ applicationCredentials: creds })
       }}
     />
