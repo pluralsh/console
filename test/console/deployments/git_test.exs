@@ -16,6 +16,37 @@ defmodule Console.Deployments.GitTest do
       assert_receive {:event, %PubSub.GitRepositoryCreated{item: ^git}}
     end
 
+    test "it will normalize common private key misformatting" do
+      user = admin_user()
+
+      {:ok, git} = Git.create_repository(%{
+        url: "git@github.com:pluralsh/console.git",
+        private_key: "invalid-key"
+      }, user)
+
+      assert git.url == "git@github.com:pluralsh/console.git"
+      assert git.private_key == "invalid-key\n"
+
+      {:ok, git} = Git.create_repository(%{
+        url: "https://github.com/pluralsh/test-repo.git",
+        private_key: "invalid-key\n"
+      }, user)
+
+      assert git.url == "https://github.com/pluralsh/test-repo.git"
+      assert git.private_key == "invalid-key\n"
+
+      assert_receive {:event, %PubSub.GitRepositoryCreated{item: ^git}}
+    end
+
+    test "it will suss out invalid git urls" do
+      user = admin_user()
+
+      {:error, _} = Git.create_repository(%{
+        url: "git@github.com/pluralsh/console.git",
+        private_key: "invalid-key"
+      }, user)
+    end
+
     test "it will respect rbac" do
       user = insert(:user)
       deployment_settings(git_bindings: [%{user_id: user.id}])

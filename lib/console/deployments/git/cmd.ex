@@ -47,14 +47,17 @@ defmodule Console.Deployments.Git.Cmd do
   end
 
   def heads(%GitRepository{} = repo) do
-    {:ok, res} = git(repo, "show-ref", ["--heads", "--tags"])
-    String.split(res, ~r/\R/)
-    |> Enum.map(&String.split(&1, " "))
-    |> Enum.filter(fn
-      [_, _] -> true
-      _ -> false
-    end)
-    |> Map.new(fn [sha, head] -> {head, sha} end)
+    with {:ok, res} <- git(repo, "show-ref", ["--heads", "--tags"]) do
+      String.split(res, ~r/\R/)
+      |> Enum.map(&String.split(&1, " "))
+      |> Enum.filter(fn
+        [_, _] -> true
+        _ -> false
+      end)
+      |> Map.new(fn [sha, head] -> {head, sha} end)
+    else
+      _ -> %{}
+    end
   end
 
   def msg(%GitRepository{} = repo), do: git(repo, "--no-pager", ["log", "-n", "1", "--format=%B"])
@@ -92,5 +95,5 @@ defmodule Console.Deployments.Git.Cmd do
     do: [{"SSH_PASSPHRASE", pass}, {"SSH_ASKPASS", "/root/bin/.ssh-askpass"}, {"DISPLAY", "1"}, {"SSH_ASKPASS_REQUIRE", "force"}]
   defp passphrase(_), do: []
 
-  defp ssh_command(pk_file), do: "ssh -i #{pk_file} -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet"
+  defp ssh_command(pk_file), do: "ssh -i #{pk_file} -F /dev/null -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 end

@@ -23,6 +23,47 @@ defmodule Console.Deployments.Git.AgentTest do
 
       assert Process.alive?(pid)
     end
+
+    test "busted credentials fail as expected" do
+      git = insert(:git_repository, auth_method: :ssh, url: "git@github.com:pluralsh/test-repo.git", private_key: "busted")
+
+      {:ok, _pid} = Discovery.start(git)
+
+      :timer.sleep(:timer.seconds(2))
+
+      git = refetch(git)
+      assert git.health == :failed
+      refute git.pulled_at
+    end
+
+    @tag :skip
+    test "it can fetch from private repos" do
+      key = Path.join(System.user_home!(), ".ssh/id_plrl_test") |> File.read!()
+      git = insert(:git_repository, auth_method: :ssh, url: "git@github.com:pluralsh/test-repo.git", private_key: key)
+      svc = insert(:service, repository: git, git: %{ref: "main", folder: "/"})
+
+      {:ok, pid} = Discovery.start(git)
+
+      {:ok, _} = Agent.fetch(pid, svc)
+
+      git = refetch(git)
+      assert git.health == :pullable
+      assert git.pulled_at
+    end
+
+    @tag :skip
+    test "it can fetch from https private repos" do
+      git = insert(:git_repository, auth_method: :basic, url: "https://github.com/pluralsh/test-repo.git", password: System.get_env("GITHUB_PAT"))
+      svc = insert(:service, repository: git, git: %{ref: "main", folder: "/"})
+
+      {:ok, pid} = Discovery.start(git)
+
+      {:ok, _} = Agent.fetch(pid, svc)
+
+      git = refetch(git)
+      assert git.health == :pullable
+      assert git.pulled_at
+    end
   end
 
   defp fetch_and_check(pid, svc) do
