@@ -867,4 +867,18 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert service["criteria"]["secrets"] == ["test-secret"]
     end
   end
+
+  describe "updateRbac" do
+    test "it can update rbac for a cluster" do
+      admin = admin_user()
+      user = insert(:user)
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"updateRbac" => true}}} = run_query("""
+        mutation Rbac($id: ID!, $rbac: RbacAttributes!) {
+          updateRbac(clusterId: $id, rbac: $rbac)
+        }
+      """, %{"id" => cluster.id, "rbac" => %{"readBindings" => [%{"userId" => user.id}]}}, %{current_user: admin})
+    end
+  end
 end

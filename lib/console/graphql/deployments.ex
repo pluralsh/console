@@ -75,7 +75,7 @@ defmodule Console.GraphQl.Deployments do
 
     @desc "a reusable mutation for updating rbac settings on core services"
     field :update_rbac, :boolean do
-      middleware Authenticateed
+      middleware Authenticated
       arg :rbac,        non_null(:rbac_attributes)
       arg :service_id,  :id
       arg :cluster_id,  :id

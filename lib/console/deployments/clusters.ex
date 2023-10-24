@@ -472,8 +472,9 @@ defmodule Console.Deployments.Clusters do
   @spec rbac(map, binary, User.t) :: cluster_resp
   def rbac(attrs, cluster_id, %User{} = user) do
     get_cluster!(cluster_id)
-    |> Cluster.rbac_changeset(attrs)
+    |> Repo.preload([:read_bindings, :write_bindings])
     |> allow(user, :write)
+    |> when_ok(&Cluster.rbac_changeset(&1, attrs))
     |> when_ok(:update)
     |> notify(:update, user)
   end
@@ -484,8 +485,9 @@ defmodule Console.Deployments.Clusters do
   @spec provider_rbac(map, binary, User.t) :: cluster_resp
   def provider_rbac(attrs, provider_id, %User{} = user) do
     get_provider!(provider_id)
-    |> ClusterProvider.rbac_changeset(attrs)
+    |> Repo.preload([:read_bindings, :write_bindings])
     |> allow(user, :write)
+    |> when_ok(&ClusterProvider.rbac_changeset(&1, attrs))
     |> when_ok(:update)
     |> notify(:update, user)
   end

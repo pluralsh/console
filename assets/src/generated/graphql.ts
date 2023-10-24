@@ -588,11 +588,9 @@ export type ClusterUpdateAttributes = {
   handle?: InputMaybe<Scalars['String']['input']>;
   kubeconfig?: InputMaybe<KubeconfigAttributes>;
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
-  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** if you optionally want to reconfigure the git repository for the cluster service */
   service?: InputMaybe<ClusterServiceAttributes>;
   version: Scalars['String']['input'];
-  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type Command = {

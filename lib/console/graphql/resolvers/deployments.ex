@@ -316,9 +316,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     end
   end
 
-  defp rbac_args(%{provider_id: prov_id}), do: {&Clusters.provider_rbac/3, prov_id}
-  defp rbac_args(%{cluster_id: prov_id}), do: {&Clusters.rbac/3, prov_id}
-  defp rbac_args(%{service_id: prov_id}), do: {&Services.rbac/3, prov_id}
+  defp rbac_args(%{provider_id: prov_id}) when is_binary(prov_id), do: {&Clusters.provider_rbac/3, prov_id}
+  defp rbac_args(%{cluster_id: id}) when is_binary(id), do: {&Clusters.rbac/3, id}
+  defp rbac_args(%{service_id: id}) when is_binary(id), do: {&Services.rbac/3, id}
 
   defp fetch_service(%{cluster: cluster, name: name}) do
     cluster = Clusters.find!(cluster)

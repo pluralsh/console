@@ -57,8 +57,9 @@ defmodule Console.Deployments.Services do
   @spec rbac(map, binary, User.t) :: service_resp
   def rbac(attrs, service_id, %User{} = user) do
     get_service!(service_id)
-    |> Service.rbac_changeset(attrs)
+    |> Repo.preload([:write_bindings, :read_bindings])
     |> allow(user, :write)
+    |> when_ok(&Service.rbac_changeset(&1, attrs))
     |> when_ok(:update)
     |> notify(:update, user)
   end

@@ -1002,10 +1002,6 @@ input ClusterUpdateAttributes {
   kubeconfig: KubeconfigAttributes
 
   nodePools: [NodePoolAttributes]
-
-  readBindings: [PolicyBindingAttributes]
-
-  writeBindings: [PolicyBindingAttributes]
 }
 
 input ClusterServiceAttributes {
