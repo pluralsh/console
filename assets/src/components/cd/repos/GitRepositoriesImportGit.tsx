@@ -87,7 +87,7 @@ export function ImportGitModal({
     (requireAuth
       ? authMethod === AuthMethod.Ssh
         ? !privateKey
-        : !username || !password
+        : !username && !password
       : false)
   const onSubmit = useCallback(
     (e: FormEvent) => {
@@ -134,6 +134,13 @@ export function ImportGitModal({
           >
             Cancel
           </Button>
+          <Switch
+            checked={requireAuth}
+            onChange={(val) => setRequireAuth(val)}
+            css={{ flexGrow: 1 }}
+          >
+            Requires authorization
+          </Switch>
         </>
       }
     >
@@ -156,84 +163,78 @@ export function ImportGitModal({
             placeholder="https://host.com/your-repo.git"
             titleContent={<GitHubLogoIcon />}
           />
-
-          <Switch
-            checked={requireAuth}
-            onChange={(val) => setRequireAuth(val)}
-          >
-            Requires authorization
-          </Switch>
         </div>
-        {requireAuth && (
-          <div
-            css={{
-              display: 'flex',
-              columnGap: theme.spacing.small,
-              '> *': {
-                flexGrow: 1,
-              },
-            }}
-          >
-            {authMethod === AuthMethod.Ssh ? (
-              <>
-                <FormField
-                  label="Private key"
-                  required
-                >
-                  <Input
-                    inputProps={{ type: 'password' }}
-                    value={privateKey}
-                    onChange={(e) => {
-                      setPrivateKey(e.currentTarget.value)
-                    }}
-                    placeholder="Private key"
-                  />
-                </FormField>
-                <FormField
-                  label="Passphrase"
-                  required
-                >
-                  <Input
-                    inputProps={{ type: 'password' }}
-                    value={passphrase}
-                    onChange={(e) => {
-                      setPassphrase(e.currentTarget.value)
-                    }}
-                    placeholder="Passphrase"
-                  />
-                </FormField>
-              </>
-            ) : (
-              <>
-                <FormField
-                  label="User name"
-                  required
-                >
-                  <Input
-                    value={username}
-                    onChange={(e) => {
-                      setUsername(e.currentTarget.value)
-                    }}
-                    placeholder="User name"
-                  />
-                </FormField>
-                <FormField
-                  label="Password"
-                  required
-                >
-                  <Input
-                    inputProps={{ type: 'password' }}
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.currentTarget.value)
-                    }}
-                    placeholder="Password"
-                  />
-                </FormField>
-              </>
-            )}
-          </div>
-        )}
+        {requireAuth &&
+          (authMethod === AuthMethod.Ssh ? (
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                rowGap: theme.spacing.medium,
+                '> *': {
+                  flexGrow: 1,
+                },
+              }}
+            >
+              <FormField
+                label="Private key"
+                required
+              >
+                <Input
+                  multiline
+                  minRows={2}
+                  maxRows={4}
+                  inputProps={{ type: 'password' }}
+                  value={privateKey}
+                  onChange={(e) => {
+                    setPrivateKey(e.currentTarget.value)
+                  }}
+                  placeholder="Private key"
+                />
+              </FormField>
+              <FormField label="Passphrase">
+                <Input
+                  inputProps={{ type: 'password' }}
+                  value={passphrase}
+                  onChange={(e) => {
+                    setPassphrase(e.currentTarget.value)
+                  }}
+                  placeholder="Passphrase"
+                />
+              </FormField>
+            </div>
+          ) : (
+            <div
+              css={{
+                display: 'flex',
+                columnGap: theme.spacing.small,
+                '> *': {
+                  flexGrow: 1,
+                },
+              }}
+            >
+              <FormField label="User name">
+                <Input
+                  value={username}
+                  onChange={(e) => {
+                    setUsername(e.currentTarget.value)
+                  }}
+                  placeholder="User name"
+                />
+              </FormField>
+              <FormField label="Password">
+                <Input
+                  inputProps={{ type: 'password' }}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.currentTarget.value)
+                  }}
+                  placeholder="Password"
+                />
+              </FormField>
+            </div>
+          ))}
+
         {error && (
           <GqlError
             header="Problem importing repository"
