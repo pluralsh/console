@@ -1,16 +1,15 @@
-import { Modal, WrapWithIf } from '@pluralsh/design-system'
+import { Modal } from '@pluralsh/design-system'
 import { ComponentProps } from 'react'
 import styled from 'styled-components'
 
-const ModalAltSC = styled(Modal)(({ theme }) => ({
+const ModalAltSC = styled(Modal)(({ theme, actions }) => ({
   padding: 0,
   '&&': {
-    padding: theme.spacing.medium,
-    '& > div, .form': {
-      margin: 0,
+    '& > div > div:first-child, & > form > div:first-child': {
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing.large,
+      paddingBottom: theme.spacing.large,
     },
   },
   '.header': {
@@ -18,12 +17,26 @@ const ModalAltSC = styled(Modal)(({ theme }) => ({
   },
   '.actions': {
     display: 'flex',
+    width: '100%',
     flexDirection: 'row-reverse',
     gap: theme.spacing.medium,
     justifyContent: 'flex-start',
     borderTop: theme.borders.default,
     paddingTop: theme.spacing.large,
   },
+  ...(actions
+    ? {
+        '& > div > *:last-child, & > form > *:last-child': {
+          '& > :first-child': {
+            display: 'none',
+            backgroundColor: 'red',
+          },
+          '& > :last-child': {
+            paddingTop: 0,
+          },
+        },
+      }
+    : {}),
 }))
 
 export default function ModalAlt({
@@ -43,21 +56,13 @@ export default function ModalAlt({
       size={size}
       padding={0}
       fade
+      asForm={asForm}
+      formProps={formProps}
+      actions={actions ? <div className="actions">{actions}</div> : undefined}
       {...props}
     >
-      <WrapWithIf
-        condition={asForm}
-        wrapper={
-          <form
-            className="form"
-            {...(formProps || {})}
-          />
-        }
-      >
-        {header && <h2 className="header">{header}</h2>}
-        {children}
-        {actions && <footer className="actions">{actions}</footer>}
-      </WrapWithIf>
+      {header && <h2 className="header">{header}</h2>}
+      {children}
     </ModalAltSC>
   )
 }
