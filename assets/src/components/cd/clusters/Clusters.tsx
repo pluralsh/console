@@ -44,6 +44,7 @@ import DecoratedName from '../services/DecoratedName'
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
 import CreateCluster from './create/CreateCluster'
+import { ClusterConditions } from './ClusterConditions'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -266,6 +267,13 @@ export const columns = [
         !cluster?.self && <ClusterUpgrade cluster={cluster} />
       )
     },
+  }),
+  columnHelper.accessor(({ node }) => node?.status?.conditions?.length ?? 0, {
+    id: 'conditions',
+    header: 'Cluster conditions',
+    cell: ({ row: { original } }) => (
+      <ClusterConditions cluster={original.node} />
+    ),
   }),
   columnHelper.accessor(({ node }) => node, {
     id: 'actions',
