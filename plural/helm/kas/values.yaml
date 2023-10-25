@@ -79,3 +79,13 @@ secrets:
   api: ""
   private_api: ""
   redis: ""
+
+
+ingress:
+  enabled: true
+  ingressClass: nginx
+  kubernetesApiPath: k8s-proxy
+  tlsSecretName: kas-tls
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod

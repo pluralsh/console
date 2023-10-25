@@ -2,7 +2,7 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "kas.fullname" . }}
+  name: {{ template "kas.fullname" . }}
   labels:
     {{- include "kas.labels" . | nindent 4 }}
 spec:

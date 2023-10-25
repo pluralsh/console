@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "kas.fullname" . }}
+  labels:
+    {{- include "kas.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type | quote }}
+  ports:
+    - port: {{ .Values.service.externalPort }}
+      targetPort: {{ .Values.service.internalPort }}
+      protocol: TCP
+      name: tcp-{{ template "kas.name" . }}-external-api
+    - port: {{ .Values.service.apiInternalPort }}
+      targetPort: {{ .Values.service.apiInternalPort }}
+      protocol: TCP
+      name: tcp-{{ template "kas.name" . }}-internal-api
+    - port: {{ .Values.service.kubernetesApiPort }}
+      targetPort: {{ .Values.service.kubernetesApiPort }}
+      protocol: TCP
+      name: tcp-{{ template "kas.name" . }}-k8s-api
+  {{- if .Values.metrics.enabled }}
+    - port: {{ .Values.service.observabilityPort }}
+      targetPort: {{ .Values.service.observabilityPort }}
+      protocol: TCP
+      name: http-metrics
+  {{- end }}
+  selector:
+    {{- include "kas.selectorLabels" . | nindent 4 }}
