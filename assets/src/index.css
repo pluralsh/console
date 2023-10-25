@@ -1,24 +1,23 @@
 body {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
-  min-width: 900px;
   min-height: 100vh;
-  overflow-x: auto;
-  overflow-y: hidden;
-  display: flex;
-  align-items: stretch;
-  flex-direction: column;
+  min-width: 900px;
+  overflow: auto hidden;
 }
 
 #root,
 .grommet-root {
-  display: flex;
-  flex-grow: 1;
   align-items: stretch;
+  display: flex;
   flex-direction: column;
+  flex-grow: 1;
 }
 
 code {
