@@ -10,4 +10,4 @@ ingress:
 
 redis:
   auth:
-    password: {{ dedupe . "kas.redis.auth.password" (randAlphaNum 64) }}
+    password: {{ dedupe . "kas.redis.auth.password" (randAlphaNum 32) }}
