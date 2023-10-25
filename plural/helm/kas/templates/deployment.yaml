@@ -85,6 +85,13 @@ spec:
           sources:
             - configMap:
                 name: {{ template "kas.configMapName" . }}
+            {{- range $name, $value := .Values.secrets }}
+            - secret:
+                name: {{ $name }}
+                items:
+                  - key: secret
+                    path: .{{ $name }}_secret
+            {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
