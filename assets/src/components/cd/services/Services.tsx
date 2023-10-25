@@ -95,8 +95,8 @@ export default function Services() {
       ColRepo,
       ColRef,
       ColLastActivity,
-      ColErrors,
       ColStatus,
+      ColErrors,
       getColActions({ refetch }),
     ],
     [refetch]
