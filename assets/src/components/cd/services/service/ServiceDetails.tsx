@@ -1,10 +1,3 @@
-import {
-  TreeNav,
-  TreeNavEntry,
-  WrapWithIf,
-  getBarePathFromPath,
-  removeTrailingSlashes,
-} from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
@@ -23,13 +16,13 @@ import { useTheme } from 'styled-components'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import isEmpty from 'lodash/isEmpty'
 
+import { mapExistingNodes } from 'utils/graphql'
+
 import {
   DocPageContextProvider,
   useDocPageContext,
 } from 'components/contexts/DocPageContext'
-
 import { getDocsData } from 'components/apps/app/App'
-
 import {
   CD_BASE_PATH,
   SERVICE_PARAM_CLUSTER,
@@ -37,10 +30,8 @@ import {
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import ComponentProgress from 'components/apps/app/components/ComponentProgress'
-
-import { mapExistingNodes } from 'utils/graphql'
-
 import { CD_BASE_CRUMBS } from 'components/cd/ContinuousDeployment'
+import { SideNavEntries } from 'components/layout/SideNavEntries'
 
 import ServiceSelector from '../ServiceSelector'
 
@@ -99,75 +90,6 @@ export const getDirectory = ({
   ]
 }
 
-function SideNavEntries({
-  directory,
-  pathname,
-  pathPrefix,
-  root = true,
-}: {
-  directory: any[]
-  pathname: string
-  pathPrefix: string
-  root?: boolean
-}) {
-  const docPageContext = useDocPageContext()
-
-  return (
-    <WrapWithIf
-      condition={root}
-      wrapper={<TreeNav />}
-    >
-      {directory.map(({ label, path, subpaths, type, ...props }) => {
-        const currentPath =
-          removeTrailingSlashes(getBarePathFromPath(pathname)) || ''
-        const fullPath = `${pathPrefix}/${removeTrailingSlashes(path) || ''}`
-        const hashlessPath = fullPath.split('#')[0]
-        const isInCurrentPath = currentPath.startsWith(hashlessPath)
-        const docPageRootHash = props?.headings?.[0]?.id || ''
-        const active =
-          type === 'docPage'
-            ? isInCurrentPath &&
-              (docPageContext.selectedHash === docPageRootHash ||
-                !docPageContext.selectedHash)
-            : type === 'docPageHash'
-            ? isInCurrentPath && docPageContext.selectedHash === props.id
-            : isInCurrentPath
-
-        return (
-          <TreeNavEntry
-            key={fullPath}
-            href={path === 'docs' ? undefined : fullPath}
-            label={label}
-            active={active}
-            {...(type === 'docPageHash' && props.id
-              ? {
-                  onClick: () => {
-                    docPageContext.scrollToHash(props.id)
-                  },
-                }
-              : type === 'docPage'
-              ? {
-                  onClick: () => {
-                    docPageContext.scrollToHash(docPageRootHash)
-                  },
-                }
-              : {})}
-          >
-            {!isEmpty(subpaths) ? (
-              <SideNavEntries
-                directory={subpaths}
-                pathname={pathname}
-                pathPrefix={pathPrefix}
-                root={false}
-              />
-            ) : null}
-          </TreeNavEntry>
-        )
-      })}
-    </WrapWithIf>
-  )
-}
-
 function ServiceDetailsBase() {
   const theme = useTheme()
   const { pathname } = useLocation()
@@ -178,6 +100,7 @@ function ServiceDetailsBase() {
     clusterName,
     serviceId,
   })
+  const docPageContext = useDocPageContext()
 
   const { data: serviceListData } = useServiceDeploymentsTinyQuery()
   const serviceList = useMemo(
@@ -228,6 +151,7 @@ function ServiceDetailsBase() {
               directory={directory}
               pathname={pathname}
               pathPrefix={pathPrefix}
+              docPageContext={docPageContext}
             />
           </div>
         </div>

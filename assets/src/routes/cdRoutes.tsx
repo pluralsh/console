@@ -16,6 +16,11 @@ import ComponentEvents from 'components/component/ComponentEvents'
 import ComponentRaw from 'components/component/ComponentRaw'
 import ComponentMetrics from 'components/component/ComponentMetrics'
 
+import { GlobalSettings } from 'components/cd/clusters/GlobalSettings'
+import { GlobalSettingsPermissions } from 'components/cd/services/globalSettings/GlobalSettingsPermissions'
+
+import { GlobalSettingsRepositories } from 'components/cd/services/globalSettings/GlobalSettingsRepositories'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -43,6 +48,7 @@ import {
   CLUSTER_NODES_PATH,
   CLUSTER_PODS_PATH,
   CLUSTER_SERVICES_PATH,
+  GLOBAL_SETTINGS_PATH_REL,
   NODE_BASE_PATH,
   POD_BASE_PATH,
   SERVICE_BASE_PATH,
@@ -118,6 +124,30 @@ export const cdRoutes = [
     <Route
       path="providers"
       element={<Providers />}
+    />
+  </Route>,
+
+  /* Global settings */
+  <Route
+    path={GLOBAL_SETTINGS_PATH_REL}
+    element={<GlobalSettings />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="permissions"
+        />
+      }
+    />
+    <Route
+      path="permissions"
+      element={<GlobalSettingsPermissions />}
+    />
+    <Route
+      path="repositories"
+      element={<GlobalSettingsRepositories />}
     />
   </Route>,
 
