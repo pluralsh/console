@@ -19,7 +19,6 @@ export function ServiceDeprecationsModal({
     <Modal
       header="Deprecated Resources"
       size="large"
-      width={1024}
       maxWidth={1024}
       portal
       {...props}
