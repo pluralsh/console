@@ -32,6 +32,7 @@ import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import {
   ColCluster,
+  ColErrors,
   ColLastActivity,
   ColRef,
   ColRepo,
@@ -94,6 +95,7 @@ export default function Services() {
       ColRepo,
       ColRef,
       ColLastActivity,
+      ColErrors,
       ColStatus,
       getColActions({ refetch }),
     ],

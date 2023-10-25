@@ -35,6 +35,10 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   deletedAt
   componentStatus
   status
+  errors {
+    message
+    source
+  }
 }
 
 fragment ServiceDeploymentDetails on ServiceDeployment {
