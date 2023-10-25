@@ -34,6 +34,7 @@ export function GitHealthChip({
       {gitHealthToLabel(health)}
     </Chip>
   )
+
   if (error) {
     return <Tooltip label={error}>{chip}</Tooltip>
   }

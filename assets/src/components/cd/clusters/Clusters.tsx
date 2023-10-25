@@ -6,6 +6,7 @@ import {
   ClusterIcon,
   EmptyState,
   IconFrame,
+  Spinner,
   Table,
   Tooltip,
   useSetBreadcrumbs,
@@ -15,7 +16,6 @@ import { useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
-import { A, Spinner } from 'honorable'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
@@ -25,8 +25,8 @@ import {
 import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
 import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
-
 import { roundToTwoPlaces } from 'components/cluster/utils'
+import { BasicLink } from 'components/utils/typography/BasicLink'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 import {
@@ -37,7 +37,6 @@ import {
 } from '../../../utils/kubernetes'
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { TableText } from '../../cluster/TableElements'
-
 import { nextSupportedVersion } from '../../../utils/semver'
 
 import DecoratedName from '../services/DecoratedName'
@@ -86,13 +85,13 @@ export const columns = [
             <div>
               <StackedText
                 first={
-                  <A
+                  <BasicLink
                     as={Link}
                     to={`/cd/clusters/${cluster?.id}`}
-                    whiteSpace="nowrap"
+                    css={{ whiteSpace: 'nowrap' }}
                   >
                     {cluster?.name}
-                  </A>
+                  </BasicLink>
                 }
                 second={`handle: ${cluster?.handle}`}
               />

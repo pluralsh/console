@@ -19,6 +19,8 @@ export const ColProvider = columnHelper.accessor(({ node }) => node?.cloud, {
   header: 'Provider',
   enableSorting: true,
   enableGlobalFilter: true,
+  meta: { gridTemplate: `fit-content(200px)` },
+
   cell: ({ getValue }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const theme = useTheme()
@@ -26,7 +28,6 @@ export const ColProvider = columnHelper.accessor(({ node }) => node?.cloud, {
     return (
       <ColWithIcon
         icon={getProviderIconURL(getValue() || '', theme.mode !== 'light')}
-        truncate={false}
       >
         {getProviderName(getValue())}
       </ColWithIcon>
@@ -39,7 +40,6 @@ export const ColName = columnHelper.accessor(({ node }) => node, {
   header: 'Name',
   enableSorting: true,
   enableGlobalFilter: true,
-  meta: { truncate: true },
   cell: ({ getValue }) => {
     const provider = getValue()
 
@@ -75,6 +75,7 @@ export const getColActions = ({ refetch }: { refetch: () => void }) =>
   columnHelper.accessor(({ node }) => node?.id, {
     id: 'actions',
     header: '',
+    meta: { gridTemplate: `fit-content(100px)` },
     cell: ({
       row: {
         original: { node },
@@ -91,19 +92,20 @@ export const getColActions = ({ refetch }: { refetch: () => void }) =>
               flexGrow: 0,
               gap: theme.spacing.large,
               alignItems: 'center',
+              alignSelf: 'end',
             }}
           >
             {node.editable && (
-              <UpdateProvider
-                provider={node}
-                refetch={refetch}
-              />
-            )}
-            {node.editable && (
-              <DeleteProvider
-                provider={node}
-                refetch={refetch}
-              />
+              <>
+                <UpdateProvider
+                  provider={node}
+                  refetch={refetch}
+                />
+                <DeleteProvider
+                  provider={node}
+                  refetch={refetch}
+                />
+              </>
             )}
           </div>
         )
