@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "kas.serviceName" . }}
+  name: {{ include "kas.serviceName" . }}
   labels:
     {{- include "kas.labels" . | nindent 4 }}
   {{- with .Values.metrics.serviceMonitor.additionalLabels }}
@@ -14,7 +14,7 @@ spec:
       - {{ $.Release.Namespace }}
   selector:
     matchLabels:
-      app: {{ template "kas.name" . }}
+      app: {{ include "kas.name" . }}
       release: {{ .Release.Name }}
   endpoints:
     - port: http-metrics

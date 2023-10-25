@@ -6,6 +6,8 @@ image:
   tag: ""
   pullSecrets: []
 
+consoleUrl: ""
+
 nameOverride: ""
 
 fullnameOverride: ""
@@ -79,7 +81,6 @@ secrets:
   private_api: ""
   redis: ""
 
-
 ingress:
   enabled: true
   ingressClass: nginx
@@ -88,3 +89,14 @@ ingress:
   annotations:
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+    sentinel: false
+  sentinel:
+    enabled: false
+  master:
+    count: 1

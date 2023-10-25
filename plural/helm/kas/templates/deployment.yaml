@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "kas.fullname" . }}
+  name: {{ include "kas.fullname" . }}
   labels:
     {{- include "kas.labels" . | nindent 4 }}
 spec:
@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+{{/*        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}*/}}
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
         {{- if and .Values.metrics.enabled (not .Values.metrics.serviceMonitor.enabled) }}
         prometheus.io/scrape: "true"
@@ -92,6 +92,11 @@ spec:
                   - key: secret
                     path: .{{ $name }}_secret
             {{- end }}
+            - secret:
+                name: {{ template "common.names.fullname" (index .Subcharts "redis") }}
+                items:
+                  - key: redis-password
+                    path: redis_server_secret
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
