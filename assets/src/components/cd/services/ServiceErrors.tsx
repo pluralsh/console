@@ -90,8 +90,6 @@ export function ServiceErrors({
             columns={columns}
             reactTableOptions={{
               getRowId(original, index) {
-                console.log('original', original)
-
                 return `${index}${original?.source}${original?.message}`
               },
             }}
