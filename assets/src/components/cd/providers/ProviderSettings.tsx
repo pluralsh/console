@@ -32,6 +32,9 @@ export function AwsSettings({
       </FormField>
       <FormField label="Secret access key">
         <InputRevealer
+          multiline
+          minRows={3}
+          maxRows={6}
           value={settings?.secretAccessKey}
           onChange={(e) => {
             updateSettings({ secretAccessKey: e.currentTarget.value })
