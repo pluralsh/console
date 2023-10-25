@@ -39,6 +39,11 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
     message
     source
   }
+  components {
+    apiDeprecations {
+      blocking
+    }
+  }
 }
 
 fragment ServiceDeploymentDetails on ServiceDeployment {

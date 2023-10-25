@@ -1,4 +1,4 @@
-import { Chip, Modal, Table, Tooltip } from '@pluralsh/design-system'
+import { Chip, ErrorIcon, Modal, Table, Tooltip } from '@pluralsh/design-system'
 import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentProps, useState } from 'react'
@@ -18,7 +18,8 @@ export function ServiceErrorsChip({
   return (
     <Tooltip label="View errors">
       <Chip
-        severity="critical"
+        severity="error"
+        icon={<ErrorIcon />}
         {...props}
       >
         {errors?.length} errors
@@ -47,14 +48,18 @@ const columns = [ColSource, ColMessage]
 
 export function ServiceErrors({
   service,
-  errors,
 }: {
-  errors: Nullable<Nullable<ServiceError>[]>
-  service: Nullable<Pick<ServiceDeploymentsRowFragment, 'name' | 'errors'>>
+  service: Nullable<
+    Pick<ServiceDeploymentsRowFragment, 'name' | 'errors' | 'components'>
+  >
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
-  if (isEmpty(errors) || !errors) {
+  const serviceErrors = service?.errors
+
+  // const serviceErrors = [{message:'hi there', source:'Source'}]
+
+  if (!serviceErrors || isEmpty(serviceErrors)) {
     return null
   }
 
@@ -70,7 +75,7 @@ export function ServiceErrors({
           setIsOpen(true)
         }}
         clickable
-        errors={errors}
+        errors={serviceErrors}
       />
       <ModalMountTransition open={isOpen}>
         <Modal
@@ -81,7 +86,7 @@ export function ServiceErrors({
           onClose={() => setIsOpen(false)}
         >
           <Table
-            data={errors}
+            data={serviceErrors}
             columns={columns}
             reactTableOptions={{
               getRowId(original, index) {

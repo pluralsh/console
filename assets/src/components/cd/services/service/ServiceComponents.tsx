@@ -1,18 +1,13 @@
 import {
   type Breadcrumb,
   Callout,
-  EmptyState,
-  Modal,
-  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ComponentProps, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
-import isEmpty from 'lodash/isEmpty'
 import { useTheme } from 'styled-components'
 
 import {
-  ServiceDeploymentComponentFragment,
   ServiceDeploymentDetailsFragment,
   useServiceDeploymentComponentsQuery,
 } from 'generated/graphql'
@@ -31,10 +26,10 @@ import { useComponentKindSelect } from 'components/apps/app/components/Component
 
 import { ComponentList } from 'components/apps/app/components/ComponentList'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { deprecationsColumns } from 'components/cd/clusters/deprecationsColumns'
 
 import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
-import { collectDeprecations, countDeprecations } from './deprecationUtils'
+import { countDeprecations } from './deprecationUtils'
+import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 
 export const getServiceComponentsBreadcrumbs = ({
   serviceId,
@@ -50,39 +45,6 @@ export const getServiceComponentsBreadcrumbs = ({
     })}/components`,
   },
 ]
-
-function DeprecationsModal({
-  components,
-  ...props
-}: {
-  components: ServiceDeploymentComponentFragment[]
-} & ComponentProps<typeof Modal>) {
-  const deprecations =
-    useMemo(() => collectDeprecations(components), [components]) || []
-
-  return (
-    <Modal
-      header="Deprecated Resources"
-      size="large"
-      maxWidth={1024}
-      portal
-      {...props}
-    >
-      {isEmpty(deprecations) ? (
-        <EmptyState message="No deprecated resources" />
-      ) : (
-        <Table
-          data={deprecations || []}
-          columns={deprecationsColumns}
-          css={{
-            maxHeight: 500,
-            height: '100%',
-          }}
-        />
-      )}
-    </Modal>
-  )
-}
 
 export default function ServiceComponents() {
   const theme = useTheme()
@@ -130,8 +92,8 @@ export default function ServiceComponents() {
       heading="Components"
       headingContent={kindSelector}
     >
-      <ModalMountTransition open>
-        <DeprecationsModal
+      <ModalMountTransition open={showDeprecations}>
+        <ServiceDeprecationsModal
           open={showDeprecations}
           onClose={() => setShowDeprecations(false)}
           components={components}

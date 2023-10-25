@@ -13,6 +13,7 @@ import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 import DecoratedName from './DecoratedName'
 import { DeleteService } from './DeleteService'
 import { ServiceErrors } from './ServiceErrors'
+import { ServiceDeprecations } from './ServiceDeprecations'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -143,10 +144,10 @@ export const ColErrors = columnHelper.accessor(
         original: { node },
       },
     }) => (
-      <ServiceErrors
-        service={node}
-        errors={node?.errors}
-      />
+      <>
+        <ServiceErrors service={node} />
+        <ServiceDeprecations service={node} />
+      </>
     ),
   }
 )
