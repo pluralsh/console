@@ -89,3 +89,5 @@ sections:
     name: aws
   - type: HELM
     name: console
+  - type: HELM
+    name: kas

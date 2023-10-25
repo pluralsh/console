@@ -61,7 +61,7 @@ serviceAccount:
   name: ""
 
 metrics:
-  enabled: true
+  enabled: false
   path: /metrics
   serviceMonitor:
     enabled: false
