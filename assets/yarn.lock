@@ -8902,7 +8902,6 @@ __metadata:
     slate-react: 0.95.0
     styled-components: 5.3.11
     stylelint: 15.11.0
-    stylelint-config-prettier: 9.0.5
     tinyqueue: 2.0.3
     type-fest: 4.2.0
     typescript: 5.2.2
@@ -17850,18 +17849,6 @@ __metadata:
     react-dom: ^16.9.0
     styled-components: ^4.3.2
   checksum: 4bc8e046234ce39b33df199603bf4a3887abb5239966d5b3904b45b79889385320bd0df7129a0805c945947aa692ca6b950296d041ee68b6b667f912926c3b77
-  languageName: node
-  linkType: hard
-
-"stylelint-config-prettier@npm:9.0.5":
-  version: 9.0.5
-  resolution: "stylelint-config-prettier@npm:9.0.5"
-  peerDependencies:
-    stylelint: ">= 11.x < 15"
-  bin:
-    stylelint-config-prettier: bin/check.js
-    stylelint-config-prettier-check: bin/check.js
-  checksum: 3d04e463e0bb7e42a5ddec49eea6ef4ea07705d887e8a3ff1fcb82278a5e2bec1a36b8498ea7ed2d24878de29d7c94ac75b1d3ac4f8b19c3a84970595b29261f
   languageName: node
   linkType: hard
 
