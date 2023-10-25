@@ -16,6 +16,7 @@ import {
 } from '../../../generated/graphql'
 import {
   ColCluster,
+  ColErrors,
   ColLastActivity,
   ColRef,
   ColRepo,
@@ -50,6 +51,7 @@ export default function ClusterServices() {
       ColRef,
       ColLastActivity,
       ColStatus,
+      ColErrors,
       getColActions({ refetch }),
     ],
     [refetch]

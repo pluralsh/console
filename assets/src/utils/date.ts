@@ -7,3 +7,9 @@ export function dateFormat(date) {
 
   return date.format('MMM Do YYYY')
 }
+
+export function toDateOrUndef(d: unknown) {
+  const date = new Date(d as any)
+
+  return Number.isNaN(date.getTime()) ? undefined : date
+}

@@ -55,6 +55,7 @@ export default function ClusterHealthChip({
       <Chip
         severity={pinged ? (healthy ? 'success' : 'error') : 'warning'}
         size={size}
+        clickable
       >
         {pinged ? (healthy ? 'Healthy' : 'Unhealthy') : 'Pending'}
       </Chip>

@@ -6,11 +6,14 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { getProviderIconURL } from 'components/utils/Provider'
+import { toDateOrUndef } from 'utils/date'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 import DecoratedName from './DecoratedName'
 import { DeleteService } from './DeleteService'
+import { ServiceErrors } from './ServiceErrors'
+import { ServiceDeprecations } from './ServiceDeprecations'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -92,12 +95,6 @@ export const ColRef = columnHelper.accessor(({ node }) => node, {
   },
 })
 
-function toDateOrUndef(d: unknown) {
-  const date = new Date(d as any)
-
-  return Number.isNaN(date.getTime()) ? undefined : date
-}
-
 export const ColLastActivity = columnHelper.accessor(
   ({ node }) => {
     const updatedAt = toDateOrUndef(node?.updatedAt)
@@ -133,6 +130,27 @@ export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
     />
   ),
 })
+
+export const ColErrors = columnHelper.accessor(
+  ({ node }) => node?.errors?.length ?? 0,
+  {
+    id: 'errors',
+    header: 'Errors',
+    enableSorting: true,
+    enableColumnFilter: true,
+    filterFn: 'equalsString',
+    cell: ({
+      row: {
+        original: { node },
+      },
+    }) => (
+      <>
+        <ServiceErrors service={node} />
+        <ServiceDeprecations service={node} />
+      </>
+    ),
+  }
+)
 
 export const getColActions = ({ refetch }: { refetch: () => void }) =>
   columnHelper.accessor(({ node }) => node?.id, {
