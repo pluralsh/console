@@ -131,13 +131,7 @@ export function ClusterConditions({
             data={cluster?.status?.conditions || []}
             reactTableOptions={{
               getRowId(originalRow, i) {
-                console.log('originalRow', originalRow)
-
-                const ret = originalRow.type ?? i
-
-                console.log('ret', ret)
-
-                return ret
+                return originalRow.type ?? i
               },
             }}
           />
