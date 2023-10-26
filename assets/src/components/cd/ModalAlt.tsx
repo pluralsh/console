@@ -69,6 +69,7 @@ export default function ModalAlt({
 
 export const StepH = styled.h3(({ theme }) => ({
   ...theme.partials.text.body2Bold,
+  color: theme.colors.text,
 }))
 export const StepBody = styled.p(({ theme }) => ({
   ...theme.partials.text.body2,

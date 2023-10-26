@@ -29,6 +29,7 @@ import DecoratedName from './DecoratedName'
 import { DeleteService } from './DeleteService'
 import { ServiceErrors } from './ServiceErrors'
 import { ServiceDeprecations } from './ServiceDeprecations'
+import { CreateGlobalService } from './CreateGlobalService'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -231,20 +232,24 @@ export const getColActions = ({ refetch }: { refetch: () => void }) =>
               serviceDeployment={serviceDeployment}
               open={menuKey === MenuItemKey.Delete}
               onClose={() => {
-                if (menuKey === MenuItemKey.Delete) {
-                  setMenuKey('')
-                }
+                setMenuKey('')
               }}
               refetch={refetch}
             />
             <ServicePermissionsModal
+              serviceDeployment={serviceDeployment}
               open={menuKey === MenuItemKey.Permissions}
               onClose={() => {
-                if (menuKey === MenuItemKey.Permissions) {
-                  setMenuKey('')
-                }
+                setMenuKey('')
               }}
+            />
+            <CreateGlobalService
               serviceDeployment={serviceDeployment}
+              open={menuKey === MenuItemKey.MakeGlobal}
+              onClose={() => {
+                setMenuKey('')
+              }}
+              refetch={refetch}
             />
           </div>
         )
