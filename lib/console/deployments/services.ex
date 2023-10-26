@@ -207,7 +207,7 @@ defmodule Console.Deployments.Services do
       |> create_revision(base)
     end)
     |> execute(extract: :base)
-    |> notify(:update)
+    |> notify(:update, :ignore)
   end
 
   def update_service(attrs, svc_id) when is_binary(svc_id),

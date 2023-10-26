@@ -22,6 +22,12 @@ defmodule Console.Deployments.PubSub.BroadcastTest do
       event = %PubSub.ServiceUpdated{item: service}
       Broadcast.handle_event(event)
     end
+
+    test "if the ignore actor is given, it won't broadcast" do
+      svc = insert(:service)
+      event = %PubSub.ServiceUpdated{item: svc, actor: :ignore}
+      :ignore = Broadcast.handle_event(event)
+    end
   end
 
   describe "ServiceDeleted" do
