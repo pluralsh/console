@@ -439,7 +439,7 @@ defmodule Console.Deployments.ClustersTest do
     end
 
     test "it can generate an agent kubeconfig" do
-      insert(:user, email: "console@plural.sh")
+      console = insert(:user, email: "console@plural.sh")
       cluster = insert(:cluster, name: "cluster", provider: build(:cluster_provider, namespace: "test-provider"))
 
       server = Clusters.control_plane(cluster)
@@ -447,6 +447,8 @@ defmodule Console.Deployments.ClustersTest do
       ["plrl", id, token] = String.split(server.auth.token, ":")
       assert id == cluster.id
       {:ok, _} = Console.Guardian.decode_and_verify(token)
+
+      assert Console.authed_user(token).id == console.id
     end
   end
 

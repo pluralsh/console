@@ -4,7 +4,12 @@ defmodule Console do
   @chars String.codepoints("abcdefghijklmnopqrstuvwxyz0123456789")
 
   def authed_user("console-" <> _ = access), do: Console.Services.Users.get_by_token(access)
-  def authed_user(jwt), do: Console.Guardian.resource_from_token(jwt)
+  def authed_user(jwt) do
+    case Console.Guardian.resource_from_token(jwt) do
+      {:ok, user, _} -> user
+      _ -> :error
+    end
+  end
 
   def mapify(l) when is_list(l), do: Enum.map(l, &mapify/1)
   def mapify(%{__schema__: _} = schema) do

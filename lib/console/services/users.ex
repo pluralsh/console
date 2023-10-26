@@ -6,6 +6,8 @@ defmodule Console.Services.Users do
   alias Console.Schema.{User, Invite, Group, GroupMember, Role, Notification, AccessToken}
   alias Console.Repo
 
+  @cache_adapter Console.conf(:cache_adapter)
+
   @ttl :timer.minutes(30)
 
   @type error :: Console.error
@@ -21,7 +23,7 @@ defmodule Console.Services.Users do
   @spec get_user!(binary) :: User.t
   def get_user!(id), do: Repo.get!(User, id)
 
-  @decorate cacheable(cache: Console.Cache, key: :console_bot, opts: [ttl: @ttl])
+  @decorate cacheable(cache: @cache_adapter, key: :console_bot, opts: [ttl: @ttl])
   def console(), do: Repo.get_by(User, email: "console@plural.sh")
 
   @decorate cacheable(cache: Console.Cache, key: {:access, token}, opts: [ttl: @ttl])
