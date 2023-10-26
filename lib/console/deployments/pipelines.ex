@@ -8,6 +8,7 @@ defmodule Console.Deployments.Pipelines do
     Pipeline,
     PipelineStage,
     PipelineEdge,
+    PipelineGate,
     StageService,
     PipelinePromotion,
     PromotionCriteria,
@@ -17,14 +18,17 @@ defmodule Console.Deployments.Pipelines do
     Service
   }
 
-  @preload [:edges, :read_bindings, :write_bindings, stages: [services: :criteria]]
+  @preload [:read_bindings, :write_bindings, edges: [:gates], stages: [services: :criteria]]
 
+  @type gate_resp :: {:ok, PipelineGate.t} | Console.error
   @type pipeline_resp :: {:ok, Pipeline.t} | Console.error
   @type promotion_resp :: {:ok, PipelinePromotion.t} | Console.error
 
   def get_pipeline(id), do: Repo.get(Pipeline, id)
 
   def get_pipeline!(id), do: Repo.get!(Pipeline, id)
+
+  def get_gate!(id), do: Repo.get!(PipelineGate, id)
 
   def get_pipeline_by_name(name), do: Repo.get_by(Pipeline, name: name)
 
@@ -58,6 +62,52 @@ defmodule Console.Deployments.Pipelines do
     end)
     |> execute(extract: :edges)
     |> notify(:create, user)
+  end
+
+  @doc """
+  Whether all promotion gates for this edge are currently open
+  """
+  @spec open?(PipelineEdge.t) :: boolean
+  def open?(%PipelineEdge{gates: [_ | _] = gates}) do
+    Enum.all?(gates, fn
+      %PipelineGate{state: :open} -> true
+      _ -> false
+    end)
+  end
+  def open?(_), do: true
+
+  @doc """
+  Whether an edge was promoted after the given dt
+  """
+  @spec promoted?(PipelineEdge.t, term) :: boolean
+  def promoted?(%PipelineEdge{promoted_at: at}, dt) when not is_nil(at),
+    do: Timex.after?(at, dt)
+  def promoted?(_, _), do: false
+
+  @doc """
+  If a user has pipeline write access, will approvate and open the given gate
+  """
+  @spec approve_gate(binary, User.t) :: gate_resp
+  def approve_gate(id, %User{} = user) do
+    get_gate!(id)
+    |> Repo.preload([edge: :pipeline])
+    |> PipelineGate.changeset(%{state: :open, approver_id: user.id})
+    |> allow(user, :approve)
+    |> when_ok(:update)
+    |> notify(:approve, user)
+  end
+
+  @doc """
+  If a user has pipeline write access, will force open a gate
+  """
+  @spec force_gate(binary, User.t) :: gate_resp
+  def force_gate(id, %User{} = user) do
+    get_gate!(id)
+    |> Repo.preload([edge: :pipeline])
+    |> PipelineGate.changeset(%{state: :open})
+    |> allow(user, :write)
+    |> when_ok(:update)
+    |> notify(:approve, user)
   end
 
   @doc """
@@ -113,6 +163,11 @@ defmodule Console.Deployments.Pipelines do
       |> PipelinePromotion.changeset(add_revised(%{services: old ++ new}, diff?(svcs, promo)))
       |> Repo.insert_or_update()
     end)
+    |> add_operation(:gates, fn %{stage: %{id: id}} ->
+      PipelineGate.for_stage(id)
+      |> Repo.update_all(set: [state: :pending])
+      |> ok()
+    end)
     |> execute(extract: :build)
     |> notify(:create)
   end
@@ -127,12 +182,19 @@ defmodule Console.Deployments.Pipelines do
     |> add_operation(:promo, fn _ -> {:ok, Repo.preload(promo, [:stage, services: [:service, :revision]])} end)
     |> add_operation(:edges, fn %{promo: %{stage: stage}} -> {:ok, edges(stage)} end)
     |> add_operation(:resolve, fn %{promo: promotion, edges: edges} ->
-      Enum.reduce(edges, start_transaction(), &promote_edge(&2, promotion, &1))
+      Enum.filter(edges, &open?/1)
+      |> Enum.filter(& !promoted?(&1, promotion.revised_at))
+      |> Enum.reduce(start_transaction(), &promote_edge(&2, promotion, &1))
       |> execute()
     end)
-    |> add_operation(:finish, fn %{promo: promo} ->
-      PipelinePromotion.changeset(promo, %{promoted_at: Timex.now()})
-      |> Repo.update()
+    |> add_operation(:finish, fn %{promo: promo, resolve: res, edges: edges} ->
+      resolved = Map.new(res, fn {edge, _} -> edge end)
+      case Enum.all?(edges, & promoted?(&1, promo.revised_at) || resolved[&1.id]) do
+        true ->
+          PipelinePromotion.changeset(promo, %{promoted_at: Timex.now()})
+          |> Repo.update()
+        _ -> {:ok, promo}
+      end
     end)
     |> execute(extract: :finish)
   end
@@ -148,6 +210,10 @@ defmodule Console.Deployments.Pipelines do
           end
         end)
       _, xact -> xact
+    end)
+    |> add_operation({:promote, edge.id}, fn _ ->
+      PipelineEdge.changeset(edge, %{promoted_at: Timex.now()})
+      |> Repo.update()
     end)
   end
   defp promote_edge(xact, _, _), do: xact
@@ -205,5 +271,9 @@ defmodule Console.Deployments.Pipelines do
     do: handle_notify(PubSub.PipelineDeleted, pipe, actor: user)
   defp notify({:ok, %Pipeline{} = pipe}, :create, user),
     do: handle_notify(PubSub.PipelineUpserted, pipe, actor: user)
+
+  defp notify({:ok, %PipelineGate{} = gate}, :approve, user),
+    do: handle_notify(PubSub.PipelineGateApproved, gate, actor: user)
+
   defp notify(pass, _, _), do: pass
 end

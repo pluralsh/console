@@ -14,8 +14,12 @@ defimpl Console.PubSub.Auditable, for: [
   Console.PubSub.GitRepositoryUpdated,
   Console.PubSub.GitRepositoryDeleted,
   Console.PubSub.DeploymentSettingsUpdated,
+  Console.PubSub.PipelineGateUpdated,
+  Console.PubSub.PipelineUpdated,
+  Console.PubSub.PipelineCreated,
+  Console.PubSub.PipelineDeleted,
 ] do
-  alias Console.Schema.{Audit, User}
+  alias Console.Schema.{Audit, User, PipelineGate}
 
   def audit(%{item: item, actor: %User{} = user}) do
     {type, action} = details(@for)
@@ -53,4 +57,12 @@ defimpl Console.PubSub.Auditable, for: [
   def details(Console.PubSub.GitRepositoryUpdated), do: {:git_repository, :create}
   def details(Console.PubSub.GitRepositoryDeleted), do: {:git_repository, :create}
   def details(Console.PubSub.DeploymentSettingsUpdated), do: {:deployment_settings, :create}
+  def details(Console.PubSub.PipelineCreated), do: {:pipeline, :create}
+  def details(Console.PubSub.PipelineUpdated), do: {:pipeline, :update}
+  def details(Console.PubSub.PipelineDeleted), do: {:pipeline, :delete}
+
+  def details(Console.PubSub.PipelineApproved), do: {:pipeline, :approve}
+
+  def item_id(%PipelineGate{edge: %{pipeline_id: id}}), do: id
+  def item_id(%{id: id}), do: id
 end

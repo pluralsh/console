@@ -1,6 +1,10 @@
 defmodule Console.GraphQl.Deployments.Pipeline do
   use Console.GraphQl.Schema.Base
-  alias Console.GraphQl.Resolvers.{Deployments}
+  alias Console.GraphQl.Resolvers.{Deployments, User}
+  alias Console.Schema.PipelineGate
+
+  ecto_enum :gate_state, PipelineGate.State
+  ecto_enum :gate_type, PipelineGate.Type
 
   @desc "the top level input object for creating/deleting pipelines"
   input_object :pipeline_attributes do
@@ -20,6 +24,15 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :to_id,   :id, description: "stage id the edge is to, can also be specified by name"
     field :from,    :string, description: "the name of the pipeline stage this edge emits from"
     field :to,      :string, description: "the name of the pipeline stage this edge points to"
+    field :gates, list_of(:pipeline_gate_attributes), description: "any optional promotion gates you wish to configure"
+  end
+
+  @desc "will configure a promotion gate for a pipeline"
+  input_object :pipeline_gate_attributes do
+    field :name,       non_null(:string), description: "the name of this gate"
+    field :type,       non_null(:gate_type), description: "the type of gate this is"
+    field :cluster,    :string, description: "the handle of a cluster this gate will execute on"
+    field :cluster_id, :string, description: "the id of the cluster this gate will execute on"
   end
 
   @desc "the attributes of a service w/in a specific stage"
@@ -62,10 +75,25 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     timestamps()
   end
 
+  @desc "an edge in the pipeline DAG"
   object :pipeline_stage_edge do
-    field :id,   non_null(:id)
-    field :from, non_null(:pipeline_stage), resolve: dataloader(Deployments)
-    field :to,   non_null(:pipeline_stage), resolve: dataloader(Deployments)
+    field :id,          non_null(:id)
+    field :promoted_at, :datetime, description: "when the edge was last promoted, if greater than the promotion objects revised at, was successfully promoted"
+    field :from,        non_null(:pipeline_stage), resolve: dataloader(Deployments)
+    field :to,          non_null(:pipeline_stage), resolve: dataloader(Deployments)
+    field :gates,       list_of(:pipeline_gate), resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  @desc "A gate blocking promotion along a release pipeline"
+  object :pipeline_gate do
+    field :id,    non_null(:id)
+    field :name,  non_null(:string), description: "the name of this gate as seen in the UI"
+    field :type,  non_null(:gate_type), description: "the type of gate this is"
+    field :state, non_null(:gate_state), description: "the current state of this gate"
+
+    field :approver, :user, description: "the last user to approve this gate", resolve: dataloader(User)
 
     timestamps()
   end
@@ -134,10 +162,27 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   object :pipeline_mutations do
     @desc "upserts a pipeline with a given name"
     field :save_pipeline, :pipeline do
+      middleware Authenticated
       arg :name,       non_null(:string)
       arg :attributes, non_null(:pipeline_attributes)
 
       resolve &Deployments.upsert_pipeline/2
+    end
+
+    @desc "approves an approval pipeline gate"
+    field :approve_gate, :pipeline_gate do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.approve_gate/2
+    end
+
+    @desc "forces a pipeline gate to be in open state"
+    field :force_gate, :pipeline_gate do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.force_gate/2
     end
   end
 end

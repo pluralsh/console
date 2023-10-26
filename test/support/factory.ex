@@ -311,6 +311,14 @@ defmodule Console.Factory do
     }
   end
 
+  def pipeline_gate_factory do
+    %Schema.PipelineGate{
+      name: sequence(:gate, & "gate-#{&1}"),
+      edge: build(:pipeline_edge),
+      type: :approval
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

@@ -372,6 +372,12 @@ type RootMutationType {
   "upserts a pipeline with a given name"
   savePipeline(name: String!, attributes: PipelineAttributes!): Pipeline
 
+  "approves an approval pipeline gate"
+  approveGate(id: ID!): PipelineGate
+
+  "forces a pipeline gate to be in open state"
+  forceGate(id: ID!): PipelineGate
+
   "a regular status ping to be sent by the deploy operator"
   pingCluster(attributes: ClusterPing!): Cluster
 
@@ -452,6 +458,17 @@ input RbacAttributes {
   writeBindings: [PolicyBindingAttributes]
 }
 
+enum GateState {
+  PENDING
+  OPEN
+  CLOSED
+}
+
+enum GateType {
+  APPROVAL
+  WINDOW
+}
+
 "the top level input object for creating\/deleting pipelines"
 input PipelineAttributes {
   stages: [PipelineStageAttributes]
@@ -477,6 +494,24 @@ input PipelineEdgeAttributes {
 
   "the name of the pipeline stage this edge points to"
   to: String
+
+  "any optional promotion gates you wish to configure"
+  gates: [PipelineGateAttributes]
+}
+
+"will configure a promotion gate for a pipeline"
+input PipelineGateAttributes {
+  "the name of this gate"
+  name: String!
+
+  "the type of gate this is"
+  type: GateType!
+
+  "the handle of a cluster this gate will execute on"
+  cluster: String
+
+  "the id of the cluster this gate will execute on"
+  clusterId: String
 }
 
 "the attributes of a service w\/in a specific stage"
@@ -544,11 +579,42 @@ type PipelineStage {
   updatedAt: DateTime
 }
 
+"an edge in the pipeline DAG"
 type PipelineStageEdge {
   id: ID!
+
+  "when the edge was last promoted, if greater than the promotion objects revised at, was successfully promoted"
+  promotedAt: DateTime
+
   from: PipelineStage!
+
   to: PipelineStage!
+
+  gates: [PipelineGate]
+
   insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"A gate blocking promotion along a release pipeline"
+type PipelineGate {
+  id: ID!
+
+  "the name of this gate as seen in the UI"
+  name: String!
+
+  "the type of gate this is"
+  type: GateType!
+
+  "the current state of this gate"
+  state: GateState!
+
+  "the last user to approve this gate"
+  approver: User
+
+  insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -1730,6 +1796,7 @@ enum AuditType {
   GIT_REPOSITORY
   DEPLOYMENT_SETTINGS
   PROVIDER_CREDENTIAL
+  PIPELINE
 }
 
 enum AuditAction {

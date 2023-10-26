@@ -212,6 +212,7 @@ export enum AuditType {
   GitRepository = 'GIT_REPOSITORY',
   Group = 'GROUP',
   GroupMember = 'GROUP_MEMBER',
+  Pipeline = 'PIPELINE',
   Pod = 'POD',
   Policy = 'POLICY',
   ProviderCredential = 'PROVIDER_CREDENTIAL',
@@ -959,6 +960,17 @@ export type FileContent = {
   path?: Maybe<Scalars['String']['output']>;
 };
 
+export enum GateState {
+  Closed = 'CLOSED',
+  Open = 'OPEN',
+  Pending = 'PENDING'
+}
+
+export enum GateType {
+  Approval = 'APPROVAL',
+  Window = 'WINDOW'
+}
+
 export type GcpCloudAttributes = {
   network?: InputMaybe<Scalars['String']['input']>;
   project?: InputMaybe<Scalars['String']['input']>;
@@ -1583,10 +1595,40 @@ export type PipelineEdgeAttributes = {
   from?: InputMaybe<Scalars['String']['input']>;
   /** stage id the edge is from, can also be specified by name */
   fromId?: InputMaybe<Scalars['ID']['input']>;
+  /** any optional promotion gates you wish to configure */
+  gates?: InputMaybe<Array<InputMaybe<PipelineGateAttributes>>>;
   /** the name of the pipeline stage this edge points to */
   to?: InputMaybe<Scalars['String']['input']>;
   /** stage id the edge is to, can also be specified by name */
   toId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** A gate blocking promotion along a release pipeline */
+export type PipelineGate = {
+  __typename?: 'PipelineGate';
+  /** the last user to approve this gate */
+  approver?: Maybe<User>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of this gate as seen in the UI */
+  name: Scalars['String']['output'];
+  /** the current state of this gate */
+  state: GateState;
+  /** the type of gate this is */
+  type: GateType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** will configure a promotion gate for a pipeline */
+export type PipelineGateAttributes = {
+  /** the handle of a cluster this gate will execute on */
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  /** the id of the cluster this gate will execute on */
+  clusterId?: InputMaybe<Scalars['String']['input']>;
+  /** the name of this gate */
+  name: Scalars['String']['input'];
+  /** the type of gate this is */
+  type: GateType;
 };
 
 /** a representation of an individual pipeline promotion, which is a list of services/revisions and timestamps to determine promotion status */
@@ -1623,11 +1665,15 @@ export type PipelineStageAttributes = {
   services?: InputMaybe<Array<InputMaybe<StageServiceAttributes>>>;
 };
 
+/** an edge in the pipeline DAG */
 export type PipelineStageEdge = {
   __typename?: 'PipelineStageEdge';
   from: PipelineStage;
+  gates?: Maybe<Array<Maybe<PipelineGate>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** when the edge was last promoted, if greater than the promotion objects revised at, was successfully promoted */
+  promotedAt?: Maybe<Scalars['DateTime']['output']>;
   to: PipelineStage;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -2003,6 +2049,8 @@ export type RollingUpdate = {
 export type RootMutationType = {
   __typename?: 'RootMutationType';
   approveBuild?: Maybe<Build>;
+  /** approves an approval pipeline gate */
+  approveGate?: Maybe<PipelineGate>;
   cancelBuild?: Maybe<Build>;
   /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
   cloneService?: Maybe<ServiceDeployment>;
@@ -2041,6 +2089,8 @@ export type RootMutationType = {
   deleteWebhook?: Maybe<Webhook>;
   enableDeployments?: Maybe<DeploymentSettings>;
   executeRunbook?: Maybe<RunbookActionResponse>;
+  /** forces a pipeline gate to be in open state */
+  forceGate?: Maybe<PipelineGate>;
   installRecipe?: Maybe<Build>;
   installStack?: Maybe<Build>;
   loginLink?: Maybe<User>;
@@ -2078,6 +2128,11 @@ export type RootMutationType = {
 
 
 export type RootMutationTypeApproveBuildArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeApproveGateArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -2275,6 +2330,11 @@ export type RootMutationTypeExecuteRunbookArgs = {
   input: RunbookActionInput;
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeForceGateArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

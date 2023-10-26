@@ -829,6 +829,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
             id
             name
             stages {
+              id
               name
               services {
                 id
@@ -836,7 +837,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
                 criteria { source { id } secrets }
               }
             }
-            edges { from { id } to { id } }
+            edges { from { id } to { id } gates { type name } }
           }
         }
       """, %{"name" => "test", "attributes" => %{
@@ -850,7 +851,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
             }}
           ]}
         ],
-        "edges" => [%{"from" => "dev", "to" => "prod"}]
+        "edges" => [%{"from" => "dev", "to" => "prod", "gates" => [%{"type" => "APPROVAL", "name" => "approve"}]}]
       }}, %{current_user: user})
 
       assert pipeline["id"]
@@ -865,6 +866,50 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert service["service"]["id"] == svc2.id
       assert service["criteria"]["source"]["id"] == svc.id
       assert service["criteria"]["secrets"] == ["test-secret"]
+
+      [edge] = pipeline["edges"]
+
+      assert edge["from"]["id"] == dev["id"]
+      assert edge["to"]["id"] == prod["id"]
+
+      [gate] = edge["gates"]
+
+      assert gate["type"] == "APPROVAL"
+      assert gate["name"] == "approve"
+    end
+  end
+
+  describe "approveGate" do
+    test "writers can approve an approval gate" do
+      user = insert(:user)
+      pipeline = insert(:pipeline, write_bindings: [%{user_id: user.id}])
+      gate = insert(:pipeline_gate, edge: build(:pipeline_edge, pipeline: pipeline))
+
+      {:ok, %{data: %{"approveGate" => approved}}} = run_query("""
+        mutation Approve($id: ID!) {
+          approveGate(id: $id) { id state }
+        }
+      """, %{"id" => gate.id}, %{current_user: user})
+
+      assert approved["id"] == gate.id
+      assert approved["state"] == "OPEN"
+    end
+  end
+
+  describe "forceGate" do
+    test "writers can force a gate open" do
+      user = insert(:user)
+      pipeline = insert(:pipeline, write_bindings: [%{user_id: user.id}])
+      gate = insert(:pipeline_gate, type: :window, edge: build(:pipeline_edge, pipeline: pipeline))
+
+      {:ok, %{data: %{"forceGate" => forced}}} = run_query("""
+        mutation Force($id: ID!) {
+          forceGate(id: $id) { id state }
+        }
+      """, %{"id" => gate.id}, %{current_user: user})
+
+      assert forced["id"] == gate.id
+      assert forced["state"] == "OPEN"
     end
   end
 

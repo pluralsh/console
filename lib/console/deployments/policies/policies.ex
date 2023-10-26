@@ -2,7 +2,7 @@ defmodule Console.Deployments.Policies do
   use Piazza.Policy
   import Console.Deployments.Policies.Rbac, only: [rbac: 3]
   alias Console.Deployments.Services
-  alias Console.Schema.{User, Cluster, Service}
+  alias Console.Schema.{User, Cluster, Service, PipelineGate}
 
   def can?(user, %Ecto.Changeset{} = cs, action),
     do: can?(user, apply_changes(cs), action)
@@ -10,6 +10,10 @@ defmodule Console.Deployments.Policies do
   def can?(user, %{read_bindings: r, write_bindings: w} = resource, :create)
         when (is_list(r) and length(r) > 0) or (is_list(w) and length(w) > 0),
     do: can?(user, Map.merge(resource, %{read_bindings: [], write_bindings: []}), :create)
+
+  def can?(%User{} = user, %PipelineGate{type: :approval} = g, :approve),
+    do: can?(user, g, :write)
+  def can?(_, %PipelineGate{}, :approve), do: {:error, "only approval gates can be approved"}
 
   def can?(%User{} = user, %Service{} = svc, :secrets),
     do: can?(user, %{svc | deleted_at: nil}, :write)

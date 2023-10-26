@@ -20,6 +20,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ProviderCredential,
     Pipeline,
     PipelineStage,
+    PipelineGate,
     PipelineEdge,
     StageService,
     PipelinePromotion,
@@ -30,6 +31,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Pipeline, _), do: Pipeline
   def query(PipelineStage, _), do: PipelineStage
   def query(PipelineEdge, _), do: PipelineEdge
+  def query(PipelineGate, _), do: PipelineGate
   def query(StageService, _), do: StageService
   def query(PipelinePromotion, _), do: PipelinePromotion
   def query(PromotionCriteria, _), do: PromotionCriteria
@@ -291,6 +293,12 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def merge_service(%{id: id, configuration: config}, %{context: %{current_user: user}}),
     do: Services.merge_service(config, id, user)
+
+  def approve_gate(%{id: id}, %{context: %{current_user: user}}),
+    do: Pipelines.approve_gate(id, user)
+
+  def force_gate(%{id: id}, %{context: %{current_user: user}}),
+    do: Pipelines.force_gate(id, user)
 
   def upsert_pipeline(%{name: name, attributes: attrs}, %{context: %{current_user: user}}),
     do: Pipelines.upsert(attrs, name, user)
