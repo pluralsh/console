@@ -15,9 +15,6 @@ export function ServiceDeprecationsModal({
   const deprecations =
     useMemo(() => collectDeprecations(components), [components]) || []
 
-  console.log('components', components)
-  console.log('deprecations', deprecations)
-
   return (
     <Modal
       header="Deprecated Resources"

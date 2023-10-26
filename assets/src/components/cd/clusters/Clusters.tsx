@@ -5,6 +5,7 @@ import {
   CheckRoundedIcon,
   ClusterIcon,
   EmptyState,
+  GearTrainIcon,
   IconFrame,
   Spinner,
   Table,
@@ -24,7 +25,11 @@ import {
 } from 'components/utils/table/ColWithIcon'
 import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
-import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
+import {
+  CD_BASE_PATH,
+  CLUSTERS_PATH,
+  GLOBAL_SETTINGS_PATH,
+} from 'routes/cdRoutesConsts'
 import { roundToTwoPlaces } from 'components/cluster/utils'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 
@@ -44,6 +49,7 @@ import DecoratedName from '../services/DecoratedName'
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
 import CreateCluster from './create/CreateCluster'
+import { ClusterConditions } from './ClusterConditions'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -267,6 +273,13 @@ export const columns = [
       )
     },
   }),
+  columnHelper.accessor(({ node }) => node?.status?.conditions?.length ?? 0, {
+    id: 'conditions',
+    header: 'Cluster conditions',
+    cell: ({ row: { original } }) => (
+      <ClusterConditions cluster={original.node} />
+    ),
+  }),
   columnHelper.accessor(({ node }) => node, {
     id: 'actions',
     header: '',
@@ -279,7 +292,9 @@ export const columns = [
         <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
           <IconFrame
             clickable
-            onClick={() => navigate(`/cd/clusters/${cluster?.id}`)}
+            onClick={() =>
+              navigate(`/${CD_BASE_PATH}/${CLUSTERS_PATH}/${cluster?.id}`)
+            }
             size="medium"
             icon={<CaretRightIcon />}
             textValue="Go to cluster details"
@@ -293,11 +308,34 @@ export const columns = [
 ]
 
 export default function Clusters() {
+  const theme = useTheme()
+  const navigate = useNavigate()
   const { data } = useClustersQuery({
     pollInterval: 10 * 1000,
     fetchPolicy: 'cache-and-network',
   })
-  const headerActions = useMemo(() => <CreateCluster />, [])
+  const headerActions = useMemo(
+    () => (
+      <div
+        css={{
+          display: 'flex',
+          justifyContent: 'end',
+          gap: theme.spacing.large,
+        }}
+      >
+        <IconFrame
+          type="secondary"
+          size="large"
+          tooltip="Global settings"
+          clickable
+          icon={<GearTrainIcon />}
+          onClick={() => navigate(GLOBAL_SETTINGS_PATH)}
+        />
+        <CreateCluster />
+      </div>
+    ),
+    [navigate, theme.spacing.large]
+  )
 
   useSetCDHeaderContent(headerActions)
   useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)

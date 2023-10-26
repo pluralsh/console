@@ -18,6 +18,15 @@ fragment ClusterNode on Node {
   }
 }
 
+fragment ClusterCondition on ClusterCondition {
+  lastTransitionTime
+  message
+  reason
+  severity
+  status
+  type
+}
+
 fragment NodePool on NodePool {
   id
   name
@@ -85,6 +94,11 @@ fragment ClustersRow on Cluster {
     id
     repository {
       url
+    }
+  }
+  status {
+    conditions {
+      ...ClusterCondition
     }
   }
   version

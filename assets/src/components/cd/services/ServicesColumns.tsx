@@ -8,6 +8,8 @@ import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { getProviderIconURL } from 'components/utils/Provider'
 import { toDateOrUndef } from 'utils/date'
 
+import { isSha1 } from '../../../utils/sha'
+
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 import DecoratedName from './DecoratedName'
@@ -75,7 +77,7 @@ export const ColRef = columnHelper.accessor(({ node }) => node, {
   id: 'gitLocation',
   header: 'Git Location',
   enableSorting: true,
-  meta: { truncate: true },
+  // meta: { truncate: true },
   cell: ({ getValue }) => {
     const svc = getValue()
 
@@ -85,10 +87,17 @@ export const ColRef = columnHelper.accessor(({ node }) => node, {
       message,
     } = svc
 
+    const refStr = isSha1(ref)
+      ? `${ref.slice(0, 5)}…${ref.slice(ref.length - 5)}`
+      : ref
+
     return (
-      <Tooltip label={message || ''}>
+      <Tooltip
+        placement="top"
+        label={<div css={{ maxWidth: 400 }}>{message || ''}</div>}
+      >
         <span>
-          {ref}@{folder}
+          {refStr}@{folder}
         </span>
       </Tooltip>
     )
