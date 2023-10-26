@@ -41,6 +41,7 @@ export default function ClusterServices() {
   const { data, error, refetch } = useServiceDeploymentsQuery({
     variables: { clusterId: clusterId || '', q: debouncedSearchString },
     pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
   })
 
   const columns = useMemo(
