@@ -21,6 +21,8 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { isSha1 } from '../../../utils/sha'
 
+import { ServicePermissionsModal } from './ServicePermissions'
+
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 import DecoratedName from './DecoratedName'
@@ -234,6 +236,15 @@ export const getColActions = ({ refetch }: { refetch: () => void }) =>
                 }
               }}
               refetch={refetch}
+            />
+            <ServicePermissionsModal
+              open={menuKey === MenuItemKey.Permissions}
+              onClose={() => {
+                if (menuKey === MenuItemKey.Permissions) {
+                  setMenuKey('')
+                }
+              }}
+              serviceDeployment={serviceDeployment}
             />
           </div>
         )

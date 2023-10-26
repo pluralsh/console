@@ -14,7 +14,7 @@ import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 export const getGlobalSettingsBreadcrumbs = ({ page }: { page: string }) => [
   ...CD_BASE_CRUMBS,
-  { label: 'global settings', url: `${CD_BASE_PATH}/clusters/globalsettings` },
+  { label: 'global settings', url: `${GLOBAL_SETTINGS_PATH}` },
   { label: page, url: `${CD_BASE_PATH}/clusters/${page}` },
 ]
 

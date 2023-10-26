@@ -239,6 +239,7 @@ fragment ServiceDeploymentBindings on ServiceDeployment {
 
 query ServiceDeploymentBindings($id: ID!) {
   serviceDeployment(id: $id) {
+    id
     ...ServiceDeploymentBindings
   }
 }
