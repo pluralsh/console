@@ -20,12 +20,13 @@ import {
   useRef,
   useState,
 } from 'react'
-import { GqlError } from 'components/utils/Alert'
 
+import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import ModalAlt, { StepH } from '../ModalAlt'
 import { PrepareGitStep } from '../PrepareGitStep'
+import SshKeyUpload from '../utils/SshKeyUpload'
 
 export function ImportGit({ refetch }: { refetch: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -233,22 +234,10 @@ export function GitAuthFields({
         },
       }}
     >
-      <FormField
-        label="Private key"
-        required
-      >
-        <Input
-          multiline
-          minRows={2}
-          maxRows={4}
-          inputProps={{ type: 'password' }}
-          value={privateKey}
-          onChange={(e) => {
-            setPrivateKey(e.currentTarget.value)
-          }}
-          placeholder="Private key"
-        />
-      </FormField>
+      <SshKeyUpload
+        privateKey={privateKey}
+        setPrivateKey={setPrivateKey}
+      />
       <FormField label="Passphrase">
         <Input
           inputProps={{ type: 'password' }}
