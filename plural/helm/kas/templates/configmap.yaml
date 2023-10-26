@@ -12,12 +12,12 @@ data:
         websocket: true
         certificate_file: "/etc/kas/tls.crt"
         key_file: "/etc/kas/tls.key"
-    kubernetes_api:
-      listen:
-        address: ":{{ .Values.service.kubernetesApiPort }}"
-        certificate_file: "/etc/kas/tls.crt"
-        key_file: "/etc/kas/tls.key"
-      url_path_prefix: "{{ .Values.ingress.kubernetesApiPath }}"
+      kubernetes_api:
+        listen:
+          address: ":{{ .Values.service.kubernetesApiPort }}"
+          certificate_file: "/etc/kas/tls.crt"
+          key_file: "/etc/kas/tls.key"
+        url_path_prefix: "{{ .Values.ingress.kubernetesApiPath }}"
     observability:
       listen:
         address: ":{{ .Values.service.observabilityPort }}"
@@ -33,5 +33,5 @@ data:
     private_api:
       listen:
         address: ":{{ .Values.service.privateApiPort }}"
-        authentication_secret_file: "/etc/kas/.private_api_secret"
-    plural_url: "{{ .Values.consoleUrl }}/gql"
+        authentication_secret_file: "/etc/kas/.privateapi_secret"
+    plural_url: "https://{{ .Values.consoleUrl }}/gql"

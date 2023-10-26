@@ -30,7 +30,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.securityContext | nindent 8 }}
       {{- with .Values.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
@@ -40,7 +40,7 @@ spec:
           image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
           args:
             - "--configuration-file=/etc/kas/config.yaml"
             {{- range .Values.extraArgs }}

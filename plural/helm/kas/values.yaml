@@ -40,7 +40,7 @@ resources:
     memory: 128Mi
   requests:
     cpu: 100m
-  memory: 128Mi
+    memory: 128Mi
 
 service:
   externalPort: 8150
@@ -78,13 +78,13 @@ autoscaling:
 
 secrets:
   api: ""
-  private_api: ""
+  privateapi: ""
   redis: ""
 
 ingress:
   enabled: true
   ingressClass: nginx
-  kubernetesApiPath: k8s-proxy
+  kubernetesApiPath: /k8s-proxy
   tlsSecretName: kas-tls
   annotations:
     kubernetes.io/tls-acme: "true"

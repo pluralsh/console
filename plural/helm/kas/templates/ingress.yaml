@@ -7,6 +7,11 @@ metadata:
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
+    {{- if eq "nginx" $.Values.ingress.ingressClass }}
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/custom-http-errors: ""
+    nginx.ingress.kubernetes.io/backend-protocol: https
+    {{- end }}
   {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.ingressClass }}
@@ -14,18 +19,18 @@ spec:
     - host: {{ .Values.ingress.kas_dns | quote }}
       http:
         paths:
-          - path: "{{ trimSuffix "/" $.Values.ingress.kubernetesApiPath }}"
+          - path: "{{ $.Values.ingress.kubernetesApiPath }}"
             pathType: Prefix
             backend:
               service:
-                name: {{ template "kas.serviceName" . }}
+                name: {{ include "kas.serviceName" . }}
                 port:
                   number: {{ .Values.service.kubernetesApiPort }}
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ template "kas.serviceName" . }}
+                name: {{ include "kas.serviceName" . }}
                 port:
                   number: {{ .Values.service.externalPort }}
   tls:
