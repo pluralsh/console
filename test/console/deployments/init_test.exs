@@ -1,5 +1,5 @@
 defmodule Console.Deployments.InitTest do
-  use Console.DataCase, async: true
+  use Console.DataCase, async: false
   alias Console.Deployments.{Init, Git}
 
   describe "#setup/0" do

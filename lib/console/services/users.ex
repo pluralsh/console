@@ -21,6 +21,9 @@ defmodule Console.Services.Users do
   @spec get_user!(binary) :: User.t
   def get_user!(id), do: Repo.get!(User, id)
 
+  @decorate cacheable(cache: Console.Cache, key: :console_bot, opts: [ttl: @ttl])
+  def console(), do: Repo.get_by(User, email: "console@plural.sh")
+
   @decorate cacheable(cache: Console.Cache, key: {:access, token}, opts: [ttl: @ttl])
   def get_by_token(token) do
     Repo.get_by(AccessToken, token: token)

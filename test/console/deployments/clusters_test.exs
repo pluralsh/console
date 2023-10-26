@@ -438,13 +438,15 @@ defmodule Console.Deployments.ClustersTest do
       assert Clusters.control_plane(cluster) == Kazan.Server.from_kubeconfig_raw(Console.conf(:test_kubeconfig))
     end
 
-    test "it can use a kubeconfig in a CAPI cluster secret" do
+    test "it can generate an agent kubeconfig" do
+      insert(:user, email: "console@plural.sh")
       cluster = insert(:cluster, name: "cluster", provider: build(:cluster_provider, namespace: "test-provider"))
-      expect(Kube.Utils, :get_secret, fn "test-provider", "cluster-kubeconfig" ->
-        {:ok, %CoreV1.Secret{data: %{"value" => Base.encode64(Console.conf(:test_kubeconfig))}}}
-      end)
 
-      assert Clusters.control_plane(cluster) == Kazan.Server.from_kubeconfig_raw(Console.conf(:test_kubeconfig))
+      server = Clusters.control_plane(cluster)
+      assert server.url == "#{Console.conf(:kas_dns)}/k8s-proxy"
+      ["plrl", id, token] = String.split(server.auth.token, ":")
+      assert id == cluster.id
+      {:ok, _} = Console.Guardian.decode_and_verify(token)
     end
   end
 

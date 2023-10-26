@@ -44,18 +44,20 @@ defmodule Console.Deployments.Clusters do
     |> Repo.exists?()
   end
 
+  @spec control_plane(Cluster.t) :: Kazan.Server.t | {:error, term}
   def control_plane(%Cluster{id: id, self: true}), do: Kazan.Server.in_cluster()
   def control_plane(%Cluster{id: id, kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
   def control_plane(%Cluster{id: id} = cluster) do
-    with {:ok, raw} <- kubeconfig(cluster) do
-      Kazan.Server.from_kubeconfig_raw(raw)
-    else
-      err ->
-        Logger.info "could not fetch kubeconfig for cluster #{id}: #{inspect(err)}"
-        :error
+    console = Users.console()
+    with {:ok, token, _} <- Console.Guardian.encode_and_sign(console, %{"cached" => true}) do
+      %Kazan.Server{
+        url: kas_proxy_url(),
+        auth: %Kazan.Server.TokenAuth{token: "plrl:#{id}:#{token}"},
+      }
     end
   end
 
+  @spec kubeconfig(Cluster.t) :: {:ok, binary} | {:error, term}
   def kubeconfig(%Cluster{name: name} = cluster) do
     with ns when is_binary(ns) <- namespace(cluster),
          {:ok, %Core.Secret{data: %{"value" => value}}} <- Kube.Utils.get_secret(ns, "#{name}-kubeconfig"),
