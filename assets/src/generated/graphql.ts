@@ -3853,6 +3853,25 @@ export type UpdateGitRepositoryMutationVariables = Exact<{
 
 export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null } | null };
 
+export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
+
+export type CreateGlobalServiceMutationVariables = Exact<{
+  attributes: GlobalServiceAttributes;
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+
+export type DeleteGlobalServiceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteGlobalServiceMutation = { __typename?: 'RootMutationType', deleteGlobalService?: { __typename?: 'GlobalService', id: string } | null };
+
 export type ClusterProviderFragment = { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, deletedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null };
 
 export type ClusterProvidersQueryVariables = Exact<{ [key: string]: never; }>;
@@ -4609,6 +4628,28 @@ export const GitRepositoriesRowFragmentDoc = gql`
   pulledAt
   updatedAt
   urlFormat
+}
+    `;
+export const GlobalServiceFragmentDoc = gql`
+    fragment GlobalService on GlobalService {
+  id
+  name
+  provider {
+    id
+    name
+    cloud
+    namespace
+  }
+  service {
+    id
+    name
+  }
+  tags {
+    name
+    value
+  }
+  insertedAt
+  updatedAt
 }
     `;
 export const ClusterProviderFragmentDoc = gql`
@@ -5883,6 +5924,80 @@ export function useUpdateGitRepositoryMutation(baseOptions?: Apollo.MutationHook
 export type UpdateGitRepositoryMutationHookResult = ReturnType<typeof useUpdateGitRepositoryMutation>;
 export type UpdateGitRepositoryMutationResult = Apollo.MutationResult<UpdateGitRepositoryMutation>;
 export type UpdateGitRepositoryMutationOptions = Apollo.BaseMutationOptions<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>;
+export const CreateGlobalServiceDocument = gql`
+    mutation CreateGlobalService($attributes: GlobalServiceAttributes!, $cluster: String, $name: String, $serviceId: ID) {
+  createGlobalService(
+    attributes: $attributes
+    cluster: $cluster
+    name: $name
+    serviceId: $serviceId
+  ) {
+    ...GlobalService
+  }
+}
+    ${GlobalServiceFragmentDoc}`;
+export type CreateGlobalServiceMutationFn = Apollo.MutationFunction<CreateGlobalServiceMutation, CreateGlobalServiceMutationVariables>;
+
+/**
+ * __useCreateGlobalServiceMutation__
+ *
+ * To run a mutation, you first call `useCreateGlobalServiceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGlobalServiceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createGlobalServiceMutation, { data, loading, error }] = useCreateGlobalServiceMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *      cluster: // value for 'cluster'
+ *      name: // value for 'name'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useCreateGlobalServiceMutation(baseOptions?: Apollo.MutationHookOptions<CreateGlobalServiceMutation, CreateGlobalServiceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateGlobalServiceMutation, CreateGlobalServiceMutationVariables>(CreateGlobalServiceDocument, options);
+      }
+export type CreateGlobalServiceMutationHookResult = ReturnType<typeof useCreateGlobalServiceMutation>;
+export type CreateGlobalServiceMutationResult = Apollo.MutationResult<CreateGlobalServiceMutation>;
+export type CreateGlobalServiceMutationOptions = Apollo.BaseMutationOptions<CreateGlobalServiceMutation, CreateGlobalServiceMutationVariables>;
+export const DeleteGlobalServiceDocument = gql`
+    mutation DeleteGlobalService($id: ID!) {
+  deleteGlobalService(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteGlobalServiceMutationFn = Apollo.MutationFunction<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>;
+
+/**
+ * __useDeleteGlobalServiceMutation__
+ *
+ * To run a mutation, you first call `useDeleteGlobalServiceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteGlobalServiceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteGlobalServiceMutation, { data, loading, error }] = useDeleteGlobalServiceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteGlobalServiceMutation(baseOptions?: Apollo.MutationHookOptions<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>(DeleteGlobalServiceDocument, options);
+      }
+export type DeleteGlobalServiceMutationHookResult = ReturnType<typeof useDeleteGlobalServiceMutation>;
+export type DeleteGlobalServiceMutationResult = Apollo.MutationResult<DeleteGlobalServiceMutation>;
+export type DeleteGlobalServiceMutationOptions = Apollo.BaseMutationOptions<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>;
 export const ClusterProvidersDocument = gql`
     query ClusterProviders {
   clusterProviders(first: 100) {
@@ -7690,6 +7805,8 @@ export const namedOperations = {
     CreateGitRepository: 'CreateGitRepository',
     DeleteGitRepository: 'DeleteGitRepository',
     UpdateGitRepository: 'UpdateGitRepository',
+    CreateGlobalService: 'CreateGlobalService',
+    DeleteGlobalService: 'DeleteGlobalService',
     CreateClusterProvider: 'CreateClusterProvider',
     UpdateClusterProvider: 'UpdateClusterProvider',
     DeleteClusterProvider: 'DeleteClusterProvider',
@@ -7728,6 +7845,7 @@ export const namedOperations = {
     ClusterBindings: 'ClusterBindings',
     MetricResponse: 'MetricResponse',
     GitRepositoriesRow: 'GitRepositoriesRow',
+    GlobalService: 'GlobalService',
     ClusterProvider: 'ClusterProvider',
     ServiceDeploymentRevision: 'ServiceDeploymentRevision',
     ServiceDeploymentsRow: 'ServiceDeploymentsRow',

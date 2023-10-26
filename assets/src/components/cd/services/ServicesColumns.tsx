@@ -1,5 +1,12 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { GitHubLogoIcon, Tooltip } from '@pluralsh/design-system'
+import {
+  GitHubLogoIcon,
+  GlobeIcon,
+  ListBoxItem,
+  PeopleIcon,
+  Tooltip,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { ServiceDeploymentsRowFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
@@ -7,6 +14,10 @@ import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { getProviderIconURL } from 'components/utils/Provider'
 import { toDateOrUndef } from 'utils/date'
+
+import { useState } from 'react'
+
+import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { isSha1 } from '../../../utils/sha'
 
@@ -161,21 +172,29 @@ export const ColErrors = columnHelper.accessor(
   }
 )
 
+enum MenuItemKey {
+  MakeGlobal = 'makeGlobal',
+  Permissions = 'permissions',
+  Delete = 'delete',
+}
+
 export const getColActions = ({ refetch }: { refetch: () => void }) =>
   columnHelper.accessor(({ node }) => node?.id, {
     id: 'actions',
     header: '',
-    cell: ({
+    cell: function ActionColumn({
       row: {
         original: { node },
       },
-    }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+    }) {
       const theme = useTheme()
+      const [menuKey, setMenuKey] = useState<Nullable<string>>('')
+      const serviceDeployment = node
 
       return (
-        node && (
+        serviceDeployment && (
           <div
+            onClick={(e) => e.stopPropagation()}
             css={{
               display: 'flex',
               gap: theme.spacing.large,
@@ -184,11 +203,37 @@ export const getColActions = ({ refetch }: { refetch: () => void }) =>
           >
             <ServicesRollbackDeployment
               refetch={refetch}
-              serviceDeployment={node}
+              serviceDeployment={serviceDeployment}
             />
+            <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
+              <ListBoxItem
+                key={MenuItemKey.MakeGlobal}
+                leftContent={<GlobeIcon />}
+                label="Make global"
+              />
+              <ListBoxItem
+                key={MenuItemKey.Permissions}
+                leftContent={<PeopleIcon />}
+                label="Permissions"
+              />
+              <ListBoxItem
+                key={MenuItemKey.Delete}
+                leftContent={
+                  <TrashCanIcon color={theme.colors['icon-danger']} />
+                }
+                label="Delete service"
+              />
+            </MoreMenu>
+            {/* Modals */}
             <DeleteService
+              serviceDeployment={serviceDeployment}
+              open={menuKey === MenuItemKey.Delete}
+              onClose={() => {
+                if (menuKey === MenuItemKey.Delete) {
+                  setMenuKey('')
+                }
+              }}
               refetch={refetch}
-              serviceDeployment={node}
             />
           </div>
         )

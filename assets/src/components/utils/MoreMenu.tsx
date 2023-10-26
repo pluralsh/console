@@ -24,7 +24,7 @@ export const MoreMenuTrigger = forwardRef(
           />
         }
         {...props}
-        // Set type after ...props to ensure it's not overridden by Select component cloning
+        // Set type after {...props} to ensure it's not overridden by Select component cloning
         type="tertiary"
       />
     )

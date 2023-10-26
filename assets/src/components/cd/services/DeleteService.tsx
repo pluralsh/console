@@ -1,47 +1,50 @@
-import { useState } from 'react'
-
-import { Div } from 'honorable'
+import { useTheme } from 'styled-components'
 
 import { Confirm } from '../../utils/Confirm'
 import {
   ServiceDeploymentsRowFragment,
   useDeleteServiceDeploymentMutation,
 } from '../../../generated/graphql'
-import { DeleteIconButton } from '../../utils/IconButtons'
 
 export function DeleteService({
   serviceDeployment,
   refetch,
+  open,
+  onClose,
 }: {
   serviceDeployment: ServiceDeploymentsRowFragment
   refetch: () => void
+  open: boolean
+  onClose: () => void
 }) {
-  const [confirm, setConfirm] = useState(false)
+  const theme = useTheme()
   const [mutation, { loading, error }] = useDeleteServiceDeploymentMutation({
     variables: { id: serviceDeployment.id },
     onCompleted: () => {
-      setConfirm(false)
+      onClose()
       refetch?.()
     },
   })
 
   return (
-    <Div onClick={(e) => e.stopPropagation()}>
-      <DeleteIconButton
-        onClick={() => setConfirm(true)}
-        tooltip
-      />
-      <Confirm
-        close={() => setConfirm(false)}
-        destructive
-        label="Delete"
-        loading={loading}
-        error={error}
-        open={confirm}
-        submit={() => mutation()}
-        title="Delete service deployment"
-        text={`Are you sure you want to delete ${serviceDeployment.name} deployment?`}
-      />
-    </Div>
+    <Confirm
+      open={open}
+      close={onClose}
+      destructive
+      label="Delete"
+      loading={loading}
+      error={error}
+      submit={() => mutation()}
+      title="Delete service deployment"
+      text={
+        <>
+          Are you sure you want to delete{' '}
+          <span css={{ color: theme.colors['text-danger'] }}>
+            “{serviceDeployment.name}”{' '}
+          </span>
+          deployment?
+        </>
+      }
+    />
   )
 }
