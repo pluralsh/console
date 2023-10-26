@@ -124,7 +124,7 @@ export const ColLastActivity = columnHelper.accessor(
 
 export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   id: 'status',
-  header: 'Component status',
+  header: 'Status',
   enableSorting: true,
   enableColumnFilter: true,
   filterFn: 'equalsString',

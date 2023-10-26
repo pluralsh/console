@@ -275,7 +275,7 @@ export const columns = [
   }),
   columnHelper.accessor(({ node }) => node?.status?.conditions?.length ?? 0, {
     id: 'conditions',
-    header: 'Cluster conditions',
+    header: 'Conditions',
     cell: ({ row: { original } }) => (
       <ClusterConditions cluster={original.node} />
     ),

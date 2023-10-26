@@ -119,7 +119,7 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.owner_id == ^owner_id)
   end
 
-  def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
+  def ordered(query \\ __MODULE__, order \\ [asc: :cluster_id, asc: :name]) do
     from(s in query, order_by: ^order)
   end
 
