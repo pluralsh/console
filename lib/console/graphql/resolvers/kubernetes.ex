@@ -218,6 +218,15 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> maybe_filter_pods(args)
   end
 
+  def read_pod_logs(_, args, %{source: %Core.Pod{metadata: %{namespace: ns, name: n}}}) do
+    Core.read_namespaced_pod_log!(ns, n, Map.to_list(args))
+    |> Kube.Utils.run()
+    |> case do
+      {:ok, logs} -> {:ok, String.split(logs, ~r/\R/)}
+      err -> err
+    end
+  end
+
   def raw_resource(%{version: v, kind: k, name: n} = args, %{context: %{service: svc}}) do
     kind = String.downcase(k) |> Inflex.pluralize()
     path = Kube.Client.Base.path(args[:group], v, kind, args[:namespace], n)

@@ -78,7 +78,7 @@ defmodule KubernetesScaffolds do
 
   def pod(name) do
     %Core.Pod{
-      metadata: %{name: name},
+      metadata: %{name: name, namespace: name},
       status: %Core.PodStatus{pod_ip: "1.2.3.4"},
       spec: %Core.PodSpec{node_name: "some-node"}
     }
