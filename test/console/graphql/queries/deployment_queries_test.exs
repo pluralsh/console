@@ -382,7 +382,8 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
   describe "clusterProviders" do
     test "it will list cluster providers" do
       user = admin_user()
-      providers = insert_list(3, :cluster_provider, cloud: "aws")
+      providers = for cloud <- ~w(aws gcp azure),
+        do: insert(:cluster_provider, cloud: cloud)
 
       {:ok, %{data: %{"clusterProviders" => found}}} = run_query("""
         query {

@@ -148,6 +148,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :installed,       :boolean, description: "whether the deploy operator has been registered for this cluster"
 
+    field :kas_url, :string, description: "the url of the kas server you can access this cluster from", resolve: fn
+      _, _, _ -> {:ok, Console.Deployments.Clusters.kas_proxy_url()}
+    end
+
     field :deploy_token, :string,
       description: "a auth token to be used by the deploy operator, only readable on create",
       resolve: &Deployments.deploy_token/3

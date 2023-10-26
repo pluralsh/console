@@ -17,9 +17,7 @@ defmodule Console.Deployments.ClustersTest do
         name: "test",
         version: "1.25",
         provider_id: provider.id,
-        node_pools: [
-          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
-        ]
+        node_pools: [%{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}]
       }, user)
 
       assert cluster.name == "test"
@@ -65,6 +63,7 @@ defmodule Console.Deployments.ClustersTest do
       assert token == cluster.deploy_token
       assert url == Path.join(Console.conf(:ext_url), "ext/gql")
       assert secrets["clusterId"] == cluster.id
+      assert secrets["kasAddress"] == "wss://kas.cd-demo.onplural.sh"
 
       [revision] = Clusters.revisions(cluster)
       assert revision.version == cluster.version

@@ -492,6 +492,20 @@ defmodule Console.Deployments.Clusters do
     |> notify(:update, user)
   end
 
+  def kas_url() do
+    Console.conf(:kas_dns)
+    |> URI.parse()
+    |> Map.put(:scheme, "wss")
+    |> URI.to_string()
+  end
+
+  def kas_proxy_url() do
+    Console.conf(:kas_dns)
+    |> URI.parse()
+    |> Map.put(:path, "/k8s-proxy")
+    |> URI.to_string()
+  end
+
   defp cluster_service(%Cluster{service_id: nil, provider: %ClusterProvider{} = provider} = cluster, %User{} = user) do
     {ns, name} = namespace_name(cluster)
     Console.Repo.preload(cluster, [:node_pools])

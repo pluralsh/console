@@ -1217,6 +1217,9 @@ type Cluster {
   "whether the deploy operator has been registered for this cluster"
   installed: Boolean
 
+  "the url of the kas server you can access this cluster from"
+  kasUrl: String
+
   "a auth token to be used by the deploy operator, only readable on create"
   deployToken: String
 

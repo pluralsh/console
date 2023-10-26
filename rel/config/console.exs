@@ -89,7 +89,8 @@ config :console,
   is_demo_project: !!get_env("IS_DEMO_PROJECT"),
   is_sandbox: !!get_env("CONSOLE_SANDBOX"),
   provider: provider,
-  build_id: get_env("CONSOLE_BUILD_ID")
+  build_id: get_env("CONSOLE_BUILD_ID"),
+  kas_url: get_env("KAS_DNS")
 
 if String.starts_with?(git_url, "https") do
   config :console,

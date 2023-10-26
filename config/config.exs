@@ -45,7 +45,8 @@ config :console,
   audit_expiry: 30,
   cache_adapter: Console.Cache,
   local_cache: Console.LocalCache,
-  version: Mix.Project.config[:version]
+  version: Mix.Project.config[:version],
+  kas_dns: "https://kas.cd-demo.onplural.sh"
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

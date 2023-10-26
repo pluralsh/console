@@ -133,6 +133,7 @@ defmodule Console.Schema.ClusterProvider do
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:repository_id)
     |> unique_constraint(:name)
+    |> unique_constraint(:cloud)
     |> backfill_namespace()
     |> backfill_cloud()
     |> backfill_git()

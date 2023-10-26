@@ -87,7 +87,8 @@ defmodule Console.Deployments.Services do
     [
       %{name: "clusterId", value: cluster_id},
       %{name: "deployToken", value: deploy_token},
-      %{name: "url", value: api_url("gql")}
+      %{name: "url", value: api_url("gql")},
+      %{name: "kasAddress", value: Clusters.kas_url()}
     ]
   end
 
