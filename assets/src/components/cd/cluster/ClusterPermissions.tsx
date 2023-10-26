@@ -1,14 +1,25 @@
 import { Button, Modal, PersonIcon } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  ComponentProps,
+  FormEvent,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import isEqual from 'lodash/isEqual'
 import uniqWith from 'lodash/uniqWith'
 
 import {
   ClusterFragment,
-  ClusterPolicyBindingFragment,
+  ClustersRowFragment,
+  PolicyBindingFragment,
+  ServiceDeploymentsRowFragment,
   useClusterBindingsQuery,
-  useUpdateClusterBindingsMutation,
+  useServiceDeploymentBindingsQuery,
+  useUpdateRbacMutation,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -39,10 +50,7 @@ function ReadPermissions({
   bindings,
   setBindings,
 }: {
-  bindings?:
-    | (ClusterPolicyBindingFragment | null | undefined)[]
-    | null
-    | undefined
+  bindings?: (PolicyBindingFragment | null | undefined)[] | null | undefined
   setBindings: any
 }) {
   return (
@@ -64,10 +72,7 @@ function WritePermissions({
   bindings,
   setBindings,
 }: {
-  bindings?:
-    | (ClusterPolicyBindingFragment | null | undefined)[]
-    | null
-    | undefined
+  bindings?: (PolicyBindingFragment | null | undefined)[] | null | undefined
   setBindings: any
 }) {
   return (
@@ -84,35 +89,103 @@ function WritePermissions({
     </PermissionsColumnSC>
   )
 }
-
 export function ClusterPermissionsModal({
   cluster,
-  open,
-  onClose,
-}: {
-  cluster: Cluster
-  open: boolean
-  onClose: () => void
+  header,
+  ...props
+}: Omit<
+  ComponentProps<typeof PermissionsModal>,
+  'bindings' | 'clusterId' | 'serviceId' | 'header'
+> & {
+  header?: ReactNode
+  cluster: ClustersRowFragment
 }) {
-  const theme = useTheme()
-
   const { data } = useClusterBindingsQuery({
     variables: { id: cluster.id },
     fetchPolicy: 'no-cache',
     skip: !cluster.id,
   })
+  const bindings = data?.cluster
 
-  const [readBindings, setReadBindings] = useState(data?.cluster?.readBindings)
-  const [writeBindings, setWriteBindings] = useState(
-    data?.cluster?.writeBindings
+  if (!bindings) {
+    return null
+  }
+
+  return (
+    <PermissionsModal
+      header={header || `Cluster permissions – ${cluster.name}`}
+      name={cluster.name}
+      bindings={bindings}
+      clusterId={cluster.id}
+      {...props}
+    />
   )
+}
+
+export function ServicePermissionsModal({
+  service,
+  header,
+  ...props
+}: Omit<
+  ComponentProps<typeof PermissionsModal>,
+  'bindings' | 'clusterId' | 'serviceId' | 'header'
+> & {
+  header?: ReactNode
+  service: ServiceDeploymentsRowFragment
+}) {
+  const { data } = useServiceDeploymentBindingsQuery({
+    variables: { id: service.id },
+    fetchPolicy: 'no-cache',
+    skip: !service.id,
+  })
+  const bindings = data?.serviceDeployment
+
+  if (!bindings) {
+    return null
+  }
+
+  return (
+    <PermissionsModal
+      header={header || `Service permissions – ${service.name}`}
+      name={service.name}
+      bindings={bindings}
+      clusterId={service.id}
+      {...props}
+    />
+  )
+}
+
+export function PermissionsModal({
+  clusterId,
+  serviceId,
+  bindings,
+  header,
+  name,
+  open,
+  onClose,
+}: {
+  clusterId?: string
+  serviceId?: string
+  bindings: {
+    readBindings?: Nullable<Nullable<PolicyBindingFragment>[]>
+    writeBindings?: Nullable<Nullable<PolicyBindingFragment>[]>
+  }
+  header: ReactNode
+  name?: string
+  open: boolean
+  onClose: () => void
+}) {
+  const theme = useTheme()
+
+  const [readBindings, setReadBindings] = useState(bindings.readBindings)
+  const [writeBindings, setWriteBindings] = useState(bindings.writeBindings)
 
   useEffect(() => {
-    setReadBindings(data?.cluster?.readBindings)
-  }, [data?.cluster?.readBindings])
+    setReadBindings(bindings.readBindings)
+  }, [bindings.readBindings])
   useEffect(() => {
-    setWriteBindings(data?.cluster?.writeBindings)
-  }, [data?.cluster?.writeBindings])
+    setWriteBindings(bindings.writeBindings)
+  }, [bindings.writeBindings])
 
   const uniqueReadBindings = useMemo(
     () => uniqWith(readBindings, isEqual),
@@ -123,7 +196,7 @@ export function ClusterPermissionsModal({
     [writeBindings]
   )
   const [mutation, { loading: mutationLoading, error: mutationError }] =
-    useUpdateClusterBindingsMutation({
+    useUpdateRbacMutation({
       onCompleted: () => {
         onClose()
       },
@@ -133,10 +206,10 @@ export function ClusterPermissionsModal({
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
-      if (cluster.version && readBindings && writeBindings) {
+      if ((serviceId || clusterId) && readBindings && writeBindings) {
         mutation({
           variables: {
-            id: cluster.id,
+            ...(clusterId ? { clusterId } : serviceId ? { serviceId } : {}),
             rbac: {
               readBindings: readBindings
                 ?.filter(isNonNullable)
@@ -149,12 +222,12 @@ export function ClusterPermissionsModal({
         })
       }
     },
-    [cluster.id, cluster.version, mutation, readBindings, writeBindings]
+    [clusterId, mutation, readBindings, serviceId, writeBindings]
   )
 
   return (
     <Modal
-      header={`Cluster permissions – ${cluster.name}`}
+      header={header}
       open={open}
       onClose={onClose}
       asForm
@@ -207,11 +280,10 @@ export function ClusterPermissionsModal({
           }}
         >
           <StepBody>
-            Bind users to read or write permissions for <b>{cluster.name}</b>{' '}
-            cluster
+            Bind users to read or write permissions for <b>{name}</b> cluster
           </StepBody>
         </div>
-        {!data ? (
+        {!bindings ? (
           <LoadingIndicator />
         ) : (
           <div css={{ display: 'flex' }}>

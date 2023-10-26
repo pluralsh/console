@@ -223,3 +223,22 @@ mutation RollbackService($id: ID, $revisionId: ID!) {
     ...ServiceDeploymentsRow
   }
 }
+
+mutation UpdateRbac($serviceId: ID, $clusterId: ID, $rbac: RbacAttributes!) {
+  updateRbac(serviceId: $serviceId, clusterId: $clusterId, rbac: $rbac)
+}
+
+fragment ServiceDeploymentBindings on ServiceDeployment {
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
+query ServiceDeploymentBindings($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentBindings
+  }
+}

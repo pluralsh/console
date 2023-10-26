@@ -3776,7 +3776,7 @@ export type ClusterNamespacesQueryVariables = Exact<{
 
 export type ClusterNamespacesQuery = { __typename?: 'RootQueryType', namespaces?: Array<{ __typename?: 'Namespace', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null };
 
-export type ClusterPolicyBindingFragment = { __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null };
+export type PolicyBindingFragment = { __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null };
 
 export type ClusterBindingsFragment = { __typename?: 'Cluster', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
@@ -3994,6 +3994,24 @@ export type RollbackServiceMutationVariables = Exact<{
 
 
 export type RollbackServiceMutation = { __typename?: 'RootMutationType', rollbackService?: { __typename?: 'ServiceDeployment', id: string, name: string, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null } | null };
+
+export type UpdateRbacMutationVariables = Exact<{
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  rbac: RbacAttributes;
+}>;
+
+
+export type UpdateRbacMutation = { __typename?: 'RootMutationType', updateRbac?: boolean | null };
+
+export type ServiceDeploymentBindingsFragment = { __typename?: 'ServiceDeployment', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
+export type ServiceDeploymentBindingsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentBindingsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type DatabaseTableRowFragment = { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null };
 
@@ -4583,8 +4601,8 @@ export const ClusterTinyFragmentDoc = gql`
   }
 }
     `;
-export const ClusterPolicyBindingFragmentDoc = gql`
-    fragment ClusterPolicyBinding on PolicyBinding {
+export const PolicyBindingFragmentDoc = gql`
+    fragment PolicyBinding on PolicyBinding {
   id
   user {
     id
@@ -4600,13 +4618,13 @@ export const ClusterPolicyBindingFragmentDoc = gql`
 export const ClusterBindingsFragmentDoc = gql`
     fragment ClusterBindings on Cluster {
   readBindings {
-    ...ClusterPolicyBinding
+    ...PolicyBinding
   }
   writeBindings {
-    ...ClusterPolicyBinding
+    ...PolicyBinding
   }
 }
-    ${ClusterPolicyBindingFragmentDoc}`;
+    ${PolicyBindingFragmentDoc}`;
 export const MetricResponseFragmentDoc = gql`
     fragment MetricResponse on MetricResponse {
   metric
@@ -4783,6 +4801,16 @@ export const ServiceDeploymentRevisionsFragmentDoc = gql`
   }
 }
     ${ServiceDeploymentRevisionFragmentDoc}`;
+export const ServiceDeploymentBindingsFragmentDoc = gql`
+    fragment ServiceDeploymentBindings on ServiceDeployment {
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+    ${PolicyBindingFragmentDoc}`;
 export const ResourceSpecFragmentDoc = gql`
     fragment ResourceSpec on ResourceSpec {
   cpu
@@ -6566,6 +6594,74 @@ export function useRollbackServiceMutation(baseOptions?: Apollo.MutationHookOpti
 export type RollbackServiceMutationHookResult = ReturnType<typeof useRollbackServiceMutation>;
 export type RollbackServiceMutationResult = Apollo.MutationResult<RollbackServiceMutation>;
 export type RollbackServiceMutationOptions = Apollo.BaseMutationOptions<RollbackServiceMutation, RollbackServiceMutationVariables>;
+export const UpdateRbacDocument = gql`
+    mutation UpdateRbac($serviceId: ID, $clusterId: ID, $rbac: RbacAttributes!) {
+  updateRbac(serviceId: $serviceId, clusterId: $clusterId, rbac: $rbac)
+}
+    `;
+export type UpdateRbacMutationFn = Apollo.MutationFunction<UpdateRbacMutation, UpdateRbacMutationVariables>;
+
+/**
+ * __useUpdateRbacMutation__
+ *
+ * To run a mutation, you first call `useUpdateRbacMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateRbacMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateRbacMutation, { data, loading, error }] = useUpdateRbacMutation({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      clusterId: // value for 'clusterId'
+ *      rbac: // value for 'rbac'
+ *   },
+ * });
+ */
+export function useUpdateRbacMutation(baseOptions?: Apollo.MutationHookOptions<UpdateRbacMutation, UpdateRbacMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateRbacMutation, UpdateRbacMutationVariables>(UpdateRbacDocument, options);
+      }
+export type UpdateRbacMutationHookResult = ReturnType<typeof useUpdateRbacMutation>;
+export type UpdateRbacMutationResult = Apollo.MutationResult<UpdateRbacMutation>;
+export type UpdateRbacMutationOptions = Apollo.BaseMutationOptions<UpdateRbacMutation, UpdateRbacMutationVariables>;
+export const ServiceDeploymentBindingsDocument = gql`
+    query ServiceDeploymentBindings($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentBindings
+  }
+}
+    ${ServiceDeploymentBindingsFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentBindingsQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentBindingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentBindingsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentBindingsQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>(ServiceDeploymentBindingsDocument, options);
+      }
+export function useServiceDeploymentBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>(ServiceDeploymentBindingsDocument, options);
+        }
+export type ServiceDeploymentBindingsQueryHookResult = ReturnType<typeof useServiceDeploymentBindingsQuery>;
+export type ServiceDeploymentBindingsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentBindingsLazyQuery>;
+export type ServiceDeploymentBindingsQueryResult = Apollo.QueryResult<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>;
 export const RestorePostgresDocument = gql`
     mutation RestorePostgres($clone: CloneAttributes, $name: String!, $namespace: String!, $timestamp: DateTime!) {
   restorePostgres(
@@ -7775,6 +7871,7 @@ export const namedOperations = {
     ServiceDeploymentComponents: 'ServiceDeploymentComponents',
     ServiceDeploymentSecrets: 'ServiceDeploymentSecrets',
     ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
+    ServiceDeploymentBindings: 'ServiceDeploymentBindings',
     PostgresDatabases: 'PostgresDatabases',
     PostgresDatabase: 'PostgresDatabase',
     Groups: 'Groups',
@@ -7815,6 +7912,7 @@ export const namedOperations = {
     MergeService: 'MergeService',
     DeleteServiceDeployment: 'DeleteServiceDeployment',
     RollbackService: 'RollbackService',
+    UpdateRbac: 'UpdateRbac',
     RestorePostgres: 'RestorePostgres',
     CreateGroupMember: 'CreateGroupMember',
     DeleteGroupMember: 'DeleteGroupMember',
@@ -7841,7 +7939,7 @@ export const namedOperations = {
     ClustersRow: 'ClustersRow',
     Cluster: 'Cluster',
     ClusterTiny: 'ClusterTiny',
-    ClusterPolicyBinding: 'ClusterPolicyBinding',
+    PolicyBinding: 'PolicyBinding',
     ClusterBindings: 'ClusterBindings',
     MetricResponse: 'MetricResponse',
     GitRepositoriesRow: 'GitRepositoriesRow',
@@ -7852,6 +7950,7 @@ export const namedOperations = {
     ServiceDeploymentDetails: 'ServiceDeploymentDetails',
     ServiceDeploymentComponent: 'ServiceDeploymentComponent',
     ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
+    ServiceDeploymentBindings: 'ServiceDeploymentBindings',
     DatabaseTableRow: 'DatabaseTableRow',
     GroupMember: 'GroupMember',
     Group: 'Group',
