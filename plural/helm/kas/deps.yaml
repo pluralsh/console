@@ -9,3 +9,7 @@ spec:
     name: bootstrap
     repo: bootstrap
     version: '>= 0.5.1'
+  - type: helm
+    name: console
+    repo: console
+    version: '>= 0.1.10'
