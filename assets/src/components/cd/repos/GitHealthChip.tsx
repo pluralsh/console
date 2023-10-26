@@ -35,8 +35,22 @@ export function GitHealthChip({
     </Chip>
   )
 
+  const errorLines = (error || '').split('\n').map((line, i, arr) => (
+    <>
+      {line}
+      {i !== arr.length - 1 && <br />}
+    </>
+  ))
+
   if (error) {
-    return <Tooltip label={error}>{chip}</Tooltip>
+    return (
+      <Tooltip
+        placement="top"
+        label={<div css={{ maxWidth: 500 }}>{errorLines}</div>}
+      >
+        {chip}
+      </Tooltip>
+    )
   }
 
   return chip
