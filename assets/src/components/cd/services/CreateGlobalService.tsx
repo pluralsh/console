@@ -3,16 +3,20 @@ import {
   FormEvent,
   useCallback,
   useMemo,
+  useRef,
   useState,
 } from 'react'
+import sortBy from 'lodash/sortBy'
 
 import styled, { useTheme } from 'styled-components'
 import {
   Button,
   Chip,
   FormField,
+  IconFrame,
   Input,
   ListBoxItemChipList,
+  PlusIcon,
 } from '@pluralsh/design-system'
 
 import {
@@ -23,6 +27,8 @@ import {
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import isEmpty from 'lodash/isEmpty'
 
 import ModalAlt, { StepBody, StepH } from '../ModalAlt'
 
@@ -44,9 +50,22 @@ export function CreateGlobalServiceModal({
 }) {
   const theme = useTheme()
   const [name, setName] = useState('')
-  const [tags, setTags] = useState(new Set<string>())
+  const [tags, setTags] = useState<Record<string, string>>({})
+  const [tagName, setTagName] = useState('')
   const [tagValue, setTagValue] = useState('')
-  const sortedTags = useMemo(() => [...tags].sort(), [tags])
+  const nameValueTags = useMemo(
+    () =>
+      sortBy(
+        Object.entries(tags).map(([name, value]) => ({
+          name,
+          value,
+        })),
+        ['name']
+      ),
+    [tags]
+  )
+  const tagNameRef = useRef<HTMLInputElement>()
+  const tagValueRef = useRef<HTMLInputElement>()
 
   const [mutation, { loading: mutationLoading, error: mutationError }] =
     useCreateGlobalServiceMutation({
@@ -76,6 +95,15 @@ export function CreateGlobalServiceModal({
   )
 
   const initialLoading = false
+
+  const addTag = () => {
+    if (tagName) {
+      setTags({ ...tags, [tagName]: tagValue })
+      setTagName('')
+      setTagValue('')
+      tagNameRef.current?.focus?.()
+    }
+  }
 
   return (
     <ModalAlt
@@ -142,44 +170,81 @@ export function CreateGlobalServiceModal({
               />
             </FormField>
             <FormField label="Cluster tags">
-              <Input
-                value={tagValue}
-                onChange={(e) => {
-                  setTagValue(e.currentTarget.value)
+              <div
+                css={{
+                  display: 'flex',
+                  gap: theme.spacing.small,
+                  alignItems: 'center',
+                  '&& > *': { flexShrink: 0, flexGrow: 1 },
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    if (tagValue) {
-                      const nextTags = new Set(tags)
-
-                      nextTags.add(tagValue)
-                      setTags(nextTags)
-                      setTagValue('')
+              >
+                <Input
+                  placeholder="Name"
+                  inputProps={{ ref: tagNameRef }}
+                  value={tagName}
+                  onChange={(e) => {
+                    setTagName(
+                      e.currentTarget.value
+                        .trim()
+                        .replace(/[^a-z0-9A-Z-_./]/, '')
+                    )
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      tagValueRef.current?.focus?.()
                     }
-                  }
-                }}
-              />
-              {tags.size > 0 && (
+                  }}
+                />
+                <Input
+                  placeholder="Value"
+                  inputProps={{ ref: tagValueRef }}
+                  value={tagValue}
+                  onChange={(e) => {
+                    setTagValue(
+                      e.currentTarget.value
+                        .trim()
+                        .replace(/[^a-z0-9A-Z-_.]/, '')
+                    )
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      addTag()
+                    }
+                  }}
+                />
+                <IconFrame
+                  css={{ '&&': { flexGrow: 0 } }}
+                  type="secondary"
+                  tooltip="Add tag"
+                  size="medium"
+                  clickable
+                  icon={<PlusIcon />}
+                  onClick={() => {
+                    addTag()
+                  }}
+                />
+              </div>
+              {!isEmpty(nameValueTags) && (
                 <ChipList
                   maxVisible={Infinity}
-                  chips={sortedTags.map((tag) => (
+                  chips={nameValueTags.map(({ name, value }) => (
                     <Chip
-                      key={tag}
+                      key={name}
                       size="small"
                       clickable
-                      onClick={() =>
+                      onClick={() => {
                         setTags((prev) => {
-                          const next = new Set(prev)
+                          const next = { ...prev }
 
-                          next.delete(tag)
+                          delete next[name]
 
                           return next
                         })
-                      }
+                      }}
                       closeButton
                     >
-                      {tag}
+                      {name}: {value}
                     </Chip>
                   ))}
                 />
