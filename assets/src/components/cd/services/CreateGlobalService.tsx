@@ -57,6 +57,13 @@ export const validateTagValue = (value) =>
   value === '' ||
   (!!value.match(/^[A-Za-z0-9]([-_.]*[A-Za-z0-9])*$/) && value.length <= 63)
 
+function tagsToNameValue<T>(tags: Record<string, T>) {
+  return Object.entries(tags).map(([name, value]) => ({
+    name,
+    value,
+  }))
+}
+
 export function CreateGlobalServiceModal({
   open,
   onClose,
@@ -64,28 +71,14 @@ export function CreateGlobalServiceModal({
   serviceDeployment,
 }: {
   open: boolean
-  onClose: () => void
-  refetch: () => void
+  onClose: Nullable<() => void>
+  refetch: Nullable<() => void>
   serviceDeployment: ServiceDeploymentsRowFragment
 }) {
   const theme = useTheme()
   const [name, setName] = useState('')
   const [tags, setTags] = useState<Record<string, string>>({})
-  const [tagName, setTagName] = useState('')
-  const [tagValue, setTagValue] = useState('')
-  const nameValueTags = useMemo(
-    () =>
-      sortBy(
-        Object.entries(tags).map(([name, value]) => ({
-          name,
-          value,
-        })),
-        ['name']
-      ),
-    [tags]
-  )
-  const tagNameRef = useRef<HTMLInputElement>()
-  const tagValueRef = useRef<HTMLInputElement>()
+  const nameValueTags = useMemo(() => tagsToNameValue(tags), [tags])
 
   const [mutation, { loading: mutationLoading, error: mutationError }] =
     useCreateGlobalServiceMutation({
@@ -93,11 +86,12 @@ export function CreateGlobalServiceModal({
         serviceId: serviceDeployment.id,
         attributes: {
           name,
+          tags: nameValueTags,
         },
       },
       onCompleted: () => {
         refetch?.()
-        onClose()
+        onClose?.()
       },
     })
 
@@ -115,17 +109,6 @@ export function CreateGlobalServiceModal({
   )
 
   const initialLoading = false
-
-  const addTag = () => {
-    console.log('tagName', tagName, validateTagName(tagName))
-    console.log('tagValue', tagValue, validateTagValue(tagValue))
-    if (validateTagName(tagName) && validateTagValue(tagValue)) {
-      setTags({ ...tags, [tagName]: tagValue })
-      setTagName('')
-      setTagValue('')
-      tagNameRef.current?.focus?.()
-    }
-  }
 
   return (
     <ModalAlt
@@ -150,7 +133,7 @@ export function CreateGlobalServiceModal({
             type="button"
             onClick={(e) => {
               e.preventDefault()
-              onClose()
+              onClose?.()
             }}
           >
             Cancel
@@ -192,91 +175,126 @@ export function CreateGlobalServiceModal({
               />
             </FormField>
             <FormField label="Cluster tags">
-              <div
-                css={{
-                  display: 'flex',
-                  gap: theme.spacing.small,
-                  alignItems: 'center',
-                  '&& > *': { flexShrink: 0, flexGrow: 1 },
+              <TagSelection
+                {...{
+                  setTags,
+                  tags,
+                  theme,
                 }}
-              >
-                <Input
-                  placeholder="Tag name"
-                  inputProps={{ ref: tagNameRef, maxLength: 63 }}
-                  value={tagName}
-                  onChange={(e) => {
-                    setTagName(
-                      e.currentTarget.value
-                        .trim()
-                        .replace(/[^a-z0-9A-Z-_./]/, '')
-                    )
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      tagValueRef.current?.focus?.()
-                    }
-                  }}
-                />
-                <Input
-                  placeholder="Value"
-                  inputProps={{ ref: tagValueRef, maxLength: 63 }}
-                  value={tagValue}
-                  onChange={(e) => {
-                    setTagValue(
-                      e.currentTarget.value
-                        .trim()
-                        .replace(/[^a-z0-9A-Z-_.]/, '')
-                    )
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      addTag()
-                    }
-                  }}
-                />
-                <IconFrame
-                  css={{ '&&': { flexGrow: 0 } }}
-                  type="secondary"
-                  tooltip="Add tag"
-                  size="medium"
-                  clickable
-                  icon={<PlusIcon />}
-                  onClick={() => {
-                    addTag()
-                  }}
-                />
-              </div>
-              {!isEmpty(nameValueTags) && (
-                <ChipList
-                  maxVisible={Infinity}
-                  chips={nameValueTags.map(({ name, value }) => (
-                    <Chip
-                      key={name}
-                      size="small"
-                      clickable
-                      onClick={() => {
-                        setTags((prev) => {
-                          const next = { ...prev }
-
-                          delete next[name]
-
-                          return next
-                        })
-                      }}
-                      closeButton
-                    >
-                      {name}: {value}
-                    </Chip>
-                  ))}
-                />
-              )}
+              />
             </FormField>
           </>
         )}
       </div>
       {mutationError && <GqlError error={mutationError} />}
     </ModalAlt>
+  )
+}
+
+function TagSelection({
+  tags,
+  setTags,
+}: {
+  setTags
+  tags: Record<string, string>
+}) {
+  const theme = useTheme()
+  const [tagName, setTagName] = useState('')
+  const [tagValue, setTagValue] = useState('')
+  const tagNameRef = useRef<HTMLInputElement>()
+  const tagValueRef = useRef<HTMLInputElement>()
+  const sortedTags = useMemo(
+    () => sortBy(tagsToNameValue(tags), ['name']),
+    [tags]
+  )
+
+  const addTag = () => {
+    if (validateTagName(tagName) && validateTagValue(tagValue)) {
+      setTags({ ...tags, [tagName]: tagValue })
+      setTagName('')
+      setTagValue('')
+      tagNameRef.current?.focus?.()
+    }
+  }
+
+  return (
+    <>
+      <div
+        css={{
+          display: 'flex',
+          gap: theme.spacing.small,
+          alignItems: 'center',
+          '&& > *': { flexShrink: 0, flexGrow: 1 },
+        }}
+      >
+        <Input
+          placeholder="Tag name"
+          inputProps={{ ref: tagNameRef, maxLength: 63 }}
+          value={tagName}
+          onChange={(e) => {
+            setTagName(
+              e.currentTarget.value.trim().replace(/[^a-z0-9A-Z-_./]/, '')
+            )
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              tagValueRef.current?.focus?.()
+            }
+          }}
+        />
+        <Input
+          placeholder="Tag value"
+          inputProps={{ ref: tagValueRef, maxLength: 63 }}
+          value={tagValue}
+          onChange={(e) => {
+            setTagValue(
+              e.currentTarget.value.trim().replace(/[^a-z0-9A-Z-_.]/, '')
+            )
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              addTag()
+            }
+          }}
+        />
+        <IconFrame
+          css={{ '&&': { flexGrow: 0 } }}
+          type="secondary"
+          tooltip="Add tag"
+          size="medium"
+          clickable
+          icon={<PlusIcon />}
+          onClick={() => {
+            addTag()
+          }}
+        />
+      </div>
+      {!isEmpty(sortedTags) && (
+        <ChipList
+          maxVisible={Infinity}
+          chips={sortedTags.map(({ name, value }) => (
+            <Chip
+              key={name}
+              size="small"
+              clickable
+              onClick={() => {
+                setTags((prev) => {
+                  const next = { ...prev }
+
+                  delete next[name]
+
+                  return next
+                })
+              }}
+              closeButton
+            >
+              {name}: {value}
+            </Chip>
+          ))}
+        />
+      )}
+    </>
   )
 }
 

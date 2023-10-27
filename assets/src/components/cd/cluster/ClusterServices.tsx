@@ -15,6 +15,7 @@ import {
   useServiceDeploymentsQuery,
 } from '../../../generated/graphql'
 import {
+  ColActions,
   ColCluster,
   ColErrors,
   ColLastActivity,
@@ -22,7 +23,6 @@ import {
   ColRepo,
   ColServiceDeployment,
   ColStatus,
-  getColActions,
 } from '../services/ServicesColumns'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import { Edge } from '../../../utils/graphql'
@@ -31,6 +31,17 @@ import { ServicesFilters } from '../services/ServicesFilters'
 import { DeployService } from '../services/deployModal/DeployService'
 
 const POLL_INTERVAL = 10 * 1000
+
+const columns = [
+  ColServiceDeployment,
+  ColCluster,
+  ColRepo,
+  ColRef,
+  ColLastActivity,
+  ColStatus,
+  ColErrors,
+  ColActions,
+]
 
 export default function ClusterServices() {
   const theme = useTheme()
@@ -43,21 +54,6 @@ export default function ClusterServices() {
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-
-  const columns = useMemo(
-    () => [
-      ColServiceDeployment,
-      ColCluster,
-      ColRepo,
-      ColRef,
-      ColLastActivity,
-      ColStatus,
-      ColErrors,
-      getColActions({ refetch }),
-    ],
-    [refetch]
-  )
-
   const [tableFilters, setTableFilters] = useState<
     Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   >({
@@ -70,8 +66,9 @@ export default function ClusterServices() {
         state: {
           ...tableFilters,
         },
+        meta: { refetch },
       }),
-      [tableFilters]
+      [refetch, tableFilters]
     )
 
   if (error) {

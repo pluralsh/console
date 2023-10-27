@@ -31,6 +31,7 @@ import { GqlError } from 'components/utils/Alert'
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import {
+  ColActions,
   ColCluster,
   ColErrors,
   ColLastActivity,
@@ -38,7 +39,6 @@ import {
   ColRepo,
   ColServiceDeployment,
   ColStatus,
-  getColActions,
 } from './ServicesColumns'
 import { DeployService } from './deployModal/DeployService'
 import { ServicesFilters } from './ServicesFilters'
@@ -57,6 +57,17 @@ const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
   },
   'Unknown'
 )
+
+const columns = [
+  ColServiceDeployment,
+  ColCluster,
+  ColRepo,
+  ColRef,
+  ColLastActivity,
+  ColStatus,
+  ColErrors,
+  ColActions,
+]
 
 export function AuthMethodChip({
   authMethod,
@@ -88,20 +99,6 @@ export default function Services() {
   })
   const data = currentData || previousData
 
-  const columns = useMemo(
-    () => [
-      ColServiceDeployment,
-      ColCluster,
-      ColRepo,
-      ColRef,
-      ColLastActivity,
-      ColStatus,
-      ColErrors,
-      getColActions({ refetch }),
-    ],
-    [refetch]
-  )
-
   useSetBreadcrumbs(
     useMemo(
       () => [
@@ -131,8 +128,11 @@ export default function Services() {
         state: {
           ...tableFilters,
         },
+        meta: {
+          refetch,
+        },
       }),
-      [tableFilters]
+      [refetch, tableFilters]
     )
 
   if (error) {

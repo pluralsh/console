@@ -13,15 +13,15 @@ export function DeleteService({
   onClose,
 }: {
   serviceDeployment: ServiceDeploymentsRowFragment
-  refetch: () => void
+  refetch: Nullable<() => void>
   open: boolean
-  onClose: () => void
+  onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
   const [mutation, { loading, error }] = useDeleteServiceDeploymentMutation({
     variables: { id: serviceDeployment.id },
     onCompleted: () => {
-      onClose()
+      onClose?.()
       refetch?.()
     },
   })

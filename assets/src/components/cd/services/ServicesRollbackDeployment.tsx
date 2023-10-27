@@ -33,7 +33,7 @@ export function ServicesRollbackDeployment({
   refetch,
 }: {
   serviceDeployment: ServiceDeploymentsRowFragment
-  refetch: () => void
+  refetch: (() => void) | undefined
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const closeModal = useCallback(() => setIsOpen(false), [])
@@ -77,8 +77,8 @@ export function ModalForm({
 }: {
   open: boolean
   serviceDeployment: ServiceDeploymentsRowFragment
-  onClose: () => void
-  refetch: () => void
+  onClose: Nullable<() => void>
+  refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
   const [revisionId, setRevisionId] = useState('')
@@ -94,7 +94,7 @@ export function ModalForm({
       },
       onCompleted: () => {
         refetch?.()
-        onClose()
+        onClose?.()
       },
     })
 
@@ -137,7 +137,7 @@ export function ModalForm({
           secondary
           onClick={(e) => {
             e.preventDefault()
-            onClose()
+            onClose?.()
           }}
         >
           Cancel
