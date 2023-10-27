@@ -21,6 +21,7 @@ import {
 
 import {
   ServiceDeploymentsRowFragment,
+  useClusterProvidersQuery,
   useCreateGlobalServiceMutation,
 } from 'generated/graphql'
 
@@ -30,7 +31,10 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import isEmpty from 'lodash/isEmpty'
 
+import { isNonNullable } from 'utils/isNonNullable'
+
 import ModalAlt, { StepBody, StepH } from '../ModalAlt'
+import { ClusterProviderSelect } from '../utils/ProviderSelect'
 
 const ChipList = styled(ListBoxItemChipList)(({ theme }) => ({
   marginTop: theme.spacing.small,
@@ -78,6 +82,7 @@ export function CreateGlobalServiceModal({
   const theme = useTheme()
   const [name, setName] = useState('')
   const [tags, setTags] = useState<Record<string, string>>({})
+  const [clusterProviderId, setClusterProviderId] = useState<Nullable<string>>()
   const nameValueTags = useMemo(() => tagsToNameValue(tags), [tags])
 
   const [mutation, { loading: mutationLoading, error: mutationError }] =
@@ -95,7 +100,7 @@ export function CreateGlobalServiceModal({
       },
     })
 
-  const allowCreate = false
+  const allowCreate = name && clusterProviderId && serviceDeployment.id
 
   const onSubmit = useCallback(
     (e: FormEvent) => {
@@ -107,6 +112,12 @@ export function CreateGlobalServiceModal({
     },
     [allowCreate, mutation]
   )
+
+  const { data } = useClusterProvidersQuery()
+  const clusterProviders =
+    data?.clusterProviders?.edges
+      ?.map((edge) => edge?.node)
+      .filter(isNonNullable) ?? []
 
   const initialLoading = false
 
@@ -181,6 +192,20 @@ export function CreateGlobalServiceModal({
                   tags,
                   theme,
                 }}
+              />
+            </FormField>
+            <FormField
+              label="Cluster provider"
+              required
+            >
+              <ClusterProviderSelect
+                aria-label="Cluster provider"
+                label="Select cluster provider"
+                selectedKey={clusterProviderId}
+                onSelectionChange={(key) => {
+                  setClusterProviderId(key)
+                }}
+                clusterProviders={clusterProviders}
               />
             </FormField>
           </>
