@@ -1,5 +1,5 @@
 import { Modal } from '@pluralsh/design-system'
-import { ComponentProps } from 'react'
+import { ComponentProps, ReactNode } from 'react'
 import styled from 'styled-components'
 
 const ModalAltSC = styled(Modal)(({ theme, actions }) => ({
@@ -12,8 +12,16 @@ const ModalAltSC = styled(Modal)(({ theme, actions }) => ({
       paddingBottom: theme.spacing.large,
     },
   },
+  '.headerArea': {
+    display: 'flex',
+    gap: theme.spacing.large,
+  },
   '.header': {
     ...theme.partials.text.subtitle1,
+    flexShrink: 1,
+  },
+  '.headerContent': {
+    flexGrow: 1,
   },
   '.actions': {
     display: 'flex',
@@ -41,6 +49,7 @@ const ModalAltSC = styled(Modal)(({ theme, actions }) => ({
 
 export default function ModalAlt({
   header,
+  headerContent,
   size = 'large',
   children,
   actions,
@@ -50,6 +59,7 @@ export default function ModalAlt({
 }: ComponentProps<typeof ModalAltSC> & {
   asForm?: boolean
   formProps?: ComponentProps<'form'>
+  headerContent?: ReactNode
 }) {
   return (
     <ModalAltSC
@@ -61,7 +71,12 @@ export default function ModalAlt({
       actions={actions ? <div className="actions">{actions}</div> : undefined}
       {...props}
     >
-      {header && <h2 className="header">{header}</h2>}
+      {header && (
+        <div className="headerArea">
+          <h2 className="header">{header}</h2>
+          <div className="headerContent">{headerContent}</div>
+        </div>
+      )}
       {children}
     </ModalAltSC>
   )
