@@ -30,6 +30,7 @@ import { DeleteService } from './DeleteService'
 import { ServiceErrors } from './ServiceErrors'
 import { ServiceDeprecations } from './ServiceDeprecations'
 import { CreateGlobalService } from './CreateGlobalService'
+import { DeleteGlobalService } from './DeleteGlobalService'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -77,12 +78,19 @@ export const ColRepo = columnHelper.accessor(
     enableSorting: true,
     meta: { truncate: true },
     cell: ({ getValue }) => (
-      <ColWithIcon
-        truncateLeft
-        icon={<GitHubLogoIcon />}
+      <Tooltip
+        placement="top-start"
+        label={getValue()}
       >
-        {getValue()}
-      </ColWithIcon>
+        <div>
+          <ColWithIcon
+            truncateLeft
+            icon={<GitHubLogoIcon />}
+          >
+            <span>{getValue()}</span>
+          </ColWithIcon>
+        </div>
+      </Tooltip>
     ),
   }
 )
@@ -177,82 +185,112 @@ export const ColErrors = columnHelper.accessor(
 
 enum MenuItemKey {
   MakeGlobal = 'makeGlobal',
+  DeleteGlobal = 'deleteGlobal',
   Permissions = 'permissions',
   Delete = 'delete',
 }
 
-export const getColActions = ({ refetch }: { refetch: () => void }) =>
-  columnHelper.accessor(({ node }) => node?.id, {
-    id: 'actions',
-    header: '',
-    cell: function ActionColumn({
-      row: {
-        original: { node },
-      },
-    }) {
-      const theme = useTheme()
-      const [menuKey, setMenuKey] = useState<Nullable<string>>('')
-      const serviceDeployment = node
+export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
+  id: 'actions',
+  header: '',
+  cell: function ActionColumn({
+    table,
+    row: {
+      original: { node },
+    },
+  }) {
+    const theme = useTheme()
+    const [menuKey, setMenuKey] = useState<Nullable<string>>('')
+    const serviceDeployment = node
+    const { refetch } = table.options.meta as { refetch?: () => void }
+    const globalService = node?.globalService
 
-      return (
-        serviceDeployment && (
-          <div
-            onClick={(e) => e.stopPropagation()}
-            css={{
-              display: 'flex',
-              gap: theme.spacing.large,
-              alignItems: 'center',
-            }}
-          >
-            <ServicesRollbackDeployment
-              refetch={refetch}
-              serviceDeployment={serviceDeployment}
-            />
-            <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
+    return (
+      serviceDeployment && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          css={{
+            width: '100%',
+            display: 'flex',
+            gap: theme.spacing.large,
+            alignItems: 'center',
+            justifyContent: 'end',
+          }}
+        >
+          {globalService && (
+            <Tooltip
+              placement="top"
+              label={`Global service: ${globalService?.name}`}
+            >
+              <GlobeIcon color={theme.colors['icon-light']} />
+            </Tooltip>
+          )}
+          <ServicesRollbackDeployment
+            refetch={refetch}
+            serviceDeployment={serviceDeployment}
+          />
+          <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
+            {!node?.globalService?.id && (
               <ListBoxItem
                 key={MenuItemKey.MakeGlobal}
                 leftContent={<GlobeIcon />}
                 label="Make global"
               />
+            )}
+            <ListBoxItem
+              key={MenuItemKey.Permissions}
+              leftContent={<PeopleIcon />}
+              label="Permissions"
+            />
+            {node?.globalService?.id && (
               <ListBoxItem
-                key={MenuItemKey.Permissions}
-                leftContent={<PeopleIcon />}
-                label="Permissions"
+                key={MenuItemKey.DeleteGlobal}
+                leftContent={<GlobeIcon color={theme.colors['icon-danger']} />}
+                label="Delete global service"
               />
-              <ListBoxItem
-                key={MenuItemKey.Delete}
-                leftContent={
-                  <TrashCanIcon color={theme.colors['icon-danger']} />
-                }
-                label="Delete service"
-              />
-            </MoreMenu>
-            {/* Modals */}
-            <DeleteService
-              serviceDeployment={serviceDeployment}
-              open={menuKey === MenuItemKey.Delete}
+            )}
+            <ListBoxItem
+              key={MenuItemKey.Delete}
+              leftContent={<TrashCanIcon color={theme.colors['icon-danger']} />}
+              label="Delete service"
+            />
+          </MoreMenu>
+          {/* Modals */}
+          <DeleteService
+            serviceDeployment={serviceDeployment}
+            open={menuKey === MenuItemKey.Delete}
+            onClose={() => {
+              setMenuKey('')
+            }}
+            refetch={refetch}
+          />
+          <ServicePermissionsModal
+            serviceDeployment={serviceDeployment}
+            open={menuKey === MenuItemKey.Permissions}
+            onClose={() => {
+              setMenuKey('')
+            }}
+          />
+          <CreateGlobalService
+            serviceDeployment={serviceDeployment}
+            open={menuKey === MenuItemKey.MakeGlobal}
+            onClose={() => {
+              setMenuKey('')
+            }}
+            refetch={refetch}
+          />
+          {serviceDeployment.globalService && (
+            <DeleteGlobalService
+              globalService={serviceDeployment.globalService}
+              open={menuKey === MenuItemKey.DeleteGlobal}
               onClose={() => {
                 setMenuKey('')
               }}
               refetch={refetch}
             />
-            <ServicePermissionsModal
-              serviceDeployment={serviceDeployment}
-              open={menuKey === MenuItemKey.Permissions}
-              onClose={() => {
-                setMenuKey('')
-              }}
-            />
-            <CreateGlobalService
-              serviceDeployment={serviceDeployment}
-              open={menuKey === MenuItemKey.MakeGlobal}
-              onClose={() => {
-                setMenuKey('')
-              }}
-              refetch={refetch}
-            />
-          </div>
-        )
+          )}
+        </div>
       )
-    },
-  })
+    )
+  },
+})

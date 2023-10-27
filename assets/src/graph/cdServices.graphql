@@ -44,6 +44,10 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
       blocking
     }
   }
+  globalService {
+    id
+    name
+  }
 }
 
 fragment ServiceDeploymentDetails on ServiceDeployment {

@@ -1,10 +1,4 @@
-import {
-  Button,
-  FormField,
-  Input,
-  ListBoxItem,
-  Select,
-} from '@pluralsh/design-system'
+import { Button, FormField, Input } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { produce } from 'immer'
 import { merge } from 'lodash'
@@ -24,12 +18,11 @@ import {
   useState,
 } from 'react'
 import { GqlError } from 'components/utils/Alert'
-
-import ProviderIcon, { getProviderName } from 'components/utils/Provider'
-
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { getProviderName } from 'components/utils/Provider'
 
 import ModalAlt from '../ModalAlt'
+import { ClusterProviderSelect } from '../utils/ProviderSelect'
 
 import { AwsSettings, GcpSettings, PROVIDER_KEYS } from './ProviderSettings'
 
@@ -48,6 +41,12 @@ const updateSettings = produce(
     return original
   }
 )
+
+const providers = PROVIDER_KEYS.map((key) => ({
+  id: key,
+  cloud: key,
+  name: getProviderName(key) || '',
+}))
 
 export function CreateProviderModal({
   open,
@@ -203,32 +202,12 @@ export function CreateProviderModal({
           />
         </FormField>
         <FormField label="Cloud provider">
-          <Select
+          <ClusterProviderSelect
             label="Select cloud provider"
-            leftContent={
-              selectedProvider && (
-                <ProviderIcon
-                  provider={selectedProvider}
-                  width={16}
-                />
-              )
-            }
+            clusterProviders={providers}
             selectedKey={selectedProvider}
             onSelectionChange={(key) => setSelectedProvider(key as any)}
-          >
-            {PROVIDER_KEYS.map((provider) => (
-              <ListBoxItem
-                key={provider}
-                label={getProviderName(provider)}
-                leftContent={
-                  <ProviderIcon
-                    provider={provider}
-                    width={16}
-                  />
-                }
-              />
-            ))}
-          </Select>
+          />
         </FormField>
         {settings}
       </div>

@@ -2,47 +2,47 @@ import { useTheme } from 'styled-components'
 
 import { Confirm } from '../../utils/Confirm'
 import {
-  ServiceDeploymentsRowFragment,
-  useDeleteServiceDeploymentMutation,
+  GlobalService,
+  useDeleteGlobalServiceMutation,
 } from '../../../generated/graphql'
 
-export function DeleteService({
-  serviceDeployment,
+export function DeleteGlobalService({
+  globalService,
   refetch,
   open,
   onClose,
 }: {
-  serviceDeployment: ServiceDeploymentsRowFragment
+  globalService: Pick<GlobalService, 'id' | 'name'>
   refetch: Nullable<() => void>
   open: boolean
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const [mutation, { loading, error }] = useDeleteServiceDeploymentMutation({
-    variables: { id: serviceDeployment.id },
+  const [mutation, { loading, error }] = useDeleteGlobalServiceMutation({
+    variables: { id: globalService.id },
     onCompleted: () => {
-      onClose?.()
       refetch?.()
+      onClose?.()
     },
   })
 
   return (
     <Confirm
-      open={open}
       close={onClose}
       destructive
       label="Delete"
       loading={loading}
       error={error}
+      open={open}
       submit={() => mutation()}
-      title="Delete service deployment"
+      title="Delete global service"
       text={
         <>
-          Are you sure you want to delete{' '}
+          Are you sure you want to delete the{' '}
           <span css={{ color: theme.colors['text-danger'] }}>
-            “{serviceDeployment.name}”{' '}
-          </span>
-          deployment?
+            “{globalService.name}”
+          </span>{' '}
+          global service?
         </>
       }
     />

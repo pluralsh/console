@@ -9,7 +9,7 @@ import { GqlError } from './Alert'
 
 type ConfirmProps = {
   open: boolean
-  close: (...args: any[]) => unknown
+  close: Nullable<(...args: any[]) => unknown>
   title?: ReactNode
   error?: ApolloError | undefined
   text?: ReactNode
