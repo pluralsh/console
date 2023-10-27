@@ -21,6 +21,7 @@ defmodule Console.Deployments.Policies do
   def can?(%Cluster{id: id}, %Service{cluster_id: id}, :read), do: :pass
 
   def can?(_, %Cluster{self: true}, :delete), do: {:error, "cannot delete the management cluster"}
+  def can?(_, %Service{protect: true}, :delete), do: {:error, "this service has deletion protection enabled"}
   def can?(_, %Service{name: "deploy-operator"}, :delete),
     do: {:error, "cannot delete the deploy operator"}
   def can?(user, %Service{} = service, :delete) do

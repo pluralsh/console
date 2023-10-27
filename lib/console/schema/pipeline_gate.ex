@@ -2,7 +2,7 @@ defmodule Console.Schema.PipelineGate do
   use Piazza.Ecto.Schema
   alias Console.Schema.{PipelineEdge, User, Cluster}
 
-  defenum Type, approval: 0, window: 1
+  defenum Type, approval: 0, window: 1, job: 2
   defenum State, pending: 0, open: 1, closed: 2
 
   schema "pipeline_gates" do

@@ -45,6 +45,7 @@ defmodule Console.Schema.Service do
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
     field :deleted_at,       :utc_datetime_usec
+    field :protect,          :boolean
 
     embeds_one :git, Git, on_replace: :update
     embeds_one :sync_config, SyncConfig, on_replace: :update do
@@ -136,7 +137,7 @@ defmodule Console.Schema.Service do
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 
-  @valid ~w(name docs_path component_status status version sha cluster_id repository_id namespace owner_id message)a
+  @valid ~w(name protect docs_path component_status status version sha cluster_id repository_id namespace owner_id message)a
 
   def changeset(model, attrs \\ %{}) do
     model

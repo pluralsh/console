@@ -337,6 +337,12 @@ defmodule Console.Deployments.ServicesTest do
       svc = insert(:service, name: "deploy-operator", write_bindings: [%{user_id: user.id}])
       {:error, _} = Services.delete_service(svc.id, user)
     end
+
+    test "it cannot delete protected services" do
+      user = insert(:user)
+      svc = insert(:service, protect: true, write_bindings: [%{user_id: user.id}])
+      {:error, _} = Services.delete_service(svc.id, user)
+    end
   end
 
   describe "#merge_service/3" do

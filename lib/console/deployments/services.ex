@@ -68,6 +68,7 @@ defmodule Console.Deployments.Services do
     repo = Git.deploy_repo!()
     create_service(%{
       repository_id: repo.id,
+      protect: true,
       name: "deploy-operator",
       namespace: "plrl-deploy-operator",
       git: %{ref: "main", folder: "charts/deployment-operator"},

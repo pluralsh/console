@@ -39,6 +39,7 @@ defmodule Console.Schema.GitRepository do
     |> add_https_path()
     |> add_path_format()
     |> normalize_pk()
+    |> required()
   end
 
   def status_changeset(model, attrs \\ %{}) do
@@ -67,6 +68,13 @@ defmodule Console.Schema.GitRepository do
     case get_change(cs, :private_key) do
       key when is_binary(key) ->
         put_change(cs, :private_key, Utils.normalize_pk(key))
+      _ -> cs
+    end
+  end
+
+  defp required(cs) do
+    case get_field(cs, :auth_method) do
+      :ssh -> validate_required(cs, [:private_key])
       _ -> cs
     end
   end

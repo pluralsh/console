@@ -88,6 +88,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :status,           non_null(:service_deployment_status), description: "A summary status enum for the health of this service"
     field :version,          non_null(:string), description: "semver of this service"
     field :git,              non_null(:git_ref), description: "description on where in git the service's manifests should be fetched"
+    field :protect,          :boolean, description: "if true, deletion of this service is not allowed"
     field :sha,              :string, description: "latest git sha we pulled from"
     field :tarball,          :string, resolve: &Deployments.tarball/3, description: "https url to fetch the latest tarball of kubernetes manifests"
     field :component_status, :string, description: "a n / m representation of the number of healthy components of this service"

@@ -467,6 +467,7 @@ enum GateState {
 enum GateType {
   APPROVAL
   WINDOW
+  JOB
 }
 
 "the top level input object for creating\/deleting pipelines"
@@ -792,6 +793,9 @@ type ServiceDeployment {
 
   "description on where in git the service's manifests should be fetched"
   git: GitRef!
+
+  "if true, deletion of this service is not allowed"
+  protect: Boolean
 
   "latest git sha we pulled from"
   sha: String

@@ -972,6 +972,7 @@ export enum GateState {
 
 export enum GateType {
   Approval = 'APPROVAL',
+  Job = 'JOB',
   Window = 'WINDOW'
 }
 
@@ -3256,6 +3257,8 @@ export type ServiceDeployment = {
   namespace: Scalars['String']['output'];
   /** whether this service is controlled by a global service */
   owner?: Maybe<GlobalService>;
+  /** if true, deletion of this service is not allowed */
+  protect?: Maybe<Scalars['Boolean']['output']>;
   /** read policy for this service */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the git repo of this service */
