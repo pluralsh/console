@@ -369,11 +369,14 @@ defmodule Console.Deployments.ClustersTest do
     test "users can delete clusters if they have write permissions" do
       user = insert(:user)
       cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      svc = insert(:service, cluster: cluster)
 
       {:ok, deleted} = Clusters.delete_cluster(cluster.id, user)
 
       assert deleted.id == cluster.id
       assert deleted.deleted_at
+
+      assert refetch(svc).deleted_at
 
       assert_receive {:event, %PubSub.ClusterDeleted{item: ^deleted}}
     end

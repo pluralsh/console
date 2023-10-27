@@ -42,6 +42,24 @@ defmodule Console.Deployments.ServicesTest do
       assert_receive {:event, %PubSub.ServiceCreated{item: ^service}}
     end
 
+    test "you cannot create a service in a deleting cluster" do
+      cluster = insert(:cluster, deleted_at: Timex.now())
+      user = admin_user()
+      git = insert(:git_repository)
+
+      {:error, _} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+    end
+
     test "it respects rbac" do
       user = insert(:user)
       cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])

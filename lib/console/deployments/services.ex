@@ -39,6 +39,11 @@ defmodule Console.Deployments.Services do
     |> add_operation(:check, fn _ ->
       Clusters.get_cluster(cluster_id)
       |> allow(user, :write)
+      |> case do
+        {:ok, %Cluster{deleted_at: nil} = cluster} -> {:ok, cluster}
+        {:ok, _} -> {:error, "cannot create a service in a deleting cluster"}
+        err -> err
+      end
     end)
     |> add_operation(:base, fn _ ->
       %Service{cluster_id: cluster_id}

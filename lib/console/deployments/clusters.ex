@@ -351,10 +351,31 @@ defmodule Console.Deployments.Clusters do
   """
   @spec delete_cluster(binary, User.t) :: cluster_resp
   def delete_cluster(id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:cluster, fn _ ->
+      get_cluster!(id)
+      |> Ecto.Changeset.change(%{deleted_at: Timex.now()})
+      |> allow(user, :delete)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:svcs, fn _ ->
+      Service.for_cluster(id)
+      |> Service.drainable()
+      |> Repo.update_all(set: [deleted_at: Timex.now()])
+      |> ok()
+    end)
+    |> execute(extract: :cluster)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Deletes a cluster (cascading to all cluster services) without attempting a drain.
+  """
+  @spec detach_cluster(binary, User.t) :: cluster_resp
+  def detach_cluster(id, %User{} = user) do
     get_cluster!(id)
-    |> Ecto.Changeset.change(%{deleted_at: Timex.now()})
     |> allow(user, :delete)
-    |> when_ok(:update)
+    |> when_ok(:delete)
     |> notify(:delete, user)
   end
 
