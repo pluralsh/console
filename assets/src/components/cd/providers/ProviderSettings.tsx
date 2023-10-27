@@ -1,4 +1,4 @@
-import { FormField } from '@pluralsh/design-system'
+import { FormField, Input } from '@pluralsh/design-system'
 import { Provider } from 'generated/graphql-plural'
 
 import { InputRevealer } from './InputRevealer'
@@ -31,7 +31,7 @@ export function AwsSettings({
         />
       </FormField>
       <FormField label="Secret access key">
-        <InputRevealer
+        <Input
           multiline
           minRows={3}
           maxRows={6}

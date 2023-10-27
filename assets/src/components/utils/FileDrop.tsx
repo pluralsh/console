@@ -84,7 +84,7 @@ const FileDropSC = styled.div<{
         : theme.colors['border-input'],
       borderStyle: 'dashed',
       borderRadius: theme.borderRadiuses.medium,
-      padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+      padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
       backgroundColor: isDragAccept ? theme.colors['fill-one'] : 'transparent',
 
       '.textArea': {

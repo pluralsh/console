@@ -11,13 +11,22 @@ import {
   useCreateGitRepositoryMutation,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
-import { GqlError } from 'components/utils/Alert'
+import {
+  Dispatch,
+  FormEvent,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 
+import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import ModalAlt, { StepH } from '../ModalAlt'
 import { PrepareGitStep } from '../PrepareGitStep'
+import SshKeyUpload from '../utils/SshKeyUpload'
 
 export function ImportGit({ refetch }: { refetch: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -164,77 +173,22 @@ export function ImportGitModal({
             titleContent={<GitHubLogoIcon />}
           />
         </div>
-        {requireAuth &&
-          (authMethod === AuthMethod.Ssh ? (
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                rowGap: theme.spacing.medium,
-                '> *': {
-                  flexGrow: 1,
-                },
-              }}
-            >
-              <FormField
-                label="Private key"
-                required
-              >
-                <Input
-                  multiline
-                  minRows={2}
-                  maxRows={4}
-                  inputProps={{ type: 'password' }}
-                  value={privateKey}
-                  onChange={(e) => {
-                    setPrivateKey(e.currentTarget.value)
-                  }}
-                  placeholder="Private key"
-                />
-              </FormField>
-              <FormField label="Passphrase">
-                <Input
-                  inputProps={{ type: 'password' }}
-                  value={passphrase}
-                  onChange={(e) => {
-                    setPassphrase(e.currentTarget.value)
-                  }}
-                  placeholder="Passphrase"
-                />
-              </FormField>
-            </div>
-          ) : (
-            <div
-              css={{
-                display: 'flex',
-                columnGap: theme.spacing.small,
-                '> *': {
-                  flexGrow: 1,
-                },
-              }}
-            >
-              <FormField label="User name">
-                <Input
-                  value={username}
-                  onChange={(e) => {
-                    setUsername(e.currentTarget.value)
-                  }}
-                  placeholder="User name"
-                />
-              </FormField>
-              <FormField label="Password">
-                <Input
-                  inputProps={{ type: 'password' }}
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.currentTarget.value)
-                  }}
-                  placeholder="Password"
-                />
-              </FormField>
-            </div>
-          ))}
-
+        {requireAuth && (
+          <GitAuthFields
+            {...{
+              authMethod,
+              theme,
+              privateKey,
+              setPrivateKey,
+              passphrase,
+              setPassphrase,
+              username,
+              setUsername,
+              password,
+              setPassword,
+            }}
+          />
+        )}
         {error && (
           <GqlError
             header="Problem importing repository"
@@ -243,5 +197,87 @@ export function ImportGitModal({
         )}
       </>
     </ModalAlt>
+  )
+}
+
+export function GitAuthFields({
+  authMethod,
+  privateKey,
+  setPrivateKey,
+  passphrase,
+  setPassphrase,
+  username,
+  setUsername,
+  password,
+  setPassword,
+}: {
+  authMethod: AuthMethod
+  privateKey: Nullable<string>
+  setPrivateKey: Dispatch<SetStateAction<Nullable<string>>>
+  passphrase: Nullable<string>
+  setPassphrase: Dispatch<SetStateAction<Nullable<string>>>
+  username: Nullable<string>
+  setUsername: Dispatch<SetStateAction<Nullable<string>>>
+  password: Nullable<string>
+  setPassword: Dispatch<SetStateAction<Nullable<string>>>
+}) {
+  const theme = useTheme()
+
+  return authMethod === AuthMethod.Ssh ? (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        rowGap: theme.spacing.medium,
+        '> *': {
+          flexGrow: 1,
+        },
+      }}
+    >
+      <SshKeyUpload
+        privateKey={privateKey}
+        setPrivateKey={setPrivateKey}
+      />
+      <FormField label="Passphrase">
+        <Input
+          inputProps={{ type: 'password' }}
+          value={passphrase}
+          onChange={(e) => {
+            setPassphrase(e.currentTarget.value)
+          }}
+          placeholder="Passphrase"
+        />
+      </FormField>
+    </div>
+  ) : (
+    <div
+      css={{
+        display: 'flex',
+        columnGap: theme.spacing.small,
+        '> *': {
+          flexGrow: 1,
+        },
+      }}
+    >
+      <FormField label="User name">
+        <Input
+          value={username}
+          onChange={(e) => {
+            setUsername(e.currentTarget.value)
+          }}
+          placeholder="User name"
+        />
+      </FormField>
+      <FormField label="Password">
+        <Input
+          inputProps={{ type: 'password' }}
+          value={password}
+          onChange={(e) => {
+            setPassword(e.currentTarget.value)
+          }}
+          placeholder="Password"
+        />
+      </FormField>
+    </div>
   )
 }

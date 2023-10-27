@@ -19,7 +19,10 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import ModalAlt from '../ModalAlt'
 
-import { getAuthMethodFromGitUrl } from './GitRepositoriesImportGit'
+import {
+  GitAuthFields,
+  getAuthMethodFromGitUrl,
+} from './GitRepositoriesImportGit'
 
 export function UpdateGitRepository({
   repo,
@@ -97,7 +100,7 @@ export function ModalForm({
     (requireAuth
       ? authMethod === AuthMethod.Ssh
         ? !privateKey
-        : !username || !password
+        : !username && !password
       : false)
   const onSubmit = useCallback(
     (e: FormEvent) => {
@@ -143,6 +146,13 @@ export function ModalForm({
           >
             Cancel
           </Button>
+          <Switch
+            checked={requireAuth}
+            onChange={(val) => setRequireAuth(val)}
+            css={{ flexGrow: 1 }}
+          >
+            Modify authorization info
+          </Switch>
         </>
       }
     >
@@ -164,82 +174,22 @@ export function ModalForm({
             titleContent={<GitHubLogoIcon />}
           />
         </FormField>
-        <Switch
-          checked={requireAuth}
-          onChange={(val) => setRequireAuth(val)}
-        >
-          Modify authorization info
-        </Switch>
       </div>
       {requireAuth && (
-        <div
-          css={{
-            display: 'flex',
-            columnGap: theme.spacing.small,
-            '> *': {
-              flexGrow: 1,
-            },
+        <GitAuthFields
+          {...{
+            authMethod,
+            theme,
+            privateKey,
+            setPrivateKey,
+            passphrase,
+            setPassphrase,
+            username,
+            setUsername,
+            password,
+            setPassword,
           }}
-        >
-          {authMethod === AuthMethod.Ssh ? (
-            <>
-              <FormField
-                label="Private key"
-                required
-              >
-                <Input
-                  inputProps={{ type: 'password' }}
-                  value={privateKey}
-                  onChange={(e) => {
-                    setPrivateKey(e.currentTarget.value)
-                  }}
-                  placeholder="Private key"
-                />
-              </FormField>
-              <FormField
-                label="Passphrase"
-                required
-              >
-                <Input
-                  inputProps={{ type: 'password' }}
-                  value={passphrase}
-                  onChange={(e) => {
-                    setPassphrase(e.currentTarget.value)
-                  }}
-                  placeholder="Passphrase"
-                />
-              </FormField>
-            </>
-          ) : (
-            <>
-              <FormField
-                label="User name"
-                required
-              >
-                <Input
-                  value={username}
-                  onChange={(e) => {
-                    setUsername(e.currentTarget.value)
-                  }}
-                  placeholder="User name"
-                />
-              </FormField>
-              <FormField
-                label="Password"
-                required
-              >
-                <Input
-                  inputProps={{ type: 'password' }}
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.currentTarget.value)
-                  }}
-                  placeholder="Password"
-                />
-              </FormField>
-            </>
-          )}
-        </div>
+        />
       )}
       {error && (
         <GqlError

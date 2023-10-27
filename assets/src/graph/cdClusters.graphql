@@ -197,7 +197,7 @@ query ClusterNamespaces($clusterId: ID) {
   }
 }
 
-fragment ClusterPolicyBinding on PolicyBinding {
+fragment PolicyBinding on PolicyBinding {
   id
   user {
     id
@@ -212,10 +212,10 @@ fragment ClusterPolicyBinding on PolicyBinding {
 
 fragment ClusterBindings on Cluster {
   readBindings {
-    ...ClusterPolicyBinding
+    ...PolicyBinding
   }
   writeBindings {
-    ...ClusterPolicyBinding
+    ...PolicyBinding
   }
 }
 

@@ -1,5 +1,12 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { GitHubLogoIcon, Tooltip } from '@pluralsh/design-system'
+import {
+  GitHubLogoIcon,
+  GlobeIcon,
+  ListBoxItem,
+  PeopleIcon,
+  Tooltip,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { ServiceDeploymentsRowFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
@@ -8,7 +15,13 @@ import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { getProviderIconURL } from 'components/utils/Provider'
 import { toDateOrUndef } from 'utils/date'
 
+import { useState } from 'react'
+
+import { MoreMenu } from 'components/utils/MoreMenu'
+
 import { isSha1 } from '../../../utils/sha'
+
+import { ServicePermissionsModal } from './ServicePermissions'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
@@ -16,6 +29,7 @@ import DecoratedName from './DecoratedName'
 import { DeleteService } from './DeleteService'
 import { ServiceErrors } from './ServiceErrors'
 import { ServiceDeprecations } from './ServiceDeprecations'
+import { CreateGlobalService } from './CreateGlobalService'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -161,21 +175,29 @@ export const ColErrors = columnHelper.accessor(
   }
 )
 
+enum MenuItemKey {
+  MakeGlobal = 'makeGlobal',
+  Permissions = 'permissions',
+  Delete = 'delete',
+}
+
 export const getColActions = ({ refetch }: { refetch: () => void }) =>
   columnHelper.accessor(({ node }) => node?.id, {
     id: 'actions',
     header: '',
-    cell: ({
+    cell: function ActionColumn({
       row: {
         original: { node },
       },
-    }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+    }) {
       const theme = useTheme()
+      const [menuKey, setMenuKey] = useState<Nullable<string>>('')
+      const serviceDeployment = node
 
       return (
-        node && (
+        serviceDeployment && (
           <div
+            onClick={(e) => e.stopPropagation()}
             css={{
               display: 'flex',
               gap: theme.spacing.large,
@@ -184,11 +206,50 @@ export const getColActions = ({ refetch }: { refetch: () => void }) =>
           >
             <ServicesRollbackDeployment
               refetch={refetch}
-              serviceDeployment={node}
+              serviceDeployment={serviceDeployment}
             />
+            <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
+              <ListBoxItem
+                key={MenuItemKey.MakeGlobal}
+                leftContent={<GlobeIcon />}
+                label="Make global"
+              />
+              <ListBoxItem
+                key={MenuItemKey.Permissions}
+                leftContent={<PeopleIcon />}
+                label="Permissions"
+              />
+              <ListBoxItem
+                key={MenuItemKey.Delete}
+                leftContent={
+                  <TrashCanIcon color={theme.colors['icon-danger']} />
+                }
+                label="Delete service"
+              />
+            </MoreMenu>
+            {/* Modals */}
             <DeleteService
+              serviceDeployment={serviceDeployment}
+              open={menuKey === MenuItemKey.Delete}
+              onClose={() => {
+                setMenuKey('')
+              }}
               refetch={refetch}
-              serviceDeployment={node}
+            />
+            <ServicePermissionsModal
+              serviceDeployment={serviceDeployment}
+              open={menuKey === MenuItemKey.Permissions}
+              onClose={() => {
+                setMenuKey('')
+              }}
+            />
+            <CreateGlobalService
+              serviceDeployment={serviceDeployment}
+              open={menuKey === MenuItemKey.MakeGlobal}
+              onClose={() => {
+                setMenuKey('')
+              }}
+              refetch={refetch}
             />
           </div>
         )
