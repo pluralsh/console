@@ -13,7 +13,6 @@ import {
 } from 'react'
 import {
   FormField,
-  Input,
   SubTab,
   TabList,
   TabListStateProps,
@@ -38,6 +37,7 @@ import { ProviderToDisplayName, ProviderToLogo } from './helpers'
 import { Provider, ProviderState } from './types'
 import { GCP } from './provider/GCP'
 import { Azure } from './provider/Azure'
+import { NameVersionHandle } from './NameVersionHandle'
 
 interface ProviderSelector {
   onProviderChange: Dispatch<Provider>
@@ -195,31 +195,8 @@ export function CreateClusterContent({
               gap: theme.spacing.large,
             }}
           >
-            <div
-              css={{
-                display: 'flex',
-                gap: theme.spacing.medium,
-              }}
-            >
-              <Input
-                width="fit-content"
-                placeholder="workload-cluster-0"
-                value={name}
-                onChange={({ target: { value } }) => setName(value)}
-                prefix={<div>Name*</div>}
-              />
-              <Input
-                placeholder="v1.24.11"
-                value={version}
-                onChange={({ target: { value } }) => setVersion(value)}
-                prefix={<div>Version*</div>}
-              />
-            </div>
-            <Input
-              placeholder="custom-handle"
-              value={handle}
-              onChange={({ target: { value } }) => setHandle(value)}
-              prefix={<div>Handle</div>}
+            <NameVersionHandle
+              {...{ name, setName, version, setVersion, handle, setHandle }}
             />
             <FormField
               label="Cluster provider"

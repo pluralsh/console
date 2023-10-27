@@ -238,5 +238,6 @@ mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
 mutation CreateCluster($attributes: ClusterAttributes!) {
   createCluster(attributes: $attributes) {
     ...Cluster
+    deployToken
   }
 }
