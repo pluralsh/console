@@ -400,6 +400,8 @@ export type Cluster = {
   __typename?: 'Cluster';
   /** all api deprecations for all services in this cluster */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
+  /** a custom credential to use when provisioning this cluster */
+  credential?: Maybe<ProviderCredential>;
   /** current k8s version as told to us by the deployment operator */
   currentVersion?: Maybe<Scalars['String']['output']>;
   /** when this cluster was scheduled for deletion */
@@ -1710,10 +1712,17 @@ export type PluralSubscription = {
 export type Pod = {
   __typename?: 'Pod';
   events?: Maybe<Array<Maybe<Event>>>;
+  logs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   metadata: Metadata;
   raw: Scalars['String']['output'];
   spec: PodSpec;
   status: PodStatus;
+};
+
+
+export type PodLogsArgs = {
+  container: Scalars['String']['input'];
+  sinceSeconds: Scalars['Int']['input'];
 };
 
 export type PodCondition = {

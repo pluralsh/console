@@ -1241,6 +1241,9 @@ type Cluster {
   "the provider we use to create this cluster (null if BYOK)"
   provider: ClusterProvider
 
+  "a custom credential to use when provisioning this cluster"
+  credential: ProviderCredential
+
   "the service used to deploy the CAPI resources of this cluster"
   service: ServiceDeployment
 
@@ -2299,6 +2302,7 @@ type Pod {
   spec: PodSpec!
   metadata: Metadata!
   raw: String!
+  logs(container: String!, sinceSeconds: Int!): [String]
   events: [Event]
 }
 

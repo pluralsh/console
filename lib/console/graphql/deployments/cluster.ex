@@ -164,6 +164,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :node_pools,       list_of(:node_pool), resolve: dataloader(Deployments), description: "list of node pool specs managed by CAPI"
     field :provider,         :cluster_provider, resolve: dataloader(Deployments), description: "the provider we use to create this cluster (null if BYOK)"
+    field :credential,       :provider_credential, resolve: dataloader(Deployments), description: "a custom credential to use when provisioning this cluster"
     field :service,          :service_deployment, resolve: dataloader(Deployments), description: "the service used to deploy the CAPI resources of this cluster"
     field :tags,             list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter clusters"
     field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments), description: "all api deprecations for all services in this cluster"
