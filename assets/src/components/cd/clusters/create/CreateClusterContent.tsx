@@ -14,8 +14,6 @@ import {
 import {
   FormField,
   Input,
-  ListBoxItem,
-  Select,
   SubTab,
   TabList,
   TabListStateProps,
@@ -24,13 +22,16 @@ import {
 import { useTheme } from 'styled-components'
 import { IconProps } from 'honorable'
 
+import { isNonNullable } from 'utils/isNonNullable'
+
 import {
   CloudSettingsAttributes,
   ClusterAttributes,
-  ClusterProvider,
   useClusterProvidersQuery,
 } from '../../../../generated/graphql'
 import LoadingIndicator from '../../../utils/LoadingIndicator'
+
+import { ClusterProviderSelect } from '../../utils/ProviderSelect'
 
 import { AWS } from './provider/AWS'
 import { ProviderToDisplayName, ProviderToLogo } from './helpers'
@@ -134,10 +135,11 @@ export function CreateClusterContent({
 
   const { data: clusterProvidersQuery, loading } = useClusterProvidersQuery()
 
-  const clusterProviders: Array<ClusterProvider> = useMemo(
+  const clusterProviders = useMemo(
     () =>
       clusterProvidersQuery?.clusterProviders?.edges
-        ?.map((e) => e!.node as ClusterProvider)
+        ?.map((e) => e!.node)
+        .filter(isNonNullable)
         .filter((p) => p?.cloud === provider) ?? [],
     [clusterProvidersQuery?.clusterProviders?.edges, provider]
   )
@@ -224,19 +226,14 @@ export function CreateClusterContent({
               hint="Configured cluster provider that should be used to provision the cluster."
               required
             >
-              <Select
+              <ClusterProviderSelect
                 aria-label="cluster provider"
                 selectedKey={clusterProvider}
-                onSelectionChange={setClusterProvider}
-              >
-                {clusterProviders.map((p) => (
-                  <ListBoxItem
-                    key={p.id}
-                    label={p.name}
-                    textValue={p.name}
-                  />
-                ))}
-              </Select>
+                onSelectionChange={(key) => {
+                  setClusterProvider(key)
+                }}
+                clusterProviders={clusterProviders}
+              />
             </FormField>
             {providerEl}
           </div>
