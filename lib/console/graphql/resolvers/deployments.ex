@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.Cluster
   import Console.Deployments.Policies, only: [allow: 3]
-  alias Console.Deployments.{Clusters, Services, Git, Settings, Global, Pipelines}
+  alias Console.Deployments.{Clusters, Services, Git, Settings, Global, Pipelines, AddOns}
   alias Console.Schema.{
     Cluster,
     ClusterNodePool,
@@ -82,6 +82,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def list_nodes(cluster, _, _), do: Clusters.nodes(cluster)
 
   def list_node_metrics(cluster, _, _), do: Clusters.node_metrics(cluster)
+
+  def list_addons(_, _), do: AddOns.addons()
 
   def service_statuses(args, %{context: %{current_user: user}}) do
     Service.for_user(user)
@@ -315,6 +317,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     end
   end
   def editable(_, _, _), do: {:ok, false}
+
+  def install_addon(%{cluster_id: cluster_id} = args, %{context: %{current_user: user}}),
+    do: AddOns.install(args, cluster_id, user)
 
   def rbac(%{rbac: rbac} = args, %{context: %{current_user: user}}) do
     {fun, id} = rbac_args(args)

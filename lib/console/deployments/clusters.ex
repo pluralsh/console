@@ -79,7 +79,7 @@ defmodule Console.Deployments.Clusters do
   Fetches the nodes for a cluster, this query is heavily cached for performance
   """
   @spec nodes(Cluster.t) :: {:ok, term} | Console.error
-  @decorate cacheable(cache: @local_adapter, key: {:nodes, id}, ttl: @node_ttl)
+  @decorate cacheable(cache: @local_adapter, key: {:nodes, id}, opts: [ttl: @node_ttl])
   def nodes(%Cluster{id: id} = cluster) do
     with %Kazan.Server{} = server <- control_plane(cluster),
          _ <- Kube.Utils.save_kubeconfig(server),
@@ -94,7 +94,7 @@ defmodule Console.Deployments.Clusters do
   Fetches the node metrics for a cluster, this query is heavily cached for performance
   """
   @spec node_metrics(Cluster.t) :: {:ok, term} | Console.error
-  @decorate cacheable(cache: @local_adapter, key: {:node_metrics, id}, ttl: @node_ttl)
+  @decorate cacheable(cache: @local_adapter, key: {:node_metrics, id}, opts: [ttl: @node_ttl])
   def node_metrics(%Cluster{id: id} = cluster) do
     with %Kazan.Server{} = server <- control_plane(cluster),
          _ <- Kube.Utils.save_kubeconfig(server),

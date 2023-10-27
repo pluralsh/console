@@ -24,6 +24,8 @@ defmodule Console.Deployments.Git.Agent do
 
   def docs(pid, %Service{} = svc), do: GenServer.call(pid, {:docs, svc}, 30_000)
 
+  def addons(pid), do: GenServer.call(pid, :addons, 30_000)
+
   def start(%GitRepository{} = repo) do
     GenServer.start(__MODULE__, repo, name: via(repo))
   end
@@ -44,6 +46,13 @@ defmodule Console.Deployments.Git.Agent do
     :timer.send_interval(@poll, :move)
     send self(), :clone
     {:ok, %State{git: repo, cache: cache}}
+  end
+
+  def handle_call(:addons, _, %State{cache: cache} = state) do
+    case Cache.fetch(cache, "main", "addons", &String.ends_with?(&1, "addon.yaml")) do
+      {:ok, %Cache.Line{file: f}, cache} -> {:reply, File.open(f), %{state | cache: cache}}
+      err -> {:reply, err, state}
+    end
   end
 
   def handle_call({:docs, %Service{git: %{ref: ref}} = svc}, _, %State{cache: cache} = state) do

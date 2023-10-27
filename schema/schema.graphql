@@ -160,6 +160,9 @@ type RootQueryType {
   "fetches an individual cluster provider"
   clusterProvider(id: ID!): ClusterProvider
 
+  "list all addons currently resident in the artifacts repo"
+  clusterAddOns: [ClusterAddOn]
+
   serviceDeployments(
     after: String
 
@@ -304,6 +307,8 @@ type RootMutationType {
   createProviderCredential(attributes: ProviderCredentialAttributes!, name: String!): ProviderCredential
 
   deleteProviderCredential(id: ID!): ProviderCredential
+
+  installAddOn(name: String!, configuration: [ConfigAttributes], clusterId: ID!, global: GlobalServiceAttributes): ServiceDeployment
 
   createServiceDeployment(
     clusterId: ID
@@ -1362,6 +1367,22 @@ type ClusterCondition {
   message: String
   reason: String
   severity: String
+}
+
+"A common kubernetes cluster add-on like cert-manager, istio, etc"
+type ClusterAddOn {
+  name: String
+  version: String
+  icon: String
+  global: Boolean
+  configuration: [AddOnConfiguration]
+}
+
+"Input configuration for an add-on you can install"
+type AddOnConfiguration {
+  name: String
+  documentation: String
+  type: String
 }
 
 type Tag {

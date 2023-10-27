@@ -91,6 +91,14 @@ export type Account = {
   subscription?: Maybe<PluralSubscription>;
 };
 
+/** Input configuration for an add-on you can install */
+export type AddOnConfiguration = {
+  __typename?: 'AddOnConfiguration';
+  documentation?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<Scalars['String']['output']>;
+};
+
 /** a representation of a kubernetes api deprecation */
 export type ApiDeprecation = {
   __typename?: 'ApiDeprecation';
@@ -461,6 +469,16 @@ export type ClusterRevisionsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** A common kubernetes cluster add-on like cert-manager, istio, etc */
+export type ClusterAddOn = {
+  __typename?: 'ClusterAddOn';
+  configuration?: Maybe<Array<Maybe<AddOnConfiguration>>>;
+  global?: Maybe<Scalars['Boolean']['output']>;
+  icon?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  version?: Maybe<Scalars['String']['output']>;
 };
 
 export type ClusterAttributes = {
@@ -2103,6 +2121,7 @@ export type RootMutationType = {
   executeRunbook?: Maybe<RunbookActionResponse>;
   /** forces a pipeline gate to be in open state */
   forceGate?: Maybe<PipelineGate>;
+  installAddOn?: Maybe<ServiceDeployment>;
   installRecipe?: Maybe<Build>;
   installStack?: Maybe<Build>;
   loginLink?: Maybe<User>;
@@ -2350,6 +2369,14 @@ export type RootMutationTypeForceGateArgs = {
 };
 
 
+export type RootMutationTypeInstallAddOnArgs = {
+  clusterId: Scalars['ID']['input'];
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  global?: InputMaybe<GlobalServiceAttributes>;
+  name: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeInstallRecipeArgs = {
   context: Scalars['Map']['input'];
   id: Scalars['ID']['input'];
@@ -2529,6 +2556,8 @@ export type RootQueryType = {
   certificate?: Maybe<Certificate>;
   /** fetches an individual cluster */
   cluster?: Maybe<Cluster>;
+  /** list all addons currently resident in the artifacts repo */
+  clusterAddOns?: Maybe<Array<Maybe<ClusterAddOn>>>;
   clusterInfo?: Maybe<ClusterInfo>;
   /** fetches an individual cluster provider */
   clusterProvider?: Maybe<ClusterProvider>;

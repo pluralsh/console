@@ -260,6 +260,22 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :severity,             :string
   end
 
+  @desc "A common kubernetes cluster add-on like cert-manager, istio, etc"
+  object :cluster_add_on do
+    field :name,          :string
+    field :version,       :string
+    field :icon,          :string
+    field :global,        :boolean
+    field :configuration, list_of(:add_on_configuration)
+  end
+
+  @desc "Input configuration for an add-on you can install"
+  object :add_on_configuration do
+    field :name,          :string
+    field :documentation, :string
+    field :type,          :string
+  end
+
   object :tag do
     field :name,  non_null(:string)
     field :value, non_null(:string)
@@ -330,6 +346,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
       resolve &Deployments.resolve_provider/2
     end
+
+    @desc "list all addons currently resident in the artifacts repo"
+    field :cluster_add_ons, list_of(:cluster_add_on) do
+      middleware Authenticated
+
+      resolve &Deployments.list_addons/2
+    end
   end
 
   object :cluster_mutations do
@@ -390,6 +413,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_provider_credential/2
+    end
+
+    field :install_add_on, :service_deployment do
+      middleware Authenticated
+      arg :name,          non_null(:string)
+      arg :configuration, list_of(:config_attributes)
+      arg :cluster_id,    non_null(:id)
+      arg :global,        :global_service_attributes
+
+      resolve &Deployments.list_addons/2
     end
   end
 end

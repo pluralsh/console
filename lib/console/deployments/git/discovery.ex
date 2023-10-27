@@ -8,18 +8,25 @@ defmodule Console.Deployments.Git.Discovery do
 
   def fetch(%Service{} = svc) do
     %{repository: repo} = Console.Repo.preload(svc, [:repository])
-    case start(repo) do
-      {:ok, pid} -> Agent.fetch(pid, svc)
-      {:error, {:already_started, pid}} -> Agent.fetch(pid, svc)
-      err -> err
-    end
+    with {:ok, pid} <- find(repo),
+      do: Agent.fetch(pid, svc)
   end
 
   def docs(%Service{} = svc) do
     %{repository: repo} = Console.Repo.preload(svc, [:repository])
+    with {:ok, pid} <- find(repo),
+      do: Agent.docs(pid, svc)
+  end
+
+  def addons(%GitRepository{} = repo) do
+    with {:ok, pid} <- find(repo),
+      do: Agent.addons(pid)
+  end
+
+  def find(%GitRepository{} = repo) do
     case start(repo) do
-      {:ok, pid} -> Agent.docs(pid, svc)
-      {:error, {:already_started, pid}} -> Agent.docs(pid, svc)
+      {:ok, pid} -> {:ok, pid}
+      {:error, {:already_started, pid}} -> {:ok, pid}
       err -> err
     end
   end

@@ -3,7 +3,7 @@ defmodule Console.Deployments.Services do
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation}
-  alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Checker}
+  alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Checker, AddOns}
   require Logger
 
   @type service_resp :: {:ok, Service.t} | Console.error
@@ -240,28 +240,13 @@ defmodule Console.Deployments.Services do
   """
   @spec docs(Service.t) :: [%{path: binary, content: binary}]
   def docs(%Service{} = svc) do
-    case Git.Discovery.docs(svc) do
-      {:ok, f} -> docs_inner(f)
+    with {:ok, f} <- Git.Discovery.docs(svc),
+         {:ok, res} <- AddOns.tar_stream(f) do
+      {:ok, Enum.map(res, fn {name, content} -> %{path: name, content: content} end)}
+    else
       err ->
         Logger.info "failed to fetch docs tarball: #{inspect(err)}"
         {:error, "could not fetch docs"}
-    end
-  end
-
-  defp docs_inner(tar_file) do
-    try do
-      with {:ok, tmp} <- Briefly.create(),
-          _ <- IO.binstream(tar_file, 1024) |> Enum.into(File.stream!(tmp)),
-          {:ok, res} <- :erl_tar.extract(tmp, [:compressed, :memory]) do
-        Enum.map(res, fn {name, content} -> %{path: to_string(name), content: to_string(content)} end)
-        |> ok()
-      else
-        err ->
-          Logger.error "could not fetch and untar docs: #{inspect(err)}"
-          {:error, "could not fetch docs"}
-      end
-    after
-      File.close(tar_file)
     end
   end
 

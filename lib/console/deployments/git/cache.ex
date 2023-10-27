@@ -34,9 +34,9 @@ defmodule Console.Deployments.Git.Cache do
     %__MODULE__{git: git, dir: dir}
   end
 
-  def fetch(%__MODULE__{} = cache, ref, path) do
+  def fetch(%__MODULE__{} = cache, ref, path, filter \\ fn _ -> true end) do
     with {:ok, sha} <- commit(cache, ref),
-         {:ok, line} <- find_commit(cache, sha, path),
+         {:ok, line} <- find_commit(cache, sha, path, filter),
       do: {:ok, line, put_in(cache.cache[{sha, path}], line)}
   end
 
@@ -46,10 +46,10 @@ defmodule Console.Deployments.Git.Cache do
     %{c | heads: heads(git), cache: Map.new(keep)}
   end
 
-  defp find_commit(%__MODULE__{git: g, cache: cache} = c, sha, path) do
+  defp find_commit(%__MODULE__{git: g, cache: cache} = c, sha, path, filter) do
     case Map.get(cache, {sha, path}) do
       %Line{} = l -> {:ok, Line.touch(l)}
-      _ -> new_line(c, g, sha, path)
+      _ -> new_line(c, g, sha, path, filter)
     end
   end
 
@@ -60,10 +60,10 @@ defmodule Console.Deployments.Git.Cache do
     end
   end
 
-  defp new_line(cache, repo, sha, path) do
+  defp new_line(cache, repo, sha, path, filter) do
     with {:ok, _} <- git(repo, "checkout", [sha]),
          {:ok, msg} <- msg(repo),
-         {:ok, f} <- tarball(cache, sha, path),
+         {:ok, f} <- tarball(cache, sha, path, filter),
       do: {:ok, Line.new(f, sha, msg)}
   end
 
@@ -74,19 +74,24 @@ defmodule Console.Deployments.Git.Cache do
     end
   end
 
-  defp tarball(%__MODULE__{git: git, dir: dir}, sha, path) do
+  defp tarball(%__MODULE__{git: git, dir: dir}, sha, path, filter) do
     p = cache_path(dir, sha, path)
     case File.exists?(p) do
       true -> {:ok, p}
-      false -> tarball(git, path, p)
+      false -> tarball(git, path, p, filter)
     end
   end
 
-  defp tarball(%GitRepository{dir: dir}, path, tgz_path) do
+  defp tarball(%GitRepository{dir: dir}, path, tgz_path, filter) do
     subpath = Path.join(dir, path)
 
+    files =
+      Console.ls_r(subpath)
+      |> Enum.filter(filter)
+      |> Enum.map(&tar_path(&1, subpath))
+
     to_charlist(tgz_path)
-    |> :erl_tar.create(Enum.map(Console.ls_r(subpath), &tar_path(&1, subpath)), [:compressed])
+    |> :erl_tar.create(files, [:compressed])
     |> case do
       :ok -> {:ok, tgz_path}
       error -> error
