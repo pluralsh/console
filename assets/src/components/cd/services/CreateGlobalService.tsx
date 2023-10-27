@@ -37,6 +37,26 @@ const ChipList = styled(ListBoxItemChipList)(({ theme }) => ({
   justifyContent: 'start',
 }))
 
+export const validateTagName = (name) => {
+  const splits = name.split('/')
+
+  if (splits.length > 2) {
+    return false
+  }
+  const key = splits.length === 1 ? splits[0] : splits[1]
+  const prefix = splits.length === 1 ? splits[1] : null
+
+  return (
+    validateTagValue(key) &&
+    key.length >= 1 &&
+    (!prefix || (prefix.length <= 253 && !prefix.match(/[/s]/)))
+  )
+}
+
+export const validateTagValue = (value) =>
+  value === '' ||
+  (!!value.match(/^[A-Za-z0-9]([-_.]*[A-Za-z0-9])*$/) && value.length <= 63)
+
 export function CreateGlobalServiceModal({
   open,
   onClose,
@@ -97,7 +117,9 @@ export function CreateGlobalServiceModal({
   const initialLoading = false
 
   const addTag = () => {
-    if (tagName) {
+    console.log('tagName', tagName, validateTagName(tagName))
+    console.log('tagValue', tagValue, validateTagValue(tagValue))
+    if (validateTagName(tagName) && validateTagValue(tagValue)) {
       setTags({ ...tags, [tagName]: tagValue })
       setTagName('')
       setTagValue('')
@@ -179,8 +201,8 @@ export function CreateGlobalServiceModal({
                 }}
               >
                 <Input
-                  placeholder="Name"
-                  inputProps={{ ref: tagNameRef }}
+                  placeholder="Tag name"
+                  inputProps={{ ref: tagNameRef, maxLength: 63 }}
                   value={tagName}
                   onChange={(e) => {
                     setTagName(
@@ -197,7 +219,7 @@ export function CreateGlobalServiceModal({
                 />
                 <Input
                   placeholder="Value"
-                  inputProps={{ ref: tagValueRef }}
+                  inputProps={{ ref: tagValueRef, maxLength: 63 }}
                   value={tagValue}
                   onChange={(e) => {
                     setTagValue(
