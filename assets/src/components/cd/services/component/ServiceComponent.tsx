@@ -7,7 +7,7 @@ import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
 import {
   COMPONENT_PARAM_ID,
   SERVICE_COMPONENT_PATH_MATCHER_ABS,
-  SERVICE_PARAM_CLUSTER,
+  SERVICE_PARAM_CLUSTER_ID,
   SERVICE_PARAM_ID,
   getServiceComponentPath,
 } from 'routes/cdRoutesConsts'
@@ -20,7 +20,7 @@ import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
 
 export const getServiceComponentBreadcrumbs = ({
   serviceId,
-  clusterName,
+  clusterId,
   componentName,
   componentId,
   ...props
@@ -28,11 +28,15 @@ export const getServiceComponentBreadcrumbs = ({
   componentName: string | null | undefined
   componentId: string | null | undefined
 }) => [
-  ...getServiceComponentsBreadcrumbs({ clusterName, serviceId, ...props }),
+  ...getServiceComponentsBreadcrumbs({
+    clusterId,
+    serviceId,
+    ...props,
+  }),
   {
     label: componentName || componentId || '',
     url: getServiceComponentPath({
-      clusterName,
+      clusterId,
       serviceId,
       componentId,
     }),
@@ -40,14 +44,14 @@ export const getServiceComponentBreadcrumbs = ({
 ]
 
 function BreadcrumbWrapper({
-  clusterName,
+  clusterId,
   serviceId,
   serviceName,
   componentId,
   componentName,
   children,
 }: {
-  clusterName: string
+  clusterId: string
   serviceId: string
   serviceName: string | undefined
   componentId: string | undefined
@@ -59,13 +63,13 @@ function BreadcrumbWrapper({
     useMemo(
       () =>
         getServiceComponentBreadcrumbs({
-          clusterName,
+          clusterId,
           serviceId,
           serviceName,
           componentId,
           componentName,
         }),
-      [clusterName, serviceId, serviceName, componentId, componentName]
+      [clusterId, serviceId, serviceName, componentId, componentName]
     )
   )
 
@@ -76,7 +80,7 @@ function BreadcrumbWrapper({
 export default function ServiceComponent() {
   const params = useParams()
   const componentId = params[COMPONENT_PARAM_ID]
-  const clusterName = params[SERVICE_PARAM_CLUSTER]!
+  const clusterId = params[SERVICE_PARAM_CLUSTER_ID]!
   const serviceId = params[SERVICE_PARAM_ID]!
 
   const { data, error } = useServiceDeploymentComponentsQuery({
@@ -94,7 +98,7 @@ export default function ServiceComponent() {
   const componentName = component?.name
 
   const breadcrumbProps = {
-    clusterName,
+    clusterId,
     serviceId,
     serviceName,
     componentId,
@@ -113,7 +117,7 @@ export default function ServiceComponent() {
       <ComponentDetails
         component={component}
         serviceComponents={components}
-        clusterName={clusterName}
+        clusterId={clusterId}
         serviceId={serviceId}
         pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
       />

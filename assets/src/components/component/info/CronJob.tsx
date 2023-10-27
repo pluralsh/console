@@ -108,7 +108,7 @@ export function getJobPath({
     if (job && clusterName) {
       jobPath = getServiceComponentPath({
         serviceId,
-        clusterName,
+        clusterId: clusterName,
         componentId: job.id,
       })
     }

@@ -18,7 +18,7 @@ import {
 import {
   CD_BASE_PATH,
   SERVICES_PATH,
-  SERVICE_PARAM_CLUSTER,
+  SERVICE_PARAM_CLUSTER_ID,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { createMapperWithFallback } from 'utils/mapping'
@@ -69,7 +69,7 @@ export function AuthMethodChip({
 export default function Services() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
+  const [clusterId, setClusterId] = useState<string>('')
   const [searchString, setSearchString] = useState()
   const debouncedSearchString = useDebounce(searchString, 100)
 
@@ -80,7 +80,7 @@ export default function Services() {
     previousData,
   } = useServiceDeploymentsQuery({
     variables: {
-      ...(clusterName ? { cluster: clusterName } : {}),
+      ...(clusterId ? { clusterId } : {}),
       q: debouncedSearchString,
     },
     pollInterval: POLL_INTERVAL,
@@ -108,11 +108,10 @@ export default function Services() {
         ...CD_BASE_CRUMBS,
         {
           label: 'services',
-          ...(clusterName ? { url: `/${CD_BASE_PATH}/${SERVICES_PATH}` } : {}),
+          url: `/${CD_BASE_PATH}/${SERVICES_PATH}`,
         },
-        ...(clusterName ? [{ label: clusterName }] : []),
       ],
-      [clusterName]
+      []
     )
   )
 
@@ -157,6 +156,8 @@ export default function Services() {
         searchString={searchString}
         setSearchString={setSearchString}
         showClusterSelect
+        clusterId={clusterId}
+        setClusterId={setClusterId}
       />
       {!data ? (
         <LoadingIndicator />
@@ -175,7 +176,7 @@ export default function Services() {
             ) =>
               navigate(
                 getServiceDetailsPath({
-                  clusterName: original.node?.cluster?.name,
+                  clusterId: original.node?.cluster?.id,
                   serviceId: original.node?.id,
                 })
               )
@@ -185,7 +186,7 @@ export default function Services() {
         </FullHeightTableWrap>
       ) : (
         <div css={{ height: '100%' }}>
-          {searchString || clusterName ? (
+          {searchString || clusterId ? (
             <EmptyState message="No service deployments match your query." />
           ) : (
             <EmptyState message="Looks like you don't have any service deployments yet." />

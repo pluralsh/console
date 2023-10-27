@@ -62,13 +62,13 @@ export type ComponentDetailsContext = {
 export function ComponentDetails({
   component,
   pathMatchString,
-  clusterName,
+  clusterId,
   serviceId,
   serviceComponents,
 }: {
   component: DetailsComponent
   pathMatchString: string
-  clusterName?: string
+  clusterId?: string
   serviceId?: string
   serviceComponents?: ComponentDetailsContext['serviceComponents']
 }) {
@@ -117,19 +117,11 @@ export function ComponentDetails({
       data,
       loading,
       refetch,
-      clusterName,
+      clusterId,
       serviceId,
       serviceComponents,
     }),
-    [
-      clusterName,
-      component,
-      data,
-      loading,
-      refetch,
-      serviceComponents,
-      serviceId,
-    ]
+    [clusterId, component, data, loading, refetch, serviceComponents, serviceId]
   )
 
   if (error) {
