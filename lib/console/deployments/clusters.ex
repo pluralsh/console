@@ -13,7 +13,7 @@ defmodule Console.Deployments.Clusters do
 
   @cache_adapter Console.conf(:cache_adapter)
   @local_adapter Console.conf(:local_cache)
-  @node_ttl :timer.minutes(2)
+  @node_ttl :timer.minutes(30)
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
@@ -80,6 +80,7 @@ defmodule Console.Deployments.Clusters do
   """
   @spec nodes(Cluster.t) :: {:ok, term} | Console.error
   @decorate cacheable(cache: @local_adapter, key: {:nodes, id}, opts: [ttl: @node_ttl])
+  def nodes(%Cluster{id: id, pinged_at: nil, self: false}), do: {:ok, []}
   def nodes(%Cluster{id: id} = cluster) do
     with %Kazan.Server{} = server <- control_plane(cluster),
          _ <- Kube.Utils.save_kubeconfig(server),
@@ -95,6 +96,7 @@ defmodule Console.Deployments.Clusters do
   """
   @spec node_metrics(Cluster.t) :: {:ok, term} | Console.error
   @decorate cacheable(cache: @local_adapter, key: {:node_metrics, id}, opts: [ttl: @node_ttl])
+  def node_metrics(%Cluster{id: id, pinged_at: nil, self: false}), do: {:ok, []}
   def node_metrics(%Cluster{id: id} = cluster) do
     with %Kazan.Server{} = server <- control_plane(cluster),
          _ <- Kube.Utils.save_kubeconfig(server),
