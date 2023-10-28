@@ -3,6 +3,7 @@ import {
   Breadcrumb,
   CaretRightIcon,
   CheckRoundedIcon,
+  CheckedShieldIcon,
   ClusterIcon,
   EmptyState,
   GearTrainIcon,
@@ -102,6 +103,7 @@ export const columns = [
                 second={`handle: ${cluster?.handle}`}
               />
             </div>
+            {cluster?.protect && <CheckedShieldIcon size={12} />}
           </DecoratedName>
         </ColWithIcon>
       )

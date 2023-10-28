@@ -66,6 +66,7 @@ fragment ClustersRow on Cluster {
   currentVersion
   id
   self
+  protect
   name
   handle
   nodes {

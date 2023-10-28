@@ -13,6 +13,7 @@ fragment ServiceDeploymentRevision on Revision {
 fragment ServiceDeploymentsRow on ServiceDeployment {
   id
   name
+  protect
   message
   git {
     ref

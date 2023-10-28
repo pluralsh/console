@@ -1,5 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import {
+  CheckedShieldIcon,
   GitHubLogoIcon,
   GlobeIcon,
   ListBoxItem,
@@ -43,7 +44,12 @@ export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
 
     return (
       node && (
-        <DecoratedName deletedAt={node.deletedAt}>{node.name}</DecoratedName>
+        <DecoratedName
+          prefix={node.protect ? <CheckedShieldIcon size={14} /> : null}
+          deletedAt={node.deletedAt}
+        >
+          {node.name}
+        </DecoratedName>
       )
     )
   },

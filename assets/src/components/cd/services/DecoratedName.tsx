@@ -1,7 +1,15 @@
 import { Chip } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-export default function DecoratedName({ deletedAt, children }) {
+export default function DecoratedName({
+  prefix,
+  deletedAt,
+  children,
+}: {
+  prefix?: any
+  deletedAt?: any
+  children: any
+}) {
   const theme = useTheme()
 
   return (
@@ -12,6 +20,7 @@ export default function DecoratedName({ deletedAt, children }) {
         alignItems: 'center',
       }}
     >
+      {prefix}
       {children}
       {deletedAt && (
         <Chip
