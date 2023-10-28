@@ -437,6 +437,8 @@ export type Cluster = {
   nodes?: Maybe<Array<Maybe<Node>>>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** if true, this cluster cannot be deleted */
+  protect?: Maybe<Scalars['Boolean']['output']>;
   /** the provider we use to create this cluster (null if BYOK) */
   provider?: Maybe<ClusterProvider>;
   /** read policy for this cluster */
@@ -490,6 +492,7 @@ export type ClusterAttributes = {
   kubeconfig?: InputMaybe<KubeconfigAttributes>;
   name: Scalars['String']['input'];
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
+  protect?: InputMaybe<Scalars['Boolean']['input']>;
   providerId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
@@ -611,6 +614,7 @@ export type ClusterUpdateAttributes = {
   handle?: InputMaybe<Scalars['String']['input']>;
   kubeconfig?: InputMaybe<KubeconfigAttributes>;
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
+  protect?: InputMaybe<Scalars['Boolean']['input']>;
   /** if you optionally want to reconfigure the git repository for the cluster service */
   service?: InputMaybe<ClusterServiceAttributes>;
   version: Scalars['String']['input'];
@@ -3333,6 +3337,7 @@ export type ServiceDeploymentAttributes = {
   git: GitRefAttributes;
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  protect?: InputMaybe<Scalars['Boolean']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   repositoryId: Scalars['ID']['input'];
   syncConfig?: InputMaybe<SyncConfigAttributes>;
@@ -3402,6 +3407,7 @@ export type ServiceStatusCount = {
 export type ServiceUpdateAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   git?: InputMaybe<GitRefAttributes>;
+  protect?: InputMaybe<Scalars['Boolean']['input']>;
   version?: InputMaybe<Scalars['String']['input']>;
 };
 

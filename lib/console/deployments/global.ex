@@ -95,7 +95,7 @@ defmodule Console.Deployments.Global do
          {:diff, true} <- {:diff, diff?(source, dest, source_secrets, dest_secrets)} do
       Services.update_service(%{
         namespace: source.namespace,
-        configuration: Enum.map(source_secrets, fn {k, v} -> %{name: k, value: v} end),
+        configuration: Enum.map(Map.merge(dest_secrets, source_secrets), fn {k, v} -> %{name: k, value: v} end),
         repository_id: source.repository_id,
         git: clean(source.git),
       }, dest.id, user)
@@ -115,11 +115,15 @@ defmodule Console.Deployments.Global do
   end
 
   defp diff?(%Service{git: git_source} = s, %Service{git: git_dest} = d, source, dest) do
-    source != dest || clean(git_source) != clean(git_dest) || s.repository_id != d.repository_id || s.namespace != d.namespace
+    missing_source?(source, dest) || clean(git_source) != clean(git_dest) || s.repository_id != d.repository_id || s.namespace != d.namespace
   end
 
   defp matches_tags?([], _), do: true
   defp matches_tags?(tags, other_tags), do: Tag.as_map(tags) == Tag.as_map(other_tags)
+
+  defp missing_source?(source, dest) do
+    Enum.any?(source, fn {k, v} -> dest[k] != v end)
+  end
 
   defp clean(git), do: Map.take(git, [:ref, :folder])
 

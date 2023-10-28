@@ -184,7 +184,7 @@ defmodule Console.Schema.Cluster do
   end
 
   def uninstalled(query \\ __MODULE__) do
-    from(c in query, where: not is_nil(c.provider_id) and not c.installed and not c.self and is_nil(c.deleted_at))
+    from(c in query, where: is_nil(c.pinged_at) and not is_nil(c.provider_id) and not c.installed and not c.self and is_nil(c.deleted_at))
   end
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
@@ -210,7 +210,7 @@ defmodule Console.Schema.Cluster do
     |> foreign_key_constraint(:credential_id)
     |> unique_constraint(:handle)
     |> unique_constraint([:name, :provider_id, :credential_id])
-    |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(30)}" end)
+    |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(50)}" end)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> backfill_handle()

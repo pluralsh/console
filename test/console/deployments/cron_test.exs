@@ -152,6 +152,7 @@ defmodule Console.Deployments.CronTest do
       %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =
         insert(:cluster, provider: insert(:cluster_provider))
       insert(:cluster, installed: true)
+      insert(:cluster, pinged_at: Timex.now())
       kubeconf_secret = "#{n}-kubeconfig"
       expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
       expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->

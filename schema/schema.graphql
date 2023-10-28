@@ -714,6 +714,7 @@ input ServiceDeploymentAttributes {
   version: String
   docsPath: String
   syncConfig: SyncConfigAttributes
+  protect: Boolean
   repositoryId: ID!
   git: GitRefAttributes!
   configuration: [ConfigAttributes]
@@ -741,6 +742,7 @@ input DiffNormalizerAttributes {
 
 input ServiceUpdateAttributes {
   version: String
+  protect: Boolean
   git: GitRefAttributes
   configuration: [ConfigAttributes]
 }
@@ -1042,6 +1044,8 @@ input ClusterAttributes {
 
   version: String!
 
+  protect: Boolean
+
   kubeconfig: KubeconfigAttributes
 
   cloudSettings: CloudSettingsAttributes
@@ -1078,6 +1082,8 @@ input ClusterUpdateAttributes {
   service: ClusterServiceAttributes
 
   kubeconfig: KubeconfigAttributes
+
+  protect: Boolean
 
   nodePools: [NodePoolAttributes]
 }
@@ -1216,6 +1222,9 @@ type Cluster {
 
   "human readable name of this cluster, will also translate to cloud k8s name"
   name: String!
+
+  "if true, this cluster cannot be deleted"
+  protect: Boolean
 
   "desired k8s version for the cluster"
   version: String
