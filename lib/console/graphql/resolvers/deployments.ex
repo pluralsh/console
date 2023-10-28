@@ -221,6 +221,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def delete_cluster(%{id: id}, %{context: %{current_user: user}}),
     do: Clusters.delete_cluster(id, user)
 
+  def detach_cluster(%{id: id}, %{context: %{current_user: user}}),
+    do: Clusters.detach_cluster(id, user)
+
   def update_provider(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.update_provider(attrs, id, user)
 

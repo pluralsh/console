@@ -378,6 +378,14 @@ defmodule Console.GraphQl.Deployments.Cluster do
       safe_resolve &Deployments.delete_cluster/2
     end
 
+    @desc "soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects"
+    field :detach_cluster, :cluster do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.detach_cluster/2
+    end
+
     field :create_cluster_provider, :cluster_provider do
       middleware Authenticated
       arg :attributes, non_null(:cluster_provider_attributes)

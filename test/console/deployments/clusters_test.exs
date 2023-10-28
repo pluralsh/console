@@ -389,6 +389,29 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "#detach_cluster/2" do
+    test "users can detach clusters if they have write permissions" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      svc = insert(:service, cluster: cluster)
+
+      {:ok, deleted} = Clusters.detach_cluster(cluster.id, user)
+
+      assert deleted.id == cluster.id
+      refute refetch(deleted)
+      refute refetch(svc)
+
+      assert_receive {:event, %PubSub.ClusterDeleted{item: ^deleted}}
+    end
+
+    test "non-writers cannot detach" do
+      user = insert(:user)
+      cluster = insert(:cluster)
+
+      {:error, _} = Clusters.detach_cluster(cluster.id, user)
+    end
+  end
+
   describe "#create_provider/2" do
     test "it will create a new capi provider deployment" do
       user = insert(:user)

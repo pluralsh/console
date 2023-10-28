@@ -162,6 +162,22 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "detachCluster" do
+    test "it can mark a cluster for deletion" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"detachCluster" => deleted}}} = run_query("""
+        mutation Delete($id: ID!) {
+          detachCluster(id: $id) { id deletedAt }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert deleted["id"] == cluster.id
+      refute refetch(cluster)
+    end
+  end
+
   describe "createClusterProvider" do
     test "it can create a new provider" do
       user = insert(:user)
