@@ -28,7 +28,7 @@ import {
 
 import {
   CD_BASE_PATH,
-  SERVICE_PARAM_CLUSTER,
+  SERVICE_PARAM_CLUSTER_ID,
   SERVICE_PARAM_ID,
 } from 'routes/cdRoutesConsts'
 
@@ -358,7 +358,7 @@ const ColActions = ({
 export default function ServiceSecrets() {
   const theme = useTheme()
   const serviceId = useParams()[SERVICE_PARAM_ID]
-  const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
+  const clusterName = useParams()[SERVICE_PARAM_CLUSTER_ID]
   const outletContext = useOutletContext<{
     service: ServiceDeploymentDetailsFragment | null | undefined
   }>()
@@ -370,7 +370,11 @@ export default function ServiceSecrets() {
   const serviceName = outletContext?.service?.name
   const breadcrumbs: Breadcrumb[] = useMemo(
     () => [
-      ...getServiceDetailsBreadcrumbs({ clusterName, serviceId, serviceName }),
+      ...getServiceDetailsBreadcrumbs({
+        clusterId: clusterName,
+        serviceId,
+        serviceName,
+      }),
       {
         label: 'secrets',
         url: `${CD_BASE_PATH}/services/${serviceId}/secrets`,

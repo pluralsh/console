@@ -13,7 +13,7 @@ import {
 } from 'generated/graphql'
 
 import {
-  SERVICE_PARAM_CLUSTER,
+  SERVICE_PARAM_CLUSTER_ID,
   SERVICE_PARAM_ID,
   getServiceComponentPath,
   getServiceDetailsPath,
@@ -34,13 +34,13 @@ import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 export const getServiceComponentsBreadcrumbs = ({
   serviceId,
   serviceName,
-  clusterName,
+  clusterId,
 }: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => [
-  ...getServiceDetailsBreadcrumbs({ clusterName, serviceId, serviceName }),
+  ...getServiceDetailsBreadcrumbs({ clusterId, serviceId, serviceName }),
   {
     label: 'components',
     url: `${getServiceDetailsPath({
-      clusterName,
+      clusterId,
       serviceId,
     })}/components`,
   },
@@ -49,7 +49,7 @@ export const getServiceComponentsBreadcrumbs = ({
 export default function ServiceComponents() {
   const theme = useTheme()
   const serviceId = useParams()[SERVICE_PARAM_ID]
-  const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
+  const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
   const [showDeprecations, setShowDeprecations] = useState(false)
   const outletContext = useOutletContext<{
     service: ServiceDeploymentDetailsFragment | null | undefined
@@ -61,8 +61,12 @@ export default function ServiceComponents() {
   const serviceName = outletContext?.service?.name
   const breadcrumbs: Breadcrumb[] = useMemo(
     () =>
-      getServiceComponentsBreadcrumbs({ clusterName, serviceId, serviceName }),
-    [clusterName, serviceId, serviceName]
+      getServiceComponentsBreadcrumbs({
+        clusterId,
+        serviceId,
+        serviceName,
+      }),
+    [clusterId, serviceId, serviceName]
   )
 
   useSetBreadcrumbs(breadcrumbs)
@@ -127,7 +131,7 @@ export default function ServiceComponents() {
           setUrl={(c) =>
             c?.name && c?.kind
               ? `${getServiceComponentPath({
-                  clusterName,
+                  clusterId,
                   serviceId,
                   componentId: c.id,
                 })}`

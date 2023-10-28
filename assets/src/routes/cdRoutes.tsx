@@ -54,7 +54,7 @@ import {
   SERVICE_BASE_PATH,
   SERVICE_COMPONENTS_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
-  SERVICE_PARAM_CLUSTER,
+  SERVICE_PARAM_CLUSTER_ID,
 } from './cdRoutesConsts'
 
 export const componentRoutes = [
@@ -110,7 +110,7 @@ export const cdRoutes = [
       element={<Clusters />}
     />
     <Route
-      path={`services/:${SERVICE_PARAM_CLUSTER}?`}
+      path={`services/:${SERVICE_PARAM_CLUSTER_ID}?`}
       element={<Services />}
     />
     {/* <Route

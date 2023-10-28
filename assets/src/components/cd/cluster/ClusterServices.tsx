@@ -119,7 +119,7 @@ export default function ClusterServices() {
             ) =>
               navigate(
                 getServiceDetailsPath({
-                  clusterName: original.node?.cluster?.name,
+                  clusterId: original.node?.cluster?.id,
                   serviceId: original.node?.id,
                 })
               )

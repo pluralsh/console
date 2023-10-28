@@ -30,7 +30,7 @@ export default function ServiceSelector({
 
         navigate(
           `${getServiceDetailsPath({
-            clusterName: service?.cluster?.name,
+            clusterId: service?.cluster?.id,
             serviceId: service?.id,
           })}${urlSuffix}`
         )

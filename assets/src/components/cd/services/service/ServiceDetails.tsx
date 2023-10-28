@@ -25,7 +25,7 @@ import {
 import { getDocsData } from 'components/apps/app/App'
 import {
   CD_BASE_PATH,
-  SERVICE_PARAM_CLUSTER,
+  SERVICE_PARAM_CLUSTER_ID,
   SERVICE_PARAM_ID,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
@@ -38,25 +38,30 @@ import ServiceSelector from '../ServiceSelector'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 
 export const getServiceDetailsBreadcrumbs = ({
-  clusterName,
+  clusterId,
   serviceId,
   serviceName,
 }: {
-  clusterName: string | null | undefined
+  clusterId: string | null | undefined
   serviceId: string | null | undefined
   serviceName?: string | null | undefined
 }) => [
   ...CD_BASE_CRUMBS,
-  { label: 'services', url: `${CD_BASE_PATH}/services` },
-  ...(clusterName && serviceId
+  { label: 'clusters', url: `${CD_BASE_PATH}/clusters` },
+  ...(clusterId
     ? [
         {
-          label: clusterName,
-          url: `/${CD_BASE_PATH}/services/${clusterName}`,
+          label: clusterId,
+          url: `/${CD_BASE_PATH}/clusters/${clusterId}`,
         },
+      ]
+    : []),
+  { label: 'services', url: `${CD_BASE_PATH}/services` },
+  ...(serviceId
+    ? [
         {
           label: serviceName || serviceId,
-          url: getServiceDetailsPath({ clusterName, serviceId }),
+          url: getServiceDetailsPath({ clusterId, serviceId }),
         },
       ]
     : []),
@@ -95,9 +100,9 @@ function ServiceDetailsBase() {
   const { pathname } = useLocation()
   const params = useParams()
   const serviceId = params[SERVICE_PARAM_ID] as string
-  const clusterName = params[SERVICE_PARAM_CLUSTER] as string
+  const clusterId = params[SERVICE_PARAM_CLUSTER_ID] as string
   const pathPrefix = getServiceDetailsPath({
-    clusterName,
+    clusterId,
     serviceId,
   })
   const docPageContext = useDocPageContext()

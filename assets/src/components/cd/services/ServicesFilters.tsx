@@ -10,7 +10,15 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
-import { Key, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Dispatch,
+  Key,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { type TableState } from '@tanstack/react-table'
 import {
   ServiceDeploymentStatus,
@@ -19,7 +27,7 @@ import {
 } from 'generated/graphql'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { SERVICE_PARAM_CLUSTER } from 'routes/cdRoutesConsts'
+import { SERVICE_PARAM_CLUSTER_ID } from 'routes/cdRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 
 import ProviderIcon from 'components/utils/Provider'
@@ -63,6 +71,8 @@ export function ServicesFilters({
   searchString,
   setSearchString,
   showClusterSelect = true,
+  clusterId,
+  setClusterId,
 }: {
   serviceDeployments: NonNullable<
     ReturnType<typeof useServiceDeploymentsQuery>['data']
@@ -73,12 +83,15 @@ export function ServicesFilters({
     filters: Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   ) => void
   showClusterSelect: boolean
+  clusterId?: string
+  setClusterId?: Dispatch<SetStateAction<string>>
 }) {
-  const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
   const navigate = useNavigate()
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
+
+  clusterId = clusterId ?? useParams()[SERVICE_PARAM_CLUSTER_ID]
 
   const { data } = useClustersTinyQuery({ skip: !showClusterSelect })
   const clusters = useMemo(
@@ -86,8 +99,8 @@ export function ServicesFilters({
     [data?.clusters]
   )
   const selectedCluster = useMemo(
-    () => clusters && clusters.find((cluster) => cluster.name === clusterName),
-    [clusters, clusterName]
+    () => clusters && clusters.find((cluster) => cluster.id === clusterId),
+    [clusters, clusterId]
   )
 
   const counts = useMemo(() => {
@@ -154,13 +167,13 @@ export function ServicesFilters({
                 Cluster
               </div>
             }
-            {...(clusterName
+            {...(clusterId
               ? {
                   dropdownFooterFixed: (
                     <ListBoxFooter
                       onClick={() => {
                         setClusterSelectIsOpen(false)
-                        navigate(`/cd/services`)
+                        setClusterId?.('')
                       }}
                       leftContent={<ClusterIcon />}
                     >
@@ -169,14 +182,12 @@ export function ServicesFilters({
                   ),
                 }
               : {})}
-            selectedKey={clusterName || ''}
-            onSelectionChange={(key) => {
-              navigate(`/cd/services${key ? `/${key}` : ''}`)
-            }}
+            selectedKey={clusterId || ''}
+            onSelectionChange={(key) => setClusterId?.(key as string)}
           >
             {(clusters || []).map((cluster) => (
               <ListBoxItem
-                key={cluster.name}
+                key={cluster.id}
                 label={cluster.name}
                 textValue={cluster.name}
                 leftContent={

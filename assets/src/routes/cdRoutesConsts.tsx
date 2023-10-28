@@ -31,10 +31,10 @@ export const POD_BASE_PATH = getPodDetailsPath({
 })
 
 export const SERVICE_PARAM_ID = 'serviceId' as const
-export const SERVICE_PARAM_CLUSTER = 'clusterName' as const
+export const SERVICE_PARAM_CLUSTER_ID = 'clusterId' as const
 export const SERVICE_BASE_PATH = getServiceDetailsPath({
   isRelative: true,
-  clusterName: `:${SERVICE_PARAM_CLUSTER}`,
+  clusterId: `:${SERVICE_PARAM_CLUSTER_ID}`,
   serviceId: `:${SERVICE_PARAM_ID}`,
 })
 export const SERVICE_COMPONENTS_PATH = 'components'
@@ -42,7 +42,7 @@ export const SERVICE_COMPONENTS_PATH = 'components'
 export const COMPONENT_PARAM_ID = `componentId` as const
 export const SERVICE_COMPONENT_PATH_MATCHER_REL = getServiceComponentPath({
   isRelative: true,
-  clusterName: `:${SERVICE_PARAM_CLUSTER}`,
+  clusterId: `:${SERVICE_PARAM_CLUSTER_ID}`,
   serviceId: `:${SERVICE_PARAM_ID}`,
   componentId: `:${COMPONENT_PARAM_ID}`,
 })
@@ -52,19 +52,19 @@ export const GLOBAL_SETTINGS_PATH_REL = `${CD_BASE_PATH}/settings`
 export const GLOBAL_SETTINGS_PATH = `/${GLOBAL_SETTINGS_PATH_REL}`
 
 export function getServiceDetailsPath({
-  clusterName,
+  clusterId,
   serviceId,
   isRelative = false,
 }: {
-  clusterName: string | null | undefined
+  clusterId: string | null | undefined
   serviceId: string | null | undefined
   isRelative?: boolean
 }) {
   return `${
     isRelative ? '' : '/'
-  }${CD_BASE_PATH}/${SERVICES_PATH}/${encodeSlashes(
-    clusterName || ''
-  )}/${encodeSlashes(serviceId || '')}`
+  }${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}/${SERVICES_PATH}/${encodeSlashes(
+    serviceId || ''
+  )}`
 }
 
 export function getServiceComponentPath({
