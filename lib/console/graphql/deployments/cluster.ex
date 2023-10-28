@@ -9,6 +9,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :provider_id,    :id
     field :credential_id,  :id, description: "a cloud credential to use when provisioning this cluster"
     field :version,        non_null(:string)
+    field :protect,        :boolean
     field :kubeconfig,     :kubeconfig_attributes
     field :cloud_settings, :cloud_settings_attributes
     field :node_pools,     list_of(:node_pool_attributes)
@@ -35,6 +36,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :service,        :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
     field :kubeconfig,     :kubeconfig_attributes
+    field :protect,        :boolean
     field :node_pools,     list_of(:node_pool_attributes)
   end
 
@@ -143,6 +145,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :id,              non_null(:id), description: "internal id of this cluster"
     field :self,            :boolean, description: "whether this is the management cluster itself"
     field :name,            non_null(:string), description: "human readable name of this cluster, will also translate to cloud k8s name"
+    field :protect,         :boolean, description: "if true, this cluster cannot be deleted"
     field :version,         :string, description: "desired k8s version for the cluster"
     field :current_version, :string, description: "current k8s version as told to us by the deployment operator"
     field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"

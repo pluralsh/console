@@ -68,6 +68,7 @@ defmodule Console.Schema.Cluster do
     field :name,            :string
     field :self,            :boolean, default: false
     field :installed,       :boolean, default: false
+    field :protect,         :boolean, default: false
 
     field :version,         :string
     field :current_version, :string
@@ -190,7 +191,7 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id service_id credential_id self version current_version name handle installed)a
+  @valid ~w(provider_id protect service_id credential_id self version current_version name handle installed)a
 
   def changeset(model, attrs \\ %{}) do
     model

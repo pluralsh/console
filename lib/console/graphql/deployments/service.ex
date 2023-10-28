@@ -12,6 +12,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :version,        :string
     field :docs_path,      :string
     field :sync_config,    :sync_config_attributes
+    field :protect,        :boolean
     field :repository_id,  non_null(:id)
     field :git,            non_null(:git_ref_attributes)
     field :configuration,  list_of(:config_attributes)
@@ -39,6 +40,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   input_object :service_update_attributes do
     field :version,       :string
+    field :protect,       :boolean
     field :git,           :git_ref_attributes
     field :configuration, list_of(:config_attributes)
   end

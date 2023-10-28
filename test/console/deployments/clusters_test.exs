@@ -387,6 +387,13 @@ defmodule Console.Deployments.ClustersTest do
 
       {:error, _} = Clusters.delete_cluster(cluster.id, user)
     end
+
+    test "it will prevent cluster deletion if protect is enabled" do
+      user = insert(:user)
+      cluster = insert(:cluster, protect: true, write_bindings: [%{user_id: user.id}])
+
+      {:error, _} = Clusters.delete_cluster(cluster.id, user)
+    end
   end
 
   describe "#detach_cluster/2" do
