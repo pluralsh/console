@@ -2117,6 +2117,8 @@ export type RootMutationType = {
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteWebhook?: Maybe<Webhook>;
+  /** soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects */
+  detachCluster?: Maybe<Cluster>;
   enableDeployments?: Maybe<DeploymentSettings>;
   executeRunbook?: Maybe<RunbookActionResponse>;
   /** forces a pipeline gate to be in open state */
@@ -2353,6 +2355,11 @@ export type RootMutationTypeDeleteUserArgs = {
 
 
 export type RootMutationTypeDeleteWebhookArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDetachClusterArgs = {
   id: Scalars['ID']['input'];
 };
 

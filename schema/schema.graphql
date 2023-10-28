@@ -298,6 +298,9 @@ type RootMutationType {
 
   deleteCluster(id: ID!): Cluster
 
+  "soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects"
+  detachCluster(id: ID!): Cluster
+
   createClusterProvider(attributes: ClusterProviderAttributes!): ClusterProvider
 
   updateClusterProvider(id: ID!, attributes: ClusterProviderUpdateAttributes!): ClusterProvider
