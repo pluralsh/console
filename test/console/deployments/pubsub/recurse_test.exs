@@ -169,4 +169,30 @@ defmodule Console.Deployments.PubSub.RecurseTest do
         do: refute Services.get_service_by_name(cluster.id, gs.service.name)
     end
   end
+
+  describe "GlobalServiceCreated" do
+    test "it will sync all relevant clusters" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository)
+      cluster = insert(:cluster)
+      admin = admin_user()
+
+      {:ok, source} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster, admin)
+
+      global = insert(:global_service, service: source)
+      sync = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+
+      event = %PubSub.GlobalServiceCreated{item: global}
+      :ok = Recurse.handle_event(event)
+
+      synced = Services.get_service_by_name(sync.id, "source")
+      refute Global.diff?(source, synced)
+    end
+  end
 end

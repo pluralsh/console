@@ -18,7 +18,8 @@ defmodule Console.Schema.Audit do
     git_repository: 12,
     deployment_settings: 13,
     provider_credential: 14,
-    pipeline: 15
+    pipeline: 15,
+    global: 16
 
   defenum Action,
     create: 0,

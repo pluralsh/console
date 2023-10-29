@@ -10,6 +10,8 @@ defimpl Console.PubSub.Auditable, for: [
   Console.PubSub.ProviderDeleted,
   Console.PubSub.ProviderCredentialCreated,
   Console.PubSub.ProviderCredentialDeleted,
+  Console.PubSub.GlobalServiceCreated,
+  Console.PubSub.GlobalServiceDeleted,
   Console.PubSub.GitRepositoryCreated,
   Console.PubSub.GitRepositoryUpdated,
   Console.PubSub.GitRepositoryDeleted,
@@ -60,6 +62,8 @@ defimpl Console.PubSub.Auditable, for: [
   def details(Console.PubSub.PipelineCreated), do: {:pipeline, :create}
   def details(Console.PubSub.PipelineUpdated), do: {:pipeline, :update}
   def details(Console.PubSub.PipelineDeleted), do: {:pipeline, :delete}
+  def details(Console.PubSub.GlobalServiceCreated), do: {:global, :create}
+  def details(Console.PubSub.GlobalServiceDeleted), do: {:global, :delete}
 
   def details(Console.PubSub.PipelineApproved), do: {:pipeline, :approve}
 

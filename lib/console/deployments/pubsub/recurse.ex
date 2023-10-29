@@ -47,6 +47,12 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterCreated do
   end
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.GlobalServiceCreated do
+  alias Console.Deployments.Global
+
+  def process(%{item: global}), do: Global.sync_clusters(global)
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceHardDeleted do
   alias Console.Schema.{Service, Cluster}
   alias Console.Deployments.Clusters
