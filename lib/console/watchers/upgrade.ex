@@ -8,7 +8,7 @@ defmodule Console.Watchers.Upgrade do
   alias Console.Clustering.Info
   alias PhoenixClient.{Channel, Message}
   alias Console.Plural.Upgrades
-  alias Console.Watchers.Handlers
+  alias Console.Watchers.{Handlers, Plural}
 
   @socket_name Application.get_env(:console, :socket)
   @poll_interval 60 * 1000
@@ -41,6 +41,7 @@ defmodule Console.Watchers.Upgrade do
     |> case do
       {:ok, %{id: id}} ->
         Process.send_after(self(), :connect, 1000)
+        {:ok, _pid} = Plural.start_wss()
         {:ok, ref} = :timer.send_interval(@poll_interval, :next)
         {:ok, _} = :timer.send_interval(@resource_interval, :usage)
         {:noreply, %{state | queue_id: id, timer: ref}}
