@@ -119,5 +119,32 @@ defmodule Console.Deployments.GlobalTest do
       synced = Services.get_service_by_name(sync.id, "source")
       refute Global.diff?(source, synced)
     end
+
+    test "it will sync to if provider is unspecified" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository)
+      cluster = insert(:cluster)
+      admin = admin_user()
+
+      {:ok, source} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster, admin)
+
+      global = insert(:global_service, service: source)
+      sync = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      sync2 = insert(:cluster, provider: cluster.provider)
+      sync3 = insert(:cluster, tags: [%{name: "sync", value: "test"}])
+
+      :ok = Global.sync_clusters(global)
+
+      for cluster <- [sync, sync2, sync3] do
+        synced = Services.get_service_by_name(cluster.id, "source")
+        refute Global.diff?(source, synced)
+      end
+    end
   end
 end

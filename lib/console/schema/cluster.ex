@@ -130,7 +130,7 @@ defmodule Console.Schema.Cluster do
   def target(query \\ __MODULE__, %GlobalService{} = global) do
     Map.take(global, [:provider_id, :tags])
     |> Enum.reduce(query, fn
-      {:provider_id, prov_id}, q -> for_provider(q, prov_id)
+      {:provider_id, prov_id}, q when is_binary(prov_id) -> for_provider(q, prov_id)
       {:tags, [_ | _] = tags}, q -> for_tags(q, tags)
       _, q -> q
     end)
