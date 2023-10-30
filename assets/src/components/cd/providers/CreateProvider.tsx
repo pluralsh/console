@@ -5,7 +5,7 @@ import { merge } from 'lodash'
 import { PartialDeep } from 'type-fest'
 
 import {
-  CloudProviderSettingsAttributes as SettingsTemp,
+  CloudProviderSettingsAttributes,
   useCreateClusterProviderMutation,
 } from 'generated/graphql'
 import {
@@ -30,9 +30,6 @@ import {
   GcpSettings,
   PROVIDER_KEYS,
 } from './ProviderSettings'
-
-// TODO: Replace when api updated
-export type CloudProviderSettingsAttributes = SettingsTemp
 
 const updateSettings = produce(
   (
