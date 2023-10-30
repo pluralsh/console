@@ -20,9 +20,10 @@ defmodule Console.Schema.ClusterProvider do
       end
 
       embeds_one :azure, Azure, on_replace: :update do
-        field :tenant_id,     :string
-        field :client_id,     :string
-        field :client_secret, EncryptedString
+        field :tenant_id,       :string
+        field :subscription_id, :string
+        field :client_id,       :string
+        field :client_secret,   EncryptedString
       end
 
       field :context, :map
@@ -50,8 +51,8 @@ defmodule Console.Schema.ClusterProvider do
 
     def azure_changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(tenant_id client_id client_secret)a)
-      |> validate_required(~w(tenant_id client_id client_secret)a)
+      |> cast(attrs, ~w(tenant_id subscription_id client_id client_secret)a)
+      |> validate_required(~w(tenant_id subscription_id client_id client_secret)a)
     end
   end
 

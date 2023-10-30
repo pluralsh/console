@@ -111,9 +111,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :azure_settings_attributes do
-    field :tenant_id,     non_null(:string)
-    field :client_id,     non_null(:id)
-    field :client_secret, non_null(:string)
+    field :tenant_id,       non_null(:string)
+    field :subscription_id, non_null(:string)
+    field :client_id,       non_null(:id)
+    field :client_secret,   non_null(:string)
   end
 
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -135,7 +136,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :regions, list_of(:string), description: "the region names this provider can deploy to",
       resolve: fn provider, _, _ -> {:ok, ClusterProvider.regions(provider)} end
 
-    field :editable,    :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this resource"
+    field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this resource"
 
     timestamps()
   end
