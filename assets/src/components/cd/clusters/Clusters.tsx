@@ -107,10 +107,15 @@ export const columns = [
             </DecoratedName>
           </ColWithIcon>
           {cluster?.protect && (
-            <CheckedShieldIcon
-              margin={8}
-              size={12}
-            />
+            <Tooltip
+              placement="top"
+              label="This cluster is protected from deletion"
+            >
+              <CheckedShieldIcon
+                margin={8}
+                size={12}
+              />
+            </Tooltip>
           )}
         </div>
       )
