@@ -498,7 +498,7 @@ export type ClusterAttributes = {
   providerId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
-  version: Scalars['String']['input'];
+  version?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
@@ -619,7 +619,7 @@ export type ClusterUpdateAttributes = {
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   /** if you optionally want to reconfigure the git repository for the cluster service */
   service?: InputMaybe<ClusterServiceAttributes>;
-  version: Scalars['String']['input'];
+  version?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Command = {

@@ -216,7 +216,7 @@ defmodule Console.Schema.Cluster do
     |> backfill_handle()
     |> validate_vsn()
     |> update_vsn()
-    |> validate_required(~w(name version handle)a)
+    |> validate_required(~w(name handle)a)
   end
 
   def update_changeset(model, attrs \\ %{}) do

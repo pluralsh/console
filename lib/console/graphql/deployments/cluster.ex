@@ -8,7 +8,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :provider_id,    :id
     field :credential_id,  :id, description: "a cloud credential to use when provisioning this cluster"
-    field :version,        non_null(:string)
+    field :version,        :string
     field :protect,        :boolean
     field :kubeconfig,     :kubeconfig_attributes
     field :cloud_settings, :cloud_settings_attributes
@@ -32,12 +32,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :cluster_update_attributes do
-    field :version,        non_null(:string)
-    field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
-    field :service,        :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
-    field :kubeconfig,     :kubeconfig_attributes
-    field :protect,        :boolean
-    field :node_pools,     list_of(:node_pool_attributes)
+    field :version,    :string
+    field :handle,     :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
+    field :service,    :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
+    field :kubeconfig, :kubeconfig_attributes
+    field :protect,    :boolean
+    field :node_pools, list_of(:node_pool_attributes)
   end
 
   input_object :cluster_service_attributes do
