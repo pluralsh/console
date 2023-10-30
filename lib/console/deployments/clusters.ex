@@ -47,9 +47,10 @@ defmodule Console.Deployments.Clusters do
   @spec control_plane(Cluster.t) :: Kazan.Server.t | {:error, term}
   def control_plane(%Cluster{id: id, self: true}), do: Kazan.Server.in_cluster()
   def control_plane(%Cluster{id: id, kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
-  def control_plane(%Cluster{id: id}) do
-    console = Users.console()
-    with {:ok, token, _} <- Console.Guardian.encode_and_sign(console, %{"cached" => true}) do
+  def control_plane(%Cluster{id: id} = cluster), do: control_plane(cluster, Users.console(), %{"cached" => true})
+
+  def control_plane(%Cluster{id: id}, %User{} = user, claims \\ %{}) do
+    with {:ok, token, _} <- Console.Guardian.encode_and_sign(user, claims) do
       %Kazan.Server{
         url: kas_proxy_url(),
         auth: %Kazan.Server.TokenAuth{token: "plrl:#{id}:#{token}"},

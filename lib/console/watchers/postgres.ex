@@ -11,12 +11,17 @@ defmodule Console.Watchers.Postgres do
       query_params: %{},
       response_model: Kube.Postgresql
     }
-    {:ok, pid} = Watcher.start_link(request, send_to: self(), recv_timeout: 15_000)
-
-    send self(), :boot
-    :timer.send_interval(5000, :watcher_ping)
-    Process.link(pid)
-    {:noreply, %{state | pid: pid}}
+    case Watcher.start_link(request, send_to: self(), recv_timeout: 15_000) do
+      {:ok, pid} ->
+        send self(), :boot
+        :timer.send_interval(5000, :watcher_ping)
+        Process.link(pid)
+        {:noreply, %{state | pid: pid}}
+      err ->
+        Logger.info "failed to watch postgres crds, this can often be a benign error: #{err}"
+        Process.send_after(self(), :start, :timer.seconds(10))
+        {:noreply, state}
+    end
   end
 
   def handle_info(:boot, state) do
