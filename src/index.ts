@@ -90,6 +90,10 @@ export {
 } from './components/ListBoxItem'
 export { default as ListBoxItemChipList } from './components/ListBoxItemChipList'
 export { Select, SelectButton } from './components/Select'
+export type {
+  SelectPropsSingle,
+  SelectPropsMultiple,
+} from './components/Select'
 export { default as LoadingSpinner } from './components/LoadingSpinner'
 export { default as LoopingLogo } from './components/LoopingLogo'
 export { ComboBox } from './components/ComboBox'

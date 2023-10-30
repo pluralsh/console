@@ -1,5 +1,5 @@
 import { type ReactNode, type Ref, forwardRef, useEffect } from 'react'
-import { Flex, H1, Modal as HonorableModal, type ModalProps } from 'honorable'
+import { Flex, H1, type ModalProps } from 'honorable'
 import PropTypes from 'prop-types'
 
 import styled, { type StyledComponentPropsWithRef } from 'styled-components'
@@ -7,6 +7,8 @@ import styled, { type StyledComponentPropsWithRef } from 'styled-components'
 import { type ColorKey, type SeverityExt } from '../types'
 
 import useLockedBody from '../hooks/useLockedBody'
+
+import { HonorableModal } from './HonorableModal'
 
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import type createIcon from './icons/createIcon'

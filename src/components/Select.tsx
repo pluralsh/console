@@ -232,22 +232,22 @@ const SelectInner = styled.div((_) => ({
   position: 'relative',
 }))
 
-function Select(
-  props: Omit<
-    SelectProps,
-    'selectionMode' | 'selectedKeys' | 'onSelectionChange'
-  > & {
-    selectionMode?: 'single'
-  } & Pick<AriaSelectProps<object>, 'onSelectionChange'>
-): ReactElement
-function Select(
-  props: Omit<
-    SelectProps,
-    'selectionMode' | 'selectedKey' | 'onSelectionChange'
-  > & {
-    selectionMode: 'multiple'
-  } & { onSelectionChange: (keys: Set<Key>) => any }
-): ReactElement
+export type SelectPropsSingle = Omit<
+  SelectProps,
+  'selectionMode' | 'selectedKeys' | 'onSelectionChange'
+> & {
+  selectionMode?: 'single'
+} & Pick<AriaSelectProps<object>, 'onSelectionChange'>
+
+export type SelectPropsMultiple = Omit<
+  SelectProps,
+  'selectionMode' | 'selectedKey' | 'onSelectionChange'
+> & {
+  selectionMode: 'multiple'
+} & { onSelectionChange: (keys: Set<Key>) => any }
+
+function Select(props: SelectPropsSingle): ReactElement
+function Select(props: SelectPropsMultiple): ReactElement
 function Select({
   children,
   selectedKey,
