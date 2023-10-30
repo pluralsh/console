@@ -100,7 +100,7 @@ function ModalRef(props: ModalProps, ref: Ref<any>) {
     [isOpen, isClosing, disableEscapeKey, handleClose]
   )
 
-  useKeyDown('Escape', handleEscapeKey)
+  useKeyDown(['Escape'], handleEscapeKey)
 
   useEffect(() => {
     if (fade && open) {
