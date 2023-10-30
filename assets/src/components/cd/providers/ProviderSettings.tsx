@@ -1,14 +1,15 @@
 import { FormField, Input } from '@pluralsh/design-system'
 import { Provider } from 'generated/graphql-plural'
 
+import { CloudProviderSettingsAttributes } from '../../../generated/graphql'
+
 import { InputRevealer } from './InputRevealer'
-import { CloudProviderSettingsAttributes } from './CreateProvider'
 import GcpCredentials from './GcpCredentials'
 
 export const PROVIDER_KEYS = [
   'aws',
+  'azure',
   'gcp',
-  // 'azure',
 ] as const satisfies readonly Lowercase<Provider>[]
 
 export function AwsSettings({
@@ -64,17 +65,41 @@ export function GcpSettings({
   )
 }
 
-// export function AzureSettings({
-//   ...props
-// }: {
-//   settings: CloudProviderSettingsAttributes['azure']
-//   updateSettings: (
-//     update: NonNullable<Partial<CloudProviderSettingsAttributes['azure']>>
-//   ) => void
-// }) {
-//   return (
-//     <FormField label="Placeholder setting">
-//       <InputRevealer />
-//     </FormField>
-//   )
-// }
+export function AzureSettings({
+  settings,
+  updateSettings,
+}: {
+  settings: CloudProviderSettingsAttributes['azure']
+  updateSettings: (
+    update: NonNullable<Partial<CloudProviderSettingsAttributes['azure']>>
+  ) => void
+}) {
+  return (
+    <>
+      <FormField label="Client ID">
+        <InputRevealer
+          value={settings?.clientId}
+          onChange={(e) => {
+            updateSettings({ clientId: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField label="Client secret">
+        <InputRevealer
+          value={settings?.clientSecret}
+          onChange={(e) => {
+            updateSettings({ clientSecret: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField label="Tenant ID">
+        <InputRevealer
+          value={settings?.tenantId}
+          onChange={(e) => {
+            updateSettings({ tenantId: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+    </>
+  )
+}

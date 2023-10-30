@@ -25,7 +25,7 @@ import {
   useClustersTinyQuery,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import { SERVICE_PARAM_CLUSTER_ID } from 'routes/cdRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
@@ -86,12 +86,12 @@ export function ServicesFilters({
   clusterId?: string
   setClusterId?: Dispatch<SetStateAction<string>>
 }) {
-  const navigate = useNavigate()
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
+  const clusterIdParam = useParams()[SERVICE_PARAM_CLUSTER_ID]
 
-  clusterId = clusterId ?? useParams()[SERVICE_PARAM_CLUSTER_ID]
+  clusterId = clusterId ?? clusterIdParam
 
   const { data } = useClustersTinyQuery({ skip: !showClusterSelect })
   const clusters = useMemo(

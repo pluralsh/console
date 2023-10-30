@@ -18,14 +18,12 @@ import {
 import {
   CD_BASE_PATH,
   SERVICES_PATH,
-  SERVICE_PARAM_CLUSTER_ID,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { createMapperWithFallback } from 'utils/mapping'
 import { Edge } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useParams } from 'react-router-dom'
 import { GqlError } from 'components/utils/Alert'
 
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
