@@ -20,7 +20,7 @@ import { useState } from 'react'
 
 import { MoreMenu } from 'components/utils/MoreMenu'
 
-import { isSha1 } from '../../../utils/sha'
+import { shortenSha1 } from '../../../utils/sha'
 
 import { ServicePermissionsModal } from './ServicePermissions'
 
@@ -91,7 +91,7 @@ export const ColRepo = columnHelper.accessor(
     id: 'repository',
     header: 'Repository',
     enableSorting: true,
-    meta: { truncate: true },
+    meta: { truncate: true, gridTemplate: 'minmax(180px,1fr)' },
     cell: ({ getValue }) => (
       <Tooltip
         placement="top-start"
@@ -124,9 +124,7 @@ export const ColRef = columnHelper.accessor(({ node }) => node, {
       message,
     } = svc
 
-    const refStr = isSha1(ref)
-      ? `${ref.slice(0, 5)}…${ref.slice(ref.length - 5)}`
-      : ref
+    const refStr = shortenSha1(ref)
 
     return (
       <Tooltip

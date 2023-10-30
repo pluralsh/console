@@ -1,17 +1,17 @@
 import {
   Button,
-  FormField,
   IconFrame,
-  ListBoxItem,
+  Modal,
   RestoreIcon,
-  Select,
+  Table,
 } from '@pluralsh/design-system'
 import {
+  ServiceDeploymentRevisionFragment,
   ServiceDeploymentsRowFragment,
   useRollbackServiceMutation,
   useServiceDeploymentRevisionsQuery,
 } from 'generated/graphql'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import {
   FormEvent,
   useCallback,
@@ -24,9 +24,10 @@ import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { mapExistingNodes } from 'utils/graphql'
-import moment from 'moment'
 
-import ModalAlt from '../ModalAlt'
+import { StepBody } from '../ModalAlt'
+
+import { columns } from './RevisionHistory'
 
 export function ServicesRollbackDeployment({
   serviceDeployment,
@@ -64,10 +65,6 @@ export function ServicesRollbackDeployment({
     </div>
   )
 }
-
-const RevisionItemSC = styled(ListBoxItem)(() => ({
-  fontVariantNumeric: 'tabular-nums',
-}))
 
 export function ModalForm({
   open,
@@ -115,6 +112,8 @@ export function ModalForm({
     [disabled, mutationLoading, mutation]
   )
 
+  console.log('revisionId', revisionId)
+
   const inputRef = useRef<HTMLInputElement>()
 
   useEffect(() => {
@@ -123,7 +122,15 @@ export function ModalForm({
 
   const actions = useMemo(
     () => (
-      <>
+      <div
+        css={{
+          display: 'flex',
+          width: '100%',
+          flexDirection: 'row-reverse',
+          gap: theme.spacing.medium,
+          justifyContent: 'flex-start',
+        }}
+      >
         <Button
           type="submit"
           disabled={disabled}
@@ -142,14 +149,14 @@ export function ModalForm({
         >
           Cancel
         </Button>
-      </>
+      </div>
     ),
-    [disabled, mutationLoading, onClose]
+    [disabled, mutationLoading, onClose, theme.spacing.medium]
   )
   const revisions = mapExistingNodes(data?.serviceDeployment?.revisions)
 
   return (
-    <ModalAlt
+    <Modal
       header="Rollback service deployment"
       open={open}
       portal
@@ -157,6 +164,9 @@ export function ModalForm({
       asForm
       formProps={{ onSubmit }}
       actions={actions}
+      width={960}
+      maxWidth={900}
+      minWidth={100}
     >
       {!data ? (
         error ? (
@@ -173,27 +183,24 @@ export function ModalForm({
               gap: theme.spacing.xsmall,
             }}
           >
-            <FormField label="Select version">
-              <Select
-                selectedKey={revisionId}
-                onSelectionChange={(key) => {
-                  setRevisionId(key as any)
-                }}
-              >
-                {(revisions || []).map(({ id, version, insertedAt }) => {
-                  const m = moment(insertedAt)
-                  const insDateStr = m.format('YYYY/MM/DD, HH:mm:ss')
+            <StepBody>
+              Select a revision to roll back to from the list below.
+            </StepBody>
+            <Table
+              data={revisions}
+              columns={columns}
+              onRowClick={(e, row) => {
+                const original =
+                  row.original as ServiceDeploymentRevisionFragment
 
-                  return (
-                    <RevisionItemSC
-                      key={id}
-                      label={`${version} – ${insDateStr}`}
-                      textValue={`${version} – ${insDateStr}`}
-                    />
-                  )
-                })}
-              </Select>
-            </FormField>
+                console.log('row original', original.id)
+
+                setRevisionId(original.id)
+              }}
+              // @ts-expect-error
+              getRowIsSelected={(row) => row.id === revisionId}
+              reactTableOptions={{ meta: { selectedId: revisionId } }}
+            />
           </div>
           {mutationError && (
             <GqlError
@@ -203,6 +210,6 @@ export function ModalForm({
           )}
         </>
       )}
-    </ModalAlt>
+    </Modal>
   )
 }
