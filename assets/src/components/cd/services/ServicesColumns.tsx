@@ -45,7 +45,16 @@ export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
     return (
       node && (
         <DecoratedName
-          prefix={node.protect ? <CheckedShieldIcon size={14} /> : null}
+          suffix={
+            node.protect ? (
+              <Tooltip
+                placement="top"
+                label="This service is protected from deletion"
+              >
+                <CheckedShieldIcon size={14} />
+              </Tooltip>
+            ) : null
+          }
           deletedAt={node.deletedAt}
         >
           {node.name}
@@ -255,11 +264,15 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
                 label="Delete global service"
               />
             )}
-            <ListBoxItem
-              key={MenuItemKey.Delete}
-              leftContent={<TrashCanIcon color={theme.colors['icon-danger']} />}
-              label="Delete service"
-            />
+            {!node.protect && (
+              <ListBoxItem
+                key={MenuItemKey.Delete}
+                leftContent={
+                  <TrashCanIcon color={theme.colors['icon-danger']} />
+                }
+                label="Delete service"
+              />
+            )}
           </MoreMenu>
           {/* Modals */}
           <DeleteService

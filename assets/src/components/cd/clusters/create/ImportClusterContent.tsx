@@ -1,7 +1,5 @@
-import { Codeline } from '@pluralsh/design-system'
+import { Code } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { StepBody, StepH, StepLink } from 'components/cd/ModalAlt'
-
 import {
   ComponentProps,
   Dispatch,
@@ -10,7 +8,8 @@ import {
   useState,
 } from 'react'
 
-import { ClusterAttributes } from '../../../../generated/graphql'
+import { StepBody, StepH, StepLink } from 'components/cd/ModalAlt'
+import { ClusterAttributes } from 'generated/graphql'
 
 import { NameVersionHandle } from './NameVersionHandle'
 
@@ -18,9 +17,9 @@ export function ImportClusterContent({
   importCluster,
   ...props
 }: {
-  importCluster: any
+  importCluster: Nullable<{ deployToken?: Nullable<string> }>
 } & ComponentProps<typeof ImportClusterContentPage1>) {
-  if (importCluster) {
+  if (importCluster?.deployToken) {
     return <ImportClusterContentPage2 deployToken={importCluster.deployToken} />
   }
 
@@ -36,22 +35,17 @@ function ImportClusterContentPage1({
 }) {
   const [name, setName] = useState<string>('')
   const [handle, setHandle] = useState<string>('')
-  const [version, setVersion] = useState<string>('')
 
   useEffect(() => {
-    if (name && version) {
+    if (name) {
       onValidityChange(true)
     } else {
       onValidityChange(false)
     }
-    onChange({ name, handle, version })
-  }, [handle, name, onChange, onValidityChange, version])
+    onChange({ name, handle })
+  }, [handle, name, onChange, onValidityChange])
 
-  return (
-    <NameVersionHandle
-      {...{ name, setName, version, setVersion, handle, setHandle }}
-    />
-  )
+  return <NameVersionHandle {...{ name, setName, handle, setHandle }} />
 }
 
 function ImportClusterContentPage2({ deployToken }: { deployToken: string }) {
@@ -87,9 +81,9 @@ function ImportClusterContentPage2({ deployToken }: { deployToken: string }) {
             .
           </StepBody>
         </div>
-        <Codeline>
+        <Code showLineNumbers={false}>
           {`plural cd install --url <console-url> -- token ${deployToken}`}
-        </Codeline>
+        </Code>
       </div>
       <div>
         <StepH css={{ display: 'inline' }}>Notice: </StepH>

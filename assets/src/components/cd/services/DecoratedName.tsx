@@ -3,12 +3,14 @@ import { useTheme } from 'styled-components'
 
 export default function DecoratedName({
   prefix,
+  suffix,
   deletedAt,
   children,
 }: {
-  prefix?: any
+  prefix?: ReactNode
+  suffix?: ReactNode
   deletedAt?: any
-  children: any
+  children: ReactNode
 }) {
   const theme = useTheme()
 
@@ -30,6 +32,7 @@ export default function DecoratedName({
           Deleting
         </Chip>
       )}
+      {suffix}
     </div>
   )
 }
