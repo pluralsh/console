@@ -124,7 +124,7 @@ export const columns = [
             theme.mode === 'dark'
           )}
         >
-          {getProviderName(provider?.name)}
+          {getProviderName(provider?.cloud)}
         </ColWithIcon>
       )
     },
