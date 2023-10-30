@@ -218,6 +218,7 @@ export enum AuditType {
   Configuration = 'CONFIGURATION',
   DeploymentSettings = 'DEPLOYMENT_SETTINGS',
   GitRepository = 'GIT_REPOSITORY',
+  Global = 'GLOBAL',
   Group = 'GROUP',
   GroupMember = 'GROUP_MEMBER',
   Pipeline = 'PIPELINE',
@@ -267,6 +268,7 @@ export type AwsSettingsAttributes = {
 export type AzureSettingsAttributes = {
   clientId: Scalars['ID']['input'];
   clientSecret: Scalars['String']['input'];
+  subscriptionId: Scalars['String']['input'];
   tenantId: Scalars['String']['input'];
 };
 

@@ -1162,6 +1162,7 @@ input GcpSettingsAttributes {
 
 input AzureSettingsAttributes {
   tenantId: String!
+  subscriptionId: String!
   clientId: ID!
   clientSecret: String!
 }
@@ -1840,6 +1841,7 @@ enum AuditType {
   DEPLOYMENT_SETTINGS
   PROVIDER_CREDENTIAL
   PIPELINE
+  GLOBAL
 }
 
 enum AuditAction {
