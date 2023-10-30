@@ -31,7 +31,7 @@ export function ClusterHealth({
   )
 }
 
-export default function ClusterHealthChip({
+function ClusterHealthChip({
   pingedAt,
   size = 'medium',
 }: {
@@ -51,7 +51,13 @@ export default function ClusterHealthChip({
     pingedAt && now.clone().subtract(2, 'minutes').isBefore(pingedAt)
 
   return (
-    <Tooltip label={`Pinged at ${moment(pingedAt).format('MMM D, h:mm')}`}>
+    <Tooltip
+      label={
+        pinged
+          ? `Pinged at ${moment(pingedAt).format('MMM D, h:mm')}`
+          : `This cluster was not pinged yet`
+      }
+    >
       <Chip
         severity={pinged ? (healthy ? 'success' : 'error') : 'warning'}
         size={size}
