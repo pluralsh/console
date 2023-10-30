@@ -100,7 +100,7 @@ export function CreateGlobalServiceModal({
       },
     })
 
-  const allowCreate = name && clusterProviderId && serviceDeployment.id
+  const allowCreate = name && serviceDeployment.id
 
   const onSubmit = useCallback(
     (e: FormEvent) => {
