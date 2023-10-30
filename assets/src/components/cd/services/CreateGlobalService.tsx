@@ -13,6 +13,7 @@ import {
   Button,
   Chip,
   FormField,
+  GlobeIcon,
   IconFrame,
   Input,
   ListBoxItemChipList,
@@ -82,8 +83,21 @@ export function CreateGlobalServiceModal({
   const theme = useTheme()
   const [name, setName] = useState('')
   const [tags, setTags] = useState<Record<string, string>>({})
-  const [clusterProviderId, setClusterProviderId] = useState<Nullable<string>>()
+  const [providerId, setClusterProviderId] = useState('')
   const nameValueTags = useMemo(() => tagsToNameValue(tags), [tags])
+
+  const { data } = useClusterProvidersQuery()
+  const clusterProviders = [
+    ...(data?.clusterProviders?.edges
+      ?.map((edge) => edge?.node)
+      .filter(isNonNullable) ?? []),
+    {
+      id: '',
+      cloud: '',
+      name: 'All providers',
+      icon: <GlobeIcon color={theme.colors['icon-xlight']} />,
+    },
+  ]
 
   const [mutation, { loading: mutationLoading, error: mutationError }] =
     useCreateGlobalServiceMutation({
@@ -92,6 +106,7 @@ export function CreateGlobalServiceModal({
         attributes: {
           name,
           tags: nameValueTags,
+          ...(providerId ? { providerId } : {}),
         },
       },
       onCompleted: () => {
@@ -112,12 +127,6 @@ export function CreateGlobalServiceModal({
     },
     [allowCreate, mutation]
   )
-
-  const { data } = useClusterProvidersQuery()
-  const clusterProviders =
-    data?.clusterProviders?.edges
-      ?.map((edge) => edge?.node)
-      .filter(isNonNullable) ?? []
 
   const initialLoading = false
 
@@ -194,14 +203,11 @@ export function CreateGlobalServiceModal({
                 }}
               />
             </FormField>
-            <FormField
-              label="Cluster provider"
-              required
-            >
+            <FormField label="Cluster provider">
               <ClusterProviderSelect
                 aria-label="Cluster provider"
                 label="Select cluster provider"
-                selectedKey={clusterProviderId}
+                selectedKey={providerId}
                 onSelectionChange={(key) => {
                   setClusterProviderId(key)
                 }}
