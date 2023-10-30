@@ -1,6 +1,11 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { Div, Flex, Input, type InputProps, P } from 'honorable'
-import React, { type ComponentProps, type ReactElement, useEffect } from 'react'
+import React, {
+  type ComponentProps,
+  type ReactElement,
+  useEffect,
+  useState,
+} from 'react'
 import type { Row } from '@tanstack/react-table'
 
 import {
@@ -205,6 +210,20 @@ function Template(args: any) {
   return <Table {...args} />
 }
 
+function SelectableTemplate(args: any) {
+  const [selectedId, setSelectedId] = useState('')
+
+  return (
+    <Table
+      {...args}
+      getRowIsSelected={(row) => row.original.id === selectedId}
+      onRowClick={(_, row) => {
+        setSelectedId(row.original.id)
+      }}
+    />
+  )
+}
+
 // A debounced input react component
 function DebouncedInput({
   initialValue,
@@ -334,4 +353,13 @@ FilterableAndSortable.args = {
   height: '400px',
   data: extremeLengthData,
   columns,
+}
+
+export const Selectable = SelectableTemplate.bind({})
+
+Selectable.args = {
+  width: '900px',
+  height: '400px',
+  data: repeatedData,
+  columns: expandingColumns,
 }

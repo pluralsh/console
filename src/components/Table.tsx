@@ -43,6 +43,7 @@ export type TableProps = Omit<
   | 'data'
   | 'columns'
   | 'getRowCanExpand'
+  | 'getRowIsSelected'
   | 'renderExpanded'
   | 'loose'
   | 'stickyColumn'
@@ -55,6 +56,7 @@ export type TableProps = Omit<
   data: any[]
   columns: any[]
   getRowCanExpand?: any
+  getRowIsSelected?: (row: Row<any>) => boolean
   renderExpanded?: any
   loose?: boolean
   stickyColumn?: boolean
@@ -137,10 +139,23 @@ const Tbody = styled(TbodyUnstyled)(({ theme }) => ({
   backgroundColor: theme.colors['fill-one'],
 }))
 
-const Tr = styled.tr<{ clickable?: boolean; lighter?: boolean }>(
-  ({ theme, clickable = false, lighter = false }) => ({
+const Tr = styled.tr<{
+  $selected?: boolean
+  $selectable?: boolean
+  $clickable?: boolean
+  $lighter?: boolean
+}>(
+  ({
+    theme,
+    $clickable: clickable = false,
+    $lighter: lighter = false,
+    $selectable: selectable = false,
+    $selected: selected = false,
+  }) => ({
     display: 'contents',
-    backgroundColor: lighter
+    backgroundColor: selected
+      ? theme.colors['fill-one-selected']
+      : lighter || (selectable && !selected)
       ? theme.colors['fill-one']
       : theme.colors['fill-one-hover'],
 
@@ -148,16 +163,20 @@ const Tr = styled.tr<{ clickable?: boolean; lighter?: boolean }>(
       cursor: 'pointer',
 
       '&:hover': {
-        backgroundColor: theme.colors['fill-one-selected'],
+        backgroundColor: selectable
+          ? selected
+            ? theme.colors['fill-one-selected']
+            : theme.colors['fill-one-hover']
+          : theme.colors['fill-one-selected'],
       },
     }),
   })
 )
 
 const Th = styled.th<{
-  stickyColumn: boolean
-  cursor?: CSSProperties['cursor']
-}>(({ theme, stickyColumn, cursor }) => ({
+  $stickyColumn: boolean
+  $cursor?: CSSProperties['cursor']
+}>(({ theme, $stickyColumn: stickyColumn, $cursor: cursor }) => ({
   padding: 0,
   position: 'sticky',
   top: 0,
@@ -211,19 +230,19 @@ const Th = styled.th<{
 
 // TODO: Set vertical align to top for tall cells (~3 lines of text or more). See ENG-683.
 const Td = styled.td<{
-  firstRow?: boolean
-  loose?: boolean
-  stickyColumn: boolean
-  truncateColumn: boolean
-  center?: boolean
+  $firstRow?: boolean
+  $loose?: boolean
+  $stickyColumn: boolean
+  $truncateColumn: boolean
+  $center?: boolean
 }>(
   ({
     theme,
-    firstRow,
-    loose,
-    stickyColumn,
-    truncateColumn = false,
-    center,
+    $firstRow: firstRow,
+    $loose: loose,
+    $stickyColumn: stickyColumn,
+    $truncateColumn: truncateColumn = false,
+    $center: center,
   }) => ({
     display: 'flex',
     flexDirection: 'column',
@@ -323,21 +342,25 @@ function FillerRow({
   height,
   index,
   stickyColumn,
+  selectable,
   ...props
 }: {
   columns: unknown[]
   height: number
   index: number
   stickyColumn: boolean
+  selectable?: boolean
 }) {
   return (
     <Tr
       aria-hidden="true"
-      lighter={index % 2 === 0}
+      $lighter={index % 2 === 0}
+      $selected={false}
+      $selectable={selectable}
     >
       <Td
         aria-hidden="true"
-        stickyColumn={stickyColumn}
+        $stickyColumn={stickyColumn}
         style={{
           height,
           minHeight: height,
@@ -346,8 +369,8 @@ function FillerRow({
           gridColumn: '1 / -1',
         }}
         colSpan={columns.length}
-        truncateColumn={false}
-        center={false}
+        $truncateColumn={false}
+        $center={false}
         {...props}
       />
     </Tr>
@@ -366,6 +389,7 @@ function FillerRows({
   position: 'top' | 'bottom'
   stickyColumn: boolean
   clickable?: boolean
+  selectable?: boolean
 }) {
   return (
     <>
@@ -421,6 +445,7 @@ function TableRef(
     data,
     columns,
     getRowCanExpand,
+    getRowIsSelected,
     renderExpanded,
     loose = false,
     stickyColumn = false,
@@ -565,10 +590,10 @@ function TableRef(
                 {headerGroup.headers.map((header) => (
                   <Th
                     key={header.id}
-                    stickyColumn={stickyColumn}
+                    $stickyColumn={stickyColumn}
                     {...(header.column.getCanSort()
                       ? {
-                          cursor:
+                          $cursor:
                             header.column.getIsSorted() === 'asc'
                               ? 's-resize'
                               : header.column.getIsSorted() === 'desc'
@@ -620,8 +645,10 @@ function TableRef(
                   <Tr
                     key={row.id}
                     onClick={(e) => onRowClick?.(e, row)}
-                    lighter={i % 2 === 0}
-                    clickable={!!onRowClick}
+                    $lighter={i % 2 === 0}
+                    $selectable={!!getRowIsSelected}
+                    $selected={getRowIsSelected?.(row) ?? false}
+                    $clickable={!!onRowClick}
                     // data-index is required for virtual scrolling to work
                     data-index={row.index}
                     {...(virtualizeRows
@@ -631,11 +658,11 @@ function TableRef(
                     {row.getVisibleCells().map((cell) => (
                       <Td
                         key={cell.id}
-                        firstRow={i === 0}
-                        loose={loose}
-                        stickyColumn={stickyColumn}
-                        truncateColumn={cell.column?.columnDef?.meta?.truncate}
-                        center={cell.column?.columnDef?.meta?.center}
+                        $firstRow={i === 0}
+                        $loose={loose}
+                        $stickyColumn={stickyColumn}
+                        $truncateColumn={cell.column?.columnDef?.meta?.truncate}
+                        $center={cell.column?.columnDef?.meta?.center}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -645,7 +672,7 @@ function TableRef(
                     ))}
                   </Tr>
                   {row.getIsExpanded() && (
-                    <Tr lighter={i % 2 === 0}>
+                    <Tr $lighter={i % 2 === 0}>
                       <TdExpand />
                       <TdExpand colSpan={row.getVisibleCells().length - 1}>
                         {renderExpanded({ row })}
