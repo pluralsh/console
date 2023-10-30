@@ -87,25 +87,32 @@ export const columns = [
       const cluster = getValue()
 
       return (
-        <ColWithIcon icon={<ClusterIcon width={16} />}>
-          <DecoratedName deletedAt={cluster?.deletedAt}>
-            <div>
-              <StackedText
-                first={
-                  <BasicLink
-                    as={Link}
-                    to={`/cd/clusters/${cluster?.id}`}
-                    css={{ whiteSpace: 'nowrap' }}
-                  >
-                    {cluster?.name}
-                  </BasicLink>
-                }
-                second={`handle: ${cluster?.handle}`}
-              />
-            </div>
-            {cluster?.protect && <CheckedShieldIcon size={12} />}
-          </DecoratedName>
-        </ColWithIcon>
+        <div css={{ display: 'flex' }}>
+          <ColWithIcon icon={<ClusterIcon width={16} />}>
+            <DecoratedName deletedAt={cluster?.deletedAt}>
+              <div>
+                <StackedText
+                  first={
+                    <BasicLink
+                      as={Link}
+                      to={`/cd/clusters/${cluster?.id}`}
+                      css={{ whiteSpace: 'nowrap' }}
+                    >
+                      {cluster?.name}
+                    </BasicLink>
+                  }
+                  second={`handle: ${cluster?.handle}`}
+                />
+              </div>
+            </DecoratedName>
+          </ColWithIcon>
+          {cluster?.protect && (
+            <CheckedShieldIcon
+              margin={8}
+              size={12}
+            />
+          )}
+        </div>
       )
     },
   }),
