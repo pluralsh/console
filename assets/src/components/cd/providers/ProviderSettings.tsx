@@ -1,8 +1,9 @@
 import { FormField, Input } from '@pluralsh/design-system'
 import { Provider } from 'generated/graphql-plural'
 
+import { CloudProviderSettingsAttributes } from '../../../generated/graphql'
+
 import { InputRevealer } from './InputRevealer'
-import { CloudProviderSettingsAttributes } from './CreateProvider'
 import GcpCredentials from './GcpCredentials'
 
 export const PROVIDER_KEYS = [
