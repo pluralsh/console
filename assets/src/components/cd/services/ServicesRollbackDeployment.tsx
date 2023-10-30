@@ -11,7 +11,7 @@ import {
   useRollbackServiceMutation,
   useServiceDeploymentRevisionsQuery,
 } from 'generated/graphql'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import {
   FormEvent,
   useCallback,
@@ -24,6 +24,8 @@ import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { mapExistingNodes } from 'utils/graphql'
+
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
 import { StepBody } from '../ModalAlt'
 
@@ -65,6 +67,15 @@ export function ServicesRollbackDeployment({
     </div>
   )
 }
+
+const ModalSC = styled(Modal)((_) => ({
+  '&&, && > *, && > * > *': {
+    display: 'flex',
+    height: '100%',
+    overflow: 'hidden',
+    flexDirection: 'column',
+  },
+}))
 
 export function ModalForm({
   open,
@@ -112,8 +123,6 @@ export function ModalForm({
     [disabled, mutationLoading, mutation]
   )
 
-  console.log('revisionId', revisionId)
-
   const inputRef = useRef<HTMLInputElement>()
 
   useEffect(() => {
@@ -156,14 +165,13 @@ export function ModalForm({
   const revisions = mapExistingNodes(data?.serviceDeployment?.revisions)
 
   return (
-    <Modal
+    <ModalSC
       header="Rollback service deployment"
       open={open}
       portal
       onClose={onClose}
       asForm
       formProps={{ onSubmit }}
-      actions={actions}
       width={960}
       maxWidth={900}
       minWidth={100}
@@ -175,32 +183,46 @@ export function ModalForm({
           <LoadingIndicator />
         )
       ) : (
-        <>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+            overflow: 'hidden',
+          }}
+        >
           <div
             css={{
               display: 'flex',
               flexDirection: 'column',
               gap: theme.spacing.xsmall,
+              overflow: 'hidden',
             }}
           >
             <StepBody>
               Select a revision to roll back to from the list below.
             </StepBody>
-            <Table
-              data={revisions}
-              columns={columns}
-              onRowClick={(e, row) => {
-                const original =
-                  row.original as ServiceDeploymentRevisionFragment
+            <FullHeightTableWrap>
+              <Table
+                data={revisions}
+                columns={columns}
+                css={{
+                  maxHeight: 'unset',
+                  height: '100%',
+                }}
+                onRowClick={(e, row) => {
+                  const original =
+                    row.original as ServiceDeploymentRevisionFragment
 
-                console.log('row original', original.id)
+                  console.log('row original', original.id)
 
-                setRevisionId(original.id)
-              }}
-              // @ts-expect-error
-              getRowIsSelected={(row) => row.id === revisionId}
-              reactTableOptions={{ meta: { selectedId: revisionId } }}
-            />
+                  setRevisionId(original.id)
+                }}
+                // @ts-expect-error
+                getRowIsSelected={(row) => row.id === revisionId}
+                reactTableOptions={{ meta: { selectedId: revisionId } }}
+              />
+            </FullHeightTableWrap>
           </div>
           {mutationError && (
             <GqlError
@@ -208,8 +230,9 @@ export function ModalForm({
               error={mutationError}
             />
           )}
-        </>
+          {actions}
+        </div>
       )}
-    </Modal>
+    </ModalSC>
   )
 }
