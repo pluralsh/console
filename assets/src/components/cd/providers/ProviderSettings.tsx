@@ -100,6 +100,15 @@ export function AzureSettings({
           }}
         />
       </FormField>
+      <FormField label="Subscription ID">
+        <Input
+          type="text"
+          value={settings?.subscriptionId}
+          onChange={(e) => {
+            updateSettings({ subscriptionId: e.currentTarget.value })
+          }}
+        />
+      </FormField>
     </>
   )
 }

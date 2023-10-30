@@ -90,7 +90,8 @@ export function CreateProviderModal({
         !(
           providerSettings.azure?.clientId &&
           providerSettings.azure?.clientSecret &&
-          providerSettings.azure?.tenantId
+          providerSettings.azure?.tenantId &&
+          providerSettings.azure?.subscriptionId
         )
       break
   }
