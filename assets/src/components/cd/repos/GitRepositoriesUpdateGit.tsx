@@ -29,7 +29,7 @@ export function UpdateGitRepository({
   refetch,
 }: {
   repo: GitRepositoriesRowFragment
-  refetch: () => void
+  refetch: Nullable<() => void>
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const closeModal = useCallback(() => setIsOpen(false), [])
@@ -66,7 +66,7 @@ export function ModalForm({
   open: boolean
   repo: GitRepositoriesRowFragment
   onClose: () => void
-  refetch: () => void
+  refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
   const [gitUrl, setGitUrl] = useState(repo.url)

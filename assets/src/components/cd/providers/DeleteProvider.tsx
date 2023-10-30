@@ -14,7 +14,7 @@ export function DeleteProvider({
   refetch,
 }: {
   provider: ClusterProviderFragment
-  refetch: () => void
+  refetch: Nullable<() => void>
 }) {
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading, error }] = useDeleteClusterProviderMutation({

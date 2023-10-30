@@ -53,7 +53,7 @@ export function UpdateProviderModal({
   provider: ClusterProviderFragment
   open: boolean
   onClose: () => void
-  refetch: () => void
+  refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
   const closeModal = useCallback(() => onClose(), [onClose])
@@ -203,7 +203,7 @@ export function UpdateProvider({
   refetch,
 }: {
   provider: ClusterProviderFragment
-  refetch: () => void
+  refetch: Nullable<() => void>
 }) {
   const [isOpen, setIsOpen] = useState(false)
 

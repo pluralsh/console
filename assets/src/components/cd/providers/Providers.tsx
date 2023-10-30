@@ -14,7 +14,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
-import { ColName, ColProvider, getColActions } from './ProvidersColumns'
+import { ColActions, ColName, ColProvider } from './ProvidersColumns'
 import { CreateProvider } from './CreateProvider'
 
 const POLL_INTERVAL = 10 * 1000
@@ -24,6 +24,7 @@ export type ServicesCluster = Exclude<
   ServiceDeploymentsRowFragment['cluster'],
   undefined | null
 >
+const columns = [ColProvider, ColName, ColActions]
 
 export default function Providers() {
   const theme = useTheme()
@@ -31,10 +32,6 @@ export default function Providers() {
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-  const columns = useMemo(
-    () => [ColProvider, ColName, getColActions({ refetch })],
-    [refetch]
-  )
 
   useSetBreadcrumbs(PROVIDERS_CRUMBS)
 

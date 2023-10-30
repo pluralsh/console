@@ -71,44 +71,45 @@ export const ColRepo = columnHelper.accessor(
   }
 )
 
-export const getColActions = ({ refetch }: { refetch: () => void }) =>
-  columnHelper.accessor(({ node }) => node?.id, {
-    id: 'actions',
-    header: '',
-    meta: { gridTemplate: `fit-content(100px)` },
-    cell: ({
-      row: {
-        original: { node },
-      },
-    }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const theme = useTheme()
-
-      return (
-        node && (
-          <div
-            css={{
-              display: 'flex',
-              flexGrow: 0,
-              gap: theme.spacing.large,
-              alignItems: 'center',
-              alignSelf: 'end',
-            }}
-          >
-            {node.editable && (
-              <>
-                <UpdateProvider
-                  provider={node}
-                  refetch={refetch}
-                />
-                <DeleteProvider
-                  provider={node}
-                  refetch={refetch}
-                />
-              </>
-            )}
-          </div>
-        )
-      )
+export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
+  id: 'actions',
+  header: '',
+  meta: { gridTemplate: `fit-content(100px)` },
+  cell: ({
+    table,
+    row: {
+      original: { node },
     },
-  })
+  }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const theme = useTheme()
+    const { refetch } = table.options.meta as { refetch?: () => void }
+
+    return (
+      node && (
+        <div
+          css={{
+            display: 'flex',
+            flexGrow: 0,
+            gap: theme.spacing.large,
+            alignItems: 'center',
+            alignSelf: 'end',
+          }}
+        >
+          {node.editable && (
+            <>
+              <UpdateProvider
+                provider={node}
+                refetch={refetch}
+              />
+              <DeleteProvider
+                provider={node}
+                refetch={refetch}
+              />
+            </>
+          )}
+        </div>
+      )
+    )
+  },
+})
