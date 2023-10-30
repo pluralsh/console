@@ -24,12 +24,15 @@ import { getProviderName } from 'components/utils/Provider'
 import ModalAlt from '../ModalAlt'
 import { ClusterProviderSelect } from '../utils/ProviderSelect'
 
-import { AwsSettings, GcpSettings, PROVIDER_KEYS } from './ProviderSettings'
+import {
+  AwsSettings,
+  AzureSettings,
+  GcpSettings,
+  PROVIDER_KEYS,
+} from './ProviderSettings'
 
 // TODO: Replace when api updated
-export type CloudProviderSettingsAttributes = SettingsTemp & {
-  azure?: Record<string, string> | null | undefined
-}
+export type CloudProviderSettingsAttributes = SettingsTemp
 
 const updateSettings = produce(
   (
@@ -84,10 +87,15 @@ export function CreateProviderModal({
     case 'gcp':
       disabled = disabled || !providerSettings.gcp?.applicationCredentials
       break
-    // case 'azure':
-    //   //  TODO: Add disabled conditions once azure support is added to api
-    //   disabled = true
-    //   break
+    case 'azure':
+      disabled =
+        disabled ||
+        !(
+          providerSettings.azure?.clientId &&
+          providerSettings.azure?.clientSecret &&
+          providerSettings.azure?.tenantId
+        )
+      break
   }
 
   const [mutation, { loading, error }] = useCreateClusterProviderMutation({
@@ -140,16 +148,16 @@ export function CreateProviderModal({
         />
       )
       break
-    // case 'azure':
-    //   settings = (
-    //     <AzureSettings
-    //       settings={providerSettings.azure}
-    //       updateSettings={(settings) =>
-    //         updateProviderSettings({ azure: settings })
-    //       }
-    //     />
-    //   )
-    //   break
+    case 'azure':
+      settings = (
+        <AzureSettings
+          settings={providerSettings.azure}
+          updateSettings={(settings) =>
+            updateProviderSettings({ azure: settings })
+          }
+        />
+      )
+      break
   }
 
   useEffect(() => {
