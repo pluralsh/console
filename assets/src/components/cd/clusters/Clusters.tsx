@@ -14,7 +14,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
-import { useMemo } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -46,6 +46,8 @@ import { TableText } from '../../cluster/TableElements'
 import { nextSupportedVersion } from '../../../utils/semver'
 
 import DecoratedName from '../services/DecoratedName'
+
+import { DeleteCluster } from '../providers/DeleteCluster'
 
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
@@ -107,10 +109,15 @@ export const columns = [
             </DecoratedName>
           </ColWithIcon>
           {cluster?.protect && (
-            <CheckedShieldIcon
-              margin={8}
-              size={12}
-            />
+            <Tooltip
+              placement="top"
+              label="This cluster is protected from deletion"
+            >
+              <CheckedShieldIcon
+                margin={8}
+                size={12}
+              />
+            </Tooltip>
           )}
         </div>
       )
@@ -292,13 +299,20 @@ export const columns = [
   columnHelper.accessor(({ node }) => node, {
     id: 'actions',
     header: '',
-    cell: ({ getValue }) => {
+    cell: ({ table, getValue }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const navigate = useNavigate()
       const cluster = getValue()
+      const { refetch } = table.options.meta as { refetch?: () => void }
 
       return (
         <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
+          {cluster && (
+            <DeleteCluster
+              cluster={cluster}
+              refetch={refetch}
+            />
+          )}
           <IconFrame
             clickable
             onClick={() =>
@@ -319,7 +333,7 @@ export const columns = [
 export default function Clusters() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { data } = useClustersQuery({
+  const { data, refetch } = useClustersQuery({
     pollInterval: 10 * 1000,
     fetchPolicy: 'cache-and-network',
   })
@@ -349,6 +363,9 @@ export default function Clusters() {
   useSetCDHeaderContent(headerActions)
   useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)
 
+  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
+    useMemo(() => ({ meta: { refetch } }), [refetch])
+
   if (!data) {
     return <LoadingIndicator />
   }
@@ -359,6 +376,7 @@ export default function Clusters() {
         loose
         data={data?.clusters?.edges || []}
         columns={columns}
+        reactTableOptions={reactTableOptions}
         css={{
           maxHeight: 'unset',
           height: '100%',

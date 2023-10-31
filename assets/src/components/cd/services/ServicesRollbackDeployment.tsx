@@ -1,12 +1,12 @@
 import {
   Button,
-  FormField,
   IconFrame,
-  ListBoxItem,
+  Modal,
   RestoreIcon,
-  Select,
+  Table,
 } from '@pluralsh/design-system'
 import {
+  ServiceDeploymentRevisionFragment,
   ServiceDeploymentsRowFragment,
   useRollbackServiceMutation,
   useServiceDeploymentRevisionsQuery,
@@ -24,9 +24,12 @@ import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { mapExistingNodes } from 'utils/graphql'
-import moment from 'moment'
 
-import ModalAlt from '../ModalAlt'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+
+import { StepBody } from '../ModalAlt'
+
+import { columns } from './RevisionHistory'
 
 export function ServicesRollbackDeployment({
   serviceDeployment,
@@ -65,8 +68,13 @@ export function ServicesRollbackDeployment({
   )
 }
 
-const RevisionItemSC = styled(ListBoxItem)(() => ({
-  fontVariantNumeric: 'tabular-nums',
+const ModalSC = styled(Modal)((_) => ({
+  '&&, && > *, && > * > *': {
+    display: 'flex',
+    height: '100%',
+    overflow: 'hidden',
+    flexDirection: 'column',
+  },
 }))
 
 export function ModalForm({
@@ -123,7 +131,15 @@ export function ModalForm({
 
   const actions = useMemo(
     () => (
-      <>
+      <div
+        css={{
+          display: 'flex',
+          width: '100%',
+          flexDirection: 'row-reverse',
+          gap: theme.spacing.medium,
+          justifyContent: 'flex-start',
+        }}
+      >
         <Button
           type="submit"
           disabled={disabled}
@@ -142,21 +158,23 @@ export function ModalForm({
         >
           Cancel
         </Button>
-      </>
+      </div>
     ),
-    [disabled, mutationLoading, onClose]
+    [disabled, mutationLoading, onClose, theme.spacing.medium]
   )
   const revisions = mapExistingNodes(data?.serviceDeployment?.revisions)
 
   return (
-    <ModalAlt
+    <ModalSC
       header="Rollback service deployment"
       open={open}
       portal
       onClose={onClose}
       asForm
       formProps={{ onSubmit }}
-      actions={actions}
+      width={960}
+      maxWidth={900}
+      minWidth={100}
     >
       {!data ? (
         error ? (
@@ -165,35 +183,46 @@ export function ModalForm({
           <LoadingIndicator />
         )
       ) : (
-        <>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+            overflow: 'hidden',
+          }}
+        >
           <div
             css={{
               display: 'flex',
               flexDirection: 'column',
               gap: theme.spacing.xsmall,
+              overflow: 'hidden',
             }}
           >
-            <FormField label="Select version">
-              <Select
-                selectedKey={revisionId}
-                onSelectionChange={(key) => {
-                  setRevisionId(key as any)
+            <StepBody>
+              Select a revision to roll back to from the list below.
+            </StepBody>
+            <FullHeightTableWrap>
+              <Table
+                data={revisions}
+                columns={columns}
+                css={{
+                  maxHeight: 'unset',
+                  height: '100%',
                 }}
-              >
-                {(revisions || []).map(({ id, version, insertedAt }) => {
-                  const m = moment(insertedAt)
-                  const insDateStr = m.format('YYYY/MM/DD, HH:mm:ss')
+                onRowClick={(e, row) => {
+                  const original =
+                    row.original as ServiceDeploymentRevisionFragment
 
-                  return (
-                    <RevisionItemSC
-                      key={id}
-                      label={`${version} – ${insDateStr}`}
-                      textValue={`${version} – ${insDateStr}`}
-                    />
-                  )
-                })}
-              </Select>
-            </FormField>
+                  console.log('row original', original.id)
+
+                  setRevisionId(original.id)
+                }}
+                // @ts-expect-error
+                getRowIsSelected={(row) => row.id === revisionId}
+                reactTableOptions={{ meta: { selectedId: revisionId } }}
+              />
+            </FullHeightTableWrap>
           </div>
           {mutationError && (
             <GqlError
@@ -201,8 +230,9 @@ export function ModalForm({
               error={mutationError}
             />
           )}
-        </>
+          {actions}
+        </div>
       )}
-    </ModalAlt>
+    </ModalSC>
   )
 }

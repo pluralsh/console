@@ -27,14 +27,13 @@ import { CD_BASE_PATH } from 'routes/cdRoutesConsts'
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import {
+  ColActions,
   ColAuthMethod,
   ColCreatedAt,
-  // ColOwner,
   ColPulledAt,
   ColRepo,
   ColStatus,
   ColUpdatedAt,
-  getColActions,
 } from './GitRepositoriesColumns'
 import { ImportGit } from './GitRepositoriesImportGit'
 import { GitRepositoriesFilters } from './GitRepositoriesFilters'
@@ -51,7 +50,7 @@ export function DeleteGitRepository({
   refetch,
 }: {
   repo: Pick<GitRepositoriesRowFragment, 'id' | 'url'>
-  refetch: () => void
+  refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
   const [confirm, setConfirm] = useState(false)
@@ -117,6 +116,17 @@ export function AuthMethodChip({
   return <Chip severity="neutral">{authMethodToLabel(authMethod)}</Chip>
 }
 
+const columns = [
+  ColRepo,
+  ColAuthMethod,
+  ColStatus,
+  ColCreatedAt,
+  ColUpdatedAt,
+  ColPulledAt,
+  // ColOwner,
+  ColActions,
+]
+
 export default function GitRepositories() {
   const theme = useTheme()
   const { data, error, refetch } = useGitRepositoriesQuery({
@@ -125,19 +135,6 @@ export default function GitRepositories() {
   })
 
   useSetBreadcrumbs(crumbs)
-  const columns = useMemo(
-    () => [
-      ColRepo,
-      ColAuthMethod,
-      ColStatus,
-      ColCreatedAt,
-      ColUpdatedAt,
-      ColPulledAt,
-      // ColOwner,
-      getColActions({ refetch }),
-    ],
-    [refetch]
-  )
 
   useSetCDHeaderContent(
     useMemo(() => <ImportGit refetch={refetch} />, [refetch])
@@ -154,8 +151,9 @@ export default function GitRepositories() {
         state: {
           ...tableFilters,
         },
+        meta: { refetch },
       }),
-      [tableFilters]
+      [refetch, tableFilters]
     )
 
   if (error) {

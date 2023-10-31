@@ -1,4 +1,5 @@
 import { Input } from '@pluralsh/design-system'
+import { Dispatch, SetStateAction } from 'react'
 import { useTheme } from 'styled-components'
 
 export function NameVersionHandle({
@@ -8,6 +9,13 @@ export function NameVersionHandle({
   setVersion,
   handle,
   setHandle,
+}: {
+  name: string
+  setName: Dispatch<SetStateAction<string>>
+  version?: string
+  setVersion?: Dispatch<SetStateAction<string>>
+  handle: string
+  setHandle: Dispatch<SetStateAction<string>>
 }) {
   const theme = useTheme()
 
@@ -35,12 +43,14 @@ export function NameVersionHandle({
           onChange={({ target: { value } }) => setName(value)}
           prefix={<div>Name*</div>}
         />
-        <Input
-          placeholder="1.24.11"
-          value={version}
-          onChange={({ target: { value } }) => setVersion(value)}
-          prefix={<div>Version*</div>}
-        />
+        {setVersion && (
+          <Input
+            placeholder="1.24.11"
+            value={version}
+            onChange={({ target: { value } }) => setVersion(value)}
+            prefix={<div>Version*</div>}
+          />
+        )}
       </div>
       <Input
         placeholder="custom-handle"

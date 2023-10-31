@@ -20,7 +20,7 @@ import { useState } from 'react'
 
 import { MoreMenu } from 'components/utils/MoreMenu'
 
-import { isSha1 } from '../../../utils/sha'
+import { shortenSha1 } from '../../../utils/sha'
 
 import { ServicePermissionsModal } from './ServicePermissions'
 
@@ -45,7 +45,16 @@ export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
     return (
       node && (
         <DecoratedName
-          prefix={node.protect ? <CheckedShieldIcon size={14} /> : null}
+          suffix={
+            node.protect ? (
+              <Tooltip
+                placement="top"
+                label="This service is protected from deletion"
+              >
+                <CheckedShieldIcon size={14} />
+              </Tooltip>
+            ) : null
+          }
           deletedAt={node.deletedAt}
         >
           {node.name}
@@ -82,7 +91,7 @@ export const ColRepo = columnHelper.accessor(
     id: 'repository',
     header: 'Repository',
     enableSorting: true,
-    meta: { truncate: true },
+    meta: { truncate: true, gridTemplate: 'minmax(180px,1fr)' },
     cell: ({ getValue }) => (
       <Tooltip
         placement="top-start"
@@ -115,9 +124,7 @@ export const ColRef = columnHelper.accessor(({ node }) => node, {
       message,
     } = svc
 
-    const refStr = isSha1(ref)
-      ? `${ref.slice(0, 5)}…${ref.slice(ref.length - 5)}`
-      : ref
+    const refStr = shortenSha1(ref)
 
     return (
       <Tooltip
@@ -255,11 +262,15 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
                 label="Delete global service"
               />
             )}
-            <ListBoxItem
-              key={MenuItemKey.Delete}
-              leftContent={<TrashCanIcon color={theme.colors['icon-danger']} />}
-              label="Delete service"
-            />
+            {!node.protect && (
+              <ListBoxItem
+                key={MenuItemKey.Delete}
+                leftContent={
+                  <TrashCanIcon color={theme.colors['icon-danger']} />
+                }
+                label="Delete service"
+              />
+            )}
           </MoreMenu>
           {/* Modals */}
           <DeleteService

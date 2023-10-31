@@ -114,41 +114,42 @@ export const ColOwner = columnHelper.accessor(
   }
 )
 
-export const getColActions = ({ refetch }: { refetch: any }) =>
-  columnHelper.accessor(({ node }) => node?.id, {
-    id: 'actions',
-    header: '',
-    cell: ({
-      row: {
-        original: { node },
-      },
-    }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const theme = useTheme()
-
-      if (!node?.editable) {
-        return null
-      }
-
-      return (
-        node && (
-          <div
-            css={{
-              display: 'flex',
-              gap: theme.spacing.large,
-              alignItems: 'center',
-            }}
-          >
-            <UpdateGitRepository
-              repo={node}
-              refetch={refetch}
-            />
-            <DeleteGitRepository
-              repo={node}
-              refetch={refetch}
-            />
-          </div>
-        )
-      )
+export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
+  id: 'actions',
+  header: '',
+  cell: ({
+    table,
+    row: {
+      original: { node },
     },
-  })
+  }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const theme = useTheme()
+    const { refetch } = table.options.meta as { refetch?: () => void }
+
+    if (!node?.editable) {
+      return null
+    }
+
+    return (
+      node && (
+        <div
+          css={{
+            display: 'flex',
+            gap: theme.spacing.large,
+            alignItems: 'center',
+          }}
+        >
+          <UpdateGitRepository
+            repo={node}
+            refetch={refetch}
+          />
+          <DeleteGitRepository
+            repo={node}
+            refetch={refetch}
+          />
+        </div>
+      )
+    )
+  },
+})

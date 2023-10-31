@@ -6,6 +6,8 @@ import ModalAlt from 'components/cd/ModalAlt'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
+import { GqlError } from 'components/utils/Alert'
+
 import {
   Cluster,
   ClusterAttributes,
@@ -42,7 +44,7 @@ function CreateClusterModal({
   )
   const [newAttrsValid, setNewAttrsValid] = useState(false)
 
-  const [createCluster, { loading }] = useCreateClusterMutation()
+  const [createCluster, { loading, error }] = useCreateClusterMutation()
 
   const onSubmit = useCallback(() => {
     if (createMode === Mode.Import) {
@@ -152,6 +154,7 @@ function CreateClusterModal({
           onValidityChange={setImportAttrsValid}
         />
       )}
+      {error && <GqlError error={error} />}
     </ModalAlt>
   )
 }

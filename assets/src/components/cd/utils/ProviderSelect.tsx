@@ -3,13 +3,17 @@ import { useTheme } from 'styled-components'
 import ProviderIcon, { getProviderIconURL } from 'components/utils/Provider'
 import { SelectProps } from '@pluralsh/design-system/dist/components/Select'
 
+import { ReactNode } from 'react'
+
 import { ClusterProvider } from '../../../generated/graphql'
 
 export function ClusterProviderSelect({
   clusterProviders,
   ...props
 }: {
-  clusterProviders: Pick<ClusterProvider, 'name' | 'id' | 'cloud'>[]
+  clusterProviders: (Pick<ClusterProvider, 'name' | 'id' | 'cloud'> & {
+    icon?: ReactNode
+  })[]
 } & Omit<SelectProps, 'children' | 'selectionMode'>) {
   const theme = useTheme()
 
@@ -20,12 +24,14 @@ export function ClusterProviderSelect({
   return (
     <Select
       leftContent={
-        selectedProvider ? (
-          <ProviderIcon
-            provider={selectedProvider.cloud}
-            width={16}
-          />
-        ) : undefined
+        selectedProvider
+          ? selectedProvider.icon || (
+              <ProviderIcon
+                provider={selectedProvider.cloud}
+                width={16}
+              />
+            )
+          : undefined
       }
       {...props}
       selectionMode="single"
@@ -35,11 +41,13 @@ export function ClusterProviderSelect({
           key={p.id}
           label={p.name}
           leftContent={
-            <img
-              width={16}
-              height={16}
-              src={getProviderIconURL(p.cloud, theme.mode === 'dark')}
-            />
+            p.icon || (
+              <img
+                width={16}
+                height={16}
+                src={getProviderIconURL(p.cloud, theme.mode === 'dark')}
+              />
+            )
           }
         />
       ))}

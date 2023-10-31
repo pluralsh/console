@@ -95,7 +95,7 @@ fragment ServiceDeploymentRevisions on ServiceDeployment {
   revision {
     ...ServiceDeploymentRevision
   }
-  revisions(first: 100) {
+  revisions(first: 500) {
     edges {
       node {
         ...ServiceDeploymentRevision

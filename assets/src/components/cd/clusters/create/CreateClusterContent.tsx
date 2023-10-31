@@ -126,9 +126,9 @@ export function CreateClusterContent({
   const [provider, setProvider] = useState<Key>(Provider.GCP)
   const [clusterProvider, setClusterProvider] = useState<Key>()
   const [providerValid, setProviderValid] = useState(false)
-  const [name, setName] = useState<string>()
-  const [handle, setHandle] = useState<string>()
-  const [version, setVersion] = useState<string>()
+  const [name, setName] = useState<string>('')
+  const [handle, setHandle] = useState<string>('')
+  const [version, setVersion] = useState<string>('')
   const [cloudSettings, setCloudSettings] = useState<CloudSettingsAttributes>(
     {} as CloudSettingsAttributes
   )
