@@ -1,6 +1,6 @@
-import { AppIcon, WrapWithIf } from '@pluralsh/design-system'
+import { AppIcon, Tooltip, WrapWithIf } from '@pluralsh/design-system'
 import styled from 'styled-components'
-import { ComponentProps } from 'react'
+import { ComponentProps, ReactNode } from 'react'
 import classNames from 'classnames'
 import { Merge } from 'type-fest'
 
@@ -29,6 +29,7 @@ const ColWithIconSC = styled.div(({ theme }) => ({
 
 export function ColWithOptionalIcon({
   icon,
+  iconTooltip,
   children,
   truncateLeft = false,
   ...props
@@ -37,20 +38,32 @@ export function ColWithOptionalIcon({
   {
     icon?: string | ComponentProps<typeof AppIcon>['icon']
     truncateLeft?: boolean
+    iconTooltip?: ReactNode
   }
 >) {
+  let iconElt = !!icon && (
+    <AppIcon
+      spacing="padding"
+      size="xxsmall"
+      icon={typeof icon !== 'string' ? icon : undefined}
+      url={typeof icon === 'string' ? icon : undefined}
+    />
+  )
+
+  if (icon && iconTooltip) {
+    iconElt = (
+      <Tooltip
+        placement="top"
+        label={iconTooltip}
+      >
+        <span>{iconElt}</span>
+      </Tooltip>
+    )
+  }
+
   return (
     <ColWithIconSC {...props}>
-      {icon && (
-        <div className="icon">
-          <AppIcon
-            spacing="padding"
-            size="xxsmall"
-            icon={typeof icon !== 'string' ? icon : undefined}
-            url={typeof icon === 'string' ? icon : undefined}
-          />
-        </div>
-      )}
+      {iconElt && <div className="icon">{iconElt}</div>}
       <div className={classNames('content', { truncateLeft: 'truncateLeft' })}>
         <WrapWithIf
           condition={truncateLeft}

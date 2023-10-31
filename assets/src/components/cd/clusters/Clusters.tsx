@@ -162,6 +162,7 @@ export const columns = [
               />
             ) : undefined
           }
+          iconTooltip="Upgrading"
         >
           <div>
             {node?.currentVersion && (
