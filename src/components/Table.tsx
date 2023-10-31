@@ -32,18 +32,19 @@ import { rankItem } from '@tanstack/match-sorter-utils'
 import type { VirtualItem } from '@tanstack/react-virtual'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import styled from 'styled-components'
+import { isEmpty } from 'lodash-es'
 
 import Button from './Button'
 import CaretUpIcon from './icons/CaretUpIcon'
 import ArrowRightIcon from './icons/ArrowRightIcon'
 import { FillLevelProvider } from './contexts/FillLevelContext'
+import EmptyState from './EmptyState'
 
 export type TableProps = Omit<
   DivProps,
   | 'data'
   | 'columns'
   | 'getRowCanExpand'
-  | 'getRowIsSelected'
   | 'renderExpanded'
   | 'loose'
   | 'stickyColumn'
@@ -52,11 +53,11 @@ export type TableProps = Omit<
   | 'virtualizerOptions'
   | 'reactTableOptions'
   | 'onRowClick'
+  | 'emptyStateProps'
 > & {
   data: any[]
   columns: any[]
   getRowCanExpand?: any
-  getRowIsSelected?: (row: Row<any>) => boolean
   renderExpanded?: any
   loose?: boolean
   stickyColumn?: boolean
@@ -69,6 +70,7 @@ export type TableProps = Omit<
   >
   reactTableOptions?: Partial<Omit<TableOptions<any>, 'data' | 'columns'>>
   onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<any>) => void
+  emptyStateProps?: ComponentProps<typeof EmptyState>
 }
 
 const propTypes = {}
@@ -445,7 +447,6 @@ function TableRef(
     data,
     columns,
     getRowCanExpand,
-    getRowIsSelected,
     renderExpanded,
     loose = false,
     stickyColumn = false,
@@ -456,6 +457,7 @@ function TableRef(
     reactVirtualOptions: virtualizerOptions,
     reactTableOptions,
     onRowClick,
+    emptyStateProps,
     ...props
   }: TableProps,
   forwardRef: Ref<any>
@@ -646,8 +648,8 @@ function TableRef(
                     key={row.id}
                     onClick={(e) => onRowClick?.(e, row)}
                     $lighter={i % 2 === 0}
-                    $selectable={!!getRowIsSelected}
-                    $selected={getRowIsSelected?.(row) ?? false}
+                    $selectable={row.getCanSelect()}
+                    $selected={row.getIsSelected() ?? false}
                     $clickable={!!onRowClick}
                     // data-index is required for virtual scrolling to work
                     data-index={row.index}
@@ -693,6 +695,11 @@ function TableRef(
             )}
           </Tbody>
         </T>
+        {isEmpty(rows) && (
+          <EmptyState
+            {...{ message: 'No results match your query', ...emptyStateProps }}
+          />
+        )}
       </Div>
       {hover && scrollTop > scrollTopMargin && (
         <Button

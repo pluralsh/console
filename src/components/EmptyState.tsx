@@ -2,7 +2,7 @@ import { type ReactElement, type Ref, forwardRef } from 'react'
 import { Div, Flex, type FlexProps, Text } from 'honorable'
 import PropTypes from 'prop-types'
 
-type EmptyStateProps = FlexProps & {
+type EmptyStateProps = Omit<FlexProps, 'message' | 'description' | 'icon'> & {
   message: string
   description?: string
   icon?: ReactElement
