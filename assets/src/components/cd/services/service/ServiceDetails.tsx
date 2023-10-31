@@ -1,5 +1,10 @@
 import { useMemo } from 'react'
-import { Outlet, useLocation, useParams } from 'react-router-dom'
+import {
+  Outlet,
+  useLocation,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
@@ -36,6 +41,13 @@ import { SideNavEntries } from 'components/layout/SideNavEntries'
 import ServiceSelector from '../ServiceSelector'
 
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
+
+type ServiceContextType = {
+  docs: ReturnType<typeof getDocsData>
+  service: Nullable<ServiceDeploymentDetailsFragment>
+}
+
+export const useServiceContext = () => useOutletContext<ServiceContextType>()
 
 export const getServiceDetailsBreadcrumbs = ({
   clusterId,
@@ -86,6 +98,7 @@ export const getDirectory = ({
       enabled: true,
     },
     { path: 'secrets', label: 'Secrets', enabled: true },
+    { path: 'revisions', label: 'Revisions', enabled: true },
     {
       path: 'docs',
       label: name ? `${capitalize(name)} docs` : 'Docs',
@@ -166,7 +179,14 @@ function ServiceDetailsBase() {
         {serviceError ? (
           <GqlError error={serviceError} />
         ) : serviceDeployment ? (
-          <Outlet context={{ docs, service: serviceData?.serviceDeployment }} />
+          <Outlet
+            context={
+              {
+                docs,
+                service: serviceData?.serviceDeployment,
+              } satisfies ServiceContextType
+            }
+          />
         ) : (
           <LoadingIndicator />
         )}

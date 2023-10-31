@@ -29,7 +29,7 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 
 import { StepBody } from '../ModalAlt'
 
-import { columns } from './RevisionHistory'
+import { selectableColumns } from './ServiceRevisionColumns'
 
 export function ServicesRollbackDeployment({
   serviceDeployment,
@@ -205,7 +205,7 @@ export function ModalForm({
             <FullHeightTableWrap>
               <Table
                 data={revisions}
-                columns={columns}
+                columns={selectableColumns}
                 css={{
                   maxHeight: 'unset',
                   height: '100%',

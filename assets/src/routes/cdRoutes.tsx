@@ -9,6 +9,7 @@ import ServiceDetails from 'components/cd/services/service/ServiceDetails'
 import ServiceDocs from 'components/cd/services/service/ServiceDocs'
 import ServiceComponents from 'components/cd/services/service/ServiceComponents'
 import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
+import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
 import ServiceComponent from 'components/cd/services/component/ServiceComponent'
 
 import ComponentInfo from 'components/component/ComponentInfo'
@@ -250,6 +251,10 @@ export const cdRoutes = [
     <Route
       element={<ServiceSecrets />}
       path="secrets"
+    />
+    <Route
+      element={<ServiceRevisions />}
+      path="revisions"
     />
     <Route
       element={<ServiceDocs />}

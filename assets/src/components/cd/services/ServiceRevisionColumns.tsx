@@ -89,4 +89,10 @@ const ColSelected = columnHelper.accessor(
   }
 )
 
-export const columns = [ColGitRef, ColMessage, ColCommitTime, ColSelected]
+export const selectableColumns = [
+  ColGitRef,
+  ColMessage,
+  ColCommitTime,
+  ColSelected,
+]
+export const columns = [ColGitRef, ColMessage, ColCommitTime]

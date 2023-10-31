@@ -13,7 +13,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useOutletContext, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import isEmpty from 'lodash/isEmpty'
 import styled, { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -21,7 +21,6 @@ import { useDebounce } from '@react-hooks-library/core'
 
 import {
   ConfigAttributes,
-  ServiceDeploymentDetailsFragment,
   useMergeServiceMutation,
   useServiceDeploymentSecretsQuery,
 } from 'generated/graphql'
@@ -40,14 +39,15 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import ModalAlt from 'components/cd/ModalAlt'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { useUpdateState } from 'components/hooks/useUpdateState'
-
 import CopyButton from 'components/utils/CopyButton'
-
 import { ObscuredToken } from 'components/profile/ObscuredToken'
-
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
-import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
+import {
+  getServiceDetailsBreadcrumbs,
+  useServiceContext,
+} from './ServiceDetails'
 
 function DeleteSecret({
   serviceDeploymentId,
@@ -359,9 +359,7 @@ export default function ServiceSecrets() {
   const theme = useTheme()
   const serviceId = useParams()[SERVICE_PARAM_ID]
   const clusterName = useParams()[SERVICE_PARAM_CLUSTER_ID]
-  const outletContext = useOutletContext<{
-    service: ServiceDeploymentDetailsFragment | null | undefined
-  }>()
+  const outletContext = useServiceContext()
 
   const [createOpen, setCreateOpen] = useState(false)
   const { data, error, refetch } = useServiceDeploymentSecretsQuery({
@@ -403,12 +401,9 @@ export default function ServiceSecrets() {
   }
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        rowGap: theme.spacing.medium,
-      }}
+    <ScrollablePage
+      heading="Secrets"
+      scrollable={false}
     >
       <ModalMountTransition open={createOpen}>
         <SecretEditModal
@@ -421,43 +416,52 @@ export default function ServiceSecrets() {
       <div
         css={{
           display: 'flex',
-          columnGap: theme.spacing.medium,
-          flexShrink: 0,
+          flexDirection: 'column',
+          rowGap: theme.spacing.medium,
+          height: '100%',
         }}
       >
-        <Input
-          placeholder="Search"
-          startIcon={<SearchIcon />}
-          value={filterString}
-          onChange={(e) => {
-            setFilterString(e.currentTarget.value)
+        <div
+          css={{
+            display: 'flex',
+            columnGap: theme.spacing.medium,
+            flexShrink: 0,
           }}
-          css={{ flexShrink: 0, flexGrow: 1 }}
-        />
-        <Button
-          primary
-          onClick={() => setCreateOpen(true)}
         >
-          Add secret
-        </Button>
-      </div>
-      {isEmpty(data?.serviceDeployment?.configuration) ? (
-        <EmptyState message="No secrets" />
-      ) : (
-        <FullHeightTableWrap>
-          <Table
-            data={data.serviceDeployment?.configuration || []}
-            columns={secretsColumns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
+          <Input
+            placeholder="Search"
+            startIcon={<SearchIcon />}
+            value={filterString}
+            onChange={(e) => {
+              setFilterString(e.currentTarget.value)
             }}
-            reactTableOptions={{
-              state: { globalFilter: debouncedFilterString },
-            }}
+            css={{ flexShrink: 0, flexGrow: 1 }}
           />
-        </FullHeightTableWrap>
-      )}
-    </div>
+          <Button
+            primary
+            onClick={() => setCreateOpen(true)}
+          >
+            Add secret
+          </Button>
+        </div>
+        {isEmpty(data?.serviceDeployment?.configuration) ? (
+          <EmptyState message="No secrets" />
+        ) : (
+          <FullHeightTableWrap>
+            <Table
+              data={data.serviceDeployment?.configuration || []}
+              columns={secretsColumns}
+              css={{
+                maxHeight: 'unset',
+                height: '100%',
+              }}
+              reactTableOptions={{
+                state: { globalFilter: debouncedFilterString },
+              }}
+            />
+          </FullHeightTableWrap>
+        )}
+      </div>
+    </ScrollablePage>
   )
 }

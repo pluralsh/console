@@ -4,13 +4,10 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
-import { useOutletContext, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import {
-  ServiceDeploymentDetailsFragment,
-  useServiceDeploymentComponentsQuery,
-} from 'generated/graphql'
+import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
 
 import {
   SERVICE_PARAM_CLUSTER_ID,
@@ -27,7 +24,10 @@ import { useComponentKindSelect } from 'components/apps/app/components/Component
 import { ComponentList } from 'components/apps/app/components/ComponentList'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
+import {
+  getServiceDetailsBreadcrumbs,
+  useServiceContext,
+} from './ServiceDetails'
 import { countDeprecations } from './deprecationUtils'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 
@@ -51,9 +51,7 @@ export default function ServiceComponents() {
   const serviceId = useParams()[SERVICE_PARAM_ID]
   const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
   const [showDeprecations, setShowDeprecations] = useState(false)
-  const outletContext = useOutletContext<{
-    service: ServiceDeploymentDetailsFragment | null | undefined
-  }>()
+  const outletContext = useServiceContext()
 
   const { data, error } = useServiceDeploymentComponentsQuery({
     variables: { id: serviceId || '' },

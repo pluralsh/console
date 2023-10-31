@@ -3,24 +3,18 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { capitalize } from 'lodash'
 import { useEffect, useRef } from 'react'
 
-import {
-  useLocation,
-  useNavigate,
-  useOutletContext,
-  useParams,
-} from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { useDocPageContext } from 'components/contexts/DocPageContext'
 
-import { getDocsData } from 'components/apps/app/App'
 import MarkdocComponent from 'components/utils/MarkdocContent'
+
+import { useServiceContext } from './ServiceDetails'
 
 export default function AppDocs() {
   const scrollRef = useRef<HTMLElement>()
   const { appName, docName } = useParams()
-  const { docs } = useOutletContext() as {
-    docs: ReturnType<typeof getDocsData>
-  }
+  const { docs } = useServiceContext()
   const { scrollHash, scrollToHash } = useDocPageContext()
 
   const hashFromUrl = useLocation().hash.slice(1)
