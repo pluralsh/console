@@ -26,18 +26,17 @@ export function DeleteCluster({
       refetch?.()
     },
   })
+  const protect = cluster.protect || cluster.self
 
   return (
     <Div onClick={(e) => e.stopPropagation()}>
       <DeleteIconButton
-        onClick={cluster.protect ? undefined : () => setConfirm(true)}
+        onClick={protect ? undefined : () => setConfirm(true)}
         tooltip
         textValue={
-          cluster.protect
-            ? 'Cluster is projected from deletion'
-            : 'Delete cluster'
+          protect ? 'Cluster is projected from deletion' : 'Delete cluster'
         }
-        disabled={!!cluster.protect}
+        disabled={!!protect}
       />
       <Confirm
         close={() => setConfirm(false)}
