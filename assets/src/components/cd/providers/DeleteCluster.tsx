@@ -9,6 +9,7 @@ import {
   useDeleteClusterMutation,
 } from '../../../generated/graphql'
 import { DeleteIconButton } from '../../utils/IconButtons'
+import { CLUSTER_PROTECT_TT_TEXT } from '../clusters/ClusterProtectBadge'
 
 export function DeleteCluster({
   cluster,
@@ -33,9 +34,7 @@ export function DeleteCluster({
       <DeleteIconButton
         onClick={protect ? undefined : () => setConfirm(true)}
         tooltip
-        textValue={
-          protect ? 'Cluster is projected from deletion' : 'Delete cluster'
-        }
+        textValue={protect ? CLUSTER_PROTECT_TT_TEXT : 'Delete cluster'}
         disabled={!!protect}
       />
       <Confirm

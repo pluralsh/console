@@ -85,7 +85,7 @@ export function ColWithIcon({
           url={typeof icon === 'string' ? icon : undefined}
         />
       </div>
-      <div className={classNames('content', { truncateLeft: 'truncateLeft' })}>
+      <div className={classNames('content', { truncateLeft })}>
         <WrapWithIf
           condition={truncateLeft}
           wrapper={<span />}

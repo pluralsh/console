@@ -23,8 +23,17 @@ export default function DecoratedName({
         alignItems: 'center',
       }}
     >
-      {prefix}
-      {children}
+      <div
+        css={{
+          display: 'flex',
+          gap: theme.spacing.xsmall,
+          alignItems: 'center',
+        }}
+      >
+        {prefix}
+        {children}
+        {suffix}
+      </div>
       {deletedAt && (
         <Chip
           loading
@@ -33,7 +42,6 @@ export default function DecoratedName({
           Deleting
         </Chip>
       )}
-      {suffix}
     </div>
   )
 }

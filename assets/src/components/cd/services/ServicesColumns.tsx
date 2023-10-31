@@ -1,6 +1,6 @@
+import { useState } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import {
-  CheckedShieldIcon,
   GitHubLogoIcon,
   GlobeIcon,
   ListBoxItem,
@@ -8,22 +8,21 @@ import {
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
+
 import { ServiceDeploymentsRowFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
+import { toDateOrUndef } from 'utils/date'
+import { shortenSha1 } from 'utils/sha'
+
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { getProviderIconURL } from 'components/utils/Provider'
-import { toDateOrUndef } from 'utils/date'
-
-import { useState } from 'react'
-
 import { MoreMenu } from 'components/utils/MoreMenu'
 
-import { shortenSha1 } from '../../../utils/sha'
+import { ClusterProtectBadge } from '../clusters/ClusterProtectBadge'
 
 import { ServicePermissionsModal } from './ServicePermissions'
-
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 import DecoratedName from './DecoratedName'
@@ -39,25 +38,18 @@ export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
   id: 'deployment',
   header: 'Deployment',
   enableSorting: true,
-  cell: ({ getValue }) => {
-    const node = getValue()
+  cell: function Cell({ getValue }) {
+    const serviceDeployment = getValue()
 
     return (
-      node && (
+      serviceDeployment && (
         <DecoratedName
           suffix={
-            node.protect ? (
-              <Tooltip
-                placement="top"
-                label="This service is protected from deletion"
-              >
-                <CheckedShieldIcon size={14} />
-              </Tooltip>
-            ) : null
+            <ClusterProtectBadge isProtected={serviceDeployment?.protect} />
           }
-          deletedAt={node.deletedAt}
+          deletedAt={serviceDeployment.deletedAt}
         >
-          {node.name}
+          {serviceDeployment.name}
         </DecoratedName>
       )
     )

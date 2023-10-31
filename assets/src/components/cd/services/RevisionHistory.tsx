@@ -4,6 +4,7 @@ import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { toDateOrUndef } from 'utils/date'
 import { CheckRoundedIcon, Tooltip } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
+
 import { StackedText } from '../clusters/Clusters'
 
 const columnHelper =

@@ -3,7 +3,6 @@ import {
   Breadcrumb,
   CaretRightIcon,
   CheckRoundedIcon,
-  CheckedShieldIcon,
   ClusterIcon,
   EmptyState,
   GearTrainIcon,
@@ -53,6 +52,7 @@ import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
 import CreateCluster from './create/CreateCluster'
 import { ClusterConditions } from './ClusterConditions'
+import { ClusterProtectBadge } from './ClusterProtectBadge'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -85,50 +85,39 @@ export const columns = [
   columnHelper.accessor(({ node }) => node, {
     id: 'cluster',
     header: 'Cluster',
-    cell: ({ getValue }) => {
+    cell: function Cell({ getValue }) {
       const cluster = getValue()
 
       return (
-        <div css={{ display: 'flex' }}>
-          <ColWithIcon icon={<ClusterIcon width={16} />}>
-            <DecoratedName deletedAt={cluster?.deletedAt}>
-              <div>
-                <StackedText
-                  first={
-                    <BasicLink
-                      as={Link}
-                      to={`/cd/clusters/${cluster?.id}`}
-                      css={{ whiteSpace: 'nowrap' }}
-                    >
-                      {cluster?.name}
-                    </BasicLink>
-                  }
-                  second={`handle: ${cluster?.handle}`}
-                />
-              </div>
-            </DecoratedName>
-          </ColWithIcon>
-          {cluster?.protect && (
-            <Tooltip
-              placement="top"
-              label="This cluster is protected from deletion"
-            >
-              <CheckedShieldIcon
-                margin={8}
-                size={12}
+        <ColWithIcon icon={<ClusterIcon width={16} />}>
+          <DecoratedName
+            deletedAt={cluster?.deletedAt}
+            suffix={<ClusterProtectBadge isProtected={cluster?.protect} />}
+          >
+            <div>
+              <StackedText
+                first={
+                  <BasicLink
+                    as={Link}
+                    to={`/cd/clusters/${cluster?.id}`}
+                    css={{ whiteSpace: 'nowrap' }}
+                  >
+                    {cluster?.name}
+                  </BasicLink>
+                }
+                second={`handle: ${cluster?.handle}`}
               />
-            </Tooltip>
-          )}
-        </div>
+            </div>
+          </DecoratedName>
+        </ColWithIcon>
       )
     },
   }),
   columnHelper.accessor(({ node }) => node?.provider, {
     id: 'cloud',
     header: 'Cloud',
-    cell: ({ getValue }) => {
+    cell: function Cell({ getValue }) {
       const provider = getValue()
-      // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
 
       return (
@@ -151,12 +140,11 @@ export const columns = [
   columnHelper.accessor(({ node }) => node, {
     id: 'version',
     header: 'Version',
-    cell: ({
+    cell: function Cell({
       row: {
         original: { node },
       },
-    }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+    }) {
       const theme = useTheme()
       const different =
         !node?.self &&
@@ -299,8 +287,7 @@ export const columns = [
   columnHelper.accessor(({ node }) => node, {
     id: 'actions',
     header: '',
-    cell: ({ table, getValue }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+    cell: function Cell({ table, getValue }) {
       const navigate = useNavigate()
       const cluster = getValue()
       const { refetch } = table.options.meta as { refetch?: () => void }
