@@ -1,5 +1,5 @@
 defmodule Console.GraphQl.PluralQueriesTest do
-  use Console.DataCase, async: true
+  use Console.DataCase, async: false
   use Mimic
   import KubernetesScaffolds
   alias Console.Plural
