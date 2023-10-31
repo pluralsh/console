@@ -72,18 +72,12 @@ const ColSelected = columnHelper.accessor(
   {
     id: 'selected',
     header: '',
-    cell: function Cell({
-      table: {
-        options: { meta },
-      },
-      row: { original },
-    }) {
+    cell: function Cell({ row: { getIsSelected } }) {
       const theme = useTheme()
-      const $selected = original?.id === (meta as any).selectedId
 
       return (
         <ColSelectedSC>
-          {$selected && (
+          {getIsSelected() && (
             <SelectedIcon
               size={16}
               color={theme.colors['action-primary']}

@@ -214,12 +214,11 @@ export function ModalForm({
                   const original =
                     row.original as ServiceDeploymentRevisionFragment
 
-                  console.log('row original', original.id)
-
                   setRevisionId(original.id)
                 }}
-                getRowIsSelected={(row) => row.id === revisionId}
-                reactTableOptions={{ meta: { selectedId: revisionId } }}
+                reactTableOptions={{
+                  state: { rowSelection: { [revisionId]: true } },
+                }}
               />
             </FullHeightTableWrap>
           </div>
