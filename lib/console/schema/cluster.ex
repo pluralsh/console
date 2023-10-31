@@ -45,12 +45,20 @@ defmodule Console.Schema.Cluster do
       embeds_one :aws, Aws, on_replace: :update do
         field :region, :string
       end
+
+      embeds_one :azure, Azure, on_replace: :update do
+        field :location,        :string
+        field :subscription_id, :string
+        field :resource_group,  :string
+        field :network,         :string
+      end
     end
 
     def changeset(model, attrs \\ %{}) do
       cast(model, attrs, [])
       |> cast_embed(:aws, with: &aws_changeset/2)
       |> cast_embed(:gcp, with: &gcp_changeset/2)
+      |> cast_embed(:azure, with: &azure_changeset/2)
     end
 
     def aws_changeset(model, attrs) do
@@ -60,6 +68,11 @@ defmodule Console.Schema.Cluster do
     def gcp_changeset(model, attrs) do
       cast(model, attrs, ~w(project network region)a)
       |> validate_required(~w(project network region)a)
+    end
+
+    def azure_changeset(model, attrs) do
+      cast(model, attrs, ~w(location subscription_id resource_group network)a)
+      |> validate_required(~w(location resource_group)a)
     end
   end
 

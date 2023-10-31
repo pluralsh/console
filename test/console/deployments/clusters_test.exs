@@ -96,6 +96,33 @@ defmodule Console.Deployments.ClustersTest do
       assert secrets["region"] == "us-east1"
     end
 
+    test "it can create a azure cluster with cloud specific configs" do
+      user = admin_user()
+      provider = insert(:cluster_provider, cloud: "azure")
+      insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25.11",
+        provider_id: provider.id,
+        cloud_settings: %{azure: %{location: "test", network: "test", resource_group: "test group", subscription_id: "test-subscription"}},
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      assert cluster.name == "test"
+      assert cluster.version == "1.25.11"
+
+      %{service: svc} = Console.Repo.preload(cluster, [:service])
+      {:ok, secrets} = Services.configuration(svc)
+      assert secrets["location"] == "test"
+      assert secrets["network"] == "test"
+      assert secrets["resourceGroup"] == "test group"
+      assert secrets["subscriptionId"] == "test-subscription"
+    end
+
     test "it will correctly validate provider-specific k8s versions" do
       user = admin_user()
       provider = insert(:cluster_provider, cloud: "gcp")

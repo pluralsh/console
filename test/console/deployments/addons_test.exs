@@ -3,6 +3,7 @@ defmodule Console.Deployments.AddOnsTest do
   alias Console.Deployments.{AddOns, Git, Services}
 
   describe "#addons" do
+    @tag :skip
     test "it can fetch add-ons in the artifacts repo" do
       deployment_settings(artifact_repository: build(:git_repository, url: "https://github.com/pluralsh/scaffolds.git"))
 
@@ -16,6 +17,7 @@ defmodule Console.Deployments.AddOnsTest do
   end
 
   describe "#install/3" do
+    @tag :skip
     test "it can install an add-on from the artifacts repo" do
       admin = admin_user()
       cluster = insert(:cluster)

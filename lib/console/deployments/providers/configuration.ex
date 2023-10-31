@@ -8,5 +8,21 @@ defmodule Console.Deployments.Providers.Configuration do
       %{name: "network", value: n},
     ]
   end
+
+  def conf(%Cluster{cloud_settings: %{azure: %Cluster.CloudSettings.Azure{} = az}}) do
+    Enum.filter([
+      %{name: "subscriptionId", value: az.subscription_id},
+      %{name: "location", value: az.location},
+      %{name: "resourceGroup", value: az.resource_group},
+      %{name: "network", value: az.network}
+    ], & &1.value)
+  end
+
+  def conf(%Cluster{cloud_settings: %{azure: %Cluster.CloudSettings.Aws{} = aws}}) do
+    Enum.filter([
+      %{name: "region", value: aws.region},
+    ], & &1.value)
+  end
+
   def conf(_), do: []
 end

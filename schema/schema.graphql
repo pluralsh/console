@@ -1113,6 +1113,7 @@ input TaintAttributes {
 input CloudSettingsAttributes {
   aws: AwsCloudAttributes
   gcp: GcpCloudAttributes
+  azure: AzureCloudAttributes
 }
 
 input AwsCloudAttributes {
@@ -1123,6 +1124,13 @@ input GcpCloudAttributes {
   project: String
   network: String
   region: String
+}
+
+input AzureCloudAttributes {
+  location: String
+  subscriptionId: String
+  resourceGroup: String
+  network: String
 }
 
 input ClusterProviderAttributes {

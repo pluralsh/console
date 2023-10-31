@@ -265,6 +265,13 @@ export type AwsSettingsAttributes = {
   secretAccessKey: Scalars['String']['input'];
 };
 
+export type AzureCloudAttributes = {
+  location?: InputMaybe<Scalars['String']['input']>;
+  network?: InputMaybe<Scalars['String']['input']>;
+  resourceGroup?: InputMaybe<Scalars['String']['input']>;
+  subscriptionId?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type AzureSettingsAttributes = {
   clientId: Scalars['ID']['input'];
   clientSecret: Scalars['String']['input'];
@@ -402,6 +409,7 @@ export type CloudSettings = {
 
 export type CloudSettingsAttributes = {
   aws?: InputMaybe<AwsCloudAttributes>;
+  azure?: InputMaybe<AzureCloudAttributes>;
   gcp?: InputMaybe<GcpCloudAttributes>;
 };
 
