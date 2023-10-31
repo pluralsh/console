@@ -50,7 +50,7 @@ function CreateClusterModal({
     if (createMode === Mode.Import) {
       createCluster({
         variables: {
-          attributes: { version: '', ...importClusterAttributes },
+          attributes: importClusterAttributes,
         },
         onCompleted: (ret) => {
           refetch?.()
