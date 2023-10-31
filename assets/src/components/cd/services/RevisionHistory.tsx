@@ -4,6 +4,7 @@ import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { toDateOrUndef } from 'utils/date'
 import { CheckRoundedIcon, Tooltip } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
+import { StackedText } from '../clusters/Clusters'
 
 const columnHelper =
   createColumnHelper<Nullable<ServiceDeploymentRevisionFragment>>()
@@ -12,12 +13,15 @@ const ColGitRef = columnHelper.accessor((row) => row?.git.ref, {
   id: 'gitRef',
   header: 'Commit ref',
   meta: { truncate: true },
-  cell: ({ getValue }) => (
+  cell: ({ row: { original }, getValue }) => (
     <Tooltip
       placement="top-start"
       label={getValue()}
     >
-      <span>{getValue()}</span>
+      <StackedText
+        first={getValue()}
+        second={`sha: ${original?.sha || ''}`}
+      />
     </Tooltip>
   ),
 })

@@ -462,6 +462,34 @@ defmodule Console.Deployments.ServicesTest do
     end
   end
 
+  describe "#update_sha/3" do
+    test "it will update service sha and its base revision" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      git = insert(:git_repository)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      {:ok, svc} = Services.update_sha(service, "test-sha", "commit message")
+
+      assert svc.sha == "test-sha"
+      assert svc.message == "commit message"
+      %{revision: revision} = Console.Repo.preload(svc, [:revision])
+      assert revision.sha == "test-sha"
+      assert revision.message == "commit message"
+    end
+  end
+
   describe "#update_components/2" do
     test "it will update the k8s components w/in the service" do
       service = insert(:service)

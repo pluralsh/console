@@ -1,5 +1,6 @@
 fragment ServiceDeploymentRevision on Revision {
   id
+  sha
   version
   message
   updatedAt

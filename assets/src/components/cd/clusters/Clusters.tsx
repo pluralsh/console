@@ -61,7 +61,7 @@ export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
-function StackedText({ first, second }) {
+export function StackedText({ first, second }) {
   const theme = useTheme()
 
   return (

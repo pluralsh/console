@@ -3964,7 +3964,7 @@ export type DeleteClusterProviderMutationVariables = Exact<{
 
 export type DeleteClusterProviderMutation = { __typename?: 'RootMutationType', deleteClusterProvider?: { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, deletedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null } | null };
 
-export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: string, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } };
+export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } };
 
 export type ServiceDeploymentsRowFragment = { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null };
 
@@ -3972,7 +3972,7 @@ export type ServiceDeploymentDetailsFragment = { __typename?: 'ServiceDeployment
 
 export type ServiceDeploymentComponentFragment = { __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null };
 
-export type ServiceDeploymentRevisionsFragment = { __typename?: 'ServiceDeployment', revision?: { __typename?: 'Revision', id: string, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null, revisions?: { __typename?: 'RevisionConnection', edges?: Array<{ __typename?: 'RevisionEdge', node?: { __typename?: 'Revision', id: string, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null } | null> | null } | null };
+export type ServiceDeploymentRevisionsFragment = { __typename?: 'ServiceDeployment', revision?: { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null, revisions?: { __typename?: 'RevisionConnection', edges?: Array<{ __typename?: 'RevisionEdge', node?: { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null } | null> | null } | null };
 
 export type ServiceDeploymentsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -4016,7 +4016,7 @@ export type ServiceDeploymentRevisionsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceDeploymentRevisionsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', revision?: { __typename?: 'Revision', id: string, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null, revisions?: { __typename?: 'RevisionConnection', edges?: Array<{ __typename?: 'RevisionEdge', node?: { __typename?: 'Revision', id: string, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null } | null> | null } | null } | null };
+export type ServiceDeploymentRevisionsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', revision?: { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null, revisions?: { __typename?: 'RevisionConnection', edges?: Array<{ __typename?: 'RevisionEdge', node?: { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null } | null> | null } | null } | null };
 
 export type CreateServiceDeploymentMutationVariables = Exact<{
   attributes: ServiceDeploymentAttributes;
@@ -4846,6 +4846,7 @@ export const ServiceDeploymentComponentFragmentDoc = gql`
 export const ServiceDeploymentRevisionFragmentDoc = gql`
     fragment ServiceDeploymentRevision on Revision {
   id
+  sha
   version
   message
   updatedAt
@@ -4861,7 +4862,7 @@ export const ServiceDeploymentRevisionsFragmentDoc = gql`
   revision {
     ...ServiceDeploymentRevision
   }
-  revisions(first: 100) {
+  revisions(first: 500) {
     edges {
       node {
         ...ServiceDeploymentRevision

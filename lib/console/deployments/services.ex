@@ -204,6 +204,14 @@ defmodule Console.Deployments.Services do
       |> Service.changeset(%{sha: sha, status: :stale, message: msg})
       |> Repo.update()
     end)
+    |> add_operation(:current, fn %{base: base} ->
+      case Repo.preload(base, [:revision]) do
+        %{revision: %Revision{} = revision} ->
+          Revision.update_changeset(revision, %{sha: sha, message: msg})
+          |> Repo.update()
+        _ -> {:ok, base}
+      end
+    end)
     |> add_operation(:revision, fn %{base: base} ->
       add_version(%{sha: sha, message: msg}, base.version)
       |> Console.dedupe(:git, %{ref: sha, folder: base.git.folder})

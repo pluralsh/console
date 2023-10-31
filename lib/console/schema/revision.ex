@@ -44,4 +44,12 @@ defmodule Console.Schema.Revision do
     |> cast_assoc(:configuration)
     |> validate_required(~w(version)a)
   end
+
+  def update_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, @valid)
+    |> cast_embed(:git)
+    |> cast_assoc(:configuration)
+    |> validate_required(~w(version)a)
+  end
 end

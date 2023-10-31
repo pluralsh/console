@@ -50,8 +50,9 @@ export default function Providers() {
         state: {
           ...tableFilters,
         },
+        meta: { refetch },
       }),
-      [tableFilters]
+      [tableFilters, refetch]
     )
 
   if (error) {
