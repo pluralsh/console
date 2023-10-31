@@ -218,7 +218,6 @@ export function ModalForm({
 
                   setRevisionId(original.id)
                 }}
-                // @ts-expect-error
                 getRowIsSelected={(row) => row.id === revisionId}
                 reactTableOptions={{ meta: { selectedId: revisionId } }}
               />

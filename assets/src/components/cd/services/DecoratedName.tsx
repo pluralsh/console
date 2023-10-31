@@ -1,4 +1,5 @@
 import { Chip } from '@pluralsh/design-system'
+import { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 
 export default function DecoratedName({
