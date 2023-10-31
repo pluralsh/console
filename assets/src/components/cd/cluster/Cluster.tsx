@@ -10,7 +10,13 @@ import {
 } from '@pluralsh/design-system'
 import { useMemo, useRef, useState } from 'react'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
+import {
+  Outlet,
+  useMatch,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
 import {
   CD_BASE_PATH,
@@ -25,6 +31,7 @@ import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
 
 import {
+  ClusterFragment,
   useClusterQuery,
   useClustersTinyQuery,
 } from '../../../generated/graphql'
@@ -77,7 +84,7 @@ export default function Cluster() {
   const { data: clustersData } = useClustersTinyQuery()
   const clusterEdges = clustersData?.clusters?.edges
 
-  const { data } = useClusterQuery({
+  const { data, refetch } = useClusterQuery({
     variables: { id: clusterId || '' },
     pollInterval: POLL_INTERVAL,
   })
@@ -174,8 +181,17 @@ export default function Cluster() {
         css={{ height: '100%' }}
         stateRef={tabStateRef}
       >
-        <Outlet context={{ cluster }} />
+        <Outlet context={{ cluster, refetch } satisfies ClusterContextType} />
       </TabPanel>
     </ResponsivePageFullWidth>
   )
+}
+
+type ClusterContextType = {
+  cluster: ClusterFragment
+  refetch: () => void
+}
+
+export function useClusterContext() {
+  return useOutletContext<ClusterContextType>()
 }

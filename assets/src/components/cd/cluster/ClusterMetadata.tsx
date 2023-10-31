@@ -1,4 +1,3 @@
-import { useOutletContext } from 'react-router-dom'
 import {
   Card,
   CheckRoundedIcon,
@@ -12,14 +11,22 @@ import moment from 'moment/moment'
 import isEmpty from 'lodash/isEmpty'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { Cluster, NodePool } from '../../../generated/graphql'
+import { ClusterFragment, NodePool } from '../../../generated/graphql'
 import { SubTitle } from '../../cluster/nodes/SubTitle'
 import ProviderIcon from '../../utils/Provider'
 import CopyButton from '../../utils/CopyButton'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { nextSupportedVersion } from '../../../utils/semver'
 
-function MetadataCard({ cluster }: { cluster: Cluster }) {
+import { useClusterContext } from './Cluster'
+
+function MetadataCard({
+  cluster,
+  refetch,
+}: {
+  cluster: ClusterFragment
+  refetch: Nullable<() => void>
+}) {
   const theme = useTheme()
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
   const upgradeVersion = nextSupportedVersion(
@@ -71,7 +78,10 @@ function MetadataCard({ cluster }: { cluster: Cluster }) {
           margin={0}
         >
           {upgradeVersion || hasDeprecations ? (
-            <ClusterUpgrade cluster={cluster} />
+            <ClusterUpgrade
+              cluster={cluster}
+              refetch={refetch}
+            />
           ) : (
             '-'
           )}
@@ -144,7 +154,7 @@ export const columns = [
 
 export default function ClusterMetadata() {
   const theme = useTheme()
-  const { cluster } = useOutletContext() as { cluster: Cluster }
+  const { cluster, refetch } = useClusterContext()
 
   return (
     <div
@@ -154,7 +164,10 @@ export default function ClusterMetadata() {
         gap: theme.spacing.medium,
       }}
     >
-      <MetadataCard cluster={cluster} />
+      <MetadataCard
+        cluster={cluster}
+        refetch={refetch}
+      />
       {!cluster.self && !isEmpty(cluster.nodePools) && (
         <Table
           data={cluster.nodePools || []}

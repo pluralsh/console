@@ -2,51 +2,67 @@ import {
   Button,
   ClusterIcon,
   ErrorIcon,
+  ListBoxItem,
   Modal,
+  Select,
   Table,
   WarningIcon,
 } from '@pluralsh/design-system'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
-import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { Confirm } from 'components/utils/Confirm'
-import { ProviderIcons } from 'components/utils/Provider'
+
 import {
   ClustersRowFragment,
   useUpdateClusterMutation,
 } from 'generated/graphql'
 
-import { nextSupportedVersion } from '../../../utils/semver'
+import {
+  nextSupportedVersion,
+  supportedUpgrades,
+  toNiceVersion,
+} from 'utils/semver'
+
+import { ColWithIcon } from 'components/utils/table/ColWithIcon'
+import { Confirm } from 'components/utils/Confirm'
+import { ProviderIcons } from 'components/utils/Provider'
+import { TabularNumbers } from 'components/cluster/TableElements'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { deprecationsColumns } from './deprecationsColumns'
 
 function ClustersUpgradeNow({
   cluster,
   targetVersion,
+  refetch,
 }: {
   cluster?: ClustersRowFragment | null
-  targetVersion: string
+  targetVersion: Nullable<string>
+  refetch: Nullable<() => void>
 }) {
-  const [mutation, { loading, error }] = useUpdateClusterMutation({
+  const [updateCluster, { loading, error }] = useUpdateClusterMutation({
     variables: {
       id: cluster?.id ?? '',
       attributes: { version: targetVersion },
     },
-    onCompleted: () => setConfirm(false),
+    onCompleted: () => {
+      refetch?.()
+      setConfirm(false)
+    },
   })
   const [confirm, setConfirm] = useState(false)
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
   const onClick = useCallback(
-    () => (!hasDeprecations ? mutation() : setConfirm(true)),
-    [hasDeprecations, mutation]
+    () => (!hasDeprecations ? updateCluster() : setConfirm(true)),
+    [hasDeprecations, updateCluster]
   )
 
   return (
-    <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
+    <>
       <Button
         small
+        disabled={!targetVersion}
         destructive={hasDeprecations}
         floating={!hasDeprecations}
         width="fit-content"
@@ -60,12 +76,12 @@ function ClustersUpgradeNow({
         title="Confirm upgrade"
         text="This could be a destructive action. Before updating your Kubernetes version check and fix all deprecated resources."
         close={() => setConfirm(false)}
-        submit={mutation}
+        submit={updateCluster}
         loading={loading}
         error={error}
         destructive
       />
-    </div>
+    </>
   )
 }
 
@@ -83,8 +99,8 @@ const upgradeColumns = [
   }),
   columnHelperUpgrade.accessor((cluster) => cluster?.version, {
     id: 'version',
-    header: 'Version',
-    cell: ({ getValue }) => <div>v{getValue()}</div>,
+    header: 'Current version',
+    cell: ({ getValue }) => <div>{toNiceVersion(getValue())}</div>,
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'nextK8sRelease',
@@ -94,48 +110,185 @@ const upgradeColumns = [
 
       return (
         <ColWithIcon icon={ProviderIcons.GENERIC}>
-          {nextSupportedVersion(
-            cluster?.version,
-            cluster?.provider?.supportedVersions
+          {toNiceVersion(
+            nextSupportedVersion(
+              cluster?.version,
+              cluster?.provider?.supportedVersions
+            )
           )}
         </ColWithIcon>
       )
     },
   }),
+
   columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
-    header: '',
-    cell: ({ getValue }) => {
+    header: 'Upgrade version',
+    meta: {
+      gridTemplate: 'fit-content(500px)',
+    },
+    cell: function Cell({ table, getValue }) {
+      const theme = useTheme()
       const cluster = getValue()
-      const upgrade = nextSupportedVersion(
-        cluster?.version,
-        cluster?.provider?.supportedVersions
+      const upgrades = useMemo(
+        () =>
+          supportedUpgrades(
+            cluster.version,
+            cluster.provider?.supportedVersions
+          ),
+        [cluster.provider?.supportedVersions, cluster.version]
       )
+      const [targetVersion, setTargetVersion] = useState<Nullable<string>>()
+
+      const { refetch } = table.options.meta as { refetch?: () => void }
+
+      useEffect(() => {
+        if (!upgrades.some((upgrade) => upgrade === targetVersion)) {
+          setTargetVersion(undefined)
+        }
+      }, [targetVersion, upgrades])
+
+      if (isEmpty(upgrades)) {
+        return null
+      }
 
       return (
-        upgrade && (
+        <div
+          css={{
+            display: 'flex',
+            gap: theme.spacing.medium,
+            alignItems: 'center',
+          }}
+        >
+          <div css={{ minWidth: 170 }}>
+            <Select
+              selectedKey={targetVersion}
+              onSelectionChange={setTargetVersion as any}
+              label="Select version"
+            >
+              {upgrades.map((v) => (
+                <ListBoxItem
+                  key={v}
+                  label={
+                    <TabularNumbers css={{ textAlign: 'right' }}>
+                      {toNiceVersion(v)}
+                    </TabularNumbers>
+                  }
+                />
+              ))}
+            </Select>
+          </div>
           <ClustersUpgradeNow
             cluster={cluster}
-            targetVersion={upgrade}
+            targetVersion={targetVersion}
+            refetch={refetch}
           />
-        )
+        </div>
       )
     },
   }),
 ]
 
-export default function ClusterUpgrade({
+function ClusterUpgradeModal({
+  open,
+  onClose,
+  hasDeprecations,
   cluster,
+  refetch,
 }: {
-  cluster?: ClustersRowFragment | null | undefined
+  open: boolean
+  onClose: () => void
+  hasDeprecations: boolean
+  cluster: ClustersRowFragment | null | undefined
+  refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const [isOpen, setIsOpen] = useState(false)
-  const closeModal = useCallback((e?: Event) => {
+
+  return (
+    <Modal
+      header="Upgrade Kubernetes"
+      open={open}
+      onClose={onClose}
+      portal
+      size="large"
+      maxWidth={1024}
+      width={1024}
+      actions={
+        <Button
+          type="button"
+          secondary
+          onClick={(e) => {
+            e.preventDefault()
+            onClose()
+          }}
+        >
+          Cancel
+        </Button>
+      }
+    >
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.large,
+        }}
+      >
+        {hasDeprecations ? (
+          <>
+            <div
+              css={{
+                ...theme.partials.text.body1,
+                color: theme.colors['text-light'],
+              }}
+            >
+              Before upgrading the Kubernetes version fix all deprecated
+              resources listed below:
+            </div>
+            <Table
+              data={cluster?.apiDeprecations || []}
+              columns={deprecationsColumns}
+              css={{
+                maxHeight: 310,
+                height: '100%',
+              }}
+            />
+          </>
+        ) : (
+          <div
+            css={{
+              ...theme.partials.text.body1,
+              color: theme.colors['text-light'],
+            }}
+          >
+            No deprecated resources detected. Ready to update.
+          </div>
+        )}
+        <Table
+          data={[cluster]}
+          columns={upgradeColumns}
+          css={{
+            maxHeight: 'unset',
+            height: '100%',
+          }}
+          reactTableOptions={{ meta: { refetch } }}
+        />
+      </div>
+    </Modal>
+  )
+}
+
+export default function ClusterUpgrade({
+  cluster,
+  refetch,
+}: {
+  cluster?: ClustersRowFragment | null | undefined
+  refetch: Nullable<() => void>
+}) {
+  const [open, setOpen] = useState(false)
+  const onClose = useCallback((e?: Event) => {
     e?.preventDefault?.()
-    setIsOpen(false)
+    setOpen(false)
   }, [])
-  const onClose = useCallback(() => setIsOpen(false), [])
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
 
   return (
@@ -157,75 +310,21 @@ export default function ClusterUpgrade({
             />
           )
         }
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setOpen(true)
+        }}
       >
         {hasDeprecations ? 'Deprecations' : 'Upgrade'}
       </Button>
-      <Modal
-        header="Upgrade Kubernetes"
-        open={isOpen}
-        onClose={onClose}
-        portal
-        size="large"
-        maxWidth={1024}
-        width={1024}
-        actions={
-          <Button
-            type="button"
-            secondary
-            onClick={closeModal}
-          >
-            Cancel
-          </Button>
-        }
-      >
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.large,
-          }}
-        >
-          {hasDeprecations ? (
-            <>
-              <div
-                css={{
-                  ...theme.partials.text.body1,
-                  color: theme.colors['text-light'],
-                }}
-              >
-                Before upgrading the Kubernetes version fix all deprecated
-                resources listed below:
-              </div>
-              <Table
-                data={cluster?.apiDeprecations || []}
-                columns={deprecationsColumns}
-                css={{
-                  maxHeight: 310,
-                  height: '100%',
-                }}
-              />
-            </>
-          ) : (
-            <div
-              css={{
-                ...theme.partials.text.body1,
-                color: theme.colors['text-light'],
-              }}
-            >
-              No deprecated resources detected. Ready to update.
-            </div>
-          )}
-          <Table
-            data={[cluster]}
-            columns={upgradeColumns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
-        </div>
-      </Modal>
+      <ModalMountTransition open={open}>
+        <ClusterUpgradeModal
+          open={open}
+          onClose={onClose}
+          hasDeprecations={hasDeprecations}
+          cluster={cluster}
+          refetch={refetch}
+        />
+      </ModalMountTransition>
     </>
   )
 }
