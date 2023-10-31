@@ -2780,6 +2780,7 @@ type ConsoleConfiguration {
   isSandbox: Boolean
   pluralLogin: Boolean
   vpnEnabled: Boolean
+  byok: Boolean
   features: AvailableFeatures
   manifest: PluralManifest
   gitStatus: GitStatus

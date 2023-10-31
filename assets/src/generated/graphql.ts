@@ -743,6 +743,7 @@ export type ConfigurationValidation = {
 
 export type ConsoleConfiguration = {
   __typename?: 'ConsoleConfiguration';
+  byok?: Maybe<Scalars['Boolean']['output']>;
   features?: Maybe<AvailableFeatures>;
   gitCommit?: Maybe<Scalars['String']['output']>;
   gitStatus?: Maybe<GitStatus>;
