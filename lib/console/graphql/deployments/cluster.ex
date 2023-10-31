@@ -135,7 +135,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :repository,          :git_repository, resolve: dataloader(Deployments), description: "the repository used to serve cluster manifests"
     field :provider_repository, :git_repository, resolve: dataloader(Deployments), description: "the repository for the CAPI service itself if customized"
     field :service,             :service_deployment, resolve: dataloader(Deployments), description: "the service of the CAPI controller itself"
-    field :credentials,         list_of(:provider_credential), resolve: dataloader(ProviderCredential), description: "a list of credentials eligible for this provider"
+    field :credentials,         list_of(:provider_credential), resolve: dataloader(Deployments), description: "a list of credentials eligible for this provider"
     field :deleted_at,          :datetime, description: "when the cluster provider was deleted"
 
     field :supported_versions, list_of(:string), description: "the kubernetes versions this provider currently supports",
