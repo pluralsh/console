@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kas.fullname" . }}
+  labels:
+    {{- include "kas.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "kas.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        {{- if and .Values.metrics.enabled (not .Values.metrics.serviceMonitor.enabled) }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.service.observabilityPort | quote }}
+        prometheus.io/path: {{ .Values.metrics.path }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "kas.selectorLabels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      serviceAccountName: {{ include "kas.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          args:
+            - "--configuration-file=/etc/kas/config.yaml"
+            {{- range .Values.extraArgs }}
+            - {{ . }}
+            {{- end }}
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          {{- if .Values.extraEnv }}
+            {{- toYaml .Values.extraEnv | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+            - containerPort: {{ .Values.service.kubernetesApiPort }}
+            - containerPort: {{ .Values.service.privateApiPort }}
+            - containerPort: {{ .Values.service.observabilityPort }}
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: {{ .Values.service.observabilityPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: {{ .Values.service.observabilityPort }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: etc-kas
+              mountPath: /etc/kas
+              readOnly: true
+      terminationGracePeriodSeconds: 300
+      volumes:
+      - name: etc-kas
+        projected:
+          defaultMode: 0440
+          sources:
+            - configMap:
+                name: {{ template "kas.configMapName" . }}
+            {{- range $name, $value := .Values.secrets }}
+            - secret:
+                name: {{ $name }}
+                items:
+                  - key: secret
+                    path: .{{ $name }}_secret
+            {{- end }}
+            - secret:
+                name: {{ template "common.names.fullname" (index .Subcharts "redis") }}
+                items:
+                  - key: redis-password
+                    path: redis_server_secret
+            - secret:
+                name: {{ .Values.ingress.tlsSecretName }}
+                items:
+                  - key: tls.crt
+                    path: tls.crt
+                  - key: tls.key
+                    path: tls.key
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
