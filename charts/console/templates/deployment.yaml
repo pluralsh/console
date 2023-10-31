@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: console
+  labels:
+{{ include "console.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: console
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: console
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{ if .Values.podLabels }}
+        {{ toYaml .Values.podLabels | nindent 8 }}
+        {{ end }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: {{ .Values.service.port | quote }}
+        checksum/config: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: console
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.shutdownDelay }}
+      initContainers:
+      - name: wait-for-pg
+        image: {{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}
+        imagePullPolicy: IfNotPresent
+        command: [ "/bin/sh", "-c", "until nc -zv plural-console 5432 -w1; do echo 'waiting for db'; sleep 1; done" ]
+      {{ if .Values.cliContainer.enabled }}
+      - name: cli-override
+        image: {{ .Values.cliContainer.image.repository }}:{{ .Values.cliContainer.image.tag }}
+        imagePullPolicy: IfNotPresent
+        command: [ "/bin/sh", "-c", "cp /go/bin/plural /shared/plural"]
+        volumeMounts:
+          - name: cli-override
+            mountPath: /shared
+      {{- end }}
+      containers:
+      - name: console
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+        envFrom:
+        - secretRef:
+            name: console-env
+        env:
+        {{ include "console.env" . | nindent 8 }}
+        {{- if  .Values.extraEnv }}
+        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- end }}
+        volumeMounts:
+        {{ if .Values.cliContainer.enabled }}
+        - name: cli-override
+          mountPath: /usr/local/bin/plural
+          subPath: plural
+        {{- end }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.port }}
+          protocol: TCP
+        - name: epmd
+          containerPort: 4369
+          protocol: TCP
+        livenessProbe:
+        {{ toYaml .Values.livenessProbe | nindent 10 }}
+        readinessProbe:
+        {{ toYaml .Values.readinessProbe | nindent 10 }}
+        resources:
+        {{- toYaml .Values.resources | nindent 10 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      volumes:
+      {{ if .Values.cliContainer.enabled }}
+      - name: cli-override
+        emptyDir: {}
+      {{- end }}

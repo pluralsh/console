@@ -1,0 +1,50 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "console.migration-name" . }}
+  labels:
+    platform.plural.sh/ignore: 'true'
+    {{ include "console.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+      initContainers:
+      - name: wait-for-pg
+        image: {{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}
+        imagePullPolicy: IfNotPresent
+        command: [ "/bin/sh", "-c", "until nc -zv plural-console 5432 -w1; do echo 'waiting for db'; sleep 1; done" ]
+      containers:
+      - name: migrator
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        command: ["/opt/app/bin/console",  "migrate"]
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        envFrom:
+        - secretRef:
+            name: console-env
+        - secretRef:
+            name: console-migration-env
+        env:
+        {{ include "console.env" . | nindent 8 }}
+        volumeMounts:
+        {{ if .Values.secrets.id_rsa }}
+        - name: console-ssh
+          mountPath: "{{ .Values.homeDir }}/.ssh"
+        {{ end }}
+        - name: console-conf
+          mountPath: "{{ .Values.homeDir }}/.plural"
+      volumes:
+        {{ if .Values.secrets.id_rsa }}
+        - name: console-ssh
+          secret:
+            defaultMode: 384
+            secretName: console-ssh
+        {{ end }}
+        - name: console-conf
+          secret:
+            secretName: console-conf
+      restartPolicy: Never
+  backoffLimit: 5

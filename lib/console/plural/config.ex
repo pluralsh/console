@@ -40,11 +40,18 @@ defmodule Console.Plural.Config do
   defp plural_endpoint(_), do: "app.plural.sh"
 
   def derive_config() do
-    with nil <- System.get_env("CHARTMART_TOKEN"),
+    with nil <- System.get_env("PLURAL_TOKEN"),
       do: from_config_file()
   end
 
   def config_file() do
+    case System.get_env("PLURAL_TOKEN") do
+      token when is_binary(token) -> %{"token" => token}
+      _ -> config_file_inner()
+    end
+  end
+
+  def config_file_inner() do
     filename = Path.join([System.user_home!(), ".plural", "config.yml"])
     case YamlElixir.read_from_file(filename) do
       {:ok, %{"kind" => "Config", "spec" => conf}} -> conf
