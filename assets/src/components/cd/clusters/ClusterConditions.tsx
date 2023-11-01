@@ -13,6 +13,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { toDateOrUndef } from 'utils/date'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { TableText } from 'components/cluster/TableElements'
+import { isEmpty } from 'lodash'
 
 function ClusterConditionsButton({
   ...props
@@ -110,6 +111,10 @@ export function ClusterConditions({
   cluster: Nullable<Pick<ClustersRowFragment, 'name' | 'id' | 'status'>>
 }) {
   const [isOpen, setIsOpen] = useState(false)
+
+  if (isEmpty(cluster?.status?.conditions)) {
+    return null
+  }
 
   return (
     <div onClick={(e) => e.stopPropagation()}>
