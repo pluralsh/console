@@ -19,6 +19,7 @@ import {
 } from 'generated/graphql'
 
 import {
+  coerceSemver,
   nextSupportedVersion,
   supportedUpgrades,
   toNiceVersion,
@@ -31,6 +32,11 @@ import { TabularNumbers } from 'components/cluster/TableElements'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { deprecationsColumns } from './deprecationsColumns'
+
+const supportedVersions = (cluster: ClustersRowFragment | null) =>
+  (cluster?.provider?.supportedVersions || []).map((vsn) =>
+    coerceSemver(vsn || '')
+  )
 
 function ClustersUpgradeNow({
   cluster,
@@ -111,10 +117,7 @@ const upgradeColumns = [
       return (
         <ColWithIcon icon={ProviderIcons.GENERIC}>
           {toNiceVersion(
-            nextSupportedVersion(
-              cluster?.version,
-              cluster?.provider?.supportedVersions
-            )
+            nextSupportedVersion(cluster?.version, supportedVersions(cluster))
           )}
         </ColWithIcon>
       )
@@ -131,11 +134,7 @@ const upgradeColumns = [
       const theme = useTheme()
       const cluster = getValue()
       const upgrades = useMemo(
-        () =>
-          supportedUpgrades(
-            cluster.version,
-            cluster.provider?.supportedVersions
-          ),
+        () => supportedUpgrades(cluster.version, supportedVersions(cluster)),
         [cluster.provider?.supportedVersions, cluster.version]
       )
       const [targetVersion, setTargetVersion] = useState<Nullable<string>>()

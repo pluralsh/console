@@ -41,3 +41,12 @@ export function toNiceVersion(version: Nullable<string>) {
 
   return `${version.startsWith('v') ? '' : 'v'}${version}`
 }
+
+export function coerceSemver(version: string) {
+  if (semver.valid(version)) {
+    return version
+  }
+
+  const vsn = `${version}.0`
+  return semver.valid(vsn) ? vsn : null
+}

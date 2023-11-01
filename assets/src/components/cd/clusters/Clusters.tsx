@@ -42,7 +42,11 @@ import {
 } from '../../../utils/kubernetes'
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { TableText } from '../../cluster/TableElements'
-import { nextSupportedVersion, toNiceVersion } from '../../../utils/semver'
+import {
+  coerceSemver,
+  nextSupportedVersion,
+  toNiceVersion,
+} from '../../../utils/semver'
 
 import DecoratedName from '../services/DecoratedName'
 
@@ -273,7 +277,9 @@ export const columns = [
       const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
       const upgrade = nextSupportedVersion(
         cluster?.version,
-        cluster?.provider?.supportedVersions
+        (cluster?.provider?.supportedVersions || []).map((vsn) =>
+          coerceSemver(vsn || '')
+        )
       )
       const { refetch } = table.options.meta as { refetch?: () => void }
 
