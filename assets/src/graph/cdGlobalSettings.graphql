@@ -1,0 +1,37 @@
+fragment DeploymentSettings on DeploymentSettings {
+  id
+  name
+  enabled
+  insertedAt
+  updatedAt
+  artifactRepository {
+    ...GitRepository
+  }
+  deployerRepository {
+    ...GitRepository
+  }
+  createBindings {
+    ...PolicyBinding
+  }
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+  gitBindings {
+    ...PolicyBinding
+  }
+}
+
+mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
+  updateDeploymentSettings(attributes: $attributes) {
+    ...DeploymentSettings
+  }
+}
+
+query DeploymentSettings {
+  deploymentSettings {
+    ...DeploymentSettings
+  }
+}

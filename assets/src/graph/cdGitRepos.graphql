@@ -1,4 +1,4 @@
-fragment GitRepositoriesRow on GitRepository {
+fragment GitRepository on GitRepository {
   id
   url
   health
@@ -9,6 +9,7 @@ fragment GitRepositoriesRow on GitRepository {
   pulledAt
   updatedAt
   urlFormat
+  httpsPath
 }
 
 query GitRepositories {
@@ -18,7 +19,7 @@ query GitRepositories {
     }
     edges {
       node {
-        ...GitRepositoriesRow
+        ...GitRepository
       }
     }
   }
@@ -26,7 +27,7 @@ query GitRepositories {
 
 mutation CreateGitRepository($attributes: GitAttributes!) {
   createGitRepository(attributes: $attributes) {
-    ...GitRepositoriesRow
+    ...GitRepository
   }
 }
 
@@ -38,6 +39,6 @@ mutation DeleteGitRepository($id: ID!) {
 
 mutation UpdateGitRepository($id: ID!, $attributes: GitAttributes!) {
   updateGitRepository(id: $id, attributes: $attributes) {
-    ...GitRepositoriesRow
+    ...GitRepository
   }
 }

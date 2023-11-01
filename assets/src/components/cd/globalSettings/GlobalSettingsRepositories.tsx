@@ -1,5 +1,5 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { getGlobalSettingsBreadcrumbs } from 'components/cd/clusters/GlobalSettings'
+import { getGlobalSettingsBreadcrumbs } from 'components/cd/globalSettings/GlobalSettings'
 import { useMemo } from 'react'
 
 export function GlobalSettingsRepositories() {

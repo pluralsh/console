@@ -8,7 +8,7 @@ import {
 import {
   AuthMethod,
   GitAttributes,
-  GitRepositoriesRowFragment,
+  GitRepositoryFragment,
   useUpdateGitRepositoryMutation,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
@@ -28,7 +28,7 @@ export function UpdateGitRepository({
   repo,
   refetch,
 }: {
-  repo: GitRepositoriesRowFragment
+  repo: GitRepositoryFragment
   refetch: Nullable<() => void>
 }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -64,7 +64,7 @@ export function ModalForm({
   refetch,
 }: {
   open: boolean
-  repo: GitRepositoriesRowFragment
+  repo: GitRepositoryFragment
   onClose: () => void
   refetch: Nullable<() => void>
 }) {

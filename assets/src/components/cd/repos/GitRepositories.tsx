@@ -8,7 +8,7 @@ import {
 import {
   AuthMethod,
   GitRepositoriesDocument,
-  type GitRepositoriesRowFragment,
+  type GitRepositoryFragment,
   useDeleteGitRepositoryMutation,
   useGitRepositoriesQuery,
 } from 'generated/graphql'
@@ -49,7 +49,7 @@ export function DeleteGitRepository({
   repo,
   refetch,
 }: {
-  repo: Pick<GitRepositoriesRowFragment, 'id' | 'url'>
+  repo: Pick<GitRepositoryFragment, 'id' | 'url'>
   refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
