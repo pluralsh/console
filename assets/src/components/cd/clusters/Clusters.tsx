@@ -167,9 +167,11 @@ export const columns = [
           <div>
             {node?.currentVersion && (
               <StackedText
-                first={`Current: ${toNiceVersion(node?.currentVersion)}`}
+                first={`Current: v${toNiceVersion(node?.currentVersion)}`}
                 second={
-                  node?.self ? null : `Target: ${toNiceVersion(node?.version)}`
+                  node?.self || !node?.version
+                    ? null
+                    : `Target: v${toNiceVersion(node?.version)}`
                 }
               />
             )}
