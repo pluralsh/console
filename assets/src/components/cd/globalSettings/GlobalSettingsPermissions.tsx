@@ -16,6 +16,13 @@ import { useCallback, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
+type SetBindingsType = (
+  bindings: Nullable<{
+    group?: Nullable<{ id: string }>
+    user?: Nullable<{ id: string }>
+  }>[]
+) => void
+
 export function GlobalSettingsPermissions({
   type,
 }: {
@@ -31,15 +38,19 @@ export function GlobalSettingsPermissions({
   const [updateSettings, { loading, error }] =
     useUpdateDeploymentSettingsMutation()
 
-  const setBindings = useCallback(
-    (bindings: { group?: { id: string }; user?: { id: string } }[]) => {
+  const setBindings = useCallback<SetBindingsType>(
+    (bindings) => {
       const finalBindings = bindings
-        .map(({ group, user }) =>
-          group ? { groupId: group.id } : user ? { userId: user.id } : null
-        )
-        .filter(isNonNullable)
+        .map((binding) => {
+          const { group, user } = binding || {}
 
-      console.log('finalBindings', finalBindings)
+          return group
+            ? { groupId: group.id }
+            : user
+            ? { userId: user.id }
+            : null
+        })
+        .filter(isNonNullable)
 
       updateSettings({
         variables: {
@@ -48,7 +59,7 @@ export function GlobalSettingsPermissions({
           },
         },
         onCompleted: (c) => {
-          console.log('comlete', c)
+          console.log('complete', c)
           refetch()
         },
       })
@@ -78,9 +89,7 @@ export default function ReadWriteBindings({
   hints,
 }: {
   bindings: Nullable<Nullable<PolicyBindingFragment>[]>
-  setBindings: (
-    bindings: { group?: { id: string }; user?: { id: string } }[]
-  ) => void
+  setBindings: SetBindingsType
   hints?: { user?: string; group?: string }
 }) {
   const theme = useTheme()
