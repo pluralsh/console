@@ -28,15 +28,17 @@ export function GlobalSettingsPermissions({
 }: {
   type: 'write' | 'read' | 'git' | 'create'
 }) {
+  const theme = useTheme()
+  const { deploymentSettings, refetch } = useGlobalSettingsContext()
+  const [updateSettings, { loading, error }] =
+    useUpdateDeploymentSettingsMutation()
+
   useSetBreadcrumbs(
     useMemo(
       () => getGlobalSettingsBreadcrumbs({ page: `${type} permissions` }),
       [type]
     )
   )
-  const { deploymentSettings, refetch } = useGlobalSettingsContext()
-  const [updateSettings, { loading, error }] =
-    useUpdateDeploymentSettingsMutation()
 
   const setBindings = useCallback<SetBindingsType>(
     (bindings) => {
@@ -69,12 +71,29 @@ export function GlobalSettingsPermissions({
 
   return (
     <ScrollablePage heading={`${upperFirst(type)} Permissions`}>
-      <ReadWriteBindings
-        bindings={bindings}
-        setBindings={setBindings}
-      />
-      {loading && 'Updating...'}
-      {error && <GqlError error={error} />}
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.medium,
+        }}
+      >
+        <ReadWriteBindings
+          bindings={bindings}
+          setBindings={setBindings}
+        />
+        {loading && (
+          <p
+            css={{
+              ...theme.partials.text.body2,
+              color: theme.colors['text-light'],
+            }}
+          >
+            Updating...
+          </p>
+        )}
+        {error && <GqlError error={error} />}
+      </div>
     </ScrollablePage>
   )
 }
