@@ -43,7 +43,8 @@ defmodule Console.Deployments.Settings do
   @spec update(map, User.t) :: settings_resp
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def update(attrs, %User{} = user) do
-    fetch()
+    fetch_consistent()
+    |> Repo.preload(@preloads)
     |> DeploymentSettings.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)

@@ -15,4 +15,24 @@ defmodule Console.Deployments.SettingsTest do
       assert updated.enabled
     end
   end
+
+  describe "#update/2" do
+    test "admins can update global settings" do
+      admin = admin_user()
+      user = insert(:user)
+      insert(:deployment_settings)
+
+      {:ok, updated} = Settings.update(%{write_bindings: [%{user_id: user.id}]}, admin)
+
+      %{write_bindings: [binding]} = Repo.preload(updated, [:write_bindings])
+      assert binding.user_id == user.id
+    end
+
+    test "non admins cannot update" do
+      user = insert(:user)
+      insert(:deployment_settings)
+
+      {:error, _} = Settings.update(%{write_bindings: [%{user_id: user.id}]}, insert(:user))
+    end
+  end
 end

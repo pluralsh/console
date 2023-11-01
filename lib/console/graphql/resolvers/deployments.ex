@@ -198,7 +198,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     end
   end
 
-  def settings(_, _), do: {:ok, Settings.fetch()}
+  def settings(_, _), do: {:ok, Settings.fetch_consistent()}
 
   def service_configuration(service, _, ctx) do
     with {:ok, _} <- allow(service, actor(ctx), :secrets),
