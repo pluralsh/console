@@ -42,7 +42,7 @@ import {
 } from '../../../utils/kubernetes'
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { TableText } from '../../cluster/TableElements'
-import { nextSupportedVersion } from '../../../utils/semver'
+import { nextSupportedVersion, toNiceVersion } from '../../../utils/semver'
 
 import DecoratedName from '../services/DecoratedName'
 
@@ -162,12 +162,15 @@ export const columns = [
               />
             ) : undefined
           }
+          iconTooltip="Upgrading"
         >
           <div>
             {node?.currentVersion && (
               <StackedText
-                first={`Current: v${node?.currentVersion}`}
-                second={node?.self ? null : `Target: v${node?.version}`}
+                first={`Current: ${toNiceVersion(node?.currentVersion)}`}
+                second={
+                  node?.self ? null : `Target: ${toNiceVersion(node?.version)}`
+                }
               />
             )}
             {!node?.currentVersion && <>-</>}
@@ -263,17 +266,23 @@ export const columns = [
   columnHelper.accessor(({ node }) => node, {
     id: 'status',
     header: 'Status',
-    cell: ({ getValue }) => {
+    cell: ({ table, getValue }) => {
       const cluster = getValue()
       const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
       const upgrade = nextSupportedVersion(
         cluster?.version,
         cluster?.provider?.supportedVersions
       )
+      const { refetch } = table.options.meta as { refetch?: () => void }
 
       return (
         (!!upgrade || hasDeprecations) &&
-        !cluster?.self && <ClusterUpgrade cluster={cluster} />
+        !cluster?.self && (
+          <ClusterUpgrade
+            cluster={cluster}
+            refetch={refetch}
+          />
+        )
       )
     },
   }),

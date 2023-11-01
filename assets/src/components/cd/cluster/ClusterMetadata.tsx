@@ -1,4 +1,3 @@
-import { useOutletContext } from 'react-router-dom'
 import {
   Card,
   CheckRoundedIcon,
@@ -12,20 +11,34 @@ import moment from 'moment/moment'
 import isEmpty from 'lodash/isEmpty'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { Cluster, NodePool } from '../../../generated/graphql'
+import { ClusterFragment, NodePool } from '../../../generated/graphql'
 import { SubTitle } from '../../cluster/nodes/SubTitle'
 import ProviderIcon from '../../utils/Provider'
 import CopyButton from '../../utils/CopyButton'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
-import { nextSupportedVersion } from '../../../utils/semver'
+import { nextSupportedVersion, toNiceVersion } from '../../../utils/semver'
 
-function MetadataCard({ cluster }: { cluster: Cluster }) {
+import {
+  ClusterConditions,
+  ClusterConditionsTable,
+} from '../clusters/ClusterConditions'
+
+import { useClusterContext } from './Cluster'
+
+function MetadataCard({
+  cluster,
+  refetch,
+}: {
+  cluster: ClusterFragment
+  refetch: Nullable<() => void>
+}) {
   const theme = useTheme()
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
   const upgradeVersion = nextSupportedVersion(
     cluster?.version,
     cluster?.provider?.supportedVersions
   )
+  const status = cluster?.status
 
   return (
     <Card padding="xlarge">
@@ -41,7 +54,7 @@ function MetadataCard({ cluster }: { cluster: Cluster }) {
           title="Current K8s version"
           margin={0}
         >
-          v{cluster?.currentVersion}
+          {toNiceVersion(cluster?.currentVersion)}
         </Prop>
         <Prop
           title="Cloud"
@@ -71,7 +84,20 @@ function MetadataCard({ cluster }: { cluster: Cluster }) {
           margin={0}
         >
           {upgradeVersion || hasDeprecations ? (
-            <ClusterUpgrade cluster={cluster} />
+            <ClusterUpgrade
+              cluster={cluster}
+              refetch={refetch}
+            />
+          ) : (
+            '-'
+          )}
+        </Prop>
+        <Prop
+          title="Conditions"
+          margin={0}
+        >
+          {!isEmpty(cluster.status?.conditions) ? (
+            <ClusterConditions cluster={cluster} />
           ) : (
             '-'
           )}
@@ -91,8 +117,51 @@ function MetadataCard({ cluster }: { cluster: Cluster }) {
             '-'
           )}
         </Prop>
+
+        {/* TODO: Make these nice */}
+        <Prop
+          title="(temp)status: controlPlaneReady"
+          margin={0}
+        >
+          {status?.controlPlaneReady}
+        </Prop>
+        <Prop
+          title="(temp)status: phase"
+          margin={0}
+        >
+          {status?.phase}
+        </Prop>
+        <Prop
+          title="(temp)status: failureReason"
+          margin={0}
+        >
+          {status?.failureReason}
+        </Prop>
+        <Prop
+          title="(temp)status: failureMessage"
+          margin={0}
+        >
+          {status?.failureMessage}
+        </Prop>
       </div>
     </Card>
+  )
+}
+
+function NodePoolsSection({ cluster }: { cluster: ClusterFragment }) {
+  if (cluster.self || isEmpty(cluster.nodePools)) {
+    return null
+  }
+
+  return (
+    <Table
+      data={cluster.nodePools || []}
+      columns={columns}
+      css={{
+        maxHeight: 'unset',
+        height: '100%',
+      }}
+    />
   )
 }
 
@@ -144,27 +213,21 @@ export const columns = [
 
 export default function ClusterMetadata() {
   const theme = useTheme()
-  const { cluster } = useOutletContext() as { cluster: Cluster }
+  const { cluster, refetch } = useClusterContext()
 
   return (
     <div
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.medium,
+        gap: theme.spacing.xlarge,
       }}
     >
-      <MetadataCard cluster={cluster} />
-      {!cluster.self && !isEmpty(cluster.nodePools) && (
-        <Table
-          data={cluster.nodePools || []}
-          columns={columns}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
-        />
-      )}
+      <MetadataCard
+        cluster={cluster}
+        refetch={refetch}
+      />
+      <NodePoolsSection cluster={cluster} />
     </div>
   )
 }

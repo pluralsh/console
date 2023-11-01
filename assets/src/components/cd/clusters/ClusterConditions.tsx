@@ -14,7 +14,7 @@ import { toDateOrUndef } from 'utils/date'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { TableText } from 'components/cluster/TableElements'
 
-export default function ClusterConditionsButton({
+function ClusterConditionsButton({
   ...props
 }: Partial<ComponentProps<typeof IconFrame>>) {
   const theme = useTheme()
@@ -107,7 +107,7 @@ const columns = [
 export function ClusterConditions({
   cluster,
 }: {
-  cluster: Nullable<ClustersRowFragment>
+  cluster: Nullable<Pick<ClustersRowFragment, 'name' | 'id' | 'status'>>
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -126,17 +126,27 @@ export function ClusterConditions({
           maxWidth={1024}
           onClose={() => setIsOpen(false)}
         >
-          <Table
-            columns={columns}
-            data={cluster?.status?.conditions || []}
-            reactTableOptions={{
-              getRowId(originalRow, i) {
-                return originalRow.type ?? i
-              },
-            }}
-          />
+          <ClusterConditionsTable cluster={cluster} />
         </Modal>
       </ModalMountTransition>
     </div>
+  )
+}
+
+export function ClusterConditionsTable({
+  cluster,
+}: {
+  cluster: Nullable<ClustersRowFragment>
+}) {
+  return (
+    <Table
+      columns={columns}
+      data={cluster?.status?.conditions || []}
+      reactTableOptions={{
+        getRowId(originalRow, i) {
+          return originalRow.type ?? i
+        },
+      }}
+    />
   )
 }

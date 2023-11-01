@@ -1,10 +1,11 @@
-import { Card } from '@pluralsh/design-system'
+import { Card, EmptyState } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { DURATIONS } from 'utils/time'
 import { filesize } from 'filesize'
 import { isNonNullable } from 'utils/isNonNullable'
 import { useTheme } from 'styled-components'
+import isEmpty from 'lodash/isEmpty'
 
 import { MetricResponseFragment, useUsageQuery } from 'generated/graphql'
 
@@ -31,13 +32,18 @@ function Graphs({
   mem: MetricResponseFragment[]
 }) {
   const theme = useTheme()
+
   const { cpuValues, memValues } = useMemo(
     () => ({
-      cpuValues: convertVals(cpu.values),
-      memValues: convertVals(mem.values),
+      cpuValues: cpu?.values ? convertVals(cpu?.values) : null,
+      memValues: mem?.values ? convertVals(mem?.values) : null,
     }),
     [cpu, mem]
   )
+
+  if (!memValues && !cpuValues) {
+    return null
+  }
 
   return (
     <div
@@ -49,34 +55,38 @@ function Graphs({
         padding: theme.spacing.large,
       }}
     >
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          flexGrow: 1,
-        }}
-      >
-        <GraphHeader title="Overall CPU Usage" />
-        <Graph
-          data={[{ id: 'cpu', data: cpuValues }]}
-          yFormat={undefined}
-          tickRotation={undefined}
-        />
-      </div>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          flexGrow: 1,
-        }}
-      >
-        <GraphHeader title="Overall Memory Usage" />
-        <Graph
-          data={[{ id: 'memory', data: memValues }]}
-          yFormat={filesize}
-          tickRotation={undefined}
-        />
-      </div>
+      {cpuValues && (
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+          }}
+        >
+          <GraphHeader title="Overall CPU Usage" />
+          <Graph
+            data={[{ id: 'cpu', data: cpuValues }]}
+            yFormat={undefined}
+            tickRotation={undefined}
+          />
+        </div>
+      )}
+      {memValues && (
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+          }}
+        >
+          <GraphHeader title="Overall Memory Usage" />
+          <Graph
+            data={[{ id: 'memory', data: memValues }]}
+            yFormat={filesize}
+            tickRotation={undefined}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -102,6 +112,10 @@ function PodGraphs({
     return { cpuGraph, memGraph }
   }, [cpu, mem])
 
+  if (!memGraph && !cpuGraph) {
+    return null
+  }
+
   return (
     <div
       css={{
@@ -112,34 +126,38 @@ function PodGraphs({
         padding: theme.spacing.large,
       }}
     >
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          flexGrow: 1,
-        }}
-      >
-        <GraphHeader title="Pod CPU Usage" />
-        <Graph
-          data={cpuGraph}
-          yFormat={undefined}
-          tickRotation={undefined}
-        />
-      </div>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          flexGrow: 1,
-        }}
-      >
-        <GraphHeader title="Pod Memory Usage" />
-        <Graph
-          data={memGraph}
-          yFormat={filesize}
-          tickRotation={undefined}
-        />
-      </div>
+      {!isEmpty(cpuGraph) && (
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+          }}
+        >
+          <GraphHeader title="Pod CPU Usage" />
+          <Graph
+            data={cpuGraph}
+            yFormat={undefined}
+            tickRotation={undefined}
+          />
+        </div>
+      )}
+      {!isEmpty(memGraph) && (
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+          }}
+        >
+          <GraphHeader title="Pod Memory Usage" />
+          <Graph
+            data={memGraph}
+            yFormat={filesize}
+            tickRotation={undefined}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -176,6 +194,23 @@ function Metric({
 
   if (!data) return <LoadingIndicator />
 
+  let content = <EmptyState message="No metrics available" />
+
+  if (!isEmpty(cpu) || !isEmpty(mem) || !isEmpty(podCpu) || !isEmpty(podMem)) {
+    content = (
+      <>
+        <Graphs
+          cpu={cpu}
+          mem={mem}
+        />
+        <PodGraphs
+          cpu={podCpu}
+          mem={podMem}
+        />
+      </>
+    )
+  }
+
   return (
     <Card
       overflow="auto"
@@ -183,14 +218,7 @@ function Metric({
       gap="small"
       {...props}
     >
-      <Graphs
-        cpu={cpu}
-        mem={mem}
-      />
-      <PodGraphs
-        cpu={podCpu}
-        mem={podMem}
-      />
+      {content}
     </Card>
   )
 }

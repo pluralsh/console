@@ -29,7 +29,7 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 
 import { StepBody } from '../ModalAlt'
 
-import { columns } from './RevisionHistory'
+import { selectableColumns } from './ServiceRevisionColumns'
 
 export function ServicesRollbackDeployment({
   serviceDeployment,
@@ -166,7 +166,7 @@ export function ModalForm({
 
   return (
     <ModalSC
-      header="Rollback service deployment"
+      header="Roll back service deployment"
       open={open}
       portal
       onClose={onClose}
@@ -205,7 +205,7 @@ export function ModalForm({
             <FullHeightTableWrap>
               <Table
                 data={revisions}
-                columns={columns}
+                columns={selectableColumns}
                 css={{
                   maxHeight: 'unset',
                   height: '100%',
@@ -214,12 +214,11 @@ export function ModalForm({
                   const original =
                     row.original as ServiceDeploymentRevisionFragment
 
-                  console.log('row original', original.id)
-
                   setRevisionId(original.id)
                 }}
-                getRowIsSelected={(row) => row.id === revisionId}
-                reactTableOptions={{ meta: { selectedId: revisionId } }}
+                reactTableOptions={{
+                  state: { rowSelection: { [revisionId]: true } },
+                }}
               />
             </FullHeightTableWrap>
           </div>
