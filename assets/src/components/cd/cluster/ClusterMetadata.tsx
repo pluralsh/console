@@ -20,7 +20,7 @@ import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { ClusterConditions } from '../clusters/ClusterConditions'
 
 import { useClusterContext } from './Cluster'
-import { NodePoolsSection } from './ClusterNodePoolsTable'
+import { NodePoolsSection } from './ClusterNodePools'
 
 function MetadataCard({
   cluster,

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   Button,
   CheckRoundedIcon,
@@ -7,14 +8,12 @@ import {
 import isEmpty from 'lodash/isEmpty'
 import { createColumnHelper } from '@tanstack/react-table'
 
+import { ClusterFragment, NodePool } from 'generated/graphql'
+
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-import { useState } from 'react'
-
-import { ClusterFragment, NodePool } from '../../../generated/graphql'
-
-import { TaintsModal } from './ClusterTaints'
-import { LabelsModal } from './ClusterLabels'
+import { LabelsModal } from './ClusterNodePoolLabels'
+import { TaintsModal } from './ClusterNodePoolTaints'
 
 export function NodePoolsSection({ cluster }: { cluster: ClusterFragment }) {
   if (cluster.self || isEmpty(cluster.nodePools)) {
