@@ -1,29 +1,26 @@
 import {
   Card,
-  CheckRoundedIcon,
+  Chip,
   IconFrame,
   Prop,
-  Table,
   Tooltip,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import moment from 'moment/moment'
 import isEmpty from 'lodash/isEmpty'
-import { createColumnHelper } from '@tanstack/react-table'
 
-import { ClusterFragment, NodePool } from '../../../generated/graphql'
+import { ClusterFragment, ClusterStatus } from 'generated/graphql'
+import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
+
 import { SubTitle } from '../../cluster/nodes/SubTitle'
 import ProviderIcon from '../../utils/Provider'
 import CopyButton from '../../utils/CopyButton'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
-import { nextSupportedVersion, toNiceVersion } from '../../../utils/semver'
-
-import {
-  ClusterConditions,
-  ClusterConditionsTable,
-} from '../clusters/ClusterConditions'
+import { ClusterConditions } from '../clusters/ClusterConditions'
 
 import { useClusterContext } from './Cluster'
+import { NodePoolsSection } from './ClusterNodePoolsTable'
 
 function MetadataCard({
   cluster,
@@ -43,7 +40,9 @@ function MetadataCard({
   return (
     <Card padding="xlarge">
       <SubTitle>Metadata</SubTitle>
-      <div css={{ display: 'flex', gap: theme.spacing.xlarge }}>
+      <div
+        css={{ display: 'flex', gap: theme.spacing.xlarge, flexWrap: 'wrap' }}
+      >
         <Prop
           title="Cluster name"
           margin={0}
@@ -92,16 +91,7 @@ function MetadataCard({
             '-'
           )}
         </Prop>
-        <Prop
-          title="Conditions"
-          margin={0}
-        >
-          {!isEmpty(cluster.status?.conditions) ? (
-            <ClusterConditions cluster={cluster} />
-          ) : (
-            '-'
-          )}
-        </Prop>
+
         <Prop
           title="Last pinged"
           margin={0}
@@ -117,99 +107,81 @@ function MetadataCard({
             '-'
           )}
         </Prop>
-
+        <Prop
+          title="Conditions"
+          margin={0}
+        >
+          {!isEmpty(cluster.status?.conditions) ? (
+            <ClusterConditions cluster={cluster} />
+          ) : (
+            '-'
+          )}
+        </Prop>
         {/* TODO: Make these nice */}
         <Prop
-          title="(temp)status: controlPlaneReady"
+          title="Control plane"
           margin={0}
         >
-          {status?.controlPlaneReady}
+          <Chip severity={status?.controlPlaneReady ? 'success' : 'warning'}>
+            {status?.controlPlaneReady ? 'Ready' : 'Not ready'}
+          </Chip>
         </Prop>
         <Prop
-          title="(temp)status: phase"
+          title="Status"
           margin={0}
         >
-          {status?.phase}
-        </Prop>
-        <Prop
-          title="(temp)status: failureReason"
-          margin={0}
-        >
-          {status?.failureReason}
-        </Prop>
-        <Prop
-          title="(temp)status: failureMessage"
-          margin={0}
-        >
-          {status?.failureMessage}
+          <ClusterStatusChip status={status} />
         </Prop>
       </div>
     </Card>
   )
 }
 
-function NodePoolsSection({ cluster }: { cluster: ClusterFragment }) {
-  if (cluster.self || isEmpty(cluster.nodePools)) {
-    return null
-  }
+function ClusterStatusChip({
+  status,
+}: {
+  status: Nullable<
+    Pick<ClusterStatus, 'phase' | 'failureMessage' | 'failureReason'>
+  >
+}) {
+  const theme = useTheme()
+  const { failureMessage, failureReason, phase } = status || {}
 
   return (
-    <Table
-      data={cluster.nodePools || []}
-      columns={columns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
-    />
+    <WrapWithIf
+      condition={!!failureMessage || !!failureReason}
+      wrapper={
+        <Tooltip
+          label={
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.xxsmall,
+                maxWidth: 300,
+              }}
+            >
+              {failureReason && <p>Reason: {failureReason}</p>}
+              {failureMessage && <p>{failureMessage}</p>}
+            </div>
+          }
+        />
+      }
+    >
+      <Chip
+        severity={
+          phase?.toLowerCase() === 'provisioned'
+            ? 'success'
+            : failureReason || failureMessage
+            ? 'error'
+            : 'neutral'
+        }
+      >
+        {phase || 'Unknown'}
+      </Chip>
+    </WrapWithIf>
   )
 }
-
-const columnHelper = createColumnHelper<NodePool>()
-
-export const columns = [
-  columnHelper.accessor((nodePool) => nodePool?.name, {
-    id: 'name',
-    header: 'Name',
-    enableSorting: true,
-    enableGlobalFilter: true,
-    meta: { truncate: true },
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor((nodePool) => nodePool?.minSize, {
-    id: 'minSize',
-    header: 'Minimum size',
-    enableSorting: true,
-    enableGlobalFilter: true,
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor((nodePool) => nodePool?.maxSize, {
-    id: 'maxSize',
-    header: 'Maximum size',
-    enableSorting: true,
-    enableGlobalFilter: true,
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor((nodePool) => nodePool?.instanceType, {
-    id: 'instanceType',
-    header: 'Instance type',
-    enableSorting: true,
-    enableGlobalFilter: true,
-    meta: { truncate: true },
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor((nodePool) => nodePool?.spot, {
-    id: 'spot',
-    header: 'Spot',
-    cell: ({ getValue }) =>
-      getValue() && (
-        <IconFrame
-          icon={<CheckRoundedIcon color="icon-success" />}
-          type="floating"
-        />
-      ),
-  }),
-]
 
 export default function ClusterMetadata() {
   const theme = useTheme()
