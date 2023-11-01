@@ -24,7 +24,7 @@ export type Scalars = {
    * be converted to UTC if there is an offset.
    */
   DateTime: { input: string; output: string; }
-  Map: { input: Map<string, unknown>; output: Map<string, unknown>; }
+  Map: { input: Record<string, unknown>; output: Record<string, unknown>; }
   UploadOrUrl: { input: string; output: string; }
   Yaml: { input: unknown; output: unknown; }
 };

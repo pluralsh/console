@@ -27,6 +27,12 @@ fragment ClusterCondition on ClusterCondition {
   type
 }
 
+fragment Taint on Taint {
+  effect
+  key
+  value
+}
+
 fragment NodePool on NodePool {
   id
   name
@@ -34,6 +40,10 @@ fragment NodePool on NodePool {
   maxSize
   instanceType
   spot
+  labels
+  taints {
+    ...Taint
+  }
 }
 
 fragment ApiDeprecation on ApiDeprecation {

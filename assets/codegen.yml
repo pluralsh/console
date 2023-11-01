@@ -26,7 +26,7 @@ generates:
             - '/* prettier-ignore */'
 config:
   scalars:
-    Map: Map<string, unknown>
+    Map: Record<string, unknown>
     UploadOrUrl: string
     DateTime: string
     Yaml: unknown
