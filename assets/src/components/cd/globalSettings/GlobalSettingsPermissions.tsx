@@ -58,18 +58,14 @@ export function GlobalSettingsPermissions({
             [`${type}Bindings`]: finalBindings,
           },
         },
-        onCompleted: (c) => {
-          console.log('complete', c)
+        onCompleted: () => {
           refetch()
         },
       })
     },
     [refetch, type, updateSettings]
   )
-
   const bindings = deploymentSettings[`${type}Bindings`]
-
-  console.log('bindings', bindings)
 
   return (
     <ScrollablePage heading={`${upperFirst(type)} Permissions`}>
