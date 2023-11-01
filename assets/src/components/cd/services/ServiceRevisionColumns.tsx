@@ -1,11 +1,27 @@
-import { ServiceDeploymentRevisionFragment } from 'generated/graphql'
+import {
+  ServiceDeploymentRevisionFragment,
+  useRollbackServiceMutation,
+} from 'generated/graphql'
 import { createColumnHelper } from '@tanstack/react-table'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { toDateOrUndef } from 'utils/date'
-import { CheckRoundedIcon, Tooltip } from '@pluralsh/design-system'
+import {
+  CheckRoundedIcon,
+  HistoryIcon,
+  IconFrame,
+  Tooltip,
+} from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 
+import { useState } from 'react'
+
+import { Confirm } from 'components/utils/Confirm'
+
+import { CaptionText } from 'components/cluster/TableElements'
+
 import { StackedText } from '../clusters/Clusters'
+
+import { useServiceContext } from './service/ServiceDetails'
 
 const columnHelper =
   createColumnHelper<Nullable<ServiceDeploymentRevisionFragment>>()
@@ -89,10 +105,78 @@ const ColSelected = columnHelper.accessor(
   }
 )
 
+const ColActionsSC = styled.div((_) => ({
+  display: 'flex',
+  alignItems: 'center',
+}))
+const ColActions = columnHelper.accessor((row) => row, {
+  id: 'selected',
+  header: '',
+  cell: function Cell({ table, row: { original } }) {
+    const theme = useTheme()
+
+    const { service } = useServiceContext()
+    const revision = original
+    const { refetch } = table.options.meta as { refetch?: Nullable<() => void> }
+    const [confirm, setConfirm] = useState(false)
+    const [mutation, { loading, error }] = useRollbackServiceMutation({
+      variables: {
+        id: service?.id || '',
+        revisionId: revision?.id || '',
+      },
+      onCompleted: () => {
+        refetch?.()
+        setConfirm(false)
+      },
+    })
+
+    return (
+      <ColActionsSC>
+        <IconFrame
+          clickable
+          tooltip="Roll back to this revision"
+          type="floating"
+          onClick={() => setConfirm(true)}
+          icon={<HistoryIcon />}
+        />
+        <Confirm
+          open={confirm}
+          close={() => setConfirm(false)}
+          label="Roll back"
+          loading={loading}
+          error={error}
+          submit={() => mutation()}
+          title="Roll back service deployment"
+          text={
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.small,
+              }}
+            >
+              <p>
+                Are you sure you want to roll back the service deployment to the
+                following revision:
+              </p>
+              <p>
+                <div>{revision?.git.ref}</div>
+                <CaptionText css={{ color: theme.colors['text-light'] }}>
+                  sha: {revision?.sha}
+                </CaptionText>
+              </p>
+            </div>
+          }
+        />
+      </ColActionsSC>
+    )
+  },
+})
+
 export const selectableColumns = [
   ColGitRef,
   ColMessage,
   ColCommitTime,
   ColSelected,
 ]
-export const columns = [ColGitRef, ColMessage, ColCommitTime]
+export const columns = [ColGitRef, ColMessage, ColCommitTime, ColActions]

@@ -166,7 +166,7 @@ export function ModalForm({
 
   return (
     <ModalSC
-      header="Rollback service deployment"
+      header="Roll back service deployment"
       open={open}
       portal
       onClose={onClose}
