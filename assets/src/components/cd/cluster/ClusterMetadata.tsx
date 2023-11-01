@@ -16,7 +16,12 @@ import { SubTitle } from '../../cluster/nodes/SubTitle'
 import ProviderIcon from '../../utils/Provider'
 import CopyButton from '../../utils/CopyButton'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
-import { nextSupportedVersion } from '../../../utils/semver'
+import { nextSupportedVersion, toNiceVersion } from '../../../utils/semver'
+
+import {
+  ClusterConditions,
+  ClusterConditionsTable,
+} from '../clusters/ClusterConditions'
 
 import { useClusterContext } from './Cluster'
 
@@ -33,6 +38,7 @@ function MetadataCard({
     cluster?.version,
     cluster?.provider?.supportedVersions
   )
+  const status = cluster?.status
 
   return (
     <Card padding="xlarge">
@@ -48,7 +54,7 @@ function MetadataCard({
           title="Current K8s version"
           margin={0}
         >
-          v{cluster?.currentVersion}
+          {toNiceVersion(cluster?.currentVersion)}
         </Prop>
         <Prop
           title="Cloud"
@@ -87,6 +93,16 @@ function MetadataCard({
           )}
         </Prop>
         <Prop
+          title="Conditions"
+          margin={0}
+        >
+          {!isEmpty(cluster.status?.conditions) ? (
+            <ClusterConditions cluster={cluster} />
+          ) : (
+            '-'
+          )}
+        </Prop>
+        <Prop
           title="Last pinged"
           margin={0}
         >
@@ -101,8 +117,51 @@ function MetadataCard({
             '-'
           )}
         </Prop>
+
+        {/* TODO: Make these nice */}
+        <Prop
+          title="(temp)status: controlPlaneReady"
+          margin={0}
+        >
+          {status?.controlPlaneReady}
+        </Prop>
+        <Prop
+          title="(temp)status: phase"
+          margin={0}
+        >
+          {status?.phase}
+        </Prop>
+        <Prop
+          title="(temp)status: failureReason"
+          margin={0}
+        >
+          {status?.failureReason}
+        </Prop>
+        <Prop
+          title="(temp)status: failureMessage"
+          margin={0}
+        >
+          {status?.failureMessage}
+        </Prop>
       </div>
     </Card>
+  )
+}
+
+function NodePoolsSection({ cluster }: { cluster: ClusterFragment }) {
+  if (cluster.self || isEmpty(cluster.nodePools)) {
+    return null
+  }
+
+  return (
+    <Table
+      data={cluster.nodePools || []}
+      columns={columns}
+      css={{
+        maxHeight: 'unset',
+        height: '100%',
+      }}
+    />
   )
 }
 
@@ -161,23 +220,14 @@ export default function ClusterMetadata() {
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.medium,
+        gap: theme.spacing.xlarge,
       }}
     >
       <MetadataCard
         cluster={cluster}
         refetch={refetch}
       />
-      {!cluster.self && !isEmpty(cluster.nodePools) && (
-        <Table
-          data={cluster.nodePools || []}
-          columns={columns}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
-        />
-      )}
+      <NodePoolsSection cluster={cluster} />
     </div>
   )
 }

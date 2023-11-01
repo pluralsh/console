@@ -210,7 +210,6 @@ function Metric({
       </>
     )
   }
-  console.log('copntent', content)
 
   return (
     <Card

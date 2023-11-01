@@ -137,6 +137,15 @@ fragment Cluster on Cluster {
       url
     }
   }
+  status {
+    conditions {
+      ...ClusterCondition
+    }
+    controlPlaneReady
+    failureMessage
+    failureReason
+    phase
+  }
   version
 }
 
