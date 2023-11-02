@@ -2,6 +2,7 @@ import { Button, GitHubLogoIcon } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import CopyButton from 'components/utils/CopyButton'
 import { ApiDeprecation } from 'generated/graphql'
+import { StackedText } from './Clusters'
 
 const columnHelperDeprecations = createColumnHelper<ApiDeprecation>()
 
@@ -12,24 +13,12 @@ export const deprecationsColumns = [
     meta: { truncate: true },
     cell: ({
       row: {
-        original: { component },
+        original: { component, ...deprecation },
       },
     }) => (
-      <div>
-        {component?.group} {component?.kind} {component?.name}
-      </div>
-    ),
-  }),
-  columnHelperDeprecations.accessor(({ component }) => component, {
-    id: 'deprecatedCopy',
-    header: '',
-    cell: ({
-      row: {
-        original: { component },
-      },
-    }) => (
-      <CopyButton
-        text={`${component?.group} ${component?.kind} ${component?.name}`}
+      <StackedText
+        first={`${component?.group}/${component?.version} ${component?.kind} ${component?.name}`}
+        second={`removed in ${deprecation.removedIn}`}
       />
     ),
   }),
@@ -37,12 +26,16 @@ export const deprecationsColumns = [
     id: 'fix',
     header: 'Fix',
     meta: { truncate: true },
-    cell: ({ getValue }) => <div>{getValue()}</div>,
-  }),
-  columnHelperDeprecations.accessor(({ replacement }) => replacement, {
-    id: 'fixCopy',
-    header: '',
-    cell: ({ getValue }) => <CopyButton text={getValue()} />,
+    cell: ({ getValue, row: { original } }) => {
+      const replacement = getValue()
+      if (!replacement) return <div>Api Permanently Removed</div>
+
+      return (
+        <div>
+          {getValue()} {original.component?.kind}
+        </div>
+      )
+    },
   }),
   columnHelperDeprecations.accessor(({ component }) => component?.service, {
     id: 'repository',

@@ -19,6 +19,7 @@ import {
 } from 'generated/graphql'
 
 import {
+  bumpMinor,
   coerceSemver,
   nextSupportedVersion,
   supportedUpgrades,
@@ -103,7 +104,7 @@ const upgradeColumns = [
       </ColWithIcon>
     ),
   }),
-  columnHelperUpgrade.accessor((cluster) => cluster?.version, {
+  columnHelperUpgrade.accessor((cluster) => cluster?.currentVersion, {
     id: 'version',
     header: 'Current version',
     cell: ({ getValue }) => <div>{toNiceVersion(getValue())}</div>,
@@ -117,7 +118,10 @@ const upgradeColumns = [
       return (
         <ColWithIcon icon={ProviderIcons.GENERIC}>
           {toNiceVersion(
-            nextSupportedVersion(cluster?.version, supportedVersions(cluster))
+            nextSupportedVersion(
+              cluster?.currentVersion,
+              supportedVersions(cluster)
+            ) || bumpMinor(cluster?.currentVersion)
           )}
         </ColWithIcon>
       )
@@ -148,7 +152,7 @@ const upgradeColumns = [
       }, [targetVersion, upgrades])
 
       if (isEmpty(upgrades)) {
-        return null
+        return <div>Cluster must be upgraded externally</div>
       }
 
       return (
