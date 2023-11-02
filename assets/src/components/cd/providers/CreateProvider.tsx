@@ -1,7 +1,8 @@
-import { Button, FormField, Input } from '@pluralsh/design-system'
+import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { produce } from 'immer'
-import { merge } from 'lodash'
+import isEmpty from 'lodash/isEmpty'
+import merge from 'lodash/merge'
 import { PartialDeep } from 'type-fest'
 
 import {
@@ -60,7 +61,11 @@ export function CreateProviderModal({
 
   const [selectedCloud, setSelectedCloud] = useState<
     (typeof SUPPORTED_CLOUDS)[number] | ''
-  >('')
+  >(
+    SUPPORTED_CLOUDS.find(
+      (cloud) => !providers?.some((p) => p?.cloud === cloud)
+    ) || ''
+  )
   const [providerSettings, updateProviderSettings] = useReducer(
     updateSettings,
     {}
@@ -108,21 +113,25 @@ export function CreateProviderModal({
     },
   })
 
-  const onSubmit = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault()
-      if (!disabled && !loading) {
-        mutation()
-      }
-    },
-    [disabled, loading, mutation]
-  )
   let settings: ReactNode
 
   const inputRef = useRef<HTMLInputElement>()
 
   const enabledProviders = SUPPORTED_CLOUDS.filter(
     (cloud) => !providers?.some((provider) => provider?.cloud === cloud)
+  )
+  const noMoreClouds = isEmpty(enabledProviders)
+
+  const onSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault()
+      if (noMoreClouds) {
+        onClose?.()
+      } else if (!disabled && !loading) {
+        mutation()
+      }
+    },
+    [disabled, loading, mutation, noMoreClouds, onClose]
   )
 
   switch (selectedCloud) {
@@ -164,6 +173,18 @@ export function CreateProviderModal({
     }
   }, [open])
 
+  if (noMoreClouds) {
+    return (
+      <Modal
+        portal
+        open={open}
+        onClose={onClose}
+      >
+        You have already created providers for all available cloud services.
+      </Modal>
+    )
+  }
+
   return (
     <ModalAlt
       header="Create provider"
@@ -173,23 +194,32 @@ export function CreateProviderModal({
       asForm
       formProps={{ onSubmit }}
       actions={
-        <>
+        noMoreClouds ? (
           <Button
             type="submit"
-            disabled={disabled}
-            loading={loading}
             primary
           >
-            Create
+            Close
           </Button>
-          <Button
-            type="button"
-            secondary
-            onClick={closeModal}
-          >
-            Cancel
-          </Button>
-        </>
+        ) : (
+          <>
+            <Button
+              type="submit"
+              disabled={disabled}
+              loading={loading}
+              primary
+            >
+              Create
+            </Button>
+            <Button
+              type="button"
+              secondary
+              onClick={closeModal}
+            >
+              Cancel
+            </Button>
+          </>
+        )
       }
     >
       <ProviderTabSelector
