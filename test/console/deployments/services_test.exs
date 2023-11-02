@@ -638,6 +638,33 @@ defmodule Console.Deployments.ServicesTest do
       assert deprecation.blocking
     end
 
+    test "it will persist deprecations even in the far future" do
+      cluster = insert(:cluster, current_version: "1.23.0")
+      service = insert(:service, cluster: cluster)
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :running,
+          synced: true,
+          group: "batch",
+          version: "v1beta1",
+          kind: "CronJob",
+          namespace: "my-app",
+          name: "api"
+        }]
+      }, service)
+
+      %{components: [component]} = Console.Repo.preload(service, [components: :api_deprecations])
+      assert component.group == "batch"
+      assert component.version == "v1beta1"
+
+      [deprecation] = component.api_deprecations
+      assert deprecation.deprecated_in == "v1.21.0"
+      assert deprecation.removed_in == "v1.25.0"
+      assert deprecation.replacement == "batch/v1"
+      refute deprecation.blocking
+    end
+
     test "it can find non-k8s deprecations" do
       service = insert(:service)
 

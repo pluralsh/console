@@ -615,6 +615,18 @@ defmodule Console.Deployments.Clusters do
     }
   end
 
+  defp provider_attributes(%ClusterProvider{name: name, cloud_settings: %{azure: %ClusterProvider.CloudSettings.Azure{} = az}}) do
+    %{
+      configuration: [
+        %{name: "providerName", value: name},
+        %{name: "subscriptionId", value: az.subscription_id},
+        %{name: "tenantId", value: az.tenant_id},
+        %{name: "clientId", value: az.client_id},
+        %{name: "clientSecret", value: az.client_secret},
+      ]
+    }
+  end
+
   defp provider_attributes(%ClusterProvider{name: name}), do: %{configuration: [%{name: "providerName", value: name}]}
 
   defp tmp_admin(%User{} = user), do: %{user | roles: %{admin: true}}

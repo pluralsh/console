@@ -482,6 +482,37 @@ defmodule Console.Deployments.ClustersTest do
         cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
       }, insert(:user))
     end
+
+    test "it will properly create an azure provider" do
+      user = insert(:user)
+      self = insert(:cluster, self: true)
+      settings = deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "azure",
+        cloud_settings: %{azure: %{tenant_id: "tenant", subscription_id: "sub", client_id: "client", client_secret: "secret"}}
+      }, user)
+
+      assert provider.name == "azure"
+      assert provider.namespace == "plrl-capi-azure"
+      refute provider.repository_id
+      assert provider.git.folder == "capi/clusters/azure"
+      assert provider.git.ref == "main"
+
+      %{service: svc} = Console.Repo.preload(provider, [:service])
+      assert svc.repository_id == settings.artifact_repository_id
+      assert svc.name == "capi-#{provider.name}"
+      assert svc.git.folder == "capi/providers/azure"
+      assert svc.git.ref == "main"
+      assert svc.namespace == provider.namespace
+      assert svc.cluster_id == self.id
+
+      {:ok, secrets} = Services.configuration(svc)
+      assert secrets["subscriptionId"] == "sub"
+      assert secrets["tenantId"] == "tenant"
+      assert secrets["clientId"] == "client"
+      assert secrets["clientSecret"] == "secret"
+    end
   end
 
   describe "#control_plane/1" do
