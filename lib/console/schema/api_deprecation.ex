@@ -26,6 +26,6 @@ defmodule Console.Schema.ApiDeprecation do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
-    |> validate_required([:component_id, :replacement])
+    |> validate_required([:component_id])
   end
 end
