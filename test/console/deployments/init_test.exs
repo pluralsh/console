@@ -23,6 +23,10 @@ defmodule Console.Deployments.InitTest do
       assert res.settings.name == "global"
       assert res.settings.deployer_repository_id == res.deploy_repo.id
       assert res.settings.artifact_repository_id == res.artifacts_repo.id
+      assert res.settings.write_policy_id
+      assert res.settings.read_policy_id
+      assert res.settings.git_policy_id
+      assert res.settings.create_policy_id
     end
   end
 end

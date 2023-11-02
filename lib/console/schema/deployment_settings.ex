@@ -42,5 +42,9 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:git_bindings)
     |> cast_assoc(:create_bindings)
+    |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
+    |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
+    |> put_new_change(:git_policy_id, &Ecto.UUID.generate/0)
+    |> put_new_change(:create_policy_id, &Ecto.UUID.generate/0)
   end
 end
