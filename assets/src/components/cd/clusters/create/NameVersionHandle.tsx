@@ -1,5 +1,5 @@
 import { Input } from '@pluralsh/design-system'
-import { Dispatch, SetStateAction, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 
 import { isNonNullable } from 'utils/isNonNullable'
@@ -16,12 +16,12 @@ export function NameVersionHandle({
   setHandle,
 }: {
   name: string
-  setName: Dispatch<SetStateAction<string>>
+  setName: (name: string) => void
   version?: string
-  setVersion?: Dispatch<SetStateAction<string>>
+  setVersion?: (version: string) => void
   versions?: Nullable<Nullable<string>[]>
   handle: string
-  setHandle: Dispatch<SetStateAction<string>>
+  setHandle: (handle: string) => void
 }) {
   const theme = useTheme()
   const filteredVersions = useMemo(

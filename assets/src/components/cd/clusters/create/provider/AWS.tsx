@@ -1,4 +1,4 @@
-import { ReactElement } from 'react'
+import { ReactElement, useEffect, useMemo } from 'react'
 import { Input } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
@@ -6,8 +6,24 @@ import { ProviderCloud } from '../types'
 
 import { NodeGroupContainer } from './NodeGroupContainer'
 
-export function AWS(): ReactElement {
+export function AWS({
+  onValidityChange,
+}: {
+  onValidityChange: (valid: boolean) => void
+}): ReactElement {
   const theme = useTheme()
+  // const {
+  //   create: {
+  //     attributes: { cloudSettings },
+  //     setAwsSettings,
+  //   },
+  // } = useCreateClusterContext()
+  // const settings = cloudSettings?.aws
+  // const setSettings = setAwsSettings
+
+  const valid = useMemo(() => false, [])
+
+  useEffect(() => onValidityChange?.(valid), [onValidityChange, valid])
 
   return (
     <div

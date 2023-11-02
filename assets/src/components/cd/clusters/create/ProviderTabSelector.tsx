@@ -76,11 +76,7 @@ export function ProviderTabSelector({
           )
         })}
       </TabList>
-
       <TabPanel
-        key={selectedProvider}
-        tabKey={selectedProvider}
-        mode="multipanel"
         stateRef={tabStateRef}
         css={{
           borderTop: theme.borders.default,
