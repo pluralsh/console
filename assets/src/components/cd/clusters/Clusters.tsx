@@ -297,13 +297,10 @@ export const columns = [
   columnHelper.accessor(({ node }) => node?.status?.conditions?.length ?? 0, {
     id: 'conditions',
     header: 'Conditions',
-    cell: ({ row: { original } }) => {
-      return (
-        original?.node?.status?.conditions && (
-          <ClusterConditions cluster={original.node} />
-        )
-      )
-    },
+    cell: ({ row: { original } }) =>
+      original?.node?.status?.conditions && (
+        <ClusterConditions cluster={original.node} />
+      ),
   }),
   columnHelper.accessor(({ node }) => node, {
     id: 'actions',
