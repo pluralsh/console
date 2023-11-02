@@ -104,7 +104,7 @@ defmodule Console.Schema.Cluster do
     has_many :node_pools, ClusterNodePool, on_replace: :delete
     has_many :service_errors, ServiceError, on_replace: :delete
     has_many :services, Service
-    has_many :tags, Tag
+    has_many :tags, Tag, on_replace: :delete
     has_many :api_deprecations, through: [:services, :api_deprecations]
 
     has_many :read_bindings, PolicyBinding,
