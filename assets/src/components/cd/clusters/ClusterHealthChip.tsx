@@ -48,7 +48,7 @@ function ClusterHealthChip({
 
   const pinged = pingedAt !== null
   const healthy =
-    pingedAt && now.clone().subtract(2, 'minutes').isBefore(pingedAt)
+    pingedAt && now.clone().subtract(10, 'minutes').isBefore(pingedAt)
 
   return (
     <Tooltip
