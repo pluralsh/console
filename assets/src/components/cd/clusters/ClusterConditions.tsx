@@ -125,7 +125,7 @@ export function ClusterConditions({
           size="large"
           open={isOpen}
           header={`Cluster conditions${
-            cluster?.name ? `– ${cluster?.name}` : ''
+            cluster?.name ? ` – ${cluster?.name}` : ''
           }`}
           width={1024}
           maxWidth={1024}

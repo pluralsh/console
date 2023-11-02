@@ -1,11 +1,73 @@
-import { ReactElement, useCallback, useState } from 'react'
-import { Button, Card, PlusIcon } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
+import {
+  ComponentProps,
+  ReactElement,
+  useCallback,
+  useRef,
+  useState,
+} from 'react'
+import {
+  Button,
+  Card,
+  PlusIcon,
+  useResizeObserver,
+} from '@pluralsh/design-system'
+import styled, { useTheme } from 'styled-components'
 
 import { NewNodeGroup } from '../helpers'
 import { NodeGroup } from '../types'
 
 import { NodeGroup as NodeGroupComponent } from './NodeGroup'
+
+const NodeGroupsScrollContainerSC = styled.div(({ theme }) => ({
+  '& > div': {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.large,
+  },
+  position: 'relative',
+  overflow: 'auto',
+  maxHeight: 350,
+}))
+
+function NodeGroupsScrollContainer({
+  children,
+  ...props
+}: ComponentProps<typeof NodeGroupsScrollContainerSC>) {
+  const theme = useTheme()
+  const ref = useRef<HTMLDivElement>(null)
+  const innerRef = useRef<HTMLDivElement>(null)
+
+  useResizeObserver(ref as any, () => {
+    if (ref.current && innerRef.current) {
+      const barWidth =
+        ref.current.getBoundingClientRect().width -
+        innerRef.current.getBoundingClientRect().width
+
+      if (barWidth > 0) {
+        innerRef.current.style.setProperty(
+          'padding-right',
+          `${theme.spacing.xsmall}px`
+        )
+        ref.current.style.setProperty(
+          'margin-right',
+          `${-barWidth - theme.spacing.xsmall}px`
+        )
+      } else {
+        innerRef.current.style.setProperty('padding-right', '0')
+        ref.current.style.setProperty('margin-right', '0')
+      }
+    }
+  })
+
+  return (
+    <NodeGroupsScrollContainerSC
+      ref={ref}
+      {...props}
+    >
+      <div ref={innerRef}>{children}</div>
+    </NodeGroupsScrollContainerSC>
+  )
+}
 
 function NodeGroupContainer({ provider }): ReactElement {
   const theme = useTheme()
@@ -74,17 +136,7 @@ function NodeGroupContainer({ provider }): ReactElement {
           </Button>
         </div>
 
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '24px',
-            position: 'relative',
-            overflow: 'auto',
-            maxHeight: '350px',
-            paddingRight: '4px', // TODO: make it dynamic based on if element is scrollable
-          }}
-        >
+        <NodeGroupsScrollContainer>
           {nodeGroups.map((ng, idx) => (
             <Card
               key={ng.id}
@@ -100,7 +152,7 @@ function NodeGroupContainer({ provider }): ReactElement {
               />
             </Card>
           ))}
-        </div>
+        </NodeGroupsScrollContainer>
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 import { Button, GitHubLogoIcon } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import CopyButton from 'components/utils/CopyButton'
 import { ApiDeprecation } from 'generated/graphql'
+
 import { StackedText } from './Clusters'
 
 const columnHelperDeprecations = createColumnHelper<ApiDeprecation>()
@@ -28,6 +28,7 @@ export const deprecationsColumns = [
     meta: { truncate: true },
     cell: ({ getValue, row: { original } }) => {
       const replacement = getValue()
+
       if (!replacement) return <div>Api Permanently Removed</div>
 
       return (

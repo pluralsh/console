@@ -1,23 +1,33 @@
 import { Input } from '@pluralsh/design-system'
-import { Dispatch, SetStateAction } from 'react'
+import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
+
+import { isNonNullable } from 'utils/isNonNullable'
+
+import { VersionSelect } from '../VersionSelect'
 
 export function NameVersionHandle({
   name,
   setName,
   version,
   setVersion,
+  versions,
   handle,
   setHandle,
 }: {
   name: string
-  setName: Dispatch<SetStateAction<string>>
+  setName: (name: string) => void
   version?: string
-  setVersion?: Dispatch<SetStateAction<string>>
+  setVersion?: (version: string) => void
+  versions?: Nullable<Nullable<string>[]>
   handle: string
-  setHandle: Dispatch<SetStateAction<string>>
+  setHandle: (handle: string) => void
 }) {
   const theme = useTheme()
+  const filteredVersions = useMemo(
+    () => versions?.filter(isNonNullable) || [],
+    [versions]
+  )
 
   return (
     <div
@@ -31,25 +41,28 @@ export function NameVersionHandle({
         css={{
           display: 'flex',
           gap: theme.spacing.medium,
-          '&& > *': {
-            flexGrow: 1,
-          },
         }}
       >
         <Input
-          css={{ width: 'fit-content' }}
+          css={{ width: 'fit-content', flexGrow: 1 }}
           placeholder="workload-cluster-0"
           value={name}
           onChange={({ target: { value } }) => setName(value)}
           prefix={<div>Name*</div>}
         />
         {setVersion && (
-          <Input
-            placeholder="1.24.11"
-            value={version}
-            onChange={({ target: { value } }) => setVersion(value)}
-            prefix={<div>Version*</div>}
-          />
+          <div
+            css={{
+              flexBasis: '140px',
+            }}
+          >
+            <VersionSelect
+              selectedKey={version}
+              versions={filteredVersions}
+              onSelectionChange={setVersion as any}
+              label="Version"
+            />
+          </div>
         )}
       </div>
       <Input

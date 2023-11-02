@@ -18,12 +18,12 @@ import {
 import { useTheme } from 'styled-components'
 
 import { RegionsForProvider, disabledNumberInputArrows } from '../helpers'
-import { NodeGroup as NodeGroupType, Provider } from '../types'
+import { NodeGroup as NodeGroupType, ProviderCloud } from '../types'
 
 import { NodeGroupAWS } from './NodeGroupAWS'
 
 interface NodeGroupProps {
-  provider: Provider
+  provider: ProviderCloud
   initialNodeGroup: NodeGroupType
   removable: boolean
   onRemove?: Dispatch<void>
@@ -48,11 +48,11 @@ function NodeGroup({
 
   const providerEl = useMemo(() => {
     switch (provider) {
-      case Provider.AWS:
+      case ProviderCloud.AWS:
         return <NodeGroupAWS {...props} />
-      case Provider.GCP:
+      case ProviderCloud.GCP:
         return <div>Node Group GCP</div>
-      case Provider.Azure:
+      case ProviderCloud.Azure:
         return <div>Node Group Azure</div>
     }
   }, [props, provider])

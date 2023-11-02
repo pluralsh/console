@@ -1,11 +1,13 @@
-import { Button, FormField, Input } from '@pluralsh/design-system'
+import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { produce } from 'immer'
-import { merge } from 'lodash'
+import isEmpty from 'lodash/isEmpty'
+import merge from 'lodash/merge'
 import { PartialDeep } from 'type-fest'
 
 import {
   CloudProviderSettingsAttributes,
+  ClusterProviderFragment,
   useCreateClusterProviderMutation,
 } from 'generated/graphql'
 import {
@@ -19,16 +21,15 @@ import {
 } from 'react'
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { getProviderName } from 'components/utils/Provider'
 
 import ModalAlt from '../ModalAlt'
-import { ClusterProviderSelect } from '../utils/ProviderSelect'
+import { ProviderTabSelector } from '../clusters/create/ProviderTabSelector'
 
 import {
   AwsSettings,
   AzureSettings,
   GcpSettings,
-  PROVIDER_KEYS,
+  SUPPORTED_CLOUDS,
 } from './ProviderSettings'
 
 const updateSettings = produce(
@@ -42,37 +43,37 @@ const updateSettings = produce(
   }
 )
 
-const providers = PROVIDER_KEYS.map((key) => ({
-  id: key,
-  cloud: key,
-  name: getProviderName(key) || '',
-}))
-
 export function CreateProviderModal({
   open,
   onClose,
   refetch,
+  providers,
 }: {
   open: boolean
   onClose: () => void
   refetch: () => void
+  providers: Nullable<Nullable<ClusterProviderFragment>[]>
 }) {
   const theme = useTheme()
   const closeModal = useCallback(() => onClose(), [onClose])
 
   const [name, setName] = useState('')
 
-  const [selectedProvider, setSelectedProvider] = useState<
-    (typeof PROVIDER_KEYS)[number] | ''
-  >('')
+  const [selectedCloud, setSelectedCloud] = useState<
+    (typeof SUPPORTED_CLOUDS)[number] | ''
+  >(
+    SUPPORTED_CLOUDS.find(
+      (cloud) => !providers?.some((p) => p?.cloud === cloud)
+    ) || ''
+  )
   const [providerSettings, updateProviderSettings] = useReducer(
     updateSettings,
     {}
   )
 
-  let disabled = !name || !selectedProvider
+  let disabled = !name || !selectedCloud
 
-  switch (selectedProvider) {
+  switch (selectedCloud) {
     case 'aws':
       disabled =
         disabled ||
@@ -100,9 +101,9 @@ export function CreateProviderModal({
     variables: {
       attributes: {
         name,
-        cloud: selectedProvider,
+        cloud: selectedCloud,
         cloudSettings: {
-          [selectedProvider]: providerSettings[selectedProvider],
+          [selectedCloud]: providerSettings[selectedCloud],
         },
       },
     },
@@ -112,20 +113,28 @@ export function CreateProviderModal({
     },
   })
 
-  const onSubmit = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault()
-      if (!disabled && !loading) {
-        mutation()
-      }
-    },
-    [disabled, loading, mutation]
-  )
   let settings: ReactNode
 
   const inputRef = useRef<HTMLInputElement>()
 
-  switch (selectedProvider) {
+  const enabledProviders = SUPPORTED_CLOUDS.filter(
+    (cloud) => !providers?.some((provider) => provider?.cloud === cloud)
+  )
+  const noMoreClouds = isEmpty(enabledProviders)
+
+  const onSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault()
+      if (noMoreClouds) {
+        onClose?.()
+      } else if (!disabled && !loading) {
+        mutation()
+      }
+    },
+    [disabled, loading, mutation, noMoreClouds, onClose]
+  )
+
+  switch (selectedCloud) {
     case 'aws':
       settings = (
         <AwsSettings
@@ -164,6 +173,18 @@ export function CreateProviderModal({
     }
   }, [open])
 
+  if (noMoreClouds) {
+    return (
+      <Modal
+        portal
+        open={open}
+        onClose={onClose}
+      >
+        You have already created providers for all available cloud services.
+      </Modal>
+    )
+  }
+
   return (
     <ModalAlt
       header="Create provider"
@@ -173,61 +194,74 @@ export function CreateProviderModal({
       asForm
       formProps={{ onSubmit }}
       actions={
-        <>
+        noMoreClouds ? (
           <Button
             type="submit"
-            disabled={disabled}
-            loading={loading}
             primary
           >
-            Create
+            Close
           </Button>
-          <Button
-            type="button"
-            secondary
-            onClick={closeModal}
-          >
-            Cancel
-          </Button>
-        </>
+        ) : (
+          <>
+            <Button
+              type="submit"
+              disabled={disabled}
+              loading={loading}
+              primary
+            >
+              Create
+            </Button>
+            <Button
+              type="button"
+              secondary
+              onClick={closeModal}
+            >
+              Cancel
+            </Button>
+          </>
+        )
       }
     >
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          rowGap: theme.spacing.medium,
-        }}
+      <ProviderTabSelector
+        enabledProviders={enabledProviders}
+        selectedProvider={selectedCloud}
+        onProviderChange={(key) => setSelectedCloud(key as any)}
       >
-        <FormField label="Name">
-          <Input
-            value={name}
-            onChange={(e) => {
-              setName(e.currentTarget.value)
-            }}
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            rowGap: theme.spacing.medium,
+          }}
+        >
+          <FormField label="Name">
+            <Input
+              value={name}
+              onChange={(e) => {
+                setName(e.currentTarget.value)
+              }}
+            />
+          </FormField>
+          {settings}
+        </div>
+        {error && (
+          <GqlError
+            header="Problem deploying service"
+            error={error}
           />
-        </FormField>
-        <FormField label="Cloud provider">
-          <ClusterProviderSelect
-            label="Select cloud provider"
-            clusterProviders={providers}
-            selectedKey={selectedProvider}
-            onSelectionChange={(key) => setSelectedProvider(key as any)}
-          />
-        </FormField>
-        {settings}
-      </div>
-      {error && (
-        <GqlError
-          header="Problem deploying service"
-          error={error}
-        />
-      )}
+        )}
+      </ProviderTabSelector>
     </ModalAlt>
   )
 }
 
-export function CreateProvider({ refetch }: { refetch: () => void }) {
+export function CreateProvider({
+  refetch,
+  providers,
+}: {
+  refetch: () => void
+  providers: Nullable<Nullable<ClusterProviderFragment>[]>
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -245,6 +279,7 @@ export function CreateProvider({ refetch }: { refetch: () => void }) {
           refetch={refetch}
           open={isOpen}
           onClose={() => setIsOpen(false)}
+          providers={providers}
         />
       </ModalMountTransition>
     </>

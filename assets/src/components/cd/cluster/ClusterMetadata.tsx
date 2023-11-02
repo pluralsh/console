@@ -107,31 +107,36 @@ function MetadataCard({
             '-'
           )}
         </Prop>
-        <Prop
-          title="Conditions"
-          margin={0}
-        >
-          {!isEmpty(cluster.status?.conditions) ? (
-            <ClusterConditions cluster={cluster} />
-          ) : (
-            '-'
-          )}
-        </Prop>
-        {/* TODO: Make these nice */}
-        <Prop
-          title="Control plane"
-          margin={0}
-        >
-          <Chip severity={status?.controlPlaneReady ? 'success' : 'warning'}>
-            {status?.controlPlaneReady ? 'Ready' : 'Not ready'}
-          </Chip>
-        </Prop>
-        <Prop
-          title="Status"
-          margin={0}
-        >
-          <ClusterStatusChip status={status} />
-        </Prop>
+        {status && (
+          <>
+            <Prop
+              title="Conditions"
+              margin={0}
+            >
+              {!isEmpty(status?.conditions) ? (
+                <ClusterConditions cluster={cluster} />
+              ) : (
+                '-'
+              )}
+            </Prop>
+            <Prop
+              title="Control plane"
+              margin={0}
+            >
+              <Chip
+                severity={status?.controlPlaneReady ? 'success' : 'warning'}
+              >
+                {status?.controlPlaneReady ? 'Ready' : 'Not ready'}
+              </Chip>
+            </Prop>
+            <Prop
+              title="Status"
+              margin={0}
+            >
+              <ClusterStatusChip status={status} />
+            </Prop>
+          </>
+        )}
       </div>
     </Card>
   )

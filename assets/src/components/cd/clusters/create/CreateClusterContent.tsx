@@ -1,181 +1,97 @@
-import {
-  ComponentType,
-  Dispatch,
-  Key,
-  MutableRefObject,
-  ReactElement,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import {
-  FormField,
-  SubTab,
-  TabList,
-  TabListStateProps,
-  TabPanel,
-} from '@pluralsh/design-system'
+import { useEffect, useMemo, useState } from 'react'
+import { FormField } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { IconProps } from 'honorable'
+import { Link } from 'react-router-dom'
+import isEmpty from 'lodash/isEmpty'
 
+import { useClusterProvidersQuery } from 'generated/graphql'
+
+import { CD_BASE_PATH } from 'routes/cdRoutesConsts'
+import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
-import {
-  CloudSettingsAttributes,
-  ClusterAttributes,
-  useClusterProvidersQuery,
-} from '../../../../generated/graphql'
-import LoadingIndicator from '../../../utils/LoadingIndicator'
-
-import { ClusterProviderSelect } from '../../utils/ProviderSelect'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { Body1P } from 'components/utils/typography/Text'
+import { InlineLink } from 'components/utils/typography/InlineLink'
+import { ProviderCredentialSelect } from 'components/cd/utils/ProviderCredsSelect'
 
 import { AWS } from './provider/AWS'
-import { ProviderToDisplayName, ProviderToLogo } from './helpers'
-import { Provider, ProviderState } from './types'
+import { ProviderCloud } from './types'
 import { GCP } from './provider/GCP'
 import { Azure } from './provider/Azure'
 import { NameVersionHandle } from './NameVersionHandle'
+import { ProviderTabSelector } from './ProviderTabSelector'
+import { SUPPORTED_CLOUDS, useCreateClusterContext } from './CreateCluster'
 
-interface ProviderSelector {
-  onProviderChange: Dispatch<Provider>
-}
-
-function ProviderSelector({ onProviderChange, children }): ReactElement {
+export function CreateClusterContent() {
   const theme = useTheme()
-
-  const [provider, setProvider] = useState<Key>(Provider.GCP)
-
-  const tabStateRef: MutableRefObject<any> = useRef()
-  const orientation = 'horizontal'
-  const tabListStateProps: TabListStateProps = {
-    keyboardActivation: 'manual',
-    orientation,
-    selectedKey: provider,
-    onSelectionChange: (p) => {
-      setProvider(p)
-      onProviderChange(p)
-    },
-  }
-
-  // TODO: remove once other providers are supported
-  const isDisabled = useCallback(
-    (p: Provider) => [Provider.AWS, Provider.Azure].includes(p),
-    []
-  )
-
-  return (
-    <>
-      <TabList
-        stateRef={tabStateRef}
-        stateProps={tabListStateProps}
-        css={{
-          width: 'fit-content',
-          border: theme.borders.default,
-          borderRadius: theme.borderRadiuses.normal,
-        }}
-      >
-        {Object.values(Provider).map((p) => {
-          const Logo: ComponentType<IconProps> = ProviderToLogo[p]
-
-          return (
-            <SubTab
-              css={{
-                display: 'flex',
-                gap: theme.spacing.xsmall,
-              }}
-              disabled={isDisabled(p)}
-              key={p}
-              textValue={ProviderToDisplayName[p]}
-            >
-              <Logo fullColor />
-              {ProviderToDisplayName[p]}
-            </SubTab>
-          )
-        })}
-      </TabList>
-
-      <TabPanel
-        key={provider}
-        tabKey={provider}
-        mode="multipanel"
-        stateRef={tabStateRef}
-        css={{
-          borderTop: theme.borders.default,
-          paddingTop: theme.spacing.large,
-        }}
-      >
-        {children}
-      </TabPanel>
-    </>
-  )
-}
-
-interface CreateClusterContentProps extends ProviderState {
-  onChange: Dispatch<SetStateAction<ClusterAttributes>>
-}
-
-export function CreateClusterContent({
-  onChange,
-  onValidityChange,
-}: CreateClusterContentProps): ReactElement {
-  const theme = useTheme()
-
-  const [provider, setProvider] = useState<Key>(Provider.GCP)
-  const [clusterProvider, setClusterProvider] = useState<Key>()
   const [providerValid, setProviderValid] = useState(false)
-  const [name, setName] = useState<string>('')
-  const [handle, setHandle] = useState<string>('')
-  const [version, setVersion] = useState<string>('')
-  const [cloudSettings, setCloudSettings] = useState<CloudSettingsAttributes>(
-    {} as CloudSettingsAttributes
-  )
+
+  const {
+    create: { attributes, setAttributes, setValid },
+  } = useCreateClusterContext()
 
   const { data: clusterProvidersQuery, loading } = useClusterProvidersQuery()
 
   const clusterProviders = useMemo(
     () =>
-      clusterProvidersQuery?.clusterProviders?.edges
-        ?.map((e) => e!.node)
-        .filter(isNonNullable)
-        .filter((p) => p?.cloud === provider) ?? [],
-    [clusterProvidersQuery?.clusterProviders?.edges, provider]
+      mapExistingNodes(clusterProvidersQuery?.clusterProviders).filter((p) =>
+        SUPPORTED_CLOUDS.some((cloud) => cloud === p.cloud)
+      ),
+    [clusterProvidersQuery?.clusterProviders]
   )
-  const providerEl = useMemo(() => {
-    switch (provider) {
-      case Provider.AWS:
-        return <AWS />
-      case Provider.GCP:
-        return (
-          <GCP
-            onValidityChange={setProviderValid}
-            onChange={setCloudSettings}
-          />
-        )
-      case Provider.Azure:
-        return <Azure />
-    }
-  }, [provider])
-  const isValid = useMemo(
-    () => !!clusterProvider && !!name && !!version && providerValid,
-    [clusterProvider, name, version, providerValid]
-  )
-  const attributes = useMemo(
+  const enabledProviders = useMemo(
     () =>
-      ({
-        name,
-        handle,
-        version,
-        providerId: clusterProvider,
-        cloudSettings,
-      }) as ClusterAttributes,
-    [name, handle, version, clusterProvider, cloudSettings]
+      clusterProviders
+        .filter((p) => !p.deletedAt)
+        .map((p) => p.cloud) as ProviderCloud[],
+    [clusterProviders]
   )
 
-  useEffect(() => onValidityChange?.(isValid), [onValidityChange, isValid])
-  useEffect(() => onChange?.(attributes), [onChange, attributes])
+  const provider = clusterProviders.find(
+    (provider) => provider.id === attributes.providerId
+  )
+  const credentialList = useMemo(
+    () => [...(provider?.credentials?.filter(isNonNullable) || [])],
+    [provider?.credentials]
+  )
+
+  useEffect(() => {
+    if (
+      !enabledProviders.some(
+        (enabledProvider) => enabledProvider === provider?.cloud
+      )
+    ) {
+      setAttributes((attrs) => ({
+        ...attrs,
+        providerId: clusterProviders?.[0]?.id,
+      }))
+    }
+  }, [clusterProviders, enabledProviders, provider?.cloud, setAttributes])
+
+  const providerEl = useMemo(() => {
+    switch (provider?.cloud) {
+      case ProviderCloud.AWS:
+        return <AWS onValidityChange={setProviderValid} />
+      case ProviderCloud.GCP:
+        return <GCP onValidityChange={setProviderValid} />
+      case ProviderCloud.Azure:
+        return <Azure onValidityChange={setProviderValid} />
+      default:
+        return null
+    }
+  }, [provider])
+
+  const isValid = useMemo(
+    () =>
+      !!attributes.providerId &&
+      !!attributes.name &&
+      !!attributes.version &&
+      providerValid,
+    [attributes.providerId, attributes.name, attributes.version, providerValid]
+  )
+
+  useEffect(() => setValid?.(isValid), [setValid, isValid])
 
   return (
     <div
@@ -185,9 +101,30 @@ export function CreateClusterContent({
         gap: theme.spacing.large,
       }}
     >
-      <ProviderSelector onProviderChange={setProvider}>
-        {loading && <LoadingIndicator />}
-        {!loading && (
+      <ProviderTabSelector
+        selectedProvider={provider?.cloud}
+        onProviderChange={(cloud) => {
+          setAttributes((attrs) => ({
+            ...attrs,
+            providerId: clusterProviders?.find((p) => p.cloud === cloud)?.id,
+          }))
+        }}
+        enabledProviders={enabledProviders}
+      >
+        {loading ? (
+          <LoadingIndicator />
+        ) : isEmpty(enabledProviders) ? (
+          <Body1P>
+            No providers have been set up. You can add cloud providers{' '}
+            <InlineLink
+              as={Link}
+              to={`/${CD_BASE_PATH}/providers`}
+            >
+              here
+            </InlineLink>
+            .
+          </Body1P>
+        ) : (
           <div
             css={{
               display: 'flex',
@@ -196,26 +133,43 @@ export function CreateClusterContent({
             }}
           >
             <NameVersionHandle
-              {...{ name, setName, version, setVersion, handle, setHandle }}
+              {...{
+                name: attributes.name || '',
+                setName: (name) => {
+                  setAttributes({ ...attributes, name })
+                },
+                version: attributes.version || '',
+                setVersion: (version) =>
+                  setAttributes({ ...attributes, version }),
+                versions: provider?.supportedVersions,
+                handle: attributes.handle || '',
+                setHandle: (handle) => {
+                  setAttributes({ ...attributes, handle })
+                },
+              }}
             />
-            <FormField
-              label="Cluster provider"
-              hint="Configured cluster provider that should be used to provision the cluster."
-              required
-            >
-              <ClusterProviderSelect
-                aria-label="cluster provider"
-                selectedKey={clusterProvider}
-                onSelectionChange={(key) => {
-                  setClusterProvider(key)
-                }}
-                clusterProviders={clusterProviders}
-              />
-            </FormField>
+            {credentialList && !isEmpty(credentialList) && (
+              <FormField
+                label="Provider credentials"
+                hint="Configured cluster provider that should be used to provision the cluster."
+              >
+                <ProviderCredentialSelect
+                  aria-label="cluster provider"
+                  selectedKey={attributes.credentialId || ''}
+                  credentials={credentialList}
+                  onSelectionChange={(key) => {
+                    setAttributes((attrs) => ({
+                      ...attrs,
+                      credentialId: credentialList?.find((c) => c.id === key),
+                    }))
+                  }}
+                />
+              </FormField>
+            )}
             {providerEl}
           </div>
         )}
-      </ProviderSelector>
+      </ProviderTabSelector>
     </div>
   )
 }

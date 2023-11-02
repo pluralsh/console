@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useMemo, useState } from 'react'
+import { ComponentProps, forwardRef, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { Div, Flex, useDebounce } from 'honorable'
 import {
@@ -13,7 +13,6 @@ import {
 } from '@pluralsh/design-system'
 import Fuse from 'fuse.js'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/ListBoxItem'
 import styled, { useTheme } from 'styled-components'
 import type { RootQueryType } from 'generated/graphql'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
@@ -44,7 +43,7 @@ const ListBoxFooterPlusInner = styled(ListBoxFooter)(({ theme }) => ({
 
 export const NamespaceListFooter = forwardRef<
   HTMLDivElement,
-  Omit<ListBoxFooterProps, 'children'>
+  Omit<ComponentProps<typeof ListBoxFooterPlusInner>, 'children'>
 >(({ leftContent, ...props }, ref) => {
   const theme = useTheme()
   const label = 'View all'

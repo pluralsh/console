@@ -1,47 +1,29 @@
-import {
-  Dispatch,
-  Key,
-  ReactElement,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
 
 import { RegionsForProvider } from '../helpers'
-import { Provider, ProviderState } from '../types'
-import {
-  CloudSettingsAttributes,
-  GcpCloudAttributes,
-} from '../../../../../generated/graphql'
+import { ProviderCloud } from '../types'
+import { useCreateClusterContext } from '../CreateCluster'
 
-interface GCPProps extends ProviderState {
-  onChange?: Dispatch<SetStateAction<CloudSettingsAttributes>>
-}
-
-export function GCP({ onValidityChange, onChange }: GCPProps): ReactElement {
+export function GCP({
+  onValidityChange,
+}: {
+  onValidityChange: (valid: boolean) => void
+}) {
   const theme = useTheme()
-  const [region, setRegion] = useState<Key>()
-  const [project, setProject] = useState<string>()
-  const [vpc, setVPC] = useState<string>()
-  const valid = useMemo(() => !!region, [region])
+  const {
+    create: {
+      attributes: { cloudSettings },
+      setGcpSettings,
+    },
+  } = useCreateClusterContext()
+  const settings = cloudSettings?.gcp
+  const setSettings = setGcpSettings
 
-  const attributes = useMemo(
-    () =>
-      ({
-        gcp: {
-          project,
-          region,
-          network: vpc,
-        } as GcpCloudAttributes,
-      }) as CloudSettingsAttributes,
-    [project, region, vpc]
-  )
+  const valid = useMemo(() => !!settings?.region, [settings?.region])
 
   useEffect(() => onValidityChange?.(valid), [onValidityChange, valid])
-  useEffect(() => onChange?.(attributes), [onChange, attributes])
 
   return (
     <div
@@ -59,15 +41,19 @@ export function GCP({ onValidityChange, onChange }: GCPProps): ReactElement {
       >
         <Input
           placeholder="project-512333"
-          value={project}
-          onChange={({ target: { value } }) => setProject(value)}
-          prefix={<div>Project ID*</div>}
+          value={settings?.project || ''}
+          onChange={({ target: { value } }) =>
+            setSettings?.({ ...settings, project: value })
+          }
+          prefix={<div>Project ID</div>}
         />
         <Input
           placeholder="vpc-network"
-          value={vpc}
-          onChange={({ target: { value } }) => setVPC(value)}
-          prefix={<div>VPC Name*</div>}
+          value={settings?.network || ''}
+          onChange={({ target: { value } }) =>
+            setSettings?.({ ...settings, network: value })
+          }
+          prefix={<div>VPC Name</div>}
         />
       </div>
       <FormField
@@ -77,10 +63,16 @@ export function GCP({ onValidityChange, onChange }: GCPProps): ReactElement {
       >
         <Select
           aria-label="region"
-          selectedKey={region}
-          onSelectionChange={setRegion}
+          selectedKey={settings?.region || ''}
+          onSelectionChange={(value) =>
+            setSettings?.({
+              ...settings,
+              region: value as string,
+            })
+          }
+          label="Choose a region"
         >
-          {RegionsForProvider[Provider.GCP].map((r) => (
+          {RegionsForProvider[ProviderCloud.GCP].map((r) => (
             <ListBoxItem
               key={r}
               label={r}

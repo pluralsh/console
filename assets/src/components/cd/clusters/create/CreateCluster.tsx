@@ -1,4 +1,13 @@
-import { useCallback, useRef, useState } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Button, Tab, TabList } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
@@ -9,6 +18,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
 
 import {
+  CloudSettingsAttributes,
   Cluster,
   ClusterAttributes,
   useCreateClusterMutation,
@@ -16,10 +26,43 @@ import {
 
 import { CreateClusterContent } from './CreateClusterContent'
 import { ImportClusterContent } from './ImportClusterContent'
+import { ProviderCloud } from './types'
 
 enum Mode {
   New = 'new',
   Import = 'import',
+}
+
+export const SUPPORTED_CLOUDS = [ProviderCloud.GCP]
+
+type NewClusterContextT = {
+  attributes: ClusterAttributes
+  setAttributes: Dispatch<SetStateAction<ClusterAttributes>>
+  setValid: Dispatch<SetStateAction<boolean>>
+  setGcpSettings?: (settings: CloudSettingsAttributes['gcp']) => void
+  setAzureSettings?: (settings: CloudSettingsAttributes['azure']) => void
+  setAwsSettings?: (settings: CloudSettingsAttributes['aws']) => void
+}
+
+type CreateClusterContextT = {
+  create: NewClusterContextT
+  import: NewClusterContextT
+}
+
+const CreateClusterContext = createContext<CreateClusterContextT | undefined>(
+  undefined
+)
+
+export const useCreateClusterContext = () => {
+  const ctx = useContext(CreateClusterContext)
+
+  if (!ctx) {
+    throw Error(
+      'useCreateClusterContext() must be used within a CreateClusterContext provider'
+    )
+  }
+
+  return ctx
 }
 
 function CreateClusterModal({
@@ -44,6 +87,46 @@ function CreateClusterModal({
   )
   const [newAttrsValid, setNewAttrsValid] = useState(false)
 
+  const cloudSetters = useMemo(
+    () => ({
+      setAwsSettings: (settings) => {
+        setClusterAttributes((attrs) => ({
+          ...attrs,
+          cloudSettings: { ...attrs.cloudSettings, aws: settings },
+        }))
+      },
+      setGcpSettings: (settings) => {
+        setClusterAttributes((attrs) => ({
+          ...attrs,
+          cloudSettings: { ...attrs.cloudSettings, gcp: settings },
+        }))
+      },
+      setAzureSettings: (settings) => {
+        setClusterAttributes((attrs) => ({
+          ...attrs,
+          cloudSettings: { ...attrs.cloudSettings, azure: settings },
+        }))
+      },
+    }),
+    []
+  )
+
+  const contextVal = useMemo<CreateClusterContextT>(
+    () => ({
+      create: {
+        attributes: clusterAttributes,
+        setAttributes: setClusterAttributes,
+        setValid: setNewAttrsValid,
+        ...cloudSetters,
+      },
+      import: {
+        attributes: importClusterAttributes,
+        setAttributes: setImportClusterAttributes,
+        setValid: setImportAttrsValid,
+      },
+    }),
+    [cloudSetters, clusterAttributes, importClusterAttributes]
+  )
   const [createCluster, { loading, error }] = useCreateClusterMutation()
 
   const onSubmit = useCallback(() => {
@@ -142,18 +225,17 @@ function CreateClusterModal({
         </div>
       }
     >
-      {createMode === Mode.New ? (
-        <CreateClusterContent
-          onChange={setClusterAttributes}
-          onValidityChange={setNewAttrsValid}
-        />
-      ) : (
-        <ImportClusterContent
-          importCluster={importCluster}
-          onChange={setImportClusterAttributes}
-          onValidityChange={setImportAttrsValid}
-        />
-      )}
+      <CreateClusterContext.Provider value={contextVal}>
+        {createMode === Mode.New ? (
+          <CreateClusterContent />
+        ) : (
+          <ImportClusterContent
+            importCluster={importCluster}
+            onChange={setImportClusterAttributes}
+            onValidityChange={setImportAttrsValid}
+          />
+        )}
+      </CreateClusterContext.Provider>
       {error && <GqlError error={error} />}
     </ModalAlt>
   )

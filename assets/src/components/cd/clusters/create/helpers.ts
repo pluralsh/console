@@ -8,7 +8,7 @@ import {
 
 import { v4 } from 'uuid'
 
-import { AWSNodeGroup, NodeGroup, Provider } from './types'
+import { AWSNodeGroup, NodeGroup, ProviderCloud } from './types'
 
 const disabledNumberInputArrows: CSSProp = {
   'input[type="number"]': {
@@ -21,20 +21,20 @@ const disabledNumberInputArrows: CSSProp = {
   },
 }
 
-const ProviderToDisplayName: { readonly [key in Provider]: string } = {
-  [Provider.AWS]: 'AWS',
-  [Provider.GCP]: 'GCP',
-  [Provider.Azure]: 'Azure',
+const ProviderToDisplayName: { readonly [key in ProviderCloud]: string } = {
+  [ProviderCloud.AWS]: 'AWS',
+  [ProviderCloud.GCP]: 'GCP',
+  [ProviderCloud.Azure]: 'Azure',
 }
 
-const ProviderToLogo: { readonly [key in Provider]: ComponentType } = {
-  [Provider.AWS]: AwsLogoIcon,
-  [Provider.GCP]: GoogleLogoIcon,
-  [Provider.Azure]: AzureLogoIcon,
+const ProviderToLogo: { readonly [key in ProviderCloud]: ComponentType } = {
+  [ProviderCloud.AWS]: AwsLogoIcon,
+  [ProviderCloud.GCP]: GoogleLogoIcon,
+  [ProviderCloud.Azure]: AzureLogoIcon,
 }
 
-const RegionsForProvider: { readonly [key in Provider]: Array<string> } = {
-  [Provider.AWS]: [
+const RegionsForProvider: { readonly [key in ProviderCloud]: Array<string> } = {
+  [ProviderCloud.AWS]: [
     'af-south-1',
     'eu-north-1',
     'ap-south-1',
@@ -58,7 +58,7 @@ const RegionsForProvider: { readonly [key in Provider]: Array<string> } = {
     'us-west-1',
     'us-west-2',
   ],
-  [Provider.GCP]: [
+  [ProviderCloud.GCP]: [
     'asia-east1',
     'asia-east2',
     'asia-northeast1',
@@ -75,7 +75,7 @@ const RegionsForProvider: { readonly [key in Provider]: Array<string> } = {
     'us-west1',
     'us-west2',
   ],
-  [Provider.Azure]: [
+  [ProviderCloud.Azure]: [
     'eastus',
     'eastus2',
     'southcentralus',
@@ -101,22 +101,22 @@ const RegionsForProvider: { readonly [key in Provider]: Array<string> } = {
   ],
 }
 
-const DefaultRegionForProvider: { readonly [key in Provider]: string } = {
-  [Provider.AWS]: 'us-east-2',
-  [Provider.GCP]: '',
-  [Provider.Azure]: '',
+const DefaultRegionForProvider: { readonly [key in ProviderCloud]: string } = {
+  [ProviderCloud.AWS]: 'us-east-2',
+  [ProviderCloud.GCP]: '',
+  [ProviderCloud.Azure]: '',
 }
 
-function NewNodeGroup(provider: Provider): NodeGroup {
+function NewNodeGroup(provider: ProviderCloud): NodeGroup {
   switch (provider) {
-    case Provider.AWS:
+    case ProviderCloud.AWS:
       return {
         id: v4(),
         nodeType: DefaultRegionForProvider[provider],
       } as AWSNodeGroup
-    case Provider.GCP:
+    case ProviderCloud.GCP:
       return {} as NodeGroup
-    case Provider.Azure:
+    case ProviderCloud.Azure:
       return {} as NodeGroup
   }
 }
