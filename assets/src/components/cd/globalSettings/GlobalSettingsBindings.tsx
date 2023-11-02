@@ -3,11 +3,25 @@ import { useMemo, useState } from 'react'
 import { BindingInput } from 'components/utils/BindingInput'
 import { useTheme } from 'styled-components'
 import groupBy from 'lodash/groupBy'
-import { PolicyBindingFragment } from 'generated/graphql'
 
-type Binding = Pick<PolicyBindingFragment, 'user' | 'group'>
+type Binding = {
+  user:
+    | {
+        id: string
+        email?: string
+      }
+    | null
+    | undefined
+  group:
+    | {
+        id: string
+        name?: string
+      }
+    | null
+    | undefined
+}
 
-export function splitBindings(bindings: (Binding | null | undefined)[]) {
+function splitBindings(bindings: (Binding | null | undefined)[]) {
   return groupBy(bindings, (binding) => {
     if (binding?.group) {
       return 'groupBindings'

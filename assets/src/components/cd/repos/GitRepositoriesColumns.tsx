@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { GitHubLogoIcon } from '@pluralsh/design-system'
-import { type GitRepositoriesRowFragment } from 'generated/graphql'
+import { type GitRepositoryFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
@@ -10,7 +10,7 @@ import { AuthMethodChip, DeleteGitRepository } from './GitRepositories'
 import { GitHealthChip, gitHealthToLabel } from './GitHealthChip'
 import { UpdateGitRepository } from './GitRepositoriesUpdateGit'
 
-const columnHelper = createColumnHelper<Edge<GitRepositoriesRowFragment>>()
+const columnHelper = createColumnHelper<Edge<GitRepositoryFragment>>()
 
 export const ColRepo = columnHelper.accessor(({ node }) => node?.url, {
   id: 'repository',

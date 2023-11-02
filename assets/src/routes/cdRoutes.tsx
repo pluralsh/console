@@ -17,10 +17,10 @@ import ComponentEvents from 'components/component/ComponentEvents'
 import ComponentRaw from 'components/component/ComponentRaw'
 import ComponentMetrics from 'components/component/ComponentMetrics'
 
-import { GlobalSettings } from 'components/cd/clusters/GlobalSettings'
-import { GlobalSettingsPermissions } from 'components/cd/services/globalSettings/GlobalSettingsPermissions'
+import { GlobalSettings } from 'components/cd/globalSettings/GlobalSettings'
+import { GlobalSettingsPermissions } from 'components/cd/globalSettings/GlobalSettingsPermissions'
 
-import { GlobalSettingsRepositories } from 'components/cd/services/globalSettings/GlobalSettingsRepositories'
+import { GlobalSettingsRepositories } from 'components/cd/globalSettings/GlobalSettingsRepositories'
 
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
@@ -138,13 +138,25 @@ export const cdRoutes = [
       element={
         <Navigate
           replace
-          to="permissions"
+          to="permissions/read"
         />
       }
     />
     <Route
-      path="permissions"
-      element={<GlobalSettingsPermissions />}
+      path="permissions/read"
+      element={<GlobalSettingsPermissions type="read" />}
+    />
+    <Route
+      path="permissions/write"
+      element={<GlobalSettingsPermissions type="write" />}
+    />
+    <Route
+      path="permissions/create"
+      element={<GlobalSettingsPermissions type="create" />}
+    />
+    <Route
+      path="permissions/git"
+      element={<GlobalSettingsPermissions type="git" />}
     />
     <Route
       path="repositories"

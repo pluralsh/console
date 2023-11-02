@@ -3898,19 +3898,19 @@ export type UsageQueryVariables = Exact<{
 
 export type UsageQuery = { __typename?: 'RootQueryType', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null };
 
-export type GitRepositoriesRowFragment = { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null };
+export type GitRepositoryFragment = { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null };
 
 export type GitRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GitRepositoriesQuery = { __typename?: 'RootQueryType', gitRepositories?: { __typename?: 'GitRepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GitRepositoryEdge', node?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null } | null } | null> | null } | null };
+export type GitRepositoriesQuery = { __typename?: 'RootQueryType', gitRepositories?: { __typename?: 'GitRepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GitRepositoryEdge', node?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null } | null> | null } | null };
 
 export type CreateGitRepositoryMutationVariables = Exact<{
   attributes: GitAttributes;
 }>;
 
 
-export type CreateGitRepositoryMutation = { __typename?: 'RootMutationType', createGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null } | null };
+export type CreateGitRepositoryMutation = { __typename?: 'RootMutationType', createGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null };
 
 export type DeleteGitRepositoryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3925,7 +3925,7 @@ export type UpdateGitRepositoryMutationVariables = Exact<{
 }>;
 
 
-export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null } | null };
+export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null };
 
 export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
 
@@ -3945,6 +3945,20 @@ export type DeleteGlobalServiceMutationVariables = Exact<{
 
 
 export type DeleteGlobalServiceMutation = { __typename?: 'RootMutationType', deleteGlobalService?: { __typename?: 'GlobalService', id: string } | null };
+
+export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, insertedAt?: string | null, updatedAt?: string | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
+export type UpdateDeploymentSettingsMutationVariables = Exact<{
+  attributes: DeploymentSettingsAttributes;
+}>;
+
+
+export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, insertedAt?: string | null, updatedAt?: string | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, insertedAt?: string | null, updatedAt?: string | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type ClusterProviderFragment = { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, deletedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null };
 
@@ -4730,20 +4744,6 @@ export const MetricResponseFragmentDoc = gql`
   }
 }
     `;
-export const GitRepositoriesRowFragmentDoc = gql`
-    fragment GitRepositoriesRow on GitRepository {
-  id
-  url
-  health
-  authMethod
-  editable
-  error
-  insertedAt
-  pulledAt
-  updatedAt
-  urlFormat
-}
-    `;
 export const GlobalServiceFragmentDoc = gql`
     fragment GlobalService on GlobalService {
   id
@@ -4766,6 +4766,49 @@ export const GlobalServiceFragmentDoc = gql`
   updatedAt
 }
     `;
+export const GitRepositoryFragmentDoc = gql`
+    fragment GitRepository on GitRepository {
+  id
+  url
+  health
+  authMethod
+  editable
+  error
+  insertedAt
+  pulledAt
+  updatedAt
+  urlFormat
+  httpsPath
+}
+    `;
+export const DeploymentSettingsFragmentDoc = gql`
+    fragment DeploymentSettings on DeploymentSettings {
+  id
+  name
+  enabled
+  insertedAt
+  updatedAt
+  artifactRepository {
+    ...GitRepository
+  }
+  deployerRepository {
+    ...GitRepository
+  }
+  createBindings {
+    ...PolicyBinding
+  }
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+  gitBindings {
+    ...PolicyBinding
+  }
+}
+    ${GitRepositoryFragmentDoc}
+${PolicyBindingFragmentDoc}`;
 export const ClusterProviderFragmentDoc = gql`
     fragment ClusterProvider on ClusterProvider {
   id
@@ -6009,13 +6052,13 @@ export const GitRepositoriesDocument = gql`
     }
     edges {
       node {
-        ...GitRepositoriesRow
+        ...GitRepository
       }
     }
   }
 }
     ${PageInfoFragmentDoc}
-${GitRepositoriesRowFragmentDoc}`;
+${GitRepositoryFragmentDoc}`;
 
 /**
  * __useGitRepositoriesQuery__
@@ -6051,10 +6094,10 @@ export type GitRepositoriesQueryResult = Apollo.QueryResult<GitRepositoriesQuery
 export const CreateGitRepositoryDocument = gql`
     mutation CreateGitRepository($attributes: GitAttributes!) {
   createGitRepository(attributes: $attributes) {
-    ...GitRepositoriesRow
+    ...GitRepository
   }
 }
-    ${GitRepositoriesRowFragmentDoc}`;
+    ${GitRepositoryFragmentDoc}`;
 export type CreateGitRepositoryMutationFn = Apollo.MutationFunction<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>;
 
 /**
@@ -6117,10 +6160,10 @@ export type DeleteGitRepositoryMutationOptions = Apollo.BaseMutationOptions<Dele
 export const UpdateGitRepositoryDocument = gql`
     mutation UpdateGitRepository($id: ID!, $attributes: GitAttributes!) {
   updateGitRepository(id: $id, attributes: $attributes) {
-    ...GitRepositoriesRow
+    ...GitRepository
   }
 }
-    ${GitRepositoriesRowFragmentDoc}`;
+    ${GitRepositoryFragmentDoc}`;
 export type UpdateGitRepositoryMutationFn = Apollo.MutationFunction<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>;
 
 /**
@@ -6222,6 +6265,78 @@ export function useDeleteGlobalServiceMutation(baseOptions?: Apollo.MutationHook
 export type DeleteGlobalServiceMutationHookResult = ReturnType<typeof useDeleteGlobalServiceMutation>;
 export type DeleteGlobalServiceMutationResult = Apollo.MutationResult<DeleteGlobalServiceMutation>;
 export type DeleteGlobalServiceMutationOptions = Apollo.BaseMutationOptions<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>;
+export const UpdateDeploymentSettingsDocument = gql`
+    mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
+  updateDeploymentSettings(attributes: $attributes) {
+    ...DeploymentSettings
+  }
+}
+    ${DeploymentSettingsFragmentDoc}`;
+export type UpdateDeploymentSettingsMutationFn = Apollo.MutationFunction<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>;
+
+/**
+ * __useUpdateDeploymentSettingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateDeploymentSettingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateDeploymentSettingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateDeploymentSettingsMutation, { data, loading, error }] = useUpdateDeploymentSettingsMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateDeploymentSettingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>(UpdateDeploymentSettingsDocument, options);
+      }
+export type UpdateDeploymentSettingsMutationHookResult = ReturnType<typeof useUpdateDeploymentSettingsMutation>;
+export type UpdateDeploymentSettingsMutationResult = Apollo.MutationResult<UpdateDeploymentSettingsMutation>;
+export type UpdateDeploymentSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>;
+export const DeploymentSettingsDocument = gql`
+    query DeploymentSettings {
+  deploymentSettings {
+    ...DeploymentSettings
+  }
+}
+    ${DeploymentSettingsFragmentDoc}`;
+
+/**
+ * __useDeploymentSettingsQuery__
+ *
+ * To run a query within a React component, call `useDeploymentSettingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeploymentSettingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeploymentSettingsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useDeploymentSettingsQuery(baseOptions?: Apollo.QueryHookOptions<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>(DeploymentSettingsDocument, options);
+      }
+export function useDeploymentSettingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>(DeploymentSettingsDocument, options);
+        }
+export function useDeploymentSettingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>(DeploymentSettingsDocument, options);
+        }
+export type DeploymentSettingsQueryHookResult = ReturnType<typeof useDeploymentSettingsQuery>;
+export type DeploymentSettingsLazyQueryHookResult = ReturnType<typeof useDeploymentSettingsLazyQuery>;
+export type DeploymentSettingsSuspenseQueryHookResult = ReturnType<typeof useDeploymentSettingsSuspenseQuery>;
+export type DeploymentSettingsQueryResult = Apollo.QueryResult<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>;
 export const ClusterProvidersDocument = gql`
     query ClusterProviders {
   clusterProviders(first: 100) {
@@ -8206,6 +8321,7 @@ export const namedOperations = {
     ClusterBindings: 'ClusterBindings',
     Usage: 'Usage',
     GitRepositories: 'GitRepositories',
+    DeploymentSettings: 'DeploymentSettings',
     ClusterProviders: 'ClusterProviders',
     ServiceDeployments: 'ServiceDeployments',
     ServiceDeploymentsTiny: 'ServiceDeploymentsTiny',
@@ -8247,6 +8363,7 @@ export const namedOperations = {
     UpdateGitRepository: 'UpdateGitRepository',
     CreateGlobalService: 'CreateGlobalService',
     DeleteGlobalService: 'DeleteGlobalService',
+    UpdateDeploymentSettings: 'UpdateDeploymentSettings',
     CreateClusterProvider: 'CreateClusterProvider',
     UpdateClusterProvider: 'UpdateClusterProvider',
     DeleteClusterProvider: 'DeleteClusterProvider',
@@ -8286,8 +8403,9 @@ export const namedOperations = {
     PolicyBinding: 'PolicyBinding',
     ClusterBindings: 'ClusterBindings',
     MetricResponse: 'MetricResponse',
-    GitRepositoriesRow: 'GitRepositoriesRow',
+    GitRepository: 'GitRepository',
     GlobalService: 'GlobalService',
+    DeploymentSettings: 'DeploymentSettings',
     ClusterProvider: 'ClusterProvider',
     ServiceDeploymentRevision: 'ServiceDeploymentRevision',
     ServiceDeploymentsRow: 'ServiceDeploymentsRow',

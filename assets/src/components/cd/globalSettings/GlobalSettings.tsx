@@ -1,5 +1,5 @@
 import { useTheme } from 'styled-components'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, useOutletContext } from 'react-router-dom'
 
 import { CD_BASE_PATH, GLOBAL_SETTINGS_PATH } from 'routes/cdRoutesConsts'
 
@@ -9,6 +9,13 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { SideNavEntries } from 'components/layout/SideNavEntries'
+
+import {
+  DeploymentSettingsFragment,
+  useDeploymentSettingsQuery,
+} from 'generated/graphql'
+
+import { useMemo } from 'react'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
@@ -20,18 +27,48 @@ export const getGlobalSettingsBreadcrumbs = ({ page }: { page: string }) => [
 
 const directory = [
   {
-    path: 'permissions',
-    label: 'Permissions',
+    path: 'permissions/read',
+    label: 'Read permissions',
   },
+  {
+    path: 'permissions/write',
+    label: 'Write permissions',
+  },
+  {
+    path: 'permissions/create',
+    label: 'Create permissions',
+  },
+  {
+    path: 'permissions/git',
+    label: 'Git write permissions',
+  },
+
   {
     path: 'repositories',
     label: 'Repositories',
   },
 ]
 
+type GlobalSettingsContextType = {
+  refetch: () => void
+  deploymentSettings: DeploymentSettingsFragment
+}
+
+export const useGlobalSettingsContext = () =>
+  useOutletContext<GlobalSettingsContextType>()
+
 export function GlobalSettings() {
   const theme = useTheme()
   const { pathname } = useLocation()
+  const { data, refetch } = useDeploymentSettingsQuery({})
+
+  const outletContext = useMemo(
+    () => ({
+      refetch,
+      ...data,
+    }),
+    [data, refetch]
+  )
 
   return (
     <ResponsiveLayoutPage>
@@ -51,7 +88,7 @@ export function GlobalSettings() {
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer role="main">
-        <Outlet />
+        {data && <Outlet context={outletContext} />}
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer />
       <ResponsiveLayoutSpacer />
