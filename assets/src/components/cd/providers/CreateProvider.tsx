@@ -6,6 +6,7 @@ import { PartialDeep } from 'type-fest'
 
 import {
   CloudProviderSettingsAttributes,
+  ClusterProviderFragment,
   useCreateClusterProviderMutation,
 } from 'generated/graphql'
 import {
@@ -19,7 +20,6 @@ import {
 } from 'react'
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { getProviderName } from 'components/utils/Provider'
 
 import ModalAlt from '../ModalAlt'
 import { ProviderTabSelector } from '../clusters/create/ProviderTabSelector'
@@ -28,7 +28,7 @@ import {
   AwsSettings,
   AzureSettings,
   GcpSettings,
-  PROVIDER_KEYS,
+  SUPPORTED_CLOUDS,
 } from './ProviderSettings'
 
 const updateSettings = produce(
@@ -42,37 +42,33 @@ const updateSettings = produce(
   }
 )
 
-const providers = PROVIDER_KEYS.map((key) => ({
-  id: key,
-  cloud: key,
-  name: getProviderName(key) || '',
-}))
-
 export function CreateProviderModal({
   open,
   onClose,
   refetch,
+  providers,
 }: {
   open: boolean
   onClose: () => void
   refetch: () => void
+  providers: Nullable<Nullable<ClusterProviderFragment>[]>
 }) {
   const theme = useTheme()
   const closeModal = useCallback(() => onClose(), [onClose])
 
   const [name, setName] = useState('')
 
-  const [selectedProvider, setSelectedProvider] = useState<
-    (typeof PROVIDER_KEYS)[number] | ''
+  const [selectedCloud, setSelectedCloud] = useState<
+    (typeof SUPPORTED_CLOUDS)[number] | ''
   >('')
   const [providerSettings, updateProviderSettings] = useReducer(
     updateSettings,
     {}
   )
 
-  let disabled = !name || !selectedProvider
+  let disabled = !name || !selectedCloud
 
-  switch (selectedProvider) {
+  switch (selectedCloud) {
     case 'aws':
       disabled =
         disabled ||
@@ -100,9 +96,9 @@ export function CreateProviderModal({
     variables: {
       attributes: {
         name,
-        cloud: selectedProvider,
+        cloud: selectedCloud,
         cloudSettings: {
-          [selectedProvider]: providerSettings[selectedProvider],
+          [selectedCloud]: providerSettings[selectedCloud],
         },
       },
     },
@@ -125,7 +121,11 @@ export function CreateProviderModal({
 
   const inputRef = useRef<HTMLInputElement>()
 
-  switch (selectedProvider) {
+  const enabledProviders = SUPPORTED_CLOUDS.filter(
+    (cloud) => !providers?.some((provider) => provider?.cloud === cloud)
+  )
+
+  switch (selectedCloud) {
     case 'aws':
       settings = (
         <AwsSettings
@@ -192,41 +192,46 @@ export function CreateProviderModal({
         </>
       }
     >
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          rowGap: theme.spacing.medium,
-        }}
+      <ProviderTabSelector
+        enabledProviders={enabledProviders}
+        selectedProvider={selectedCloud}
+        onProviderChange={(key) => setSelectedCloud(key as any)}
       >
-        <FormField label="Name">
-          <Input
-            value={name}
-            onChange={(e) => {
-              setName(e.currentTarget.value)
-            }}
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            rowGap: theme.spacing.medium,
+          }}
+        >
+          <FormField label="Name">
+            <Input
+              value={name}
+              onChange={(e) => {
+                setName(e.currentTarget.value)
+              }}
+            />
+          </FormField>
+          {settings}
+        </div>
+        {error && (
+          <GqlError
+            header="Problem deploying service"
+            error={error}
           />
-        </FormField>
-        <FormField label="Cloud provider">
-          <ProviderTabSelector
-            support={providers}
-            selectedKey={selectedProvider}
-            onSelectionChange={(key) => setSelectedProvider(key as any)}
-          />
-        </FormField>
-        {settings}
-      </div>
-      {error && (
-        <GqlError
-          header="Problem deploying service"
-          error={error}
-        />
-      )}
+        )}
+      </ProviderTabSelector>
     </ModalAlt>
   )
 }
 
-export function CreateProvider({ refetch }: { refetch: () => void }) {
+export function CreateProvider({
+  refetch,
+  providers,
+}: {
+  refetch: () => void
+  providers: Nullable<Nullable<ClusterProviderFragment>[]>
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -244,6 +249,7 @@ export function CreateProvider({ refetch }: { refetch: () => void }) {
           refetch={refetch}
           open={isOpen}
           onClose={() => setIsOpen(false)}
+          providers={providers}
         />
       </ModalMountTransition>
     </>

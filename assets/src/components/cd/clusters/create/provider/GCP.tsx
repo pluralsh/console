@@ -79,6 +79,7 @@ export function GCP({ onValidityChange, onChange }: GCPProps): ReactElement {
           aria-label="region"
           selectedKey={region}
           onSelectionChange={setRegion}
+          label="Choose a region"
         >
           {RegionsForProvider[ProviderCloud.GCP].map((r) => (
             <ListBoxItem

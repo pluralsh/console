@@ -1,11 +1,9 @@
 import {
   ComponentType,
-  Key,
   MutableRefObject,
   ReactNode,
   useCallback,
   useRef,
-  useState,
 } from 'react'
 import {
   SubTab,
@@ -23,25 +21,23 @@ export function ProviderTabSelector({
   enabledProviders = [],
   onProviderChange,
   children,
+  selectedProvider,
 }: {
   onProviderChange: any
   children: ReactNode
   enabledProviders: ProviderCloud[]
+  selectedProvider: Nullable<string>
 }) {
   const theme = useTheme()
-
-  const [provider, setProvider] = useState<Key>(ProviderCloud.AWS)
-
   const tabStateRef: MutableRefObject<any> = useRef()
   const orientation = 'horizontal'
+
+  selectedProvider = selectedProvider || 'aws'
   const tabListStateProps: TabListStateProps = {
     keyboardActivation: 'manual',
     orientation,
-    selectedKey: provider,
-    onSelectionChange: (p) => {
-      setProvider(p)
-      onProviderChange(p)
-    },
+    selectedKey: selectedProvider,
+    onSelectionChange: onProviderChange,
   }
 
   const isDisabled = useCallback(
@@ -82,8 +78,8 @@ export function ProviderTabSelector({
       </TabList>
 
       <TabPanel
-        key={provider}
-        tabKey={provider}
+        key={selectedProvider}
+        tabKey={selectedProvider}
         mode="multipanel"
         stateRef={tabStateRef}
         css={{

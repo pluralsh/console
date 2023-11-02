@@ -2,9 +2,7 @@ import {
   Button,
   ClusterIcon,
   ErrorIcon,
-  ListBoxItem,
   Modal,
-  Select,
   Table,
   WarningIcon,
 } from '@pluralsh/design-system'
@@ -29,10 +27,10 @@ import {
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { Confirm } from 'components/utils/Confirm'
 import { ProviderIcons } from 'components/utils/Provider'
-import { TabularNumbers } from 'components/cluster/TableElements'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { deprecationsColumns } from './deprecationsColumns'
+import { VersionSelect } from './VersionSelect'
 
 const supportedVersions = (cluster: ClustersRowFragment | null) =>
   (cluster?.provider?.supportedVersions || []).map((vsn) =>
@@ -139,7 +137,7 @@ const upgradeColumns = [
       const cluster = getValue()
       const upgrades = useMemo(
         () => supportedUpgrades(cluster.version, supportedVersions(cluster)),
-        [cluster.provider?.supportedVersions, cluster.version]
+        [cluster]
       )
       const [targetVersion, setTargetVersion] = useState<Nullable<string>>()
 
@@ -164,22 +162,12 @@ const upgradeColumns = [
           }}
         >
           <div css={{ minWidth: 170 }}>
-            <Select
+            <VersionSelect
               selectedKey={targetVersion}
               onSelectionChange={setTargetVersion as any}
               label="Select version"
-            >
-              {upgrades.map((v) => (
-                <ListBoxItem
-                  key={v}
-                  label={
-                    <TabularNumbers css={{ textAlign: 'right' }}>
-                      {toNiceVersion(v)}
-                    </TabularNumbers>
-                  }
-                />
-              ))}
-            </Select>
+              versions={upgrades}
+            />
           </div>
           <ClustersUpgradeNow
             cluster={cluster}

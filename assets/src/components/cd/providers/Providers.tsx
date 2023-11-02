@@ -12,6 +12,8 @@ import {
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import { mapExistingNodes } from 'utils/graphql'
+
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import { ColActions, ColName, ColProvider } from './ProvidersColumns'
@@ -36,7 +38,15 @@ export default function Providers() {
   useSetBreadcrumbs(PROVIDERS_CRUMBS)
 
   useSetCDHeaderContent(
-    useMemo(() => <CreateProvider refetch={refetch} />, [refetch])
+    useMemo(
+      () => (
+        <CreateProvider
+          refetch={refetch}
+          providers={mapExistingNodes(data?.clusterProviders)}
+        />
+      ),
+      [data?.clusterProviders, refetch]
+    )
   )
   const [tableFilters, _] = useState<
     Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>

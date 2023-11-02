@@ -1,16 +1,17 @@
 import { FormField, Input } from '@pluralsh/design-system'
-import { Provider } from 'generated/graphql-plural'
 
 import { CloudProviderSettingsAttributes } from '../../../generated/graphql'
+
+import { ProviderCloud } from '../clusters/create/types'
 
 import { InputRevealer } from './InputRevealer'
 import GcpCredentials from './GcpCredentials'
 
-export const PROVIDER_KEYS = [
-  'aws',
-  'azure',
-  'gcp',
-] as const satisfies readonly Lowercase<Provider>[]
+export const SUPPORTED_CLOUDS = [
+  ProviderCloud.AWS,
+  ProviderCloud.Azure,
+  ProviderCloud.GCP,
+] as const satisfies readonly ProviderCloud[]
 
 export function AwsSettings({
   settings,

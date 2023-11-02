@@ -29,6 +29,7 @@ fragment ClusterProvider on ClusterProvider {
   credentials {
     ...ProviderCredential
   }
+  supportedVersions
   deletedAt
   insertedAt
   updatedAt

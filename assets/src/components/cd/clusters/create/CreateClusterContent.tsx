@@ -132,6 +132,7 @@ export function CreateClusterContent({
       }}
     >
       <ProviderTabSelector
+        selectedProvider={provider?.cloud}
         onProviderChange={(cloud) => {
           setProvider(clusterProviders.find((p) => p.cloud === cloud))
         }}
@@ -159,7 +160,15 @@ export function CreateClusterContent({
             }}
           >
             <NameVersionHandle
-              {...{ name, setName, version, setVersion, handle, setHandle }}
+              {...{
+                name,
+                setName,
+                version,
+                setVersion,
+                versions: provider?.supportedVersions,
+                handle,
+                setHandle,
+              }}
             />
             {credentialList && !isEmpty(credentialList) && (
               <FormField
