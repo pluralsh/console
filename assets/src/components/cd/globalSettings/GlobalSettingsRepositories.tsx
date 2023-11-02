@@ -44,7 +44,6 @@ export function GlobalSettingsRepositories() {
     (e) => {
       e.preventDefault()
       if (allowSubmit) {
-        console.log('do mutation')
         updateSettings({
           variables: {
             attributes: {
@@ -71,8 +70,6 @@ export function GlobalSettingsRepositories() {
     },
     [allowSubmit, formState, refetch, updateSettings]
   )
-
-  console.log({ artifactRepository, deployerRepository })
 
   return (
     <ScrollablePage heading="Repositories">
