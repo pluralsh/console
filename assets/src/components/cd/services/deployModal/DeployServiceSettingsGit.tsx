@@ -1,6 +1,7 @@
 import {
   ComboBox,
   FormField,
+  GitHubLogoIcon,
   Input,
   ListBoxItem,
 } from '@pluralsh/design-system'
@@ -24,49 +25,14 @@ export function DeployServiceSettingsGit({
   gitFolder: string
   setGitFolder: Dispatch<SetStateAction<string>>
 }) {
-  const [comboBoxInput, setComboBoxInput] = useState('')
-
-  const selectedRepo = repos.find((r) => r.id === repositoryId)
-
-  const repoSearchResults = useMemo(
-    () =>
-      repos
-        .map((repo) => {
-          const rankingInfo = rankItem(repo, comboBoxInput, {
-            accessors: [(v) => v.url],
-          })
-
-          return { item: repo, rankingInfo }
-        })
-        .filter((item) => item.rankingInfo.passed)
-        .sort((a, b) => compareItems(a.rankingInfo, b.rankingInfo)),
-    [comboBoxInput, repos]
-  )
-
   return (
     <>
       <FormField label="Connect your repository">
-        <ComboBox
-          inputValue={comboBoxInput}
-          onInputChange={(inputVal) => setComboBoxInput(inputVal)}
-          selectedKey={repositoryId}
-          onSelectionChange={(key) => {
-            setRepoId(key as any)
-            setComboBoxInput('')
-          }}
-          inputProps={{
-            placeholder: selectedRepo
-              ? selectedRepo.url
-              : 'Select a Git repository',
-          }}
-        >
-          {repoSearchResults.map(({ item: { id, url } }) => (
-            <ListBoxItem
-              key={id}
-              label={url}
-            />
-          ))}
-        </ComboBox>
+        <RepositorySelector
+          repositories={repos}
+          repositoryId={repositoryId}
+          setRepositoryId={setRepoId}
+        />
       </FormField>
       <FormField
         label="Git ref"
@@ -90,4 +56,60 @@ export function DeployServiceSettingsGit({
       </FormField>
     </>
   )
+}
+
+export function RepositorySelector({
+  repositories,
+  repositoryId,
+  setRepositoryId,
+}: {
+  repositories: any
+  repositoryId: Nullable<string>
+  setRepositoryId: (repositoryId: string) => void
+}) {
+  const [comboBoxInput, setComboBoxInput] = useState('')
+
+  const selectedRepo = repositories.find((r) => r.id === repositoryId)
+
+  const repoSearchResults = useMemo(
+    () =>
+      repositories
+        .map((repo) => {
+          const rankingInfo = rankItem(repo, comboBoxInput, {
+            accessors: [(v) => v.url],
+          })
+
+          return { item: repo, rankingInfo }
+        })
+        .filter((item) => item.rankingInfo.passed)
+        .sort((a, b) => compareItems(a.rankingInfo, b.rankingInfo)),
+    [comboBoxInput, repositories]
+  )
+
+  const comboBox = (
+    <ComboBox
+      inputValue={comboBoxInput}
+      onInputChange={(inputVal) => setComboBoxInput(inputVal)}
+      selectedKey={repositoryId}
+      onSelectionChange={(key) => {
+        setRepositoryId(key as any)
+        setComboBoxInput('')
+      }}
+      inputProps={{
+        placeholder: selectedRepo
+          ? selectedRepo.url
+          : 'Select a Git repository',
+      }}
+      startIcon={<GitHubLogoIcon />}
+    >
+      {repoSearchResults.map(({ item: { id, url } }) => (
+        <ListBoxItem
+          key={id}
+          label={url}
+        />
+      ))}
+    </ComboBox>
+  )
+
+  return comboBox
 }
