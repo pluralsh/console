@@ -151,7 +151,6 @@ defmodule Console.Deployments.CronTest do
     test "it can install the operator into a provisioned cluster" do
       %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =
         insert(:cluster, provider: insert(:cluster_provider))
-      insert(:cluster, installed: true)
       insert(:cluster, pinged_at: Timex.now())
       kubeconf_secret = "#{n}-kubeconfig"
       expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)

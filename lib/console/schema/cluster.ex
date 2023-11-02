@@ -197,7 +197,7 @@ defmodule Console.Schema.Cluster do
   end
 
   def uninstalled(query \\ __MODULE__) do
-    from(c in query, where: is_nil(c.pinged_at) and (not is_nil(c.provider_id) or c.self) and not c.installed and is_nil(c.deleted_at))
+    from(c in query, where: is_nil(c.pinged_at) and (not is_nil(c.provider_id) or c.self) and is_nil(c.deleted_at))
   end
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)

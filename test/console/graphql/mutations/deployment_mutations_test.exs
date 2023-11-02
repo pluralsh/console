@@ -61,6 +61,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       provider = insert(:cluster_provider)
       insert(:cluster, self: true)
       insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      expect(Console.Features, :available?, fn :cd -> true end)
 
       {:ok, %{data: %{"createCluster" => cluster}}} = run_query("""
         mutation Create($attributes: ClusterAttributes!) {
@@ -99,6 +100,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       provider = insert(:cluster_provider)
       insert(:cluster, self: true)
       insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      expect(Console.Features, :available?, fn :cd -> true end)
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",
@@ -257,6 +259,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       cluster = insert(:cluster)
       user = admin_user()
       git = insert(:git_repository)
+      expect(Console.Features, :available?, fn :cd -> true end)
 
       {:ok, %{data: %{"createServiceDeployment" => service}}} = run_query("""
         mutation Create($clusterId: ID!, $attributes: ServiceDeploymentAttributes!) {
@@ -321,6 +324,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       cluster = insert(:cluster, handle: "test")
       user = admin_user()
       git = insert(:git_repository)
+      expect(Console.Features, :available?, fn :cd -> true end)
 
       {:ok, %{data: %{"createServiceDeployment" => service}}} = run_query("""
         mutation Create($cluster: String!, $attributes: ServiceDeploymentAttributes!) {
@@ -403,6 +407,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
   describe "updateServiceDeployment" do
     test "updates the service" do
+      expect(Console.Features, :available?, fn :cd -> true end)
       cluster = insert(:cluster)
       user = admin_user()
       git = insert(:git_repository)
@@ -447,6 +452,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       cluster = insert(:cluster, handle: "test")
       user = admin_user()
       git = insert(:git_repository)
+      expect(Console.Features, :available?, fn :cd -> true end)
       {:ok, service} = create_service(cluster, user, [
         name: "test",
         namespace: "test",

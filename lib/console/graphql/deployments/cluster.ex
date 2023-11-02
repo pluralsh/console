@@ -370,6 +370,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   object :cluster_mutations do
     field :create_cluster, :cluster do
       middleware Authenticated
+      middleware Feature, :cd
       arg :attributes, non_null(:cluster_attributes)
 
       safe_resolve &Deployments.create_cluster/2
@@ -377,6 +378,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :update_cluster, :cluster do
       middleware Authenticated
+      middleware Feature, :cd
       arg :id, non_null(:id)
       arg :attributes, non_null(:cluster_update_attributes)
 

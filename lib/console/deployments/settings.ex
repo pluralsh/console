@@ -67,7 +67,7 @@ defmodule Console.Deployments.Settings do
       |> allow(user, :write)
       |> when_ok(:update)
     end)
-    |> add_operation(:installl, fn _ ->
+    |> add_operation(:install, fn _ ->
       cluster = Clusters.local_cluster()
       Services.api_url("gql")
       |> Plural.install_cd(cluster.deploy_token)
