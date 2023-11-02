@@ -11,7 +11,7 @@ import { useTheme } from 'styled-components'
 import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
 
 import { RegionsForProvider } from '../helpers'
-import { Provider, ProviderState } from '../types'
+import { ProviderCloud, ProviderState } from '../types'
 import {
   CloudSettingsAttributes,
   GcpCloudAttributes,
@@ -80,7 +80,7 @@ export function GCP({ onValidityChange, onChange }: GCPProps): ReactElement {
           selectedKey={region}
           onSelectionChange={setRegion}
         >
-          {RegionsForProvider[Provider.GCP].map((r) => (
+          {RegionsForProvider[ProviderCloud.GCP].map((r) => (
             <ListBoxItem
               key={r}
               label={r}

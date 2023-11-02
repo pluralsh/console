@@ -1,6 +1,6 @@
 import { Dispatch } from 'react'
 
-enum Provider {
+enum ProviderCloud {
   AWS = 'aws',
   Azure = 'azure',
   GCP = 'gcp',
@@ -23,4 +23,4 @@ interface AWSNodeGroup extends NodeGroup {
 }
 
 export type { NodeGroup, AWSNodeGroup, ProviderState }
-export { Provider }
+export { ProviderCloud }

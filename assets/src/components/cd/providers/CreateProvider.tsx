@@ -22,7 +22,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { getProviderName } from 'components/utils/Provider'
 
 import ModalAlt from '../ModalAlt'
-import { ClusterProviderSelect } from '../utils/ProviderSelect'
+import { ProviderTabSelector } from '../clusters/create/ProviderTabSelector'
 
 import {
   AwsSettings,
@@ -208,9 +208,8 @@ export function CreateProviderModal({
           />
         </FormField>
         <FormField label="Cloud provider">
-          <ClusterProviderSelect
-            label="Select cloud provider"
-            clusterProviders={providers}
+          <ProviderTabSelector
+            support={providers}
             selectedKey={selectedProvider}
             onSelectionChange={(key) => setSelectedProvider(key as any)}
           />

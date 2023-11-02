@@ -2,7 +2,7 @@ import { ReactElement } from 'react'
 import { Input } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-import { Provider } from '../types'
+import { ProviderCloud } from '../types'
 
 import { NodeGroupContainer } from './NodeGroupContainer'
 
@@ -30,7 +30,7 @@ export function AWS(): ReactElement {
           </div>
         }
       />
-      <NodeGroupContainer provider={Provider.AWS} />
+      <NodeGroupContainer provider={ProviderCloud.AWS} />
     </div>
   )
 }

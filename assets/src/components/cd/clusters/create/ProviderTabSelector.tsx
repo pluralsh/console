@@ -1,0 +1,98 @@
+import {
+  ComponentType,
+  Key,
+  MutableRefObject,
+  ReactNode,
+  useCallback,
+  useRef,
+  useState,
+} from 'react'
+import {
+  SubTab,
+  TabList,
+  TabListStateProps,
+  TabPanel,
+} from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
+import { IconProps } from 'honorable'
+
+import { ProviderToDisplayName, ProviderToLogo } from './helpers'
+import { ProviderCloud } from './types'
+
+export function ProviderTabSelector({
+  enabledProviders = [],
+  onProviderChange,
+  children,
+}: {
+  onProviderChange: any
+  children: ReactNode
+  enabledProviders: ProviderCloud[]
+}) {
+  const theme = useTheme()
+
+  const [provider, setProvider] = useState<Key>(ProviderCloud.AWS)
+
+  const tabStateRef: MutableRefObject<any> = useRef()
+  const orientation = 'horizontal'
+  const tabListStateProps: TabListStateProps = {
+    keyboardActivation: 'manual',
+    orientation,
+    selectedKey: provider,
+    onSelectionChange: (p) => {
+      setProvider(p)
+      onProviderChange(p)
+    },
+  }
+
+  const isDisabled = useCallback(
+    (p) => !enabledProviders.some((enabledP) => p === enabledP),
+
+    [enabledProviders]
+  )
+
+  return (
+    <>
+      <TabList
+        stateRef={tabStateRef}
+        stateProps={tabListStateProps}
+        css={{
+          width: 'fit-content',
+          border: theme.borders.default,
+          borderRadius: theme.borderRadiuses.normal,
+        }}
+      >
+        {Object.values(ProviderCloud).map((p) => {
+          const Logo: ComponentType<IconProps> = ProviderToLogo[p]
+
+          return (
+            <SubTab
+              css={{
+                display: 'flex',
+                gap: theme.spacing.xsmall,
+              }}
+              disabled={isDisabled(p)}
+              key={p}
+              textValue={ProviderToDisplayName[p]}
+            >
+              <Logo fullColor />
+              {ProviderToDisplayName[p]}
+            </SubTab>
+          )
+        })}
+      </TabList>
+
+      <TabPanel
+        key={provider}
+        tabKey={provider}
+        mode="multipanel"
+        stateRef={tabStateRef}
+        css={{
+          borderTop: theme.borders.default,
+          paddingTop: theme.spacing.large,
+        }}
+      >
+        {children}
+      </TabPanel>
+    </>
+  )
+}

@@ -1,3 +1,12 @@
+fragment ProviderCredential on ProviderCredential {
+  id
+  insertedAt
+  kind
+  name
+  namespace
+  updatedAt
+}
+
 fragment ClusterProvider on ClusterProvider {
   id
   name
@@ -16,6 +25,9 @@ fragment ClusterProvider on ClusterProvider {
     id
     name
     namespace
+  }
+  credentials {
+    ...ProviderCredential
   }
   deletedAt
   insertedAt

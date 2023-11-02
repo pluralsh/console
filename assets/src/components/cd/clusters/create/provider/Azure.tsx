@@ -1,7 +1,7 @@
 import { ReactElement } from 'react'
 import { useTheme } from 'styled-components'
 
-import { Provider } from '../types'
+import { ProviderCloud } from '../types'
 
 import { NodeGroupContainer } from './NodeGroupContainer'
 
@@ -16,7 +16,7 @@ export function Azure(): ReactElement {
         gap: theme.spacing.large,
       }}
     >
-      <NodeGroupContainer provider={Provider.Azure} />
+      <NodeGroupContainer provider={ProviderCloud.Azure} />
     </div>
   )
 }
