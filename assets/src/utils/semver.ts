@@ -48,5 +48,6 @@ export function coerceSemver(version: string) {
   }
 
   const vsn = `${version}.0`
+
   return semver.valid(vsn) ? vsn : null
 }
