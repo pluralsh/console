@@ -741,6 +741,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     test "admins can update settings" do
       admin = admin_user()
       settings = deployment_settings()
+      user = insert(:user)
       git = insert(:git_repository)
 
       {:ok, %{data: %{"updateDeploymentSettings" => updated}}} = run_query("""
@@ -748,12 +749,29 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
           updateDeploymentSettings(attributes: $attrs) {
             id
             deployerRepository { id }
+            readBindings { user { id } }
           }
         }
-      """, %{"attrs" => %{"deployerRepositoryId" => git.id}}, %{current_user: admin})
+      """, %{
+        "attrs" => %{
+          "deployerRepositoryId" => git.id,
+          "readBindings" => [%{"userId" => user.id}]
+        }
+      }, %{current_user: admin})
 
       assert updated["id"] == settings.id
       assert updated["deployerRepository"]["id"] == git.id
+      assert hd(updated["readBindings"])["user"]["id"] == user.id
+
+      {:ok, %{data: %{"deploymentSettings" => read}}} = run_query("""
+        query {
+          deploymentSettings {
+            readBindings { user { id } }
+          }
+        }
+      """, %{}, %{current_user: admin})
+
+      assert hd(read["readBindings"])["user"]["id"] == user.id
     end
   end
 
