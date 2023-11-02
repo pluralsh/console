@@ -21,6 +21,7 @@ import {
 
 import { CD_BASE_PATH } from 'routes/cdRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { Body1P } from 'components/utils/typography/Text'
@@ -69,27 +70,10 @@ export function CreateClusterContent({
         .map((p) => p.cloud) as ProviderCloud[],
     [clusterProviders]
   )
-  // const credentialList = useMemo(
-  //   () => [...(provider?.credentials?.filter(isNonNullable) || [])],
-  //   [provider?.credentials]
-  // )
-
-  const credentialList = [
-    {
-      id: '1',
-      name: 'Credentials 1',
-      kind: 'kind',
-      namespace: 'namespace',
-    },
-    {
-      id: '2',
-      name: 'Credentials 2',
-      kind: 'kind',
-      namespace: 'namespace',
-    },
-  ]
-
-  console.log('selectedCreds', selectedCreds)
+  const credentialList = useMemo(
+    () => [...(provider?.credentials?.filter(isNonNullable) || [])],
+    [provider?.credentials]
+  )
 
   useEffect(() => {
     if (
