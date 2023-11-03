@@ -611,6 +611,7 @@ defmodule Console.Deployments.Clusters do
       configuration: [
         %{name: "providerName", value: prov.name},
         %{name: "applicationCredentials", value: ac},
+        %{name: "applicationCredentialsBase64", value: Base.encode64(ac)},
       ]
     }
   end
