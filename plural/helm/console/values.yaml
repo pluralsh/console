@@ -141,6 +141,7 @@ affinity:
 
 provider: google
 postgresNamespace: postgres
+useAADPodIdentity: false
 
 postgresql:
   image:

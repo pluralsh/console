@@ -19,12 +19,23 @@ ingress:
 postgresNamespace: {{ namespace "postgres" }}
 provider: {{ .Provider }}
 
-{{- if eq .Provider "azure" }}
+{{- if and (eq .Provider "azure") (not .ClusterAPI) }}
 podLabels:
   aadpodidbinding: console
 
+useAADPodIdentity: true
+
 consoleIdentityId: {{ importValue "Terraform" "console_msi_id" }}
 consoleIdentityClientId: {{ importValue "Terraform" "console_msi_client_id" }}
+{{- end }}
+
+{{- if and (eq .Provider "azure") .ClusterAPI }}
+podLabels:
+  azure.workload.identity/use: "true"
+
+serviceAccount:
+  annotations:
+    azure.workload.identity/client-id: {{ importValue "Terraform" "console_msi_client_id" }}
 {{- end }}
 
 extraEnv:

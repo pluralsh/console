@@ -1,4 +1,4 @@
-{{ if eq .Values.provider "azure" }}
+{{ if and (eq .Values.provider "azure") .Values.useAADPodIdentity }}
 apiVersion: aadpodidentity.k8s.io/v1
 kind: AzureIdentity
 metadata:
