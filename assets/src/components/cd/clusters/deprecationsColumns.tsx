@@ -29,7 +29,7 @@ export const deprecationsColumns = [
     cell: ({ getValue, row: { original } }) => {
       const replacement = getValue()
 
-      if (!replacement) return <div>Api Permanently Removed</div>
+      if (!replacement) return <div>Permanently Removed</div>
 
       return (
         <div>
