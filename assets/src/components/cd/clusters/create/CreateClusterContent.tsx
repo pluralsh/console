@@ -4,13 +4,11 @@ import { useTheme } from 'styled-components'
 import { Link } from 'react-router-dom'
 import isEmpty from 'lodash/isEmpty'
 
-import { useClusterProvidersQuery } from 'generated/graphql'
+import { useClusterProvidersSuspenseQuery } from 'generated/graphql'
 
 import { CD_BASE_PATH } from 'routes/cdRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { Body1P } from 'components/utils/typography/Text'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { ProviderCredentialSelect } from 'components/cd/utils/ProviderCredsSelect'
@@ -31,7 +29,7 @@ export function CreateClusterContent() {
     create: { attributes, setAttributes, setValid },
   } = useCreateClusterContext()
 
-  const { data: clusterProvidersQuery, loading } = useClusterProvidersQuery()
+  const { data: clusterProvidersQuery } = useClusterProvidersSuspenseQuery()
 
   const clusterProviders = useMemo(
     () =>
@@ -48,9 +46,10 @@ export function CreateClusterContent() {
     [clusterProviders]
   )
 
-  const provider = clusterProviders.find(
-    (provider) => provider.id === attributes.providerId
-  )
+  const provider =
+    clusterProviders.find(
+      (provider) => provider.id === attributes.providerId
+    ) || clusterProviders?.[0]
   const credentialList = useMemo(
     () => [...(provider?.credentials?.filter(isNonNullable) || [])],
     [provider?.credentials]
@@ -111,9 +110,7 @@ export function CreateClusterContent() {
         }}
         enabledProviders={enabledProviders}
       >
-        {loading ? (
-          <LoadingIndicator />
-        ) : isEmpty(enabledProviders) ? (
+        {isEmpty(enabledProviders) ? (
           <Body1P>
             No providers have been set up. You can add cloud providers{' '}
             <InlineLink

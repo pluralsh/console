@@ -24,6 +24,8 @@ import {
   useCreateClusterMutation,
 } from '../../../../generated/graphql'
 
+import { useOpenTransition } from '../../../hooks/suspense/useOpenTransition'
+
 import { CreateClusterContent } from './CreateClusterContent'
 import { ImportClusterContent } from './ImportClusterContent'
 import { ProviderCloud } from './types'
@@ -243,12 +245,13 @@ function CreateClusterModal({
 
 export default function CreateCluster() {
   const [isOpen, setIsOpen] = useState(false)
+  const { buttonProps } = useOpenTransition(isOpen, setIsOpen)
 
   return (
     <>
       <Button
         primary
-        onClick={() => setIsOpen(true)}
+        {...buttonProps}
       >
         Create cluster
       </Button>
