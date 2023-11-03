@@ -45,12 +45,7 @@ defmodule Console.GraphQl.Configuration do
     field :is_sandbox,      :boolean
     field :plural_login,    :boolean
     field :vpn_enabled,     :boolean
-    field :byok,            :boolean, resolve: fn _, _, _ ->
-      case Console.conf(:provider) do
-        prov when prov not in ~w(aws gcp azure)a -> {:ok, true}
-        _ -> {:ok, false}
-      end
-    end
+    field :byok,            :boolean, resolve: fn _, _, _ -> {:ok, Console.byok?()} end
     field :features,        :available_features
 
     field :manifest,        :plural_manifest, resolve: fn

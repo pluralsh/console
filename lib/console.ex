@@ -1,6 +1,15 @@
 defmodule Console do
   @type error :: {:error, term}
 
+  def provider(), do: Console.conf(:provider)
+
+  def byok?() do
+    case provider() do
+      prov when prov in ~w(aws gcp azure)a -> false
+      _ -> true
+    end
+  end
+
   @chars String.codepoints("abcdefghijklmnopqrstuvwxyz0123456789")
 
   def authed_user("console-" <> _ = access), do: Console.Services.Users.get_by_token(access)

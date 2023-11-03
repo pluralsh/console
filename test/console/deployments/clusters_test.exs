@@ -566,6 +566,17 @@ defmodule Console.Deployments.ClustersTest do
       assert secrets["clientId"] == "client"
       assert secrets["clientSecret"] == "secret"
     end
+
+    test "it will not create an azure provider on gcp management clusters" do
+      user = insert(:user)
+      insert(:cluster, self: true, provider: build(:cluster_provider, cloud: "gcp"))
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:error, _} = Clusters.create_provider(%{
+        name: "azure",
+        cloud_settings: %{azure: %{tenant_id: "tenant", subscription_id: "sub", client_id: "client", client_secret: "secret"}}
+      }, user)
+    end
   end
 
   describe "#control_plane/1" do

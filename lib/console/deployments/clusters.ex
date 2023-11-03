@@ -399,6 +399,13 @@ defmodule Console.Deployments.Clusters do
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
+    |> add_operation(:validate, fn %{create: prov} ->
+        case {Repo.preload(local_cluster(), [:provider]), prov} do
+          {%{provider: %{cloud: "gcp"}}, %{cloud: "azure"}} ->
+            {:error, "cannot safely use the azure provider on GCP due to a conflict with workload identity"}
+          {_, prov} -> {:ok, prov}
+        end
+    end)
     |> add_operation(:svc, fn
       %{create: %{self: true} = prov} -> {:ok, prov}
       %{create: prov} -> provider_service(prov, tmp_admin(user))
