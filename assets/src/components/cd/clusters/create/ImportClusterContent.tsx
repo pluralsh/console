@@ -30,7 +30,7 @@ function ImportClusterContentPage1({
   onChange,
   onValidityChange,
 }: {
-  onChange: Dispatch<SetStateAction<ClusterAttributes>>
+  onChange: Dispatch<SetStateAction<Partial<ClusterAttributes>>>
   onValidityChange: Dispatch<SetStateAction<boolean>>
 }) {
   const [name, setName] = useState<string>('')

@@ -8,25 +8,29 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Button, Tab, TabList } from '@pluralsh/design-system'
+import { Button, Tab, TabList, TabPanel } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-
-import ModalAlt from 'components/cd/ModalAlt'
-
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
-import { GqlError } from 'components/utils/Alert'
+import sortBy from 'lodash/sortBy'
 
 import {
   CloudSettingsAttributes,
   Cluster,
   ClusterAttributes,
+  useClusterProvidersSuspenseQuery,
   useCreateClusterMutation,
-} from '../../../../generated/graphql'
+} from 'generated/graphql'
 
-import { useOpenTransition } from '../../../hooks/suspense/useOpenTransition'
+import { mapExistingNodes } from 'utils/graphql'
 
-import { CreateClusterContent } from './CreateClusterContent'
+import { useOpenTransition } from 'components/hooks/suspense/useOpenTransition'
+import ModalAlt from 'components/cd/ModalAlt'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { GqlError } from 'components/utils/Alert'
+
+import {
+  CreateClusterContent,
+  attributesAreValid,
+} from './CreateClusterContent'
 import { ImportClusterContent } from './ImportClusterContent'
 import { ProviderCloud } from './types'
 
@@ -35,12 +39,15 @@ enum Mode {
   Import = 'import',
 }
 
-export const SUPPORTED_CLOUDS = [ProviderCloud.GCP]
+export const ORDERED_CLOUDS = [
+  ProviderCloud.AWS,
+  ProviderCloud.GCP,
+  ProviderCloud.Azure,
+]
 
 type NewClusterContextT = {
-  attributes: ClusterAttributes
-  setAttributes: Dispatch<SetStateAction<ClusterAttributes>>
-  setValid: Dispatch<SetStateAction<boolean>>
+  attributes: Partial<ClusterAttributes>
+  setAttributes: Dispatch<SetStateAction<Partial<ClusterAttributes>>>
   setGcpSettings?: (settings: CloudSettingsAttributes['gcp']) => void
   setAzureSettings?: (settings: CloudSettingsAttributes['azure']) => void
   setAwsSettings?: (settings: CloudSettingsAttributes['aws']) => void
@@ -50,6 +57,8 @@ type CreateClusterContextT = {
   create: NewClusterContextT
   import: NewClusterContextT
 }
+export type CloudSettings<T extends keyof CloudSettingsAttributes> =
+  NonNullable<CloudSettingsAttributes[T]>
 
 const CreateClusterContext = createContext<CreateClusterContextT | undefined>(
   undefined
@@ -78,16 +87,38 @@ function CreateClusterModal({
 }) {
   const theme = useTheme()
   const [createMode, setCreateMode] = useState(Mode.New)
-  const [importClusterAttributes, setImportClusterAttributes] =
-    useState<ClusterAttributes>({} as ClusterAttributes)
+  const [importClusterAttributes, setImportClusterAttributes] = useState<
+    Partial<ClusterAttributes>
+  >({})
   const [importAttrsValid, setImportAttrsValid] = useState(false)
   const [importCluster, setImportCluster] =
     useState<Nullable<Pick<Cluster, 'id' | 'deployToken'>>>(undefined)
 
-  const [clusterAttributes, setClusterAttributes] = useState<ClusterAttributes>(
-    {} as ClusterAttributes
+  const { data: clusterProvidersQuery } = useClusterProvidersSuspenseQuery()
+
+  const clusterProviders = useMemo(
+    () =>
+      sortBy(
+        mapExistingNodes(clusterProvidersQuery?.clusterProviders)
+          .filter((p) => ORDERED_CLOUDS.some((cloud) => cloud === p.cloud))
+          .filter((p) => !p.deletedAt),
+        (p) => ORDERED_CLOUDS.indexOf(p.cloud as ProviderCloud)
+      ),
+    [clusterProvidersQuery?.clusterProviders]
   )
-  const [newAttrsValid, setNewAttrsValid] = useState(false)
+  const initialProviderId: string | undefined = clusterProviders?.[0]?.id
+  const [clusterAttributes, setClusterAttributes] = useState<
+    Partial<ClusterAttributes>
+  >(initialProviderId ? { providerId: initialProviderId } : {})
+
+  const currentProvider = useMemo(
+    () => clusterProviders.find((p) => p.id === clusterAttributes.providerId),
+    [clusterAttributes.providerId, clusterProviders]
+  )
+  const newAttrsValid = attributesAreValid(
+    clusterAttributes,
+    currentProvider?.cloud
+  )
 
   const cloudSetters = useMemo(
     () => ({
@@ -118,13 +149,11 @@ function CreateClusterModal({
       create: {
         attributes: clusterAttributes,
         setAttributes: setClusterAttributes,
-        setValid: setNewAttrsValid,
         ...cloudSetters,
       },
       import: {
         attributes: importClusterAttributes,
         setAttributes: setImportClusterAttributes,
-        setValid: setImportAttrsValid,
       },
     }),
     [cloudSetters, clusterAttributes, importClusterAttributes]
@@ -135,7 +164,7 @@ function CreateClusterModal({
     if (createMode === Mode.Import) {
       createCluster({
         variables: {
-          attributes: importClusterAttributes,
+          attributes: importClusterAttributes as ClusterAttributes,
         },
         onCompleted: (ret) => {
           refetch?.()
@@ -145,7 +174,7 @@ function CreateClusterModal({
     } else if (createMode === Mode.New) {
       createCluster({
         variables: {
-          attributes: clusterAttributes,
+          attributes: clusterAttributes as ClusterAttributes,
         },
         onCompleted: () => {
           refetch?.()
@@ -228,15 +257,17 @@ function CreateClusterModal({
       }
     >
       <CreateClusterContext.Provider value={contextVal}>
-        {createMode === Mode.New ? (
-          <CreateClusterContent />
-        ) : (
-          <ImportClusterContent
-            importCluster={importCluster}
-            onChange={setImportClusterAttributes}
-            onValidityChange={setImportAttrsValid}
-          />
-        )}
+        <TabPanel stateRef={tabStateRef}>
+          {createMode === Mode.New ? (
+            <CreateClusterContent providers={clusterProviders} />
+          ) : (
+            <ImportClusterContent
+              importCluster={importCluster}
+              onChange={setImportClusterAttributes}
+              onValidityChange={setImportAttrsValid}
+            />
+          )}
+        </TabPanel>
       </CreateClusterContext.Provider>
       {error && <GqlError error={error} />}
     </ModalAlt>
