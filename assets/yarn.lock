@@ -8892,7 +8892,6 @@ __metadata:
     "@graphql-codegen/typescript-operations": 4.0.1
     "@graphql-codegen/typescript-react-apollo": 4.1.0
     "@jumpn/utils-graphql": 0.6.0
-    "@loomhq/loom-embed": 1.5.0
     "@markdoc/markdoc": 0.3.0
     "@nivo/core": 0.83.0
     "@nivo/geo": 0.83.0
@@ -8946,7 +8945,7 @@ __metadata:
     honorable: 1.0.0-beta.17
     honorable-theme-default: 1.0.0-beta.5
     husky: 8.0.3
-    immer: 10.0.2
+    immer: 10.0.3
     js-file-download: 0.4.12
     js-yaml: 4.1.0
     jsdom: 22.1.0
@@ -8999,7 +8998,7 @@ __metadata:
     styled-components: 5.3.11
     stylelint: 15.11.0
     tinyqueue: 2.0.3
-    type-fest: 4.2.0
+    type-fest: 4.6.0
     typescript: 5.2.2
     use-immer: 0.9.0
     usehooks-ts: 2.9.1
@@ -12274,13 +12273,6 @@ __metadata:
   version: 5.2.4
   resolution: "ignore@npm:5.2.4"
   checksum: 3d4c309c6006e2621659311783eaea7ebcd41fe4ca1d78c91c473157ad6666a57a2df790fe0d07a12300d9aac2888204d7be8d59f9aaf665b1c7fcdb432517ef
-  languageName: node
-  linkType: hard
-
-"immer@npm:10.0.2":
-  version: 10.0.2
-  resolution: "immer@npm:10.0.2"
-  checksum: 525a3b14210d02ae420c3b9f6ca14f7e9bcf625611d1356e773e7739f14c7c8de50dac442e6c7de3a6e24a782f7b792b6b8666bc0b3f00269d21a95f8f68ca84
   languageName: node
   linkType: hard
 
@@ -18578,10 +18570,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:4.2.0":
-  version: 4.2.0
-  resolution: "type-fest@npm:4.2.0"
-  checksum: 76c5dfde9293b1b185b266a07df669f68d58ae3e19c06e33f0ff0dd0ba68628f05389bc26bcee8476e29a79ab7da054653670b9778399ceb079c4c259bac29f0
+"type-fest@npm:4.6.0":
+  version: 4.6.0
+  resolution: "type-fest@npm:4.6.0"
+  checksum: e38f2b4b35e912bf60dbe7d4350653fb76b241a456e849fab85002ba08e938a26a7c44a330dd5620dd48ce57566be7c97e997064dc0d5066d5b6949b8c444430
   languageName: node
   linkType: hard
 
