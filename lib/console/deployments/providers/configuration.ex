@@ -18,7 +18,7 @@ defmodule Console.Deployments.Providers.Configuration do
     ], & &1.value)
   end
 
-  def conf(%Cluster{cloud_settings: %{azure: %Cluster.CloudSettings.Aws{} = aws}}) do
+  def conf(%Cluster{cloud_settings: %{aws: %Cluster.CloudSettings.Aws{} = aws}}) do
     Enum.filter([
       %{name: "region", value: aws.region},
     ], & &1.value)
