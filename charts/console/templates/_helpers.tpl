@@ -80,4 +80,5 @@ spec: {{ .Values.secrets.config | toYaml | nindent 2 }}
     secretKeyRef:
       name: {{ .Values.dsnSecret }}
       key: {{ .Values.dsnKey }}
+      optional: true
 {{- end -}}

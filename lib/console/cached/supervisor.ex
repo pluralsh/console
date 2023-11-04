@@ -14,7 +14,7 @@ defmodule Console.Cached.Supervisor do
       Console.Cached.Node,
       Console.Cached.Cluster,
       Console.Cached.ClusterNodes,
-      Console.Cached.Secret,
+      # Console.Cached.Secret,
     ]
 
     Supervisor.init(children, strategy: :one_for_one, max_restarts: 15)

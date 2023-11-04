@@ -11,10 +11,13 @@ import CommandPaletteLauncher from 'components/CommandPaletteLauncher'
 import { InstallerModal } from '../repos/installer/Modal'
 
 import DemoBanner from './DemoBanner'
+import { LoginContext } from 'components/contexts'
+import { useContext } from 'react'
 
 const APP_ICON = '/console-logo-white.png'
 
 export default function Header() {
+  const { configuration } = useContext<any>(LoginContext)
   const navigate = useNavigate()
 
   return (
@@ -42,7 +45,7 @@ export default function Header() {
         <BillingLegacyUserMessage />
         <BillingSubscriptionChip />
         <CommandPaletteLauncher />
-        <InstallerModal />
+        {!configuration.byok && <InstallerModal />}
       </Flex>
     </Div>
   )

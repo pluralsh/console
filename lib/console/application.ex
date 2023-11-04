@@ -51,10 +51,11 @@ defmodule Console.Application do
   defp consumers(), do: Console.conf(:consumers) || []
 
   defp deployer() do
-    case Console.conf(:build_id) do
-      build_id when is_binary(build_id) ->
+    case {Console.conf(:build_id), Console.byok?()} do
+      {build_id, _} when is_binary(build_id) ->
         [{Console.Runner.Harakiri, [Console.storage(), build_id]}]
-      _ -> [Console.Deployer]
+      {_, false} -> [Console.Deployer]
+      _ -> []
     end
   end
 end

@@ -5,7 +5,7 @@ defmodule Console do
 
   def byok?() do
     case provider() do
-      prov when prov in ~w(aws gcp azure)a -> false
+      prov when prov in ~w(aws gcp azure generic)a -> false
       _ -> true
     end
   end

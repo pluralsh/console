@@ -46,7 +46,7 @@ provider = case get_env("PROVIDER") do
   "aws" -> :aws
   "azure" -> :azure
   "equinix" -> :equinix
-  _ -> :custom
+  _ -> :kubernetes
 end
 
 if provider != :gcp do

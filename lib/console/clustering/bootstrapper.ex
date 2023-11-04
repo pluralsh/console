@@ -14,7 +14,7 @@ defmodule Console.Bootstrapper do
 
   def init(_) do
     Process.flag(:trap_exit, true)
-    if Console.conf(:initialize) do
+    if Console.conf(:initialize) && !Console.byok?() do
       send self(), :init
     end
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)

@@ -42,6 +42,7 @@ type MenuItem = {
   path: string
   pathRegexp?: RegExp
   sandboxed?: boolean
+  plural?: boolean
 }
 
 const MENU_ITEMS: MenuItem[] = [
@@ -49,6 +50,7 @@ const MENU_ITEMS: MenuItem[] = [
     text: 'Apps',
     icon: <AppsIcon />,
     path: '/',
+    plural: true,
     pathRegexp: /^\/(apps)/,
   },
   {
@@ -59,6 +61,7 @@ const MENU_ITEMS: MenuItem[] = [
   {
     text: 'Builds',
     icon: <BuildIcon />,
+    plural: true,
     path: '/builds',
   },
   {
@@ -74,6 +77,7 @@ const MENU_ITEMS: MenuItem[] = [
   {
     text: 'Database management',
     icon: <DatabaseIcon />,
+    plural: true,
     path: `/${DB_MANAGEMENT_PATH}`,
   },
   // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true },
@@ -186,19 +190,22 @@ export default function Sidebar() {
           grow={1}
           shrink={1}
         >
-          {menuItems.map((item, i) => (
-            <SidebarItem
-              key={i}
-              clickable
-              tooltip={item.text}
-              className={`sidebar-${item.text}`}
-              active={isActive(item)}
-              as={Link}
-              to={item.path}
-            >
-              {item.icon}
-            </SidebarItem>
-          ))}
+          {menuItems.map(
+            (item, i) =>
+              (!item.plural || !configuration.byok) && (
+                <SidebarItem
+                  key={i}
+                  clickable
+                  tooltip={item.text}
+                  className={`sidebar-${item.text}`}
+                  active={isActive(item)}
+                  as={Link}
+                  to={item.path}
+                >
+                  {item.icon}
+                </SidebarItem>
+              )
+          )}
           <Flex grow={1} />
           <SidebarItem
             tooltip="Discord"
