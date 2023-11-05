@@ -28,6 +28,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import App from './AppCard'
 import { appState } from './misc'
+import { LoginContext } from 'components/contexts'
+import { redirect } from 'react-router-dom'
 
 const ALL_FILTER = 'All'
 
@@ -137,6 +139,7 @@ const searchOptions = {
 const breadcrumbs: Breadcrumb[] = [{ label: 'apps', url: '/' }]
 
 export default function Apps() {
+  const { configuration } = useContext<any>(LoginContext)
   const { applications = [] } = useContext<any>(InstallationContext)
   const [query, setQuery] = useState<string>('')
   const [filter, setFilter] = useState<any>(ALL_FILTER)
@@ -170,6 +173,8 @@ export default function Apps() {
     return filteredByQuery
   }, [appsByState, filter, query])
   const noFilteredApps = filteredApps?.length < 1
+
+  if (configuration?.byok) return redirect('/cd/clusters')
 
   if (isEmpty(applications)) return <LoadingIndicator />
 

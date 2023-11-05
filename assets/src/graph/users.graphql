@@ -65,6 +65,7 @@ query Me {
     isDemoProject
     isSandbox
     pluralLogin
+    byok
     manifest {
       ...Manifest
     }
