@@ -60,7 +60,12 @@ defmodule Console.Deployer do
     end
   end
 
-  def file(path), do: GenServer.call(leader(), {:file, path}, @call_timeout)
+  def file(path) do
+    case Console.byok?() do
+      true -> {:ok, ""}
+      _ -> GenServer.call(leader(), {:file, path}, @call_timeout)
+    end
+  end
 
   def wake(), do: GenServer.call(leader(), :poll, @call_timeout)
 
