@@ -147,6 +147,25 @@ defmodule Console.Deployments.Clusters do
   Installs the operator on this cluster using the plural cd command
   """
   @spec install(Cluster.t) :: cluster_resp
+  def install(%Cluster{id: id, deploy_token: token, self: true} = cluster) do
+    tee = Tee.new()
+    Command.set_build(tee)
+    url = Services.api_url("gql")
+    with {:ok, _} <- Console.Commands.Plural.install_cd(url, token) do
+      get_cluster(id)
+      |> Repo.preload([:service_errors])
+      |> Cluster.changeset(%{installed: true, service_errors: []})
+      |> Repo.update()
+    else
+      {:error, out} = err ->
+        add_errors(cluster, [%{source: "bootstrap", message: Tee.output(out)}])
+        err
+      pass ->
+        Logger.info "could not install operator to cluster: #{inspect(pass)}"
+        {:error, :unready}
+    end
+  end
+
   def install(%Cluster{id: id, deploy_token: token} = cluster) do
     tee = Tee.new()
     Command.set_build(tee)
