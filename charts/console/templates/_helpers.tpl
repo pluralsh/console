@@ -80,7 +80,7 @@ spec: {{ .Values.secrets.config | toYaml | nindent 2 }}
 - name: POSTGRES_URL
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.dsnSecret }}
-      key: {{ .Values.dsnKey }}
+      name: {{ .Values.postgres.dsnSecret | quote }}
+      key: {{ .Values.postgres.dsnKey | quote }}
       optional: true
 {{- end -}}

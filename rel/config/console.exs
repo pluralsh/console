@@ -92,7 +92,7 @@ config :console,
   build_id: get_env("CONSOLE_BUILD_ID"),
   kas_url: get_env("KAS_DNS")
 
-if String.starts_with?(git_url, "https") do
+if git_url && String.starts_with?(git_url, "https") do
   config :console,
     git_ssh_key: :pass
 end
