@@ -23,6 +23,7 @@ extraSecretEnv:
   KAS_API_SECRET: {{ configuration.kasApi }}
   KAS_PRIVATE_API_SECRET: {{ configuration.kasPrivateApi }}
   KAS_REDIS_SECRET: {{ configuration.kasRedis }}
+  POSTGRES_URL: {{ configuration.postgresUrl }}
 
 kas:
   consoleUrl: {{ configuration.consoleDns }}
