@@ -16,6 +16,10 @@ defmodule Console.Middleware.Rbac do
       _ -> put_result(res, {:error, "forbidden"})
     end
   end
+  def call(_, _) do
+    IO.inspect(res.context)
+    put_result(res, {:error, "forbidden"})
+  end
 
   defp fetch(%{source: %{} = source}, %{field: arg}) when is_atom(arg), do: Map.get(source, arg, @dummy)
   defp fetch(%{source: %{} = source}, %{field: [_ | _] = path}), do: Console.deep_get(source, path, @dummy)
