@@ -325,6 +325,34 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       assert first == "some logs"
       assert second == "returned"
     end
+
+    test "it can query pod logs w/ cd auth" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+      expect(Kube.Utils, :run, 2, fn
+        %{path: "/api/v1/namespaces/name/pods/name/log"} -> {:ok, "some logs\nreturned"}
+        _ -> {:ok, pod("name")}
+      end)
+
+      {:ok, %{data: %{"pod" => pod}}} = run_query("""
+        query Pod($name: String!, $clusterId: ID!) {
+          pod(name: $name, namespace: $name, clusterId: $clusterId) {
+            metadata { name }
+            status { podIp }
+            spec { nodeName }
+            logs(container: "test", sinceSeconds: 5)
+          }
+        }
+      """, %{"name" => "name", "clusterId" => cluster.id}, %{current_user: user})
+
+      assert pod["metadata"]["name"] == "name"
+      assert pod["status"]["podIp"]
+      assert pod["spec"]["nodeName"]
+      [first, second] = pod["logs"]
+      assert first == "some logs"
+      assert second == "returned"
+    end
   end
 
   describe "logfilters" do
