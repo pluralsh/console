@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react'
-import { FormField } from '@pluralsh/design-system'
+import { useEffect, useMemo, version } from 'react'
+import { FormField, usePrevious } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { Link } from 'react-router-dom'
 import isEmpty from 'lodash/isEmpty'
@@ -74,10 +74,23 @@ export function CreateClusterContent({
     clusterProviders.find(
       (provider) => provider.id === attributes.providerId
     ) || clusterProviders?.[0]
+  const prevProvider = usePrevious(provider)
   const credentialList = useMemo(
     () => [...(provider?.credentials?.filter(isNonNullable) || [])],
     [provider?.credentials]
   )
+
+  // Make sure version remains valid when provider changes
+  useEffect(() => {
+    if (
+      provider !== prevProvider &&
+      !provider.supportedVersions?.some(
+        (version) => version === attributes.version
+      )
+    ) {
+      setAttributes({ ...attributes, version: '' })
+    }
+  }, [provider, attributes.version, attributes, setAttributes, prevProvider])
 
   useEffect(() => {
     if (
