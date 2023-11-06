@@ -159,6 +159,10 @@ fragment Cluster on Cluster {
     phase
   }
   version
+  tags {
+    name
+    value
+  }
 }
 
 query Clusters {

@@ -1,6 +1,7 @@
 import {
   Card,
   Chip,
+  ChipList,
   IconFrame,
   Prop,
   Tooltip,
@@ -36,108 +37,131 @@ function MetadataCard({
     cluster?.provider?.supportedVersions
   )
   const status = cluster?.status
+  const renderTag = (tag) => `${tag.name}${tag.value ? `: ${tag.value}` : ''}`
 
   return (
-    <Card padding="xlarge">
-      <SubTitle>Metadata</SubTitle>
-      <div
-        css={{ display: 'flex', gap: theme.spacing.xlarge, flexWrap: 'wrap' }}
-      >
-        <Prop
-          title="Cluster name"
-          margin={0}
+    <Card
+      css={{
+        '&&': {
+          padding: theme.spacing.large,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.large,
+        },
+      }}
+    >
+      <section>
+        <SubTitle>Metadata</SubTitle>
+        <div
+          css={{ display: 'flex', gap: theme.spacing.xlarge, flexWrap: 'wrap' }}
         >
-          {cluster?.name}
-        </Prop>
-        <Prop
-          title="Current K8s version"
-          margin={0}
-        >
-          {toNiceVersion(cluster?.currentVersion)}
-        </Prop>
-        <Prop
-          title="Cloud"
-          margin={0}
-        >
-          <IconFrame
-            type="secondary"
-            icon={
-              <ProviderIcon
-                provider={cluster?.provider?.cloud || 'BYOK'}
-                width={16}
-              />
-            }
-          />
-        </Prop>
-        <Prop
-          title="Git URL"
-          margin={0}
-        >
-          <CopyButton
-            text={cluster?.service?.repository?.url || ''}
-            type="secondary"
-          />
-        </Prop>
-        <Prop
-          title="Warnings"
-          margin={0}
-        >
-          {upgradeVersion || hasDeprecations ? (
-            <ClusterUpgrade
-              cluster={cluster}
-              refetch={refetch}
+          <Prop
+            title="Cluster name"
+            margin={0}
+          >
+            {cluster?.name}
+          </Prop>
+          <Prop
+            title="Current K8s version"
+            margin={0}
+          >
+            {toNiceVersion(cluster?.currentVersion)}
+          </Prop>
+          <Prop
+            title="Cloud"
+            margin={0}
+          >
+            <IconFrame
+              type="secondary"
+              icon={
+                <ProviderIcon
+                  provider={cluster?.provider?.cloud || 'BYOK'}
+                  width={16}
+                />
+              }
             />
-          ) : (
-            '-'
-          )}
-        </Prop>
+          </Prop>
+          <Prop
+            title="Git URL"
+            margin={0}
+          >
+            <CopyButton
+              text={cluster?.service?.repository?.url || ''}
+              type="secondary"
+            />
+          </Prop>
+          <Prop
+            title="Warnings"
+            margin={0}
+          >
+            {upgradeVersion || hasDeprecations ? (
+              <ClusterUpgrade
+                cluster={cluster}
+                refetch={refetch}
+              />
+            ) : (
+              '-'
+            )}
+          </Prop>
 
-        <Prop
-          title="Last pinged"
-          margin={0}
-        >
-          {cluster?.pingedAt ? (
-            <Tooltip
-              label={moment(cluster?.pingedAt).format('lll')}
-              placement="top"
-            >
-              <span>{moment(cluster?.pingedAt).fromNow()}</span>
-            </Tooltip>
-          ) : (
-            '-'
-          )}
-        </Prop>
-        {status && (
-          <>
-            <Prop
-              title="Conditions"
-              margin={0}
-            >
-              {!isEmpty(status?.conditions) ? (
-                <ClusterConditions cluster={cluster} />
-              ) : (
-                '-'
-              )}
-            </Prop>
-            <Prop
-              title="Control plane"
-              margin={0}
-            >
-              <Chip
-                severity={status?.controlPlaneReady ? 'success' : 'warning'}
+          <Prop
+            title="Last pinged"
+            margin={0}
+          >
+            {cluster?.pingedAt ? (
+              <Tooltip
+                label={moment(cluster?.pingedAt).format('lll')}
+                placement="top"
               >
-                {status?.controlPlaneReady ? 'Ready' : 'Not ready'}
-              </Chip>
-            </Prop>
-            <Prop
-              title="Status"
-              margin={0}
-            >
-              <ClusterStatusChip status={status} />
-            </Prop>
-          </>
-        )}
-      </div>
+                <span>{moment(cluster?.pingedAt).fromNow()}</span>
+              </Tooltip>
+            ) : (
+              '-'
+            )}
+          </Prop>
+          {status && (
+            <>
+              <Prop
+                title="Conditions"
+                margin={0}
+              >
+                {!isEmpty(status?.conditions) ? (
+                  <ClusterConditions cluster={cluster} />
+                ) : (
+                  '-'
+                )}
+              </Prop>
+              <Prop
+                title="Control plane"
+                margin={0}
+              >
+                <Chip
+                  severity={status?.controlPlaneReady ? 'success' : 'warning'}
+                >
+                  {status?.controlPlaneReady ? 'Ready' : 'Not ready'}
+                </Chip>
+              </Prop>
+              <Prop
+                title="Status"
+                margin={0}
+              >
+                <ClusterStatusChip status={status} />
+              </Prop>
+            </>
+          )}
+        </div>
+      </section>
+      {cluster?.tags && !isEmpty(cluster.tags) && (
+        <section>
+          <SubTitle>Tags</SubTitle>
+          <ChipList
+            size="small"
+            limit={8}
+            values={cluster.tags}
+            transformValue={renderTag}
+          />
+        </section>
+      )}
     </Card>
   )
 }
