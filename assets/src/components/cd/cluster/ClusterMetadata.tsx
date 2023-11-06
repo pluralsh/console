@@ -16,7 +16,6 @@ import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
 
 import { SubTitle } from '../../cluster/nodes/SubTitle'
 import ProviderIcon from '../../utils/Provider'
-import CopyButton from '../../utils/CopyButton'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { ClusterConditions } from '../clusters/ClusterConditions'
 
@@ -81,15 +80,7 @@ function MetadataCard({
               }
             />
           </Prop>
-          <Prop
-            title="Git URL"
-            margin={0}
-          >
-            <CopyButton
-              text={cluster?.service?.repository?.url || ''}
-              type="secondary"
-            />
-          </Prop>
+
           <Prop
             title="Warnings"
             margin={0}

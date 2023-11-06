@@ -5,17 +5,13 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { toDateOrUndef } from 'utils/date'
-import {
-  CheckRoundedIcon,
-  HistoryIcon,
-  IconFrame,
-  Tooltip,
-} from '@pluralsh/design-system'
+import { HistoryIcon, IconFrame, Tooltip } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 
 import { useState } from 'react'
 
 import { Confirm } from 'components/utils/Confirm'
+import { SelectedIcon } from 'components/utils/SelectedIcon'
 
 import { CaptionText } from 'components/cluster/TableElements'
 
@@ -61,24 +57,6 @@ const ColCommitTime = columnHelper.accessor(
   }
 )
 
-const SelectedIcon = styled(CheckRoundedIcon)(({ theme }) => ({
-  color: theme.colors['action-primary'],
-  position: 'relative',
-  '& svg': {
-    zIndex: 0,
-  },
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: '2px',
-    right: '2px',
-    left: '2px',
-    bottom: '2px',
-    backgroundColor: theme.colors['text-always-white'],
-    borderRadius: '50%',
-  },
-}))
-
 const ColSelectedSC = styled.div((_) => ({
   display: 'flex',
   alignItems: 'center',
@@ -107,7 +85,9 @@ const ColSelected = columnHelper.accessor(
 
 const ColActionsSC = styled.div((_) => ({
   display: 'flex',
+  flexGrow: 1,
   alignItems: 'center',
+  justifyContent: 'center',
 }))
 const ColActions = columnHelper.accessor((row) => row, {
   id: 'selected',
@@ -129,16 +109,40 @@ const ColActions = columnHelper.accessor((row) => row, {
         setConfirm(false)
       },
     })
+    const { currentRevision } = table.options.meta as {
+      currentRevision?: Nullable<ServiceDeploymentRevisionFragment>
+    }
+
+    const isCurrent = original?.id === currentRevision?.id
 
     return (
       <ColActionsSC>
-        <IconFrame
-          clickable
-          tooltip="Roll back to this revision"
-          type="floating"
-          onClick={() => setConfirm(true)}
-          icon={<HistoryIcon />}
-        />
+        {isCurrent ? (
+          <Tooltip
+            placement="top"
+            label="Current"
+          >
+            <div
+              css={{
+                width: 32,
+                height: 32,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <SelectedIcon />
+            </div>
+          </Tooltip>
+        ) : (
+          <IconFrame
+            clickable
+            tooltip="Roll back to this revision"
+            type="floating"
+            onClick={() => setConfirm(true)}
+            icon={<HistoryIcon />}
+          />
+        )}
         <Confirm
           open={confirm}
           close={() => setConfirm(false)}
