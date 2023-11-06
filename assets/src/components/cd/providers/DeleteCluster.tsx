@@ -27,7 +27,7 @@ export function DeleteCluster({
       refetch?.()
     },
   })
-  const protect = cluster.protect || cluster.self
+  const protect = cluster.protect || cluster.self || !!cluster.deletedAt
 
   return (
     <Div onClick={(e) => e.stopPropagation()}>
@@ -35,7 +35,7 @@ export function DeleteCluster({
         onClick={protect ? undefined : () => setConfirm(true)}
         tooltip
         textValue={protect ? CLUSTER_PROTECT_TT_TEXT : 'Delete cluster'}
-        disabled={!!protect}
+        disabled={protect}
       />
       <Confirm
         close={() => setConfirm(false)}
