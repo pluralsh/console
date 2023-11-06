@@ -8,8 +8,10 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, LabelSelectorRequirement}
 
   def list_applications(_, _) do
-    with {:ok, %{items: items}} <- Client.list_applications(),
-      do: {:ok, items}
+    case Client.list_applications() do
+      {:ok, %{items: items}} -> {:ok, items}
+      _ -> {:ok, []}
+    end
   end
 
   def list_node_metrics(_, _) do

@@ -30,12 +30,8 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       terminationGracePeriodSeconds: {{ .Values.shutdownDelay }}
-      initContainers:
-      - name: wait-for-pg
-        image: {{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}
-        imagePullPolicy: IfNotPresent
-        command: [ "/bin/sh", "-c", "until nc -zv plural-console 5432 -w1; do echo 'waiting for db'; sleep 1; done" ]
       {{ if .Values.cliContainer.enabled }}
+      initContainers:
       - name: cli-override
         image: {{ .Values.cliContainer.image.repository }}:{{ .Values.cliContainer.image.tag }}
         imagePullPolicy: IfNotPresent

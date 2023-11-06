@@ -6,6 +6,11 @@ import { StackedText } from './Clusters'
 
 const columnHelperDeprecations = createColumnHelper<ApiDeprecation>()
 
+const namespacedName = (component) =>
+  component?.namespace
+    ? `${component?.namespace}/${component.name}`
+    : component?.name
+
 export const deprecationsColumns = [
   columnHelperDeprecations.accessor(({ component }) => component, {
     id: 'deprecated',
@@ -17,7 +22,9 @@ export const deprecationsColumns = [
       },
     }) => (
       <StackedText
-        first={`${component?.group}/${component?.version} ${component?.kind} ${component?.name}`}
+        first={`${component?.group}/${component?.version}.${component?.kind}: ${namespacedName(
+          component
+        )}`}
         second={`removed in ${deprecation.removedIn}`}
       />
     ),
@@ -33,7 +40,8 @@ export const deprecationsColumns = [
 
       return (
         <div>
-          {getValue()} {original.component?.kind}
+          {getValue()}.{original.component?.kind}:{' '}
+          {namespacedName(original.component)}
         </div>
       )
     },

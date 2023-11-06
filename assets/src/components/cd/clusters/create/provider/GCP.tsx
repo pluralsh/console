@@ -1,16 +1,27 @@
-import { useEffect, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
 
+import { CloudSettingsAttributes } from 'generated/graphql'
+
 import { RegionsForProvider } from '../helpers'
 import { ProviderCloud } from '../types'
-import { useCreateClusterContext } from '../CreateCluster'
+import { CloudSettings, useCreateClusterContext } from '../CreateCluster'
 
-export function GCP({
-  onValidityChange,
-}: {
-  onValidityChange: (valid: boolean) => void
-}) {
+const CLOUD = ProviderCloud.GCP as const
+
+const requiredProps: (keyof CloudSettings<typeof CLOUD>)[] = ['region']
+
+function isRequired(propName: keyof CloudSettings<typeof CLOUD>) {
+  return requiredProps.some((p) => p === propName)
+}
+
+export function settingsAreValidGcp(
+  props: NonNullable<CloudSettingsAttributes[typeof CLOUD]> = {}
+) {
+  return requiredProps.reduce((acc, reqProp) => acc && !!props?.[reqProp], true)
+}
+
+export function GCP() {
   const theme = useTheme()
   const {
     create: {
@@ -20,10 +31,6 @@ export function GCP({
   } = useCreateClusterContext()
   const settings = cloudSettings?.gcp
   const setSettings = setGcpSettings
-
-  const valid = useMemo(() => !!settings?.region, [settings?.region])
-
-  useEffect(() => onValidityChange?.(valid), [onValidityChange, valid])
 
   return (
     <div
@@ -45,7 +52,7 @@ export function GCP({
           onChange={({ target: { value } }) =>
             setSettings?.({ ...settings, project: value })
           }
-          prefix={<div>Project ID</div>}
+          prefix={<div>Project ID{isRequired('project') && '*'}</div>}
         />
         <Input
           placeholder="vpc-network"
@@ -53,13 +60,13 @@ export function GCP({
           onChange={({ target: { value } }) =>
             setSettings?.({ ...settings, network: value })
           }
-          prefix={<div>VPC Name</div>}
+          prefix={<div>VPC Name{isRequired('network') && '*'}</div>}
         />
       </div>
       <FormField
         label="Region"
         hint="Region where workload cluster should be created."
-        required
+        required={isRequired('region')}
       >
         <Select
           aria-label="region"

@@ -110,6 +110,7 @@ export const ME_Q = gql`
       gitCommit
     }
     configuration {
+      byok
       vpnEnabled
       gitCommit
       isDemoProject

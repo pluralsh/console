@@ -54,6 +54,7 @@ fragment ApiDeprecation on ApiDeprecation {
     version
     kind
     name
+    namespace
     service {
       git {
         ref

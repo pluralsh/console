@@ -46,20 +46,28 @@ provider = case get_env("PROVIDER") do
   "aws" -> :aws
   "azure" -> :azure
   "equinix" -> :equinix
-  _ -> :custom
+  _ -> :kubernetes
 end
 
 if provider != :gcp do
   config :goth, disabled: true
 end
 
-config :console, Console.Repo,
-  database: "console",
-  username: "console",
-  password: get_env("POSTGRES_PASSWORD"),
-  hostname: get_env("DBHOST") || "console-postgresql",
-  ssl: String.to_existing_atom(get_env("DBSSL") || "false"),
-  pool_size: 10
+
+if get_env("POSTGRES_URL") do
+  config :console, Console.Repo,
+    url: get_env("POSTGRES_URL"),
+    ssl: String.to_existing_atom(get_env("DBSSL") || "true"),
+    pool_size: 10
+else
+  config :console, Console.Repo,
+    database: "console",
+    username: "console",
+    password: get_env("POSTGRES_PASSWORD"),
+    hostname: get_env("DBHOST") || "console-postgresql",
+    ssl: String.to_existing_atom(get_env("DBSSL") || "false"),
+    pool_size: 10
+end
 
 git_url = get_env("GIT_URL")
 
@@ -74,17 +82,13 @@ config :console,
   ssh_askpass: "/root/bin/.ssh-askpass",
   git_url: get_env("GIT_URL"),
   branch: get_env("BRANCH_NAME") || "master",
-  repo_root: get_env("REPO_ROOT"),
-  forge_config: "/ect/forge/.forge",
+  repo_root: get_env("REPO_ROOT") || "workspace",
   git_ssh_key: {:home, ".ssh/id_rsa"},
   webhook_secret: get_env("WEBHOOK_SECRET"),
-  git_user_name: get_env("GIT_USER", "forge"),
-  git_user_email: get_env("GIT_EMAIL", "forge@piazzaapp.com"),
+  git_user_name: get_env("GIT_USER", "plural"),
+  git_user_email: get_env("GIT_EMAIL", "console@plural.sh"),
   url: get_env("HOST"),
   ext_url: add_https.(get_env("EXT_HOST") || get_env("HOST")),
-  incoming_webhook: get_env("PIAZZA_INCOMING_WEBHOOK"),
-  grafana_dns: get_env("GRAFANA_DNS"),
-  piazza_secret: get_env("PIAZZA_WEBHOOK_SECRET"),
   cluster_name: get_env("CLUSTER_NAME"),
   is_demo_project: !!get_env("IS_DEMO_PROJECT"),
   is_sandbox: !!get_env("CONSOLE_SANDBOX"),
@@ -92,7 +96,7 @@ config :console,
   build_id: get_env("CONSOLE_BUILD_ID"),
   kas_url: get_env("KAS_DNS")
 
-if String.starts_with?(git_url, "https") do
+if git_url && String.starts_with?(git_url, "https") do
   config :console,
     git_ssh_key: :pass
 end

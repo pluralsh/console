@@ -15,7 +15,14 @@ import {
   TabList,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useCallback, useContext, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import Fuse from 'fuse.js'
 
 import { Readiness, readinessToLabel } from 'utils/status'
@@ -28,6 +35,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import App from './AppCard'
 import { appState } from './misc'
+import { LoginContext } from 'components/contexts'
+import { useNavigate } from 'react-router-dom'
 
 const ALL_FILTER = 'All'
 
@@ -137,10 +146,16 @@ const searchOptions = {
 const breadcrumbs: Breadcrumb[] = [{ label: 'apps', url: '/' }]
 
 export default function Apps() {
+  const { configuration } = useContext<any>(LoginContext)
   const { applications = [] } = useContext<any>(InstallationContext)
   const [query, setQuery] = useState<string>('')
   const [filter, setFilter] = useState<any>(ALL_FILTER)
   const tabStateRef = useRef<any>(null)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (configuration?.byok) navigate('/cd/clusters')
+  }, [configuration, navigate])
 
   useSetBreadcrumbs(breadcrumbs)
 

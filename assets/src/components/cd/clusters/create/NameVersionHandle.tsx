@@ -6,6 +6,8 @@ import { isNonNullable } from 'utils/isNonNullable'
 
 import { VersionSelect } from '../VersionSelect'
 
+import { isRequired } from './CreateClusterContent'
+
 export function NameVersionHandle({
   name,
   setName,
@@ -48,7 +50,7 @@ export function NameVersionHandle({
           placeholder="workload-cluster-0"
           value={name}
           onChange={({ target: { value } }) => setName(value)}
-          prefix={<div>Name*</div>}
+          prefix={<div>Name{isRequired('name') && '*'}</div>}
         />
         {setVersion && (
           <div
@@ -60,7 +62,7 @@ export function NameVersionHandle({
               selectedKey={version}
               versions={filteredVersions}
               onSelectionChange={setVersion as any}
-              label="Version"
+              label={`Version${isRequired('name') && '*'}`}
             />
           </div>
         )}
@@ -69,7 +71,7 @@ export function NameVersionHandle({
         placeholder="custom-handle"
         value={handle}
         onChange={({ target: { value } }) => setHandle(value)}
-        prefix={<div>Handle</div>}
+        prefix={<div>Handle{isRequired('handle') && '*'}</div>}
       />
     </div>
   )

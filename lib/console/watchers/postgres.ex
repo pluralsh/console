@@ -18,8 +18,8 @@ defmodule Console.Watchers.Postgres do
         Process.link(pid)
         {:noreply, %{state | pid: pid}}
       err ->
-        Logger.info "failed to watch postgres crds, this can often be a benign error: #{err}"
-        Process.send_after(self(), :start, :timer.seconds(10))
+        Logger.info "failed to watch postgres crds, this can often be a benign error: #{inspect(err)}"
+        Process.send_after(self(), :start, :timer.minutes(1))
         {:noreply, state}
     end
   end

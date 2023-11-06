@@ -19,7 +19,8 @@ defmodule Console.Commands.Configuration do
   def ssh_path(), do: mkpath(conf(:git_ssh_key))
 
   defp register_ssh_keys() do
-    with ssh_key when is_binary(ssh_key) <- mkpath(conf(:git_ssh_key)),
+    with false <- Console.byok?(),
+         ssh_key when is_binary(ssh_key) <- mkpath(conf(:git_ssh_key)),
       do: ssh_add(ssh_key)
   end
 

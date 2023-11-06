@@ -147,6 +147,25 @@ defmodule Console.Deployments.Clusters do
   Installs the operator on this cluster using the plural cd command
   """
   @spec install(Cluster.t) :: cluster_resp
+  def install(%Cluster{id: id, deploy_token: token, self: true} = cluster) do
+    tee = Tee.new()
+    Command.set_build(tee)
+    url = Services.api_url("gql")
+    with {:ok, _} <- Console.Commands.Plural.install_cd(url, token) do
+      get_cluster(id)
+      |> Repo.preload([:service_errors])
+      |> Cluster.changeset(%{installed: true, service_errors: []})
+      |> Repo.update()
+    else
+      {:error, out} = err ->
+        add_errors(cluster, [%{source: "bootstrap", message: Tee.output(out)}])
+        err
+      pass ->
+        Logger.info "could not install operator to cluster: #{inspect(pass)}"
+        {:error, :unready}
+    end
+  end
+
   def install(%Cluster{id: id, deploy_token: token} = cluster) do
     tee = Tee.new()
     Command.set_build(tee)
@@ -399,6 +418,13 @@ defmodule Console.Deployments.Clusters do
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
+    |> add_operation(:validate, fn %{create: prov} ->
+        case {Repo.preload(local_cluster(), [:provider]), prov} do
+          {%{provider: %{cloud: "gcp"}}, %{cloud: "azure"}} ->
+            {:error, "cannot safely use the azure provider on GCP due to a conflict with workload identity"}
+          {_, prov} -> {:ok, prov}
+        end
+    end)
     |> add_operation(:svc, fn
       %{create: %{self: true} = prov} -> {:ok, prov}
       %{create: prov} -> provider_service(prov, tmp_admin(user))
@@ -611,6 +637,7 @@ defmodule Console.Deployments.Clusters do
       configuration: [
         %{name: "providerName", value: prov.name},
         %{name: "applicationCredentials", value: ac},
+        %{name: "applicationCredentialsBase64", value: Base.encode64(ac)},
       ]
     }
   end

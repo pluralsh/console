@@ -10,6 +10,7 @@ secrets:
   erlang: {{ configuration.erlang }}
   admin_email: {{ configuration.adminEmail }}
   admin_password: {{ configuration.adminPassword }}
+  cluster_name: {{ configuration.clusterName }}
   {% if configuration.pluralClientId %}
   plural_client_id: {{ configuration.pluralClientId }}
   {% endif %}
@@ -22,6 +23,7 @@ extraSecretEnv:
   KAS_API_SECRET: {{ configuration.kasApi }}
   KAS_PRIVATE_API_SECRET: {{ configuration.kasPrivateApi }}
   KAS_REDIS_SECRET: {{ configuration.kasRedis }}
+  POSTGRES_URL: {{ configuration.postgresUrl }}
 
 kas:
   consoleUrl: {{ configuration.consoleDns }}

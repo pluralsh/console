@@ -24,12 +24,16 @@ defmodule Console.Deployments.Init do
       }, bot)
     end)
     |> add_operation(:provider, fn _ ->
-      Clusters.create_provider(%{
-        name: "#{Console.conf(:provider)}",
-        namespace: "bootstrap",
-        self: true,
-        cloud: "#{Console.conf(:provider)}"
-      }, bot)
+      case Console.byok?() do
+        true -> {:ok, %{id: nil}}
+        _ ->
+          Clusters.create_provider(%{
+            name: "#{Console.conf(:provider)}",
+            namespace: "bootstrap",
+            self: true,
+            cloud: "#{Console.conf(:provider)}"
+          }, bot)
+      end
     end)
     |> add_operation(:rebind, fn %{provider: provider, cluster: cluster} ->
       Ecto.Changeset.change(cluster, %{provider_id: provider.id})

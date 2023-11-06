@@ -65,7 +65,7 @@ ingress:
   ingressClass: nginx
   annotations:
     kubernetes.io/tls-acme: "true"
-    cert-manager.io/cluster-issuer: plural
+    cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
     nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
@@ -111,5 +111,8 @@ affinity:
             values:
             - console
         topologyKey: "kubernetes.io/hostname"
+
+monitoring:
+  enabled: false
 
 provider: custom

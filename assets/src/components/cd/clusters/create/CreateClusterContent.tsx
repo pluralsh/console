@@ -1,56 +1,78 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { FormField } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { Link } from 'react-router-dom'
 import isEmpty from 'lodash/isEmpty'
 
-import { useClusterProvidersQuery } from 'generated/graphql'
+import { ClusterAttributes, ClusterProviderFragment } from 'generated/graphql'
 
 import { CD_BASE_PATH } from 'routes/cdRoutesConsts'
-import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { Body1P } from 'components/utils/typography/Text'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { ProviderCredentialSelect } from 'components/cd/utils/ProviderCredsSelect'
 
-import { AWS } from './provider/AWS'
+import { AWS, settingsAreValidAws } from './provider/AWS'
 import { ProviderCloud } from './types'
-import { GCP } from './provider/GCP'
-import { Azure } from './provider/Azure'
+import { GCP, settingsAreValidGcp } from './provider/GCP'
+import { Azure, settingsAreValidAzure } from './provider/Azure'
 import { NameVersionHandle } from './NameVersionHandle'
 import { ProviderTabSelector } from './ProviderTabSelector'
-import { SUPPORTED_CLOUDS, useCreateClusterContext } from './CreateCluster'
+import { useCreateClusterContext } from './CreateCluster'
 
-export function CreateClusterContent() {
+const requiredProps: (keyof ClusterAttributes)[] = [
+  'providerId',
+  'name',
+  'version',
+]
+
+export function isRequired(propName: keyof ClusterAttributes) {
+  return requiredProps.some((p) => p === propName)
+}
+
+export function attributesAreValid(
+  attributes: Partial<ClusterAttributes>,
+  cloud?: Nullable<string>
+) {
+  if (!cloud) {
+    return false
+  }
+
+  return (
+    requiredProps.reduce(
+      (acc, reqProp) => acc && !!attributes?.[reqProp],
+      true
+    ) &&
+    (cloud === ProviderCloud.AWS
+      ? settingsAreValidAws(attributes.cloudSettings?.aws || {})
+      : cloud === ProviderCloud.GCP
+      ? settingsAreValidGcp(attributes.cloudSettings?.gcp || {})
+      : cloud === ProviderCloud.Azure
+      ? settingsAreValidAzure(attributes.cloudSettings?.azure || {})
+      : false)
+  )
+}
+
+export function CreateClusterContent({
+  providers: clusterProviders,
+}: {
+  providers: ClusterProviderFragment[]
+}) {
   const theme = useTheme()
-  const [providerValid, setProviderValid] = useState(false)
 
   const {
-    create: { attributes, setAttributes, setValid },
+    create: { attributes, setAttributes },
   } = useCreateClusterContext()
 
-  const { data: clusterProvidersQuery, loading } = useClusterProvidersQuery()
-
-  const clusterProviders = useMemo(
-    () =>
-      mapExistingNodes(clusterProvidersQuery?.clusterProviders).filter((p) =>
-        SUPPORTED_CLOUDS.some((cloud) => cloud === p.cloud)
-      ),
-    [clusterProvidersQuery?.clusterProviders]
-  )
   const enabledProviders = useMemo(
-    () =>
-      clusterProviders
-        .filter((p) => !p.deletedAt)
-        .map((p) => p.cloud) as ProviderCloud[],
+    () => clusterProviders.map((p) => p.cloud) as ProviderCloud[],
     [clusterProviders]
   )
 
-  const provider = clusterProviders.find(
-    (provider) => provider.id === attributes.providerId
-  )
+  const provider =
+    clusterProviders.find(
+      (provider) => provider.id === attributes.providerId
+    ) || clusterProviders?.[0]
   const credentialList = useMemo(
     () => [...(provider?.credentials?.filter(isNonNullable) || [])],
     [provider?.credentials]
@@ -72,26 +94,15 @@ export function CreateClusterContent() {
   const providerEl = useMemo(() => {
     switch (provider?.cloud) {
       case ProviderCloud.AWS:
-        return <AWS onValidityChange={setProviderValid} />
+        return <AWS />
       case ProviderCloud.GCP:
-        return <GCP onValidityChange={setProviderValid} />
+        return <GCP />
       case ProviderCloud.Azure:
-        return <Azure onValidityChange={setProviderValid} />
+        return <Azure />
       default:
         return null
     }
   }, [provider])
-
-  const isValid = useMemo(
-    () =>
-      !!attributes.providerId &&
-      !!attributes.name &&
-      !!attributes.version &&
-      providerValid,
-    [attributes.providerId, attributes.name, attributes.version, providerValid]
-  )
-
-  useEffect(() => setValid?.(isValid), [setValid, isValid])
 
   return (
     <div
@@ -111,9 +122,7 @@ export function CreateClusterContent() {
         }}
         enabledProviders={enabledProviders}
       >
-        {loading ? (
-          <LoadingIndicator />
-        ) : isEmpty(enabledProviders) ? (
+        {isEmpty(enabledProviders) ? (
           <Body1P>
             No providers have been set up. You can add cloud providers{' '}
             <InlineLink
@@ -152,15 +161,20 @@ export function CreateClusterContent() {
               <FormField
                 label="Provider credentials"
                 hint="Configured cluster provider that should be used to provision the cluster."
+                required={isRequired('credentialId')}
               >
                 <ProviderCredentialSelect
                   aria-label="cluster provider"
                   selectedKey={attributes.credentialId || ''}
                   credentials={credentialList}
                   onSelectionChange={(key) => {
+                    const credentialId = credentialList?.find(
+                      (c) => c.id === key
+                    )?.id
+
                     setAttributes((attrs) => ({
                       ...attrs,
-                      credentialId: credentialList?.find((c) => c.id === key),
+                      ...(credentialId ? { credentialId } : {}),
                     }))
                   }}
                 />

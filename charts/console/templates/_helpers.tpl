@@ -59,6 +59,8 @@ spec: {{ .Values.secrets.config | toYaml | nindent 2 }}
 {{- define "console.env" -}}
 - name: HOST
   value: {{ .Values.ingress.console_dns }}
+- name: KAS_DNS
+  value: {{ .Values.ingress.kas_dns }}
 - name: DEPLOYED_AT
   value: {{ now | unixEpoch | quote }}
 - name: NAMESPACE
@@ -78,6 +80,7 @@ spec: {{ .Values.secrets.config | toYaml | nindent 2 }}
 - name: POSTGRES_URL
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.dsnSecret }}
-      key: {{ .Values.dsnKey }}
+      name: {{ .Values.postgres.dsnSecret | quote }}
+      key: {{ .Values.postgres.dsnKey | quote }}
+      optional: true
 {{- end -}}
