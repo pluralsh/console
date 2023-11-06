@@ -38,7 +38,7 @@ resource "azurerm_federated_identity_credential" "capz" {
   name                = "${var.console_identity}-federated-credential"
   resource_group_name = data.azurerm_resource_group.group.name
   audience            = ["api://AzureADTokenExchange"]
-  issuer              = one(data.azurerm_kubernetes_cluster.cluster[*].oidc_issuer_url)
+  issuer              = data.azurerm_kubernetes_cluster.cluster.oidc_issuer_url
   parent_id           = azurerm_user_assigned_identity.console.id
   subject             = "system:serviceaccount:${var.namespace}:console"
 }
