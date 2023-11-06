@@ -1,12 +1,15 @@
 import { ReactElement, useMemo } from 'react'
+import { useTheme } from 'styled-components'
 import {
-  CheckedShieldIcon,
   ClusterIcon,
+  ManagementClusterIcon,
+  ProtectedClusterIcon,
   Spinner,
   Tooltip,
   WrapWithIf,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
+
+import { PROTECT_TT_TEXT } from './ProtectBadge'
 
 interface DynamicClusterIconProps {
   deleting?: boolean
@@ -30,7 +33,7 @@ export function DynamicClusterIcon({
   const tooltip = useMemo(() => {
     if (deleting) return 'Cluster is being deleted'
     if (upgrading) return 'Cluster is being upgraded'
-    if (protect) return 'Cluster is protected from deletion'
+    if (protect) return PROTECT_TT_TEXT('cluster')
 
     return ''
   }, [deleting, upgrading, protect])
@@ -39,44 +42,29 @@ export function DynamicClusterIcon({
   return (
     <WrapWithIf
       condition={condition}
-      wrapper={<Tooltip label={tooltip} />}
+      wrapper={
+        <Tooltip
+          label={tooltip}
+          placement="top"
+        />
+      }
     >
       <div
         css={{
           display: 'flex',
-          position: 'relative',
         }}
       >
         {pending && (
           <Spinner
-            style={{
-              width: 16,
-              height: 16,
-            }}
             size={16}
             color={
               deleting ? theme.colors['icon-danger'] : theme.colors['icon-info']
             }
           />
         )}
-        {!pending && !self && <ClusterIcon size={16} />}
-        {!pending && self && (
-          <ClusterIcon
-            color={theme.colors['icon-success']}
-            size={16}
-          />
-        )}
-        {protect && (
-          <CheckedShieldIcon
-            css={{
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-            }}
-            size={12}
-            margin={-4}
-          />
-        )}
+        {!pending && !self && protect && <ProtectedClusterIcon size={16} />}
+        {!pending && !self && !protect && <ClusterIcon size={16} />}
+        {!pending && self && <ManagementClusterIcon size={16} />}
       </div>
     </WrapWithIf>
   )

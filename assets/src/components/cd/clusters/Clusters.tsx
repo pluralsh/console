@@ -154,19 +154,21 @@ export const columns = [
         original: { node },
       },
     }) {
-      ;<div>
-        {node?.currentVersion && (
-          <StackedText
-            first={`Current: ${toNiceVersion(node?.currentVersion)}`}
-            second={
-              node?.self || !node?.version
-                ? null
-                : `Target: ${toNiceVersion(node?.version)}`
-            }
-          />
-        )}
-        {!node?.currentVersion && <>-</>}
-      </div>
+      return (
+        <div>
+          {node?.currentVersion && (
+            <StackedText
+              first={`Current: ${toNiceVersion(node?.currentVersion)}`}
+              second={
+                node?.self || !node?.version
+                  ? null
+                  : `Target: ${toNiceVersion(node?.version)}`
+              }
+            />
+          )}
+          {!node?.currentVersion && <>-</>}
+        </div>
+      )
     },
   }),
   columnHelper.accessor(({ node }) => node, {
