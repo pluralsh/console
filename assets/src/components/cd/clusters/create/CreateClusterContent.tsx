@@ -18,7 +18,8 @@ import { GCP, settingsAreValidGcp } from './provider/GCP'
 import { Azure, settingsAreValidAzure } from './provider/Azure'
 import { NameVersionHandle } from './NameVersionHandle'
 import { ProviderTabSelector } from './ProviderTabSelector'
-import { useCreateClusterContext } from './CreateCluster'
+import { ClusterCreateMode, useCreateClusterContext } from './CreateCluster'
+import { ClusterTagSelection } from './ClusterTagSelection'
 
 const requiredProps: (keyof ClusterAttributes)[] = [
   'providerId',
@@ -61,7 +62,7 @@ export function CreateClusterContent({
   const theme = useTheme()
 
   const {
-    create: { attributes, setAttributes },
+    new: { attributes, setAttributes },
   } = useCreateClusterContext()
 
   const enabledProviders = useMemo(
@@ -180,6 +181,7 @@ export function CreateClusterContent({
                 />
               </FormField>
             )}
+            <ClusterTagSelection mode={ClusterCreateMode.New} />
             {providerEl}
           </div>
         )}

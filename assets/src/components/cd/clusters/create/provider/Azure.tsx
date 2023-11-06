@@ -24,7 +24,7 @@ export function settingsAreValidAzure(
 export function Azure() {
   const theme = useTheme()
   const {
-    create: {
+    new: {
       attributes: { cloudSettings },
       setAzureSettings,
     },

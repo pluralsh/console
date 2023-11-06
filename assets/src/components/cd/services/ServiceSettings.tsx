@@ -103,8 +103,6 @@ export function ModalForm({
     inputRef.current?.focus?.()
   }, [])
 
-  console.log('state', state)
-
   return (
     <ModalAlt
       header="Update service"
