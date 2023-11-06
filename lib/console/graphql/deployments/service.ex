@@ -15,6 +15,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :protect,        :boolean
     field :repository_id,  non_null(:id)
     field :git,            non_null(:git_ref_attributes)
+    field :kustomize,      :kustomize_attributes
     field :configuration,  list_of(:config_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
@@ -43,6 +44,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :protect,       :boolean
     field :git,           :git_ref_attributes
     field :configuration, list_of(:config_attributes)
+    field :kustomize,     :kustomize_attributes
   end
 
   input_object :service_clone_attributes do
@@ -82,6 +84,10 @@ defmodule Console.GraphQl.Deployments.Service do
     field :provider_id, :id
   end
 
+  input_object :kustomize_attributes do
+    field :path, non_null(:string), description: "the path to the kustomization file to use"
+  end
+
   @desc "a reference to a service deployed from a git repo into a cluster"
   object :service_deployment do
     field :id,               non_null(:id), description: "internal id of this service"
@@ -95,6 +101,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :tarball,          :string, resolve: &Deployments.tarball/3, description: "https url to fetch the latest tarball of kubernetes manifests"
     field :component_status, :string, description: "a n / m representation of the number of healthy components of this service"
     field :sync_config,      :sync_config, description: "settings for advanced tuning of the sync process"
+    field :kustomize,        :kustomize, description: "kustomize related service metadata"
     field :message,          :string, description: "the commit message currently in use"
     field :deleted_at,       :datetime, description: "the time this service was scheduled for deletion"
 
@@ -145,6 +152,11 @@ defmodule Console.GraphQl.Deployments.Service do
   object :service_configuration do
     field :name,  non_null(:string)
     field :value, non_null(:string)
+  end
+
+  @desc "metadata needed for configuring kustomize"
+  object :kustomize do
+    field :path, non_null(:string)
   end
 
   @desc "representation of a kubernetes component deployed by a service"
