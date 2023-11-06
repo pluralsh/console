@@ -16,7 +16,7 @@ defmodule Console.Middleware.Rbac do
       _ -> put_result(res, {:error, "forbidden"})
     end
   end
-  def call(_, _) do
+  def call(res, _) do
     IO.inspect(res.context)
     put_result(res, {:error, "forbidden"})
   end
