@@ -5,7 +5,14 @@ import {
   Input,
   ListBoxItem,
 } from '@pluralsh/design-system'
-import { Dispatch, SetStateAction, useMemo, useState } from 'react'
+import {
+  ChangeEvent,
+  Dispatch,
+  EventHandler,
+  SetStateAction,
+  useMemo,
+  useState,
+} from 'react'
 import { compareItems, rankItem } from '@tanstack/match-sorter-utils'
 
 export function DeployServiceSettingsGit({
@@ -34,27 +41,63 @@ export function DeployServiceSettingsGit({
           setRepositoryId={setRepoId}
         />
       </FormField>
-      <FormField
-        label="Git ref"
+      <ServiceGitRefField
         required
-        hint="Branch name, tag name, or commit SHA"
-      >
-        <Input
-          value={gitRef}
-          onChange={(e) => setGitRef(e.currentTarget.value)}
-        />
-      </FormField>
-      <FormField
+        value={gitRef}
+        onChange={(e) => setGitRef(e.currentTarget.value)}
+      />
+      <ServiceGitFolderField
         required
-        label="Git folder"
-        hint="Folder within the source tree where manifests are located"
-      >
-        <Input
-          value={gitFolder}
-          onChange={(e) => setGitFolder(e.currentTarget.value)}
-        />
-      </FormField>
+        value={gitFolder}
+        onChange={(e) => setGitFolder(e.currentTarget.value)}
+      />
     </>
+  )
+}
+
+export function ServiceGitRefField({
+  value,
+  onChange,
+  required,
+}: {
+  value: string
+  onChange: EventHandler<ChangeEvent<HTMLInputElement>>
+  required?: boolean
+}) {
+  return (
+    <FormField
+      label="Git ref"
+      required={!!required}
+      hint="Branch name, tag name, or commit SHA"
+    >
+      <Input
+        value={value}
+        onChange={onChange}
+      />
+    </FormField>
+  )
+}
+
+export function ServiceGitFolderField({
+  value,
+  onChange,
+  required,
+}: {
+  value: string
+  onChange: EventHandler<ChangeEvent<HTMLInputElement>>
+  required?: boolean
+}) {
+  return (
+    <FormField
+      required={required}
+      label="Git folder"
+      hint="Folder within the source tree where manifests are located"
+    >
+      <Input
+        value={value}
+        onChange={onChange}
+      />
+    </FormField>
   )
 }
 
