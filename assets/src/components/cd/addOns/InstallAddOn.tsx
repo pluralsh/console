@@ -39,6 +39,10 @@ import { isNonNullable } from 'utils/isNonNullable'
 
 import { SetReqNonNull } from 'utils/SetReqNonNull'
 
+import { InlineLink } from 'components/utils/typography/InlineLink'
+
+import { Body2P } from 'components/utils/typography/Text'
+
 import ModalAlt from '../ModalAlt'
 
 import { GlobalServiceFields } from '../services/GlobalServiceFields'
@@ -108,7 +112,7 @@ export function InstallAddOnModal({
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const [formState, setFormState] = useState(FormState.Initial)
+  const [formState, setFormState] = useState(FormState.Complete)
   const [serviceDeployment, setServiceDeployment] =
     useState<Nullable<ServiceDeploymentsRowFragment>>()
   const configuration =
@@ -197,6 +201,9 @@ export function InstallAddOnModal({
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
+      if (formState === FormState.Complete) {
+        closeModal()
+      }
       if (!allowSubmit) {
         return
       }
@@ -207,7 +214,7 @@ export function InstallAddOnModal({
       }
       mutation()
     },
-    [addOn.global, allowSubmit, formState, mutation]
+    [addOn.global, allowSubmit, closeModal, formState, mutation]
   )
   const clusters = useMemo(
     () => mapExistingNodes(data.clusters),
@@ -253,24 +260,13 @@ export function InstallAddOnModal({
             </Button>
           </>
         ) : (
-          <>
-            <Button
-              type="button"
-              secondary
-              onClick={closeModal}
-            >
-              Close
-            </Button>
-            <Button
-              as={Link}
-              to={getServiceDetailsPath({
-                clusterId: serviceDeployment?.cluster?.id,
-                serviceId: serviceDeployment?.id,
-              })}
-            >
-              View thing
-            </Button>
-          </>
+          <Button
+            type="button"
+            secondary
+            onClick={closeModal}
+          >
+            Close
+          </Button>
         )
       }
     >
@@ -289,6 +285,8 @@ export function InstallAddOnModal({
                 ? 0
                 : formState === FormState.Global
                 ? 1
+                : formState === FormState.Complete
+                ? 2
                 : 1
             }
           />
@@ -324,6 +322,27 @@ export function InstallAddOnModal({
               clusterProviders,
             }}
           />
+        ) : formState === FormState.Complete ? (
+          <Body2P>
+            Successfully installed {addOn.name}.{' '}
+            <InlineLink
+              as={Link}
+              to={getServiceDetailsPath({
+                clusterId: serviceDeployment?.cluster?.id,
+                serviceId: serviceDeployment?.id,
+              })}
+            >
+              See details
+            </InlineLink>{' '}
+            or view{' '}
+            <InlineLink
+              as={Link}
+              to="/cd/services"
+            >
+              all services
+            </InlineLink>
+            .
+          </Body2P>
         ) : null}
       </div>
       {formState !== FormState.Complete && error && (

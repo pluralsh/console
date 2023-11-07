@@ -358,27 +358,25 @@ const ColActions = ({
 export default function ServiceSecrets() {
   const theme = useTheme()
   const serviceId = useParams()[SERVICE_PARAM_ID]
-  const clusterName = useParams()[SERVICE_PARAM_CLUSTER_ID]
+  const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
   const outletContext = useServiceContext()
 
   const [createOpen, setCreateOpen] = useState(false)
   const { data, error, refetch } = useServiceDeploymentSecretsQuery({
     variables: { id: serviceId || '' },
   })
-  const serviceName = outletContext?.service?.name
   const breadcrumbs: Breadcrumb[] = useMemo(
     () => [
       ...getServiceDetailsBreadcrumbs({
-        clusterId: clusterName,
-        serviceId,
-        serviceName,
+        cluster: outletContext.service?.cluster || { id: clusterId || '' },
+        service: outletContext.service || { id: serviceId || '' },
       }),
       {
         label: 'secrets',
         url: `${CD_BASE_PATH}/services/${serviceId}/secrets`,
       },
     ],
-    [clusterName, serviceId, serviceName]
+    [clusterId, outletContext.service, serviceId]
   )
 
   useSetBreadcrumbs(breadcrumbs)

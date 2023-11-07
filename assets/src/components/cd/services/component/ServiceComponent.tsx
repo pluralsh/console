@@ -19,8 +19,8 @@ import { GqlError } from 'components/utils/Alert'
 import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
 
 export const getServiceComponentBreadcrumbs = ({
-  serviceId,
-  clusterId,
+  service,
+  cluster,
   componentName,
   componentId,
   ...props
@@ -29,31 +29,29 @@ export const getServiceComponentBreadcrumbs = ({
   componentId: string | null | undefined
 }) => [
   ...getServiceComponentsBreadcrumbs({
-    clusterId,
-    serviceId,
+    cluster,
+    service,
     ...props,
   }),
   {
     label: componentName || componentId || '',
     url: getServiceComponentPath({
-      clusterId,
-      serviceId,
+      clusterId: cluster.id,
+      serviceId: service.id,
       componentId,
     }),
   },
 ]
 
 function BreadcrumbWrapper({
-  clusterId,
-  serviceId,
-  serviceName,
+  cluster,
+  service,
   componentId,
   componentName,
   children,
 }: {
-  clusterId: string
-  serviceId: string
-  serviceName: string | undefined
+  cluster: any
+  service: any
   componentId: string | undefined
   componentName: string | undefined
 
@@ -63,13 +61,12 @@ function BreadcrumbWrapper({
     useMemo(
       () =>
         getServiceComponentBreadcrumbs({
-          clusterId,
-          serviceId,
-          serviceName,
+          cluster,
+          service,
           componentId,
           componentName,
         }),
-      [clusterId, serviceId, serviceName, componentId, componentName]
+      [cluster, service, componentId, componentName]
     )
   )
 
@@ -89,7 +86,7 @@ export default function ServiceComponent() {
     },
   })
 
-  const serviceName = data?.serviceDeployment?.name
+  const serviceDeployment = data?.serviceDeployment
   const components = data?.serviceDeployment?.components
 
   const component = components?.find(
@@ -98,9 +95,8 @@ export default function ServiceComponent() {
   const componentName = component?.name
 
   const breadcrumbProps = {
-    clusterId,
-    serviceId,
-    serviceName,
+    cluster: clusterId,
+    service: serviceDeployment,
     componentId,
     componentName,
   }
