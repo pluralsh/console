@@ -21,7 +21,7 @@ import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { getProviderIconURL } from 'components/utils/Provider'
 import { MoreMenu } from 'components/utils/MoreMenu'
 
-import { ClusterProtectBadge } from '../clusters/ClusterProtectBadge'
+import { ProtectBadge } from '../clusters/ProtectBadge'
 
 import { ServicePermissions } from './ServicePermissions'
 import { ServiceStatusChip } from './ServiceStatusChip'
@@ -47,7 +47,10 @@ export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
       serviceDeployment && (
         <DecoratedName
           suffix={
-            <ClusterProtectBadge isProtected={serviceDeployment?.protect} />
+            <ProtectBadge
+              isProtected={serviceDeployment?.protect}
+              resource="service"
+            />
           }
           deletedAt={serviceDeployment.deletedAt}
         >

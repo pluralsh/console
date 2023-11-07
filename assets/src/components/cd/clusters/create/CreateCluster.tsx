@@ -219,7 +219,7 @@ function CreateClusterModal({
       header="Create a cluster"
       headerContent={tabs}
       size="large"
-      style={{ padding: 0 }}
+      style={{ padding: 0, position: 'absolute', top: '20%' }}
       open={open}
       portal
       onClose={() => {
