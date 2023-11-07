@@ -170,6 +170,7 @@
     "vite-plugin-rewrite-all": "1.0.1",
     "vite-tsconfig-paths": "4.2.1",
     "vitest": "0.34.6",
+    "vitest-tsconfig-paths": "3.4.1",
     "wait-on": "7.0.1"
   },
   "lint-staged": {
