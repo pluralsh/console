@@ -110,9 +110,7 @@ export default function ContinuousDeployment() {
         stateRef={tabStateRef}
       >
         <CDContext.Provider value={cdContext}>
-          <Suspense fallback={<LoadingIndicator />}>
-            <Outlet />
-          </Suspense>
+          <Outlet />
         </CDContext.Provider>
       </TabPanel>
     </ResponsivePageFullWidth>
