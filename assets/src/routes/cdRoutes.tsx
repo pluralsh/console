@@ -52,6 +52,7 @@ import {
   GLOBAL_SETTINGS_PATH_REL,
   NODE_BASE_PATH,
   POD_BASE_PATH,
+  POD_LOGS_PATH,
   SERVICE_BASE_PATH,
   SERVICE_COMPONENTS_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
@@ -237,7 +238,7 @@ export const cdRoutes = [
       element={<PodRaw />}
     />
     <Route
-      path="logs"
+      path={POD_LOGS_PATH}
       element={<PodLogs />}
     />
   </Route>,

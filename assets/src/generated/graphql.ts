@@ -4296,6 +4296,17 @@ export type PodQueryVariables = Exact<{
 
 export type PodQuery = { __typename?: 'RootQueryType', pod?: { __typename?: 'Pod', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null };
 
+export type PodLogsQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  container: Scalars['String']['input'];
+  sinceSeconds: Scalars['Int']['input'];
+}>;
+
+
+export type PodLogsQuery = { __typename?: 'RootQueryType', pod?: { __typename?: 'Pod', logs?: Array<string | null> | null } | null };
+
 export type ServiceFragment = { __typename?: 'Service', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null } | null> | null } | null }, spec: { __typename?: 'ServiceSpec', type?: string | null, clusterIp?: string | null, ports?: Array<{ __typename?: 'ServicePort', name?: string | null, protocol?: string | null, port?: number | null, targetPort?: string | null } | null> | null } };
 
 export type ServiceQueryVariables = Exact<{
@@ -7846,6 +7857,50 @@ export type PodQueryHookResult = ReturnType<typeof usePodQuery>;
 export type PodLazyQueryHookResult = ReturnType<typeof usePodLazyQuery>;
 export type PodSuspenseQueryHookResult = ReturnType<typeof usePodSuspenseQuery>;
 export type PodQueryResult = Apollo.QueryResult<PodQuery, PodQueryVariables>;
+export const PodLogsDocument = gql`
+    query PodLogs($name: String!, $namespace: String!, $clusterId: ID, $container: String!, $sinceSeconds: Int!) {
+  pod(name: $name, namespace: $namespace, clusterId: $clusterId) {
+    logs(container: $container, sinceSeconds: $sinceSeconds)
+  }
+}
+    `;
+
+/**
+ * __usePodLogsQuery__
+ *
+ * To run a query within a React component, call `usePodLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePodLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePodLogsQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      clusterId: // value for 'clusterId'
+ *      container: // value for 'container'
+ *      sinceSeconds: // value for 'sinceSeconds'
+ *   },
+ * });
+ */
+export function usePodLogsQuery(baseOptions: Apollo.QueryHookOptions<PodLogsQuery, PodLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PodLogsQuery, PodLogsQueryVariables>(PodLogsDocument, options);
+      }
+export function usePodLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PodLogsQuery, PodLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PodLogsQuery, PodLogsQueryVariables>(PodLogsDocument, options);
+        }
+export function usePodLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PodLogsQuery, PodLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PodLogsQuery, PodLogsQueryVariables>(PodLogsDocument, options);
+        }
+export type PodLogsQueryHookResult = ReturnType<typeof usePodLogsQuery>;
+export type PodLogsLazyQueryHookResult = ReturnType<typeof usePodLogsLazyQuery>;
+export type PodLogsSuspenseQueryHookResult = ReturnType<typeof usePodLogsSuspenseQuery>;
+export type PodLogsQueryResult = Apollo.QueryResult<PodLogsQuery, PodLogsQueryVariables>;
 export const ServiceDocument = gql`
     query Service($name: String!, $namespace: String!, $serviceId: ID) {
   service(name: $name, namespace: $namespace, serviceId: $serviceId) {
@@ -8362,6 +8417,7 @@ export const namedOperations = {
     Node: 'Node',
     NodeMetric: 'NodeMetric',
     Pod: 'Pod',
+    PodLogs: 'PodLogs',
     Service: 'Service',
     StatefulSet: 'StatefulSet',
     UnstructuredResource: 'UnstructuredResource',
