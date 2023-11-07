@@ -57,7 +57,7 @@ extraEnv:
 - name: GRAFANA_TENANT
   value: {{ .Cluster }}
 {{- end }}
-{{- if eq .Provider "azure" }}
+{{- if and (eq .Provider "azure") (not .ClusterAPI) }}
 - name: ARM_USE_MSI
   value: 'true'
 - name: ARM_SUBSCRIPTION_ID
