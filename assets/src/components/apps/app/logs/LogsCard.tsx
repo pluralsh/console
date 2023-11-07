@@ -5,10 +5,6 @@ import { useCallback, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { useParams } from 'react-router-dom'
-
-import { usePodLogsQuery } from '../../../../generated/graphql'
-
 import LogContent from './LogContent'
 import LogsScrollIndicator from './LogsScrollIndicator'
 
@@ -22,28 +18,13 @@ export function LogsCard({
   fullscreen = false,
   height = 800,
 }: any) {
-  const { clusterId, container, name } = useParams()
   const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
   const [loader, setLoader] = useState<any>(null)
 
-  console.log(clusterId)
-  console.log(container)
-  console.log(name)
-
-  // const { data, loading, fetchMore, refetch } = useQuery(LOGS_Q, {
-  //   variables: { query, limit: LIMIT },
-  //   pollInterval: live ? POLL_INTERVAL : 0,
-  // })
-
-  const { data, loading, fetchMore, refetch } = usePodLogsQuery({
-    variables: {
-      name: name!,
-      namespace,
-      clusterId,
-      container: container!,
-      sinceSeconds: 100,
-    },
+  const { data, loading, fetchMore, refetch } = useQuery(LOGS_Q, {
+    variables: { query, limit: LIMIT },
+    pollInterval: live ? POLL_INTERVAL : 0,
   })
 
   const returnToTop = useCallback(() => {
@@ -71,7 +52,7 @@ export function LogsCard({
             listRef={listRef}
             setListRef={setListRef}
             namespace={namespace}
-            logs={data?.pod?.logs}
+            logs={data.logs}
             setLoader={setLoader}
             search={query}
             loading={loading}

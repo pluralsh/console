@@ -34,14 +34,14 @@ import NodeRaw from '../components/cd/cluster/node/NodeRaw'
 import NodeMetadata from '../components/cd/cluster/node/NodeMetadata'
 
 import AddOns from '../components/cd/addOns/AddOns'
-
-import PodLogs from '../components/cd/cluster/pod/PodLogs'
 import Pod from '../components/cd/cluster/pod/Pod'
 import PodInfo from '../components/cd/cluster/pod/PodInfo'
 import ClusterMetadata from '../components/cd/cluster/ClusterMetadata'
 import PodRaw from '../components/cluster/pods/PodRaw'
 
 import PodEvents from '../components/cluster/pods/PodEvents'
+
+import Logs from '../components/cd/cluster/pod/logs/Logs'
 
 import {
   ADDONS_PATH,
@@ -55,7 +55,6 @@ import {
   GLOBAL_SETTINGS_PATH_REL,
   NODE_BASE_PATH,
   POD_BASE_PATH,
-  POD_LOGS_PATH,
   SERVICE_BASE_PATH,
   SERVICE_COMPONENTS_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
@@ -245,8 +244,8 @@ export const cdRoutes = [
       element={<PodRaw />}
     />
     <Route
-      path={POD_LOGS_PATH}
-      element={<PodLogs />}
+      path="logs"
+      element={<Logs />}
     />
   </Route>,
 
