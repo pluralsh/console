@@ -33,10 +33,12 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import { LoginContext } from 'components/contexts'
+
+import { useNavigate } from 'react-router-dom'
+
 import App from './AppCard'
 import { appState } from './misc'
-import { LoginContext } from 'components/contexts'
-import { useNavigate } from 'react-router-dom'
 
 const ALL_FILTER = 'All'
 
