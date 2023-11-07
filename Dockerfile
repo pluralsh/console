@@ -84,7 +84,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     mv plural /usr/local/bin/plural && \
     curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl && \
     mv kubectl /usr/local/bin/kubectl && \
-    pip install --upgrade pipl && \
+    pip install --upgrade pip && \
     pip install azure-cli && \
     chmod +x /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/plural && \
