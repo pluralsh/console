@@ -68,7 +68,7 @@ extraEnv:
 {{- if and (eq .Provider "azure") .ClusterAPI }}
 - name: ARM_USE_OIDC
   value: 'true'
-- name: ARM_OIDC_TOKEN_FILE_PATH # Same as AZURE_FEDERATED_TOKEN_FILE that gets injected by AZWI.
+- name: ARM_OIDC_TOKEN_FILE_PATH # Same as AZURE_FEDERATED_TOKEN_FILE that gets injected by AZWI
   value: /var/run/secrets/azure/tokens/azure-identity-token
 {{- end }}
 
