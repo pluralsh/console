@@ -1,0 +1,36 @@
+fragment AddOnConfiguration on AddOnConfiguration {
+  documentation
+  name
+  type
+}
+fragment ClusterAddOn on ClusterAddOn {
+  global
+  icon
+  name
+  version
+  configuration {
+    ...AddOnConfiguration
+  }
+}
+
+query ClusterAddOns {
+  clusterAddOns {
+    ...ClusterAddOn
+  }
+}
+
+mutation InstallAddOn(
+  $clusterId: ID!
+  $name: String!
+  $configuration: [ConfigAttributes]
+  $global: GlobalServiceAttributes
+) {
+  installAddOn(
+    clusterId: $clusterId
+    configuration: $configuration
+    global: $global
+    name: $name
+  ) {
+    ...ServiceDeploymentsRow
+  }
+}

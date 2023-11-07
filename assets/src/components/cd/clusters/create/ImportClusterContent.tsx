@@ -12,6 +12,8 @@ import { StepBody, StepH, StepLink } from 'components/cd/ModalAlt'
 import { ClusterAttributes } from 'generated/graphql'
 
 import { NameVersionHandle } from './NameVersionHandle'
+import { ClusterTagSelection } from './ClusterTagSelection'
+import { ClusterCreateMode } from './CreateCluster'
 
 export function ImportClusterContent({
   importCluster,
@@ -33,6 +35,7 @@ function ImportClusterContentPage1({
   onChange: Dispatch<SetStateAction<Partial<ClusterAttributes>>>
   onValidityChange: Dispatch<SetStateAction<boolean>>
 }) {
+  const theme = useTheme()
   const [name, setName] = useState<string>('')
   const [handle, setHandle] = useState<string>('')
 
@@ -45,7 +48,18 @@ function ImportClusterContentPage1({
     onChange({ name, handle })
   }, [handle, name, onChange, onValidityChange])
 
-  return <NameVersionHandle {...{ name, setName, handle, setHandle }} />
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.large,
+      }}
+    >
+      <NameVersionHandle {...{ name, setName, handle, setHandle }} />
+      <ClusterTagSelection mode={ClusterCreateMode.Import} />
+    </div>
+  )
 }
 
 function ImportClusterContentPage2({ deployToken }: { deployToken: string }) {

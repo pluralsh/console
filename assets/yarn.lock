@@ -4039,9 +4039,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:3.7.0":
-  version: 3.7.0
-  resolution: "@pluralsh/design-system@npm:3.7.0"
+"@pluralsh/design-system@npm:3.8.0":
+  version: 3.8.0
+  resolution: "@pluralsh/design-system@npm:3.8.0"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@loomhq/loom-embed": 1.5.0
@@ -4089,7 +4089,7 @@ __metadata:
     react-dom: ">=18.2.0"
     react-transition-group: ">=4.4.5"
     styled-components: ">=5.3.11"
-  checksum: f0369a2b4b4461e1ec1def0b59ab26053d6aa34a97ce50f66447e2ca914c16e8b871ccaf361565a9e9d94d9e6687be3305b1ac1739cbeaea66d4a6b996c06888
+  checksum: da2d150e6537ec52ac5f377a0ee4338779b921c34b083379b78938d2a27d0995dc911992871b76aaceabe886a8c064b3d2e4bd0cbe43dc2e523939ee98c383e9
   languageName: node
   linkType: hard
 
@@ -8899,7 +8899,7 @@ __metadata:
     "@nivo/pie": 0.83.0
     "@nivo/radial-bar": 0.83.0
     "@nivo/tooltip": 0.83.0
-    "@pluralsh/design-system": 3.7.0
+    "@pluralsh/design-system": 3.8.0
     "@pluralsh/eslint-config-typescript": 2.5.116
     "@pluralsh/stylelint-config": 2.0.9
     "@react-hooks-library/core": 0.5.1

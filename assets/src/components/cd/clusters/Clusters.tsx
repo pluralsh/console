@@ -2,12 +2,9 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import {
   Breadcrumb,
   CaretRightIcon,
-  CheckRoundedIcon,
-  ClusterIcon,
   EmptyState,
   GearTrainIcon,
   IconFrame,
-  Spinner,
   Table,
   Tooltip,
   useSetBreadcrumbs,
@@ -19,10 +16,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import {
-  ColWithIcon,
-  ColWithOptionalIcon,
-} from 'components/utils/table/ColWithIcon'
+import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
 import {
@@ -47,16 +41,13 @@ import {
   nextSupportedVersion,
   toNiceVersion,
 } from '../../../utils/semver'
-
-import DecoratedName from '../services/DecoratedName'
-
 import { DeleteCluster } from '../providers/DeleteCluster'
 
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
 import CreateCluster from './create/CreateCluster'
 import { ClusterConditions } from './ClusterConditions'
-import { ClusterProtectBadge } from './ClusterProtectBadge'
+import { DynamicClusterIcon } from './DynamicClusterIcon'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -89,31 +80,45 @@ export const columns = [
   columnHelper.accessor(({ node }) => node, {
     id: 'cluster',
     header: 'Cluster',
-    cell: function Cell({ getValue }) {
+    cell: function Cell({
+      getValue,
+      row: {
+        original: { node },
+      },
+    }) {
       const cluster = getValue()
+      const different =
+        !node?.self &&
+        !!node?.currentVersion &&
+        !!node?.version &&
+        node?.currentVersion !== node?.version
 
       return (
-        <ColWithIcon icon={<ClusterIcon width={16} />}>
-          <DecoratedName
-            deletedAt={cluster?.deletedAt}
-            suffix={<ClusterProtectBadge isProtected={cluster?.protect} />}
-          >
-            <div>
-              <StackedText
-                first={
-                  <BasicLink
-                    as={Link}
-                    to={`/cd/clusters/${cluster?.id}`}
-                    css={{ whiteSpace: 'nowrap' }}
-                  >
-                    {cluster?.name}
-                  </BasicLink>
-                }
-                second={`handle: ${cluster?.handle}`}
+        <div css={{ display: 'flex' }}>
+          <ColWithIcon
+            icon={
+              <DynamicClusterIcon
+                deleting={!!cluster?.deletedAt}
+                upgrading={different}
+                protect={!!cluster?.protect}
+                self={!!cluster?.self}
               />
-            </div>
-          </DecoratedName>
-        </ColWithIcon>
+            }
+          >
+            <StackedText
+              first={
+                <BasicLink
+                  as={Link}
+                  to={`/cd/clusters/${cluster?.id}`}
+                  css={{ whiteSpace: 'nowrap' }}
+                >
+                  {cluster?.name}
+                </BasicLink>
+              }
+              second={`handle: ${cluster?.handle}`}
+            />
+          </ColWithIcon>
+        </div>
       )
     },
   }),
@@ -149,39 +154,20 @@ export const columns = [
         original: { node },
       },
     }) {
-      const theme = useTheme()
-      const different =
-        !node?.self &&
-        node?.currentVersion &&
-        node?.version &&
-        node?.currentVersion !== node?.version
-
       return (
-        <ColWithOptionalIcon
-          icon={
-            different ? (
-              <Spinner
-                color={theme.colors['icon-info']}
-                size={16}
-              />
-            ) : undefined
-          }
-          iconTooltip="Upgrading"
-        >
-          <div>
-            {node?.currentVersion && (
-              <StackedText
-                first={`Current: ${toNiceVersion(node?.currentVersion)}`}
-                second={
-                  node?.self || !node?.version
-                    ? null
-                    : `Target: ${toNiceVersion(node?.version)}`
-                }
-              />
-            )}
-            {!node?.currentVersion && <>-</>}
-          </div>
-        </ColWithOptionalIcon>
+        <div>
+          {node?.currentVersion && (
+            <StackedText
+              first={`Current: ${toNiceVersion(node?.currentVersion)}`}
+              second={
+                node?.self || !node?.version
+                  ? null
+                  : `Target: ${toNiceVersion(node?.version)}`
+              }
+            />
+          )}
+          {!node?.currentVersion && <>-</>}
+        </div>
       )
     },
   }),
@@ -257,17 +243,6 @@ export const columns = [
         display
       )
     },
-  }),
-  columnHelper.accessor(({ node }) => node?.self, {
-    id: 'mgmt',
-    header: 'Mgmt',
-    cell: ({ getValue }) =>
-      getValue() && (
-        <IconFrame
-          icon={<CheckRoundedIcon color="icon-success" />}
-          type="floating"
-        />
-      ),
   }),
   columnHelper.accessor(({ node }) => node, {
     id: 'status',

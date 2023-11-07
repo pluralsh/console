@@ -30,6 +30,11 @@ defmodule Console.Deployments.Services do
     |> Enum.any?(& &1)
   end
 
+  def count() do
+    Service.nonsystem()
+    |> Repo.aggregate(:count, :id)
+  end
+
   @doc """
   Creates a new service in a cluster, alongside an initial revision for the service
   """

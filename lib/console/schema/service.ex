@@ -53,6 +53,10 @@ defmodule Console.Schema.Service do
       embeds_one :namespace_metadata, Metadata
     end
 
+    embeds_one :kustomize, Kustomize, on_replace: :update do
+      field :path, :string
+    end
+
     belongs_to :revision,   Revision
     belongs_to :cluster,    Cluster
     belongs_to :repository, GitRepository
@@ -82,6 +86,10 @@ defmodule Console.Schema.Service do
   end
 
   def drainable(query \\ __MODULE__) do
+    from(s in query, where: s.name != "deploy-operator")
+  end
+
+  def nonsystem(query \\ __MODULE__) do
     from(s in query, where: s.name != "deploy-operator")
   end
 
@@ -146,6 +154,7 @@ defmodule Console.Schema.Service do
     |> semver(:version)
     |> cast_embed(:git)
     |> cast_embed(:sync_config, with: &sync_config_changeset/2)
+    |> cast_embed(:kustomize, with: &kustomize_changeset/2)
     |> cast_assoc(:components)
     |> cast_assoc(:errors)
     |> cast_assoc(:read_bindings)
@@ -179,5 +188,11 @@ defmodule Console.Schema.Service do
     |> cast(attrs, [])
     |> cast_embed(:namespace_metadata)
     |> cast_embed(:diff_normalizers)
+  end
+
+  def kustomize_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(path)a)
+    |> validate_required(~w(path)a)
   end
 end

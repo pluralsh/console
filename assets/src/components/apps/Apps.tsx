@@ -33,10 +33,12 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import { LoginContext } from 'components/contexts'
+
+import { useNavigate } from 'react-router-dom'
+
 import App from './AppCard'
 import { appState } from './misc'
-import { LoginContext } from 'components/contexts'
-import { useNavigate } from 'react-router-dom'
 
 const ALL_FILTER = 'All'
 
@@ -84,7 +86,7 @@ function ReadyEmptyState() {
     <EmptyState
       icon={<LifePreserverIcon size={64} />}
       message="That's awkward."
-      description="None of yout apps appear to be ready. Don't worry — we're here to help."
+      description="None of your apps appear to be ready. Don't worry — we're here to help."
       width={400}
     >
       <Button

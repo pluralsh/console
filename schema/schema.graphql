@@ -717,6 +717,7 @@ input ServiceDeploymentAttributes {
   protect: Boolean
   repositoryId: ID!
   git: GitRefAttributes!
+  kustomize: KustomizeAttributes
   configuration: [ConfigAttributes]
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
@@ -745,6 +746,7 @@ input ServiceUpdateAttributes {
   protect: Boolean
   git: GitRefAttributes
   configuration: [ConfigAttributes]
+  kustomize: KustomizeAttributes
 }
 
 input ServiceCloneAttributes {
@@ -784,6 +786,11 @@ input GlobalServiceAttributes {
   providerId: ID
 }
 
+input KustomizeAttributes {
+  "the path to the kustomization file to use"
+  path: String!
+}
+
 "a reference to a service deployed from a git repo into a cluster"
 type ServiceDeployment {
   "internal id of this service"
@@ -818,6 +825,9 @@ type ServiceDeployment {
 
   "settings for advanced tuning of the sync process"
   syncConfig: SyncConfig
+
+  "kustomize related service metadata"
+  kustomize: Kustomize
 
   "the commit message currently in use"
   message: String
@@ -904,6 +914,11 @@ type GitRef {
 type ServiceConfiguration {
   name: String!
   value: String!
+}
+
+"metadata needed for configuring kustomize"
+type Kustomize {
+  path: String!
 }
 
 "representation of a kubernetes component deployed by a service"

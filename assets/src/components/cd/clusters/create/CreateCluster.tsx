@@ -34,7 +34,7 @@ import {
 import { ImportClusterContent } from './ImportClusterContent'
 import { ProviderCloud } from './types'
 
-enum Mode {
+export enum ClusterCreateMode {
   New = 'new',
   Import = 'import',
 }
@@ -54,8 +54,8 @@ type NewClusterContextT = {
 }
 
 type CreateClusterContextT = {
-  create: NewClusterContextT
-  import: NewClusterContextT
+  [ClusterCreateMode.New]: NewClusterContextT
+  [ClusterCreateMode.Import]: NewClusterContextT
 }
 export type CloudSettings<T extends keyof CloudSettingsAttributes> =
   NonNullable<CloudSettingsAttributes[T]>
@@ -86,7 +86,7 @@ function CreateClusterModal({
   refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const [createMode, setCreateMode] = useState(Mode.New)
+  const [createMode, setCreateMode] = useState(ClusterCreateMode.New)
   const [importClusterAttributes, setImportClusterAttributes] = useState<
     Partial<ClusterAttributes>
   >({})
@@ -95,7 +95,6 @@ function CreateClusterModal({
     useState<Nullable<Pick<Cluster, 'id' | 'deployToken'>>>(undefined)
 
   const { data: clusterProvidersQuery } = useClusterProvidersSuspenseQuery()
-
   const clusterProviders = useMemo(
     () =>
       sortBy(
@@ -146,7 +145,7 @@ function CreateClusterModal({
 
   const contextVal = useMemo<CreateClusterContextT>(
     () => ({
-      create: {
+      new: {
         attributes: clusterAttributes,
         setAttributes: setClusterAttributes,
         ...cloudSetters,
@@ -161,7 +160,7 @@ function CreateClusterModal({
   const [createCluster, { loading, error }] = useCreateClusterMutation()
 
   const onSubmit = useCallback(() => {
-    if (createMode === Mode.Import) {
+    if (createMode === ClusterCreateMode.Import) {
       createCluster({
         variables: {
           attributes: importClusterAttributes as ClusterAttributes,
@@ -171,7 +170,7 @@ function CreateClusterModal({
           setImportCluster(ret.createCluster)
         },
       })
-    } else if (createMode === Mode.New) {
+    } else if (createMode === ClusterCreateMode.New) {
       createCluster({
         variables: {
           attributes: clusterAttributes as ClusterAttributes,
@@ -209,8 +208,8 @@ function CreateClusterModal({
           onSelectionChange: setCreateMode as any,
         }}
       >
-        <Tab key={Mode.New}>Create new</Tab>
-        <Tab key={Mode.Import}>Import existing</Tab>
+        <Tab key={ClusterCreateMode.New}>Create new</Tab>
+        <Tab key={ClusterCreateMode.Import}>Import existing</Tab>
       </TabList>
     </div>
   )
@@ -220,7 +219,7 @@ function CreateClusterModal({
       header="Create a cluster"
       headerContent={tabs}
       size="large"
-      style={{ padding: 0 }}
+      style={{ padding: 0, position: 'absolute', top: '20%' }}
       open={open}
       portal
       onClose={() => {
@@ -234,18 +233,24 @@ function CreateClusterModal({
           }}
         >
           <Button
-            secondary={!(createMode === Mode.Import && importCluster)}
-            primary={createMode === Mode.Import && importCluster}
+            secondary={
+              !(createMode === ClusterCreateMode.Import && importCluster)
+            }
+            primary={createMode === ClusterCreateMode.Import && importCluster}
             onClick={onClose}
           >
-            {createMode === Mode.Import && importCluster ? 'Done' : 'Cancel'}
+            {createMode === ClusterCreateMode.Import && importCluster
+              ? 'Done'
+              : 'Cancel'}
           </Button>
-          {(createMode === Mode.New ||
-            (createMode === Mode.Import && !importCluster)) && (
+          {(createMode === ClusterCreateMode.New ||
+            (createMode === ClusterCreateMode.Import && !importCluster)) && (
             <Button
               onClick={onSubmit}
               disabled={
-                createMode === Mode.New ? !newAttrsValid : !importAttrsValid
+                createMode === ClusterCreateMode.New
+                  ? !newAttrsValid
+                  : !importAttrsValid
               }
               loading={loading}
               primary
@@ -258,7 +263,7 @@ function CreateClusterModal({
     >
       <CreateClusterContext.Provider value={contextVal}>
         <TabPanel stateRef={tabStateRef}>
-          {createMode === Mode.New ? (
+          {createMode === ClusterCreateMode.New ? (
             <CreateClusterContent providers={clusterProviders} />
           ) : (
             <ImportClusterContent

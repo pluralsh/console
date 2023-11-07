@@ -3,21 +3,16 @@ import {
   FormEvent,
   useCallback,
   useMemo,
-  useRef,
   useState,
 } from 'react'
-import sortBy from 'lodash/sortBy'
 
 import styled, { useTheme } from 'styled-components'
 import {
   Button,
-  Chip,
   FormField,
   GlobeIcon,
-  IconFrame,
   Input,
   ListBoxItemChipList,
-  PlusIcon,
 } from '@pluralsh/design-system'
 
 import {
@@ -30,14 +25,14 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import isEmpty from 'lodash/isEmpty'
-
 import { isNonNullable } from 'utils/isNonNullable'
 
 import ModalAlt, { StepBody, StepH } from '../ModalAlt'
 import { ClusterProviderSelect } from '../utils/ProviderSelect'
 
-const ChipList = styled(ListBoxItemChipList)(({ theme }) => ({
+import { TagSelection } from './TagSelection'
+
+export const ChipList = styled(ListBoxItemChipList)(({ theme }) => ({
   marginTop: theme.spacing.small,
   justifyContent: 'start',
 }))
@@ -62,7 +57,7 @@ export const validateTagValue = (value) =>
   value === '' ||
   (!!value.match(/^[A-Za-z0-9]([-_.]*[A-Za-z0-9])*$/) && value.length <= 63)
 
-function tagsToNameValue<T>(tags: Record<string, T>) {
+export function tagsToNameValue<T>(tags: Record<string, T>) {
   return Object.entries(tags).map(([name, value]) => ({
     name,
     value,
@@ -219,113 +214,6 @@ export function CreateGlobalServiceModal({
       </div>
       {mutationError && <GqlError error={mutationError} />}
     </ModalAlt>
-  )
-}
-
-function TagSelection({
-  tags,
-  setTags,
-}: {
-  setTags
-  tags: Record<string, string>
-}) {
-  const theme = useTheme()
-  const [tagName, setTagName] = useState('')
-  const [tagValue, setTagValue] = useState('')
-  const tagNameRef = useRef<HTMLInputElement>()
-  const tagValueRef = useRef<HTMLInputElement>()
-  const sortedTags = useMemo(
-    () => sortBy(tagsToNameValue(tags), ['name']),
-    [tags]
-  )
-
-  const addTag = () => {
-    if (validateTagName(tagName) && validateTagValue(tagValue)) {
-      setTags({ ...tags, [tagName]: tagValue })
-      setTagName('')
-      setTagValue('')
-      tagNameRef.current?.focus?.()
-    }
-  }
-
-  return (
-    <>
-      <div
-        css={{
-          display: 'flex',
-          gap: theme.spacing.small,
-          alignItems: 'center',
-          '&& > *': { flexShrink: 0, flexGrow: 1 },
-        }}
-      >
-        <Input
-          placeholder="Tag name"
-          inputProps={{ ref: tagNameRef, maxLength: 63 }}
-          value={tagName}
-          onChange={(e) => {
-            setTagName(
-              e.currentTarget.value.trim().replace(/[^a-z0-9A-Z-_./]/, '')
-            )
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              tagValueRef.current?.focus?.()
-            }
-          }}
-        />
-        <Input
-          placeholder="Tag value"
-          inputProps={{ ref: tagValueRef, maxLength: 63 }}
-          value={tagValue}
-          onChange={(e) => {
-            setTagValue(
-              e.currentTarget.value.trim().replace(/[^a-z0-9A-Z-_.]/, '')
-            )
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
-              addTag()
-            }
-          }}
-        />
-        <IconFrame
-          css={{ '&&': { flexGrow: 0 } }}
-          type="secondary"
-          tooltip="Add tag"
-          size="medium"
-          clickable
-          icon={<PlusIcon />}
-          onClick={() => {
-            addTag()
-          }}
-        />
-      </div>
-      {!isEmpty(sortedTags) && (
-        <ChipList
-          maxVisible={Infinity}
-          chips={sortedTags.map(({ name, value }) => (
-            <Chip
-              key={name}
-              size="small"
-              clickable
-              onClick={() => {
-                setTags((prev) => {
-                  const next = { ...prev }
-
-                  delete next[name]
-
-                  return next
-                })
-              }}
-              closeButton
-            >
-              {name}: {value}
-            </Chip>
-          ))}
-        />
-      )}
-    </>
   )
 }
 
