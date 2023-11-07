@@ -29,7 +29,6 @@ export const POD_BASE_PATH = getPodDetailsPath({
   name: `:${POD_PARAM_NAME}`,
   namespace: `:${POD_PARAM_NAMESPACE}`,
 })
-export const POD_LOGS_PATH = `logs/:container`
 
 export const SERVICE_PARAM_ID = 'serviceId' as const
 export const SERVICE_PARAM_CLUSTER_ID = 'clusterId' as const
