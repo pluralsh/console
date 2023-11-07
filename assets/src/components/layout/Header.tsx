@@ -8,11 +8,13 @@ import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessag
 
 import CommandPaletteLauncher from 'components/CommandPaletteLauncher'
 
+import { LoginContext } from 'components/contexts'
+
+import { useContext } from 'react'
+
 import { InstallerModal } from '../repos/installer/Modal'
 
 import DemoBanner from './DemoBanner'
-import { LoginContext } from 'components/contexts'
-import { useContext } from 'react'
 
 const APP_ICON = '/console-logo-white.png'
 

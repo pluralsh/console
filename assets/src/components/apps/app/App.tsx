@@ -29,6 +29,7 @@ import { useTheme } from 'styled-components'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import isEmpty from 'lodash/isEmpty'
 import { config } from 'markdoc/mdSchema'
+import { toNiceVersion } from 'utils/semver'
 
 import { LoginContext } from '../../contexts'
 import AppStatus from '../AppStatus'
@@ -37,7 +38,6 @@ import {
   DocPageContextProvider,
   useDocPageContext,
 } from '../../contexts/DocPageContext'
-import { versionName } from '../AppCard'
 
 import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
@@ -309,7 +309,7 @@ function AppWithoutContext() {
           marginTop={validLinks?.length > 0 ? 0 : 56}
         >
           <PropsContainer title="App">
-            <Prop title="Current version">{versionName(version)}</Prop>
+            <Prop title="Current version">{toNiceVersion(version)}</Prop>
             <Prop title="Status">
               <AppStatus app={currentApp} />
             </Prop>
