@@ -1,7 +1,6 @@
 import { Breadcrumb, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import {
   ReactNode,
-  Suspense,
   createContext,
   useContext,
   useLayoutEffect,
@@ -20,7 +19,6 @@ import {
   CLUSTERS_PATH,
   SERVICES_PATH,
 } from 'routes/cdRoutesConsts'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 const CDContext = createContext<
   | {

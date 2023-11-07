@@ -3,7 +3,7 @@ import {
   Button,
   EmptyState,
   Input,
-  MagnifyingGlassIcon,
+  SearchIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
@@ -94,12 +94,12 @@ export default function AddOns() {
         maxWidth: 1528,
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.large,
+        gap: theme.spacing.small,
       }}
     >
       <Input
-        placeholder="Filter add-ons"
-        startIcon={<MagnifyingGlassIcon size={14} />}
+        placeholder="Search"
+        startIcon={<SearchIcon />}
         value={filterString}
         onChange={(event) => setFilterString(event.target.value)}
         width="100%"
