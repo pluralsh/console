@@ -63,9 +63,13 @@ export default function AddOns() {
     )
   )
 
-  const { data } = useSuspenseQueryPolling(useClusterAddOnsSuspenseQuery(), {
-    pollInterval: POLL_INTERVAL,
-  })
+  const { data } = useSuspenseQueryPolling(
+    useClusterAddOnsSuspenseQuery({ fetchPolicy: 'cache-and-network' }),
+    {
+      pollInterval: POLL_INTERVAL,
+    }
+  )
+
   const addOns = data.clusterAddOns
 
   const filteredAddOns = useMemo(() => {

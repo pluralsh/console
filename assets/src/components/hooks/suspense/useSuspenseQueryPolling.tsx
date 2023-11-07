@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react'
 
-export function useSuspenseQueryPolling<U extends { refetch: () => Promise }>(
-  queryResult: U,
-  { pollInterval }: { pollInterval: number }
-): U {
+export function useSuspenseQueryPolling<
+  U extends { refetch: () => Promise<any> },
+>(queryResult: U, { pollInterval }: { pollInterval: number }): U {
   const { refetch } = queryResult
   const timeoutIdRef = useRef<any>(null)
 
