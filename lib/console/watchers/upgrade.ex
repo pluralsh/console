@@ -6,13 +6,14 @@ defmodule Console.Watchers.Upgrade do
     execute: 1
   ]
   alias Console.Clustering.Info
+  alias Console.Deployments.Services
   alias PhoenixClient.{Channel, Message}
   alias Console.Plural.Upgrades
   alias Console.Watchers.{Handlers, Plural}
 
   @socket_name Application.get_env(:console, :socket)
   @poll_interval 60 * 1000
-  @resource_interval 60 * 60 * 1000
+  @resource_interval :timer.minutes(60)
 
   def record_usage() do
     with pid when is_pid(pid) <- Process.whereis(__MODULE__),
@@ -43,7 +44,8 @@ defmodule Console.Watchers.Upgrade do
         Process.send_after(self(), :connect, 1000)
         {:ok, _pid} = Plural.start_wss()
         {:ok, ref} = :timer.send_interval(@poll_interval, :next)
-        {:ok, _} = :timer.send_interval(@resource_interval, :usage)
+        # {:ok, _} = :timer.send_interval(@resource_interval, :usage)
+        {:ok, _} = :timer.send_interval(@resource_interval, :svcs)
         {:noreply, %{state | queue_id: id, timer: ref}}
       err ->
         Logger.error "failed to create upgrade queue: #{inspect(err)}"
@@ -79,6 +81,20 @@ defmodule Console.Watchers.Upgrade do
     else
       error ->
         Logger.info "Failed to deliver upgrade: #{inspect(error)}"
+        {:noreply, state}
+    end
+  end
+
+  def handle_info(:svcs, %{upgrades: nil} = state), do: {:noreply, state}
+  def handle_info(:svcs, %{upgrades: upgrades} = state) do
+    with {:leader, true} <- {:leader, Console.Deployer.leader?()},
+         {:ok, summary} <- Info.fetch() do
+      svcs = Services.count()
+      Channel.push(upgrades, "usage", Map.put(summary, :services, svcs))
+      {:noreply, state}
+    else
+      err ->
+        Logger.info "Did not report usage because of #{inspect(err)}"
         {:noreply, state}
     end
   end
