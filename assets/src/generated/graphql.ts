@@ -1306,6 +1306,17 @@ export type KubernetesUnstructured = {
   raw?: Maybe<Scalars['Map']['output']>;
 };
 
+/** metadata needed for configuring kustomize */
+export type Kustomize = {
+  __typename?: 'Kustomize';
+  path: Scalars['String']['output'];
+};
+
+export type KustomizeAttributes = {
+  /** the path to the kustomization file to use */
+  path: Scalars['String']['input'];
+};
+
 export type LabelInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   value?: InputMaybe<Scalars['String']['input']>;
@@ -3300,6 +3311,8 @@ export type ServiceDeployment = {
   /** internal id of this service */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** kustomize related service metadata */
+  kustomize?: Maybe<Kustomize>;
   /** the commit message currently in use */
   message?: Maybe<Scalars['String']['output']>;
   /** human readable name of this service, must be unique per cluster */
@@ -3346,6 +3359,7 @@ export type ServiceDeploymentAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   docsPath?: InputMaybe<Scalars['String']['input']>;
   git: GitRefAttributes;
+  kustomize?: InputMaybe<KustomizeAttributes>;
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   protect?: InputMaybe<Scalars['Boolean']['input']>;
@@ -3418,6 +3432,7 @@ export type ServiceStatusCount = {
 export type ServiceUpdateAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   git?: InputMaybe<GitRefAttributes>;
+  kustomize?: InputMaybe<KustomizeAttributes>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   version?: InputMaybe<Scalars['String']['input']>;
 };
