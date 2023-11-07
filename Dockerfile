@@ -89,10 +89,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     chmod +x /usr/local/bin/helm && \
     chmod +x /usr/local/bin/terraform
 
-RUN apk add --no-cache gcc musl-dev python3-dev libffi-dev openssl-dev cargo make && \
-    pip install --no-cache-dir azure-cli && \
-    apk del --purge build && \
-    chmod +x /usr/local/bin/az
+FROM mcr.microsoft.com/azure-cli:latest as az
 
 # From this line onwards, we're in a new image, which will be the image used in production
 FROM erlang:24.3.4.6-alpine
@@ -105,7 +102,7 @@ COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 COPY --from=tools /usr/local/bin/helm /usr/local/bin/helm
 COPY --from=tools /usr/local/bin/terraform /usr/local/bin/terraform
 COPY --from=tools /usr/local/bin/kubectl /usr/local/bin/kubectl
-COPY --from=tools /usr/local/bin/az /usr/local/bin/az
+COPY --from=az /usr/local/bin/az /usr/local/bin/az
 
 RUN apk --no-cache add \
         ca-certificates \
