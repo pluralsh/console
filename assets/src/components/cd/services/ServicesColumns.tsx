@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import {
+  GearTrainIcon,
   GitHubLogoIcon,
   GlobeIcon,
   ListBoxItem,
@@ -22,7 +23,7 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { ClusterProtectBadge } from '../clusters/ClusterProtectBadge'
 
-import { ServicePermissionsModal } from './ServicePermissions'
+import { ServicePermissions } from './ServicePermissions'
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 import DecoratedName from './DecoratedName'
@@ -31,6 +32,7 @@ import { ServiceErrors } from './ServiceErrors'
 import { ServiceDeprecations } from './ServiceDeprecations'
 import { CreateGlobalService } from './CreateGlobalService'
 import { DeleteGlobalService } from './DeleteGlobalService'
+import { ServiceSettings } from './ServiceSettings'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -192,6 +194,7 @@ enum MenuItemKey {
   MakeGlobal = 'makeGlobal',
   DeleteGlobal = 'deleteGlobal',
   Permissions = 'permissions',
+  Settings = 'settings',
   Delete = 'delete',
 }
 
@@ -247,6 +250,11 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
               leftContent={<PeopleIcon />}
               label="Permissions"
             />
+            <ListBoxItem
+              key={MenuItemKey.Settings}
+              leftContent={<GearTrainIcon />}
+              label="Settings"
+            />
             {node?.globalService?.id && (
               <ListBoxItem
                 key={MenuItemKey.DeleteGlobal}
@@ -273,12 +281,20 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
             }}
             refetch={refetch}
           />
-          <ServicePermissionsModal
+          <ServicePermissions
             serviceDeployment={serviceDeployment}
             open={menuKey === MenuItemKey.Permissions}
             onClose={() => {
               setMenuKey('')
             }}
+          />
+          <ServiceSettings
+            serviceDeployment={serviceDeployment}
+            open={menuKey === MenuItemKey.Settings}
+            onClose={() => {
+              setMenuKey('')
+            }}
+            refetch={refetch}
           />
           <CreateGlobalService
             serviceDeployment={serviceDeployment}

@@ -81,7 +81,10 @@ export default function ServiceRevisions() {
               height: '100%',
             }}
             reactTableOptions={{
-              meta: { refetch },
+              meta: {
+                refetch,
+                currentRevision: data.serviceDeployment.revision,
+              },
             }}
           />
         </FullHeightTableWrap>

@@ -25,7 +25,7 @@ export function settingsAreValidAws(
 export function AWS(): ReactElement {
   const theme = useTheme()
   const {
-    create: {
+    new: {
       attributes: { cloudSettings },
       setAwsSettings,
     },

@@ -8,7 +8,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { PermissionsModal } from '../utils/PermissionsModal'
 
-export function ServicePermissionsModal({
+function ServicePermissionsModal({
   serviceDeployment,
   header,
   ...props

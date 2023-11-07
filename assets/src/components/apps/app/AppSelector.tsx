@@ -4,8 +4,9 @@ import { isEmpty } from 'lodash'
 import { useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import { toNiceVersion } from 'utils/semver'
+
 import { getIcon, hasIcons } from '../misc'
-import { versionName } from '../AppCard'
 
 export default function AppSelector({ applications, currentApp, directory }) {
   const navigate = useNavigate()
@@ -62,7 +63,7 @@ export default function AppSelector({ applications, currentApp, directory }) {
                     color="text-xlight"
                     marginLeft="small"
                   >
-                    {versionName(app.spec.descriptor.version)}
+                    {toNiceVersion(app.spec.descriptor.version)}
                   </Span>
                 )}
               </P>

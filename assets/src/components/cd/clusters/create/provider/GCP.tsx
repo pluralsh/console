@@ -24,7 +24,7 @@ export function settingsAreValidGcp(
 export function GCP() {
   const theme = useTheme()
   const {
-    create: {
+    new: {
       attributes: { cloudSettings },
       setGcpSettings,
     },

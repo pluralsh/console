@@ -1,6 +1,7 @@
 import { Breadcrumb, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import {
   ReactNode,
+  Suspense,
   createContext,
   useContext,
   useLayoutEffect,
@@ -13,7 +14,13 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 
 import { Outlet, useMatch } from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
-import { CD_BASE_PATH } from 'routes/cdRoutesConsts'
+import {
+  ADDONS_PATH,
+  CD_BASE_PATH,
+  CLUSTERS_PATH,
+  SERVICES_PATH,
+} from 'routes/cdRoutesConsts'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 const CDContext = createContext<
   | {
@@ -44,10 +51,11 @@ export const CD_BASE_CRUMBS = [
 ] as const satisfies readonly Breadcrumb[]
 
 const directory = [
-  { path: 'clusters', label: 'Clusters' },
-  { path: 'services', label: 'Services' },
+  { path: CLUSTERS_PATH, label: 'Clusters' },
+  { path: SERVICES_PATH, label: 'Services' },
   { path: 'git', label: 'Git repositories' },
   { path: 'providers', label: 'Providers' },
+  { path: ADDONS_PATH, label: 'Add-ons' },
 ] as const
 
 export default function ContinuousDeployment() {
@@ -102,7 +110,9 @@ export default function ContinuousDeployment() {
         stateRef={tabStateRef}
       >
         <CDContext.Provider value={cdContext}>
-          <Outlet />
+          <Suspense fallback={<LoadingIndicator />}>
+            <Outlet />
+          </Suspense>
         </CDContext.Provider>
       </TabPanel>
     </ResponsivePageFullWidth>

@@ -1,4 +1,4 @@
-import { Flex, P } from 'honorable'
+import { Flex } from 'honorable'
 import {
   AppIcon,
   ArrowTopRightIcon,
@@ -20,6 +20,12 @@ import { useNavigate } from 'react-router-dom'
 import { ensureURLValidity } from 'utils/url'
 
 import { Readiness } from 'utils/status'
+
+import { toNiceVersion } from 'utils/semver'
+
+import { Body1BoldP } from 'components/utils/typography/Text'
+
+import styled, { useTheme } from 'styled-components'
 
 import { ListItemBorder, appState, getIcon, hasIcons } from './misc'
 import AppStatus from './AppStatus'
@@ -52,11 +58,17 @@ export const getBorderColor = (app) => {
   }
 }
 
-export const versionName = (vsn: string) =>
-  vsn.startsWith('v') ? vsn : `v${vsn}`
+const AppCardSC = styled(Card)(({ theme }) => ({
+  '&&': {
+    position: 'relative',
+    display: 'flex',
+    minWidth: 450,
+  },
+}))
 
 export default function AppCard({ app }: any) {
   const navigate = useNavigate()
+  const theme = useTheme()
 
   if (!app?.spec?.descriptor) return null
 
@@ -70,14 +82,8 @@ export default function AppCard({ app }: any) {
   const validLinks = links?.filter(({ url }) => !!url)
 
   return (
-    <Card
+    <AppCardSC
       clickable
-      position="relative"
-      display="flex"
-      flexBasis="45%"
-      flexGrow={1}
-      flexShrink={1}
-      minWidth={450}
       className={`app-${name}`}
       onClick={() => navigate(`/apps/${name}`)}
     >
@@ -90,7 +96,7 @@ export default function AppCard({ app }: any) {
       >
         {hasIcons(app) && (
           <AppIcon
-            url={getIcon(app)}
+            url={getIcon(app, theme.mode === 'dark')}
             size="xsmall"
           />
         )}
@@ -99,15 +105,10 @@ export default function AppCard({ app }: any) {
             align="center"
             gap="small"
           >
-            <P
-              body1
-              fontWeight={600}
-            >
-              {name}
-            </P>
+            <Body1BoldP as="h3">{name}</Body1BoldP>
             <AppStatus app={app} />
           </Flex>
-          {version && <Flex>{versionName(version)}</Flex>}
+          {version && <Flex>{toNiceVersion(version)}</Flex>}
         </Flex>
       </Flex>
       <Flex grow={1} />
@@ -168,6 +169,6 @@ export default function AppCard({ app }: any) {
           ))}
         </Select>
       </Flex>
-    </Card>
+    </AppCardSC>
   )
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { FormField } from '@pluralsh/design-system'
+import { FormField, usePrevious } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { Link } from 'react-router-dom'
 import isEmpty from 'lodash/isEmpty'
@@ -18,7 +18,8 @@ import { GCP, settingsAreValidGcp } from './provider/GCP'
 import { Azure, settingsAreValidAzure } from './provider/Azure'
 import { NameVersionHandle } from './NameVersionHandle'
 import { ProviderTabSelector } from './ProviderTabSelector'
-import { useCreateClusterContext } from './CreateCluster'
+import { ClusterCreateMode, useCreateClusterContext } from './CreateCluster'
+import { ClusterTagSelection } from './ClusterTagSelection'
 
 const requiredProps: (keyof ClusterAttributes)[] = [
   'providerId',
@@ -61,7 +62,7 @@ export function CreateClusterContent({
   const theme = useTheme()
 
   const {
-    create: { attributes, setAttributes },
+    new: { attributes, setAttributes },
   } = useCreateClusterContext()
 
   const enabledProviders = useMemo(
@@ -73,10 +74,23 @@ export function CreateClusterContent({
     clusterProviders.find(
       (provider) => provider.id === attributes.providerId
     ) || clusterProviders?.[0]
+  const prevProvider = usePrevious(provider)
   const credentialList = useMemo(
     () => [...(provider?.credentials?.filter(isNonNullable) || [])],
     [provider?.credentials]
   )
+
+  // Make sure version remains valid when provider changes
+  useEffect(() => {
+    if (
+      provider !== prevProvider &&
+      !provider.supportedVersions?.some(
+        (version) => version === attributes.version
+      )
+    ) {
+      setAttributes({ ...attributes, version: '' })
+    }
+  }, [provider, attributes.version, attributes, setAttributes, prevProvider])
 
   useEffect(() => {
     if (
@@ -180,6 +194,7 @@ export function CreateClusterContent({
                 />
               </FormField>
             )}
+            <ClusterTagSelection mode={ClusterCreateMode.New} />
             {providerEl}
           </div>
         )}
