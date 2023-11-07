@@ -1,6 +1,7 @@
 import { Breadcrumb, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import {
   ReactNode,
+  Suspense,
   createContext,
   useContext,
   useLayoutEffect,
@@ -19,6 +20,9 @@ import {
   CLUSTERS_PATH,
   SERVICES_PATH,
 } from 'routes/cdRoutesConsts'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+export const POLL_INTERVAL = 10_000
 
 const CDContext = createContext<
   | {
@@ -108,7 +112,9 @@ export default function ContinuousDeployment() {
         stateRef={tabStateRef}
       >
         <CDContext.Provider value={cdContext}>
-          <Outlet />
+          <Suspense fallback={<LoadingIndicator />}>
+            <Outlet />
+          </Suspense>
         </CDContext.Provider>
       </TabPanel>
     </ResponsivePageFullWidth>

@@ -19,7 +19,9 @@ import Fuse from 'fuse.js'
 
 import { ADDONS_PATH, CD_BASE_PATH } from 'routes/cdRoutesConsts'
 
-import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
+import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
+
+import { CD_BASE_CRUMBS, POLL_INTERVAL } from '../ContinuousDeployment'
 
 import AddOnCard from './AddOnCard'
 
@@ -65,13 +67,10 @@ export default function AddOns() {
     )
   )
 
-  const { data, error } = useClusterAddOnsSuspenseQuery()
-
-  console.log('error', error)
-
+  const { data } = useSuspenseQueryPolling(useClusterAddOnsSuspenseQuery(), {
+    pollInterval: POLL_INTERVAL,
+  })
   const addOns = data.clusterAddOns
-
-  console.log('addOns', addOns)
 
   const filteredAddOns = useMemo(() => {
     if (!filterString) {
@@ -82,8 +81,6 @@ export default function AddOns() {
 
     return fuse.search(filterString).map((result) => result.item)
   }, [filterString, addOns])
-
-  console.log('filteredAddOns', filteredAddOns)
 
   if (isEmpty(addOns)) return <LoadingIndicator />
   const noFilteredAddOns = isEmpty(filteredAddOns)

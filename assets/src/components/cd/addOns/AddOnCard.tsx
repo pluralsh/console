@@ -77,8 +77,6 @@ export default function AddOnCard({ addOn }: { addOn: ClusterAddOnFragment }) {
 
   const { name, global, icon, version } = addOn
 
-  console.log('addon configuration', addOn.configuration)
-
   return (
     <AddOnCardSC>
       {icon && (
@@ -206,8 +204,6 @@ export function InstallAddOnModal({
     () => mapExistingNodes(data.clusters),
     [data.clusters]
   )
-
-  console.log('configVals', configVals)
 
   return (
     <ModalAlt
