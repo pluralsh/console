@@ -75,7 +75,7 @@ ENV CLI_VERSION=v0.7.10
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
 ENV KUBECTL_VERSION=v1.25.5
 
-RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
+RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base py3-pip gcc musl-dev python3-dev libffi-dev openssl-dev cargo make && \
     curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \
     mv linux-${TARGETARCH}/helm /usr/local/bin/helm && \
     wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION/v/}/terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip && \
@@ -84,10 +84,13 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     mv plural /usr/local/bin/plural && \
     curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl && \
     mv kubectl /usr/local/bin/kubectl && \
+    pip install --upgrade pipl && \
+    pip install azure-cli && \
     chmod +x /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/plural && \
     chmod +x /usr/local/bin/helm && \
-    chmod +x /usr/local/bin/terraform
+    chmod +x /usr/local/bin/terraform && \
+    chmod +x /usr/local/bin/az \
 
 # From this line onwards, we're in a new image, which will be the image used in production
 FROM erlang:24.3.4.6-alpine
@@ -100,6 +103,7 @@ COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 COPY --from=tools /usr/local/bin/helm /usr/local/bin/helm
 COPY --from=tools /usr/local/bin/terraform /usr/local/bin/terraform
 COPY --from=tools /usr/local/bin/kubectl /usr/local/bin/kubectl
+COPY --from=tools /usr/local/bin/az /usr/local/bin/az
 
 RUN apk --no-cache add \
         ca-certificates \
