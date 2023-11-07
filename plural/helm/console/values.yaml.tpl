@@ -68,8 +68,18 @@ extraEnv:
 {{- if and (eq .Provider "azure") .ClusterAPI }}
 - name: ARM_USE_OIDC
   value: 'true'
+- name: ARM_USE_MSI
+  value: 'false'
+- name: ARM_USE_CLI
+  value: 'false'
 - name: ARM_OIDC_TOKEN_FILE_PATH # Same as AZURE_FEDERATED_TOKEN_FILE that gets injected by AZWI
   value: /var/run/secrets/azure/tokens/azure-identity-token
+- name: ARM_SUBSCRIPTION_ID
+  value: {{ .Context.SubscriptionId }}
+- name: ARM_TENANT_ID
+  value: {{ .Context.TenantId }}
+- name: ARM_CLIENT_ID
+  value: {{ importValue "Terraform" "console_msi_client_id" }}
 {{- end }}
 
 {{- if or (eq .Provider "aws") $isGcp }}
