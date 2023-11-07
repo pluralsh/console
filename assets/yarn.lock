@@ -9029,7 +9029,7 @@ __metadata:
     vite-plugin-rewrite-all: 1.0.1
     vite-tsconfig-paths: 4.2.1
     vitest: 0.34.6
-    vitest-tsconfig-paths: ^3.4.1
+    vitest-tsconfig-paths: 3.4.1
     wait-on: 7.0.1
     workbox-core: 7.0.0
     workbox-expiration: 7.0.0
@@ -19375,7 +19375,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest-tsconfig-paths@npm:^3.4.1":
+"vitest-tsconfig-paths@npm:3.4.1":
   version: 3.4.1
   resolution: "vitest-tsconfig-paths@npm:3.4.1"
   dependencies:
