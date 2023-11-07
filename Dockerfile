@@ -75,7 +75,7 @@ ENV CLI_VERSION=v0.7.10
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
 ENV KUBECTL_VERSION=v1.25.5
 
-RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base py3-pip gcc musl-dev python3-dev libffi-dev cargo make && \
+RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base py3-pip gcc musl-dev python3-dev openssl-dev cargo make && \
     curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \
     mv linux-${TARGETARCH}/helm /usr/local/bin/helm && \
     wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION/v/}/terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip && \
@@ -90,7 +90,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     chmod +x /usr/local/bin/plural && \
     chmod +x /usr/local/bin/helm && \
     chmod +x /usr/local/bin/terraform && \
-    chmod +x /usr/local/bin/az \
+    chmod +x /usr/local/bin/az
 
 # From this line onwards, we're in a new image, which will be the image used in production
 FROM erlang:24.3.4.6-alpine
