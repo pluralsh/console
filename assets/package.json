@@ -135,7 +135,7 @@
     "@graphql-codegen/typescript-react-apollo": "3.3.7",
     "@pluralsh/eslint-config-typescript": "2.5.112",
     "@pluralsh/stylelint-config": "2.0.8",
-    "@types/jsdom": "21.1.1",
+    "@types/jsdom": "21.1.5",
     "@types/styled-components": "5.1.26",
     "@types/uuid": "9.0.2",
     "@typescript-eslint/eslint-plugin": "6.8.0",
