@@ -66,20 +66,16 @@ extraEnv:
   value: {{ .Context.TenantId }}
 {{- end }}
 {{- if and (eq .Provider "azure") .ClusterAPI }}
-- name: ARM_USE_OIDC
-  value: 'true'
-- name: ARM_USE_MSI
-  value: 'false'
-- name: ARM_USE_CLI
-  value: 'false'
-- name: ARM_OIDC_TOKEN_FILE_PATH # Same as AZURE_FEDERATED_TOKEN_FILE that gets injected by AZWI
-  value: /var/run/secrets/azure/tokens/azure-identity-token
+# Terraform that is executed in console doesn't work with workload identity.
+# Service principal auth is used as a temporary workaround.
 - name: ARM_SUBSCRIPTION_ID
   value: {{ .Context.SubscriptionId }}
 - name: ARM_TENANT_ID
   value: {{ .Context.TenantId }}
 - name: ARM_CLIENT_ID
-  value: {{ importValue "Terraform" "console_msi_client_id" }}
+  value: {{ importValue "Terraform" "console_sp_client_id" }}
+- name: ARM_CLIENT_SECRET
+  value: {{ importValue "Terraform" "console_sp_client_secret" }}
 {{- end }}
 
 {{- if or (eq .Provider "aws") $isGcp }}

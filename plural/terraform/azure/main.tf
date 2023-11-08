@@ -42,3 +42,23 @@ resource "azurerm_federated_identity_credential" "capz" {
   parent_id           = azurerm_user_assigned_identity.console.id
   subject             = "system:serviceaccount:${var.namespace}:console"
 }
+
+# Terraform that is executed in console doesn't work with workload identity.
+# Service principal auth is used as a temporary workaround.
+resource "azuread_application" "app" {
+  display_name = "${var.cluster_name}-console"
+}
+
+resource "azuread_service_principal" "app" {
+  application_id = azuread_application.app.application_id
+}
+
+resource "azuread_service_principal_password" "app" {
+  service_principal_id = azuread_service_principal.app.id
+}
+
+resource "azurerm_role_assignment" "app" {
+  scope                = data.azurerm_subscription.current.id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.app.id
+}
