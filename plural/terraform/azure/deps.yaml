@@ -17,4 +17,4 @@ outputs:
   console_sp_client_id: console_sp_client_id
   console_sp_client_secret: console_sp_client_secret
 description: console azure bootstrapping
-version: 0.1.3
+version: 0.1.4
