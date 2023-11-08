@@ -89,21 +89,23 @@ function MetadataCard({
               }
             />
           </Prop>
-          <Prop
-            title="Service"
-            margin={0}
-          >
-            <A
-              as={Link}
-              to={getServiceDetailsPath({
-                clusterId: cluster?.id,
-                serviceId: cluster?.service?.id,
-              })}
-              inline
+          {!cluster?.self && (
+            <Prop
+              title="Service"
+              margin={0}
             >
-              {cluster?.service?.name}
-            </A>
-          </Prop>
+              <A
+                as={Link}
+                to={getServiceDetailsPath({
+                  clusterId: cluster?.id,
+                  serviceId: cluster?.service?.id,
+                })}
+                inline
+              >
+                {cluster?.service?.name}
+              </A>
+            </Prop>
+          )}
           <Prop
             title="Warnings"
             margin={0}
