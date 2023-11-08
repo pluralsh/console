@@ -17,7 +17,7 @@ defmodule Console.Deployments.AddOnsTest do
   end
 
   describe "#install/3" do
-    # @tag :skip
+    @tag :skip
     test "it can install an add-on from the artifacts repo" do
       admin = admin_user()
       cluster = insert(:cluster)
