@@ -27,16 +27,17 @@ export function DynamicClusterIcon({
   const theme = useTheme()
 
   const condition = useMemo(
-    () => deleting || upgrading || protect,
-    [deleting, upgrading, protect]
+    () => deleting || upgrading || protect || self,
+    [deleting, upgrading, protect, self]
   )
   const tooltip = useMemo(() => {
     if (deleting) return 'Cluster is being deleted'
     if (upgrading) return 'Cluster is being upgraded'
     if (protect) return PROTECT_TT_TEXT('cluster')
+    if (self) return 'Management cluster'
 
     return ''
-  }, [deleting, upgrading, protect])
+  }, [deleting, upgrading, protect, self])
   const pending = useMemo(() => deleting || upgrading, [deleting, upgrading])
 
   return (

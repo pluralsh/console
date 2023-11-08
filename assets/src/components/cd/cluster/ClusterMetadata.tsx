@@ -14,10 +14,16 @@ import isEmpty from 'lodash/isEmpty'
 import { ClusterFragment, ClusterStatus } from 'generated/graphql'
 import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
 
+import { Link } from 'react-router-dom'
+
 import { SubTitle } from '../../cluster/nodes/SubTitle'
 import ProviderIcon from '../../utils/Provider'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { ClusterConditions } from '../clusters/ClusterConditions'
+
+import { getServiceDetailsPath } from '../../../routes/cdRoutesConsts'
+
+import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { useClusterContext } from './Cluster'
 import { NodePoolsSection } from './ClusterNodePools'
@@ -80,7 +86,22 @@ function MetadataCard({
               }
             />
           </Prop>
-
+          {!cluster?.self && (
+            <Prop
+              title="Service"
+              margin={0}
+            >
+              <InlineLink
+                as={Link}
+                to={getServiceDetailsPath({
+                  clusterId: cluster?.id,
+                  serviceId: cluster?.service?.id,
+                })}
+              >
+                {cluster?.service?.name}
+              </InlineLink>
+            </Prop>
+          )}
           <Prop
             title="Warnings"
             margin={0}
@@ -90,22 +111,6 @@ function MetadataCard({
                 cluster={cluster}
                 refetch={refetch}
               />
-            ) : (
-              '-'
-            )}
-          </Prop>
-
-          <Prop
-            title="Last pinged"
-            margin={0}
-          >
-            {cluster?.pingedAt ? (
-              <Tooltip
-                label={moment(cluster?.pingedAt).format('lll')}
-                placement="top"
-              >
-                <span>{moment(cluster?.pingedAt).fromNow()}</span>
-              </Tooltip>
             ) : (
               '-'
             )}
@@ -140,6 +145,21 @@ function MetadataCard({
               </Prop>
             </>
           )}
+          <Prop
+            title="Last pinged"
+            margin={0}
+          >
+            {cluster?.pingedAt ? (
+              <Tooltip
+                label={moment(cluster?.pingedAt).format('lll')}
+                placement="top"
+              >
+                <span>{moment(cluster?.pingedAt).fromNow()}</span>
+              </Tooltip>
+            ) : (
+              '-'
+            )}
+          </Prop>
         </div>
       </section>
       {cluster?.tags && !isEmpty(cluster.tags) && (

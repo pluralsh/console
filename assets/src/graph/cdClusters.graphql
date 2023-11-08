@@ -145,6 +145,7 @@ fragment Cluster on Cluster {
   self
   service {
     id
+    name
     repository {
       url
     }
