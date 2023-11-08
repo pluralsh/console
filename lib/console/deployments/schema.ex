@@ -19,7 +19,7 @@ defmodule Console.Deployments.AddOn do
 
   def spec() do
     %__MODULE__{
-      configuration: [AddOnConfig.spec9]
+      configuration: [AddOnConfig.spec()]
     }
   end
 end
