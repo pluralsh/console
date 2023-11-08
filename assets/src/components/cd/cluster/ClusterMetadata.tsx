@@ -16,14 +16,14 @@ import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
 
 import { Link } from 'react-router-dom'
 
-import { A } from 'honorable'
-
 import { SubTitle } from '../../cluster/nodes/SubTitle'
 import ProviderIcon from '../../utils/Provider'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { ClusterConditions } from '../clusters/ClusterConditions'
 
 import { getServiceDetailsPath } from '../../../routes/cdRoutesConsts'
+
+import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { useClusterContext } from './Cluster'
 import { NodePoolsSection } from './ClusterNodePools'
@@ -91,16 +91,15 @@ function MetadataCard({
               title="Service"
               margin={0}
             >
-              <A
+              <InlineLink
                 as={Link}
                 to={getServiceDetailsPath({
                   clusterId: cluster?.id,
                   serviceId: cluster?.service?.id,
                 })}
-                inline
               >
                 {cluster?.service?.name}
-              </A>
+              </InlineLink>
             </Prop>
           )}
           <Prop
