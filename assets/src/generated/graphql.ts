@@ -3827,14 +3827,16 @@ export type CreateBuildMutationVariables = Exact<{
 
 export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild?: { __typename?: 'Build', id: string } | null };
 
-export type AddOnConfigurationFragment = { __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null };
+export type AddOnConfigConditionFragment = { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null };
 
-export type ClusterAddOnFragment = { __typename?: 'ClusterAddOn', global?: boolean | null, icon?: string | null, name?: string | null, version?: string | null, configuration?: Array<{ __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null } | null> | null };
+export type AddOnConfigurationFragment = { __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null, values?: Array<string | null> | null, condition?: { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null } | null };
+
+export type ClusterAddOnFragment = { __typename?: 'ClusterAddOn', global?: boolean | null, icon?: string | null, name?: string | null, version?: string | null, configuration?: Array<{ __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null, values?: Array<string | null> | null, condition?: { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null } | null } | null> | null };
 
 export type ClusterAddOnsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ClusterAddOnsQuery = { __typename?: 'RootQueryType', clusterAddOns?: Array<{ __typename?: 'ClusterAddOn', global?: boolean | null, icon?: string | null, name?: string | null, version?: string | null, configuration?: Array<{ __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null } | null> | null } | null> | null };
+export type ClusterAddOnsQuery = { __typename?: 'RootQueryType', clusterAddOns?: Array<{ __typename?: 'ClusterAddOn', global?: boolean | null, icon?: string | null, name?: string | null, version?: string | null, configuration?: Array<{ __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null, values?: Array<string | null> | null, condition?: { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null } | null } | null> | null } | null> | null };
 
 export type InstallAddOnMutationVariables = Exact<{
   clusterId: Scalars['ID']['input'];
@@ -4580,13 +4582,24 @@ export const PageInfoFragmentDoc = gql`
   endCursor
 }
     `;
+export const AddOnConfigConditionFragmentDoc = gql`
+    fragment AddOnConfigCondition on AddOnConfigCondition {
+  field
+  operation
+  value
+}
+    `;
 export const AddOnConfigurationFragmentDoc = gql`
     fragment AddOnConfiguration on AddOnConfiguration {
   documentation
   name
   type
+  values
+  condition {
+    ...AddOnConfigCondition
+  }
 }
-    `;
+    ${AddOnConfigConditionFragmentDoc}`;
 export const ClusterAddOnFragmentDoc = gql`
     fragment ClusterAddOn on ClusterAddOn {
   global
@@ -8629,6 +8642,7 @@ export const namedOperations = {
     ConfigurationOverlay: 'ConfigurationOverlay',
     Repository: 'Repository',
     PageInfo: 'PageInfo',
+    AddOnConfigCondition: 'AddOnConfigCondition',
     AddOnConfiguration: 'AddOnConfiguration',
     ClusterAddOn: 'ClusterAddOn',
     ClusterNode: 'ClusterNode',

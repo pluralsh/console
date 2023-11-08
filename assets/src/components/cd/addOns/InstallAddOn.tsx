@@ -7,49 +7,43 @@ import {
 } from 'react'
 import {
   Button,
-  FormField,
   GearTrainIcon,
   GlobeIcon,
-  Input,
   Stepper,
   Switch,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import upperFirst from 'lodash/upperFirst'
+import { SetNonNullable, SetRequired } from 'type-fest'
+import { Link } from 'react-router-dom'
+
 import {
   AddOnConfigurationFragment,
   ClusterAddOnFragment,
-  ClusterTinyFragment,
   GlobalServiceAttributes,
   ServiceDeploymentsRowFragment,
   useClusterProvidersSuspenseQuery,
   useClustersTinySuspenseQuery,
   useInstallAddOnMutation,
 } from 'generated/graphql'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { SetNonNullable, SetRequired } from 'type-fest'
-import { GqlError } from 'components/utils/Alert'
-import { mapExistingNodes } from 'utils/graphql'
-import { useOpenTransition } from 'components/hooks/suspense/useOpenTransition'
 
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
-import { Link } from 'react-router-dom'
-
+import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-
 import { SetReqNonNull } from 'utils/SetReqNonNull'
 
+import { useOpenTransition } from 'components/hooks/suspense/useOpenTransition'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { GqlError } from 'components/utils/Alert'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-
 import { Body2P } from 'components/utils/typography/Text'
 
 import ModalAlt from '../ModalAlt'
-
 import { GlobalServiceFields } from '../services/GlobalServiceFields'
-
 import { tagsToNameValue } from '../services/CreateGlobalService'
 
+import { AddOnConfigurationFields } from './AddOnBasicSettings'
+import { validateAndFilterConfig } from './configurationUtils'
 import { ClusterSelect } from './ClusterSelect'
 
 enum FormState {
@@ -116,15 +110,18 @@ export function InstallAddOnModal({
   const [formState, setFormState] = useState(FormState.Basic)
   const [serviceDeployment, setServiceDeployment] =
     useState<Nullable<ServiceDeploymentsRowFragment>>()
-  const configuration =
-    addOn?.configuration?.filter(
-      (
-        a
-      ): a is SetRequired<
-        SetNonNullable<AddOnConfigurationFragment, 'name'>,
-        'name'
-      > => !!a?.name
-    ) || []
+  const configuration = useMemo(
+    () =>
+      addOn?.configuration?.filter(
+        (
+          a
+        ): a is SetRequired<
+          SetNonNullable<AddOnConfigurationFragment, 'name'>,
+          'name'
+        > => !!a?.name
+      ) || [],
+    [addOn?.configuration]
+  )
 
   // Initial form variables
   const [configVals, setConfigVals] = useState(
@@ -132,6 +129,11 @@ export function InstallAddOnModal({
   )
   const [clusterId, setClusterId] = useState('')
   const [isGlobal, setIsGlobal] = useState(false)
+
+  const { isValid: configIsValid, values: filteredConfiguration } = useMemo(
+    () => validateAndFilterConfig(configuration, configVals),
+    [configVals, configuration]
+  )
 
   // Global form variables
   const [globalName, setGlobalName] = useState('')
@@ -171,10 +173,7 @@ export function InstallAddOnModal({
     variables: {
       clusterId,
       name: addOn.name,
-      configuration: Object.entries(configVals).map(([name, value]) => ({
-        name,
-        value,
-      })),
+      configuration: filteredConfiguration,
       ...(isGlobal ? { global: globalProps } : {}),
     },
     onCompleted: (result) => {
@@ -192,7 +191,7 @@ export function InstallAddOnModal({
     ? formState === FormState.Global
     : formState === FormState.Basic
 
-  const initialPropsComplete = addOn.name && clusterId
+  const initialPropsComplete = addOn.name && clusterId && configIsValid
   const globalPropsComplete = globalProps.name
 
   const allowSubmit =
@@ -315,16 +314,24 @@ export function InstallAddOnModal({
         }}
       >
         {formState === FormState.Basic ? (
-          <InitialSettings
-            {...{
-              clusters,
-              clusterId,
-              setClusterId,
-              configuration,
-              configVals,
-              setConfigVals,
-            }}
-          />
+          <>
+            <ClusterSelect
+              label="Select cluster"
+              clusters={clusters}
+              selectedKey={clusterId}
+              onSelectionChange={(key) => setClusterId(key as string)}
+            />
+            <AddOnConfigurationFields
+              {...{
+                clusters,
+                clusterId,
+                setClusterId,
+                configuration,
+                configVals,
+                setConfigVals,
+              }}
+            />
+          </>
         ) : formState === FormState.Global ? (
           <GlobalSettings
             {...{
@@ -338,26 +345,34 @@ export function InstallAddOnModal({
             }}
           />
         ) : formState === FormState.Complete ? (
-          <Body2P>
-            Successfully installed {addOn.name}.{' '}
-            <InlineLink
-              as={Link}
-              to={getServiceDetailsPath({
-                clusterId: serviceDeployment?.cluster?.id,
-                serviceId: serviceDeployment?.id,
-              })}
-            >
-              See details
-            </InlineLink>{' '}
-            or view{' '}
-            <InlineLink
-              as={Link}
-              to="/cd/services"
-            >
-              all services
-            </InlineLink>
-            .
-          </Body2P>
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.small,
+            }}
+          >
+            <Body2P>Successfully installed {addOn.name}.</Body2P>
+            <Body2P>
+              <InlineLink
+                as={Link}
+                to={getServiceDetailsPath({
+                  clusterId: serviceDeployment?.cluster?.id,
+                  serviceId: serviceDeployment?.id,
+                })}
+              >
+                See details
+              </InlineLink>{' '}
+              or view{' '}
+              <InlineLink
+                as={Link}
+                to="/cd/services"
+              >
+                all services
+              </InlineLink>
+              .
+            </Body2P>
+          </div>
         ) : null}
       </div>
       {formState !== FormState.Complete && error && (
@@ -372,66 +387,4 @@ export function InstallAddOnModal({
 
 function GlobalSettings(props: ComponentProps<typeof GlobalServiceFields>) {
   return <GlobalServiceFields {...props} />
-}
-
-function InitialSettings({
-  clusters,
-  clusterId,
-  setClusterId,
-  // name,
-  // setName,
-  configuration,
-  configVals,
-  setConfigVals,
-}: {
-  clusters: ClusterTinyFragment[]
-  clusterId: string
-  setClusterId: (string) => void
-  // name: string
-  // setName: (string) => void
-  configuration: AddOnConfigurationFragment[]
-  configVals: Record<string, string>
-  setConfigVals: (vals: Record<string, string>) => void
-}) {
-  return (
-    <>
-      <ClusterSelect
-        label="Select cluster"
-        clusters={clusters}
-        selectedKey={clusterId}
-        onSelectionChange={(key) => setClusterId(key as string)}
-      />
-      {/* <FormField
-        required
-        label="Name"
-      >
-        <Input
-          value={name}
-          onChange={(e) => setName(e.currentTarget.value)}
-        />
-      </FormField> */}
-      {configuration.map((cfg) => {
-        const { name, documentation } = cfg
-
-        return (
-          name && (
-            <FormField
-              label={name}
-              hint={upperFirst(documentation || '')}
-            >
-              <Input
-                value={configVals[name]}
-                onChange={(e) => {
-                  setConfigVals({
-                    ...configVals,
-                    [name]: e.currentTarget.value,
-                  })
-                }}
-              />
-            </FormField>
-          )
-        )
-      })}
-    </>
-  )
 }

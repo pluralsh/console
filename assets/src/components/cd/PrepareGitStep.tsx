@@ -53,7 +53,7 @@ export function PrepareGitStep() {
           Need some help to Git ready? Use a plural scaffold to get started or
           read our{' '}
           <StepLink
-            href="https://docs.plural.sh/getting-started/quickstart"
+            href="https://docs.plural.sh/getting-started/deployments"
             target="_blank"
           >
             quick start guide

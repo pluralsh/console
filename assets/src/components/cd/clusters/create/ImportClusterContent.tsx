@@ -87,7 +87,7 @@ function ImportClusterContentPage2({ deployToken }: { deployToken: string }) {
           <StepBody>
             Need help? Consult our{' '}
             <StepLink
-              href="https://docs.plural.sh/getting-started/quickstart"
+              href="https://docs.plural.sh/getting-started/deployments"
               target="_blank"
             >
               quick start guide
