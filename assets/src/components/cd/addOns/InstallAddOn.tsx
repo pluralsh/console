@@ -112,7 +112,7 @@ export function InstallAddOnModal({
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const [formState, setFormState] = useState(FormState.Complete)
+  const [formState, setFormState] = useState(FormState.Initial)
   const [serviceDeployment, setServiceDeployment] =
     useState<Nullable<ServiceDeploymentsRowFragment>>()
   const configuration =
