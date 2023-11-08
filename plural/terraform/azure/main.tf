@@ -45,8 +45,13 @@ resource "azurerm_federated_identity_credential" "capz" {
 
 # Terraform that is executed in console doesn't work with workload identity.
 # Service principal auth is used as a temporary workaround.
+data "azuread_client_config" "current" {}
+
 resource "azuread_application" "app" {
   display_name = "${var.cluster_name}-console"
+  owners = [
+    data.azuread_client_config.current.object_id
+  ]
 }
 
 resource "azuread_service_principal" "app" {
