@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { startTransition, useEffect, useRef } from 'react'
 
 export function useSuspenseQueryPolling<
   U extends { refetch: () => Promise<any> },
@@ -11,10 +11,12 @@ export function useSuspenseQueryPolling<
 
     function startTimeout() {
       timeoutIdRef.current = setTimeout(() => {
-        refetch().finally(() => {
-          if (!_stopped) {
-            startTimeout()
-          }
+        startTransition(() => {
+          refetch().finally(() => {
+            if (!_stopped) {
+              startTimeout()
+            }
+          })
         })
       }, pollInterval)
     }
