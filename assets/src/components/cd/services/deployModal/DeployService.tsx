@@ -232,8 +232,7 @@ export function DeployServiceModal({
       <div
         css={{
           display: 'flex',
-          paddingTop: theme.spacing.medium,
-          paddingBottom: theme.spacing.large,
+          paddingBottom: theme.spacing.medium,
         }}
       >
         <Stepper

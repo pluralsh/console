@@ -166,7 +166,7 @@ defmodule Console.Schema.Service do
     |> unique_constraint([:cluster_id, :owner_id])
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
-    |> validate_required([:name, :version, :cluster_id, :repository_id])
+    |> validate_required([:name, :namespace, :version, :cluster_id, :repository_id])
   end
 
   def rollback_changeset(model, attrs \\ %{}) do

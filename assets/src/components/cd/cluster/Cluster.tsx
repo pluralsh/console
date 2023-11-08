@@ -8,7 +8,7 @@ import {
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useMemo, useRef, useState } from 'react'
+import { Suspense, useMemo, useRef, useState } from 'react'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import {
   Outlet,
@@ -30,9 +30,11 @@ import {
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
 
+import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
+
 import {
   ClusterFragment,
-  useClusterQuery,
+  useClusterSuspenseQuery,
   useClustersTinyQuery,
 } from '../../../generated/graphql'
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
@@ -50,46 +52,69 @@ const directory = [
 
 const POLL_INTERVAL = 10 * 1000
 
+export const getClusterBreadcrumbs = ({
+  cluster,
+  tab,
+}: {
+  cluster: {
+    name?: Nullable<string>
+    handle?: Nullable<string>
+    id: Nullable<string>
+  }
+  tab?: string
+}) => {
+  const clustersPath = `/${CD_BASE_PATH}/${CLUSTERS_PATH}`
+  const clusterPath = `${clustersPath}/${cluster.id}`
+  const tabPath = `${clusterPath}/${tab}`
+
+  return [
+    ...CD_BASE_CRUMBS,
+    { label: 'clusters', url: clustersPath },
+    ...(cluster.id
+      ? [
+          {
+            label: cluster?.handle || cluster?.name || cluster.id,
+            url: clusterPath,
+          },
+          ...(tab ? [{ label: tab, url: tabPath }] : []),
+        ]
+      : []),
+  ]
+}
+
 export default function Cluster() {
   const theme = useTheme()
   const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
-  const { clusterId }: { clusterId?: string } = useParams()
+  const { clusterId } = useParams<{ clusterId: string }>()
   const tab = useMatch(`/${CLUSTER_BASE_PATH}/:tab`)?.params?.tab || ''
 
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
   const currentTab = directory.find(({ path }) => path === tab)
-  const crumbs: Breadcrumb[] = useMemo(() => {
-    const clustersPath = `/${CD_BASE_PATH}/${CLUSTERS_PATH}`
-    const clusterPath = `${clustersPath}/${clusterId}`
-    const tabPath = `${clusterPath}/${tab}`
-
-    return [
-      ...CD_BASE_CRUMBS,
-      { label: 'clusters', url: clustersPath },
-      ...(clusterId
-        ? [
-            {
-              label: clusterId,
-              url: clusterPath,
-            },
-            { label: tab, url: tabPath },
-          ]
-        : []),
-    ]
-  }, [clusterId, tab])
-
-  useSetBreadcrumbs(crumbs)
 
   const { data: clustersData } = useClustersTinyQuery()
   const clusterEdges = clustersData?.clusters?.edges
 
-  const { data, refetch } = useClusterQuery({
-    variables: { id: clusterId || '' },
-    pollInterval: POLL_INTERVAL,
-  })
+  const { data, refetch } = useSuspenseQueryPolling(
+    useClusterSuspenseQuery({
+      variables: { id: clusterId || '' },
+      fetchPolicy: 'cache-and-network',
+    }),
+    { pollInterval: POLL_INTERVAL }
+  )
 
   const cluster = data?.cluster
+
+  const crumbs: Breadcrumb[] = useMemo(
+    () =>
+      getClusterBreadcrumbs({
+        cluster: cluster || { id: clusterId || '' },
+        tab: currentTab?.path,
+      }),
+    [cluster, clusterId, currentTab?.path]
+  )
+
+  useSetBreadcrumbs(crumbs)
 
   if (!cluster) return <LoadingIndicator />
 
@@ -181,7 +206,9 @@ export default function Cluster() {
         css={{ height: '100%' }}
         stateRef={tabStateRef}
       >
-        <Outlet context={{ cluster, refetch } satisfies ClusterContextType} />
+        <Suspense fallback={<LoadingIndicator />}>
+          <Outlet context={{ cluster, refetch } satisfies ClusterContextType} />
+        </Suspense>
       </TabPanel>
     </ResponsivePageFullWidth>
   )

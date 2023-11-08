@@ -13,7 +13,7 @@ import { useDebounce } from '@react-hooks-library/core'
 import {
   AuthMethod,
   type ServiceDeploymentsRowFragment,
-  useServiceDeploymentsQuery,
+  useServiceDeploymentsSuspenseQuery,
 } from 'generated/graphql'
 import {
   CD_BASE_PATH,
@@ -26,7 +26,13 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
-import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
+import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
+
+import {
+  CD_BASE_CRUMBS,
+  POLL_INTERVAL,
+  useSetCDHeaderContent,
+} from '../ContinuousDeployment'
 
 import {
   ColActions,
@@ -40,8 +46,6 @@ import {
 } from './ServicesColumns'
 import { DeployService } from './deployModal/DeployService'
 import { ServicesFilters } from './ServicesFilters'
-
-const POLL_INTERVAL = 10 * 1000
 
 export type ServicesCluster = Exclude<
   ServiceDeploymentsRowFragment['cluster'],
@@ -82,20 +86,16 @@ export default function Services() {
   const [searchString, setSearchString] = useState()
   const debouncedSearchString = useDebounce(searchString, 100)
 
-  const {
-    data: currentData,
-    error,
-    refetch,
-    previousData,
-  } = useServiceDeploymentsQuery({
-    variables: {
-      ...(clusterId ? { clusterId } : {}),
-      q: debouncedSearchString,
-    },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
-  const data = currentData || previousData
+  const { data, error, refetch } = useSuspenseQueryPolling(
+    useServiceDeploymentsSuspenseQuery({
+      variables: {
+        ...(clusterId ? { clusterId } : {}),
+        q: debouncedSearchString,
+      },
+      fetchPolicy: 'cache-and-network',
+    }),
+    { pollInterval: POLL_INTERVAL }
+  )
 
   useSetBreadcrumbs(
     useMemo(

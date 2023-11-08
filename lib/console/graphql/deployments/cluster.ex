@@ -283,9 +283,18 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   @desc "Input configuration for an add-on you can install"
   object :add_on_configuration do
-    field :name,          :string
-    field :documentation, :string
-    field :type,          :string
+    field :name,          :string, description: "name for this configuration"
+    field :documentation, :string, description: "a docstring explaining this configuration"
+    field :type,          :string, description: "a type for the configuration (should eventually be coerced back to string)"
+    field :values,        list_of(:string), description: "the values for ENUM type conditions"
+    field :condition,     :add_on_config_condition
+  end
+
+  @desc "a condition that determines whether its configuration is viewable"
+  object :add_on_config_condition do
+    field :operation, :string, description: "the operation for this condition, eg EQ, LT, GT"
+    field :field,     :string, description: "the field this condition applies to"
+    field :value,     :string, description: "the value to apply the codition with, for binary operators like LT/GT"
   end
 
   object :tag do
@@ -444,7 +453,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :cluster_id,    non_null(:id)
       arg :global,        :global_service_attributes
 
-      resolve &Deployments.list_addons/2
+      resolve &Deployments.install_addon/2
     end
   end
 end

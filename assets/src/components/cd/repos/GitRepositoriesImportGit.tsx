@@ -143,13 +143,15 @@ export function ImportGitModal({
           >
             Cancel
           </Button>
-          <Switch
-            checked={requireAuth}
-            onChange={(val) => setRequireAuth(val)}
-            css={{ flexGrow: 1 }}
-          >
-            Requires authorization
-          </Switch>
+          <div css={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+            <Switch
+              checked={requireAuth}
+              onChange={(val) => setRequireAuth(val)}
+              css={{ width: 'fit-content' }}
+            >
+              Requires authorization
+            </Switch>
+          </div>
         </>
       }
     >

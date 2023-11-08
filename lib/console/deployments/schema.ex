@@ -1,7 +1,13 @@
 defmodule Console.Deployments.AddOnConfig do
+  defmodule Condition, do: defstruct [:field, :operation, :value]
+
   @type t :: %__MODULE__{}
 
-  defstruct [:name, :documentation, :type]
+  defstruct [:name, :documentation, :type, :values, :condition]
+
+  def spec() do
+    %__MODULE__{condition: %Condition{}}
+  end
 end
 
 defmodule Console.Deployments.AddOn do
@@ -13,7 +19,7 @@ defmodule Console.Deployments.AddOn do
 
   def spec() do
     %__MODULE__{
-      configuration: [%AddOnConfig{}]
+      configuration: [AddOnConfig.spec()]
     }
   end
 end

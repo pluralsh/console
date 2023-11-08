@@ -22,6 +22,8 @@ import {
 } from 'routes/cdRoutesConsts'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+export const POLL_INTERVAL = 10_000
+
 const CDContext = createContext<
   | {
       setHeaderContent: (content: ReactNode) => void

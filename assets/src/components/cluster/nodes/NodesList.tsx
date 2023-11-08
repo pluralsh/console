@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
 import { Div, Flex } from 'honorable'
 import {
+  EmptyState,
   IconFrame,
   Table,
   Tooltip,
@@ -287,7 +288,7 @@ export function NodesList({
   )
 
   if (!tableData || tableData.length === 0) {
-    return <>No nodes available.</>
+    return <EmptyState message="No nodes available." />
   }
 
   return (

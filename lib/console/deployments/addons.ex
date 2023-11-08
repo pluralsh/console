@@ -33,6 +33,7 @@ defmodule Console.Deployments.AddOns do
       |> add_operation(:svc, fn _ ->
         Services.create_service(%{
           name: addon.name,
+          namespace: addon.name,
           version: addon.version || "0.1.0",
           repository_id: artifacts.id,
           git: %{ref: "main", folder: "addons/#{name}"},

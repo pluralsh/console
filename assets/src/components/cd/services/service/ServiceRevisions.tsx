@@ -29,8 +29,10 @@ import {
 } from './ServiceDetails'
 
 export default function ServiceRevisions() {
-  const serviceId = useParams()[SERVICE_PARAM_ID]
-  const clusterName = useParams()[SERVICE_PARAM_CLUSTER_ID]
+  const { serviceId, clusterId } = useParams<{
+    [SERVICE_PARAM_ID]: string
+    [SERVICE_PARAM_CLUSTER_ID]: string
+  }>()
   const { service } = useServiceContext()
 
   const { data, error, refetch } = useServiceDeploymentRevisionsQuery({
@@ -39,20 +41,18 @@ export default function ServiceRevisions() {
   })
   const revisions = mapExistingNodes(data?.serviceDeployment?.revisions)
 
-  const serviceName = service?.name
   const breadcrumbs: Breadcrumb[] = useMemo(
     () => [
       ...getServiceDetailsBreadcrumbs({
-        clusterId: clusterName,
-        serviceId,
-        serviceName,
+        cluster: service?.cluster || { id: clusterId || '' },
+        service: service || { id: serviceId || '' },
       }),
       {
         label: 'revisions',
         url: `${CD_BASE_PATH}/services/${serviceId}/revisions`,
       },
     ],
-    [clusterName, serviceId, serviceName]
+    [clusterId, service, serviceId]
   )
 
   useSetBreadcrumbs(breadcrumbs)
