@@ -49,21 +49,21 @@ data "azuread_client_config" "current" {}
 
 resource "azuread_application" "app" {
   display_name = "${var.cluster_name}-console"
-  owners = [
-    data.azuread_client_config.current.object_id
-  ]
-}
-
-resource "azuread_service_principal" "app" {
-  application_id = azuread_application.app.application_id
-}
-
-resource "azuread_service_principal_password" "app" {
-  service_principal_id = azuread_service_principal.app.id
+  owners = [data.azuread_client_config.current.object_id]
 }
 
 resource "azurerm_role_assignment" "app" {
   scope                = data.azurerm_subscription.current.id
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.app.id
+}
+
+resource "azuread_service_principal" "app" {
+  client_id = azuread_application.app.client_id
+  app_role_assignment_required = false
+  owners = azuread_application.app.owners
+}
+
+resource "azuread_service_principal_password" "app" {
+  service_principal_id = azuread_service_principal.app.id
 }

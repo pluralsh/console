@@ -7,7 +7,7 @@ output "console_msi_id" {
 }
 
 output "console_sp_client_id" {
-  value = azuread_application.app.application_id
+  value = azuread_application.app.client_id
 }
 
 output "console_sp_client_secret" {
