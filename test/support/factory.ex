@@ -173,6 +173,7 @@ defmodule Console.Factory do
   def service_factory do
     %Schema.Service{
       name: sequence(:service, & "service-#{&1}"),
+      namespace: "test",
       version: "0.0.1",
       git: %{ref: "main", folder: "k8s"},
       write_policy_id: Ecto.UUID.generate(),

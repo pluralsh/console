@@ -10,3 +10,15 @@ query Pod($name: String!, $namespace: String!, $clusterId: ID) {
     ...PodWithEvents
   }
 }
+
+query PodLogs(
+  $name: String!
+  $namespace: String!
+  $clusterId: ID
+  $container: String!
+  $sinceSeconds: Int!
+) {
+  pod(name: $name, namespace: $namespace, clusterId: $clusterId) {
+    logs(container: $container, sinceSeconds: $sinceSeconds)
+  }
+}

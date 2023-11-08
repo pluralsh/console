@@ -30,6 +30,8 @@ defmodule Console.Deployments.AddOnsTest do
       }, cluster.id, admin)
 
       assert svc.cluster_id == cluster.id
+      assert svc.namespace == "datadog"
+      assert svc.name == "datadog"
       assert svc.repository_id == Git.artifacts_repo!().id
 
       {:ok, secrets} = Services.configuration(svc)

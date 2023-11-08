@@ -12,7 +12,7 @@ import LogLine from './LogLine'
 import { Level } from './misc'
 import LogInfo from './LogInfo'
 
-function determineLevel(line) {
+export function determineLevel(line) {
   if (/fatal/i.test(line)) return Level.FATAL
   if (/error/i.test(line)) return Level.ERROR
   if (/warn/i.test(line)) return Level.WARN

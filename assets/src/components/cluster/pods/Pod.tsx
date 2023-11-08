@@ -7,13 +7,10 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
 import { usePodQuery } from '../../../generated/graphql'
-
 import { POLL_INTERVAL } from '../constants'
-
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import SideNav from './PodSideNav'

@@ -36,12 +36,13 @@ import { LinkTabWrap } from '../../../utils/Tabs'
 import { CD_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
 import { podStatusToReadiness } from '../../../../utils/status'
 import { StatusChip } from '../../../cluster/TableElements'
+import LogsLegend from '../../../apps/app/logs/LogsLegend'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
-  // TODO: { path: 'logs', label: 'Logs' }
+  { path: 'logs', label: 'Logs' },
 ]
 
 export default function Pod() {
@@ -132,7 +133,13 @@ export default function Pod() {
         <Outlet context={{ pod }} />
       </TabPanel>
       <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutSidecarContainer>
+      <ResponsiveLayoutSidecarContainer
+        css={{
+          gap: theme.spacing.medium,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <Sidecar heading="Metadata">
           <SidecarItem heading="Pod name">{pod?.metadata?.name}</SidecarItem>
           <SidecarItem heading="Namespace">
@@ -155,6 +162,7 @@ export default function Pod() {
             <StatusChip readiness={readiness} />
           </SidecarItem>
         </Sidecar>
+        {tab === 'logs' && <LogsLegend />}
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>
   )
