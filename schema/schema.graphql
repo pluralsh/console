@@ -1416,9 +1416,31 @@ type ClusterAddOn {
 
 "Input configuration for an add-on you can install"
 type AddOnConfiguration {
+  "name for this configuration"
   name: String
+
+  "a docstring explaining this configuration"
   documentation: String
+
+  "a type for the configuration (should eventually be coerced back to string)"
   type: String
+
+  "the values for ENUM type conditions"
+  values: [String]
+
+  condition: AddOnConfigCondition
+}
+
+"a condition that determines whether its configuration is viewable"
+type AddOnConfigCondition {
+  "the operation for this condition, eg EQ, LT, GT"
+  operation: String
+
+  "the field this condition applies to"
+  field: String
+
+  "the value to apply the codition with, for binary operators like LT\/GT"
+  value: String
 }
 
 type Tag {

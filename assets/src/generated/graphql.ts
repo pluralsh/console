@@ -91,12 +91,29 @@ export type Account = {
   subscription?: Maybe<PluralSubscription>;
 };
 
+/** a condition that determines whether its configuration is viewable */
+export type AddOnConfigCondition = {
+  __typename?: 'AddOnConfigCondition';
+  /** the field this condition applies to */
+  field?: Maybe<Scalars['String']['output']>;
+  /** the operation for this condition, eg EQ, LT, GT */
+  operation?: Maybe<Scalars['String']['output']>;
+  /** the value to apply the codition with, for binary operators like LT/GT */
+  value?: Maybe<Scalars['String']['output']>;
+};
+
 /** Input configuration for an add-on you can install */
 export type AddOnConfiguration = {
   __typename?: 'AddOnConfiguration';
+  condition?: Maybe<AddOnConfigCondition>;
+  /** a docstring explaining this configuration */
   documentation?: Maybe<Scalars['String']['output']>;
+  /** name for this configuration */
   name?: Maybe<Scalars['String']['output']>;
+  /** a type for the configuration (should eventually be coerced back to string) */
   type?: Maybe<Scalars['String']['output']>;
+  /** the values for ENUM type conditions */
+  values?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
 };
 
 /** a representation of a kubernetes api deprecation */
