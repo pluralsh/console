@@ -12,6 +12,7 @@ import {
   GlobeIcon,
   Input,
   Stepper,
+  Switch,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import upperFirst from 'lodash/upperFirst'
@@ -33,7 +34,7 @@ import { useOpenTransition } from 'components/hooks/suspense/useOpenTransition'
 
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
-import { Link } from 'react-router-dom'
+import { Form, Link } from 'react-router-dom'
 
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -52,14 +53,14 @@ import { tagsToNameValue } from '../services/CreateGlobalService'
 import { ClusterSelect } from './ClusterSelect'
 
 enum FormState {
-  Initial = 'initial',
+  Basic = 'initial',
   Global = 'global',
   Complete = 'complete',
 }
 
 const stepperSteps = [
   {
-    key: FormState.Initial,
+    key: FormState.Basic,
     stepTitle: <>Service props</>,
     IconComponent: GearTrainIcon,
   },
@@ -112,7 +113,7 @@ export function InstallAddOnModal({
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const [formState, setFormState] = useState(FormState.Initial)
+  const [formState, setFormState] = useState(FormState.Basic)
   const [serviceDeployment, setServiceDeployment] =
     useState<Nullable<ServiceDeploymentsRowFragment>>()
   const configuration =
@@ -130,6 +131,7 @@ export function InstallAddOnModal({
     Object.fromEntries(configuration.map((cfg) => [cfg?.name, '']))
   )
   const [clusterId, setClusterId] = useState('')
+  const [isGlobal, setIsGlobal] = useState(false)
 
   // Global form variables
   const [globalName, setGlobalName] = useState('')
@@ -173,7 +175,7 @@ export function InstallAddOnModal({
         name,
         value,
       })),
-      ...(addOn.global ? { global: globalProps } : {}),
+      ...(isGlobal ? { global: globalProps } : {}),
     },
     onCompleted: (result) => {
       if (result.installAddOn) {
@@ -186,15 +188,15 @@ export function InstallAddOnModal({
     onClose?.()
   }, [onClose])
 
-  const isSubmitStep = addOn.global
+  const isSubmitStep = isGlobal
     ? formState === FormState.Global
-    : formState === FormState.Initial
+    : formState === FormState.Basic
 
   const initialPropsComplete = addOn.name && clusterId
   const globalPropsComplete = globalProps.name
 
   const allowSubmit =
-    formState === FormState.Initial
+    formState === FormState.Basic
       ? initialPropsComplete
       : initialPropsComplete && globalPropsComplete
 
@@ -207,14 +209,14 @@ export function InstallAddOnModal({
       if (!allowSubmit) {
         return
       }
-      if (addOn.global && formState === FormState.Initial) {
+      if (isGlobal && formState === FormState.Basic) {
         setFormState(FormState.Global)
 
         return
       }
       mutation()
     },
-    [addOn.global, allowSubmit, closeModal, formState, mutation]
+    [isGlobal, allowSubmit, closeModal, formState, mutation]
   )
   const clusters = useMemo(
     () => mapExistingNodes(data.clusters),
@@ -245,7 +247,7 @@ export function InstallAddOnModal({
                 type="button"
                 secondary
                 onClick={() => {
-                  setFormState(FormState.Initial)
+                  setFormState(FormState.Basic)
                 }}
               >
                 Go back
@@ -258,6 +260,19 @@ export function InstallAddOnModal({
             >
               Cancel
             </Button>
+            {addOn.global && formState === FormState.Basic && (
+              <div css={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+                <Switch
+                  onChange={(checked) => {
+                    setIsGlobal(checked)
+                  }}
+                  checked={isGlobal}
+                  css={{ width: 'fit-content' }}
+                >
+                  Make global
+                </Switch>
+              </div>
+            )}
           </>
         ) : (
           <Button
@@ -279,9 +294,9 @@ export function InstallAddOnModal({
         >
           <Stepper
             compact
-            steps={stepperSteps}
+            steps={isGlobal ? stepperSteps : [stepperSteps[0]]}
             stepIndex={
-              formState === FormState.Initial
+              formState === FormState.Basic
                 ? 0
                 : formState === FormState.Global
                 ? 1
@@ -299,7 +314,7 @@ export function InstallAddOnModal({
           gap: theme.spacing.medium,
         }}
       >
-        {formState === FormState.Initial ? (
+        {formState === FormState.Basic ? (
           <InitialSettings
             {...{
               clusters,
