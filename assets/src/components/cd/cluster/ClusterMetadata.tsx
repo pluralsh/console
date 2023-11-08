@@ -23,10 +23,7 @@ import ProviderIcon from '../../utils/Provider'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { ClusterConditions } from '../clusters/ClusterConditions'
 
-import {
-  getNodeDetailsPath,
-  getServiceDetailsPath,
-} from '../../../routes/cdRoutesConsts'
+import { getServiceDetailsPath } from '../../../routes/cdRoutesConsts'
 
 import { useClusterContext } from './Cluster'
 import { NodePoolsSection } from './ClusterNodePools'
