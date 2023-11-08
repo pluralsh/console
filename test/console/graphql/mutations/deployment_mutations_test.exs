@@ -974,3 +974,29 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 end
+
+defmodule Console.GraphQl.Mutations.SyncDeploymentMutationsTest do
+  use Console.DataCase, async: false
+  use Mimic
+
+  describe "installAddOn" do
+    @tag :skip
+    test "it can properly install a k8s add-on defined in the scaffolds repo" do
+      admin = admin_user()
+      cluster = insert(:cluster)
+      deployment_settings(artifact_repository: build(:git_repository, url: "https://github.com/pluralsh/scaffolds.git"))
+
+      {:ok, %{data: %{"installAddOn" => svc}}} = run_query("""
+        mutation Install($id: ID!) {
+          installAddOn(clusterId: $id, configuration: [], name: "metrics-server") {
+            id
+            name
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin})
+
+      assert svc["id"]
+      assert svc["name"] == "metrics-server"
+    end
+  end
+end

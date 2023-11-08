@@ -444,7 +444,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :cluster_id,    non_null(:id)
       arg :global,        :global_service_attributes
 
-      resolve &Deployments.list_addons/2
+      resolve &Deployments.install_addon/2
     end
   end
 end
