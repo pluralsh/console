@@ -34,7 +34,7 @@ import { useOpenTransition } from 'components/hooks/suspense/useOpenTransition'
 
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
-import { Form, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import { isNonNullable } from 'utils/isNonNullable'
 
