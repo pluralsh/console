@@ -32,16 +32,15 @@ import { countDeprecations } from './deprecationUtils'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 
 export const getServiceComponentsBreadcrumbs = ({
-  serviceId,
-  serviceName,
-  clusterId,
+  service,
+  cluster,
 }: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => [
-  ...getServiceDetailsBreadcrumbs({ clusterId, serviceId, serviceName }),
+  ...getServiceDetailsBreadcrumbs({ cluster, service }),
   {
     label: 'components',
     url: `${getServiceDetailsPath({
-      clusterId,
-      serviceId,
+      clusterId: cluster.id,
+      serviceId: service.id,
     })}/components`,
   },
 ]
@@ -56,15 +55,13 @@ export default function ServiceComponents() {
   const { data, error } = useServiceDeploymentComponentsQuery({
     variables: { id: serviceId || '' },
   })
-  const serviceName = outletContext?.service?.name
   const breadcrumbs: Breadcrumb[] = useMemo(
     () =>
       getServiceComponentsBreadcrumbs({
-        clusterId,
-        serviceId,
-        serviceName,
+        cluster: outletContext?.service?.cluster as any,
+        service: outletContext?.service as any,
       }),
-    [clusterId, serviceId, serviceName]
+    [outletContext.service]
   )
 
   useSetBreadcrumbs(breadcrumbs)

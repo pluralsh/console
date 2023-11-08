@@ -2,6 +2,10 @@ import { Outlet, Route } from 'react-router-dom'
 
 import { usePosthog } from 'components/utils/Posthog'
 
+import { Suspense } from 'react'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+
 import { LinkLogin } from '../components/login/LinkLogin'
 import Console from '../components/layout/Console'
 
@@ -14,7 +18,11 @@ import { consoleRoutes } from './consoleRoutes'
 function Root() {
   usePosthog()
 
-  return <Outlet />
+  return (
+    <Suspense fallback={<LoadingIndicator />}>
+      <Outlet />
+    </Suspense>
+  )
 }
 
 export const rootRoutes = (

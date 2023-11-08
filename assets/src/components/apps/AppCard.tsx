@@ -58,7 +58,7 @@ export const getBorderColor = (app) => {
   }
 }
 
-const AppCardSC = styled(Card)(({ theme: _theme }) => ({
+const AppCardSC = styled(Card)((_) => ({
   '&&': {
     position: 'relative',
     display: 'flex',

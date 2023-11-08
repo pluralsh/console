@@ -10,7 +10,7 @@ import {
   GitRepositoriesDocument,
   type GitRepositoryFragment,
   useDeleteGitRepositoryMutation,
-  useGitRepositoriesQuery,
+  useGitRepositoriesSuspenseQuery,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { ComponentProps, useMemo, useState } from 'react'
@@ -24,7 +24,13 @@ import { removeConnection, updateCache } from 'utils/graphql'
 
 import { CD_BASE_PATH } from 'routes/cdRoutesConsts'
 
-import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
+import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
+
+import {
+  CD_BASE_CRUMBS,
+  POLL_INTERVAL,
+  useSetCDHeaderContent,
+} from '../ContinuousDeployment'
 
 import {
   ColActions,
@@ -38,7 +44,6 @@ import {
 import { ImportGit } from './GitRepositoriesImportGit'
 import { GitRepositoriesFilters } from './GitRepositoriesFilters'
 
-const POLL_INTERVAL = 10 * 1000
 const crumbs = [
   ...CD_BASE_CRUMBS,
   { label: 'git', url: `/${CD_BASE_PATH}/git` },
@@ -129,10 +134,12 @@ const columns = [
 
 export default function GitRepositories() {
   const theme = useTheme()
-  const { data, error, refetch } = useGitRepositoriesQuery({
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data, error, refetch } = useSuspenseQueryPolling(
+    useGitRepositoriesSuspenseQuery({
+      fetchPolicy: 'cache-and-network',
+    }),
+    { pollInterval: POLL_INTERVAL }
+  )
 
   useSetBreadcrumbs(crumbs)
 

@@ -35,8 +35,9 @@ import {
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import ComponentProgress from 'components/apps/app/components/ComponentProgress'
-import { CD_BASE_CRUMBS } from 'components/cd/ContinuousDeployment'
 import { SideNavEntries } from 'components/layout/SideNavEntries'
+
+import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 
 import ServiceSelector from '../ServiceSelector'
 
@@ -44,36 +45,27 @@ import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 
 type ServiceContextType = {
   docs: ReturnType<typeof getDocsData>
-  service: Nullable<ServiceDeploymentDetailsFragment>
+  service: ServiceDeploymentDetailsFragment
 }
 
 export const useServiceContext = () => useOutletContext<ServiceContextType>()
 
 export const getServiceDetailsBreadcrumbs = ({
-  clusterId,
-  serviceId,
-  serviceName,
-}: {
-  clusterId: string | null | undefined
-  serviceId: string | null | undefined
-  serviceName?: string | null | undefined
+  cluster,
+  service,
+}: Parameters<typeof getClusterBreadcrumbs>[0] & {
+  service: { name?: Nullable<string>; id: string }
 }) => [
-  ...CD_BASE_CRUMBS,
-  { label: 'clusters', url: `${CD_BASE_PATH}/clusters` },
-  ...(clusterId
-    ? [
-        {
-          label: clusterId,
-          url: `/${CD_BASE_PATH}/clusters/${clusterId}`,
-        },
-      ]
-    : []),
+  ...getClusterBreadcrumbs({ cluster }),
   { label: 'services', url: `${CD_BASE_PATH}/services` },
-  ...(serviceId
+  ...(service.id && cluster.id
     ? [
         {
-          label: serviceName || serviceId,
-          url: getServiceDetailsPath({ clusterId, serviceId }),
+          label: service?.name || service?.id,
+          url: getServiceDetailsPath({
+            clusterId: cluster.id,
+            serviceId: service.id,
+          }),
         },
       ]
     : []),
@@ -183,7 +175,7 @@ function ServiceDetailsBase() {
             context={
               {
                 docs,
-                service: serviceData?.serviceDeployment,
+                service: serviceDeployment,
               } satisfies ServiceContextType
             }
           />

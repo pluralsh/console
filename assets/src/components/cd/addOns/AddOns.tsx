@@ -1,25 +1,23 @@
-import { Div, Flex } from 'honorable'
 import {
   Button,
   EmptyState,
   Input,
-  MagnifyingGlassIcon,
+  SearchIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
-
 import { isEmpty } from 'lodash'
-
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import Fuse from 'fuse.js'
 
 import { useClusterAddOnsSuspenseQuery } from 'generated/graphql'
 
-import Fuse from 'fuse.js'
-
 import { ADDONS_PATH, CD_BASE_PATH } from 'routes/cdRoutesConsts'
 
-import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
+
+import { CD_BASE_CRUMBS, POLL_INTERVAL } from '../ContinuousDeployment'
 
 import AddOnCard from './AddOnCard'
 
@@ -65,13 +63,14 @@ export default function AddOns() {
     )
   )
 
-  const { data, error } = useClusterAddOnsSuspenseQuery()
-
-  console.log('error', error)
+  const { data } = useSuspenseQueryPolling(
+    useClusterAddOnsSuspenseQuery({ fetchPolicy: 'cache-and-network' }),
+    {
+      pollInterval: POLL_INTERVAL,
+    }
+  )
 
   const addOns = data.clusterAddOns
-
-  console.log('addOns', addOns)
 
   const filteredAddOns = useMemo(() => {
     if (!filterString) {
@@ -83,8 +82,6 @@ export default function AddOns() {
     return fuse.search(filterString).map((result) => result.item)
   }, [filterString, addOns])
 
-  console.log('filteredAddOns', filteredAddOns)
-
   if (isEmpty(addOns)) return <LoadingIndicator />
   const noFilteredAddOns = isEmpty(filteredAddOns)
 
@@ -94,21 +91,23 @@ export default function AddOns() {
         maxWidth: 1528,
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.large,
+        gap: theme.spacing.small,
       }}
     >
       <Input
-        placeholder="Filter add-ons"
-        startIcon={<MagnifyingGlassIcon size={14} />}
+        placeholder="Search"
+        startIcon={<SearchIcon />}
         value={filterString}
         onChange={(event) => setFilterString(event.target.value)}
         width="100%"
       />
       {!noFilteredAddOns ? (
-        <Div
-          display="grid"
-          gap="small"
-          gridTemplateColumns="repeat(auto-fit, minmax(450px, 1fr))"
+        <div
+          css={{
+            display: 'grid',
+            gap: theme.spacing.small,
+            gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))',
+          }}
         >
           {filteredAddOns?.map(
             (addOn) =>
@@ -119,19 +118,22 @@ export default function AddOns() {
                 />
               )
           )}
-        </Div>
+        </div>
       ) : (
-        <Flex
-          justifyContent="center"
-          alignItems="center"
-          minHeight="100%"
-          overflow="auto"
+        <div
+          css={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '100%',
+            overflow: 'auto',
+          }}
         >
           <QueryEmptyState
             query={filterString}
             setQuery={setFilterString}
           />
-        </Flex>
+        </div>
       )}
     </div>
   )

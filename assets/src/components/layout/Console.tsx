@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Toast } from '@pluralsh/design-system'
 import { MarkdocContextProvider } from '@pluralsh/design-system/dist/markdoc/MarkdocContext'
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
@@ -8,6 +9,7 @@ import { A, Flex, Span } from 'honorable'
 import { Outlet } from 'react-router-dom'
 
 import { CommandPalette } from 'components/CommandPalette'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { PluralProvider } from '../contexts/PluralContext'
 import { InstallationsProvider } from '../Installations'
@@ -104,7 +106,9 @@ function ConsoleContent() {
         >
           <ContentOverlay />
           <Subheader />
-          <Outlet />
+          <Suspense fallback={<LoadingIndicator />}>
+            <Outlet />
+          </Suspense>
         </Flex>
       </Flex>
       <HelpLauncher />

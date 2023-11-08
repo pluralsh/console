@@ -9,7 +9,10 @@ import {
   Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
+import {
+  ClustersRowFragment,
+  useClustersSuspenseQuery,
+} from 'generated/graphql'
 import { ComponentProps, useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -27,7 +30,7 @@ import {
 import { roundToTwoPlaces } from 'components/cluster/utils'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 
-import { useSetCDHeaderContent } from '../ContinuousDeployment'
+import { POLL_INTERVAL, useSetCDHeaderContent } from '../ContinuousDeployment'
 import {
   cpuFormat,
   cpuParser,
@@ -42,6 +45,8 @@ import {
   toNiceVersion,
 } from '../../../utils/semver'
 import { DeleteCluster } from '../providers/DeleteCluster'
+
+import { useSuspenseQueryPolling } from '../../hooks/suspense/useSuspenseQueryPolling'
 
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
@@ -313,10 +318,12 @@ export const columns = [
 export default function Clusters() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { data, refetch } = useClustersQuery({
-    pollInterval: 10 * 1000,
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data, refetch } = useSuspenseQueryPolling(
+    useClustersSuspenseQuery({
+      fetchPolicy: 'cache-and-network',
+    }),
+    { pollInterval: POLL_INTERVAL }
+  )
   const headerActions = useMemo(
     () => (
       <div
