@@ -7,32 +7,26 @@ import {
 } from 'react'
 import {
   Button,
-  FormField,
   GearTrainIcon,
   GlobeIcon,
-  Input,
-  ListBoxItem,
-  Select,
   Stepper,
   Switch,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import upperFirst from 'lodash/upperFirst'
-import isEmpty from 'lodash/isEmpty'
 import { SetNonNullable, SetRequired } from 'type-fest'
 import { Link } from 'react-router-dom'
 
 import {
-  AddOnConfigConditionFragment,
   AddOnConfigurationFragment,
   ClusterAddOnFragment,
-  ClusterTinyFragment,
   GlobalServiceAttributes,
   ServiceDeploymentsRowFragment,
   useClusterProvidersSuspenseQuery,
   useClustersTinySuspenseQuery,
   useInstallAddOnMutation,
 } from 'generated/graphql'
+
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -44,14 +38,12 @@ import { GqlError } from 'components/utils/Alert'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { Body2P } from 'components/utils/typography/Text'
 
-import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
-
-import { OperationType } from 'components/repos/constants'
-
 import ModalAlt from '../ModalAlt'
 import { GlobalServiceFields } from '../services/GlobalServiceFields'
 import { tagsToNameValue } from '../services/CreateGlobalService'
 
+import { AddOnConfigurationFields } from './AddOnBasicSettings'
+import { validateAndFilterConfig } from './configurationUtils'
 import { ClusterSelect } from './ClusterSelect'
 
 enum FormState {
@@ -72,88 +64,6 @@ const stepperSteps = [
     IconComponent: GlobeIcon,
   },
 ]
-
-enum ConfigurationType {
-  Select = 'select',
-  Boolean = 'bool',
-  String = 'string',
-}
-
-function conditionIsMet(
-  condition: Nullable<AddOnConfigConditionFragment>,
-  values: Record<string, string | number | boolean | undefined>
-) {
-  if (!condition || !condition.field || !condition.operation) {
-    return true
-  }
-  const value = values[condition.field]
-
-  switch (condition.operation.toUpperCase()) {
-    case OperationType.NOT:
-      return !value
-    case OperationType.PREFIX:
-      return (
-        (typeof value === 'string' &&
-          typeof condition?.value === 'string' &&
-          value.startsWith(condition.value)) ??
-        false
-      )
-    case OperationType.EQUAL:
-      return value === condition.value
-  }
-
-  return true
-}
-
-export function parseToBool(val: boolean | string | undefined | null) {
-  if (typeof val === 'boolean') {
-    return val
-  }
-  let boolVal = false
-
-  if (typeof val === 'string') {
-    try {
-      const jsonVal = JSON.parse(val.toLowerCase())
-
-      if (typeof jsonVal === 'boolean') {
-        boolVal = jsonVal
-      }
-    } catch {
-      /* empty */
-    }
-  }
-
-  return boolVal
-}
-
-function validateAndFilterConfig(
-  config: Nullable<AddOnConfigurationFragment>[],
-  configVals: Record<string, string | undefined>
-) {
-  const filteredValues: { name: string; value: string }[] = []
-  const isValid = config.reduce((acc, configItem) => {
-    const conditionMet = conditionIsMet(configItem?.condition, configVals)
-    const name = configItem?.name
-
-    if (conditionMet && name) {
-      let value = configVals[name]
-
-      if (configItem.type === ConfigurationType.Boolean) {
-        value = parseToBool(value).toString()
-      }
-
-      if (value) {
-        filteredValues.push({ name, value })
-      }
-
-      return !!value && acc
-    }
-
-    return acc
-  }, true)
-
-  return { isValid, values: filteredValues }
-}
 
 export function InstallAddOn({
   addOn,
@@ -404,16 +314,24 @@ export function InstallAddOnModal({
         }}
       >
         {formState === FormState.Basic ? (
-          <InitialSettings
-            {...{
-              clusters,
-              clusterId,
-              setClusterId,
-              configuration,
-              configVals,
-              setConfigVals,
-            }}
-          />
+          <>
+            <ClusterSelect
+              label="Select cluster"
+              clusters={clusters}
+              selectedKey={clusterId}
+              onSelectionChange={(key) => setClusterId(key as string)}
+            />
+            <AddOnConfigurationFields
+              {...{
+                clusters,
+                clusterId,
+                setClusterId,
+                configuration,
+                configVals,
+                setConfigVals,
+              }}
+            />
+          </>
         ) : formState === FormState.Global ? (
           <GlobalSettings
             {...{
@@ -469,87 +387,4 @@ export function InstallAddOnModal({
 
 function GlobalSettings(props: ComponentProps<typeof GlobalServiceFields>) {
   return <GlobalServiceFields {...props} />
-}
-
-function InitialSettings({
-  clusters,
-  clusterId,
-  setClusterId,
-  configuration,
-  configVals,
-  setConfigVals,
-}: {
-  clusters: ClusterTinyFragment[]
-  clusterId: string
-  setClusterId: (string) => void
-  configuration: AddOnConfigurationFragment[]
-  configVals: Record<string, string>
-  setConfigVals: (vals: Record<string, string>) => void
-}) {
-  return (
-    <>
-      <ClusterSelect
-        label="Select cluster"
-        clusters={clusters}
-        selectedKey={clusterId}
-        onSelectionChange={(key) => setClusterId(key as string)}
-      />
-      {configuration.map((cfg) => {
-        const { name, documentation, type, values } = cfg
-
-        if (!name || !conditionIsMet(cfg?.condition, configVals)) {
-          return null
-        }
-        const setValue = (value: string) => {
-          setConfigVals({ ...configVals, [name]: value })
-        }
-
-        const configStringVal = configVals[name] || ''
-        let configBoolVal = false
-
-        if (type === ConfigurationType.Boolean) {
-          configBoolVal = parseToBool(configStringVal)
-        }
-
-        return (
-          <FormField
-            required
-            label={name}
-            hint={upperFirst(documentation || '')}
-          >
-            {type === ConfigurationType.Boolean ? (
-              <Switch
-                checked={!!configBoolVal}
-                onChange={(isChecked) => {
-                  setValue(isChecked.toString())
-                }}
-              />
-            ) : type === ConfigurationType.Select && !isEmpty(values) ? (
-              <Select
-                label={`Select ${name}`}
-                selectedKey={configStringVal}
-                onSelectionChange={(key) => {
-                  setValue(key as string)
-                }}
-              >
-                {values?.map((value) => (
-                  <ListBoxItem
-                    key={value as string}
-                    label={value}
-                  />
-                )) || []}
-              </Select>
-            ) : (
-              <Input
-                value={configStringVal}
-                onChange={(e) => {
-                  setValue(e.currentTarget.value)
-                }}
-              />
-            )}
-          </FormField>
-        )
-      })}
-    </>
-  )
 }
