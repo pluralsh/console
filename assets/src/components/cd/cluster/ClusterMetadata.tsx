@@ -94,22 +94,6 @@ function MetadataCard({
               '-'
             )}
           </Prop>
-
-          <Prop
-            title="Last pinged"
-            margin={0}
-          >
-            {cluster?.pingedAt ? (
-              <Tooltip
-                label={moment(cluster?.pingedAt).format('lll')}
-                placement="top"
-              >
-                <span>{moment(cluster?.pingedAt).fromNow()}</span>
-              </Tooltip>
-            ) : (
-              '-'
-            )}
-          </Prop>
           {status && (
             <>
               <Prop
@@ -140,6 +124,21 @@ function MetadataCard({
               </Prop>
             </>
           )}
+          <Prop
+            title="Last pinged"
+            margin={0}
+          >
+            {cluster?.pingedAt ? (
+              <Tooltip
+                label={moment(cluster?.pingedAt).format('lll')}
+                placement="top"
+              >
+                <span>{moment(cluster?.pingedAt).fromNow()}</span>
+              </Tooltip>
+            ) : (
+              '-'
+            )}
+          </Prop>
         </div>
       </section>
       {cluster?.tags && !isEmpty(cluster.tags) && (
