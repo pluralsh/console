@@ -13,7 +13,7 @@ import { useDebounce } from '@react-hooks-library/core'
 import {
   AuthMethod,
   type ServiceDeploymentsRowFragment,
-  useServiceDeploymentsSuspenseQuery,
+  useServiceDeploymentsQuery,
 } from 'generated/graphql'
 import {
   CD_BASE_PATH,
@@ -25,8 +25,6 @@ import { Edge } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
-
-import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
 
 import {
   CD_BASE_CRUMBS,
@@ -86,16 +84,20 @@ export default function Services() {
   const [searchString, setSearchString] = useState()
   const debouncedSearchString = useDebounce(searchString, 100)
 
-  const { data, error, refetch } = useSuspenseQueryPolling(
-    useServiceDeploymentsSuspenseQuery({
-      variables: {
-        ...(clusterId ? { clusterId } : {}),
-        q: debouncedSearchString,
-      },
-      fetchPolicy: 'cache-and-network',
-    }),
-    { pollInterval: POLL_INTERVAL }
-  )
+  const {
+    data: currentData,
+    error,
+    refetch,
+    previousData,
+  } = useServiceDeploymentsQuery({
+    variables: {
+      ...(clusterId ? { clusterId } : {}),
+      q: debouncedSearchString,
+    },
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
+  const data = currentData || previousData
 
   useSetBreadcrumbs(
     useMemo(
