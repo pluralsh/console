@@ -50,8 +50,10 @@ const useCommand = (initialCommand?: string | null) => {
 
 function ShellWithContext() {
   const { command, setCommand, defaultCommand, isDefault } = useCommand(null)
-  const { namespace, name, container } = useParams()
+  const { namespace, name, container, clusterId } = useParams()
   const shellContext = useContext(ShellContext)
+  const cluster = clusterId ? `${clusterId}:` : ''
+  const room = `pod:${cluster}${namespace}:${name}:${container}`
 
   return (
     <Flex
@@ -76,7 +78,7 @@ function ShellWithContext() {
         <TerminalThemeSelector />
       </Flex>
       <TerminalScreen
-        room={`pod:${namespace}:${name}:${container}`}
+        room={room}
         command={command}
         header={`Connecting to pod ${name} using ${command}...`}
       />
@@ -84,6 +86,7 @@ function ShellWithContext() {
   )
 }
 
+// It's used by two different routes.
 export default function Shell() {
   const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
 
