@@ -156,7 +156,13 @@ query ServiceDeployment($id: ID!) {
 
 query ServiceDeploymentComponents($id: ID!) {
   serviceDeployment(id: $id) {
+    id
     name
+    cluster {
+      id
+      name
+      handle
+    }
     components {
       ...ServiceDeploymentComponent
     }

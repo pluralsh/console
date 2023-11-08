@@ -95,8 +95,8 @@ export default function ServiceComponent() {
   const componentName = component?.name
 
   const breadcrumbProps = {
-    cluster: clusterId,
-    service: serviceDeployment,
+    cluster: serviceDeployment || { id: clusterId },
+    service: serviceDeployment?.cluster || { id: serviceId },
     componentId,
     componentName,
   }
