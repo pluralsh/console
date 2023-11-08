@@ -4,6 +4,11 @@ data "azurerm_resource_group" "group" {
 
 data "azurerm_subscription" "current" {}
 
+data "azurerm_kubernetes_cluster" "cluster" {
+  name = var.cluster_name
+  resource_group_name = var.resource_group
+}
+
 resource "kubernetes_namespace" "console" {
   metadata {
     name = var.namespace
@@ -27,4 +32,38 @@ resource "azurerm_role_assignment" "rg-reader" {
   scope                = data.azurerm_subscription.current.id
   role_definition_name = "Owner"
   principal_id         = azurerm_user_assigned_identity.console.principal_id
+}
+
+resource "azurerm_federated_identity_credential" "capz" {
+  name                = "${var.console_identity}-federated-credential"
+  resource_group_name = data.azurerm_resource_group.group.name
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = data.azurerm_kubernetes_cluster.cluster.oidc_issuer_url
+  parent_id           = azurerm_user_assigned_identity.console.id
+  subject             = "system:serviceaccount:${var.namespace}:console"
+}
+
+# Terraform that is executed in console doesn't work with workload identity.
+# Service principal auth is used as a temporary workaround.
+data "azuread_client_config" "current" {}
+
+resource "azuread_application" "app" {
+  display_name = "${var.cluster_name}-console"
+  owners = [data.azuread_client_config.current.object_id]
+}
+
+resource "azurerm_role_assignment" "app" {
+  scope                = data.azurerm_subscription.current.id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.app.id
+}
+
+resource "azuread_service_principal" "app" {
+  client_id = azuread_application.app.client_id
+  app_role_assignment_required = false
+  owners = azuread_application.app.owners
+}
+
+resource "azuread_service_principal_password" "app" {
+  service_principal_id = azuread_service_principal.app.id
 }
