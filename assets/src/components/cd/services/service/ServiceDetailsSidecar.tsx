@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ServiceDeploymentDetailsFragment } from 'generated/graphql'
-import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
+import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
 import { toNiceVersion } from 'utils/semver'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
@@ -59,7 +59,7 @@ export function ServiceDetailsSidecar({
         <Prop title="Cluster name">
           <InlineLink
             as={Link}
-            to={`/${CD_BASE_PATH}/${CLUSTERS_PATH}/${cluster.id}`}
+            to={`/${CD_REL_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}`}
           >
             {cluster.name}
           </InlineLink>

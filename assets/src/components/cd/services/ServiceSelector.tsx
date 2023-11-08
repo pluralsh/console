@@ -2,7 +2,7 @@ import { ListBoxItem, Select } from '@pluralsh/design-system'
 import { Key, useCallback } from 'react'
 import { ServiceDeployment } from 'generated/graphql'
 import {
-  SERVICE_BASE_PATH,
+  SERVICE_ABS_PATH,
   SERVICE_PARAM_ID,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
@@ -16,7 +16,7 @@ export default function ServiceSelector({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const pathMatch = useMatch(`/${SERVICE_BASE_PATH}*`)
+  const pathMatch = useMatch(`${SERVICE_ABS_PATH}*`)
   const urlSuffix = pathMatch?.params['*'] ? `/${pathMatch?.params['*']}` : ''
   const currentServiceId = pathMatch?.params[SERVICE_PARAM_ID]
   const selectedKey = currentServiceId

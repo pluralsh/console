@@ -23,9 +23,9 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
 import {
-  CD_BASE_PATH,
-  CLUSTERS_PATH,
-  GLOBAL_SETTINGS_PATH,
+  CD_REL_PATH,
+  CLUSTERS_REL_PATH,
+  GLOBAL_SETTINGS_ABS_PATH,
 } from 'routes/cdRoutesConsts'
 import { roundToTwoPlaces } from 'components/cluster/utils'
 import { BasicLink } from 'components/utils/typography/BasicLink'
@@ -56,7 +56,7 @@ import { DynamicClusterIcon } from './DynamicClusterIcon'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
-  { label: 'clusters', url: `${CD_BASE_PATH}/${CLUSTERS_PATH}` },
+  { label: 'clusters', url: `${CD_REL_PATH}/${CLUSTERS_REL_PATH}` },
 ]
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
@@ -301,7 +301,7 @@ export const columns = [
           <IconFrame
             clickable
             onClick={() =>
-              navigate(`/${CD_BASE_PATH}/${CLUSTERS_PATH}/${cluster?.id}`)
+              navigate(`/${CD_REL_PATH}/${CLUSTERS_REL_PATH}/${cluster?.id}`)
             }
             size="medium"
             icon={<CaretRightIcon />}
@@ -339,7 +339,7 @@ export default function Clusters() {
           tooltip="Global settings"
           clickable
           icon={<GearTrainIcon />}
-          onClick={() => navigate(GLOBAL_SETTINGS_PATH)}
+          onClick={() => navigate(GLOBAL_SETTINGS_ABS_PATH)}
         />
         <CreateCluster />
       </div>

@@ -22,7 +22,7 @@ import { createMapperWithFallback } from 'utils/mapping'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { removeConnection, updateCache } from 'utils/graphql'
 
-import { CD_BASE_PATH } from 'routes/cdRoutesConsts'
+import { CD_REL_PATH } from 'routes/cdRoutesConsts'
 
 import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
 
@@ -44,10 +44,7 @@ import {
 import { ImportGit } from './GitRepositoriesImportGit'
 import { GitRepositoriesFilters } from './GitRepositoriesFilters'
 
-const crumbs = [
-  ...CD_BASE_CRUMBS,
-  { label: 'git', url: `/${CD_BASE_PATH}/git` },
-]
+const crumbs = [...CD_BASE_CRUMBS, { label: 'git', url: `/${CD_REL_PATH}/git` }]
 
 // Will need to update once delete mutation exists in API
 export function DeleteGitRepository({

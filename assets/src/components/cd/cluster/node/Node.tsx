@@ -10,16 +10,17 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import { LinkTabWrap } from 'components/utils/Tabs'
 
 import {
-  CD_BASE_PATH,
-  CLUSTERS_PATH,
-  CLUSTER_NODES_PATH,
-  NODE_BASE_PATH,
+  NODE_ABS_PATH,
   NODE_PARAM_CLUSTER,
   NODE_PARAM_NAME,
   getNodeDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
-import { useNodeMetricQuery, useNodeQuery } from '../../../../generated/graphql'
-import { CD_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
+import {
+  useClusterQuery,
+  useNodeMetricQuery,
+  useNodeQuery,
+} from '../../../../generated/graphql'
+import { getClusterBreadcrumbs } from '../Cluster'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -54,24 +55,24 @@ function HeadingTabList({ tabStateRef, currentTab }: any) {
 
 export default function Node() {
   const params = useParams()
-  const name = (params[NODE_PARAM_NAME] as string) || ''
-  const clusterId = (params[NODE_PARAM_CLUSTER] as string) || ''
+  const name = (params[NODE_PARAM_NAME] as string)!
+  const clusterId = (params[NODE_PARAM_CLUSTER] as string)!
   const tabStateRef = useRef<any>()
-  const tab = useMatch(`${NODE_BASE_PATH}/:tab`)?.params?.tab || ''
+  const tab = useMatch(`${NODE_ABS_PATH}/:tab`)?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
+
+  const { data: clusterData } = useClusterQuery({
+    variables: { id: clusterId },
+    fetchPolicy: 'cache-and-network',
+  })
 
   useSetBreadcrumbs(
     useMemo(
       () => [
-        ...CD_CLUSTERS_BASE_CRUMBS,
-        {
-          label: clusterId || '',
-          url: `${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}`,
-        },
-        {
-          label: 'nodes',
-          url: `${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}/${CLUSTER_NODES_PATH}`,
-        },
+        ...getClusterBreadcrumbs({
+          cluster: clusterData?.cluster || { id: clusterId },
+          tab: 'nodes',
+        }),
         ...(clusterId && name
           ? [
               {
@@ -89,7 +90,7 @@ export default function Node() {
             ]
           : []),
       ],
-      [clusterId, name, tab]
+      [clusterData?.cluster, clusterId, name, tab]
     )
   )
 

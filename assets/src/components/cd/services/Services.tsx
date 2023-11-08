@@ -16,8 +16,8 @@ import {
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
 import {
-  CD_BASE_PATH,
-  SERVICES_PATH,
+  CD_REL_PATH,
+  SERVICES_REL_PATH,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { createMapperWithFallback } from 'utils/mapping'
@@ -105,7 +105,7 @@ export default function Services() {
         ...CD_BASE_CRUMBS,
         {
           label: 'services',
-          url: `/${CD_BASE_PATH}/${SERVICES_PATH}`,
+          url: `/${CD_REL_PATH}/${SERVICES_REL_PATH}`,
         },
       ],
       []

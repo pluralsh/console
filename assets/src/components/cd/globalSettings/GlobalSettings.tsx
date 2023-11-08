@@ -1,7 +1,7 @@
 import { useTheme } from 'styled-components'
 import { Outlet, useLocation, useOutletContext } from 'react-router-dom'
 
-import { CD_BASE_PATH, GLOBAL_SETTINGS_PATH } from 'routes/cdRoutesConsts'
+import { CD_REL_PATH, GLOBAL_SETTINGS_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
@@ -21,8 +21,8 @@ import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 export const getGlobalSettingsBreadcrumbs = ({ page }: { page: string }) => [
   ...CD_BASE_CRUMBS,
-  { label: 'global settings', url: `${GLOBAL_SETTINGS_PATH}` },
-  { label: page, url: `${CD_BASE_PATH}/clusters/${page}` },
+  { label: 'global settings', url: `${GLOBAL_SETTINGS_ABS_PATH}` },
+  { label: page, url: `${CD_REL_PATH}/clusters/${page}` },
 ]
 
 const directory = [
@@ -82,7 +82,7 @@ export function GlobalSettings() {
           <SideNavEntries
             directory={directory}
             pathname={pathname}
-            pathPrefix={GLOBAL_SETTINGS_PATH}
+            pathPrefix={GLOBAL_SETTINGS_ABS_PATH}
           />
         </div>
       </ResponsiveLayoutSidenavContainer>

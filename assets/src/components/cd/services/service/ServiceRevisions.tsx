@@ -10,7 +10,7 @@ import isEmpty from 'lodash/isEmpty'
 import { useServiceDeploymentRevisionsQuery } from 'generated/graphql'
 
 import {
-  CD_BASE_PATH,
+  CD_REL_PATH,
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_PARAM_ID,
 } from 'routes/cdRoutesConsts'
@@ -49,7 +49,7 @@ export default function ServiceRevisions() {
       }),
       {
         label: 'revisions',
-        url: `${CD_BASE_PATH}/services/${serviceId}/revisions`,
+        url: `${CD_REL_PATH}/services/${serviceId}/revisions`,
       },
     ],
     [clusterId, service, serviceId]

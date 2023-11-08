@@ -12,7 +12,7 @@ import Fuse from 'fuse.js'
 
 import { useClusterAddOnsSuspenseQuery } from 'generated/graphql'
 
-import { ADDONS_PATH, CD_BASE_PATH } from 'routes/cdRoutesConsts'
+import { ADDONS_REL_PATH, CD_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
@@ -56,7 +56,7 @@ export default function AddOns() {
         ...CD_BASE_CRUMBS,
         {
           label: 'add-ons',
-          url: `/${CD_BASE_PATH}/${ADDONS_PATH}`,
+          url: `${CD_ABS_PATH}/${ADDONS_REL_PATH}`,
         },
       ],
       []

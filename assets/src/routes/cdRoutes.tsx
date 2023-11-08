@@ -1,9 +1,17 @@
+import { useLayoutEffect } from 'react'
+
 import ContinuousDeployment from 'components/cd/ContinuousDeployment'
 import Clusters from 'components/cd/clusters/Clusters'
 import GitRepositories from 'components/cd/repos/GitRepositories'
 import Services from 'components/cd/services/Services'
 import Providers from 'components/cd/providers/Providers'
-import { Navigate, Route } from 'react-router-dom'
+import {
+  Navigate,
+  Outlet,
+  Route,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
 
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
 import ServiceDocs from 'components/cd/services/service/ServiceDocs'
@@ -21,6 +29,8 @@ import { GlobalSettings } from 'components/cd/globalSettings/GlobalSettings'
 import { GlobalSettingsPermissions } from 'components/cd/globalSettings/GlobalSettingsPermissions'
 
 import { GlobalSettingsRepositories } from 'components/cd/globalSettings/GlobalSettingsRepositories'
+
+import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
@@ -44,24 +54,26 @@ import PodEvents from '../components/cluster/pods/PodEvents'
 import Logs from '../components/cd/cluster/pod/logs/Logs'
 
 import {
-  ADDONS_PATH,
-  CD_BASE_PATH,
-  CLUSTERS_PATH,
-  CLUSTER_BASE_PATH,
+  ADDONS_REL_PATH,
+  CD_ABS_PATH,
+  CD_DEFAULT_REL_PATH,
+  CD_REL_PATH,
+  CLUSTERS_REL_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
   CLUSTER_PODS_PATH,
+  CLUSTER_REL_PATH,
   CLUSTER_SERVICES_PATH,
-  GLOBAL_SETTINGS_PATH_REL,
-  NODE_BASE_PATH,
-  POD_BASE_PATH,
-  SERVICE_BASE_PATH,
+  GLOBAL_SETTINGS_REL_PATH,
+  NODE_REL_PATH,
+  POD_REL_PATH,
   SERVICE_COMPONENTS_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
   SERVICE_PARAM_CLUSTER_ID,
+  SERVICE_REL_PATH,
 } from './cdRoutesConsts'
 
-export const componentRoutes = [
+export const componentRoutes = (
   <Route
     path={SERVICE_COMPONENT_PATH_MATCHER_REL}
     element={<ServiceComponent />}
@@ -91,26 +103,29 @@ export const componentRoutes = [
       path="raw"
       element={<ComponentRaw />}
     />
-  </Route>,
-]
+  </Route>
+)
 
-export const cdRoutes = [
-  /* Root */
-  <Route
-    path={CD_BASE_PATH}
-    element={<ContinuousDeployment />}
-  >
+const defaultLocation = `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}` as const
+
+function CdRoot() {
+  const cdIsEnabled = useCDEnabled()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useLayoutEffect(() => {
+    if (!cdIsEnabled && location.pathname !== defaultLocation) {
+      navigate(defaultLocation)
+    }
+  }, [cdIsEnabled, location.pathname, navigate])
+
+  return <Outlet />
+}
+
+const mainRoutes = (
+  <Route element={<ContinuousDeployment />}>
     <Route
-      index
-      element={
-        <Navigate
-          replace
-          to={CLUSTERS_PATH}
-        />
-      }
-    />
-    <Route
-      path={CLUSTERS_PATH}
+      path={CLUSTERS_REL_PATH}
       element={<Clusters />}
     />
     <Route
@@ -130,14 +145,15 @@ export const cdRoutes = [
       element={<Providers />}
     />
     <Route
-      path={ADDONS_PATH}
+      path={ADDONS_REL_PATH}
       element={<AddOns />}
     />
-  </Route>,
+  </Route>
+)
 
-  /* Global settings */
+const globalSettingsRoutes = (
   <Route
-    path={GLOBAL_SETTINGS_PATH_REL}
+    path={GLOBAL_SETTINGS_REL_PATH}
     element={<GlobalSettings />}
   >
     <Route
@@ -169,11 +185,12 @@ export const cdRoutes = [
       path="repositories"
       element={<GlobalSettingsRepositories />}
     />
-  </Route>,
+  </Route>
+)
 
-  /* Cluster details */
+const clusterDetailsRoutes = (
   <Route
-    path={CLUSTER_BASE_PATH}
+    path={CLUSTER_REL_PATH}
     element={<Cluster />}
   >
     <Route
@@ -201,11 +218,12 @@ export const cdRoutes = [
       path={CLUSTER_METADATA_PATH}
       element={<ClusterMetadata />}
     />
-  </Route>,
+  </Route>
+)
 
-  /* Node Details */
+const nodeDetailsRoutes = (
   <Route
-    path={NODE_BASE_PATH}
+    path={NODE_REL_PATH}
     element={<Node />}
   >
     <Route
@@ -224,11 +242,12 @@ export const cdRoutes = [
       path="metadata"
       element={<NodeMetadata />}
     />
-  </Route>,
+  </Route>
+)
 
-  /* Pod Details */
+const podDetailsRoutes = (
   <Route
-    path={POD_BASE_PATH}
+    path={POD_REL_PATH}
     element={<Pod />}
   >
     <Route
@@ -247,11 +266,12 @@ export const cdRoutes = [
       path="logs"
       element={<Logs />}
     />
-  </Route>,
+  </Route>
+)
 
-  // Service details
+const serviceDetailsRoutes = (
   <Route
-    path={SERVICE_BASE_PATH}
+    path={SERVICE_REL_PATH}
     element={<ServiceDetails />}
   >
     <Route
@@ -284,8 +304,29 @@ export const cdRoutes = [
         element={<ServiceDocs />}
       />
     </Route>
-  </Route>,
+  </Route>
+)
 
-  // Service component
-  ...componentRoutes,
+export const cdRoutes = [
+  <Route
+    path={CD_REL_PATH}
+    element={<CdRoot />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to={CLUSTERS_REL_PATH}
+        />
+      }
+    />
+    {mainRoutes}
+    {globalSettingsRoutes}
+    {clusterDetailsRoutes}
+    {nodeDetailsRoutes}
+    {podDetailsRoutes}
+    {serviceDetailsRoutes}
+    {componentRoutes}
+  </Route>,
 ]
