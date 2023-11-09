@@ -29,7 +29,7 @@ import { updateCache } from 'utils/graphql'
 import styled from 'styled-components'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 
-import { CD_BASE_PATH as CD_PATH } from 'routes/cdRoutesConsts'
+import { CD_ABS_PATH, CD_DEFAULT_REL_PATH } from 'routes/cdRoutesConsts'
 
 import { LoginContext } from '../contexts'
 
@@ -56,7 +56,8 @@ const MENU_ITEMS: MenuItem[] = [
   {
     text: 'Continuous deployment',
     icon: <GitPullIcon />,
-    path: `/${CD_PATH}`,
+    path: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}`,
+    pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
   },
   {
     text: 'Builds',

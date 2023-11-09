@@ -1,7 +1,7 @@
 defmodule Console.Deployments.AddOnConfig do
   defmodule Condition, do: defstruct [:field, :operation, :value]
 
-  @type t :: %__MODULE__{}
+  @type t :: %__MODULE__{condition: %Condition{}}
 
   defstruct [:name, :documentation, :type, :values, :condition]
 

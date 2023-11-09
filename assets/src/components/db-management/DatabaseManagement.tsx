@@ -31,6 +31,8 @@ import { SHORT_POLL_INTERVAL } from 'components/cluster/constants'
 
 import chroma from 'chroma-js'
 
+import { GqlError } from 'components/utils/Alert'
+
 import demoDbs from './demo-dbs.json'
 
 import {
@@ -46,7 +48,7 @@ import {
   DatabasesList,
 } from './DatabasesList'
 
-const DemoBlur = styled.div(({ theme }) => ({
+export const DemoBlur = styled.div(({ theme }) => ({
   position: 'absolute',
   top: 0,
   right: 0,
@@ -243,7 +245,12 @@ function DatabaseManagementContent({
   )
 
   if (error) {
-    return <>Sorry, something went wrong</>
+    return (
+      <GqlError
+        header="Sorry, something went wrong"
+        error={error}
+      />
+    )
   }
 
   if (!postgresDatabases || !applications) {

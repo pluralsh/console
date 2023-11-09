@@ -19,9 +19,9 @@ import {
 } from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
 import {
-  CD_BASE_PATH,
-  CLUSTERS_PATH,
-  CLUSTER_BASE_PATH,
+  CD_ABS_PATH,
+  CLUSTERS_REL_PATH,
+  CLUSTER_ABS_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
   CLUSTER_PODS_PATH,
@@ -30,11 +30,9 @@ import {
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
 
-import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
-
 import {
   ClusterFragment,
-  useClusterSuspenseQuery,
+  useClusterQuery,
   useClustersTinyQuery,
 } from '../../../generated/graphql'
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
@@ -63,9 +61,9 @@ export const getClusterBreadcrumbs = ({
   }
   tab?: string
 }) => {
-  const clustersPath = `/${CD_BASE_PATH}/${CLUSTERS_PATH}`
-  const clusterPath = `${clustersPath}/${cluster.id}`
-  const tabPath = `${clusterPath}/${tab}`
+  const clustersPath = `${CD_ABS_PATH}/${CLUSTERS_REL_PATH}` as const
+  const clusterPath = `${clustersPath}/${cluster.id}` as const
+  const tabPath = `${clusterPath}/${tab || ''}` as const
 
   return [
     ...CD_BASE_CRUMBS,
@@ -87,7 +85,7 @@ export default function Cluster() {
   const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const { clusterId } = useParams<{ clusterId: string }>()
-  const tab = useMatch(`/${CLUSTER_BASE_PATH}/:tab`)?.params?.tab || ''
+  const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab`)?.params?.tab || ''
 
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
   const currentTab = directory.find(({ path }) => path === tab)
@@ -95,13 +93,11 @@ export default function Cluster() {
   const { data: clustersData } = useClustersTinyQuery()
   const clusterEdges = clustersData?.clusters?.edges
 
-  const { data, refetch } = useSuspenseQueryPolling(
-    useClusterSuspenseQuery({
-      variables: { id: clusterId || '' },
-      fetchPolicy: 'cache-and-network',
-    }),
-    { pollInterval: POLL_INTERVAL }
-  )
+  const { data, refetch } = useClusterQuery({
+    variables: { id: clusterId || '' },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
 
   const cluster = data?.cluster
 
@@ -175,7 +171,7 @@ export default function Cluster() {
                 subTab
                 key={path}
                 textValue={label}
-                to={`/${CLUSTER_BASE_PATH}/${path}`.replace(
+                to={`${CLUSTER_ABS_PATH}/${path}`.replace(
                   ':clusterId',
                   clusterId ?? ''
                 )}

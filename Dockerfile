@@ -103,8 +103,8 @@ COPY --from=tools /usr/local/bin/kubectl /usr/local/bin/kubectl
 
 RUN apk --no-cache add \
         ca-certificates \
-        # python3 \
-        # py3-pip \
+        python3 \
+        py3-pip \
         # py-crcmod \
         curl \
         bash \
@@ -113,6 +113,10 @@ RUN apk --no-cache add \
         openssl-dev \
         git \
         gnupg
+
+RUN apk add --no-cache --update --virtual=build gcc musl-dev python3-dev libffi-dev openssl-dev cargo make && \
+    pip3 install --no-cache-dir --prefer-binary azure-cli && \
+    apk del build
 
 # The name of your application/release (required)
 ARG APP_NAME=console

@@ -54,7 +54,6 @@ function BreadcrumbWrapper({
   service: any
   componentId: string | undefined
   componentName: string | undefined
-
   children: ReactNode
 }) {
   useSetBreadcrumbs(
@@ -95,8 +94,8 @@ export default function ServiceComponent() {
   const componentName = component?.name
 
   const breadcrumbProps = {
-    cluster: serviceDeployment || { id: clusterId },
-    service: serviceDeployment?.cluster || { id: serviceId },
+    cluster: serviceDeployment?.cluster || { id: serviceId },
+    service: serviceDeployment || { id: clusterId },
     componentId,
     componentName,
   }

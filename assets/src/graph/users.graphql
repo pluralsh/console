@@ -73,6 +73,12 @@ query Me {
       cloned
       output
     }
+    features {
+      audits
+      databaseManagement
+      userManagement
+      vpn
+    }
   }
 }
 

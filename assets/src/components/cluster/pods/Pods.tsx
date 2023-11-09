@@ -21,6 +21,8 @@ import { isEqual } from 'utils/kubernetes'
 import { isEmpty, uniqBy } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import { GqlError } from 'components/utils/Alert'
+
 import { PODS_Q, PODS_SUB } from '../queries'
 import { SHORT_POLL_INTERVAL } from '../constants'
 
@@ -195,7 +197,12 @@ export default function AllPods() {
   )
 
   if (error) {
-    return <>Sorry, something went wrong</>
+    return (
+      <GqlError
+        header="Sorry, something went wrong"
+        error={error}
+      />
+    )
   }
 
   return (

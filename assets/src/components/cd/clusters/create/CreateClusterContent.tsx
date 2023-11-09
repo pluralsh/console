@@ -6,7 +6,7 @@ import isEmpty from 'lodash/isEmpty'
 
 import { ClusterAttributes, ClusterProviderFragment } from 'generated/graphql'
 
-import { CD_BASE_PATH } from 'routes/cdRoutesConsts'
+import { CD_REL_PATH } from 'routes/cdRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 import { Body1P } from 'components/utils/typography/Text'
 import { InlineLink } from 'components/utils/typography/InlineLink'
@@ -141,7 +141,7 @@ export function CreateClusterContent({
             No providers have been set up. You can add cloud providers{' '}
             <InlineLink
               as={Link}
-              to={`/${CD_BASE_PATH}/providers`}
+              to={`/${CD_REL_PATH}/providers`}
             >
               here
             </InlineLink>
