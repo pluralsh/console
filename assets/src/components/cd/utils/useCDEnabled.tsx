@@ -4,7 +4,7 @@ export const useCDEnabled = () => {
   const login = useLogin()
 
   // TODO: Remove this debug value
-  return false
+  // return false
 
   return !!login?.configuration?.features?.cd
 }

@@ -24,7 +24,6 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import { LinkTabWrap } from 'components/utils/Tabs'
 import { MakeInert } from 'components/utils/MakeInert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModal'
 
 import { useCDEnabled } from './utils/useCDEnabled'
 import { PluralErrorBoundary } from './PluralErrorBoundary'
@@ -33,10 +32,28 @@ export const POLL_INTERVAL = 10_000
 
 const CDContext = createContext<
   | {
+      setScrollable: (content: boolean) => void
       setHeaderContent: (content: ReactNode) => void
     }
   | undefined
 >(undefined)
+
+export const useSetCDScrollable = (scrollable: boolean) => {
+  const ctx = useContext(CDContext)
+
+  if (!ctx) {
+    console.warn('useSetCDScrollable() must be used within a CDContext')
+  }
+  const { setScrollable } = ctx || {}
+
+  useLayoutEffect(() => {
+    setScrollable?.(scrollable)
+
+    return () => {
+      setScrollable?.(false)
+    }
+  }, [scrollable, setScrollable])
+}
 
 export const useSetCDHeaderContent = (headerContent?: ReactNode) => {
   const ctx = useContext(CDContext)
@@ -70,14 +87,15 @@ const directory = [
 export default function ContinuousDeployment() {
   const theme = useTheme()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
-  const [showUpgrade, setShowUpgrade] = useState(true)
-
+  const [scrollable, setScrollable] = useState(true)
   const cdContext = useMemo(
     () => ({
       setHeaderContent,
+      setScrollable,
     }),
     []
   )
+
   const cdEnabled = useCDEnabled()
 
   const tabStateRef = useRef<any>(null)
@@ -88,7 +106,7 @@ export default function ContinuousDeployment() {
 
   return (
     <ResponsivePageFullWidth
-      scrollable={false}
+      scrollable={scrollable}
       headingContent={
         <MakeInert inert={!cdEnabled}>
           <div
@@ -140,16 +158,6 @@ export default function ContinuousDeployment() {
           stateRef={tabStateRef}
         >
           <CDContext.Provider value={cdContext}>
-            {!cdEnabled && (
-              <BillingFeatureBlockModal
-                open={showUpgrade}
-                message="Upgrade to Plural Professional to use Continuous Deployment features."
-                onClose={() => {
-                  setShowUpgrade(false)
-                }}
-              />
-            )}
-
             <Suspense fallback={<LoadingIndicator />}>
               <Outlet />
             </Suspense>

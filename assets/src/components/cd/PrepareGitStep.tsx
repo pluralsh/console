@@ -1,6 +1,8 @@
 import { Code } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
+import { CD_QUICKSTART_LINK } from 'routes/cdRoutesConsts'
+
 import { StepBody, StepH, StepLink } from './ModalAlt'
 
 const scaffoldTabs = [
@@ -53,7 +55,7 @@ export function PrepareGitStep() {
           Need some help to Git ready? Use a plural scaffold to get started or
           read our{' '}
           <StepLink
-            href="https://docs.plural.sh/getting-started/deployments"
+            href={CD_QUICKSTART_LINK}
             target="_blank"
           >
             quick start guide
