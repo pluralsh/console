@@ -57,7 +57,7 @@ export const ColActions = ({
       readiness &&
       readiness === Readiness.Ready && (
         <ShellLink
-          to={`/cd/clusters/${clusterId}/pods/${namespace}/${podName}/shell/${name}`}
+          to={`/cd/clusters/${clusterId}/pods/${namespace}/${podName}/shell?container=${name}`}
           textValue={`Launch ${name} shell`}
         />
       ),

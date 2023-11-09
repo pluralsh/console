@@ -269,7 +269,7 @@ const podDetailsRoutes = (
       element={<Logs />}
     />
     <Route
-      path="shell/:container"
+      path="shell"
       element={<PodShell />}
     />
   </Route>
