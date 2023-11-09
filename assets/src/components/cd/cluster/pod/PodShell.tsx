@@ -1,14 +1,19 @@
-import { useOutletContext, useSearchParams } from 'react-router-dom'
+import { useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Pod } from 'generated/graphql'
 import { useTheme } from 'styled-components'
-import { Key, useMemo, useState } from 'react'
+import { Key, useMemo, useRef, useState } from 'react'
 import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
+
+import { ShellContext, TerminalActions } from '../../../terminal/Terminal'
+import { ShellWithContext } from '../../../cluster/containers/ContainerShell'
 
 export default function PodShell() {
   const { pod } = useOutletContext() as { pod: Pod }
+  const { clusterId } = useParams()
   const [searchParams] = useSearchParams()
+  const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
 
   if (!pod) {
     throw new Error('This cloud shell can only be used in a pod context')
@@ -52,7 +57,14 @@ export default function PodShell() {
             ))}
           </Select>
         </FormField>
-        shell
+        <ShellContext.Provider value={ref}>
+          <ShellWithContext
+            clusterId={clusterId}
+            name={pod.metadata.name}
+            namespace={pod.metadata.namespace || ''}
+            container={(selected as string) || ''}
+          />
+        </ShellContext.Provider>
       </div>
     </ScrollablePage>
   )
