@@ -1,8 +1,10 @@
 import { Flex, FlexProps } from 'honorable'
+import { forwardRef } from 'react'
 
-export function FullHeightTableWrap(props: FlexProps) {
-  return (
+export const FullHeightTableWrap = forwardRef<HTMLElement, FlexProps>(
+  (props, ref) => (
     <Flex
+      ref={ref}
       direction="column"
       height="100%"
       overflow="hidden"
@@ -14,4 +16,4 @@ export function FullHeightTableWrap(props: FlexProps) {
       {...props}
     />
   )
-}
+)

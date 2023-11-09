@@ -2,6 +2,9 @@ function encodeSlashes(str: string) {
   return str.replaceAll('/', '%2F')
 }
 
+export const CD_QUICKSTART_LINK =
+  'https://docs.plural.sh/getting-started/deployments'
+
 export const CD_REL_PATH = 'cd' as const
 export const CD_ABS_PATH = `/${CD_REL_PATH}` as const
 export const CLUSTERS_REL_PATH = 'clusters' as const

@@ -4434,12 +4434,14 @@ export type RoleBindingFragment = { __typename?: 'RoleBinding', id: string, user
 
 export type RoleFragment = { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null };
 
+export type AvailableFeaturesFragment = { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null, vpn?: boolean | null };
+
 export type ManifestFragment = { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'RootQueryType', externalToken?: string | null, me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', vpnEnabled?: boolean | null, gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null, vpn?: boolean | null } | null } | null };
+export type MeQuery = { __typename?: 'RootQueryType', externalToken?: string | null, me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', vpnEnabled?: boolean | null, gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null, vpn?: boolean | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -5500,6 +5502,15 @@ export const RoleFragmentDoc = gql`
   }
 }
     ${RoleBindingFragmentDoc}`;
+export const AvailableFeaturesFragmentDoc = gql`
+    fragment AvailableFeatures on AvailableFeatures {
+  audits
+  cd
+  databaseManagement
+  userManagement
+  vpn
+}
+    `;
 export const ManifestFragmentDoc = gql`
     fragment Manifest on PluralManifest {
   network {
@@ -8421,16 +8432,14 @@ export const MeDocument = gql`
       output
     }
     features {
-      audits
-      databaseManagement
-      userManagement
-      vpn
+      ...AvailableFeatures
     }
   }
 }
     ${UserFragmentDoc}
 ${RoleFragmentDoc}
-${ManifestFragmentDoc}`;
+${ManifestFragmentDoc}
+${AvailableFeaturesFragmentDoc}`;
 
 /**
  * __useMeQuery__
@@ -8702,6 +8711,7 @@ export const namedOperations = {
     Invite: 'Invite',
     RoleBinding: 'RoleBinding',
     Role: 'Role',
+    AvailableFeatures: 'AvailableFeatures',
     Manifest: 'Manifest'
   }
 }

@@ -36,6 +36,14 @@ fragment Role on Role {
   }
 }
 
+fragment AvailableFeatures on AvailableFeatures {
+  audits
+  cd
+  databaseManagement
+  userManagement
+  vpn
+}
+
 fragment Manifest on PluralManifest {
   network {
     pluralDns
@@ -74,10 +82,7 @@ query Me {
       output
     }
     features {
-      audits
-      databaseManagement
-      userManagement
-      vpn
+      ...AvailableFeatures
     }
   }
 }

@@ -116,7 +116,7 @@ export default function Cluster() {
 
   return (
     <ResponsivePageFullWidth
-      scrollable
+      scrollable={tab !== 'services' && tab !== 'pods'}
       headingContent={
         <>
           {clusterEdges && !isEmpty(clusterEdges) && (
