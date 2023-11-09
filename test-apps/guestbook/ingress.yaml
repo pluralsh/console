@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: guestbook-ingress
   annotations:
+    cert-manager.io/issue-temporary-certificate: "true"
+    acme.cert-manager.io/http01-edit-in-place: "true"
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
