@@ -48,7 +48,7 @@ import {
   DatabasesList,
 } from './DatabasesList'
 
-const DemoBlur = styled.div(({ theme }) => ({
+export const DemoBlur = styled.div(({ theme }) => ({
   position: 'absolute',
   top: 0,
   right: 0,

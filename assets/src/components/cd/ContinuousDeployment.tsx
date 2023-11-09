@@ -17,7 +17,6 @@ import {
   ADDONS_REL_PATH,
   CD_ABS_PATH,
   CD_DEFAULT_REL_PATH,
-  CD_REL_PATH,
   CLUSTERS_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
@@ -75,7 +74,7 @@ export default function ContinuousDeployment() {
     }),
     []
   )
-  const cdIsEnabled = useCDEnabled()
+  const cdEnabled = useCDEnabled()
 
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${CD_ABS_PATH}/:tab*`)
@@ -101,12 +100,16 @@ export default function ContinuousDeployment() {
                 subTab
                 key={path}
                 textValue={label}
-                to={!cdIsEnabled ? '#' : `/${CD_REL_PATH}/${path}`}
+                to={!cdEnabled ? '' : `${CD_ABS_PATH}/${path}`}
+                onClick={(e) => {
+                  e.preventDefault()
+                  console.log('prevented')
+                }}
               >
                 <SubTab
                   key={path}
                   textValue={label}
-                  disabled={!cdIsEnabled && path !== CD_DEFAULT_REL_PATH}
+                  disabled={!cdEnabled && path !== CD_DEFAULT_REL_PATH}
                 >
                   {label}
                 </SubTab>
@@ -123,7 +126,7 @@ export default function ContinuousDeployment() {
           stateRef={tabStateRef}
         >
           <CDContext.Provider value={cdContext}>
-            {!cdIsEnabled && (
+            {!cdEnabled && (
               <BillingFeatureBlockModal
                 open={showUpgrade}
                 message="Upgrade to Plural Professional to use Continuous Deployment features."

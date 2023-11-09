@@ -57,6 +57,7 @@ const MENU_ITEMS: MenuItem[] = [
     text: 'Continuous deployment',
     icon: <GitPullIcon />,
     path: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}`,
+    pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
   },
   {
     text: 'Builds',
