@@ -75,7 +75,6 @@ export default function ContinuousDeployment() {
     }),
     []
   )
-  // TODO: Figure out proper feature flag
   const cdIsEnabled = useCDEnabled()
 
   const tabStateRef = useRef<any>(null)
