@@ -40,6 +40,7 @@ const DIRECTORY = [
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
   { path: 'logs', label: 'Logs' },
+  { path: 'shell', label: 'Shell' },
 ]
 
 export default function Pod() {

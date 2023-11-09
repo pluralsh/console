@@ -53,6 +53,8 @@ import PodEvents from '../components/cluster/pods/PodEvents'
 
 import Logs from '../components/cd/cluster/pod/logs/Logs'
 
+import PodShell from '../components/cd/cluster/pod/PodShell'
+
 import {
   ADDONS_REL_PATH,
   CD_ABS_PATH,
@@ -265,6 +267,10 @@ const podDetailsRoutes = (
     <Route
       path="logs"
       element={<Logs />}
+    />
+    <Route
+      path="shell"
+      element={<PodShell />}
     />
   </Route>
 )

@@ -1,4 +1,4 @@
-import { Link, useOutletContext } from 'react-router-dom'
+import { Link, useOutletContext, useParams } from 'react-router-dom'
 import { Flex } from 'honorable'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Pod } from 'generated/graphql'
@@ -6,10 +6,23 @@ import { statusesToRecord } from 'components/cluster/pods/PodInfo'
 
 import { Button, LogsIcon } from '@pluralsh/design-system'
 
+import { useMemo } from 'react'
+
 import PodConditions from '../../../cluster/pods/PodConditions'
 import Metadata from '../../../cluster/pods/PodMetadata'
 import { SubTitle } from '../../../cluster/nodes/SubTitle'
-import { ContainersList } from '../../../cluster/containers/ContainersList'
+import {
+  ColCpuReservation,
+  ColImage,
+  ColMemoryReservation,
+  ColName,
+  ColPorts,
+  ColStatus,
+  ContainersList,
+  ShellLink,
+  columnHelper,
+} from '../../../cluster/containers/ContainersList'
+import { Readiness } from '../../../../utils/status'
 
 function ViewLogsButton() {
   return (
@@ -25,7 +38,34 @@ function ViewLogsButton() {
   )
 }
 
+export const ColActions = ({
+  clusterId,
+  podName,
+  namespace,
+}: {
+  clusterId?: string
+  podName?: string
+  namespace?: string
+}) =>
+  columnHelper.display({
+    id: 'actions',
+    cell: ({
+      row: {
+        original: { name, readiness },
+      },
+    }: any) =>
+      readiness &&
+      readiness === Readiness.Ready && (
+        <ShellLink
+          to={`/cd/clusters/${clusterId}/pods/${namespace}/${podName}/shell?container=${name}`}
+          textValue={`Launch ${name} shell`}
+        />
+      ),
+    header: '',
+  })
+
 export default function PodInfo() {
+  const { clusterId } = useParams()
   const { pod } = useOutletContext() as { pod: Pod }
   const containers = pod.spec.containers || []
   const initContainers = pod.spec.initContainers || []
@@ -34,6 +74,22 @@ export default function PodInfo() {
     pod.status?.initContainerStatuses
   )
   const conditions = pod?.status?.conditions || []
+  const columns = useMemo(
+    () => [
+      ColName,
+      ColImage,
+      ColMemoryReservation,
+      ColCpuReservation,
+      ColPorts,
+      ColStatus,
+      ColActions({
+        clusterId,
+        podName: pod.metadata.name,
+        namespace: pod.metadata.namespace || '',
+      }),
+    ],
+    [pod]
+  )
 
   return (
     <ScrollablePage
@@ -53,6 +109,8 @@ export default function PodInfo() {
             initContainerStatuses={initContainerStatuses}
             namespace={pod.metadata.namespace || ''}
             podName={pod.metadata.name}
+            columns={columns}
+            rowLink={false}
           />
         </section>
         <section>
