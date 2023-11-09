@@ -15,6 +15,7 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import { LinkTabWrap } from 'components/utils/Tabs'
 import {
   ADDONS_REL_PATH,
+  CD_ABS_PATH,
   CD_DEFAULT_REL_PATH,
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
@@ -53,7 +54,7 @@ export const useSetCDHeaderContent = (headerContent?: ReactNode) => {
 }
 
 export const CD_BASE_CRUMBS = [
-  { label: 'cd', url: `/${CD_REL_PATH}/${CD_DEFAULT_REL_PATH}` },
+  { label: 'cd', url: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}` },
 ] as const satisfies readonly Breadcrumb[]
 
 const directory = [
@@ -78,7 +79,7 @@ export default function ContinuousDeployment() {
   const cdIsEnabled = useCDEnabled()
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`/${CD_REL_PATH}/:tab*`)
+  const pathMatch = useMatch(`${CD_ABS_PATH}/:tab*`)
   // @ts-expect-error
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
