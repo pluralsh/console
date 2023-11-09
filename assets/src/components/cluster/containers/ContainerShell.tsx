@@ -73,6 +73,9 @@ export function ShellWithContext({
     >
       <Flex gap="medium">
         <ShellCommandEditor
+          name={name}
+          namespace={namespace}
+          container={container}
           command={command}
           defaultCommand={defaultCommand}
           isDefault={isDefault}

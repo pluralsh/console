@@ -85,11 +85,17 @@ const CodeWrap = styled.div<{ $isEditing: boolean }>(({ $isEditing }) => ({
 }))
 
 export function ShellCommandEditor({
+  namespace,
+  name,
+  container,
   command,
   setCommand,
   isDefault,
   defaultCommand,
 }: {
+  namespace: string
+  name: string
+  container: string
   command: string
   setCommand: (arg: string | null) => void
   isDefault: boolean
@@ -97,7 +103,6 @@ export function ShellCommandEditor({
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [inputVal, setInputVal] = useState(command)
-  const { namespace, name, container } = useParams()
   const inputWrapRef = useRef<HTMLDivElement>()
 
   useEffect(() => {
