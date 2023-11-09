@@ -6,7 +6,7 @@ export const DEMO_CLUSTERS = [
       apiDeprecations: [],
       currentVersion: '1.25.14',
       deletedAt: null,
-      handle: 'cd-demo',
+      handle: 'main-cluster',
       id: 'aaaa',
       installed: true,
       name: 'main-cluster',
@@ -64,7 +64,7 @@ export const DEMO_CLUSTERS = [
           },
         },
       ],
-      pingedAt: '2023-11-09T17:11:51.438277Z',
+      pingedAt: '3000-11-09T17:11:51.438277Z',
       protect: true,
       provider: {
         __typename: 'ClusterProvider',
@@ -174,7 +174,7 @@ export const DEMO_CLUSTERS = [
           },
         },
       ],
-      pingedAt: '2023-11-09T17:11:33.015081Z',
+      pingedAt: '3000-11-09T17:11:33.015081Z',
       protect: true,
       provider: {
         __typename: 'ClusterProvider',
@@ -282,7 +282,7 @@ export const DEMO_CLUSTERS = [
       name: 'kind-2',
       nodeMetrics: [],
       nodes: [],
-      pingedAt: '2023-11-08T20:00:33.035838Z',
+      pingedAt: '3000-11-08T20:00:33.035838Z',
       protect: false,
       provider: null,
       self: false,
@@ -291,4 +291,98 @@ export const DEMO_CLUSTERS = [
       version: null,
     },
   },
-] as const as any
+  {
+    __typename: 'ClusterEdge',
+    node: {
+      __typename: 'Cluster',
+      apiDeprecations: [],
+      currentVersion: '1.25.14',
+      deletedAt: null,
+      handle: 'cd-demo',
+      id: 'gggg',
+      installed: true,
+      name: 'main-cluster',
+      nodeMetrics: [
+        {
+          __typename: 'NodeMetric',
+          usage: {
+            __typename: 'NodeUsage',
+            cpu: '4000000000n',
+            memory: '10000000Ki',
+          },
+        },
+      ],
+      nodes: [
+        {
+          __typename: 'Node',
+          status: {
+            __typename: 'NodeStatus',
+            capacity: {
+              cpu: '2',
+              'ephemeral-storage': '47227284Ki',
+              'hugepages-1Gi': '0',
+              'hugepages-2Mi': '0',
+              memory: '8145588Ki',
+              pods: '110',
+            },
+          },
+        },
+        {
+          __typename: 'Node',
+          status: {
+            __typename: 'NodeStatus',
+            capacity: {
+              cpu: '2',
+              'ephemeral-storage': '47227284Ki',
+              'hugepages-1Gi': '0',
+              'hugepages-2Mi': '0',
+              memory: '8145588Ki',
+              pods: '110',
+            },
+          },
+        },
+        {
+          __typename: 'Node',
+          status: {
+            __typename: 'NodeStatus',
+            capacity: {
+              cpu: '2',
+              'ephemeral-storage': '47227284Ki',
+              'hugepages-1Gi': '0',
+              'hugepages-2Mi': '0',
+              memory: '8145588Ki',
+              pods: '110',
+            },
+          },
+        },
+      ],
+      pingedAt: '3000-11-09T17:11:51.438277Z',
+      protect: true,
+      provider: {
+        __typename: 'ClusterProvider',
+        cloud: 'azure',
+        id: 'hhhh',
+        name: 'azure',
+        namespace: 'bootstrap',
+        supportedVersions: ['1.28.1'],
+      },
+      self: true,
+      service: null,
+      status: {
+        __typename: 'ClusterStatus',
+        conditions: [
+          {
+            __typename: 'ClusterCondition',
+            lastTransitionTime: '2023-11-03T18:49:25Z',
+            message: null,
+            reason: null,
+            severity: null,
+            status: 'True',
+            type: 'Ready',
+          },
+        ],
+      },
+      version: '1.25.14',
+    },
+  },
+] as any[]
