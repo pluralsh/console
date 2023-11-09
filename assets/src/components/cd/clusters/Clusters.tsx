@@ -10,7 +10,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
-import { ComponentProps, useLayoutEffect, useMemo, useRef } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -24,29 +24,25 @@ import {
   CLUSTERS_REL_PATH,
   GLOBAL_SETTINGS_ABS_PATH,
 } from 'routes/cdRoutesConsts'
-import { roundToTwoPlaces } from 'components/cluster/utils'
-import { BasicLink } from 'components/utils/typography/BasicLink'
-
 import chroma from 'chroma-js'
 
-import { POLL_INTERVAL, useSetCDHeaderContent } from '../ContinuousDeployment'
+import { coerceSemver, nextSupportedVersion, toNiceVersion } from 'utils/semver'
+
+import { roundToTwoPlaces } from 'components/cluster/utils'
+import { BasicLink } from 'components/utils/typography/BasicLink'
 import {
   cpuFormat,
   cpuParser,
   memoryFormat,
   memoryParser,
-} from '../../../utils/kubernetes'
-import { UsageBar } from '../../cluster/nodes/UsageBar'
-import { TableText } from '../../cluster/TableElements'
-import {
-  coerceSemver,
-  nextSupportedVersion,
-  toNiceVersion,
-} from '../../../utils/semver'
+} from 'utils/kubernetes'
+import { UsageBar } from 'components/cluster/nodes/UsageBar'
+import { TableText } from 'components/cluster/TableElements'
+import { MakeInert } from 'components/utils/MakeInert'
+
+import { POLL_INTERVAL, useSetCDHeaderContent } from '../ContinuousDeployment'
 import { DeleteCluster } from '../providers/DeleteCluster'
-
 import { useCDEnabled } from '../utils/useCDEnabled'
-
 import { DEMO_CLUSTERS } from '../utils/demoData'
 
 import ClusterUpgrade from './ClusterUpgrade'
@@ -347,29 +343,6 @@ const TableWrapperSC = styled(FullHeightTableWrap)<TableWrapperSCProps>(
   })
 )
 
-function TableWrapper({
-  blurred,
-  ...props
-}: Omit<ComponentProps<typeof TableWrapperSC>, '$blurred'>) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useLayoutEffect(() => {
-    if (blurred) {
-      ref.current?.setAttribute('inert', '')
-    } else {
-      ref.current?.removeAttribute('inert')
-    }
-  }, [blurred])
-
-  return (
-    <TableWrapperSC
-      $blurred={blurred}
-      ref={ref}
-      {...props}
-    />
-  )
-}
-
 export default function Clusters() {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -415,21 +388,23 @@ export default function Clusters() {
   const tableData = usingDemoData ? DEMO_CLUSTERS : data?.clusters?.edges
 
   return !isEmpty(tableData) ? (
-    <TableWrapper
-      blurred={usingDemoData && true}
-      className="shouldforward"
-    >
-      <Table
-        loose
-        data={tableData || []}
-        columns={columns}
-        reactTableOptions={reactTableOptions}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
-      />
-    </TableWrapper>
+    <MakeInert inert={usingDemoData}>
+      <TableWrapperSC
+        $blurred={usingDemoData}
+        className="shouldforward"
+      >
+        <Table
+          loose
+          data={tableData || []}
+          columns={columns}
+          reactTableOptions={reactTableOptions}
+          css={{
+            maxHeight: 'unset',
+            height: '100%',
+          }}
+        />
+      </TableWrapperSC>
+    </MakeInert>
   ) : (
     <EmptyState message="Looks like you don't have any CD clusters yet." />
   )

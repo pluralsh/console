@@ -10,9 +10,8 @@ import {
   useState,
 } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
-import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { LinkTabWrap } from 'components/utils/Tabs'
 import {
   ADDONS_REL_PATH,
   CD_ABS_PATH,
@@ -20,6 +19,10 @@ import {
   CLUSTERS_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
+
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+import { LinkTabWrap } from 'components/utils/Tabs'
+import { MakeInert } from 'components/utils/MakeInert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModal'
 
@@ -65,6 +68,7 @@ const directory = [
 ] as const
 
 export default function ContinuousDeployment() {
+  const theme = useTheme()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [showUpgrade, setShowUpgrade] = useState(true)
 
@@ -86,38 +90,48 @@ export default function ContinuousDeployment() {
     <ResponsivePageFullWidth
       scrollable={false}
       headingContent={
-        <>
-          <TabList
-            gap="xxsmall"
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
+        <MakeInert inert={!cdEnabled}>
+          <div
+            css={{
+              display: 'flex',
+              gap: theme.spacing.large,
+              flexGrow: 1,
+              width: '100%',
+              justifyContent: 'space-between',
             }}
           >
-            {directory.map(({ label, path }) => (
-              <LinkTabWrap
-                subTab
-                key={path}
-                textValue={label}
-                to={!cdEnabled ? '' : `${CD_ABS_PATH}/${path}`}
-                onClick={(e) => {
-                  e.preventDefault()
-                  console.log('prevented')
-                }}
-              >
-                <SubTab
+            <TabList
+              gap="xxsmall"
+              stateRef={tabStateRef}
+              stateProps={{
+                orientation: 'horizontal',
+                selectedKey: currentTab?.path,
+              }}
+            >
+              {directory.map(({ label, path }) => (
+                <LinkTabWrap
+                  subTab
                   key={path}
                   textValue={label}
-                  disabled={!cdEnabled && path !== CD_DEFAULT_REL_PATH}
+                  to={!cdEnabled ? '' : `${CD_ABS_PATH}/${path}`}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    console.log('prevented')
+                  }}
                 >
-                  {label}
-                </SubTab>
-              </LinkTabWrap>
-            ))}
-          </TabList>
-          {headerContent}
-        </>
+                  <SubTab
+                    key={path}
+                    textValue={label}
+                    disabled={!cdEnabled && path !== CD_DEFAULT_REL_PATH}
+                  >
+                    {label}
+                  </SubTab>
+                </LinkTabWrap>
+              ))}
+            </TabList>
+            {headerContent}
+          </div>
+        </MakeInert>
       }
     >
       <PluralErrorBoundary>
