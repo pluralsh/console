@@ -43,9 +43,9 @@ type ContainerTableRow = {
   status?: ContainerStatus
   readiness: ReadinessT
 }
-export const columnHelper = createColumnHelper<ContainerTableRow>()
+const columnHelper = createColumnHelper<ContainerTableRow>()
 
-export const ColStatus = columnHelper.accessor(
+const ColStatus = columnHelper.accessor(
   (row) => (row?.readiness ? readinessToLabel[row.readiness] : ''),
   {
     id: 'status',
@@ -58,7 +58,7 @@ export const ColStatus = columnHelper.accessor(
   }
 )
 
-export const ColName = columnHelper.accessor((row) => row.name, {
+const ColName = columnHelper.accessor((row) => row.name, {
   id: 'name',
   cell: ({ row: { original }, ...props }) => (
     <TableText>
@@ -76,7 +76,7 @@ export const ColName = columnHelper.accessor((row) => row.name, {
   },
 })
 
-export const ColImage = columnHelper.accessor((row) => row.image, {
+const ColImage = columnHelper.accessor((row) => row.image, {
   id: 'image',
   cell: (props) => (
     <Tooltip
@@ -98,7 +98,7 @@ export const ColImage = columnHelper.accessor((row) => row.image, {
   },
 })
 
-export const ColPorts = columnHelper.accessor((row) => row.ports, {
+const ColPorts = columnHelper.accessor((row) => row.ports, {
   id: 'ports',
   cell: (props) => {
     const content = props
@@ -120,7 +120,7 @@ export const ColPorts = columnHelper.accessor((row) => row.ports, {
   header: 'Ports',
 })
 
-export const ColMemoryReservation = columnHelper.accessor(
+const ColMemoryReservation = columnHelper.accessor(
   (row) => row?.memory?.requests,
   {
     id: 'memory',
@@ -142,19 +142,16 @@ export const ColMemoryReservation = columnHelper.accessor(
   }
 )
 
-export const ColCpuReservation = columnHelper.accessor(
-  (row) => row?.cpu?.requests,
-  {
-    id: 'cpu-reservations',
-    cell: ({ row: { original }, ...props }) => (
-      <Usage
-        used={props.getValue()}
-        total={original?.cpu?.limits}
-      />
-    ),
-    header: 'CPU',
-  }
-)
+const ColCpuReservation = columnHelper.accessor((row) => row?.cpu?.requests, {
+  id: 'cpu-reservations',
+  cell: ({ row: { original }, ...props }) => (
+    <Usage
+      used={props.getValue()}
+      total={original?.cpu?.limits}
+    />
+  ),
+  header: 'CPU',
+})
 
 function ShellLinkUnstyled({
   textValue,
@@ -220,7 +217,6 @@ type ContainersListProps = {
   podName: string
   refetch?: any
   columns?: any[]
-  rowLink?: boolean
 }
 
 function toTableData(
@@ -264,7 +260,6 @@ export function ContainersList({
   columns,
   namespace,
   podName,
-  rowLink = true,
 }: ContainersListProps) {
   const navigate = useNavigate()
   const tableData: ContainerTableRow[] = useMemo(() => {
@@ -308,14 +303,11 @@ export function ContainersList({
       loose
       data={tableData}
       columns={columns}
+      onRowClick={(_e, { original }: Row<ContainerTableRow>) =>
+        original?.readiness === Readiness.Ready &&
+        navigate(`/pods/${namespace}/${podName}/shell/${original?.name}`)
+      }
       {...TABLE_HEIGHT}
-      {...(rowLink
-        ? {
-            onRowClick: (_e, { original }: Row<ContainerTableRow>) =>
-              original?.readiness === Readiness.Ready &&
-              navigate(`/pods/${namespace}/${podName}/shell/${original?.name}`),
-          }
-        : {})}
     />
   )
 }

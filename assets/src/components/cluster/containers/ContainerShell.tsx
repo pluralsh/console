@@ -48,22 +48,10 @@ const useCommand = (initialCommand?: string | null) => {
   }
 }
 
-export function ShellWithContext({
-  namespace,
-  name,
-  container,
-  clusterId,
-}: {
-  namespace: string
-  name: string
-  container: string
-  clusterId?: string
-}) {
+function ShellWithContext() {
   const { command, setCommand, defaultCommand, isDefault } = useCommand(null)
-
+  const { namespace, name, container } = useParams()
   const shellContext = useContext(ShellContext)
-  const cluster = clusterId ? `${clusterId}:` : ''
-  const room = `pod:${cluster}${namespace}:${name}:${container}`
 
   return (
     <Flex
@@ -73,9 +61,6 @@ export function ShellWithContext({
     >
       <Flex gap="medium">
         <ShellCommandEditor
-          name={name}
-          namespace={namespace}
-          container={container}
           command={command}
           defaultCommand={defaultCommand}
           isDefault={isDefault}
@@ -87,10 +72,11 @@ export function ShellWithContext({
         >
           <ToolIcon size={16} />
         </HeaderIconButton>
+
         <TerminalThemeSelector />
       </Flex>
       <TerminalScreen
-        room={room}
+        room={`pod:${namespace}:${name}:${container}`}
         command={command}
         header={`Connecting to pod ${name} using ${command}...`}
       />
@@ -100,15 +86,10 @@ export function ShellWithContext({
 
 export default function Shell() {
   const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
-  const { name = '', namespace = '', container = '' } = useParams()
 
   return (
     <ShellContext.Provider value={ref}>
-      <ShellWithContext
-        name={name}
-        namespace={namespace}
-        container={container}
-      />
+      <ShellWithContext />
     </ShellContext.Provider>
   )
 }
