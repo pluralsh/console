@@ -30,11 +30,9 @@ import {
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
 
-import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
-
 import {
   ClusterFragment,
-  useClusterSuspenseQuery,
+  useClusterQuery,
   useClustersTinyQuery,
 } from '../../../generated/graphql'
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
@@ -95,13 +93,11 @@ export default function Cluster() {
   const { data: clustersData } = useClustersTinyQuery()
   const clusterEdges = clustersData?.clusters?.edges
 
-  const { data, refetch } = useSuspenseQueryPolling(
-    useClusterSuspenseQuery({
-      variables: { id: clusterId || '' },
-      fetchPolicy: 'cache-and-network',
-    }),
-    { pollInterval: POLL_INTERVAL }
-  )
+  const { data, refetch } = useClusterQuery({
+    variables: { id: clusterId || '' },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
 
   const cluster = data?.cluster
 

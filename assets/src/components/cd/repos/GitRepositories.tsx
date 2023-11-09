@@ -10,7 +10,7 @@ import {
   GitRepositoriesDocument,
   type GitRepositoryFragment,
   useDeleteGitRepositoryMutation,
-  useGitRepositoriesSuspenseQuery,
+  useGitRepositoriesQuery,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { ComponentProps, useMemo, useState } from 'react'
@@ -23,8 +23,6 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { removeConnection, updateCache } from 'utils/graphql'
 
 import { CD_REL_PATH } from 'routes/cdRoutesConsts'
-
-import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
 
 import {
   CD_BASE_CRUMBS,
@@ -131,12 +129,10 @@ const columns = [
 
 export default function GitRepositories() {
   const theme = useTheme()
-  const { data, error, refetch } = useSuspenseQueryPolling(
-    useGitRepositoriesSuspenseQuery({
-      fetchPolicy: 'cache-and-network',
-    }),
-    { pollInterval: POLL_INTERVAL }
-  )
+  const { data, error, refetch } = useGitRepositoriesQuery({
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
 
   useSetBreadcrumbs(crumbs)
 
