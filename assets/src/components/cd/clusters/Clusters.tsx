@@ -10,7 +10,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
-import { ComponentProps, useMemo } from 'react'
+import { ComponentProps, useLayoutEffect, useMemo, useRef } from 'react'
 import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -46,6 +46,8 @@ import {
 import { DeleteCluster } from '../providers/DeleteCluster'
 
 import { useCDEnabled } from '../utils/useCDEnabled'
+
+import { DEMO_CLUSTERS } from '../utils/demoData'
 
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
@@ -314,7 +316,10 @@ export const columns = [
   }),
 ]
 
-const TableWrapperSC = styled(FullHeightTableWrap)<{ $blurred: boolean }>(
+type TableWrapperSCProps = {
+  $blurred: boolean
+}
+const TableWrapperSC = styled(FullHeightTableWrap)<TableWrapperSCProps>(
   ({ theme, $blurred }) => ({
     '&&': {
       ...($blurred
@@ -341,6 +346,29 @@ const TableWrapperSC = styled(FullHeightTableWrap)<{ $blurred: boolean }>(
     },
   })
 )
+
+function TableWrapper({
+  blurred,
+  ...props
+}: Omit<ComponentProps<typeof TableWrapperSC>, '$blurred'>) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    if (blurred) {
+      ref.current?.setAttribute('inert', '')
+    } else {
+      ref.current?.removeAttribute('inert')
+    }
+  }, [blurred])
+
+  return (
+    <TableWrapperSC
+      $blurred={blurred}
+      ref={ref}
+      {...props}
+    />
+  )
+}
 
 export default function Clusters() {
   const theme = useTheme()
@@ -383,15 +411,17 @@ export default function Clusters() {
   if (!data) {
     return <LoadingIndicator />
   }
+  const usingDemoData = isEmpty(data?.clusters?.edges) || !cdIsEnabled
+  const tableData = usingDemoData ? DEMO_CLUSTERS : data?.clusters?.edges
 
-  return !isEmpty(data?.clusters?.edges) ? (
-    <TableWrapperSC
-      $blurred={!cdIsEnabled}
-      className="wrap"
+  return !isEmpty(tableData) ? (
+    <TableWrapper
+      blurred={usingDemoData && true}
+      className="shouldforward"
     >
       <Table
         loose
-        data={data?.clusters?.edges || []}
+        data={tableData || []}
         columns={columns}
         reactTableOptions={reactTableOptions}
         css={{
@@ -399,7 +429,7 @@ export default function Clusters() {
           height: '100%',
         }}
       />
-    </TableWrapperSC>
+    </TableWrapper>
   ) : (
     <EmptyState message="Looks like you don't have any CD clusters yet." />
   )
