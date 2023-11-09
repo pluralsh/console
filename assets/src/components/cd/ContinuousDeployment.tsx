@@ -9,10 +9,9 @@ import {
   useRef,
   useState,
 } from 'react'
+import { Outlet, useMatch } from 'react-router-dom'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
-import { Outlet, useMatch } from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
 import {
   ADDONS_REL_PATH,
@@ -25,6 +24,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModal'
 
 import { useCDEnabled } from './utils/useCDEnabled'
+import { PluralErrorBoundary } from './PluralErrorBoundary'
 
 export const POLL_INTERVAL = 10_000
 
@@ -117,25 +117,28 @@ export default function ContinuousDeployment() {
         </>
       }
     >
-      <TabPanel
-        css={{ height: '100%' }}
-        stateRef={tabStateRef}
-      >
-        <CDContext.Provider value={cdContext}>
-          {!cdIsEnabled && (
-            <BillingFeatureBlockModal
-              open={showUpgrade}
-              message="Upgrade to Plural Professional to use Continuous Deployment features."
-              onClose={() => {
-                setShowUpgrade(false)
-              }}
-            />
-          )}
-          <Suspense fallback={<LoadingIndicator />}>
-            <Outlet />
-          </Suspense>
-        </CDContext.Provider>
-      </TabPanel>
+      <PluralErrorBoundary>
+        <TabPanel
+          css={{ height: '100%' }}
+          stateRef={tabStateRef}
+        >
+          <CDContext.Provider value={cdContext}>
+            {!cdIsEnabled && (
+              <BillingFeatureBlockModal
+                open={showUpgrade}
+                message="Upgrade to Plural Professional to use Continuous Deployment features."
+                onClose={() => {
+                  setShowUpgrade(false)
+                }}
+              />
+            )}
+
+            <Suspense fallback={<LoadingIndicator />}>
+              <Outlet />
+            </Suspense>
+          </CDContext.Provider>
+        </TabPanel>
+      </PluralErrorBoundary>
     </ResponsivePageFullWidth>
   )
 }
