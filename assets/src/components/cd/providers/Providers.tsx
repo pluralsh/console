@@ -6,15 +6,13 @@ import isEmpty from 'lodash/isEmpty'
 
 import {
   type ServiceDeploymentsRowFragment,
-  useClusterProvidersSuspenseQuery,
+  useClusterProvidersQuery,
 } from 'generated/graphql'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { mapExistingNodes } from 'utils/graphql'
-
-import { useSuspenseQueryPolling } from 'components/hooks/suspense/useSuspenseQueryPolling'
 
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
@@ -32,12 +30,10 @@ const columns = [ColProvider, ColName, ColActions]
 
 export default function Providers() {
   const theme = useTheme()
-  const { data, error, refetch } = useSuspenseQueryPolling(
-    useClusterProvidersSuspenseQuery({
-      fetchPolicy: 'cache-and-network',
-    }),
-    { pollInterval: POLL_INTERVAL }
-  )
+  const { data, error, refetch } = useClusterProvidersQuery({
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
 
   useSetBreadcrumbs(PROVIDERS_CRUMBS)
 

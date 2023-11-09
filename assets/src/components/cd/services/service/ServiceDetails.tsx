@@ -29,7 +29,7 @@ import {
 } from 'components/contexts/DocPageContext'
 import { getDocsData } from 'components/apps/app/App'
 import {
-  CD_BASE_PATH,
+  CD_REL_PATH,
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_PARAM_ID,
   getServiceDetailsPath,
@@ -57,7 +57,7 @@ export const getServiceDetailsBreadcrumbs = ({
   service: { name?: Nullable<string>; id: string }
 }) => [
   ...getClusterBreadcrumbs({ cluster }),
-  { label: 'services', url: `${CD_BASE_PATH}/services` },
+  { label: 'services', url: `${CD_REL_PATH}/services` },
   ...(service.id && cluster.id
     ? [
         {

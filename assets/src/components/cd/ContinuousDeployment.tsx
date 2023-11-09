@@ -9,18 +9,22 @@ import {
   useRef,
   useState,
 } from 'react'
+import { Outlet, useMatch } from 'react-router-dom'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
-import { Outlet, useMatch } from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
 import {
-  ADDONS_PATH,
-  CD_BASE_PATH,
-  CLUSTERS_PATH,
-  SERVICES_PATH,
+  ADDONS_REL_PATH,
+  CD_ABS_PATH,
+  CD_DEFAULT_REL_PATH,
+  CLUSTERS_REL_PATH,
+  SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModal'
+
+import { useCDEnabled } from './utils/useCDEnabled'
+import { PluralErrorBoundary } from './PluralErrorBoundary'
 
 export const POLL_INTERVAL = 10_000
 
@@ -49,27 +53,31 @@ export const useSetCDHeaderContent = (headerContent?: ReactNode) => {
 }
 
 export const CD_BASE_CRUMBS = [
-  { label: 'cd', url: '/cd' },
+  { label: 'cd', url: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}` },
 ] as const satisfies readonly Breadcrumb[]
 
 const directory = [
-  { path: CLUSTERS_PATH, label: 'Clusters' },
-  { path: SERVICES_PATH, label: 'Services' },
+  { path: CLUSTERS_REL_PATH, label: 'Clusters' },
+  { path: SERVICES_REL_PATH, label: 'Services' },
   { path: 'git', label: 'Git repositories' },
   { path: 'providers', label: 'Providers' },
-  { path: ADDONS_PATH, label: 'Add-ons' },
+  { path: ADDONS_REL_PATH, label: 'Add-ons' },
 ] as const
 
 export default function ContinuousDeployment() {
   const [headerContent, setHeaderContent] = useState<ReactNode>()
+  const [showUpgrade, setShowUpgrade] = useState(true)
+
   const cdContext = useMemo(
     () => ({
       setHeaderContent,
     }),
     []
   )
+  const cdEnabled = useCDEnabled()
+
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`/${CD_BASE_PATH}/:tab*`)
+  const pathMatch = useMatch(`${CD_ABS_PATH}/:tab*`)
   // @ts-expect-error
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
@@ -92,11 +100,16 @@ export default function ContinuousDeployment() {
                 subTab
                 key={path}
                 textValue={label}
-                to={`/${CD_BASE_PATH}/${path}`}
+                to={!cdEnabled ? '' : `${CD_ABS_PATH}/${path}`}
+                onClick={(e) => {
+                  e.preventDefault()
+                  console.log('prevented')
+                }}
               >
                 <SubTab
                   key={path}
                   textValue={label}
+                  disabled={!cdEnabled && path !== CD_DEFAULT_REL_PATH}
                 >
                   {label}
                 </SubTab>
@@ -107,16 +120,28 @@ export default function ContinuousDeployment() {
         </>
       }
     >
-      <TabPanel
-        css={{ height: '100%' }}
-        stateRef={tabStateRef}
-      >
-        <CDContext.Provider value={cdContext}>
-          <Suspense fallback={<LoadingIndicator />}>
-            <Outlet />
-          </Suspense>
-        </CDContext.Provider>
-      </TabPanel>
+      <PluralErrorBoundary>
+        <TabPanel
+          css={{ height: '100%' }}
+          stateRef={tabStateRef}
+        >
+          <CDContext.Provider value={cdContext}>
+            {!cdEnabled && (
+              <BillingFeatureBlockModal
+                open={showUpgrade}
+                message="Upgrade to Plural Professional to use Continuous Deployment features."
+                onClose={() => {
+                  setShowUpgrade(false)
+                }}
+              />
+            )}
+
+            <Suspense fallback={<LoadingIndicator />}>
+              <Outlet />
+            </Suspense>
+          </CDContext.Provider>
+        </TabPanel>
+      </PluralErrorBoundary>
     </ResponsivePageFullWidth>
   )
 }

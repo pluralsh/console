@@ -2,11 +2,14 @@ function encodeSlashes(str: string) {
   return str.replaceAll('/', '%2F')
 }
 
-export const CD_BASE_PATH = 'cd' as const
-export const CLUSTERS_PATH = 'clusters' as const
-export const SERVICES_PATH = 'services' as const
+export const CD_REL_PATH = 'cd' as const
+export const CD_ABS_PATH = `/${CD_REL_PATH}` as const
+export const CLUSTERS_REL_PATH = 'clusters' as const
+export const SERVICES_REL_PATH = 'services' as const
+export const CD_DEFAULT_REL_PATH = CLUSTERS_REL_PATH
 
-export const CLUSTER_BASE_PATH = `${CD_BASE_PATH}/${CLUSTERS_PATH}/:clusterId`
+export const CLUSTER_REL_PATH = `${CLUSTERS_REL_PATH}/:clusterId` as const
+export const CLUSTER_ABS_PATH = `${CD_ABS_PATH}/${CLUSTER_REL_PATH}` as const
 export const CLUSTER_SERVICES_PATH = 'services' as const
 export const CLUSTER_NODES_PATH = 'nodes' as const
 export const CLUSTER_PODS_PATH = 'pods' as const
@@ -14,8 +17,13 @@ export const CLUSTER_METADATA_PATH = 'metadata' as const
 
 export const NODE_PARAM_NAME = 'name' as const
 export const NODE_PARAM_CLUSTER = 'clusterId' as const
-export const NODE_BASE_PATH = getNodeDetailsPath({
+
+export const NODE_REL_PATH = getNodeDetailsPath({
   isRelative: true,
+  clusterId: `:${NODE_PARAM_CLUSTER}`,
+  name: `:${NODE_PARAM_NAME}`,
+})
+export const NODE_ABS_PATH = getNodeDetailsPath({
   clusterId: `:${NODE_PARAM_CLUSTER}`,
   name: `:${NODE_PARAM_NAME}`,
 })
@@ -23,8 +31,13 @@ export const NODE_BASE_PATH = getNodeDetailsPath({
 export const POD_PARAM_NAME = 'name' as const
 export const POD_PARAM_NAMESPACE = 'namespace' as const
 export const POD_PARAM_CLUSTER = 'clusterId' as const
-export const POD_BASE_PATH = getPodDetailsPath({
+export const POD_REL_PATH = getPodDetailsPath({
   isRelative: true,
+  clusterId: `:${POD_PARAM_CLUSTER}`,
+  name: `:${POD_PARAM_NAME}`,
+  namespace: `:${POD_PARAM_NAMESPACE}`,
+})
+export const POD_ABS_PATH = getPodDetailsPath({
   clusterId: `:${POD_PARAM_CLUSTER}`,
   name: `:${POD_PARAM_NAME}`,
   namespace: `:${POD_PARAM_NAMESPACE}`,
@@ -32,8 +45,12 @@ export const POD_BASE_PATH = getPodDetailsPath({
 
 export const SERVICE_PARAM_ID = 'serviceId' as const
 export const SERVICE_PARAM_CLUSTER_ID = 'clusterId' as const
-export const SERVICE_BASE_PATH = getServiceDetailsPath({
+export const SERVICE_REL_PATH = getServiceDetailsPath({
   isRelative: true,
+  clusterId: `:${SERVICE_PARAM_CLUSTER_ID}`,
+  serviceId: `:${SERVICE_PARAM_ID}`,
+})
+export const SERVICE_ABS_PATH = getServiceDetailsPath({
   clusterId: `:${SERVICE_PARAM_CLUSTER_ID}`,
   serviceId: `:${SERVICE_PARAM_ID}`,
 })
@@ -46,11 +63,10 @@ export const SERVICE_COMPONENT_PATH_MATCHER_REL = getServiceComponentPath({
   serviceId: `:${SERVICE_PARAM_ID}`,
   componentId: `:${COMPONENT_PARAM_ID}`,
 })
-export const SERVICE_COMPONENT_PATH_MATCHER_ABS = `/${SERVICE_COMPONENT_PATH_MATCHER_REL}`
-
-export const ADDONS_PATH = 'addons'
-export const GLOBAL_SETTINGS_PATH_REL = `${CD_BASE_PATH}/settings`
-export const GLOBAL_SETTINGS_PATH = `/${GLOBAL_SETTINGS_PATH_REL}`
+export const SERVICE_COMPONENT_PATH_MATCHER_ABS = `${CD_ABS_PATH}/${SERVICE_COMPONENT_PATH_MATCHER_REL}`
+export const ADDONS_REL_PATH = 'addons'
+export const GLOBAL_SETTINGS_REL_PATH = `settings`
+export const GLOBAL_SETTINGS_ABS_PATH = `${CD_ABS_PATH}/${GLOBAL_SETTINGS_REL_PATH}`
 
 export function getServiceDetailsPath({
   clusterId,
@@ -62,8 +78,8 @@ export function getServiceDetailsPath({
   isRelative?: boolean
 }) {
   return `${
-    isRelative ? '' : '/'
-  }${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}/${SERVICES_PATH}/${encodeSlashes(
+    isRelative ? '' : `${CD_ABS_PATH}/`
+  }${CLUSTERS_REL_PATH}/${clusterId}/${SERVICES_REL_PATH}/${encodeSlashes(
     serviceId || ''
   )}`
 }
@@ -89,8 +105,8 @@ export function getNodeDetailsPath({
   isRelative?: boolean
 }) {
   return `${
-    isRelative ? '' : '/'
-  }${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}/${CLUSTER_NODES_PATH}/${name}`
+    isRelative ? '' : `${CD_ABS_PATH}/`
+  }${CLUSTERS_REL_PATH}/${clusterId}/${CLUSTER_NODES_PATH}/${name}`
 }
 
 export function getPodDetailsPath({
@@ -104,16 +120,16 @@ export function getPodDetailsPath({
   namespace?: string | null
   isRelative?: boolean
 }) {
-  let path = isRelative ? '' : '/'
+  let path = isRelative ? '' : `${CD_ABS_PATH}/`
 
-  path += `${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}/${CLUSTER_PODS_PATH}/`
+  path += `${CLUSTERS_REL_PATH}/${clusterId}/${CLUSTER_PODS_PATH}`
 
   if (namespace) {
-    path += `${namespace}/`
+    path += `/${namespace}`
   }
 
   if (name) {
-    path += `${name}/`
+    path += `/${name}`
   }
 
   return path

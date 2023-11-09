@@ -14,7 +14,7 @@ import { useDocPageContext } from 'components/contexts/DocPageContext'
 import MarkdocComponent from 'components/utils/MarkdocContent'
 
 import {
-  CD_BASE_PATH,
+  CD_REL_PATH,
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_PARAM_ID,
 } from 'routes/cdRoutesConsts'
@@ -44,7 +44,7 @@ export default function ServiceDocs() {
       }),
       {
         label: 'docs',
-        url: `${CD_BASE_PATH}/services/${serviceId}/docs`,
+        url: `${CD_REL_PATH}/services/${serviceId}/docs`,
       },
     ],
     [clusterId, service, serviceId]

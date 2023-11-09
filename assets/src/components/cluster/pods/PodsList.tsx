@@ -309,7 +309,7 @@ export const PodsList = memo(
     pods,
     applications,
     columns,
-    linkBasePath = `/pods/`,
+    linkBasePath = `/pods`,
     ...props
   }: PodListProps) => {
     const navigate = useNavigate()
@@ -362,7 +362,7 @@ export const PodsList = memo(
         virtualizeRows
         {...props}
         onRowClick={(_e, { original }: Row<PodTableRow>) =>
-          navigate(`${linkBasePath}${original.namespace}/${original.name}`)
+          navigate(`${linkBasePath}/${original.namespace}/${original.name}`)
         }
       />
     )

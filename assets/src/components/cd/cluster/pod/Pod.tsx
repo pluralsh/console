@@ -21,22 +21,19 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
 import {
-  CD_BASE_PATH,
-  CLUSTERS_PATH,
-  CLUSTER_PODS_PATH,
-  POD_BASE_PATH,
+  POD_ABS_PATH,
   POD_PARAM_CLUSTER,
   POD_PARAM_NAME,
   POD_PARAM_NAMESPACE,
   getNodeDetailsPath,
   getPodDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
-import { usePodQuery } from '../../../../generated/graphql'
+import { useClusterQuery, usePodQuery } from '../../../../generated/graphql'
 import { LinkTabWrap } from '../../../utils/Tabs'
-import { CD_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
 import { podStatusToReadiness } from '../../../../utils/status'
 import { StatusChip } from '../../../cluster/TableElements'
 import LogsLegend from '../../../apps/app/logs/LogsLegend'
+import { getClusterBreadcrumbs } from '../Cluster'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -47,26 +44,25 @@ const DIRECTORY = [
 
 export default function Pod() {
   const params = useParams()
-  const clusterId = (params[POD_PARAM_CLUSTER] as string) || ''
-  const namespace = (params[POD_PARAM_NAMESPACE] as string) || ''
-  const name = (params[POD_PARAM_NAME] as string) || ''
+  const clusterId = (params[POD_PARAM_CLUSTER] as string)!
+  const namespace = (params[POD_PARAM_NAMESPACE] as string)!
+  const name = (params[POD_PARAM_NAME] as string)!
   const tabStateRef = useRef<any>()
   const theme = useTheme()
-  const tab = useMatch(`${POD_BASE_PATH}:tab`)?.params?.tab || ''
+  const tab = useMatch(`${POD_ABS_PATH}/:tab`)?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
+
+  const { data: clusterData } = useClusterQuery({
+    variables: { id: clusterId },
+  })
 
   useSetBreadcrumbs(
     useMemo(
       () => [
-        ...CD_CLUSTERS_BASE_CRUMBS,
-        {
-          label: clusterId,
-          url: `${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}`,
-        },
-        {
-          label: 'pods',
-          url: `${CD_BASE_PATH}/${CLUSTERS_PATH}/${clusterId}/${CLUSTER_PODS_PATH}`,
-        },
+        ...getClusterBreadcrumbs({
+          cluster: clusterData?.cluster || { id: clusterId },
+          tab: 'pods',
+        }),
         ...(clusterId && name && namespace
           ? [
               {
@@ -84,7 +80,7 @@ export default function Pod() {
             ]
           : []),
       ],
-      [clusterId, name, namespace, tab]
+      [clusterData?.cluster, clusterId, name, namespace, tab]
     )
   )
 
@@ -96,6 +92,8 @@ export default function Pod() {
 
   const pod = data?.pod
   const readiness = podStatusToReadiness(pod?.status)
+
+  console.log('pod', pod)
 
   if (error) {
     return <GqlError error={error} />

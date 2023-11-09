@@ -9,26 +9,25 @@ import {
   Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import {
-  ClustersRowFragment,
-  useClustersSuspenseQuery,
-} from 'generated/graphql'
+import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
 import { ComponentProps, useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Link, useNavigate } from 'react-router-dom'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
 import {
-  CD_BASE_PATH,
-  CLUSTERS_PATH,
-  GLOBAL_SETTINGS_PATH,
+  CD_REL_PATH,
+  CLUSTERS_REL_PATH,
+  GLOBAL_SETTINGS_ABS_PATH,
 } from 'routes/cdRoutesConsts'
 import { roundToTwoPlaces } from 'components/cluster/utils'
 import { BasicLink } from 'components/utils/typography/BasicLink'
+
+import chroma from 'chroma-js'
 
 import { POLL_INTERVAL, useSetCDHeaderContent } from '../ContinuousDeployment'
 import {
@@ -46,7 +45,7 @@ import {
 } from '../../../utils/semver'
 import { DeleteCluster } from '../providers/DeleteCluster'
 
-import { useSuspenseQueryPolling } from '../../hooks/suspense/useSuspenseQueryPolling'
+import { useCDEnabled } from '../utils/useCDEnabled'
 
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
@@ -56,7 +55,7 @@ import { DynamicClusterIcon } from './DynamicClusterIcon'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
-  { label: 'clusters', url: `${CD_BASE_PATH}/${CLUSTERS_PATH}` },
+  { label: 'clusters', url: `${CD_REL_PATH}/${CLUSTERS_REL_PATH}` },
 ]
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
@@ -301,7 +300,7 @@ export const columns = [
           <IconFrame
             clickable
             onClick={() =>
-              navigate(`/${CD_BASE_PATH}/${CLUSTERS_PATH}/${cluster?.id}`)
+              navigate(`/${CD_REL_PATH}/${CLUSTERS_REL_PATH}/${cluster?.id}`)
             }
             size="medium"
             icon={<CaretRightIcon />}
@@ -315,36 +314,64 @@ export const columns = [
   }),
 ]
 
+const TableWrapperSC = styled(FullHeightTableWrap)<{ $blurred: boolean }>(
+  ({ theme, $blurred }) => ({
+    '&&': {
+      ...($blurred
+        ? {
+            position: 'relative',
+            height: 'fit-content',
+            maxHeight: 300,
+            pointerEvents: 'none',
+            '&:before': {
+              content: '""',
+              position: 'absolute',
+              top: -5,
+              left: -5,
+              right: -5,
+              bottom: -5,
+              zIndex: 10,
+              background: `linear-gradient(180deg, ${chroma(
+                theme.colors['fill-zero']
+              ).alpha(0.1)} 0%, ${theme.colors['fill-zero']} 100%)`,
+              backdropFilter: `blur(1px)`,
+            },
+          }
+        : {}),
+    },
+  })
+)
+
 export default function Clusters() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { data, refetch } = useSuspenseQueryPolling(
-    useClustersSuspenseQuery({
-      fetchPolicy: 'cache-and-network',
-    }),
-    { pollInterval: POLL_INTERVAL }
-  )
+  const cdIsEnabled = useCDEnabled()
+  const { data, refetch } = useClustersQuery({
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
   const headerActions = useMemo(
-    () => (
-      <div
-        css={{
-          display: 'flex',
-          justifyContent: 'end',
-          gap: theme.spacing.large,
-        }}
-      >
-        <IconFrame
-          type="secondary"
-          size="large"
-          tooltip="Global settings"
-          clickable
-          icon={<GearTrainIcon />}
-          onClick={() => navigate(GLOBAL_SETTINGS_PATH)}
-        />
-        <CreateCluster />
-      </div>
-    ),
-    [navigate, theme.spacing.large]
+    () =>
+      cdIsEnabled ? (
+        <div
+          css={{
+            display: 'flex',
+            justifyContent: 'end',
+            gap: theme.spacing.large,
+          }}
+        >
+          <IconFrame
+            type="secondary"
+            size="large"
+            tooltip="Global settings"
+            clickable
+            icon={<GearTrainIcon />}
+            onClick={() => navigate(GLOBAL_SETTINGS_ABS_PATH)}
+          />
+          <CreateCluster />
+        </div>
+      ) : null,
+    [cdIsEnabled, navigate, theme.spacing.large]
   )
 
   useSetCDHeaderContent(headerActions)
@@ -358,7 +385,10 @@ export default function Clusters() {
   }
 
   return !isEmpty(data?.clusters?.edges) ? (
-    <FullHeightTableWrap>
+    <TableWrapperSC
+      $blurred={!cdIsEnabled}
+      className="wrap"
+    >
       <Table
         loose
         data={data?.clusters?.edges || []}
@@ -369,7 +399,7 @@ export default function Clusters() {
           height: '100%',
         }}
       />
-    </FullHeightTableWrap>
+    </TableWrapperSC>
   ) : (
     <EmptyState message="Looks like you don't have any CD clusters yet." />
   )

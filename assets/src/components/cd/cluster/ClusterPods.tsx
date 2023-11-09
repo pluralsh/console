@@ -13,6 +13,8 @@ import { Div, Flex, useDebounce } from 'honorable'
 
 import Fuse from 'fuse.js'
 
+import { GqlError } from 'components/utils/Alert'
+
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
   ColContainers,
@@ -148,7 +150,12 @@ export default function ClusterPods() {
   )
 
   if (error) {
-    return <>Sorry, something went wrong</>
+    return (
+      <GqlError
+        header="Sorry, something went wrong"
+        error={error}
+      />
+    )
   }
 
   return !data ? (
