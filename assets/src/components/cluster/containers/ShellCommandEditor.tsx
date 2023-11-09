@@ -7,7 +7,6 @@ import {
 } from '@pluralsh/design-system'
 import { useEffect, useRef, useState } from 'react'
 import { Flex, Form } from 'honorable'
-import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 export const CODELINE_HEIGHT = 42

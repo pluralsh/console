@@ -98,7 +98,6 @@ export function ShellWithContext({
   )
 }
 
-// It's used by two different routes.
 export default function Shell() {
   const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
   const { name = '', namespace = '', container = '' } = useParams()
