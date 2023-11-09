@@ -2815,6 +2815,7 @@ type GitStatus {
 type AvailableFeatures {
   vpn: Boolean
   audits: Boolean
+  cd: Boolean
   userManagement: Boolean
   databaseManagement: Boolean
 }
