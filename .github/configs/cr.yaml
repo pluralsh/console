@@ -1,5 +1,5 @@
 ## Reference: https://github.com/helm/chart-releaser/blob/main/pkg/config/config.go#L40-L65
 index-path: "./index.yaml"
-release-name-template: "v{{ .Version }}"
+release-name-template: "console-chart-v{{ .Version }}"
 generate-release-notes: true
 skip-existing: true
