@@ -1,0 +1,18 @@
+apiVersion: v1
+entries:
+  console:
+  - apiVersion: v2
+    appVersion: 0.7.85
+    created: "2023-11-10T20:08:13.540384779Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.0.2
+    description: A Helm chart for Kubernetes
+    digest: c8cd05afb08e61ff22d7c1966a3d144e5acb9dbfe3878eb3c3da11f61d6834e1
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.1.1/console-0.1.1.tgz
+    version: 0.1.1
+generated: "2023-11-10T20:08:13.54042678Z"
