@@ -76,13 +76,25 @@ defmodule Console.Deployments.Clusters do
     end
   end
 
+  def warm(:nodes, %Cluster{id: id} = cluster) do
+    with {:ok, nodes} <- fetch_nodes(cluster),
+      do: @local_adapter.put({:nodes, id}, {:ok, nodes}, ttl: @node_ttl)
+  end
+
+  def warm(:node_metrics, %Cluster{id: id} = cluster) do
+    with {:ok, metrics} <- fetch_node_metrics(cluster),
+      do: @local_adapter.put({:node_metrics, id}, {:ok, metrics}, ttl: @node_ttl)
+  end
+
   @doc """
   Fetches the nodes for a cluster, this query is heavily cached for performance
   """
   @spec nodes(Cluster.t) :: {:ok, term} | Console.error
   @decorate cacheable(cache: @local_adapter, key: {:nodes, id}, opts: [ttl: @node_ttl])
-  def nodes(%Cluster{id: id, pinged_at: nil, self: false}), do: {:ok, []}
-  def nodes(%Cluster{id: id} = cluster) do
+  def nodes(%Cluster{id: id} = cluster), do: fetch_nodes(cluster)
+
+  defp fetch_nodes(%Cluster{pinged_at: nil, self: false}), do: {:ok, []}
+  defp fetch_nodes(%Cluster{} = cluster) do
     with %Kazan.Server{} = server <- control_plane(cluster),
          _ <- Kube.Utils.save_kubeconfig(server),
          {:ok, %{items: items}} <- Core.list_node!() |> Kube.Utils.run() do
@@ -92,13 +104,16 @@ defmodule Console.Deployments.Clusters do
     end
   end
 
+
   @doc """
   Fetches the node metrics for a cluster, this query is heavily cached for performance
   """
   @spec node_metrics(Cluster.t) :: {:ok, term} | Console.error
   @decorate cacheable(cache: @local_adapter, key: {:node_metrics, id}, opts: [ttl: @node_ttl])
-  def node_metrics(%Cluster{id: id, pinged_at: nil, self: false}), do: {:ok, []}
-  def node_metrics(%Cluster{id: id} = cluster) do
+  def node_metrics(%Cluster{id: id} = cluster), do: fetch_node_metrics(cluster)
+
+  defp fetch_node_metrics(%Cluster{pinged_at: nil, self: false}), do: {:ok, []}
+  defp fetch_node_metrics(%Cluster{} = cluster) do
     with %Kazan.Server{} = server <- control_plane(cluster),
          _ <- Kube.Utils.save_kubeconfig(server),
          {:ok, %{items: items}} <- Kube.Client.list_metrics() do
