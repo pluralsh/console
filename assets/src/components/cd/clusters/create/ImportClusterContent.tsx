@@ -8,8 +8,10 @@ import {
   useState,
 } from 'react'
 
-import { StepBody, StepH, StepLink } from 'components/cd/ModalAlt'
 import { ClusterAttributes } from 'generated/graphql'
+
+import { CD_QUICKSTART_LINK } from 'routes/cdRoutesConsts'
+import { StepBody, StepH, StepLink } from 'components/cd/ModalAlt'
 
 import { NameVersionHandle } from './NameVersionHandle'
 import { ClusterTagSelection } from './ClusterTagSelection'
@@ -87,7 +89,7 @@ function ImportClusterContentPage2({ deployToken }: { deployToken: string }) {
           <StepBody>
             Need help? Consult our{' '}
             <StepLink
-              href="https://docs.plural.sh/getting-started/deployments"
+              href={CD_QUICKSTART_LINK}
               target="_blank"
             >
               quick start guide

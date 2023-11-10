@@ -68,6 +68,7 @@ function LogLine({ getValue }): ReactElement {
         display: 'flex',
         alignItems: 'center',
         paddingLeft: theme.spacing.small,
+        wordBreak: 'break-all',
       }}
     >
       {getValue()}

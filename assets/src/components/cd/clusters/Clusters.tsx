@@ -1,8 +1,10 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   Breadcrumb,
+  BrowseAppsIcon,
+  Button,
+  Card,
   CaretRightIcon,
-  EmptyState,
   GearTrainIcon,
   IconFrame,
   Table,
@@ -10,7 +12,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
-import { ComponentProps, useMemo } from 'react'
+import { ComponentProps, ReactNode, useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -20,32 +22,37 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
 import {
+  CD_QUICKSTART_LINK,
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
   GLOBAL_SETTINGS_ABS_PATH,
 } from 'routes/cdRoutesConsts'
-import { roundToTwoPlaces } from 'components/cluster/utils'
-import { BasicLink } from 'components/utils/typography/BasicLink'
-
 import chroma from 'chroma-js'
 
-import { POLL_INTERVAL, useSetCDHeaderContent } from '../ContinuousDeployment'
+import { coerceSemver, nextSupportedVersion, toNiceVersion } from 'utils/semver'
+
+import { roundToTwoPlaces } from 'components/cluster/utils'
+import { BasicLink } from 'components/utils/typography/BasicLink'
 import {
   cpuFormat,
   cpuParser,
   memoryFormat,
   memoryParser,
-} from '../../../utils/kubernetes'
-import { UsageBar } from '../../cluster/nodes/UsageBar'
-import { TableText } from '../../cluster/TableElements'
-import {
-  coerceSemver,
-  nextSupportedVersion,
-  toNiceVersion,
-} from '../../../utils/semver'
-import { DeleteCluster } from '../providers/DeleteCluster'
+} from 'utils/kubernetes'
+import { UsageBar } from 'components/cluster/nodes/UsageBar'
+import { TableText } from 'components/cluster/TableElements'
+import { MakeInert } from 'components/utils/MakeInert'
 
+import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
+
+import {
+  POLL_INTERVAL,
+  useSetCDHeaderContent,
+  useSetCDScrollable,
+} from '../ContinuousDeployment'
+import { DeleteCluster } from '../providers/DeleteCluster'
 import { useCDEnabled } from '../utils/useCDEnabled'
+import { DEMO_CLUSTERS } from '../utils/demoData'
 
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
@@ -314,14 +321,17 @@ export const columns = [
   }),
 ]
 
-const TableWrapperSC = styled(FullHeightTableWrap)<{ $blurred: boolean }>(
+type TableWrapperSCProps = {
+  $blurred: boolean
+}
+const TableWrapperSC = styled(FullHeightTableWrap)<TableWrapperSCProps>(
   ({ theme, $blurred }) => ({
     '&&': {
       ...($blurred
         ? {
             position: 'relative',
             height: 'fit-content',
-            maxHeight: 300,
+            // maxHeight: 300,
             pointerEvents: 'none',
             '&:before': {
               content: '""',
@@ -377,30 +387,185 @@ export default function Clusters() {
   useSetCDHeaderContent(headerActions)
   useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)
 
-  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
-    useMemo(() => ({ meta: { refetch } }), [refetch])
+  const clusterEdges = data?.clusters?.edges
+  // const clusterEdges =  []
+
+  const isDemo = isEmpty(clusterEdges) || !cdIsEnabled
+  const tableData = isDemo ? DEMO_CLUSTERS : clusterEdges
+
+  useSetCDScrollable(isDemo)
 
   if (!data) {
     return <LoadingIndicator />
   }
 
-  return !isEmpty(data?.clusters?.edges) ? (
-    <TableWrapperSC
-      $blurred={!cdIsEnabled}
-      className="wrap"
-    >
-      <Table
-        loose
-        data={data?.clusters?.edges || []}
-        columns={columns}
-        reactTableOptions={reactTableOptions}
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
+  return !isDemo ? (
+    <FullHeightTableWrap>
+      <ClustersTable
+        data={tableData || []}
+        refetch={refetch}
       />
-    </TableWrapperSC>
+    </FullHeightTableWrap>
   ) : (
-    <EmptyState message="Looks like you don't have any CD clusters yet." />
+    <DemoContent mode={cdIsEnabled ? 'empty' : 'disabled'} />
+  )
+}
+
+function ClustersTable({
+  refetch,
+  data,
+}: {
+  refetch?: () => void
+  data: any[]
+}) {
+  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
+    useMemo(() => ({ meta: { refetch } }), [refetch])
+
+  return (
+    <Table
+      loose
+      data={data || []}
+      columns={columns}
+      reactTableOptions={reactTableOptions}
+      css={{
+        maxHeight: 'unset',
+        height: '100%',
+      }}
+    />
+  )
+}
+
+function DemoContent({ mode }: { mode: 'disabled' | 'empty' }) {
+  return (
+    <div>
+      <DemoTable mode={mode} />
+    </div>
+  )
+}
+
+function DemoTable({ mode }: { mode: 'disabled' | 'empty' }) {
+  const tableData =
+    mode === 'disabled' ? DEMO_CLUSTERS.slice(0, 4) : DEMO_CLUSTERS.slice(0, 3)
+
+  return (
+    <div
+      css={{
+        position: 'relative',
+      }}
+    >
+      <MakeInert inert>
+        <TableWrapperSC $blurred>
+          <ClustersTable data={tableData} />
+        </TableWrapperSC>
+      </MakeInert>
+
+      {mode === 'disabled' && (
+        <OverlayCard
+          title="Upgrade needed"
+          actions={
+            <Button
+              primary
+              as="a"
+              href="https://app.plural.sh/account/billing"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Review plans
+            </Button>
+          }
+        >
+          Upgrade to Plural Professional to enable Continuous Deployment
+          features.
+        </OverlayCard>
+      )}
+      {mode === 'empty' && (
+        <OverlayCard
+          title="Create your first cluster to get started"
+          actions={
+            <>
+              <Button
+                primary
+                as="a"
+                href={CD_QUICKSTART_LINK}
+                target="_blank"
+              >
+                Guided deployment
+              </Button>
+              <Button
+                secondary
+                startIcon={<BrowseAppsIcon />}
+                as={Link}
+                to="/"
+              >
+                Explore the Console
+              </Button>
+            </>
+          }
+        />
+      )}
+    </div>
+  )
+}
+
+const OverlayCardSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  position: 'absolute',
+  alignItems: 'center',
+  justifyContent: 'center',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 50,
+  '.card': {
+    padding: theme.spacing.xlarge,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.large,
+    boxShadow: theme.boxShadows.modal,
+    maxWidth: 460,
+  },
+  '.content': {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.small,
+  },
+  '.body': {
+    color: theme.colors['text-light'],
+  },
+  '.actions': { display: 'flex', gap: theme.spacing.medium },
+}))
+
+function OverlayCard({
+  title,
+  children,
+  actions,
+}: {
+  title?: ReactNode
+  children?: ReactNode
+  actions?: ReactNode
+}) {
+  return (
+    <OverlayCardSC>
+      <Card
+        className="card"
+        fillLevel={2}
+      >
+        {(title || children) && (
+          <div className="content">
+            {title && (
+              <Body1BoldP
+                as="h3"
+                className="title"
+              >
+                {title}
+              </Body1BoldP>
+            )}
+            {children && <Body2P className="body">{children}</Body2P>}
+          </div>
+        )}
+        {actions && <div className="actions">{actions}</div>}
+      </Card>
+    </OverlayCardSC>
   )
 }
