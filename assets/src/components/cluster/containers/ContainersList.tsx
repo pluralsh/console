@@ -218,6 +218,7 @@ type ContainersListProps = {
   initContainerStatuses?: Record<string, Maybe<ContainerStatus>>
   namespace: string
   podName: string
+  clusterId?: string
   refetch?: any
   columns?: any[]
   rowLink?: boolean
@@ -264,6 +265,7 @@ export function ContainersList({
   columns,
   namespace,
   podName,
+  clusterId,
   rowLink = true,
 }: ContainersListProps) {
   const navigate = useNavigate()
@@ -308,6 +310,13 @@ export function ContainersList({
       loose
       data={tableData}
       columns={columns}
+      reactTableOptions={{
+        meta: {
+          clusterId,
+          podName,
+          namespace,
+        },
+      }}
       {...TABLE_HEIGHT}
       {...(rowLink
         ? {
