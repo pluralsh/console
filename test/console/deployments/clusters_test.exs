@@ -39,6 +39,7 @@ defmodule Console.Deployments.ClustersTest do
       assert svc.name == "cluster-#{provider.name}-#{cluster.name}"
       assert svc.namespace == provider.namespace
       assert svc.cluster_id == self.id
+      assert svc.protect
 
       {:ok, secrets} = Services.configuration(svc)
       assert secrets["clusterName"] == cluster.name
@@ -494,6 +495,7 @@ defmodule Console.Deployments.ClustersTest do
       assert svc.git.ref == "main"
       assert svc.namespace == provider.namespace
       assert svc.cluster_id == self.id
+      assert svc.protect
 
       {:ok, secrets} = Services.configuration(svc)
       assert secrets["accessKeyId"] == "aid"

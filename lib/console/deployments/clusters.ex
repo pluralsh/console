@@ -580,6 +580,7 @@ defmodule Console.Deployments.Clusters do
     |> Map.merge(%{
       repository_id: provider.repository_id || Git.artifacts_repo!().id,
       name: name,
+      protect: true,
       namespace: ns,
       git: Map.take(provider.git, ~w(ref folder)a),
     })
@@ -618,6 +619,7 @@ defmodule Console.Deployments.Clusters do
     |> Map.merge(%{
       repository_id: Git.artifacts_repo!().id,
       name: "capi-#{name}",
+      protect: true,
       namespace: provider.namespace,
       git: %{ref: "main", folder: "capi/providers/#{provider.cloud}"},
     })
