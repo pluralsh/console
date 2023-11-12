@@ -218,22 +218,12 @@ defmodule Console.GraphQl.Deployments.Service do
   @desc "Advanced configuration of how to sync resources"
   object :sync_config do
     field :namespace_metadata, :namespace_metadata
-    field :diff_normalizers, list_of(:diff_normalizer)
   end
 
   @desc "metadata fields for created namespaces"
   object :namespace_metadata do
     field :labels,      :map
     field :annotations, :map
-  end
-
-  @desc "specification for ignoring diffs for subfields of manifests, to avoid admission controllers and other mutations"
-  object :diff_normalizer do
-    field :group,            non_null(:string)
-    field :kind,             non_null(:string)
-    field :name,             non_null(:string)
-    field :namespace,        non_null(:string)
-    field :json_patches, list_of(non_null(:string))
   end
 
   connection node_type: :service_deployment

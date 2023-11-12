@@ -1018,22 +1018,12 @@ type ServiceStatusCount {
 "Advanced configuration of how to sync resources"
 type SyncConfig {
   namespaceMetadata: NamespaceMetadata
-  diffNormalizers: [DiffNormalizer]
 }
 
 "metadata fields for created namespaces"
 type NamespaceMetadata {
   labels: Map
   annotations: Map
-}
-
-"specification for ignoring diffs for subfields of manifests, to avoid admission controllers and other mutations"
-type DiffNormalizer {
-  group: String!
-  kind: String!
-  name: String!
-  namespace: String!
-  jsonPatches: [String!]
 }
 
 type ServiceDeploymentConnection {

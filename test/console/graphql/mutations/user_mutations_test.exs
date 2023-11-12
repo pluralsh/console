@@ -145,6 +145,19 @@ defmodule Console.GraphQl.UserMutationsTest do
       assert refetch(admin)
     end
 
+    test "cannot delete the console user" do
+      admin = admin_user()
+      console = insert(:user, bot_name: "console")
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteUser(id: $id) { id }
+        }
+      """, %{"id" => console.id}, %{current_user: admin})
+
+      assert refetch(console)
+    end
+
     test "nonadmins cannot delete users" do
       [user, other] = insert_list(2, :user)
 

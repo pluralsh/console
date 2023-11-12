@@ -980,16 +980,6 @@ export type DeploymentStrategy = {
   type?: Maybe<Scalars['String']['output']>;
 };
 
-/** specification for ignoring diffs for subfields of manifests, to avoid admission controllers and other mutations */
-export type DiffNormalizer = {
-  __typename?: 'DiffNormalizer';
-  group: Scalars['String']['output'];
-  jsonPatches?: Maybe<Array<Scalars['String']['output']>>;
-  kind: Scalars['String']['output'];
-  name: Scalars['String']['output'];
-  namespace: Scalars['String']['output'];
-};
-
 export type DiffNormalizerAttributes = {
   group: Scalars['String']['input'];
   jsonPatches?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -3565,7 +3555,6 @@ export type StatusCondition = {
 /** Advanced configuration of how to sync resources */
 export type SyncConfig = {
   __typename?: 'SyncConfig';
-  diffNormalizers?: Maybe<Array<Maybe<DiffNormalizer>>>;
   namespaceMetadata?: Maybe<NamespaceMetadata>;
 };
 

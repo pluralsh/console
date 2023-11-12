@@ -101,8 +101,12 @@ defmodule Console.Services.Users do
   @spec delete_user(binary, User.t) :: user_resp
   def delete_user(id, %User{id: id}), do: {:error, "you cannot delete yourself"}
   def delete_user(id, %User{}) do
-    get_user!(id)
-    |> Repo.delete()
+    case get_user(id) do
+      %User{bot_name: "console"} -> {:error, "cannot delete the console user"}
+      nil -> {:error, "not found"}
+      user -> {:ok, user}
+    end
+    |> when_ok(:delete)
   end
 
   @spec bootstrap_user(map) :: user_resp
