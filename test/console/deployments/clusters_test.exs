@@ -328,6 +328,41 @@ defmodule Console.Deployments.ClustersTest do
       }, cluster.id, user)
     end
 
+    test "it will validate that version changes don't happen when others are pending" do
+      user = admin_user()
+      provider = insert(:cluster_provider)
+      insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25",
+        current_version: "1.25",
+        provider_id: provider.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      assert cluster.current_version == "1.25"
+
+      {:ok, cluster} = Clusters.update_cluster(%{
+        version: "1.26",
+        node_pools: [
+          %{name: "pool", min_size: 2, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, cluster.id, user)
+
+      assert cluster.version == "1.26"
+
+      {:error, _} = Clusters.update_cluster(%{
+        version: "1.26.5",
+        node_pools: [
+          %{name: "pool", min_size: 2, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, cluster.id, user)
+    end
+
     test "it will validate that version changes don't exceed 1 minor version against current_version if present" do
       user = admin_user()
       provider = insert(:cluster_provider)
