@@ -260,6 +260,8 @@ defmodule Console.Schema.Cluster do
 
   defp validate_vsn(cs) do
     case {get_change(cs, :version), cs.data.version, cs.data.current_version} do
+      {vsn, old, current} when is_binary(vsn) and is_binary(old) and is_binary(current) and old != current ->
+        add_error(cs, :version, "cannot upgrade while an upgrade is still in progress")
       {v, _, prev} when is_binary(v) and is_binary(prev) ->
         validate_vsn(cs, v, prev)
       {v, prev, _} when is_binary(v) and is_binary(prev) ->
