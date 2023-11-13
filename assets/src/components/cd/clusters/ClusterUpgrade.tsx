@@ -17,7 +17,6 @@ import {
 } from 'generated/graphql'
 
 import {
-  bumpMinor,
   coerceSemver,
   nextSupportedVersion,
   supportedUpgrades,
@@ -25,7 +24,6 @@ import {
 } from 'utils/semver'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { Confirm } from 'components/utils/Confirm'
-import { ProviderIcons } from 'components/utils/Provider'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { ApolloError } from '@apollo/client'
@@ -115,25 +113,6 @@ const upgradeColumns = [
     cell: ({ getValue }) => <div>{toNiceVersion(getValue())}</div>,
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
-    id: 'nextK8sRelease',
-    header: 'Next K8s release',
-    cell: ({ getValue }) => {
-      const cluster = getValue()
-
-      return (
-        <ColWithIcon icon={ProviderIcons.GENERIC}>
-          {toNiceVersion(
-            nextSupportedVersion(
-              cluster?.currentVersion,
-              supportedVersions(cluster)
-            ) || bumpMinor(cluster?.currentVersion)
-          )}
-        </ColWithIcon>
-      )
-    },
-  }),
-
-  columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
     header: 'Upgrade version',
     meta: {
@@ -146,7 +125,14 @@ const upgradeColumns = [
         () => supportedUpgrades(cluster.version, supportedVersions(cluster)),
         [cluster]
       )
-      const [targetVersion, setTargetVersion] = useState<Nullable<string>>()
+      const upgradeVersion = nextSupportedVersion(
+        cluster?.version,
+        (cluster?.provider?.supportedVersions || []).map((vsn) =>
+          coerceSemver(vsn || '')
+        )
+      )
+      const [targetVersion, setTargetVersion] =
+        useState<Nullable<string>>(upgradeVersion)
 
       const { refetch, setError } = table.options.meta as {
         refetch?: () => void

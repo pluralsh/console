@@ -2,12 +2,6 @@ import semver from 'semver'
 
 import { isNonNullable } from './isNonNullable'
 
-export function bumpMinor(version?: string | null): string | null {
-  if (!version) return null
-
-  return semver.inc(version, 'minor')
-}
-
 export function nextSupportedVersion(
   version?: string | null,
   supportedVersions?: (string | null)[] | null
