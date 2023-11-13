@@ -110,14 +110,14 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
         %{
           "name" => "queries",
           "queries" => [
-            %{"query" => "some-query", "legend" => "legend", "results" => [%{"timestamp" => 1, "value" => "1"}]}
+            %{"query" => "some-query", "legend" => "legend", "results" => [%{"timestamp" => "1", "value" => "1"}]}
           ]
         },
         %{
           "name" => "formatted",
           "queries" => [
-            %{"query" => "formatted-query", "legend" => "legend-val", "results" => [%{"timestamp" => 1, "value" => "1"}]},
-            %{"query" => "formatted-query", "legend" => "legend-val2", "results" => [%{"timestamp" => 1, "value" => "1"}]}
+            %{"query" => "formatted-query", "legend" => "legend-val", "results" => [%{"timestamp" => "1", "value" => "1"}]},
+            %{"query" => "formatted-query", "legend" => "legend-val2", "results" => [%{"timestamp" => "1", "value" => "1"}]}
           ]
         }
       ]
@@ -147,10 +147,10 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       """, %{"query" => ~s({namespace="console"}), "limit" => 100}, %{current_user: insert(:user)})
 
       assert first["stream"]["var"] == "val"
-      assert first["values"] == [%{"timestamp" => 1, "value" => "hello"}]
+      assert first["values"] == [%{"timestamp" => "1", "value" => "hello"}]
 
       assert second["stream"]["var"] == "val2"
-      assert second["values"] == [%{"timestamp" => 1, "value" => "world"}]
+      assert second["values"] == [%{"timestamp" => "1", "value" => "world"}]
     end
   end
 
@@ -173,7 +173,7 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
         }
       """, %{"q" => "something"}, %{current_user: insert(:user)})
 
-      assert metric["values"] == [%{"timestamp" => 1, "value" => "1"}]
+      assert metric["values"] == [%{"timestamp" => "1", "value" => "1"}]
     end
   end
 

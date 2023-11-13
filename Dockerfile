@@ -14,7 +14,7 @@ COPY assets/ ./
 
 RUN yarn run build
 
-FROM bitwalker/alpine-elixir:1.11.4 AS builder
+FROM bitwalker/alpine-elixir:1.12.3 AS builder
 
 # The following are build arguments used to change variable parts of the image.
 # The name of your application/release (required)
@@ -90,21 +90,21 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     chmod +x /usr/local/bin/terraform
 
 # From this line onwards, we're in a new image, which will be the image used in production
-FROM erlang:23.3.4.18-alpine
+FROM erlang:24.3.4.6-alpine
 
 ARG CLOUD_SDK_VERSION=273.0.0
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
 ENV PATH /google-cloud-sdk/bin:$PATH
 
+COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 COPY --from=tools /usr/local/bin/helm /usr/local/bin/helm
 COPY --from=tools /usr/local/bin/terraform /usr/local/bin/terraform
-COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 COPY --from=tools /usr/local/bin/kubectl /usr/local/bin/kubectl
 
 RUN apk --no-cache add \
         ca-certificates \
-        # python3 \
-        # py3-pip \
+        python3 \
+        py3-pip \
         # py-crcmod \
         curl \
         bash \
@@ -113,6 +113,10 @@ RUN apk --no-cache add \
         openssl-dev \
         git \
         gnupg
+
+RUN apk add --no-cache --update --virtual=build gcc musl-dev python3-dev libffi-dev openssl-dev cargo make && \
+    pip3 install --no-cache-dir --prefer-binary azure-cli && \
+    apk del build
 
 # The name of your application/release (required)
 ARG APP_NAME=console
@@ -125,6 +129,10 @@ ENV REPLACE_OS_VARS=true \
     GIT_COMMIT=${GIT_COMMIT}
 
 WORKDIR /opt/app
+
+RUN addgroup -S --gid 10001 app
+RUN adduser -u 10001 -S console -G app
+RUN chown console:app /opt/app 
 
 RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
 RUN mkdir -p /root/.plural && mkdir -p /root/.creds && mkdir /root/bin

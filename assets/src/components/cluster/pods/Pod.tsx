@@ -7,16 +7,19 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
-import Sidecar from './PodSidecar'
+import { usePodQuery } from '../../../generated/graphql'
+import { POLL_INTERVAL } from '../constants'
+import LoadingIndicator from '../../utils/LoadingIndicator'
+
 import SideNav from './PodSideNav'
+import Sidecar from './PodSidecar'
 
 export default function Node() {
   const tabStateRef = useRef<any>()
   const theme = useTheme()
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const { tab } = useMatch('/pods/:namespace/:name/:tab')?.params || {}
 
   const breadcrumbs = useMemo(
@@ -35,6 +38,16 @@ export default function Node() {
 
   useSetBreadcrumbs(breadcrumbs)
 
+  const { data } = usePodQuery({
+    variables: { name, namespace },
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
+
+  const pod = data?.pod
+
+  if (!pod) return <LoadingIndicator />
+
   return (
     <ResponsiveLayoutPage>
       <ResponsiveLayoutSidenavContainer paddingTop={40 + theme.spacing.medium}>
@@ -45,11 +58,11 @@ export default function Node() {
         as={<ResponsiveLayoutContentContainer overflow="visible" />}
         stateRef={tabStateRef}
       >
-        <Outlet />
+        <Outlet context={{ pod }} />
       </TabPanel>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer>
-        <Sidecar />
+        <Sidecar pod={data?.pod} />
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>
   )

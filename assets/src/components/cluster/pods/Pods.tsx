@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useMemo, useState } from 'react'
+import { ComponentProps, forwardRef, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { Div, Flex, useDebounce } from 'honorable'
 import {
@@ -13,7 +13,6 @@ import {
 } from '@pluralsh/design-system'
 import Fuse from 'fuse.js'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/ListBoxItem'
 import styled, { useTheme } from 'styled-components'
 import type { RootQueryType } from 'generated/graphql'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
@@ -21,6 +20,8 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import { isEqual } from 'utils/kubernetes'
 import { isEmpty, uniqBy } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import { GqlError } from 'components/utils/Alert'
 
 import { PODS_Q, PODS_SUB } from '../queries'
 import { SHORT_POLL_INTERVAL } from '../constants'
@@ -41,9 +42,10 @@ import {
 const ListBoxFooterPlusInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
 }))
-const NamespaceListFooter = forwardRef<
+
+export const NamespaceListFooter = forwardRef<
   HTMLDivElement,
-  Omit<ListBoxFooterProps, 'children'>
+  Omit<ComponentProps<typeof ListBoxFooterPlusInner>, 'children'>
 >(({ leftContent, ...props }, ref) => {
   const theme = useTheme()
   const label = 'View all'
@@ -195,7 +197,12 @@ export default function AllPods() {
   )
 
   if (error) {
-    return <>Sorry, something went wrong</>
+    return (
+      <GqlError
+        header="Sorry, something went wrong"
+        error={error}
+      />
+    )
   }
 
   return (

@@ -11,6 +11,7 @@ defmodule Kube.Client do
   list_request :list_wireguard_peers, Kube.WireguardPeer.List
   list_request :list_certificate, Kube.Certificate.List
   list_request :list_postgresqls, Kube.Postgresql.List
+  list_request :list_clusters, Kube.Cluster.List
 
   get_request :get_dashboard, Kube.Dashboard
   get_request :get_slashcommand, Kube.SlashCommand
@@ -22,6 +23,7 @@ defmodule Kube.Client do
   get_request :get_vertical_pod_autoscaler, Kube.VerticalPodAutoscaler
   get_request :get_wireguard_peer, Kube.WireguardPeer
   get_request :get_wireguard_server, Kube.WireguardServer
+  get_request :get_cluster, Kube.Cluster
 
   delete_request :delete_wireguard_peer, Kube.WireguardPeer
   delete_request :delete_certificate, Kube.Certificate
@@ -36,6 +38,16 @@ defmodule Kube.Client do
   list_all_request :list_licenses, Kube.License.List
   list_all_request :list_applications, Kube.Application.List
   list_all_request :list_metrics, Kube.NodeMetric.List
+
+  def raw(path) do
+    %Kazan.Request{
+      method: "get",
+      path: path,
+      query_params: %{},
+      response_model: Kube.Client.EchoModel
+    }
+    |> Kube.Utils.run()
+  end
 
   def get_application(name), do: get_application(name, name)
 

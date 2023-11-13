@@ -19,7 +19,7 @@ defmodule Console.GraphQl.Schema.Base do
       use Absinthe.Relay.Schema.Notation, :modern
       import Absinthe.Resolution.Helpers
       import Console.GraphQl.Schema.Base
-      alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature}
+      alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature, ClusterAuthenticated}
     end
   end
 
@@ -63,6 +63,28 @@ defmodule Console.GraphQl.Schema.Base do
     end
   end
 
+  defmacro service_authorized(perm) do
+    quote do
+      arg :service_id, :id
+      middleware Console.Middleware.CdAuthenticated, perm: unquote(perm)
+    end
+  end
+
+  defmacro cluster_authorized(perm) do
+    quote do
+      arg :cluster_id, :id
+      middleware Console.Middleware.CdAuthenticated, perm: unquote(perm)
+    end
+  end
+
+  defmacro hybrid_authorized(perm) do
+    quote do
+      arg :service_id, :id
+      arg :cluster_id, :id
+      middleware Console.Middleware.CdAuthenticated, perm: unquote(perm)
+    end
+  end
+
   defmacro datetime_func(name, key) do
     quote do
       field unquote(name), :datetime, resolve: fn
@@ -98,7 +120,9 @@ defmodule Console.GraphQl.Schema.Base do
           error -> error
         end
       rescue
-        error -> {:error, Exception.message(error)}
+        error ->
+          {_, msg} = Console.GraphQl.Exception.error(error)
+          {:error, msg}
       end
     end
   end

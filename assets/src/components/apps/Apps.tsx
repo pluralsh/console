@@ -15,7 +15,14 @@ import {
   TabList,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useCallback, useContext, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import Fuse from 'fuse.js'
 
 import { Readiness, readinessToLabel } from 'utils/status'
@@ -25,6 +32,10 @@ import { isEmpty } from 'lodash'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import { LoginContext } from 'components/contexts'
+
+import { useNavigate } from 'react-router-dom'
 
 import App from './AppCard'
 import { appState } from './misc'
@@ -75,7 +86,7 @@ function ReadyEmptyState() {
     <EmptyState
       icon={<LifePreserverIcon size={64} />}
       message="That's awkward."
-      description="None of yout apps appear to be ready. Don't worry — we're here to help."
+      description="None of your apps appear to be ready. Don't worry — we're here to help."
       width={400}
     >
       <Button
@@ -137,10 +148,16 @@ const searchOptions = {
 const breadcrumbs: Breadcrumb[] = [{ label: 'apps', url: '/' }]
 
 export default function Apps() {
+  const { configuration } = useContext<any>(LoginContext)
   const { applications = [] } = useContext<any>(InstallationContext)
   const [query, setQuery] = useState<string>('')
   const [filter, setFilter] = useState<any>(ALL_FILTER)
   const tabStateRef = useRef<any>(null)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (configuration?.byok) navigate('/cd/clusters')
+  }, [configuration, navigate])
 
   useSetBreadcrumbs(breadcrumbs)
 

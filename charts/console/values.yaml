@@ -1,0 +1,118 @@
+# Default values for watchman.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+homeDir: /root
+
+image:
+  repository: dkr.plural.sh/console/console
+  tag: ~
+  imagePullPolicy: IfNotPresent
+
+initContainer:
+  image:
+    repository: gcr.io/pluralsh/library/busybox
+    tag: 1.35.0
+
+cliContainer:
+  enabled: false
+  image:
+    repository: ghcr.io/pluralsh/plural-cli
+    tag: latest
+
+serviceAccount:
+  create: true
+  annotations: {}
+
+extraSecretEnv: []
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 4000
+
+dbPasswordSecret: console.plural-console.credentials.postgresql.acid.zalan.do
+
+shutdownDelay: 30
+
+ingress:
+  enabled: true
+  ingressClass: nginx
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
+    nginx.ingress.kubernetes.io/session-cookie-path: /socket
+
+postgres:
+  dsnSecret: postgres-dsn
+  dsnKey: dsn
+  host: CHANGEME
+  port: 5432
+  passwordSecret: postgres-password
+
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 250Mi
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: 'app.kubernetes.io/name'
+            operator: In
+            values:
+            - console
+        topologyKey: "kubernetes.io/hostname"
+
+monitoring:
+  enabled: false
+
+provider: custom

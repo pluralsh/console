@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { Box, LayerPositionType } from 'grommet'
 import { Button, DownloadIcon, Modal, Toast } from '@pluralsh/design-system'
 import { Modal as HonorableModal } from 'honorable/dist/components/Modal/Modal'
+import { useTheme } from 'styled-components'
 
 import { Installer } from './Installer'
 
 export function InstallerModal() {
+  const theme = useTheme()
   const [open, setOpen] = useState(false)
   const [confirmClose, setConfirmClose] = useState(false)
   const [visible, setVisible] = useState(false)
@@ -23,13 +25,19 @@ export function InstallerModal() {
       </Button>
 
       <HonorableModal
+        portal
         BackdropProps={{ zIndex: 20 }}
         open={open}
         fontSize={16}
         width={768}
         maxWidth={768}
         height={768}
-        padding={24}
+        {...{
+          paddingLeft: theme.spacing.large,
+          paddingRight: theme.spacing.large,
+          paddingTop: theme.spacing.large,
+          paddingBottom: theme.spacing.large,
+        }}
       >
         {open && (
           <Installer

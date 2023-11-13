@@ -22,6 +22,8 @@ cliContainer:
     repository: ghcr.io/pluralsh/plural-cli
     tag: latest
 
+podLabels: {}
+
 serviceAccount:
   create: true
   annotations: {}
@@ -141,6 +143,7 @@ affinity:
 
 provider: google
 postgresNamespace: postgres
+useAADPodIdentity: false
 
 postgresql:
   image:

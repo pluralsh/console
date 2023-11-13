@@ -1,5 +1,4 @@
 import { useMutation } from '@apollo/client'
-import { Box } from 'grommet'
 import { ListBoxItem } from '@pluralsh/design-system'
 import { Dispatch, useContext, useState } from 'react'
 import { LoginContext } from 'components/contexts'
@@ -58,10 +57,12 @@ export default function Role({ role, q }: any) {
   }
 
   return (
-    <Box
-      fill="horizontal"
-      direction="row"
-      align="center"
+    <div
+      css={{
+        display: 'flex',
+        width: '100%',
+        alignItems: 'center',
+      }}
     >
       <Info
         text={role.name}
@@ -83,25 +84,23 @@ export default function Role({ role, q }: any) {
           ))}
         </MoreMenu>
       )}
-      <>
-        <Confirm
-          open={confirm}
-          title="Delete role"
-          text="Are you sure you want to delete this role? This could have downstream effects on a large number of users."
-          close={() => setConfirm(false)}
-          submit={() => mutation()}
-          loading={loading}
-          destructive
-          error={error}
+      <Confirm
+        open={confirm}
+        title="Delete role"
+        text="Are you sure you want to delete this role? This could have downstream effects on a large number of users."
+        close={() => setConfirm(false)}
+        submit={() => mutation()}
+        loading={loading}
+        destructive
+        error={error}
+      />
+      {edit && (
+        <RoleEdit
+          role={role}
+          open={edit}
+          setOpen={setEdit}
         />
-        {edit && (
-          <RoleEdit
-            role={role}
-            open={edit}
-            setOpen={setEdit}
-          />
-        )}
-      </>
-    </Box>
+      )}
+    </div>
   )
 }

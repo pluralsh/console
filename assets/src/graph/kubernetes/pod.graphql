@@ -1,0 +1,24 @@
+fragment PodWithEvents on Pod {
+  ...Pod
+  events {
+    ...Event
+  }
+}
+
+query Pod($name: String!, $namespace: String!, $clusterId: ID) {
+  pod(name: $name, namespace: $namespace, clusterId: $clusterId) {
+    ...PodWithEvents
+  }
+}
+
+query PodLogs(
+  $name: String!
+  $namespace: String!
+  $clusterId: ID
+  $container: String!
+  $sinceSeconds: Int!
+) {
+  pod(name: $name, namespace: $namespace, clusterId: $clusterId) {
+    logs(container: $container, sinceSeconds: $sinceSeconds)
+  }
+}

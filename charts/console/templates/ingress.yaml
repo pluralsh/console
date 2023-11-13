@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: console
+  labels:
+{{ include "console.labels" . | indent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.ingressClass }}
+  tls:
+  - hosts:
+    - {{ .Values.ingress.console_dns | quote }}
+    secretName: console-tls
+  rules:
+  - host: {{ .Values.ingress.console_dns | quote }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: console
+            port: 
+              name: http

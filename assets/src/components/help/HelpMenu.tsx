@@ -37,11 +37,13 @@ function HelpMenuButton({
   )
 }
 const HelpMenuSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  padding: theme.spacing.medium,
-  flexDirection: 'column',
-  rowGap: theme.spacing.medium,
-  boxShadow: theme.boxShadows.modal,
+  '&&': {
+    padding: theme.spacing.medium,
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: theme.spacing.medium,
+    boxShadow: theme.boxShadows.modal,
+  },
   '.heading': {
     margin: 0,
     ...theme.partials.text.overline,

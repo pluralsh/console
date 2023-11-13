@@ -3,6 +3,9 @@ import 'styled-components'
 
 import { type styledTheme } from '@pluralsh/design-system'
 
+// Allow css prop on html elements
+import type {} from 'styled-components/cssprop'
+
 type StyledTheme = typeof styledTheme
 
 // and extend them!

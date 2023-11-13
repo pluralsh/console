@@ -1,18 +1,12 @@
-import { useQuery } from '@apollo/client'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { Flex } from 'honorable'
 import { Button, LogsIcon } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { ContainerStatus, Maybe, Pod } from 'generated/graphql'
 import { asQuery } from 'components/utils/query'
 
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-
-import { POLL_INTERVAL } from '../constants'
-import { POD_INFO_Q } from '../queries'
 import { SubTitle } from '../nodes/SubTitle'
 import { ContainersList } from '../containers/ContainersList'
-
 import { useNamespaceIsApp } from '../../hooks/useNamespaceIsApp'
 
 import PodMetadata from './PodMetadata'
@@ -68,18 +62,7 @@ function ViewLogsButton({ metadata }: any) {
 }
 
 export default function PodInfo() {
-  const { name, namespace } = useParams()
-  const { data } = useQuery<{ pod: Pod }>(POD_INFO_Q, {
-    variables: { name, namespace },
-    pollInterval: POLL_INTERVAL,
-  })
-
-  if (!name || !namespace) {
-    return null
-  }
-  if (!data) return <LoadingIndicator />
-
-  const { pod } = data
+  const { pod } = useOutletContext() as { pod: Pod }
   const containers = pod.spec.containers || []
   const initContainers = pod.spec.initContainers || []
   const containerStatuses = statusesToRecord(pod.status?.containerStatuses)
@@ -104,8 +87,8 @@ export default function PodInfo() {
             containerStatuses={containerStatuses}
             initContainers={initContainers}
             initContainerStatuses={initContainerStatuses}
-            namespace={namespace}
-            podName={name}
+            namespace={pod.metadata.namespace ?? ''}
+            podName={pod.metadata.name}
           />
         </section>
         <section>

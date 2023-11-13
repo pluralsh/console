@@ -1,6 +1,6 @@
 import { ReactNode, useRef } from 'react'
-import { Card } from '@pluralsh/design-system'
-import { animated, useSpring } from 'react-spring'
+import { AnimatedDiv, Card } from '@pluralsh/design-system'
+import { useSpring } from 'react-spring'
 import styled, { useTheme } from 'styled-components'
 import { Div } from 'honorable'
 import { createPortal } from 'react-dom'
@@ -50,7 +50,7 @@ export function ChartTooltip({
   )
 
   const content = (
-    <animated.div
+    <AnimatedDiv
       style={{
         position: 'fixed',
         top: 0,
@@ -71,7 +71,7 @@ export function ChartTooltip({
           {label}: <b>{value}</b>
         </div>
       </ChartTooltipWrap>
-    </animated.div>
+    </AnimatedDiv>
   )
 
   return (

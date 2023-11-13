@@ -1,0 +1,257 @@
+fragment ServiceDeploymentRevision on Revision {
+  id
+  sha
+  version
+  message
+  updatedAt
+  insertedAt
+  git {
+    folder
+    ref
+  }
+}
+
+fragment ServiceDeploymentsRow on ServiceDeployment {
+  id
+  name
+  protect
+  message
+  git {
+    ref
+    folder
+  }
+  cluster {
+    id
+    name
+    provider {
+      name
+      cloud
+    }
+  }
+  repository {
+    id
+    url
+  }
+  insertedAt
+  updatedAt
+  deletedAt
+  componentStatus
+  status
+  errors {
+    message
+    source
+  }
+  components {
+    apiDeprecations {
+      blocking
+    }
+  }
+  globalService {
+    id
+    name
+  }
+}
+
+fragment ServiceDeploymentDetails on ServiceDeployment {
+  id
+  name
+  namespace
+  componentStatus
+  status
+  cluster {
+    id
+    name
+  }
+  version
+  docs {
+    content
+    path
+  }
+  git {
+    folder
+    ref
+  }
+  components {
+    apiDeprecations {
+      blocking
+    }
+  }
+}
+
+fragment ServiceDeploymentComponent on ServiceComponent {
+  id
+  name
+  group
+  kind
+  namespace
+  state
+  synced
+  version
+  apiDeprecations {
+    ...ApiDeprecation
+  }
+}
+
+fragment ServiceDeploymentRevisions on ServiceDeployment {
+  revision {
+    ...ServiceDeploymentRevision
+  }
+  revisions(first: 500) {
+    edges {
+      node {
+        ...ServiceDeploymentRevision
+      }
+    }
+  }
+}
+
+query ServiceDeployments(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $cluster: String
+  $clusterId: ID
+) {
+  serviceDeployments(
+    first: $first
+    after: $after
+    q: $q
+    cluster: $cluster
+    clusterId: $clusterId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ServiceDeploymentsRow
+      }
+    }
+  }
+}
+
+query ServiceDeploymentsTiny {
+  serviceDeployments(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        id
+        name
+        cluster {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+
+query ServiceDeployment($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentDetails
+  }
+}
+
+query ServiceDeploymentComponents($id: ID!) {
+  serviceDeployment(id: $id) {
+    id
+    name
+    cluster {
+      id
+      name
+      handle
+    }
+    components {
+      ...ServiceDeploymentComponent
+    }
+  }
+}
+
+query ServiceDeploymentSecrets($id: ID!) {
+  serviceDeployment(id: $id) {
+    configuration {
+      name
+      value
+    }
+  }
+}
+
+query ServiceDeploymentRevisions($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentRevisions
+  }
+}
+
+mutation CreateServiceDeployment(
+  $attributes: ServiceDeploymentAttributes!
+  $cluster: String
+  $clusterId: ID
+) {
+  createServiceDeployment(
+    attributes: $attributes
+    cluster: $cluster
+    clusterId: $clusterId
+  ) {
+    ...ServiceDeploymentsRow
+  }
+}
+
+mutation UpdateServiceDeployment(
+  $id: ID!
+  $attributes: ServiceUpdateAttributes!
+) {
+  updateServiceDeployment(id: $id, attributes: $attributes) {
+    configuration {
+      name
+      value
+    }
+    git {
+      folder
+      ref
+    }
+    version
+  }
+}
+
+mutation MergeService($id: ID!, $configuration: [ConfigAttributes]) {
+  mergeService(id: $id, configuration: $configuration) {
+    configuration {
+      name
+      value
+    }
+  }
+}
+
+mutation DeleteServiceDeployment($id: ID!) {
+  deleteServiceDeployment(id: $id) {
+    id
+  }
+}
+
+mutation RollbackService($id: ID, $revisionId: ID!) {
+  rollbackService(id: $id, revisionId: $revisionId) {
+    ...ServiceDeploymentsRow
+  }
+}
+
+mutation UpdateRbac($serviceId: ID, $clusterId: ID, $rbac: RbacAttributes!) {
+  updateRbac(serviceId: $serviceId, clusterId: $clusterId, rbac: $rbac)
+}
+
+fragment ServiceDeploymentBindings on ServiceDeployment {
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
+query ServiceDeploymentBindings($id: ID!) {
+  serviceDeployment(id: $id) {
+    id
+    ...ServiceDeploymentBindings
+  }
+}

@@ -1,0 +1,44 @@
+fragment GitRepository on GitRepository {
+  id
+  url
+  health
+  authMethod
+  editable
+  error
+  insertedAt
+  pulledAt
+  updatedAt
+  urlFormat
+  httpsPath
+}
+
+query GitRepositories {
+  gitRepositories(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...GitRepository
+      }
+    }
+  }
+}
+
+mutation CreateGitRepository($attributes: GitAttributes!) {
+  createGitRepository(attributes: $attributes) {
+    ...GitRepository
+  }
+}
+
+mutation DeleteGitRepository($id: ID!) {
+  deleteGitRepository(id: $id) {
+    id
+  }
+}
+
+mutation UpdateGitRepository($id: ID!, $attributes: GitAttributes!) {
+  updateGitRepository(id: $id, attributes: $attributes) {
+    ...GitRepository
+  }
+}

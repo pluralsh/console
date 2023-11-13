@@ -18,3 +18,5 @@ defmodule Console.PubSub.UpgradePolicyDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.NotificationCreated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.TemporaryTokenCreated, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.AccessTokenUsage, do: use Piazza.PubSub.Event

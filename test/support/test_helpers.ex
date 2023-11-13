@@ -1,4 +1,18 @@
 defmodule Console.TestHelpers do
+  import Console.Factory
+  alias Console.Schema.{Cluster, Service}
+  alias Console.Deployments.Services
+
+  def deployment_settings(args \\ []) do
+    Console.Cache.flush()
+    insert(:deployment_settings, args)
+  end
+
+  def create_service(attrs, %Cluster{} = cluster, user), do: create_service(cluster, user, attrs)
+  def create_service(%Cluster{id: id}, user, attrs), do: Services.create_service(Map.new(attrs), id, user)
+
+  def update_service(attrs, %Service{id: id}, user), do: Services.update_service(attrs, id, user)
+
   def ids_equal(found, expected) do
     found = MapSet.new(ids(found))
     expected = MapSet.new(ids(expected))

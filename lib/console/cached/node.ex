@@ -15,6 +15,6 @@ defmodule Console.Cached.Node do
 
   defp publish(%{type: event, object: node}) do
     Logger.info "Publishing metrics after #{event} for #{node.metadata.name}"
-    Console.Watchers.Upgrade.record_usage()
+    # Console.Watchers.Upgrade.record_usage()
   end
 end

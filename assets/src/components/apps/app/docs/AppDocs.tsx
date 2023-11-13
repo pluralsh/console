@@ -12,8 +12,9 @@ import {
 
 import { getDocsData } from '../App'
 
-import { useDocPageContext } from './AppDocsContext'
-import MarkdocComponent from './MarkdocContent'
+import { useDocPageContext } from '../../../contexts/DocPageContext'
+
+import MarkdocComponent from '../../../utils/MarkdocContent'
 
 export default function AppDocs() {
   const scrollRef = useRef<HTMLElement>()

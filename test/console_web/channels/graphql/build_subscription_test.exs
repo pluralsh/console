@@ -34,6 +34,7 @@ defmodule ConsoleWeb.GraphQl.BuildSubscriptionTest do
 
     test "Build modify will send UPDATE deltas" do
       user = insert(:user)
+      Process.whereis(Console.PubSub.Registry)
       {:ok, socket} = establish_socket(user)
 
       ref = push_doc(socket, """

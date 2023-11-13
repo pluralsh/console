@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kas.configMapName" . }}
+  labels:
+    {{- include "kas.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    agent:
+      listen:
+        address: ":{{ .Values.service.internalPort }}"
+        websocket: true
+        certificate_file: "/etc/kas/tls.crt"
+        key_file: "/etc/kas/tls.key"
+      kubernetes_api:
+        listen:
+          address: ":{{ .Values.service.kubernetesApiPort }}"
+          certificate_file: "/etc/kas/tls.crt"
+          key_file: "/etc/kas/tls.key"
+        url_path_prefix: "{{ .Values.ingress.kubernetesApiPath }}"
+    observability:
+      listen:
+        address: ":{{ .Values.service.observabilityPort }}"
+    redis:
+      server:
+        address: "{{ printf "%s-master" (include "common.names.fullname" (index .Subcharts "redis")) }}:{{ .Values.redis.master.service.ports.redis }}"
+      key_prefix: {{ include "kas.name" . }}
+      password_file: "/etc/kas/redis_server_secret"
+    api:
+      listen:
+        address: ":{{ .Values.service.apiInternalPort }}"
+        authentication_secret_file: "/etc/kas/.api_secret"
+    private_api:
+      listen:
+        address: ":{{ .Values.service.privateApiPort }}"
+        authentication_secret_file: "/etc/kas/.privateapi_secret"
+    plural_url: "https://{{ .Values.consoleUrl }}/gql"

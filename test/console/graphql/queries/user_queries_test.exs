@@ -248,4 +248,53 @@ defmodule Console.GraphQl.UserQueriesTest do
              |> ids_equal([read | notifs])
     end
   end
+
+  describe "accessToken" do
+    test "it can fetch an access token for a user" do
+      token = insert(:access_token)
+      audit = insert(:access_token_audit, token: token)
+      expect(Console.Features, :available?, fn :audit -> true end)
+
+      {:ok, %{data: %{"accessToken" => found}}} = run_query("""
+        query Token($id: ID!) {
+          accessToken(id: $id) {
+            id
+            audits(first: 5) { edges { node { id } } }
+          }
+        }
+      """, %{"id" => token.id}, %{current_user: token.user})
+
+      assert found["id"] == token.id
+      assert from_connection(found["audits"])
+             |> ids_equal([audit])
+    end
+
+    test "it cannot fetch other users tokens" do
+      token = insert(:access_token)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Token($id: ID!) {
+          accessToken(id: $id) { id }
+        }
+      """, %{"id" => token.id}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "accessTokens" do
+    test "it can fetch the access tokens for a user" do
+      user = insert(:user)
+      tokens = insert_list(3, :access_token, user: user)
+
+      {:ok, %{data: %{"accessTokens" => found}}} = run_query("""
+        query {
+          accessTokens(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(tokens)
+    end
+  end
 end

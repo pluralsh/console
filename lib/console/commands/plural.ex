@@ -1,7 +1,7 @@
 defmodule Console.Commands.Plural do
   require Logger
   import Console
-  import Console.Commands.Command, only: [cmd: 3, cmd_raw: 3]
+  import Console.Commands.Command, only: [cmd_raw: 3, cmd: 4]
 
   def unlock() do
     with {:ok, _} <- plural("crypto", ["init"]),
@@ -16,6 +16,17 @@ defmodule Console.Commands.Plural do
 
   def install([_ | _] = repos), do: plural("deploy", ["--silence", "--ignore-console" | Enum.flat_map(repos, & ["--from", &1])])
   def install(repo), do: plural("deploy", ["--silence", "--ignore-console", "--from", repo])
+
+  def install_cd(url, token, kubeconfig \\ nil) do
+    with conf when is_binary(conf) <- kubeconfig,
+         {:ok, f} <- Briefly.create(),
+         :ok <- File.write(f, conf) do
+      plural("deployments", ["install", "--url", url, "--token", token], [{"KUBECONFIG", f}])
+    else
+      nil -> plural("deployments", ["install", "--url", url, "--token", token])
+      err -> err
+    end
+  end
 
   def unlock_repo(repo), do: plural("repos", ["unlock", repo])
 
@@ -36,5 +47,5 @@ defmodule Console.Commands.Plural do
 
   def repair(), do: plural("repair", [])
 
-  def plural(command, args), do: cmd("plural", [command | args], workspace())
+  def plural(command, args, env \\ []), do: cmd("plural", [command | args], workspace(), env)
 end

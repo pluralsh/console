@@ -141,6 +141,185 @@ defmodule Console.Factory do
     }
   end
 
+  def cluster_provider_factory do
+    %Schema.ClusterProvider{
+      name: sequence(:provider_name, & "provider-#{&1}"),
+      namespace: sequence(:provider_namespace, & "ns-#{&1}"),
+      repository: build(:git_repository),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+      git: %{ref: "master", folder: "providers"}
+    }
+  end
+
+  def cluster_factory do
+    %Schema.Cluster{
+      version: "1.24",
+      handle: sequence(:cluster_handle, & "handle-#{&1}"),
+      provider: build(:cluster_provider),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+      name: sequence(:cluster_name, & "cluster-#{&1}"),
+      deploy_token: sequence(:deploy_token, & "deploy-#{&1}"),
+    }
+  end
+
+  def git_repository_factory do
+    %Schema.GitRepository{
+      url: sequence(:git_repo, & "https://github.com/pluralsh/repo-#{&1}.git")
+    }
+  end
+
+  def service_factory do
+    %Schema.Service{
+      name: sequence(:service, & "service-#{&1}"),
+      namespace: "test",
+      version: "0.0.1",
+      git: %{ref: "main", folder: "k8s"},
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+      cluster: build(:cluster),
+      repository: build(:git_repository),
+    }
+  end
+
+  def revision_factory do
+    %Schema.Revision{
+      service: build(:service)
+    }
+  end
+
+  def service_component_factory do
+    %Schema.ServiceComponent{
+      group: "networking.k8s.io",
+      version: "v1",
+      kind: "ingress",
+      namespace: "name",
+      name: "name",
+      synced: true,
+      state: :running,
+      service: build(:service)
+    }
+  end
+
+  def access_token_factory do
+    %Schema.AccessToken{
+      token: sequence(:access_token, & "console-#{&1}"),
+      user: build(:user)
+    }
+  end
+
+  def access_token_audit_factory do
+    %Schema.AccessTokenAudit{
+      token: build(:access_token)
+    }
+  end
+
+  def deployment_settings_factory do
+    %Schema.DeploymentSettings{
+      name: "global",
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+      git_policy_id: Ecto.UUID.generate(),
+      create_policy_id: Ecto.UUID.generate(),
+      artifact_repository: build(:git_repository),
+      deployer_repository: build(:git_repository)
+    }
+  end
+
+  def api_deprecation_factory do
+    %Schema.ApiDeprecation{
+      blocking: false,
+      component: build(:service_component)
+    }
+  end
+
+  def global_service_factory do
+    %Schema.GlobalService{
+      name: sequence(:global_service, & "gs-#{&1}"),
+      service: build(:service),
+    }
+  end
+
+  def deploy_token_factory do
+    %Schema.DeployToken{
+      token: sequence(:deploy_token, & "deploy-#{&1}"),
+      cluster: build(:cluster)
+    }
+  end
+
+  def cluster_revision_factory do
+    %Schema.ClusterRevision{
+      cluster: build(:cluster),
+      version: "1.23"
+    }
+  end
+
+  def provider_credential_factory do
+    %Schema.ProviderCredential{
+      name: sequence(:credential, & "cred-#{&1}"),
+      namespace: sequence(:credential_ns, & "plrl-capi-cred-#{&1}"),
+      kind: "Secret",
+      provider: build(:cluster_provider)
+    }
+  end
+
+  def pipeline_factory do
+    %Schema.Pipeline{
+      name: sequence(:pipeline, & "pipeline-#{&1}"),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate()
+    }
+  end
+
+  def pipeline_stage_factory do
+    %Schema.PipelineStage{
+      name: sequence(:pipeline_stage, & "stage-#{&1}")
+    }
+  end
+
+  def pipeline_edge_factory do
+    %Schema.PipelineEdge{
+      from: build(:pipeline_stage),
+      to: build(:pipeline_stage)
+    }
+  end
+
+  def stage_service_factory do
+    %Schema.StageService{
+      stage: build(:pipeline_stage),
+      service: build(:service),
+    }
+  end
+
+  def pipeline_promotion_factory do
+    %Schema.PipelinePromotion{
+      stage: build(:pipeline_stage),
+    }
+  end
+
+  def promotion_service_factory do
+    %Schema.PromotionService{
+      promotion: build(:pipeline_promotion),
+      service: build(:service),
+      revision: build(:revision)
+    }
+  end
+
+  def promotion_criteria_factory do
+    %Schema.PromotionCriteria{
+      source: build(:service)
+    }
+  end
+
+  def pipeline_gate_factory do
+    %Schema.PipelineGate{
+      name: sequence(:gate, & "gate-#{&1}"),
+      edge: build(:pipeline_edge),
+      type: :approval
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
@@ -148,5 +327,9 @@ defmodule Console.Factory do
 
   def admin_user() do
     insert(:user, roles: %{admin: true})
+  end
+
+  def bot(name) do
+    insert(:user, bot_name: name, roles: %{admin: true})
   end
 end

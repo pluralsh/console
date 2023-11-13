@@ -17,6 +17,21 @@ defmodule Console.Cron.JobsTest do
     end
   end
 
+  describe "#prune_audits/0" do
+    test "it will prune the expired audit logs" do
+      keep = insert_list(2, :audit)
+      expire = insert_list(2, :audit, inserted_at: Timex.now() |> Timex.shift(days: -100))
+
+      {_, _} = Jobs.prune_audits()
+
+      for b <- keep,
+        do: assert refetch(b)
+
+      for b <- expire,
+        do: refute refetch(b)
+    end
+  end
+
   describe "#prune_invites/0" do
     test "It will delete expired invites" do
       keep = insert_list(2, :invite)

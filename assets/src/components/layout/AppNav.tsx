@@ -1,4 +1,5 @@
 import {
+  AnimatedDiv,
   Card,
   Chip,
   CloseIcon,
@@ -22,7 +23,7 @@ import Fuse from 'fuse.js'
 import isEmpty from 'lodash/isEmpty'
 import { useOnClickOutside } from 'components/hooks/useOnClickOutside'
 import { Div } from 'honorable'
-import { animated, useTransition } from 'react-spring'
+import { useTransition } from 'react-spring'
 import { createPortal } from 'react-dom'
 
 import { usePlatform } from 'components/hooks/usePlatform'
@@ -228,7 +229,7 @@ export function StatusPanel({ statuses, open, onClose }) {
   )
 
   content = transitions((styles) => (
-    <animated.div
+    <AnimatedDiv
       style={{
         position: 'fixed',
         top: 0,
@@ -241,7 +242,7 @@ export function StatusPanel({ statuses, open, onClose }) {
       }}
     >
       {content}
-    </animated.div>
+    </AnimatedDiv>
   ))
 
   return createPortal(content, document.body)

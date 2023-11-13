@@ -11,7 +11,15 @@ defmodule Console.Schema.Audit do
     role: 5,
     group_member: 6,
     policy: 7,
-    temp_token: 8
+    temp_token: 8,
+    service: 9,
+    cluster: 10,
+    cluster_provider: 11,
+    git_repository: 12,
+    deployment_settings: 13,
+    provider_credential: 14,
+    pipeline: 15,
+    global: 16
 
   defenum Action,
     create: 0,
@@ -21,10 +29,11 @@ defmodule Console.Schema.Audit do
     cancel: 4
 
   schema "audits" do
-    field :type, Type
-    field :action, Action
+    field :type,       Type
+    field :action,     Action
     field :repository, :string
-    field :data, Piazza.Ecto.Types.Erlang
+    field :item_id,    :binary_id
+    field :data,       Piazza.Ecto.Types.Erlang
 
     field :ip,        :string
     field :country,   :string
@@ -49,6 +58,11 @@ defmodule Console.Schema.Audit do
     from(a in query, where: a.inserted_at >= ^dt)
   end
 
+  def expired(query \\ __MODULE__) do
+    expiry = Timex.now() |> Timex.shift(days: -Console.conf(:audit_expiry))
+    from(a in query, where: a.inserted_at <= ^expiry)
+  end
+
   def aggregate(query \\ __MODULE__) do
     from(a in query,
       where: not is_nil(a.country),
@@ -63,6 +77,6 @@ defmodule Console.Schema.Audit do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:actor_id)
-    |> validate_required([:type, :action, :data])
+    |> validate_required([:type, :action])
   end
 end

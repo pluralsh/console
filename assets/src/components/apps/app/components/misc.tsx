@@ -3,12 +3,15 @@ import {
   BriefcaseIcon,
   CertificateIcon,
   Chip,
+  ComponentsIcon,
   DeploymentIcon,
   HistoryIcon,
   NetworkInIcon,
   NetworkInterfaceIcon,
   VolumesIcon,
 } from '@pluralsh/design-system'
+import { ComponentState } from 'generated/graphql'
+import { ComponentProps } from 'react'
 
 export const statusToBorder = {
   [Readiness.Ready]: '',
@@ -22,7 +25,7 @@ export const statusToSeverity = {
   [Readiness.InProgress]: 'warning',
   [Readiness.Failed]: 'error',
   [Readiness.Complete]: 'success',
-} as const satisfies Record<ReadinessT, string>
+} as const satisfies Record<ReadinessT, ComponentProps<typeof Chip>['severity']>
 
 const statusToDisplay = {
   [Readiness.Ready]: 'Ready',
@@ -31,18 +34,62 @@ const statusToDisplay = {
   [Readiness.Complete]: 'Complete',
 } as const satisfies Record<ReadinessT, string>
 
-export function ComponentStatus({ status }: { status?: string | null }) {
+const stateToDisplay = {
+  [ComponentState.Running]: 'Running',
+  [ComponentState.Pending]: 'In progress',
+  [ComponentState.Failed]: 'Failed',
+} as const satisfies Record<ComponentState, string>
+
+const stateToSeverity = {
+  [ComponentState.Running]: 'success',
+  [ComponentState.Pending]: 'warning',
+  [ComponentState.Failed]: 'error',
+} as const satisfies Record<
+  ComponentState,
+  ComponentProps<typeof Chip>['severity']
+>
+
+export function ComponentStatusChip({
+  status,
+  className,
+}: {
+  className?: string
+  status?: string | null
+}) {
   if (!status) {
     status = Readiness.InProgress
   }
 
   return (
-    <div>
+    <div className={className}>
       <Chip
         size="small"
         severity={statusToSeverity[status]}
       >
         {statusToDisplay[status]}
+      </Chip>
+    </div>
+  )
+}
+
+export function ComponentStateChip({
+  state,
+  className,
+}: {
+  className?: string
+  state?: ComponentState | null | undefined
+}) {
+  if (!state) {
+    return null
+  }
+
+  return (
+    <div className={className}>
+      <Chip
+        size="small"
+        severity={stateToSeverity[state]}
+      >
+        {stateToDisplay[state]}
       </Chip>
     </div>
   )
@@ -71,6 +118,6 @@ export function ComponentIcon({
     case 'certificate':
       return <CertificateIcon size={size} />
     default:
-      return null
+      return <ComponentsIcon size={size} />
   }
 }

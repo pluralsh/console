@@ -12,7 +12,7 @@ export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' |
 const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string | number; output: string; }
+  ID: { input: string; output: string; }
   String: { input: string; output: string; }
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
@@ -23,8 +23,8 @@ export type Scalars = {
    * string, including UTC timezone ("Z"). The parsed date and time string will
    * be converted to UTC if there is an offset.
    */
-  DateTime: { input: Date; output: Date; }
-  Map: { input: Map<string, unknown>; output: Map<string, unknown>; }
+  DateTime: { input: string; output: string; }
+  Map: { input: Record<string, unknown>; output: Record<string, unknown>; }
   UploadOrUrl: { input: string; output: string; }
   Yaml: { input: unknown; output: unknown; }
 };
@@ -433,6 +433,8 @@ export type Cluster = {
   provider: Provider;
   /** The upgrade queue for applications running on the cluster. */
   queue?: Maybe<UpgradeQueue>;
+  /** the services deployed from this cluster */
+  serviceCount?: Maybe<Scalars['Int']['output']>;
   /** The source of the cluster. */
   source?: Maybe<Source>;
   /** whether all installations in the cluster have been synced */
@@ -514,6 +516,7 @@ export type ClusterUsageHistory = {
   cpu?: Maybe<Scalars['Int']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   memory?: Maybe<Scalars['Int']['output']>;
+  services?: Maybe<Scalars['Int']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -2030,6 +2033,7 @@ export type PlanFeatureAttributes = {
 export type PlanFeatures = {
   __typename?: 'PlanFeatures';
   audit?: Maybe<Scalars['Boolean']['output']>;
+  cd?: Maybe<Scalars['Boolean']['output']>;
   databaseManagement?: Maybe<Scalars['Boolean']['output']>;
   userManagement?: Maybe<Scalars['Boolean']['output']>;
   vpn?: Maybe<Scalars['Boolean']['output']>;
@@ -5151,8 +5155,13 @@ export function useChatLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatQ
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<ChatQuery, ChatQueryVariables>(ChatDocument, options);
         }
+export function useChatSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatQuery, ChatQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ChatQuery, ChatQueryVariables>(ChatDocument, options);
+        }
 export type ChatQueryHookResult = ReturnType<typeof useChatQuery>;
 export type ChatLazyQueryHookResult = ReturnType<typeof useChatLazyQuery>;
+export type ChatSuspenseQueryHookResult = ReturnType<typeof useChatSuspenseQuery>;
 export type ChatQueryResult = Apollo.QueryResult<ChatQuery, ChatQueryVariables>;
 export const namedOperations = {
   Query: {

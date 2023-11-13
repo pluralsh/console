@@ -2,15 +2,20 @@ import { Flex } from 'honorable'
 import { Chip } from '@pluralsh/design-system'
 
 interface ComponentProgressProps {
-  app: any
   label?: boolean
   suffix?: string
+  componentsReady?: string | null | undefined
 }
 
-function ComponentProgress({ app, label, suffix }: ComponentProgressProps) {
-  const componentsReady = app?.status?.componentsReady
-  const split = componentsReady?.split('/')
-  const ready = split?.length > 1 && split[0] === split[1]
+function ComponentProgress({
+  label,
+  suffix,
+  componentsReady,
+}: ComponentProgressProps) {
+  const split = componentsReady?.split('/') || [0, 0]
+  const numReady = Number(split[0]) ?? 0
+  const numTotal = Number(split[1]) ?? 0
+  const ready = numTotal > 0 && numReady >= numTotal
   const severity = ready ? 'success' : 'warning'
 
   return (
@@ -20,7 +25,7 @@ function ComponentProgress({ app, label, suffix }: ComponentProgressProps) {
         size="small"
         severity={severity}
       >
-        {componentsReady} {suffix}
+        {numReady} / {numTotal} {suffix}
       </Chip>
     </Flex>
   )

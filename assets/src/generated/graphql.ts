@@ -12,7 +12,7 @@ export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' |
 const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string | number; output: string; }
+  ID: { input: string; output: string; }
   String: { input: string; output: string; }
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
@@ -23,9 +23,64 @@ export type Scalars = {
    * string, including UTC timezone ("Z"). The parsed date and time string will
    * be converted to UTC if there is an offset.
    */
-  DateTime: { input: Date; output: Date; }
+  DateTime: { input: string; output: string; }
   Long: { input: any; output: any; }
-  Map: { input: Map<string, unknown>; output: Map<string, unknown>; }
+  Map: { input: Record<string, unknown>; output: Record<string, unknown>; }
+};
+
+export type AccessToken = {
+  __typename?: 'AccessToken';
+  audits?: Maybe<AccessTokenAuditConnection>;
+  id?: Maybe<Scalars['ID']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  token?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type AccessTokenAuditsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type AccessTokenAudit = {
+  __typename?: 'AccessTokenAudit';
+  city?: Maybe<Scalars['String']['output']>;
+  count?: Maybe<Scalars['Int']['output']>;
+  country?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['ID']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  ip?: Maybe<Scalars['String']['output']>;
+  latitude?: Maybe<Scalars['String']['output']>;
+  longitude?: Maybe<Scalars['String']['output']>;
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AccessTokenAuditConnection = {
+  __typename?: 'AccessTokenAuditConnection';
+  edges?: Maybe<Array<Maybe<AccessTokenAuditEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AccessTokenAuditEdge = {
+  __typename?: 'AccessTokenAuditEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AccessTokenAudit>;
+};
+
+export type AccessTokenConnection = {
+  __typename?: 'AccessTokenConnection';
+  edges?: Maybe<Array<Maybe<AccessTokenEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AccessTokenEdge = {
+  __typename?: 'AccessTokenEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AccessToken>;
 };
 
 export type Account = {
@@ -34,6 +89,48 @@ export type Account = {
   delinquentAt?: Maybe<Scalars['DateTime']['output']>;
   grandfatheredUntil?: Maybe<Scalars['DateTime']['output']>;
   subscription?: Maybe<PluralSubscription>;
+};
+
+/** a condition that determines whether its configuration is viewable */
+export type AddOnConfigCondition = {
+  __typename?: 'AddOnConfigCondition';
+  /** the field this condition applies to */
+  field?: Maybe<Scalars['String']['output']>;
+  /** the operation for this condition, eg EQ, LT, GT */
+  operation?: Maybe<Scalars['String']['output']>;
+  /** the value to apply the codition with, for binary operators like LT/GT */
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** Input configuration for an add-on you can install */
+export type AddOnConfiguration = {
+  __typename?: 'AddOnConfiguration';
+  condition?: Maybe<AddOnConfigCondition>;
+  /** a docstring explaining this configuration */
+  documentation?: Maybe<Scalars['String']['output']>;
+  /** name for this configuration */
+  name?: Maybe<Scalars['String']['output']>;
+  /** a type for the configuration (should eventually be coerced back to string) */
+  type?: Maybe<Scalars['String']['output']>;
+  /** the values for ENUM type conditions */
+  values?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+/** a representation of a kubernetes api deprecation */
+export type ApiDeprecation = {
+  __typename?: 'ApiDeprecation';
+  /** the kubernetes version the replacement api was created in */
+  availableIn?: Maybe<Scalars['String']['output']>;
+  /** whether you cannot safely upgrade to the next kubernetes version if this deprecation exists */
+  blocking?: Maybe<Scalars['Boolean']['output']>;
+  /** the component of this deprecation */
+  component?: Maybe<ServiceComponent>;
+  /** the kubernetes version the deprecation was posted */
+  deprecatedIn?: Maybe<Scalars['String']['output']>;
+  /** the kubernetes version the api version will be removed and unusable in */
+  removedIn?: Maybe<Scalars['String']['output']>;
+  /** the api you can replace this resource with */
+  replacement?: Maybe<Scalars['String']['output']>;
 };
 
 export type Application = {
@@ -133,14 +230,27 @@ export type AuditMetric = {
 
 export enum AuditType {
   Build = 'BUILD',
+  Cluster = 'CLUSTER',
+  ClusterProvider = 'CLUSTER_PROVIDER',
   Configuration = 'CONFIGURATION',
+  DeploymentSettings = 'DEPLOYMENT_SETTINGS',
+  GitRepository = 'GIT_REPOSITORY',
+  Global = 'GLOBAL',
   Group = 'GROUP',
   GroupMember = 'GROUP_MEMBER',
+  Pipeline = 'PIPELINE',
   Pod = 'POD',
   Policy = 'POLICY',
+  ProviderCredential = 'PROVIDER_CREDENTIAL',
   Role = 'ROLE',
+  Service = 'SERVICE',
   TempToken = 'TEMP_TOKEN',
   User = 'USER'
+}
+
+export enum AuthMethod {
+  Basic = 'BASIC',
+  Ssh = 'SSH'
 }
 
 export enum AutoscalingTarget {
@@ -151,9 +261,40 @@ export enum AutoscalingTarget {
 export type AvailableFeatures = {
   __typename?: 'AvailableFeatures';
   audits?: Maybe<Scalars['Boolean']['output']>;
+  cd?: Maybe<Scalars['Boolean']['output']>;
   databaseManagement?: Maybe<Scalars['Boolean']['output']>;
   userManagement?: Maybe<Scalars['Boolean']['output']>;
   vpn?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** aws node customizations */
+export type AwsCloud = {
+  __typename?: 'AwsCloud';
+  /** custom launch template for your nodes, useful for Golden AMI setups */
+  launchTemplateId?: Maybe<Scalars['String']['output']>;
+};
+
+export type AwsCloudAttributes = {
+  region?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AwsSettingsAttributes = {
+  accessKeyId: Scalars['String']['input'];
+  secretAccessKey: Scalars['String']['input'];
+};
+
+export type AzureCloudAttributes = {
+  location?: InputMaybe<Scalars['String']['input']>;
+  network?: InputMaybe<Scalars['String']['input']>;
+  resourceGroup?: InputMaybe<Scalars['String']['input']>;
+  subscriptionId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AzureSettingsAttributes = {
+  clientId: Scalars['ID']['input'];
+  clientSecret: Scalars['String']['input'];
+  subscriptionId: Scalars['String']['input'];
+  tenantId: Scalars['String']['input'];
 };
 
 export type BindingAttributes = {
@@ -272,12 +413,239 @@ export type CloneAttributes = {
   uid?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type CloudProviderSettingsAttributes = {
+  aws?: InputMaybe<AwsSettingsAttributes>;
+  azure?: InputMaybe<AzureSettingsAttributes>;
+  gcp?: InputMaybe<GcpSettingsAttributes>;
+};
+
+/** cloud specific settings for a node pool */
+export type CloudSettings = {
+  __typename?: 'CloudSettings';
+  aws?: Maybe<AwsCloud>;
+};
+
+export type CloudSettingsAttributes = {
+  aws?: InputMaybe<AwsCloudAttributes>;
+  azure?: InputMaybe<AzureCloudAttributes>;
+  gcp?: InputMaybe<GcpCloudAttributes>;
+};
+
+/** a representation of a cluster you can deploy to */
+export type Cluster = {
+  __typename?: 'Cluster';
+  /** all api deprecations for all services in this cluster */
+  apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
+  /** a custom credential to use when provisioning this cluster */
+  credential?: Maybe<ProviderCredential>;
+  /** current k8s version as told to us by the deployment operator */
+  currentVersion?: Maybe<Scalars['String']['output']>;
+  /** when this cluster was scheduled for deletion */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a auth token to be used by the deploy operator, only readable on create */
+  deployToken?: Maybe<Scalars['String']['output']>;
+  /** whether the current user can edit this cluster */
+  editable?: Maybe<Scalars['Boolean']['output']>;
+  /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
+  handle?: Maybe<Scalars['String']['output']>;
+  /** internal id of this cluster */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether the deploy operator has been registered for this cluster */
+  installed?: Maybe<Scalars['Boolean']['output']>;
+  /** the url of the kas server you can access this cluster from */
+  kasUrl?: Maybe<Scalars['String']['output']>;
+  /** human readable name of this cluster, will also translate to cloud k8s name */
+  name: Scalars['String']['output'];
+  /** list the cached node metrics for a cluster, can also be stale up to 5m */
+  nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
+  /** list of node pool specs managed by CAPI */
+  nodePools?: Maybe<Array<Maybe<NodePool>>>;
+  /** list cached nodes for a cluster, this can be stale up to 5m */
+  nodes?: Maybe<Array<Maybe<Node>>>;
+  /** last time the deploy operator pinged this cluster */
+  pingedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** if true, this cluster cannot be deleted */
+  protect?: Maybe<Scalars['Boolean']['output']>;
+  /** the provider we use to create this cluster (null if BYOK) */
+  provider?: Maybe<ClusterProvider>;
+  /** read policy for this cluster */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** a custom git repository if you want to define your own CAPI manifests */
+  repository?: Maybe<GitRepository>;
+  /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
+  revisions?: Maybe<RevisionConnection>;
+  /** whether this is the management cluster itself */
+  self?: Maybe<Scalars['Boolean']['output']>;
+  /** the service used to deploy the CAPI resources of this cluster */
+  service?: Maybe<ServiceDeployment>;
+  /** any errors which might have occurred during the bootstrap process */
+  serviceErrors?: Maybe<Array<Maybe<ServiceError>>>;
+  /** the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null */
+  status?: Maybe<ClusterStatus>;
+  /** key/value tags to filter clusters */
+  tags?: Maybe<Array<Maybe<Tag>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** desired k8s version for the cluster */
+  version?: Maybe<Scalars['String']['output']>;
+  /** write policy for this cluster */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterRevisionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** A common kubernetes cluster add-on like cert-manager, istio, etc */
+export type ClusterAddOn = {
+  __typename?: 'ClusterAddOn';
+  configuration?: Maybe<Array<Maybe<AddOnConfiguration>>>;
+  global?: Maybe<Scalars['Boolean']['output']>;
+  icon?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+export type ClusterAttributes = {
+  cloudSettings?: InputMaybe<CloudSettingsAttributes>;
+  /** a cloud credential to use when provisioning this cluster */
+  credentialId?: InputMaybe<Scalars['ID']['input']>;
+  /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  kubeconfig?: InputMaybe<KubeconfigAttributes>;
+  name: Scalars['String']['input'];
+  nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
+  protect?: InputMaybe<Scalars['Boolean']['input']>;
+  providerId?: InputMaybe<Scalars['ID']['input']>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
+  version?: InputMaybe<Scalars['String']['input']>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+/** a single condition struct for various phases of the cluster provisionining process */
+export type ClusterCondition = {
+  __typename?: 'ClusterCondition';
+  lastTransitionTime?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  reason?: Maybe<Scalars['String']['output']>;
+  severity?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<Scalars['String']['output']>;
+};
+
+export type ClusterConnection = {
+  __typename?: 'ClusterConnection';
+  edges?: Maybe<Array<Maybe<ClusterEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterEdge = {
+  __typename?: 'ClusterEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Cluster>;
+};
+
 export type ClusterInfo = {
   __typename?: 'ClusterInfo';
   gitCommit?: Maybe<Scalars['String']['output']>;
   gitVersion?: Maybe<Scalars['String']['output']>;
   platform?: Maybe<Scalars['String']['output']>;
   version?: Maybe<Scalars['String']['output']>;
+};
+
+export type ClusterPing = {
+  currentVersion: Scalars['String']['input'];
+};
+
+/** a CAPI provider for a cluster, cloud is inferred from name if not provided manually */
+export type ClusterProvider = {
+  __typename?: 'ClusterProvider';
+  /** the name of the cloud service for this provider */
+  cloud: Scalars['String']['output'];
+  /** a list of credentials eligible for this provider */
+  credentials?: Maybe<Array<Maybe<ProviderCredential>>>;
+  /** when the cluster provider was deleted */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether the current user can edit this resource */
+  editable?: Maybe<Scalars['Boolean']['output']>;
+  /** the details of how cluster manifests will be synced from git when created with this provider */
+  git: GitRef;
+  /** the id of this provider */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a human readable name for the provider, globally unique */
+  name: Scalars['String']['output'];
+  /** the namespace the CAPI resources are deployed into */
+  namespace: Scalars['String']['output'];
+  /** the repository for the CAPI service itself if customized */
+  providerRepository?: Maybe<GitRepository>;
+  /** the region names this provider can deploy to */
+  regions?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the repository used to serve cluster manifests */
+  repository?: Maybe<GitRepository>;
+  /** the service of the CAPI controller itself */
+  service?: Maybe<ServiceDeployment>;
+  /** the kubernetes versions this provider currently supports */
+  supportedVersions?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ClusterProviderAttributes = {
+  cloud?: InputMaybe<Scalars['String']['input']>;
+  cloudSettings?: InputMaybe<CloudProviderSettingsAttributes>;
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ClusterProviderConnection = {
+  __typename?: 'ClusterProviderConnection';
+  edges?: Maybe<Array<Maybe<ClusterProviderEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterProviderEdge = {
+  __typename?: 'ClusterProviderEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterProvider>;
+};
+
+export type ClusterProviderUpdateAttributes = {
+  cloudSettings?: InputMaybe<CloudProviderSettingsAttributes>;
+  /** if you optionally want to reconfigure the git repository for the cluster provider */
+  service?: InputMaybe<ClusterServiceAttributes>;
+};
+
+export type ClusterServiceAttributes = {
+  git: GitRefAttributes;
+  id: Scalars['ID']['input'];
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** the crd status of the cluster as seen by the CAPI operator */
+export type ClusterStatus = {
+  __typename?: 'ClusterStatus';
+  conditions?: Maybe<Array<Maybe<ClusterCondition>>>;
+  controlPlaneReady?: Maybe<Scalars['Boolean']['output']>;
+  failureMessage?: Maybe<Scalars['String']['output']>;
+  failureReason?: Maybe<Scalars['String']['output']>;
+  phase?: Maybe<Scalars['String']['output']>;
+};
+
+export type ClusterUpdateAttributes = {
+  /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  kubeconfig?: InputMaybe<KubeconfigAttributes>;
+  nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
+  protect?: InputMaybe<Scalars['Boolean']['input']>;
+  /** if you optionally want to reconfigure the git repository for the cluster service */
+  service?: InputMaybe<ClusterServiceAttributes>;
+  version?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Command = {
@@ -314,6 +682,27 @@ export type Component = {
   __typename?: 'Component';
   group: Scalars['String']['output'];
   kind: Scalars['String']['output'];
+};
+
+export type ComponentAttributes = {
+  group: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  state?: InputMaybe<ComponentState>;
+  synced: Scalars['Boolean']['input'];
+  version: Scalars['String']['input'];
+};
+
+export enum ComponentState {
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Running = 'RUNNING'
+}
+
+export type ConfigAttributes = {
+  name: Scalars['String']['input'];
+  value?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ConfigMap = {
@@ -380,6 +769,7 @@ export type ConfigurationValidation = {
 
 export type ConsoleConfiguration = {
   __typename?: 'ConsoleConfiguration';
+  byok?: Maybe<Scalars['Boolean']['output']>;
   features?: Maybe<AvailableFeatures>;
   gitCommit?: Maybe<Scalars['String']['output']>;
   gitStatus?: Maybe<GitStatus>;
@@ -538,6 +928,38 @@ export type Deployment = {
   status: DeploymentStatus;
 };
 
+/** global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator */
+export type DeploymentSettings = {
+  __typename?: 'DeploymentSettings';
+  /** the repo to fetch CAPI manifests from, for both providers and clusters */
+  artifactRepository?: Maybe<GitRepository>;
+  /** policy for creation of new clusters */
+  createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the repo to fetch the deploy operators manifests from */
+  deployerRepository?: Maybe<GitRepository>;
+  /** whether you've yet to enable CD for this instance */
+  enabled: Scalars['Boolean']['output'];
+  /** policy for managing git repos */
+  gitBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  /** read policy across all clusters */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** write policy across all clusters */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+export type DeploymentSettingsAttributes = {
+  artifactRepositoryId?: InputMaybe<Scalars['ID']['input']>;
+  createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  deployerRepositoryId?: InputMaybe<Scalars['ID']['input']>;
+  gitBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
 export type DeploymentSpec = {
   __typename?: 'DeploymentSpec';
   replicas?: Maybe<Scalars['Int']['output']>;
@@ -558,6 +980,14 @@ export type DeploymentStrategy = {
   type?: Maybe<Scalars['String']['output']>;
 };
 
+export type DiffNormalizerAttributes = {
+  group: Scalars['String']['input'];
+  jsonPatches?: InputMaybe<Array<Scalars['String']['input']>>;
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+};
+
 export type Event = {
   __typename?: 'Event';
   action?: Maybe<Scalars['String']['output']>;
@@ -575,10 +1005,135 @@ export type FileContent = {
   path?: Maybe<Scalars['String']['output']>;
 };
 
+export enum GateState {
+  Closed = 'CLOSED',
+  Open = 'OPEN',
+  Pending = 'PENDING'
+}
+
+export enum GateType {
+  Approval = 'APPROVAL',
+  Job = 'JOB',
+  Window = 'WINDOW'
+}
+
+export type GcpCloudAttributes = {
+  network?: InputMaybe<Scalars['String']['input']>;
+  project?: InputMaybe<Scalars['String']['input']>;
+  region?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GcpSettingsAttributes = {
+  applicationCredentials: Scalars['String']['input'];
+};
+
+export type GitAttributes = {
+  /** a manually supplied https path for non standard git setups.  This is auto-inferred in many cases */
+  httpsPath?: InputMaybe<Scalars['String']['input']>;
+  /** a passphrase to decrypt the given private key */
+  passphrase?: InputMaybe<Scalars['String']['input']>;
+  /** the http password for http authenticated repos */
+  password?: InputMaybe<Scalars['String']['input']>;
+  /** an ssh private key to use with this repo if an ssh url was given */
+  privateKey?: InputMaybe<Scalars['String']['input']>;
+  /** the url of this repository */
+  url: Scalars['String']['input'];
+  /** similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder} */
+  urlFormat?: InputMaybe<Scalars['String']['input']>;
+  /** the http username for authenticated http repos, defaults to apiKey for github */
+  username?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** a file fetched from a git repository, eg a docs .md file */
+export type GitFile = {
+  __typename?: 'GitFile';
+  content: Scalars['String']['output'];
+  path: Scalars['String']['output'];
+};
+
+export enum GitHealth {
+  Failed = 'FAILED',
+  Pullable = 'PULLABLE'
+}
+
+/** a representation of where to pull manifests from git */
+export type GitRef = {
+  __typename?: 'GitRef';
+  /** the folder manifests live under */
+  folder: Scalars['String']['output'];
+  /** a general git ref, either a branch name or commit sha understandable by `git checkout <ref>` */
+  ref: Scalars['String']['output'];
+};
+
+export type GitRefAttributes = {
+  folder: Scalars['String']['input'];
+  ref: Scalars['String']['input'];
+};
+
+/** a git repository available for deployments */
+export type GitRepository = {
+  __typename?: 'GitRepository';
+  /** whether its a http or ssh url */
+  authMethod?: Maybe<AuthMethod>;
+  /** whether the current user can edit this repo */
+  editable?: Maybe<Scalars['Boolean']['output']>;
+  /** the error message if there were any pull errors */
+  error?: Maybe<Scalars['String']['output']>;
+  /** whether we can currently pull this repo with the provided credentials */
+  health?: Maybe<GitHealth>;
+  /** the https url for this git repo */
+  httpsPath?: Maybe<Scalars['String']['output']>;
+  /** internal id of this repository */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last successsful git pull timestamp */
+  pulledAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the git url of the repository, either https or ssh supported */
+  url: Scalars['String']['output'];
+  /** a format string to get the http url for a subfolder in a git repo */
+  urlFormat?: Maybe<Scalars['String']['output']>;
+};
+
+export type GitRepositoryConnection = {
+  __typename?: 'GitRepositoryConnection';
+  edges?: Maybe<Array<Maybe<GitRepositoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type GitRepositoryEdge = {
+  __typename?: 'GitRepositoryEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<GitRepository>;
+};
+
 export type GitStatus = {
   __typename?: 'GitStatus';
   cloned?: Maybe<Scalars['Boolean']['output']>;
   output?: Maybe<Scalars['String']['output']>;
+};
+
+/** a rules based mechanism to redeploy a service across a fleet of clusters */
+export type GlobalService = {
+  __typename?: 'GlobalService';
+  /** internal id of this global service */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a human readable name for this global service */
+  name: Scalars['String']['output'];
+  /** whether to only apply to clusters with this provider */
+  provider?: Maybe<ClusterProvider>;
+  /** the service to replicate across clusters */
+  service?: Maybe<ServiceDeployment>;
+  /** a set of tags to select clusters for this global service */
+  tags?: Maybe<Array<Maybe<Tag>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type GlobalServiceAttributes = {
+  name: Scalars['String']['input'];
+  providerId?: InputMaybe<Scalars['ID']['input']>;
+  tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
 };
 
 export type Group = {
@@ -739,6 +1294,10 @@ export type JobStatus = {
   succeeded?: Maybe<Scalars['Int']['output']>;
 };
 
+export type KubeconfigAttributes = {
+  raw?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** supported kubernetes objects fetchable in runbooks */
 export type KubernetesData = Deployment | StatefulSet;
 
@@ -746,6 +1305,24 @@ export type KubernetesDatasource = {
   __typename?: 'KubernetesDatasource';
   name: Scalars['String']['output'];
   resource: Scalars['String']['output'];
+};
+
+export type KubernetesUnstructured = {
+  __typename?: 'KubernetesUnstructured';
+  events?: Maybe<Array<Maybe<Event>>>;
+  metadata: Metadata;
+  raw?: Maybe<Scalars['Map']['output']>;
+};
+
+/** metadata needed for configuring kustomize */
+export type Kustomize = {
+  __typename?: 'Kustomize';
+  path: Scalars['String']['output'];
+};
+
+export type KustomizeAttributes = {
+  /** the path to the kustomization file to use */
+  path: Scalars['String']['input'];
 };
 
 export type LabelInput = {
@@ -843,6 +1420,11 @@ export type Metadata = {
   namespace?: Maybe<Scalars['String']['output']>;
 };
 
+export type MetadataAttributes = {
+  annotations?: InputMaybe<Scalars['Map']['input']>;
+  labels?: InputMaybe<Scalars['Map']['input']>;
+};
+
 export type MetricResponse = {
   __typename?: 'MetricResponse';
   metric?: Maybe<Scalars['Map']['output']>;
@@ -851,7 +1433,7 @@ export type MetricResponse = {
 
 export type MetricResult = {
   __typename?: 'MetricResult';
-  timestamp?: Maybe<Scalars['Int']['output']>;
+  timestamp?: Maybe<Scalars['Long']['output']>;
   value?: Maybe<Scalars['String']['output']>;
 };
 
@@ -862,6 +1444,13 @@ export type Namespace = {
   raw: Scalars['String']['output'];
   spec: NamespaceSpec;
   status: NamespaceStatus;
+};
+
+/** metadata fields for created namespaces */
+export type NamespaceMetadata = {
+  __typename?: 'NamespaceMetadata';
+  annotations?: Maybe<Scalars['Map']['output']>;
+  labels?: Maybe<Scalars['Map']['output']>;
 };
 
 export type NamespaceSpec = {
@@ -898,6 +1487,41 @@ export type NodeMetric = {
   timestamp?: Maybe<Scalars['String']['output']>;
   usage?: Maybe<NodeUsage>;
   window?: Maybe<Scalars['String']['output']>;
+};
+
+/** a specification for a node pool to be created in this cluster */
+export type NodePool = {
+  __typename?: 'NodePool';
+  /** cloud specific settings for the node groups */
+  cloudSettings?: Maybe<CloudSettings>;
+  /** internal id for this node pool */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the type of node to use (usually cloud-specific) */
+  instanceType: Scalars['String']['output'];
+  /** kubernetes labels to apply to the nodes in this pool, useful for node selectors */
+  labels?: Maybe<Scalars['Map']['output']>;
+  /** maximum number of instances in this node pool */
+  maxSize: Scalars['Int']['output'];
+  /** minimum number of instances in this node pool */
+  minSize: Scalars['Int']['output'];
+  /** name of this node pool (must be unique) */
+  name: Scalars['String']['output'];
+  /** whether this is a spot pool or not */
+  spot?: Maybe<Scalars['Boolean']['output']>;
+  /** any taints you'd want to apply to a node, for eg preventing scheduling on spot instances */
+  taints?: Maybe<Array<Maybe<Taint>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type NodePoolAttributes = {
+  cloudSettings?: InputMaybe<CloudSettingsAttributes>;
+  instanceType: Scalars['String']['input'];
+  labels?: InputMaybe<Scalars['Map']['input']>;
+  maxSize: Scalars['Int']['input'];
+  minSize: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+  taints?: InputMaybe<Array<InputMaybe<TaintAttributes>>>;
 };
 
 export type NodeSpec = {
@@ -990,6 +1614,127 @@ export enum Permission {
   Read = 'READ'
 }
 
+/** a release pipeline, composed of multiple stages each with potentially multiple services */
+export type Pipeline = {
+  __typename?: 'Pipeline';
+  /** edges linking two stages w/in the pipeline in a full DAG */
+  edges?: Maybe<Array<Maybe<PipelineStageEdge>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of the pipeline */
+  name: Scalars['String']['output'];
+  /** the stages of this pipeline */
+  stages?: Maybe<Array<Maybe<PipelineStage>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** the top level input object for creating/deleting pipelines */
+export type PipelineAttributes = {
+  edges?: InputMaybe<Array<InputMaybe<PipelineEdgeAttributes>>>;
+  stages?: InputMaybe<Array<InputMaybe<PipelineStageAttributes>>>;
+};
+
+export type PipelineConnection = {
+  __typename?: 'PipelineConnection';
+  edges?: Maybe<Array<Maybe<PipelineEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PipelineEdge = {
+  __typename?: 'PipelineEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Pipeline>;
+};
+
+/** specification of an edge between two pipeline stages */
+export type PipelineEdgeAttributes = {
+  /** the name of the pipeline stage this edge emits from */
+  from?: InputMaybe<Scalars['String']['input']>;
+  /** stage id the edge is from, can also be specified by name */
+  fromId?: InputMaybe<Scalars['ID']['input']>;
+  /** any optional promotion gates you wish to configure */
+  gates?: InputMaybe<Array<InputMaybe<PipelineGateAttributes>>>;
+  /** the name of the pipeline stage this edge points to */
+  to?: InputMaybe<Scalars['String']['input']>;
+  /** stage id the edge is to, can also be specified by name */
+  toId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** A gate blocking promotion along a release pipeline */
+export type PipelineGate = {
+  __typename?: 'PipelineGate';
+  /** the last user to approve this gate */
+  approver?: Maybe<User>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of this gate as seen in the UI */
+  name: Scalars['String']['output'];
+  /** the current state of this gate */
+  state: GateState;
+  /** the type of gate this is */
+  type: GateType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** will configure a promotion gate for a pipeline */
+export type PipelineGateAttributes = {
+  /** the handle of a cluster this gate will execute on */
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  /** the id of the cluster this gate will execute on */
+  clusterId?: InputMaybe<Scalars['String']['input']>;
+  /** the name of this gate */
+  name: Scalars['String']['input'];
+  /** the type of gate this is */
+  type: GateType;
+};
+
+/** a representation of an individual pipeline promotion, which is a list of services/revisions and timestamps to determine promotion status */
+export type PipelinePromotion = {
+  __typename?: 'PipelinePromotion';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time this promotion was fully promoted, it's no longer pending if promoted_at > revised_at */
+  promotedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time this promotion was updated */
+  revisedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the services included in this promotion */
+  services?: Maybe<Array<Maybe<PromotionService>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** a pipeline stage, has a list of services and potentially a promotion which might be pending */
+export type PipelineStage = {
+  __typename?: 'PipelineStage';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of this stage (eg dev, prod, staging) */
+  name: Scalars['String']['output'];
+  /** a promotion which might be outstanding for this stage */
+  promotion?: Maybe<PipelinePromotion>;
+  /** the services within this stage */
+  services?: Maybe<Array<Maybe<StageService>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** specification of a stage of a pipeline */
+export type PipelineStageAttributes = {
+  name: Scalars['String']['input'];
+  services?: InputMaybe<Array<InputMaybe<StageServiceAttributes>>>;
+};
+
+/** an edge in the pipeline DAG */
+export type PipelineStageEdge = {
+  __typename?: 'PipelineStageEdge';
+  from: PipelineStage;
+  gates?: Maybe<Array<Maybe<PipelineGate>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** when the edge was last promoted, if greater than the promotion objects revised at, was successfully promoted */
+  promotedAt?: Maybe<Scalars['DateTime']['output']>;
+  to: PipelineStage;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type Plan = {
   __typename?: 'Plan';
   id?: Maybe<Scalars['ID']['output']>;
@@ -1020,10 +1765,17 @@ export type PluralSubscription = {
 export type Pod = {
   __typename?: 'Pod';
   events?: Maybe<Array<Maybe<Event>>>;
+  logs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   metadata: Metadata;
   raw: Scalars['String']['output'];
   spec: PodSpec;
   status: PodStatus;
+};
+
+
+export type PodLogsArgs = {
+  container: Scalars['String']['input'];
+  sinceSeconds: Scalars['Int']['input'];
 };
 
 export type PodCondition = {
@@ -1074,6 +1826,19 @@ export type PodStatus = {
   reason?: Maybe<Scalars['String']['output']>;
 };
 
+export type PolicyBinding = {
+  __typename?: 'PolicyBinding';
+  group?: Maybe<Group>;
+  id?: Maybe<Scalars['ID']['output']>;
+  user?: Maybe<User>;
+};
+
+export type PolicyBindingAttributes = {
+  groupId?: InputMaybe<Scalars['ID']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type Port = {
   __typename?: 'Port';
   containerPort?: Maybe<Scalars['Int']['output']>;
@@ -1121,6 +1886,64 @@ export type PrometheusDatasource = {
   format?: Maybe<Scalars['String']['output']>;
   legend?: Maybe<Scalars['String']['output']>;
   query: Scalars['String']['output'];
+};
+
+/** how a promotion for a service will be performed */
+export type PromotionCriteria = {
+  __typename?: 'PromotionCriteria';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether you want to copy any configuration values from the source service */
+  secrets?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the source service in a prior stage to promote settings from */
+  source?: Maybe<ServiceDeployment>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** actions to perform if this stage service were promoted */
+export type PromotionCriteriaAttributes = {
+  /** the handle of the cluster for the source service */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  /** the name of the source service */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the secrets to copy over in a promotion */
+  secrets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** the id of the service to promote from */
+  sourceId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** a service to be potentially promoted */
+export type PromotionService = {
+  __typename?: 'PromotionService';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the revision of the service to promote */
+  revision?: Maybe<Revision>;
+  /** a service to promote */
+  service?: Maybe<ServiceDeployment>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** a cloud credential that can be used while creating new clusters */
+export type ProviderCredential = {
+  __typename?: 'ProviderCredential';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ProviderCredentialAttributes = {
+  kind?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type RbacAttributes = {
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export enum ReadType {
@@ -1211,6 +2034,35 @@ export type Resources = {
   requests?: Maybe<ResourceSpec>;
 };
 
+/** a representation of a past revision of a service */
+export type Revision = {
+  __typename?: 'Revision';
+  /** git spec of the prior revision */
+  git: GitRef;
+  /** id of this revision */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the commit message for this revision */
+  message?: Maybe<Scalars['String']['output']>;
+  /** the sha this service was pulled from */
+  sha?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the service's semver */
+  version: Scalars['String']['output'];
+};
+
+export type RevisionConnection = {
+  __typename?: 'RevisionConnection';
+  edges?: Maybe<Array<Maybe<RevisionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type RevisionEdge = {
+  __typename?: 'RevisionEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Revision>;
+};
+
 export type Role = {
   __typename?: 'Role';
   description?: Maybe<Scalars['String']['output']>;
@@ -1261,41 +2113,82 @@ export type RollingUpdate = {
 export type RootMutationType = {
   __typename?: 'RootMutationType';
   approveBuild?: Maybe<Build>;
+  /** approves an approval pipeline gate */
+  approveGate?: Maybe<PipelineGate>;
   cancelBuild?: Maybe<Build>;
+  /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
+  cloneService?: Maybe<ServiceDeployment>;
+  createAccessToken?: Maybe<AccessToken>;
   createBuild?: Maybe<Build>;
+  createCluster?: Maybe<Cluster>;
+  createClusterProvider?: Maybe<ClusterProvider>;
+  createGitRepository?: Maybe<GitRepository>;
+  createGlobalService?: Maybe<GlobalService>;
   createGroup?: Maybe<Group>;
   createGroupMember?: Maybe<GroupMember>;
   createInvite?: Maybe<Invite>;
   createPeer?: Maybe<WireguardPeer>;
+  createProviderCredential?: Maybe<ProviderCredential>;
   createRole?: Maybe<Role>;
+  createServiceDeployment?: Maybe<ServiceDeployment>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
+  deleteAccessToken?: Maybe<AccessToken>;
   deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
+  deleteCluster?: Maybe<Cluster>;
+  deleteClusterProvider?: Maybe<ClusterProvider>;
+  deleteGitRepository?: Maybe<GitRepository>;
+  deleteGlobalService?: Maybe<GlobalService>;
   deleteGroup?: Maybe<Group>;
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
   deleteNode?: Maybe<Node>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePod?: Maybe<Pod>;
+  deleteProviderCredential?: Maybe<ProviderCredential>;
   deleteRole?: Maybe<Role>;
+  deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteWebhook?: Maybe<Webhook>;
+  /** soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects */
+  detachCluster?: Maybe<Cluster>;
+  enableDeployments?: Maybe<DeploymentSettings>;
   executeRunbook?: Maybe<RunbookActionResponse>;
+  /** forces a pipeline gate to be in open state */
+  forceGate?: Maybe<PipelineGate>;
+  installAddOn?: Maybe<ServiceDeployment>;
   installRecipe?: Maybe<Build>;
   installStack?: Maybe<Build>;
   loginLink?: Maybe<User>;
   markRead?: Maybe<User>;
+  /** merges configuration for a service */
+  mergeService?: Maybe<ServiceDeployment>;
   oauthCallback?: Maybe<User>;
   overlayConfiguration?: Maybe<Build>;
+  /** a regular status ping to be sent by the deploy operator */
+  pingCluster?: Maybe<Cluster>;
   readNotifications?: Maybe<User>;
   restartBuild?: Maybe<Build>;
   restorePostgres?: Maybe<Postgresql>;
+  /** rewires this service to use the given revision id */
+  rollbackService?: Maybe<ServiceDeployment>;
+  /** upserts a pipeline with a given name */
+  savePipeline?: Maybe<Pipeline>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
+  updateCluster?: Maybe<Cluster>;
+  updateClusterProvider?: Maybe<ClusterProvider>;
   updateConfiguration?: Maybe<Configuration>;
+  updateDeploymentSettings?: Maybe<DeploymentSettings>;
+  updateGitRepository?: Maybe<GitRepository>;
   updateGroup?: Maybe<Group>;
+  /** a reusable mutation for updating rbac settings on core services */
+  updateRbac?: Maybe<Scalars['Boolean']['output']>;
   updateRole?: Maybe<Role>;
+  /** updates only the components of a given service, to be sent after deploy operator syncs */
+  updateServiceComponents?: Maybe<ServiceDeployment>;
+  updateServiceDeployment?: Maybe<ServiceDeployment>;
   updateSmtp?: Maybe<Smtp>;
   updateUser?: Maybe<User>;
 };
@@ -1306,13 +2199,50 @@ export type RootMutationTypeApproveBuildArgs = {
 };
 
 
+export type RootMutationTypeApproveGateArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCancelBuildArgs = {
   id: Scalars['ID']['input'];
 };
 
 
+export type RootMutationTypeCloneServiceArgs = {
+  attributes: ServiceCloneAttributes;
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  clusterId: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootMutationTypeCreateBuildArgs = {
   attributes: BuildAttributes;
+};
+
+
+export type RootMutationTypeCreateClusterArgs = {
+  attributes: ClusterAttributes;
+};
+
+
+export type RootMutationTypeCreateClusterProviderArgs = {
+  attributes: ClusterProviderAttributes;
+};
+
+
+export type RootMutationTypeCreateGitRepositoryArgs = {
+  attributes: GitAttributes;
+};
+
+
+export type RootMutationTypeCreateGlobalServiceArgs = {
+  attributes: GlobalServiceAttributes;
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1339,8 +2269,21 @@ export type RootMutationTypeCreatePeerArgs = {
 };
 
 
+export type RootMutationTypeCreateProviderCredentialArgs = {
+  attributes: ProviderCredentialAttributes;
+  name: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeCreateRoleArgs = {
   attributes: RoleAttributes;
+};
+
+
+export type RootMutationTypeCreateServiceDeploymentArgs = {
+  attributes: ServiceDeploymentAttributes;
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1354,9 +2297,34 @@ export type RootMutationTypeCreateWebhookArgs = {
 };
 
 
+export type RootMutationTypeDeleteAccessTokenArgs = {
+  token: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeDeleteCertificateArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeDeleteClusterArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteClusterProviderArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteGitRepositoryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteGlobalServiceArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1374,6 +2342,7 @@ export type RootMutationTypeDeleteGroupMemberArgs = {
 export type RootMutationTypeDeleteJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1390,10 +2359,21 @@ export type RootMutationTypeDeletePeerArgs = {
 export type RootMutationTypeDeletePodArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeDeleteProviderCredentialArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
 export type RootMutationTypeDeleteRoleArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteServiceDeploymentArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1413,10 +2393,28 @@ export type RootMutationTypeDeleteWebhookArgs = {
 };
 
 
+export type RootMutationTypeDetachClusterArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeExecuteRunbookArgs = {
   input: RunbookActionInput;
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeForceGateArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeInstallAddOnArgs = {
+  clusterId: Scalars['ID']['input'];
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  global?: InputMaybe<GlobalServiceAttributes>;
+  name: Scalars['String']['input'];
 };
 
 
@@ -1444,6 +2442,12 @@ export type RootMutationTypeMarkReadArgs = {
 };
 
 
+export type RootMutationTypeMergeServiceArgs = {
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeOauthCallbackArgs = {
   code: Scalars['String']['input'];
   redirect?: InputMaybe<Scalars['String']['input']>;
@@ -1453,6 +2457,11 @@ export type RootMutationTypeOauthCallbackArgs = {
 export type RootMutationTypeOverlayConfigurationArgs = {
   context: Scalars['Map']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypePingClusterArgs = {
+  attributes: ClusterPing;
 };
 
 
@@ -1469,6 +2478,20 @@ export type RootMutationTypeRestorePostgresArgs = {
 };
 
 
+export type RootMutationTypeRollbackServiceArgs = {
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  revisionId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeSavePipelineArgs = {
+  attributes: PipelineAttributes;
+  name: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeSignInArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -1481,11 +2504,34 @@ export type RootMutationTypeSignupArgs = {
 };
 
 
+export type RootMutationTypeUpdateClusterArgs = {
+  attributes: ClusterUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateClusterProviderArgs = {
+  attributes: ClusterProviderUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateConfigurationArgs = {
   content: Scalars['String']['input'];
   message?: InputMaybe<Scalars['String']['input']>;
   repository: Scalars['String']['input'];
   tool?: InputMaybe<Tool>;
+};
+
+
+export type RootMutationTypeUpdateDeploymentSettingsArgs = {
+  attributes: DeploymentSettingsAttributes;
+};
+
+
+export type RootMutationTypeUpdateGitRepositoryArgs = {
+  attributes: GitAttributes;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1495,9 +2541,32 @@ export type RootMutationTypeUpdateGroupArgs = {
 };
 
 
+export type RootMutationTypeUpdateRbacArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  providerId?: InputMaybe<Scalars['ID']['input']>;
+  rbac: RbacAttributes;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootMutationTypeUpdateRoleArgs = {
   attributes: RoleAttributes;
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateServiceComponentsArgs = {
+  components?: InputMaybe<Array<InputMaybe<ComponentAttributes>>>;
+  errors?: InputMaybe<Array<InputMaybe<ServiceErrorAttributes>>>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateServiceDeploymentArgs = {
+  attributes: ServiceUpdateAttributes;
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1513,6 +2582,8 @@ export type RootMutationTypeUpdateUserArgs = {
 
 export type RootQueryType = {
   __typename?: 'RootQueryType';
+  accessToken?: Maybe<AccessToken>;
+  accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
   ai?: Maybe<Scalars['String']['output']>;
   application?: Maybe<Application>;
@@ -1524,7 +2595,19 @@ export type RootQueryType = {
   builds?: Maybe<BuildConnection>;
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   certificate?: Maybe<Certificate>;
+  /** fetches an individual cluster */
+  cluster?: Maybe<Cluster>;
+  /** list all addons currently resident in the artifacts repo */
+  clusterAddOns?: Maybe<Array<Maybe<ClusterAddOn>>>;
   clusterInfo?: Maybe<ClusterInfo>;
+  /** fetches an individual cluster provider */
+  clusterProvider?: Maybe<ClusterProvider>;
+  /** a relay connection of all providers visible to the current user */
+  clusterProviders?: Maybe<ClusterProviderConnection>;
+  /** the services deployed in the current cluster, to be polled by the deploy operator */
+  clusterServices?: Maybe<Array<Maybe<ServiceDeployment>>>;
+  /** a relay connection of all clusters visible to the current user */
+  clusters?: Maybe<ClusterConnection>;
   configMap?: Maybe<ConfigMap>;
   configMaps?: Maybe<Array<Maybe<ConfigMap>>>;
   configuration?: Maybe<ConsoleConfiguration>;
@@ -1534,7 +2617,9 @@ export type RootQueryType = {
   dashboard?: Maybe<Dashboard>;
   dashboards?: Maybe<Array<Maybe<Dashboard>>>;
   deployment?: Maybe<Deployment>;
+  deploymentSettings?: Maybe<DeploymentSettings>;
   externalToken?: Maybe<Scalars['String']['output']>;
+  gitRepositories?: Maybe<GitRepositoryConnection>;
   groupMembers?: Maybe<GroupMemberConnection>;
   groups?: Maybe<GroupConnection>;
   ingress?: Maybe<Ingress>;
@@ -1546,6 +2631,8 @@ export type RootQueryType = {
   logs?: Maybe<Array<Maybe<LogStream>>>;
   me?: Maybe<User>;
   metric?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** tells you what cluster a deploy token points to */
+  myCluster?: Maybe<Cluster>;
   myWireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
   namespaces?: Maybe<Array<Maybe<Namespace>>>;
   node?: Maybe<Node>;
@@ -1553,6 +2640,8 @@ export type RootQueryType = {
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   nodes?: Maybe<Array<Maybe<Node>>>;
   notifications?: Maybe<NotificationConnection>;
+  pipeline?: Maybe<Pipeline>;
+  pipelines?: Maybe<PipelineConnection>;
   pluralContext?: Maybe<PluralContext>;
   pod?: Maybe<Pod>;
   pods?: Maybe<PodConnection>;
@@ -1570,15 +2659,35 @@ export type RootQueryType = {
   secret?: Maybe<Secret>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
+  /** fetches details of this service deployment, and can be called by the deploy operator */
+  serviceDeployment?: Maybe<ServiceDeployment>;
+  serviceDeployments?: Maybe<ServiceDeploymentConnection>;
+  serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
   statefulSet?: Maybe<StatefulSet>;
   temporaryToken?: Maybe<Scalars['String']['output']>;
+  /** exchanges a kubeconfig token for user info */
+  tokenExchange?: Maybe<User>;
+  unstructuredResource?: Maybe<KubernetesUnstructured>;
   upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
   users?: Maybe<UserConnection>;
   webhooks?: Maybe<WebhookConnection>;
   wireguardPeer?: Maybe<WireguardPeer>;
   wireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
+};
+
+
+export type RootQueryTypeAccessTokenArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeAccessTokensArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1622,12 +2731,42 @@ export type RootQueryTypeCachedPodsArgs = {
 export type RootQueryTypeCertificateArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeClusterArgs = {
+  handle?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeClusterProviderArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeClusterProvidersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeClustersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type RootQueryTypeConfigMapArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1644,6 +2783,7 @@ export type RootQueryTypeConfigurationOverlaysArgs = {
 export type RootQueryTypeCronJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1664,6 +2804,15 @@ export type RootQueryTypeDashboardsArgs = {
 export type RootQueryTypeDeploymentArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeGitRepositoriesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1688,6 +2837,7 @@ export type RootQueryTypeGroupsArgs = {
 export type RootQueryTypeIngressArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1707,6 +2857,7 @@ export type RootQueryTypeInviteArgs = {
 export type RootQueryTypeJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1735,13 +2886,25 @@ export type RootQueryTypeMetricArgs = {
 };
 
 
+export type RootQueryTypeNamespacesArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootQueryTypeNodeArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
 };
 
 
 export type RootQueryTypeNodeMetricArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeNodeMetricsArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1754,17 +2917,34 @@ export type RootQueryTypeNotificationsArgs = {
 };
 
 
+export type RootQueryTypePipelineArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypePipelinesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypePodArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type RootQueryTypePodsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
@@ -1834,6 +3014,7 @@ export type RootQueryTypeScalingRecommendationArgs = {
 export type RootQueryTypeSecretArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1845,6 +3026,30 @@ export type RootQueryTypeSecretsArgs = {
 export type RootQueryTypeServiceArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeServiceDeploymentArgs = {
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeServiceDeploymentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeServiceStatusesArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1856,6 +3061,22 @@ export type RootQueryTypeStackArgs = {
 export type RootQueryTypeStatefulSetArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeTokenExchangeArgs = {
+  token: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeUnstructuredResourceArgs = {
+  group?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  version: Scalars['String']['input'];
 };
 
 
@@ -2034,6 +3255,160 @@ export type Service = {
   status: ServiceStatus;
 };
 
+export type ServiceCloneAttributes = {
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** representation of a kubernetes component deployed by a service */
+export type ServiceComponent = {
+  __typename?: 'ServiceComponent';
+  /** any api deprecations discovered from this component */
+  apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
+  /** api group of this resource */
+  group?: Maybe<Scalars['String']['output']>;
+  /** internal id */
+  id: Scalars['ID']['output'];
+  /** api kind of this resource */
+  kind: Scalars['String']['output'];
+  /** kubernetes name of this resource */
+  name: Scalars['String']['output'];
+  /** kubernetes namespace of this resource */
+  namespace?: Maybe<Scalars['String']['output']>;
+  /** the service this component belongs to */
+  service?: Maybe<ServiceDeployment>;
+  /** kubernetes component health enum */
+  state?: Maybe<ComponentState>;
+  /** whether this component has been applied to the k8s api */
+  synced: Scalars['Boolean']['output'];
+  /** api version of this resource */
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+/** a configuration item k/v pair */
+export type ServiceConfiguration = {
+  __typename?: 'ServiceConfiguration';
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeployment = {
+  __typename?: 'ServiceDeployment';
+  /** the cluster this service is deployed into */
+  cluster?: Maybe<Cluster>;
+  /** a n / m representation of the number of healthy components of this service */
+  componentStatus?: Maybe<Scalars['String']['output']>;
+  /** the kubernetes component of a service */
+  components?: Maybe<Array<Maybe<ServiceComponent>>>;
+  /** possibly secret configuration used to template the manifests of this service */
+  configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
+  /** the time this service was scheduled for deletion */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries */
+  docs?: Maybe<Array<Maybe<GitFile>>>;
+  /** whether this service is editable */
+  editable?: Maybe<Scalars['Boolean']['output']>;
+  /** a list of errors generated by the deployment operator */
+  errors?: Maybe<Array<Maybe<ServiceError>>>;
+  /** description on where in git the service's manifests should be fetched */
+  git: GitRef;
+  /** the global service this service is the source for */
+  globalService?: Maybe<GlobalService>;
+  /** internal id of this service */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** kustomize related service metadata */
+  kustomize?: Maybe<Kustomize>;
+  /** the commit message currently in use */
+  message?: Maybe<Scalars['String']['output']>;
+  /** human readable name of this service, must be unique per cluster */
+  name: Scalars['String']['output'];
+  /** kubernetes namespace this service will be deployed to */
+  namespace: Scalars['String']['output'];
+  /** whether this service is controlled by a global service */
+  owner?: Maybe<GlobalService>;
+  /** if true, deletion of this service is not allowed */
+  protect?: Maybe<Scalars['Boolean']['output']>;
+  /** read policy for this service */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the git repo of this service */
+  repository?: Maybe<GitRepository>;
+  /** the current revision of this service */
+  revision?: Maybe<Revision>;
+  /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
+  revisions?: Maybe<RevisionConnection>;
+  /** latest git sha we pulled from */
+  sha?: Maybe<Scalars['String']['output']>;
+  /** A summary status enum for the health of this service */
+  status: ServiceDeploymentStatus;
+  /** settings for advanced tuning of the sync process */
+  syncConfig?: Maybe<SyncConfig>;
+  /** https url to fetch the latest tarball of kubernetes manifests */
+  tarball?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** semver of this service */
+  version: Scalars['String']['output'];
+  /** write policy of this service */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeploymentRevisionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ServiceDeploymentAttributes = {
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  docsPath?: InputMaybe<Scalars['String']['input']>;
+  git: GitRefAttributes;
+  kustomize?: InputMaybe<KustomizeAttributes>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  protect?: InputMaybe<Scalars['Boolean']['input']>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  repositoryId: Scalars['ID']['input'];
+  syncConfig?: InputMaybe<SyncConfigAttributes>;
+  version?: InputMaybe<Scalars['String']['input']>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type ServiceDeploymentConnection = {
+  __typename?: 'ServiceDeploymentConnection';
+  edges?: Maybe<Array<Maybe<ServiceDeploymentEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ServiceDeploymentEdge = {
+  __typename?: 'ServiceDeploymentEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ServiceDeployment>;
+};
+
+export enum ServiceDeploymentStatus {
+  Failed = 'FAILED',
+  Healthy = 'HEALTHY',
+  Stale = 'STALE',
+  Synced = 'SYNCED'
+}
+
+/** an error sent from the deploy operator about sync progress */
+export type ServiceError = {
+  __typename?: 'ServiceError';
+  message: Scalars['String']['output'];
+  source: Scalars['String']['output'];
+};
+
+export type ServiceErrorAttributes = {
+  message: Scalars['String']['input'];
+  source: Scalars['String']['input'];
+};
+
 export type ServicePort = {
   __typename?: 'ServicePort';
   name?: Maybe<Scalars['String']['output']>;
@@ -2053,6 +3428,21 @@ export type ServiceSpec = {
 export type ServiceStatus = {
   __typename?: 'ServiceStatus';
   loadBalancer?: Maybe<LoadBalancerStatus>;
+};
+
+/** a rollup count of the statuses of services in a query */
+export type ServiceStatusCount = {
+  __typename?: 'ServiceStatusCount';
+  count: Scalars['Int']['output'];
+  status: ServiceDeploymentStatus;
+};
+
+export type ServiceUpdateAttributes = {
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  git?: InputMaybe<GitRefAttributes>;
+  kustomize?: InputMaybe<KustomizeAttributes>;
+  protect?: InputMaybe<Scalars['Boolean']['input']>;
+  version?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum Severity {
@@ -2088,6 +3478,29 @@ export type Stack = {
   name: Scalars['String']['output'];
   sections?: Maybe<Array<Maybe<RecipeSection>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** the configuration of a service within a pipeline stage, including optional promotion criteria */
+export type StageService = {
+  __typename?: 'StageService';
+  /** criteria for how a promotion of this service shall be performed */
+  criteria?: Maybe<PromotionCriteria>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a pointer to a service */
+  service?: Maybe<ServiceDeployment>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** the attributes of a service w/in a specific stage */
+export type StageServiceAttributes = {
+  criteria?: InputMaybe<PromotionCriteriaAttributes>;
+  /** the cluster handle of this service */
+  handle?: InputMaybe<Scalars['String']['input']>;
+  /** the name of this service */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the name of this service */
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type StatefulSet = {
@@ -2139,6 +3552,42 @@ export type StatusCondition = {
   type: Scalars['String']['output'];
 };
 
+/** Advanced configuration of how to sync resources */
+export type SyncConfig = {
+  __typename?: 'SyncConfig';
+  namespaceMetadata?: Maybe<NamespaceMetadata>;
+};
+
+export type SyncConfigAttributes = {
+  diffNormalizer?: InputMaybe<DiffNormalizerAttributes>;
+  namespaceMetadata?: InputMaybe<MetadataAttributes>;
+};
+
+export type Tag = {
+  __typename?: 'Tag';
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type TagAttributes = {
+  name: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
+/** a kubernetes node taint */
+export type Taint = {
+  __typename?: 'Taint';
+  effect: Scalars['String']['output'];
+  key: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type TaintAttributes = {
+  effect: Scalars['String']['input'];
+  key: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
 export type TerminatedState = {
   __typename?: 'TerminatedState';
   exitCode?: Maybe<Scalars['Int']['output']>;
@@ -2188,6 +3637,7 @@ export type User = {
   buildTimestamp?: Maybe<Scalars['DateTime']['output']>;
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   email: Scalars['String']['output'];
+  groups?: Maybe<Array<Maybe<Group>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   jwt?: Maybe<Scalars['String']['output']>;
@@ -2316,21 +3766,19 @@ export type WireguardPeerStatus = {
   ready?: Maybe<Scalars['Boolean']['output']>;
 };
 
-export type CostAnalysisFragmentFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
+export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
 
-export type FileContentFragmentFragment = { __typename?: 'FileContent', content?: string | null, path?: string | null };
+export type FileContentFragment = { __typename?: 'FileContent', content?: string | null, path?: string | null };
 
-export type ConfigurationFragmentFragment = { __typename?: 'Configuration', helm?: string | null, terraform?: string | null };
+export type ConfigurationFragment = { __typename?: 'Configuration', helm?: string | null, terraform?: string | null };
 
-export type ApplicationSpecFragmentFragment = { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null };
+export type ApplicationSpecFragment = { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null };
 
-export type ApplicationStatusFragmentFragment = { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
+export type ApplicationStatusFragment = { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
 
-export type ApplicationFragmentFragment = { __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null };
+export type ApplicationFragment = { __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null };
 
-export type MetadataFragmentFragment = { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null };
-
-export type ConfigurationOverlayFragmentFragment = { __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } };
+export type ConfigurationOverlayFragment = { __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } };
 
 export type AppQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -2346,7 +3794,7 @@ export type AppInfoQueryVariables = Exact<{
 
 export type AppInfoQuery = { __typename?: 'RootQueryType', application?: { __typename?: 'Application', info?: string | null, name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null } | null };
 
-export type RepositoryFragmentFragment = { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null };
+export type RepositoryFragment = { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null };
 
 export type RepositoryQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -2360,7 +3808,7 @@ export type PageInfoFragment = { __typename?: 'PageInfo', hasNextPage: boolean, 
 export type PluralContextQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PluralContextQuery = { __typename?: 'RootQueryType', pluralContext?: { __typename?: 'PluralContext', buckets?: Array<string | null> | null, configuration: Map<string, unknown>, domains?: Array<string | null> | null } | null };
+export type PluralContextQuery = { __typename?: 'RootQueryType', pluralContext?: { __typename?: 'PluralContext', buckets?: Array<string | null> | null, configuration: Record<string, unknown>, domains?: Array<string | null> | null } | null };
 
 export type CreateBuildMutationVariables = Exact<{
   attributes: BuildAttributes;
@@ -2369,11 +3817,336 @@ export type CreateBuildMutationVariables = Exact<{
 
 export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild?: { __typename?: 'Build', id: string } | null };
 
-export type ResourceSpecFragment = { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null };
+export type AddOnConfigConditionFragment = { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null };
 
-export type ResourcesFragment = { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null };
+export type AddOnConfigurationFragment = { __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null, values?: Array<string | null> | null, condition?: { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null } | null };
 
-export type DatabaseTableRowFragment = { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null };
+export type ClusterAddOnFragment = { __typename?: 'ClusterAddOn', global?: boolean | null, icon?: string | null, name?: string | null, version?: string | null, configuration?: Array<{ __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null, values?: Array<string | null> | null, condition?: { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null } | null } | null> | null };
+
+export type ClusterAddOnsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ClusterAddOnsQuery = { __typename?: 'RootQueryType', clusterAddOns?: Array<{ __typename?: 'ClusterAddOn', global?: boolean | null, icon?: string | null, name?: string | null, version?: string | null, configuration?: Array<{ __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null, values?: Array<string | null> | null, condition?: { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null } | null } | null> | null } | null> | null };
+
+export type InstallAddOnMutationVariables = Exact<{
+  clusterId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>> | InputMaybe<ConfigAttributes>>;
+  global?: InputMaybe<GlobalServiceAttributes>;
+}>;
+
+
+export type InstallAddOnMutation = { __typename?: 'RootMutationType', installAddOn?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
+
+export type ClusterNodeFragment = { __typename?: 'Node', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } };
+
+export type ClusterConditionFragment = { __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null };
+
+export type TaintFragment = { __typename?: 'Taint', effect: string, key: string, value: string };
+
+export type NodePoolFragment = { __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null };
+
+export type ApiDeprecationFragment = { __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null };
+
+export type ClustersRowFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null };
+
+export type ClusterFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
+
+export type ClustersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null } | null } | null> | null } | null };
+
+export type ClusterTinyFragment = { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
+
+export type ClustersTinyQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ClustersTinyQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
+
+export type ClusterQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ClusterQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+
+export type ClusterPodsQueryVariables = Exact<{
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ClusterPodsQuery = { __typename?: 'RootQueryType', pods?: { __typename?: 'PodConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'PodEdge', node?: { __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null } | null> | null } | null };
+
+export type ClusterNamespacesQueryVariables = Exact<{
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ClusterNamespacesQuery = { __typename?: 'RootQueryType', namespaces?: Array<{ __typename?: 'Namespace', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null };
+
+export type PolicyBindingFragment = { __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null };
+
+export type ClusterBindingsFragment = { __typename?: 'Cluster', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
+export type ClusterBindingsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ClusterBindingsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type UpdateClusterBindingsMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  rbac: RbacAttributes;
+}>;
+
+
+export type UpdateClusterBindingsMutation = { __typename?: 'RootMutationType', updateRbac?: boolean | null };
+
+export type UpdateClusterMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ClusterUpdateAttributes;
+}>;
+
+
+export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null } | null };
+
+export type CreateClusterMutationVariables = Exact<{
+  attributes: ClusterAttributes;
+}>;
+
+
+export type CreateClusterMutation = { __typename?: 'RootMutationType', createCluster?: { __typename?: 'Cluster', deployToken?: string | null, currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+
+export type DeleteClusterMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteClusterMutation = { __typename?: 'RootMutationType', deleteCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+
+export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
+
+export type UsageQueryVariables = Exact<{
+  cpu: Scalars['String']['input'];
+  mem: Scalars['String']['input'];
+  podCpu: Scalars['String']['input'];
+  podMem: Scalars['String']['input'];
+  step: Scalars['String']['input'];
+  offset: Scalars['Int']['input'];
+}>;
+
+
+export type UsageQuery = { __typename?: 'RootQueryType', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null };
+
+export type GitRepositoryFragment = { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null };
+
+export type GitRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GitRepositoriesQuery = { __typename?: 'RootQueryType', gitRepositories?: { __typename?: 'GitRepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GitRepositoryEdge', node?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null } | null> | null } | null };
+
+export type CreateGitRepositoryMutationVariables = Exact<{
+  attributes: GitAttributes;
+}>;
+
+
+export type CreateGitRepositoryMutation = { __typename?: 'RootMutationType', createGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null };
+
+export type DeleteGitRepositoryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteGitRepositoryMutation = { __typename?: 'RootMutationType', deleteGitRepository?: { __typename?: 'GitRepository', id: string } | null };
+
+export type UpdateGitRepositoryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: GitAttributes;
+}>;
+
+
+export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null };
+
+export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
+
+export type CreateGlobalServiceMutationVariables = Exact<{
+  attributes: GlobalServiceAttributes;
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+
+export type DeleteGlobalServiceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteGlobalServiceMutation = { __typename?: 'RootMutationType', deleteGlobalService?: { __typename?: 'GlobalService', id: string } | null };
+
+export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, insertedAt?: string | null, updatedAt?: string | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
+export type UpdateDeploymentSettingsMutationVariables = Exact<{
+  attributes: DeploymentSettingsAttributes;
+}>;
+
+
+export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, insertedAt?: string | null, updatedAt?: string | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, insertedAt?: string | null, updatedAt?: string | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type ProviderCredentialFragment = { __typename?: 'ProviderCredential', id: string, insertedAt?: string | null, kind: string, name: string, namespace: string, updatedAt?: string | null };
+
+export type ClusterProviderFragment = { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, supportedVersions?: Array<string | null> | null, deletedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null, credentials?: Array<{ __typename?: 'ProviderCredential', id: string, insertedAt?: string | null, kind: string, name: string, namespace: string, updatedAt?: string | null } | null> | null };
+
+export type ClusterProvidersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ClusterProvidersQuery = { __typename?: 'RootQueryType', clusterProviders?: { __typename?: 'ClusterProviderConnection', edges?: Array<{ __typename?: 'ClusterProviderEdge', node?: { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, supportedVersions?: Array<string | null> | null, deletedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null, credentials?: Array<{ __typename?: 'ProviderCredential', id: string, insertedAt?: string | null, kind: string, name: string, namespace: string, updatedAt?: string | null } | null> | null } | null } | null> | null } | null };
+
+export type CreateClusterProviderMutationVariables = Exact<{
+  attributes: ClusterProviderAttributes;
+}>;
+
+
+export type CreateClusterProviderMutation = { __typename?: 'RootMutationType', createClusterProvider?: { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, supportedVersions?: Array<string | null> | null, deletedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null, credentials?: Array<{ __typename?: 'ProviderCredential', id: string, insertedAt?: string | null, kind: string, name: string, namespace: string, updatedAt?: string | null } | null> | null } | null };
+
+export type UpdateClusterProviderMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ClusterProviderUpdateAttributes;
+}>;
+
+
+export type UpdateClusterProviderMutation = { __typename?: 'RootMutationType', updateClusterProvider?: { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, supportedVersions?: Array<string | null> | null, deletedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null, credentials?: Array<{ __typename?: 'ProviderCredential', id: string, insertedAt?: string | null, kind: string, name: string, namespace: string, updatedAt?: string | null } | null> | null } | null };
+
+export type DeleteClusterProviderMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteClusterProviderMutation = { __typename?: 'RootMutationType', deleteClusterProvider?: { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, supportedVersions?: Array<string | null> | null, deletedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null, credentials?: Array<{ __typename?: 'ProviderCredential', id: string, insertedAt?: string | null, kind: string, name: string, namespace: string, updatedAt?: string | null } | null> | null } | null };
+
+export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } };
+
+export type ServiceDeploymentsRowFragment = { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null };
+
+export type ServiceDeploymentDetailsFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, componentStatus?: string | null, status: ServiceDeploymentStatus, version: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null, git: { __typename?: 'GitRef', folder: string, ref: string }, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null };
+
+export type ServiceDeploymentComponentFragment = { __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null };
+
+export type ServiceDeploymentRevisionsFragment = { __typename?: 'ServiceDeployment', revision?: { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null, revisions?: { __typename?: 'RevisionConnection', edges?: Array<{ __typename?: 'RevisionEdge', node?: { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null } | null> | null } | null };
+
+export type ServiceDeploymentsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null };
+
+export type ServiceDeploymentsTinyQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ServiceDeploymentsTinyQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null };
+
+export type ServiceDeploymentQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, componentStatus?: string | null, status: ServiceDeploymentStatus, version: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null, git: { __typename?: 'GitRef', folder: string, ref: string }, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null } | null };
+
+export type ServiceDeploymentComponentsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentComponentsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null } | null> | null } | null };
+
+export type ServiceDeploymentSecretsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentSecretsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null };
+
+export type ServiceDeploymentRevisionsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentRevisionsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', revision?: { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null, revisions?: { __typename?: 'RevisionConnection', edges?: Array<{ __typename?: 'RevisionEdge', node?: { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null } | null> | null } | null } | null };
+
+export type CreateServiceDeploymentMutationVariables = Exact<{
+  attributes: ServiceDeploymentAttributes;
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CreateServiceDeploymentMutation = { __typename?: 'RootMutationType', createServiceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
+
+export type UpdateServiceDeploymentMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ServiceUpdateAttributes;
+}>;
+
+
+export type UpdateServiceDeploymentMutation = { __typename?: 'RootMutationType', updateServiceDeployment?: { __typename?: 'ServiceDeployment', version: string, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null };
+
+export type MergeServiceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>> | InputMaybe<ConfigAttributes>>;
+}>;
+
+
+export type MergeServiceMutation = { __typename?: 'RootMutationType', mergeService?: { __typename?: 'ServiceDeployment', configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null };
+
+export type DeleteServiceDeploymentMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteServiceDeploymentMutation = { __typename?: 'RootMutationType', deleteServiceDeployment?: { __typename?: 'ServiceDeployment', id: string } | null };
+
+export type RollbackServiceMutationVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  revisionId: Scalars['ID']['input'];
+}>;
+
+
+export type RollbackServiceMutation = { __typename?: 'RootMutationType', rollbackService?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
+
+export type UpdateRbacMutationVariables = Exact<{
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  rbac: RbacAttributes;
+}>;
+
+
+export type UpdateRbacMutation = { __typename?: 'RootMutationType', updateRbac?: boolean | null };
+
+export type ServiceDeploymentBindingsFragment = { __typename?: 'ServiceDeployment', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
+export type ServiceDeploymentBindingsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentBindingsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type DatabaseTableRowFragment = { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Record<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null };
 
 export type RestorePostgresMutationVariables = Exact<{
   clone?: InputMaybe<CloneAttributes>;
@@ -2388,7 +4161,7 @@ export type RestorePostgresMutation = { __typename?: 'RootMutationType', restore
 export type PostgresDatabasesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostgresDatabasesQuery = { __typename?: 'RootQueryType', postgresDatabases?: Array<{ __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null } | null> | null, applications?: Array<{ __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', icons?: Array<string | null> | null } } } | null> | null };
+export type PostgresDatabasesQuery = { __typename?: 'RootQueryType', postgresDatabases?: Array<{ __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Record<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null } | null> | null, applications?: Array<{ __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', icons?: Array<string | null> | null } } } | null> | null };
 
 export type PostgresDatabaseQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -2396,11 +4169,11 @@ export type PostgresDatabaseQueryVariables = Exact<{
 }>;
 
 
-export type PostgresDatabaseQuery = { __typename?: 'RootQueryType', postgresDatabase?: { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null } | null };
+export type PostgresDatabaseQuery = { __typename?: 'RootQueryType', postgresDatabase?: { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Record<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null } | null };
 
-export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
+export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
-export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null };
+export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
 export type GroupsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -2408,7 +4181,7 @@ export type GroupsQueryVariables = Exact<{
 }>;
 
 
-export type GroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null> | null } | null };
+export type GroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
 
 export type SearchGroupsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -2416,7 +4189,7 @@ export type SearchGroupsQueryVariables = Exact<{
 }>;
 
 
-export type SearchGroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null> | null } | null };
+export type SearchGroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
 
 export type GroupMembersQueryVariables = Exact<{
   cursor?: InputMaybe<Scalars['String']['input']>;
@@ -2424,7 +4197,7 @@ export type GroupMembersQueryVariables = Exact<{
 }>;
 
 
-export type GroupMembersQuery = { __typename?: 'RootQueryType', groupMembers?: { __typename?: 'GroupMemberConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupMemberEdge', node?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null } | null> | null } | null };
+export type GroupMembersQuery = { __typename?: 'RootQueryType', groupMembers?: { __typename?: 'GroupMemberConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupMemberEdge', node?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null } | null> | null } | null };
 
 export type CreateGroupMemberMutationVariables = Exact<{
   groupId: Scalars['ID']['input'];
@@ -2432,7 +4205,7 @@ export type CreateGroupMemberMutationVariables = Exact<{
 }>;
 
 
-export type CreateGroupMemberMutation = { __typename?: 'RootMutationType', createGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null };
+export type CreateGroupMemberMutation = { __typename?: 'RootMutationType', createGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null };
 
 export type DeleteGroupMemberMutationVariables = Exact<{
   groupId: Scalars['ID']['input'];
@@ -2440,14 +4213,14 @@ export type DeleteGroupMemberMutationVariables = Exact<{
 }>;
 
 
-export type DeleteGroupMemberMutation = { __typename?: 'RootMutationType', deleteGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null };
+export type DeleteGroupMemberMutation = { __typename?: 'RootMutationType', deleteGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null };
 
 export type CreateGroupMutationVariables = Exact<{
   attributes: GroupAttributes;
 }>;
 
 
-export type CreateGroupMutation = { __typename?: 'RootMutationType', createGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
+export type CreateGroupMutation = { __typename?: 'RootMutationType', createGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type UpdateGroupMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2455,32 +4228,228 @@ export type UpdateGroupMutationVariables = Exact<{
 }>;
 
 
-export type UpdateGroupMutation = { __typename?: 'RootMutationType', updateGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
+export type UpdateGroupMutation = { __typename?: 'RootMutationType', updateGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type DeleteGroupMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
+export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
-export type UserFragment = { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
+export type CertificateFragment = { __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null }, spec: { __typename?: 'CertificateSpec', dnsNames?: Array<string | null> | null, secretName: string, issuerRef?: { __typename?: 'IssuerRef', group?: string | null, kind?: string | null, name?: string | null } | null } };
+
+export type CertificateQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CertificateQuery = { __typename?: 'RootQueryType', certificate?: { __typename?: 'Certificate', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null }, spec: { __typename?: 'CertificateSpec', dnsNames?: Array<string | null> | null, secretName: string, issuerRef?: { __typename?: 'IssuerRef', group?: string | null, kind?: string | null, name?: string | null } | null } } | null };
+
+export type CronJobFragment = { __typename?: 'CronJob', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CronStatus', lastScheduleTime?: string | null }, spec: { __typename?: 'CronSpec', schedule: string, suspend?: boolean | null, concurrencyPolicy?: string | null } };
+
+export type CronJobQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CronJobQuery = { __typename?: 'RootQueryType', cronJob?: { __typename?: 'CronJob', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, jobs?: Array<{ __typename?: 'Job', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null } } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CronStatus', lastScheduleTime?: string | null }, spec: { __typename?: 'CronSpec', schedule: string, suspend?: boolean | null, concurrencyPolicy?: string | null } } | null };
+
+export type DeploymentFragment = { __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DeploymentStatus', availableReplicas?: number | null, replicas?: number | null, unavailableReplicas?: number | null }, spec: { __typename?: 'DeploymentSpec', replicas?: number | null, strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null } };
+
+export type DeploymentQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type DeploymentQuery = { __typename?: 'RootQueryType', deployment?: { __typename?: 'Deployment', raw: string, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DeploymentStatus', availableReplicas?: number | null, replicas?: number | null, unavailableReplicas?: number | null }, spec: { __typename?: 'DeploymentSpec', replicas?: number | null, strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null } } | null };
+
+export type IngressFragment = { __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null, hostname?: string | null } | null> | null } | null }, spec: { __typename?: 'IngressSpec', tls?: Array<{ __typename?: 'IngressTls', hosts?: Array<string | null> | null } | null> | null, rules?: Array<{ __typename?: 'IngressRule', host?: string | null, http?: { __typename?: 'HttpIngressRule', paths?: Array<{ __typename?: 'IngressPath', path?: string | null, backend?: { __typename?: 'IngressBackend', serviceName?: string | null, servicePort?: string | null } | null } | null> | null } | null } | null> | null } };
+
+export type IngressQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type IngressQuery = { __typename?: 'RootQueryType', ingress?: { __typename?: 'Ingress', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null, hostname?: string | null } | null> | null } | null }, spec: { __typename?: 'IngressSpec', tls?: Array<{ __typename?: 'IngressTls', hosts?: Array<string | null> | null } | null> | null, rules?: Array<{ __typename?: 'IngressRule', host?: string | null, http?: { __typename?: 'HttpIngressRule', paths?: Array<{ __typename?: 'IngressPath', path?: string | null, backend?: { __typename?: 'IngressBackend', serviceName?: string | null, servicePort?: string | null } | null } | null> | null } | null } | null> | null } } | null };
+
+export type JobFragment = { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null };
+
+export type JobQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type JobQuery = { __typename?: 'RootQueryType', job?: { __typename?: 'Job', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null } | null };
+
+export type MetadataFragment = { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null };
+
+export type EventFragment = { __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null };
+
+export type ResourceSpecFragment = { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null };
+
+export type ResourcesFragment = { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null };
+
+export type ContainerFragment = { __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null };
+
+export type ContainerStatusFragment = { __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null };
+
+export type PodFragment = { __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } };
+
+export type JobStatusFragment = { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null };
+
+export type NodeFragment = { __typename?: 'Node', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null };
+
+export type NodeMetricFragment = { __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null };
+
+export type NodeQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type NodeQuery = { __typename?: 'RootQueryType', node?: { __typename?: 'Node', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
+
+export type NodeMetricQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type NodeMetricQuery = { __typename?: 'RootQueryType', nodeMetric?: { __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null };
+
+export type PodWithEventsFragment = { __typename?: 'Pod', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } };
+
+export type PodQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type PodQuery = { __typename?: 'RootQueryType', pod?: { __typename?: 'Pod', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null };
+
+export type PodLogsQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  container: Scalars['String']['input'];
+  sinceSeconds: Scalars['Int']['input'];
+}>;
+
+
+export type PodLogsQuery = { __typename?: 'RootQueryType', pod?: { __typename?: 'Pod', logs?: Array<string | null> | null } | null };
+
+export type ServiceFragment = { __typename?: 'Service', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null } | null> | null } | null }, spec: { __typename?: 'ServiceSpec', type?: string | null, clusterIp?: string | null, ports?: Array<{ __typename?: 'ServicePort', name?: string | null, protocol?: string | null, port?: number | null, targetPort?: string | null } | null> | null } };
+
+export type ServiceQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ServiceQuery = { __typename?: 'RootQueryType', service?: { __typename?: 'Service', raw: string, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null } | null> | null } | null }, spec: { __typename?: 'ServiceSpec', type?: string | null, clusterIp?: string | null, ports?: Array<{ __typename?: 'ServicePort', name?: string | null, protocol?: string | null, port?: number | null, targetPort?: string | null } | null> | null } } | null };
+
+export type StatefulSetFragment = { __typename?: 'StatefulSet', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'StatefulSetStatus', replicas?: number | null, currentReplicas?: number | null, readyReplicas?: number | null, updatedReplicas?: number | null }, spec: { __typename?: 'StatefulSetSpec', replicas?: number | null, serviceName?: string | null } };
+
+export type StatefulSetQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type StatefulSetQuery = { __typename?: 'RootQueryType', statefulSet?: { __typename?: 'StatefulSet', raw: string, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'StatefulSetStatus', replicas?: number | null, currentReplicas?: number | null, readyReplicas?: number | null, updatedReplicas?: number | null }, spec: { __typename?: 'StatefulSetSpec', replicas?: number | null, serviceName?: string | null } } | null };
+
+export type UnstructuredResourceFragment = { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null };
+
+export type UnstructuredResourceQueryVariables = Exact<{
+  group?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  serviceId: Scalars['ID']['input'];
+  version: Scalars['String']['input'];
+}>;
+
+
+export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
+
+export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null };
+
+export type AccessTokenAuditFragment = { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null };
+
+export type AccessTokensQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AccessTokensQuery = { __typename?: 'RootQueryType', accessTokens?: { __typename?: 'AccessTokenConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenEdge', node?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
+
+export type TokenAuditsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  cursor?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type TokenAuditsQuery = { __typename?: 'RootQueryType', accessToken?: { __typename?: 'AccessToken', id?: string | null, audits?: { __typename?: 'AccessTokenAuditConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenAuditEdge', node?: { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
+
+export type CreateAccessTokenMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateAccessTokenMutation = { __typename?: 'RootMutationType', createAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null };
+
+export type DeleteAccessTokenMutationVariables = Exact<{
+  token: Scalars['String']['input'];
+}>;
+
+
+export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null };
+
+export type UserFragment = { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
 
 export type InviteFragment = { __typename?: 'Invite', secureId: string };
 
-export type RoleBindingFragment = { __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
+export type RoleBindingFragment = { __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
-export type RoleFragment = { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null> | null };
+export type RoleFragment = { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null };
+
+export type AvailableFeaturesFragment = { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null, vpn?: boolean | null };
 
 export type ManifestFragment = { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'RootQueryType', externalToken?: string | null, me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null> | null } | null> | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', vpnEnabled?: boolean | null, gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null } | null };
+export type MeQuery = { __typename?: 'RootQueryType', externalToken?: string | null, me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', vpnEnabled?: boolean | null, gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null, vpn?: boolean | null } | null } | null };
 
-export const ApplicationSpecFragmentFragmentDoc = gql`
-    fragment ApplicationSpecFragment on ApplicationSpec {
+export type UsersQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']['input']>;
+  cursor?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type UsersQuery = { __typename?: 'RootQueryType', users?: { __typename?: 'UserConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'UserEdge', node?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null> | null } | null };
+
+export type SearchUsersQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']['input']>;
+  cursor?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SearchUsersQuery = { __typename?: 'RootQueryType', users?: { __typename?: 'UserConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'UserEdge', node?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null> | null } | null };
+
+export const ApplicationSpecFragmentDoc = gql`
+    fragment ApplicationSpec on ApplicationSpec {
   descriptor {
     type
     icons
@@ -2497,8 +4466,8 @@ export const ApplicationSpecFragmentFragmentDoc = gql`
   }
 }
     `;
-export const ApplicationStatusFragmentFragmentDoc = gql`
-    fragment ApplicationStatusFragment on ApplicationStatus {
+export const ApplicationStatusFragmentDoc = gql`
+    fragment ApplicationStatus on ApplicationStatus {
   components {
     group
     kind
@@ -2514,8 +4483,8 @@ export const ApplicationStatusFragmentFragmentDoc = gql`
   componentsReady
 }
     `;
-export const CostAnalysisFragmentFragmentDoc = gql`
-    fragment CostAnalysisFragment on CostAnalysis {
+export const CostAnalysisFragmentDoc = gql`
+    fragment CostAnalysis on CostAnalysis {
   minutes
   cpuCost
   pvCost
@@ -2523,24 +4492,24 @@ export const CostAnalysisFragmentFragmentDoc = gql`
   totalCost
 }
     `;
-export const ApplicationFragmentFragmentDoc = gql`
-    fragment ApplicationFragment on Application {
+export const ApplicationFragmentDoc = gql`
+    fragment Application on Application {
   name
   spec {
-    ...ApplicationSpecFragment
+    ...ApplicationSpec
   }
   status {
-    ...ApplicationStatusFragment
+    ...ApplicationStatus
   }
   cost {
-    ...CostAnalysisFragment
+    ...CostAnalysis
   }
 }
-    ${ApplicationSpecFragmentFragmentDoc}
-${ApplicationStatusFragmentFragmentDoc}
-${CostAnalysisFragmentFragmentDoc}`;
-export const MetadataFragmentFragmentDoc = gql`
-    fragment MetadataFragment on Metadata {
+    ${ApplicationSpecFragmentDoc}
+${ApplicationStatusFragmentDoc}
+${CostAnalysisFragmentDoc}`;
+export const MetadataFragmentDoc = gql`
+    fragment Metadata on Metadata {
   name
   namespace
   labels {
@@ -2553,10 +4522,10 @@ export const MetadataFragmentFragmentDoc = gql`
   }
 }
     `;
-export const ConfigurationOverlayFragmentFragmentDoc = gql`
-    fragment ConfigurationOverlayFragment on ConfigurationOverlay {
+export const ConfigurationOverlayFragmentDoc = gql`
+    fragment ConfigurationOverlay on ConfigurationOverlay {
   metadata {
-    ...MetadataFragment
+    ...Metadata
   }
   spec {
     name
@@ -2570,41 +4539,531 @@ export const ConfigurationOverlayFragmentFragmentDoc = gql`
     }
   }
 }
-    ${MetadataFragmentFragmentDoc}`;
-export const ConfigurationFragmentFragmentDoc = gql`
-    fragment ConfigurationFragment on Configuration {
+    ${MetadataFragmentDoc}`;
+export const ConfigurationFragmentDoc = gql`
+    fragment Configuration on Configuration {
   helm
   terraform
 }
     `;
-export const FileContentFragmentFragmentDoc = gql`
-    fragment FileContentFragment on FileContent {
+export const FileContentFragmentDoc = gql`
+    fragment FileContent on FileContent {
   content
   path
 }
     `;
-export const RepositoryFragmentFragmentDoc = gql`
-    fragment RepositoryFragment on Repository {
+export const RepositoryFragmentDoc = gql`
+    fragment Repository on Repository {
   id
   name
   icon
   description
   grafanaDns
   configuration {
-    ...ConfigurationFragment
+    ...Configuration
   }
   docs {
-    ...FileContentFragment
+    ...FileContent
   }
 }
-    ${ConfigurationFragmentFragmentDoc}
-${FileContentFragmentFragmentDoc}`;
+    ${ConfigurationFragmentDoc}
+${FileContentFragmentDoc}`;
 export const PageInfoFragmentDoc = gql`
     fragment PageInfo on PageInfo {
   hasNextPage
   endCursor
 }
     `;
+export const AddOnConfigConditionFragmentDoc = gql`
+    fragment AddOnConfigCondition on AddOnConfigCondition {
+  field
+  operation
+  value
+}
+    `;
+export const AddOnConfigurationFragmentDoc = gql`
+    fragment AddOnConfiguration on AddOnConfiguration {
+  documentation
+  name
+  type
+  values
+  condition {
+    ...AddOnConfigCondition
+  }
+}
+    ${AddOnConfigConditionFragmentDoc}`;
+export const ClusterAddOnFragmentDoc = gql`
+    fragment ClusterAddOn on ClusterAddOn {
+  global
+  icon
+  name
+  version
+  configuration {
+    ...AddOnConfiguration
+  }
+}
+    ${AddOnConfigurationFragmentDoc}`;
+export const ApiDeprecationFragmentDoc = gql`
+    fragment ApiDeprecation on ApiDeprecation {
+  availableIn
+  blocking
+  component {
+    group
+    version
+    kind
+    name
+    namespace
+    service {
+      git {
+        ref
+        folder
+      }
+      repository {
+        httpsPath
+        urlFormat
+      }
+    }
+  }
+  deprecatedIn
+  removedIn
+  replacement
+}
+    `;
+export const ClusterConditionFragmentDoc = gql`
+    fragment ClusterCondition on ClusterCondition {
+  lastTransitionTime
+  message
+  reason
+  severity
+  status
+  type
+}
+    `;
+export const ClustersRowFragmentDoc = gql`
+    fragment ClustersRow on Cluster {
+  apiDeprecations {
+    ...ApiDeprecation
+  }
+  currentVersion
+  id
+  self
+  protect
+  name
+  handle
+  nodes {
+    status {
+      capacity
+    }
+  }
+  nodeMetrics {
+    usage {
+      cpu
+      memory
+    }
+  }
+  installed
+  pingedAt
+  deletedAt
+  provider {
+    id
+    cloud
+    name
+    namespace
+    supportedVersions
+  }
+  self
+  service {
+    id
+    repository {
+      url
+    }
+  }
+  status {
+    conditions {
+      ...ClusterCondition
+    }
+  }
+  version
+}
+    ${ApiDeprecationFragmentDoc}
+${ClusterConditionFragmentDoc}`;
+export const TaintFragmentDoc = gql`
+    fragment Taint on Taint {
+  effect
+  key
+  value
+}
+    `;
+export const NodePoolFragmentDoc = gql`
+    fragment NodePool on NodePool {
+  id
+  name
+  minSize
+  maxSize
+  instanceType
+  spot
+  labels
+  taints {
+    ...Taint
+  }
+}
+    ${TaintFragmentDoc}`;
+export const ClusterNodeFragmentDoc = gql`
+    fragment ClusterNode on Node {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    allocatable
+    capacity
+    conditions {
+      type
+      status
+      message
+    }
+  }
+  spec {
+    podCidr
+    providerId
+  }
+}
+    ${MetadataFragmentDoc}`;
+export const NodeMetricFragmentDoc = gql`
+    fragment NodeMetric on NodeMetric {
+  metadata {
+    ...Metadata
+  }
+  usage {
+    cpu
+    memory
+  }
+  timestamp
+  window
+}
+    ${MetadataFragmentDoc}`;
+export const ClusterFragmentDoc = gql`
+    fragment Cluster on Cluster {
+  apiDeprecations {
+    ...ApiDeprecation
+  }
+  currentVersion
+  id
+  name
+  handle
+  nodePools {
+    ...NodePool
+  }
+  nodes {
+    ...ClusterNode
+  }
+  nodeMetrics {
+    ...NodeMetric
+  }
+  pingedAt
+  provider {
+    id
+    cloud
+    name
+    namespace
+    supportedVersions
+  }
+  self
+  service {
+    id
+    name
+    repository {
+      url
+    }
+  }
+  status {
+    conditions {
+      ...ClusterCondition
+    }
+    controlPlaneReady
+    failureMessage
+    failureReason
+    phase
+  }
+  version
+  tags {
+    name
+    value
+  }
+}
+    ${ApiDeprecationFragmentDoc}
+${NodePoolFragmentDoc}
+${ClusterNodeFragmentDoc}
+${NodeMetricFragmentDoc}
+${ClusterConditionFragmentDoc}`;
+export const ClusterTinyFragmentDoc = gql`
+    fragment ClusterTiny on Cluster {
+  id
+  name
+  provider {
+    cloud
+  }
+}
+    `;
+export const PolicyBindingFragmentDoc = gql`
+    fragment PolicyBinding on PolicyBinding {
+  id
+  user {
+    id
+    name
+    email
+  }
+  group {
+    id
+    name
+  }
+}
+    `;
+export const ClusterBindingsFragmentDoc = gql`
+    fragment ClusterBindings on Cluster {
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+    ${PolicyBindingFragmentDoc}`;
+export const MetricResponseFragmentDoc = gql`
+    fragment MetricResponse on MetricResponse {
+  metric
+  values {
+    timestamp
+    value
+  }
+}
+    `;
+export const GlobalServiceFragmentDoc = gql`
+    fragment GlobalService on GlobalService {
+  id
+  name
+  provider {
+    id
+    name
+    cloud
+    namespace
+  }
+  service {
+    id
+    name
+  }
+  tags {
+    name
+    value
+  }
+  insertedAt
+  updatedAt
+}
+    `;
+export const GitRepositoryFragmentDoc = gql`
+    fragment GitRepository on GitRepository {
+  id
+  url
+  health
+  authMethod
+  editable
+  error
+  insertedAt
+  pulledAt
+  updatedAt
+  urlFormat
+  httpsPath
+}
+    `;
+export const DeploymentSettingsFragmentDoc = gql`
+    fragment DeploymentSettings on DeploymentSettings {
+  id
+  name
+  enabled
+  insertedAt
+  updatedAt
+  artifactRepository {
+    ...GitRepository
+  }
+  deployerRepository {
+    ...GitRepository
+  }
+  createBindings {
+    ...PolicyBinding
+  }
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+  gitBindings {
+    ...PolicyBinding
+  }
+}
+    ${GitRepositoryFragmentDoc}
+${PolicyBindingFragmentDoc}`;
+export const ProviderCredentialFragmentDoc = gql`
+    fragment ProviderCredential on ProviderCredential {
+  id
+  insertedAt
+  kind
+  name
+  namespace
+  updatedAt
+}
+    `;
+export const ClusterProviderFragmentDoc = gql`
+    fragment ClusterProvider on ClusterProvider {
+  id
+  name
+  namespace
+  cloud
+  editable
+  git {
+    folder
+    ref
+  }
+  repository {
+    id
+    url
+  }
+  service {
+    id
+    name
+    namespace
+  }
+  credentials {
+    ...ProviderCredential
+  }
+  supportedVersions
+  deletedAt
+  insertedAt
+  updatedAt
+}
+    ${ProviderCredentialFragmentDoc}`;
+export const ServiceDeploymentsRowFragmentDoc = gql`
+    fragment ServiceDeploymentsRow on ServiceDeployment {
+  id
+  name
+  protect
+  message
+  git {
+    ref
+    folder
+  }
+  cluster {
+    id
+    name
+    provider {
+      name
+      cloud
+    }
+  }
+  repository {
+    id
+    url
+  }
+  insertedAt
+  updatedAt
+  deletedAt
+  componentStatus
+  status
+  errors {
+    message
+    source
+  }
+  components {
+    apiDeprecations {
+      blocking
+    }
+  }
+  globalService {
+    id
+    name
+  }
+}
+    `;
+export const ServiceDeploymentDetailsFragmentDoc = gql`
+    fragment ServiceDeploymentDetails on ServiceDeployment {
+  id
+  name
+  namespace
+  componentStatus
+  status
+  cluster {
+    id
+    name
+  }
+  version
+  docs {
+    content
+    path
+  }
+  git {
+    folder
+    ref
+  }
+  components {
+    apiDeprecations {
+      blocking
+    }
+  }
+}
+    `;
+export const ServiceDeploymentComponentFragmentDoc = gql`
+    fragment ServiceDeploymentComponent on ServiceComponent {
+  id
+  name
+  group
+  kind
+  namespace
+  state
+  synced
+  version
+  apiDeprecations {
+    ...ApiDeprecation
+  }
+}
+    ${ApiDeprecationFragmentDoc}`;
+export const ServiceDeploymentRevisionFragmentDoc = gql`
+    fragment ServiceDeploymentRevision on Revision {
+  id
+  sha
+  version
+  message
+  updatedAt
+  insertedAt
+  git {
+    folder
+    ref
+  }
+}
+    `;
+export const ServiceDeploymentRevisionsFragmentDoc = gql`
+    fragment ServiceDeploymentRevisions on ServiceDeployment {
+  revision {
+    ...ServiceDeploymentRevision
+  }
+  revisions(first: 500) {
+    edges {
+      node {
+        ...ServiceDeploymentRevision
+      }
+    }
+  }
+}
+    ${ServiceDeploymentRevisionFragmentDoc}`;
+export const ServiceDeploymentBindingsFragmentDoc = gql`
+    fragment ServiceDeploymentBindings on ServiceDeployment {
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+    ${PolicyBindingFragmentDoc}`;
 export const ResourceSpecFragmentDoc = gql`
     fragment ResourceSpec on ResourceSpec {
   cpu
@@ -2684,6 +5143,325 @@ export const GroupMemberFragmentDoc = gql`
 }
     ${UserFragmentDoc}
 ${GroupFragmentDoc}`;
+export const CertificateFragmentDoc = gql`
+    fragment Certificate on Certificate {
+  metadata {
+    ...Metadata
+  }
+  status {
+    renewalTime
+    notBefore
+    notAfter
+  }
+  spec {
+    dnsNames
+    secretName
+    issuerRef {
+      group
+      kind
+      name
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const CronJobFragmentDoc = gql`
+    fragment CronJob on CronJob {
+  metadata {
+    ...Metadata
+  }
+  status {
+    lastScheduleTime
+  }
+  spec {
+    schedule
+    suspend
+    concurrencyPolicy
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const DeploymentFragmentDoc = gql`
+    fragment Deployment on Deployment {
+  metadata {
+    ...Metadata
+  }
+  status {
+    availableReplicas
+    replicas
+    unavailableReplicas
+  }
+  spec {
+    replicas
+    strategy {
+      type
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const IngressFragmentDoc = gql`
+    fragment Ingress on Ingress {
+  metadata {
+    ...Metadata
+  }
+  status {
+    loadBalancer {
+      ingress {
+        ip
+        hostname
+      }
+    }
+  }
+  spec {
+    tls {
+      hosts
+    }
+    rules {
+      host
+      http {
+        paths {
+          path
+          backend {
+            serviceName
+            servicePort
+          }
+        }
+      }
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const JobStatusFragmentDoc = gql`
+    fragment JobStatus on JobStatus {
+  active
+  completionTime
+  succeeded
+  failed
+  startTime
+}
+    `;
+export const ContainerStatusFragmentDoc = gql`
+    fragment ContainerStatus on ContainerStatus {
+  restartCount
+  ready
+  name
+  state {
+    running {
+      startedAt
+    }
+    terminated {
+      exitCode
+      message
+      reason
+    }
+    waiting {
+      message
+      reason
+    }
+  }
+}
+    `;
+export const ContainerFragmentDoc = gql`
+    fragment Container on Container {
+  name
+  image
+  ports {
+    containerPort
+    protocol
+  }
+  resources {
+    ...Resources
+  }
+}
+    ${ResourcesFragmentDoc}`;
+export const PodFragmentDoc = gql`
+    fragment Pod on Pod {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    podIp
+    reason
+    containerStatuses {
+      ...ContainerStatus
+    }
+    initContainerStatuses {
+      ...ContainerStatus
+    }
+    conditions {
+      lastProbeTime
+      lastTransitionTime
+      message
+      reason
+      status
+      type
+    }
+  }
+  spec {
+    nodeName
+    serviceAccountName
+    containers {
+      ...Container
+    }
+    initContainers {
+      ...Container
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${ContainerStatusFragmentDoc}
+${ContainerFragmentDoc}`;
+export const JobFragmentDoc = gql`
+    fragment Job on Job {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...JobStatus
+  }
+  spec {
+    backoffLimit
+    parallelism
+    activeDeadlineSeconds
+  }
+  pods {
+    ...Pod
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${JobStatusFragmentDoc}
+${PodFragmentDoc}`;
+export const EventFragmentDoc = gql`
+    fragment Event on Event {
+  action
+  lastTimestamp
+  count
+  message
+  reason
+  type
+}
+    `;
+export const NodeFragmentDoc = gql`
+    fragment Node on Node {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    allocatable
+    capacity
+    conditions {
+      type
+      status
+      message
+    }
+  }
+  spec {
+    podCidr
+    providerId
+  }
+  raw
+  pods {
+    ...Pod
+  }
+  events {
+    ...Event
+  }
+}
+    ${MetadataFragmentDoc}
+${PodFragmentDoc}
+${EventFragmentDoc}`;
+export const PodWithEventsFragmentDoc = gql`
+    fragment PodWithEvents on Pod {
+  ...Pod
+  events {
+    ...Event
+  }
+}
+    ${PodFragmentDoc}
+${EventFragmentDoc}`;
+export const ServiceFragmentDoc = gql`
+    fragment Service on Service {
+  metadata {
+    ...Metadata
+  }
+  status {
+    loadBalancer {
+      ingress {
+        ip
+      }
+    }
+  }
+  spec {
+    type
+    clusterIp
+    ports {
+      name
+      protocol
+      port
+      targetPort
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const StatefulSetFragmentDoc = gql`
+    fragment StatefulSet on StatefulSet {
+  metadata {
+    ...Metadata
+  }
+  status {
+    replicas
+    currentReplicas
+    readyReplicas
+    updatedReplicas
+  }
+  spec {
+    replicas
+    serviceName
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const UnstructuredResourceFragmentDoc = gql`
+    fragment UnstructuredResource on KubernetesUnstructured {
+  raw
+  metadata {
+    ...Metadata
+  }
+  events {
+    ...Event
+  }
+}
+    ${MetadataFragmentDoc}
+${EventFragmentDoc}`;
+export const AccessTokenFragmentDoc = gql`
+    fragment AccessToken on AccessToken {
+  id
+  insertedAt
+  token
+  updatedAt
+}
+    `;
+export const AccessTokenAuditFragmentDoc = gql`
+    fragment AccessTokenAudit on AccessTokenAudit {
+  id
+  city
+  count
+  country
+  insertedAt
+  ip
+  latitude
+  longitude
+  timestamp
+  updatedAt
+}
+    `;
 export const InviteFragmentDoc = gql`
     fragment Invite on Invite {
   secureId
@@ -2713,6 +5491,15 @@ export const RoleFragmentDoc = gql`
   }
 }
     ${RoleBindingFragmentDoc}`;
+export const AvailableFeaturesFragmentDoc = gql`
+    fragment AvailableFeatures on AvailableFeatures {
+  audits
+  cd
+  databaseManagement
+  userManagement
+  vpn
+}
+    `;
 export const ManifestFragmentDoc = gql`
     fragment Manifest on PluralManifest {
   network {
@@ -2730,14 +5517,14 @@ export const AppDocument = gql`
       helm
       terraform
     }
-    ...ApplicationFragment
+    ...Application
   }
   configurationOverlays(namespace: $name) {
-    ...ConfigurationOverlayFragment
+    ...ConfigurationOverlay
   }
 }
-    ${ApplicationFragmentFragmentDoc}
-${ConfigurationOverlayFragmentFragmentDoc}`;
+    ${ApplicationFragmentDoc}
+${ConfigurationOverlayFragmentDoc}`;
 
 /**
  * __useAppQuery__
@@ -2763,17 +5550,22 @@ export function useAppLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AppQue
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<AppQuery, AppQueryVariables>(AppDocument, options);
         }
+export function useAppSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AppQuery, AppQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AppQuery, AppQueryVariables>(AppDocument, options);
+        }
 export type AppQueryHookResult = ReturnType<typeof useAppQuery>;
 export type AppLazyQueryHookResult = ReturnType<typeof useAppLazyQuery>;
+export type AppSuspenseQueryHookResult = ReturnType<typeof useAppSuspenseQuery>;
 export type AppQueryResult = Apollo.QueryResult<AppQuery, AppQueryVariables>;
 export const AppInfoDocument = gql`
     query AppInfo($name: String!) {
   application(name: $name) {
-    ...ApplicationFragment
+    ...Application
     info
   }
 }
-    ${ApplicationFragmentFragmentDoc}`;
+    ${ApplicationFragmentDoc}`;
 
 /**
  * __useAppInfoQuery__
@@ -2799,16 +5591,21 @@ export function useAppInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Ap
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<AppInfoQuery, AppInfoQueryVariables>(AppInfoDocument, options);
         }
+export function useAppInfoSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AppInfoQuery, AppInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AppInfoQuery, AppInfoQueryVariables>(AppInfoDocument, options);
+        }
 export type AppInfoQueryHookResult = ReturnType<typeof useAppInfoQuery>;
 export type AppInfoLazyQueryHookResult = ReturnType<typeof useAppInfoLazyQuery>;
+export type AppInfoSuspenseQueryHookResult = ReturnType<typeof useAppInfoSuspenseQuery>;
 export type AppInfoQueryResult = Apollo.QueryResult<AppInfoQuery, AppInfoQueryVariables>;
 export const RepositoryDocument = gql`
     query Repository($name: String!) {
   repository(name: $name) {
-    ...RepositoryFragment
+    ...Repository
   }
 }
-    ${RepositoryFragmentFragmentDoc}`;
+    ${RepositoryFragmentDoc}`;
 
 /**
  * __useRepositoryQuery__
@@ -2834,8 +5631,13 @@ export function useRepositoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<RepositoryQuery, RepositoryQueryVariables>(RepositoryDocument, options);
         }
+export function useRepositorySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RepositoryQuery, RepositoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<RepositoryQuery, RepositoryQueryVariables>(RepositoryDocument, options);
+        }
 export type RepositoryQueryHookResult = ReturnType<typeof useRepositoryQuery>;
 export type RepositoryLazyQueryHookResult = ReturnType<typeof useRepositoryLazyQuery>;
+export type RepositorySuspenseQueryHookResult = ReturnType<typeof useRepositorySuspenseQuery>;
 export type RepositoryQueryResult = Apollo.QueryResult<RepositoryQuery, RepositoryQueryVariables>;
 export const PluralContextDocument = gql`
     query PluralContext {
@@ -2870,8 +5672,13 @@ export function usePluralContextLazyQuery(baseOptions?: Apollo.LazyQueryHookOpti
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<PluralContextQuery, PluralContextQueryVariables>(PluralContextDocument, options);
         }
+export function usePluralContextSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PluralContextQuery, PluralContextQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PluralContextQuery, PluralContextQueryVariables>(PluralContextDocument, options);
+        }
 export type PluralContextQueryHookResult = ReturnType<typeof usePluralContextQuery>;
 export type PluralContextLazyQueryHookResult = ReturnType<typeof usePluralContextLazyQuery>;
+export type PluralContextSuspenseQueryHookResult = ReturnType<typeof usePluralContextSuspenseQuery>;
 export type PluralContextQueryResult = Apollo.QueryResult<PluralContextQuery, PluralContextQueryVariables>;
 export const CreateBuildDocument = gql`
     mutation CreateBuild($attributes: BuildAttributes!) {
@@ -2906,6 +5713,1510 @@ export function useCreateBuildMutation(baseOptions?: Apollo.MutationHookOptions<
 export type CreateBuildMutationHookResult = ReturnType<typeof useCreateBuildMutation>;
 export type CreateBuildMutationResult = Apollo.MutationResult<CreateBuildMutation>;
 export type CreateBuildMutationOptions = Apollo.BaseMutationOptions<CreateBuildMutation, CreateBuildMutationVariables>;
+export const ClusterAddOnsDocument = gql`
+    query ClusterAddOns {
+  clusterAddOns {
+    ...ClusterAddOn
+  }
+}
+    ${ClusterAddOnFragmentDoc}`;
+
+/**
+ * __useClusterAddOnsQuery__
+ *
+ * To run a query within a React component, call `useClusterAddOnsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterAddOnsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterAddOnsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useClusterAddOnsQuery(baseOptions?: Apollo.QueryHookOptions<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>(ClusterAddOnsDocument, options);
+      }
+export function useClusterAddOnsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>(ClusterAddOnsDocument, options);
+        }
+export function useClusterAddOnsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>(ClusterAddOnsDocument, options);
+        }
+export type ClusterAddOnsQueryHookResult = ReturnType<typeof useClusterAddOnsQuery>;
+export type ClusterAddOnsLazyQueryHookResult = ReturnType<typeof useClusterAddOnsLazyQuery>;
+export type ClusterAddOnsSuspenseQueryHookResult = ReturnType<typeof useClusterAddOnsSuspenseQuery>;
+export type ClusterAddOnsQueryResult = Apollo.QueryResult<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>;
+export const InstallAddOnDocument = gql`
+    mutation InstallAddOn($clusterId: ID!, $name: String!, $configuration: [ConfigAttributes], $global: GlobalServiceAttributes) {
+  installAddOn(
+    clusterId: $clusterId
+    configuration: $configuration
+    global: $global
+    name: $name
+  ) {
+    ...ServiceDeploymentsRow
+  }
+}
+    ${ServiceDeploymentsRowFragmentDoc}`;
+export type InstallAddOnMutationFn = Apollo.MutationFunction<InstallAddOnMutation, InstallAddOnMutationVariables>;
+
+/**
+ * __useInstallAddOnMutation__
+ *
+ * To run a mutation, you first call `useInstallAddOnMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useInstallAddOnMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [installAddOnMutation, { data, loading, error }] = useInstallAddOnMutation({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *      name: // value for 'name'
+ *      configuration: // value for 'configuration'
+ *      global: // value for 'global'
+ *   },
+ * });
+ */
+export function useInstallAddOnMutation(baseOptions?: Apollo.MutationHookOptions<InstallAddOnMutation, InstallAddOnMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<InstallAddOnMutation, InstallAddOnMutationVariables>(InstallAddOnDocument, options);
+      }
+export type InstallAddOnMutationHookResult = ReturnType<typeof useInstallAddOnMutation>;
+export type InstallAddOnMutationResult = Apollo.MutationResult<InstallAddOnMutation>;
+export type InstallAddOnMutationOptions = Apollo.BaseMutationOptions<InstallAddOnMutation, InstallAddOnMutationVariables>;
+export const ClustersDocument = gql`
+    query Clusters {
+  clusters(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClustersRow
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClustersRowFragmentDoc}`;
+
+/**
+ * __useClustersQuery__
+ *
+ * To run a query within a React component, call `useClustersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClustersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClustersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useClustersQuery(baseOptions?: Apollo.QueryHookOptions<ClustersQuery, ClustersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClustersQuery, ClustersQueryVariables>(ClustersDocument, options);
+      }
+export function useClustersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClustersQuery, ClustersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClustersQuery, ClustersQueryVariables>(ClustersDocument, options);
+        }
+export function useClustersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClustersQuery, ClustersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClustersQuery, ClustersQueryVariables>(ClustersDocument, options);
+        }
+export type ClustersQueryHookResult = ReturnType<typeof useClustersQuery>;
+export type ClustersLazyQueryHookResult = ReturnType<typeof useClustersLazyQuery>;
+export type ClustersSuspenseQueryHookResult = ReturnType<typeof useClustersSuspenseQuery>;
+export type ClustersQueryResult = Apollo.QueryResult<ClustersQuery, ClustersQueryVariables>;
+export const ClustersTinyDocument = gql`
+    query ClustersTiny {
+  clusters(first: 100) {
+    edges {
+      node {
+        ...ClusterTiny
+      }
+    }
+  }
+}
+    ${ClusterTinyFragmentDoc}`;
+
+/**
+ * __useClustersTinyQuery__
+ *
+ * To run a query within a React component, call `useClustersTinyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClustersTinyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClustersTinyQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useClustersTinyQuery(baseOptions?: Apollo.QueryHookOptions<ClustersTinyQuery, ClustersTinyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClustersTinyQuery, ClustersTinyQueryVariables>(ClustersTinyDocument, options);
+      }
+export function useClustersTinyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClustersTinyQuery, ClustersTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClustersTinyQuery, ClustersTinyQueryVariables>(ClustersTinyDocument, options);
+        }
+export function useClustersTinySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClustersTinyQuery, ClustersTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClustersTinyQuery, ClustersTinyQueryVariables>(ClustersTinyDocument, options);
+        }
+export type ClustersTinyQueryHookResult = ReturnType<typeof useClustersTinyQuery>;
+export type ClustersTinyLazyQueryHookResult = ReturnType<typeof useClustersTinyLazyQuery>;
+export type ClustersTinySuspenseQueryHookResult = ReturnType<typeof useClustersTinySuspenseQuery>;
+export type ClustersTinyQueryResult = Apollo.QueryResult<ClustersTinyQuery, ClustersTinyQueryVariables>;
+export const ClusterDocument = gql`
+    query Cluster($id: ID!) {
+  cluster(id: $id) {
+    ...Cluster
+  }
+}
+    ${ClusterFragmentDoc}`;
+
+/**
+ * __useClusterQuery__
+ *
+ * To run a query within a React component, call `useClusterQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useClusterQuery(baseOptions: Apollo.QueryHookOptions<ClusterQuery, ClusterQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterQuery, ClusterQueryVariables>(ClusterDocument, options);
+      }
+export function useClusterLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterQuery, ClusterQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterQuery, ClusterQueryVariables>(ClusterDocument, options);
+        }
+export function useClusterSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterQuery, ClusterQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterQuery, ClusterQueryVariables>(ClusterDocument, options);
+        }
+export type ClusterQueryHookResult = ReturnType<typeof useClusterQuery>;
+export type ClusterLazyQueryHookResult = ReturnType<typeof useClusterLazyQuery>;
+export type ClusterSuspenseQueryHookResult = ReturnType<typeof useClusterSuspenseQuery>;
+export type ClusterQueryResult = Apollo.QueryResult<ClusterQuery, ClusterQueryVariables>;
+export const ClusterPodsDocument = gql`
+    query ClusterPods($clusterId: ID, $namespace: String) {
+  pods(first: 100, clusterId: $clusterId, namespace: $namespace) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Pod
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${PodFragmentDoc}`;
+
+/**
+ * __useClusterPodsQuery__
+ *
+ * To run a query within a React component, call `useClusterPodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterPodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterPodsQuery({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useClusterPodsQuery(baseOptions?: Apollo.QueryHookOptions<ClusterPodsQuery, ClusterPodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterPodsQuery, ClusterPodsQueryVariables>(ClusterPodsDocument, options);
+      }
+export function useClusterPodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterPodsQuery, ClusterPodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterPodsQuery, ClusterPodsQueryVariables>(ClusterPodsDocument, options);
+        }
+export function useClusterPodsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterPodsQuery, ClusterPodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterPodsQuery, ClusterPodsQueryVariables>(ClusterPodsDocument, options);
+        }
+export type ClusterPodsQueryHookResult = ReturnType<typeof useClusterPodsQuery>;
+export type ClusterPodsLazyQueryHookResult = ReturnType<typeof useClusterPodsLazyQuery>;
+export type ClusterPodsSuspenseQueryHookResult = ReturnType<typeof useClusterPodsSuspenseQuery>;
+export type ClusterPodsQueryResult = Apollo.QueryResult<ClusterPodsQuery, ClusterPodsQueryVariables>;
+export const ClusterNamespacesDocument = gql`
+    query ClusterNamespaces($clusterId: ID) {
+  namespaces(clusterId: $clusterId) {
+    metadata {
+      ...Metadata
+    }
+  }
+}
+    ${MetadataFragmentDoc}`;
+
+/**
+ * __useClusterNamespacesQuery__
+ *
+ * To run a query within a React component, call `useClusterNamespacesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterNamespacesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterNamespacesQuery({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useClusterNamespacesQuery(baseOptions?: Apollo.QueryHookOptions<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>(ClusterNamespacesDocument, options);
+      }
+export function useClusterNamespacesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>(ClusterNamespacesDocument, options);
+        }
+export function useClusterNamespacesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>(ClusterNamespacesDocument, options);
+        }
+export type ClusterNamespacesQueryHookResult = ReturnType<typeof useClusterNamespacesQuery>;
+export type ClusterNamespacesLazyQueryHookResult = ReturnType<typeof useClusterNamespacesLazyQuery>;
+export type ClusterNamespacesSuspenseQueryHookResult = ReturnType<typeof useClusterNamespacesSuspenseQuery>;
+export type ClusterNamespacesQueryResult = Apollo.QueryResult<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>;
+export const ClusterBindingsDocument = gql`
+    query ClusterBindings($id: ID!) {
+  cluster(id: $id) {
+    ...ClusterBindings
+  }
+}
+    ${ClusterBindingsFragmentDoc}`;
+
+/**
+ * __useClusterBindingsQuery__
+ *
+ * To run a query within a React component, call `useClusterBindingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterBindingsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useClusterBindingsQuery(baseOptions: Apollo.QueryHookOptions<ClusterBindingsQuery, ClusterBindingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterBindingsQuery, ClusterBindingsQueryVariables>(ClusterBindingsDocument, options);
+      }
+export function useClusterBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterBindingsQuery, ClusterBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterBindingsQuery, ClusterBindingsQueryVariables>(ClusterBindingsDocument, options);
+        }
+export function useClusterBindingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterBindingsQuery, ClusterBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterBindingsQuery, ClusterBindingsQueryVariables>(ClusterBindingsDocument, options);
+        }
+export type ClusterBindingsQueryHookResult = ReturnType<typeof useClusterBindingsQuery>;
+export type ClusterBindingsLazyQueryHookResult = ReturnType<typeof useClusterBindingsLazyQuery>;
+export type ClusterBindingsSuspenseQueryHookResult = ReturnType<typeof useClusterBindingsSuspenseQuery>;
+export type ClusterBindingsQueryResult = Apollo.QueryResult<ClusterBindingsQuery, ClusterBindingsQueryVariables>;
+export const UpdateClusterBindingsDocument = gql`
+    mutation UpdateClusterBindings($id: ID!, $rbac: RbacAttributes!) {
+  updateRbac(clusterId: $id, rbac: $rbac)
+}
+    `;
+export type UpdateClusterBindingsMutationFn = Apollo.MutationFunction<UpdateClusterBindingsMutation, UpdateClusterBindingsMutationVariables>;
+
+/**
+ * __useUpdateClusterBindingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateClusterBindingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateClusterBindingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateClusterBindingsMutation, { data, loading, error }] = useUpdateClusterBindingsMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      rbac: // value for 'rbac'
+ *   },
+ * });
+ */
+export function useUpdateClusterBindingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateClusterBindingsMutation, UpdateClusterBindingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateClusterBindingsMutation, UpdateClusterBindingsMutationVariables>(UpdateClusterBindingsDocument, options);
+      }
+export type UpdateClusterBindingsMutationHookResult = ReturnType<typeof useUpdateClusterBindingsMutation>;
+export type UpdateClusterBindingsMutationResult = Apollo.MutationResult<UpdateClusterBindingsMutation>;
+export type UpdateClusterBindingsMutationOptions = Apollo.BaseMutationOptions<UpdateClusterBindingsMutation, UpdateClusterBindingsMutationVariables>;
+export const UpdateClusterDocument = gql`
+    mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
+  updateCluster(id: $id, attributes: $attributes) {
+    ...ClustersRow
+  }
+}
+    ${ClustersRowFragmentDoc}`;
+export type UpdateClusterMutationFn = Apollo.MutationFunction<UpdateClusterMutation, UpdateClusterMutationVariables>;
+
+/**
+ * __useUpdateClusterMutation__
+ *
+ * To run a mutation, you first call `useUpdateClusterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateClusterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateClusterMutation, { data, loading, error }] = useUpdateClusterMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateClusterMutation(baseOptions?: Apollo.MutationHookOptions<UpdateClusterMutation, UpdateClusterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateClusterMutation, UpdateClusterMutationVariables>(UpdateClusterDocument, options);
+      }
+export type UpdateClusterMutationHookResult = ReturnType<typeof useUpdateClusterMutation>;
+export type UpdateClusterMutationResult = Apollo.MutationResult<UpdateClusterMutation>;
+export type UpdateClusterMutationOptions = Apollo.BaseMutationOptions<UpdateClusterMutation, UpdateClusterMutationVariables>;
+export const CreateClusterDocument = gql`
+    mutation CreateCluster($attributes: ClusterAttributes!) {
+  createCluster(attributes: $attributes) {
+    ...Cluster
+    deployToken
+  }
+}
+    ${ClusterFragmentDoc}`;
+export type CreateClusterMutationFn = Apollo.MutationFunction<CreateClusterMutation, CreateClusterMutationVariables>;
+
+/**
+ * __useCreateClusterMutation__
+ *
+ * To run a mutation, you first call `useCreateClusterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateClusterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createClusterMutation, { data, loading, error }] = useCreateClusterMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateClusterMutation(baseOptions?: Apollo.MutationHookOptions<CreateClusterMutation, CreateClusterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateClusterMutation, CreateClusterMutationVariables>(CreateClusterDocument, options);
+      }
+export type CreateClusterMutationHookResult = ReturnType<typeof useCreateClusterMutation>;
+export type CreateClusterMutationResult = Apollo.MutationResult<CreateClusterMutation>;
+export type CreateClusterMutationOptions = Apollo.BaseMutationOptions<CreateClusterMutation, CreateClusterMutationVariables>;
+export const DeleteClusterDocument = gql`
+    mutation DeleteCluster($id: ID!) {
+  deleteCluster(id: $id) {
+    ...Cluster
+  }
+}
+    ${ClusterFragmentDoc}`;
+export type DeleteClusterMutationFn = Apollo.MutationFunction<DeleteClusterMutation, DeleteClusterMutationVariables>;
+
+/**
+ * __useDeleteClusterMutation__
+ *
+ * To run a mutation, you first call `useDeleteClusterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteClusterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteClusterMutation, { data, loading, error }] = useDeleteClusterMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteClusterMutation(baseOptions?: Apollo.MutationHookOptions<DeleteClusterMutation, DeleteClusterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteClusterMutation, DeleteClusterMutationVariables>(DeleteClusterDocument, options);
+      }
+export type DeleteClusterMutationHookResult = ReturnType<typeof useDeleteClusterMutation>;
+export type DeleteClusterMutationResult = Apollo.MutationResult<DeleteClusterMutation>;
+export type DeleteClusterMutationOptions = Apollo.BaseMutationOptions<DeleteClusterMutation, DeleteClusterMutationVariables>;
+export const UsageDocument = gql`
+    query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!) {
+  cpu: metric(query: $cpu, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  mem: metric(query: $mem, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  podCpu: metric(query: $podCpu, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  podMem: metric(query: $podMem, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+}
+    ${MetricResponseFragmentDoc}`;
+
+/**
+ * __useUsageQuery__
+ *
+ * To run a query within a React component, call `useUsageQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUsageQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUsageQuery({
+ *   variables: {
+ *      cpu: // value for 'cpu'
+ *      mem: // value for 'mem'
+ *      podCpu: // value for 'podCpu'
+ *      podMem: // value for 'podMem'
+ *      step: // value for 'step'
+ *      offset: // value for 'offset'
+ *   },
+ * });
+ */
+export function useUsageQuery(baseOptions: Apollo.QueryHookOptions<UsageQuery, UsageQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UsageQuery, UsageQueryVariables>(UsageDocument, options);
+      }
+export function useUsageLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UsageQuery, UsageQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UsageQuery, UsageQueryVariables>(UsageDocument, options);
+        }
+export function useUsageSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<UsageQuery, UsageQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<UsageQuery, UsageQueryVariables>(UsageDocument, options);
+        }
+export type UsageQueryHookResult = ReturnType<typeof useUsageQuery>;
+export type UsageLazyQueryHookResult = ReturnType<typeof useUsageLazyQuery>;
+export type UsageSuspenseQueryHookResult = ReturnType<typeof useUsageSuspenseQuery>;
+export type UsageQueryResult = Apollo.QueryResult<UsageQuery, UsageQueryVariables>;
+export const GitRepositoriesDocument = gql`
+    query GitRepositories {
+  gitRepositories(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...GitRepository
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${GitRepositoryFragmentDoc}`;
+
+/**
+ * __useGitRepositoriesQuery__
+ *
+ * To run a query within a React component, call `useGitRepositoriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGitRepositoriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGitRepositoriesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGitRepositoriesQuery(baseOptions?: Apollo.QueryHookOptions<GitRepositoriesQuery, GitRepositoriesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GitRepositoriesQuery, GitRepositoriesQueryVariables>(GitRepositoriesDocument, options);
+      }
+export function useGitRepositoriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GitRepositoriesQuery, GitRepositoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GitRepositoriesQuery, GitRepositoriesQueryVariables>(GitRepositoriesDocument, options);
+        }
+export function useGitRepositoriesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GitRepositoriesQuery, GitRepositoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GitRepositoriesQuery, GitRepositoriesQueryVariables>(GitRepositoriesDocument, options);
+        }
+export type GitRepositoriesQueryHookResult = ReturnType<typeof useGitRepositoriesQuery>;
+export type GitRepositoriesLazyQueryHookResult = ReturnType<typeof useGitRepositoriesLazyQuery>;
+export type GitRepositoriesSuspenseQueryHookResult = ReturnType<typeof useGitRepositoriesSuspenseQuery>;
+export type GitRepositoriesQueryResult = Apollo.QueryResult<GitRepositoriesQuery, GitRepositoriesQueryVariables>;
+export const CreateGitRepositoryDocument = gql`
+    mutation CreateGitRepository($attributes: GitAttributes!) {
+  createGitRepository(attributes: $attributes) {
+    ...GitRepository
+  }
+}
+    ${GitRepositoryFragmentDoc}`;
+export type CreateGitRepositoryMutationFn = Apollo.MutationFunction<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>;
+
+/**
+ * __useCreateGitRepositoryMutation__
+ *
+ * To run a mutation, you first call `useCreateGitRepositoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGitRepositoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createGitRepositoryMutation, { data, loading, error }] = useCreateGitRepositoryMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateGitRepositoryMutation(baseOptions?: Apollo.MutationHookOptions<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>(CreateGitRepositoryDocument, options);
+      }
+export type CreateGitRepositoryMutationHookResult = ReturnType<typeof useCreateGitRepositoryMutation>;
+export type CreateGitRepositoryMutationResult = Apollo.MutationResult<CreateGitRepositoryMutation>;
+export type CreateGitRepositoryMutationOptions = Apollo.BaseMutationOptions<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>;
+export const DeleteGitRepositoryDocument = gql`
+    mutation DeleteGitRepository($id: ID!) {
+  deleteGitRepository(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteGitRepositoryMutationFn = Apollo.MutationFunction<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>;
+
+/**
+ * __useDeleteGitRepositoryMutation__
+ *
+ * To run a mutation, you first call `useDeleteGitRepositoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteGitRepositoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteGitRepositoryMutation, { data, loading, error }] = useDeleteGitRepositoryMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteGitRepositoryMutation(baseOptions?: Apollo.MutationHookOptions<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>(DeleteGitRepositoryDocument, options);
+      }
+export type DeleteGitRepositoryMutationHookResult = ReturnType<typeof useDeleteGitRepositoryMutation>;
+export type DeleteGitRepositoryMutationResult = Apollo.MutationResult<DeleteGitRepositoryMutation>;
+export type DeleteGitRepositoryMutationOptions = Apollo.BaseMutationOptions<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>;
+export const UpdateGitRepositoryDocument = gql`
+    mutation UpdateGitRepository($id: ID!, $attributes: GitAttributes!) {
+  updateGitRepository(id: $id, attributes: $attributes) {
+    ...GitRepository
+  }
+}
+    ${GitRepositoryFragmentDoc}`;
+export type UpdateGitRepositoryMutationFn = Apollo.MutationFunction<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>;
+
+/**
+ * __useUpdateGitRepositoryMutation__
+ *
+ * To run a mutation, you first call `useUpdateGitRepositoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateGitRepositoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateGitRepositoryMutation, { data, loading, error }] = useUpdateGitRepositoryMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateGitRepositoryMutation(baseOptions?: Apollo.MutationHookOptions<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>(UpdateGitRepositoryDocument, options);
+      }
+export type UpdateGitRepositoryMutationHookResult = ReturnType<typeof useUpdateGitRepositoryMutation>;
+export type UpdateGitRepositoryMutationResult = Apollo.MutationResult<UpdateGitRepositoryMutation>;
+export type UpdateGitRepositoryMutationOptions = Apollo.BaseMutationOptions<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>;
+export const CreateGlobalServiceDocument = gql`
+    mutation CreateGlobalService($attributes: GlobalServiceAttributes!, $cluster: String, $name: String, $serviceId: ID) {
+  createGlobalService(
+    attributes: $attributes
+    cluster: $cluster
+    name: $name
+    serviceId: $serviceId
+  ) {
+    ...GlobalService
+  }
+}
+    ${GlobalServiceFragmentDoc}`;
+export type CreateGlobalServiceMutationFn = Apollo.MutationFunction<CreateGlobalServiceMutation, CreateGlobalServiceMutationVariables>;
+
+/**
+ * __useCreateGlobalServiceMutation__
+ *
+ * To run a mutation, you first call `useCreateGlobalServiceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGlobalServiceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createGlobalServiceMutation, { data, loading, error }] = useCreateGlobalServiceMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *      cluster: // value for 'cluster'
+ *      name: // value for 'name'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useCreateGlobalServiceMutation(baseOptions?: Apollo.MutationHookOptions<CreateGlobalServiceMutation, CreateGlobalServiceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateGlobalServiceMutation, CreateGlobalServiceMutationVariables>(CreateGlobalServiceDocument, options);
+      }
+export type CreateGlobalServiceMutationHookResult = ReturnType<typeof useCreateGlobalServiceMutation>;
+export type CreateGlobalServiceMutationResult = Apollo.MutationResult<CreateGlobalServiceMutation>;
+export type CreateGlobalServiceMutationOptions = Apollo.BaseMutationOptions<CreateGlobalServiceMutation, CreateGlobalServiceMutationVariables>;
+export const DeleteGlobalServiceDocument = gql`
+    mutation DeleteGlobalService($id: ID!) {
+  deleteGlobalService(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteGlobalServiceMutationFn = Apollo.MutationFunction<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>;
+
+/**
+ * __useDeleteGlobalServiceMutation__
+ *
+ * To run a mutation, you first call `useDeleteGlobalServiceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteGlobalServiceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteGlobalServiceMutation, { data, loading, error }] = useDeleteGlobalServiceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteGlobalServiceMutation(baseOptions?: Apollo.MutationHookOptions<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>(DeleteGlobalServiceDocument, options);
+      }
+export type DeleteGlobalServiceMutationHookResult = ReturnType<typeof useDeleteGlobalServiceMutation>;
+export type DeleteGlobalServiceMutationResult = Apollo.MutationResult<DeleteGlobalServiceMutation>;
+export type DeleteGlobalServiceMutationOptions = Apollo.BaseMutationOptions<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>;
+export const UpdateDeploymentSettingsDocument = gql`
+    mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
+  updateDeploymentSettings(attributes: $attributes) {
+    ...DeploymentSettings
+  }
+}
+    ${DeploymentSettingsFragmentDoc}`;
+export type UpdateDeploymentSettingsMutationFn = Apollo.MutationFunction<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>;
+
+/**
+ * __useUpdateDeploymentSettingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateDeploymentSettingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateDeploymentSettingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateDeploymentSettingsMutation, { data, loading, error }] = useUpdateDeploymentSettingsMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateDeploymentSettingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>(UpdateDeploymentSettingsDocument, options);
+      }
+export type UpdateDeploymentSettingsMutationHookResult = ReturnType<typeof useUpdateDeploymentSettingsMutation>;
+export type UpdateDeploymentSettingsMutationResult = Apollo.MutationResult<UpdateDeploymentSettingsMutation>;
+export type UpdateDeploymentSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateDeploymentSettingsMutation, UpdateDeploymentSettingsMutationVariables>;
+export const DeploymentSettingsDocument = gql`
+    query DeploymentSettings {
+  deploymentSettings {
+    ...DeploymentSettings
+  }
+}
+    ${DeploymentSettingsFragmentDoc}`;
+
+/**
+ * __useDeploymentSettingsQuery__
+ *
+ * To run a query within a React component, call `useDeploymentSettingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeploymentSettingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeploymentSettingsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useDeploymentSettingsQuery(baseOptions?: Apollo.QueryHookOptions<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>(DeploymentSettingsDocument, options);
+      }
+export function useDeploymentSettingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>(DeploymentSettingsDocument, options);
+        }
+export function useDeploymentSettingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>(DeploymentSettingsDocument, options);
+        }
+export type DeploymentSettingsQueryHookResult = ReturnType<typeof useDeploymentSettingsQuery>;
+export type DeploymentSettingsLazyQueryHookResult = ReturnType<typeof useDeploymentSettingsLazyQuery>;
+export type DeploymentSettingsSuspenseQueryHookResult = ReturnType<typeof useDeploymentSettingsSuspenseQuery>;
+export type DeploymentSettingsQueryResult = Apollo.QueryResult<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>;
+export const ClusterProvidersDocument = gql`
+    query ClusterProviders {
+  clusterProviders(first: 100) {
+    edges {
+      node {
+        ...ClusterProvider
+      }
+    }
+  }
+}
+    ${ClusterProviderFragmentDoc}`;
+
+/**
+ * __useClusterProvidersQuery__
+ *
+ * To run a query within a React component, call `useClusterProvidersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterProvidersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterProvidersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useClusterProvidersQuery(baseOptions?: Apollo.QueryHookOptions<ClusterProvidersQuery, ClusterProvidersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterProvidersQuery, ClusterProvidersQueryVariables>(ClusterProvidersDocument, options);
+      }
+export function useClusterProvidersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterProvidersQuery, ClusterProvidersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterProvidersQuery, ClusterProvidersQueryVariables>(ClusterProvidersDocument, options);
+        }
+export function useClusterProvidersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterProvidersQuery, ClusterProvidersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterProvidersQuery, ClusterProvidersQueryVariables>(ClusterProvidersDocument, options);
+        }
+export type ClusterProvidersQueryHookResult = ReturnType<typeof useClusterProvidersQuery>;
+export type ClusterProvidersLazyQueryHookResult = ReturnType<typeof useClusterProvidersLazyQuery>;
+export type ClusterProvidersSuspenseQueryHookResult = ReturnType<typeof useClusterProvidersSuspenseQuery>;
+export type ClusterProvidersQueryResult = Apollo.QueryResult<ClusterProvidersQuery, ClusterProvidersQueryVariables>;
+export const CreateClusterProviderDocument = gql`
+    mutation CreateClusterProvider($attributes: ClusterProviderAttributes!) {
+  createClusterProvider(attributes: $attributes) {
+    ...ClusterProvider
+  }
+}
+    ${ClusterProviderFragmentDoc}`;
+export type CreateClusterProviderMutationFn = Apollo.MutationFunction<CreateClusterProviderMutation, CreateClusterProviderMutationVariables>;
+
+/**
+ * __useCreateClusterProviderMutation__
+ *
+ * To run a mutation, you first call `useCreateClusterProviderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateClusterProviderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createClusterProviderMutation, { data, loading, error }] = useCreateClusterProviderMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateClusterProviderMutation(baseOptions?: Apollo.MutationHookOptions<CreateClusterProviderMutation, CreateClusterProviderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateClusterProviderMutation, CreateClusterProviderMutationVariables>(CreateClusterProviderDocument, options);
+      }
+export type CreateClusterProviderMutationHookResult = ReturnType<typeof useCreateClusterProviderMutation>;
+export type CreateClusterProviderMutationResult = Apollo.MutationResult<CreateClusterProviderMutation>;
+export type CreateClusterProviderMutationOptions = Apollo.BaseMutationOptions<CreateClusterProviderMutation, CreateClusterProviderMutationVariables>;
+export const UpdateClusterProviderDocument = gql`
+    mutation UpdateClusterProvider($id: ID!, $attributes: ClusterProviderUpdateAttributes!) {
+  updateClusterProvider(id: $id, attributes: $attributes) {
+    ...ClusterProvider
+  }
+}
+    ${ClusterProviderFragmentDoc}`;
+export type UpdateClusterProviderMutationFn = Apollo.MutationFunction<UpdateClusterProviderMutation, UpdateClusterProviderMutationVariables>;
+
+/**
+ * __useUpdateClusterProviderMutation__
+ *
+ * To run a mutation, you first call `useUpdateClusterProviderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateClusterProviderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateClusterProviderMutation, { data, loading, error }] = useUpdateClusterProviderMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateClusterProviderMutation(baseOptions?: Apollo.MutationHookOptions<UpdateClusterProviderMutation, UpdateClusterProviderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateClusterProviderMutation, UpdateClusterProviderMutationVariables>(UpdateClusterProviderDocument, options);
+      }
+export type UpdateClusterProviderMutationHookResult = ReturnType<typeof useUpdateClusterProviderMutation>;
+export type UpdateClusterProviderMutationResult = Apollo.MutationResult<UpdateClusterProviderMutation>;
+export type UpdateClusterProviderMutationOptions = Apollo.BaseMutationOptions<UpdateClusterProviderMutation, UpdateClusterProviderMutationVariables>;
+export const DeleteClusterProviderDocument = gql`
+    mutation DeleteClusterProvider($id: ID!) {
+  deleteClusterProvider(id: $id) {
+    ...ClusterProvider
+  }
+}
+    ${ClusterProviderFragmentDoc}`;
+export type DeleteClusterProviderMutationFn = Apollo.MutationFunction<DeleteClusterProviderMutation, DeleteClusterProviderMutationVariables>;
+
+/**
+ * __useDeleteClusterProviderMutation__
+ *
+ * To run a mutation, you first call `useDeleteClusterProviderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteClusterProviderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteClusterProviderMutation, { data, loading, error }] = useDeleteClusterProviderMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteClusterProviderMutation(baseOptions?: Apollo.MutationHookOptions<DeleteClusterProviderMutation, DeleteClusterProviderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteClusterProviderMutation, DeleteClusterProviderMutationVariables>(DeleteClusterProviderDocument, options);
+      }
+export type DeleteClusterProviderMutationHookResult = ReturnType<typeof useDeleteClusterProviderMutation>;
+export type DeleteClusterProviderMutationResult = Apollo.MutationResult<DeleteClusterProviderMutation>;
+export type DeleteClusterProviderMutationOptions = Apollo.BaseMutationOptions<DeleteClusterProviderMutation, DeleteClusterProviderMutationVariables>;
+export const ServiceDeploymentsDocument = gql`
+    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID) {
+  serviceDeployments(
+    first: $first
+    after: $after
+    q: $q
+    cluster: $cluster
+    clusterId: $clusterId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ServiceDeploymentsRow
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ServiceDeploymentsRowFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentsQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      q: // value for 'q'
+ *      cluster: // value for 'cluster'
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useServiceDeploymentsQuery(baseOptions?: Apollo.QueryHookOptions<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>(ServiceDeploymentsDocument, options);
+      }
+export function useServiceDeploymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>(ServiceDeploymentsDocument, options);
+        }
+export function useServiceDeploymentsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>(ServiceDeploymentsDocument, options);
+        }
+export type ServiceDeploymentsQueryHookResult = ReturnType<typeof useServiceDeploymentsQuery>;
+export type ServiceDeploymentsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentsLazyQuery>;
+export type ServiceDeploymentsSuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentsSuspenseQuery>;
+export type ServiceDeploymentsQueryResult = Apollo.QueryResult<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>;
+export const ServiceDeploymentsTinyDocument = gql`
+    query ServiceDeploymentsTiny {
+  serviceDeployments(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        id
+        name
+        cluster {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentsTinyQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentsTinyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentsTinyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentsTinyQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useServiceDeploymentsTinyQuery(baseOptions?: Apollo.QueryHookOptions<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>(ServiceDeploymentsTinyDocument, options);
+      }
+export function useServiceDeploymentsTinyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>(ServiceDeploymentsTinyDocument, options);
+        }
+export function useServiceDeploymentsTinySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>(ServiceDeploymentsTinyDocument, options);
+        }
+export type ServiceDeploymentsTinyQueryHookResult = ReturnType<typeof useServiceDeploymentsTinyQuery>;
+export type ServiceDeploymentsTinyLazyQueryHookResult = ReturnType<typeof useServiceDeploymentsTinyLazyQuery>;
+export type ServiceDeploymentsTinySuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentsTinySuspenseQuery>;
+export type ServiceDeploymentsTinyQueryResult = Apollo.QueryResult<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>;
+export const ServiceDeploymentDocument = gql`
+    query ServiceDeployment($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentDetails
+  }
+}
+    ${ServiceDeploymentDetailsFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>(ServiceDeploymentDocument, options);
+      }
+export function useServiceDeploymentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>(ServiceDeploymentDocument, options);
+        }
+export function useServiceDeploymentSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>(ServiceDeploymentDocument, options);
+        }
+export type ServiceDeploymentQueryHookResult = ReturnType<typeof useServiceDeploymentQuery>;
+export type ServiceDeploymentLazyQueryHookResult = ReturnType<typeof useServiceDeploymentLazyQuery>;
+export type ServiceDeploymentSuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentSuspenseQuery>;
+export type ServiceDeploymentQueryResult = Apollo.QueryResult<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>;
+export const ServiceDeploymentComponentsDocument = gql`
+    query ServiceDeploymentComponents($id: ID!) {
+  serviceDeployment(id: $id) {
+    id
+    name
+    cluster {
+      id
+      name
+      handle
+    }
+    components {
+      ...ServiceDeploymentComponent
+    }
+  }
+}
+    ${ServiceDeploymentComponentFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentComponentsQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentComponentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentComponentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentComponentsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentComponentsQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>(ServiceDeploymentComponentsDocument, options);
+      }
+export function useServiceDeploymentComponentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>(ServiceDeploymentComponentsDocument, options);
+        }
+export function useServiceDeploymentComponentsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>(ServiceDeploymentComponentsDocument, options);
+        }
+export type ServiceDeploymentComponentsQueryHookResult = ReturnType<typeof useServiceDeploymentComponentsQuery>;
+export type ServiceDeploymentComponentsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentComponentsLazyQuery>;
+export type ServiceDeploymentComponentsSuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentComponentsSuspenseQuery>;
+export type ServiceDeploymentComponentsQueryResult = Apollo.QueryResult<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>;
+export const ServiceDeploymentSecretsDocument = gql`
+    query ServiceDeploymentSecrets($id: ID!) {
+  serviceDeployment(id: $id) {
+    configuration {
+      name
+      value
+    }
+  }
+}
+    `;
+
+/**
+ * __useServiceDeploymentSecretsQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentSecretsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentSecretsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentSecretsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentSecretsQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>(ServiceDeploymentSecretsDocument, options);
+      }
+export function useServiceDeploymentSecretsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>(ServiceDeploymentSecretsDocument, options);
+        }
+export function useServiceDeploymentSecretsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>(ServiceDeploymentSecretsDocument, options);
+        }
+export type ServiceDeploymentSecretsQueryHookResult = ReturnType<typeof useServiceDeploymentSecretsQuery>;
+export type ServiceDeploymentSecretsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentSecretsLazyQuery>;
+export type ServiceDeploymentSecretsSuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentSecretsSuspenseQuery>;
+export type ServiceDeploymentSecretsQueryResult = Apollo.QueryResult<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>;
+export const ServiceDeploymentRevisionsDocument = gql`
+    query ServiceDeploymentRevisions($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentRevisions
+  }
+}
+    ${ServiceDeploymentRevisionsFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentRevisionsQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentRevisionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentRevisionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentRevisionsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentRevisionsQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>(ServiceDeploymentRevisionsDocument, options);
+      }
+export function useServiceDeploymentRevisionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>(ServiceDeploymentRevisionsDocument, options);
+        }
+export function useServiceDeploymentRevisionsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>(ServiceDeploymentRevisionsDocument, options);
+        }
+export type ServiceDeploymentRevisionsQueryHookResult = ReturnType<typeof useServiceDeploymentRevisionsQuery>;
+export type ServiceDeploymentRevisionsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentRevisionsLazyQuery>;
+export type ServiceDeploymentRevisionsSuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentRevisionsSuspenseQuery>;
+export type ServiceDeploymentRevisionsQueryResult = Apollo.QueryResult<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>;
+export const CreateServiceDeploymentDocument = gql`
+    mutation CreateServiceDeployment($attributes: ServiceDeploymentAttributes!, $cluster: String, $clusterId: ID) {
+  createServiceDeployment(
+    attributes: $attributes
+    cluster: $cluster
+    clusterId: $clusterId
+  ) {
+    ...ServiceDeploymentsRow
+  }
+}
+    ${ServiceDeploymentsRowFragmentDoc}`;
+export type CreateServiceDeploymentMutationFn = Apollo.MutationFunction<CreateServiceDeploymentMutation, CreateServiceDeploymentMutationVariables>;
+
+/**
+ * __useCreateServiceDeploymentMutation__
+ *
+ * To run a mutation, you first call `useCreateServiceDeploymentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateServiceDeploymentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createServiceDeploymentMutation, { data, loading, error }] = useCreateServiceDeploymentMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *      cluster: // value for 'cluster'
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useCreateServiceDeploymentMutation(baseOptions?: Apollo.MutationHookOptions<CreateServiceDeploymentMutation, CreateServiceDeploymentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateServiceDeploymentMutation, CreateServiceDeploymentMutationVariables>(CreateServiceDeploymentDocument, options);
+      }
+export type CreateServiceDeploymentMutationHookResult = ReturnType<typeof useCreateServiceDeploymentMutation>;
+export type CreateServiceDeploymentMutationResult = Apollo.MutationResult<CreateServiceDeploymentMutation>;
+export type CreateServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<CreateServiceDeploymentMutation, CreateServiceDeploymentMutationVariables>;
+export const UpdateServiceDeploymentDocument = gql`
+    mutation UpdateServiceDeployment($id: ID!, $attributes: ServiceUpdateAttributes!) {
+  updateServiceDeployment(id: $id, attributes: $attributes) {
+    configuration {
+      name
+      value
+    }
+    git {
+      folder
+      ref
+    }
+    version
+  }
+}
+    `;
+export type UpdateServiceDeploymentMutationFn = Apollo.MutationFunction<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>;
+
+/**
+ * __useUpdateServiceDeploymentMutation__
+ *
+ * To run a mutation, you first call `useUpdateServiceDeploymentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateServiceDeploymentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateServiceDeploymentMutation, { data, loading, error }] = useUpdateServiceDeploymentMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateServiceDeploymentMutation(baseOptions?: Apollo.MutationHookOptions<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>(UpdateServiceDeploymentDocument, options);
+      }
+export type UpdateServiceDeploymentMutationHookResult = ReturnType<typeof useUpdateServiceDeploymentMutation>;
+export type UpdateServiceDeploymentMutationResult = Apollo.MutationResult<UpdateServiceDeploymentMutation>;
+export type UpdateServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>;
+export const MergeServiceDocument = gql`
+    mutation MergeService($id: ID!, $configuration: [ConfigAttributes]) {
+  mergeService(id: $id, configuration: $configuration) {
+    configuration {
+      name
+      value
+    }
+  }
+}
+    `;
+export type MergeServiceMutationFn = Apollo.MutationFunction<MergeServiceMutation, MergeServiceMutationVariables>;
+
+/**
+ * __useMergeServiceMutation__
+ *
+ * To run a mutation, you first call `useMergeServiceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMergeServiceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mergeServiceMutation, { data, loading, error }] = useMergeServiceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      configuration: // value for 'configuration'
+ *   },
+ * });
+ */
+export function useMergeServiceMutation(baseOptions?: Apollo.MutationHookOptions<MergeServiceMutation, MergeServiceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MergeServiceMutation, MergeServiceMutationVariables>(MergeServiceDocument, options);
+      }
+export type MergeServiceMutationHookResult = ReturnType<typeof useMergeServiceMutation>;
+export type MergeServiceMutationResult = Apollo.MutationResult<MergeServiceMutation>;
+export type MergeServiceMutationOptions = Apollo.BaseMutationOptions<MergeServiceMutation, MergeServiceMutationVariables>;
+export const DeleteServiceDeploymentDocument = gql`
+    mutation DeleteServiceDeployment($id: ID!) {
+  deleteServiceDeployment(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteServiceDeploymentMutationFn = Apollo.MutationFunction<DeleteServiceDeploymentMutation, DeleteServiceDeploymentMutationVariables>;
+
+/**
+ * __useDeleteServiceDeploymentMutation__
+ *
+ * To run a mutation, you first call `useDeleteServiceDeploymentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteServiceDeploymentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteServiceDeploymentMutation, { data, loading, error }] = useDeleteServiceDeploymentMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteServiceDeploymentMutation(baseOptions?: Apollo.MutationHookOptions<DeleteServiceDeploymentMutation, DeleteServiceDeploymentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteServiceDeploymentMutation, DeleteServiceDeploymentMutationVariables>(DeleteServiceDeploymentDocument, options);
+      }
+export type DeleteServiceDeploymentMutationHookResult = ReturnType<typeof useDeleteServiceDeploymentMutation>;
+export type DeleteServiceDeploymentMutationResult = Apollo.MutationResult<DeleteServiceDeploymentMutation>;
+export type DeleteServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<DeleteServiceDeploymentMutation, DeleteServiceDeploymentMutationVariables>;
+export const RollbackServiceDocument = gql`
+    mutation RollbackService($id: ID, $revisionId: ID!) {
+  rollbackService(id: $id, revisionId: $revisionId) {
+    ...ServiceDeploymentsRow
+  }
+}
+    ${ServiceDeploymentsRowFragmentDoc}`;
+export type RollbackServiceMutationFn = Apollo.MutationFunction<RollbackServiceMutation, RollbackServiceMutationVariables>;
+
+/**
+ * __useRollbackServiceMutation__
+ *
+ * To run a mutation, you first call `useRollbackServiceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRollbackServiceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [rollbackServiceMutation, { data, loading, error }] = useRollbackServiceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      revisionId: // value for 'revisionId'
+ *   },
+ * });
+ */
+export function useRollbackServiceMutation(baseOptions?: Apollo.MutationHookOptions<RollbackServiceMutation, RollbackServiceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RollbackServiceMutation, RollbackServiceMutationVariables>(RollbackServiceDocument, options);
+      }
+export type RollbackServiceMutationHookResult = ReturnType<typeof useRollbackServiceMutation>;
+export type RollbackServiceMutationResult = Apollo.MutationResult<RollbackServiceMutation>;
+export type RollbackServiceMutationOptions = Apollo.BaseMutationOptions<RollbackServiceMutation, RollbackServiceMutationVariables>;
+export const UpdateRbacDocument = gql`
+    mutation UpdateRbac($serviceId: ID, $clusterId: ID, $rbac: RbacAttributes!) {
+  updateRbac(serviceId: $serviceId, clusterId: $clusterId, rbac: $rbac)
+}
+    `;
+export type UpdateRbacMutationFn = Apollo.MutationFunction<UpdateRbacMutation, UpdateRbacMutationVariables>;
+
+/**
+ * __useUpdateRbacMutation__
+ *
+ * To run a mutation, you first call `useUpdateRbacMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateRbacMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateRbacMutation, { data, loading, error }] = useUpdateRbacMutation({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      clusterId: // value for 'clusterId'
+ *      rbac: // value for 'rbac'
+ *   },
+ * });
+ */
+export function useUpdateRbacMutation(baseOptions?: Apollo.MutationHookOptions<UpdateRbacMutation, UpdateRbacMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateRbacMutation, UpdateRbacMutationVariables>(UpdateRbacDocument, options);
+      }
+export type UpdateRbacMutationHookResult = ReturnType<typeof useUpdateRbacMutation>;
+export type UpdateRbacMutationResult = Apollo.MutationResult<UpdateRbacMutation>;
+export type UpdateRbacMutationOptions = Apollo.BaseMutationOptions<UpdateRbacMutation, UpdateRbacMutationVariables>;
+export const ServiceDeploymentBindingsDocument = gql`
+    query ServiceDeploymentBindings($id: ID!) {
+  serviceDeployment(id: $id) {
+    id
+    ...ServiceDeploymentBindings
+  }
+}
+    ${ServiceDeploymentBindingsFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentBindingsQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentBindingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentBindingsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentBindingsQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>(ServiceDeploymentBindingsDocument, options);
+      }
+export function useServiceDeploymentBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>(ServiceDeploymentBindingsDocument, options);
+        }
+export function useServiceDeploymentBindingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>(ServiceDeploymentBindingsDocument, options);
+        }
+export type ServiceDeploymentBindingsQueryHookResult = ReturnType<typeof useServiceDeploymentBindingsQuery>;
+export type ServiceDeploymentBindingsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentBindingsLazyQuery>;
+export type ServiceDeploymentBindingsSuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentBindingsSuspenseQuery>;
+export type ServiceDeploymentBindingsQueryResult = Apollo.QueryResult<ServiceDeploymentBindingsQuery, ServiceDeploymentBindingsQueryVariables>;
 export const RestorePostgresDocument = gql`
     mutation RestorePostgres($clone: CloneAttributes, $name: String!, $namespace: String!, $timestamp: DateTime!) {
   restorePostgres(
@@ -2988,8 +7299,13 @@ export function usePostgresDatabasesLazyQuery(baseOptions?: Apollo.LazyQueryHook
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>(PostgresDatabasesDocument, options);
         }
+export function usePostgresDatabasesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>(PostgresDatabasesDocument, options);
+        }
 export type PostgresDatabasesQueryHookResult = ReturnType<typeof usePostgresDatabasesQuery>;
 export type PostgresDatabasesLazyQueryHookResult = ReturnType<typeof usePostgresDatabasesLazyQuery>;
+export type PostgresDatabasesSuspenseQueryHookResult = ReturnType<typeof usePostgresDatabasesSuspenseQuery>;
 export type PostgresDatabasesQueryResult = Apollo.QueryResult<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>;
 export const PostgresDatabaseDocument = gql`
     query PostgresDatabase($name: String!, $namespace: String!) {
@@ -3024,8 +7340,13 @@ export function usePostgresDatabaseLazyQuery(baseOptions?: Apollo.LazyQueryHookO
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>(PostgresDatabaseDocument, options);
         }
+export function usePostgresDatabaseSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>(PostgresDatabaseDocument, options);
+        }
 export type PostgresDatabaseQueryHookResult = ReturnType<typeof usePostgresDatabaseQuery>;
 export type PostgresDatabaseLazyQueryHookResult = ReturnType<typeof usePostgresDatabaseLazyQuery>;
+export type PostgresDatabaseSuspenseQueryHookResult = ReturnType<typeof usePostgresDatabaseSuspenseQuery>;
 export type PostgresDatabaseQueryResult = Apollo.QueryResult<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>;
 export const GroupsDocument = gql`
     query Groups($q: String, $cursor: String) {
@@ -3068,8 +7389,13 @@ export function useGroupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Gro
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GroupsQuery, GroupsQueryVariables>(GroupsDocument, options);
         }
+export function useGroupsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GroupsQuery, GroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GroupsQuery, GroupsQueryVariables>(GroupsDocument, options);
+        }
 export type GroupsQueryHookResult = ReturnType<typeof useGroupsQuery>;
 export type GroupsLazyQueryHookResult = ReturnType<typeof useGroupsLazyQuery>;
+export type GroupsSuspenseQueryHookResult = ReturnType<typeof useGroupsSuspenseQuery>;
 export type GroupsQueryResult = Apollo.QueryResult<GroupsQuery, GroupsQueryVariables>;
 export const SearchGroupsDocument = gql`
     query SearchGroups($q: String, $cursor: String) {
@@ -3112,8 +7438,13 @@ export function useSearchGroupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<SearchGroupsQuery, SearchGroupsQueryVariables>(SearchGroupsDocument, options);
         }
+export function useSearchGroupsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SearchGroupsQuery, SearchGroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchGroupsQuery, SearchGroupsQueryVariables>(SearchGroupsDocument, options);
+        }
 export type SearchGroupsQueryHookResult = ReturnType<typeof useSearchGroupsQuery>;
 export type SearchGroupsLazyQueryHookResult = ReturnType<typeof useSearchGroupsLazyQuery>;
+export type SearchGroupsSuspenseQueryHookResult = ReturnType<typeof useSearchGroupsSuspenseQuery>;
 export type SearchGroupsQueryResult = Apollo.QueryResult<SearchGroupsQuery, SearchGroupsQueryVariables>;
 export const GroupMembersDocument = gql`
     query GroupMembers($cursor: String, $id: ID!) {
@@ -3156,8 +7487,13 @@ export function useGroupMembersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<GroupMembersQuery, GroupMembersQueryVariables>(GroupMembersDocument, options);
         }
+export function useGroupMembersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GroupMembersQuery, GroupMembersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GroupMembersQuery, GroupMembersQueryVariables>(GroupMembersDocument, options);
+        }
 export type GroupMembersQueryHookResult = ReturnType<typeof useGroupMembersQuery>;
 export type GroupMembersLazyQueryHookResult = ReturnType<typeof useGroupMembersLazyQuery>;
+export type GroupMembersSuspenseQueryHookResult = ReturnType<typeof useGroupMembersSuspenseQuery>;
 export type GroupMembersQueryResult = Apollo.QueryResult<GroupMembersQuery, GroupMembersQueryVariables>;
 export const CreateGroupMemberDocument = gql`
     mutation CreateGroupMember($groupId: ID!, $userId: ID!) {
@@ -3327,6 +7663,734 @@ export function useDeleteGroupMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteGroupMutationHookResult = ReturnType<typeof useDeleteGroupMutation>;
 export type DeleteGroupMutationResult = Apollo.MutationResult<DeleteGroupMutation>;
 export type DeleteGroupMutationOptions = Apollo.BaseMutationOptions<DeleteGroupMutation, DeleteGroupMutationVariables>;
+export const CertificateDocument = gql`
+    query Certificate($name: String!, $namespace: String!, $serviceId: ID) {
+  certificate(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Certificate
+    events {
+      ...Event
+    }
+  }
+}
+    ${CertificateFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useCertificateQuery__
+ *
+ * To run a query within a React component, call `useCertificateQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCertificateQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCertificateQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useCertificateQuery(baseOptions: Apollo.QueryHookOptions<CertificateQuery, CertificateQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CertificateQuery, CertificateQueryVariables>(CertificateDocument, options);
+      }
+export function useCertificateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CertificateQuery, CertificateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CertificateQuery, CertificateQueryVariables>(CertificateDocument, options);
+        }
+export function useCertificateSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CertificateQuery, CertificateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CertificateQuery, CertificateQueryVariables>(CertificateDocument, options);
+        }
+export type CertificateQueryHookResult = ReturnType<typeof useCertificateQuery>;
+export type CertificateLazyQueryHookResult = ReturnType<typeof useCertificateLazyQuery>;
+export type CertificateSuspenseQueryHookResult = ReturnType<typeof useCertificateSuspenseQuery>;
+export type CertificateQueryResult = Apollo.QueryResult<CertificateQuery, CertificateQueryVariables>;
+export const CronJobDocument = gql`
+    query CronJob($name: String!, $namespace: String!, $serviceId: ID) {
+  cronJob(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...CronJob
+    events {
+      ...Event
+    }
+    jobs {
+      metadata {
+        name
+        namespace
+      }
+      status {
+        ...JobStatus
+      }
+    }
+  }
+}
+    ${CronJobFragmentDoc}
+${EventFragmentDoc}
+${JobStatusFragmentDoc}`;
+
+/**
+ * __useCronJobQuery__
+ *
+ * To run a query within a React component, call `useCronJobQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCronJobQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCronJobQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useCronJobQuery(baseOptions: Apollo.QueryHookOptions<CronJobQuery, CronJobQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CronJobQuery, CronJobQueryVariables>(CronJobDocument, options);
+      }
+export function useCronJobLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CronJobQuery, CronJobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CronJobQuery, CronJobQueryVariables>(CronJobDocument, options);
+        }
+export function useCronJobSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CronJobQuery, CronJobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CronJobQuery, CronJobQueryVariables>(CronJobDocument, options);
+        }
+export type CronJobQueryHookResult = ReturnType<typeof useCronJobQuery>;
+export type CronJobLazyQueryHookResult = ReturnType<typeof useCronJobLazyQuery>;
+export type CronJobSuspenseQueryHookResult = ReturnType<typeof useCronJobSuspenseQuery>;
+export type CronJobQueryResult = Apollo.QueryResult<CronJobQuery, CronJobQueryVariables>;
+export const DeploymentDocument = gql`
+    query Deployment($name: String!, $namespace: String!, $serviceId: ID) {
+  deployment(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Deployment
+    pods {
+      ...Pod
+    }
+    events {
+      ...Event
+    }
+  }
+}
+    ${DeploymentFragmentDoc}
+${PodFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useDeploymentQuery__
+ *
+ * To run a query within a React component, call `useDeploymentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeploymentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeploymentQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useDeploymentQuery(baseOptions: Apollo.QueryHookOptions<DeploymentQuery, DeploymentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeploymentQuery, DeploymentQueryVariables>(DeploymentDocument, options);
+      }
+export function useDeploymentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeploymentQuery, DeploymentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeploymentQuery, DeploymentQueryVariables>(DeploymentDocument, options);
+        }
+export function useDeploymentSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeploymentQuery, DeploymentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeploymentQuery, DeploymentQueryVariables>(DeploymentDocument, options);
+        }
+export type DeploymentQueryHookResult = ReturnType<typeof useDeploymentQuery>;
+export type DeploymentLazyQueryHookResult = ReturnType<typeof useDeploymentLazyQuery>;
+export type DeploymentSuspenseQueryHookResult = ReturnType<typeof useDeploymentSuspenseQuery>;
+export type DeploymentQueryResult = Apollo.QueryResult<DeploymentQuery, DeploymentQueryVariables>;
+export const IngressDocument = gql`
+    query Ingress($name: String!, $namespace: String!, $serviceId: ID) {
+  ingress(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Ingress
+    events {
+      ...Event
+    }
+  }
+}
+    ${IngressFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useIngressQuery__
+ *
+ * To run a query within a React component, call `useIngressQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIngressQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIngressQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useIngressQuery(baseOptions: Apollo.QueryHookOptions<IngressQuery, IngressQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IngressQuery, IngressQueryVariables>(IngressDocument, options);
+      }
+export function useIngressLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IngressQuery, IngressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IngressQuery, IngressQueryVariables>(IngressDocument, options);
+        }
+export function useIngressSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IngressQuery, IngressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<IngressQuery, IngressQueryVariables>(IngressDocument, options);
+        }
+export type IngressQueryHookResult = ReturnType<typeof useIngressQuery>;
+export type IngressLazyQueryHookResult = ReturnType<typeof useIngressLazyQuery>;
+export type IngressSuspenseQueryHookResult = ReturnType<typeof useIngressSuspenseQuery>;
+export type IngressQueryResult = Apollo.QueryResult<IngressQuery, IngressQueryVariables>;
+export const JobDocument = gql`
+    query Job($name: String!, $namespace: String!, $serviceId: ID) {
+  job(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Job
+    events {
+      ...Event
+    }
+  }
+}
+    ${JobFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useJobQuery__
+ *
+ * To run a query within a React component, call `useJobQuery` and pass it any options that fit your needs.
+ * When your component renders, `useJobQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useJobQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useJobQuery(baseOptions: Apollo.QueryHookOptions<JobQuery, JobQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<JobQuery, JobQueryVariables>(JobDocument, options);
+      }
+export function useJobLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<JobQuery, JobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<JobQuery, JobQueryVariables>(JobDocument, options);
+        }
+export function useJobSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<JobQuery, JobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<JobQuery, JobQueryVariables>(JobDocument, options);
+        }
+export type JobQueryHookResult = ReturnType<typeof useJobQuery>;
+export type JobLazyQueryHookResult = ReturnType<typeof useJobLazyQuery>;
+export type JobSuspenseQueryHookResult = ReturnType<typeof useJobSuspenseQuery>;
+export type JobQueryResult = Apollo.QueryResult<JobQuery, JobQueryVariables>;
+export const NodeDocument = gql`
+    query Node($name: String!, $clusterId: ID) {
+  node(name: $name, clusterId: $clusterId) {
+    ...Node
+  }
+}
+    ${NodeFragmentDoc}`;
+
+/**
+ * __useNodeQuery__
+ *
+ * To run a query within a React component, call `useNodeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNodeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNodeQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useNodeQuery(baseOptions: Apollo.QueryHookOptions<NodeQuery, NodeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NodeQuery, NodeQueryVariables>(NodeDocument, options);
+      }
+export function useNodeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NodeQuery, NodeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NodeQuery, NodeQueryVariables>(NodeDocument, options);
+        }
+export function useNodeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NodeQuery, NodeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NodeQuery, NodeQueryVariables>(NodeDocument, options);
+        }
+export type NodeQueryHookResult = ReturnType<typeof useNodeQuery>;
+export type NodeLazyQueryHookResult = ReturnType<typeof useNodeLazyQuery>;
+export type NodeSuspenseQueryHookResult = ReturnType<typeof useNodeSuspenseQuery>;
+export type NodeQueryResult = Apollo.QueryResult<NodeQuery, NodeQueryVariables>;
+export const NodeMetricDocument = gql`
+    query NodeMetric($name: String!, $clusterId: ID) {
+  nodeMetric(name: $name, clusterId: $clusterId) {
+    ...NodeMetric
+  }
+}
+    ${NodeMetricFragmentDoc}`;
+
+/**
+ * __useNodeMetricQuery__
+ *
+ * To run a query within a React component, call `useNodeMetricQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNodeMetricQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNodeMetricQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useNodeMetricQuery(baseOptions: Apollo.QueryHookOptions<NodeMetricQuery, NodeMetricQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NodeMetricQuery, NodeMetricQueryVariables>(NodeMetricDocument, options);
+      }
+export function useNodeMetricLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NodeMetricQuery, NodeMetricQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NodeMetricQuery, NodeMetricQueryVariables>(NodeMetricDocument, options);
+        }
+export function useNodeMetricSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NodeMetricQuery, NodeMetricQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NodeMetricQuery, NodeMetricQueryVariables>(NodeMetricDocument, options);
+        }
+export type NodeMetricQueryHookResult = ReturnType<typeof useNodeMetricQuery>;
+export type NodeMetricLazyQueryHookResult = ReturnType<typeof useNodeMetricLazyQuery>;
+export type NodeMetricSuspenseQueryHookResult = ReturnType<typeof useNodeMetricSuspenseQuery>;
+export type NodeMetricQueryResult = Apollo.QueryResult<NodeMetricQuery, NodeMetricQueryVariables>;
+export const PodDocument = gql`
+    query Pod($name: String!, $namespace: String!, $clusterId: ID) {
+  pod(name: $name, namespace: $namespace, clusterId: $clusterId) {
+    ...PodWithEvents
+  }
+}
+    ${PodWithEventsFragmentDoc}`;
+
+/**
+ * __usePodQuery__
+ *
+ * To run a query within a React component, call `usePodQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePodQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePodQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function usePodQuery(baseOptions: Apollo.QueryHookOptions<PodQuery, PodQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PodQuery, PodQueryVariables>(PodDocument, options);
+      }
+export function usePodLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PodQuery, PodQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PodQuery, PodQueryVariables>(PodDocument, options);
+        }
+export function usePodSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PodQuery, PodQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PodQuery, PodQueryVariables>(PodDocument, options);
+        }
+export type PodQueryHookResult = ReturnType<typeof usePodQuery>;
+export type PodLazyQueryHookResult = ReturnType<typeof usePodLazyQuery>;
+export type PodSuspenseQueryHookResult = ReturnType<typeof usePodSuspenseQuery>;
+export type PodQueryResult = Apollo.QueryResult<PodQuery, PodQueryVariables>;
+export const PodLogsDocument = gql`
+    query PodLogs($name: String!, $namespace: String!, $clusterId: ID, $container: String!, $sinceSeconds: Int!) {
+  pod(name: $name, namespace: $namespace, clusterId: $clusterId) {
+    logs(container: $container, sinceSeconds: $sinceSeconds)
+  }
+}
+    `;
+
+/**
+ * __usePodLogsQuery__
+ *
+ * To run a query within a React component, call `usePodLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePodLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePodLogsQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      clusterId: // value for 'clusterId'
+ *      container: // value for 'container'
+ *      sinceSeconds: // value for 'sinceSeconds'
+ *   },
+ * });
+ */
+export function usePodLogsQuery(baseOptions: Apollo.QueryHookOptions<PodLogsQuery, PodLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PodLogsQuery, PodLogsQueryVariables>(PodLogsDocument, options);
+      }
+export function usePodLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PodLogsQuery, PodLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PodLogsQuery, PodLogsQueryVariables>(PodLogsDocument, options);
+        }
+export function usePodLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PodLogsQuery, PodLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PodLogsQuery, PodLogsQueryVariables>(PodLogsDocument, options);
+        }
+export type PodLogsQueryHookResult = ReturnType<typeof usePodLogsQuery>;
+export type PodLogsLazyQueryHookResult = ReturnType<typeof usePodLogsLazyQuery>;
+export type PodLogsSuspenseQueryHookResult = ReturnType<typeof usePodLogsSuspenseQuery>;
+export type PodLogsQueryResult = Apollo.QueryResult<PodLogsQuery, PodLogsQueryVariables>;
+export const ServiceDocument = gql`
+    query Service($name: String!, $namespace: String!, $serviceId: ID) {
+  service(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Service
+    pods {
+      ...Pod
+    }
+    events {
+      ...Event
+    }
+  }
+}
+    ${ServiceFragmentDoc}
+${PodFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useServiceQuery__
+ *
+ * To run a query within a React component, call `useServiceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useServiceQuery(baseOptions: Apollo.QueryHookOptions<ServiceQuery, ServiceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceQuery, ServiceQueryVariables>(ServiceDocument, options);
+      }
+export function useServiceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceQuery, ServiceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceQuery, ServiceQueryVariables>(ServiceDocument, options);
+        }
+export function useServiceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceQuery, ServiceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceQuery, ServiceQueryVariables>(ServiceDocument, options);
+        }
+export type ServiceQueryHookResult = ReturnType<typeof useServiceQuery>;
+export type ServiceLazyQueryHookResult = ReturnType<typeof useServiceLazyQuery>;
+export type ServiceSuspenseQueryHookResult = ReturnType<typeof useServiceSuspenseQuery>;
+export type ServiceQueryResult = Apollo.QueryResult<ServiceQuery, ServiceQueryVariables>;
+export const StatefulSetDocument = gql`
+    query StatefulSet($name: String!, $namespace: String!, $serviceId: ID) {
+  statefulSet(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...StatefulSet
+    pods {
+      ...Pod
+    }
+    events {
+      ...Event
+    }
+  }
+}
+    ${StatefulSetFragmentDoc}
+${PodFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useStatefulSetQuery__
+ *
+ * To run a query within a React component, call `useStatefulSetQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStatefulSetQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStatefulSetQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useStatefulSetQuery(baseOptions: Apollo.QueryHookOptions<StatefulSetQuery, StatefulSetQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StatefulSetQuery, StatefulSetQueryVariables>(StatefulSetDocument, options);
+      }
+export function useStatefulSetLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StatefulSetQuery, StatefulSetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StatefulSetQuery, StatefulSetQueryVariables>(StatefulSetDocument, options);
+        }
+export function useStatefulSetSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StatefulSetQuery, StatefulSetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StatefulSetQuery, StatefulSetQueryVariables>(StatefulSetDocument, options);
+        }
+export type StatefulSetQueryHookResult = ReturnType<typeof useStatefulSetQuery>;
+export type StatefulSetLazyQueryHookResult = ReturnType<typeof useStatefulSetLazyQuery>;
+export type StatefulSetSuspenseQueryHookResult = ReturnType<typeof useStatefulSetSuspenseQuery>;
+export type StatefulSetQueryResult = Apollo.QueryResult<StatefulSetQuery, StatefulSetQueryVariables>;
+export const UnstructuredResourceDocument = gql`
+    query UnstructuredResource($group: String, $kind: String!, $name: String!, $namespace: String, $serviceId: ID!, $version: String!) {
+  unstructuredResource(
+    group: $group
+    kind: $kind
+    name: $name
+    namespace: $namespace
+    serviceId: $serviceId
+    version: $version
+  ) {
+    ...UnstructuredResource
+  }
+}
+    ${UnstructuredResourceFragmentDoc}`;
+
+/**
+ * __useUnstructuredResourceQuery__
+ *
+ * To run a query within a React component, call `useUnstructuredResourceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUnstructuredResourceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUnstructuredResourceQuery({
+ *   variables: {
+ *      group: // value for 'group'
+ *      kind: // value for 'kind'
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *      version: // value for 'version'
+ *   },
+ * });
+ */
+export function useUnstructuredResourceQuery(baseOptions: Apollo.QueryHookOptions<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>(UnstructuredResourceDocument, options);
+      }
+export function useUnstructuredResourceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>(UnstructuredResourceDocument, options);
+        }
+export function useUnstructuredResourceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>(UnstructuredResourceDocument, options);
+        }
+export type UnstructuredResourceQueryHookResult = ReturnType<typeof useUnstructuredResourceQuery>;
+export type UnstructuredResourceLazyQueryHookResult = ReturnType<typeof useUnstructuredResourceLazyQuery>;
+export type UnstructuredResourceSuspenseQueryHookResult = ReturnType<typeof useUnstructuredResourceSuspenseQuery>;
+export type UnstructuredResourceQueryResult = Apollo.QueryResult<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>;
+export const AccessTokensDocument = gql`
+    query AccessTokens {
+  accessTokens(first: 500) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AccessToken
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${AccessTokenFragmentDoc}`;
+
+/**
+ * __useAccessTokensQuery__
+ *
+ * To run a query within a React component, call `useAccessTokensQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAccessTokensQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAccessTokensQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAccessTokensQuery(baseOptions?: Apollo.QueryHookOptions<AccessTokensQuery, AccessTokensQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AccessTokensQuery, AccessTokensQueryVariables>(AccessTokensDocument, options);
+      }
+export function useAccessTokensLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AccessTokensQuery, AccessTokensQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AccessTokensQuery, AccessTokensQueryVariables>(AccessTokensDocument, options);
+        }
+export function useAccessTokensSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AccessTokensQuery, AccessTokensQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AccessTokensQuery, AccessTokensQueryVariables>(AccessTokensDocument, options);
+        }
+export type AccessTokensQueryHookResult = ReturnType<typeof useAccessTokensQuery>;
+export type AccessTokensLazyQueryHookResult = ReturnType<typeof useAccessTokensLazyQuery>;
+export type AccessTokensSuspenseQueryHookResult = ReturnType<typeof useAccessTokensSuspenseQuery>;
+export type AccessTokensQueryResult = Apollo.QueryResult<AccessTokensQuery, AccessTokensQueryVariables>;
+export const TokenAuditsDocument = gql`
+    query TokenAudits($id: ID!, $cursor: String) {
+  accessToken(id: $id) {
+    id
+    audits(first: 500, after: $cursor) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...AccessTokenAudit
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${AccessTokenAuditFragmentDoc}`;
+
+/**
+ * __useTokenAuditsQuery__
+ *
+ * To run a query within a React component, call `useTokenAuditsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTokenAuditsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTokenAuditsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useTokenAuditsQuery(baseOptions: Apollo.QueryHookOptions<TokenAuditsQuery, TokenAuditsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<TokenAuditsQuery, TokenAuditsQueryVariables>(TokenAuditsDocument, options);
+      }
+export function useTokenAuditsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TokenAuditsQuery, TokenAuditsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<TokenAuditsQuery, TokenAuditsQueryVariables>(TokenAuditsDocument, options);
+        }
+export function useTokenAuditsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<TokenAuditsQuery, TokenAuditsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<TokenAuditsQuery, TokenAuditsQueryVariables>(TokenAuditsDocument, options);
+        }
+export type TokenAuditsQueryHookResult = ReturnType<typeof useTokenAuditsQuery>;
+export type TokenAuditsLazyQueryHookResult = ReturnType<typeof useTokenAuditsLazyQuery>;
+export type TokenAuditsSuspenseQueryHookResult = ReturnType<typeof useTokenAuditsSuspenseQuery>;
+export type TokenAuditsQueryResult = Apollo.QueryResult<TokenAuditsQuery, TokenAuditsQueryVariables>;
+export const CreateAccessTokenDocument = gql`
+    mutation CreateAccessToken {
+  createAccessToken {
+    ...AccessToken
+  }
+}
+    ${AccessTokenFragmentDoc}`;
+export type CreateAccessTokenMutationFn = Apollo.MutationFunction<CreateAccessTokenMutation, CreateAccessTokenMutationVariables>;
+
+/**
+ * __useCreateAccessTokenMutation__
+ *
+ * To run a mutation, you first call `useCreateAccessTokenMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAccessTokenMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createAccessTokenMutation, { data, loading, error }] = useCreateAccessTokenMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCreateAccessTokenMutation(baseOptions?: Apollo.MutationHookOptions<CreateAccessTokenMutation, CreateAccessTokenMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateAccessTokenMutation, CreateAccessTokenMutationVariables>(CreateAccessTokenDocument, options);
+      }
+export type CreateAccessTokenMutationHookResult = ReturnType<typeof useCreateAccessTokenMutation>;
+export type CreateAccessTokenMutationResult = Apollo.MutationResult<CreateAccessTokenMutation>;
+export type CreateAccessTokenMutationOptions = Apollo.BaseMutationOptions<CreateAccessTokenMutation, CreateAccessTokenMutationVariables>;
+export const DeleteAccessTokenDocument = gql`
+    mutation DeleteAccessToken($token: String!) {
+  deleteAccessToken(token: $token) {
+    ...AccessToken
+  }
+}
+    ${AccessTokenFragmentDoc}`;
+export type DeleteAccessTokenMutationFn = Apollo.MutationFunction<DeleteAccessTokenMutation, DeleteAccessTokenMutationVariables>;
+
+/**
+ * __useDeleteAccessTokenMutation__
+ *
+ * To run a mutation, you first call `useDeleteAccessTokenMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteAccessTokenMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteAccessTokenMutation, { data, loading, error }] = useDeleteAccessTokenMutation({
+ *   variables: {
+ *      token: // value for 'token'
+ *   },
+ * });
+ */
+export function useDeleteAccessTokenMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAccessTokenMutation, DeleteAccessTokenMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteAccessTokenMutation, DeleteAccessTokenMutationVariables>(DeleteAccessTokenDocument, options);
+      }
+export type DeleteAccessTokenMutationHookResult = ReturnType<typeof useDeleteAccessTokenMutation>;
+export type DeleteAccessTokenMutationResult = Apollo.MutationResult<DeleteAccessTokenMutation>;
+export type DeleteAccessTokenMutationOptions = Apollo.BaseMutationOptions<DeleteAccessTokenMutation, DeleteAccessTokenMutationVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -3348,6 +8412,7 @@ export const MeDocument = gql`
     isDemoProject
     isSandbox
     pluralLogin
+    byok
     manifest {
       ...Manifest
     }
@@ -3355,11 +8420,15 @@ export const MeDocument = gql`
       cloned
       output
     }
+    features {
+      ...AvailableFeatures
+    }
   }
 }
     ${UserFragmentDoc}
 ${RoleFragmentDoc}
-${ManifestFragmentDoc}`;
+${ManifestFragmentDoc}
+${AvailableFeaturesFragmentDoc}`;
 
 /**
  * __useMeQuery__
@@ -3384,51 +8453,254 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
         }
+export function useMeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MeQuery, MeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+        }
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
+export type MeSuspenseQueryHookResult = ReturnType<typeof useMeSuspenseQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const UsersDocument = gql`
+    query Users($q: String, $cursor: String) {
+  users(q: $q, first: 20, after: $cursor) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...User
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${UserFragmentDoc}`;
+
+/**
+ * __useUsersQuery__
+ *
+ * To run a query within a React component, call `useUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUsersQuery({
+ *   variables: {
+ *      q: // value for 'q'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useUsersQuery(baseOptions?: Apollo.QueryHookOptions<UsersQuery, UsersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+      }
+export function useUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UsersQuery, UsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+        }
+export function useUsersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<UsersQuery, UsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+        }
+export type UsersQueryHookResult = ReturnType<typeof useUsersQuery>;
+export type UsersLazyQueryHookResult = ReturnType<typeof useUsersLazyQuery>;
+export type UsersSuspenseQueryHookResult = ReturnType<typeof useUsersSuspenseQuery>;
+export type UsersQueryResult = Apollo.QueryResult<UsersQuery, UsersQueryVariables>;
+export const SearchUsersDocument = gql`
+    query SearchUsers($q: String, $cursor: String) {
+  users(q: $q, after: $cursor, first: 5) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...User
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${UserFragmentDoc}`;
+
+/**
+ * __useSearchUsersQuery__
+ *
+ * To run a query within a React component, call `useSearchUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchUsersQuery({
+ *   variables: {
+ *      q: // value for 'q'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useSearchUsersQuery(baseOptions?: Apollo.QueryHookOptions<SearchUsersQuery, SearchUsersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchUsersQuery, SearchUsersQueryVariables>(SearchUsersDocument, options);
+      }
+export function useSearchUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchUsersQuery, SearchUsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchUsersQuery, SearchUsersQueryVariables>(SearchUsersDocument, options);
+        }
+export function useSearchUsersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SearchUsersQuery, SearchUsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchUsersQuery, SearchUsersQueryVariables>(SearchUsersDocument, options);
+        }
+export type SearchUsersQueryHookResult = ReturnType<typeof useSearchUsersQuery>;
+export type SearchUsersLazyQueryHookResult = ReturnType<typeof useSearchUsersLazyQuery>;
+export type SearchUsersSuspenseQueryHookResult = ReturnType<typeof useSearchUsersSuspenseQuery>;
+export type SearchUsersQueryResult = Apollo.QueryResult<SearchUsersQuery, SearchUsersQueryVariables>;
 export const namedOperations = {
   Query: {
     App: 'App',
     AppInfo: 'AppInfo',
     Repository: 'Repository',
     PluralContext: 'PluralContext',
+    ClusterAddOns: 'ClusterAddOns',
+    Clusters: 'Clusters',
+    ClustersTiny: 'ClustersTiny',
+    Cluster: 'Cluster',
+    ClusterPods: 'ClusterPods',
+    ClusterNamespaces: 'ClusterNamespaces',
+    ClusterBindings: 'ClusterBindings',
+    Usage: 'Usage',
+    GitRepositories: 'GitRepositories',
+    DeploymentSettings: 'DeploymentSettings',
+    ClusterProviders: 'ClusterProviders',
+    ServiceDeployments: 'ServiceDeployments',
+    ServiceDeploymentsTiny: 'ServiceDeploymentsTiny',
+    ServiceDeployment: 'ServiceDeployment',
+    ServiceDeploymentComponents: 'ServiceDeploymentComponents',
+    ServiceDeploymentSecrets: 'ServiceDeploymentSecrets',
+    ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
+    ServiceDeploymentBindings: 'ServiceDeploymentBindings',
     PostgresDatabases: 'PostgresDatabases',
     PostgresDatabase: 'PostgresDatabase',
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
-    Me: 'Me'
+    Certificate: 'Certificate',
+    CronJob: 'CronJob',
+    Deployment: 'Deployment',
+    Ingress: 'Ingress',
+    Job: 'Job',
+    Node: 'Node',
+    NodeMetric: 'NodeMetric',
+    Pod: 'Pod',
+    PodLogs: 'PodLogs',
+    Service: 'Service',
+    StatefulSet: 'StatefulSet',
+    UnstructuredResource: 'UnstructuredResource',
+    AccessTokens: 'AccessTokens',
+    TokenAudits: 'TokenAudits',
+    Me: 'Me',
+    Users: 'Users',
+    SearchUsers: 'SearchUsers'
   },
   Mutation: {
     CreateBuild: 'CreateBuild',
+    InstallAddOn: 'InstallAddOn',
+    UpdateClusterBindings: 'UpdateClusterBindings',
+    UpdateCluster: 'UpdateCluster',
+    CreateCluster: 'CreateCluster',
+    DeleteCluster: 'DeleteCluster',
+    CreateGitRepository: 'CreateGitRepository',
+    DeleteGitRepository: 'DeleteGitRepository',
+    UpdateGitRepository: 'UpdateGitRepository',
+    CreateGlobalService: 'CreateGlobalService',
+    DeleteGlobalService: 'DeleteGlobalService',
+    UpdateDeploymentSettings: 'UpdateDeploymentSettings',
+    CreateClusterProvider: 'CreateClusterProvider',
+    UpdateClusterProvider: 'UpdateClusterProvider',
+    DeleteClusterProvider: 'DeleteClusterProvider',
+    CreateServiceDeployment: 'CreateServiceDeployment',
+    UpdateServiceDeployment: 'UpdateServiceDeployment',
+    MergeService: 'MergeService',
+    DeleteServiceDeployment: 'DeleteServiceDeployment',
+    RollbackService: 'RollbackService',
+    UpdateRbac: 'UpdateRbac',
     RestorePostgres: 'RestorePostgres',
     CreateGroupMember: 'CreateGroupMember',
     DeleteGroupMember: 'DeleteGroupMember',
     CreateGroup: 'CreateGroup',
     UpdateGroup: 'UpdateGroup',
-    DeleteGroup: 'DeleteGroup'
+    DeleteGroup: 'DeleteGroup',
+    CreateAccessToken: 'CreateAccessToken',
+    DeleteAccessToken: 'DeleteAccessToken'
   },
   Fragment: {
-    CostAnalysisFragment: 'CostAnalysisFragment',
-    FileContentFragment: 'FileContentFragment',
-    ConfigurationFragment: 'ConfigurationFragment',
-    ApplicationSpecFragment: 'ApplicationSpecFragment',
-    ApplicationStatusFragment: 'ApplicationStatusFragment',
-    ApplicationFragment: 'ApplicationFragment',
-    MetadataFragment: 'MetadataFragment',
-    ConfigurationOverlayFragment: 'ConfigurationOverlayFragment',
-    RepositoryFragment: 'RepositoryFragment',
+    CostAnalysis: 'CostAnalysis',
+    FileContent: 'FileContent',
+    Configuration: 'Configuration',
+    ApplicationSpec: 'ApplicationSpec',
+    ApplicationStatus: 'ApplicationStatus',
+    Application: 'Application',
+    ConfigurationOverlay: 'ConfigurationOverlay',
+    Repository: 'Repository',
     PageInfo: 'PageInfo',
-    ResourceSpec: 'ResourceSpec',
-    Resources: 'Resources',
+    AddOnConfigCondition: 'AddOnConfigCondition',
+    AddOnConfiguration: 'AddOnConfiguration',
+    ClusterAddOn: 'ClusterAddOn',
+    ClusterNode: 'ClusterNode',
+    ClusterCondition: 'ClusterCondition',
+    Taint: 'Taint',
+    NodePool: 'NodePool',
+    ApiDeprecation: 'ApiDeprecation',
+    ClustersRow: 'ClustersRow',
+    Cluster: 'Cluster',
+    ClusterTiny: 'ClusterTiny',
+    PolicyBinding: 'PolicyBinding',
+    ClusterBindings: 'ClusterBindings',
+    MetricResponse: 'MetricResponse',
+    GitRepository: 'GitRepository',
+    GlobalService: 'GlobalService',
+    DeploymentSettings: 'DeploymentSettings',
+    ProviderCredential: 'ProviderCredential',
+    ClusterProvider: 'ClusterProvider',
+    ServiceDeploymentRevision: 'ServiceDeploymentRevision',
+    ServiceDeploymentsRow: 'ServiceDeploymentsRow',
+    ServiceDeploymentDetails: 'ServiceDeploymentDetails',
+    ServiceDeploymentComponent: 'ServiceDeploymentComponent',
+    ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
+    ServiceDeploymentBindings: 'ServiceDeploymentBindings',
     DatabaseTableRow: 'DatabaseTableRow',
     GroupMember: 'GroupMember',
     Group: 'Group',
+    Certificate: 'Certificate',
+    CronJob: 'CronJob',
+    Deployment: 'Deployment',
+    Ingress: 'Ingress',
+    Job: 'Job',
+    Metadata: 'Metadata',
+    Event: 'Event',
+    ResourceSpec: 'ResourceSpec',
+    Resources: 'Resources',
+    Container: 'Container',
+    ContainerStatus: 'ContainerStatus',
+    Pod: 'Pod',
+    JobStatus: 'JobStatus',
+    Node: 'Node',
+    NodeMetric: 'NodeMetric',
+    PodWithEvents: 'PodWithEvents',
+    Service: 'Service',
+    StatefulSet: 'StatefulSet',
+    UnstructuredResource: 'UnstructuredResource',
+    AccessToken: 'AccessToken',
+    AccessTokenAudit: 'AccessTokenAudit',
     User: 'User',
     Invite: 'Invite',
     RoleBinding: 'RoleBinding',
     Role: 'Role',
+    AvailableFeatures: 'AvailableFeatures',
     Manifest: 'Manifest'
   }
 }

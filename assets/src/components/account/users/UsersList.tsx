@@ -1,25 +1,26 @@
-import { useQuery } from '@apollo/client'
 import { Div } from 'honorable'
 import { EmptyState, SearchIcon } from '@pluralsh/design-system'
 import { useContext, useEffect, useState } from 'react'
-import { StandardScroller } from 'components/utils/SmoothScroller'
 import { isEmpty } from 'lodash'
+
+import { useUsersQuery } from 'generated/graphql'
+
 import { LoginContext } from 'components/contexts'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { StandardScroller } from 'components/utils/SmoothScroller'
 
 import { List, ListItem } from '../../utils/List'
 import ListInput from '../../utils/ListInput'
 import { extendConnection } from '../../../utils/graphql'
 
 import UserInvite from './UserInvite'
-import { USERS_Q } from './queries'
 import { User } from './User'
 
 export default function UsersList() {
   const { configuration } = useContext<any>(LoginContext)
   const [q, setQ] = useState('')
   const [listRef, setListRef] = useState<any>(null)
-  const { data, loading, fetchMore } = useQuery(USERS_Q, { variables: { q } })
+  const { data, loading, fetchMore } = useUsersQuery({ variables: { q } })
   const [dataCache, setDataCache] = useState(data)
 
   useEffect(() => {
@@ -28,7 +29,8 @@ export default function UsersList() {
 
   if (!data && !dataCache) return <LoadingIndicator />
 
-  const { edges, pageInfo } = data?.users || dataCache?.users || {}
+  const { edges, pageInfo } = data?.users ||
+    dataCache?.users || { pageInfo: {} }
 
   return (
     <List>
@@ -44,7 +46,7 @@ export default function UsersList() {
         flexGrow={1}
         width="100%"
       >
-        {edges?.length > 0 ? (
+        {(edges?.length ?? 0) > 0 ? (
           <StandardScroller
             listRef={listRef}
             setListRef={setListRef}

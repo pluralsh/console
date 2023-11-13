@@ -1,34 +1,31 @@
-import { Flex } from 'honorable'
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
   Breadcrumbs,
   IconFrame,
-  theme,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 
-import { ResponsiveLayoutContentContainer } from '../utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
+import { useTheme } from 'styled-components'
 
 export default function Subheader() {
+  const theme = useTheme()
   const navigate = useNavigate()
 
   return (
-    <Flex
-      align="center"
-      backgroundColor={theme.colors?.grey[950]}
-      borderBottom="1px solid border"
-      minHeight={48}
-      paddingHorizontal="large"
+    <div
+      css={{
+        display: 'flex',
+        alignItems: 'center',
+        backgroundColor: theme.colors?.grey[950],
+        borderBottom: '1px solid border',
+        minHeight: 48,
+        paddingLeft: theme.spacing.large,
+        paddingRight: theme.spacing.large,
+        gap: theme.spacing.large,
+      }}
     >
-      <ResponsiveLayoutSidenavContainer
-        gap="small"
-        display="flex"
-        width={240}
-      >
+      <div css={{ display: 'flex', gap: theme.spacing.small }}>
         <IconFrame
           clickable
           size="small"
@@ -45,17 +42,24 @@ export default function Subheader() {
           textValue="Forward"
           type="floating"
         />
-      </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer justifyContent="center">
+      </div>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'left',
+          justifyContent: 'left',
+          overflow: 'hidden',
+          flexGrow: 1,
+        }}
+      >
         <Breadcrumbs
-          paddingTop="small"
-          paddingBottom="small"
-          marginRight="medium"
+          css={{
+            paddingTop: theme.spacing.small,
+            paddingBottom: theme.spacing.small,
+          }}
         />
-      </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSidecarContainer />
-      <ResponsiveLayoutSpacer />
-    </Flex>
+      </div>
+    </div>
   )
 }

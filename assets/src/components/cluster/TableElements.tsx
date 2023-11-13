@@ -115,6 +115,7 @@ function TableCaretLinkUnstyled({
       <IconFrame
         clickable
         textValue={textValue}
+        tooltip={textValue}
         size="medium"
         icon={<CaretRightIcon />}
       />
@@ -152,6 +153,10 @@ export function LabelWithIcon({
     </Flex>
   )
 }
+
+export const TabularNumbers = styled.span(() => ({
+  fontVariantNumeric: 'tabular-nums',
+}))
 
 export const TABLE_HEIGHT = {
   maxHeight: 'clamp(390px, calc(100vh - 260px), 1000px)',

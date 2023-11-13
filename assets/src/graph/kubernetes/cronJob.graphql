@@ -1,0 +1,32 @@
+fragment CronJob on CronJob {
+  metadata {
+    ...Metadata
+  }
+  status {
+    lastScheduleTime
+  }
+  spec {
+    schedule
+    suspend
+    concurrencyPolicy
+  }
+  raw
+}
+
+query CronJob($name: String!, $namespace: String!, $serviceId: ID) {
+  cronJob(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...CronJob
+    events {
+      ...Event
+    }
+    jobs {
+      metadata {
+        name
+        namespace
+      }
+      status {
+        ...JobStatus
+      }
+    }
+  }
+}

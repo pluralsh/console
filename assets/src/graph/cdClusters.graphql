@@ -1,0 +1,276 @@
+fragment ClusterNode on Node {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    allocatable
+    capacity
+    conditions {
+      type
+      status
+      message
+    }
+  }
+  spec {
+    podCidr
+    providerId
+  }
+}
+
+fragment ClusterCondition on ClusterCondition {
+  lastTransitionTime
+  message
+  reason
+  severity
+  status
+  type
+}
+
+fragment Taint on Taint {
+  effect
+  key
+  value
+}
+
+fragment NodePool on NodePool {
+  id
+  name
+  minSize
+  maxSize
+  instanceType
+  spot
+  labels
+  taints {
+    ...Taint
+  }
+}
+
+fragment ApiDeprecation on ApiDeprecation {
+  availableIn
+  blocking
+  component {
+    group
+    version
+    kind
+    name
+    namespace
+    service {
+      git {
+        ref
+        folder
+      }
+      repository {
+        httpsPath
+        urlFormat
+      }
+    }
+  }
+  deprecatedIn
+  removedIn
+  replacement
+}
+
+fragment ClustersRow on Cluster {
+  apiDeprecations {
+    ...ApiDeprecation
+  }
+  currentVersion
+  id
+  self
+  protect
+  name
+  handle
+  nodes {
+    status {
+      capacity
+    }
+  }
+  nodeMetrics {
+    usage {
+      cpu
+      memory
+    }
+  }
+  installed
+  pingedAt
+  deletedAt
+  provider {
+    id
+    cloud
+    name
+    namespace
+    supportedVersions
+  }
+  self
+  service {
+    id
+    repository {
+      url
+    }
+  }
+  status {
+    conditions {
+      ...ClusterCondition
+    }
+  }
+  version
+}
+
+fragment Cluster on Cluster {
+  apiDeprecations {
+    ...ApiDeprecation
+  }
+  currentVersion
+  id
+  name
+  handle
+  nodePools {
+    ...NodePool
+  }
+  nodes {
+    ...ClusterNode
+  }
+  nodeMetrics {
+    ...NodeMetric
+  }
+  pingedAt
+  provider {
+    id
+    cloud
+    name
+    namespace
+    supportedVersions
+  }
+  self
+  service {
+    id
+    name
+    repository {
+      url
+    }
+  }
+  status {
+    conditions {
+      ...ClusterCondition
+    }
+    controlPlaneReady
+    failureMessage
+    failureReason
+    phase
+  }
+  version
+  tags {
+    name
+    value
+  }
+}
+
+query Clusters {
+  clusters(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClustersRow
+      }
+    }
+  }
+}
+
+fragment ClusterTiny on Cluster {
+  id
+  name
+  provider {
+    cloud
+  }
+}
+
+query ClustersTiny {
+  clusters(first: 100) {
+    edges {
+      node {
+        ...ClusterTiny
+      }
+    }
+  }
+}
+
+query Cluster($id: ID!) {
+  cluster(id: $id) {
+    ...Cluster
+  }
+}
+
+query ClusterPods($clusterId: ID, $namespace: String) {
+  pods(first: 100, clusterId: $clusterId, namespace: $namespace) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Pod
+      }
+    }
+  }
+}
+
+query ClusterNamespaces($clusterId: ID) {
+  namespaces(clusterId: $clusterId) {
+    metadata {
+      ...Metadata
+    }
+  }
+}
+
+fragment PolicyBinding on PolicyBinding {
+  id
+  user {
+    id
+    name
+    email
+  }
+  group {
+    id
+    name
+  }
+}
+
+fragment ClusterBindings on Cluster {
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
+query ClusterBindings($id: ID!) {
+  cluster(id: $id) {
+    ...ClusterBindings
+  }
+}
+
+mutation UpdateClusterBindings($id: ID!, $rbac: RbacAttributes!) {
+  updateRbac(clusterId: $id, rbac: $rbac)
+}
+
+mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
+  updateCluster(id: $id, attributes: $attributes) {
+    ...ClustersRow
+  }
+}
+
+mutation CreateCluster($attributes: ClusterAttributes!) {
+  createCluster(attributes: $attributes) {
+    ...Cluster
+    deployToken
+  }
+}
+
+mutation DeleteCluster($id: ID!) {
+  deleteCluster(id: $id) {
+    ...Cluster
+  }
+}

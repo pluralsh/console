@@ -1,0 +1,42 @@
+fragment GlobalService on GlobalService {
+  id
+  name
+  provider {
+    id
+    name
+    cloud
+    namespace
+  }
+  service {
+    id
+    name
+  }
+  tags {
+    name
+    value
+  }
+  insertedAt
+  updatedAt
+}
+
+mutation CreateGlobalService(
+  $attributes: GlobalServiceAttributes!
+  $cluster: String
+  $name: String
+  $serviceId: ID
+) {
+  createGlobalService(
+    attributes: $attributes
+    cluster: $cluster
+    name: $name
+    serviceId: $serviceId
+  ) {
+    ...GlobalService
+  }
+}
+
+mutation DeleteGlobalService($id: ID!) {
+  deleteGlobalService(id: $id) {
+    id
+  }
+}

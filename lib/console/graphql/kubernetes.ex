@@ -51,6 +51,17 @@ defmodule Console.GraphQl.Kubernetes do
     end
   end
 
+  object :kubernetes_unstructured do
+    field :raw, :map
+    field :metadata, non_null(:metadata)
+    field :events,   list_of(:event), resolve: fn
+      %{raw: %{"metadata" => %{"namespace" => ns, "uid" => uid}}}, _, _ ->
+        Kubernetes.list_events(%{metadata: %{uid: uid, namespace: ns}})
+      %{raw: %{"metadata" => %{"uid" => uid}}}, _, _ ->
+        Kubernetes.list_all_events(%{metadata: %{uid: uid}})
+    end
+  end
+
   import_types Console.GraphQl.Kubernetes.Event
   import_types Console.GraphQl.Kubernetes.License
   import_types Console.GraphQl.Kubernetes.Application
@@ -73,11 +84,23 @@ defmodule Console.GraphQl.Kubernetes do
   delta :application
 
   object :kubernetes_queries do
+    field :unstructured_resource, :kubernetes_unstructured do
+      middleware Authenticated
+      arg :group,     :string
+      arg :version,   non_null(:string)
+      arg :kind,      non_null(:string)
+      arg :namespace, :string
+      arg :name,      non_null(:string)
+      service_authorized :read
+
+      resolve &Kubernetes.raw_resource/2
+    end
+
     field :service, :service do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_service/2
     end
@@ -91,7 +114,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_deployment/2
     end
@@ -100,7 +123,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_stateful_set/2
     end
@@ -109,7 +132,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_ingress/2
     end
@@ -123,6 +146,7 @@ defmodule Console.GraphQl.Kubernetes do
     field :node, :node do
       middleware Authenticated
       arg :name, non_null(:string)
+      cluster_authorized :read
 
       safe_resolve &Kubernetes.resolve_node/2
     end
@@ -131,7 +155,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name, non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_cron_job/2
     end
@@ -140,7 +164,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name, non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_job/2
     end
@@ -149,7 +173,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_certificate/2
     end
@@ -158,14 +182,16 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name, non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      hybrid_authorized :read
 
       safe_resolve &Kubernetes.resolve_pod/2
     end
 
     connection field :pods, node_type: :pod do
       middleware Authenticated
+      arg :namespace,  :string
       arg :namespaces, list_of(:string)
+      cluster_authorized :read
 
       safe_resolve &Kubernetes.list_all_pods/2
     end
@@ -199,6 +225,7 @@ defmodule Console.GraphQl.Kubernetes do
 
     field :namespaces, list_of(:namespace) do
       middleware Authenticated
+      cluster_authorized :read
 
       safe_resolve &Kubernetes.list_namespaces/2
     end
@@ -213,6 +240,7 @@ defmodule Console.GraphQl.Kubernetes do
 
     field :node_metrics, list_of(:node_metric) do
       middleware Authenticated
+      cluster_authorized :read
 
       safe_resolve &Kubernetes.list_node_metrics/2
     end
@@ -220,6 +248,7 @@ defmodule Console.GraphQl.Kubernetes do
     field :node_metric, :node_metric do
       middleware Authenticated
       arg :name, non_null(:string)
+      cluster_authorized :read
 
       safe_resolve &Kubernetes.resolve_node_metrics/2
     end
@@ -239,7 +268,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :operate, arg: :namespace
+      service_authorized :operate
 
       safe_resolve &Kubernetes.delete_pod/2
     end
@@ -248,7 +277,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :operate, arg: :namespace
+      service_authorized :operate
 
       safe_resolve &Kubernetes.delete_job/2
     end

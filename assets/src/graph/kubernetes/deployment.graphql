@@ -1,0 +1,29 @@
+fragment Deployment on Deployment {
+  metadata {
+    ...Metadata
+  }
+  status {
+    availableReplicas
+    replicas
+    unavailableReplicas
+  }
+  spec {
+    replicas
+    strategy {
+      type
+    }
+  }
+  raw
+}
+
+query Deployment($name: String!, $namespace: String!, $serviceId: ID) {
+  deployment(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Deployment
+    pods {
+      ...Pod
+    }
+    events {
+      ...Event
+    }
+  }
+}

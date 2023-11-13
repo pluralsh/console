@@ -66,3 +66,13 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.UserCreated do
     Console.Repo.insert_all(GroupMember, data)
   end
 end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.AccessTokenUsage do
+  def process(%{item: token, context: %{ip: ip}}) do
+    trunc = Timex.now()
+            |> Timex.set(minute: 0, second: 0, microsecond: {0, 6})
+    key = "#{token.id}:#{ip}:#{Timex.format!(trunc, "{ISO:Extended}")}"
+
+    Console.Buffer.Orchestrator.submit(Console.Buffers.TokenAudit, key, {token.id, trunc, ip})
+  end
+end

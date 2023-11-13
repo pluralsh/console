@@ -2,14 +2,13 @@ import { useQuery } from '@apollo/client'
 import { ModalHeader } from 'forge-core'
 
 import { Box, Text } from 'grommet'
-
 import { chunk } from 'lodash'
 
 import { RECIPES_Q } from '../graphql/plural'
+import ProviderIcon from '../utils/Provider'
 
 import { MODAL_WIDTH, PROVIDER_WIDTH } from './constants'
 import { Container } from './Container'
-import { Provider } from './Provider'
 
 function Recipe({ recipe, setRecipe }) {
   return (
@@ -26,7 +25,7 @@ function Recipe({ recipe, setRecipe }) {
           align="center"
           justify="center"
         >
-          <Provider
+          <ProviderIcon
             provider={recipe.provider}
             width={PROVIDER_WIDTH - 5}
           />

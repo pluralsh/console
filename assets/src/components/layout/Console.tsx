@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Toast } from '@pluralsh/design-system'
 import { MarkdocContextProvider } from '@pluralsh/design-system/dist/markdoc/MarkdocContext'
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
@@ -8,6 +9,7 @@ import { A, Flex, Span } from 'honorable'
 import { Outlet } from 'react-router-dom'
 
 import { CommandPalette } from 'components/CommandPalette'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { PluralProvider } from '../contexts/PluralContext'
 import { InstallationsProvider } from '../Installations'
@@ -60,14 +62,12 @@ function ConsoleContent() {
   return (
     <Flex
       position="relative"
-      width="100vw"
-      maxWidth="100vw"
-      height="100vh"
-      minWidth="0"
+      height="100%"
       minHeight="0"
       maxHeight="100vh"
       overflow="hidden"
       flexDirection="column"
+      flexGrow={1}
     >
       {isProduction && (
         <WithApplicationUpdate>
@@ -95,6 +95,7 @@ function ConsoleContent() {
         minWidth={0}
         minHeight={0}
         flexGrow={1}
+        alignItems="stretch"
       >
         <Sidebar />
         <Flex
@@ -105,7 +106,9 @@ function ConsoleContent() {
         >
           <ContentOverlay />
           <Subheader />
-          <Outlet />
+          <Suspense fallback={<LoadingIndicator />}>
+            <Outlet />
+          </Suspense>
         </Flex>
       </Flex>
       <HelpLauncher />

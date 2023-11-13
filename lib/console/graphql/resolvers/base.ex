@@ -33,6 +33,10 @@ defmodule Console.GraphQl.Resolvers.Base do
     Relay.Connection.from_query(query, &Console.Repo.all/1, args)
   end
 
+  def all(query) do
+    {:ok, Console.Repo.all(query)}
+  end
+
   @compile {:inline, ok: 1}
   def ok(result), do: {:ok, result}
 end

@@ -1,10 +1,9 @@
-import { Box } from 'grommet'
 import isEmpty from 'lodash/isEmpty'
-import { Div } from 'honorable'
 import { EmptyState } from '@pluralsh/design-system'
 import { useState } from 'react'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useQuery } from '@apollo/client'
+import { useTheme } from 'styled-components'
 
 import { ListItem } from '../../utils/List'
 import { extendConnection } from '../../../utils/graphql'
@@ -15,6 +14,7 @@ import Role from './Role'
 import { ROLES_Q } from './queries'
 
 export default function RolesList({ q }: any) {
+  const theme = useTheme()
   const { data, loading, fetchMore } = useQuery(ROLES_Q, { variables: { q } })
   const [listRef, setListRef] = useState<any>(null)
 
@@ -23,9 +23,13 @@ export default function RolesList({ q }: any) {
   const { edges, pageInfo } = data.roles
 
   return (
-    <Box
-      fill
-      pad={{ bottom: 'small' }}
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        width: '100%',
+      }}
     >
       {edges?.length ? (
         <StandardScroller
@@ -54,11 +58,7 @@ export default function RolesList({ q }: any) {
           hasNextPage={pageInfo.hasNextPage}
           loading={loading}
           placeholder={() => (
-            <Div
-              flex={false}
-              height="50px"
-              padding="small"
-            />
+            <div css={{ padding: theme.spacing.small, height: 50 }} />
           )}
           handleScroll={undefined}
           refreshKey={undefined}
@@ -75,6 +75,6 @@ export default function RolesList({ q }: any) {
           <RoleCreate q={q} />
         </EmptyState>
       )}
-    </Box>
+    </div>
   )
 }

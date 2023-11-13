@@ -19,12 +19,23 @@ ingress:
 postgresNamespace: {{ namespace "postgres" }}
 provider: {{ .Provider }}
 
-{{- if eq .Provider "azure" }}
+{{- if and (eq .Provider "azure") (not .ClusterAPI) }}
 podLabels:
   aadpodidbinding: console
 
+useAADPodIdentity: true
+
 consoleIdentityId: {{ importValue "Terraform" "console_msi_id" }}
 consoleIdentityClientId: {{ importValue "Terraform" "console_msi_client_id" }}
+{{- end }}
+
+{{- if and (eq .Provider "azure") .ClusterAPI }}
+podLabels:
+  azure.workload.identity/use: "true"
+
+serviceAccount:
+  annotations:
+    azure.workload.identity/client-id: {{ importValue "Terraform" "console_msi_client_id" }}
 {{- end }}
 
 extraEnv:
@@ -46,13 +57,25 @@ extraEnv:
 - name: GRAFANA_TENANT
   value: {{ .Cluster }}
 {{- end }}
-{{- if eq .Provider "azure" }}
+{{- if and (eq .Provider "azure") (not .ClusterAPI) }}
 - name: ARM_USE_MSI
   value: 'true'
 - name: ARM_SUBSCRIPTION_ID
   value: {{ .Context.SubscriptionId }}
 - name: ARM_TENANT_ID
   value: {{ .Context.TenantId }}
+{{- end }}
+{{- if and (eq .Provider "azure") .ClusterAPI }}
+# Terraform that is executed in console doesn't work with workload identity.
+# Service principal auth is used as a temporary workaround.
+- name: ARM_SUBSCRIPTION_ID
+  value: {{ .Context.SubscriptionId }}
+- name: ARM_TENANT_ID
+  value: {{ .Context.TenantId }}
+- name: ARM_CLIENT_ID
+  value: {{ importValue "Terraform" "console_sp_client_id" }}
+- name: ARM_CLIENT_SECRET
+  value: {{ importValue "Terraform" "console_sp_client_secret" }}
 {{- end }}
 
 {{- if or (eq .Provider "aws") $isGcp }}

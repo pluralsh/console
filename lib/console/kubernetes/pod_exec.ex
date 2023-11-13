@@ -19,7 +19,7 @@ defmodule Console.Kubernetes.PodExec do
   def start_link(path, pid, %{url: "https://" <> url, ca_cert: cert, auth: auth}) do
     WebSockex.start_link("wss://#{url}#{path}", __MODULE__, %State{pid: pid}, [
       extra_headers: [{"Authorization", "Bearer #{auth.token}"}],
-      cacerts: [cert]
+      cacerts: (if cert, do: [cert], else: nil)
     ])
   end
   def start_link(path, pid), do: start_link(path, pid, Kazan.Server.in_cluster())

@@ -78,7 +78,7 @@ defmodule KubernetesScaffolds do
 
   def pod(name) do
     %Core.Pod{
-      metadata: %{name: name},
+      metadata: %{name: name, namespace: name},
       status: %Core.PodStatus{pod_ip: "1.2.3.4"},
       spec: %Core.PodSpec{node_name: "some-node"}
     }
@@ -289,6 +289,13 @@ defmodule KubernetesScaffolds do
         resources: %Kube.Postgresql.Spec.Resources{requests: %{cpu: "1", memory: "1Gi"}}
       },
       status: %{"PostgresClusterStatus" => "Running"}
+    }
+  end
+
+  def cluster(name, ready \\ true) do
+    %Kube.Cluster{
+      metadata: %ObjectMeta{name: name, namespace: name},
+      status: %Kube.Cluster.Status{control_plane_ready: ready}
     }
   end
 end

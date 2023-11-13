@@ -26,6 +26,8 @@ import 'react-pulse-dot/dist/index.css'
 import { client } from './helpers/client'
 import { rootRoutes } from './routes/rootRoutes'
 
+import { PluralErrorBoundary } from './components/cd/PluralErrorBoundary'
+
 const INTERCOM_APP_ID = 'p127zb9y'
 
 const router = createBrowserRouter(createRoutesFromElements(rootRoutes))
@@ -46,14 +48,16 @@ export default function App() {
                 <CssBaseline />
                 <GlobalStyle />
                 <DocSearchStyles />
-                <Grommet
-                  full
-                  // @ts-ignore
-                  theme={mergedStyledTheme}
-                  themeMode="dark"
-                >
-                  <RouterProvider router={router} />
-                </Grommet>
+                <PluralErrorBoundary>
+                  <Grommet
+                    className="grommet-root"
+                    // @ts-ignore
+                    theme={mergedStyledTheme}
+                    themeMode="dark"
+                  >
+                    <RouterProvider router={router} />
+                  </Grommet>
+                </PluralErrorBoundary>
               </CookieSettingsProvider>
             </OverlayContextProvider>
           </StyledThemeProvider>

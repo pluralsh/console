@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Resolvers.User do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.User
-  alias Console.Schema.{Group, GroupMember, Role, RoleBinding, Notification}
+  alias Console.Schema.{Group, GroupMember, Role, RoleBinding, Notification, AccessToken, AccessTokenAudit}
   alias Console.Services.Users
   require Logger
 
@@ -42,6 +42,18 @@ defmodule Console.GraphQl.Resolvers.User do
   def list_notifications(args, %{context: %{current_user: user}}) do
     Notification.ordered()
     |> filter_unread(args, user)
+    |> paginate(args)
+  end
+
+  def list_tokens(args, %{context: %{current_user: user}}) do
+    AccessToken.for_user(user.id)
+    |> AccessToken.ordered()
+    |> paginate(args)
+  end
+
+  def list_token_audits(args, %{source: %{id: id}}) do
+    AccessTokenAudit.for_token(id)
+    |> AccessTokenAudit.ordered()
     |> paginate(args)
   end
 
@@ -103,6 +115,14 @@ defmodule Console.GraphQl.Resolvers.User do
   def resolve_invite(%{id: secure_id}, _),
     do: {:ok, Users.get_invite(secure_id)}
 
+  def resolve_token(%{id: id}, %{context: %{current_user: %{id: user_id}}}) do
+    Console.Repo.get!(AccessToken, id)
+    |> case do
+      %{user_id: ^user_id} = token -> {:ok, token}
+      _ -> {:error, "forbidden"}
+    end
+  end
+
   def signin_user(%{email: email, password: password}, _) do
     Users.login_user(email, password)
     |> with_jwt()
@@ -153,6 +173,12 @@ defmodule Console.GraphQl.Resolvers.User do
   end
 
   def delete_role(%{id: id}, _), do: Users.delete_role(id)
+
+  def create_access_token(_, %{context: %{current_user: user}}),
+    do: Users.create_access_token(user)
+
+  def delete_access_token(%{token: token}, %{context: %{current_user: user}}),
+    do: Users.delete_access_token(token, user)
 
   defp with_permissions(%{permissions: perms} = attrs) when is_list(perms) do
     perm_set = MapSet.new(perms)

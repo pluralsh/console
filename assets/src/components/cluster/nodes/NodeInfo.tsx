@@ -24,12 +24,6 @@ import { NODE_Q } from '../queries'
 import { NodeGraphs } from './NodeGraphs'
 import { SubTitle } from './SubTitle'
 
-export const podContainers = (pods) =>
-  pods
-    .filter(({ status: { phase } }) => phase !== 'Succeeded')
-    .map(({ spec: { containers } }) => containers)
-    .flat()
-
 export default function NodeInfo() {
   const { name } = useParams()
 

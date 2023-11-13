@@ -1,0 +1,29 @@
+fragment MetricResponse on MetricResponse {
+  metric
+  values {
+    timestamp
+    value
+  }
+}
+
+query Usage(
+  $cpu: String!
+  $mem: String!
+  $podCpu: String!
+  $podMem: String!
+  $step: String!
+  $offset: Int!
+) {
+  cpu: metric(query: $cpu, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  mem: metric(query: $mem, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  podCpu: metric(query: $podCpu, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  podMem: metric(query: $podMem, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+}

@@ -5,7 +5,7 @@ import styled from 'styled-components'
 type BillingFeatureBlockModalProps = {
   message?: string
   open: boolean
-  onClose: Dispatch<void>
+  onClose?: Nullable<Dispatch<void>>
 }
 
 const Header = styled.div({
@@ -36,7 +36,7 @@ export default function BillingFeatureBlockModal({
         </Header>
       }
       open={open}
-      onClose={() => onClose()}
+      onClose={onClose ? () => onClose() : undefined}
       size="large"
       style={{ padding: 0 }}
     >
@@ -49,7 +49,7 @@ export default function BillingFeatureBlockModal({
           rel="noopener noreferrer"
           width="max-content"
           marginTop="large"
-          onClick={() => onClose()}
+          onClick={() => onClose?.()}
         >
           Review plans
         </Button>

@@ -18,7 +18,7 @@ defmodule ConsoleWeb.ChannelCase do
   using do
     quote do
       # Import conveniences for testing with channels
-      use Phoenix.ChannelTest
+      import Phoenix.ChannelTest
       use Absinthe.Phoenix.SubscriptionTest, schema: Console.GraphQl
       import Console.Factory
       import Console.TestHelpers
@@ -33,7 +33,11 @@ defmodule ConsoleWeb.ChannelCase do
 
       def mk_socket(user) do
         {:ok, token, _} = Console.Guardian.encode_and_sign(user)
-        connect(ConsoleWeb.UserSocket, %{"token" => "Bearer #{token}"}, %{})
+        connect(ConsoleWeb.UserSocket, %{"token" => "Bearer #{token}"}, connect_info: %{})
+      end
+
+      def cluster_socket(cluster) do
+        connect(ConsoleWeb.ExternalSocket, %{"token" => cluster.deploy_token}, connect_info: %{})
       end
     end
   end

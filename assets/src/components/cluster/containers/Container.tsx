@@ -18,12 +18,12 @@ import {
 } from '@pluralsh/design-system'
 import { Div, Flex } from 'honorable'
 import styled from 'styled-components'
-import { useQuery } from '@apollo/client'
 import {
   ContainerStatus,
   Container as ContainerT,
   Maybe,
   Pod,
+  usePodQuery,
 } from 'generated/graphql'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
@@ -31,7 +31,6 @@ import { LinkTabWrap } from 'components/utils/Tabs'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { POD_INFO_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
 import { statusesToRecord } from '../pods/PodInfo'
 
@@ -79,7 +78,7 @@ const SelectTrigger = styled(SelectButton)({
 })
 
 export default function Container() {
-  const { name, namespace, container: containerName } = useParams()
+  const { name = '', namespace = '', container: containerName } = useParams()
   const { setBreadcrumbs } = useBreadcrumbs()
   const tabStateRef = useRef<any>()
   const navigate = useNavigate()
@@ -88,7 +87,7 @@ export default function Container() {
   const subpath = match?.params?.subpath || ''
   const currentTab = DIRECTORY.find(({ path }) => path === subpath)
 
-  const { data, error } = useQuery<{ pod: Pod }>(POD_INFO_Q, {
+  const { data, error } = usePodQuery({
     variables: { name, namespace },
     pollInterval: POLL_INTERVAL,
   })

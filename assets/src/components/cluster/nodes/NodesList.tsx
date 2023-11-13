@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
 import { Div, Flex } from 'honorable'
 import {
+  EmptyState,
   IconFrame,
   Table,
   Tooltip,
@@ -35,7 +36,7 @@ import { UsageBar } from './UsageBar'
 
 type Capacity = { memory?: string; cpu?: string }
 
-type TableData = {
+export type TableData = {
   name: string
   memory: {
     used?: number
@@ -50,7 +51,7 @@ type TableData = {
   readiness: ReadinessT
 }
 
-const columnHelper = createColumnHelper<TableData>()
+export const columnHelper = createColumnHelper<TableData>()
 
 const zoneKey = 'failure-domain.beta.kubernetes.io/zone'
 const regionKey = 'failure-domain.beta.kubernetes.io/region'
@@ -92,7 +93,7 @@ function DeleteNode({ name, refetch }) {
   )
 }
 
-const ColName = columnHelper.accessor((row) => row.name, {
+export const ColName = columnHelper.accessor((row) => row.name, {
   id: 'name',
   enableSorting: true,
   cell: (props) => (
@@ -108,21 +109,21 @@ const ColName = columnHelper.accessor((row) => row.name, {
   meta: { truncate: true },
 })
 
-const ColRegion = columnHelper.accessor((row) => row.region, {
+export const ColRegion = columnHelper.accessor((row) => row.region, {
   id: 'region',
   enableSorting: true,
   cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
   header: 'Region',
 })
 
-const ColZone = columnHelper.accessor((row) => row.zone, {
+export const ColZone = columnHelper.accessor((row) => row.zone, {
   id: 'zone',
   enableSorting: true,
   cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
   header: 'Zone',
 })
 
-const ColCpuUsage = columnHelper.accessor(
+export const ColCpuUsage = columnHelper.accessor(
   (row) => (row?.cpu?.used ?? 0) / (row?.cpu?.total ?? 1),
   {
     id: 'cpu-usage',
@@ -145,7 +146,7 @@ const ColCpuUsage = columnHelper.accessor(
   }
 )
 
-const ColMemoryUsage = columnHelper.accessor(
+export const ColMemoryUsage = columnHelper.accessor(
   (row) => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
   {
     id: 'memory-usage',
@@ -168,25 +169,31 @@ const ColMemoryUsage = columnHelper.accessor(
   }
 )
 
-const ColCpuTotal = columnHelper.accessor((row) => row?.cpu?.total ?? 0, {
-  id: 'cpu-total',
-  enableSorting: true,
-  sortingFn: numishSort,
-  cell: (props) => <UsageText>{props.getValue()}</UsageText>,
-  header: 'CPU',
-})
+export const ColCpuTotal = columnHelper.accessor(
+  (row) => row?.cpu?.total ?? 0,
+  {
+    id: 'cpu-total',
+    enableSorting: true,
+    sortingFn: numishSort,
+    cell: (props) => <UsageText>{props.getValue()}</UsageText>,
+    header: 'CPU',
+  }
+)
 
-const ColMemoryTotal = columnHelper.accessor((row) => row?.memory?.total ?? 0, {
-  id: 'memory-total',
-  enableSorting: true,
-  sortingFn: numishSort,
-  cell: (props: any) => (
-    <UsageText>{filesize(props.getValue())?.toString()}</UsageText>
-  ),
-  header: 'Memory',
-})
+export const ColMemoryTotal = columnHelper.accessor(
+  (row) => row?.memory?.total ?? 0,
+  {
+    id: 'memory-total',
+    enableSorting: true,
+    sortingFn: numishSort,
+    cell: (props: any) => (
+      <UsageText>{filesize(props.getValue())?.toString()}</UsageText>
+    ),
+    header: 'Memory',
+  }
+)
 
-const ColStatus = columnHelper.accessor(
+export const ColStatus = columnHelper.accessor(
   (row) => (row?.readiness ? readinessToLabel[row.readiness] : ''),
   {
     id: 'status',
@@ -200,7 +207,7 @@ const ColStatus = columnHelper.accessor(
   }
 )
 
-const ColActions = (refetch) =>
+export const ColActions = (refetch) =>
   columnHelper.accessor(() => null, {
     id: 'actions',
     cell: ({ row: { original } }) => (
@@ -224,11 +231,13 @@ const ColActions = (refetch) =>
 export function NodesList({
   nodes,
   nodeMetrics,
-  refetch,
+  columns,
+  linkBasePath = `/nodes/`,
 }: {
-  nodes: Node[]
-  nodeMetrics: NodeMetric[]
-  refetch: any
+  nodes: (Node | null)[]
+  nodeMetrics: (NodeMetric | null)[]
+  columns: ColumnDef<TableData, any>[]
+  linkBasePath?: string
 }) {
   const navigate = useNavigate()
   const metrics: Record<string, { cpu?: number; memory?: number }> =
@@ -237,61 +246,49 @@ export function NodesList({
         return {}
       }
 
-      return nodeMetrics.reduce(
-        (prev, { metadata: { name }, usage }) => ({
-          ...prev,
-          [name]: {
-            cpu: cpuParser(usage?.cpu ?? ''),
-            memory: memoryParser(usage?.memory ?? ''),
-          },
-        }),
-        {}
-      )
+      return nodeMetrics
+        .filter((metric): metric is NodeMetric => !!metric)
+        .reduce(
+          (prev, { metadata: { name }, usage }) => ({
+            ...prev,
+            [name]: {
+              cpu: cpuParser(usage?.cpu ?? ''),
+              memory: memoryParser(usage?.memory ?? ''),
+            },
+          }),
+          {}
+        )
     }, [nodeMetrics])
 
   const tableData: TableData[] = useMemo(
     () =>
-      (nodes || []).map((node) => {
-        const thisMetrics = metrics[node.metadata.name]
-        const labelsMap = mapify(node.metadata.labels)
-        const capacity: Capacity = (node?.status?.capacity as Capacity) ?? {}
+      (nodes || [])
+        .filter((node): node is Node => !!node)
+        .map((node) => {
+          const thisMetrics = metrics[node.metadata.name]
+          const labelsMap = mapify(node?.metadata.labels)
+          const capacity: Capacity = (node?.status?.capacity as Capacity) ?? {}
 
-        return {
-          name: node?.metadata?.name,
-          memory: {
-            used: thisMetrics?.memory,
-            total: memoryParser(capacity?.memory),
-          },
-          cpu: {
-            used: thisMetrics?.cpu,
-            total: cpuParser(capacity?.cpu),
-          },
-          region: labelsMap[regionKey],
-          zone: labelsMap[zoneKey],
-          readiness: nodeStatusToReadiness(node?.status),
-        }
-      }),
+          return {
+            name: node?.metadata?.name,
+            memory: {
+              used: thisMetrics?.memory,
+              total: memoryParser(capacity?.memory),
+            },
+            cpu: {
+              used: thisMetrics?.cpu,
+              total: cpuParser(capacity?.cpu),
+            },
+            region: labelsMap[regionKey],
+            zone: labelsMap[zoneKey],
+            readiness: nodeStatusToReadiness(node.status),
+          }
+        }),
     [metrics, nodes]
   )
 
-  // Memoize columns to prevent rerendering entire table
-  const columns: ColumnDef<TableData, any>[] = useMemo(
-    () => [
-      ColName,
-      ColRegion,
-      ColZone,
-      ColCpuUsage,
-      ColMemoryUsage,
-      ColCpuTotal,
-      ColMemoryTotal,
-      ColStatus,
-      ColActions(refetch),
-    ],
-    [refetch]
-  )
-
   if (!tableData || tableData.length === 0) {
-    return <>No nodes available.</>
+    return <EmptyState message="No nodes available." />
   }
 
   return (
@@ -300,7 +297,7 @@ export function NodesList({
       data={tableData}
       columns={columns}
       onRowClick={(_e, { original }: Row<TableData>) =>
-        navigate(`/nodes/${original?.name}`)
+        navigate(`${linkBasePath}${original?.name}`)
       }
     />
   )

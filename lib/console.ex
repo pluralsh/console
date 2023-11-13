@@ -1,5 +1,41 @@
 defmodule Console do
-  @chars String.codepoints("abcdefghijklmnopqrstuvwxyz")
+  @type error :: {:error, term}
+
+  def provider(), do: Console.conf(:provider)
+
+  def byok?() do
+    case provider() do
+      prov when prov in ~w(aws gcp azure generic)a -> false
+      _ -> true
+    end
+  end
+
+  @chars String.codepoints("abcdefghijklmnopqrstuvwxyz0123456789")
+
+  def authed_user("console-" <> _ = access), do: Console.Services.Users.get_by_token(access)
+  def authed_user(jwt) do
+    case Console.Guardian.resource_from_token(jwt) do
+      {:ok, user, _} -> user
+      _ -> :error
+    end
+  end
+
+  def mapify(l) when is_list(l), do: Enum.map(l, &mapify/1)
+  def mapify(%{__schema__: _} = schema) do
+    Piazza.Ecto.Schema.mapify(schema)
+    |> mapify()
+  end
+  def mapify(%{__struct__: _} = struct) do
+    Map.from_struct(struct)
+    |> mapify()
+  end
+  def mapify(%{} = map) do
+    Enum.map(map, fn {k, v} -> {k, mapify(v)} end)
+    |> Map.new()
+  end
+  def mapify(v), do: v
+
+  def url(path), do: Path.join(Console.conf(:url), path)
 
   def is_set(var) do
     case System.get_env(var) do
@@ -8,6 +44,30 @@ defmodule Console do
       _ -> true
     end
   end
+
+  def dedupe(attrs, key, val) do
+    as_string = Atom.to_string(key)
+    case attrs do
+      %{^key => _} -> attrs
+      %{^as_string => _} -> attrs
+      _ -> put_new(attrs, key, val)
+    end
+  end
+
+  def ls_r(path \\ ".") do
+    cond do
+      File.regular?(path) -> [path]
+      File.dir?(path) ->
+        File.ls!(path)
+        |> Enum.map(&Path.join(path, &1))
+        |> Enum.map(&ls_r/1)
+        |> Enum.concat()
+      true -> []
+    end
+  end
+
+  def put_new(attrs, key, val) when is_function(val), do: Map.put_new_lazy(attrs, key, val)
+  def put_new(attrs, key, val), do: Map.put_new(attrs, key, val)
 
   def merge(list) when is_list(list) do
     Enum.reduce(list, %{}, &Map.merge(&2, &1))
@@ -69,7 +129,7 @@ defmodule Console do
   def workspace(), do: Path.join(conf(:workspace_root), conf(:repo_root))
 
   def hmac(secret, payload) do
-    :crypto.hmac(:sha, secret, payload)
+    :crypto.mac(:hmac, :sha1, secret, payload)
     |> Base.encode16(case: :lower)
   end
 

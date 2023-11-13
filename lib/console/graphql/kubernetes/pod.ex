@@ -9,6 +9,14 @@ defmodule Console.GraphQl.Kubernetes.Pod do
     field :metadata, non_null(:metadata)
 
     field :raw, non_null(:string), resolve: fn model, _, _ -> encode(model) end
+
+    field :logs, list_of(:string) do
+      arg :container, non_null(:string)
+      arg :since_seconds, non_null(:integer)
+
+      resolve &Kubernetes.read_pod_logs/3
+    end
+
     field :events, list_of(:event), resolve: fn
       model, _, _ -> Kubernetes.list_events(model)
     end

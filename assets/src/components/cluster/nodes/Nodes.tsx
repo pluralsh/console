@@ -8,11 +8,25 @@ import { cpuParser, memoryParser } from 'utils/kubernetes'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import { ColumnDef } from '@tanstack/react-table'
+
 import { SHORT_POLL_INTERVAL } from '../constants'
 import { NODES_Q } from '../queries'
 
 import { ClusterMetrics } from './ClusterMetrics'
-import { NodesList } from './NodesList'
+import {
+  ColActions,
+  ColCpuTotal,
+  ColCpuUsage,
+  ColMemoryTotal,
+  ColMemoryUsage,
+  ColName,
+  ColRegion,
+  ColStatus,
+  ColZone,
+  NodesList,
+  TableData,
+} from './NodesList'
 
 export type ResourceUsage = {
   cpu: number
@@ -48,6 +62,22 @@ export default function Nodes() {
     return { cpu, mem }
   }, [data])
 
+  // Memoize columns to prevent rerendering entire table
+  const columns: ColumnDef<TableData, any>[] = useMemo(
+    () => [
+      ColName,
+      ColRegion,
+      ColZone,
+      ColCpuUsage,
+      ColMemoryUsage,
+      ColCpuTotal,
+      ColMemoryTotal,
+      ColStatus,
+      ColActions(refetch),
+    ],
+    [refetch]
+  )
+
   return (
     <ResponsivePageFullWidth heading="Nodes">
       {!data ? (
@@ -66,7 +96,7 @@ export default function Nodes() {
           <NodesList
             nodes={data.nodes}
             nodeMetrics={data.nodeMetrics}
-            refetch={refetch}
+            columns={columns}
           />
         </Flex>
       )}

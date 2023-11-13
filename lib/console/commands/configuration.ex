@@ -3,18 +3,22 @@ defmodule Console.Commands.Configuration do
   require Logger
   import Console
 
-  def start_link(_) do
-    Task.start_link(__MODULE__, :run, [])
-  end
+  def start_link(_), do: Task.start_link(__MODULE__, :run, [])
 
   def run() do
-    {:ok, _} = register_ssh_keys()
+    case register_ssh_keys() do
+      {:ok, _} -> :ok
+      err ->
+        Logger.error "Failed to register ssh keys: #{inspect(err)}"
+        err
+    end
   end
 
   def ssh_path(), do: mkpath(conf(:git_ssh_key))
 
   defp register_ssh_keys() do
-    with ssh_key when is_binary(ssh_key) <- mkpath(conf(:git_ssh_key)),
+    with {:ok, false} <- {:ok, Console.byok?()},
+         ssh_key when is_binary(ssh_key) <- mkpath(conf(:git_ssh_key)),
       do: ssh_add(ssh_key)
   end
 

@@ -29,11 +29,10 @@ defmodule Console.Deployer do
   def init(storage) do
     Process.flag(:trap_exit, true)
     Logger.info "Starting deployer"
-    :pg2.create(@group)
-    :pg2.join(@group, self())
-    {:ok, _} = :timer.send_interval(@poll_interval, :poll)
-    send self(), :init
+    :pg.start(@group)
+    :pg.join(@group, self())
     if Console.conf(:initialize) do
+      {:ok, _} = :timer.send_interval(@poll_interval, :poll)
       :timer.send_interval(:timer.minutes(2), :sync)
     end
     {:ok, %State{storage: storage, id: Ecto.UUID.generate(), cloned: Bootstrapper.git_enabled?()}}
@@ -61,7 +60,12 @@ defmodule Console.Deployer do
     end
   end
 
-  def file(path), do: GenServer.call(leader(), {:file, path}, @call_timeout)
+  def file(path) do
+    case Console.byok?() do
+      true -> {:ok, ""}
+      _ -> GenServer.call(leader(), {:file, path}, @call_timeout)
+    end
+  end
 
   def wake(), do: GenServer.call(leader(), :poll, @call_timeout)
 
@@ -126,10 +130,6 @@ defmodule Console.Deployer do
   def handle_cast(:sync, state), do: {:noreply, state}
 
   def handle_info(:sync, state), do: handle_cast(:sync, state)
-
-  def handle_info(:init, %State{} = state) do
-    {:noreply, state}
-  end
 
   def handle_info(:poll, %State{cloned: false} = state) do
     {:noreply, %{state | cloned: Bootstrapper.git_enabled?()}}
@@ -232,7 +232,7 @@ defmodule Console.Deployer do
   defp ping(state), do: state
 
   def broadcast(msg \\ :sync) do
-    :pg2.get_members(@group)
+    :pg.get_members(@group)
     |> Enum.filter(& &1 != self())
     |> Enum.each(&GenServer.cast(&1, msg))
   end

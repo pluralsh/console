@@ -1,19 +1,18 @@
 import { useMutation } from '@apollo/client'
-import { Box } from 'grommet'
-import { Switch } from 'honorable'
 import { useCallback, useContext, useState } from 'react'
 import { LoginContext } from 'components/contexts'
-import { Chip } from '@pluralsh/design-system'
+import { Chip, Switch } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
 
 import { Confirm } from 'components/utils/Confirm'
 
 import UserInfo from '../../utils/UserInfo'
-
 import { Permissions, hasRbac } from '../misc'
 
 import { EDIT_USER } from './queries'
 
 export function User({ user }: any) {
+  const theme = useTheme()
   const { me } = useContext(LoginContext)
   const [mutation, { loading, error }] = useMutation<any>(EDIT_USER, {
     variables: { id: user.id },
@@ -48,14 +47,17 @@ export function User({ user }: any) {
   )
 
   return (
-    <Box
-      fill="horizontal"
-      direction="row"
-      align="center"
+    <div
+      css={{
+        display: 'flex',
+        alignItems: 'center',
+        width: '100%',
+        gap: theme.spacing.small,
+      }}
     >
       <UserInfo
-        fill="horizontal"
         user={user}
+        css={{ width: '100%' }}
       />
       {confirmModal}
       {!editable && isAdmin && <Chip>Admin</Chip>}
@@ -74,6 +76,6 @@ export function User({ user }: any) {
           Admin
         </Switch>
       )}
-    </Box>
+    </div>
   )
 }

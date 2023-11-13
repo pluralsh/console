@@ -1,6 +1,8 @@
 import isString from 'lodash/isString'
 import uniqWith from 'lodash/uniqWith'
 
+import { isNonNullable } from './isNonNullable'
+
 export function updateFragment(cache, { fragment, id, update, fragmentName }) {
   const current = cache.readFragment({ id, fragment, fragmentName })
 
@@ -91,4 +93,22 @@ export function deepFetch(map, path) {
   if (!map[key]) return null
 
   return deepFetch(map[key], path.slice(1))
+}
+
+export type Edge<N> = { node?: N | null }
+export type Edges<N> = (Edge<N> | null)[]
+export type Connection<N> = {
+  edges?: Edges<N> | null
+}
+export type PaginatedResult<N> = Connection<N> & {
+  pageInfo: { endCursor?: string | null | undefined; hasNextPage: boolean }
+}
+
+export function mapExistingNodes<N>(connection?: Connection<N> | null) {
+  if (!connection?.edges) {
+    return [] as N[]
+  }
+  const { edges } = connection
+
+  return (edges || []).map((edge) => edge?.node).filter(isNonNullable)
 }

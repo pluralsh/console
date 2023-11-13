@@ -8,6 +8,7 @@ import {
   DatabaseIcon,
   DiscordIcon,
   GitHubLogoIcon,
+  GitPullIcon,
   ListIcon,
   LogoutIcon,
   PeopleIcon,
@@ -17,32 +18,23 @@ import {
   SidebarItem,
   SidebarSection,
 } from '@pluralsh/design-system'
-
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-
+import { Link, useLocation } from 'react-router-dom'
 import { ReactElement, useCallback, useContext, useRef, useState } from 'react'
-
-import { Avatar, Flex, Menu, MenuItem, Span, useOutsideClick } from 'honorable'
-
+import { Avatar, Flex, Menu, MenuItem, useOutsideClick } from 'honorable'
 import { wipeToken } from 'helpers/auth'
 import posthog from 'posthog-js'
-
 import { ME_Q } from 'components/graphql/users'
-
 import { useMutation } from '@apollo/client'
-
 import { updateCache } from 'utils/graphql'
-
-import { useTheme } from 'styled-components'
-
+import styled from 'styled-components'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
+
+import { CD_ABS_PATH, CD_DEFAULT_REL_PATH } from 'routes/cdRoutesConsts'
 
 import { LoginContext } from '../contexts'
 
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
-
-export const SIDEBAR_ICON_HEIGHT = '42px'
 
 type MenuItem = {
   text: string
@@ -50,6 +42,7 @@ type MenuItem = {
   path: string
   pathRegexp?: RegExp
   sandboxed?: boolean
+  plural?: boolean
 }
 
 const MENU_ITEMS: MenuItem[] = [
@@ -57,11 +50,19 @@ const MENU_ITEMS: MenuItem[] = [
     text: 'Apps',
     icon: <AppsIcon />,
     path: '/',
+    plural: true,
     pathRegexp: /^\/(apps)/,
+  },
+  {
+    text: 'Continuous deployment',
+    icon: <GitPullIcon />,
+    path: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}`,
+    pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
   },
   {
     text: 'Builds',
     icon: <BuildIcon />,
+    plural: true,
     path: '/builds',
   },
   {
@@ -77,6 +78,7 @@ const MENU_ITEMS: MenuItem[] = [
   {
     text: 'Database management',
     icon: <DatabaseIcon />,
+    plural: true,
     path: `/${DB_MANAGEMENT_PATH}`,
   },
   // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true },
@@ -92,31 +94,6 @@ const MENU_ITEMS: MenuItem[] = [
   },
 ]
 
-function SidebarMenuItem({
-  tooltip,
-  href,
-  className,
-  children,
-}: {
-  tooltip: string
-  href?: string
-  className?: string
-  children: JSX.Element
-}) {
-  return (
-    <SidebarItem
-      clickable
-      tooltip={tooltip}
-      href={href}
-      height={32}
-      width={32}
-      className={className}
-    >
-      {children}
-    </SidebarItem>
-  )
-}
-
 function isActiveMenuItem(
   { path, pathRegexp }: Pick<MenuItem, 'path' | 'pathRegexp'>,
   currentPath
@@ -127,18 +104,40 @@ function isActiveMenuItem(
   )
 }
 
+const SidebarSC = styled(DSSidebar).attrs(() => ({ variant: 'console' }))(
+  (_) => ({
+    flexGrow: 1,
+    minHeight: 0,
+    height: 'auto',
+  })
+)
+
+const NotificationsCountSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: theme.colors['text-always-white'],
+  backgroundColor: theme.colors['icon-danger-critical'],
+  borderRadius: '50%',
+  fontSize: 10,
+  height: 15,
+  width: 15,
+  position: 'absolute',
+  left: 16,
+  top: 2,
+}))
+
 export default function Sidebar() {
   const menuItemRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const notificationsPanelRef = useRef<HTMLDivElement>(null)
-  const [isMenuOpen, setIsMenuOpened] = useState<boolean>(false)
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] =
     useState(false)
   const sidebarWidth = 64
   const { me, configuration } = useContext<any>(LoginContext)
-  const navigate = useNavigate()
   const { pathname } = useLocation()
-  const active = useCallback(
+  const isActive = useCallback(
     (menuItem: Parameters<typeof isActiveMenuItem>[0]) =>
       isActiveMenuItem(menuItem, pathname),
     [pathname]
@@ -146,8 +145,6 @@ export default function Sidebar() {
   const menuItems = configuration.isSandbox
     ? MENU_ITEMS.filter(({ sandboxed }) => !sandboxed)
     : MENU_ITEMS
-
-  const theme = useTheme()
 
   const [mutation] = useMutation(MARK_READ, {
     update: (cache) =>
@@ -169,7 +166,7 @@ export default function Sidebar() {
   )
 
   const handleLogout = useCallback(() => {
-    setIsMenuOpened(false)
+    setIsMenuOpen(false)
     wipeToken()
     posthog.reset()
     const w: Window = window
@@ -179,7 +176,7 @@ export default function Sidebar() {
 
   useOutsideClick(menuRef, (event) => {
     if (!menuItemRef.current?.contains(event.target as any)) {
-      setIsMenuOpened(false)
+      setIsMenuOpen(false)
     }
   })
 
@@ -189,92 +186,79 @@ export default function Sidebar() {
 
   return (
     <>
-      <DSSidebar backgroundColor={theme.colors?.grey[950]}>
+      <SidebarSC variant="console">
         <SidebarSection
           grow={1}
           shrink={1}
         >
-          {menuItems.map((item, i) => (
-            <SidebarItem
-              key={i}
-              clickable
-              tooltip={item.text}
-              className={`sidebar-${item.text}`}
-              onClick={() => navigate(item.path)}
-              backgroundColor={active(item) ? theme.colors?.grey[875] : null}
-              _hover={{
-                backgroundColor: theme.colors?.grey[900],
-                cursor: 'pointer',
-              }}
-              borderRadius="normal"
-              height={32}
-              width={32}
-            >
-              {item.icon}
-            </SidebarItem>
-          ))}
+          {menuItems.map(
+            (item, i) =>
+              (!item.plural || !configuration.byok) && (
+                <SidebarItem
+                  key={i}
+                  clickable
+                  tooltip={item.text}
+                  className={`sidebar-${item.text}`}
+                  active={isActive(item)}
+                  as={Link}
+                  to={item.path}
+                >
+                  {item.icon}
+                </SidebarItem>
+              )
+          )}
           <Flex grow={1} />
-          <SidebarMenuItem
+          <SidebarItem
             tooltip="Discord"
             className="sidebar-discord"
+            clickable
+            as="a"
+            target="_blank"
+            rel="noopener noreferrer"
             href="https://discord.gg/bEBAMXV64s"
           >
             <DiscordIcon />
-          </SidebarMenuItem>
-          <SidebarMenuItem
+          </SidebarItem>
+          <SidebarItem
             tooltip="GitHub"
             className="sidebar-github"
+            clickable
+            as="a"
+            target="_blank"
+            rel="noopener noreferrer"
             href="https://github.com/pluralsh/plural"
           >
             <GitHubLogoIcon />
-          </SidebarMenuItem>
+          </SidebarItem>
           <SidebarItem
-            position="relative"
             clickable
             label="Notifications"
             tooltip="Notifications"
             className="sidebar-notifications"
+            css={{
+              position: 'relative',
+            }}
             onClick={(event) => {
               event.stopPropagation()
               toggleNotificationPanel(!isNotificationsPanelOpen)
             }}
             badge={me?.unreadNotifications}
-            backgroundColor={
-              isNotificationsPanelOpen ? theme.colors?.grey[875] : null
-            }
-            width={32}
-            height={32}
+            active={isNotificationsPanelOpen}
           >
             <BellIcon />
             {me?.unreadNotifications > 0 && (
-              <Flex
-                color="white"
-                backgroundColor="error"
-                borderRadius="100%"
-                fontSize={11}
-                align="start"
-                justify="center"
-                height={15}
-                width={15}
-                position="absolute"
-                left={16}
-                top={2}
-              >
-                <Span marginTop={-2}>
-                  {me.unreadNotifications > 99 ? '!' : me.unreadNotifications}
-                </Span>
-              </Flex>
+              <NotificationsCountSC>
+                {me.unreadNotifications > 99 ? '!' : me.unreadNotifications}
+              </NotificationsCountSC>
             )}
           </SidebarItem>
           <SidebarItem
             ref={menuItemRef}
             className="sidebar-menu"
-            py={0.25 / 2}
-            px={0.5}
             active={isMenuOpen}
             clickable
             collapsed
-            onClick={() => setIsMenuOpened((x) => !x)}
+            onClick={() => setIsMenuOpen((x) => !x)}
           >
             <Avatar
               name={me.name}
@@ -283,7 +267,7 @@ export default function Sidebar() {
             />
           </SidebarItem>
         </SidebarSection>
-      </DSSidebar>
+      </SidebarSC>
       {isMenuOpen && (
         <Menu
           ref={menuRef}
@@ -299,7 +283,7 @@ export default function Sidebar() {
             to="/profile"
             className="sidebar-menu-myprofile"
             color="inherit"
-            onClick={() => setIsMenuOpened(false)}
+            onClick={() => setIsMenuOpen(false)}
             textDecoration="none"
           >
             <PersonIcon marginRight="xsmall" />
@@ -312,7 +296,7 @@ export default function Sidebar() {
             rel="noopener noreferrer"
             className="sidebar-menu-docs"
             color="inherit"
-            onClick={() => setIsMenuOpened(false)}
+            onClick={() => setIsMenuOpen(false)}
             textDecoration="none"
           >
             <ScrollIcon marginRight="xsmall" />

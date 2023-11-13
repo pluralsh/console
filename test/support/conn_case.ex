@@ -15,12 +15,13 @@ defmodule ConsoleWeb.ConnCase do
 
   use ExUnit.CaseTemplate
   import Plug.Conn
-  alias Console.Schema.User
+  alias Console.Schema.{User, Cluster, AccessToken}
 
   using do
     quote do
       # Import conveniences for testing with connections
-      use Phoenix.ConnTest
+      import Plug.Conn
+      import Phoenix.ConnTest
       alias ConsoleWeb.Router.Helpers, as: Routes
       import Console.Factory
       import Console.TestHelpers
@@ -45,4 +46,8 @@ defmodule ConsoleWeb.ConnCase do
     {:ok, token, _} = Console.Guardian.encode_and_sign(user)
     put_req_header(conn, "authorization", "Bearer #{token}")
   end
+  def add_auth_headers(conn, %Cluster{deploy_token: token}),
+    do: put_req_header(conn, "authorization", "Token #{token}")
+  def add_auth_headers(conn, %AccessToken{token: token}),
+    do: put_req_header(conn, "authorization", "Token #{token}")
 end

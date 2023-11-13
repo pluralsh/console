@@ -10,6 +10,8 @@ import { Div, Span } from 'honorable'
 
 import { useQuery } from '@apollo/client'
 
+import { isNonNullable } from 'utils/isNonNullable'
+
 import { RECIPES_Q, RECIPE_Q } from '../../graphql/plural'
 import { Recipe, RepositoryContext } from '../../../generated/graphql'
 
@@ -29,6 +31,7 @@ const findContext = (
   contexts
     .filter((ctx) => ctx.repository === repository)
     .map((ctx) => ctx.context)
+    .filter(isNonNullable)
     .reduce((acc, ctx) => ({ ...acc, ...ctx }), {})
 
 export function Application({ ...props }: any): ReactElement {

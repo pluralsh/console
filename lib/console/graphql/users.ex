@@ -57,6 +57,8 @@ defmodule Console.GraphQl.Users do
     field :roles,           :user_roles
     field :read_timestamp,  :datetime
     field :build_timestamp, :datetime
+
+    field :groups, list_of(:group), resolve: dataloader(User)
     field :bound_roles,     list_of(:role), resolve: fn user, _, _ ->
       {:ok, Console.Schema.User.roles(user)}
     end
@@ -142,11 +144,39 @@ defmodule Console.GraphQl.Users do
     timestamps()
   end
 
+  object :access_token do
+    field :id,    :id
+    field :token, :string
+
+    connection field :audits, node_type: :access_token_audit do
+      middleware Feature, :audit
+      resolve &User.list_token_audits/2
+    end
+
+    timestamps()
+  end
+
+  object :access_token_audit do
+    field :id,        :id
+    field :ip,        :string
+    field :timestamp, :datetime
+    field :count,     :integer
+    field :city,      :string
+    field :country,   :string
+    field :latitude,  :string
+    field :longitude, :string
+
+    timestamps()
+  end
+
+
   connection node_type: :user
   connection node_type: :group
   connection node_type: :group_member
   connection node_type: :role
   connection node_type: :notification
+  connection node_type: :access_token
+  connection node_type: :access_token_audit
 
   delta :notification
 
@@ -215,6 +245,18 @@ defmodule Console.GraphQl.Users do
       middleware AdminRequired
 
       resolve &User.temporary_token/2
+    end
+
+    connection field :access_tokens, node_type: :access_token do
+      middleware Authenticated
+      resolve &User.list_tokens/2
+    end
+
+    field :access_token, :access_token do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &User.resolve_token/2
     end
   end
 
@@ -363,6 +405,19 @@ defmodule Console.GraphQl.Users do
       arg :id, non_null(:id)
 
       safe_resolve &User.delete_role/2
+    end
+
+    field :create_access_token, :access_token do
+      middleware Authenticated
+
+      safe_resolve &User.create_access_token/2
+    end
+
+    field :delete_access_token, :access_token do
+      middleware Authenticated
+      arg :token, non_null(:string)
+
+      safe_resolve &User.delete_access_token/2
     end
   end
 

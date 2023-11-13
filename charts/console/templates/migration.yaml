@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "console.migration-name" . }}
+  labels:
+    platform.plural.sh/ignore: 'true'
+    {{ include "console.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+      containers:
+      - name: migrator
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        command: ["/opt/app/bin/console",  "migrate"]
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        envFrom:
+        - secretRef:
+            name: console-env
+        - secretRef:
+            name: console-migration-env
+        env:
+        {{ include "console.env" . | nindent 8 }}
+      restartPolicy: Never
+  backoffLimit: 5

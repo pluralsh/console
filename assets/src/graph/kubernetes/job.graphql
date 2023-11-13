@@ -1,0 +1,26 @@
+fragment Job on Job {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...JobStatus
+  }
+  spec {
+    backoffLimit
+    parallelism
+    activeDeadlineSeconds
+  }
+  pods {
+    ...Pod
+  }
+  raw
+}
+
+query Job($name: String!, $namespace: String!, $serviceId: ID) {
+  job(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Job
+    events {
+      ...Event
+    }
+  }
+}

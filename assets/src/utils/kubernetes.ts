@@ -53,5 +53,5 @@ export function cpuFormat(value?: string | number | null) {
 }
 
 export function memoryFormat(value?: number | null | undefined) {
-  return filesize(value, { base: 2 })
+  return filesize(value ?? 0, { base: 2 })
 }

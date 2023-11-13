@@ -1,9 +1,8 @@
-import { Card } from '@pluralsh/design-system'
+import { Card, PropWide } from '@pluralsh/design-system'
 
 import { Flex } from 'honorable'
 
-import PropWide from 'components/utils/PropWide'
-import { ComponentStatus } from 'components/apps/app/components/misc'
+import { ComponentStatusChip } from 'components/apps/app/components/misc'
 import { Pod } from 'generated/graphql'
 import { LabelPairsSection } from 'components/utils/LabelPairsSection'
 import { Readiness, podStatusToReadiness } from 'utils/status'
@@ -58,13 +57,15 @@ export default function Metadata({ pod }: { pod: Pod }) {
               title="Phase"
               fontWeight={600}
             >
-              <ComponentStatus status={phaseToReadiness(pod?.status?.phase)} />
+              <ComponentStatusChip
+                status={phaseToReadiness(pod?.status?.phase)}
+              />
             </PropWide>
             <PropWide
               title="Readiness"
               fontWeight={600}
             >
-              <ComponentStatus status={podStatusToReadiness(pod?.status)} />
+              <ComponentStatusChip status={podStatusToReadiness(pod?.status)} />
             </PropWide>
           </div>
         </Flex>

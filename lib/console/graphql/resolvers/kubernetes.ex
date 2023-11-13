@@ -8,8 +8,10 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, LabelSelectorRequirement}
 
   def list_applications(_, _) do
-    with {:ok, %{items: items}} <- Client.list_applications(),
-      do: {:ok, items}
+    case Client.list_applications() do
+      {:ok, %{items: items}} -> {:ok, items}
+      _ -> {:ok, []}
+    end
   end
 
   def list_node_metrics(_, _) do
@@ -22,7 +24,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def cluster_info(_, _) do
     Kazan.Apis.Version.get_code!()
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def list_log_filters(%{namespace: ns}, _) do
@@ -43,49 +45,49 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   def resolve_service(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
     |> Core.read_namespaced_service!(name)
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def resolve_deployment(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
     |> Apps.read_namespaced_deployment!(name)
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def resolve_stateful_set(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
     |> Apps.read_namespaced_stateful_set!(name)
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def resolve_ingress(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
     |> Networking.read_namespaced_ingress!(name)
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def resolve_cron_job(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
     |> Batch.read_namespaced_cron_job!(name)
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def resolve_job(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
     |> BatchV1.read_namespaced_job!(name)
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def resolve_config_map(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
     |> Core.read_namespaced_config_map!(name)
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def resolve_secret(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
     |> Core.read_namespaced_secret!(name)
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def resolve_certificate(%{namespace: ns, name: name}, _) do
@@ -102,23 +104,23 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def list_nodes(_, _) do
     Core.list_node!()
-    |> Kazan.run()
+    |> Kube.Utils.run()
     |> items_response()
   end
 
   def resolve_pod(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
     |> Core.read_namespaced_pod!(name)
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def resolve_node(%{name: name}, _) do
     Core.read_node!(name)
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def delete_node(%{name: name}, _) do
-    with {:ok, node} <- Core.read_node!(name) |> Kazan.run(),
+    with {:ok, node} <- Core.read_node!(name) |> Kube.Utils.run(),
          {:ok, _} <- Console.Commands.Plural.terminate(node.metadata.name),
       do: {:ok, node}
   end
@@ -130,7 +132,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
       query_params: %{},
       response_model: Core.Pod
     }
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def delete_job(%{namespace: namespace, name: name}, _) do
@@ -140,7 +142,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
       query_params: %{},
       response_model: BatchV1.Job
     }
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def delete_certificate(%{namespace: ns, name: name}, _) do
@@ -151,13 +153,13 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   def list_events(%{metadata: %{uid: uid, namespace: ns}}) do
     Console.namespace(ns)
     |> Core.list_namespaced_event!(field_selector: "involvedObject.uid=#{uid}")
-    |> Kazan.run()
+    |> Kube.Utils.run()
     |> items_response()
   end
 
   def list_all_events(%{metadata: %{uid: uid}}) do
     Core.list_event_for_all_namespaces!(field_selector: "involvedObject.uid=#{uid}")
-    |> Kazan.run()
+    |> Kube.Utils.run()
     |> items_response()
   end
 
@@ -165,28 +167,28 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   def list_pods(%{namespace: ns}, label_selector) do
     Console.namespace(ns)
     |> Core.list_namespaced_pod!(label_selector: construct_label_selector(label_selector))
-    |> Kazan.run()
+    |> Kube.Utils.run()
     |> items_response()
   end
 
   def list_jobs(%{namespace: ns}) do
     Console.namespace(ns)
     |> BatchV1.list_namespaced_job!()
-    |> Kazan.run()
+    |> Kube.Utils.run()
     |> items_response()
   end
 
   def list_config_maps(%{namespace: ns}, _) do
     Console.namespace(ns)
     |> Core.list_namespaced_config_map!()
-    |> Kazan.run()
+    |> Kube.Utils.run()
     |> items_response()
   end
 
   def list_secrets(%{namespace: ns}, _) do
     Console.namespace(ns)
     |> Core.list_namespaced_secret!()
-    |> Kazan.run()
+    |> Kube.Utils.run()
     |> items_response()
   end
 
@@ -195,14 +197,21 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def list_pods_for_node(%{metadata: %{name:  name}}) do
     Core.list_pod_for_all_namespaces!(field_selector: "spec.nodeName=#{name}")
-    |> Kazan.run()
+    |> Kube.Utils.run()
     |> items_response()
+  end
+
+  def list_all_pods(%{namespace: ns} = args, _) do
+    ns
+    |> Core.list_namespaced_pod!(page_params(args))
+    |> Kube.Utils.run()
+    |> items_connection()
   end
 
   def list_all_pods(args, _) do
     (page_params(args) ++ namespace_params(args))
     |> Core.list_pod_for_all_namespaces!()
-    |> Kazan.run()
+    |> Kube.Utils.run()
     |> items_connection()
   end
 
@@ -211,14 +220,37 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> maybe_filter_pods(args)
   end
 
+  def read_pod_logs(_, args, %{source: %Core.Pod{metadata: %{namespace: ns, name: n}}}) do
+    Core.read_namespaced_pod_log!(ns, n, Map.to_list(args))
+    |> Kube.Utils.run()
+    |> case do
+      {:ok, logs} -> {:ok, String.split(logs, ~r/\R/)}
+      err -> err
+    end
+  end
+
+  def raw_resource(%{version: v, kind: k, name: n} = args, %{context: %{service: svc}}) do
+    kind = String.downcase(k) |> Inflex.pluralize()
+    path = Kube.Client.Base.path(args[:group], v, kind, args[:namespace], n)
+    with {:ok, res} <- Kube.Client.raw(path),
+         {:ok, res} <- Console.Deployments.Services.accessible(svc, res),
+      do: {:ok, %{raw: res, metadata: Kube.Utils.raw_meta(res)}}
+  end
+  def raw_resource(_, _), do: {:error, "forbidden"}
+
   defp maybe_filter_pods(pods, %{namespaces: [_ | _] = namespaces}) do
     namespaces = MapSet.new(namespaces)
     {:ok, Enum.filter(pods, &MapSet.member?(namespaces, &1.metadata.namespace))}
   end
   defp maybe_filter_pods(pods, _), do: {:ok, pods}
 
-  def list_namespaces(_, _), do: {:ok, Console.namespaces()}
+  def list_namespaces(%{cluster_id: _}, _) do
+    Core.list_namespace!()
+    |> Kube.Utils.run()
+    |> items_response()
+  end
 
+  def list_namespaces(_, _), do: {:ok, Console.namespaces()}
 
   defp namespace_params(%{namespaces: [_ | _] = namespaces}) do
     namespaces = MapSet.new(namespaces)
@@ -243,7 +275,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   defp items_connection({:ok, %{items: items, metadata: %{continue: cursor}}}) do
     edges = Enum.map(items, &%{node: &1})
-    {:ok, %{edges: edges, page_info: %{end_cursor: cursor}}}
+    {:ok, %{edges: edges, page_info: %{end_cursor: cursor, has_next_page: is_binary(cursor) and byte_size(cursor) != 0}}}
   end
   defp items_connection(err), do: err
 

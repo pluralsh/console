@@ -7,6 +7,45 @@ defmodule Kube.Utils do
   @type secret_resp :: {:ok, CoreV1.Secret.t} | error
   @type statefulset_resp :: {:ok, AppsV1.StatefulSet.t} | error
 
+  @kubeconf :kubeconfig
+
+  def raw_meta(%{"metadata" => meta}) do
+    %MetaV1.ObjectMeta{
+      name: meta["name"],
+      namespace: meta["namespace"],
+      labels: meta["labels"] || %{},
+      annotations: meta["annotations"] || %{},
+      creation_timestamp: meta["creationTimestamp"]
+    }
+  end
+  def raw_meta(_), do: nil
+
+  def identifier(%{"apiVersion" => gv, "kind" => k, "metadata" => %{"name" => n} = meta}) do
+    {g, v} = group_version(gv)
+    {g, v, k, Map.get(meta, "namespace"), n}
+  end
+  def identifier(%{api_version: gv, kind: k, metadata: %{name: n} = meta}) do
+    {g, v} = group_version(gv)
+    {g, v, k, Map.get(meta, :namespace), n}
+  end
+
+  def group_version(api_version) do
+    case String.split(api_version, "/") do
+      [g, v] -> {g, v}
+      [v] -> {nil, v}
+    end
+  end
+
+  def save_kubeconfig(val), do: Process.put(@kubeconf, val)
+  def kubeconfig(), do: Process.get(@kubeconf)
+
+  def run(query) do
+    case kubeconfig() do
+      %Kazan.Server{} = server -> Kazan.run(query, server: server)
+      _ -> Kazan.run(query)
+    end
+  end
+
   @spec metadata(binary) :: MetaV1.ObjectMeta.t
   def metadata(name, other \\ %{}), do: struct(MetaV1.ObjectMeta, Map.merge(%{name: name}, other))
 

@@ -19,6 +19,7 @@ defmodule Console.GraphQl.Kubernetes.Config do
   object :config_queries do
     field :config_map, :config_map do
       middleware Authenticated
+      service_authorized :read
       namespace_args()
 
       safe_resolve &Kubernetes.resolve_config_map/2
@@ -26,7 +27,7 @@ defmodule Console.GraphQl.Kubernetes.Config do
 
     field :secret, :secret do
       middleware Authenticated
-      middleware Rbac, perm: :operate, arg: :namespace
+      service_authorized :operate
       namespace_args()
 
       safe_resolve &Kubernetes.resolve_secret/2

@@ -3,7 +3,7 @@ defmodule Console.Commands.ConfigurationTest do
 
   describe "#run/0" do
     test "It will cp ssh keys" do
-      {:ok, _} = Console.Commands.Configuration.run()
+      :ok = Console.Commands.Configuration.run()
     end
   end
 end
