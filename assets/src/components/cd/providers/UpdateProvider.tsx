@@ -190,7 +190,7 @@ export function UpdateProviderModal({
       </div>
       {error && (
         <GqlError
-          header="Problem deploying service"
+          header="Problem updating provider"
           error={error}
         />
       )}

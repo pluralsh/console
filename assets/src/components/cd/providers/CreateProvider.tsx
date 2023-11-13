@@ -246,7 +246,7 @@ export function CreateProviderModal({
         </div>
         {error && (
           <GqlError
-            header="Problem deploying service"
+            header="Problem creating provider"
             error={error}
           />
         )}
