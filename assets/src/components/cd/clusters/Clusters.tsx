@@ -383,7 +383,7 @@ export default function Clusters() {
   const tableData = isDemo ? DEMO_CLUSTERS : clusterEdges
   const showGettingStarted = isDemo || (clusterEdges?.length ?? 0) < 2
 
-  useSetCDScrollable(showGettingStarted)
+  useSetCDScrollable(showGettingStarted || isDemo)
 
   if (!data) {
     return <LoadingIndicator />
