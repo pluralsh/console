@@ -37,6 +37,7 @@ import { GqlError } from '../../utils/Alert'
 import { TabularNumbers } from '../../cluster/TableElements'
 
 import { deprecationsColumns } from './deprecationsColumns'
+import { StackedText } from './Clusters'
 
 const supportedVersions = (cluster: ClustersRowFragment | null) =>
   cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
@@ -115,10 +116,28 @@ const upgradeColumns = [
       </ColWithIcon>
     ),
   }),
-  columnHelperUpgrade.accessor((cluster) => cluster?.currentVersion, {
+  columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'version',
-    header: 'Current version',
-    cell: ({ getValue }) => <div>{toNiceVersion(getValue())}</div>,
+    header: 'Version',
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+
+      return (
+        <div>
+          {cluster?.currentVersion && (
+            <StackedText
+              first={`Current: ${toNiceVersion(cluster?.currentVersion)}`}
+              second={
+                cluster?.self || !cluster?.version
+                  ? null
+                  : `Target: ${toNiceVersion(cluster?.version)}`
+              }
+            />
+          )}
+          {!cluster?.currentVersion && <>-</>}
+        </div>
+      )
+    },
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
