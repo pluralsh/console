@@ -6,18 +6,18 @@ import {
   Modal,
   Select,
   Table,
+  Tooltip,
   WarningIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
-
 import {
   ClustersRowFragment,
   useUpdateClusterMutation,
 } from 'generated/graphql'
-
 import {
   nextSupportedVersion,
   supportedUpgrades,
@@ -27,17 +27,13 @@ import {
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { Confirm } from 'components/utils/Confirm'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
 import { ApolloError } from '@apollo/client'
-
 import { coerce } from 'semver'
 
 import { GqlError } from '../../utils/Alert'
-
 import { TabularNumbers } from '../../cluster/TableElements'
 
 import { deprecationsColumns } from './deprecationsColumns'
-import { StackedText } from './Clusters'
 
 const supportedVersions = (cluster: ClustersRowFragment | null) =>
   cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
@@ -76,20 +72,37 @@ function ClustersUpgradeNow({
     () => (!hasDeprecations ? updateCluster() : setConfirm(true)),
     [hasDeprecations, updateCluster]
   )
+  const isUpgrading =
+    !cluster?.self &&
+    !!cluster?.currentVersion &&
+    !!cluster?.version &&
+    cluster?.currentVersion !== cluster?.version
+  const tooltip = isUpgrading
+    ? 'Cluster is already upgrading'
+    : cluster?.deletedAt
+    ? 'Cluster is being deleted'
+    : null
 
   return (
     <>
-      <Button
-        small
-        disabled={!targetVersion}
-        destructive={hasDeprecations}
-        floating={!hasDeprecations}
-        width="fit-content"
-        loading={!hasDeprecations && loading}
-        onClick={onClick}
+      <WrapWithIf
+        condition={isUpgrading || !!cluster?.deletedAt}
+        wrapper={<Tooltip label={tooltip} />}
       >
-        Upgrade now
-      </Button>
+        <div>
+          <Button
+            small
+            disabled={!targetVersion || isUpgrading || !!cluster?.deletedAt}
+            destructive={hasDeprecations}
+            floating={!hasDeprecations}
+            width="fit-content"
+            loading={!hasDeprecations && loading}
+            onClick={onClick}
+          >
+            Upgrade now
+          </Button>
+        </div>
+      </WrapWithIf>
       <Confirm
         open={confirm}
         title="Confirm upgrade"
@@ -116,28 +129,10 @@ const upgradeColumns = [
       </ColWithIcon>
     ),
   }),
-  columnHelperUpgrade.accessor((cluster) => cluster, {
+  columnHelperUpgrade.accessor((cluster) => cluster?.currentVersion, {
     id: 'version',
-    header: 'Version',
-    cell: ({ getValue }) => {
-      const cluster = getValue()
-
-      return (
-        <div>
-          {cluster?.currentVersion && (
-            <StackedText
-              first={`Current: ${toNiceVersion(cluster?.currentVersion)}`}
-              second={
-                cluster?.self || !cluster?.version
-                  ? null
-                  : `Target: ${toNiceVersion(cluster?.version)}`
-              }
-            />
-          )}
-          {!cluster?.currentVersion && <>-</>}
-        </div>
-      )
-    },
+    header: 'Current version',
+    cell: ({ getValue }) => <div>{toNiceVersion(getValue())}</div>,
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
