@@ -23,11 +23,14 @@ import {
   supportedUpgrades,
   toNiceVersion,
 } from 'utils/semver'
-
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { Confirm } from 'components/utils/Confirm'
 import { ProviderIcons } from 'components/utils/Provider'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { ApolloError } from '@apollo/client'
+
+import { GqlError } from '../../utils/Alert'
 
 import { deprecationsColumns } from './deprecationsColumns'
 import { VersionSelect } from './VersionSelect'
@@ -41,10 +44,12 @@ function ClustersUpgradeNow({
   cluster,
   targetVersion,
   refetch,
+  setError,
 }: {
   cluster?: ClustersRowFragment | null
   targetVersion: Nullable<string>
   refetch: Nullable<() => void>
+  setError: Nullable<(error: Nullable<ApolloError>) => void>
 }) {
   const [updateCluster, { loading, error }] = useUpdateClusterMutation({
     variables: {
@@ -53,8 +58,10 @@ function ClustersUpgradeNow({
     },
     onCompleted: () => {
       refetch?.()
+      setError?.(undefined)
       setConfirm(false)
     },
+    onError: (e: ApolloError) => setError?.(e),
   })
   const [confirm, setConfirm] = useState(false)
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
@@ -141,7 +148,10 @@ const upgradeColumns = [
       )
       const [targetVersion, setTargetVersion] = useState<Nullable<string>>()
 
-      const { refetch } = table.options.meta as { refetch?: () => void }
+      const { refetch, setError } = table.options.meta as {
+        refetch?: () => void
+        setError?: (error: Nullable<ApolloError>) => void
+      }
 
       useEffect(() => {
         if (!upgrades.some((upgrade) => upgrade === targetVersion)) {
@@ -173,6 +183,7 @@ const upgradeColumns = [
             cluster={cluster}
             targetVersion={targetVersion}
             refetch={refetch}
+            setError={setError}
           />
         </div>
       )
@@ -193,6 +204,7 @@ function ClusterUpgradeModal({
   cluster: ClustersRowFragment | null | undefined
   refetch: Nullable<() => void>
 }) {
+  const [error, setError] = useState<Nullable<ApolloError>>(undefined)
   const theme = useTheme()
 
   return (
@@ -261,8 +273,14 @@ function ClusterUpgradeModal({
             maxHeight: 'unset',
             height: '100%',
           }}
-          reactTableOptions={{ meta: { refetch } }}
+          reactTableOptions={{ meta: { refetch, setError } }}
         />
+        {error && (
+          <GqlError
+            header="Problem upgrading cluster"
+            error={error}
+          />
+        )}
       </div>
     </Modal>
   )
