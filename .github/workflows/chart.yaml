@@ -3,7 +3,7 @@ name: Publish Chart
 on:
   push:
     branches:
-    - main
+    - master
     - cd-scaffolding
 jobs:
   publish:
