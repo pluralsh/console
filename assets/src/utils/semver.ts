@@ -1,43 +1,36 @@
-import semver from 'semver'
+import semver, { coerce } from 'semver'
+
+import { ProviderCloud } from '../components/cd/clusters/create/types'
 
 import { isNonNullable } from './isNonNullable'
 
-export function bumpMinor(version?: string | null): string | null {
-  if (!version) return null
-
-  return semver.inc(version, 'minor')
-}
-
 export function nextSupportedVersion(
-  version?: string | null,
-  supportedVersions?: (string | null)[] | null
+  current?: Nullable<string>,
+  supported?: Nullable<Nullable<string>[]>
 ): string | null {
-  const supported = supportedVersions
-    ? supportedVersions.filter((v): v is string => !!v)
-    : []
-
-  return semver.minSatisfying(supported, `>${version}`)
+  return semver.minSatisfying(
+    supported?.map((vsn) => coerce(vsn)?.raw).filter(isNonNullable) ?? [],
+    `>${current}`
+  )
 }
 
 export function supportedUpgrades(
-  currentVersion: Nullable<string>,
-  supportedVersions: Nullable<Nullable<string>[]>
+  current: Nullable<string>,
+  supported: Nullable<Nullable<string>[]>
 ): string[] {
-  let versions: string[]
+  const coercedCurrent = semver.coerce(current)
+  let upgrades = supported?.filter(isNonNullable) ?? []
 
-  if (!currentVersion) {
-    versions = supportedVersions?.filter(isNonNullable) || []
-  } else {
-    versions =
-      supportedVersions?.filter(
-        (ver): ver is string =>
-          !!ver &&
-          semver.gt(ver, currentVersion) &&
-          semver.minor(ver) - semver.minor(currentVersion) <= 1
-      ) || []
+  if (coercedCurrent) {
+    upgrades =
+      upgrades?.filter(
+        (ver) =>
+          semver.gt(ver, coercedCurrent) &&
+          semver.minor(ver) - semver.minor(coercedCurrent) <= 1
+      ) ?? []
   }
 
-  return versions.sort(semver.rcompare)
+  return upgrades.sort(semver.rcompare)
 }
 
 export function toNiceVersion(version: Nullable<string>) {
@@ -48,12 +41,20 @@ export function toNiceVersion(version: Nullable<string>) {
   return `${version.startsWith('v') ? '' : 'v'}${version}`
 }
 
-export function coerceSemver(version: string) {
-  if (semver.valid(version)) {
-    return version
+export function toProviderSupportedVersion(
+  version: Nullable<string>,
+  providerCloud: Nullable<string>
+) {
+  const coercedVersion = semver.coerce(version)
+
+  if (!coercedVersion || !providerCloud) {
+    return null
   }
 
-  const vsn = `${version}.0`
+  // We need to skip patch version for AWS as its versioning doesn't follow SemVer spec.
+  if (providerCloud === ProviderCloud.AWS) {
+    return `${coercedVersion.major}.${coercedVersion.minor}`
+  }
 
-  return semver.valid(vsn) ? vsn : null
+  return version
 }

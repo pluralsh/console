@@ -2,59 +2,69 @@ import {
   Button,
   ClusterIcon,
   ErrorIcon,
+  ListBoxItem,
   Modal,
+  Select,
   Table,
+  Tooltip,
   WarningIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
-
 import {
   ClustersRowFragment,
   useUpdateClusterMutation,
 } from 'generated/graphql'
-
 import {
-  bumpMinor,
-  coerceSemver,
   nextSupportedVersion,
   supportedUpgrades,
   toNiceVersion,
+  toProviderSupportedVersion,
 } from 'utils/semver'
-
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { Confirm } from 'components/utils/Confirm'
-import { ProviderIcons } from 'components/utils/Provider'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { ApolloError } from '@apollo/client'
+import { coerce } from 'semver'
+
+import { GqlError } from '../../utils/Alert'
+import { TabularNumbers } from '../../cluster/TableElements'
 
 import { deprecationsColumns } from './deprecationsColumns'
-import { VersionSelect } from './VersionSelect'
 
 const supportedVersions = (cluster: ClustersRowFragment | null) =>
-  (cluster?.provider?.supportedVersions || []).map((vsn) =>
-    coerceSemver(vsn || '')
-  )
+  cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
 
 function ClustersUpgradeNow({
   cluster,
   targetVersion,
   refetch,
+  setError,
 }: {
   cluster?: ClustersRowFragment | null
   targetVersion: Nullable<string>
   refetch: Nullable<() => void>
+  setError: Nullable<(error: Nullable<ApolloError>) => void>
 }) {
   const [updateCluster, { loading, error }] = useUpdateClusterMutation({
     variables: {
       id: cluster?.id ?? '',
-      attributes: { version: targetVersion },
+      attributes: {
+        version: toProviderSupportedVersion(
+          targetVersion,
+          cluster?.provider?.cloud
+        ),
+      },
     },
     onCompleted: () => {
       refetch?.()
+      setError?.(undefined)
       setConfirm(false)
     },
+    onError: (e: ApolloError) => setError?.(e),
   })
   const [confirm, setConfirm] = useState(false)
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
@@ -62,20 +72,37 @@ function ClustersUpgradeNow({
     () => (!hasDeprecations ? updateCluster() : setConfirm(true)),
     [hasDeprecations, updateCluster]
   )
+  const isUpgrading =
+    !cluster?.self &&
+    !!cluster?.currentVersion &&
+    !!cluster?.version &&
+    cluster?.currentVersion !== cluster?.version
+  const tooltip = isUpgrading
+    ? 'Cluster is already upgrading'
+    : cluster?.deletedAt
+    ? 'Cluster is being deleted'
+    : null
 
   return (
     <>
-      <Button
-        small
-        disabled={!targetVersion}
-        destructive={hasDeprecations}
-        floating={!hasDeprecations}
-        width="fit-content"
-        loading={!hasDeprecations && loading}
-        onClick={onClick}
+      <WrapWithIf
+        condition={isUpgrading || !!cluster?.deletedAt}
+        wrapper={<Tooltip label={tooltip} />}
       >
-        Upgrade now
-      </Button>
+        <div>
+          <Button
+            small
+            disabled={!targetVersion || isUpgrading || !!cluster?.deletedAt}
+            destructive={hasDeprecations}
+            floating={!hasDeprecations}
+            width="fit-content"
+            loading={!hasDeprecations && loading}
+            onClick={onClick}
+          >
+            Upgrade now
+          </Button>
+        </div>
+      </WrapWithIf>
       <Confirm
         open={confirm}
         title="Confirm upgrade"
@@ -108,25 +135,6 @@ const upgradeColumns = [
     cell: ({ getValue }) => <div>{toNiceVersion(getValue())}</div>,
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
-    id: 'nextK8sRelease',
-    header: 'Next K8s release',
-    cell: ({ getValue }) => {
-      const cluster = getValue()
-
-      return (
-        <ColWithIcon icon={ProviderIcons.GENERIC}>
-          {toNiceVersion(
-            nextSupportedVersion(
-              cluster?.currentVersion,
-              supportedVersions(cluster)
-            ) || bumpMinor(cluster?.currentVersion)
-          )}
-        </ColWithIcon>
-      )
-    },
-  }),
-
-  columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
     header: 'Upgrade version',
     meta: {
@@ -139,9 +147,17 @@ const upgradeColumns = [
         () => supportedUpgrades(cluster.version, supportedVersions(cluster)),
         [cluster]
       )
-      const [targetVersion, setTargetVersion] = useState<Nullable<string>>()
+      const upgradeVersion = nextSupportedVersion(
+        cluster?.version,
+        cluster?.provider?.supportedVersions
+      )
+      const [targetVersion, setTargetVersion] =
+        useState<Nullable<string>>(upgradeVersion)
 
-      const { refetch } = table.options.meta as { refetch?: () => void }
+      const { refetch, setError } = table.options.meta as {
+        refetch?: () => void
+        setError?: (error: Nullable<ApolloError>) => void
+      }
 
       useEffect(() => {
         if (!upgrades.some((upgrade) => upgrade === targetVersion)) {
@@ -162,17 +178,30 @@ const upgradeColumns = [
           }}
         >
           <div css={{ minWidth: 170 }}>
-            <VersionSelect
+            <Select
+              label="Select version"
               selectedKey={targetVersion}
               onSelectionChange={setTargetVersion as any}
-              label="Select version"
-              versions={upgrades}
-            />
+            >
+              {upgrades.map((v) => (
+                <ListBoxItem
+                  key={v}
+                  label={
+                    <TabularNumbers css={{ textAlign: 'right' }}>
+                      {toNiceVersion(
+                        toProviderSupportedVersion(v, cluster?.provider?.cloud)
+                      )}
+                    </TabularNumbers>
+                  }
+                />
+              ))}
+            </Select>
           </div>
           <ClustersUpgradeNow
             cluster={cluster}
             targetVersion={targetVersion}
             refetch={refetch}
+            setError={setError}
           />
         </div>
       )
@@ -193,6 +222,7 @@ function ClusterUpgradeModal({
   cluster: ClustersRowFragment | null | undefined
   refetch: Nullable<() => void>
 }) {
+  const [error, setError] = useState<Nullable<ApolloError>>(undefined)
   const theme = useTheme()
 
   return (
@@ -261,8 +291,14 @@ function ClusterUpgradeModal({
             maxHeight: 'unset',
             height: '100%',
           }}
-          reactTableOptions={{ meta: { refetch } }}
+          reactTableOptions={{ meta: { refetch, setError } }}
         />
+        {error && (
+          <GqlError
+            header="Problem upgrading cluster"
+            error={error}
+          />
+        )}
       </div>
     </Modal>
   )

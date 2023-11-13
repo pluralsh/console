@@ -232,6 +232,7 @@ export function CreateProviderModal({
             display: 'flex',
             flexDirection: 'column',
             rowGap: theme.spacing.medium,
+            marginBottom: error ? theme.spacing.large : 0,
           }}
         >
           <FormField label="Name">
@@ -245,10 +246,12 @@ export function CreateProviderModal({
           {settings}
         </div>
         {error && (
-          <GqlError
-            header="Problem deploying service"
-            error={error}
-          />
+          <div css={{ marginTop: theme.spacing.large }}>
+            <GqlError
+              header="Problem creating provider"
+              error={error}
+            />
+          </div>
         )}
       </ProviderTabSelector>
     </ModalAlt>
