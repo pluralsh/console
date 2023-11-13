@@ -1,5 +1,10 @@
 import semver from 'semver'
 
+import { ProviderCloud } from '../components/cd/clusters/create/types'
+import { AWS } from '../components/cd/clusters/create/provider/AWS'
+import { GCP } from '../components/cd/clusters/create/provider/GCP'
+import { Azure } from '../components/cd/clusters/create/provider/Azure'
+
 import { isNonNullable } from './isNonNullable'
 
 export function nextSupportedVersion(
@@ -40,6 +45,24 @@ export function toNiceVersion(version: Nullable<string>) {
   }
 
   return `${version.startsWith('v') ? '' : 'v'}${version}`
+}
+
+export function toProviderSupportedVersion(
+  version: Nullable<string>,
+  providerCloud: Nullable<string>
+) {
+  const parsedVersion = semver.coerce(version)
+
+  if (!parsedVersion || !providerCloud) {
+    return null
+  }
+
+  // We need to skip patch version for AWS as its versioning doesn't follow SemVer spec.
+  if (providerCloud === ProviderCloud.AWS) {
+    return `${parsedVersion.major}.${parsedVersion.minor}`
+  }
+
+  return version
 }
 
 export function coerceSemver(version: string) {

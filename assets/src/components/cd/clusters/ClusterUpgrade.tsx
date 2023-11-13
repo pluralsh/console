@@ -21,6 +21,7 @@ import {
   nextSupportedVersion,
   supportedUpgrades,
   toNiceVersion,
+  toProviderSupportedVersion,
 } from 'utils/semver'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { Confirm } from 'components/utils/Confirm'
@@ -52,7 +53,12 @@ function ClustersUpgradeNow({
   const [updateCluster, { loading, error }] = useUpdateClusterMutation({
     variables: {
       id: cluster?.id ?? '',
-      attributes: { version: targetVersion },
+      attributes: {
+        version: toProviderSupportedVersion(
+          targetVersion,
+          cluster?.provider?.cloud
+        ),
+      },
     },
     onCompleted: () => {
       refetch?.()
