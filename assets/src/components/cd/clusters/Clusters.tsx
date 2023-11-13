@@ -28,9 +28,7 @@ import {
   GLOBAL_SETTINGS_ABS_PATH,
 } from 'routes/cdRoutesConsts'
 import chroma from 'chroma-js'
-
 import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
-
 import { roundToTwoPlaces } from 'components/cluster/utils'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import {
@@ -42,10 +40,7 @@ import {
 import { UsageBar } from 'components/cluster/nodes/UsageBar'
 import { TableText } from 'components/cluster/TableElements'
 import { MakeInert } from 'components/utils/MakeInert'
-
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
-
-import { coerce } from 'semver'
 
 import {
   POLL_INTERVAL,
