@@ -189,10 +189,12 @@ export function UpdateProviderModal({
         {settings}
       </div>
       {error && (
-        <GqlError
-          header="Problem updating provider"
-          error={error}
-        />
+        <div css={{ marginTop: theme.spacing.large }}>
+          <GqlError
+            header="Problem updating provider"
+            error={error}
+          />
+        </div>
       )}
     </ModalAlt>
   )
