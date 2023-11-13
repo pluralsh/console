@@ -86,3 +86,6 @@ sections:
     name: gcp
   - type: HELM
     name: console
+  - type: HELM
+    name: kas
+    

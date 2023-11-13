@@ -86,4 +86,5 @@ sections:
     name: azure
   - type: HELM
     name: console
-        
+  - type: HELM
+    name: kas
