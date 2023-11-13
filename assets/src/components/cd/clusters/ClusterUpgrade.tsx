@@ -17,7 +17,6 @@ import {
 } from 'generated/graphql'
 
 import {
-  coerceSemver,
   nextSupportedVersion,
   supportedUpgrades,
   toNiceVersion,
@@ -29,15 +28,15 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { ApolloError } from '@apollo/client'
 
+import { coerce } from 'semver'
+
 import { GqlError } from '../../utils/Alert'
 
 import { deprecationsColumns } from './deprecationsColumns'
 import { VersionSelect } from './VersionSelect'
 
 const supportedVersions = (cluster: ClustersRowFragment | null) =>
-  (cluster?.provider?.supportedVersions || []).map((vsn) =>
-    coerceSemver(vsn || '')
-  )
+  (cluster?.provider?.supportedVersions || []).map((vsn) => coerce(vsn)?.raw)
 
 function ClustersUpgradeNow({
   cluster,
@@ -133,9 +132,7 @@ const upgradeColumns = [
       )
       const upgradeVersion = nextSupportedVersion(
         cluster?.version,
-        (cluster?.provider?.supportedVersions || []).map((vsn) =>
-          coerceSemver(vsn || '')
-        )
+        cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw)
       )
       const [targetVersion, setTargetVersion] =
         useState<Nullable<string>>(upgradeVersion)

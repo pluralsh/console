@@ -1,19 +1,14 @@
 import semver from 'semver'
 
 import { ProviderCloud } from '../components/cd/clusters/create/types'
-import { AWS } from '../components/cd/clusters/create/provider/AWS'
-import { GCP } from '../components/cd/clusters/create/provider/GCP'
-import { Azure } from '../components/cd/clusters/create/provider/Azure'
 
 import { isNonNullable } from './isNonNullable'
 
 export function nextSupportedVersion(
-  version?: string | null,
-  supportedVersions?: (string | null)[] | null
+  version?: Nullable<string>,
+  supportedVersions?: Nullable<Nullable<string>[]>
 ): string | null {
-  const supported = supportedVersions
-    ? supportedVersions.filter((v): v is string => !!v)
-    : []
+  const supported = supportedVersions?.filter((v): v is string => !!v) ?? []
 
   return semver.minSatisfying(supported, `>${version}`)
 }
@@ -23,16 +18,17 @@ export function supportedUpgrades(
   supportedVersions: Nullable<Nullable<string>[]>
 ): string[] {
   let versions: string[]
+  const current = semver.coerce(currentVersion)
 
-  if (!currentVersion) {
+  if (!current) {
     versions = supportedVersions?.filter(isNonNullable) || []
   } else {
     versions =
       supportedVersions?.filter(
         (ver): ver is string =>
           !!ver &&
-          semver.gt(ver, currentVersion) &&
-          semver.minor(ver) - semver.minor(currentVersion) <= 1
+          semver.gt(ver, current) &&
+          semver.minor(ver) - semver.minor(current) <= 1
       ) || []
   }
 
@@ -63,14 +59,4 @@ export function toProviderSupportedVersion(
   }
 
   return version
-}
-
-export function coerceSemver(version: string) {
-  if (semver.valid(version)) {
-    return version
-  }
-
-  const vsn = `${version}.0`
-
-  return semver.valid(vsn) ? vsn : null
 }
