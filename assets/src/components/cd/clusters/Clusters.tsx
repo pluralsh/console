@@ -265,7 +265,7 @@ export const columns = [
       const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
       const upgrade = nextSupportedVersion(
         cluster?.version,
-        cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw)
+        cluster?.provider?.supportedVersions
       )
       const { refetch } = table.options.meta as { refetch?: () => void }
 

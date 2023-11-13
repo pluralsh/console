@@ -2,7 +2,9 @@ import {
   Button,
   ClusterIcon,
   ErrorIcon,
+  ListBoxItem,
   Modal,
+  Select,
   Table,
   WarningIcon,
 } from '@pluralsh/design-system'
@@ -32,11 +34,12 @@ import { coerce } from 'semver'
 
 import { GqlError } from '../../utils/Alert'
 
+import { TabularNumbers } from '../../cluster/TableElements'
+
 import { deprecationsColumns } from './deprecationsColumns'
-import { VersionSelect } from './VersionSelect'
 
 const supportedVersions = (cluster: ClustersRowFragment | null) =>
-  (cluster?.provider?.supportedVersions || []).map((vsn) => coerce(vsn)?.raw)
+  cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
 
 function ClustersUpgradeNow({
   cluster,
@@ -132,7 +135,7 @@ const upgradeColumns = [
       )
       const upgradeVersion = nextSupportedVersion(
         cluster?.version,
-        cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw)
+        cluster?.provider?.supportedVersions
       )
       const [targetVersion, setTargetVersion] =
         useState<Nullable<string>>(upgradeVersion)
@@ -161,12 +164,24 @@ const upgradeColumns = [
           }}
         >
           <div css={{ minWidth: 170 }}>
-            <VersionSelect
+            <Select
+              label="Select version"
               selectedKey={targetVersion}
               onSelectionChange={setTargetVersion as any}
-              label="Select version"
-              versions={upgrades}
-            />
+            >
+              {upgrades.map((v) => (
+                <ListBoxItem
+                  key={v}
+                  label={
+                    <TabularNumbers css={{ textAlign: 'right' }}>
+                      {toNiceVersion(
+                        toProviderSupportedVersion(v, cluster?.provider?.cloud)
+                      )}
+                    </TabularNumbers>
+                  }
+                />
+              ))}
+            </Select>
           </div>
           <ClustersUpgradeNow
             cluster={cluster}

@@ -1,35 +1,36 @@
-import semver from 'semver'
+import semver, { coerce } from 'semver'
 
 import { ProviderCloud } from '../components/cd/clusters/create/types'
 
 import { isNonNullable } from './isNonNullable'
 
 export function nextSupportedVersion(
-  version?: Nullable<string>,
-  supportedVersions?: Nullable<Nullable<string>[]>
+  current?: Nullable<string>,
+  supported?: Nullable<Nullable<string>[]>
 ): string | null {
-  const supported = supportedVersions?.filter((v): v is string => !!v) ?? []
-
-  return semver.minSatisfying(supported, `>${version}`)
+  return semver.minSatisfying(
+    supported?.map((vsn) => coerce(vsn)?.raw).filter(isNonNullable) ?? [],
+    `>${current}`
+  )
 }
 
 export function supportedUpgrades(
-  currentVersion: Nullable<string>,
+  current: Nullable<string>,
   supportedVersions: Nullable<Nullable<string>[]>
 ): string[] {
   let versions: string[]
-  const current = semver.coerce(currentVersion)
+  const coercedCurrent = semver.coerce(current)
 
-  if (!current) {
-    versions = supportedVersions?.filter(isNonNullable) || []
+  if (!coercedCurrent) {
+    versions = supportedVersions?.filter(isNonNullable) ?? []
   } else {
     versions =
       supportedVersions?.filter(
         (ver): ver is string =>
           !!ver &&
-          semver.gt(ver, current) &&
-          semver.minor(ver) - semver.minor(current) <= 1
-      ) || []
+          semver.gt(ver, coercedCurrent) &&
+          semver.minor(ver) - semver.minor(coercedCurrent) <= 1
+      ) ?? []
   }
 
   return versions.sort(semver.rcompare)

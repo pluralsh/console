@@ -1,10 +1,10 @@
-import { Input } from '@pluralsh/design-system'
+import { Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-
 import { isNonNullable } from 'utils/isNonNullable'
 
-import { VersionSelect } from '../VersionSelect'
+import { TabularNumbers } from '../../../cluster/TableElements'
+import { toNiceVersion } from '../../../../utils/semver'
 
 import { isRequired } from './CreateClusterContent'
 
@@ -58,12 +58,22 @@ export function NameVersionHandle({
               flexBasis: '140px',
             }}
           >
-            <VersionSelect
+            <Select
               selectedKey={version}
-              versions={filteredVersions}
               onSelectionChange={setVersion as any}
               label={`Version${isRequired('name') && '*'}`}
-            />
+            >
+              {filteredVersions.map((v) => (
+                <ListBoxItem
+                  key={v}
+                  label={
+                    <TabularNumbers css={{ textAlign: 'right' }}>
+                      {toNiceVersion(v)}
+                    </TabularNumbers>
+                  }
+                />
+              ))}
+            </Select>
           </div>
         )}
       </div>
