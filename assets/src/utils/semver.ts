@@ -16,24 +16,21 @@ export function nextSupportedVersion(
 
 export function supportedUpgrades(
   current: Nullable<string>,
-  supportedVersions: Nullable<Nullable<string>[]>
+  supported: Nullable<Nullable<string>[]>
 ): string[] {
-  let versions: string[]
   const coercedCurrent = semver.coerce(current)
+  let upgrades = supported?.filter(isNonNullable) ?? []
 
-  if (!coercedCurrent) {
-    versions = supportedVersions?.filter(isNonNullable) ?? []
-  } else {
-    versions =
-      supportedVersions?.filter(
-        (ver): ver is string =>
-          !!ver &&
+  if (coercedCurrent) {
+    upgrades =
+      upgrades?.filter(
+        (ver) =>
           semver.gt(ver, coercedCurrent) &&
           semver.minor(ver) - semver.minor(coercedCurrent) <= 1
       ) ?? []
   }
 
-  return versions.sort(semver.rcompare)
+  return upgrades.sort(semver.rcompare)
 }
 
 export function toNiceVersion(version: Nullable<string>) {
@@ -48,15 +45,15 @@ export function toProviderSupportedVersion(
   version: Nullable<string>,
   providerCloud: Nullable<string>
 ) {
-  const parsedVersion = semver.coerce(version)
+  const coercedVersion = semver.coerce(version)
 
-  if (!parsedVersion || !providerCloud) {
+  if (!coercedVersion || !providerCloud) {
     return null
   }
 
   // We need to skip patch version for AWS as its versioning doesn't follow SemVer spec.
   if (providerCloud === ProviderCloud.AWS) {
-    return `${parsedVersion.major}.${parsedVersion.minor}`
+    return `${coercedVersion.major}.${coercedVersion.minor}`
   }
 
   return version
