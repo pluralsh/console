@@ -1,9 +1,6 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   Breadcrumb,
-  BrowseAppsIcon,
-  Button,
-  Card,
   CaretRightIcon,
   GearTrainIcon,
   IconFrame,
@@ -12,7 +9,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
-import { ComponentProps, ReactNode, useMemo } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -22,7 +19,6 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
 import {
-  CD_QUICKSTART_LINK,
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
   GLOBAL_SETTINGS_ABS_PATH,
@@ -39,8 +35,6 @@ import {
 } from 'utils/kubernetes'
 import { UsageBar } from 'components/cluster/nodes/UsageBar'
 import { TableText } from 'components/cluster/TableElements'
-import { MakeInert } from 'components/utils/MakeInert'
-import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
 
 import {
   POLL_INTERVAL,
@@ -56,6 +50,8 @@ import { ClusterHealth } from './ClusterHealthChip'
 import CreateCluster from './create/CreateCluster'
 import { ClusterConditions } from './ClusterConditions'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
+import { DemoTable } from './ClustersDemoTable'
+import { ClustersGettingStarted } from './ClustersGettingStarted'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -319,7 +315,7 @@ export const columns = [
 type TableWrapperSCProps = {
   $blurred: boolean
 }
-const TableWrapperSC = styled(FullHeightTableWrap)<TableWrapperSCProps>(
+export const TableWrapperSC = styled(FullHeightTableWrap)<TableWrapperSCProps>(
   ({ theme, $blurred }) => ({
     '&&': {
       ...($blurred
@@ -383,30 +379,34 @@ export default function Clusters() {
   useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)
 
   const clusterEdges = data?.clusters?.edges
-  // const clusterEdges =  []
-
   const isDemo = isEmpty(clusterEdges) || !cdIsEnabled
   const tableData = isDemo ? DEMO_CLUSTERS : clusterEdges
+  const showGettingStarted = isDemo || (clusterEdges?.length ?? 0) < 2
 
-  useSetCDScrollable(isDemo)
+  useSetCDScrollable(showGettingStarted || isDemo)
 
   if (!data) {
     return <LoadingIndicator />
   }
 
-  return !isDemo ? (
-    <FullHeightTableWrap>
-      <ClustersTable
-        data={tableData || []}
-        refetch={refetch}
-      />
-    </FullHeightTableWrap>
-  ) : (
-    <DemoContent mode={cdIsEnabled ? 'empty' : 'disabled'} />
+  return (
+    <>
+      {!isDemo ? (
+        <FullHeightTableWrap>
+          <ClustersTable
+            data={tableData || []}
+            refetch={refetch}
+          />
+        </FullHeightTableWrap>
+      ) : (
+        <DemoTable mode={cdIsEnabled ? 'empty' : 'disabled'} />
+      )}
+      {showGettingStarted && <ClustersGettingStarted />}
+    </>
   )
 }
 
-function ClustersTable({
+export function ClustersTable({
   refetch,
   data,
 }: {
@@ -427,140 +427,5 @@ function ClustersTable({
         height: '100%',
       }}
     />
-  )
-}
-
-function DemoContent({ mode }: { mode: 'disabled' | 'empty' }) {
-  return (
-    <div>
-      <DemoTable mode={mode} />
-    </div>
-  )
-}
-
-function DemoTable({ mode }: { mode: 'disabled' | 'empty' }) {
-  const tableData =
-    mode === 'disabled' ? DEMO_CLUSTERS.slice(0, 4) : DEMO_CLUSTERS.slice(0, 3)
-
-  return (
-    <div
-      css={{
-        position: 'relative',
-      }}
-    >
-      <MakeInert inert>
-        <TableWrapperSC $blurred>
-          <ClustersTable data={tableData} />
-        </TableWrapperSC>
-      </MakeInert>
-
-      {mode === 'disabled' && (
-        <OverlayCard
-          title="Upgrade needed"
-          actions={
-            <Button
-              primary
-              as="a"
-              href="https://app.plural.sh/account/billing"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Review plans
-            </Button>
-          }
-        >
-          Upgrade to Plural Professional to enable Continuous Deployment
-          features.
-        </OverlayCard>
-      )}
-      {mode === 'empty' && (
-        <OverlayCard
-          title="Create your first cluster to get started"
-          actions={
-            <>
-              <Button
-                primary
-                as="a"
-                href={CD_QUICKSTART_LINK}
-                target="_blank"
-              >
-                Guided deployment
-              </Button>
-              <Button
-                secondary
-                startIcon={<BrowseAppsIcon />}
-                as={Link}
-                to="/"
-              >
-                Explore the Console
-              </Button>
-            </>
-          }
-        />
-      )}
-    </div>
-  )
-}
-
-const OverlayCardSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  position: 'absolute',
-  alignItems: 'center',
-  justifyContent: 'center',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  zIndex: 50,
-  '.card': {
-    padding: theme.spacing.xlarge,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.large,
-    boxShadow: theme.boxShadows.modal,
-    maxWidth: 460,
-  },
-  '.content': {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.small,
-  },
-  '.body': {
-    color: theme.colors['text-light'],
-  },
-  '.actions': { display: 'flex', gap: theme.spacing.medium },
-}))
-
-function OverlayCard({
-  title,
-  children,
-  actions,
-}: {
-  title?: ReactNode
-  children?: ReactNode
-  actions?: ReactNode
-}) {
-  return (
-    <OverlayCardSC>
-      <Card
-        className="card"
-        fillLevel={2}
-      >
-        {(title || children) && (
-          <div className="content">
-            {title && (
-              <Body1BoldP
-                as="h3"
-                className="title"
-              >
-                {title}
-              </Body1BoldP>
-            )}
-            {children && <Body2P className="body">{children}</Body2P>}
-          </div>
-        )}
-        {actions && <div className="actions">{actions}</div>}
-      </Card>
-    </OverlayCardSC>
   )
 }

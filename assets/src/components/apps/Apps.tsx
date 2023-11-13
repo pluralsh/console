@@ -1,3 +1,5 @@
+import { DISCORD_LINK } from 'utils/constants'
+
 import { InstallationContext } from 'components/Installations'
 import { A, Div, Flex } from 'honorable'
 import {
@@ -91,7 +93,7 @@ function ReadyEmptyState() {
     >
       <Button
         as="a"
-        href="https://discord.gg/bEBAMXV64s"
+        href={DISCORD_LINK}
         target="_blank"
         rel="noopener noreferrer"
         marginTop="medium"

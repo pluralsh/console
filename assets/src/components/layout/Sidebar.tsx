@@ -1,3 +1,5 @@
+import { DISCORD_LINK, GITHUB_LINK } from 'utils/constants'
+
 import {
   ApiIcon,
   AppsIcon,
@@ -215,7 +217,7 @@ export default function Sidebar() {
             as="a"
             target="_blank"
             rel="noopener noreferrer"
-            href="https://discord.gg/bEBAMXV64s"
+            href={DISCORD_LINK}
           >
             <DiscordIcon />
           </SidebarItem>
@@ -226,7 +228,7 @@ export default function Sidebar() {
             as="a"
             target="_blank"
             rel="noopener noreferrer"
-            href="https://github.com/pluralsh/plural"
+            href={`${GITHUB_LINK}/plural`}
           >
             <GitHubLogoIcon />
           </SidebarItem>

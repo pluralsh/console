@@ -1,6 +1,6 @@
 import { useTheme } from 'styled-components'
 
-import { CD_QUICKSTART_LINK } from 'routes/cdRoutesConsts'
+import { DOCS_CD_QUICKSTART_LINK } from 'utils/constants'
 
 import { StepBody, StepH, StepLink } from './ModalAlt'
 
@@ -26,7 +26,7 @@ export function PrepareGitStep() {
         <StepBody>
           Need some help to Git ready? Read our{' '}
           <StepLink
-            href={CD_QUICKSTART_LINK}
+            href={DOCS_CD_QUICKSTART_LINK}
             target="_blank"
           >
             quick start guide

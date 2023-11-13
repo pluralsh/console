@@ -27,3 +27,4 @@ export const Title1H1 = styled.h1(({ theme }) => ({
 export const Title2H1 = styled.h1(({ theme }) => ({
   ...theme.partials.text.title2,
 }))
+export const A = styled.a``
