@@ -1,5 +1,5 @@
 // Common links
-export const DISCORD_LINK = 'https://discord.gg/pluralsh'
+export const DISCORD_LINK = 'https://discord.com/invite/bEBAMXV64s'
 
 export const GITHUB_LINK = 'https://github.com/pluralsh'
 export const GITHUB_REPO_PLURAL_LINK = `${GITHUB_LINK}/plural`
