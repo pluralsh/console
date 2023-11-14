@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Cron do
   use Console.Services.Base
   alias Console.Deployments.{Services, Clusters, Global}
+  alias Console.Services.Users
   alias Console.Schema.{Cluster, Service, ServiceComponent, GlobalService, PipelineStage, PipelinePromotion}
   alias Console.Deployments.Pipelines.Discovery
 
@@ -57,6 +58,23 @@ defmodule Console.Deployments.Cron do
     |> Stream.each(fn cluster ->
       Logger.info "installing operator on #{cluster.id}"
       Clusters.install(cluster)
+    end)
+    |> Stream.run()
+  end
+
+  def migrate_kas() do
+    Logger.info "trying to migrate kas url for all agents"
+    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    expected = Clusters.kas_url()
+    Service.agent()
+    |> Service.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn svc ->
+      Logger.info "migrating kas to current value"
+      case Services.configuration(svc) do
+        {:ok, %{"kasAddress" => ^expected}} -> Logger.info "ignoring #{svc.id} as it has correct address"
+        _ -> Services.merge_service([%{name: "kasAddress", value: expected}], svc.id, bot)
+      end
     end)
     |> Stream.run()
   end

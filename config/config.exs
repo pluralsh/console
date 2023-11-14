@@ -46,7 +46,7 @@ config :console,
   cache_adapter: Console.Cache,
   local_cache: Console.LocalCache,
   version: Mix.Project.config[:version],
-  kas_dns: "https://kas.cd-demo.onplural.sh"
+  kas_dns: "https://kas.example.com"
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

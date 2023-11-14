@@ -41,7 +41,7 @@ serviceAccount:
 extraEnv:
 {{ if .Values.kas_dns }}
 - name: KAS_DNS
-  value: {{ .Values.kas_dns }}
+  value: https://{{ .Values.kas_dns }}
 {{ end }}
 {{- if eq .Provider "aws" }}
 - name: BACKUP_ACCESS_KEY

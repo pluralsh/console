@@ -64,7 +64,7 @@ defmodule Console.Deployments.ClustersTest do
       assert token == cluster.deploy_token
       assert url == Path.join(Console.conf(:ext_url), "ext/gql")
       assert secrets["clusterId"] == cluster.id
-      assert secrets["kasAddress"] == "wss://kas.cd-demo.onplural.sh"
+      assert secrets["kasAddress"] == "wss://kas.example.com"
 
       [revision] = Clusters.revisions(cluster)
       assert revision.version == cluster.version

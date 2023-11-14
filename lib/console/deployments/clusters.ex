@@ -560,17 +560,24 @@ defmodule Console.Deployments.Clusters do
   end
 
   def kas_url() do
-    Console.conf(:kas_dns)
+    kas_dns()
     |> URI.parse()
     |> Map.put(:scheme, "wss")
     |> URI.to_string()
   end
 
   def kas_proxy_url() do
-    Console.conf(:kas_dns)
+    kas_dns()
     |> URI.parse()
     |> Map.put(:path, "/k8s-proxy")
     |> URI.to_string()
+  end
+
+  defp kas_dns() do
+    case Console.conf(:kas_dns) do
+      "http" <> _ = dns -> dns
+      dns -> "https://#{dns}"
+    end
   end
 
   defp cluster_service(%Cluster{service_id: nil, provider: %ClusterProvider{} = provider} = cluster, %User{} = user) do

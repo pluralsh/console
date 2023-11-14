@@ -3,7 +3,7 @@ defmodule Console.Deployments.CronTest do
   use Mimic
   import KubernetesScaffolds
   alias Kazan.Apis.Core.V1, as: Core
-  alias Console.Deployments.{Cron, Clusters}
+  alias Console.Deployments.{Cron, Clusters, Services}
 
   describe "#prune_services/0" do
     test "it will wipe stale drained services" do
@@ -162,6 +162,30 @@ defmodule Console.Deployments.CronTest do
       :ok = Cron.install_clusters()
 
       assert refetch(cluster).installed
+    end
+  end
+
+  describe "#migrate_kas/0" do
+    test "it will update kasAddress for deploy-operator services" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      git = insert(:git_repository)
+
+      {:ok, service} = create_service(%{
+        name: "deploy-operator",
+        namespace: "plrl-deploy-operator",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "kasAddress", value: "wss://bogus"}]
+      }, cluster, user)
+
+      :ok = Cron.migrate_kas()
+
+      svc = refetch(service)
+      {:ok, %{"kasAddress" => new}} = Services.configuration(svc)
+
+      assert new == Clusters.kas_url()
     end
   end
 
