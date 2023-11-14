@@ -5,5 +5,5 @@ alias Console.Schema.AgentMigration
 seed do
   %AgentMigration{}
   |> AgentMigration.changeset()
-  |> Console.Repo.update()
+  |> Console.Repo.insert()
 end

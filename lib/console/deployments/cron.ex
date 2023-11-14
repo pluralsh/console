@@ -154,6 +154,7 @@ defmodule Console.Deployments.Cron do
       |> Repo.update()
       Logger.info "migration #{migration.id} completed"
     end)
+    |> Stream.run()
   end
 
   def scan_pending_promotions() do
