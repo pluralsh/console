@@ -17,6 +17,7 @@ import {
   CD_ABS_PATH,
   CD_DEFAULT_REL_PATH,
   CLUSTERS_REL_PATH,
+  PIPELINES_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
 
@@ -82,6 +83,7 @@ const directory = [
   { path: 'git', label: 'Git repositories' },
   { path: 'providers', label: 'Providers' },
   { path: ADDONS_REL_PATH, label: 'Add-ons' },
+  { path: PIPELINES_REL_PATH, label: 'Pipelines' },
 ] as const
 
 export default function ContinuousDeployment() {
@@ -99,8 +101,7 @@ export default function ContinuousDeployment() {
   const cdEnabled = useCDEnabled()
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${CD_ABS_PATH}/:tab*`)
-  // @ts-expect-error
+  const pathMatch = useMatch<{ tab: string }>(`${CD_ABS_PATH}/:tab*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 

@@ -1,0 +1,93 @@
+fragment PipelineServiceDeployment on ServiceDeployment {
+  id
+  name
+}
+
+fragment PipelineGate on PipelineGate {
+  id
+}
+fragment PipelinePromotion on PipelinePromotion {
+  id
+}
+fragment PromotionCriteria on PromotionCriteria {
+  id
+  secrets
+  source {
+    ...PipelineServiceDeployment
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment StageService on StageService {
+  id
+  criteria {
+    ...PromotionCriteria
+  }
+  insertedAt
+  updatedAt
+  service {
+    ...PipelineServiceDeployment
+  }
+}
+fragment PipelineStage on PipelineStage {
+  id
+  name
+  insertedAt
+  updatedAt
+  promotion {
+    ...PipelinePromotion
+  }
+  services {
+    ...StageService
+  }
+}
+
+fragment PipelineStageEdge on PipelineStageEdge {
+  id
+  insertedAt
+  promotedAt
+  updatedAt
+  gates {
+    ...PipelineGate
+  }
+  from {
+    ...PipelineStage
+  }
+  to {
+    ...PipelineStage
+  }
+}
+
+fragment Pipeline on Pipeline {
+  id
+  name
+  insertedAt
+  updatedAt
+  edges {
+    ...PipelineStageEdge
+  }
+  stages {
+    ...PipelineStage
+  }
+}
+
+query Pipelines {
+  pipelines(first: 100) {
+    edges {
+      cursor
+      node {
+        ...Pipeline
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+query Pipeline($id: ID!) {
+  pipeline(id: $id) {
+    ...Pipeline
+  }
+}

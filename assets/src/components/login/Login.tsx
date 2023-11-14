@@ -204,6 +204,8 @@ export function EnsureLogin({ children }) {
   if (!data?.clusterInfo) return null
   const { __typename, ...clusterInformation } = data.clusterInfo
 
+  console.log('login context in provider', loginContextValue)
+
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <IncidentContext.Provider value={{ clusterInformation }}>
