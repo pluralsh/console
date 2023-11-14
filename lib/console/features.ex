@@ -16,7 +16,7 @@ defmodule Console.Features do
       send self(), :poll
     end
 
-    {:ok, {%Features{}, nil}}
+    {:ok, fetch_state({%Features{}, nil})}
   end
 
   def available?(feature) do
@@ -34,10 +34,12 @@ defmodule Console.Features do
 
   def handle_call(:account, _, {_, account} = state), do: {:reply, account, state}
 
-  def handle_info(:poll, state) do
+  def handle_info(:poll, state), do: {:noreply, fetch_state(state)}
+
+  defp fetch_state(state) do
     case Accounts.account() do
-      {:ok, %Account{availableFeatures: %Features{} = feats} = account} -> {:noreply, {feats, account}}
-      _ -> {:noreply, state}
+      {:ok, %Account{availableFeatures: %Features{} = feats} = account} -> {feats, account}
+      _ -> state
     end
   end
 end
