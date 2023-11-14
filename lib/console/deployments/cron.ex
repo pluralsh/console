@@ -150,7 +150,7 @@ defmodule Console.Deployments.Cron do
         Clusters.install(cluster)
       end)
       |> Stream.run()
-      AgentMigration.changeset(migration, %{complete: true})
+      AgentMigration.changeset(migration, %{completed: true})
       |> Repo.update()
       Logger.info "migration #{migration.id} completed"
     end)
