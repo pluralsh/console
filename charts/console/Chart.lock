@@ -1,6 +1,6 @@
 dependencies:
 - name: kas
   repository: file://../../plural/helm/kas
-  version: 0.0.2
-digest: sha256:69e2bf338837678bcfa6fa2512fa10468380a35ce872dfbb94a3836a969e64e4
-generated: "2023-10-30T22:58:06.667222-04:00"
+  version: 0.0.3
+digest: sha256:71264d8a9936ef983bf48ac4779febdb72f651058f8ab9b3b75e013a2bac040f
+generated: "2023-11-14T13:48:17.925228-05:00"
