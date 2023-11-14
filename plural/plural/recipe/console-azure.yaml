@@ -40,6 +40,9 @@ sections:
   - name: console_dns
     documentation: Fully Qualified Domain Name for the console dashboard, eg console.topleveldomain.com if topleveldomain.com is the hostname you inputed above.
     type: DOMAIN
+  - name: kas_dns
+    documentation: Fully Qualified Domain Name for the console kubernetes proxy, eg kas.topleveldomain.com if topleveldomain.com is the hostname you inputed above.
+    type: DOMAIN
   - name: git_user
     documentation: git username for console to use in git operations, eg your github username
     type: STRING
@@ -86,4 +89,5 @@ sections:
     name: azure
   - type: HELM
     name: console
-        
+  - type: HELM
+    name: kas

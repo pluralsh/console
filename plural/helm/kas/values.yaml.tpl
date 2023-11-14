@@ -1,4 +1,4 @@
-consoleUrl: {{ .Configuration.console.console_dns }}
+consoleUrl: {{ .Values.console_dns }}
 
 secrets:
   api: {{ dedupe . "kas.secrets.api" (randAlphaNum 64) }}
