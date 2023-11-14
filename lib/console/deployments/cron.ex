@@ -2,7 +2,7 @@ defmodule Console.Deployments.Cron do
   use Console.Services.Base
   alias Console.Deployments.{Services, Clusters, Global}
   alias Console.Services.Users
-  alias Console.Schema.{Cluster, Service, ServiceComponent, GlobalService, PipelineStage, PipelinePromotion}
+  alias Console.Schema.{Cluster, Service, ServiceComponent, GlobalService, PipelineStage, PipelinePromotion, AgentMigration}
   alias Console.Deployments.Pipelines.Discovery
 
   require Logger
@@ -133,6 +133,26 @@ defmodule Console.Deployments.Cron do
     |> Stream.each(fn stage ->
       Logger.info "attempting to promote stage #{stage.id} (#{stage.name})"
       Discovery.stage(stage)
+    end)
+    |> Stream.run()
+  end
+
+  def migrate_agents() do
+    AgentMigration.incomplete()
+    |> Repo.all()
+    |> Stream.each(fn migration ->
+      Cluster.installable()
+      |> Cluster.stream()
+      |> Cluster.preloaded()
+      |> Repo.stream(method: :keyset)
+      |> Stream.each(fn cluster ->
+        Logger.info "installing operator on #{cluster.id}"
+        Clusters.install(cluster)
+      end)
+      |> Stream.run()
+      AgentMigration.changeset(migration, %{completed: true})
+      |> Repo.update()
+      Logger.info "migration #{migration.id} completed"
     end)
     |> Stream.run()
   end

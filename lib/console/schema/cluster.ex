@@ -196,6 +196,10 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: not is_nil(c.deleted_at))
   end
 
+  def installable(query \\ __MODULE__) do
+    from(c in query, where: (not is_nil(c.provider_id) or c.self) and is_nil(c.deleted_at))
+  end
+
   def uninstalled(query \\ __MODULE__) do
     from(c in query, where: is_nil(c.pinged_at) and (not is_nil(c.provider_id) or c.self) and is_nil(c.deleted_at))
   end
