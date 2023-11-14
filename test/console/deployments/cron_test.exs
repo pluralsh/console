@@ -177,14 +177,14 @@ defmodule Console.Deployments.CronTest do
         namespace: "plrl-deploy-operator",
         repository_id: git.id,
         git: %{ref: "main", folder: "k8s"},
-        configuration: [%{name: "kasAddress", value: "wss://bogus"}]
+        configuration: [%{name: "kasAddress", value: "wss://bogus"}, %{name: "deployToken", value: "test-token"}]
       }, cluster, user)
 
       :ok = Cron.migrate_kas()
 
       svc = refetch(service)
-      {:ok, %{"kasAddress" => new}} = Services.configuration(svc)
-
+      {:ok, %{"kasAddress" => new} = conf} = Services.configuration(svc)
+      assert conf["deployToken"] == "test-token"
       assert new == Clusters.kas_url()
     end
   end
