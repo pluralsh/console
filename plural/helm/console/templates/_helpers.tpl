@@ -59,6 +59,10 @@ spec: {{ .Values.secrets.config | toYaml | nindent 2 }}
 {{- define "console.env" -}}
 - name: HOST
   value: {{ .Values.ingress.console_dns }}
+{{- if .Values.externalIngress.hostname }}
+- name: EXT_HOST
+  value: {{ .Values.externalIngress.hostname | quote }}
+{{- end }}
 - name: DEPLOYED_AT
   value: {{ now | unixEpoch | quote }}
 - name: NAMESPACE
