@@ -4221,135 +4221,13 @@ export type PipelineStageEdgeFragment = { __typename?: 'PipelineStageEdge', id: 
 
 export type PipelineFragment = { __typename?: 'Pipeline', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, edges?: Array<{ __typename?: 'PipelineStageEdge', id: string, insertedAt?: string | null, promotedAt?: string | null, updatedAt?: string | null, gates?: Array<{ __typename?: 'PipelineGate', id: string } | null> | null, from: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null }, to: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null } } | null> | null, stages?: Array<{ __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null } | null> | null };
 
-export type PipelinesQueryVariables = Exact<{ [key: string]: never; }>;
+export type PipelinesQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 
-export type PipelinesQuery = {
-  __typename?: 'RootQueryType'
-  pipelines?: {
-    __typename?: 'PipelineConnection'
-    edges?: Array<{
-      __typename?: 'PipelineEdge'
-      cursor?: string | null
-      node?: {
-        __typename?: 'Pipeline'
-        id: string
-        name: string
-        insertedAt?: string | null
-        updatedAt?: string | null
-        edges?: Array<{
-          __typename?: 'PipelineStageEdge'
-          id: string
-          insertedAt?: string | null
-          promotedAt?: string | null
-          updatedAt?: string | null
-          gates?: Array<{
-            __typename?: 'PipelineGate'
-            id: string
-          } | null> | null
-          from: {
-            __typename?: 'PipelineStage'
-            id: string
-            name: string
-            insertedAt?: string | null
-            updatedAt?: string | null
-            promotion?: { __typename?: 'PipelinePromotion'; id: string } | null
-            services?: Array<{
-              __typename?: 'StageService'
-              id: string
-              insertedAt?: string | null
-              updatedAt?: string | null
-              criteria?: {
-                __typename?: 'PromotionCriteria'
-                id: string
-                secrets?: Array<string | null> | null
-                insertedAt?: string | null
-                updatedAt?: string | null
-                source?: {
-                  __typename?: 'ServiceDeployment'
-                  id: string
-                  name: string
-                } | null
-              } | null
-              service?: {
-                __typename?: 'ServiceDeployment'
-                id: string
-                name: string
-              } | null
-            } | null> | null
-          }
-          to: {
-            __typename?: 'PipelineStage'
-            id: string
-            name: string
-            insertedAt?: string | null
-            updatedAt?: string | null
-            promotion?: { __typename?: 'PipelinePromotion'; id: string } | null
-            services?: Array<{
-              __typename?: 'StageService'
-              id: string
-              insertedAt?: string | null
-              updatedAt?: string | null
-              criteria?: {
-                __typename?: 'PromotionCriteria'
-                id: string
-                secrets?: Array<string | null> | null
-                insertedAt?: string | null
-                updatedAt?: string | null
-                source?: {
-                  __typename?: 'ServiceDeployment'
-                  id: string
-                  name: string
-                } | null
-              } | null
-              service?: {
-                __typename?: 'ServiceDeployment'
-                id: string
-                name: string
-              } | null
-            } | null> | null
-          }
-        } | null> | null
-        stages?: Array<{
-          __typename?: 'PipelineStage'
-          id: string
-          name: string
-          insertedAt?: string | null
-          updatedAt?: string | null
-          promotion?: { __typename?: 'PipelinePromotion'; id: string } | null
-          services?: Array<{
-            __typename?: 'StageService'
-            id: string
-            insertedAt?: string | null
-            updatedAt?: string | null
-            criteria?: {
-              __typename?: 'PromotionCriteria'
-              id: string
-              secrets?: Array<string | null> | null
-              insertedAt?: string | null
-              updatedAt?: string | null
-              source?: {
-                __typename?: 'ServiceDeployment'
-                id: string
-                name: string
-              } | null
-            } | null
-            service?: {
-              __typename?: 'ServiceDeployment'
-              id: string
-              name: string
-            } | null
-          } | null> | null
-        } | null> | null
-      } | null
-    } | null> | null
-    pageInfo: {
-      __typename?: 'PageInfo'
-      hasNextPage: boolean
-      endCursor?: string | null
-    }
-  } | null
-}
+export type PipelinesQuery = { __typename?: 'RootQueryType', pipelines?: { __typename?: 'PipelineConnection', edges?: Array<{ __typename?: 'PipelineEdge', cursor?: string | null, node?: { __typename?: 'Pipeline', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, edges?: Array<{ __typename?: 'PipelineStageEdge', id: string, insertedAt?: string | null, promotedAt?: string | null, updatedAt?: string | null, gates?: Array<{ __typename?: 'PipelineGate', id: string } | null> | null, from: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null }, to: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null } } | null> | null, stages?: Array<{ __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null } } | null };
 
 export type PipelineQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7064,8 +6942,8 @@ export type DeploymentSettingsLazyQueryHookResult = ReturnType<typeof useDeploym
 export type DeploymentSettingsSuspenseQueryHookResult = ReturnType<typeof useDeploymentSettingsSuspenseQuery>;
 export type DeploymentSettingsQueryResult = Apollo.QueryResult<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>;
 export const PipelinesDocument = gql`
-    query Pipelines {
-  pipelines(first: 100) {
+    query Pipelines($first: Int = 50, $after: String) {
+  pipelines(first: $first, after: $after) {
     edges {
       cursor
       node {
@@ -7092,6 +6970,8 @@ ${PageInfoFragmentDoc}`;
  * @example
  * const { data, loading, error } = usePipelinesQuery({
  *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *   },
  * });
  */

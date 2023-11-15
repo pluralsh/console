@@ -133,10 +133,6 @@ export default function ContinuousDeployment() {
                   key={path}
                   textValue={label}
                   to={!cdEnabled ? '' : `${CD_ABS_PATH}/${path}`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    console.log('prevented')
-                  }}
                 >
                   <SubTab
                     key={path}

@@ -6025,14 +6025,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-virtual@npm:3.0.0-beta.54":
-  version: 3.0.0-beta.54
-  resolution: "@tanstack/react-virtual@npm:3.0.0-beta.54"
+"@tanstack/react-virtual@npm:3.0.0-beta.54, @tanstack/react-virtual@npm:3.0.0-beta.68":
+  version: 3.0.0-beta.68
+  resolution: "@tanstack/react-virtual@npm:3.0.0-beta.68"
   dependencies:
-    "@tanstack/virtual-core": 3.0.0-beta.54
+    "@tanstack/virtual-core": 3.0.0-beta.68
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: ddeb3cb46db89365609d5bc402b8a8d410dc7e5f38ee579f39e5589c62a2123799ba36586939a5a6ad1a701650a5b169f657fd24687687bf08f4827b0099bc75
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: e8d4110fde9eb7e27b7067a300ac8bb08622a19b7c25a3b1b313b61e76093f1c500a90723011584971a0f5c4c7832df0c90276d4cf2d43f06281199636e50c4a
   languageName: node
   linkType: hard
 
@@ -6043,10 +6044,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/virtual-core@npm:3.0.0-beta.54":
-  version: 3.0.0-beta.54
-  resolution: "@tanstack/virtual-core@npm:3.0.0-beta.54"
-  checksum: a58cb30e1bbf8a0420caea8693df11c909c1190908163fef75aeddfa11bba621ca993ab218f4e7537c05c1651f9398e61016f3e3d374093c87029b52c868f0e7
+"@tanstack/virtual-core@npm:3.0.0-beta.68":
+  version: 3.0.0-beta.68
+  resolution: "@tanstack/virtual-core@npm:3.0.0-beta.68"
+  checksum: f06898afc6501e6a6240425f2bdbd0e2dc637f4f58cb4a9e13fca7e8e25b93be25543559c53b243bf70e386302844f419d9110010db964916a523495db114f51
   languageName: node
   linkType: hard
 
@@ -8914,6 +8915,7 @@ __metadata:
     "@pluralsh/eslint-config-typescript": 2.5.116
     "@pluralsh/stylelint-config": 2.0.9
     "@react-hooks-library/core": 0.5.1
+    "@tanstack/react-virtual": 3.0.0-beta.68
     "@testing-library/jest-dom": 5.16.5
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3

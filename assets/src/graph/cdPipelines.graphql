@@ -6,9 +6,11 @@ fragment PipelineServiceDeployment on ServiceDeployment {
 fragment PipelineGate on PipelineGate {
   id
 }
+
 fragment PipelinePromotion on PipelinePromotion {
   id
 }
+
 fragment PromotionCriteria on PromotionCriteria {
   id
   secrets
@@ -72,8 +74,8 @@ fragment Pipeline on Pipeline {
   }
 }
 
-query Pipelines {
-  pipelines(first: 100) {
+query Pipelines($first: Int = 50, $after: String) {
+  pipelines(first: $first, after: $after) {
     edges {
       cursor
       node {
