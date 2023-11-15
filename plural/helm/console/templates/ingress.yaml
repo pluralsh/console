@@ -25,3 +25,33 @@ spec:
             name: console
             port: 
               name: http
+{{ if .Values.externalIngress.hostname }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: console-external
+  labels:
+{{ include "console.labels" . | indent 4 }}
+  {{- with .Values.externalIngress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.externalIngress.ingressClass }}
+  tls:
+  - hosts:
+    - {{ .Values.externalIngress.hostname | quote }}
+    secretName: console-external-tls
+  rules:
+  - host: {{ .Values.externalIngress.hostname | quote }}
+    http:
+      paths:
+      - path: /ext
+        pathType: Prefix
+        backend:
+          service: 
+            name: console
+            port: 
+              name: http
+{{ end }}
