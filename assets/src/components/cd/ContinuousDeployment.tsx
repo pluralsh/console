@@ -87,7 +87,7 @@ const directory = [
 export default function ContinuousDeployment() {
   const theme = useTheme()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
-  const [scrollable, setScrollable] = useState(true)
+  const [scrollable, setScrollable] = useState(false)
   const cdContext = useMemo(
     () => ({
       setHeaderContent,
