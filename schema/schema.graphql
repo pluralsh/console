@@ -143,6 +143,8 @@ type RootQueryType {
 
   postgresDatabase(namespace: String!, name: String!): Postgresql
 
+  gitRepository(id: ID, url: String): GitRepository
+
   gitRepositories(after: String, first: Int, before: String, last: Int): GitRepositoryConnection
 
   "exchanges a kubeconfig token for user info"

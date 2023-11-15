@@ -2620,6 +2620,7 @@ export type RootQueryType = {
   deploymentSettings?: Maybe<DeploymentSettings>;
   externalToken?: Maybe<Scalars['String']['output']>;
   gitRepositories?: Maybe<GitRepositoryConnection>;
+  gitRepository?: Maybe<GitRepository>;
   groupMembers?: Maybe<GroupMemberConnection>;
   groups?: Maybe<GroupConnection>;
   ingress?: Maybe<Ingress>;
@@ -2813,6 +2814,12 @@ export type RootQueryTypeGitRepositoriesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeGitRepositoryArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
 };
 
 
