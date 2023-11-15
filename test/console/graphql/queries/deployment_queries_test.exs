@@ -20,6 +20,42 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
     end
   end
 
+  describe "gitRepository" do
+    test "it can fetch a git repository by id" do
+      repo = insert(:git_repository)
+
+      {:ok, %{data: %{"gitRepository" => found}}} = run_query("""
+        query Git($id: ID!) {
+          gitRepository(id: $id) { id }
+        }
+      """, %{"id" => repo.id}, %{current_user: admin_user()})
+
+      assert found["id"] == repo.id
+    end
+
+    test "it can fetch a git repository by url" do
+      repo = insert(:git_repository)
+
+      {:ok, %{data: %{"gitRepository" => found}}} = run_query("""
+        query Git($url: String!) {
+          gitRepository(url: $url) { id }
+        }
+      """, %{"url" => repo.url}, %{current_user: admin_user()})
+
+      assert found["id"] == repo.id
+    end
+
+    test "users without access cannot fetch" do
+      repo = insert(:git_repository)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Git($url: String!) {
+          gitRepository(url: $url) { id }
+        }
+      """, %{"url" => repo.url}, %{current_user: insert(:user)})
+    end
+  end
+
   describe "clusters" do
     test "it can list clusters in the system" do
       clusters = insert_list(3, :cluster)
