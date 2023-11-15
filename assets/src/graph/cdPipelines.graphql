@@ -75,6 +75,7 @@ fragment StageService on StageService {
     ...PipelineServiceDeployment
   }
 }
+
 fragment PipelineStage on PipelineStage {
   id
   name

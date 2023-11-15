@@ -1941,6 +1941,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dagrejs/dagre@npm:1.0.4":
+  version: 1.0.4
+  resolution: "@dagrejs/dagre@npm:1.0.4"
+  dependencies:
+    "@dagrejs/graphlib": 2.1.13
+  checksum: 49fefa4128604ad2231a9a572b93912398edde53a069e63e4fee4bc42145d0fbe153d9763edd47b91f0732895f3428577f518f355b97da515a426144eab9d3dc
+  languageName: node
+  linkType: hard
+
+"@dagrejs/graphlib@npm:2.1.13":
+  version: 2.1.13
+  resolution: "@dagrejs/graphlib@npm:2.1.13"
+  checksum: 7d0732f78675ea1c25e54ad1fb2dcd3b8784705faba328bd44def6f372140197ccdf546d75c33db05555da9b288a00d67f34317215f64233b89e9e59bd79596a
+  languageName: node
+  linkType: hard
+
 "@docsearch/css@npm:3.5.1":
   version: 3.5.1
   resolution: "@docsearch/css@npm:3.5.1"
@@ -9274,6 +9290,7 @@ __metadata:
     "@absinthe/socket": 0.2.1
     "@apollo/client": 3.8.7
     "@cypress/webpack-preprocessor": 5.17.1
+    "@dagrejs/dagre": 1.0.4
     "@docsearch/js": 3.5.1
     "@docsearch/react": 3.5.1
     "@emotion/react": 11.11.1

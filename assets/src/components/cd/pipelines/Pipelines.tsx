@@ -8,7 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
-
+import { ReactFlowProvider } from 'reactflow'
 import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -97,7 +97,7 @@ const PipelineListItem: VirtualListRenderer<Edge<PipelineFragment>, ListMeta> =
     )
   }
 
-export default function Pipelines() {
+function Pipelines() {
   const theme = useTheme()
   const { data, error, fetchMore, networkStatus } = usePipelinesQuery({
     fetchPolicy: 'cache-and-network',
@@ -126,11 +126,8 @@ export default function Pipelines() {
     }
     fetchMore({
       variables: { cursor: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult: { pipelines } }) => {
-        console.log('more pipelines', pipelines)
-
-        return extendConnection(prev, pipelines, 'pipelines')
-      },
+      updateQuery: (prev, { fetchMoreResult: { pipelines } }) =>
+        extendConnection(prev, pipelines, 'pipelines'),
     })
   }, [fetchMore, pageInfo?.endCursor, pageInfo?.hasNextPage])
 
@@ -184,6 +181,14 @@ export default function Pipelines() {
         <EmptyState message="Looks like you don't have any pipelines yet." />
       )}
     </div>
+  )
+}
+
+export default function PipelinesWrapper() {
+  return (
+    <ReactFlowProvider>
+      <Pipelines />
+    </ReactFlowProvider>
   )
 }
 
