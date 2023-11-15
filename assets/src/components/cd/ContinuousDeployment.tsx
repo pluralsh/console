@@ -101,7 +101,8 @@ export default function ContinuousDeployment() {
   const cdEnabled = useCDEnabled()
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch<{ tab: string }>(`${CD_ABS_PATH}/:tab*`)
+  const pathMatch = useMatch(`${CD_ABS_PATH}/:tab*`)
+  // @ts-ignore
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 

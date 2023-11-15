@@ -23,9 +23,6 @@ export default function BillingSubscriptionProvider({
     pollInterval: 60_000,
   })
 
-  console.log('subscription query data', data)
-  console.log('subscription query error', error)
-
   const subscriptionContextValue = useMemo<SubscriptionContextType>(() => {
     const account = data?.account
     const availableFeatures = account?.availableFeatures
@@ -38,8 +35,6 @@ export default function BillingSubscriptionProvider({
     const isLegacyUser = !!grandfatheredUntil
     const isGrandfathered =
       isLegacyUser && moment().isBefore(moment(grandfatheredUntil))
-
-    console.log('subscription', subscription)
 
     // Marking grandfathering as expired only for a month after expiry date.
     // Afterwards expiry banners will not be visible and UI will be the same as for open-source users.
@@ -63,8 +58,6 @@ export default function BillingSubscriptionProvider({
       refetch,
     }
   }, [data, refetch])
-
-  console.log('subscription context val', subscriptionContextValue)
 
   if (error)
     return (
