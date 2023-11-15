@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import {
   ComponentProps,
   ReactNode,
@@ -67,10 +67,9 @@ export function VirtualList<
   gap?: number
   meta: M
 } & ComponentProps<typeof VirtualParentSC>) {
+  const theme = useTheme()
   const parentRef = useRef<HTMLElement>(null)
-  const height = 14
 
-  console.log('parentRef', parentRef.current)
   const rowCount = rows.length
   const getScrollElement = useCallback(() => parentRef.current, [parentRef])
   const getItemKey = useCallback(
@@ -83,13 +82,17 @@ export function VirtualList<
     },
     [getRowId, rows]
   )
+  const estimateSize = useCallback(
+    (index) => theme.spacing.xxlarge + (index === rowCount - 1 ? 0 : gap),
+    [gap, rowCount, theme.spacing.xxlarge]
+  )
 
   const virtualizer = useVirtualizer({
     count: rowCount,
     overscan: 10,
     getScrollElement,
     getItemKey,
-    estimateSize: (index) => height + (index === rowCount - 1 ? 0 : gap),
+    estimateSize,
     measureElement: (el) => {
       console.log('measure el', el)
       // Since <td>s are rendered with `display: contents`, we need to calculate

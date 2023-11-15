@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   AppIcon,
   Card,
@@ -22,6 +22,8 @@ import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 import { VirtualList, VirtualListRenderer } from '../../utils/VirtualList'
 
+import { Pipeline } from './Pipeline'
+
 const POLL_INTERVAL = 10 * 1000
 const PIPELINES_CRUMBS = [...CD_BASE_CRUMBS, { label: 'pipelines' }]
 
@@ -34,11 +36,12 @@ const PipelineList = styled(VirtualList)(({ theme }) => ({
 }))
 
 const PipelineEditAreaSC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-one'],
+  border: theme.borders.default,
   width: '100%',
   height: '100%',
   borderRadius: theme.borderRadiuses.large,
   position: 'relative',
+  overflow: 'hidden',
 }))
 
 type ListMeta = {
@@ -46,29 +49,35 @@ type ListMeta = {
   setSelectedId: (string) => void
 }
 
-const PipelineListItemSC = styled(Card)(({ theme }) => ({
+const PipelineListItemSC = styled(Card)(({ theme, selected }) => ({
   '&&': {
     width: '100%',
     padding: theme.spacing.medium,
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.medium,
+    borderColor: selected ? theme.colors['border-secondary'] : undefined,
   },
 }))
 const PipelineListItem: VirtualListRenderer<Edge<PipelineFragment>, ListMeta> =
   // eslint-disable-next-line func-names
   function ({ row, meta }) {
     const theme = useTheme()
+    const { node } = row
 
-    if (!row.node) {
+    if (!node) {
       return null
     }
-    const isSelected = row.node.id === meta.selectedId
+    const isSelected = node.id === meta.selectedId
 
     return (
       <PipelineListItemSC
         clickable
         selected={isSelected}
+        onClick={(e) => {
+          e.preventDefault()
+          meta?.setSelectedId?.(node.id)
+        }}
       >
         <AppIcon
           type="secondary"
@@ -101,6 +110,14 @@ export default function Pipelines() {
     pipeEdges?.[0]?.node?.id ?? ''
   )
 
+  useEffect(() => {
+    const firstId = pipeEdges?.[0]?.node?.id
+
+    if (firstId && !selectedPipeline) {
+      setSelectedPipeline(firstId)
+    }
+  }, [pipeEdges, selectedPipeline])
+
   useSetBreadcrumbs(PIPELINES_CRUMBS)
 
   const loadNextPage = useCallback(() => {
@@ -111,9 +128,8 @@ export default function Pipelines() {
       variables: { cursor: pageInfo.endCursor },
       updateQuery: (prev, { fetchMoreResult: { pipelines } }) => {
         console.log('more pipelines', pipelines)
-        const x = extendConnection(prev, pipelines, 'pipelines')
 
-        return x
+        return extendConnection(prev, pipelines, 'pipelines')
       },
     })
   }, [fetchMore, pageInfo?.endCursor, pageInfo?.hasNextPage])
@@ -124,6 +140,10 @@ export default function Pipelines() {
       setSelectedId: setSelectedPipeline,
     }),
     [selectedPipeline]
+  )
+  const pipeline = useMemo(
+    () => pipeEdges?.find((p) => p?.node?.id === selectedPipeline)?.node,
+    [pipeEdges, selectedPipeline]
   )
 
   if (error) {
@@ -156,7 +176,9 @@ export default function Pipelines() {
             gap={theme.spacing.xsmall}
             meta={meta}
           />
-          <PipelineEditAreaSC />
+          <PipelineEditAreaSC>
+            {pipeline && <Pipeline pipeline={pipeline} />}
+          </PipelineEditAreaSC>
         </div>
       ) : (
         <EmptyState message="Looks like you don't have any pipelines yet." />

@@ -1,14 +1,57 @@
 fragment PipelineServiceDeployment on ServiceDeployment {
   id
   name
+  namespace
+  status
+  componentStatus
 }
 
 fragment PipelineGate on PipelineGate {
   id
+  name
+  state
+  type
+  approver {
+    ...User
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment Revision on Revision {
+  id
+  git {
+    ref
+    folder
+  }
+  insertedAt
+  updatedAt
+  message
+  sha
+  version
+}
+
+fragment PromotionService on PromotionService {
+  id
+  revision {
+    ...Revision
+  }
+  service {
+    ...PipelineServiceDeployment
+  }
+  insertedAt
+  updatedAt
 }
 
 fragment PipelinePromotion on PipelinePromotion {
   id
+  services {
+    ...PromotionService
+  }
+  insertedAt
+  updatedAt
+  promotedAt
+  revisedAt
 }
 
 fragment PromotionCriteria on PromotionCriteria {
