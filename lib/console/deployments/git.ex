@@ -13,6 +13,8 @@ defmodule Console.Deployments.Git do
 
   def get_by_url!(url), do: Console.Repo.get_by!(GitRepository, url: url)
 
+  def get_by_url(url), do: Console.Repo.get_by(GitRepository, url: url)
+
   def deploy_url(), do: "https://github.com/pluralsh/deployment-operator.git"
 
   def artifacts_url(), do: "https://github.com/pluralsh/scaffolds.git"

@@ -161,8 +161,13 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     end
   end
 
-  def resolve_git(%{id: id}, %{context: %{current_user: user}}) do
+  def resolve_git(%{id: id}, %{context: %{current_user: user}}) when is_binary(id) do
     Git.get_repository(id)
+    |> allow(user, :read)
+  end
+
+  def resolve_git(%{url: url}, %{context: %{current_user: user}}) do
+    Git.get_by_url(url)
     |> allow(user, :read)
   end
 
