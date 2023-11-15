@@ -20,7 +20,7 @@ import { NetworkStatus } from '@apollo/client'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
-import { VirtualList, VirtualListRenderer } from './PipelinesColumns'
+import { VirtualList, VirtualListRenderer } from '../../utils/VirtualList'
 
 const POLL_INTERVAL = 10 * 1000
 const PIPELINES_CRUMBS = [...CD_BASE_CRUMBS, { label: 'pipelines' }]
