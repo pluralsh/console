@@ -281,6 +281,42 @@ defmodule Console.Deployments.PipelinesTest do
     end
   end
 
+  describe "#for_cluster/1" do
+    test "it will fetch eligible gates for a cluster" do
+      cluster = insert(:cluster)
+      other   = insert(:cluster)
+      job = insert(:pipeline_gate, type: :job, state: :pending, cluster: cluster)
+      insert(:pipeline_gate, type: :job, state: :pending, cluster: other)
+      insert(:pipeline_gate, type: :job, state: :open, cluster: cluster)
+      insert(:pipeline_gate, type: :job, state: :closed, cluster: cluster)
+      insert(:pipeline_gate, type: :approval)
+
+      [found] = Pipelines.for_cluster(cluster)
+
+      assert found.id == job.id
+    end
+  end
+
+  describe "#update_gate/3" do
+    test "a deployment agent can update a cluster gate" do
+      cluster = insert(:cluster)
+      job = insert(:pipeline_gate, type: :job, state: :pending, cluster: cluster)
+
+      {:ok, updated} = Pipelines.update_gate(%{state: :open}, job.id, cluster)
+
+      assert updated.id == job.id
+      assert updated.cluster_id == cluster.id
+      assert updated.state == :open
+    end
+
+    test "agents cannot update gates for other clusters" do
+      cluster = insert(:cluster)
+      job = insert(:pipeline_gate, type: :job, state: :pending, cluster: cluster)
+
+      {:error, _} = Pipelines.update_gate(%{state: :open}, job.id, insert(:cluster))
+    end
+  end
+
   describe "#apply_promotion" do
     test "it can apply a promotion to all adjacent pipeline stages" do
       admin = admin_user()

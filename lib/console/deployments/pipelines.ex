@@ -15,7 +15,8 @@ defmodule Console.Deployments.Pipelines do
     PromotionService,
     User,
     Revision,
-    Service
+    Service,
+    Cluster
   }
 
   @preload [:read_bindings, :write_bindings, edges: [:gates], stages: [services: :criteria]]
@@ -85,6 +86,17 @@ defmodule Console.Deployments.Pipelines do
   def promoted?(_, _), do: false
 
   @doc """
+  Fetches all eligible gates for a cluster
+  """
+  @spec for_cluster(Cluster.t) :: [PipelineGate.t]
+  def for_cluster(%Cluster{id: id}) do
+    PipelineGate.for_cluster(id)
+    |> PipelineGate.for_agent()
+    |> PipelineGate.pending()
+    |> Repo.all()
+  end
+
+  @doc """
   If a user has pipeline write access, will approvate and open the given gate
   """
   @spec approve_gate(binary, User.t) :: gate_resp
@@ -95,6 +107,17 @@ defmodule Console.Deployments.Pipelines do
     |> allow(user, :approve)
     |> when_ok(:update)
     |> notify(:approve, user)
+  end
+
+  @doc """
+  An update to a gate's status, to be called from w/in a deployment agent
+  """
+  @spec update_gate(map, binary, Cluster.t) :: gate_resp
+  def update_gate(attrs, id, %Cluster{} = cluster) do
+    get_gate!(id)
+    |> PipelineGate.update_changeset(attrs)
+    |> allow(cluster, :update)
+    |> when_ok(:update)
   end
 
   @doc """

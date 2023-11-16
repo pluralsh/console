@@ -788,6 +788,20 @@ export type Container = {
   resources?: Maybe<Resources>;
 };
 
+/** container env variable */
+export type ContainerEnv = {
+  __typename?: 'ContainerEnv';
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** env from declarations for containers */
+export type ContainerEnvFrom = {
+  __typename?: 'ContainerEnvFrom';
+  configMap: Scalars['String']['output'];
+  secret: Scalars['String']['output'];
+};
+
 export type ContainerRecommendation = {
   __typename?: 'ContainerRecommendation';
   containerName?: Maybe<Scalars['String']['output']>;
@@ -802,6 +816,15 @@ export type ContainerResources = {
   __typename?: 'ContainerResources';
   cpu?: Maybe<Scalars['String']['output']>;
   memory?: Maybe<Scalars['String']['output']>;
+};
+
+/** a shortform spec for job containers, designed for ease-of-use */
+export type ContainerSpec = {
+  __typename?: 'ContainerSpec';
+  args?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  env?: Maybe<Array<Maybe<ContainerEnv>>>;
+  envFrom?: Maybe<Array<Maybe<ContainerEnvFrom>>>;
+  image: Scalars['String']['output'];
 };
 
 export type ContainerState = {
@@ -1005,17 +1028,33 @@ export type FileContent = {
   path?: Maybe<Scalars['String']['output']>;
 };
 
+/** detailed gate specifications */
+export type GateSpec = {
+  __typename?: 'GateSpec';
+  job?: Maybe<JobGateSpec>;
+};
+
 export enum GateState {
   Closed = 'CLOSED',
   Open = 'OPEN',
   Pending = 'PENDING'
 }
 
+export type GateStatusAttributes = {
+  jobRef?: InputMaybe<NamespacedName>;
+};
+
 export enum GateType {
   Approval = 'APPROVAL',
   Job = 'JOB',
   Window = 'WINDOW'
 }
+
+/** the allowed inputs for a deployment agent gate update */
+export type GateUpdateAttributes = {
+  state?: InputMaybe<GateState>;
+  status?: InputMaybe<GateStatusAttributes>;
+};
 
 export type GcpCloudAttributes = {
   network?: InputMaybe<Scalars['String']['input']>;
@@ -1272,6 +1311,14 @@ export type Job = {
   status: JobStatus;
 };
 
+/** the full specification of a job gate */
+export type JobGateSpec = {
+  __typename?: 'JobGateSpec';
+  containers?: Maybe<Array<Maybe<ContainerSpec>>>;
+  namespace: Scalars['String']['output'];
+  raw?: Maybe<Scalars['String']['output']>;
+};
+
 export type JobReference = {
   __typename?: 'JobReference';
   name: Scalars['String']['output'];
@@ -1461,6 +1508,11 @@ export type NamespaceSpec = {
 export type NamespaceStatus = {
   __typename?: 'NamespaceStatus';
   phase?: Maybe<Scalars['String']['output']>;
+};
+
+export type NamespacedName = {
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
 };
 
 export type Node = {
@@ -1669,6 +1721,8 @@ export type PipelineGate = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of this gate as seen in the UI */
   name: Scalars['String']['output'];
+  /** more detailed specification for complex gates */
+  spec?: Maybe<GateSpec>;
   /** the current state of this gate */
   state: GateState;
   /** the type of gate this is */
@@ -2181,6 +2235,7 @@ export type RootMutationType = {
   updateClusterProvider?: Maybe<ClusterProvider>;
   updateConfiguration?: Maybe<Configuration>;
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
+  updateGate?: Maybe<PipelineGate>;
   updateGitRepository?: Maybe<GitRepository>;
   updateGroup?: Maybe<Group>;
   /** a reusable mutation for updating rbac settings on core services */
@@ -2529,6 +2584,12 @@ export type RootMutationTypeUpdateDeploymentSettingsArgs = {
 };
 
 
+export type RootMutationTypeUpdateGateArgs = {
+  attributes: GateUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateGitRepositoryArgs = {
   attributes: GitAttributes;
   id: Scalars['ID']['input'];
@@ -2599,6 +2660,7 @@ export type RootQueryType = {
   cluster?: Maybe<Cluster>;
   /** list all addons currently resident in the artifacts repo */
   clusterAddOns?: Maybe<Array<Maybe<ClusterAddOn>>>;
+  clusterGates?: Maybe<Array<Maybe<PipelineGate>>>;
   clusterInfo?: Maybe<ClusterInfo>;
   /** fetches an individual cluster provider */
   clusterProvider?: Maybe<ClusterProvider>;

@@ -204,6 +204,8 @@ type RootQueryType {
   "tells you what cluster a deploy token points to"
   myCluster: Cluster
 
+  clusterGates: [PipelineGate]
+
   deploymentSettings: DeploymentSettings
 }
 
@@ -394,6 +396,8 @@ type RootMutationType {
   "updates only the components of a given service, to be sent after deploy operator syncs"
   updateServiceComponents(id: ID!, components: [ComponentAttributes], errors: [ServiceErrorAttributes]): ServiceDeployment
 
+  updateGate(id: ID!, attributes: GateUpdateAttributes!): PipelineGate
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
 
@@ -525,6 +529,21 @@ input PipelineGateAttributes {
   clusterId: String
 }
 
+"the allowed inputs for a deployment agent gate update"
+input GateUpdateAttributes {
+  state: GateState
+  status: GateStatusAttributes
+}
+
+input GateStatusAttributes {
+  jobRef: NamespacedName
+}
+
+input NamespacedName {
+  name: String!
+  namespace: String!
+}
+
 "the attributes of a service w\/in a specific stage"
 input StageServiceAttributes {
   "the cluster handle of this service"
@@ -621,12 +640,47 @@ type PipelineGate {
   "the current state of this gate"
   state: GateState!
 
+  "more detailed specification for complex gates"
+  spec: GateSpec
+
   "the last user to approve this gate"
   approver: User
 
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"detailed gate specifications"
+type GateSpec {
+  job: JobGateSpec
+}
+
+"the full specification of a job gate"
+type JobGateSpec {
+  namespace: String!
+  raw: String
+  containers: [ContainerSpec]
+}
+
+"a shortform spec for job containers, designed for ease-of-use"
+type ContainerSpec {
+  image: String!
+  args: [String]
+  env: [ContainerEnv]
+  envFrom: [ContainerEnvFrom]
+}
+
+"container env variable"
+type ContainerEnv {
+  name: String!
+  value: String!
+}
+
+"env from declarations for containers"
+type ContainerEnvFrom {
+  configMap: String!
+  secret: String!
 }
 
 "the configuration of a service within a pipeline stage, including optional promotion criteria"
