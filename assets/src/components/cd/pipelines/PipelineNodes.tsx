@@ -1,10 +1,17 @@
-import { Card, Chip, ThumbsUpIcon } from '@pluralsh/design-system'
 import {
+  AppsIcon,
+  Card,
+  Chip,
+  ChronjobIcon,
+  ThumbsUpIcon,
+} from '@pluralsh/design-system'
+import {
+  GateState,
   GateType,
   PipelineGateFragment,
   PipelineStageFragment,
 } from 'generated/graphql'
-import { ReactNode, useMemo } from 'react'
+import { ComponentProps, ReactNode, useMemo } from 'react'
 import { Handle, type NodeProps, Position, useEdges, useNodes } from 'reactflow'
 import styled from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
@@ -38,7 +45,10 @@ const StageNodeSC = styled(Card)(({ theme }) => ({
   },
   '.headerArea': {
     display: 'flex',
+    alignItems: 'center',
     gap: theme.spacing.small,
+    minHeight: 22,
+    marginTop: -4,
   },
   '.heading': {
     ...theme.partials.text.overline,
@@ -122,7 +132,10 @@ export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
               <li>
                 <ServiceCardSC>
                   <div>{service?.service?.name}</div>
-                  <ServiceStatusChip status={service?.service?.status} />
+                  <ServiceStatusChip
+                    size="small"
+                    status={service?.service?.status}
+                  />
                 </ServiceCardSC>
               </li>
             ))}
@@ -139,13 +152,20 @@ export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
 }
 const GateTypeHeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
+  alignItems: 'center',
   gap: theme.spacing.xxsmall,
+  ...theme.partials.text.body2Bold,
 }))
 const gateTypeToIcon = {
   [GateType.Approval]: <ThumbsUpIcon />,
-  [GateType.Window]: <ThumbsUpIcon />,
-  [GateType.Job]: <ThumbsUpIcon />,
+  [GateType.Window]: <AppsIcon />,
+  [GateType.Job]: <ChronjobIcon />,
 } as const satisfies Record<GateType, ReactNode>
+const gateStateToSeverity = {
+  [GateState.Open]: 'success',
+  [GateState.Closed]: 'critical',
+  [GateState.Pending]: 'warning',
+} as const satisfies Record<GateState, ComponentProps<typeof Chip>['severity']>
 
 function GateTypeHeading({ type }: { type: GateType }) {
   return (
@@ -164,7 +184,12 @@ export function GateNode({ data }: NodeProps<PipelineGateFragment>) {
       />
       <div className="headerArea">
         <h2 className="heading">{data.name}</h2>
-        <Chip size="small">{upperFirst(data.state.toLowerCase())}</Chip>
+        <Chip
+          size="small"
+          severity={gateStateToSeverity[data.state]}
+        >
+          {upperFirst(data.state.toLowerCase())}
+        </Chip>
       </div>
       {data.type && <GateTypeHeading type={data.type} />}
       {data.approver && <div>{data.approver.name}</div>}

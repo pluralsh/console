@@ -1,5 +1,10 @@
-import { IconFrame, ReloadIcon } from '@pluralsh/design-system'
-import { PipelineFragment } from 'generated/graphql'
+import { AppsIcon, IconFrame, ReloadIcon } from '@pluralsh/design-system'
+import {
+  GateState,
+  GateType,
+  PipelineFragment,
+  PipelineGateFragment,
+} from 'generated/graphql'
 import { useCallback, useMemo } from 'react'
 import ReactFlow, {
   Background,
@@ -10,16 +15,16 @@ import ReactFlow, {
   useReactFlow,
 } from 'reactflow'
 import Dagre from '@dagrejs/dagre'
-
-import 'reactflow/dist/style.css'
-import { useTheme } from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable'
-
 import chroma from 'chroma-js'
-
 import isEmpty from 'lodash/isEmpty'
 
+import 'reactflow/dist/style.css'
+import styled, { useTheme } from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable'
+
 import { GateNode, StageNode } from './PipelineNodes'
+
+const DEBUG_MODE = false
 
 enum NodeType {
   Stage = 'stage',
@@ -50,71 +55,35 @@ const getLayoutedElements = (nodes, edges, options) => {
   }
 }
 
+const FAKE_GATES: Partial<PipelineGateFragment>[] = [
+  {
+    id: '1',
+    name: 'An approval',
+    type: GateType.Approval,
+    state: GateState.Closed,
+  },
+  {
+    id: '2',
+    name: 'A window',
+    type: GateType.Window,
+    state: GateState.Open,
+  },
+  {
+    id: '3',
+    name: 'A job',
+    type: GateType.Job,
+    state: GateState.Pending,
+  },
+]
+
 export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
   const theme = useTheme()
   const gridGap = theme.spacing.large
   const margin = gridGap * 1
-  const { initialNodes, initialEdges } = useMemo(() => {
-    const edges: Edge<any>[] = []
-    const pipeStages = pipeline.stages?.filter(isNonNullable) ?? []
-    const pipeEdges = pipeline.edges?.filter(isNonNullable) ?? []
-    const gateNodes = pipeEdges?.flatMap((edge, i) => {
-      console.log('edge', edge)
-      if (edge && isEmpty(edge?.gates)) {
-        edges.push({
-          id: edge.id,
-          source: edge.from.id,
-          target: edge.to.id,
-          data: edge,
-        })
-      }
-
-      return (
-        edge?.gates?.filter(isNonNullable)?.map((gate, j) => {
-          console.log('gate', gate)
-          if (gate) {
-            if (edge?.to?.id) {
-              edges.push({
-                id: `${gate.id}->${edge.to.id}`,
-                source: gate.id,
-                target: edge.to.id,
-              })
-            }
-            if (edge?.from?.id) {
-              edges.push({
-                id: `${edge.from.id}->${gate.id}`,
-                source: edge.from.id,
-                target: gate.id,
-              })
-            }
-          }
-
-          return {
-            id: gate?.id,
-            type: NodeType.Gate,
-            position: {
-              x: margin + i * gridGap * 10,
-              y: margin + j * gridGap * 10,
-            },
-            data: gate,
-          }
-        }) ?? []
-      )
-    })
-
-    return {
-      initialNodes: [
-        ...pipeStages.map((stage, i) => ({
-          id: stage?.id,
-          position: { x: margin + i * gridGap * 10, y: margin },
-          type: NodeType.Stage,
-          data: stage,
-        })),
-        ...gateNodes,
-      ],
-      initialEdges: edges,
-    }
-  }, [gridGap, margin, pipeline.edges, pipeline.stages])
+  const { initialNodes, initialEdges } = useMemo(
+    () => getNodesEdges(pipeline, gridGap, margin),
+    [gridGap, margin, pipeline]
+  )
   const { fitView, setViewport } = useReactFlow()
   const [nodes, setNodes, _onNodesChange] = useNodesState(initialNodes as any)
   const [edges, setEdges, _onEdgesChange] = useEdgesState(initialEdges)
@@ -133,7 +102,7 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
   )
 
   return (
-    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+    <ReactFlowWrapperSC>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -168,7 +137,104 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
         >
           Reset view
         </IconFrame>
+        <IconFrame
+          clickable
+          type="floating"
+          icon={<AppsIcon />}
+          tooltip="Dagre layout"
+          onClick={() => setViewport({ x: 0, y: 0, zoom: 1 })}
+        >
+          Reset view
+        </IconFrame>
       </div>
-    </div>
+    </ReactFlowWrapperSC>
   )
+}
+
+const ReactFlowWrapperSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  '.react-flow__edge-path': {
+    color: theme.colors['border-secondary'],
+    stroke: theme.colors['border-secondary'],
+  },
+}))
+
+function getNodesEdges(
+  pipeline: PipelineFragment,
+  gridGap: number,
+  margin: number
+) {
+  const edges: Edge<any>[] = []
+  const pipeStages = pipeline.stages?.filter(isNonNullable) ?? []
+  const pipeEdges = pipeline.edges?.filter(isNonNullable) ?? []
+  const gateNodes = pipeEdges?.flatMap((e, i) => {
+    let edge = { ...e }
+
+    console.log('gates', edge.gates)
+
+    console.log('edge', edge)
+    if (edge && isEmpty(edge?.gates)) {
+      // DEBUG GATES
+      if (DEBUG_MODE) {
+        // @ts-ignore
+        edge = { ...edge, gates: FAKE_GATES }
+      } else {
+        edges.push({
+          id: edge.id,
+          source: edge.from.id,
+          target: edge.to.id,
+          data: edge,
+        })
+      }
+    }
+
+    return (
+      edge?.gates?.filter(isNonNullable)?.map((gate, j) => {
+        console.log('gate', gate)
+        if (gate) {
+          if (edge?.to?.id) {
+            edges.push({
+              id: `${gate.id}->${edge.to.id}`,
+              source: gate.id,
+              target: edge.to.id,
+            })
+          }
+          if (edge?.from?.id) {
+            edges.push({
+              id: `${edge.from.id}->${gate.id}`,
+              source: edge.from.id,
+              target: gate.id,
+            })
+          }
+        }
+
+        return {
+          id: gate?.id,
+          type: NodeType.Gate,
+          position: {
+            x: gridGap * 6 + margin + i * gridGap * 10,
+            y: margin + j * gridGap * 5,
+          },
+          data: gate,
+        }
+      }) ?? []
+    )
+  })
+
+  return {
+    initialNodes: [
+      ...pipeStages.map((stage, i) => ({
+        id: stage?.id,
+        position: { x: margin + i * gridGap * 20, y: margin },
+        type: NodeType.Stage,
+        data: stage,
+      })),
+      ...gateNodes,
+    ],
+    initialEdges: edges,
+  }
 }
