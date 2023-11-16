@@ -3,6 +3,7 @@ import {
   Card,
   Chip,
   ChronjobIcon,
+  ClusterIcon,
   ThumbsUpIcon,
 } from '@pluralsh/design-system'
 import {
@@ -11,9 +12,15 @@ import {
   PipelineGateFragment,
   PipelineStageFragment,
 } from 'generated/graphql'
-import { ComponentProps, ReactNode, useMemo } from 'react'
+import {
+  ComponentProps,
+  ReactElement,
+  ReactNode,
+  cloneElement,
+  useMemo,
+} from 'react'
 import { Handle, type NodeProps, Position, useEdges, useNodes } from 'reactflow'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 import upperFirst from 'lodash/upperFirst'
 
@@ -121,7 +128,7 @@ export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
         position={Position.Left}
       />
       <h2 className="heading">STAGE</h2>
-      <h3 className="name">{data.name}</h3>
+      <IconHeading icon={<ClusterIcon />}>Deploy to {data.name}</IconHeading>
 
       {!isEmpty(data.services) && (
         <div className="section">
@@ -150,10 +157,10 @@ export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
     </StageNodeSC>
   )
 }
-const GateTypeHeaderSC = styled.div(({ theme }) => ({
+const IconHeadingSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  gap: theme.spacing.xxsmall,
+  gap: theme.spacing.xsmall,
   ...theme.partials.text.body2Bold,
 }))
 const gateTypeToIcon = {
@@ -167,14 +174,35 @@ const gateStateToSeverity = {
   [GateState.Pending]: 'warning',
 } as const satisfies Record<GateState, ComponentProps<typeof Chip>['severity']>
 
-function GateTypeHeading({ type }: { type: GateType }) {
+function IconHeading({
+  icon,
+  children,
+}: {
+  icon: ReactElement
+  children: ReactNode
+}) {
+  const theme = useTheme()
+  const clonedIcon = cloneElement(icon, {
+    size: 12,
+    color: theme.colors['icon-light'],
+  })
+
   return (
-    <GateTypeHeaderSC>
-      {gateTypeToIcon[type]}
-      {upperFirst(type.toLowerCase())}
-    </GateTypeHeaderSC>
+    <IconHeadingSC>
+      {clonedIcon}
+      {children}
+    </IconHeadingSC>
   )
 }
+
+function GateTypeHeading({ type }: { type: GateType }) {
+  return (
+    <IconHeading icon={gateTypeToIcon[type]}>
+      {upperFirst(type.toLowerCase())}
+    </IconHeading>
+  )
+}
+
 export function GateNode({ data }: NodeProps<PipelineGateFragment>) {
   return (
     <StageNodeSC>
