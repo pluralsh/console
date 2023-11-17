@@ -2,8 +2,12 @@ defmodule Console.Schema.Gates.JobSpec do
   use Piazza.Ecto.Schema
 
   embedded_schema do
-    field :namespace, :string
-    field :raw, :string
+    field :namespace,       :string
+    field :raw,             :string
+    field :service_account, :string
+    field :labels,          :map
+    field :annotations,     :map
+
     embeds_many :containers, Container, on_replace: :delete do
       field       :image, :string
       field       :args,  {:array, :string}
@@ -20,7 +24,7 @@ defmodule Console.Schema.Gates.JobSpec do
     end
   end
 
-  @valid ~w(namespace raw)a
+  @valid ~w(namespace raw labels annotations service_account)a
 
   def changeset(model, attrs \\ %{}) do
     model

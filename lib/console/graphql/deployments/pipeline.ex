@@ -33,6 +33,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :type,       non_null(:gate_type), description: "the type of gate this is"
     field :cluster,    :string, description: "the handle of a cluster this gate will execute on"
     field :cluster_id, :string, description: "the id of the cluster this gate will execute on"
+    field :spec,       :gate_spec_attributes, description: "a specification for more complex gate types"
   end
 
   @desc "the allowed inputs for a deployment agent gate update"
@@ -57,9 +58,12 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
   @desc "spec for a job gate"
   input_object :gate_job_attributes do
-    field :namespace,  non_null(:string)
-    field :raw,        :string, description: "if you'd rather define the job spec via straight k8s yaml"
-    field :containers, list_of(:container_attributes)
+    field :namespace,       non_null(:string)
+    field :raw,             :string, description: "if you'd rather define the job spec via straight k8s yaml"
+    field :containers,      list_of(:container_attributes)
+    field :labels,          :map
+    field :annotations,     :map
+    field :service_account, :string
   end
 
   @desc "the attributes for a container"
@@ -151,9 +155,12 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
   @desc "the full specification of a job gate"
   object :job_gate_spec do
-    field :namespace,  non_null(:string)
-    field :raw,        :string
-    field :containers, list_of(:container_spec)
+    field :namespace,       non_null(:string), description: "the namespace the job will run in"
+    field :raw,             :string, description: "a raw kubernetes job resource, overrides any other configuration"
+    field :containers,      list_of(:container_spec), description: "list of containers to run in this job"
+    field :labels,          :map, description: "any pod labels to apply"
+    field :annotations,     :map, description: "any pod annotations to apply"
+    field :service_account, :string, description: "the service account the pod will use"
   end
 
   @desc "a shortform spec for job containers, designed for ease-of-use"

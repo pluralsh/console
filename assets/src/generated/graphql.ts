@@ -788,6 +788,14 @@ export type Container = {
   resources?: Maybe<Resources>;
 };
 
+/** the attributes for a container */
+export type ContainerAttributes = {
+  args?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  env?: InputMaybe<Array<InputMaybe<EnvAttributes>>>;
+  envFrom?: InputMaybe<Array<InputMaybe<EnvFromAttributes>>>;
+  image: Scalars['String']['input'];
+};
+
 /** container env variable */
 export type ContainerEnv = {
   __typename?: 'ContainerEnv';
@@ -1011,6 +1019,16 @@ export type DiffNormalizerAttributes = {
   namespace: Scalars['String']['input'];
 };
 
+export type EnvAttributes = {
+  name: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
+export type EnvFromAttributes = {
+  configMap: Scalars['String']['input'];
+  secret: Scalars['String']['input'];
+};
+
 export type Event = {
   __typename?: 'Event';
   action?: Maybe<Scalars['String']['output']>;
@@ -1028,10 +1046,26 @@ export type FileContent = {
   path?: Maybe<Scalars['String']['output']>;
 };
 
+/** spec for a job gate */
+export type GateJobAttributes = {
+  annotations?: InputMaybe<Scalars['Map']['input']>;
+  containers?: InputMaybe<Array<InputMaybe<ContainerAttributes>>>;
+  labels?: InputMaybe<Scalars['Map']['input']>;
+  namespace: Scalars['String']['input'];
+  /** if you'd rather define the job spec via straight k8s yaml */
+  raw?: InputMaybe<Scalars['String']['input']>;
+  serviceAccount?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** detailed gate specifications */
 export type GateSpec = {
   __typename?: 'GateSpec';
   job?: Maybe<JobGateSpec>;
+};
+
+/** a more refined spec for parameters needed for complex gates */
+export type GateSpecAttributes = {
+  job?: InputMaybe<GateJobAttributes>;
 };
 
 export enum GateState {
@@ -1314,9 +1348,18 @@ export type Job = {
 /** the full specification of a job gate */
 export type JobGateSpec = {
   __typename?: 'JobGateSpec';
+  /** any pod annotations to apply */
+  annotations?: Maybe<Scalars['Map']['output']>;
+  /** list of containers to run in this job */
   containers?: Maybe<Array<Maybe<ContainerSpec>>>;
+  /** any pod labels to apply */
+  labels?: Maybe<Scalars['Map']['output']>;
+  /** the namespace the job will run in */
   namespace: Scalars['String']['output'];
+  /** a raw kubernetes job resource, overrides any other configuration */
   raw?: Maybe<Scalars['String']['output']>;
+  /** the service account the pod will use */
+  serviceAccount?: Maybe<Scalars['String']['output']>;
 };
 
 export type JobReference = {
@@ -1738,6 +1781,8 @@ export type PipelineGateAttributes = {
   clusterId?: InputMaybe<Scalars['String']['input']>;
   /** the name of this gate */
   name: Scalars['String']['input'];
+  /** a specification for more complex gate types */
+  spec?: InputMaybe<GateSpecAttributes>;
   /** the type of gate this is */
   type: GateType;
 };

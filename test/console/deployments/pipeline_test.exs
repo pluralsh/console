@@ -19,7 +19,18 @@ defmodule Console.Deployments.PipelinesTest do
           ]}
         ],
         edges: [
-          %{from: "dev", to: "prod", gates: [%{type: :approval, name: "approve"}]}
+          %{
+            from: "dev",
+            to: "prod",
+            gates: [
+              %{type: :approval, name: "approve"},
+              %{type: :job, name: "integration", spec: %{
+                job: %{
+                  namespace: "namespace",
+                  containers: [%{image: "my-test:latest"}]
+                }
+              }}
+            ]}
         ]
       }, "my-pipeline", user)
 
@@ -40,10 +51,17 @@ defmodule Console.Deployments.PipelinesTest do
       assert edge.from_id == dev.id
       assert edge.to_id == prod.id
 
-      [gate] = edge.gates
+      [gate, job_gate] = edge.gates
       assert gate.name == "approve"
       assert gate.type == :approval
       assert gate.edge_id == edge.id
+
+      assert job_gate.name == "integration"
+      assert job_gate.type == :job
+      assert job_gate.edge_id == edge.id
+      assert job_gate.spec.job.namespace == "namespace"
+      [container] = job_gate.spec.job.containers
+      assert container.image == "my-test:latest"
 
       assert_receive {:event, %PubSub.PipelineUpserted{item: ^pipeline}}
     end
