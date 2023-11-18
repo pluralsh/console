@@ -11,6 +11,7 @@ import ReactFlow, {
   BackgroundVariant,
   type Edge,
   type Node as FlowNode,
+  MarkerType,
   useEdgesState,
   useNodesState,
   useReactFlow,
@@ -20,7 +21,7 @@ import chroma from 'chroma-js'
 import isEmpty from 'lodash/isEmpty'
 
 import 'reactflow/dist/style.css'
-import styled, { useTheme } from 'styled-components'
+import styled, { DefaultTheme, useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
 import { groupBy } from 'lodash'
@@ -212,7 +213,9 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
           type="floating"
           icon={<ReloadIcon />}
           tooltip="Reset view"
-          onClick={() => setViewport({ x: 0, y: 0, zoom: 1 })}
+          onClick={() =>
+            setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 500 })
+          }
         >
           Reset view
         </IconFrame>
@@ -241,13 +244,25 @@ const ReactFlowWrapperSC = styled.div<{ $hide }>(({ theme, $hide }) => ({
   '.react-flow__renderer': {
     display: $hide ? 'none' : 'block',
   },
-  '.react-flow__edge-path': {
-    color: theme.colors['border-secondary'],
-    stroke: theme.colors['border-secondary'],
-  },
 }))
 
+const getEdgeProps = (theme: DefaultTheme) => ({
+  type: 'smoothstep',
+  color: theme.colors['border-secondary'],
+  style: {
+    stroke: theme.colors['border-secondary'],
+    strokeWidth: 1,
+  },
+  markerEnd: {
+    type: MarkerType.Arrow,
+    width: 24,
+    height: 24,
+    color: theme.colors['border-secondary'],
+  },
+})
+
 function getNodesEdges(pipeline: PipelineFragment) {
+  const theme = useTheme()
   const edges: Edge<any>[] = []
   const pipeStages = pipeline.stages?.filter(isNonNullable) ?? []
   const pipeEdges = pipeline.edges?.filter(isNonNullable) ?? []
@@ -261,8 +276,8 @@ function getNodesEdges(pipeline: PipelineFragment) {
     }
     if (edge && isEmpty(edge?.gates)) {
       edges.push({
+        ...getEdgeProps(theme),
         id: edge.id,
-        type: 'smoothstep',
         source: edge.from.id,
         target: edge.to.id,
         data: edge,
@@ -294,18 +309,18 @@ function getNodesEdges(pipeline: PipelineFragment) {
 
         if (edge?.to?.id) {
           edges.push({
+            ...getEdgeProps(theme),
             id: `${nodeId}->${edge.to.id}`,
             source: nodeId,
             target: edge.to.id,
-            type: 'smoothstep',
           })
         }
         if (edge?.from?.id) {
           edges.push({
+            ...getEdgeProps(theme),
             id: `${edge.from.id}->${nodeId}`,
             source: edge.from.id,
             target: nodeId,
-            type: 'smoothstep',
           })
         }
 
