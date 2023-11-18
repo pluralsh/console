@@ -1,15 +1,14 @@
 import {
-  AppsIcon,
   Card,
   Chip,
-  ChronjobIcon,
   ClusterIcon,
+  ListIcon,
   ThumbsUpIcon,
 } from '@pluralsh/design-system'
 import {
   GateState,
-  GateType,
   PipelineGateFragment,
+  PipelineStageEdgeFragment,
   PipelineStageFragment,
 } from 'generated/graphql'
 import {
@@ -163,11 +162,7 @@ const IconHeadingSC = styled.div(({ theme }) => ({
   gap: theme.spacing.xsmall,
   ...theme.partials.text.body2Bold,
 }))
-const gateTypeToIcon = {
-  [GateType.Approval]: <ThumbsUpIcon />,
-  [GateType.Window]: <AppsIcon />,
-  [GateType.Job]: <ChronjobIcon />,
-} as const satisfies Record<GateType, ReactNode>
+
 const gateStateToSeverity = {
   [GateState.Open]: 'success',
   [GateState.Closed]: 'critical',
@@ -195,15 +190,7 @@ function IconHeading({
   )
 }
 
-function GateTypeHeading({ type }: { type: GateType }) {
-  return (
-    <IconHeading icon={gateTypeToIcon[type]}>
-      {upperFirst(type.toLowerCase())}
-    </IconHeading>
-  )
-}
-
-export function GateNode({ data }: NodeProps<PipelineGateFragment>) {
+export function ApprovalNode({ data: gate }: NodeProps<PipelineGateFragment>) {
   return (
     <StageNodeSC>
       <HandleSC
@@ -211,17 +198,58 @@ export function GateNode({ data }: NodeProps<PipelineGateFragment>) {
         position={Position.Left}
       />
       <div className="headerArea">
-        <h2 className="heading">{data.name}</h2>
+        <h2 className="heading">Action</h2>
         <Chip
+          size="small"
+          severity={gateStateToSeverity[gate.state]}
+        >
+          {upperFirst(gate.state.toLowerCase())}
+        </Chip>
+      </div>
+      <IconHeading icon={<ThumbsUpIcon />}>Approval</IconHeading>
+      {gate.approver && <div>Approver: {gate.approver.name}</div>}
+      <HandleSC
+        type="source"
+        position={Position.Right}
+        id="a"
+      />
+    </StageNodeSC>
+  )
+}
+
+export function TestsNode({
+  data: edge,
+}: NodeProps<PipelineStageEdgeFragment>) {
+  return (
+    <StageNodeSC>
+      <HandleSC
+        type="target"
+        position={Position.Left}
+      />
+      <div className="headerArea">
+        <h2 className="heading">Action</h2>
+        {/* <Chip
           size="small"
           severity={gateStateToSeverity[data.state]}
         >
           {upperFirst(data.state.toLowerCase())}
-        </Chip>
+        </Chip> */}
       </div>
-      {data.type && <GateTypeHeading type={data.type} />}
-      {data.approver && <div>{data.approver.name}</div>}
-
+      <IconHeading icon={<ListIcon />}>Tests</IconHeading>
+      {/* {data.approver && <div>{data.approver.name}</div>} */}
+      <ul className="serviceList">
+        {edge.gates?.map((gate) => (
+          <li>
+            <ServiceCardSC>
+              <div>{gate?.name}</div>
+              {/* <ServiceStatusChip
+              size="small"
+              status={gate?.state}
+            /> */}
+            </ServiceCardSC>
+          </li>
+        ))}
+      </ul>
       <HandleSC
         type="source"
         position={Position.Right}

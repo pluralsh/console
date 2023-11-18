@@ -23,17 +23,21 @@ import 'reactflow/dist/style.css'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
-import { GateNode, StageNode } from './PipelineNodes'
+import { groupBy } from 'lodash'
+
+import { ApprovalNode, StageNode, TestsNode } from './PipelineNodes'
 
 const DEBUG_MODE = true
 
 enum NodeType {
   Stage = 'stage',
-  Gate = 'gate',
+  Tests = 'tests',
+  Approval = 'approval',
 }
 const nodeTypes = {
   [NodeType.Stage]: StageNode,
-  [NodeType.Gate]: GateNode,
+  [NodeType.Approval]: ApprovalNode,
+  [NodeType.Tests]: TestsNode,
 }
 
 const dagre = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
@@ -79,8 +83,8 @@ const getLayoutedElements = (
 
   dagre.setGraph({
     rankdir: direction,
-    marginx: 0,
-    marginy: 0,
+    marginx: margin,
+    marginy: margin,
     nodesep: gridGap * 1,
     ranksep: gridGap * 4,
   })
@@ -163,7 +167,7 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
         // fitView()
       })
     },
-    [nodes, edges, getViewport, setNodes, setEdges]
+    [nodes, edges, getViewport, gridGap, margin, setNodes, setEdges]
   )
 
   useLayoutEffect(() => {
@@ -247,7 +251,7 @@ function getNodesEdges(pipeline: PipelineFragment) {
   const edges: Edge<any>[] = []
   const pipeStages = pipeline.stages?.filter(isNonNullable) ?? []
   const pipeEdges = pipeline.edges?.filter(isNonNullable) ?? []
-  const gateNodes = pipeEdges?.flatMap((e, i) => {
+  const gateNodes = pipeEdges?.flatMap((e) => {
     let edge = { ...e }
 
     console.log('edge', edge)
@@ -256,40 +260,60 @@ function getNodesEdges(pipeline: PipelineFragment) {
       edge = { ...edge, gates: FAKE_GATES }
     }
     if (edge && isEmpty(edge?.gates)) {
-      // DEBUG GATES
       edges.push({
         id: edge.id,
+        type: 'smoothstep',
         source: edge.from.id,
         target: edge.to.id,
         data: edge,
       })
     }
 
+    const groupedGates = groupBy(edge?.gates, (gate) => {
+      switch (gate?.type) {
+        case GateType.Approval:
+          return NodeType.Approval
+        default:
+          return NodeType.Tests
+      }
+    }) as Record<NodeType, PipelineGateFragment[]>
+
+    console.log('groupedGates', groupedGates)
+
     return (
-      edge?.gates?.filter(isNonNullable)?.map((gate, j) => {
-        console.log('gate', gate)
-        if (gate) {
-          if (edge?.to?.id) {
-            edges.push({
-              id: `${gate.id}->${edge.to.id}`,
-              source: gate.id,
-              target: edge.to.id,
-            })
-          }
-          if (edge?.from?.id) {
-            edges.push({
-              id: `${edge.from.id}->${gate.id}`,
-              source: edge.from.id,
-              target: gate.id,
-            })
-          }
+      Object.entries(groupedGates).flatMap(([type, gates]) => {
+        const nodeId =
+          type === NodeType.Approval ? `${edge.id}-${gates?.[0]?.id}` : edge.id
+
+        console.log('entries', [type, gates])
+        console.log('entries nodeId', nodeId)
+
+        if (!gates || !nodeId) {
+          return []
+        }
+
+        if (edge?.to?.id) {
+          edges.push({
+            id: `${nodeId}->${edge.to.id}`,
+            source: nodeId,
+            target: edge.to.id,
+            type: 'smoothstep',
+          })
+        }
+        if (edge?.from?.id) {
+          edges.push({
+            id: `${edge.from.id}->${nodeId}`,
+            source: edge.from.id,
+            target: nodeId,
+            type: 'smoothstep',
+          })
         }
 
         return {
-          id: gate?.id,
-          type: NodeType.Gate,
+          id: nodeId,
+          type,
           position: { x: 0, y: 0 },
-          data: gate,
+          data: type === NodeType.Approval ? gates?.[0] : { ...edge, gates },
         }
       }) ?? []
     )
@@ -297,7 +321,7 @@ function getNodesEdges(pipeline: PipelineFragment) {
 
   return {
     initialNodes: [
-      ...pipeStages.map((stage, i) => ({
+      ...pipeStages.map((stage) => ({
         id: stage?.id,
         position: { x: 0, y: 0 },
         type: NodeType.Stage,
