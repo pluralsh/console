@@ -79,6 +79,7 @@ const getLayoutedElements = (
 
   dagre.setGraph({
     rankdir: direction,
+    align: 'UL',
     marginx: margin,
     marginy: margin,
     nodesep: gridGap * 1,
@@ -224,6 +225,10 @@ const getEdgeProps = (theme: DefaultTheme) => ({
   },
 })
 
+const TYPE_SORT_VALS = Object.fromEntries(
+  [NodeType.Stage, NodeType.Approval, NodeType.Tests].map((val, i) => [val, i])
+)
+
 function getNodesEdges(pipeline: PipelineFragment, theme: DefaultTheme) {
   const edges: Edge<any>[] = []
   const pipeStages = pipeline.stages?.filter(isNonNullable) ?? []
@@ -255,40 +260,49 @@ function getNodesEdges(pipeline: PipelineFragment, theme: DefaultTheme) {
     }) as Record<NodeType, PipelineGateFragment[]>
 
     return (
-      Object.entries(groupedGates).flatMap(([type, gates]) => {
-        const nodeId =
-          type === NodeType.Approval ? `${edge.id}-${gates?.[0]?.id}` : edge.id
+      Object.entries(groupedGates)
+        // Order of edges matters to Dagre layout, so sort by type ahead of time
+        .sort(
+          ([aType], [bType]) => TYPE_SORT_VALS[bType] - TYPE_SORT_VALS[aType]
+        )
+        .flatMap(([type, gates]) => {
+          const nodeId =
+            type === NodeType.Approval
+              ? `${edge.id}-${gates?.[0]?.id}`
+              : edge.id
 
-        if (!gates || !nodeId) {
-          return []
-        }
+          if (!gates || !nodeId) {
+            return []
+          }
 
-        if (edge?.to?.id) {
-          edges.push({
-            ...getEdgeProps(theme),
-            id: `${nodeId}->${edge.to.id}`,
-            source: nodeId,
-            target: edge.to.id,
-          })
-        }
-        if (edge?.from?.id) {
-          edges.push({
-            ...getEdgeProps(theme),
-            id: `${edge.from.id}->${nodeId}`,
-            source: edge.from.id,
-            target: nodeId,
-          })
-        }
+          if (edge?.to?.id) {
+            edges.push({
+              ...getEdgeProps(theme),
+              id: `${nodeId}->${edge.to.id}`,
+              source: nodeId,
+              target: edge.to.id,
+            })
+          }
+          if (edge?.from?.id) {
+            edges.push({
+              ...getEdgeProps(theme),
+              id: `${edge.from.id}->${nodeId}`,
+              source: edge.from.id,
+              target: nodeId,
+            })
+          }
 
-        return {
-          id: nodeId,
-          type,
-          position: { x: 0, y: 0 },
-          data: { ...edge, gates },
-        }
-      }) ?? []
+          return {
+            id: nodeId,
+            type,
+            position: { x: 0, y: 0 },
+            data: { ...edge, gates },
+          }
+        })
     )
   })
+
+  console.log('  gateNodes', gateNodes)
 
   return {
     initialNodes: [
