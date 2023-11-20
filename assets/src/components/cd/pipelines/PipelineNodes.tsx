@@ -63,7 +63,7 @@ const NodeCardList = styled.ul(({ theme }) => ({
   gap: theme.spacing.xsmall,
 }))
 
-const StageNodeSC = styled(Card)(({ theme }) => ({
+const BaseNodeSC = styled(Card)(({ theme }) => ({
   '&&': {
     position: 'relative',
     padding: theme.spacing.small,
@@ -93,10 +93,6 @@ const StageNodeSC = styled(Card)(({ theme }) => ({
   },
   '.heading': {
     ...theme.partials.text.overline,
-    color: theme.colors['text-light'],
-  },
-  '.name': {
-    ...theme.partials.text.body1Bold,
     color: theme.colors['text-light'],
   },
   '.subhead': {
@@ -148,7 +144,7 @@ export const useNodeEdges = () => {
 
 export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
   return (
-    <StageNodeSC>
+    <BaseNodeSC>
       <HandleSC
         type="target"
         position={Position.Left}
@@ -185,7 +181,7 @@ export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
         position={Position.Right}
         id="a"
       />
-    </StageNodeSC>
+    </BaseNodeSC>
   )
 }
 const IconHeadingSC = styled.div(({ theme }) => ({
@@ -247,7 +243,7 @@ export function ApprovalNode({
   }
 
   return (
-    <StageNodeSC>
+    <BaseNodeSC>
       <HandleSC
         type="target"
         position={Position.Left}
@@ -268,7 +264,7 @@ export function ApprovalNode({
         position={Position.Right}
         id="a"
       />
-    </StageNodeSC>
+    </BaseNodeSC>
   )
 }
 
@@ -409,7 +405,7 @@ export function TestsNode({
   }
 
   return (
-    <StageNodeSC>
+    <BaseNodeSC>
       <HandleSC
         type="target"
         position={Position.Left}
@@ -448,6 +444,6 @@ export function TestsNode({
         position={Position.Right}
         id="a"
       />
-    </StageNodeSC>
+    </BaseNodeSC>
   )
 }

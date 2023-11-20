@@ -211,7 +211,7 @@ const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
 }))
 
 const getEdgeProps = (theme: DefaultTheme) => ({
-  type: 'smoothstep',
+  type: 'step',
   color: theme.colors['border-secondary'],
   style: {
     stroke: theme.colors['border-secondary'],
