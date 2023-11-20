@@ -11,6 +11,10 @@ defmodule Console.Deployments.Policies do
         when (is_list(r) and length(r) > 0) or (is_list(w) and length(w) > 0),
     do: can?(user, Map.merge(resource, %{read_bindings: [], write_bindings: []}), :create)
 
+  def can?(%Cluster{id: id}, %PipelineGate{cluster_id: id}, :update),
+    do: :pass
+  def can?(_, %PipelineGate{}, :update), do: {:error, "forbidden"}
+
   def can?(%User{} = user, %PipelineGate{type: :approval} = g, :approve),
     do: can?(user, g, :write)
   def can?(_, %PipelineGate{}, :approve), do: {:error, "only approval gates can be approved"}

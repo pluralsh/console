@@ -57,6 +57,7 @@ defmodule Console.GraphQl.Deployments do
     import_fields :pipeline_queries
     import_fields :public_service_queries
     import_fields :public_cluster_queries
+    import_fields :public_pipeline_queries
 
     field :deployment_settings, :deployment_settings do
       middleware Authenticated
@@ -72,6 +73,7 @@ defmodule Console.GraphQl.Deployments do
     import_fields :pipeline_mutations
     import_fields :public_cluster_mutations
     import_fields :public_service_mutations
+    import_fields :public_pipeline_mutations
 
     @desc "a reusable mutation for updating rbac settings on core services"
     field :update_rbac, :boolean do

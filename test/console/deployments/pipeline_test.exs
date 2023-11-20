@@ -19,7 +19,18 @@ defmodule Console.Deployments.PipelinesTest do
           ]}
         ],
         edges: [
-          %{from: "dev", to: "prod", gates: [%{type: :approval, name: "approve"}]}
+          %{
+            from: "dev",
+            to: "prod",
+            gates: [
+              %{type: :approval, name: "approve"},
+              %{type: :job, name: "integration", spec: %{
+                job: %{
+                  namespace: "namespace",
+                  containers: [%{image: "my-test:latest"}]
+                }
+              }}
+            ]}
         ]
       }, "my-pipeline", user)
 
@@ -40,10 +51,17 @@ defmodule Console.Deployments.PipelinesTest do
       assert edge.from_id == dev.id
       assert edge.to_id == prod.id
 
-      [gate] = edge.gates
+      [gate, job_gate] = edge.gates
       assert gate.name == "approve"
       assert gate.type == :approval
       assert gate.edge_id == edge.id
+
+      assert job_gate.name == "integration"
+      assert job_gate.type == :job
+      assert job_gate.edge_id == edge.id
+      assert job_gate.spec.job.namespace == "namespace"
+      [container] = job_gate.spec.job.containers
+      assert container.image == "my-test:latest"
 
       assert_receive {:event, %PubSub.PipelineUpserted{item: ^pipeline}}
     end
@@ -278,6 +296,42 @@ defmodule Console.Deployments.PipelinesTest do
       assert_receive {:event, %PubSub.PipelineGateApproved{item: ^approved}}
 
       {:error, _} = Pipelines.force_gate(gate.id, insert(:user))
+    end
+  end
+
+  describe "#for_cluster/1" do
+    test "it will fetch eligible gates for a cluster" do
+      cluster = insert(:cluster)
+      other   = insert(:cluster)
+      job = insert(:pipeline_gate, type: :job, state: :pending, cluster: cluster)
+      insert(:pipeline_gate, type: :job, state: :pending, cluster: other)
+      insert(:pipeline_gate, type: :job, state: :open, cluster: cluster)
+      insert(:pipeline_gate, type: :job, state: :closed, cluster: cluster)
+      insert(:pipeline_gate, type: :approval)
+
+      [found] = Pipelines.for_cluster(cluster)
+
+      assert found.id == job.id
+    end
+  end
+
+  describe "#update_gate/3" do
+    test "a deployment agent can update a cluster gate" do
+      cluster = insert(:cluster)
+      job = insert(:pipeline_gate, type: :job, state: :pending, cluster: cluster)
+
+      {:ok, updated} = Pipelines.update_gate(%{state: :open}, job.id, cluster)
+
+      assert updated.id == job.id
+      assert updated.cluster_id == cluster.id
+      assert updated.state == :open
+    end
+
+    test "agents cannot update gates for other clusters" do
+      cluster = insert(:cluster)
+      job = insert(:pipeline_gate, type: :job, state: :pending, cluster: cluster)
+
+      {:error, _} = Pipelines.update_gate(%{state: :open}, job.id, insert(:cluster))
     end
   end
 

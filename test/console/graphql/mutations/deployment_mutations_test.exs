@@ -973,6 +973,22 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       """, %{"id" => cluster.id, "rbac" => %{"readBindings" => [%{"userId" => user.id}]}}, %{current_user: admin})
     end
   end
+
+  describe "updateGate" do
+    test "an agent can update a gate it owns" do
+      cluster = insert(:cluster)
+      job = insert(:pipeline_gate, type: :job, state: :pending, cluster: cluster)
+
+      {:ok, %{data: %{"updateGate" => updated}}} = run_query("""
+        mutation Update($id: ID!, $state: GateState!) {
+          updateGate(id: $id, attributes: {state: $state}) { id state }
+        }
+      """, %{"id" => job.id, "state" => "OPEN"}, %{cluster: cluster})
+
+      assert updated["id"] == job.id
+      assert updated["state"] == "OPEN"
+    end
+  end
 end
 
 defmodule Console.GraphQl.Mutations.SyncDeploymentMutationsTest do

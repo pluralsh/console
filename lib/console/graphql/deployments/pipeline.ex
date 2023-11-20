@@ -33,6 +33,55 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :type,       non_null(:gate_type), description: "the type of gate this is"
     field :cluster,    :string, description: "the handle of a cluster this gate will execute on"
     field :cluster_id, :string, description: "the id of the cluster this gate will execute on"
+    field :spec,       :gate_spec_attributes, description: "a specification for more complex gate types"
+  end
+
+  @desc "the allowed inputs for a deployment agent gate update"
+  input_object :gate_update_attributes do
+    field :state,  :gate_state
+    field :status, :gate_status_attributes
+  end
+
+  input_object :gate_status_attributes do
+    field :job_ref, :namespaced_name
+  end
+
+  input_object :namespaced_name do
+    field :name,      non_null(:string)
+    field :namespace, non_null(:string)
+  end
+
+  @desc "a more refined spec for parameters needed for complex gates"
+  input_object :gate_spec_attributes do
+    field :job, :gate_job_attributes
+  end
+
+  @desc "spec for a job gate"
+  input_object :gate_job_attributes do
+    field :namespace,       non_null(:string)
+    field :raw,             :string, description: "if you'd rather define the job spec via straight k8s yaml"
+    field :containers,      list_of(:container_attributes)
+    field :labels,          :map
+    field :annotations,     :map
+    field :service_account, :string
+  end
+
+  @desc "the attributes for a container"
+  input_object :container_attributes do
+    field :image,    non_null(:string)
+    field :args,     list_of(:string)
+    field :env,      list_of(:env_attributes)
+    field :env_from, list_of(:env_from_attributes)
+  end
+
+  input_object :env_attributes do
+    field :name,  non_null(:string)
+    field :value, non_null(:string)
+  end
+
+  input_object :env_from_attributes do
+    field :secret,     non_null(:string)
+    field :config_map, non_null(:string)
   end
 
   @desc "the attributes of a service w/in a specific stage"
@@ -92,10 +141,46 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :name,  non_null(:string), description: "the name of this gate as seen in the UI"
     field :type,  non_null(:gate_type), description: "the type of gate this is"
     field :state, non_null(:gate_state), description: "the current state of this gate"
+    field :spec,  :gate_spec, description: "more detailed specification for complex gates"
 
     field :approver, :user, description: "the last user to approve this gate", resolve: dataloader(User)
 
     timestamps()
+  end
+
+  @desc "detailed gate specifications"
+  object :gate_spec do
+    field :job, :job_gate_spec
+  end
+
+  @desc "the full specification of a job gate"
+  object :job_gate_spec do
+    field :namespace,       non_null(:string), description: "the namespace the job will run in"
+    field :raw,             :string, description: "a raw kubernetes job resource, overrides any other configuration"
+    field :containers,      list_of(:container_spec), description: "list of containers to run in this job"
+    field :labels,          :map, description: "any pod labels to apply"
+    field :annotations,     :map, description: "any pod annotations to apply"
+    field :service_account, :string, description: "the service account the pod will use"
+  end
+
+  @desc "a shortform spec for job containers, designed for ease-of-use"
+  object :container_spec do
+    field :image,    non_null(:string)
+    field :args,     list_of(:string)
+    field :env,      list_of(:container_env)
+    field :env_from, list_of(:container_env_from)
+  end
+
+  @desc "container env variable"
+  object :container_env do
+    field :name,  non_null(:string)
+    field :value, non_null(:string)
+  end
+
+  @desc "env from declarations for containers"
+  object :container_env_from do
+    field :config_map, non_null(:string)
+    field :secret,     non_null(:string)
   end
 
   @desc "the configuration of a service within a pipeline stage, including optional promotion criteria"
@@ -143,6 +228,24 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   end
 
   connection node_type: :pipeline
+
+  object :public_pipeline_queries do
+    field :cluster_gates, list_of(:pipeline_gate) do
+      middleware ClusterAuthenticated
+
+      resolve &Deployments.cluster_gates/2
+    end
+  end
+
+  object :public_pipeline_mutations do
+    field :update_gate, :pipeline_gate do
+      middleware ClusterAuthenticated
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:gate_update_attributes)
+
+      resolve &Deployments.update_gate/2
+    end
+  end
 
   object :pipeline_queries do
     connection field :pipelines, node_type: :pipeline do

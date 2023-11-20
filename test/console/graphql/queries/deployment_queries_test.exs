@@ -610,4 +610,24 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       """, %{"id" => pipe.id}, %{current_user: insert(:user)})
     end
   end
+
+  describe "clusterGates" do
+    test "it will fetch the gates configured for a cluster" do
+      cluster = insert(:cluster)
+      other   = insert(:cluster)
+      job = insert(:pipeline_gate, type: :job, state: :pending, cluster: cluster)
+      insert(:pipeline_gate, type: :job, state: :pending, cluster: other)
+      insert(:pipeline_gate, type: :job, state: :open, cluster: cluster)
+      insert(:pipeline_gate, type: :job, state: :closed, cluster: cluster)
+      insert(:pipeline_gate, type: :approval)
+
+      {:ok, %{data: %{"clusterGates" => [found]}}} = run_query("""
+        query {
+          clusterGates { id }
+        }
+      """, %{}, %{cluster: cluster})
+
+      assert found["id"] == job.id
+    end
+  end
 end

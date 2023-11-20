@@ -204,6 +204,8 @@ type RootQueryType {
   "tells you what cluster a deploy token points to"
   myCluster: Cluster
 
+  clusterGates: [PipelineGate]
+
   deploymentSettings: DeploymentSettings
 }
 
@@ -394,6 +396,8 @@ type RootMutationType {
   "updates only the components of a given service, to be sent after deploy operator syncs"
   updateServiceComponents(id: ID!, components: [ComponentAttributes], errors: [ServiceErrorAttributes]): ServiceDeployment
 
+  updateGate(id: ID!, attributes: GateUpdateAttributes!): PipelineGate
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
 
@@ -523,6 +527,63 @@ input PipelineGateAttributes {
 
   "the id of the cluster this gate will execute on"
   clusterId: String
+
+  "a specification for more complex gate types"
+  spec: GateSpecAttributes
+}
+
+"the allowed inputs for a deployment agent gate update"
+input GateUpdateAttributes {
+  state: GateState
+  status: GateStatusAttributes
+}
+
+input GateStatusAttributes {
+  jobRef: NamespacedName
+}
+
+input NamespacedName {
+  name: String!
+  namespace: String!
+}
+
+"a more refined spec for parameters needed for complex gates"
+input GateSpecAttributes {
+  job: GateJobAttributes
+}
+
+"spec for a job gate"
+input GateJobAttributes {
+  namespace: String!
+
+  "if you'd rather define the job spec via straight k8s yaml"
+  raw: String
+
+  containers: [ContainerAttributes]
+
+  labels: Map
+
+  annotations: Map
+
+  serviceAccount: String
+}
+
+"the attributes for a container"
+input ContainerAttributes {
+  image: String!
+  args: [String]
+  env: [EnvAttributes]
+  envFrom: [EnvFromAttributes]
+}
+
+input EnvAttributes {
+  name: String!
+  value: String!
+}
+
+input EnvFromAttributes {
+  secret: String!
+  configMap: String!
 }
 
 "the attributes of a service w\/in a specific stage"
@@ -621,12 +682,61 @@ type PipelineGate {
   "the current state of this gate"
   state: GateState!
 
+  "more detailed specification for complex gates"
+  spec: GateSpec
+
   "the last user to approve this gate"
   approver: User
 
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"detailed gate specifications"
+type GateSpec {
+  job: JobGateSpec
+}
+
+"the full specification of a job gate"
+type JobGateSpec {
+  "the namespace the job will run in"
+  namespace: String!
+
+  "a raw kubernetes job resource, overrides any other configuration"
+  raw: String
+
+  "list of containers to run in this job"
+  containers: [ContainerSpec]
+
+  "any pod labels to apply"
+  labels: Map
+
+  "any pod annotations to apply"
+  annotations: Map
+
+  "the service account the pod will use"
+  serviceAccount: String
+}
+
+"a shortform spec for job containers, designed for ease-of-use"
+type ContainerSpec {
+  image: String!
+  args: [String]
+  env: [ContainerEnv]
+  envFrom: [ContainerEnvFrom]
+}
+
+"container env variable"
+type ContainerEnv {
+  name: String!
+  value: String!
+}
+
+"env from declarations for containers"
+type ContainerEnvFrom {
+  configMap: String!
+  secret: String!
 }
 
 "the configuration of a service within a pipeline stage, including optional promotion criteria"

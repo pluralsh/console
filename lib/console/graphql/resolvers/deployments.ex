@@ -161,6 +161,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     end
   end
 
+  def cluster_gates(_, %{context: %{cluster: cluster}}), do: {:ok, Pipelines.for_cluster(cluster)}
+
   def resolve_git(%{id: id}, %{context: %{current_user: user}}) when is_binary(id) do
     Git.get_repository(id)
     |> allow(user, :read)
@@ -309,6 +311,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def force_gate(%{id: id}, %{context: %{current_user: user}}),
     do: Pipelines.force_gate(id, user)
+
+  def update_gate(%{id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
+    do: Pipelines.update_gate(attrs, id, cluster)
 
   def upsert_pipeline(%{name: name, attributes: attrs}, %{context: %{current_user: user}}),
     do: Pipelines.upsert(attrs, name, user)
