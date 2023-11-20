@@ -98,7 +98,7 @@ export type AddOnConfigCondition = {
   field?: Maybe<Scalars['String']['output']>;
   /** the operation for this condition, eg EQ, LT, GT */
   operation?: Maybe<Scalars['String']['output']>;
-  /** the value to apply the codition with, for binary operators like LT/GT */
+  /** the value to apply the condition with, for binary operators like LT/GT */
   value?: Maybe<Scalars['String']['output']>;
 };
 
@@ -114,6 +114,27 @@ export type AddOnConfiguration = {
   type?: Maybe<Scalars['String']['output']>;
   /** the values for ENUM type conditions */
   values?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+/** the specification of a runtime service at a specific version */
+export type AddonVersion = {
+  __typename?: 'AddonVersion';
+  /** checks if this is blocking a specific kubernetes upgrade */
+  blocking?: Maybe<Scalars['Boolean']['output']>;
+  /** any add-ons this might break */
+  incompatibilities?: Maybe<Array<Maybe<VersionReference>>>;
+  /** kubernetes versions this add-on works with */
+  kube?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** any other add-ons this might require */
+  requirements?: Maybe<Array<Maybe<VersionReference>>>;
+  /** add-on version, semver formatted */
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+
+/** the specification of a runtime service at a specific version */
+export type AddonVersionBlockingArgs = {
+  kubeVersion: Scalars['String']['input'];
 };
 
 /** a representation of a kubernetes api deprecation */
@@ -475,6 +496,8 @@ export type Cluster = {
   repository?: Maybe<GitRepository>;
   /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
   revisions?: Maybe<RevisionConnection>;
+  /** fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries */
+  runtimeServices?: Maybe<Array<Maybe<RuntimeService>>>;
   /** whether this is the management cluster itself */
   self?: Maybe<Scalars['Boolean']['output']>;
   /** the service used to deploy the CAPI resources of this cluster */
@@ -589,11 +612,18 @@ export type ClusterProvider = {
   regions?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the repository used to serve cluster manifests */
   repository?: Maybe<GitRepository>;
+  runtimeServices?: Maybe<Array<Maybe<RuntimeService>>>;
   /** the service of the CAPI controller itself */
   service?: Maybe<ServiceDeployment>;
   /** the kubernetes versions this provider currently supports */
   supportedVersions?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+/** a CAPI provider for a cluster, cloud is inferred from name if not provided manually */
+export type ClusterProviderRuntimeServicesArgs = {
+  kubeVersion?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ClusterProviderAttributes = {
@@ -2268,6 +2298,8 @@ export type RootMutationType = {
   /** a regular status ping to be sent by the deploy operator */
   pingCluster?: Maybe<Cluster>;
   readNotifications?: Maybe<User>;
+  /** registers a list of runtime services discovered for the current cluster */
+  registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
   restartBuild?: Maybe<Build>;
   restorePostgres?: Maybe<Postgresql>;
   /** rewires this service to use the given revision id */
@@ -2562,6 +2594,12 @@ export type RootMutationTypeOverlayConfigurationArgs = {
 
 export type RootMutationTypePingClusterArgs = {
   attributes: ClusterPing;
+};
+
+
+export type RootMutationTypeRegisterRuntimeServicesArgs = {
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  services?: InputMaybe<Array<InputMaybe<RuntimeServiceAttributes>>>;
 };
 
 
@@ -3346,6 +3384,35 @@ export type RunningState = {
   startedAt?: Maybe<Scalars['String']['output']>;
 };
 
+/** a full specification of a kubernetes runtime component's requirements */
+export type RuntimeAddon = {
+  __typename?: 'RuntimeAddon';
+  versions?: Maybe<Array<Maybe<AddonVersion>>>;
+};
+
+/** a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api */
+export type RuntimeService = {
+  __typename?: 'RuntimeService';
+  /** the full specification of this kubernetes add-on */
+  addon?: Maybe<RuntimeAddon>;
+  /** the version of the add-on you've currently deployed */
+  addonVersion?: Maybe<AddonVersion>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** add-on name */
+  name: Scalars['String']['output'];
+  /** the plural service it came from */
+  service?: Maybe<ServiceDeployment>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** add-on version, should be semver formatted */
+  version: Scalars['String']['output'];
+};
+
+export type RuntimeServiceAttributes = {
+  name: Scalars['String']['input'];
+  version: Scalars['String']['input'];
+};
+
 export type Secret = {
   __typename?: 'Secret';
   data: Scalars['Map']['output'];
@@ -3790,6 +3857,13 @@ export type UserRoleAttributes = {
 export type UserRoles = {
   __typename?: 'UserRoles';
   admin?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** a shortform reference to an addon by version */
+export type VersionReference = {
+  __typename?: 'VersionReference';
+  name: Scalars['String']['output'];
+  version: Scalars['String']['output'];
 };
 
 export type VerticalPodAutoscaler = {

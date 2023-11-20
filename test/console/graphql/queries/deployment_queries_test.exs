@@ -154,6 +154,64 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
              |> ids_equal([revision])
     end
 
+    test "it can fetch runtime services" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}], current_version: "1.25")
+      runtime = insert(:runtime_service, cluster: cluster, name: "ingress-nginx", version: "1.5.1")
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query Cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            runtimeServices {
+              id
+              name
+              version
+              addon { versions { version kube } }
+              addonVersion {
+                version
+                kube
+                blocking(kubeVersion: "1.26")
+              }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == cluster.id
+      [svc] = found["runtimeServices"]
+      assert svc["id"] == runtime.id
+      assert svc["name"] == "ingress-nginx"
+      assert svc["addonVersion"]["blocking"]
+      assert svc["addonVersion"]["kube"] == ~w(1.25 1.24 1.23)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query Cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            runtimeServices {
+              id
+              name
+              version
+              addon { versions { version kube } }
+              addonVersion {
+                version
+                kube
+                blocking(kubeVersion: "1.25")
+              }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == cluster.id
+      [svc] = found["runtimeServices"]
+      assert svc["id"] == runtime.id
+      assert svc["name"] == "ingress-nginx"
+      refute svc["addonVersion"]["blocking"]
+      assert svc["addonVersion"]["kube"] == ~w(1.25 1.24 1.23)
+    end
+
     test "it respects rbac" do
       user = insert(:user)
       cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])

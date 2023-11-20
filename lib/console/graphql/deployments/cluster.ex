@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.Deployments.Cluster do
   use Console.GraphQl.Schema.Base
   alias Console.Schema.ClusterProvider
+  alias Console.Deployments.Compatibilities
   alias Console.GraphQl.Resolvers.{Deployments}
 
   input_object :cluster_attributes do
@@ -125,6 +126,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :client_secret,   non_null(:string)
   end
 
+  input_object :runtime_service_attributes do
+    field :name,    non_null(:string)
+    field :version, non_null(:string)
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -137,6 +143,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :service,             :service_deployment, resolve: dataloader(Deployments), description: "the service of the CAPI controller itself"
     field :credentials,         list_of(:provider_credential), resolve: dataloader(Deployments), description: "a list of credentials eligible for this provider"
     field :deleted_at,          :datetime, description: "when the cluster provider was deleted"
+
+    field :runtime_services, list_of(:runtime_service) do
+      arg :kube_version, :string, description: "the kubernetes version you want to check is upgradeable"
+      resolve &Deployments.runtime_services/3
+    end
 
     field :supported_versions, list_of(:string), description: "the kubernetes versions this provider currently supports",
       resolve: fn provider, _, _ -> {:ok, ClusterProvider.supported_versions(provider)} end
@@ -196,6 +207,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     connection field :revisions, node_type: :revision do
       resolve &Deployments.list_cluster_revisions/3
     end
+
+    @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
+    field :runtime_services, list_of(:runtime_service), resolve: &Deployments.runtime_services/3
 
     field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this cluster"
 
@@ -294,7 +308,46 @@ defmodule Console.GraphQl.Deployments.Cluster do
   object :add_on_config_condition do
     field :operation, :string, description: "the operation for this condition, eg EQ, LT, GT"
     field :field,     :string, description: "the field this condition applies to"
-    field :value,     :string, description: "the value to apply the codition with, for binary operators like LT/GT"
+    field :value,     :string, description: "the value to apply the condition with, for binary operators like LT/GT"
+  end
+
+  @desc "a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api"
+  object :runtime_service do
+    field :id,            non_null(:id)
+    field :name,          non_null(:string), description: "add-on name"
+    field :version,       non_null(:string), description: "add-on version, should be semver formatted"
+    field :addon,         :runtime_addon,    description: "the full specification of this kubernetes add-on"
+    field :addon_version, :addon_version,    description: "the version of the add-on you've currently deployed"
+    field :service,       :service_deployment,
+      resolve: dataloader(Deployments),
+      description: "the plural service it came from"
+
+    timestamps()
+  end
+
+  @desc "a full specification of a kubernetes runtime component's requirements"
+  object :runtime_addon do
+    field :versions, list_of(:addon_version)
+  end
+
+  @desc "the specification of a runtime service at a specific version"
+  object :addon_version do
+    field :version,           :string, description: "add-on version, semver formatted"
+    field :kube,              list_of(:string), description: "kubernetes versions this add-on works with"
+    field :requirements,      list_of(:version_reference), description: "any other add-ons this might require"
+    field :incompatibilities, list_of(:version_reference), description: "any add-ons this might break"
+
+    @desc "checks if this is blocking a specific kubernetes upgrade"
+    field :blocking, :boolean do
+      arg :kube_version, non_null(:string)
+      resolve fn vsn, %{kube_version: kube}, _ -> {:ok, Compatibilities.Version.blocking?(vsn, kube)} end
+    end
+  end
+
+  @desc "a shortform reference to an addon by version"
+  object :version_reference do
+    field :name,    non_null(:string)
+    field :version, non_null(:string)
   end
 
   object :tag do
@@ -316,6 +369,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :attributes, non_null(:cluster_ping)
 
       safe_resolve &Deployments.ping/2
+    end
+
+    @desc "registers a list of runtime services discovered for the current cluster"
+    field :register_runtime_services, :integer do
+      middleware ClusterAuthenticated
+      arg :services,   list_of(:runtime_service_attributes)
+      arg :service_id, :id
+
+      resolve &Deployments.create_runtime_services/2
     end
   end
 

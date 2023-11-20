@@ -214,6 +214,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     end
   end
 
+  def runtime_services(cluster, _, _), do: {:ok, Clusters.runtime_services(cluster)}
+
   def enable(_, %{context: %{current_user: user}}), do: Settings.enable(user)
 
   def create_cluster(%{attributes: attrs}, %{context: %{current_user: user}}),
@@ -322,6 +324,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Clusters.ping(attrs, cluster)
+
+  def create_runtime_services(%{services: svcs} = args, %{context: %{cluster: cluster}}),
+    do: Clusters.create_runtime_services(svcs, args[:service_id], cluster)
 
   def editable(resource, _, %{context: %{current_user: user}}) do
     case allow(resource, user, :write) do

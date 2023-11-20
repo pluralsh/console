@@ -1,6 +1,8 @@
 defmodule Console.Deployments.Compatibilities.Table do
   use GenServer
+  import Console.Deployments.Ecto.Validations, only: [clean_version: 1]
   alias Console.Deployments.Compatibilities.AddOn
+  alias Console.Schema.{RuntimeService}
   alias ETS.KeyValueSet
   require Logger
 
@@ -21,6 +23,12 @@ defmodule Console.Deployments.Compatibilities.Table do
     send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
     {:ok, %State{table: table, url: @url}}
+  end
+
+  def fetch(%RuntimeService{name: name, version: vsn}) do
+    vsn = clean_version(vsn)
+    with %AddOn{} = addon <- fetch(name),
+      do: AddOn.find_version(addon, vsn)
   end
 
   def fetch(name) do

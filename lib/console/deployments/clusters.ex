@@ -9,7 +9,17 @@ defmodule Console.Deployments.Clusters do
   alias Console.Deployments.Compatibilities.Table
   alias Console.Services.Users
   alias Kazan.Apis.Core.V1, as: Core
-  alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken, ClusterRevision, ProviderCredential, RuntimeService}
+  alias Console.Schema.{
+    Cluster,
+    User,
+    ClusterProvider,
+    Service,
+    DeployToken,
+    ClusterRevision,
+    ProviderCredential,
+    RuntimeService
+  }
+  alias Console.Deployments.Compatibilities
   require Logger
 
   @cache_adapter Console.conf(:cache_adapter)
@@ -567,6 +577,16 @@ defmodule Console.Deployments.Clusters do
     RuntimeService.for_cluster(id)
     |> RuntimeService.ordered()
     |> Repo.all()
+    |> Enum.map(fn svc ->
+      case Table.fetch(svc.name) do
+        %Compatibilities.AddOn{} = addon ->
+          Map.merge(svc, %{
+            addon: addon,
+            addon_version: Compatibilities.AddOn.find_version(addon, svc.version)
+          })
+        _ -> svc
+      end
+    end)
   end
 
   @doc """
@@ -575,7 +595,7 @@ defmodule Console.Deployments.Clusters do
   @spec create_runtime_services([map], binary, Cluster.t) :: {:ok, integer} | Console.error
   def create_runtime_services(svcs, service_id, %Cluster{id: id}) do
     replace = if is_nil(service_id), do: [:name, :version], else: [:name, :version, :service_id]
-    services = Enum.filter(svcs, fn
+    Enum.filter(svcs, fn
       %{name: n} -> Table.fetch(n)
       _ -> false
     end)
@@ -585,15 +605,18 @@ defmodule Console.Deployments.Clusters do
       inserted_at: Timex.now(),
       updated_at: Timex.now()
     }))
+    |> case do
+      [_ | _] = services ->
+        {count, _} = Repo.insert_all(
+          RuntimeService,
+          services,
+          on_conflict: {:replace, replace},
+          conflict_target: [:cluster_id, :name]
+        )
+        {:ok, count}
 
-    Repo.insert_all(
-      RuntimeService,
-      services,
-      on_conflict: {:replace, replace},
-      conflict_target: [:cluster_id, :name]
-    )
-    |> elem(0)
-    |> ok()
+      _ -> {:ok, 0}
+    end
   end
 
   def kas_url() do

@@ -6,6 +6,9 @@ defmodule Console.Schema.RuntimeService do
     field :name,    :string
     field :version, :string
 
+    field :addon,         :map, virtual: true
+    field :addon_version, :map, virtual: true
+
     belongs_to :service, Service
     belongs_to :cluster, Cluster
 
