@@ -34,6 +34,7 @@ export { default as CheckRoundedIcon } from './components/icons/CheckRoundedIcon
 export { default as ChronjobIcon } from './components/icons/ChronjobIcon'
 export { default as CliIcon } from './components/icons/CliIcon'
 export { default as CloseIcon } from './components/icons/CloseIcon'
+export { default as CloseRoundedIcon } from './components/icons/CloseRoundedIcon'
 export { default as CloudIcon } from './components/icons/CloudIcon'
 export { default as ClusterIcon } from './components/icons/ClusterIcon'
 export { default as CollapseIcon } from './components/icons/CollapseIcon'
