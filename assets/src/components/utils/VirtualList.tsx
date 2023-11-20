@@ -94,8 +94,7 @@ export function VirtualList<
     getItemKey,
     estimateSize,
     measureElement: (el) => {
-      console.log('measure el', el)
-      // Since <td>s are rendered with `display: contents`, we need to calculate
+      // Since element is rendered with `display: contents`, we need to calculate
       // row height from contents using Range
       if (el?.getBoundingClientRect().height <= 0 && el?.hasChildNodes()) {
         const range = document.createRange()
@@ -149,8 +148,6 @@ export function VirtualList<
             const row = rows[virtualRow.index]
 
             if (isLoaderRow) {
-              console.log('isLoaderRow')
-
               return <div key="loaderRow">Loading</div>
             }
             if (!row) {

@@ -1,6 +1,5 @@
 import { AppsIcon, IconFrame, ReloadIcon } from '@pluralsh/design-system'
 import {
-  GateState,
   GateType,
   PipelineFragment,
   PipelineGateFragment,
@@ -27,6 +26,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { groupBy } from 'lodash'
 
 import { ApprovalNode, StageNode, TestsNode } from './PipelineNodes'
+import { FAKE_GATES } from './FAKE_GATES'
 
 const DEBUG_MODE = true
 
@@ -49,25 +49,20 @@ function measureNode(node: FlowNode, zoom) {
   try {
     const selector = `[data-id="${node.id}"]`
 
-    console.log('selector', selector)
     domNode = document.querySelector(selector)
   } catch (e) {
-    console.log('caught', e)
-
     return
   }
 
-  console.log('domNode', domNode)
-
   const rect = domNode?.getBoundingClientRect()
 
-  console.log('rect', rect)
-
-  return {
+  const ret = {
     ...node,
-    width: (rect?.width || 100) / zoom,
-    height: (rect?.height || 100) / zoom,
+    width: (rect?.width || 200) / zoom,
+    height: (rect?.height || 200) / zoom,
   }
+
+  return ret
 }
 type DagreDirection = 'LR' | 'RL' | 'TB' | 'BT'
 const getLayoutedElements = (
@@ -92,7 +87,6 @@ const getLayoutedElements = (
 
   edges.forEach((edge) => dagre.setEdge(edge.source, edge.target))
   nodes.forEach((node) => {
-    console.log('measure', node)
     const measuredNode = measureNode(node, zoom)
 
     if (measuredNode) {
@@ -104,55 +98,28 @@ const getLayoutedElements = (
 
   return {
     nodes: nodes.map((node) => {
-      const { x, y } = dagre.node(node.id)
+      const { x, y, width, height } = dagre.node(node.id)
 
-      console.log({ x, y })
-
-      return { ...node, position: { x, y } }
+      // Dagre returns center of node, but react-flow expects top/left
+      return { ...node, position: { x: x - width / 2, y: y - height / 2 } }
     }),
     edges,
   }
 }
-
-const FAKE_GATES: Partial<PipelineGateFragment>[] = [
-  {
-    id: '1',
-    name: 'An approval',
-    type: GateType.Approval,
-    state: GateState.Closed,
-  },
-  {
-    id: '2',
-    name: 'A window',
-    type: GateType.Window,
-    state: GateState.Open,
-  },
-  {
-    id: '3',
-    name: 'A job',
-    type: GateType.Job,
-    state: GateState.Pending,
-  },
-]
 
 export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
   const theme = useTheme()
   const gridGap = theme.spacing.large
   const margin = gridGap * 1
   const { initialNodes, initialEdges } = useMemo(
-    () => getNodesEdges(pipeline),
-    [pipeline]
+    () => getNodesEdges(pipeline, theme),
+    [pipeline, theme]
   )
-  const {
-    fitView: _fitView,
-    setViewport,
-    getViewport,
-    viewportInitialized,
-  } = useReactFlow()
+  const { setViewport, getViewport, viewportInitialized } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as any)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
 
-  const onLayout = useCallback(
+  const layoutNodes = useCallback(
     (direction: DagreDirection = 'LR') => {
       const layouted = getLayoutedElements(nodes, edges, {
         direction,
@@ -163,24 +130,20 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
 
       setNodes([...layouted.nodes])
       setEdges([...layouted.edges])
-
-      window.requestAnimationFrame(() => {
-        // fitView()
-      })
     },
     [nodes, edges, getViewport, gridGap, margin, setNodes, setEdges]
   )
 
   useLayoutEffect(() => {
     if (viewportInitialized) {
-      onLayout()
+      layoutNodes()
     }
     // Only run on first render
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewportInitialized])
 
   return (
-    <ReactFlowWrapperSC $hide={!viewportInitialized}>
+    <ReactFlowWrapperSC>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -225,7 +188,7 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
           icon={<AppsIcon />}
           tooltip="Auto-layout"
           onClick={() => {
-            onLayout()
+            layoutNodes()
           }}
         >
           Reset view
@@ -235,14 +198,14 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
   )
 }
 
-const ReactFlowWrapperSC = styled.div<{ $hide }>(({ theme, $hide }) => ({
+const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
   '.react-flow__renderer': {
-    display: $hide ? 'none' : 'block',
+    opacity: $hide ? 0 : 1,
   },
 }))
 
@@ -261,15 +224,13 @@ const getEdgeProps = (theme: DefaultTheme) => ({
   },
 })
 
-function getNodesEdges(pipeline: PipelineFragment) {
-  const theme = useTheme()
+function getNodesEdges(pipeline: PipelineFragment, theme: DefaultTheme) {
   const edges: Edge<any>[] = []
   const pipeStages = pipeline.stages?.filter(isNonNullable) ?? []
   const pipeEdges = pipeline.edges?.filter(isNonNullable) ?? []
   const gateNodes = pipeEdges?.flatMap((e) => {
     let edge = { ...e }
 
-    console.log('edge', edge)
     if (DEBUG_MODE) {
       // @ts-ignore
       edge = { ...edge, gates: FAKE_GATES }
@@ -293,15 +254,10 @@ function getNodesEdges(pipeline: PipelineFragment) {
       }
     }) as Record<NodeType, PipelineGateFragment[]>
 
-    console.log('groupedGates', groupedGates)
-
     return (
       Object.entries(groupedGates).flatMap(([type, gates]) => {
         const nodeId =
           type === NodeType.Approval ? `${edge.id}-${gates?.[0]?.id}` : edge.id
-
-        console.log('entries', [type, gates])
-        console.log('entries nodeId', nodeId)
 
         if (!gates || !nodeId) {
           return []
@@ -328,7 +284,7 @@ function getNodesEdges(pipeline: PipelineFragment) {
           id: nodeId,
           type,
           position: { x: 0, y: 0 },
-          data: type === NodeType.Approval ? gates?.[0] : { ...edge, gates },
+          data: { ...edge, gates },
         }
       }) ?? []
     )

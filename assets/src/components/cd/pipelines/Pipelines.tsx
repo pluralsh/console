@@ -3,7 +3,7 @@ import {
   AppIcon,
   Card,
   EmptyState,
-  GitPullIcon,
+  PipelineIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
@@ -20,7 +20,7 @@ import { NetworkStatus } from '@apollo/client'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
-import { VirtualList, VirtualListRenderer } from '../../utils/VirtualList'
+import { VirtualList, type VirtualListRenderer } from '../../utils/VirtualList'
 
 import { Pipeline } from './Pipeline'
 
@@ -83,7 +83,7 @@ const PipelineListItem: VirtualListRenderer<Edge<PipelineFragment>, ListMeta> =
           type="secondary"
           size="xxsmall"
           icon={
-            <GitPullIcon
+            <PipelineIcon
               color={
                 isSelected
                   ? theme.colors['icon-info']

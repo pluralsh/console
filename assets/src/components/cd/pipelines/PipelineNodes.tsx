@@ -1,18 +1,25 @@
 import {
+  AppIcon,
   Card,
   Chip,
+  CloseIcon,
   ClusterIcon,
-  ListIcon,
+  Spinner,
+  StatusOkIcon,
+  TestTubeIcon,
   ThumbsUpIcon,
+  Tooltip,
 } from '@pluralsh/design-system'
 import {
   GateState,
   PipelineGateFragment,
   PipelineStageEdgeFragment,
   PipelineStageFragment,
+  ServiceDeploymentStatus,
 } from 'generated/graphql'
 import {
   ComponentProps,
+  ComponentPropsWithoutRef,
   ReactElement,
   ReactNode,
   cloneElement,
@@ -23,7 +30,38 @@ import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 import upperFirst from 'lodash/upperFirst'
 
-import { ServiceStatusChip } from '../services/ServiceStatusChip'
+type CardStatus = 'ok' | 'closed' | 'pending'
+
+const serviceStateToCardStatus = {
+  [ServiceDeploymentStatus.Healthy]: 'ok',
+  [ServiceDeploymentStatus.Synced]: 'ok',
+  [ServiceDeploymentStatus.Stale]: 'pending',
+  [ServiceDeploymentStatus.Failed]: 'closed',
+} as const satisfies Record<ServiceDeploymentStatus, CardStatus>
+
+const gateStateToCardStatus = {
+  [GateState.Open]: 'ok',
+  [GateState.Closed]: 'closed',
+  [GateState.Pending]: 'pending',
+} as const satisfies Record<GateState, CardStatus>
+
+const gateStateToApprovalText = {
+  [GateState.Open]: 'Approved',
+  [GateState.Pending]: 'Waiting',
+  [GateState.Closed]: 'Blocked',
+} as const satisfies Record<GateState, string>
+
+const gateStateToTestText = {
+  [GateState.Open]: 'Passed',
+  [GateState.Pending]: 'In progress',
+  [GateState.Closed]: 'Failed',
+} as const satisfies Record<GateState, string>
+
+const NodeCardList = styled.ul(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+}))
 
 const StageNodeSC = styled(Card)(({ theme }) => ({
   '&&': {
@@ -39,11 +77,6 @@ const StageNodeSC = styled(Card)(({ theme }) => ({
       ...theme.partials.reset.li,
     },
   },
-  '.serviceList': {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.xsmall,
-  },
   '.section': {
     display: 'flex',
     flexDirection: 'column',
@@ -52,6 +85,8 @@ const StageNodeSC = styled(Card)(({ theme }) => ({
   '.headerArea': {
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'space-between',
+
     gap: theme.spacing.small,
     minHeight: 22,
     marginTop: -4,
@@ -69,16 +104,7 @@ const StageNodeSC = styled(Card)(({ theme }) => ({
     color: theme.colors['text-light'],
   },
 }))
-const ServiceCardSC = styled(Card)(({ theme }) => ({
-  '&&': {
-    ...theme.partials.text.body2,
-    color: theme.colors['text-light'],
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
-    display: 'flex',
-    gap: theme.spacing.xsmall,
-    alignItems: 'center',
-  },
-}))
+
 const HANDLE_SIZE = 10
 const HandleSC = styled(Handle).attrs(() => ({
   isConnectable: false,
@@ -119,6 +145,7 @@ export const useNodeEdges = () => {
     [edges, nodes]
   )
 }
+
 export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
   return (
     <StageNodeSC>
@@ -133,19 +160,24 @@ export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
         <div className="section">
           {/* <h4 className="subhead">Services</h4> */}
 
-          <ul className="serviceList">
+          <NodeCardList>
             {data.services?.map((service) => (
               <li>
-                <ServiceCardSC>
+                <ServiceCard
+                  status={
+                    service?.service?.status
+                      ? serviceStateToCardStatus[service?.service?.status]
+                      : undefined
+                  }
+                  statusLabel={upperFirst(
+                    service?.service?.status.toLowerCase?.()
+                  )}
+                >
                   <div>{service?.service?.name}</div>
-                  <ServiceStatusChip
-                    size="small"
-                    status={service?.service?.status}
-                  />
-                </ServiceCardSC>
+                </ServiceCard>
               </li>
             ))}
-          </ul>
+          </NodeCardList>
         </div>
       )}
       <HandleSC
@@ -190,7 +222,30 @@ function IconHeading({
   )
 }
 
-export function ApprovalNode({ data: gate }: NodeProps<PipelineGateFragment>) {
+function reduceGateStatuses(gates: Nullable<Nullable<PipelineGateFragment>[]>) {
+  let reducedState: GateState | undefined
+
+  if (gates?.some((g) => g?.state === GateState.Closed)) {
+    reducedState = GateState.Closed
+  } else if (gates?.some((g) => g?.state === GateState.Pending)) {
+    reducedState = GateState.Pending
+  } else if (gates?.every((g) => g?.state === GateState.Open)) {
+    reducedState = GateState.Open
+  }
+
+  return reducedState
+}
+
+export function ApprovalNode({
+  data: edge,
+}: NodeProps<PipelineStageEdgeFragment>) {
+  const gates = edge?.gates
+  const reducedState = reduceGateStatuses(gates)
+
+  if (!reducedState) {
+    return null
+  }
+
   return (
     <StageNodeSC>
       <HandleSC
@@ -201,13 +256,13 @@ export function ApprovalNode({ data: gate }: NodeProps<PipelineGateFragment>) {
         <h2 className="heading">Action</h2>
         <Chip
           size="small"
-          severity={gateStateToSeverity[gate.state]}
+          severity={gateStateToSeverity[reducedState]}
         >
-          {upperFirst(gate.state.toLowerCase())}
+          {gateStateToApprovalText[reducedState]}
         </Chip>
       </div>
       <IconHeading icon={<ThumbsUpIcon />}>Approval</IconHeading>
-      {gate.approver && <div>Approver: {gate.approver.name}</div>}
+      {gates?.map((gate) => gate?.approver && <ApproverCard gate={gate} />)}
       <HandleSC
         type="source"
         position={Position.Right}
@@ -217,9 +272,142 @@ export function ApprovalNode({ data: gate }: NodeProps<PipelineGateFragment>) {
   )
 }
 
+const StatusCardSC = styled(Card)(({ theme }) => ({
+  '&&': {
+    padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: theme.spacing.small,
+  },
+  '.state': {
+    display: 'flex',
+    alignItems: 'center',
+  },
+}))
+
+function StatusCard({
+  status,
+  statusLabel,
+  children,
+  ...props
+}: {
+  status: Nullable<CardStatus>
+  statusLabel?: Nullable<string>
+} & ComponentPropsWithoutRef<typeof StatusCardSC>) {
+  const theme = useTheme()
+
+  return (
+    <StatusCardSC {...props}>
+      <div className="contentArea">{children}</div>
+      {status && (
+        <div className="state">
+          <Tooltip label={statusLabel}>
+            {status === 'ok' ? (
+              <StatusOkIcon
+                size={12}
+                color={theme.colors['icon-success']}
+              />
+            ) : status === 'closed' ? (
+              <CloseIcon
+                size={12}
+                color={theme.colors['icon-danger-critical']}
+              />
+            ) : (
+              <div>
+                <Spinner
+                  size={12}
+                  color={theme.colors['icon-warning']}
+                />
+              </div>
+            )}
+          </Tooltip>
+        </div>
+      )}
+    </StatusCardSC>
+  )
+}
+
+const ApproverCardSC = styled(StatusCard)(({ theme }) => ({
+  '.contentArea': {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.small,
+  },
+  '.name': {
+    ...theme.partials.text.body2,
+    color: theme.colors['text-light'],
+  },
+  '.email': {
+    ...theme.partials.text.caption,
+    color: theme.colors['text-xlight'],
+    marginTop: -theme.spacing.xxxsmall,
+  },
+}))
+
+function ApproverCard({
+  gate,
+  ...props
+}: { gate: PipelineGateFragment } & ComponentPropsWithoutRef<
+  typeof ApproverCardSC
+>) {
+  const { approver } = gate
+
+  if (!approver) {
+    return null
+  }
+
+  return (
+    <ApproverCardSC
+      status={gate.state ? gateStateToCardStatus[gate.state] : undefined}
+      statusLabel={gate.state ? gateStateToApprovalText[gate.state] : undefined}
+      {...props}
+    >
+      <AppIcon
+        size="xxsmall"
+        name={approver.name}
+        url={approver.profile ?? undefined}
+        spacing="none"
+      />
+      <div>
+        <p className="name">{approver.name}</p>
+        <p className="email">{approver.email}</p>
+      </div>
+    </ApproverCardSC>
+  )
+}
+
+const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
+  '.contentArea': {
+    ...theme.partials.text.body2,
+    color: theme.colors['text-light'],
+    display: 'flex',
+    gap: theme.spacing.xsmall,
+    alignItems: 'center',
+  },
+}))
+
+function ServiceCard({
+  state,
+  ...props
+}: ComponentPropsWithoutRef<typeof ServiceCardSC>) {
+  return (
+    <ServiceCardSC
+      state={state}
+      {...props}
+    />
+  )
+}
 export function TestsNode({
   data: edge,
 }: NodeProps<PipelineStageEdgeFragment>) {
+  const gates = edge?.gates
+  const reducedState = reduceGateStatuses(gates)
+
+  if (!reducedState) {
+    return null
+  }
+
   return (
     <StageNodeSC>
       <HandleSC
@@ -228,28 +416,33 @@ export function TestsNode({
       />
       <div className="headerArea">
         <h2 className="heading">Action</h2>
-        {/* <Chip
+        <Chip
           size="small"
-          severity={gateStateToSeverity[data.state]}
+          severity={gateStateToSeverity[reducedState]}
         >
-          {upperFirst(data.state.toLowerCase())}
-        </Chip> */}
+          {gateStateToTestText[reducedState]}
+        </Chip>
       </div>
-      <IconHeading icon={<ListIcon />}>Tests</IconHeading>
-      {/* {data.approver && <div>{data.approver.name}</div>} */}
-      <ul className="serviceList">
-        {edge.gates?.map((gate) => (
-          <li>
-            <ServiceCardSC>
-              <div>{gate?.name}</div>
-              {/* <ServiceStatusChip
-              size="small"
-              status={gate?.state}
-            /> */}
-            </ServiceCardSC>
-          </li>
-        ))}
-      </ul>
+      <IconHeading icon={<TestTubeIcon />}>Run test group</IconHeading>
+      <NodeCardList>
+        {edge.gates?.map(
+          (gate) =>
+            gate && (
+              <li>
+                <StatusCard
+                  status={
+                    gate.state ? gateStateToCardStatus[gate.state] : undefined
+                  }
+                  statusLabel={
+                    gate.state ? gateStateToTestText[gate.state] : undefined
+                  }
+                >
+                  {gate.name}
+                </StatusCard>
+              </li>
+            )
+        )}
+      </NodeCardList>
       <HandleSC
         type="source"
         position={Position.Right}
