@@ -142,14 +142,47 @@ export const useNodeEdges = () => {
   )
 }
 
+enum StageStatus {
+  Complete = 'Complete',
+  Pending = 'Pending',
+}
+const stageStatusToSeverity = {
+  [StageStatus.Complete]: 'success',
+  [StageStatus.Pending]: 'warning',
+} as const satisfies Record<
+  StageStatus,
+  ComponentProps<typeof Chip>['severity']
+>
+
+function getStageStatus(stage: Pick<PipelineStageFragment, 'promotion'>) {
+  const promotedDate = new Date(stage.promotion?.promotedAt || '')
+  const revisedDate = new Date(stage.promotion?.revisedAt || '')
+
+  if (promotedDate > revisedDate) {
+    return StageStatus.Complete
+  }
+
+  return StageStatus.Pending
+}
+
 export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
+  const status = getStageStatus(data)
+
   return (
     <BaseNodeSC>
       <HandleSC
         type="target"
         position={Position.Left}
       />
-      <h2 className="heading">STAGE</h2>
+      <div className="headerArea">
+        <h2 className="heading">STAGE</h2>
+        <Chip
+          size="small"
+          severity={stageStatusToSeverity[status]}
+        >
+          {status}
+        </Chip>
+      </div>
       <IconHeading icon={<ClusterIcon />}>Deploy to {data.name}</IconHeading>
 
       {!isEmpty(data.services) && (

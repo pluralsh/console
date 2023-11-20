@@ -302,8 +302,6 @@ function getNodesEdges(pipeline: PipelineFragment, theme: DefaultTheme) {
     )
   })
 
-  console.log('  gateNodes', gateNodes)
-
   return {
     initialNodes: [
       ...pipeStages.map((stage) => ({
