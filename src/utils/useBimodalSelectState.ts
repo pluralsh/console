@@ -15,6 +15,7 @@ https://github.com/adobe/react-spectrum/blob/main/packages/%40react-stately/sele
  * governing permissions and limitations under the License.
  */
 
+import { useFormValidationState } from '@react-stately/form'
 import { useMenuTriggerState } from 'react-stately'
 import { type AriaSelectProps } from '@react-types/select'
 import { type ListProps, type SelectState, useListState } from 'react-stately'
@@ -105,6 +106,11 @@ function useBimodalSelectState<T extends object>({
 
   listStateRef.current = listState
 
+  const validationState = useFormValidationState({
+    ...props,
+    value: selectionMode === 'single' ? selectedKey : selectedKeys,
+  })
+
   const selectedItem =
     selectedKey != null ? listState.collection.getItem(selectedKey) : null
 
@@ -115,6 +121,7 @@ function useBimodalSelectState<T extends object>({
   const [isFocused, setFocused] = useState(false)
 
   return {
+    ...validationState,
     ...listState,
     ...triggerState,
     selectedKey,

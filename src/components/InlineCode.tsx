@@ -1,4 +1,4 @@
-import { type ComponentPropsWithRef, forwardRef } from 'react'
+import { type ComponentProps, forwardRef } from 'react'
 
 import styled from 'styled-components'
 
@@ -66,7 +66,7 @@ const CodeElt = styled.code<{ $parentFillLevel: FillLevel }>(
   })
 )
 
-const InlineCode = forwardRef<HTMLElement, ComponentPropsWithRef<'code'>>(
+const InlineCode = forwardRef<HTMLElement, ComponentProps<typeof CodeElt>>(
   ({ ...props }, ref) => {
     const parentFillLevel = useFillLevel()
 
