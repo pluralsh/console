@@ -255,7 +255,7 @@ function ClusterUpgradeModal({
           gap: theme.spacing.large,
         }}
       >
-        {hasDeprecations ? (
+        {hasDeprecations && (
           <>
             <div
               css={{
@@ -275,15 +275,6 @@ function ClusterUpgradeModal({
               }}
             />
           </>
-        ) : (
-          <div
-            css={{
-              ...theme.partials.text.body1,
-              color: theme.colors['text-light'],
-            }}
-          >
-            No deprecated resources detected. Ready to update.
-          </div>
         )}
         <RuntimeServices cluster={cluster} />
         <Table
