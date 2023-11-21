@@ -102,7 +102,7 @@ export default function ContinuousDeployment() {
 
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${CD_ABS_PATH}/:tab*`)
-  // @ts-ignore
+  // @ts-expect-error
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 
