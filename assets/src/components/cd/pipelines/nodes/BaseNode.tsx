@@ -13,14 +13,24 @@ import {
   ReactElement,
   ReactNode,
   cloneElement,
+  useMemo,
 } from 'react'
-import { Handle, type NodeProps, Position } from 'reactflow'
+import {
+  Handle,
+  type Node,
+  type NodeProps,
+  Position,
+  useNodes,
+} from 'reactflow'
 import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
 import { useNodeEdges } from '../utils/hooks'
+import { reduceGateStates } from '../utils/reduceGateStatuses'
 
 export type CardStatus = 'ok' | 'closed' | 'pending'
+
+const HANDLE_SIZE = 10
 
 export const gateStateToCardStatus = {
   [GateState.Open]: 'ok',
@@ -72,7 +82,6 @@ const BaseNodeSC = styled(Card)(({ theme }) => ({
   },
 }))
 
-const HANDLE_SIZE = 10
 const HandleSC = styled(Handle)<{ $isConnected?: boolean; $isOpen?: boolean }>(
   ({ theme, $isConnected, $isOpen = true }) => ({
     '&&': {
@@ -100,13 +109,28 @@ export function BaseNode({
   children,
 }: NodeProps<NodeMeta> & { children: ReactNode }) {
   const { incomers, outgoers } = useNodeEdges(id)
+  const nodes = useNodes()
+
+  console.log('incomers', incomers)
+
+  const reducedInState = useMemo(() => {
+    const incomingNodes = nodes.filter((node) =>
+      incomers.some((incomer) => incomer.source === node.id)
+    )
+
+    return reduceGateStates(
+      incomingNodes.map((inNode) => ({
+        state: (inNode as Node<NodeMeta>)?.data?.meta?.state,
+      }))
+    )
+  }, [incomers, nodes])
 
   return (
     <BaseNodeSC>
       <HandleSC
         type="target"
         $isConnected={!isEmpty(incomers)}
-        $isOpen={!isEmpty(incomers)}
+        $isOpen={reducedInState === GateState.Open}
         position={Position.Left}
       />
       {children}

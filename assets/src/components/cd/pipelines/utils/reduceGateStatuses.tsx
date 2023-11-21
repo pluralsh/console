@@ -1,7 +1,7 @@
-import { GateState, PipelineGateFragment } from 'generated/graphql'
+import { GateState } from 'generated/graphql'
 
-export function reduceGateStatuses(
-  gates: Nullable<Nullable<PipelineGateFragment>[]>
+export function reduceGateStates(
+  gates: Nullable<Nullable<{ state: Nullable<GateState> }>[]>
 ) {
   let reducedState: GateState | undefined
 

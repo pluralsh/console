@@ -5,8 +5,9 @@ import { useTheme } from 'styled-components'
 
 import { useEdgeNodes } from './utils/hooks'
 
-const ACTIVE_ID = 'pipeline-markerArrowActive'
-const ID = 'pipeline-markerArrow'
+export const CUSTOM_EDGE_NAME = 'plural-edge' as const
+const MARKER_ACTIVE_ID = 'pipeline-markerArrowActive'
+const MARKER_ID = 'pipeline-markerArrow'
 
 export default function EdgeLine({
   style,
@@ -28,12 +29,12 @@ export default function EdgeLine({
         ...style,
         stroke: color,
       }}
-      markerEnd={`url(#${active ? ACTIVE_ID : ID})`}
+      markerEnd={`url(#${active ? MARKER_ACTIVE_ID : MARKER_ID})`}
     />
   )
 }
 
-export const edgeTypes = { 'custom-edge': EdgeLine } as const
+export const edgeTypes = { [CUSTOM_EDGE_NAME]: EdgeLine } as const
 function EdgeLineMarker({ id, color }: { id: string; color: string }) {
   return (
     <marker
@@ -64,11 +65,11 @@ export function EdgeLineMarkerDefs() {
     <svg>
       <defs>
         <EdgeLineMarker
-          id={ID}
+          id={MARKER_ID}
           color={theme.colors.border}
         />
         <EdgeLineMarker
-          id={ACTIVE_ID}
+          id={MARKER_ACTIVE_ID}
           color={theme.colors['border-secondary']}
         />
       </defs>

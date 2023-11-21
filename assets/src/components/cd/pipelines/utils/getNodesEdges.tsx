@@ -11,7 +11,9 @@ import { groupBy } from 'lodash'
 
 import { StageStatus, getStageStatus } from '../nodes/StageNode'
 
-import { reduceGateStatuses } from './reduceGateStatuses'
+import { CUSTOM_EDGE_NAME } from '../EdgeLine'
+
+import { reduceGateStates } from './reduceGateStatuses'
 
 import { DEMO_GATES, PIPELINE_DEBUG_MODE } from './_demo_data'
 
@@ -22,7 +24,7 @@ export enum NodeType {
 }
 
 const baseEdgeProps = {
-  type: 'custom-edge',
+  type: CUSTOM_EDGE_NAME,
 }
 
 const TYPE_SORT_VALS = Object.fromEntries(
@@ -91,7 +93,7 @@ export function getNodesEdges(pipeline: PipelineFragment) {
               target: nodeId,
             })
           }
-          const state = reduceGateStatuses(gates)
+          const state = reduceGateStates(gates)
 
           return {
             id: nodeId,
