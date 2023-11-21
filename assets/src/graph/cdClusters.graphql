@@ -71,6 +71,31 @@ fragment ApiDeprecation on ApiDeprecation {
   replacement
 }
 
+fragment RuntimeService on RuntimeService {
+  id
+  name
+  version
+  addon {
+    icon
+    versions {
+      ...AddonVersion
+    }
+  }
+}
+
+fragment AddonVersion on AddonVersion {
+  version
+  kube
+  incompatibilities {
+    version
+    name
+  }
+  requirements {
+    version
+    name
+  }
+}
+
 fragment ClustersRow on Cluster {
   apiDeprecations {
     ...ApiDeprecation
@@ -249,6 +274,28 @@ fragment ClusterBindings on Cluster {
 query ClusterBindings($id: ID!) {
   cluster(id: $id) {
     ...ClusterBindings
+  }
+}
+
+query RuntimeServices($id: ID!, $kubeVersion: String!) {
+  cluster(id: $id) {
+    runtimeServices {
+      ...RuntimeService
+      service {
+        git {
+          ref
+          folder
+        }
+        repository {
+          httpsPath
+          urlFormat
+        }
+      }
+      addonVersion {
+        blocking(kubeVersion: $kubeVersion)
+        ...AddonVersion
+      }
+    }
   }
 }
 

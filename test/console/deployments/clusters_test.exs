@@ -801,6 +801,32 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "#create_runtime_services/3" do
+    test "it can create runtime services at cluster scope and overwrite at service scope" do
+      cluster = insert(:cluster)
+
+      {:ok, 1} = Clusters.create_runtime_services([
+        %{name: "ingress-nginx", version: "1.9.1"},
+        %{name: "istio", version: "2.0.0"}
+      ], nil, cluster)
+
+      [runtime] = Clusters.runtime_services(cluster)
+      assert runtime.name == "ingress-nginx"
+      assert runtime.version == "1.9.1"
+
+      svc = insert(:service, cluster: cluster)
+      {:ok, 1} = Clusters.create_runtime_services([
+        %{name: "ingress-nginx", version: "1.9.1"},
+        %{name: "istio", version: "2.0.0"}
+      ], svc.id, cluster)
+
+      [runtime] = Clusters.runtime_services(cluster)
+      assert runtime.name == "ingress-nginx"
+      assert runtime.version == "1.9.1"
+      assert runtime.service_id == svc.id
+    end
+  end
+
   describe "#refresh_kubeconfig/2" do
     test "it will refresh for base capi clusters" do
       provider = insert(:cluster_provider)

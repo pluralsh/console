@@ -155,6 +155,43 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "registerRuntimeServices" do
+    test "it can upsert a set of runtime services" do
+      cluster = insert(:cluster, version: "1.24")
+
+      {:ok, %{data: %{"registerRuntimeServices" => 1}}} = run_query("""
+        mutation CreateRuntime($services: [RuntimeServiceAttributes]) {
+          registerRuntimeServices(services: $services)
+        }
+      """, %{"services" => [
+        %{"name" => "ingress-nginx", "version" => "1.3.1"},
+        %{"name" => "bogus", "version" => "0.0.0"}
+      ]}, %{cluster: cluster})
+
+      [runtime] = Clusters.runtime_services(cluster)
+      assert runtime.name == "ingress-nginx"
+      assert runtime.version == "1.3.1"
+    end
+
+    test "it can add a service id in the upsert" do
+      cluster = insert(:cluster, version: "1.24")
+      svc = insert(:service, cluster: cluster)
+      {:ok, %{data: %{"registerRuntimeServices" => 1}}} = run_query("""
+        mutation CreateRuntime($services: [RuntimeServiceAttributes], $serviceId: ID) {
+          registerRuntimeServices(services: $services, serviceId: $serviceId)
+        }
+      """, %{"services" => [
+        %{"name" => "ingress-nginx", "version" => "1.3.1"},
+        %{"name" => "bogus", "version" => "0.0.0"}
+      ], "serviceId" => svc.id}, %{cluster: cluster})
+
+      [runtime] = Clusters.runtime_services(cluster)
+      assert runtime.name == "ingress-nginx"
+      assert runtime.version == "1.3.1"
+      assert runtime.service_id == svc.id
+    end
+  end
+
   describe "deleteCluster" do
     test "it can mark a cluster for deletion" do
       user = insert(:user)

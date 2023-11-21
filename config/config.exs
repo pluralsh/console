@@ -73,7 +73,11 @@ config :ra,
 config :console,
   replicas: 1,
   nodes: [],
-  watchers: []
+  watchers: [],
+  optional_watchers: [
+    Console.Watchers.Application,
+    Console.Watchers.Postgres,
+  ]
 
 config :porcelain, driver: Porcelain.Driver.Basic
 

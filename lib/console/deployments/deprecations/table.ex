@@ -6,7 +6,7 @@ defmodule Console.Deployments.Deprecations.Table do
 
   @table :api_deprecations
   @poll :timer.minutes(60)
-  @url "https://raw.githubusercontent.com/pluralsh/console/cd-scaffolding/static/versions.yml"
+  @url "https://raw.githubusercontent.com/pluralsh/console/master/static/versions.yml"
 
   defmodule State do
     defstruct [:table, :url]

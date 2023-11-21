@@ -24,6 +24,7 @@ defmodule Console.Application do
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Git.Kick,
       Console.Deployments.Deprecations.Table,
+      Console.Deployments.Compatibilities.Table,
       Console.Cache,
       Console.ReplicatedCache,
       Console.TestCache,

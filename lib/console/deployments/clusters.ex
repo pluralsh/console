@@ -6,9 +6,20 @@ defmodule Console.Deployments.Clusters do
   alias Console.Commands.{Tee, Command}
   alias Console.Deployments.{Services, Git, Providers.Configuration}
   alias Console.Deployments.Providers.Versions
+  alias Console.Deployments.Compatibilities.Table
   alias Console.Services.Users
   alias Kazan.Apis.Core.V1, as: Core
-  alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken, ClusterRevision, ProviderCredential}
+  alias Console.Schema.{
+    Cluster,
+    User,
+    ClusterProvider,
+    Service,
+    DeployToken,
+    ClusterRevision,
+    ProviderCredential,
+    RuntimeService
+  }
+  alias Console.Deployments.Compatibilities
   require Logger
 
   @cache_adapter Console.conf(:cache_adapter)
@@ -18,6 +29,7 @@ defmodule Console.Deployments.Clusters do
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
   @type credential_resp :: {:ok, ProviderCredential.t} | Console.error
+  @type runtime_service_resp :: {:ok, RuntimeService.t} | Console.error
 
   def find!(identifier) do
     case Uniq.UUID.parse(identifier) do
@@ -557,6 +569,54 @@ defmodule Console.Deployments.Clusters do
     |> when_ok(&ClusterProvider.rbac_changeset(&1, attrs))
     |> when_ok(:update)
     |> notify(:update, user)
+  end
+
+  @spec runtime_services(Cluster.t | binary) :: [RuntimeService.t]
+  def runtime_services(%Cluster{id: id}), do: runtime_services(id)
+  def runtime_services(id) when is_binary(id) do
+    RuntimeService.for_cluster(id)
+    |> RuntimeService.ordered()
+    |> Repo.all()
+    |> Enum.map(fn svc ->
+      case Table.fetch(svc.name) do
+        %Compatibilities.AddOn{} = addon ->
+          Map.merge(svc, %{
+            addon: addon,
+            addon_version: Compatibilities.AddOn.find_version(addon, svc.version)
+          })
+        _ -> svc
+      end
+    end)
+  end
+
+  @doc """
+  Upserts a list of runtime service entries for a cluster (and optionally labels their service id)
+  """
+  @spec create_runtime_services([map], binary, Cluster.t) :: {:ok, integer} | Console.error
+  def create_runtime_services(svcs, service_id, %Cluster{id: id}) do
+    replace = if is_nil(service_id), do: [:name, :version], else: [:name, :version, :service_id]
+    Enum.filter(svcs, fn
+      %{name: n} -> Table.fetch(n)
+      _ -> false
+    end)
+    |> Enum.map(&Map.merge(&1, %{
+      cluster_id: id,
+      service_id: service_id,
+      inserted_at: Timex.now(),
+      updated_at: Timex.now()
+    }))
+    |> case do
+      [_ | _] = services ->
+        {count, _} = Repo.insert_all(
+          RuntimeService,
+          services,
+          on_conflict: {:replace, replace},
+          conflict_target: [:cluster_id, :name]
+        )
+        {:ok, count}
+
+      _ -> {:ok, 0}
+    end
   end
 
   def kas_url() do

@@ -393,6 +393,9 @@ type RootMutationType {
   "a regular status ping to be sent by the deploy operator"
   pingCluster(attributes: ClusterPing!): Cluster
 
+  "registers a list of runtime services discovered for the current cluster"
+  registerRuntimeServices(services: [RuntimeServiceAttributes], serviceId: ID): Int
+
   "updates only the components of a given service, to be sent after deploy operator syncs"
   updateServiceComponents(id: ID!, components: [ComponentAttributes], errors: [ServiceErrorAttributes]): ServiceDeployment
 
@@ -1292,6 +1295,11 @@ input AzureSettingsAttributes {
   clientSecret: String!
 }
 
+input RuntimeServiceAttributes {
+  name: String!
+  version: String!
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -1323,6 +1331,11 @@ type ClusterProvider {
 
   "when the cluster provider was deleted"
   deletedAt: DateTime
+
+  runtimeServices(
+    "the kubernetes version you want to check is upgradeable"
+    kubeVersion: String
+  ): [RuntimeService]
 
   "the kubernetes versions this provider currently supports"
   supportedVersions: [String]
@@ -1417,6 +1430,9 @@ type Cluster {
 
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
+
+  "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
+  runtimeServices: [RuntimeService]
 
   "whether the current user can edit this cluster"
   editable: Boolean
@@ -1541,8 +1557,64 @@ type AddOnConfigCondition {
   "the field this condition applies to"
   field: String
 
-  "the value to apply the codition with, for binary operators like LT\/GT"
+  "the value to apply the condition with, for binary operators like LT\/GT"
   value: String
+}
+
+"a service encapsulating a controller like istio\/ingress-nginx\/etc that is meant to extend the kubernetes api"
+type RuntimeService {
+  id: ID!
+
+  "add-on name"
+  name: String!
+
+  "add-on version, should be semver formatted"
+  version: String!
+
+  "the full specification of this kubernetes add-on"
+  addon: RuntimeAddon
+
+  "the version of the add-on you've currently deployed"
+  addonVersion: AddonVersion
+
+  "the plural service it came from"
+  service: ServiceDeployment
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"a full specification of a kubernetes runtime component's requirements"
+type RuntimeAddon {
+  "an icon to identify this runtime add-on"
+  icon: String
+
+  versions: [AddonVersion]
+}
+
+"the specification of a runtime service at a specific version"
+type AddonVersion {
+  "add-on version, semver formatted"
+  version: String
+
+  "kubernetes versions this add-on works with"
+  kube: [String]
+
+  "any other add-ons this might require"
+  requirements: [VersionReference]
+
+  "any add-ons this might break"
+  incompatibilities: [VersionReference]
+
+  "checks if this is blocking a specific kubernetes upgrade"
+  blocking(kubeVersion: String!): Boolean
+}
+
+"a shortform reference to an addon by version"
+type VersionReference {
+  name: String!
+  version: String!
 }
 
 type Tag {

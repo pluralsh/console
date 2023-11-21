@@ -4,6 +4,10 @@ import { ProviderCloud } from '../components/cd/clusters/create/types'
 
 import { isNonNullable } from './isNonNullable'
 
+export function canUpgrade(version: string) {
+  return !version || semver.lt(version, '1.28.0')
+}
+
 export function nextSupportedVersion(
   current?: Nullable<string>,
   supported?: Nullable<Nullable<string>[]>
