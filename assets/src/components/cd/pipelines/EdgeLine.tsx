@@ -3,7 +3,7 @@ import { ComponentProps } from 'react'
 import { StepEdge } from 'reactflow'
 import { useTheme } from 'styled-components'
 
-import { useEdgeNodes } from './PipelineNodes'
+import { useEdgeNodes } from './utils/hooks'
 
 const ACTIVE_ID = 'pipeline-markerArrowActive'
 const ID = 'pipeline-markerArrow'

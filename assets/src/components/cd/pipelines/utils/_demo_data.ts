@@ -1,6 +1,9 @@
+// TODO: Remove later
 import { GateState, GateType, PipelineGateFragment } from 'generated/graphql'
 
-export const FAKE_GATES: Partial<PipelineGateFragment>[] = [
+export const PIPELINE_DEBUG_MODE = true
+
+export const DEMO_GATES: Partial<PipelineGateFragment>[] = [
   {
     id: '1',
     name: 'An approval',
@@ -14,36 +17,36 @@ export const FAKE_GATES: Partial<PipelineGateFragment>[] = [
       email: 'klink@plural.sh',
     },
   },
-  {
-    id: '2',
-    name: 'An approval',
-    type: GateType.Approval,
-    state: GateState.Pending,
-    approver: {
-      id: '2',
-      name: 'Michael Guarino',
-      profile: '',
-      email: 'mjg@plural.sh',
-    },
-  },
-  {
-    id: '3',
-    name: 'An approval',
-    type: GateType.Approval,
-    state: GateState.Closed,
-    approver: {
-      id: '3',
-      name: 'Samantha Bolian',
-      profile: '',
-      email: 'samb@plural.sh',
-    },
-  },
-  {
-    id: '4',
-    name: 'approval',
-    type: GateType.Approval,
-    state: GateState.Closed,
-  },
+  // {
+  //   id: '2',
+  //   name: 'An approval',
+  //   type: GateType.Approval,
+  //   state: GateState.Pending,
+  //   approver: {
+  //     id: '2',
+  //     name: 'Michael Guarino',
+  //     profile: '',
+  //     email: 'mjg@plural.sh',
+  //   },
+  // },
+  // {
+  //   id: '3',
+  //   name: 'An approval',
+  //   type: GateType.Approval,
+  //   state: GateState.Closed,
+  //   approver: {
+  //     id: '3',
+  //     name: 'Samantha Bolian',
+  //     profile: '',
+  //     email: 'samb@plural.sh',
+  //   },
+  // },
+  // {
+  //   id: '4',
+  //   name: 'approval',
+  //   type: GateType.Approval,
+  //   state: GateState.Closed,
+  // },
   {
     id: '10',
     name: 'Delivery window',
