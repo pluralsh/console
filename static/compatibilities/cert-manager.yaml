@@ -1,0 +1,82 @@
+icon: https://raw.githubusercontent.com/cert-manager/cert-manager/d53c0b9270f8cd90d908460d69502694e1838f5f/logo/logo-small.png
+versions:
+- version: 1.13.0
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+  requirements: []
+  incompatibilities: []
+- version: 1.12.0
+  kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+- version: 1.11.0
+  kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+- version: 1.10.0
+  kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+- version: 1.9.0
+  kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+- version: 1.8.0
+  kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+- version: 1.7.0
+  kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+- version: 1.6.0
+  kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+  requirements: []
+  incompatibilities: []
+- version: 1.5.0
+  kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+- version: 1.4.0
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+- version: 1.3.0
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+- version: 1.2.0
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+- version: 1.1.0
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11']
+  requirements: []
+  incompatibilities: []
+- version: 1.0.0
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11']
+  requirements: []
+  incompatibilities: []
+- version: 0.16.0
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11']
+  requirements: []
+  incompatibilities: []
+- version: 0.15.0
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11']
+  requirements: []
+  incompatibilities: []
+- version: 0.14.0
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11']
+  requirements: []
+  incompatibilities: []
+- version: 0.13.0
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11']
+  requirements: []
+  incompatibilities: []
+- version: 0.12.0
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11']
+  requirements: []
+  incompatibilities: []
+- version: 0.11.0
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11', '1.10', '1.9']
+  requirements: []
+  incompatibilities: []

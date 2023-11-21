@@ -1,0 +1,22 @@
+icon: https://github.com/kubernetes-sigs/external-dns/blob/master/docs/img/external-dns.png?raw=true
+versions:
+- version: 0.14.0
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+- version: 0.11.0
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+- version: 0.10.0
+  kube: ['1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+- version: 0.9.0
+  kube: ['1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11', '1.10', '1.9']
+  requirements: []
+  incompatibilities: []
+- version: 0.0.0
+  kube: ['1.18', '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11', '1.10', '1.9']
+  requirements: []
+  incompatibilities: []

@@ -212,6 +212,39 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert svc["addonVersion"]["kube"] == ~w(1.25 1.24 1.23)
     end
 
+    test "it can fetch runtime services on weird semver boundaries" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}], current_version: "1.25")
+      runtime = insert(:runtime_service, cluster: cluster, name: "cert-manager", version: "1.13.1")
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query Cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            runtimeServices {
+              id
+              name
+              version
+              addon { versions { version kube } }
+              addonVersion {
+                version
+                kube
+                blocking(kubeVersion: "1.26")
+              }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == cluster.id
+      [svc] = found["runtimeServices"]
+      assert svc["id"] == runtime.id
+      assert svc["name"] == "cert-manager"
+      assert svc["version"] == "1.13.1"
+      refute svc["addonVersion"]["blocking"]
+      assert svc["addonVersion"]["kube"] == ~w(1.28 1.27 1.26 1.25 1.24 1.23)
+    end
+
     test "it respects rbac" do
       user = insert(:user)
       cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
