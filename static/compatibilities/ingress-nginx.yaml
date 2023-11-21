@@ -1,4 +1,4 @@
-icon: /addons/ngnix.png
+icon: https://github.com/pluralsh/plural-artifacts/blob/main/ingress-nginx/plural/icons/nginx.png?raw=true
 versions:
 - version: 1.9.4
   kube: ['1.28', '1.27', '1.26', '1.25']

@@ -21,9 +21,8 @@ export default function RuntimeServices({
     },
     pollInterval: POLL_INTERVAL,
   })
-  console.log(data)
 
-  if (!data) return null
+  if ((data?.cluster?.runtimeServices || []).length <= 0) return null
 
   return (
     <Table
