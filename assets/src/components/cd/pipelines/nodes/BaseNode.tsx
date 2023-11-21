@@ -111,8 +111,6 @@ export function BaseNode({
   const { incomers, outgoers } = useNodeEdges(id)
   const nodes = useNodes()
 
-  console.log('incomers', incomers)
-
   const reducedInState = useMemo(() => {
     const incomingNodes = nodes.filter((node) =>
       incomers.some((incomer) => incomer.source === node.id)
