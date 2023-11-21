@@ -14,7 +14,6 @@ export const runtimeColumns = [
   columnHelperRuntime.accessor((row) => row?.addon, {
     id: 'name',
     header: 'Name',
-    meta: { truncate: true },
     cell: ({ getValue, row: { original } }) => {
       const addon = getValue()
       if (!addon) return null
@@ -41,7 +40,6 @@ export const runtimeColumns = [
   columnHelperRuntime.accessor((row) => row?.addonVersion, {
     id: 'blocking',
     header: 'Blocks Upgrade',
-    meta: { truncate: true },
     cell: ({ getValue }) => {
       const addonVersion = getValue()
       if (!addonVersion?.blocking) return null
@@ -57,7 +55,6 @@ export const runtimeColumns = [
   columnHelperRuntime.accessor((row) => row?.service, {
     id: 'git',
     header: 'Repository',
-    meta: { truncate: true },
     cell: ({ getValue }) => <GitPointer service={getValue()} />,
   }),
 ]
