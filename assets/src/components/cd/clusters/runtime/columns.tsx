@@ -4,6 +4,7 @@ import { RuntimeServicesQuery } from 'generated/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { TableText } from 'components/cluster/TableElements'
 import { ErrorIcon } from '@pluralsh/design-system'
+import { GitPointer } from '../deprecationsColumns'
 
 type RuntimeServiceCluster = NonNullable<RuntimeServicesQuery['cluster']>
 type RuntimeService = NonNullable<RuntimeServiceCluster['runtimeServices']>[0]
@@ -29,7 +30,7 @@ export const runtimeColumns = [
   }),
   columnHelperRuntime.accessor((row) => row?.addonVersion, {
     id: 'kube-version',
-    header: 'Supported Kubernetes Versions',
+    header: 'Kubernetes Versions',
     meta: { truncate: true },
     cell: ({ getValue }) => {
       const addonVersion = getValue()
@@ -52,5 +53,11 @@ export const runtimeColumns = [
         />
       )
     },
+  }),
+  columnHelperRuntime.accessor((row) => row?.service, {
+    id: 'git',
+    header: 'Repository',
+    meta: { truncate: true },
+    cell: ({ getValue }) => <GitPointer service={getValue()} />,
   }),
 ]

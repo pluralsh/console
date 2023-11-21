@@ -35,7 +35,7 @@ export default function RuntimeServices({
         }}
       >
         We detected these kubernetes add-ons in your cluster, you should
-        validate their compatible before upgrading
+        validate they are compatible before upgrading
       </div>
       <Table
         data={data?.cluster?.runtimeServices || []}
