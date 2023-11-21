@@ -1,4 +1,9 @@
-import { IconFrame, ReloadIcon, usePrevious } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  ReloadIcon,
+  styledTheme,
+  usePrevious,
+} from '@pluralsh/design-system'
 import { PipelineFragment } from 'generated/graphql'
 import {
   useCallback,
@@ -32,10 +37,11 @@ const nodeTypes = {
   [NodeType.Tests]: TestsNode,
 }
 
+export const PIPELINE_GRID_GAP = styledTheme.spacing.large
+
 export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
   const theme = useTheme()
-  const gridGap = theme.spacing.large
-  const margin = gridGap * 1
+  const margin = PIPELINE_GRID_GAP * 1
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
     () => getNodesAndEdges(pipeline),
     [pipeline]
@@ -53,7 +59,7 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
       const layouted = getLayoutedElements(nodes, edges, {
         direction,
         zoom: getViewport().zoom,
-        gridGap,
+        gridGap: PIPELINE_GRID_GAP,
         margin,
       })
 
@@ -61,7 +67,7 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
       setEdges([...layouted.edges])
       setNeedsLayout(false)
     },
-    [nodes, edges, getViewport, gridGap, margin, setNodes, setEdges]
+    [nodes, edges, getViewport, margin, setNodes, setEdges]
   )
 
   useLayoutEffect(() => {
@@ -109,7 +115,7 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
       >
         <Background
           variant={BackgroundVariant.Dots}
-          gap={gridGap}
+          gap={PIPELINE_GRID_GAP}
           size={1}
           color={`${chroma(theme.colors['border-fill-three']).alpha(1)}`}
         />

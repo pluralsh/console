@@ -15,6 +15,8 @@ import { useNavigate } from 'react-router-dom'
 
 import styled from 'styled-components'
 
+import { PIPELINE_GRID_GAP } from '../Pipeline'
+
 import {
   BaseNode,
   CardStatus,
@@ -82,7 +84,7 @@ export function getStageStatus(
 }
 
 const StageNodeSC = styled(BaseNode)((_) => ({
-  '&&': { minWidth: 220 },
+  '&&': { minWidth: 10 * PIPELINE_GRID_GAP },
 }))
 
 export function StageNode(
