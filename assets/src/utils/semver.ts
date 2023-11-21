@@ -5,7 +5,7 @@ import { ProviderCloud } from '../components/cd/clusters/create/types'
 import { isNonNullable } from './isNonNullable'
 
 export function canUpgrade(version: string) {
-  return semver.lt(version, '1.28.0')
+  return !version || semver.lt(version, '1.28.0')
 }
 
 export function nextSupportedVersion(

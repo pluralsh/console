@@ -262,7 +262,7 @@ export const columns = [
       if (
         !upgrade &&
         !hasDeprecations &&
-        !(!cluster?.provider && canUpgrade(cluster?.currentVersion ?? ''))
+        !(!cluster?.provider && canUpgrade(cluster?.currentVersion ?? '0.0.0'))
       ) {
         return null
       }
