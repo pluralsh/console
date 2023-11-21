@@ -107,7 +107,10 @@ export function BaseNode({
   id,
   data: { meta },
   children,
-}: NodeProps<NodeMeta> & { children: ReactNode }) {
+  ...props
+}: NodeProps<NodeMeta> & { children: ReactNode } & ComponentProps<
+    typeof BaseNodeSC
+  >) {
   const { incomers, outgoers } = useNodeEdges(id)
   const nodes = useNodes()
 
@@ -124,7 +127,7 @@ export function BaseNode({
   }, [incomers, nodes])
 
   return (
-    <BaseNodeSC>
+    <BaseNodeSC {...props}>
       <HandleSC
         type="target"
         isConnectable={false}

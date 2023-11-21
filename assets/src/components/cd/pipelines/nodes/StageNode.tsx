@@ -43,6 +43,9 @@ const stageStatusToSeverity = {
   ComponentProps<typeof Chip>['severity']
 >
 const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
+  '&&': {
+    width: '100%',
+  },
   '.serviceName': {
     ...theme.partials.text.body2,
     color: theme.colors['text-light'],
@@ -78,6 +81,10 @@ export function getStageStatus(
   return StageStatus.Pending
 }
 
+const StageNodeSC = styled(BaseNode)((_) => ({
+  '&&': { minWidth: 220 },
+}))
+
 export function StageNode(
   props: NodeProps<
     PipelineStageFragment &
@@ -91,7 +98,7 @@ export function StageNode(
   const status = meta.stageStatus
 
   return (
-    <BaseNode {...props}>
+    <StageNodeSC {...props}>
       <div className="headerArea">
         <h2 className="heading">STAGE</h2>
         <Chip
@@ -139,6 +146,6 @@ export function StageNode(
           </NodeCardList>
         </div>
       )}
-    </BaseNode>
+    </StageNodeSC>
   )
 }
