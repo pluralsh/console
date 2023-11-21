@@ -34,6 +34,7 @@ import { GqlError } from '../../utils/Alert'
 import { TabularNumbers } from '../../cluster/TableElements'
 
 import { deprecationsColumns } from './deprecationsColumns'
+import RuntimeServices from './runtime/RuntimeServices'
 
 const supportedVersions = (cluster: ClustersRowFragment | null) =>
   cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
@@ -140,7 +141,7 @@ const upgradeColumns = [
     meta: {
       gridTemplate: 'fit-content(500px)',
     },
-    cell: function Cell({ table, getValue }) {
+    cell: function Cell({ table, getValue, row: { original } }) {
       const theme = useTheme()
       const cluster = getValue()
       const upgrades = useMemo(
@@ -165,7 +166,7 @@ const upgradeColumns = [
         }
       }, [targetVersion, upgrades])
 
-      if (isEmpty(upgrades)) {
+      if (isEmpty(upgrades) || original.self) {
         return <div>Cluster must be upgraded externally</div>
       }
 
@@ -262,7 +263,7 @@ function ClusterUpgradeModal({
                 color: theme.colors['text-light'],
               }}
             >
-              Before upgrading the Kubernetes version fix all deprecated
+              Before upgrading your Kubernetes version, fix all deprecated
               resources listed below:
             </div>
             <Table
@@ -284,6 +285,7 @@ function ClusterUpgradeModal({
             No deprecated resources detected. Ready to update.
           </div>
         )}
+        <RuntimeServices cluster={cluster} />
         <Table
           data={[cluster]}
           columns={upgradeColumns}

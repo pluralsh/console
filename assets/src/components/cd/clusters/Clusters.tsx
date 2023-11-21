@@ -24,7 +24,7 @@ import {
   GLOBAL_SETTINGS_ABS_PATH,
 } from 'routes/cdRoutesConsts'
 import chroma from 'chroma-js'
-import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
+import { canUpgrade, nextSupportedVersion, toNiceVersion } from 'utils/semver'
 import { roundToTwoPlaces } from 'components/cluster/utils'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import {
@@ -259,15 +259,19 @@ export const columns = [
         cluster?.provider?.supportedVersions
       )
       const { refetch } = table.options.meta as { refetch?: () => void }
+      if (
+        !upgrade &&
+        !hasDeprecations &&
+        !(!cluster?.provider && canUpgrade(cluster?.currentVersion ?? ''))
+      ) {
+        return null
+      }
 
       return (
-        (!!upgrade || hasDeprecations) &&
-        !cluster?.self && (
-          <ClusterUpgrade
-            cluster={cluster}
-            refetch={refetch}
-          />
-        )
+        <ClusterUpgrade
+          cluster={cluster}
+          refetch={refetch}
+        />
       )
     },
   }),

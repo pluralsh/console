@@ -1587,6 +1587,9 @@ type RuntimeService {
 
 "a full specification of a kubernetes runtime component's requirements"
 type RuntimeAddon {
+  "an icon to identify this runtime add-on"
+  icon: String
+
   versions: [AddonVersion]
 }
 

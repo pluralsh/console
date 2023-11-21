@@ -3387,6 +3387,8 @@ export type RunningState = {
 /** a full specification of a kubernetes runtime component's requirements */
 export type RuntimeAddon = {
   __typename?: 'RuntimeAddon';
+  /** an icon to identify this runtime add-on */
+  icon?: Maybe<Scalars['String']['output']>;
   versions?: Maybe<Array<Maybe<AddonVersion>>>;
 };
 
@@ -4036,6 +4038,10 @@ export type NodePoolFragment = { __typename?: 'NodePool', id: string, name: stri
 
 export type ApiDeprecationFragment = { __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null };
 
+export type RuntimeServiceFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null };
+
+export type AddonVersionFragment = { __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null };
+
 export type ClustersRowFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null };
 
 export type ClusterFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
@@ -4084,6 +4090,14 @@ export type ClusterBindingsQueryVariables = Exact<{
 
 
 export type ClusterBindingsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type RuntimeServicesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  kubeVersion: Scalars['String']['input'];
+}>;
+
+
+export type RuntimeServicesQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null } | null> | null } | null };
 
 export type UpdateClusterBindingsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4791,6 +4805,33 @@ export const ClusterAddOnFragmentDoc = gql`
   }
 }
     ${AddOnConfigurationFragmentDoc}`;
+export const AddonVersionFragmentDoc = gql`
+    fragment AddonVersion on AddonVersion {
+  version
+  kube
+  incompatibilities {
+    version
+    name
+  }
+  requirements {
+    version
+    name
+  }
+}
+    `;
+export const RuntimeServiceFragmentDoc = gql`
+    fragment RuntimeService on RuntimeService {
+  id
+  name
+  version
+  addon {
+    icon
+    versions {
+      ...AddonVersion
+    }
+  }
+}
+    ${AddonVersionFragmentDoc}`;
 export const ApiDeprecationFragmentDoc = gql`
     fragment ApiDeprecation on ApiDeprecation {
   availableIn
@@ -6242,6 +6283,54 @@ export type ClusterBindingsQueryHookResult = ReturnType<typeof useClusterBinding
 export type ClusterBindingsLazyQueryHookResult = ReturnType<typeof useClusterBindingsLazyQuery>;
 export type ClusterBindingsSuspenseQueryHookResult = ReturnType<typeof useClusterBindingsSuspenseQuery>;
 export type ClusterBindingsQueryResult = Apollo.QueryResult<ClusterBindingsQuery, ClusterBindingsQueryVariables>;
+export const RuntimeServicesDocument = gql`
+    query RuntimeServices($id: ID!, $kubeVersion: String!) {
+  cluster(id: $id) {
+    runtimeServices {
+      ...RuntimeService
+      addonVersion {
+        blocking(kubeVersion: $kubeVersion)
+        ...AddonVersion
+      }
+    }
+  }
+}
+    ${RuntimeServiceFragmentDoc}
+${AddonVersionFragmentDoc}`;
+
+/**
+ * __useRuntimeServicesQuery__
+ *
+ * To run a query within a React component, call `useRuntimeServicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRuntimeServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRuntimeServicesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      kubeVersion: // value for 'kubeVersion'
+ *   },
+ * });
+ */
+export function useRuntimeServicesQuery(baseOptions: Apollo.QueryHookOptions<RuntimeServicesQuery, RuntimeServicesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RuntimeServicesQuery, RuntimeServicesQueryVariables>(RuntimeServicesDocument, options);
+      }
+export function useRuntimeServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RuntimeServicesQuery, RuntimeServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RuntimeServicesQuery, RuntimeServicesQueryVariables>(RuntimeServicesDocument, options);
+        }
+export function useRuntimeServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RuntimeServicesQuery, RuntimeServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<RuntimeServicesQuery, RuntimeServicesQueryVariables>(RuntimeServicesDocument, options);
+        }
+export type RuntimeServicesQueryHookResult = ReturnType<typeof useRuntimeServicesQuery>;
+export type RuntimeServicesLazyQueryHookResult = ReturnType<typeof useRuntimeServicesLazyQuery>;
+export type RuntimeServicesSuspenseQueryHookResult = ReturnType<typeof useRuntimeServicesSuspenseQuery>;
+export type RuntimeServicesQueryResult = Apollo.QueryResult<RuntimeServicesQuery, RuntimeServicesQueryVariables>;
 export const UpdateClusterBindingsDocument = gql`
     mutation UpdateClusterBindings($id: ID!, $rbac: RbacAttributes!) {
   updateRbac(clusterId: $id, rbac: $rbac)
@@ -8760,6 +8849,7 @@ export const namedOperations = {
     ClusterPods: 'ClusterPods',
     ClusterNamespaces: 'ClusterNamespaces',
     ClusterBindings: 'ClusterBindings',
+    RuntimeServices: 'RuntimeServices',
     Usage: 'Usage',
     GitRepositories: 'GitRepositories',
     DeploymentSettings: 'DeploymentSettings',
@@ -8843,6 +8933,8 @@ export const namedOperations = {
     Taint: 'Taint',
     NodePool: 'NodePool',
     ApiDeprecation: 'ApiDeprecation',
+    RuntimeService: 'RuntimeService',
+    AddonVersion: 'AddonVersion',
     ClustersRow: 'ClustersRow',
     Cluster: 'Cluster',
     ClusterTiny: 'ClusterTiny',
