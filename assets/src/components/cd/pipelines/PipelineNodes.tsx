@@ -322,20 +322,26 @@ export function ApprovalNode(props: EdgeNode) {
         )}
       </div>
       <IconHeading icon={<ThumbsUpIcon />}>Approval</IconHeading>
-      {gates?.map((gate) =>
-        gate?.approver ? (
-          <ApproverCard gate={gate} />
-        ) : (
-          gate && (
-            <ServiceCard
-              status={gateStateToCardStatus[gate.state]}
-              statusLabel={gateStateToApprovalText[gate.state]}
-            >
-              {gate.name}
-            </ServiceCard>
+      <NodeCardList>
+        {gates?.map((gate) =>
+          gate?.approver ? (
+            <li>
+              <ApproverCard gate={gate} />
+            </li>
+          ) : (
+            gate && (
+              <li>
+                <ServiceCard
+                  status={gateStateToCardStatus[gate.state]}
+                  statusLabel={gateStateToApprovalText[gate.state]}
+                >
+                  {gate.name}
+                </ServiceCard>
+              </li>
+            )
           )
-        )
-      )}
+        )}
+      </NodeCardList>
     </BaseNode>
   )
 }
