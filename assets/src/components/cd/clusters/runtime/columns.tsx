@@ -4,6 +4,7 @@ import { RuntimeServicesQuery } from 'generated/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { TableText } from 'components/cluster/TableElements'
 import { ErrorIcon } from '@pluralsh/design-system'
+
 import { GitPointer } from '../deprecationsColumns'
 
 type RuntimeServiceCluster = NonNullable<RuntimeServicesQuery['cluster']>
@@ -16,6 +17,7 @@ export const runtimeColumns = [
     header: 'Name',
     cell: ({ getValue, row: { original } }) => {
       const addon = getValue()
+
       if (!addon) return null
 
       return <ColWithIcon icon={addon.icon}>{original?.name}</ColWithIcon>
@@ -33,7 +35,9 @@ export const runtimeColumns = [
     meta: { truncate: true },
     cell: ({ getValue }) => {
       const addonVersion = getValue()
+
       if (!addonVersion) return null
+
       return <TableText>{(addonVersion.kube || []).join(', ')}</TableText>
     },
   }),
@@ -42,6 +46,7 @@ export const runtimeColumns = [
     header: 'Blocks Upgrade',
     cell: ({ getValue }) => {
       const addonVersion = getValue()
+
       if (!addonVersion?.blocking) return null
 
       return (

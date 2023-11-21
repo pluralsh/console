@@ -80,8 +80,6 @@ export const deprecationsColumns = [
   columnHelperDeprecations.accessor(({ component }) => component?.service, {
     id: 'repository',
     header: 'Repository',
-    cell: ({ getValue }) => {
-      return <GitPointer service={getValue()} />
-    },
+    cell: ({ getValue }) => <GitPointer service={getValue()} />,
   }),
 ]
