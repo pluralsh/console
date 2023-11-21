@@ -1,4 +1,4 @@
-import { AppsIcon, IconFrame, ReloadIcon } from '@pluralsh/design-system'
+import { IconFrame, ReloadIcon } from '@pluralsh/design-system'
 import { PipelineFragment } from 'generated/graphql'
 import { useCallback, useLayoutEffect, useMemo } from 'react'
 import ReactFlow, {
@@ -101,17 +101,6 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
           onClick={() =>
             setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 500 })
           }
-        >
-          Reset view
-        </IconFrame>
-        <IconFrame
-          clickable
-          type="floating"
-          icon={<AppsIcon />}
-          tooltip="Auto-layout"
-          onClick={() => {
-            layoutNodes()
-          }}
         >
           Reset view
         </IconFrame>
