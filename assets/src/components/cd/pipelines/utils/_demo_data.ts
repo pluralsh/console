@@ -1,7 +1,7 @@
 // TODO: Remove later
 import { GateState, GateType, PipelineGateFragment } from 'generated/graphql'
 
-export const PIPELINE_DEBUG_MODE = true
+export const PIPELINE_DEBUG_MODE = false
 
 export const DEMO_GATES: Partial<PipelineGateFragment>[] = [
   {
