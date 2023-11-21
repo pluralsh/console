@@ -109,12 +109,6 @@ export function ApprovalNode(props: EdgeNode) {
             gate && (
               <li>
                 <ApproveButton id={gate.id} />
-                {/* <ServiceCard
-                  status={gateStateToCardStatus[gate.state]}
-                  statusLabel={gateStateToApprovalText[gate.state]}
-                >
-                  {gate.name}
-                </ServiceCard> */}
               </li>
             )
           )

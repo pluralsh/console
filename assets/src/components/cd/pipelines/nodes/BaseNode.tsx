@@ -237,22 +237,3 @@ export function StatusCard({
     </StatusCardSC>
   )
 }
-
-const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
-  '.contentArea': {
-    ...theme.partials.text.body2,
-    color: theme.colors['text-light'],
-  },
-}))
-
-export function ServiceCard({
-  state,
-  ...props
-}: ComponentPropsWithoutRef<typeof ServiceCardSC>) {
-  return (
-    <ServiceCardSC
-      state={state}
-      {...props}
-    />
-  )
-}

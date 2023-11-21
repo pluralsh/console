@@ -3,11 +3,17 @@ import {
   PipelineStageFragment,
   ServiceDeploymentStatus,
 } from 'generated/graphql'
-import { ComponentProps } from 'react'
+import { ComponentProps, ComponentPropsWithoutRef } from 'react'
 import { type NodeProps } from 'reactflow'
 import isEmpty from 'lodash/isEmpty'
 import upperFirst from 'lodash/upperFirst'
 import { MergeDeep } from 'type-fest'
+
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
+
+import { useNavigate } from 'react-router-dom'
+
+import styled from 'styled-components'
 
 import {
   BaseNode,
@@ -15,7 +21,7 @@ import {
   IconHeading,
   NodeCardList,
   NodeMeta,
-  ServiceCard,
+  StatusCard,
 } from './BaseNode'
 
 const serviceStateToCardStatus = {
@@ -36,6 +42,28 @@ const stageStatusToSeverity = {
   StageStatus,
   ComponentProps<typeof Chip>['severity']
 >
+const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
+  '.serviceName': {
+    ...theme.partials.text.body2,
+    color: theme.colors['text-light'],
+  },
+  '.clusterName': {
+    ...theme.partials.text.caption,
+    color: theme.colors['text-xlight'],
+  },
+}))
+
+export function ServiceCard({
+  state,
+  ...props
+}: ComponentPropsWithoutRef<typeof ServiceCardSC>) {
+  return (
+    <ServiceCardSC
+      state={state}
+      {...props}
+    />
+  )
+}
 
 export function getStageStatus(
   stage: Pick<PipelineStageFragment, 'promotion'>
@@ -56,6 +84,7 @@ export function StageNode(
       MergeDeep<NodeMeta, { meta: { stageStatus: StageStatus } }>
   >
 ) {
+  const navigate = useNavigate()
   const {
     data: { meta, ...stage },
   } = props
@@ -76,22 +105,34 @@ export function StageNode(
 
       {!isEmpty(stage.services) && (
         <div className="section">
-          {/* <h4 className="subhead">Services</h4> */}
-
           <NodeCardList>
-            {stage.services?.map((service) => (
+            {stage.services?.map((stageService) => (
               <li>
                 <ServiceCard
+                  clickable
+                  onClick={() => {
+                    navigate(
+                      getServiceDetailsPath({
+                        clusterId: stageService?.service?.cluster?.id,
+                        serviceId: stageService?.service?.id,
+                      })
+                    )
+                  }}
                   status={
-                    service?.service?.status
-                      ? serviceStateToCardStatus[service?.service?.status]
+                    stageService?.service?.status
+                      ? serviceStateToCardStatus[stageService?.service?.status]
                       : undefined
                   }
                   statusLabel={upperFirst(
-                    service?.service?.status.toLowerCase?.()
+                    stageService?.service?.status.toLowerCase?.()
                   )}
                 >
-                  <div>{service?.service?.name}</div>
+                  <div className="serviceName">
+                    {stageService?.service?.name}
+                  </div>
+                  <div className="clusterName">
+                    {stageService?.service?.cluster?.name}
+                  </div>
                 </ServiceCard>
               </li>
             ))}

@@ -2,6 +2,10 @@ fragment PipelineServiceDeployment on ServiceDeployment {
   id
   name
   namespace
+  cluster {
+    id
+    name
+  }
   status
   componentStatus
 }
