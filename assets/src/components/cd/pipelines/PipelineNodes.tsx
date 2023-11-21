@@ -2,7 +2,7 @@ import {
   AppIcon,
   Card,
   Chip,
-  CloseIcon,
+  CloseRoundedIcon,
   ClusterIcon,
   Spinner,
   StatusOkIcon,
@@ -25,10 +25,18 @@ import {
   cloneElement,
   useMemo,
 } from 'react'
-import { Handle, type NodeProps, Position, useEdges, useNodes } from 'reactflow'
+import {
+  type Edge,
+  Handle,
+  type NodeProps,
+  Position,
+  useEdges,
+  useNodes,
+} from 'reactflow'
 import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 import upperFirst from 'lodash/upperFirst'
+import { MergeDeep } from 'type-fest'
 
 type CardStatus = 'ok' | 'closed' | 'pending'
 
@@ -102,47 +110,28 @@ const BaseNodeSC = styled(Card)(({ theme }) => ({
 }))
 
 const HANDLE_SIZE = 10
-const HandleSC = styled(Handle).attrs(() => ({
-  isConnectable: false,
-}))(({ theme }) => ({
-  '&&': {
-    width: HANDLE_SIZE,
-    height: HANDLE_SIZE,
-    borderColor: theme.colors['border-secondary'],
-    borderWidth: theme.borderWidths.default,
-    '&.react-flow__handle-left': {
-      left: -HANDLE_SIZE / 2,
+const HandleSC = styled(Handle)<{ $isConnected?: boolean; $isOpen?: boolean }>(
+  ({ theme, $isConnected, $isOpen = true }) => ({
+    '&&': {
+      visibility: $isConnected ? 'visible' : 'hidden',
+      width: HANDLE_SIZE,
+      height: HANDLE_SIZE,
+      borderColor: $isOpen
+        ? theme.colors['border-secondary']
+        : theme.colors.border,
+      borderWidth: theme.borderWidths.default,
+      backgroundColor: theme.colors['fill-zero'],
+      '&.react-flow__handle-left': {
+        left: -HANDLE_SIZE / 2,
+      },
+      '&.react-flow__handle-right': {
+        right: -HANDLE_SIZE / 2,
+      },
     },
-    '&.react-flow__handle-right': {
-      right: -HANDLE_SIZE / 2,
-    },
-  },
-}))
+  })
+)
 
-export const useNodeEdges = () => {
-  const edges = useEdges()
-  const nodes = useNodes()
-
-  return useMemo(
-    () =>
-      Object.fromEntries(
-        nodes.map((node) => {
-          const ret = [
-            node.id,
-            {
-              source: edges.filter((e) => e.source === node.id),
-              target: edges.filter((e) => e.target === node.id),
-            },
-          ]
-
-          return ret
-        })
-      ),
-    [edges, nodes]
-  )
-}
-
-enum StageStatus {
+export enum StageStatus {
   Complete = 'Complete',
   Pending = 'Pending',
 }
@@ -154,7 +143,9 @@ const stageStatusToSeverity = {
   ComponentProps<typeof Chip>['severity']
 >
 
-function getStageStatus(stage: Pick<PipelineStageFragment, 'promotion'>) {
+export function getStageStatus(
+  stage: Pick<PipelineStageFragment, 'promotion'>
+) {
   const promotedDate = new Date(stage.promotion?.promotedAt || '')
   const revisedDate = new Date(stage.promotion?.revisedAt || '')
 
@@ -165,15 +156,73 @@ function getStageStatus(stage: Pick<PipelineStageFragment, 'promotion'>) {
   return StageStatus.Pending
 }
 
-export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
-  const status = getStageStatus(data)
+export function BaseNode({
+  id,
+  data: { meta },
+  children,
+}: NodeProps<NodeMeta> & { children: ReactNode }) {
+  const { incomers, outgoers } = useNodeEdges(id)
 
   return (
     <BaseNodeSC>
       <HandleSC
         type="target"
+        $isConnected={!isEmpty(incomers)}
+        $isOpen={!isEmpty(incomers)}
         position={Position.Left}
       />
+      {children}
+      <HandleSC
+        type="source"
+        $isConnected={!isEmpty(outgoers)}
+        $isOpen={meta.state === GateState.Open}
+        position={Position.Right}
+      />
+    </BaseNodeSC>
+  )
+}
+
+const useNodeEdges = (nodeId: Nullable<string>) => {
+  const edges = useEdges()
+  const outgoers = useMemo(
+    () => edges.filter((edge) => edge.source === nodeId),
+    [edges, nodeId]
+  )
+  const incomers = useMemo(
+    () => edges.filter((edge) => edge.target === nodeId),
+    [edges, nodeId]
+  )
+
+  return useMemo(() => ({ outgoers, incomers }), [incomers, outgoers])
+}
+
+export const useEdgeNodes = (edge: Pick<Edge, 'source' | 'target'>) => {
+  const nodes = useNodes()
+  const source = useMemo(
+    () => nodes.find((node) => node.id === edge.source),
+    [nodes, edge.source]
+  )
+  const target = useMemo(
+    () => nodes.find((node) => node.id === edge.target),
+    [nodes, edge.target]
+  )
+
+  return useMemo(() => ({ source, target }), [source, target])
+}
+
+export function StageNode(
+  props: NodeProps<
+    PipelineStageFragment &
+      MergeDeep<NodeMeta, { meta: { stageStatus: StageStatus } }>
+  >
+) {
+  const {
+    data: { meta, ...stage },
+  } = props
+  const status = meta.stageStatus
+
+  return (
+    <BaseNode {...props}>
       <div className="headerArea">
         <h2 className="heading">STAGE</h2>
         <Chip
@@ -183,14 +232,14 @@ export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
           {status}
         </Chip>
       </div>
-      <IconHeading icon={<ClusterIcon />}>Deploy to {data.name}</IconHeading>
+      <IconHeading icon={<ClusterIcon />}>Deploy to {stage.name}</IconHeading>
 
-      {!isEmpty(data.services) && (
+      {!isEmpty(stage.services) && (
         <div className="section">
           {/* <h4 className="subhead">Services</h4> */}
 
           <NodeCardList>
-            {data.services?.map((service) => (
+            {stage.services?.map((service) => (
               <li>
                 <ServiceCard
                   status={
@@ -209,12 +258,7 @@ export function StageNode({ data }: NodeProps<PipelineStageFragment>) {
           </NodeCardList>
         </div>
       )}
-      <HandleSC
-        type="source"
-        position={Position.Right}
-        id="a"
-      />
-    </BaseNodeSC>
+    </BaseNode>
   )
 }
 const IconHeadingSC = styled.div(({ theme }) => ({
@@ -251,53 +295,48 @@ function IconHeading({
   )
 }
 
-function reduceGateStatuses(gates: Nullable<Nullable<PipelineGateFragment>[]>) {
-  let reducedState: GateState | undefined
+type NodeMeta = { meta: { state: GateState } }
 
-  if (gates?.some((g) => g?.state === GateState.Closed)) {
-    reducedState = GateState.Closed
-  } else if (gates?.some((g) => g?.state === GateState.Pending)) {
-    reducedState = GateState.Pending
-  } else if (gates?.every((g) => g?.state === GateState.Open)) {
-    reducedState = GateState.Open
-  }
+type StageNode = NodeProps<PipelineStageEdgeFragment & NodeMeta>
 
-  return reducedState
-}
+type EdgeNode = NodeProps<PipelineStageEdgeFragment & NodeMeta>
 
-export function ApprovalNode({
-  data: edge,
-}: NodeProps<PipelineStageEdgeFragment>) {
+export function ApprovalNode(props: EdgeNode) {
+  const {
+    data: { meta, ...edge },
+  } = props
+
   const gates = edge?.gates
-  const reducedState = reduceGateStatuses(gates)
-
-  if (!reducedState) {
-    return null
-  }
 
   return (
-    <BaseNodeSC>
-      <HandleSC
-        type="target"
-        position={Position.Left}
-      />
+    <BaseNode {...props}>
       <div className="headerArea">
         <h2 className="heading">Action</h2>
-        <Chip
-          size="small"
-          severity={gateStateToSeverity[reducedState]}
-        >
-          {gateStateToApprovalText[reducedState]}
-        </Chip>
+        {meta.state && (
+          <Chip
+            size="small"
+            severity={gateStateToSeverity[meta.state]}
+          >
+            {gateStateToApprovalText[meta.state]}
+          </Chip>
+        )}
       </div>
       <IconHeading icon={<ThumbsUpIcon />}>Approval</IconHeading>
-      {gates?.map((gate) => gate?.approver && <ApproverCard gate={gate} />)}
-      <HandleSC
-        type="source"
-        position={Position.Right}
-        id="a"
-      />
-    </BaseNodeSC>
+      {gates?.map((gate) =>
+        gate?.approver ? (
+          <ApproverCard gate={gate} />
+        ) : (
+          gate && (
+            <ServiceCard
+              status={gateStateToCardStatus[gate.state]}
+              statusLabel={gateStateToApprovalText[gate.state]}
+            >
+              {gate.name}
+            </ServiceCard>
+          )
+        )
+      )}
+    </BaseNode>
   )
 }
 
@@ -338,7 +377,7 @@ function StatusCard({
                 color={theme.colors['icon-success']}
               />
             ) : status === 'closed' ? (
-              <CloseIcon
+              <CloseRoundedIcon
                 size={12}
                 color={theme.colors['icon-danger-critical']}
               />
@@ -410,9 +449,6 @@ const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
   '.contentArea': {
     ...theme.partials.text.body2,
     color: theme.colors['text-light'],
-    display: 'flex',
-    gap: theme.spacing.xsmall,
-    alignItems: 'center',
   },
 }))
 
@@ -427,34 +463,28 @@ function ServiceCard({
     />
   )
 }
-export function TestsNode({
-  data: edge,
-}: NodeProps<PipelineStageEdgeFragment>) {
+export function TestsNode(props: EdgeNode) {
+  const {
+    data: { meta, ...edge },
+  } = props
   const gates = edge?.gates
-  const reducedState = reduceGateStatuses(gates)
-
-  if (!reducedState) {
-    return null
-  }
 
   return (
-    <BaseNodeSC>
-      <HandleSC
-        type="target"
-        position={Position.Left}
-      />
-      <div className="headerArea">
-        <h2 className="heading">Action</h2>
-        <Chip
-          size="small"
-          severity={gateStateToSeverity[reducedState]}
-        >
-          {gateStateToTestText[reducedState]}
-        </Chip>
-      </div>
+    <BaseNode {...props}>
+      {meta.state && (
+        <div className="headerArea">
+          <h2 className="heading">Action</h2>
+          <Chip
+            size="small"
+            severity={gateStateToSeverity[meta.state]}
+          >
+            {gateStateToTestText[meta.state]}
+          </Chip>
+        </div>
+      )}
       <IconHeading icon={<TestTubeIcon />}>Run test group</IconHeading>
       <NodeCardList>
-        {edge.gates?.map(
+        {gates?.map(
           (gate) =>
             gate && (
               <li>
@@ -472,11 +502,6 @@ export function TestsNode({
             )
         )}
       </NodeCardList>
-      <HandleSC
-        type="source"
-        position={Position.Right}
-        id="a"
-      />
-    </BaseNodeSC>
+    </BaseNode>
   )
 }

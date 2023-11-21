@@ -39,6 +39,12 @@ export const FAKE_GATES: Partial<PipelineGateFragment>[] = [
     },
   },
   {
+    id: '4',
+    name: 'approval',
+    type: GateType.Approval,
+    state: GateState.Closed,
+  },
+  {
     id: '10',
     name: 'Delivery window',
     type: GateType.Window,

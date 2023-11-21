@@ -1,5 +1,6 @@
 import { AppsIcon, IconFrame, ReloadIcon } from '@pluralsh/design-system'
 import {
+  GateState,
   GateType,
   PipelineFragment,
   PipelineGateFragment,
@@ -10,7 +11,6 @@ import ReactFlow, {
   BackgroundVariant,
   type Edge,
   type Node as FlowNode,
-  MarkerType,
   useEdgesState,
   useNodesState,
   useReactFlow,
@@ -20,13 +20,21 @@ import chroma from 'chroma-js'
 import isEmpty from 'lodash/isEmpty'
 
 import 'reactflow/dist/style.css'
-import styled, { DefaultTheme, useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
 import { groupBy } from 'lodash'
 
-import { ApprovalNode, StageNode, TestsNode } from './PipelineNodes'
+import {
+  ApprovalNode,
+  StageNode,
+  StageStatus,
+  TestsNode,
+  getStageStatus,
+} from './PipelineNodes'
+import { reduceGateStatuses } from './reduceGateStatuses'
 import { FAKE_GATES } from './FAKE_GATES'
+import { EdgeLineMarkerDefs, edgeTypes } from './EdgeLine'
 
 const DEBUG_MODE = true
 
@@ -113,8 +121,8 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
   const gridGap = theme.spacing.large
   const margin = gridGap * 1
   const { initialNodes, initialEdges } = useMemo(
-    () => getNodesEdges(pipeline, theme),
-    [pipeline, theme]
+    () => getNodesEdges(pipeline),
+    [pipeline]
   )
   const { setViewport, getViewport, viewportInitialized } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as any)
@@ -155,6 +163,8 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
         nodesDraggable={false}
         edgesUpdatable={false}
         edgesFocusable={false}
+        nodesConnectable={false}
+        edgeTypes={edgeTypes}
       >
         <Background
           variant={BackgroundVariant.Dots}
@@ -162,6 +172,7 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
           size={1}
           color={`${chroma(theme.colors['border-fill-three']).alpha(1)}`}
         />
+        <EdgeLineMarkerDefs />
       </ReactFlow>
       <div
         css={{
@@ -210,26 +221,15 @@ const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
   },
 }))
 
-const getEdgeProps = (theme: DefaultTheme) => ({
-  type: 'step',
-  color: theme.colors['border-secondary'],
-  style: {
-    stroke: theme.colors['border-secondary'],
-    strokeWidth: 1,
-  },
-  markerEnd: {
-    type: MarkerType.Arrow,
-    width: 24,
-    height: 24,
-    color: theme.colors['border-secondary'],
-  },
-})
+const baseEdgeProps = {
+  type: 'custom-edge',
+}
 
 const TYPE_SORT_VALS = Object.fromEntries(
   [NodeType.Stage, NodeType.Approval, NodeType.Tests].map((val, i) => [val, i])
 )
 
-function getNodesEdges(pipeline: PipelineFragment, theme: DefaultTheme) {
+function getNodesEdges(pipeline: PipelineFragment) {
   const edges: Edge<any>[] = []
   const pipeStages = pipeline.stages?.filter(isNonNullable) ?? []
   const pipeEdges = pipeline.edges?.filter(isNonNullable) ?? []
@@ -242,7 +242,7 @@ function getNodesEdges(pipeline: PipelineFragment, theme: DefaultTheme) {
     }
     if (edge && isEmpty(edge?.gates)) {
       edges.push({
-        ...getEdgeProps(theme),
+        ...baseEdgeProps,
         id: edge.id,
         source: edge.from.id,
         target: edge.to.id,
@@ -277,7 +277,7 @@ function getNodesEdges(pipeline: PipelineFragment, theme: DefaultTheme) {
 
           if (edge?.to?.id) {
             edges.push({
-              ...getEdgeProps(theme),
+              ...baseEdgeProps,
               id: `${nodeId}->${edge.to.id}`,
               source: nodeId,
               target: edge.to.id,
@@ -285,18 +285,19 @@ function getNodesEdges(pipeline: PipelineFragment, theme: DefaultTheme) {
           }
           if (edge?.from?.id) {
             edges.push({
-              ...getEdgeProps(theme),
+              ...baseEdgeProps,
               id: `${edge.from.id}->${nodeId}`,
               source: edge.from.id,
               target: nodeId,
             })
           }
+          const state = reduceGateStatuses(gates)
 
           return {
             id: nodeId,
             type,
             position: { x: 0, y: 0 },
-            data: { ...edge, gates },
+            data: { ...edge, gates, meta: { state } },
           }
         })
     )
@@ -304,12 +305,25 @@ function getNodesEdges(pipeline: PipelineFragment, theme: DefaultTheme) {
 
   return {
     initialNodes: [
-      ...pipeStages.map((stage) => ({
-        id: stage?.id,
-        position: { x: 0, y: 0 },
-        type: NodeType.Stage,
-        data: stage,
-      })),
+      ...pipeStages.map((stage) => {
+        const stageStatus = getStageStatus(stage)
+
+        return {
+          id: stage?.id,
+          position: { x: 0, y: 0 },
+          type: NodeType.Stage,
+          data: {
+            ...stage,
+            meta: {
+              stageStatus,
+              state:
+                stageStatus === StageStatus.Complete
+                  ? GateState.Open
+                  : GateState.Pending,
+            },
+          },
+        }
+      }),
       ...gateNodes,
     ],
     initialEdges: edges,
