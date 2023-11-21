@@ -188,7 +188,7 @@ defmodule Console.Deployments.Pipelines do
     end)
     |> add_operation(:gates, fn %{stage: %{id: id}} ->
       PipelineGate.for_stage(id)
-      |> Repo.update_all(set: [state: :pending])
+      |> Repo.update_all(set: [state: :pending, approver_id: nil])
       |> ok()
     end)
     |> execute(extract: :build)
