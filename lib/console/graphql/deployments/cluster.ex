@@ -327,6 +327,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   @desc "a full specification of a kubernetes runtime component's requirements"
   object :runtime_addon do
+    field :icon,     :string, description: "an icon to identify this runtime add-on"
     field :versions, list_of(:addon_version)
   end
 
