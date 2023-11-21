@@ -8,7 +8,7 @@ defmodule Console.Deployments.Compatibilities.Table do
 
   @table :addon_compatibilities
   @poll :timer.minutes(30)
-  @url "https://raw.githubusercontent.com/pluralsh/console/compatibilities/static/compatibilities/"
+  @url "https://raw.githubusercontent.com/pluralsh/console/master/static/compatibilities/"
 
   defmodule State do
     defstruct [:table, :url]
