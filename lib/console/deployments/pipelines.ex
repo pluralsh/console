@@ -186,10 +186,14 @@ defmodule Console.Deployments.Pipelines do
       |> PipelinePromotion.changeset(add_revised(%{services: old ++ new}, diff?(svcs, promo)))
       |> Repo.insert_or_update()
     end)
-    |> add_operation(:gates, fn %{stage: %{id: id}} ->
-      PipelineGate.for_stage(id)
-      |> Repo.update_all(set: [state: :pending, approver_id: nil])
-      |> ok()
+    |> add_operation(:gates, fn %{stage: %{id: id}, build: promo} ->
+      case !promo.promoted_at || Timex.before?(promo.promoted_at, promo.revised_at) do
+        true ->
+          PipelineGate.for_stage(id)
+          |> Repo.update_all(set: [state: :pending, approver_id: nil])
+          |> ok()
+        false -> {:ok, 0}
+      end
     end)
     |> execute(extract: :build)
     |> notify(:create)
