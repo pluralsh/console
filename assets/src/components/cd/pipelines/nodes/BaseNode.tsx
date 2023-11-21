@@ -127,6 +127,7 @@ export function BaseNode({
     <BaseNodeSC>
       <HandleSC
         type="target"
+        isConnectable={false}
         $isConnected={!isEmpty(incomers)}
         $isOpen={reducedInState === GateState.Open}
         position={Position.Left}
@@ -134,6 +135,7 @@ export function BaseNode({
       {children}
       <HandleSC
         type="source"
+        isConnectable={false}
         $isConnected={!isEmpty(outgoers)}
         $isOpen={meta.state === GateState.Open}
         position={Position.Right}

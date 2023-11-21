@@ -118,4 +118,8 @@ const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
   '.react-flow__renderer': {
     opacity: $hide ? 0 : 1,
   },
+  '.react-flow__edge': {
+    pointerEvents: 'none',
+    cursor: 'unset',
+  },
 }))

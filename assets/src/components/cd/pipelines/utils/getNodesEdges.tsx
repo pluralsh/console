@@ -25,6 +25,7 @@ export enum NodeType {
 
 const baseEdgeProps = {
   type: CUSTOM_EDGE_NAME,
+  updatable: false,
 }
 
 const TYPE_SORT_VALS = Object.fromEntries(
