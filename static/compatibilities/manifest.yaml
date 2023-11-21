@@ -1,2 +1,3 @@
 names:
 - ingress-nginx
+- cert-manager
