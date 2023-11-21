@@ -1,16 +1,23 @@
-import { AppIcon, Chip, ThumbsUpIcon } from '@pluralsh/design-system'
-import { GateState, PipelineGateFragment } from 'generated/graphql'
+import { AppIcon, Button, Chip, ThumbsUpIcon } from '@pluralsh/design-system'
+import {
+  GateState,
+  PipelineGateFragment,
+  useApproveGateMutation,
+} from 'generated/graphql'
 
-import { ComponentPropsWithoutRef } from 'react'
+import { ComponentPropsWithoutRef, useState } from 'react'
 
 import styled from 'styled-components'
+
+import { Confirm } from 'components/utils/Confirm'
+
+import { ApolloError } from '@apollo/client'
 
 import {
   BaseNode,
   EdgeNode,
   IconHeading,
   NodeCardList,
-  ServiceCard,
   StatusCard,
   gateStateToCardStatus,
   gateStateToSeverity,
@@ -101,17 +108,64 @@ export function ApprovalNode(props: EdgeNode) {
           ) : (
             gate && (
               <li>
-                <ServiceCard
+                <ApproveButton id={gate.id} />
+                {/* <ServiceCard
                   status={gateStateToCardStatus[gate.state]}
                   statusLabel={gateStateToApprovalText[gate.state]}
                 >
                   {gate.name}
-                </ServiceCard>
+                </ServiceCard> */}
               </li>
             )
           )
         )}
       </NodeCardList>
     </BaseNode>
+  )
+}
+
+function ApproveButton({
+  id,
+  onCompleted,
+  onError,
+}: {
+  id: string
+  onCompleted?: () => void
+  onError?: (e: ApolloError) => void
+}) {
+  const [confirmIsOpen, setConfirmIsOpen] = useState(false)
+
+  const [approveGateMutation, { loading, error }] = useApproveGateMutation({
+    variables: { id },
+    onCompleted: () => {
+      onCompleted?.()
+    },
+    onError: (e) => onError?.(e),
+  })
+
+  return (
+    <>
+      <Button
+        small
+        secondary
+        onClick={() => {
+          setConfirmIsOpen(true)
+        }}
+      >
+        Approve
+      </Button>
+      <Confirm
+        open={confirmIsOpen}
+        loading={loading}
+        error={error}
+        title={null}
+        text="Are you sure you want to approve this?"
+        label="Approve"
+        submit={() => {
+          approveGateMutation()
+        }}
+        close={() => setConfirmIsOpen(false)}
+      />
+    </>
   )
 }

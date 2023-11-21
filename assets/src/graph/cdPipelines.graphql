@@ -137,3 +137,9 @@ query Pipeline($id: ID!) {
     ...Pipeline
   }
 }
+
+mutation ApproveGate($id: ID!) {
+  approveGate(id: $id) {
+    ...PipelineGate
+  }
+}

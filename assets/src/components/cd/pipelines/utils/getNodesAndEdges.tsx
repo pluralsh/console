@@ -32,7 +32,7 @@ const TYPE_SORT_VALS = Object.fromEntries(
   [NodeType.Stage, NodeType.Approval, NodeType.Tests].map((val, i) => [val, i])
 )
 
-export function getNodesEdges(pipeline: PipelineFragment) {
+export function getNodesAndEdges(pipeline: PipelineFragment) {
   const edges: Edge<any>[] = []
   const pipeStages = pipeline.stages?.filter(isNonNullable) ?? []
   const pipeEdges = pipeline.edges?.filter(isNonNullable) ?? []
@@ -107,7 +107,7 @@ export function getNodesEdges(pipeline: PipelineFragment) {
   })
 
   return {
-    initialNodes: [
+    nodes: [
       ...pipeStages.map((stage) => {
         const stageStatus = getStageStatus(stage)
 
@@ -129,6 +129,6 @@ export function getNodesEdges(pipeline: PipelineFragment) {
       }),
       ...gateNodes,
     ],
-    initialEdges: edges,
+    edges,
   }
 }

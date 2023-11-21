@@ -1,6 +1,12 @@
-import { IconFrame, ReloadIcon } from '@pluralsh/design-system'
+import { IconFrame, ReloadIcon, usePrevious } from '@pluralsh/design-system'
 import { PipelineFragment } from 'generated/graphql'
-import { useCallback, useLayoutEffect, useMemo } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react'
 import ReactFlow, {
   Background,
   BackgroundVariant,
@@ -18,7 +24,7 @@ import { StageNode } from './nodes/StageNode'
 import { ApprovalNode } from './nodes/ApprovalNode'
 import { DagreDirection, getLayoutedElements } from './utils/nodeLayouter'
 import { EdgeLineMarkerDefs, edgeTypes } from './EdgeLine'
-import { NodeType, getNodesEdges } from './utils/getNodesEdges'
+import { NodeType, getNodesAndEdges } from './utils/getNodesAndEdges'
 
 const nodeTypes = {
   [NodeType.Stage]: StageNode,
@@ -30,13 +36,17 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
   const theme = useTheme()
   const gridGap = theme.spacing.large
   const margin = gridGap * 1
-  const { initialNodes, initialEdges } = useMemo(
-    () => getNodesEdges(pipeline),
+  const { nodes: initialNodes, edges: initialEdges } = useMemo(
+    () => getNodesAndEdges(pipeline),
     [pipeline]
   )
   const { setViewport, getViewport, viewportInitialized } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as any)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+  const [needsLayout, setNeedsLayout] = useState(true)
+  const prevPipeline = usePrevious(pipeline)
+  const prevNodes = usePrevious(nodes)
+  const prevEdges = usePrevious(edges)
 
   const layoutNodes = useCallback(
     (direction: DagreDirection = 'LR') => {
@@ -49,17 +59,38 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
 
       setNodes([...layouted.nodes])
       setEdges([...layouted.edges])
+      setNeedsLayout(false)
     },
     [nodes, edges, getViewport, gridGap, margin, setNodes, setEdges]
   )
 
   useLayoutEffect(() => {
-    if (viewportInitialized) {
+    if (viewportInitialized && needsLayout) {
       layoutNodes()
+      requestAnimationFrame(() => {
+        layoutNodes()
+      })
     }
-    // Only run on first render
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewportInitialized])
+  }, [
+    viewportInitialized,
+    needsLayout,
+    nodes,
+    prevNodes,
+    edges,
+    prevEdges,
+    layoutNodes,
+  ])
+
+  useEffect(() => {
+    // Don't run for initial value of pipeline, only for changes
+    if (prevPipeline && prevPipeline !== pipeline) {
+      const { nodes, edges } = getNodesAndEdges(pipeline)
+
+      setNodes(nodes)
+      setEdges(edges)
+      setNeedsLayout(true)
+    }
+  }, [pipeline, prevPipeline, setEdges, setNodes])
 
   return (
     <ReactFlowWrapperSC>
