@@ -48,7 +48,13 @@ defmodule Console.Deployments.Compatibilities.AddOn do
     }
   end
 
-  def find_version(%__MODULE__{versions: [_ | _] = vsns}, version), do: find_version(vsns, version)
+  def find_version(%__MODULE__{versions: [_ | _] = vsns}, version) do
+    case Version.parse(version) do
+      {:ok, v} -> find_version(vsns, v)
+      _ -> nil
+    end
+  end
+
   def find_version([%{version: version} = found | _], version), do: found
   def find_version([%{version: first} = v1, %{version: second} = v2 | rest], version) do
     first  = clean_version(first)

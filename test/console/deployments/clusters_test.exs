@@ -825,6 +825,19 @@ defmodule Console.Deployments.ClustersTest do
       assert runtime.version == "1.9.1"
       assert runtime.service_id == svc.id
     end
+
+    test "it can create with goofy semvers" do
+      cluster = insert(:cluster)
+
+      {:ok, 1} = Clusters.create_runtime_services([
+        %{name: "ingress-nginx", version: "v1.9.1"},
+        %{name: "istio", version: "2.0.0"}
+      ], nil, cluster)
+
+      [runtime] = Clusters.runtime_services(cluster)
+      assert runtime.name == "ingress-nginx"
+      assert runtime.version == "1.9.1"
+    end
   end
 
   describe "#refresh_kubeconfig/2" do

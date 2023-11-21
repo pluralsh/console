@@ -7,6 +7,7 @@ defmodule Console.Deployments.Clusters do
   alias Console.Deployments.{Services, Git, Providers.Configuration}
   alias Console.Deployments.Providers.Versions
   alias Console.Deployments.Compatibilities.Table
+  alias Console.Deployments.Ecto.Validations
   alias Console.Services.Users
   alias Kazan.Apis.Core.V1, as: Core
   alias Console.Schema.{
@@ -582,7 +583,7 @@ defmodule Console.Deployments.Clusters do
         %Compatibilities.AddOn{} = addon ->
           Map.merge(svc, %{
             addon: addon,
-            addon_version: Compatibilities.AddOn.find_version(addon, svc.version)
+            addon_version: Compatibilities.AddOn.find_version(addon, Validations.clean_version(svc.version))
           })
         _ -> svc
       end
@@ -598,6 +599,10 @@ defmodule Console.Deployments.Clusters do
     Enum.filter(svcs, fn
       %{name: n} -> Table.fetch(n)
       _ -> false
+    end)
+    |> Enum.map(fn
+      %{version: v} = map -> Map.put(map, :version, Validations.clean_version(v))
+      m -> m
     end)
     |> Enum.map(&Map.merge(&1, %{
       cluster_id: id,
