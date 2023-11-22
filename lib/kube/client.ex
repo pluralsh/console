@@ -24,6 +24,8 @@ defmodule Kube.Client do
   get_request :get_wireguard_peer, Kube.WireguardPeer
   get_request :get_wireguard_server, Kube.WireguardServer
   get_request :get_cluster, Kube.Cluster
+  get_request :get_helm_repository, Kube.HelmRepository
+  get_request :get_helm_chart, Kube.HelmChart
 
   delete_request :delete_wireguard_peer, Kube.WireguardPeer
   delete_request :delete_certificate, Kube.Certificate
@@ -32,12 +34,14 @@ defmodule Kube.Client do
   create_request :create_postgresql, Kube.Postgresql
   create_request :create_vertical_pod_autoscaler, Kube.VerticalPodAutoscaler
   create_request :create_statefulset_resize, Kube.StatefulSetResize
+  create_request :create_helm_chart, Kube.HelmChart
 
   list_all_request :list_postgresqls, Kube.Postgresql.List
   list_all_request :list_slashcommands, Kube.SlashCommand.List
   list_all_request :list_licenses, Kube.License.List
   list_all_request :list_applications, Kube.Application.List
   list_all_request :list_metrics, Kube.NodeMetric.List
+  list_all_request :list_helm_repositories, Kube.HelmRepository.List
 
   def raw(path) do
     %Kazan.Request{

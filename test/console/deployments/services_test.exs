@@ -717,7 +717,7 @@ end
 
 defmodule Console.Deployments.ServicesAsyncTest do
   use Console.DataCase, async: false
-  alias Console.Deployments.Services
+  alias Console.Deployments.{Services, Tar}
 
   describe "#docs/1" do
     test "it can fetch the docs for a given service" do
@@ -726,6 +726,20 @@ defmodule Console.Deployments.ServicesAsyncTest do
 
       {:ok, [%{path: "test.md", content: content}]} = Services.docs(service)
       assert content == "hello world"
+    end
+  end
+
+  describe "#tarstream/1" do
+    test "it can splice in a new values.yaml.tpl" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, helm: %{values: "value: test"}, repository: git, git: %{ref: "master", folder: "charts/console"})
+
+      {:ok, f} = Services.tarstream(svc)
+      {:ok, content} = Tar.tar_stream(f)
+
+      content = Map.new(content)
+      assert content["Chart.yaml"] =~ "console"
+      assert content["values.yaml.liquid"] == "value: test"
     end
   end
 end

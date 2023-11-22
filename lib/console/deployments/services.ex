@@ -3,7 +3,7 @@ defmodule Console.Deployments.Services do
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation}
-  alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Checker, AddOns}
+  alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Checker, AddOns, Tar}
   require Logger
 
   @type service_resp :: {:ok, Service.t} | Console.error
@@ -25,8 +25,15 @@ defmodule Console.Deployments.Services do
 
   def tarball(%Service{id: id}), do: api_url("v1/git/tarballs?id=#{id}")
 
+  def tarstream(%Service{helm: %Service.Helm{values: values}} = svc) do
+    with {:ok, tar} <- Git.Discovery.fetch(svc),
+      do: Tar.splice(tar, %{"values.yaml.liquid" => values})
+  end
+  def tarstream(%Service{} = svc), do: Git.Discovery.fetch(svc)
+
   def referenced?(id) do
-    Enum.map([Cluster.for_service(id), ClusterProvider.for_service(id)], &Console.Repo.exists?/1)
+    [Cluster.for_service(id), ClusterProvider.for_service(id)]
+    |> Enum.map(&Console.Repo.exists?/1)
     |> Enum.any?(& &1)
   end
 
