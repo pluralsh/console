@@ -95,7 +95,8 @@ defmodule Console.GraphQl.Deployments.Service do
     field :namespace,        non_null(:string), description: "kubernetes namespace this service will be deployed to"
     field :status,           non_null(:service_deployment_status), description: "A summary status enum for the health of this service"
     field :version,          non_null(:string), description: "semver of this service"
-    field :git,              non_null(:git_ref), description: "description on where in git the service's manifests should be fetched"
+    field :git,              :git_ref,   description: "description on where in git the service's manifests should be fetched"
+    field :helm,             :helm_spec, description: "description of how helm charts should be applied"
     field :protect,          :boolean, description: "if true, deletion of this service is not allowed"
     field :sha,              :string, description: "latest git sha we pulled from"
     field :tarball,          :string, resolve: &Deployments.tarball/3, description: "https url to fetch the latest tarball of kubernetes manifests"
@@ -146,6 +147,10 @@ defmodule Console.GraphQl.Deployments.Service do
   object :git_ref do
     field :ref,    non_null(:string), description: "a general git ref, either a branch name or commit sha understandable by `git checkout <ref>`"
     field :folder, non_null(:string), description: "the folder manifests live under"
+  end
+
+  object :helm_spec do
+    field :values, :string, description: "a helm values file to use with this service"
   end
 
   @desc "a configuration item k/v pair"
