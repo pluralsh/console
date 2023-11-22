@@ -13,6 +13,17 @@ The Plural Console is the administrative hub of the plural platform.  It has a n
 
 We strive to make it powerful enough to make you feel like any application you deploy using Plural has an operational profile comparable to a managed service, even without being one.
 
+## Contributor Program
+
+We are currently trying to aggregate compatibility and dependency information for many CNCF add-ons within the kubernetes ecosystem.  You can see some early examples in `static/compatibilities` and are hoping to get community support getting these built out and keeping them up-to-date.  We are focused on properly compensating any contributions to the Plural platform, which includes a bounty for either adding the compatibility info for a net-new application, or updating the information alongside a new version that has been released.  Currently the rewards are:
+
+* $50 for adding compatibilities for a specific version of an application
+* $150 for adding a new application and all to-date compatibility information
+
+To be eligible for the upgrade bounty you'll need to submit a PR to this repo with the changes and a link to whatever documentation confirms the correctness of the information.  We'll then review and if it's correct and useful for the broader community, you'll be eligible for the reward once merged.
+
+To claim the reward, you should get in touch with us on our discord at https://discord.gg/pluralsh and we'll simply need to confirm that you did the work (easy way to do that is linking your discord handle on the relevant PRs) and will give you the bounty you've earned.
+
 ## Development
 
 Console's server side is written in Elixir, and exposes a graphql api. The frontend is in react, all code lives in this single repo and common development tasks can be done using the Makefile at the root of the repo.
