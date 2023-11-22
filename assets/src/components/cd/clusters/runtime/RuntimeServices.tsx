@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { runtimeColumns } from './columns'
+import ExpandedColumn from './ExpandedColumn'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -23,6 +24,7 @@ export default function RuntimeServices({
       kubeVersion,
       id: cluster?.id ?? '',
     },
+    fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
 
@@ -42,6 +44,11 @@ export default function RuntimeServices({
       <Table
         data={data?.cluster?.runtimeServices || []}
         columns={runtimeColumns}
+        getRowCanExpand={() => true}
+        renderExpanded={({ row }) => {
+          console.log(row)
+          return <ExpandedColumn runtimeService={row.original} />
+        }}
         css={{
           maxHeight: 310,
           height: '100%',

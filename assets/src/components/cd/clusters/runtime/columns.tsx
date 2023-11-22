@@ -3,24 +3,75 @@ import { RuntimeServicesQuery } from 'generated/graphql'
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { TableText } from 'components/cluster/TableElements'
-import { ErrorIcon } from '@pluralsh/design-system'
+import {
+  CaretDownIcon,
+  CaretRightIcon,
+  ErrorIcon,
+} from '@pluralsh/design-system'
 
 import { GitPointer } from '../deprecationsColumns'
+import { useTheme } from 'styled-components'
 
 type RuntimeServiceCluster = NonNullable<RuntimeServicesQuery['cluster']>
-type RuntimeService = NonNullable<RuntimeServiceCluster['runtimeServices']>[0]
+export type RuntimeService = NonNullable<
+  RuntimeServiceCluster['runtimeServices']
+>[0]
+type AddOnVersion = NonNullable<
+  NonNullable<NonNullable<RuntimeService>['addon']>['versions']
+>[0]
+
 const columnHelperRuntime = createColumnHelper<RuntimeService>()
+const columnHelperExpanded = createColumnHelper<AddOnVersion>()
+
+export const expandedColumns = [
+  columnHelperExpanded.accessor((row) => row?.version, {
+    id: 'version',
+    header: 'Add-On Version',
+    cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
+  }),
+  columnHelperExpanded.accessor((row) => row?.kube, {
+    id: 'kube',
+    header: 'Kubernetes Versions',
+    cell: ({ getValue }) => (
+      <TableText>{(getValue() || []).join(', ')}</TableText>
+    ),
+  }),
+]
 
 export const runtimeColumns = [
   columnHelperRuntime.accessor((row) => row?.addon, {
     id: 'name',
     header: 'Name',
-    cell: ({ getValue, row: { original } }) => {
+    cell: ({ getValue, row }) => {
+      const theme = useTheme()
       const addon = getValue()
-
+      const expanded = row.getIsExpanded()
       if (!addon) return null
 
-      return <ColWithIcon icon={addon.icon}>{original?.name}</ColWithIcon>
+      return (
+        <ColWithIcon icon={addon.icon}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: theme.spacing.xxsmall,
+            }}
+          >
+            {row.original?.name}
+            {expanded ? (
+              <CaretDownIcon
+                size={12}
+                onClick={row.getToggleExpandedHandler()}
+              />
+            ) : (
+              <CaretRightIcon
+                size={12}
+                onClick={row.getToggleExpandedHandler()}
+              />
+            )}
+          </div>
+        </ColWithIcon>
+      )
     },
   }),
   columnHelperRuntime.accessor((row) => row?.version, {
