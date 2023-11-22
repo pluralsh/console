@@ -1,8 +1,10 @@
 import { Table } from '@pluralsh/design-system'
 import { ClustersRowFragment, useRuntimeServicesQuery } from 'generated/graphql'
 import { useState } from 'react'
-import { runtimeColumns } from './columns'
+
 import { useTheme } from 'styled-components'
+
+import { runtimeColumns } from './columns'
 
 const POLL_INTERVAL = 10 * 1000
 

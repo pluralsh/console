@@ -244,14 +244,20 @@ defmodule Console.Deployments.PipelinesTest do
       svc = insert(:service, sha: "test-sha", status: :healthy)
       rev = insert(:revision, service: svc, sha: "test-sha")
       insert(:stage_service, stage: stage, service: svc)
-      promotion = insert(:pipeline_promotion, stage: stage, revised_at: Timex.now() |> Timex.shift(minutes: -1))
+      promotion = insert(:pipeline_promotion, stage: stage, promoted_at: Timex.now(), revised_at: Timex.now() |> Timex.shift(minutes: -1))
       insert(:promotion_service, promotion: promotion, service: svc, revision: rev)
+
+      stage2 = insert(:pipeline_stage, pipeline: stage.pipeline)
+      edge = insert(:pipeline_edge, from: stage, to: stage2)
+      gate = insert(:pipeline_gate, edge: edge, state: :open)
 
       {:ok, promo} = Pipelines.build_promotion(stage)
 
       assert promo.id == promotion.id
       assert promo.stage_id == stage.id
       assert promo.revised_at == promotion.revised_at
+
+      assert refetch(gate).state == :open
     end
   end
 

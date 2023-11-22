@@ -94,8 +94,6 @@ export default function Pod() {
   const pod = data?.pod
   const readiness = podStatusToReadiness(pod?.status)
 
-  console.log('pod', pod)
-
   if (error) {
     return <GqlError error={error} />
   }

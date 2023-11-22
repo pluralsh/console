@@ -1,9 +1,10 @@
 import { ReactNode } from 'react'
 import { ApolloError } from '@apollo/client'
-import { Div } from 'honorable'
 import { Button, Modal } from '@pluralsh/design-system'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { useTheme } from 'styled-components'
 
 import { GqlError } from './Alert'
 
@@ -30,6 +31,8 @@ export function Confirm({
   loading = false,
   destructive = false,
 }: ConfirmProps) {
+  const theme = useTheme()
+
   return (
     <ModalMountTransition open={open}>
       <Modal
@@ -65,12 +68,9 @@ export function Confirm({
             header="Something went wrong"
           />
         ) : (
-          <Div
-            body1
-            color="text"
-          >
+          <div css={{ ...theme.partials.text.body1, color: theme.colors.text }}>
             {text}
-          </Div>
+          </div>
         )}
       </Modal>
     </ModalMountTransition>

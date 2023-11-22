@@ -32,12 +32,16 @@ export const serviceStatusToSeverity = createMapperWithFallback<
 export function ServiceStatusChip({
   status,
   componentStatus,
+  ...props
 }: {
   status: ServiceDeploymentStatus | null | undefined
   componentStatus?: string | null | undefined
-}) {
+} & ComponentProps<typeof Chip>) {
   return (
-    <Chip severity={serviceStatusToSeverity(status)}>
+    <Chip
+      severity={serviceStatusToSeverity(status)}
+      {...props}
+    >
       {componentStatus && <>{componentStatus} </>}
       {serviceStatusToLabel(status)}
     </Chip>

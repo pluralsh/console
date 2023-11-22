@@ -32,6 +32,8 @@ import { GlobalSettingsRepositories } from 'components/cd/globalSettings/GlobalS
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
+import Pipelines from 'components/cd/pipelines/Pipelines'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -68,6 +70,7 @@ import {
   CLUSTER_SERVICES_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NODE_REL_PATH,
+  PIPELINES_REL_PATH,
   POD_REL_PATH,
   SERVICE_COMPONENTS_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
@@ -134,10 +137,10 @@ const mainRoutes = (
       path={`services/:${SERVICE_PARAM_CLUSTER_ID}?`}
       element={<Services />}
     />
-    {/* <Route
-      path="pipelines"
+    <Route
+      path={PIPELINES_REL_PATH}
       element={<Pipelines />}
-    /> */}
+    />
     <Route
       path="git"
       element={<GitRepositories />}

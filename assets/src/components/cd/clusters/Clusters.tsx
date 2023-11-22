@@ -259,6 +259,7 @@ export const columns = [
         cluster?.provider?.supportedVersions
       )
       const { refetch } = table.options.meta as { refetch?: () => void }
+
       if (
         !upgrade &&
         !hasDeprecations &&

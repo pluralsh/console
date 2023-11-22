@@ -1,0 +1,149 @@
+fragment PipelineServiceDeployment on ServiceDeployment {
+  id
+  name
+  namespace
+  cluster {
+    id
+    name
+  }
+  status
+  componentStatus
+}
+
+fragment PipelineGate on PipelineGate {
+  id
+  name
+  state
+  type
+  approver {
+    ...User
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment Revision on Revision {
+  id
+  git {
+    ref
+    folder
+  }
+  insertedAt
+  updatedAt
+  message
+  sha
+  version
+}
+
+fragment PromotionService on PromotionService {
+  id
+  revision {
+    ...Revision
+  }
+  service {
+    ...PipelineServiceDeployment
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment PipelinePromotion on PipelinePromotion {
+  id
+  services {
+    ...PromotionService
+  }
+  insertedAt
+  updatedAt
+  promotedAt
+  revisedAt
+}
+
+fragment PromotionCriteria on PromotionCriteria {
+  id
+  secrets
+  source {
+    ...PipelineServiceDeployment
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment StageService on StageService {
+  id
+  criteria {
+    ...PromotionCriteria
+  }
+  insertedAt
+  updatedAt
+  service {
+    ...PipelineServiceDeployment
+  }
+}
+
+fragment PipelineStage on PipelineStage {
+  id
+  name
+  insertedAt
+  updatedAt
+  promotion {
+    ...PipelinePromotion
+  }
+  services {
+    ...StageService
+  }
+}
+
+fragment PipelineStageEdge on PipelineStageEdge {
+  id
+  insertedAt
+  promotedAt
+  updatedAt
+  gates {
+    ...PipelineGate
+  }
+  from {
+    ...PipelineStage
+  }
+  to {
+    ...PipelineStage
+  }
+}
+
+fragment Pipeline on Pipeline {
+  id
+  name
+  insertedAt
+  updatedAt
+  edges {
+    ...PipelineStageEdge
+  }
+  stages {
+    ...PipelineStage
+  }
+}
+
+query Pipelines($first: Int = 50, $after: String) {
+  pipelines(first: $first, after: $after) {
+    edges {
+      cursor
+      node {
+        ...Pipeline
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+query Pipeline($id: ID!) {
+  pipeline(id: $id) {
+    ...Pipeline
+  }
+}
+
+mutation ApproveGate($id: ID!) {
+  approveGate(id: $id) {
+    ...PipelineGate
+  }
+}
