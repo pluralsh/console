@@ -9,8 +9,9 @@ import {
   ErrorIcon,
 } from '@pluralsh/design-system'
 
-import { GitPointer } from '../deprecationsColumns'
 import { useTheme } from 'styled-components'
+
+import { GitPointer } from '../deprecationsColumns'
 
 type RuntimeServiceCluster = NonNullable<RuntimeServicesQuery['cluster']>
 export type RuntimeService = NonNullable<
@@ -22,6 +23,35 @@ type AddOnVersion = NonNullable<
 
 const columnHelperRuntime = createColumnHelper<RuntimeService>()
 const columnHelperExpanded = createColumnHelper<AddOnVersion>()
+
+function AddOnName({ addon, row, expanded }) {
+  const theme = useTheme()
+
+  return (
+    <ColWithIcon icon={addon.icon}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: theme.spacing.xxsmall,
+        }}
+      >
+        {row.original?.name}
+        {expanded ? (
+          <CaretDownIcon
+            size={12}
+            onClick={row.getToggleExpandedHandler()}
+          />
+        ) : (
+          <CaretRightIcon
+            size={12}
+            onClick={row.getToggleExpandedHandler()}
+          />
+        )}
+      </div>
+    </ColWithIcon>
+  )
+}
 
 export const expandedColumns = [
   columnHelperExpanded.accessor((row) => row?.version, {
@@ -43,34 +73,17 @@ export const runtimeColumns = [
     id: 'name',
     header: 'Name',
     cell: ({ getValue, row }) => {
-      const theme = useTheme()
       const addon = getValue()
       const expanded = row.getIsExpanded()
+
       if (!addon) return null
 
       return (
-        <ColWithIcon icon={addon.icon}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: theme.spacing.xxsmall,
-            }}
-          >
-            {row.original?.name}
-            {expanded ? (
-              <CaretDownIcon
-                size={12}
-                onClick={row.getToggleExpandedHandler()}
-              />
-            ) : (
-              <CaretRightIcon
-                size={12}
-                onClick={row.getToggleExpandedHandler()}
-              />
-            )}
-          </div>
-        </ColWithIcon>
+        <AddOnName
+          addon={addon}
+          expanded={expanded}
+          row={row}
+        />
       )
     },
   }),

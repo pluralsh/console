@@ -47,6 +47,7 @@ export default function RuntimeServices({
         getRowCanExpand={() => true}
         renderExpanded={({ row }) => {
           console.log(row)
+
           return <ExpandedColumn runtimeService={row.original} />
         }}
         css={{

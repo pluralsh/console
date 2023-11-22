@@ -1,6 +1,8 @@
 import { Table } from '@pluralsh/design-system'
-import { RuntimeService, expandedColumns } from './columns'
+
 import { useTheme } from 'styled-components'
+
+import { RuntimeService, expandedColumns } from './columns'
 
 export default function ExpandedColumn({
   runtimeService,
@@ -8,6 +10,7 @@ export default function ExpandedColumn({
   runtimeService: RuntimeService
 }) {
   const theme = useTheme()
+
   console.log(runtimeService)
   const versions = runtimeService?.addon?.versions || []
 
