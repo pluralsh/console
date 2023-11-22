@@ -33,6 +33,24 @@ defmodule Console.Schema.Service do
     end
   end
 
+  defmodule Helm do
+    use Piazza.Ecto.Schema
+
+    embedded_schema do
+      field :values,     Piazza.Ecto.EncryptedString
+      field :chart,      :string
+      field :version,    :string
+
+      embeds_one :repository, Console.Schema.NamespacedName
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(values chart version)a)
+      |> cast_embed(:repository)
+    end
+  end
+
   schema "services" do
     field :name,             :string
     field :component_status, :string
@@ -47,7 +65,9 @@ defmodule Console.Schema.Service do
     field :deleted_at,       :utc_datetime_usec
     field :protect,          :boolean
 
-    embeds_one :git, Git, on_replace: :update
+    embeds_one :git,  Git,  on_replace: :update
+    embeds_one :helm, Helm, on_replace: :update
+
     embeds_one :sync_config, SyncConfig, on_replace: :update do
       embeds_many :diff_normalizers, DiffNormalizer
       embeds_one :namespace_metadata, Metadata
@@ -157,6 +177,7 @@ defmodule Console.Schema.Service do
     |> kubernetes_names([:name, :namespace])
     |> semver(:version)
     |> cast_embed(:git)
+    |> cast_embed(:helm)
     |> cast_embed(:sync_config, with: &sync_config_changeset/2)
     |> cast_embed(:kustomize, with: &kustomize_changeset/2)
     |> cast_assoc(:components)
@@ -170,7 +191,7 @@ defmodule Console.Schema.Service do
     |> unique_constraint([:cluster_id, :owner_id])
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
-    |> validate_required([:name, :namespace, :version, :cluster_id, :repository_id])
+    |> validate_required([:name, :namespace, :version, :cluster_id])
   end
 
   def rollback_changeset(model, attrs \\ %{}) do
