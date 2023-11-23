@@ -195,7 +195,8 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:create, fn %{source: source, config: config} ->
       Map.take(source, [:repository_id, :sha, :name, :namespace])
-      |> Map.put(:git, Map.from_struct(source.git))
+      |> Console.dedupe(:git, source.git && %{ref: source.git.ref, folder: source.git.folder})
+      |> Console.dedupe(:helm, source.helm && Console.mapify(source.helm))
       |> Map.merge(attrs)
       |> Map.put(:configuration, config)
       |> create_service(cluster_id, user)
@@ -226,7 +227,8 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:revision, fn %{base: base} ->
       add_version(%{sha: sha, message: msg}, base.version)
-      |> Console.dedupe(:git, %{ref: sha, folder: base.git.folder})
+      |> Console.dedupe(:git, base.git && %{ref: sha, folder: base.git.folder})
+      |> Console.dedupe(:helm, base.helm && Console.mapify(base.helm))
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)
         Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
@@ -247,7 +249,8 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:revision, fn %{base: base} ->
       add_version(attrs, base.version)
-      |> Console.dedupe(:git, Map.take(base.git, ~w(ref folder)a))
+      |> Console.dedupe(:git, Map.take(base.git || %{}, ~w(ref folder)a))
+      |> Console.dedupe(:helm, base.helm && Console.mapify(base.helm))
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)
         Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
@@ -293,12 +296,12 @@ defmodule Console.Deployments.Services do
       end
     end)
     |> add_operation(:update, fn %{service: svc, revision: rev} ->
-      svc
-      |> Service.rollback_changeset(%{
+      Service.rollback_changeset(svc, %{
         status: :stale,
         revision_id: rev.id,
         sha: rev.sha,
-        git: Map.take(rev.git, [:ref, :folder])
+        git: rev.git && Map.take(rev.git, [:ref, :folder]),
+        helm: rev.helm && Console.mapify(rev.helm)
       })
       |> Repo.update()
     end)

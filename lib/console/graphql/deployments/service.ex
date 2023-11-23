@@ -14,7 +14,8 @@ defmodule Console.GraphQl.Deployments.Service do
     field :sync_config,    :sync_config_attributes
     field :protect,        :boolean
     field :repository_id,  non_null(:id)
-    field :git,            non_null(:git_ref_attributes)
+    field :git,            :git_ref_attributes
+    field :helm,           :helm_config_attributes
     field :kustomize,      :kustomize_attributes
     field :configuration,  list_of(:config_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
@@ -24,6 +25,13 @@ defmodule Console.GraphQl.Deployments.Service do
   input_object :sync_config_attributes do
     field :namespace_metadata, :metadata_attributes
     field :diff_normalizer,    :diff_normalizer_attributes
+  end
+
+  input_object :helm_config_attributes do
+    field :values,     :string
+    field :chart,      :string
+    field :version,    :string
+    field :repository, :namespaced_name
   end
 
   input_object :metadata_attributes do
@@ -43,6 +51,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :version,       :string
     field :protect,       :boolean
     field :git,           :git_ref_attributes
+    field :helm,          :helm_config_attributes
     field :configuration, list_of(:config_attributes)
     field :kustomize,     :kustomize_attributes
   end
@@ -96,7 +105,11 @@ defmodule Console.GraphQl.Deployments.Service do
     field :status,           non_null(:service_deployment_status), description: "A summary status enum for the health of this service"
     field :version,          non_null(:string), description: "semver of this service"
     field :git,              :git_ref,   description: "description on where in git the service's manifests should be fetched"
-    field :helm,             :helm_spec, description: "description of how helm charts should be applied"
+    field :helm,             :helm_spec, description: "description of how helm charts should be applied", resolve: fn
+      %{helm: %{} = helm} = svc, _, _ ->
+        {:ok, Map.put(helm, :parent, svc)}
+      svc, _, _ -> {:ok, svc.helm}
+    end
     field :protect,          :boolean, description: "if true, deletion of this service is not allowed"
     field :sha,              :string, description: "latest git sha we pulled from"
     field :tarball,          :string, resolve: &Deployments.tarball/3, description: "https url to fetch the latest tarball of kubernetes manifests"
@@ -110,6 +123,11 @@ defmodule Console.GraphQl.Deployments.Service do
     field :docs, list_of(:git_file), resolve: &Deployments.docs/3
 
     field :repository, :git_repository, resolve: dataloader(Deployments), description: "the git repo of this service"
+
+    field :helm_repository, :helm_repository, resolve: fn
+      svc, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.HelmRepositoryLoader, :helm, svc)
+    end
 
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this service"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
@@ -136,7 +154,8 @@ defmodule Console.GraphQl.Deployments.Service do
   object :revision do
     field :id,      non_null(:id), description: "id of this revision"
     field :version, non_null(:string), description: "the service's semver"
-    field :git,     non_null(:git_ref), description: "git spec of the prior revision"
+    field :git,     :git_ref, description: "git spec of the prior revision"
+    field :helm,    :helm_spec, description: "description of how helm charts should be applied"
     field :sha,     :string, description: "the sha this service was pulled from"
     field :message, :string, description: "the commit message for this revision"
 
@@ -150,7 +169,10 @@ defmodule Console.GraphQl.Deployments.Service do
   end
 
   object :helm_spec do
-    field :values, :string, description: "a helm values file to use with this service"
+    field :chart,   :string, description: "the name of the chart this service is using"
+    field :values,  :string, description: "a helm values file to use with this service, requires auth and so is heavy to query",
+      resolve: &Deployments.helm_values/3
+    field :version, :string, description: "the chart version in use currently"
   end
 
   @desc "a configuration item k/v pair"

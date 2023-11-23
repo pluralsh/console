@@ -147,6 +147,10 @@ type RootQueryType {
 
   gitRepositories(after: String, first: Int, before: String, last: Int): GitRepositoryConnection
 
+  helmRepositories: [HelmRepository]
+
+  helmRepository(name: String!, namespace: String!): HelmRepository
+
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
 
@@ -831,7 +835,8 @@ input ServiceDeploymentAttributes {
   syncConfig: SyncConfigAttributes
   protect: Boolean
   repositoryId: ID!
-  git: GitRefAttributes!
+  git: GitRefAttributes
+  helm: HelmConfigAttributes
   kustomize: KustomizeAttributes
   configuration: [ConfigAttributes]
   readBindings: [PolicyBindingAttributes]
@@ -841,6 +846,13 @@ input ServiceDeploymentAttributes {
 input SyncConfigAttributes {
   namespaceMetadata: MetadataAttributes
   diffNormalizer: DiffNormalizerAttributes
+}
+
+input HelmConfigAttributes {
+  values: String
+  chart: String
+  version: String
+  repository: NamespacedName
 }
 
 input MetadataAttributes {
@@ -860,6 +872,7 @@ input ServiceUpdateAttributes {
   version: String
   protect: Boolean
   git: GitRefAttributes
+  helm: HelmConfigAttributes
   configuration: [ConfigAttributes]
   kustomize: KustomizeAttributes
 }
@@ -924,7 +937,10 @@ type ServiceDeployment {
   version: String!
 
   "description on where in git the service's manifests should be fetched"
-  git: GitRef!
+  git: GitRef
+
+  "description of how helm charts should be applied"
+  helm: HelmSpec
 
   "if true, deletion of this service is not allowed"
   protect: Boolean
@@ -955,6 +971,8 @@ type ServiceDeployment {
 
   "the git repo of this service"
   repository: GitRepository
+
+  helmRepository: HelmRepository
 
   "read policy for this service"
   readBindings: [PolicyBinding]
@@ -1003,7 +1021,10 @@ type Revision {
   version: String!
 
   "git spec of the prior revision"
-  git: GitRef!
+  git: GitRef
+
+  "description of how helm charts should be applied"
+  helm: HelmSpec
 
   "the sha this service was pulled from"
   sha: String
@@ -1023,6 +1044,17 @@ type GitRef {
 
   "the folder manifests live under"
   folder: String!
+}
+
+type HelmSpec {
+  "the name of the chart this service is using"
+  chart: String
+
+  "a helm values file to use with this service"
+  values: String
+
+  "the chart version in use currently"
+  version: String
 }
 
 "a configuration item k\/v pair"
@@ -1697,6 +1729,29 @@ type GitRepository {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"a crd representation of a helm repository"
+type HelmRepository {
+  metadata: Metadata!
+
+  spec: HelmRepositorySpec!
+
+  "can fetch the status of a given helm repository"
+  status: HelmRepositoryStatus
+}
+
+"a specification of how a helm repository is fetched"
+type HelmRepositorySpec {
+  provider: String!
+  url: String!
+  type: String!
+}
+
+"the state of this helm repository"
+type HelmRepositoryStatus {
+  ready: Boolean
+  message: String
 }
 
 type GitRepositoryConnection {

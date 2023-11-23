@@ -463,6 +463,50 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert Enum.all?(found["components"], & &1["state"] == "RUNNING")
     end
 
+    test "it can fetch helm values with rbac protection" do
+      user = admin_user()
+      reader = insert(:user)
+      cluster = insert(:cluster)
+      repository = insert(:git_repository)
+      {:ok, service} = create_service(cluster, user, [
+        name: "test",
+        namespace: "test",
+        git: %{ref: "master", folder: "k8s"},
+        helm: %{values: "secret: value"},
+        repository_id: repository.id,
+        configuration: [%{name: "name", value: "value"}],
+        read_bindings: [%{user_id: reader.id}]
+      ])
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query Service($id: ID!) {
+          serviceDeployment(id: $id) {
+            name
+            namespace
+            git { ref folder }
+            helm { values }
+            repository { id }
+          }
+        }
+      """, %{"id" => service.id}, %{current_user: user})
+
+      assert found["helm"]["values"] == "secret: value"
+
+      {:ok, %{data: %{"serviceDeployment" => found}, errors: [_ | _]}} = run_query("""
+        query Service($id: ID!) {
+          serviceDeployment(id: $id) {
+            name
+            namespace
+            git { ref folder }
+            helm { values }
+            repository { id }
+          }
+        }
+      """, %{"id" => service.id}, %{current_user: reader})
+
+      refute found["helm"]["values"]
+    end
+
     test "it respects rbac" do
       user = insert(:user)
       service = insert(:service, read_bindings: [%{user_id: user.id}])
