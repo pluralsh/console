@@ -247,6 +247,12 @@ mutation UpdateRbac($serviceId: ID, $clusterId: ID, $rbac: RbacAttributes!) {
   updateRbac(serviceId: $serviceId, clusterId: $clusterId, rbac: $rbac)
 }
 
+mutation SelfManage($values: String!) {
+  selfManage(values: $values) {
+    ...ServiceDeploymentsRow
+  }
+}
+
 fragment ServiceDeploymentBindings on ServiceDeployment {
   readBindings {
     ...PolicyBinding

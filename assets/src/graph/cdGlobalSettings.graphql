@@ -2,6 +2,7 @@ fragment DeploymentSettings on DeploymentSettings {
   id
   name
   enabled
+  selfManaged
   insertedAt
   updatedAt
   artifactRepository {

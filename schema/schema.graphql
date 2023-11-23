@@ -372,6 +372,8 @@ type RootMutationType {
     attributes: ServiceCloneAttributes!
   ): ServiceDeployment
 
+  selfManage(values: String!): ServiceDeployment
+
   createGlobalService(
     serviceId: ID
 
@@ -441,6 +443,9 @@ type DeploymentSettings {
   enabled: Boolean!
 
   name: String!
+
+  "whether the byok cluster has been brought under self-management"
+  selfManaged: Boolean
 
   "the repo to fetch CAPI manifests from, for both providers and clusters"
   artifactRepository: GitRepository
