@@ -5,6 +5,7 @@ defmodule Console.Schema.DeploymentSettings do
   schema "deployment_settings" do
     field :name,             :string
     field :enabled,          :boolean
+    field :self_managed,     :boolean
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
     field :create_policy_id, :binary_id
@@ -33,7 +34,7 @@ defmodule Console.Schema.DeploymentSettings do
     timestamps()
   end
 
-  @valid ~w(name enabled artifact_repository_id deployer_repository_id)a
+  @valid ~w(name enabled self_managed artifact_repository_id deployer_repository_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

@@ -1026,6 +1026,25 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert updated["state"] == "OPEN"
     end
   end
+
+  describe "selfManage" do
+    test "it can self-manage a byok console" do
+      admin = admin_user()
+      deployment_settings(create_bindings: [%{user_id: admin.id}])
+      insert(:cluster, self: true)
+
+      {:ok, %{data: %{"selfManage" => svc}}} = run_query("""
+        mutation SelfManage($values: String!) {
+          selfManage(values: $values) {
+            id
+            name
+          }
+        }
+      """, %{"values" => "value: bogus"}, %{current_user: admin})
+
+      assert svc["name"] == "console"
+    end
+  end
 end
 
 defmodule Console.GraphQl.Mutations.SyncDeploymentMutationsTest do

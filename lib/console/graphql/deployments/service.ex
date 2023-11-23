@@ -370,6 +370,13 @@ defmodule Console.GraphQl.Deployments.Service do
       safe_resolve &Deployments.clone_service/2
     end
 
+    field :self_manage, :service_deployment do
+      middleware Authenticated
+      arg :values, non_null(:string)
+
+      resolve &Deployments.self_manage/2
+    end
+
     field :create_global_service, :global_service do
       middleware Authenticated
       arg :service_id, :id

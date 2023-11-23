@@ -2,8 +2,8 @@ defmodule Console.Deployments.Services do
   use Console.Services.Base
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation}
-  alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Checker, AddOns, Tar}
+  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository}
+  alias Console.Deployments.{Secrets.Store, Settings, Git, Clusters, Deprecations.Checker, AddOns, Tar}
   require Logger
 
   @type service_resp :: {:ok, Service.t} | Console.error
@@ -203,6 +203,36 @@ defmodule Console.Deployments.Services do
     end)
     |> execute(extract: :create)
     |> notify(:create, user)
+  end
+
+  @doc """
+  Allows the console to manage its own upgrades, given the original installation values file
+  """
+  @spec self_manage(binary, User.t) :: service_resp
+  def self_manage(values, %User{} = user) do
+    start_transaction()
+    |> add_operation(:values, fn _ -> YamlElixir.read_from_string(values) end)
+    |> add_operation(:git, fn _ ->
+      url = "https://github.com/pluralsh/console.git"
+      case Git.get_by_url(url) do
+        %GitRepository{} = git -> {:ok, git}
+        _ -> Git.create_repository(%{url: url}, user)
+      end
+    end)
+    |> add_operation(:service, fn %{git: git} ->
+      cluster = Clusters.local_cluster()
+      create_service(%{
+        name: "console",
+        namespace: "plrl-console",
+        repository_id: git.id,
+        git: %{ref: "master", folder: "charts/console"},
+        helm: %{values: values},
+      }, cluster.id, user)
+    end)
+    |> add_operation(:settings, fn _ ->
+      Settings.update(%{self_managed: true}, user)
+    end)
+    |> execute(extract: :service)
   end
 
   @doc """

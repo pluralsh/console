@@ -490,6 +490,26 @@ defmodule Console.Deployments.ServicesTest do
     end
   end
 
+  describe "#self_manage/2" do
+    test "admins can convert their byok consoles to self-managed" do
+      admin = admin_user()
+      settings = deployment_settings(create_bindings: [%{user_id: admin.id}])
+      insert(:cluster, self: true)
+
+      {:ok, console} = Services.self_manage("value: bogus", admin)
+
+      assert console.name == "console"
+      assert console.namespace == "plrl-console"
+      assert console.helm.values == "value: bogus"
+      assert console.git.ref == "master"
+      assert console.git.folder == "charts/console"
+      %{repository: repo} = Console.Repo.preload(console, [:repository])
+      assert repo.url == "https://github.com/pluralsh/console.git"
+
+      assert refetch(settings).self_managed
+    end
+  end
+
   describe "#update_components/2" do
     test "it will update the k8s components w/in the service" do
       service = insert(:service)

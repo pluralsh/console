@@ -297,6 +297,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def update_service_components(%{id: id} = args, %{context: %{cluster: cluster}}),
     do: Services.update_components(Map.take(args, [:errors, :components]), id, cluster)
 
+  def self_manage(%{values: values}, %{context: %{current_user: user}}),
+    do: Services.self_manage(values, user)
+
   def create_git_repository(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.create_repository(attrs, user)
 
