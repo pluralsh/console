@@ -4,6 +4,7 @@ defmodule Console.Deployments.Services do
   alias Console.PubSub
   alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository}
   alias Console.Deployments.{Secrets.Store, Settings, Git, Clusters, Deprecations.Checker, AddOns, Tar}
+  alias Console.Deployments.Helm
   require Logger
 
   @type service_resp :: {:ok, Service.t} | Console.error
@@ -25,11 +26,23 @@ defmodule Console.Deployments.Services do
 
   def tarball(%Service{id: id}), do: api_url("v1/git/tarballs?id=#{id}")
 
-  def tarstream(%Service{helm: %Service.Helm{values: values}} = svc) do
-    with {:ok, tar} <- Git.Discovery.fetch(svc),
+  @doc """
+  Constructs a filestream for the tar artifact of a service, and perhaps performs some JIT modifications
+  before sending it upstream to the given client.
+  """
+  @spec tarstream(Service.t) :: {:ok, File.t} | Console.error
+  def tarstream(%Service{helm: %Service.Helm{values: values}} = svc) when is_binary(values) do
+    with {:ok, tar} <- tarfile(svc),
       do: Tar.splice(tar, %{"values.yaml.liquid" => values})
   end
-  def tarstream(%Service{} = svc), do: Git.Discovery.fetch(svc)
+  def tarstream(%Service{} = svc), do: tarfile(svc)
+
+  defp tarfile(%Service{helm: %Service.Helm{chart: c, version: v}} = svc) when is_binary(c) and is_binary(v) do
+    with {:ok, f, sha} <- Helm.Charts.artifact(svc),
+         {:ok, _} <- update_sha(svc, sha, ""),
+      do: {:ok, f}
+  end
+  defp tarfile(%Service{} = svc), do: Git.Discovery.fetch(svc)
 
   def referenced?(id) do
     [Cluster.for_service(id), ClusterProvider.for_service(id)]
@@ -61,6 +74,11 @@ defmodule Console.Deployments.Services do
       %Service{cluster_id: cluster_id}
       |> Service.changeset(add_version(attrs, "0.0.1"))
       |> Console.Repo.insert()
+    end)
+    |> add_operation(:check_repo, fn
+      %{base: %{helm: %{repository: %{namespace: ns, name: n}}}} ->
+        Helm.Repository.get(ns, n)
+      _ -> {:ok, true}
     end)
     |> add_operation(:revision, fn %{base: base} -> create_revision(add_version(attrs, "0.0.1"), base) end)
     |> add_revision()

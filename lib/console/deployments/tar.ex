@@ -2,13 +2,22 @@ defmodule Console.Deployments.Tar do
   @type err :: Console.error
 
   @doc """
-  Takes a tar file and adds a set of additional files to it, then returns a new file handle to it
+  Streams a tar from a url to a local file and returns a handle
   """
-  @spec splice(File.t, map) :: {:ok, File.t} | err
-  def splice(tar_file, additional) do
+  @spec from_url(binary) :: {:ok, File.t} | err
+  def from_url(url) do
+    stream = HTTPStream.get(url)
     with {:ok, tmp} <- Briefly.create(),
-         {:ok, contents} <- tar_stream(tar_file) do
-      contents = Map.new(contents) |> Map.merge(additional)
+         :ok <- Stream.into(stream, File.stream!(tmp)) |> Stream.run(),
+      do: File.open(tmp)
+  end
+
+  @doc """
+  Converts a list of tar contents to a new tarball file and returns a working handle
+  """
+  @spec tarball([{binary, binary}]) :: {:ok, File.t} | err
+  def tarball(contents) do
+    with {:ok, tmp} <- Briefly.create() do
       tar_contents = Enum.map(contents, fn {p, c} -> {to_charlist(p), c} end)
       to_charlist(tmp)
       |> :erl_tar.create(tar_contents, [:compressed])
@@ -16,6 +25,19 @@ defmodule Console.Deployments.Tar do
         :ok -> File.open(tmp)
         error -> error
       end
+    end
+  end
+
+  @doc """
+  Takes a tar file and adds a set of additional files to it, then returns a new file handle to it
+  """
+  @spec splice(File.t, map) :: {:ok, File.t} | err
+  def splice(tar_file, additional) do
+    with {:ok, contents} <- tar_stream(tar_file) do
+      Map.new(contents)
+      |> Map.merge(additional)
+      |> Map.to_list()
+      |> tarball()
     end
   end
 

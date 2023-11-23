@@ -101,7 +101,6 @@ defmodule Console.MixProject do
       {:quantum, "~> 2.3"},
       {:yaml_elixir, "~> 2.9"},
       {:poison, "~> 5.0", override: true},
-      {:mojito, "~> 0.3.0"},
       {:ets, "~> 0.9"},
       {:reverse_proxy_plug, "~> 1.2.1"},
       {:kazan, "~> 0.11", github: "michaeljguarino/kazan", ref: "e26d21b324fd8b09bbc20ffde783d10a314684d9"},
@@ -110,7 +109,7 @@ defmodule Console.MixProject do
       {:prometheus_ex, "~> 3.0"},
       {:prometheus_plugs, "~> 1.1.1"},
       {:guardian, "~> 1.2.1"},
-      {:httpoison, "~> 1.7"},
+      {:httpoison, "~> 1.7", override: true},
       {:nebulex, "== 2.0.0"},
       {:shards, "~> 1.0"},      #=> For using :shards as backend
       {:decorator, "~> 1.3"},   #=> For using Caching Annotations
@@ -125,6 +124,11 @@ defmodule Console.MixProject do
       {:websockex, "~> 0.4.3"},
       {:briefly, "~> 0.4.0"},
       {:libring, "~> 1.0"},
+      {:http_stream, "~> 1.0.0"},
+
+      # if using the Mint adapter:
+      {:castore, "~> 0.1.7"},
+      {:mint, "~> 1.1.0"},
       {:phoenix_client, "~> 0.11", git: "https://github.com/michaeljguarino/phoenix_client.git", branch: "mguarino/channel-listen"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:elixpath, "~> 0.1.1", git: "https://github.com/mtannaan/elixpath.git"},

@@ -3,6 +3,12 @@ defmodule Console.Deployments.Helm.Repository do
   alias Console.Deployments.Helm.{Schema, Chart}
 
   @doc """
+  Fetches a helm repository by namespace/name
+  """
+  @spec get(binary, binary) :: {:ok, HelmRepository.t} | Console.error
+  def get(ns, n), do: Kube.Client.get_helm_repository(ns, n)
+
+  @doc """
   Gets the current status of this repository object
   """
   @spec status(HelmRepository.t) :: {:ok, %{ready: boolean, message: binary}} | Console.error
