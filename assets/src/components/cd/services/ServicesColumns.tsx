@@ -116,12 +116,9 @@ export const ColRef = columnHelper.accessor(({ node }) => node, {
     const svc = getValue()
 
     if (!svc) return null
-    const {
-      git: { ref, folder },
-      message,
-    } = svc
+    const { message } = svc
 
-    const refStr = shortenSha1(ref)
+    const refStr = shortenSha1(svc.git?.ref || '')
 
     return (
       <Tooltip
@@ -129,7 +126,7 @@ export const ColRef = columnHelper.accessor(({ node }) => node, {
         label={<div css={{ maxWidth: 400 }}>{message || ''}</div>}
       >
         <span>
-          {refStr}@{folder}
+          {refStr}@{svc.git?.folder}
         </span>
       </Tooltip>
     )

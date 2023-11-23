@@ -22,7 +22,7 @@ import { useServiceContext } from './service/ServiceDetails'
 const columnHelper =
   createColumnHelper<Nullable<ServiceDeploymentRevisionFragment>>()
 
-const ColGitRef = columnHelper.accessor((row) => row?.git.ref, {
+const ColGitRef = columnHelper.accessor((row) => row?.git?.ref, {
   id: 'gitRef',
   header: 'Commit ref',
   meta: { truncate: true },
@@ -164,7 +164,7 @@ const ColActions = columnHelper.accessor((row) => row, {
                 following revision:
               </p>
               <p>
-                <div>{revision?.git.ref}</div>
+                <div>{revision?.git?.ref}</div>
                 <CaptionText css={{ color: theme.colors['text-light'] }}>
                   sha: {revision?.sha}
                 </CaptionText>

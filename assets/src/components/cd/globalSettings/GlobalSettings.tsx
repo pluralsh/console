@@ -17,8 +17,9 @@ import {
 
 import { useContext, useMemo } from 'react'
 
-import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 import { LoginContext } from 'components/contexts'
+
+import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 export const getGlobalSettingsBreadcrumbs = ({ page }: { page: string }) => [
   ...CD_BASE_CRUMBS,

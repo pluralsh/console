@@ -59,8 +59,8 @@ export function ModalForm({
     update: updateState,
     hasUpdates,
   } = useUpdateState({
-    gitRef: serviceDeployment.git.ref ?? '',
-    gitFolder: serviceDeployment.git.folder ?? '',
+    gitRef: serviceDeployment.git?.ref ?? '',
+    gitFolder: serviceDeployment.git?.folder ?? '',
     protect: !!serviceDeployment.protect,
   })
 
