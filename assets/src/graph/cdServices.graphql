@@ -63,6 +63,10 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
     name
   }
   version
+  helm {
+    chart
+    version
+  }
   docs {
     content
     path
@@ -174,6 +178,9 @@ query ServiceDeploymentSecrets($id: ID!) {
     configuration {
       name
       value
+    }
+    helm {
+      values
     }
   }
 }

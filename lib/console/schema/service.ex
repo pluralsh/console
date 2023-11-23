@@ -37,16 +37,17 @@ defmodule Console.Schema.Service do
     use Piazza.Ecto.Schema
 
     embedded_schema do
-      field :values,     Piazza.Ecto.EncryptedString
-      field :chart,      :string
-      field :version,    :string
+      field :values,       Piazza.Ecto.EncryptedString
+      field :chart,        :string
+      field :version,      :string
+      field :values_files, {:array, :string}
 
       embeds_one :repository, Console.Schema.NamespacedName
     end
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(values chart version)a)
+      |> cast(attrs, ~w(values chart version values_files)a)
       |> cast_embed(:repository)
     end
   end

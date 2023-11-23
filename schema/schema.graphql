@@ -850,6 +850,7 @@ input SyncConfigAttributes {
 
 input HelmConfigAttributes {
   values: String
+  valuesFiles: [String]
   chart: String
   version: String
   repository: NamespacedName
@@ -1050,11 +1051,14 @@ type HelmSpec {
   "the name of the chart this service is using"
   chart: String
 
-  "a helm values file to use with this service"
+  "a helm values file to use with this service, requires auth and so is heavy to query"
   values: String
 
   "the chart version in use currently"
   version: String
+
+  "a list of relative paths to values files to use for helm applies"
+  valuesFiles: [String]
 }
 
 "a configuration item k\/v pair"
