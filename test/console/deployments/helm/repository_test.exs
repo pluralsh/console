@@ -11,7 +11,7 @@ defmodule Console.Deployments.Helm.RepositoryTest do
         }
       }
 
-      {:ok, [%{name: "console", charts: [chart | _]}]} = Repository.charts(repo)
+      {:ok, [%{name: "console", versions: [chart | _]}]} = Repository.charts(repo)
 
       assert chart.name
       assert chart.version

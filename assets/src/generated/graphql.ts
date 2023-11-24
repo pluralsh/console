@@ -1288,6 +1288,29 @@ export type GroupMemberEdge = {
   node?: Maybe<GroupMember>;
 };
 
+/** a chart manifest entry, including all versions */
+export type HelmChartEntry = {
+  __typename?: 'HelmChartEntry';
+  /** the name of the chart */
+  name?: Maybe<Scalars['String']['output']>;
+  /** all found versions of the chart */
+  versions?: Maybe<Array<Maybe<HelmChartVersion>>>;
+};
+
+/** a chart version contained within a helm repository manifest */
+export type HelmChartVersion = {
+  __typename?: 'HelmChartVersion';
+  /** the version of the app contained w/in this chart */
+  appVersion?: Maybe<Scalars['String']['output']>;
+  /** sha digest of this chart's contents */
+  digest?: Maybe<Scalars['String']['output']>;
+  /** the name of the chart */
+  name?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<Scalars['String']['output']>;
+  /** the version of the chart itself */
+  version?: Maybe<Scalars['String']['output']>;
+};
+
 export type HelmConfigAttributes = {
   chart?: InputMaybe<Scalars['String']['input']>;
   repository?: InputMaybe<NamespacedName>;
@@ -1299,6 +1322,8 @@ export type HelmConfigAttributes = {
 /** a crd representation of a helm repository */
 export type HelmRepository = {
   __typename?: 'HelmRepository';
+  /** the charts found in this repository (heavy operation, don't do in list endpoints) */
+  charts?: Maybe<Array<Maybe<HelmChartEntry>>>;
   metadata: Metadata;
   spec: HelmRepositorySpec;
   /** can fetch the status of a given helm repository */
@@ -4212,10 +4237,27 @@ export type UsageQuery = { __typename?: 'RootQueryType', cpu?: Array<{ __typenam
 
 export type GitRepositoryFragment = { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null };
 
+export type HelmRepositoryFragment = { __typename?: 'HelmRepository', metadata: { __typename?: 'Metadata', namespace?: string | null, name: string }, spec: { __typename?: 'HelmRepositorySpec', url: string, type: string, provider: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null };
+
+export type HelmChartVersionFragment = { __typename?: 'HelmChartVersion', name?: string | null, appVersion?: string | null, version?: string | null, digest?: string | null };
+
 export type GitRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GitRepositoriesQuery = { __typename?: 'RootQueryType', gitRepositories?: { __typename?: 'GitRepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GitRepositoryEdge', node?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null } | null> | null } | null };
+
+export type HelmRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type HelmRepositoriesQuery = { __typename?: 'RootQueryType', helmRepositories?: Array<{ __typename?: 'HelmRepository', metadata: { __typename?: 'Metadata', namespace?: string | null, name: string }, spec: { __typename?: 'HelmRepositorySpec', url: string, type: string, provider: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null> | null };
+
+export type HelmRepositoryQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type HelmRepositoryQuery = { __typename?: 'RootQueryType', helmRepository?: { __typename?: 'HelmRepository', charts?: Array<{ __typename?: 'HelmChartEntry', name?: string | null, versions?: Array<{ __typename?: 'HelmChartVersion', name?: string | null, appVersion?: string | null, version?: string | null, digest?: string | null } | null> | null } | null> | null, metadata: { __typename?: 'Metadata', namespace?: string | null, name: string }, spec: { __typename?: 'HelmRepositorySpec', url: string, type: string, provider: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null };
 
 export type CreateGitRepositoryMutationVariables = Exact<{
   attributes: GitAttributes;
@@ -5181,6 +5223,31 @@ export const MetricResponseFragmentDoc = gql`
     timestamp
     value
   }
+}
+    `;
+export const HelmRepositoryFragmentDoc = gql`
+    fragment HelmRepository on HelmRepository {
+  metadata {
+    namespace
+    name
+  }
+  spec {
+    url
+    type
+    provider
+  }
+  status {
+    ready
+    message
+  }
+}
+    `;
+export const HelmChartVersionFragmentDoc = gql`
+    fragment HelmChartVersion on HelmChartVersion {
+  name
+  appVersion
+  version
+  digest
 }
     `;
 export const GlobalServiceFragmentDoc = gql`
@@ -6835,6 +6902,93 @@ export type GitRepositoriesQueryHookResult = ReturnType<typeof useGitRepositorie
 export type GitRepositoriesLazyQueryHookResult = ReturnType<typeof useGitRepositoriesLazyQuery>;
 export type GitRepositoriesSuspenseQueryHookResult = ReturnType<typeof useGitRepositoriesSuspenseQuery>;
 export type GitRepositoriesQueryResult = Apollo.QueryResult<GitRepositoriesQuery, GitRepositoriesQueryVariables>;
+export const HelmRepositoriesDocument = gql`
+    query HelmRepositories {
+  helmRepositories {
+    ...HelmRepository
+  }
+}
+    ${HelmRepositoryFragmentDoc}`;
+
+/**
+ * __useHelmRepositoriesQuery__
+ *
+ * To run a query within a React component, call `useHelmRepositoriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHelmRepositoriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHelmRepositoriesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useHelmRepositoriesQuery(baseOptions?: Apollo.QueryHookOptions<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>(HelmRepositoriesDocument, options);
+      }
+export function useHelmRepositoriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>(HelmRepositoriesDocument, options);
+        }
+export function useHelmRepositoriesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>(HelmRepositoriesDocument, options);
+        }
+export type HelmRepositoriesQueryHookResult = ReturnType<typeof useHelmRepositoriesQuery>;
+export type HelmRepositoriesLazyQueryHookResult = ReturnType<typeof useHelmRepositoriesLazyQuery>;
+export type HelmRepositoriesSuspenseQueryHookResult = ReturnType<typeof useHelmRepositoriesSuspenseQuery>;
+export type HelmRepositoriesQueryResult = Apollo.QueryResult<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>;
+export const HelmRepositoryDocument = gql`
+    query HelmRepository($namespace: String!, $name: String!) {
+  helmRepository(namespace: $namespace, name: $name) {
+    ...HelmRepository
+    charts {
+      name
+      versions {
+        ...HelmChartVersion
+      }
+    }
+  }
+}
+    ${HelmRepositoryFragmentDoc}
+${HelmChartVersionFragmentDoc}`;
+
+/**
+ * __useHelmRepositoryQuery__
+ *
+ * To run a query within a React component, call `useHelmRepositoryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHelmRepositoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHelmRepositoryQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useHelmRepositoryQuery(baseOptions: Apollo.QueryHookOptions<HelmRepositoryQuery, HelmRepositoryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HelmRepositoryQuery, HelmRepositoryQueryVariables>(HelmRepositoryDocument, options);
+      }
+export function useHelmRepositoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HelmRepositoryQuery, HelmRepositoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HelmRepositoryQuery, HelmRepositoryQueryVariables>(HelmRepositoryDocument, options);
+        }
+export function useHelmRepositorySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HelmRepositoryQuery, HelmRepositoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HelmRepositoryQuery, HelmRepositoryQueryVariables>(HelmRepositoryDocument, options);
+        }
+export type HelmRepositoryQueryHookResult = ReturnType<typeof useHelmRepositoryQuery>;
+export type HelmRepositoryLazyQueryHookResult = ReturnType<typeof useHelmRepositoryLazyQuery>;
+export type HelmRepositorySuspenseQueryHookResult = ReturnType<typeof useHelmRepositorySuspenseQuery>;
+export type HelmRepositoryQueryResult = Apollo.QueryResult<HelmRepositoryQuery, HelmRepositoryQueryVariables>;
 export const CreateGitRepositoryDocument = gql`
     mutation CreateGitRepository($attributes: GitAttributes!) {
   createGitRepository(attributes: $attributes) {
@@ -9281,6 +9435,8 @@ export const namedOperations = {
     RuntimeServices: 'RuntimeServices',
     Usage: 'Usage',
     GitRepositories: 'GitRepositories',
+    HelmRepositories: 'HelmRepositories',
+    HelmRepository: 'HelmRepository',
     DeploymentSettings: 'DeploymentSettings',
     Pipelines: 'Pipelines',
     Pipeline: 'Pipeline',
@@ -9375,6 +9531,8 @@ export const namedOperations = {
     ClusterBindings: 'ClusterBindings',
     MetricResponse: 'MetricResponse',
     GitRepository: 'GitRepository',
+    HelmRepository: 'HelmRepository',
+    HelmChartVersion: 'HelmChartVersion',
     GlobalService: 'GlobalService',
     DeploymentSettings: 'DeploymentSettings',
     PipelineServiceDeployment: 'PipelineServiceDeployment',

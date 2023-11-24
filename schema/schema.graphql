@@ -1746,6 +1746,9 @@ type HelmRepository {
 
   spec: HelmRepositorySpec!
 
+  "the charts found in this repository (heavy operation, don't do in list endpoints)"
+  charts: [HelmChartEntry]
+
   "can fetch the status of a given helm repository"
   status: HelmRepositoryStatus
 }
@@ -1761,6 +1764,32 @@ type HelmRepositorySpec {
 type HelmRepositoryStatus {
   ready: Boolean
   message: String
+}
+
+"a chart manifest entry, including all versions"
+type HelmChartEntry {
+  "the name of the chart"
+  name: String
+
+  "all found versions of the chart"
+  versions: [HelmChartVersion]
+}
+
+"a chart version contained within a helm repository manifest"
+type HelmChartVersion {
+  "the version of the app contained w\/in this chart"
+  appVersion: String
+
+  "the version of the chart itself"
+  version: String
+
+  "the name of the chart"
+  name: String
+
+  type: String
+
+  "sha digest of this chart's contents"
+  digest: String
 }
 
 type GitRepositoryConnection {

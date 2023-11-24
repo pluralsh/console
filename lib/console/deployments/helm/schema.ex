@@ -21,7 +21,7 @@ defmodule Console.Deployments.Helm.Schema do
 
   def transform(%__MODULE__{entries: %{} = entries} = repo) do
     entries = Enum.map(entries, fn {name, charts} ->
-      %{name: name, charts: Enum.map(charts, &Chart.build/1)}
+      %{name: name, versions: Enum.map(charts, &Chart.build/1)}
     end)
     %{repo | entries: entries}
   end

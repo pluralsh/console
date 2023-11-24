@@ -38,6 +38,9 @@ defmodule Console.GraphQl.Deployments.Git do
   object :helm_repository do
     field :metadata, non_null(:metadata)
     field :spec,     non_null(:helm_repository_spec)
+    field :charts,   list_of(:helm_chart_entry),
+      resolve: &Deployments.helm_charts/3,
+      description: "the charts found in this repository (heavy operation, don't do in list endpoints)"
     field :status,   :helm_repository_status,
       resolve: &Deployments.helm_status/3,
       description: "can fetch the status of a given helm repository"
@@ -54,6 +57,21 @@ defmodule Console.GraphQl.Deployments.Git do
   object :helm_repository_status do
     field :ready,   :boolean
     field :message, :string
+  end
+
+  @desc "a chart manifest entry, including all versions"
+  object :helm_chart_entry do
+    field :name,     :string, description: "the name of the chart"
+    field :versions, list_of(:helm_chart_version), description: "all found versions of the chart"
+  end
+
+  @desc "a chart version contained within a helm repository manifest"
+  object :helm_chart_version do
+    field :app_version, :string, description: "the version of the app contained w/in this chart"
+    field :version,     :string, description: "the version of the chart itself"
+    field :name,        :string, description: "the name of the chart"
+    field :type,        :string
+    field :digest,      :string, description: "sha digest of this chart's contents"
   end
 
   connection node_type: :git_repository

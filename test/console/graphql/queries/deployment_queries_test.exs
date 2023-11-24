@@ -1,5 +1,7 @@
 defmodule Console.GraphQl.DeploymentQueriesTest do
   use Console.DataCase, async: true
+  alias Kube.HelmRepository
+  use Mimic
 
   describe "gitRepositories" do
     test "it can list git repositories" do
@@ -763,6 +765,34 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       """, %{}, %{cluster: cluster})
 
       assert found["id"] == job.id
+    end
+  end
+
+  describe "helmRepository" do
+    test "it can fetch the charts from a helm repository" do
+      expect(Kube.Client, :get_helm_repository, fn "helm-charts", "console" ->
+        {:ok, %HelmRepository{
+          status: %HelmRepository.Status{
+            artifact: %HelmRepository.Status.Artifact{url: "https://pluralsh.github.io/console/index.yaml"}
+          }
+        }}
+      end)
+
+      {:ok, %{data: %{"helmRepository" => repo}}} = run_query("""
+        query {
+          helmRepository(namespace: "helm-charts", name: "console") {
+            charts {
+              name
+              versions { name version appVersion }
+            }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      [%{"name" => "console", "versions" => [chart | _]} | _] = repo["charts"]
+      assert chart["name"] == "console"
+      assert chart["version"]
+      assert chart["appVersion"]
     end
   end
 end

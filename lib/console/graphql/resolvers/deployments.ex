@@ -149,6 +149,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def list_helm_repositories(_, _), do: Git.list_helm_repositories()
 
+  def helm_charts(helm, _, _), do: Repository.charts(helm)
+
   def helm_status(helm, _, _), do: Repository.status(helm)
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
