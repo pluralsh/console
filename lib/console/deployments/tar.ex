@@ -17,15 +17,16 @@ defmodule Console.Deployments.Tar do
   """
   @spec tarball([{binary, binary}]) :: {:ok, File.t} | err
   def tarball(contents) do
-    with {:ok, tmp} <- Briefly.create() do
-      tar_contents = Enum.map(contents, fn {p, c} -> {to_charlist(p), c} end)
-      to_charlist(tmp)
-      |> :erl_tar.create(tar_contents, [:compressed])
-      |> case do
-        :ok -> File.open(tmp)
-        error -> error
-      end
-    end
+    with {:ok, tmp} <- Briefly.create(),
+         :ok <- tarball(tmp, contents),
+      do: File.open(tmp)
+  end
+
+  @spec tarball(binary, [{binary, binary}]) :: :ok | err
+  def tarball(file, contents) do
+    tar_contents = Enum.map(contents, fn {p, c} -> {to_charlist(p), c} end)
+    to_charlist(file)
+    |> :erl_tar.create(tar_contents, [:compressed])
   end
 
   @doc """

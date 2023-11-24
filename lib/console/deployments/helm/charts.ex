@@ -2,29 +2,20 @@ defmodule Console.Deployments.Helm.Charts do
   alias Kube.Client
   alias Kube.HelmChart
   alias Console.Schema.Service
-  alias Console.Deployments.Tar
+  alias Console.Deployments.{Tar, Helm.Server}
 
   @doc """
   Downloads a chart artifact from the found chart crd of the given service
   """
   @spec artifact(Service.t) :: {:ok, File.t, binary} | Console.error
   def artifact(%Service{} = svc) do
-    with {:ok, %HelmChart{
-            spec: %HelmChart.Spec{chart: chart},
-            status: %HelmChart.Status{artifact: %HelmChart.Status.Artifact{digest: sha, url: url}}
-          }} when is_binary(url) <- get(svc),
-         {:ok, f} <- Tar.from_url(url),
-         {:ok, contents} <- Tar.tar_stream(f),
-         {:ok, f} <- Tar.tarball(remove_prefix(contents, chart)) do
-      {:ok, f, sha}
+    with {:ok, chart} <- get(svc),
+         {:ok, f} <- Server.fetch(chart) do
+      {:ok, f, chart.status.artifact.digest}
     else
       {:ok, _} -> {:error, "chart not yet loaded"}
       err -> err
     end
-  end
-
-  defp remove_prefix(contents, chart) do
-    Enum.map(contents, fn {path, content} -> {String.trim_leading(path, "#{chart}/"), content} end)
   end
 
   @spec get(Service.t) :: {:ok, HelmChart.t} | Console.error

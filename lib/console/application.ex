@@ -21,6 +21,7 @@ defmodule Console.Application do
       {Registry, [keys: :unique, name: Console.Deployments.Pipelines.Supervisor.registry()]},
       {Cluster.Supervisor, [topologies, [name: Console.ClusterSupervisor]]},
       Console.Deployments.Git.Supervisor,
+      Console.Deployments.Helm.Server,
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Git.Kick,
       Console.Deployments.Deprecations.Table,
