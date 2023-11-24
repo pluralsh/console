@@ -79,6 +79,7 @@ import {
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
+import SelfManage from 'components/cd/globalSettings/SelfManage'
 
 export const componentRoutes = (
   <Route
@@ -191,6 +192,10 @@ const globalSettingsRoutes = (
     <Route
       path="repositories"
       element={<GlobalSettingsRepositories />}
+    />
+    <Route
+      path="auto-update"
+      element={<SelfManage />}
     />
   </Route>
 )

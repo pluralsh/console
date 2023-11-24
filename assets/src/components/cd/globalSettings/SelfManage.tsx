@@ -1,38 +1,36 @@
-import { Callout, CodeEditor } from '@pluralsh/design-system'
+import { CodeEditor } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useSelfManageMutation } from 'generated/graphql'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+const INTRO_TEXT =
+  '# Paste your helm values file here, this will create a CD service that will auto-update instance\n' +
+  '# with these values persisted throughout'
+
 export default function SelfManage() {
   const navigate = useNavigate()
-  const [values, setValues] = useState('')
+  const [values, setValues] = useState(INTRO_TEXT)
   const [mutation, { loading, error }] = useSelfManageMutation({
     variables: { values },
     onCompleted: () => navigate('/cd/services'),
   })
 
   return (
-    <ScrollablePage heading="Configure Automatic Upgrades">
+    <ScrollablePage
+      heading="Configure Automatic Upgrades"
+      gap="medium"
+      scrollable={false}
+    >
       {error && (
         <GqlError
           error={error}
           header="Failed to update service"
         />
       )}
-      <Callout
-        severity="info"
-        title="Auto-Upgrading"
-      >
-        This will configure CD to fully manage itself, accepting updates from
-        our upstream helm charts. You should post your current values file in
-        the text editor below to ensure current settings remain preserved, and
-        these can be managed in the future via our API or the service interface
-        here.
-      </Callout>
       <CodeEditor
-        value={values}
+        value={INTRO_TEXT}
         language="yaml"
         save
         saving={loading}

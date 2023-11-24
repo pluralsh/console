@@ -47,7 +47,7 @@ export default function ServiceHelm() {
   return (
     <ScrollablePage
       heading="Helm"
-      scrollable
+      scrollable={false}
     >
       {error && (
         <GqlError
@@ -56,7 +56,7 @@ export default function ServiceHelm() {
         />
       )}
       <CodeEditor
-        value={values}
+        value={data?.serviceDeployment?.helm?.values || ''}
         language="yaml"
         save
         saving={loading}

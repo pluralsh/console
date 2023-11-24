@@ -243,6 +243,7 @@ defmodule Console.Deployments.Services do
         name: "console",
         namespace: "plrl-console",
         repository_id: git.id,
+        protect: true,
         git: %{ref: "master", folder: "charts/console"},
         helm: %{values: values},
       }, cluster.id, user)
