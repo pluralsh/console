@@ -3,7 +3,7 @@ import {
   useServiceDeploymentSecretsQuery,
   useUpdateServiceDeploymentMutation,
 } from 'generated/graphql'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useEffect, useState } from 'react'
 import { CodeEditor } from '@pluralsh/design-system'
@@ -21,6 +21,7 @@ function EmptyState({ error }) {
 }
 
 export default function ServiceHelm() {
+  const navigate = useNavigate()
   const serviceId = useParams()[SERVICE_PARAM_ID]
   const [values, setValues] = useState('')
 
@@ -31,6 +32,7 @@ export default function ServiceHelm() {
         helm: { values },
       },
     },
+    onCompleted: () => navigate('/cd/services'),
   })
   const { data, error: fetchError } = useServiceDeploymentSecretsQuery({
     variables: { id: serviceId || '' },

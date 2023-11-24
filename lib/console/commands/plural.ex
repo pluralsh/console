@@ -21,9 +21,9 @@ defmodule Console.Commands.Plural do
     with conf when is_binary(conf) <- kubeconfig,
          {:ok, f} <- Briefly.create(),
          :ok <- File.write(f, conf) do
-      plural("deployments", ["install", "--url", url, "--token", token, "--force"], [{"KUBECONFIG", f}, {"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
+      plural_home("deployments", ["install", "--url", url, "--token", token, "--force"], [{"KUBECONFIG", f}, {"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
     else
-      nil -> plural("deployments", ["install", "--url", url, "--token", token, "--force"], [{"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
+      nil -> plural_home("deployments", ["install", "--url", url, "--token", token, "--force"], [{"PLURAL_INSTALL_AGENT_CONFIRM", "true"}])
       err -> err
     end
   end
@@ -46,6 +46,9 @@ defmodule Console.Commands.Plural do
   def info(repo), do: cmd_raw("plural", ["info", repo], workspace())
 
   def repair(), do: plural("repair", [])
+
+  def plural_home(command, args, env \\ []),
+    do: cmd("plural", [command | args], System.user_home(), env)
 
   def plural(command, args, env \\ []), do: cmd("plural", [command | args], workspace(), env)
 end

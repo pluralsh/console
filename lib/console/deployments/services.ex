@@ -237,6 +237,9 @@ defmodule Console.Deployments.Services do
         _ -> Git.create_repository(%{url: url}, user)
       end
     end)
+    |> add_operation(:settings, fn _ ->
+      Settings.update(%{self_managed: true}, user)
+    end)
     |> add_operation(:service, fn %{git: git} ->
       cluster = Clusters.local_cluster()
       create_service(%{
@@ -247,9 +250,6 @@ defmodule Console.Deployments.Services do
         git: %{ref: "master", folder: "charts/console"},
         helm: %{values: values},
       }, cluster.id, user)
-    end)
-    |> add_operation(:settings, fn _ ->
-      Settings.update(%{self_managed: true}, user)
     end)
     |> execute(extract: :service)
   end

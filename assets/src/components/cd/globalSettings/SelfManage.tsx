@@ -6,7 +6,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const INTRO_TEXT =
-  '# Paste your helm values file here, this will create a CD service that will auto-update instance\n' +
+  '# Paste your helm values file here\n' +
+  '# this will create a service that will auto-update your instance\n' +
   '# with these values persisted throughout'
 
 export default function SelfManage() {
