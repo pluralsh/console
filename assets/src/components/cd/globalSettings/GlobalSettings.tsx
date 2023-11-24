@@ -82,7 +82,7 @@ export function GlobalSettings() {
       directory.filter(
         ({ path }) =>
           path !== 'auto-update' ||
-          (configuration?.byok && data?.deploymentSettings?.selfManaged)
+          (configuration?.byok && !data?.deploymentSettings?.selfManaged)
       ),
     [configuration, data]
   )

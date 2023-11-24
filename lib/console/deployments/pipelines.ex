@@ -245,9 +245,12 @@ defmodule Console.Deployments.Pipelines do
   end
   defp promote_edge(xact, _, _), do: xact
 
-  defp promote_service(%Revision{sha: sha, git: %{folder: f}} = rev, %StageService{service_id: id} = ss) do
+  defp promote_service(%Revision{sha: sha} = rev, %StageService{service_id: id} = ss) do
     with {:ok, configs} <- configs(rev, ss) do
-      Map.merge(%{git: %{ref: sha, folder: f}}, configs)
+      Map.merge(%{
+        git: rev.git && %{ref: sha, folder: rev.git.folder},
+        helm: rev.helm && %{version: rev.helm.version}
+      }, configs)
       |> Services.update_service(id)
     end
   end
