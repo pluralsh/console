@@ -169,10 +169,16 @@ defmodule Console.GraphQl.Deployments.Service do
     field :folder, non_null(:string), description: "the folder manifests live under"
   end
 
+  object :object_reference do
+    field :name,      :string
+    field :namespace, :string
+  end
+
   object :helm_spec do
     field :chart,        :string, description: "the name of the chart this service is using"
     field :values,       :string, description: "a helm values file to use with this service, requires auth and so is heavy to query",
       resolve: &Deployments.helm_values/3
+    field :repository,   :object_reference, description: "pointer to the flux helm repository resource used for this chart"
     field :version,      :string, description: "the chart version in use currently"
     field :values_files, list_of(:string), description: "a list of relative paths to values files to use for helm applies"
   end

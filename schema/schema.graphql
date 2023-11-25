@@ -1052,12 +1052,20 @@ type GitRef {
   folder: String!
 }
 
+type ObjectReference {
+  name: String
+  namespace: String
+}
+
 type HelmSpec {
   "the name of the chart this service is using"
   chart: String
 
   "a helm values file to use with this service, requires auth and so is heavy to query"
   values: String
+
+  "pointer to the flux helm repository resource used for this chart"
+  repository: ObjectReference
 
   "the chart version in use currently"
   version: String

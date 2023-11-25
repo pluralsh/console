@@ -5,6 +5,10 @@ fragment ServiceDeploymentRevision on Revision {
   message
   updatedAt
   insertedAt
+  helm {
+    chart
+    version
+  }
   git {
     folder
     ref
@@ -23,6 +27,10 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   helm {
     chart
     version
+    repository {
+      namespace
+      name
+    }
   }
   cluster {
     id
@@ -79,6 +87,10 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
   helm {
     chart
     version
+    repository {
+      namespace
+      name
+    }
   }
   docs {
     content
