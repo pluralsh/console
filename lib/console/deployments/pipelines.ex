@@ -249,7 +249,7 @@ defmodule Console.Deployments.Pipelines do
     with {:ok, configs} <- configs(rev, ss) do
       Map.merge(%{
         git: rev.git && %{ref: sha, folder: rev.git.folder},
-        helm: rev.helm && %{version: rev.helm.version}
+        helm: rev.helm && %{version: rev.helm.version, chart: rev.helm.chart}
       }, configs)
       |> Services.update_service(id)
     end

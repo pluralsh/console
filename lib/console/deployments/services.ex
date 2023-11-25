@@ -39,7 +39,7 @@ defmodule Console.Deployments.Services do
 
   defp tarfile(%Service{helm: %Service.Helm{chart: c, version: v}} = svc) when is_binary(c) and is_binary(v) do
     with {:ok, f, sha} <- Helm.Charts.artifact(svc),
-         {:ok, _} <- update_sha(svc, sha, ""),
+         {:ok, _} <- update_sha_without_revision(svc, sha),
       do: {:ok, f}
   end
   defp tarfile(%Service{} = svc), do: Git.Discovery.fetch(svc)
@@ -286,6 +286,25 @@ defmodule Console.Deployments.Services do
     end)
     |> execute(extract: :base)
     |> notify(:update, :ignore)
+  end
+
+  defp update_sha_without_revision(%Service{sha: sha} = svc, sha), do: {:ok, svc}
+  defp update_sha_without_revision(%Service{id: id}, sha) do
+    start_transaction()
+    |> add_operation(:base, fn _ ->
+      get_service!(id)
+      |> Service.changeset(%{sha: sha})
+      |> Repo.update()
+    end)
+    |> add_operation(:current, fn %{base: base} ->
+      case Repo.preload(base, [:revision]) do
+        %{revision: %Revision{} = revision} ->
+          Revision.update_changeset(revision, %{sha: sha})
+          |> Repo.update()
+        _ -> {:ok, base}
+      end
+    end)
+    |> execute(extract: :base)
   end
 
   def update_service(attrs, svc_id) when is_binary(svc_id),
