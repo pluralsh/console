@@ -18,11 +18,20 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceComponentsUpdated do
   def process(_), do: :ok
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceCreated do
+  alias Console.Schema.Service
+  alias Console.Deployments.Helm.Charts
+
+  def process(%{item: %Service{} = svc}), do: Charts.get(svc)
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceUpdated do
   alias Console.Deployments.Global
+  alias Console.Deployments.Helm.Charts
   alias Console.Schema.{User, Service, GlobalService}
 
   def process(%{item: %Service{} = item, actor: %User{}}) do
+    Charts.get(item)
     case Console.Repo.preload(item, [:global_service]) do
       %Service{global_service: %GlobalService{} = global} ->
         {:global, Global.sync_clusters(global)}

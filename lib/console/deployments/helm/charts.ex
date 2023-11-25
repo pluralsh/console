@@ -20,13 +20,15 @@ defmodule Console.Deployments.Helm.Charts do
   end
 
   @spec get(Service.t) :: {:ok, HelmChart.t} | Console.error
-  def get(%Service{helm: %Service.Helm{chart: chart, version: vsn, repository: %{namespace: ns, name: n}}}) do
+  def get(%Service{helm: %Service.Helm{chart: chart, version: vsn, repository: %{namespace: ns, name: n}}})
+    when is_binary(chart) and is_binary(vsn) do
     name = chart_name(n, chart, vsn)
     case Client.get_helm_chart(ns, name) do
       {:ok, chart} -> {:ok, chart}
       _ -> jit_create(ns, name, n, chart, vsn)
     end
   end
+  def get(_), do: {:error, "service does not reference a helm chart"}
 
   defp jit_create(namespace, name, repo, chart, version) do
     Client.create_helm_chart(%HelmChart{
