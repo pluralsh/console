@@ -89,30 +89,32 @@ export function ModalForm({
     protect: !!serviceDeployment.protect,
   })
 
-  const git =
-    state.gitRef && state.gitFolder
-      ? { folder: state.gitFolder, ref: state.gitRef }
-      : null
-  const helm =
-    state.helmChart && state.helmVersion
-      ? { chart: state.helmChart, version: state.helmVersion }
-      : null
   const attributes = useMemo(() => {
+    const git =
+      state.gitRef && state.gitFolder
+        ? { folder: state.gitFolder, ref: state.gitRef }
+        : null
+    const helm =
+      state.helmChart && state.helmVersion
+        ? { chart: state.helmChart, version: state.helmVersion }
+        : null
     let attributes: ServiceUpdateAttributes = { protect: state.protect }
+
     if (git) {
       attributes = { git, ...attributes }
     }
     if (helm) {
       attributes = { helm, ...attributes }
     }
+
     return attributes
-  }, [state, git, helm])
+  }, [state])
 
   const [updateService, { loading, error }] =
     useUpdateServiceDeploymentMutation({
       variables: {
         id: serviceDeployment.id,
-        attributes: attributes,
+        attributes,
       },
       onCompleted: () => {
         refetch?.()

@@ -263,7 +263,7 @@ export function DeployServiceModal({
           stepIndex={
             formState === FormState.Initial
               ? 0
-              : formState === FormState.Git || formState == FormState.Helm
+              : formState === FormState.Git || formState === FormState.Helm
               ? 1
               : 2
           }
@@ -303,7 +303,7 @@ export function DeployServiceModal({
               setGitFolder,
             }}
           />
-        ) : formState == FormState.Helm ? (
+        ) : formState === FormState.Helm ? (
           <DeployServiceSettingsHelm
             {...{
               repository,

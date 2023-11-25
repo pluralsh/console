@@ -36,6 +36,8 @@ import Pipelines from 'components/cd/pipelines/Pipelines'
 
 import ServiceHelm from 'components/cd/services/service/ServiceHelm'
 
+import SelfManage from 'components/cd/globalSettings/SelfManage'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -79,7 +81,6 @@ import {
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
-import SelfManage from 'components/cd/globalSettings/SelfManage'
 
 export const componentRoutes = (
   <Route

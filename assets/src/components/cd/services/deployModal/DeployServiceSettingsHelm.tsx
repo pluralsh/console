@@ -1,10 +1,4 @@
-import {
-  FormField,
-  Input,
-  ListBoxItem,
-  LoadingSpinner,
-  Select,
-} from '@pluralsh/design-system'
+import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import { HelmHealthChip } from 'components/cd/repos/HelmHealthChip'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
@@ -92,12 +86,15 @@ export function ChartForm({ charts, chart, version, setChart, setVersion }) {
 
 function EmptyState({ loading }) {
   if (loading) return <LoadingIndicator />
+
   return <>Looks like you need to register a helm repository first...</>
 }
 
 const keyToRepo = (key) => {
   const parts = (key || '').split(':')
+
   if (parts.length === 2) return { namespace: parts[0], name: parts[1] }
+
   return null
 }
 
