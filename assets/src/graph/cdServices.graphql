@@ -20,12 +20,25 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
     ref
     folder
   }
+  helm {
+    chart
+    version
+  }
   cluster {
     id
     name
     provider {
       name
       cloud
+    }
+  }
+  helmRepository {
+    spec {
+      url
+    }
+    status {
+      ready
+      message
     }
   }
   repository {

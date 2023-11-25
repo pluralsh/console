@@ -127,7 +127,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
     field :helm_repository, :helm_repository, resolve: fn
       svc, _, %{context: %{loader: loader}} ->
-        manual_dataloader(loader, Console.GraphQl.HelmRepositoryLoader, :helm, svc)
+        manual_dataloader(loader, Console.GraphQl.Resolvers.HelmRepositoryLoader, :helm, svc)
     end
 
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this service"

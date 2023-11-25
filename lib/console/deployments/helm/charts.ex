@@ -2,7 +2,7 @@ defmodule Console.Deployments.Helm.Charts do
   alias Kube.Client
   alias Kube.HelmChart
   alias Console.Schema.Service
-  alias Console.Deployments.{Tar, Helm.Server}
+  alias Console.Deployments.Helm.Server
   alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
 
   @doc """

@@ -8,13 +8,13 @@ defmodule Console.GraphQl.Resolvers.HelmRepositoryLoader do
 
   def query(_, services) do
     repos = fetch_repos()
-    Map.new(services, & {&1, !repos[key(&1)]})
+    Map.new(services, & {&1, repos[key(&1)]})
   end
 
   def fetch_repos() do
     case Git.list_helm_repositories() do
       {:ok, repos} ->
-        Map.new(repos, & {{&1.namespace, &1.name}, &1})
+        Map.new(repos, & {{&1.metadata.namespace, &1.metadata.name}, &1})
       _ -> %{}
     end
   end

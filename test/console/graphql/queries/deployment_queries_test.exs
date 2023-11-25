@@ -286,6 +286,36 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert Enum.all?(found, & &1["name"])
     end
 
+    test "it can sideload helm repositories" do
+      cluster = insert(:cluster)
+      services = insert_list(3, :service, cluster: cluster)
+      svc = insert(:service, cluster: cluster, helm: %{chart: "chart", version: "0.1.0", repository: %{namespace: "ns", name: "name"}})
+      expect(Kube.Client, :list_helm_repositories, fn ->
+        {:ok, %{items: [%Kube.HelmRepository{
+          metadata: %{namespace: "ns", name: "name"},
+          spec: %Kube.HelmRepository.Spec{url: "https://helm.sh"},
+        }]}}
+      end)
+
+      {:ok, %{data: %{"serviceDeployments" => found}}} = run_query("""
+        query Services($clusterId: ID!) {
+          serviceDeployments(clusterId: $clusterId, first: 5) {
+            edges {
+              node {
+                id
+                helmRepository { spec { url } }
+              }
+            }
+          }
+        }
+      """, %{"clusterId" => cluster.id}, %{current_user: admin_user()})
+
+      found = from_connection(found)
+
+      assert ids_equal(found, [svc | services])
+      assert Enum.any?(found, & &1["helmRepository"])
+    end
+
     test "it can list services in the system by cluster handle" do
       cluster = insert(:cluster, handle: "test")
       services = insert_list(3, :service, cluster: cluster)
