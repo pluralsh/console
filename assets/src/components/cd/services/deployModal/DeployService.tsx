@@ -138,9 +138,12 @@ export function DeployServiceModal({
 
   const initialFormValid = name && namespace && clusterId
   const allowGoToGit = formState === FormState.Initial && initialFormValid
-  const gitSettingsValid = repositoryId && gitFolder && gitRef
+  const gitSettingsValid =
+    (repositoryId && gitFolder && gitRef) || (chart && version && repository)
   const allowGoToSecrets =
-    formState === FormState.Git && initialFormValid && gitSettingsValid
+    (formState === FormState.Git || formState === FormState.Helm) &&
+    initialFormValid &&
+    gitSettingsValid
 
   const allowDeploy =
     formState === FormState.Secrets &&

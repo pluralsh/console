@@ -1755,9 +1755,9 @@ type HelmRepository {
 
 "a specification of how a helm repository is fetched"
 type HelmRepositorySpec {
-  provider: String!
+  provider: String
   url: String!
-  type: String!
+  type: String
 }
 
 "the state of this helm repository"

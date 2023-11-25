@@ -38,7 +38,7 @@ function RawChartForm({ chart, setChart, version, setVersion }) {
 }
 
 export function ChartForm({ charts, chart, version, setChart, setVersion }) {
-  if (charts.length === 0) {
+  if (charts?.length === 0) {
     return (
       <RawChartForm
         chart={chart}
@@ -74,11 +74,11 @@ export function ChartForm({ charts, chart, version, setChart, setVersion }) {
         label="Version"
       >
         <Select
-          label="Select chart"
-          selectedKey={chart || ''}
-          onSelectionChange={(key) => setChart(key)}
+          label="Select version"
+          selectedKey={version || ''}
+          onSelectionChange={(key) => setVersion(key)}
         >
-          {(selectedChart.versions || []).map((vsn) => (
+          {(selectedChart?.versions || []).map((vsn) => (
             <ListBoxItem
               key={vsn.version}
               label={`${vsn.version} (appVersion=${vsn.appVersion})`}
@@ -96,7 +96,7 @@ function EmptyState({ loading }) {
 }
 
 const keyToRepo = (key) => {
-  const parts = key.split(':')
+  const parts = (key || '').split(':')
   if (parts.length === 2) return { namespace: parts[0], name: parts[1] }
   return null
 }
@@ -165,7 +165,7 @@ export default function DeployServiceSettingsHelm({
         </Select>
       </FormField>
       <ChartForm
-        charts={charts?.helmRepository?.charts}
+        charts={charts?.helmRepository?.charts || []}
         chart={chart}
         setChart={setChart}
         version={version}

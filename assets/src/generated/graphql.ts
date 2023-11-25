@@ -1333,8 +1333,8 @@ export type HelmRepository = {
 /** a specification of how a helm repository is fetched */
 export type HelmRepositorySpec = {
   __typename?: 'HelmRepositorySpec';
-  provider: Scalars['String']['output'];
-  type: Scalars['String']['output'];
+  provider?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<Scalars['String']['output']>;
   url: Scalars['String']['output'];
 };
 
@@ -4237,7 +4237,7 @@ export type UsageQuery = { __typename?: 'RootQueryType', cpu?: Array<{ __typenam
 
 export type GitRepositoryFragment = { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null };
 
-export type HelmRepositoryFragment = { __typename?: 'HelmRepository', metadata: { __typename?: 'Metadata', namespace?: string | null, name: string }, spec: { __typename?: 'HelmRepositorySpec', url: string, type: string, provider: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null };
+export type HelmRepositoryFragment = { __typename?: 'HelmRepository', metadata: { __typename?: 'Metadata', namespace?: string | null, name: string }, spec: { __typename?: 'HelmRepositorySpec', url: string, type?: string | null, provider?: string | null }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null };
 
 export type HelmChartVersionFragment = { __typename?: 'HelmChartVersion', name?: string | null, appVersion?: string | null, version?: string | null, digest?: string | null };
 
@@ -4249,7 +4249,7 @@ export type GitRepositoriesQuery = { __typename?: 'RootQueryType', gitRepositori
 export type HelmRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HelmRepositoriesQuery = { __typename?: 'RootQueryType', helmRepositories?: Array<{ __typename?: 'HelmRepository', metadata: { __typename?: 'Metadata', namespace?: string | null, name: string }, spec: { __typename?: 'HelmRepositorySpec', url: string, type: string, provider: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null> | null };
+export type HelmRepositoriesQuery = { __typename?: 'RootQueryType', helmRepositories?: Array<{ __typename?: 'HelmRepository', metadata: { __typename?: 'Metadata', namespace?: string | null, name: string }, spec: { __typename?: 'HelmRepositorySpec', url: string, type?: string | null, provider?: string | null }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null> | null };
 
 export type HelmRepositoryQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4257,7 +4257,7 @@ export type HelmRepositoryQueryVariables = Exact<{
 }>;
 
 
-export type HelmRepositoryQuery = { __typename?: 'RootQueryType', helmRepository?: { __typename?: 'HelmRepository', charts?: Array<{ __typename?: 'HelmChartEntry', name?: string | null, versions?: Array<{ __typename?: 'HelmChartVersion', name?: string | null, appVersion?: string | null, version?: string | null, digest?: string | null } | null> | null } | null> | null, metadata: { __typename?: 'Metadata', namespace?: string | null, name: string }, spec: { __typename?: 'HelmRepositorySpec', url: string, type: string, provider: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null };
+export type HelmRepositoryQuery = { __typename?: 'RootQueryType', helmRepository?: { __typename?: 'HelmRepository', charts?: Array<{ __typename?: 'HelmChartEntry', name?: string | null, versions?: Array<{ __typename?: 'HelmChartVersion', name?: string | null, appVersion?: string | null, version?: string | null, digest?: string | null } | null> | null } | null> | null, metadata: { __typename?: 'Metadata', namespace?: string | null, name: string }, spec: { __typename?: 'HelmRepositorySpec', url: string, type?: string | null, provider?: string | null }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null };
 
 export type CreateGitRepositoryMutationVariables = Exact<{
   attributes: GitAttributes;

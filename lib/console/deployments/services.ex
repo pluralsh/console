@@ -316,7 +316,7 @@ defmodule Console.Deployments.Services do
   fetches the docs for a given service out of git, and renders them as a list of file path/content pairs
   """
   @spec docs(Service.t) :: [%{path: binary, content: binary}]
-  def docs(%Service{} = svc) do
+  def docs(%Service{repository_id: id} = svc) when is_binary(id) do
     with {:ok, f} <- Git.Discovery.docs(svc),
          {:ok, res} <- AddOns.tar_stream(f) do
       {:ok, Enum.map(res, fn {name, content} -> %{path: name, content: content} end)}
@@ -326,6 +326,7 @@ defmodule Console.Deployments.Services do
         {:error, "could not fetch docs"}
     end
   end
+  def docs(_), do: {:ok, []}
 
   @doc """
   Rollbacks a service to a given revision id, all configuration will then be fetched via that revision
