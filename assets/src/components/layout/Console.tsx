@@ -4,7 +4,6 @@ import { MarkdocContextProvider } from '@pluralsh/design-system/dist/markdoc/Mar
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
-import usePosthogIdentify from 'components/utils/Posthog'
 import { A, Flex, Span } from 'honorable'
 import { Outlet } from 'react-router-dom'
 
@@ -57,7 +56,7 @@ export default function Console() {
 function ConsoleContent() {
   const isProduction = import.meta.env.MODE === 'production'
 
-  usePosthogIdentify()
+  // usePosthogIdentify()
 
   return (
     <Flex

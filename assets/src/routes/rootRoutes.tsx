@@ -1,7 +1,5 @@
 import { Outlet, Route } from 'react-router-dom'
 
-import { usePosthog } from 'components/utils/Posthog'
-
 import { Suspense } from 'react'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -16,7 +14,7 @@ import { OAuthCallback } from '../components/login/OauthCallback'
 import { consoleRoutes } from './consoleRoutes'
 
 function Root() {
-  usePosthog()
+  // usePosthog()
 
   return (
     <Suspense fallback={<LoadingIndicator />}>
