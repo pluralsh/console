@@ -3,6 +3,7 @@ defmodule Console.Deployments.Helm.Charts do
   alias Kube.HelmChart
   alias Console.Schema.Service
   alias Console.Deployments.{Tar, Helm.Server}
+  alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
 
   @doc """
   Downloads a chart artifact from the found chart crd of the given service
@@ -29,7 +30,7 @@ defmodule Console.Deployments.Helm.Charts do
 
   defp jit_create(namespace, name, repo, chart, version) do
     Client.create_helm_chart(%HelmChart{
-      metadata: %{
+      metadata: %MetaV1.ObjectMeta{
         name: name,
         namespace: namespace,
         annotations: %{
