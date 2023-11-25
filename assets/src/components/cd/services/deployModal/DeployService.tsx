@@ -4,6 +4,7 @@ import {
   GitHubIcon,
   PadlockLockedIcon,
   Stepper,
+  Switch,
 } from '@pluralsh/design-system'
 import {
   useClustersTinyQuery,
@@ -26,10 +27,12 @@ import {
   DeployServiceSettingsSecrets,
   Secret,
 } from './DeployServiceSettingsSecrets'
+import DeployServiceSettingsHelm from './DeployServiceSettingsHelm'
 
 enum FormState {
   Initial = 'initial',
   Git = 'git',
+  Helm = 'helm',
   Secrets = 'secrets',
 }
 
@@ -78,6 +81,9 @@ export function DeployServiceModal({
   const [clusterId, setClusterId] = useState('')
   const [name, setName] = useState('')
   const [repositoryId, setRepositoryId] = useState('')
+  const [repository, setRepository] = useState(null)
+  const [chart, setChart] = useState('')
+  const [version, setVersion] = useState('')
   const [gitFolder, setGitFolder] = useState('')
   const [gitRef, setGitRef] = useState('')
   const [namespace, setNamespace] = useState('')
@@ -99,6 +105,10 @@ export function DeployServiceModal({
     }))
   }, [secrets])
 
+  const helm =
+    repository && chart && version ? { repository, chart, version } : null
+  const git = gitRef && gitFolder ? { ref: gitRef, folder: gitFolder } : null
+
   const [mutation, { loading: mutationLoading, error: mutationError }] =
     useCreateServiceDeploymentMutation({
       variables: {
@@ -107,7 +117,8 @@ export function DeployServiceModal({
           repositoryId,
           name,
           namespace,
-          git: { ref: gitRef, folder: gitFolder },
+          git,
+          helm,
           configuration,
         },
       },
@@ -190,7 +201,7 @@ export function DeployServiceModal({
                 Go back
               </Button>
             </>
-          ) : formState === FormState.Git ? (
+          ) : formState === FormState.Git || formState === FormState.Helm ? (
             <>
               <Button
                 type="submit"
@@ -199,6 +210,14 @@ export function DeployServiceModal({
               >
                 Add secrets
               </Button>
+              <Switch
+                checked={formState === FormState.Helm}
+                onChange={(selected) =>
+                  setFormState(selected ? FormState.Helm : FormState.Git)
+                }
+              >
+                Use Helm Source
+              </Switch>
               <Button
                 secondary
                 type="button"
@@ -241,7 +260,7 @@ export function DeployServiceModal({
           stepIndex={
             formState === FormState.Initial
               ? 0
-              : formState === FormState.Git
+              : formState === FormState.Git || formState == FormState.Helm
               ? 1
               : 2
           }
@@ -279,6 +298,17 @@ export function DeployServiceModal({
               setGitRef,
               gitFolder,
               setGitFolder,
+            }}
+          />
+        ) : formState == FormState.Helm ? (
+          <DeployServiceSettingsHelm
+            {...{
+              repository,
+              setRepository,
+              chart,
+              setChart,
+              version,
+              setVersion,
             }}
           />
         ) : (

@@ -48,9 +48,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "a specification of how a helm repository is fetched"
   object :helm_repository_spec do
-    field :provider, non_null(:string)
+    field :provider, :string
     field :url,      non_null(:string)
-    field :type,     non_null(:string)
+    field :type,     :string
   end
 
   @desc "the state of this helm repository"
