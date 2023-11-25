@@ -298,7 +298,7 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:revision, fn %{base: base} ->
       add_version(attrs, base.version)
-      |> Console.dedupe(:git, Map.take(base.git || %{}, ~w(ref folder)a))
+      |> Console.dedupe(:git, base.git && Console.mapify(base.git))
       |> Console.dedupe(:helm, base.helm && Console.mapify(base.helm))
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)

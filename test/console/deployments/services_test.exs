@@ -183,6 +183,46 @@ defmodule Console.Deployments.ServicesTest do
       assert second.git.folder == "k8s"
     end
 
+    test "helm services can be updated" do
+      cluster = insert(:cluster)
+      user = admin_user()
+      expect(Kube.Client, :get_helm_repository, fn _, _ -> {:ok, %Kube.HelmRepository{}} end)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        helm: %{
+          chart: "chart",
+          version: "0.1.0",
+          repository: %{namespace: "ns", name: "name"}
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      {:ok, updated} = Services.update_service(%{
+        helm: %{
+          chart: "chart",
+          version: "0.1.1"
+        },
+      }, service.id, user)
+
+      assert_receive {:event, %PubSub.ServiceUpdated{item: ^updated}}
+
+      assert updated.name == "my-service"
+      assert updated.namespace == "my-service"
+      assert updated.version == "0.0.1"
+      assert updated.helm.chart == "chart"
+      assert updated.helm.version == "0.1.1"
+      refute updated.git
+      assert updated.revision_id
+      assert updated.status == :stale
+
+      %{revision: revision} = Console.Repo.preload(updated, [:revision])
+      assert revision.helm.chart == updated.helm.chart
+      assert revision.helm.version == updated.helm.version
+    end
+
     test "it will respect rbac" do
       user = insert(:user)
       cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
