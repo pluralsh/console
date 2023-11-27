@@ -13,7 +13,7 @@ versions:
   requirements: []
   incompatibilities: []
 - versin: 15.2.2
-  version: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
 - version: 0.0.0
