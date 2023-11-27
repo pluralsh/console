@@ -16,10 +16,17 @@ export function updateFragment(cache, { fragment, id, update, fragmentName }) {
   })
 }
 
-export function extendConnection(prev, next, key) {
+export function extendConnection<
+  K extends string,
+  T extends Partial<Record<K, (Connection<any> & PaginatedResult<any>) | null>>,
+>(prev: T, next: T[K] | null | undefined, key: K) {
+  if (!next) {
+    return prev
+  }
   const { edges, pageInfo } = next
-  const uniq = uniqWith([...prev[key].edges, ...edges], (a, b) =>
-    a.node?.id ? a.node?.id === b.node?.id : false
+  const uniq = uniqWith(
+    [...(prev[key]?.edges ?? []), ...(edges ?? [])],
+    (a, b) => (a?.node?.id ? a?.node?.id === b?.node?.id : false)
   )
 
   return {
