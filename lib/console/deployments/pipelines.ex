@@ -164,12 +164,12 @@ defmodule Console.Deployments.Pipelines do
   def build_promotion(%PipelineStage{id: id} = stage) do
     start_transaction()
     |> add_operation(:stage, fn _ ->
-      {:ok, Repo.preload(stage, [promotion: [:services], services: [:service]])}
+      {:ok, Repo.preload(stage, [promotion: [:services], services: [service: :revision]])}
     end)
     |> add_operation(:services, fn %{stage: %{services: svcs}} ->
       Enum.map(svcs, & &1.service)
       |> Enum.filter(& &1.status == :healthy)
-      |> Enum.map(& {&1, current_revision(&1)})
+      |> Enum.map(& {&1, &1.revision})
       |> Enum.filter(fn {_, r} -> r end)
       |> ok()
     end)
@@ -248,7 +248,7 @@ defmodule Console.Deployments.Pipelines do
   defp promote_service(%Revision{sha: sha} = rev, %StageService{service_id: id} = ss) do
     with {:ok, configs} <- configs(rev, ss) do
       Map.merge(%{
-        git: rev.git && %{ref: sha, folder: rev.git.folder},
+        git: rev.git && %{ref: sha || rev.git.ref, folder: rev.git.folder},
         helm: rev.helm && %{version: rev.helm.version, chart: rev.helm.chart}
       }, configs)
       |> Services.update_service(id)
@@ -284,14 +284,6 @@ defmodule Console.Deployments.Pipelines do
     end)
   end
   defp diff?(_, _), do: true
-
-  defp current_revision(%Service{sha: sha, id: id}) do
-    Revision.for_service(id)
-    |> Revision.for_sha(sha)
-    |> Revision.limit(1)
-    |> Revision.ordered()
-    |> Repo.one()
-  end
 
   defp notify({:ok, %PipelinePromotion{} = promo}, :create),
     do: handle_notify(PubSub.PromotionCreated, promo)
