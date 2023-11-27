@@ -858,5 +858,33 @@ defmodule Console.Deployments.ServicesAsyncTest do
       assert content["Chart.yaml"] =~ "console"
       assert content["values.yaml.liquid"] == "value: test"
     end
+
+    test "it can support multiple sources" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service,
+        repository: git,
+        git: %{ref: "master", folder: "charts/console"},
+        helm: %{
+          chart: "podinfo",
+          version: "5.0",
+          repository: %{name: "podinfo", namespace: "helm-charts"},
+          values_files: ["values.yaml"]
+        }
+      )
+
+      name = Console.Deployments.Helm.Charts.chart_name("podinfo", "podinfo", "5.0")
+      expect(Kube.Client, :get_helm_chart, fn "helm-charts", ^name -> {:ok, %Kube.HelmChart{
+        spec: %Kube.HelmChart.Spec{chart: "podinfo"},
+        status: %Kube.HelmChart.Status{
+          artifact: %Kube.HelmChart.Status.Artifact{digest: "sha", url: "https://stefanprodan.github.io/podinfo/podinfo-6.5.3.tgz"}
+        }
+      }} end)
+
+      {:ok, f} = Services.tarstream(svc)
+      {:ok, content} = Tar.tar_stream(f)
+      content = Map.new(content)
+
+      assert content["values.yaml"] =~ "dkr.plural.sh"
+    end
   end
 end
