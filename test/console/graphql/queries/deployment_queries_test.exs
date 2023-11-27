@@ -1,5 +1,7 @@
 defmodule Console.GraphQl.DeploymentQueriesTest do
   use Console.DataCase, async: true
+  alias Kube.HelmRepository
+  use Mimic
 
   describe "gitRepositories" do
     test "it can list git repositories" do
@@ -284,6 +286,36 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert Enum.all?(found, & &1["name"])
     end
 
+    test "it can sideload helm repositories" do
+      cluster = insert(:cluster)
+      services = insert_list(3, :service, cluster: cluster)
+      svc = insert(:service, cluster: cluster, helm: %{chart: "chart", version: "0.1.0", repository: %{namespace: "ns", name: "name"}})
+      expect(Kube.Client, :list_helm_repositories, fn ->
+        {:ok, %{items: [%Kube.HelmRepository{
+          metadata: %{namespace: "ns", name: "name"},
+          spec: %Kube.HelmRepository.Spec{url: "https://helm.sh"},
+        }]}}
+      end)
+
+      {:ok, %{data: %{"serviceDeployments" => found}}} = run_query("""
+        query Services($clusterId: ID!) {
+          serviceDeployments(clusterId: $clusterId, first: 5) {
+            edges {
+              node {
+                id
+                helmRepository { spec { url } }
+              }
+            }
+          }
+        }
+      """, %{"clusterId" => cluster.id}, %{current_user: admin_user()})
+
+      found = from_connection(found)
+
+      assert ids_equal(found, [svc | services])
+      assert Enum.any?(found, & &1["helmRepository"])
+    end
+
     test "it can list services in the system by cluster handle" do
       cluster = insert(:cluster, handle: "test")
       services = insert_list(3, :service, cluster: cluster)
@@ -461,6 +493,50 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert Enum.all?(found["components"], & &1["synced"])
       assert Enum.all?(found["components"], & &1["group"] == "networking.k8s.io")
       assert Enum.all?(found["components"], & &1["state"] == "RUNNING")
+    end
+
+    test "it can fetch helm values with rbac protection" do
+      user = admin_user()
+      reader = insert(:user)
+      cluster = insert(:cluster)
+      repository = insert(:git_repository)
+      {:ok, service} = create_service(cluster, user, [
+        name: "test",
+        namespace: "test",
+        git: %{ref: "master", folder: "k8s"},
+        helm: %{values: "secret: value"},
+        repository_id: repository.id,
+        configuration: [%{name: "name", value: "value"}],
+        read_bindings: [%{user_id: reader.id}]
+      ])
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query Service($id: ID!) {
+          serviceDeployment(id: $id) {
+            name
+            namespace
+            git { ref folder }
+            helm { values }
+            repository { id }
+          }
+        }
+      """, %{"id" => service.id}, %{current_user: user})
+
+      assert found["helm"]["values"] == "secret: value"
+
+      {:ok, %{data: %{"serviceDeployment" => found}, errors: [_ | _]}} = run_query("""
+        query Service($id: ID!) {
+          serviceDeployment(id: $id) {
+            name
+            namespace
+            git { ref folder }
+            helm { values }
+            repository { id }
+          }
+        }
+      """, %{"id" => service.id}, %{current_user: reader})
+
+      refute found["helm"]["values"]
     end
 
     test "it respects rbac" do
@@ -719,6 +795,34 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       """, %{}, %{cluster: cluster})
 
       assert found["id"] == job.id
+    end
+  end
+
+  describe "helmRepository" do
+    test "it can fetch the charts from a helm repository" do
+      expect(Kube.Client, :get_helm_repository, fn "helm-charts", "console" ->
+        {:ok, %HelmRepository{
+          status: %HelmRepository.Status{
+            artifact: %HelmRepository.Status.Artifact{url: "https://pluralsh.github.io/console/index.yaml"}
+          }
+        }}
+      end)
+
+      {:ok, %{data: %{"helmRepository" => repo}}} = run_query("""
+        query {
+          helmRepository(namespace: "helm-charts", name: "console") {
+            charts {
+              name
+              versions { name version appVersion }
+            }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      [%{"name" => "console", "versions" => [chart | _]} | _] = repo["charts"]
+      assert chart["name"] == "console"
+      assert chart["version"]
+      assert chart["appVersion"]
     end
   end
 end

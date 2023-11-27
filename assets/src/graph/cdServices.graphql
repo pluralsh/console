@@ -5,6 +5,10 @@ fragment ServiceDeploymentRevision on Revision {
   message
   updatedAt
   insertedAt
+  helm {
+    chart
+    version
+  }
   git {
     folder
     ref
@@ -20,12 +24,29 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
     ref
     folder
   }
+  helm {
+    chart
+    version
+    repository {
+      namespace
+      name
+    }
+  }
   cluster {
     id
     name
     provider {
       name
       cloud
+    }
+  }
+  helmRepository {
+    spec {
+      url
+    }
+    status {
+      ready
+      message
     }
   }
   repository {
@@ -63,6 +84,14 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
     name
   }
   version
+  helm {
+    chart
+    version
+    repository {
+      namespace
+      name
+    }
+  }
   docs {
     content
     path
@@ -175,6 +204,9 @@ query ServiceDeploymentSecrets($id: ID!) {
       name
       value
     }
+    helm {
+      values
+    }
   }
 }
 
@@ -238,6 +270,12 @@ mutation RollbackService($id: ID, $revisionId: ID!) {
 
 mutation UpdateRbac($serviceId: ID, $clusterId: ID, $rbac: RbacAttributes!) {
   updateRbac(serviceId: $serviceId, clusterId: $clusterId, rbac: $rbac)
+}
+
+mutation SelfManage($values: String!) {
+  selfManage(values: $values) {
+    ...ServiceDeploymentsRow
+  }
 }
 
 fragment ServiceDeploymentBindings on ServiceDeployment {

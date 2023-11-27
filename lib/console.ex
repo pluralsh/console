@@ -138,6 +138,11 @@ defmodule Console do
     |> Base.url_encode64()
   end
 
+  def shab16(body) do
+    :crypto.hash(:sha, body)
+    |> Base.encode16(case: :lower)
+  end
+
   def put_path(map, [k], value), do: Map.put(map, k, value)
   def put_path(map, [k | rest], value) do
     case map do

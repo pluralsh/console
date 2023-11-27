@@ -12,6 +12,29 @@ fragment GitRepository on GitRepository {
   httpsPath
 }
 
+fragment HelmRepository on HelmRepository {
+  metadata {
+    namespace
+    name
+  }
+  spec {
+    url
+    type
+    provider
+  }
+  status {
+    ready
+    message
+  }
+}
+
+fragment HelmChartVersion on HelmChartVersion {
+  name
+  appVersion
+  version
+  digest
+}
+
 query GitRepositories {
   gitRepositories(first: 100) {
     pageInfo {
@@ -20,6 +43,24 @@ query GitRepositories {
     edges {
       node {
         ...GitRepository
+      }
+    }
+  }
+}
+
+query HelmRepositories {
+  helmRepositories {
+    ...HelmRepository
+  }
+}
+
+query HelmRepository($namespace: String!, $name: String!) {
+  helmRepository(namespace: $namespace, name: $name) {
+    ...HelmRepository
+    charts {
+      name
+      versions {
+        ...HelmChartVersion
       }
     }
   }

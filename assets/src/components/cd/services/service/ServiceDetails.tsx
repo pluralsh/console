@@ -81,7 +81,7 @@ export const getDirectory = ({
   if (!serviceDeployment) {
     return []
   }
-  const { name, componentStatus } = serviceDeployment
+  const { name, componentStatus, helm } = serviceDeployment
 
   return [
     {
@@ -90,6 +90,7 @@ export const getDirectory = ({
       enabled: true,
     },
     { path: 'secrets', label: 'Secrets', enabled: true },
+    { path: 'helm', label: 'Helm', enabled: !!helm },
     { path: 'revisions', label: 'Revisions', enabled: true },
     {
       path: 'docs',

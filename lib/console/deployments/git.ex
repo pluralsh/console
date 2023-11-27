@@ -73,6 +73,17 @@ defmodule Console.Deployments.Git do
     end
   end
 
+  @doc """
+  Fetches all helm repos registered in this cluster so far
+  """
+  @spec list_helm_repositories() :: {:ok, [Kube.HelmRepository.t]} | Console.error
+  def list_helm_repositories() do
+    case Kube.Client.list_helm_repositories() do
+      {:ok, %{items: items}} -> {:ok, items}
+      _ -> {:ok, []}
+    end
+  end
+
   def status(%GitRepository{} = repo, status) do
     GitRepository.status_changeset(repo, status)
     |> Console.Repo.update()

@@ -7,7 +7,9 @@ defmodule Console.Schema.Revision do
     field :sha,     :string
     field :message, :string
 
-    embeds_one :git, Service.Git, on_replace: :update
+    embeds_one :git,  Service.Git, on_replace: :update
+    embeds_one :helm, Service.Helm, on_replace: :update
+
     belongs_to :service, Service
     has_many :configuration, ServiceConfiguration
 
@@ -41,6 +43,7 @@ defmodule Console.Schema.Revision do
     |> cast(attrs, @valid)
     |> put_change(:id, Piazza.Ecto.UUID.generate_monotonic())
     |> cast_embed(:git)
+    |> cast_embed(:helm)
     |> cast_assoc(:configuration)
     |> validate_required(~w(version)a)
   end

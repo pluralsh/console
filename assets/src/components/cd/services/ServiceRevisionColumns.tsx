@@ -22,21 +22,28 @@ import { useServiceContext } from './service/ServiceDetails'
 const columnHelper =
   createColumnHelper<Nullable<ServiceDeploymentRevisionFragment>>()
 
-const ColGitRef = columnHelper.accessor((row) => row?.git.ref, {
+const ColGitRef = columnHelper.accessor((row) => row, {
   id: 'gitRef',
-  header: 'Commit ref',
+  header: 'Revision',
   meta: { truncate: true },
-  cell: ({ row: { original }, getValue }) => (
-    <Tooltip
-      placement="top-start"
-      label={getValue()}
-    >
-      <StackedText
-        first={getValue()}
-        second={`sha: ${original?.sha || ''}`}
-      />
-    </Tooltip>
-  ),
+  cell: ({ getValue }) => {
+    const rev = getValue()
+    const ref = rev?.helm?.chart
+      ? `${rev.helm.chart}@${rev.helm.version}`
+      : rev?.git?.ref
+
+    return (
+      <Tooltip
+        placement="top-start"
+        label={ref}
+      >
+        <StackedText
+          first={ref}
+          second={`sha: ${rev?.sha || ''}`}
+        />
+      </Tooltip>
+    )
+  },
 })
 
 const ColMessage = columnHelper.accessor((row) => row?.message, {
@@ -164,7 +171,7 @@ const ColActions = columnHelper.accessor((row) => row, {
                 following revision:
               </p>
               <p>
-                <div>{revision?.git.ref}</div>
+                <div>{revision?.git?.ref}</div>
                 <CaptionText css={{ color: theme.colors['text-light'] }}>
                   sha: {revision?.sha}
                 </CaptionText>

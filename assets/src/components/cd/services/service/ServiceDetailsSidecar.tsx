@@ -25,7 +25,7 @@ export function ServiceDetailsSidecar({
   if (!serviceDeployment) {
     return null
   }
-  const { name, version, status, cluster, git } = serviceDeployment
+  const { name, version, status, cluster, git, helm } = serviceDeployment
 
   return (
     <PropsContainer>
@@ -46,15 +46,28 @@ export function ServiceDetailsSidecar({
           <Chip severity="success">None</Chip>
         )}
       </Prop>
-      <Prop title="Git folder">{git.folder}</Prop>
-      <Prop
-        title="Git ref"
-        css={{
-          wordBreak: 'break-word',
-        }}
-      >
-        {git.ref}
-      </Prop>
+      {helm && <Prop title="Helm Chart">{helm.chart}</Prop>}
+      {helm && (
+        <Prop
+          title="Chart Version"
+          css={{
+            wordBreak: 'break-word',
+          }}
+        >
+          {helm.version}
+        </Prop>
+      )}
+      {git && <Prop title="Git folder">{git.folder}</Prop>}
+      {git && (
+        <Prop
+          title="Git ref"
+          css={{
+            wordBreak: 'break-word',
+          }}
+        >
+          {git.ref}
+        </Prop>
+      )}
       {cluster?.name && (
         <Prop title="Cluster name">
           <InlineLink

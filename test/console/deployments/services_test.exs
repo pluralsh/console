@@ -1,5 +1,6 @@
 defmodule Console.Deployments.ServicesTest do
   use Console.DataCase, async: true
+  use Mimic
   alias Console.PubSub
   alias Console.Deployments.Services
 
@@ -37,6 +38,43 @@ defmodule Console.Deployments.ServicesTest do
 
       {:ok, secrets} = Services.configuration(service)
 
+      assert secrets["name"] == "value"
+
+      assert_receive {:event, %PubSub.ServiceCreated{item: ^service}}
+    end
+
+    test "it can create a helm-based service and initial revision" do
+      cluster = insert(:cluster)
+      user = admin_user()
+
+      expect(Kube.Client, :get_helm_repository, fn "helm-charts", "podinfo" -> {:ok, %Kube.HelmRepository{}} end)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        helm: %{
+          chart: "podinfo",
+          version: "5.0",
+          repository: %{namespace: "helm-charts", name: "podinfo"},
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      assert service.name == "my-service"
+      assert service.namespace == "my-service"
+      assert service.version == "0.0.1"
+      assert service.cluster_id == cluster.id
+      assert service.helm.chart == "podinfo"
+      assert service.helm.version == "5.0"
+      assert service.helm.repository.name == "podinfo"
+      assert service.status == :stale
+
+      %{revision: revision} = Console.Repo.preload(service, [:revision])
+      assert revision.helm.chart == service.helm.chart
+      assert revision.helm.version == service.helm.version
+
+      {:ok, secrets} = Services.configuration(service)
       assert secrets["name"] == "value"
 
       assert_receive {:event, %PubSub.ServiceCreated{item: ^service}}
@@ -143,6 +181,46 @@ defmodule Console.Deployments.ServicesTest do
       assert first.id == revision.id
       assert second.git.ref == "main"
       assert second.git.folder == "k8s"
+    end
+
+    test "helm services can be updated" do
+      cluster = insert(:cluster)
+      user = admin_user()
+      expect(Kube.Client, :get_helm_repository, fn _, _ -> {:ok, %Kube.HelmRepository{}} end)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        helm: %{
+          chart: "chart",
+          version: "0.1.0",
+          repository: %{namespace: "ns", name: "name"}
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      {:ok, updated} = Services.update_service(%{
+        helm: %{
+          chart: "chart",
+          version: "0.1.1"
+        },
+      }, service.id, user)
+
+      assert_receive {:event, %PubSub.ServiceUpdated{item: ^updated}}
+
+      assert updated.name == "my-service"
+      assert updated.namespace == "my-service"
+      assert updated.version == "0.0.1"
+      assert updated.helm.chart == "chart"
+      assert updated.helm.version == "0.1.1"
+      refute updated.git
+      assert updated.revision_id
+      assert updated.status == :stale
+
+      %{revision: revision} = Console.Repo.preload(updated, [:revision])
+      assert revision.helm.chart == updated.helm.chart
+      assert revision.helm.version == updated.helm.version
     end
 
     test "it will respect rbac" do
@@ -490,6 +568,26 @@ defmodule Console.Deployments.ServicesTest do
     end
   end
 
+  describe "#self_manage/2" do
+    test "admins can convert their byok consoles to self-managed" do
+      admin = admin_user()
+      settings = deployment_settings(create_bindings: [%{user_id: admin.id}])
+      insert(:cluster, self: true)
+
+      {:ok, console} = Services.self_manage("value: bogus", admin)
+
+      assert console.name == "console"
+      assert console.namespace == "plrl-console"
+      assert console.helm.values == "value: bogus"
+      assert console.git.ref == "master"
+      assert console.git.folder == "charts/console"
+      %{repository: repo} = Console.Repo.preload(console, [:repository])
+      assert repo.url == "https://github.com/pluralsh/console.git"
+
+      assert refetch(settings).self_managed
+    end
+  end
+
   describe "#update_components/2" do
     test "it will update the k8s components w/in the service" do
       service = insert(:service)
@@ -717,7 +815,8 @@ end
 
 defmodule Console.Deployments.ServicesAsyncTest do
   use Console.DataCase, async: false
-  alias Console.Deployments.Services
+  use Mimic
+  alias Console.Deployments.{Services, Tar}
 
   describe "#docs/1" do
     test "it can fetch the docs for a given service" do
@@ -726,6 +825,38 @@ defmodule Console.Deployments.ServicesAsyncTest do
 
       {:ok, [%{path: "test.md", content: content}]} = Services.docs(service)
       assert content == "hello world"
+    end
+  end
+
+  describe "#tarstream/1" do
+    test "it can fetch a chart for a helm service" do
+      svc = insert(:service, helm: %{chart: "podinfo", version: "5.0", repository: %{name: "podinfo", namespace: "helm-charts"}})
+      name = Console.Deployments.Helm.Charts.chart_name("podinfo", "podinfo", "5.0")
+      expect(Kube.Client, :get_helm_chart, fn "helm-charts", ^name -> {:ok, %Kube.HelmChart{
+        spec: %Kube.HelmChart.Spec{chart: "podinfo"},
+        status: %Kube.HelmChart.Status{
+          artifact: %Kube.HelmChart.Status.Artifact{digest: "sha", url: "https://stefanprodan.github.io/podinfo/podinfo-6.5.3.tgz"}
+        }
+      }} end)
+
+      {:ok, f} = Services.tarstream(svc)
+      {:ok, content} = Tar.tar_stream(f)
+      content = Map.new(content)
+      assert content["Chart.yaml"]
+
+      assert refetch(svc).sha == "sha"
+    end
+
+    test "it can splice in a new values.yaml.tpl" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, helm: %{values: "value: test"}, repository: git, git: %{ref: "master", folder: "charts/console"})
+
+      {:ok, f} = Services.tarstream(svc)
+      {:ok, content} = Tar.tar_stream(f)
+
+      content = Map.new(content)
+      assert content["Chart.yaml"] =~ "console"
+      assert content["values.yaml.liquid"] == "value: test"
     end
   end
 end

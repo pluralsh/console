@@ -82,56 +82,73 @@ export const ColCluster = columnHelper.accessor(
   }
 )
 
-export const ColRepo = columnHelper.accessor(
-  ({ node }) => node?.repository?.url,
-  {
-    id: 'repository',
-    header: 'Repository',
-    enableSorting: true,
-    meta: { truncate: true, gridTemplate: 'minmax(180px,1fr)' },
-    cell: ({ getValue }) => (
+export const ColRepo = columnHelper.accessor(({ node }) => node, {
+  id: 'repository',
+  header: 'Repository',
+  enableSorting: true,
+  meta: { truncate: true, gridTemplate: 'minmax(180px,1fr)' },
+  cell: ({ getValue }) => {
+    const theme = useTheme()
+    const svc = getValue()
+    const git = svc?.repository
+    const helm = svc?.helmRepository
+    const url = git?.url || helm?.spec?.url || ''
+
+    return (
       <Tooltip
         placement="top-start"
-        label={getValue()}
+        label={url}
       >
         <div>
           <ColWithIcon
             truncateLeft
-            icon={<GitHubLogoIcon />}
+            icon={
+              git ? (
+                <GitHubLogoIcon />
+              ) : (
+                getProviderIconURL('byok', theme.mode === 'dark')
+              )
+            }
           >
-            <span>{getValue()}</span>
+            <span>{url}</span>
           </ColWithIcon>
         </div>
       </Tooltip>
-    ),
-  }
-)
+    )
+  },
+})
 
 export const ColRef = columnHelper.accessor(({ node }) => node, {
   id: 'gitLocation',
-  header: 'Git Location',
+  header: 'Reference',
   enableSorting: true,
   // meta: { truncate: true },
   cell: ({ getValue }) => {
     const svc = getValue()
 
     if (!svc) return null
-    const {
-      git: { ref, folder },
-      message,
-    } = svc
+    const { message } = svc
 
-    const refStr = shortenSha1(ref)
+    const refStr = shortenSha1(svc.git?.ref || '')
 
     return (
-      <Tooltip
-        placement="top"
-        label={<div css={{ maxWidth: 400 }}>{message || ''}</div>}
-      >
-        <span>
-          {refStr}@{folder}
-        </span>
-      </Tooltip>
+      <>
+        {svc.helm && (
+          <span>
+            {svc.helm?.chart}@{svc.helm?.version}
+          </span>
+        )}
+        {svc.git && (
+          <Tooltip
+            placement="top"
+            label={<div css={{ maxWidth: 400 }}>{message || ''}</div>}
+          >
+            <span>
+              {refStr}@{svc.git?.folder}
+            </span>
+          </Tooltip>
+        )}
+      </>
     )
   },
 })

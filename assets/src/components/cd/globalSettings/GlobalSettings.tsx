@@ -15,7 +15,9 @@ import {
   useDeploymentSettingsQuery,
 } from 'generated/graphql'
 
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
+
+import { LoginContext } from 'components/contexts'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
@@ -47,6 +49,10 @@ const directory = [
     path: 'repositories',
     label: 'Repositories',
   },
+  {
+    path: 'auto-update',
+    label: 'Auto Update',
+  },
 ]
 
 type GlobalSettingsContextType = {
@@ -60,6 +66,7 @@ export const useGlobalSettingsContext = () =>
 export function GlobalSettings() {
   const theme = useTheme()
   const { pathname } = useLocation()
+  const { configuration } = useContext<any>(LoginContext)
   const { data, refetch } = useDeploymentSettingsQuery({})
 
   const outletContext = useMemo(
@@ -68,6 +75,16 @@ export function GlobalSettings() {
       ...data,
     }),
     [data, refetch]
+  )
+
+  const prunedDirectory = useMemo(
+    () =>
+      directory.filter(
+        ({ path }) =>
+          path !== 'auto-update' ||
+          (configuration?.byok && !data?.deploymentSettings?.selfManaged)
+      ),
+    [configuration, data]
   )
 
   return (
@@ -80,7 +97,7 @@ export function GlobalSettings() {
           }}
         >
           <SideNavEntries
-            directory={directory}
+            directory={prunedDirectory}
             pathname={pathname}
             pathPrefix={GLOBAL_SETTINGS_ABS_PATH}
           />

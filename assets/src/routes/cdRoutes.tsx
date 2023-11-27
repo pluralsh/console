@@ -34,6 +34,10 @@ import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
 import Pipelines from 'components/cd/pipelines/Pipelines'
 
+import ServiceHelm from 'components/cd/services/service/ServiceHelm'
+
+import SelfManage from 'components/cd/globalSettings/SelfManage'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -190,6 +194,10 @@ const globalSettingsRoutes = (
       path="repositories"
       element={<GlobalSettingsRepositories />}
     />
+    <Route
+      path="auto-update"
+      element={<SelfManage />}
+    />
   </Route>
 )
 
@@ -303,6 +311,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceRevisions />}
       path="revisions"
+    />
+    <Route
+      element={<ServiceHelm />}
+      path="helm"
     />
     <Route
       element={<ServiceDocs />}

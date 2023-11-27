@@ -81,6 +81,7 @@ config :console,
 
 config :porcelain, driver: Porcelain.Driver.Basic
 
+config :http_stream, adapter: HTTPStream.Adapter.HTTPoison
 
 config :console, Console.PartitionedCache,
   primary: [

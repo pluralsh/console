@@ -65,8 +65,6 @@ spec: {{ .Values.secrets.config | toYaml | nindent 2 }}
 {{- end }}
 - name: KAS_DNS
   value: {{ .Values.ingress.kas_dns }}
-- name: DEPLOYED_AT
-  value: {{ now | unixEpoch | quote }}
 - name: NAMESPACE
   valueFrom:
     fieldRef:

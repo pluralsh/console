@@ -2,6 +2,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.Cluster
   import Console.Deployments.Policies, only: [allow: 3]
   alias Console.Deployments.{Clusters, Services, Git, Settings, Global, Pipelines, AddOns}
+  alias Console.Deployments.Helm.Repository
   alias Console.Schema.{
     Cluster,
     ClusterNodePool,
@@ -144,6 +145,14 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> paginate(args)
   end
 
+  def get_helm_repository(%{name: name, namespace: ns}, _), do: Kube.Client.get_helm_repository(ns, name)
+
+  def list_helm_repositories(_, _), do: Git.list_helm_repositories()
+
+  def helm_charts(helm, _, _), do: Repository.charts(helm)
+
+  def helm_status(helm, _, _), do: Repository.status(helm)
+
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
   def resolve_cluster(%{handle: handle}, %{context: %{current_user: user}}) do
     Clusters.find!(handle)
@@ -211,6 +220,13 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     with {:ok, _} <- allow(service, actor(ctx), :secrets),
          {:ok, secrets} <- Services.configuration(service) do
       {:ok, Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)}
+    end
+  end
+
+  def helm_values(%{parent: service} = helm, _, ctx) do
+    case allow(service, actor(ctx), :secrets) do
+      {:ok, _} -> {:ok, helm.values}
+      err -> err
     end
   end
 
@@ -282,6 +298,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def update_service_components(%{id: id} = args, %{context: %{cluster: cluster}}),
     do: Services.update_components(Map.take(args, [:errors, :components]), id, cluster)
+
+  def self_manage(%{values: values}, %{context: %{current_user: user}}),
+    do: Services.self_manage(values, user)
 
   def create_git_repository(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.create_repository(attrs, user)

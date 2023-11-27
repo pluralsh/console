@@ -160,9 +160,10 @@ defmodule Kube.Parser do
     "spec" => %{
       "group" => group,
       "names" => %{"plural" => path, "kind" => kind},
-      "versions" => [%{"name" => v, "schema" => %{"openAPIV3Schema" => schema}} | _]
+      "versions" => [_ | _] = vsns
     }
   }) do
+    %{"name" => v, "schema" => %{"openAPIV3Schema" => schema}} = List.last(vsns)
     {group, v, path, kind, schema}
   end
 end

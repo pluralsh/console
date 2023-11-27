@@ -2,8 +2,9 @@ defmodule Console.Deployments.Services do
   use Console.Services.Base
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation}
-  alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Checker, AddOns}
+  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository}
+  alias Console.Deployments.{Secrets.Store, Settings, Git, Clusters, Deprecations.Checker, AddOns, Tar}
+  alias Console.Deployments.Helm
   require Logger
 
   @type service_resp :: {:ok, Service.t} | Console.error
@@ -25,8 +26,27 @@ defmodule Console.Deployments.Services do
 
   def tarball(%Service{id: id}), do: api_url("v1/git/tarballs?id=#{id}")
 
+  @doc """
+  Constructs a filestream for the tar artifact of a service, and perhaps performs some JIT modifications
+  before sending it upstream to the given client.
+  """
+  @spec tarstream(Service.t) :: {:ok, File.t} | Console.error
+  def tarstream(%Service{helm: %Service.Helm{values: values}} = svc) when is_binary(values) do
+    with {:ok, tar} <- tarfile(svc),
+      do: Tar.splice(tar, %{"values.yaml.liquid" => values})
+  end
+  def tarstream(%Service{} = svc), do: tarfile(svc)
+
+  defp tarfile(%Service{helm: %Service.Helm{chart: c, version: v}} = svc) when is_binary(c) and is_binary(v) do
+    with {:ok, f, sha} <- Helm.Charts.artifact(svc),
+         {:ok, _} <- update_sha_without_revision(svc, sha),
+      do: {:ok, f}
+  end
+  defp tarfile(%Service{} = svc), do: Git.Discovery.fetch(svc)
+
   def referenced?(id) do
-    Enum.map([Cluster.for_service(id), ClusterProvider.for_service(id)], &Console.Repo.exists?/1)
+    [Cluster.for_service(id), ClusterProvider.for_service(id)]
+    |> Enum.map(&Console.Repo.exists?/1)
     |> Enum.any?(& &1)
   end
 
@@ -54,6 +74,11 @@ defmodule Console.Deployments.Services do
       %Service{cluster_id: cluster_id}
       |> Service.changeset(add_version(attrs, "0.0.1"))
       |> Console.Repo.insert()
+    end)
+    |> add_operation(:check_repo, fn
+      %{base: %{helm: %{repository: %{namespace: ns, name: n}}}} ->
+        Helm.Repository.get(ns, n)
+      _ -> {:ok, true}
     end)
     |> add_operation(:revision, fn %{base: base} -> create_revision(add_version(attrs, "0.0.1"), base) end)
     |> add_revision()
@@ -188,13 +213,45 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:create, fn %{source: source, config: config} ->
       Map.take(source, [:repository_id, :sha, :name, :namespace])
-      |> Map.put(:git, Map.from_struct(source.git))
+      |> Console.dedupe(:git, source.git && %{ref: source.git.ref, folder: source.git.folder})
+      |> Console.dedupe(:helm, source.helm && Console.mapify(source.helm))
       |> Map.merge(attrs)
       |> Map.put(:configuration, config)
       |> create_service(cluster_id, user)
     end)
     |> execute(extract: :create)
     |> notify(:create, user)
+  end
+
+  @doc """
+  Allows the console to manage its own upgrades, given the original installation values file
+  """
+  @spec self_manage(binary, User.t) :: service_resp
+  def self_manage(values, %User{} = user) do
+    start_transaction()
+    |> add_operation(:values, fn _ -> YamlElixir.read_from_string(values) end)
+    |> add_operation(:git, fn _ ->
+      url = "https://github.com/pluralsh/console.git"
+      case Git.get_by_url(url) do
+        %GitRepository{} = git -> {:ok, git}
+        _ -> Git.create_repository(%{url: url}, user)
+      end
+    end)
+    |> add_operation(:settings, fn _ ->
+      Settings.update(%{self_managed: true}, user)
+    end)
+    |> add_operation(:service, fn %{git: git} ->
+      cluster = Clusters.local_cluster()
+      create_service(%{
+        name: "console",
+        namespace: "plrl-console",
+        repository_id: git.id,
+        protect: true,
+        git: %{ref: "master", folder: "charts/console"},
+        helm: %{values: values},
+      }, cluster.id, user)
+    end)
+    |> execute(extract: :service)
   end
 
   @doc """
@@ -219,7 +276,8 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:revision, fn %{base: base} ->
       add_version(%{sha: sha, message: msg}, base.version)
-      |> Console.dedupe(:git, %{ref: sha, folder: base.git.folder})
+      |> Console.dedupe(:git, base.git && %{ref: sha, folder: base.git.folder})
+      |> Console.dedupe(:helm, base.helm && Console.mapify(base.helm))
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)
         Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
@@ -228,6 +286,25 @@ defmodule Console.Deployments.Services do
     end)
     |> execute(extract: :base)
     |> notify(:update, :ignore)
+  end
+
+  defp update_sha_without_revision(%Service{sha: sha} = svc, sha), do: {:ok, svc}
+  defp update_sha_without_revision(%Service{id: id}, sha) do
+    start_transaction()
+    |> add_operation(:base, fn _ ->
+      get_service!(id)
+      |> Service.changeset(%{sha: sha})
+      |> Repo.update()
+    end)
+    |> add_operation(:current, fn %{base: base} ->
+      case Repo.preload(base, [:revision]) do
+        %{revision: %Revision{} = revision} ->
+          Revision.update_changeset(revision, %{sha: sha})
+          |> Repo.update()
+        _ -> {:ok, base}
+      end
+    end)
+    |> execute(extract: :base)
   end
 
   def update_service(attrs, svc_id) when is_binary(svc_id),
@@ -240,7 +317,8 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:revision, fn %{base: base} ->
       add_version(attrs, base.version)
-      |> Console.dedupe(:git, Map.take(base.git, ~w(ref folder)a))
+      |> Console.dedupe(:git, base.git && Console.mapify(base.git))
+      |> Console.dedupe(:helm, base.helm && Console.mapify(base.helm))
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)
         Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
@@ -257,7 +335,7 @@ defmodule Console.Deployments.Services do
   fetches the docs for a given service out of git, and renders them as a list of file path/content pairs
   """
   @spec docs(Service.t) :: [%{path: binary, content: binary}]
-  def docs(%Service{} = svc) do
+  def docs(%Service{repository_id: id} = svc) when is_binary(id) do
     with {:ok, f} <- Git.Discovery.docs(svc),
          {:ok, res} <- AddOns.tar_stream(f) do
       {:ok, Enum.map(res, fn {name, content} -> %{path: name, content: content} end)}
@@ -267,6 +345,7 @@ defmodule Console.Deployments.Services do
         {:error, "could not fetch docs"}
     end
   end
+  def docs(_), do: {:ok, []}
 
   @doc """
   Rollbacks a service to a given revision id, all configuration will then be fetched via that revision
@@ -286,12 +365,12 @@ defmodule Console.Deployments.Services do
       end
     end)
     |> add_operation(:update, fn %{service: svc, revision: rev} ->
-      svc
-      |> Service.rollback_changeset(%{
+      Service.rollback_changeset(svc, %{
         status: :stale,
         revision_id: rev.id,
         sha: rev.sha,
-        git: Map.take(rev.git, [:ref, :folder])
+        git: rev.git && Map.take(rev.git, [:ref, :folder]),
+        helm: rev.helm && Console.mapify(rev.helm)
       })
       |> Repo.update()
     end)

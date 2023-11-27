@@ -18,6 +18,7 @@ defmodule Console.GraphQl.Schema.Base do
       use Absinthe.Schema.Notation
       use Absinthe.Relay.Schema.Notation, :modern
       import Absinthe.Resolution.Helpers
+      import Console.GraphQl.Schema.Helpers
       import Console.GraphQl.Schema.Base
       alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature, ClusterAuthenticated}
     end

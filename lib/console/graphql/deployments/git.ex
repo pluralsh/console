@@ -27,9 +27,51 @@ defmodule Console.GraphQl.Deployments.Git do
     field :https_path,   :string, description: "the https url for this git repo"
     field :url_format,   :string, description: "a format string to get the http url for a subfolder in a git repo"
 
-    field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this repo"
+    field :editable, :boolean,
+      resolve: &Deployments.editable/3,
+      description: "whether the current user can edit this repo"
 
     timestamps()
+  end
+
+  @desc "a crd representation of a helm repository"
+  object :helm_repository do
+    field :metadata, non_null(:metadata)
+    field :spec,     non_null(:helm_repository_spec)
+    field :charts,   list_of(:helm_chart_entry),
+      resolve: &Deployments.helm_charts/3,
+      description: "the charts found in this repository (heavy operation, don't do in list endpoints)"
+    field :status,   :helm_repository_status,
+      resolve: &Deployments.helm_status/3,
+      description: "can fetch the status of a given helm repository"
+  end
+
+  @desc "a specification of how a helm repository is fetched"
+  object :helm_repository_spec do
+    field :provider, :string
+    field :url,      non_null(:string)
+    field :type,     :string
+  end
+
+  @desc "the state of this helm repository"
+  object :helm_repository_status do
+    field :ready,   :boolean
+    field :message, :string
+  end
+
+  @desc "a chart manifest entry, including all versions"
+  object :helm_chart_entry do
+    field :name,     :string, description: "the name of the chart"
+    field :versions, list_of(:helm_chart_version), description: "all found versions of the chart"
+  end
+
+  @desc "a chart version contained within a helm repository manifest"
+  object :helm_chart_version do
+    field :app_version, :string, description: "the version of the app contained w/in this chart"
+    field :version,     :string, description: "the version of the chart itself"
+    field :name,        :string, description: "the name of the chart"
+    field :type,        :string
+    field :digest,      :string, description: "sha digest of this chart's contents"
   end
 
   connection node_type: :git_repository
@@ -49,6 +91,20 @@ defmodule Console.GraphQl.Deployments.Git do
       middleware Authenticated
 
       resolve &Deployments.list_git_repositories/2
+    end
+
+    field :helm_repositories, list_of(:helm_repository) do
+      middleware Authenticated
+
+      resolve &Deployments.list_helm_repositories/2
+    end
+
+    field :helm_repository, :helm_repository do
+      middleware Authenticated
+      arg :name,      non_null(:string)
+      arg :namespace, non_null(:string)
+
+      resolve &Deployments.get_helm_repository/2
     end
   end
 

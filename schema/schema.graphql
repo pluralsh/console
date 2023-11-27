@@ -147,6 +147,10 @@ type RootQueryType {
 
   gitRepositories(after: String, first: Int, before: String, last: Int): GitRepositoryConnection
 
+  helmRepositories: [HelmRepository]
+
+  helmRepository(name: String!, namespace: String!): HelmRepository
+
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
 
@@ -368,6 +372,8 @@ type RootMutationType {
     attributes: ServiceCloneAttributes!
   ): ServiceDeployment
 
+  selfManage(values: String!): ServiceDeployment
+
   createGlobalService(
     serviceId: ID
 
@@ -437,6 +443,9 @@ type DeploymentSettings {
   enabled: Boolean!
 
   name: String!
+
+  "whether the byok cluster has been brought under self-management"
+  selfManaged: Boolean
 
   "the repo to fetch CAPI manifests from, for both providers and clusters"
   artifactRepository: GitRepository
@@ -831,7 +840,8 @@ input ServiceDeploymentAttributes {
   syncConfig: SyncConfigAttributes
   protect: Boolean
   repositoryId: ID!
-  git: GitRefAttributes!
+  git: GitRefAttributes
+  helm: HelmConfigAttributes
   kustomize: KustomizeAttributes
   configuration: [ConfigAttributes]
   readBindings: [PolicyBindingAttributes]
@@ -841,6 +851,14 @@ input ServiceDeploymentAttributes {
 input SyncConfigAttributes {
   namespaceMetadata: MetadataAttributes
   diffNormalizer: DiffNormalizerAttributes
+}
+
+input HelmConfigAttributes {
+  values: String
+  valuesFiles: [String]
+  chart: String
+  version: String
+  repository: NamespacedName
 }
 
 input MetadataAttributes {
@@ -860,6 +878,7 @@ input ServiceUpdateAttributes {
   version: String
   protect: Boolean
   git: GitRefAttributes
+  helm: HelmConfigAttributes
   configuration: [ConfigAttributes]
   kustomize: KustomizeAttributes
 }
@@ -924,7 +943,10 @@ type ServiceDeployment {
   version: String!
 
   "description on where in git the service's manifests should be fetched"
-  git: GitRef!
+  git: GitRef
+
+  "description of how helm charts should be applied"
+  helm: HelmSpec
 
   "if true, deletion of this service is not allowed"
   protect: Boolean
@@ -955,6 +977,8 @@ type ServiceDeployment {
 
   "the git repo of this service"
   repository: GitRepository
+
+  helmRepository: HelmRepository
 
   "read policy for this service"
   readBindings: [PolicyBinding]
@@ -1003,7 +1027,10 @@ type Revision {
   version: String!
 
   "git spec of the prior revision"
-  git: GitRef!
+  git: GitRef
+
+  "description of how helm charts should be applied"
+  helm: HelmSpec
 
   "the sha this service was pulled from"
   sha: String
@@ -1023,6 +1050,28 @@ type GitRef {
 
   "the folder manifests live under"
   folder: String!
+}
+
+type ObjectReference {
+  name: String
+  namespace: String
+}
+
+type HelmSpec {
+  "the name of the chart this service is using"
+  chart: String
+
+  "a helm values file to use with this service, requires auth and so is heavy to query"
+  values: String
+
+  "pointer to the flux helm repository resource used for this chart"
+  repository: ObjectReference
+
+  "the chart version in use currently"
+  version: String
+
+  "a list of relative paths to values files to use for helm applies"
+  valuesFiles: [String]
 }
 
 "a configuration item k\/v pair"
@@ -1697,6 +1746,58 @@ type GitRepository {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"a crd representation of a helm repository"
+type HelmRepository {
+  metadata: Metadata!
+
+  spec: HelmRepositorySpec!
+
+  "the charts found in this repository (heavy operation, don't do in list endpoints)"
+  charts: [HelmChartEntry]
+
+  "can fetch the status of a given helm repository"
+  status: HelmRepositoryStatus
+}
+
+"a specification of how a helm repository is fetched"
+type HelmRepositorySpec {
+  provider: String
+  url: String!
+  type: String
+}
+
+"the state of this helm repository"
+type HelmRepositoryStatus {
+  ready: Boolean
+  message: String
+}
+
+"a chart manifest entry, including all versions"
+type HelmChartEntry {
+  "the name of the chart"
+  name: String
+
+  "all found versions of the chart"
+  versions: [HelmChartVersion]
+}
+
+"a chart version contained within a helm repository manifest"
+type HelmChartVersion {
+  "the version of the app contained w\/in this chart"
+  appVersion: String
+
+  "the version of the chart itself"
+  version: String
+
+  "the name of the chart"
+  name: String
+
+  type: String
+
+  "sha digest of this chart's contents"
+  digest: String
 }
 
 type GitRepositoryConnection {

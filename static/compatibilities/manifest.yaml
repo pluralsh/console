@@ -2,3 +2,5 @@ names:
 - ingress-nginx
 - cert-manager
 - external-dns
+- argo-rollouts
+- kube-prometheus-stack

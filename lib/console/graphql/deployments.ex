@@ -24,6 +24,7 @@ defmodule Console.GraphQl.Deployments do
     field :id,             non_null(:id)
     field :enabled,        non_null(:boolean), description: "whether you've yet to enable CD for this instance"
     field :name,           non_null(:string)
+    field :self_managed,   :boolean, description: "whether the byok cluster has been brought under self-management"
 
     field :artifact_repository, :git_repository, resolve: dataloader(Deployments), description: "the repo to fetch CAPI manifests from, for both providers and clusters"
     field :deployer_repository, :git_repository, resolve: dataloader(Deployments), description: "the repo to fetch the deploy operators manifests from"

@@ -1,13 +1,13 @@
 defmodule ConsoleWeb.GitController do
   use ConsoleWeb, :controller
-  alias Console.Deployments.{Services, Git.Discovery}
+  alias Console.Deployments.Services
   alias Console.Schema.Cluster
   require Logger
 
   def tarball(conn, %{"id" => service_id}) do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),
-         {{:ok, f}, _} <- {Discovery.fetch(svc), svc} do
+         {{:ok, f}, _} <- {Services.tarstream(svc), svc} do
       try do
         conn =
           conn
