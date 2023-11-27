@@ -31,6 +31,13 @@ defmodule Console.Deployments.Services do
   before sending it upstream to the given client.
   """
   @spec tarstream(Service.t) :: {:ok, File.t} | Console.error
+  def tarstream(%Service{repository_id: id, helm: %Service.Helm{values_files: [_ | _] = files}} = svc) when is_binary(id) do
+    with {:ok, f} <- Git.Discovery.fetch(svc),
+         {:ok, contents} <- Tar.tar_stream(f),
+         contents = Map.new(contents),
+         {:ok, f, _} <- Helm.Charts.artifact(svc),
+      do: Tar.splice(f, Map.take(contents, files))
+  end
   def tarstream(%Service{helm: %Service.Helm{values: values}} = svc) when is_binary(values) do
     with {:ok, tar} <- tarfile(svc),
       do: Tar.splice(tar, %{"values.yaml.liquid" => values})
