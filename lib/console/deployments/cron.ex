@@ -56,7 +56,7 @@ defmodule Console.Deployments.Cron do
     |> Cluster.preloaded()
     |> Repo.stream(method: :keyset)
     |> Stream.each(fn cluster ->
-      Logger.info "installing operator on #{cluster.id}"
+      Logger.info "installing operator on #{cluster.id}, name=#{cluster.name}, handle=#{cluster.handle}"
       Clusters.install(cluster)
     end)
     |> Stream.run()
