@@ -164,7 +164,10 @@ defmodule Console.Deployments.Pipelines do
   def build_promotion(%PipelineStage{id: id} = stage) do
     start_transaction()
     |> add_operation(:stage, fn _ ->
-      {:ok, Repo.preload(stage, [promotion: [:services], services: [service: :revision]])}
+      case Repo.preload(stage, [:from_edges, promotion: [:services], services: [service: :revision]]) do
+        %{from_edges: [_ | _]} = stage -> {:ok, stage}
+        _ -> {:error, "this stage has no successors"}
+      end
     end)
     |> add_operation(:services, fn %{stage: %{services: svcs}} ->
       Enum.map(svcs, & &1.service)
