@@ -4,6 +4,7 @@ import React, {
   type ComponentProps,
   type ReactElement,
   useEffect,
+  useMemo,
   useState,
 } from 'react'
 import type { Row } from '@tanstack/react-table'
@@ -210,6 +211,49 @@ function Template(args: any) {
   return <Table {...args} />
 }
 
+function PagedTemplate({ data, pageSize, ...args }: any) {
+  const [endIndex, setEndIndex] = useState(pageSize - 1)
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
+  const pagedData = useMemo(
+    () => (data as any[]).slice(0, endIndex),
+    [data, endIndex]
+  )
+  const hasNextPage = pagedData.length < data.length
+
+  useEffect(() => {
+    if (isFetchingNextPage) {
+      let cancelled = false
+
+      setTimeout(() => {
+        if (cancelled) {
+          return
+        }
+        const nextEndIndex = endIndex + pageSize
+
+        setEndIndex(nextEndIndex > data.length - 1 ? data.length : nextEndIndex)
+        setIsFetchingNextPage(false)
+      }, 1500)
+
+      return () => {
+        cancelled = true
+      }
+    }
+  }, [data.length, endIndex, isFetchingNextPage, pageSize])
+
+  return (
+    <Table
+      {...args}
+      virtualizeRows
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={() => {
+        setIsFetchingNextPage(true)
+      }}
+      data={pagedData}
+    />
+  )
+}
+
 function SelectableTemplate(args: any) {
   const [selectedId, setSelectedId] = useState('')
 
@@ -301,6 +345,15 @@ Default.args = {
 export const VirtualizedRows = Template.bind({})
 VirtualizedRows.args = {
   virtualizeRows: true,
+  width: '900px',
+  height: '400px',
+  data: extremeLengthData,
+  columns,
+}
+
+export const PagedData = PagedTemplate.bind({})
+PagedData.args = {
+  pageSize: 30,
   width: '900px',
   height: '400px',
   data: extremeLengthData,
