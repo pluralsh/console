@@ -2,9 +2,10 @@ import { Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { coerce, rsort } from 'semver'
 
 import { TabularNumbers } from '../../../cluster/TableElements'
-import { toNiceVersion } from '../../../../utils/semver'
+import { toNiceVersion, trimVersion } from '../../../../utils/semver'
 
 import { isRequired } from './CreateClusterContent'
 
@@ -27,7 +28,12 @@ export function NameVersionHandle({
 }) {
   const theme = useTheme()
   const filteredVersions = useMemo(
-    () => versions?.filter(isNonNullable) || [],
+    () =>
+      rsort<string>(
+        (versions?.filter(isNonNullable) || []).map(
+          (v) => coerce(v)?.version ?? v
+        )
+      ).map((v) => trimVersion(v)),
     [versions]
   )
 

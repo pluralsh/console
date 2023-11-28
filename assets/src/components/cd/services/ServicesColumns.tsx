@@ -88,6 +88,7 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
   enableSorting: true,
   meta: { truncate: true, gridTemplate: 'minmax(180px,1fr)' },
   cell: ({ getValue }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const theme = useTheme()
     const svc = getValue()
     const git = svc?.repository
