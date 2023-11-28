@@ -70,8 +70,6 @@ export function CreateClusterContent({
     [clusterProviders]
   )
 
-  console.log(attributes)
-
   const provider =
     clusterProviders.find(
       (provider) => provider.id === attributes.providerId

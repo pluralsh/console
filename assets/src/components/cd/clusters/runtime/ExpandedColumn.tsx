@@ -10,8 +10,6 @@ export default function ExpandedColumn({
   runtimeService: RuntimeService
 }) {
   const theme = useTheme()
-
-  console.log(runtimeService)
   const versions = runtimeService?.addon?.versions || []
 
   return (

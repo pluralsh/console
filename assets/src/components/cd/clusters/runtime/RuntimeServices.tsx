@@ -45,11 +45,9 @@ export default function RuntimeServices({
         data={data?.cluster?.runtimeServices || []}
         columns={runtimeColumns}
         getRowCanExpand={() => true}
-        renderExpanded={({ row }) => {
-          console.log(row)
-
-          return <ExpandedColumn runtimeService={row.original} />
-        }}
+        renderExpanded={({ row }) => (
+          <ExpandedColumn runtimeService={row.original} />
+        )}
         css={{
           maxHeight: 310,
           height: '100%',
