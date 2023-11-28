@@ -45,6 +45,16 @@ export function toNiceVersion(version: Nullable<string>) {
   return `${version.startsWith('v') ? '' : 'v'}${version}`
 }
 
+export function trimVersion(version: Nullable<string>): string {
+  if (!version) {
+    return ''
+  }
+
+  return version.endsWith('.0')
+    ? version.substring(0, version.length - 2)
+    : version
+}
+
 export function toProviderSupportedVersion(
   version: Nullable<string>,
   providerCloud: Nullable<string>

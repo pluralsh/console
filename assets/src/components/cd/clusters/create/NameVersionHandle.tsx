@@ -5,7 +5,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { coerce, rsort } from 'semver'
 
 import { TabularNumbers } from '../../../cluster/TableElements'
-import { toNiceVersion } from '../../../../utils/semver'
+import { toNiceVersion, trimVersion } from '../../../../utils/semver'
 
 import { isRequired } from './CreateClusterContent'
 
@@ -29,11 +29,11 @@ export function NameVersionHandle({
   const theme = useTheme()
   const filteredVersions = useMemo(
     () =>
-      rsort(
+      rsort<string>(
         (versions?.filter(isNonNullable) || []).map(
           (v) => coerce(v)?.version ?? v
         )
-      ),
+      ).map((v) => trimVersion(v)),
     [versions]
   )
 
