@@ -13,10 +13,10 @@ import styled, { useTheme } from 'styled-components'
 import {
   Dispatch,
   Key,
+  MutableRefObject,
   SetStateAction,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
 import { type TableState } from '@tanstack/react-table'
@@ -73,6 +73,7 @@ export function ServicesFilters({
   showClusterSelect = true,
   clusterId,
   setClusterId,
+  tabStateRef,
 }: {
   serviceDeployments: NonNullable<
     ReturnType<typeof useServiceDeploymentsQuery>['data']
@@ -85,9 +86,9 @@ export function ServicesFilters({
   showClusterSelect: boolean
   clusterId?: string
   setClusterId?: Dispatch<SetStateAction<string>>
+  tabStateRef: MutableRefObject<any>
 }) {
   const theme = useTheme()
-  const tabStateRef = useRef<any>(null)
   const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
   const clusterIdParam = useParams()[SERVICE_PARAM_CLUSTER_ID]
 

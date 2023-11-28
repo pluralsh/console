@@ -18,8 +18,10 @@ export function updateFragment(cache, { fragment, id, update, fragmentName }) {
 
 export function extendConnection<
   K extends string,
-  T extends Partial<Record<K, (Connection<any> & PaginatedResult<any>) | null>>,
->(prev: T, next: T[K] | null | undefined, key: K) {
+  TData extends Partial<
+    Record<K, (Connection<any> & PaginatedResult<any>) | null>
+  >,
+>(prev: TData, next: TData[K] | null | undefined, key: K) {
   if (!next) {
     return prev
   }

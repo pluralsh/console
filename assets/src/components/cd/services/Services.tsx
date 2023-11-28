@@ -1,7 +1,15 @@
-import { ComponentProps, useMemo, useState } from 'react'
+import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   Chip,
   EmptyState,
+  TabPanel,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -21,10 +29,12 @@ import {
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { createMapperWithFallback } from 'utils/mapping'
-import { Edge } from 'utils/graphql'
+import { Edge, extendConnection } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
+
+import { QueryResult } from '@apollo/client'
 
 import {
   CD_BASE_CRUMBS,
@@ -77,28 +87,80 @@ export function AuthMethodChip({
   return <Chip severity="neutral">{authMethodToLabel(authMethod)}</Chip>
 }
 
+// @ts-expect-error
+const REACT_VIRTUAL_OPTIONS: ComponentProps<
+  typeof Table
+>['reactVirtualOptions'] = {
+  overscan: 4,
+}
+
+const QUERY_PAGE_SIZE = 8
+
 export default function Services() {
   const theme = useTheme()
   const navigate = useNavigate()
   const [clusterId, setClusterId] = useState<string>('')
   const [searchString, setSearchString] = useState()
   const debouncedSearchString = useDebounce(searchString, 100)
+  const tabStateRef = useRef<any>(null)
 
-  const {
-    data: currentData,
-    error,
-    refetch,
-    previousData,
-  } = useServiceDeploymentsQuery({
+  const queryResult = useServiceDeploymentsQuery({
     variables: {
       ...(clusterId ? { clusterId } : {}),
       q: debouncedSearchString,
+      first: QUERY_PAGE_SIZE,
     },
-    pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-  const data = currentData || previousData
+  const { error, refetch, loading, fetchMore } = queryResult
+  const data = queryResult?.data || queryResult?.previousData
 
+  console.log('length', data?.serviceDeployments?.edges?.length)
+
+  // Start hook
+  const key = 'serviceDeployments' as const
+  const { variables } = queryResult
+  const edges = data?.[key]?.edges
+
+  const deps = [
+    ...Object.values(queryResult?.variables || {}).flat(),
+    queryResult.data?.[key]?.pageInfo?.endCursor,
+  ]
+
+  useEffect(() => {
+    if (!edges) {
+      return
+    }
+    let intervalId
+
+    if (!loading) {
+      intervalId = setInterval(() => {
+        const total = edges?.length || 0
+
+        if (!variables) {
+          return
+        }
+        refetch({
+          ...(variables || {}),
+          first: total,
+        }).then((e) => {
+          console.log('polled', e?.data?.serviceDeployments?.edges)
+        })
+      }, POLL_INTERVAL / 5)
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId)
+      }
+    }
+  }, [edges, loading, refetch, variables])
+
+  const pageInfo = data?.serviceDeployments?.pageInfo
+
+  console.log('pageInfo', pageInfo)
+
+  console.log('datalen', data?.serviceDeployments?.edges?.length)
   useSetBreadcrumbs(
     useMemo(
       () => [
@@ -134,6 +196,24 @@ export default function Services() {
       [refetch, tableFilters]
     )
 
+  console.log('okay loading', loading)
+  console.log('okay data', data?.serviceDeployments?.edges)
+
+  const fetchNextPage = useCallback(() => {
+    if (!pageInfo?.endCursor) {
+      return
+    }
+    fetchMore({
+      variables: { after: pageInfo.endCursor },
+      updateQuery: (prev, { fetchMoreResult }) =>
+        extendConnection(
+          prev,
+          fetchMoreResult.serviceDeployments,
+          'serviceDeployments'
+        ),
+    })
+  }, [fetchMore, pageInfo?.endCursor])
+
   if (error) {
     return <GqlError error={error} />
   }
@@ -158,41 +238,52 @@ export default function Services() {
         showClusterSelect
         clusterId={clusterId}
         setClusterId={setClusterId}
+        tabStateRef={tabStateRef}
       />
-      {!data ? (
-        <LoadingIndicator />
-      ) : !isEmpty(data?.serviceDeployments?.edges) ? (
-        <FullHeightTableWrap>
-          <Table
-            data={data?.serviceDeployments?.edges || []}
-            columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-            onRowClick={(
-              _e,
-              { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-            ) =>
-              navigate(
-                getServiceDetailsPath({
-                  clusterId: original.node?.cluster?.id,
-                  serviceId: original.node?.id,
-                })
-              )
-            }
-            reactTableOptions={reactTableOptions}
-          />
-        </FullHeightTableWrap>
-      ) : (
-        <div css={{ height: '100%' }}>
-          {searchString || clusterId ? (
-            <EmptyState message="No service deployments match your query." />
-          ) : (
-            <EmptyState message="Looks like you don't have any service deployments yet." />
-          )}
-        </div>
-      )}
+      <TabPanel
+        stateRef={tabStateRef}
+        css={{ height: '100%', overflow: 'hidden' }}
+      >
+        {!data ? (
+          <LoadingIndicator />
+        ) : !isEmpty(data?.serviceDeployments?.edges) ? (
+          <FullHeightTableWrap>
+            <Table
+              virtualizeRows
+              data={data?.serviceDeployments?.edges || []}
+              columns={columns}
+              css={{
+                maxHeight: 'unset',
+                height: '100%',
+              }}
+              onRowClick={(
+                _e,
+                { original }: Row<Edge<ServiceDeploymentsRowFragment>>
+              ) =>
+                navigate(
+                  getServiceDetailsPath({
+                    clusterId: original.node?.cluster?.id,
+                    serviceId: original.node?.id,
+                  })
+                )
+              }
+              hasNextPage={pageInfo?.hasNextPage}
+              fetchNextPage={fetchNextPage}
+              isFetchingNextPage={loading}
+              reactTableOptions={reactTableOptions}
+              reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            />
+          </FullHeightTableWrap>
+        ) : (
+          <div css={{ height: '100%' }}>
+            {searchString || clusterId ? (
+              <EmptyState message="No service deployments match your query." />
+            ) : (
+              <EmptyState message="Looks like you don't have any service deployments yet." />
+            )}
+          </div>
+        )}
+      </TabPanel>
     </div>
   )
 }
