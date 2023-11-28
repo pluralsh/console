@@ -18,6 +18,7 @@ config :console, :consumers, [
   Console.PubSub.Consumers.Rtc,
   Console.PubSub.Consumers.Audit,
   Console.Deployments.PubSub.Broadcast,
+  Console.Deployments.PubSub.Pipeline,
 ]
 
 config :console, Console.Cron,

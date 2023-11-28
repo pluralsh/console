@@ -134,7 +134,7 @@ export const ColRef = columnHelper.accessor(({ node }) => node, {
 
     return (
       <>
-        {svc.helm && (
+        {svc.helm?.chart && svc.helm?.version && (
           <span>
             {svc.helm?.chart}@{svc.helm?.version}
           </span>

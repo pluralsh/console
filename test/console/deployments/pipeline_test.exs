@@ -182,10 +182,20 @@ defmodule Console.Deployments.PipelinesTest do
 
   describe "#build_promotion/1" do
     test "it will create a new promotion for a pipeline stage and mark all gates pending" do
+      admin = admin_user()
+      git = insert(:git_repository)
+      {:ok, svc} = create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        repository_id: git.id,
+        status: :healthy,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, insert(:cluster), admin)
+
       stage = insert(:pipeline_stage)
       prod = insert(:pipeline_stage)
-      svc = insert(:service, sha: "test-sha", status: :healthy)
-      rev = insert(:revision, service: svc, sha: "test-sha")
+      insert(:pipeline_edge, from: stage)
       insert(:stage_service, stage: stage, service: svc)
       edge = insert(:pipeline_edge, from: stage, to: prod)
       gate = insert(:pipeline_gate, edge: edge, state: :open)
@@ -196,15 +206,25 @@ defmodule Console.Deployments.PipelinesTest do
       assert promo.revised_at
       [service] = promo.services
       assert service.service_id == svc.id
-      assert service.revision_id == rev.id
+      assert service.revision_id == svc.revision_id
 
       assert refetch(gate).state == :pending
     end
 
     test "it will revise a promotion if there is a change" do
+      admin = admin_user()
+      git = insert(:git_repository)
+      {:ok, svc} = create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        repository_id: git.id,
+        status: :healthy,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, insert(:cluster), admin)
+
       stage = insert(:pipeline_stage)
-      svc = insert(:service, sha: "test-sha", status: :healthy)
-      rev = insert(:revision, service: svc, sha: "test-sha")
+      insert(:pipeline_edge, from: stage)
       insert(:stage_service, stage: stage, service: svc)
       promotion = insert(:pipeline_promotion, stage: stage, revised_at: Timex.now()  |> Timex.shift(minutes: -1))
       insert(:promotion_service, promotion: promotion, service: svc, revision: build(:revision))
@@ -216,15 +236,34 @@ defmodule Console.Deployments.PipelinesTest do
       assert promo.stage_id == stage.id
       refute promo.revised_at == promotion.revised_at
       service = Enum.find(promo.services, & &1.service_id == svc.id)
-      assert service.revision_id == rev.id
+      assert service.revision_id == svc.revision_id
 
       assert Enum.find(promo.services, & &1.id == other.id).revision_id == other.revision_id
 
       assert_receive {:event, %PubSub.PromotionCreated{item: ^promo}}
     end
 
+    test "it will ignore if the stage has no successors" do
+      admin = admin_user()
+      git = insert(:git_repository)
+      {:ok, svc} = create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        repository_id: git.id,
+        status: :healthy,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, insert(:cluster), admin)
+
+      stage = insert(:pipeline_stage)
+      insert(:stage_service, stage: stage, service: svc)
+
+      {:error, _} = Pipelines.build_promotion(stage)
+    end
+
     test "it will not revise a promotion if the service is not healthy" do
       stage = insert(:pipeline_stage)
+      insert(:pipeline_edge, from: stage)
       svc = insert(:service, sha: "test-sha", status: :stale)
       insert(:revision, service: svc, sha: "test-sha")
       insert(:stage_service, stage: stage, service: svc)
@@ -241,6 +280,7 @@ defmodule Console.Deployments.PipelinesTest do
 
     test "it won't revise a promotion if there are no changes" do
       stage = insert(:pipeline_stage)
+      insert(:pipeline_edge, from: stage)
       svc = insert(:service, sha: "test-sha", status: :healthy)
       rev = insert(:revision, service: svc, sha: "test-sha")
       insert(:stage_service, stage: stage, service: svc)
@@ -367,7 +407,7 @@ defmodule Console.Deployments.PipelinesTest do
         namespace: "test",
         git: %{ref: "master", folder: "k8s"},
         repository_id: repository.id,
-        configuration: [%{name: "name", value: "value"}]
+        configuration: [%{name: "name", value: "value"}, %{name: "other", value: "other-value"}]
       ])
 
       insert(:stage_service, stage: dev, service: dev_svc)
@@ -388,6 +428,7 @@ defmodule Console.Deployments.PipelinesTest do
       assert prod_svc.git.folder == "k8s"
       {:ok, secrets} = Services.configuration(prod_svc)
       assert secrets["name"] == "new-value"
+      assert secrets["other"] == "other-value"
     end
 
     test "it will block promotion if a gate is not open" do

@@ -13,7 +13,8 @@ defmodule Console.Schema.Service do
     GlobalService,
     ServiceError,
     DiffNormalizer,
-    Metadata
+    Metadata,
+    StageService
   }
 
   defenum Status, stale: 0, synced: 1, healthy: 2, failed: 3
@@ -90,6 +91,7 @@ defmodule Console.Schema.Service do
     has_many :errors, ServiceError, on_replace: :delete
     has_many :components, ServiceComponent, on_replace: :delete
     has_many :api_deprecations, through: [:components, :api_deprecations]
+    has_many :stage_services, StageService
     has_many :read_bindings, PolicyBinding,
       on_replace: :delete,
       foreign_key: :policy_id,

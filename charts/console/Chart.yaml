@@ -1,6 +1,6 @@
 apiVersion: v2
 name: console
-description: A Helm chart for Kubernetes
+description: deploys the plural console and additional dependencies, for use in bring-your-own-kube setups
 type: application
 version: 0.1.11
 appVersion: 0.7.4

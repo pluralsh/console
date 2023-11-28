@@ -1,14 +1,24 @@
-# console
+# Plural Console
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.7.85](https://img.shields.io/badge/AppVersion-0.7.85-informational?style=flat-square)
+Sets up an installation of the Plural Console directly into a Kubernetes cluster. The console serves as a combination of a Kubernetes dashboard, continuous deployment system and general Kubernetes fleet manager.  We recommend using this chart if you'd rather control your management cluster fully, otherwise set up the management cluster using Plural itself and also benefit from self-service open source installation alongside.
 
-A Helm chart for Kubernetes
+## Helm Repository Info
 
-## Requirements
+To add the repository, simply run:
 
-| Repository | Name | Version |
-|------------|------|---------|
-| file://../../plural/helm/kas | kas | 0.0.2 |
+```sh
+helm repo add plrl-console https://pluralsh.github.io/console
+helm repo update
+```
+
+We recommend you use the `plural` cli to initialize the basic values, which you can install using the instructions [here](https://docs.plural.sh/getting-started/quickstart#install-plural-cli) or directly from the releases page in our [github repo](https://github.com/pluralsh/plural-cli/) for the cli.  Then you can run:
+
+```sh
+plural login
+plural cd control-plane
+```
+
+to generate your values file and install from there.
 
 ## Values
 

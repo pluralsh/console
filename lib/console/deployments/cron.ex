@@ -127,16 +127,6 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
-  def scan_pipeline_stages() do
-    PipelineStage.stream()
-    |> Repo.stream(method: :keyset)
-    |> Stream.each(fn stage ->
-      Logger.info "attempting to promote stage #{stage.id} (#{stage.name})"
-      Discovery.stage(stage)
-    end)
-    |> Stream.run()
-  end
-
   def migrate_agents() do
     AgentMigration.incomplete()
     |> Repo.all()
@@ -153,6 +143,16 @@ defmodule Console.Deployments.Cron do
       AgentMigration.changeset(migration, %{completed: true})
       |> Repo.update()
       Logger.info "migration #{migration.id} completed"
+    end)
+    |> Stream.run()
+  end
+
+  def scan_pipeline_stages() do
+    PipelineStage.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn stage ->
+      Logger.info "attempting to promote stage #{stage.id} (#{stage.name})"
+      Discovery.stage(stage)
     end)
     |> Stream.run()
   end

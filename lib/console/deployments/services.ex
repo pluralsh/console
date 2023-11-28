@@ -265,7 +265,7 @@ defmodule Console.Deployments.Services do
   Updates the sha of a service if relevant
   """
   @spec update_sha(Service.t, binary, binary) :: service_resp
-  def update_sha(%Service{sha: sha} = svc, sha, _), do: {:ok, svc}
+  def update_sha(%Service{revision: %Revision{sha: sha}} = svc, sha, _), do: {:ok, svc}
   def update_sha(%Service{id: id}, sha, msg) do
     start_transaction()
     |> add_operation(:base, fn _ ->
