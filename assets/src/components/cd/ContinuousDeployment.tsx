@@ -80,10 +80,10 @@ export const CD_BASE_CRUMBS = [
 const directory = [
   { path: CLUSTERS_REL_PATH, label: 'Clusters' },
   { path: SERVICES_REL_PATH, label: 'Services' },
-  { path: 'git', label: 'Git repositories' },
+  { path: 'git', label: 'Repositories' },
+  { path: PIPELINES_REL_PATH, label: 'Pipelines' },
   { path: 'providers', label: 'Providers' },
   { path: ADDONS_REL_PATH, label: 'Add-ons' },
-  { path: PIPELINES_REL_PATH, label: 'Pipelines' },
 ] as const
 
 export default function ContinuousDeployment() {
