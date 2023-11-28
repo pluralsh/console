@@ -2,6 +2,7 @@ import { Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { coerce, rsort } from 'semver'
 
 import { TabularNumbers } from '../../../cluster/TableElements'
 import { toNiceVersion } from '../../../../utils/semver'
@@ -27,7 +28,12 @@ export function NameVersionHandle({
 }) {
   const theme = useTheme()
   const filteredVersions = useMemo(
-    () => versions?.filter(isNonNullable) || [],
+    () =>
+      rsort(
+        (versions?.filter(isNonNullable) || []).map(
+          (v) => coerce(v)?.version ?? v
+        )
+      ),
     [versions]
   )
 
