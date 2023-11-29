@@ -238,7 +238,7 @@ export function DeployServiceModal({
               disabled={!allowGoToGit}
               primary
             >
-              Select Git repository
+              Select repository
             </Button>
           )}
           <Button

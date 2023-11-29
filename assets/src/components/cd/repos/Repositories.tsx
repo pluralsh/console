@@ -2,18 +2,23 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import {
   Chip,
   EmptyState,
+  Switch,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { skipToken } from '@apollo/client'
 import {
   AuthMethod,
   GitRepositoriesDocument,
+  GitRepositoriesQuery,
   type GitRepositoryFragment,
+  HelmRepositoriesQuery,
   useDeleteGitRepositoryMutation,
   useGitRepositoriesQuery,
+  useHelmRepositoriesQuery,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
-import { ComponentProps, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { type TableState } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
 import { Confirm } from 'components/utils/Confirm'
@@ -31,16 +36,16 @@ import {
 } from '../ContinuousDeployment'
 
 import {
-  ColActions,
-  ColAuthMethod,
-  ColCreatedAt,
-  ColPulledAt,
-  ColRepo,
+  ColName,
+  ColNamespace,
+  ColProvider,
   ColStatus,
-  ColUpdatedAt,
-} from './GitRepositoriesColumns'
+  ColType,
+  ColUrl,
+} from './HelmRepositoriesColumns'
 import { ImportGit } from './GitRepositoriesImportGit'
 import { GitRepositoriesFilters } from './GitRepositoriesFilters'
+import { GitRepositoryTable } from './GitRepositoryTable'
 
 const crumbs = [...CD_BASE_CRUMBS, { label: 'git', url: `/${CD_REL_PATH}/git` }]
 
@@ -116,23 +121,33 @@ export function AuthMethodChip({
   return <Chip severity="neutral">{authMethodToLabel(authMethod)}</Chip>
 }
 
-const columns = [
-  ColRepo,
-  ColAuthMethod,
-  ColStatus,
-  ColCreatedAt,
-  ColUpdatedAt,
-  ColPulledAt,
-  // ColOwner,
-  ColActions,
-]
+enum RepoKind {
+  Git = 'Git',
+  Helm = 'Helm',
+}
 
 export default function GitRepositories() {
+  const [repoKind, setRepoKind] = useState(RepoKind.Git)
+  const kindLabel = repoKind === RepoKind.Helm ? 'Helm' : 'Git'
   const theme = useTheme()
-  const { data, error, refetch } = useGitRepositoriesQuery({
+  const gitQueryResult = useGitRepositoriesQuery({
+    skip: repoKind !== RepoKind.Git,
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
+  const helmQueryResult = useHelmRepositoriesQuery({
+    skip: repoKind !== RepoKind.Helm,
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
+
+  const { data, error, refetch } =
+    repoKind === RepoKind.Helm ? helmQueryResult : gitQueryResult
+
+  console.log('skipToken', skipToken)
+
+  console.log('helmRepositories', helmQueryResult.data?.helmRepositories)
+  console.log('gitRepositories', gitQueryResult?.data?.gitRepositories?.edges)
 
   useSetBreadcrumbs(crumbs)
 
@@ -145,23 +160,21 @@ export default function GitRepositories() {
     globalFilter: '',
   })
 
-  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
-    useMemo(
-      () => ({
-        state: {
-          ...tableFilters,
-        },
-        meta: { refetch },
-      }),
-      [refetch, tableFilters]
-    )
-
   if (error) {
     return (
-      <EmptyState message="Looks like you don't have any Git repositories yet." />
+      <EmptyState
+        message={`Looks like you don’t have any ${kindLabel} repositories yet.`}
+      />
     )
   }
-  if (!data) {
+  const list =
+    repoKind === RepoKind.Helm
+      ? helmQueryResult?.data?.helmRepositories
+      : gitQueryResult?.data?.gitRepositories?.edges
+
+  console.log('list', list)
+
+  if (!list) {
     return <LoadingIndicator />
   }
 
@@ -174,25 +187,82 @@ export default function GitRepositories() {
         height: '100%',
       }}
     >
-      <GitRepositoriesFilters
-        data={data}
-        setTableFilters={setTableFilters}
-      />
-      {!isEmpty(data?.gitRepositories?.edges) ? (
+      <div css={{ display: 'flex', gap: theme.spacing.medium }}>
+        <Switch
+          checked={repoKind === RepoKind.Helm}
+          onChange={(v) => setRepoKind(v ? RepoKind.Helm : RepoKind.Git)}
+        >
+          Helm?
+        </Switch>
+        <GitRepositoriesFilters
+          data={data}
+          setTableFilters={setTableFilters}
+        />
+      </div>
+      {!isEmpty(list) ? (
         <FullHeightTableWrap>
-          <Table
-            data={data?.gitRepositories?.edges || []}
-            columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-            reactTableOptions={reactTableOptions}
-          />
+          {repoKind === RepoKind.Helm ? (
+            <HelmRepositoryTable
+              data={data as HelmRepositoriesQuery}
+              filters={tableFilters}
+              refetch={refetch}
+            />
+          ) : (
+            <GitRepositoryTable
+              data={data as GitRepositoriesQuery}
+              filters={tableFilters}
+              refetch={refetch}
+            />
+          )}
         </FullHeightTableWrap>
       ) : (
-        <EmptyState message="Looks like you don't have any Git repositories yet." />
+        <EmptyState
+          message={`Looks like you don’t have any ${kindLabel} repositories yet.`}
+        />
       )}
     </div>
+  )
+}
+
+const helmRepoColumns = [
+  ColName,
+  ColNamespace,
+  ColProvider,
+  ColType,
+  ColUrl,
+  ColStatus,
+]
+
+function HelmRepositoryTable({
+  data,
+  refetch,
+  filters,
+}: {
+  data: HelmRepositoriesQuery
+  filters: Record<string, any>
+  refetch: () => void
+}) {
+  const reactTableOptions = useMemo(
+    () => ({
+      state: {
+        ...filters,
+      },
+      meta: { refetch },
+    }),
+    [refetch, filters]
+  )
+
+  console.log('data', data)
+
+  return (
+    <Table
+      data={data?.helmRepositories || []}
+      columns={helmRepoColumns}
+      css={{
+        maxHeight: 'unset',
+        height: '100%',
+      }}
+      reactTableOptions={reactTableOptions}
+    />
   )
 }

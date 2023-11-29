@@ -23,6 +23,7 @@ export const statusTabs = Object.entries({
 const GitRepositoryFiltersSC = styled.div(({ theme }) => ({
   display: 'flex',
   columnGap: theme.spacing.medium,
+  flexGrow: 1,
   '.statusTab': {
     display: 'flex',
     gap: theme.spacing.small,
