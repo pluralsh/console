@@ -1,6 +1,8 @@
-import { PageInfoFragment } from 'generated/graphql'
+import { InputMaybe, PageInfoFragment } from 'generated/graphql'
 import { Connection, PaginatedResult, extendConnection } from 'utils/graphql'
-import { ApolloQueryResult } from '@apollo/client'
+import { ApolloQueryResult, QueryResult } from '@apollo/client'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { useEffect } from 'react'
 
 type FetchMoreT<
   TData extends Partial<
@@ -46,4 +48,47 @@ export function fetchMoreAndExtend<
       return ret
     },
   })
+}
+
+export function useFetchMorePolling<
+  QData extends Partial<Record<K, any>>,
+  QVariables extends {
+    first?: InputMaybe<number> | undefined
+    after?: InputMaybe<string> | undefined
+  },
+  K extends string,
+>(
+  queryResult: QueryResult<QData, QVariables>,
+  key: K,
+  interval: number = POLL_INTERVAL
+) {
+  const { variables, data, loading, refetch } = queryResult
+  const edges = data?.[key]?.edges
+
+  useEffect(() => {
+    if (!edges) {
+      return
+    }
+    let intervalId
+
+    if (!loading) {
+      intervalId = setInterval(() => {
+        const total = edges?.length || 0
+
+        if (!variables) {
+          return
+        }
+        refetch({
+          ...(variables || {}),
+          first: total,
+        })
+      }, interval)
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId)
+      }
+    }
+  }, [edges, interval, key, loading, refetch, variables])
 }

@@ -1,11 +1,4 @@
-import {
-  ComponentProps,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import {
   Chip,
   EmptyState,
@@ -20,9 +13,6 @@ import isEmpty from 'lodash/isEmpty'
 import { useDebounce } from '@react-hooks-library/core'
 import {
   AuthMethod,
-  Exact,
-  InputMaybe,
-  ServiceDeploymentsQuery,
   type ServiceDeploymentsRowFragment,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
@@ -37,13 +27,9 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
-import { QueryResult } from '@apollo/client'
+import { useFetchMorePolling } from 'components/utils/tableFetchHelpers'
 
-import {
-  CD_BASE_CRUMBS,
-  POLL_INTERVAL,
-  useSetCDHeaderContent,
-} from '../ContinuousDeployment'
+import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import {
   ColActions,
@@ -97,7 +83,7 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 4,
 }
 
-const QUERY_PAGE_SIZE = 8
+const QUERY_PAGE_SIZE = 50
 
 export default function Services() {
   const theme = useTheme()
@@ -116,11 +102,9 @@ export default function Services() {
     fetchPolicy: 'cache-and-network',
   })
   const { error, refetch, loading, fetchMore, data } = queryResult
+  const pageInfo = data?.serviceDeployments?.pageInfo
 
-  console.log('length', data?.serviceDeployments?.edges?.length)
-
-  // Start hook
-  const pageInfo = useFetchMorePolling(queryResult)
+  useFetchMorePolling(queryResult, 'serviceDeployments')
 
   useSetBreadcrumbs(
     useMemo(
@@ -156,9 +140,6 @@ export default function Services() {
       }),
       [refetch, tableFilters]
     )
-
-  console.log('okay loading', loading)
-  console.log('okay data', data?.serviceDeployments?.edges)
 
   const fetchNextPage = useCallback(() => {
     if (!pageInfo?.endCursor) {
@@ -247,75 +228,4 @@ export default function Services() {
       </TabPanel>
     </div>
   )
-}
-
-function useFetchMorePolling<
-  Q extends Record<string, any>,
-  T,
-  K extends keyof Q,
->(
-  queryResult: QueryResult<
-    ServiceDeploymentsQuery,
-    Exact<{
-      first?: InputMaybe<number> | undefined
-      after?: InputMaybe<string> | undefined
-      q?:
-        | import('/Users/klink/Library/CloudStorage/Dropbox/dev/plural/plural-console/assets/src/generated/graphql').InputMaybe<string>
-        | undefined
-      cluster?:
-        | import('/Users/klink/Library/CloudStorage/Dropbox/dev/plural/plural-console/assets/src/generated/graphql').InputMaybe<string>
-        | undefined
-      clusterId?:
-        | import('/Users/klink/Library/CloudStorage/Dropbox/dev/plural/plural-console/assets/src/generated/graphql').InputMaybe<string>
-        | undefined
-    }>
-  >
-) {
-  const key = 'serviceDeployments' as const
-  const { variables, data, loading, refetch } = queryResult
-  const edges = data?.[key]?.edges
-
-  useEffect(() => {
-    if (!edges) {
-      return
-    }
-    let intervalId
-
-    if (!loading) {
-      intervalId = setInterval(() => {
-        const total = edges?.length || 0
-
-        if (!variables) {
-          return
-        }
-        refetch({
-          ...(variables || {}),
-          first: total,
-        }).then((e) => {
-          console.log('polled', e?.data?.serviceDeployments?.edges)
-        })
-      }, POLL_INTERVAL / 5)
-    }
-    console.log(
-      'RERUN EFFECT',
-      'intervalId',
-      intervalId,
-      'total',
-      edges?.length
-    )
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
-    }
-  }, [edges, loading, refetch, variables])
-
-  const pageInfo = data?.serviceDeployments?.pageInfo
-
-  console.log('pageInfo', pageInfo)
-
-  console.log('datalen', data?.serviceDeployments?.edges?.length)
-
-  return pageInfo
 }
