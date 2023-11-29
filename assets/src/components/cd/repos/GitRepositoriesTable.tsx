@@ -1,6 +1,6 @@
 import { Table } from '@pluralsh/design-system'
 import { GitRepositoriesQuery } from 'generated/graphql'
-import { useMemo } from 'react'
+import { Key, useMemo } from 'react'
 
 import {
   ColActions,
@@ -19,26 +19,37 @@ export const gitRepoColumns = [
   ColCreatedAt,
   ColUpdatedAt,
   ColPulledAt,
-  // ColOwner,
   ColActions,
 ]
-export function GitRepositoryTable({
+export function GitRepositoriesTable({
   data,
   refetch,
-  filters,
+  filterString,
+  statusFilterKey,
 }: {
   data: GitRepositoriesQuery
-  filters: Record<string, any>
+  filterString: string
+  statusFilterKey: Key
   refetch: () => void
 }) {
   const reactTableOptions = useMemo(
     () => ({
       state: {
-        ...filters,
+        globalFilter: filterString,
+        columnFilters: [
+          ...(statusFilterKey !== 'ALL'
+            ? [
+                {
+                  id: 'status',
+                  value: statusFilterKey,
+                },
+              ]
+            : []),
+        ],
       },
       meta: { refetch },
     }),
-    [refetch, filters]
+    [filterString, refetch, statusFilterKey]
   )
 
   return (

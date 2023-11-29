@@ -1,10 +1,10 @@
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { type HelmRepositoryFragment } from 'generated/graphql'
+import { GitHealth, type HelmRepositoryFragment } from 'generated/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DEFAULT_CHART_ICON } from 'components/utils/Provider'
 
-import { HelmHealthChip, getHelmHealthLabel } from './HelmHealthChip'
+import { HelmHealthChip } from './HelmHealthChip'
 
 const columnHelper = createColumnHelper<HelmRepositoryFragment>()
 
@@ -39,8 +39,9 @@ export const ColAuthMethod = columnHelper.accessor((node) => node?.spec.type, {
   enableSorting: true,
   cell: ({ getValue }) => getValue(),
 })
+
 export const ColStatus = columnHelper.accessor(
-  (repo) => getHelmHealthLabel(repo?.status?.ready ?? false),
+  (repo) => (repo?.status?.ready ? GitHealth.Pullable : GitHealth.Failed),
   {
     id: 'status',
     header: 'Status',
