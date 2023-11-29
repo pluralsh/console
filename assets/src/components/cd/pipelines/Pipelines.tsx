@@ -13,8 +13,7 @@ import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import uniqWith from 'lodash/uniqWith'
-import { Connection, Edge, PaginatedResult } from 'utils/graphql'
+import { Edge, extendConnection } from 'utils/graphql'
 
 import { NetworkStatus } from '@apollo/client'
 
@@ -190,28 +189,4 @@ export default function PipelinesWrapper() {
       <Pipelines />
     </ReactFlowProvider>
   )
-}
-
-// Trial for TS-aware version from utils/graphql'
-export function extendConnection<
-  K extends string,
-  T extends Partial<Record<K, (Connection<any> & PaginatedResult<any>) | null>>,
->(prev: T, next: T[K] | null | undefined, key: K) {
-  if (!next) {
-    return prev
-  }
-  const { edges, pageInfo } = next || {}
-  const uniq = uniqWith(
-    [...(prev[key]?.edges ?? []), ...(edges ?? [])],
-    (a, b) => (a?.node?.id ? a?.node?.id === b?.node?.id : false)
-  )
-
-  return {
-    ...prev,
-    [key]: {
-      ...prev[key],
-      pageInfo,
-      edges: uniq,
-    },
-  }
 }
