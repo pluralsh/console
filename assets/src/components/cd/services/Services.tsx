@@ -1,7 +1,8 @@
-import { ComponentProps, useMemo, useState } from 'react'
+import { ComponentProps, useMemo, useRef, useState } from 'react'
 import {
   Chip,
   EmptyState,
+  TabPanel,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -83,6 +84,7 @@ export default function Services() {
   const [clusterId, setClusterId] = useState<string>('')
   const [searchString, setSearchString] = useState()
   const debouncedSearchString = useDebounce(searchString, 100)
+  const tabStateRef = useRef<any>(null)
 
   const {
     data: currentData,
@@ -158,41 +160,47 @@ export default function Services() {
         showClusterSelect
         clusterId={clusterId}
         setClusterId={setClusterId}
+        tabStateRef={tabStateRef}
       />
-      {!data ? (
-        <LoadingIndicator />
-      ) : !isEmpty(data?.serviceDeployments?.edges) ? (
-        <FullHeightTableWrap>
-          <Table
-            data={data?.serviceDeployments?.edges || []}
-            columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-            onRowClick={(
-              _e,
-              { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-            ) =>
-              navigate(
-                getServiceDetailsPath({
-                  clusterId: original.node?.cluster?.id,
-                  serviceId: original.node?.id,
-                })
-              )
-            }
-            reactTableOptions={reactTableOptions}
-          />
-        </FullHeightTableWrap>
-      ) : (
-        <div css={{ height: '100%' }}>
-          {searchString || clusterId ? (
-            <EmptyState message="No service deployments match your query." />
-          ) : (
-            <EmptyState message="Looks like you don't have any service deployments yet." />
-          )}
-        </div>
-      )}
+      <TabPanel
+        stateRef={tabStateRef}
+        css={{ height: '100%', overflow: 'hidden' }}
+      >
+        {!data ? (
+          <LoadingIndicator />
+        ) : !isEmpty(data?.serviceDeployments?.edges) ? (
+          <FullHeightTableWrap>
+            <Table
+              data={data?.serviceDeployments?.edges || []}
+              columns={columns}
+              css={{
+                maxHeight: 'unset',
+                height: '100%',
+              }}
+              onRowClick={(
+                _e,
+                { original }: Row<Edge<ServiceDeploymentsRowFragment>>
+              ) =>
+                navigate(
+                  getServiceDetailsPath({
+                    clusterId: original.node?.cluster?.id,
+                    serviceId: original.node?.id,
+                  })
+                )
+              }
+              reactTableOptions={reactTableOptions}
+            />
+          </FullHeightTableWrap>
+        ) : (
+          <div css={{ height: '100%' }}>
+            {searchString || clusterId ? (
+              <EmptyState message="No service deployments match your query." />
+            ) : (
+              <EmptyState message="Looks like you don't have any service deployments yet." />
+            )}
+          </div>
+        )}
+      </TabPanel>
     </div>
   )
 }
