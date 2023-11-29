@@ -105,7 +105,6 @@ export type {
   AppMenuAction,
 } from './components/AppList'
 export { AppList } from './components/AppList'
-export { default as SelectItem } from './components/SelectItem'
 export { default as Slider } from './components/Slider'
 export { default as PricingCalculator } from './components/pricingcalculator/PricingCalculator'
 export { default as PricingCalculatorExtended } from './components/pricingcalculator/PricingCalculatorExtended'

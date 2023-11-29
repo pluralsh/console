@@ -1,4 +1,5 @@
-import { type ReactElement } from 'react'
+import { type FocusableElement } from '@react-types/shared'
+import { type DOMAttributes, type ReactElement } from 'react'
 import styled from 'styled-components'
 
 const ControlWrap = styled.div(({ theme }) => ({
@@ -24,15 +25,25 @@ type ControlProps = {
   header: string
   caption?: string
   children: ReactElement | ReactElement[] | string
+  labelProps?: DOMAttributes<FocusableElement>
 }
 
-export default function Control({ header, caption, children }: ControlProps) {
+export default function Control({
+  header,
+  caption,
+  children,
+  labelProps,
+}: ControlProps) {
   return (
     <ControlWrap>
-      <div className={`header ${caption ? 'with-caption' : 'without-caption'}`}>
-        {header}
+      <div {...labelProps}>
+        <div
+          className={`header ${caption ? 'with-caption' : 'without-caption'}`}
+        >
+          {header}
+        </div>
+        {caption && <div className="caption">{caption}</div>}
       </div>
-      <div className="caption">{caption}</div>
       {children}
     </ControlWrap>
   )

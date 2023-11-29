@@ -34,6 +34,8 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import styled, { useTheme } from 'styled-components'
 import { isEmpty, isNil } from 'lodash-es'
 
+import usePrevious from '../hooks/usePrevious'
+
 import Button from './Button'
 import CaretUpIcon from './icons/CaretUpIcon'
 import ArrowRightIcon from './icons/ArrowRightIcon'
@@ -52,9 +54,15 @@ export type TableProps = Omit<
   | 'scrollTopMargin'
   | 'virtualizeRows'
   | 'virtualizerOptions'
+  | 'lockColumnsOnFirstScroll'
+  | 'reactVirtualOptions'
   | 'reactTableOptions'
   | 'onRowClick'
   | 'emptyStateProps'
+  | 'hasNextPage'
+  | 'fetchNextPage'
+  | 'isFetchingNextPage'
+  | 'onVirtualWindowChange'
 > & {
   data: any[]
   columns: any[]
@@ -65,9 +73,8 @@ export type TableProps = Omit<
   scrollTopMargin?: number
   virtualizeRows?: boolean
   lockColumnsOnFirstScroll?: boolean
-  reactVirtualOptions?: Omit<
-    Parameters<typeof useVirtualizer>[0],
-    'count' | 'getScrollElement'
+  reactVirtualOptions?: Partial<
+    Omit<Parameters<typeof useVirtualizer>[0], 'count' | 'getScrollElement'>
   >
   reactTableOptions?: Partial<Omit<TableOptions<any>, 'data' | 'columns'>>
   onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<any>) => void
@@ -75,6 +82,10 @@ export type TableProps = Omit<
   hasNextPage?: boolean
   fetchNextPage?: () => void
   isFetchingNextPage?: boolean
+  onVirtualSliceChange?: (slice: {
+    start: VirtualItem
+    end: VirtualItem
+  }) => void
 }
 
 const propTypes = {}
@@ -458,6 +469,40 @@ function useOnFirstScroll(
   }, [hasScrolled, onFirstScroll, ref])
 }
 
+function useOnVirtualSliceChange({
+  virtualRows,
+  virtualizeRows,
+  onVirtualSliceChange,
+}: {
+  virtualRows: VirtualItem[]
+  virtualizeRows: boolean
+  onVirtualSliceChange: (slice: {
+    start: VirtualItem
+    end: VirtualItem
+  }) => void
+}) {
+  const sliceStartRow = virtualRows[0]
+  const sliceEndRow = virtualRows[virtualRows.length - 1]
+  const prevSliceStartRow = usePrevious(virtualRows[0])
+  const prevSliceEndRow = usePrevious(virtualRows[virtualRows.length - 1])
+
+  useEffect(() => {
+    if (
+      virtualizeRows &&
+      (prevSliceEndRow !== sliceEndRow || prevSliceStartRow !== sliceStartRow)
+    ) {
+      onVirtualSliceChange?.({ start: sliceStartRow, end: sliceEndRow })
+    }
+  }, [
+    sliceStartRow,
+    sliceEndRow,
+    virtualizeRows,
+    onVirtualSliceChange,
+    prevSliceEndRow,
+    prevSliceStartRow,
+  ])
+}
+
 function TableRef(
   {
     data,
@@ -477,6 +522,7 @@ function TableRef(
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
+    onVirtualSliceChange,
     ...props
   }: TableProps,
   forwardRef: Ref<any>
@@ -515,9 +561,13 @@ function TableRef(
   >(null)
 
   const { rows: tableRows } = table.getRowModel()
+  const getItemKey = useCallback<
+    Parameters<typeof useVirtualizer>[0]['getItemKey']
+  >((i) => tableRows[i]?.id || i, [tableRows])
   const rowVirtualizer = useVirtualizer({
     count: hasNextPage ? tableRows.length + 1 : tableRows.length,
     overscan: 6,
+    getItemKey,
     getScrollElement: () => tableContainerRef.current,
     estimateSize: () => 52,
     measureElement: (el) => {
@@ -538,6 +588,8 @@ function TableRef(
   })
   const virtualRows = rowVirtualizer.getVirtualItems()
   const virtualHeight = rowVirtualizer.getTotalSize()
+
+  useOnVirtualSliceChange({ virtualRows, virtualizeRows, onVirtualSliceChange })
 
   lockColumnsOnFirstScroll = lockColumnsOnFirstScroll ?? virtualizeRows
   useOnFirstScroll(

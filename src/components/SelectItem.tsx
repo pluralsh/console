@@ -5,10 +5,7 @@ import {
   cloneElement,
   forwardRef,
   useContext,
-  useEffect,
-  useId,
   useRef,
-  useState,
 } from 'react'
 import styled from 'styled-components'
 
@@ -48,50 +45,19 @@ const SelectItemWrap = styled.label<SelectItemWrapProps>(
 type SelectItemProps = AriaRadioProps & {
   icon: ReactElement
   label?: string
-  selected?: boolean
-  defaultSelected?: boolean
-  checked?: boolean
   name?: string
-  onChange?: (e: { target: { checked: boolean } }) => void
+  className?: string
 }
 
-const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
-  ({
-    icon,
-    label,
-    value,
-    checked: checkedProp,
-    defaultSelected,
-    'aria-describedby': ariaDescribedBy,
-    onChange,
-    onBlur,
-    onFocus,
-    onKeyDown,
-    onKeyUp,
-    name,
-  }) => {
-    const [checked, setChecked] = useState(defaultSelected || checkedProp)
-    const state = useContext(RadioContext) || {
-      setSelectedValue: () => {},
-      selectedValue: checkedProp || checked ? value : undefined,
-    }
-
-    useEffect(() => {
-      setChecked(checkedProp)
-    }, [checkedProp])
-
-    const labelId = useId()
+const SelectItem = forwardRef<any, SelectItemProps>(
+  ({ icon, label, value, name, className, ...props }, ref) => {
+    const state = useContext(RadioContext)
     const inputRef = useRef<any>()
     const { isFocusVisible, focusProps } = useFocusRing()
     const { inputProps, isSelected } = useRadio(
       {
         value,
-        'aria-describedby': ariaDescribedBy,
-        'aria-labelledby': labelId,
-        onBlur,
-        onFocus,
-        onKeyDown,
-        onKeyUp,
+        ...props,
       },
       state,
       inputRef
@@ -103,6 +69,8 @@ const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
       <SelectItemWrap
         selected={isSelected}
         focused={isFocusVisible}
+        className={className}
+        ref={ref}
       >
         {icon}
         {label && <div className="label">{label}</div>}
@@ -111,13 +79,6 @@ const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
             {...inputProps}
             {...focusProps}
             name={inputProps.name || name}
-            onChange={(e) => {
-              if (typeof onChange === 'function') {
-                onChange(e)
-              }
-              setChecked(!checked)
-              inputProps.onChange(e)
-            }}
             ref={inputRef}
           />
         </VisuallyHidden>

@@ -89,6 +89,20 @@ const ScrollContainer = styled.div<ScrollContainerProps>(
   })
 )
 
+function propsToTextValue({
+  textValue,
+  children,
+  label,
+}: Record<string, unknown>) {
+  return typeof textValue === 'string' && textValue
+    ? textValue
+    : typeof label === 'string' && label
+    ? label
+    : typeof children === 'string' && children
+    ? children
+    : ''
+}
+
 function useItemWrappedChildren(
   children: ReactElement | ReactElement[],
   header?: ReactElement,
@@ -100,16 +114,25 @@ function useItemWrappedChildren(
     const wrapped: JSX.Element[] = []
 
     if (header) {
-      wrapped.push(<Item key={HEADER_KEY}>{header}</Item>)
+      const { textValue: _, ...headerProps } = header.props
+
+      wrapped.push(
+        <Item
+          textValue={propsToTextValue(header.props)}
+          key={HEADER_KEY}
+        >
+          {cloneElement(header, headerProps)}
+        </Item>
+      )
     }
     Children.forEach(children, (child) => {
-      const { textValue, ...childProps } = child?.props || {}
+      const { textValue: _, ...childProps } = child.props
 
       if (child) {
         const item = (
           <Item
             key={child.key}
-            textValue={textValue || ''}
+            textValue={propsToTextValue(child.props)}
           >
             {cloneElement(child, childProps)}
           </Item>
@@ -120,7 +143,16 @@ function useItemWrappedChildren(
     })
 
     if (footer) {
-      wrapped.push(<Item key={FOOTER_KEY}>{footer}</Item>)
+      const { textValue: _, ...footerProps } = footer.props
+
+      wrapped.push(
+        <Item
+          textValue={propsToTextValue(footer.props)}
+          key={FOOTER_KEY}
+        >
+          {cloneElement(footer, footerProps)}
+        </Item>
+      )
     }
 
     return wrapped

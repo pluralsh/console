@@ -79,3 +79,5 @@ export function affixKeysToValues<
     ])
   ) as AffixKeyToValue<T, Prefix, Suffix>
 }
+
+export type Extends<T, U extends T> = U

@@ -2,7 +2,7 @@ import { Button, Flex } from 'honorable'
 import { useState } from 'react'
 
 import { type LayerPositionType } from '../components/Layer'
-import { GraphQLToast, type Severity, Toast } from '../components/Toast'
+import { GraphQLToast, Toast, type ToastSeverity } from '../components/Toast'
 
 export default {
   title: 'Toast',
@@ -21,7 +21,7 @@ export default {
 }
 
 type Args = {
-  severity: Severity
+  severity: ToastSeverity
   closeTimeout?: number
 }
 

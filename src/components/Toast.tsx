@@ -1,10 +1,16 @@
 import { type FlexProps } from 'honorable'
 import { type Ref, forwardRef, useCallback, useEffect, useState } from 'react'
 
+import { type Severity } from '../types'
+import { type Extends } from '../utils/ts-utils'
+
 import Banner from './Banner'
 import Layer, { type LayerPositionType } from './Layer'
 
-export type Severity = 'info' | 'success' | 'error'
+export type ToastSeverity = Extends<
+  Severity,
+  'info' | 'success' | 'danger' | 'error'
+>
 
 type ToastProps = {
   position?: LayerPositionType
@@ -12,7 +18,7 @@ type ToastProps = {
   onClose?: () => void
   onCloseComplete?: () => void
   show?: boolean
-  severity?: Severity
+  severity?: ToastSeverity
 } & FlexProps
 
 const defaults = {
@@ -20,7 +26,7 @@ const defaults = {
   position: 'bottom-right' as LayerPositionType,
   onClose: () => {},
   onCloseComplete: () => {},
-  severity: 'info' as Severity,
+  severity: 'info' as ToastSeverity,
 }
 
 const Toast = forwardRef(
@@ -99,7 +105,7 @@ function GraphQLToast({
 }: GraphQLToastProps): JSX.Element {
   return (
     <Toast
-      severity="error"
+      severity="danger"
       {...props}
     >
       {header}: {error?.graphQLErrors[0]?.message}

@@ -8,6 +8,8 @@ import {
 } from 'react'
 import styled, { type DefaultTheme, useTheme } from 'styled-components'
 
+import { SEVERITIES } from '../types'
+
 import { Spinner } from './Spinner'
 import Card, { type BaseCardProps } from './Card'
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
@@ -15,14 +17,6 @@ import CloseIcon from './icons/CloseIcon'
 
 const HUES = ['default', 'lighter', 'lightest'] as const
 const SIZES = ['small', 'medium', 'large'] as const
-const SEVERITIES = [
-  'neutral',
-  'info',
-  'success',
-  'warning',
-  'error',
-  'critical',
-] as const
 
 type ChipHue = (typeof HUES)[number]
 type ChipSize = (typeof SIZES)[number]
@@ -65,8 +59,10 @@ const severityToColor = {
   info: 'text-primary-accent',
   success: 'text-success-light',
   warning: 'text-warning-light',
-  error: 'text-danger-light',
+  danger: 'text-danger-light',
   critical: 'text-danger',
+  // deprecated
+  error: 'text-danger-light',
 } as const satisfies Record<ChipSeverity, string>
 
 const severityToIconColor = {
@@ -74,8 +70,10 @@ const severityToIconColor = {
   info: 'icon-info',
   success: 'icon-success',
   warning: 'icon-warning',
-  error: 'icon-danger',
+  danger: 'icon-danger',
   critical: 'icon-danger-critical',
+  // deprecated
+  error: 'icon-danger',
 } as const satisfies Record<ChipSeverity, keyof DefaultTheme['colors']>
 
 const sizeToCloseHeight = {

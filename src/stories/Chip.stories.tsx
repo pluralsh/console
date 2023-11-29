@@ -137,7 +137,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
               Local
             </Chip>
             <Chip
-              severity="error"
+              severity="danger"
               size="small"
               {...args}
             >

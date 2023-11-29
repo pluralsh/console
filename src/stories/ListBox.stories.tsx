@@ -56,7 +56,7 @@ const chips = [
     Additional
   </Chip>,
   <Chip
-    severity="error"
+    severity="danger"
     {...chipProps}
   >
     Extra

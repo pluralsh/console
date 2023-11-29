@@ -3,11 +3,14 @@ import { Div, Flex, Input, type InputProps, P } from 'honorable'
 import React, {
   type ComponentProps,
   type ReactElement,
+  useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react'
 import type { Row } from '@tanstack/react-table'
+
+import { useTheme } from 'styled-components'
 
 import {
   AppIcon,
@@ -212,6 +215,7 @@ function Template(args: any) {
 }
 
 function PagedTemplate({ data, pageSize, ...args }: any) {
+  const theme = useTheme()
   const [endIndex, setEndIndex] = useState(pageSize - 1)
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
   const pagedData = useMemo(
@@ -219,6 +223,13 @@ function PagedTemplate({ data, pageSize, ...args }: any) {
     [data, endIndex]
   )
   const hasNextPage = pagedData.length < data.length
+  const [virtualSlice, setVirtualSlice] = useState(null)
+
+  const onVirtualSliceChange = useCallback<
+    ComponentProps<typeof Table>['onVirtualSliceChange']
+  >((vSlice) => {
+    setVirtualSlice(vSlice)
+  }, [])
 
   useEffect(() => {
     if (isFetchingNextPage) {
@@ -241,16 +252,29 @@ function PagedTemplate({ data, pageSize, ...args }: any) {
   }, [data.length, endIndex, isFetchingNextPage, pageSize])
 
   return (
-    <Table
-      {...args}
-      virtualizeRows
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
-      fetchNextPage={() => {
-        setIsFetchingNextPage(true)
-      }}
-      data={pagedData}
-    />
+    <>
+      <Table
+        {...args}
+        virtualizeRows
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        fetchNextPage={() => {
+          setIsFetchingNextPage(true)
+        }}
+        reactTableOptions={{
+          getRowId: (_, index) => `key-${index}`,
+        }}
+        onVirtualSliceChange={onVirtualSliceChange}
+        data={pagedData}
+      />
+      {virtualSlice && (
+        <p css={{ ...theme.partials.text.body2 }}>
+          Virtual slice start index: {virtualSlice.start.index}
+          <br />
+          Virtual slice end index: {virtualSlice.end.index}
+        </p>
+      )}
+    </>
   )
 }
 

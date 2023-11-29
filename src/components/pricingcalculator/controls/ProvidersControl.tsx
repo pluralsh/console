@@ -1,8 +1,11 @@
 import { type Dispatch, createElement } from 'react'
 import styled from 'styled-components'
+import { useRadioGroupState } from 'react-stately'
+import { useRadioGroup } from 'react-aria'
 
 import SelectItem from '../../SelectItem'
 import { PROVIDERS } from '../misc'
+import { RadioContext } from '../../RadioGroup'
 
 import Control from './Control'
 
@@ -25,23 +28,37 @@ export default function ProviderControl({
   providerId,
   setProviderId,
 }: ProviderControlProps) {
+  const providerRadioGroupProps = {
+    label: header,
+    description: 'caption',
+    value: providerId,
+    onChange: (id: string) => {
+      setProviderId(id)
+    },
+  }
+  const state = useRadioGroupState(providerRadioGroupProps)
+  const { radioGroupProps, labelProps } = useRadioGroup(
+    providerRadioGroupProps,
+    state
+  )
+
   return (
     <Control
       header={header}
       caption={caption}
+      labelProps={labelProps}
     >
-      <ProvidersWrap>
-        {PROVIDERS.map(({ id, name, icon }) => (
-          <SelectItem
-            label={name}
-            icon={createElement(icon, { fullColor: true })}
-            value={id}
-            checked={providerId === id}
-            onChange={({ target: { checked } }: any) => {
-              if (checked) setProviderId(id)
-            }}
-          />
-        ))}
+      <ProvidersWrap {...radioGroupProps}>
+        <RadioContext.Provider value={state}>
+          {PROVIDERS.map(({ id, name, icon }) => (
+            <SelectItem
+              label={name}
+              name={name}
+              icon={createElement(icon, { fullColor: true })}
+              value={id}
+            />
+          ))}
+        </RadioContext.Provider>
       </ProvidersWrap>
     </Control>
   )
