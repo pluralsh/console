@@ -6,13 +6,21 @@ defmodule Console.PubSub.Consumers.Rtc do
 
 
   def handle_event(event) do
-    with {resource, delta} <- Rtc.deliver(event) do
-      topic = Console.GraphQl.Topic.infer(resource, delta)
-      Absinthe.Subscription.publish(
-        ConsoleWeb.Endpoint,
-        %{payload: resource, delta: delta},
-        topic
-      )
+    case Rtc.deliver(event) do
+      {resource, delta} ->
+         topic = Console.GraphQl.Topic.infer(resource, delta)
+         publish(resource, delta, topic)
+      {resource, topics, delta} ->
+        publish(resource, delta, topics)
+      _ -> :ok
     end
+  end
+
+  defp publish(resource, delta, topic) do
+    Absinthe.Subscription.publish(
+      ConsoleWeb.Endpoint,
+      %{payload: resource, delta: delta},
+      topic
+    )
   end
 end
