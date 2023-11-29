@@ -299,6 +299,16 @@ export type AwsCloudAttributes = {
   region?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** aws specific cloud configuration */
+export type AwsCloudSettings = {
+  __typename?: 'AwsCloudSettings';
+  region?: Maybe<Scalars['String']['output']>;
+};
+
+export type AwsNodeCloudAttributes = {
+  launchTemplateId?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type AwsSettingsAttributes = {
   accessKeyId: Scalars['String']['input'];
   secretAccessKey: Scalars['String']['input'];
@@ -309,6 +319,15 @@ export type AzureCloudAttributes = {
   network?: InputMaybe<Scalars['String']['input']>;
   resourceGroup?: InputMaybe<Scalars['String']['input']>;
   subscriptionId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** azure-specific cluster cloud configuration */
+export type AzureCloudSettings = {
+  __typename?: 'AzureCloudSettings';
+  location?: Maybe<Scalars['String']['output']>;
+  network?: Maybe<Scalars['String']['output']>;
+  resourceGroup?: Maybe<Scalars['String']['output']>;
+  subscriptionId?: Maybe<Scalars['String']['output']>;
 };
 
 export type AzureSettingsAttributes = {
@@ -440,10 +459,12 @@ export type CloudProviderSettingsAttributes = {
   gcp?: InputMaybe<GcpSettingsAttributes>;
 };
 
-/** cloud specific settings for a node pool */
+/** the cloud configuration for a cluster */
 export type CloudSettings = {
   __typename?: 'CloudSettings';
-  aws?: Maybe<AwsCloud>;
+  aws?: Maybe<AwsCloudSettings>;
+  azure?: Maybe<AzureCloudSettings>;
+  gcp?: Maybe<GcpCloudSettings>;
 };
 
 export type CloudSettingsAttributes = {
@@ -504,6 +525,8 @@ export type Cluster = {
   service?: Maybe<ServiceDeployment>;
   /** any errors which might have occurred during the bootstrap process */
   serviceErrors?: Maybe<Array<Maybe<ServiceError>>>;
+  /** the cloud settings for this cluster (for instance its aws region) */
+  settings?: Maybe<CloudSettings>;
   /** the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null */
   status?: Maybe<ClusterStatus>;
   /** key/value tags to filter clusters */
@@ -1128,6 +1151,14 @@ export type GcpCloudAttributes = {
   region?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** gcp specific cluster cloud configuration */
+export type GcpCloudSettings = {
+  __typename?: 'GcpCloudSettings';
+  network?: Maybe<Scalars['String']['output']>;
+  project?: Maybe<Scalars['String']['output']>;
+  region?: Maybe<Scalars['String']['output']>;
+};
+
 export type GcpSettingsAttributes = {
   applicationCredentials: Scalars['String']['input'];
 };
@@ -1671,6 +1702,12 @@ export type Node = {
   status: NodeStatus;
 };
 
+/** cloud specific settings for a node pool */
+export type NodeCloudSettings = {
+  __typename?: 'NodeCloudSettings';
+  aws?: Maybe<AwsCloud>;
+};
+
 export type NodeCondition = {
   __typename?: 'NodeCondition';
   message?: Maybe<Scalars['String']['output']>;
@@ -1691,7 +1728,7 @@ export type NodeMetric = {
 export type NodePool = {
   __typename?: 'NodePool';
   /** cloud specific settings for the node groups */
-  cloudSettings?: Maybe<CloudSettings>;
+  cloudSettings?: Maybe<NodeCloudSettings>;
   /** internal id for this node pool */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -1713,13 +1750,17 @@ export type NodePool = {
 };
 
 export type NodePoolAttributes = {
-  cloudSettings?: InputMaybe<CloudSettingsAttributes>;
+  cloudSettings?: InputMaybe<NodePoolCloudAttributes>;
   instanceType: Scalars['String']['input'];
   labels?: InputMaybe<Scalars['Map']['input']>;
   maxSize: Scalars['Int']['input'];
   minSize: Scalars['Int']['input'];
   name: Scalars['String']['input'];
   taints?: InputMaybe<Array<InputMaybe<TaintAttributes>>>;
+};
+
+export type NodePoolCloudAttributes = {
+  aws?: InputMaybe<AwsNodeCloudAttributes>;
 };
 
 export type NodeSpec = {

@@ -65,7 +65,7 @@ defmodule Console.Deployments.Compatibilities.AddOn do
     end
   end
 
-  def find_version([%{version: first} = v1, %{version: second} = v2 | rest], version) do
+  def find_version([%{version: first} = v1, %{version: second} = v2 | rest], version) when is_binary(first) and is_binary(second) do
     first  = clean_version(first)
     second = clean_version(second)
 
