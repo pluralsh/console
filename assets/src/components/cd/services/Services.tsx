@@ -20,6 +20,9 @@ import isEmpty from 'lodash/isEmpty'
 import { useDebounce } from '@react-hooks-library/core'
 import {
   AuthMethod,
+  Exact,
+  InputMaybe,
+  ServiceDeploymentsQuery,
   type ServiceDeploymentsRowFragment,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
@@ -112,55 +115,13 @@ export default function Services() {
     },
     fetchPolicy: 'cache-and-network',
   })
-  const { error, refetch, loading, fetchMore } = queryResult
-  const data = queryResult?.data || queryResult?.previousData
+  const { error, refetch, loading, fetchMore, data } = queryResult
 
   console.log('length', data?.serviceDeployments?.edges?.length)
 
   // Start hook
-  const key = 'serviceDeployments' as const
-  const { variables } = queryResult
-  const edges = data?.[key]?.edges
+  const pageInfo = useFetchMorePolling(queryResult)
 
-  const deps = [
-    ...Object.values(queryResult?.variables || {}).flat(),
-    queryResult.data?.[key]?.pageInfo?.endCursor,
-  ]
-
-  useEffect(() => {
-    if (!edges) {
-      return
-    }
-    let intervalId
-
-    if (!loading) {
-      intervalId = setInterval(() => {
-        const total = edges?.length || 0
-
-        if (!variables) {
-          return
-        }
-        refetch({
-          ...(variables || {}),
-          first: total,
-        }).then((e) => {
-          console.log('polled', e?.data?.serviceDeployments?.edges)
-        })
-      }, POLL_INTERVAL / 5)
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
-    }
-  }, [edges, loading, refetch, variables])
-
-  const pageInfo = data?.serviceDeployments?.pageInfo
-
-  console.log('pageInfo', pageInfo)
-
-  console.log('datalen', data?.serviceDeployments?.edges?.length)
   useSetBreadcrumbs(
     useMemo(
       () => [
@@ -286,4 +247,75 @@ export default function Services() {
       </TabPanel>
     </div>
   )
+}
+
+function useFetchMorePolling<
+  Q extends Record<string, any>,
+  T,
+  K extends keyof Q,
+>(
+  queryResult: QueryResult<
+    ServiceDeploymentsQuery,
+    Exact<{
+      first?: InputMaybe<number> | undefined
+      after?: InputMaybe<string> | undefined
+      q?:
+        | import('/Users/klink/Library/CloudStorage/Dropbox/dev/plural/plural-console/assets/src/generated/graphql').InputMaybe<string>
+        | undefined
+      cluster?:
+        | import('/Users/klink/Library/CloudStorage/Dropbox/dev/plural/plural-console/assets/src/generated/graphql').InputMaybe<string>
+        | undefined
+      clusterId?:
+        | import('/Users/klink/Library/CloudStorage/Dropbox/dev/plural/plural-console/assets/src/generated/graphql').InputMaybe<string>
+        | undefined
+    }>
+  >
+) {
+  const key = 'serviceDeployments' as const
+  const { variables, data, loading, refetch } = queryResult
+  const edges = data?.[key]?.edges
+
+  useEffect(() => {
+    if (!edges) {
+      return
+    }
+    let intervalId
+
+    if (!loading) {
+      intervalId = setInterval(() => {
+        const total = edges?.length || 0
+
+        if (!variables) {
+          return
+        }
+        refetch({
+          ...(variables || {}),
+          first: total,
+        }).then((e) => {
+          console.log('polled', e?.data?.serviceDeployments?.edges)
+        })
+      }, POLL_INTERVAL / 5)
+    }
+    console.log(
+      'RERUN EFFECT',
+      'intervalId',
+      intervalId,
+      'total',
+      edges?.length
+    )
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId)
+      }
+    }
+  }, [edges, loading, refetch, variables])
+
+  const pageInfo = data?.serviceDeployments?.pageInfo
+
+  console.log('pageInfo', pageInfo)
+
+  console.log('datalen', data?.serviceDeployments?.edges?.length)
+
+  return pageInfo
 }
