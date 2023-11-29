@@ -54,7 +54,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :instance_type,  non_null(:string)
     field :labels,         :map
     field :taints,         list_of(:taint_attributes)
-    field :cloud_settings, :cloud_settings_attributes
+    field :cloud_settings, :node_pool_cloud_attributes
   end
 
   input_object :taint_attributes do
@@ -84,6 +84,14 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :subscription_id, :string
     field :resource_group,  :string
     field :network,         :string
+  end
+
+  input_object :node_pool_cloud_attributes do
+    field :aws, :aws_node_cloud_attributes
+  end
+
+  input_object :aws_node_cloud_attributes do
+    field :launch_template_id, :string
   end
 
   input_object :cluster_provider_attributes do
@@ -170,7 +178,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :current_version, :string, description: "current k8s version as told to us by the deployment operator"
     field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :installed,       :boolean, description: "whether the deploy operator has been registered for this cluster"
-
+    field :settings,        :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
     field :kas_url, :string, description: "the url of the kas server you can access this cluster from", resolve: fn
       _, _, _ -> {:ok, Console.Deployments.Clusters.kas_proxy_url()}
     end
@@ -235,7 +243,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :spot,           :boolean, description: "whether this is a spot pool or not"
     field :labels,         :map, description: "kubernetes labels to apply to the nodes in this pool, useful for node selectors"
     field :taints,         list_of(:taint), description: "any taints you'd want to apply to a node, for eg preventing scheduling on spot instances"
-    field :cloud_settings, :cloud_settings, description: "cloud specific settings for the node groups"
+    field :cloud_settings, :node_cloud_settings, description: "cloud specific settings for the node groups"
 
     timestamps()
   end
@@ -247,8 +255,35 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :effect, non_null(:string)
   end
 
-  @desc "cloud specific settings for a node pool"
+  @desc "the cloud configuration for a cluster"
   object :cloud_settings do
+    field :aws,   :aws_cloud_settings
+    field :gcp,   :gcp_cloud_settings
+    field :azure, :azure_cloud_settings
+  end
+
+  @desc "aws specific cloud configuration"
+  object :aws_cloud_settings do
+    field :region, :string
+  end
+
+  @desc "gcp specific cluster cloud configuration"
+  object :gcp_cloud_settings do
+    field :project, :string
+    field :network, :string
+    field :region,  :string
+  end
+
+  @desc "azure-specific cluster cloud configuration"
+  object :azure_cloud_settings do
+    field :location,        :string
+    field :subscription_id, :string
+    field :resource_group,  :string
+    field :network,         :string
+  end
+
+  @desc "cloud specific settings for a node pool"
+  object :node_cloud_settings do
     field :aws, :aws_cloud
   end
 

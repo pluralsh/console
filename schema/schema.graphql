@@ -1270,7 +1270,7 @@ input NodePoolAttributes {
   instanceType: String!
   labels: Map
   taints: [TaintAttributes]
-  cloudSettings: CloudSettingsAttributes
+  cloudSettings: NodePoolCloudAttributes
 }
 
 input TaintAttributes {
@@ -1300,6 +1300,14 @@ input AzureCloudAttributes {
   subscriptionId: String
   resourceGroup: String
   network: String
+}
+
+input NodePoolCloudAttributes {
+  aws: AwsNodeCloudAttributes
+}
+
+input AwsNodeCloudAttributes {
+  launchTemplateId: String
 }
 
 input ClusterProviderAttributes {
@@ -1426,6 +1434,9 @@ type Cluster {
   "whether the deploy operator has been registered for this cluster"
   installed: Boolean
 
+  "the cloud settings for this cluster (for instance its aws region)"
+  settings: CloudSettings
+
   "the url of the kas server you can access this cluster from"
   kasUrl: String
 
@@ -1518,7 +1529,7 @@ type NodePool {
   taints: [Taint]
 
   "cloud specific settings for the node groups"
-  cloudSettings: CloudSettings
+  cloudSettings: NodeCloudSettings
 
   insertedAt: DateTime
 
@@ -1532,8 +1543,35 @@ type Taint {
   effect: String!
 }
 
-"cloud specific settings for a node pool"
+"the cloud configuration for a cluster"
 type CloudSettings {
+  aws: AwsCloudSettings
+  gcp: GcpCloudSettings
+  azure: AzureCloudSettings
+}
+
+"aws specific cloud configuration"
+type AwsCloudSettings {
+  region: String
+}
+
+"gcp specific cluster cloud configuration"
+type GcpCloudSettings {
+  project: String
+  network: String
+  region: String
+}
+
+"azure-specific cluster cloud configuration"
+type AzureCloudSettings {
+  location: String
+  subscriptionId: String
+  resourceGroup: String
+  network: String
+}
+
+"cloud specific settings for a node pool"
+type NodeCloudSettings {
   aws: AwsCloud
 }
 
