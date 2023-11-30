@@ -89,11 +89,12 @@ const ScrollContainer = styled.div<ScrollContainerProps>(
   })
 )
 
-function propsToTextValue({
-  textValue,
-  children,
-  label,
-}: Record<string, unknown>) {
+function propsToTextValue(props: Record<string, unknown> | null | undefined) {
+  if (!props) {
+    return ''
+  }
+  const { textValue, children, label } = props
+
   return typeof textValue === 'string' && textValue
     ? textValue
     : typeof label === 'string' && label
@@ -126,20 +127,22 @@ function useItemWrappedChildren(
       )
     }
     Children.forEach(children, (child) => {
-      const { textValue: _, ...childProps } = child.props
-
-      if (child) {
-        const item = (
-          <Item
-            key={child.key}
-            textValue={propsToTextValue(child.props)}
-          >
-            {cloneElement(child, childProps)}
-          </Item>
-        )
-
-        wrapped.push(item)
+      if (!child) {
+        return
       }
+
+      const { textValue: _, ...passThruProps } = child.props || {}
+
+      const item = (
+        <Item
+          key={child.key}
+          textValue={propsToTextValue(child.props)}
+        >
+          {cloneElement(child, passThruProps)}
+        </Item>
+      )
+
+      wrapped.push(item)
     })
 
     if (footer) {
