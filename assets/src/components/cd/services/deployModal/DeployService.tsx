@@ -76,6 +76,21 @@ const stepperSteps = [
   },
 ]
 
+function sanitizeSecrets(secrets: Secret[]) {
+  const cfg: Record<string, string> = {}
+
+  for (const { name, value } of secrets) {
+    if (name) {
+      cfg[name] = value
+    }
+  }
+
+  return Object.entries(cfg).map(([name, value]) => ({
+    name,
+    value,
+  }))
+}
+
 export function DeployServiceModal({
   open,
   onClose,
@@ -101,35 +116,20 @@ export function DeployServiceModal({
   const [secrets, setSecrets] = useState<Secret[]>([{ name: '', value: '' }])
   const [secretsErrors, setSecretsErrors] = useState(false)
   const [helmValuesFiles, setHelmValuesFiles] = useState<string[]>([''])
-  const [helmValues, setHelmValues] = useState('# Add your values here')
+  const [helmValues, setHelmValues] = useState('')
   const [helmValuesErrors, setHelmValuesErrors] = useState(false)
   const [repoTab, setRepoTab] = useState(RepoKind.Git)
 
-  const configuration = useMemo(() => {
-    const cfg: Record<string, string> = {}
-
-    for (const { name, value } of secrets) {
-      if (name) {
-        cfg[name] = value
-      }
-    }
-
-    return Object.entries(cfg).map(([name, value]) => ({
-      name,
-      value,
-    }))
-  }, [secrets])
-
-  const initialFormValid = name && namespace && clusterId
+  const initialFormValid = !!(name && namespace && clusterId)
   const allowGoToRepo = formState === FormState.Initial && initialFormValid
   const hasHelmRepo = !!helmRepository
   const hasGitRepo = !!repositoryId
 
   const gitSettingsValid = hasGitRepo
-    ? repositoryId && gitFolder && gitRef
+    ? !!(repositoryId && gitFolder && gitRef)
     : hasHelmRepo
   const helmSettingsValid = hasHelmRepo
-    ? chart && version && helmRepository
+    ? !!(chart && version && helmRepository)
     : hasGitRepo
   const repoSettingsValid = helmSettingsValid && gitSettingsValid
 
@@ -144,46 +144,8 @@ export function DeployServiceModal({
       repoSettingsValid) ||
     (formState === FormState.HelmValues && !helmValuesErrors)
 
-  const helm = useMemo(
-    () =>
-      hasHelmRepo && helmSettingsValid
-        ? {
-            repository: helmRepository,
-            chart,
-            version,
-            values: helmValues || null,
-            valuesFiles: helmValuesFiles.filter((value) => !!value),
-          }
-        : null,
-    [
-      hasHelmRepo,
-      helmSettingsValid,
-      helmRepository,
-      chart,
-      version,
-      helmValues,
-      helmValuesFiles,
-    ]
-  )
-
-  const git = useMemo(
-    () => (gitRef && gitFolder ? { ref: gitRef, folder: gitFolder } : null),
-    [gitFolder, gitRef]
-  )
-
   const [mutation, { loading: mutationLoading, error: mutationError }] =
     useCreateServiceDeploymentMutation({
-      variables: {
-        clusterId,
-        attributes: {
-          repositoryId,
-          name,
-          namespace,
-          git,
-          helm,
-          configuration,
-        },
-      },
       onCompleted: () => {
         refetch?.()
         onClose()
@@ -206,6 +168,55 @@ export function DeployServiceModal({
     !secretsErrors &&
     !mutationLoading
 
+  const deployService = useCallback(() => {
+    const helm =
+      hasHelmRepo && helmSettingsValid
+        ? {
+            repository: helmRepository,
+            chart,
+            version,
+            values: helmValues || null,
+            valuesFiles: helmValuesFiles.filter((value) => !!value),
+          }
+        : null
+
+    const git =
+      hasGitRepo && gitSettingsValid ? { ref: gitRef, folder: gitFolder } : null
+
+    const configuration = sanitizeSecrets(secrets)
+    const variables = {
+      clusterId,
+      attributes: {
+        repositoryId,
+        name,
+        namespace,
+        git,
+        helm,
+        configuration,
+      },
+    }
+
+    mutation({ variables })
+  }, [
+    chart,
+    clusterId,
+    gitFolder,
+    gitRef,
+    gitSettingsValid,
+    hasGitRepo,
+    hasHelmRepo,
+    helmRepository,
+    helmSettingsValid,
+    helmValues,
+    helmValuesFiles,
+    mutation,
+    name,
+    namespace,
+    repositoryId,
+    secrets,
+    version,
+  ])
+
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
@@ -217,7 +228,7 @@ export function DeployServiceModal({
       } else if (allowGoToSecrets) {
         setFormState(FormState.Secrets)
       } else if (allowDeploy) {
-        mutation()
+        deployService()
       }
     },
     [
@@ -225,7 +236,7 @@ export function DeployServiceModal({
       allowGoToHelmValues,
       allowGoToSecrets,
       allowDeploy,
-      mutation,
+      deployService,
     ]
   )
 
@@ -267,7 +278,9 @@ export function DeployServiceModal({
                 type="button"
                 onClick={(e) => {
                   e.preventDefault()
-                  setFormState(FormState.Repository)
+                  setFormState(
+                    hasHelmRepo ? FormState.HelmValues : FormState.Repository
+                  )
                 }}
               >
                 Go back
