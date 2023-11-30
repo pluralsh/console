@@ -83,5 +83,6 @@ export const ColUrl = columnHelper.accessor((repo) => repo?.spec.url, {
   header: 'Url',
   enableSorting: true,
   meta: { truncate: true },
+  enableGlobalFilter: true,
   cell: ({ getValue }) => <div>{getValue()}</div>,
 })

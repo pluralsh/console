@@ -5,6 +5,8 @@ import {
   useHelmRepositoriesQuery,
   useHelmRepositoryQuery,
 } from 'generated/graphql'
+import isEmpty from 'lodash/isEmpty'
+import { useLayoutEffect } from 'react'
 
 function RawChartForm({ chart, setChart, version, setVersion }) {
   return (
@@ -15,7 +17,7 @@ function RawChartForm({ chart, setChart, version, setVersion }) {
       >
         <Input
           value={chart}
-          onChange={setChart}
+          onChange={(e) => setChart(e.target?.value)}
         />
       </FormField>
       <FormField
@@ -24,7 +26,7 @@ function RawChartForm({ chart, setChart, version, setVersion }) {
       >
         <Input
           value={version}
-          onChange={setVersion}
+          onChange={(e) => setVersion(e.target?.value)}
         />
       </FormField>
     </>
@@ -32,7 +34,35 @@ function RawChartForm({ chart, setChart, version, setVersion }) {
 }
 
 export function ChartForm({ charts, chart, version, setChart, setVersion }) {
-  if (charts?.length === 0) {
+  const selectedChart = charts?.find((c) => c.name === chart)
+
+  useLayoutEffect(() => {
+    if (!isEmpty(charts)) {
+      if (
+        !charts.find((c) => {
+          console.log('chart.name', c.name)
+          console.log('chart', chart)
+
+          return c.name === chart
+        })
+      ) {
+        setVersion('')
+        setChart('')
+      } else if (!selectedChart?.versions?.find((v) => v.version === version)) {
+        setVersion('')
+      }
+    }
+  }, [
+    chart,
+    charts,
+    charts.length,
+    selectedChart?.versions,
+    setChart,
+    setVersion,
+    version,
+  ])
+
+  if (isEmpty(charts)) {
     return (
       <RawChartForm
         chart={chart}
@@ -42,7 +72,6 @@ export function ChartForm({ charts, chart, version, setChart, setVersion }) {
       />
     )
   }
-  const selectedChart = charts.find((c) => c.name === chart)
 
   return (
     <>
@@ -53,7 +82,12 @@ export function ChartForm({ charts, chart, version, setChart, setVersion }) {
         <Select
           label="Select chart"
           selectedKey={chart || ''}
-          onSelectionChange={(key) => setChart(key)}
+          onSelectionChange={(key) => {
+            setChart(key)
+            if (key !== chart) {
+              setVersion('')
+            }
+          }}
         >
           {(charts || []).map((chart) => (
             <ListBoxItem
@@ -68,9 +102,10 @@ export function ChartForm({ charts, chart, version, setChart, setVersion }) {
         label="Version"
       >
         <Select
-          label="Select version"
+          label={!chart ? 'Must select a chart first' : 'Select version'}
           selectedKey={version || ''}
           onSelectionChange={(key) => setVersion(key)}
+          isDisabled={!chart}
         >
           {(selectedChart?.versions || []).map((vsn) => (
             <ListBoxItem

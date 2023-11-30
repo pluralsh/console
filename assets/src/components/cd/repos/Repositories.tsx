@@ -230,11 +230,11 @@ export default function GitRepositories() {
 
 const helmRepoColumns = [
   ColName,
+  ColStatus,
   ColNamespace,
   ColProvider,
   ColType,
   ColUrl,
-  ColStatus,
 ]
 
 function HelmRepositoriesTable({
