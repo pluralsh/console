@@ -41,16 +41,20 @@ export function DeployServiceSettingsGit({
           setRepositoryId={setRepoId}
         />
       </FormField>
-      <ServiceGitRefField
-        required
-        value={gitRef}
-        onChange={(e) => setGitRef(e.currentTarget.value)}
-      />
-      <ServiceGitFolderField
-        required
-        value={gitFolder}
-        onChange={(e) => setGitFolder(e.currentTarget.value)}
-      />
+      {repositoryId && (
+        <>
+          <ServiceGitRefField
+            required
+            value={gitRef}
+            onChange={(e) => setGitRef(e.currentTarget.value)}
+          />
+          <ServiceGitFolderField
+            required
+            value={gitFolder}
+            onChange={(e) => setGitFolder(e.currentTarget.value)}
+          />
+        </>
+      )}
     </>
   )
 }
@@ -67,7 +71,7 @@ export function ServiceGitRefField({
   return (
     <FormField
       label="Git ref"
-      required={!!required}
+      required={required}
       hint="Branch name, tag name, or commit SHA"
     >
       <Input
@@ -111,6 +115,7 @@ export function RepositorySelector({
   setRepositoryId: (repositoryId: string) => void
 }) {
   const [comboBoxInput, setComboBoxInput] = useState('')
+  const [selectIsOpen, setSelectIsOpen] = useState(false)
 
   const selectedRepo = repositories.find((r) => r.id === repositoryId)
 
@@ -137,6 +142,7 @@ export function RepositorySelector({
       onSelectionChange={(key) => {
         setRepositoryId(key as any)
         setComboBoxInput('')
+        setSelectIsOpen(false)
       }}
       inputProps={{
         placeholder: selectedRepo
@@ -144,6 +150,13 @@ export function RepositorySelector({
           : 'Select a Git repository',
       }}
       startIcon={<GitHubLogoIcon />}
+      dropdownHeader={repositoryId ? <ListBoxItem label="None" /> : undefined}
+      isOpen={selectIsOpen}
+      onOpenChange={(open) => setSelectIsOpen(open)}
+      onHeaderClick={() => {
+        setRepositoryId('')
+        setSelectIsOpen(false)
+      }}
     >
       {repoSearchResults.map(({ item: { id, url } }) => (
         <ListBoxItem

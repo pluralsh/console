@@ -7,24 +7,22 @@ import {
   Stepper,
 } from '@pluralsh/design-system'
 import {
+  NamespacedName,
   useClustersTinyQuery,
   useCreateServiceDeploymentMutation,
   useGitRepositoriesQuery,
 } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { mapExistingNodes } from 'utils/graphql'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { mapExistingNodes } from 'utils/graphql'
-
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
 import {
   RepoKind,
   RepoKindSelector,
 } from 'components/cd/utils/RepoKindSelector'
-
-import ModalAlt from '../../ModalAlt'
+import ModalAlt from 'components/cd/ModalAlt'
 
 import { DeployServiceSettingsGit } from './DeployServiceSettingsGit'
 import { DeployServiceSettingsBasic } from './DeployServiceSettingsBasic'
@@ -92,7 +90,9 @@ export function DeployServiceModal({
   const [clusterId, setClusterId] = useState('')
   const [name, setName] = useState('')
   const [repositoryId, setRepositoryId] = useState('')
-  const [repository, setRepository] = useState(null)
+  const [helmRepository, setHelmRepository] = useState<NamespacedName | null>(
+    null
+  )
   const [chart, setChart] = useState('')
   const [version, setVersion] = useState('')
   const [gitFolder, setGitFolder] = useState('')
@@ -100,11 +100,10 @@ export function DeployServiceModal({
   const [namespace, setNamespace] = useState('')
   const [secrets, setSecrets] = useState<Secret[]>([{ name: '', value: '' }])
   const [secretsErrors, setSecretsErrors] = useState(false)
-  const [helmValues, setHelmValues] = useState<Secret[]>([
-    { name: '', value: '' },
-  ])
+  const [helmValuesFiles, setHelmValuesFiles] = useState<string[]>([''])
+  const [helmValues, setHelmValues] = useState('# Add your values here')
   const [helmValuesErrors, setHelmValuesErrors] = useState(false)
-  const [repoKind, setRepoKind] = useState(RepoKind.Git)
+  const [repoTab, setRepoTab] = useState(RepoKind.Git)
 
   const configuration = useMemo(() => {
     const cfg: Record<string, string> = {}
@@ -121,9 +120,56 @@ export function DeployServiceModal({
     }))
   }, [secrets])
 
-  const helm =
-    repository && chart && version ? { repository, chart, version } : null
-  const git = gitRef && gitFolder ? { ref: gitRef, folder: gitFolder } : null
+  const initialFormValid = name && namespace && clusterId
+  const allowGoToRepo = formState === FormState.Initial && initialFormValid
+  const hasHelmRepo = !!helmRepository
+  const hasGitRepo = !!repositoryId
+
+  const gitSettingsValid = hasGitRepo
+    ? repositoryId && gitFolder && gitRef
+    : hasHelmRepo
+  const helmSettingsValid = hasHelmRepo
+    ? chart && version && helmRepository
+    : hasGitRepo
+  const repoSettingsValid = helmSettingsValid && gitSettingsValid
+
+  const allowGoToHelmValues =
+    formState === FormState.Repository &&
+    initialFormValid &&
+    hasHelmRepo &&
+    repoSettingsValid
+  const allowGoToSecrets =
+    (formState === FormState.Repository &&
+      initialFormValid &&
+      repoSettingsValid) ||
+    (formState === FormState.HelmValues && !helmValuesErrors)
+
+  const helm = useMemo(
+    () =>
+      hasHelmRepo && helmSettingsValid
+        ? {
+            repository: helmRepository,
+            chart,
+            version,
+            values: helmValues || null,
+            valuesFiles: helmValuesFiles.filter((value) => !!value),
+          }
+        : null,
+    [
+      hasHelmRepo,
+      helmSettingsValid,
+      helmRepository,
+      chart,
+      version,
+      helmValues,
+      helmValuesFiles,
+    ]
+  )
+
+  const git = useMemo(
+    () => (gitRef && gitFolder ? { ref: gitRef, folder: gitFolder } : null),
+    [gitFolder, gitRef]
+  )
 
   const [mutation, { loading: mutationLoading, error: mutationError }] =
     useCreateServiceDeploymentMutation({
@@ -152,27 +198,11 @@ export function DeployServiceModal({
     [clustersData?.clusters]
   )
 
-  const initialFormValid = name && namespace && clusterId
-  const allowGoToRepo = formState === FormState.Initial && initialFormValid
-  const gitSettingsValid =
-    repoKind === RepoKind.Helm
-      ? chart && version && repository
-      : repositoryId && gitFolder && gitRef
-  const allowGoToHelmValues =
-    formState === FormState.Repository &&
-    initialFormValid &&
-    repoKind === RepoKind.Helm &&
-    gitSettingsValid
-  const allowGoToSecrets =
-    (formState === FormState.Repository &&
-      initialFormValid &&
-      repoKind === RepoKind.Git &&
-      gitSettingsValid) ||
-    (formState === FormState.HelmValues && !helmValuesErrors)
-
   const allowDeploy =
     formState === FormState.Secrets &&
     initialFormValid &&
+    repoSettingsValid &&
+    (hasHelmRepo ? !helmValuesErrors : true) &&
     !secretsErrors &&
     !mutationLoading
 
@@ -202,10 +232,9 @@ export function DeployServiceModal({
   const repos = mapExistingNodes(reposData?.gitRepositories).filter(
     (repo) => repo.health === 'PULLABLE'
   )
-  const finalStepperSteps =
-    repoKind === RepoKind.Helm
-      ? stepperSteps
-      : stepperSteps.filter((step) => step.key !== FormState.HelmValues)
+  const finalStepperSteps = hasHelmRepo
+    ? stepperSteps
+    : stepperSteps.filter((step) => step.key !== FormState.HelmValues)
   const currentStepIndex = stepperSteps.findIndex(
     (step) => step.key === formState
   )
@@ -246,7 +275,7 @@ export function DeployServiceModal({
             </>
           ) : formState === FormState.Repository ? (
             <>
-              {repoKind === RepoKind.Git ? (
+              {!hasHelmRepo ? (
                 <Button
                   type="submit"
                   disabled={!allowGoToSecrets}
@@ -351,8 +380,8 @@ export function DeployServiceModal({
           />
         ) : formState === FormState.Repository ? (
           <RepoKindSelector
-            onKindChange={setRepoKind}
-            selectedKind={repoKind}
+            onKindChange={setRepoTab}
+            selectedKind={repoTab}
           >
             <div
               css={{
@@ -361,11 +390,11 @@ export function DeployServiceModal({
                 gap: theme.spacing.medium,
               }}
             >
-              {repoKind === RepoKind.Helm ? (
+              {repoTab === RepoKind.Helm ? (
                 <DeployServiceSettingsHelm
                   {...{
-                    repository,
-                    setRepository,
+                    repository: helmRepository,
+                    setRepository: setHelmRepository,
                     chart,
                     setChart,
                     version,
@@ -391,6 +420,8 @@ export function DeployServiceModal({
           <DeployServiceSettingsHelmValues
             helmValues={helmValues}
             setHelmValues={setHelmValues}
+            helmValuesFiles={helmValuesFiles}
+            setHelmValuesFiles={setHelmValuesFiles}
             setHelmValuesErrors={setHelmValuesErrors}
           />
         ) : (

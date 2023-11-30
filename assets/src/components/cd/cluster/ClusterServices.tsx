@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
-import { ComponentProps, useMemo, useState } from 'react'
+import { ComponentProps, useMemo, useRef, useState } from 'react'
 import isEmpty from 'lodash/isEmpty'
-import { EmptyState, Table } from '@pluralsh/design-system'
+import { EmptyState, TabPanel, Table } from '@pluralsh/design-system'
 import { Row, TableState } from '@tanstack/react-table'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
@@ -49,6 +49,8 @@ export default function ClusterServices() {
   const { clusterId } = useParams()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
+  const tabStateRef = useRef<any>(null)
+
   const { data, error, refetch } = useServiceDeploymentsQuery({
     variables: { clusterId: clusterId || '', q: debouncedSearchString },
     pollInterval: POLL_INTERVAL,
@@ -101,35 +103,41 @@ export default function ClusterServices() {
           showClusterSelect={false}
           searchString={searchString}
           setSearchString={setSearchString}
+          tabStateRef={tabStateRef}
         />
         <DeployService refetch={refetch} />
       </div>
-      {!isEmpty(data?.serviceDeployments?.edges) ? (
-        <FullHeightTableWrap>
-          <Table
-            data={data?.serviceDeployments?.edges || []}
-            columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-            onRowClick={(
-              _e,
-              { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-            ) =>
-              navigate(
-                getServiceDetailsPath({
-                  clusterId: original.node?.cluster?.id,
-                  serviceId: original.node?.id,
-                })
-              )
-            }
-            reactTableOptions={reactTableOptions}
-          />
-        </FullHeightTableWrap>
-      ) : (
-        <EmptyState message="Looks like you don't have any service deployments yet." />
-      )}
+      <TabPanel
+        stateRef={tabStateRef}
+        css={{ height: '100%', overflow: 'hidden' }}
+      >
+        {!isEmpty(data?.serviceDeployments?.edges) ? (
+          <FullHeightTableWrap>
+            <Table
+              data={data?.serviceDeployments?.edges || []}
+              columns={columns}
+              css={{
+                maxHeight: 'unset',
+                height: '100%',
+              }}
+              onRowClick={(
+                _e,
+                { original }: Row<Edge<ServiceDeploymentsRowFragment>>
+              ) =>
+                navigate(
+                  getServiceDetailsPath({
+                    clusterId: original.node?.cluster?.id,
+                    serviceId: original.node?.id,
+                  })
+                )
+              }
+              reactTableOptions={reactTableOptions}
+            />
+          </FullHeightTableWrap>
+        ) : (
+          <EmptyState message="Looks like you don't have any service deployments yet." />
+        )}
+      </TabPanel>
     </div>
   )
 }
