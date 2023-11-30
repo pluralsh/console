@@ -432,6 +432,7 @@ defmodule Console.Deployments.Services do
   defp stabilize(attrs, _), do: attrs
 
   defp component_key(%{group: g, version: v, kind: k, namespace: ns, name: n}), do: {g, v, k, ns, n}
+  defp component_key(_), do: nil
 
   @doc """
   Find and insert any deprecations for this service's components
@@ -439,25 +440,42 @@ defmodule Console.Deployments.Services do
   @spec add_deprecations(Service.t) :: {:ok, map} | Console.error
   def add_deprecations(%Service{} = service) do
     %{components: components, cluster: cluster} = Repo.preload(service, [:components, :cluster])
-    xact = add_operation(start_transaction(), :wipe, fn _ ->
-      ApiDeprecation.for_service(service.id)
-      |> Repo.delete_all()
-      |> ok()
-    end)
-
-    Enum.reduce(components, xact, fn component, xact ->
+    Enum.map(components, fn component ->
       case Checker.check(component, cluster) do
         {entry, blocking} ->
-          add_operation(xact, component.id, fn _ ->
-            attrs = Map.from_struct(entry) |> Map.put(:blocking, blocking)
-            %ApiDeprecation{component_id: component.id}
-            |> ApiDeprecation.changeset(attrs)
-            |> Repo.insert()
-          end)
-        _ -> xact
+          Map.from_struct(entry)
+          |> Map.put(:blocking, blocking)
+          |> Map.put(:component_id, component.id)
+          |> Map.take(ApiDeprecation.fields())
+        _ -> nil
       end
     end)
-    |> execute()
+    |> Enum.filter(& &1)
+    |> case do
+      [_ | _] = deprecations ->
+        start_transaction()
+        |> add_operation(:wipe, fn _ ->
+          ApiDeprecation.for_service(service.id)
+          |> ApiDeprecation.without_component(Enum.map(deprecations, & &1[:component_id]))
+          |> Repo.delete_all()
+          |> ok()
+        end)
+        |> add_operation(:deps, fn _ ->
+          data = Enum.map(deprecations, &timestamped/1)
+          Repo.insert_all(
+            ApiDeprecation,
+            data,
+            on_conflict: :replace_all,
+            conflict_target: :component_id
+          )
+          |> ok()
+        end)
+        |> execute()
+      _ ->
+        ApiDeprecation.for_service(service.id)
+        |> Repo.delete_all()
+        |> ok()
+    end
   end
 
   @doc """

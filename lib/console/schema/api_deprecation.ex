@@ -14,6 +14,10 @@ defmodule Console.Schema.ApiDeprecation do
     timestamps()
   end
 
+  def without_component(query \\ __MODULE__, component_ids) do
+    from(d in query, where: d.component_id not in ^component_ids)
+  end
+
   def for_service(query \\ __MODULE__, service_id) do
     from(d in query,
       join: c in assoc(d, :component),
@@ -21,11 +25,14 @@ defmodule Console.Schema.ApiDeprecation do
     )
   end
 
-  @valid ~w(deprecated_in removed_in replacement available_in blocking)a
+  @valid ~w(deprecated_in component_id removed_in replacement available_in blocking)a
+
+  def fields(), do: @valid
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> unique_constraint(:component_id)
     |> validate_required([:component_id])
   end
 end

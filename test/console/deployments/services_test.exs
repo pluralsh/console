@@ -593,18 +593,31 @@ defmodule Console.Deployments.ServicesTest do
       service = insert(:service)
 
       {:ok, service} = Services.update_components(%{
-        components: [%{
-          state: :running,
-          synced: true,
-          group: "networking.k8s.io",
-          version: "v1",
-          kind: "Ingress",
-          namespace: "my-app",
-          name: "api"
-        }]
+        errors: [],
+        components: [
+          %{
+            state: :running,
+            synced: true,
+            group: "networking.k8s.io",
+            version: "v1",
+            kind: "Ingress",
+            namespace: "my-app",
+            name: "api"
+          },
+          %{
+            state: :running,
+            synced: true,
+            group: "networking.k8s.io",
+            version: "v1",
+            kind: "Ingress",
+            namespace: nil,
+            name: "api2"
+          }
+        ]
       }, service)
 
-      %{components: [component]} = Console.Repo.preload(service, [:components])
+      %{components: components} = Console.Repo.preload(service, [:components])
+      component = Enum.find(components, & &1.name == "api")
       assert component.state == :running
       assert component.synced
       assert component.group == "networking.k8s.io"
@@ -615,24 +628,38 @@ defmodule Console.Deployments.ServicesTest do
 
       svc = refetch(service)
       assert svc.status == :healthy
-      assert svc.component_status == "1 / 1"
+      assert svc.component_status == "2 / 2"
 
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
 
-      {:ok, service} = Services.update_components(%{
-        components: [%{
-          state: :running,
-          synced: true,
-          group: "networking.k8s.io",
-          version: "v1",
-          kind: "Ingress",
-          namespace: "my-app",
-          name: "api"
-        }]
-      }, service)
+      :timer.sleep(:timer.seconds(1))
+      {:ok, updated} = Services.update_components(%{
+        errors: [],
+        components: [
+          %{
+            state: :running,
+            synced: true,
+            group: "networking.k8s.io",
+            version: "v1",
+            kind: "Ingress",
+            namespace: nil,
+            name: "api2"
+          },
+          %{
+            state: :running,
+            synced: true,
+            group: "networking.k8s.io",
+            version: "v1",
+            kind: "Ingress",
+            namespace: "my-app",
+            name: "api"
+          }
+        ]
+      }, service.id)
 
-      %{components: [updated_component]} = Console.Repo.preload(service, [:components])
-
+      %{components: components} = Console.Repo.preload(updated, [:components])
+      updated_component = Enum.find(components, & &1.name == "api")
+      assert updated.updated_at == service.updated_at
       assert component.id == updated_component.id
     end
 
