@@ -12,6 +12,16 @@ defmodule Console.GraphQl.CustomTypes do
     end
   end
 
+  scalar :json, name: "Json" do
+    serialize &mapish/1
+    parse fn
+      %Blueprint.Input.String{value: value}, _ ->
+        Jason.decode(value)
+      %Blueprint.Input.Null{}, _ -> {:ok, nil}
+      _, _ -> :error
+    end
+  end
+
   scalar :long, name: "Long" do
     serialize &Integer.to_string/1
     parse fn

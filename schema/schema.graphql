@@ -1268,7 +1268,7 @@ input NodePoolAttributes {
   minSize: Int!
   maxSize: Int!
   instanceType: String!
-  labels: Map
+  labels: Json
   taints: [TaintAttributes]
   cloudSettings: NodePoolCloudAttributes
 }
@@ -1523,7 +1523,7 @@ type NodePool {
   spot: Boolean
 
   "kubernetes labels to apply to the nodes in this pool, useful for node selectors"
-  labels: Map
+  labels: Json
 
   "any taints you'd want to apply to a node, for eg preventing scheduling on spot instances"
   taints: [Taint]
@@ -3246,6 +3246,8 @@ enum Delta {
 }
 
 scalar Map
+
+scalar Json
 
 scalar Long
 
