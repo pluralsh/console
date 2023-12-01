@@ -70,13 +70,12 @@ export function ServiceCard({
   )
 }
 
-export function getStageStatus(
-  stage: Pick<PipelineStageFragment, 'promotion'>
-) {
-  const promotedDate = new Date(stage.promotion?.promotedAt || '')
-  const revisedDate = new Date(stage.promotion?.revisedAt || '')
-
-  if (promotedDate > revisedDate) {
+export function getStageStatus(stage: PipelineStageFragment) {
+  if (
+    (stage.services || []).every(
+      (svc) => svc?.service?.status === ServiceDeploymentStatus.Healthy
+    )
+  ) {
     return StageStatus.Complete
   }
 
