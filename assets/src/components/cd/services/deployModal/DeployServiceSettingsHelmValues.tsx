@@ -1,9 +1,21 @@
 import { Button, CodeEditor, FormField, Input } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
-import { Dispatch, SetStateAction, memo, useEffect, useMemo } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useVisuallyHidden } from 'react-aria'
 import { produce } from 'immer'
 import { DeleteIconButton } from 'components/utils/IconButtons'
+import { FileDrop, FileDropFile } from 'components/utils/FileDrop'
+import isEmpty from 'lodash/isEmpty'
+import { InlineLink } from 'components/utils/typography/InlineLink'
+import { DropzoneOptions } from 'react-dropzone'
 
 export const HelmValuesFilesTableSC = styled.table(({ theme }) => ({
   display: 'grid',
@@ -77,19 +89,86 @@ const HelmValuesInput = memo(
     setHelmValues: Dispatch<SetStateAction<string>>
   }) => {
     console.log('HelmValuesInput rendering')
+    const [manual, setManual] = useState(true)
+    const [fileName, setFileName] = useState<string | undefined>()
+    const [fileError, setFileError] = useState<Nullable<string>>()
+
+    useEffect(() => {
+      if (manual) {
+        setFileName(undefined)
+        setFileError(undefined)
+      }
+    }, [manual])
+
+    const readFile = useCallback<NonNullable<DropzoneOptions['onDrop']>>(
+      async (files) => {
+        if (isEmpty(files)) {
+          return
+        }
+        const file = files?.[0]
+        const content = await file?.text()
+
+        if (!content) {
+          setFileError('File is empty')
+          setFileName(file.name)
+
+          return
+        }
+        setFileError(undefined)
+        setFileName(file.name)
+        setHelmValues(content)
+        setManual(true)
+      },
+      [setHelmValues]
+    )
 
     return (
-      <FormField label="Raw YAML values">
-        <CodeEditor
-          value={helmValues}
-          language="yaml"
-          height={200}
-          options={{ lineNumbers: false, minimap: { enabled: false } }}
-          onChange={(value) => {
-            console.log('change', value)
-            setHelmValues(value)
-          }}
-        />
+      <FormField
+        label="Raw YAML values"
+        caption={
+          <InlineLink
+            css={{ cursor: 'pointer' }}
+            onClick={(e) => {
+              e.preventDefault()
+              setManual(!manual)
+            }}
+          >
+            {manual ? 'Upload file' : 'Enter manually'}
+          </InlineLink>
+        }
+      >
+        {manual ? (
+          <CodeEditor
+            value={helmValues}
+            language="yaml"
+            height={200}
+            options={{ lineNumbers: false, minimap: { enabled: false } }}
+            onChange={(value) => {
+              console.log('change', value)
+              setHelmValues(value)
+            }}
+          />
+        ) : (
+          <FileDrop
+            onDrop={readFile}
+            messages={{
+              default: 'Drop your values file here',
+            }}
+            error={!!fileError}
+            files={
+              !!fileName && [
+                <FileDropFile
+                  key="file"
+                  label={fileName}
+                  onClear={() => {
+                    setFileName(undefined)
+                    setFileError(undefined)
+                  }}
+                />,
+              ]
+            }
+          />
+        )}
       </FormField>
     )
   }
