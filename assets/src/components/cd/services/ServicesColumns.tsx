@@ -93,7 +93,7 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
     const svc = getValue()
     const git = svc?.repository
     const helm = svc?.helmRepository
-    const url = git?.url || helm?.spec?.url || ''
+    const url = helm?.spec?.url || git?.url || ''
 
     return (
       <Tooltip
@@ -104,10 +104,10 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
           <ColWithIcon
             truncateLeft
             icon={
-              git ? (
-                <GitHubLogoIcon />
-              ) : (
+              helm ? (
                 getProviderIconURL('byok', theme.mode === 'dark')
+              ) : (
+                <GitHubLogoIcon />
               )
             }
           >
