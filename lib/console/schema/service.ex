@@ -201,6 +201,8 @@ defmodule Console.Schema.Service do
     model
     |> cast(attrs, ~w(revision_id sha status)a)
     |> cast_embed(:git)
+    |> cast_embed(:helm)
+    |> cast_embed(:kustomize)
     |> validate_required(~w(revision_id)a)
   end
 
