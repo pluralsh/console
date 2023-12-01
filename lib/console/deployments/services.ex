@@ -295,7 +295,7 @@ defmodule Console.Deployments.Services do
     |> notify(:update, :ignore)
   end
 
-  defp update_sha_without_revision(%Service{sha: sha} = svc, sha), do: {:ok, svc}
+  defp update_sha_without_revision(%Service{revision: %Revision{sha: sha}} = svc, sha), do: {:ok, svc}
   defp update_sha_without_revision(%Service{id: id}, sha) do
     start_transaction()
     |> add_operation(:base, fn _ ->

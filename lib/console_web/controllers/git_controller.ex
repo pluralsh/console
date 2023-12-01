@@ -7,6 +7,7 @@ defmodule ConsoleWeb.GitController do
   def tarball(conn, %{"id" => service_id}) do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),
+         svc <- Console.Repo.preload(svc, [:revision]),
          {{:ok, f}, _} <- {Services.tarstream(svc), svc} do
       try do
         conn =
