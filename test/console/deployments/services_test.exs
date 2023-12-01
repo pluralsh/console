@@ -183,6 +183,35 @@ defmodule Console.Deployments.ServicesTest do
       assert second.git.folder == "k8s"
     end
 
+    test "services still persist correct revisions on sparse updates" do
+      cluster = insert(:cluster)
+      user = admin_user()
+      git = insert(:git_repository)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      {:ok, updated} = Services.update_service(%{
+        git: %{
+          ref: "master",
+        },
+        configuration: [%{name: "name", value: "other-value"}, %{name: "name2", value: "value"}]
+      }, service.id, user)
+
+      %{revision: revision} = Console.Repo.preload(updated, [:revision])
+      assert revision.git.ref == updated.git.ref
+      assert revision.git.folder == updated.git.folder
+    end
+
     test "helm services can be updated" do
       cluster = insert(:cluster)
       user = admin_user()
