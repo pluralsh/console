@@ -6,23 +6,27 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import styled from 'styled-components'
-import { Key, useEffect, useMemo, useRef, useState } from 'react'
-import { type TableState } from '@tanstack/react-table'
+import { Key, useEffect, useRef, useState } from 'react'
 import { useDebounce } from '@react-hooks-library/core'
-import { GitHealth, useGitRepositoriesQuery } from 'generated/graphql'
+import {
+  GitHealth,
+  useGitRepositoriesQuery,
+  useHelmRepositoriesQuery,
+} from 'generated/graphql'
 
 import { gitHealthToLabel, gitHealthToSeverity } from './GitHealthChip'
 
-type StatusTabKey = GitHealth | 'ALL'
+export type StatusFilterKey = GitHealth | 'ALL'
 export const statusTabs = Object.entries({
   ALL: { label: 'All' },
   [GitHealth.Pullable]: { label: gitHealthToLabel(GitHealth.Pullable) },
   [GitHealth.Failed]: { label: gitHealthToLabel(GitHealth.Failed) },
-} as const satisfies Record<StatusTabKey, { label: string }>)
+} as const satisfies Record<StatusFilterKey, { label: string }>)
 
 const GitRepositoryFiltersSC = styled.div(({ theme }) => ({
   display: 'flex',
   columnGap: theme.spacing.medium,
+  flexGrow: 1,
   '.statusTab': {
     display: 'flex',
     gap: theme.spacing.small,
@@ -30,55 +34,61 @@ const GitRepositoryFiltersSC = styled.div(({ theme }) => ({
   },
 }))
 
-export function GitRepositoriesFilters({
-  data,
-  setTableFilters,
-}: {
+export function countsFromGitRepos(
   data: ReturnType<typeof useGitRepositoriesQuery>['data']
-  setTableFilters: (
-    filters: Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
-  ) => void
+) {
+  const c: Record<string, number | undefined> = {
+    ALL: data?.gitRepositories?.edges?.length,
+  }
+
+  data?.gitRepositories?.edges?.forEach((edge) => {
+    if (edge?.node?.health) {
+      c[edge?.node?.health] = (c[edge?.node?.health] ?? 0) + 1
+    }
+  })
+
+  return c
+}
+
+export function countsFromHelmRepos(
+  data: ReturnType<typeof useHelmRepositoriesQuery>['data']
+) {
+  const c: Record<string, number | undefined> = {
+    ALL: data?.helmRepositories?.length,
+  }
+
+  data?.helmRepositories?.forEach((repo) => {
+    if (repo?.status?.ready) {
+      c[GitHealth.Pullable] = (c[GitHealth.Pullable] ?? 0) + 1
+    } else {
+      c[GitHealth.Failed] = (c[GitHealth.Failed] ?? 0) + 1
+    }
+  })
+
+  return c
+}
+
+export function RepositoriesFilters({
+  statusCounts,
+  statusFilterKey,
+  setStatusFilterKey,
+  setFilterString: setFilterStringProp,
+}: {
+  statusCounts: any
+  statusFilterKey: Key
+  setStatusFilterKey: (key: Key) => void
+  setFilterString: (filterString: string) => void
 }) {
   const tabStateRef = useRef<any>(null)
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 100)
-  const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
-  const counts = useMemo(() => {
-    const c: Record<string, number | undefined> = {
-      ALL: data?.gitRepositories?.edges?.length,
-    }
-
-    data?.gitRepositories?.edges?.forEach((edge) => {
-      if (edge?.node?.health) {
-        c[edge?.node?.health] = (c[edge?.node?.health] ?? 0) + 1
-      }
-    })
-
-    return c
-  }, [data?.gitRepositories?.edges])
-
-  const tableFilters: Partial<
-    Pick<TableState, 'globalFilter' | 'columnFilters'>
-  > = useMemo(
-    () => ({
-      globalFilter: debouncedFilterString,
-      columnFilters: [
-        ...(statusFilterKey !== 'ALL'
-          ? [
-              {
-                id: 'status',
-                value: statusFilterKey,
-              },
-            ]
-          : []),
-      ],
-    }),
-    [debouncedFilterString, statusFilterKey]
-  )
 
   useEffect(() => {
-    setTableFilters(tableFilters)
-  }, [setTableFilters, tableFilters])
+    setFilterStringProp(debouncedFilterString)
+  }, [debouncedFilterString, setFilterStringProp])
+  useEffect(() => {
+    setStatusFilterKey(statusFilterKey)
+  }, [statusFilterKey, setStatusFilterKey])
 
   return (
     <GitRepositoryFiltersSC>
@@ -102,7 +112,7 @@ export function GitRepositoriesFilters({
           orientation: 'horizontal',
           selectedKey: statusFilterKey,
           onSelectionChange: (key) => {
-            setStatusTabKey(key)
+            setStatusFilterKey(key)
           },
         }}
       >
@@ -117,7 +127,7 @@ export function GitRepositoriesFilters({
               size="small"
               severity={gitHealthToSeverity(key as any)}
             >
-              {counts[key] ?? 0}
+              {statusCounts[key] ?? 0}
             </Chip>
           </SubTab>
         ))}

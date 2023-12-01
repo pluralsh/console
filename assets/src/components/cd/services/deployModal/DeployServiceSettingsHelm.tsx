@@ -5,8 +5,10 @@ import {
   useHelmRepositoriesQuery,
   useHelmRepositoryQuery,
 } from 'generated/graphql'
+import isEmpty from 'lodash/isEmpty'
+import { useLayoutEffect, useState } from 'react'
 
-function RawChartForm({ chart, setChart, version, setVersion }) {
+function ChartFormValuesRaw({ chart, setChart, version, setVersion }) {
   return (
     <>
       <FormField
@@ -15,7 +17,7 @@ function RawChartForm({ chart, setChart, version, setVersion }) {
       >
         <Input
           value={chart}
-          onChange={setChart}
+          onChange={(e) => setChart(e.target?.value)}
         />
       </FormField>
       <FormField
@@ -24,26 +26,21 @@ function RawChartForm({ chart, setChart, version, setVersion }) {
       >
         <Input
           value={version}
-          onChange={setVersion}
+          onChange={(e) => setVersion(e.target?.value)}
         />
       </FormField>
     </>
   )
 }
 
-export function ChartForm({ charts, chart, version, setChart, setVersion }) {
-  if (charts?.length === 0) {
-    return (
-      <RawChartForm
-        chart={chart}
-        setChart={setChart}
-        version={version}
-        setVersion={setVersion}
-      />
-    )
-  }
-  const selectedChart = charts.find((c) => c.name === chart)
-
+function ChartFormValuesDropdown({
+  chart,
+  setChart,
+  charts,
+  version,
+  setVersion,
+  selectedChart,
+}) {
   return (
     <>
       <FormField
@@ -53,7 +50,12 @@ export function ChartForm({ charts, chart, version, setChart, setVersion }) {
         <Select
           label="Select chart"
           selectedKey={chart || ''}
-          onSelectionChange={(key) => setChart(key)}
+          onSelectionChange={(key) => {
+            setChart(key)
+            if (key !== chart) {
+              setVersion('')
+            }
+          }}
         >
           {(charts || []).map((chart) => (
             <ListBoxItem
@@ -68,9 +70,10 @@ export function ChartForm({ charts, chart, version, setChart, setVersion }) {
         label="Version"
       >
         <Select
-          label="Select version"
+          label={!chart ? 'Must select a chart first' : 'Select version'}
           selectedKey={version || ''}
           onSelectionChange={(key) => setVersion(key)}
+          isDisabled={!chart}
         >
           {(selectedChart?.versions || []).map((vsn) => (
             <ListBoxItem
@@ -81,6 +84,51 @@ export function ChartForm({ charts, chart, version, setChart, setVersion }) {
         </Select>
       </FormField>
     </>
+  )
+}
+
+export function ChartForm({ charts, chart, version, setChart, setVersion }) {
+  const selectedChart = charts?.find((c) => c.name === chart)
+
+  useLayoutEffect(() => {
+    if (!isEmpty(charts)) {
+      if (!charts.find((c) => c.name === chart)) {
+        setVersion('')
+        setChart('')
+      } else if (!selectedChart?.versions?.find((v) => v.version === version)) {
+        setVersion('')
+      }
+    }
+  }, [
+    chart,
+    charts,
+    charts.length,
+    selectedChart?.versions,
+    setChart,
+    setVersion,
+    version,
+  ])
+
+  if (isEmpty(charts)) {
+    return (
+      <ChartFormValuesRaw
+        chart={chart}
+        setChart={setChart}
+        version={version}
+        setVersion={setVersion}
+      />
+    )
+  }
+
+  return (
+    <ChartFormValuesDropdown
+      chart={chart}
+      charts={charts}
+      setChart={setChart}
+      selectedChart={selectedChart}
+      version={version}
+      setVersion={setVersion}
+    />
   )
 }
 
@@ -109,6 +157,7 @@ export default function DeployServiceSettingsHelm({
   const { data, loading } = useHelmRepositoriesQuery({
     fetchPolicy: 'cache-and-network',
   })
+  const [selectIsOpen, setSelectIsOpen] = useState(false)
 
   const { data: charts } = useHelmRepositoryQuery({
     variables: {
@@ -127,17 +176,25 @@ export default function DeployServiceSettingsHelm({
       r?.metadata.namespace === repository?.namespace
   )
 
+  const selectedKey = repository
+    ? `${repository?.namespace}:${repository?.name}`
+    : ''
+
   return (
     <>
       <FormField
-        required
         label="Repository"
         hint="Select a chart repository to fetch your chart from"
       >
         <Select
           label="Select Repository"
-          selectedKey={`${repository?.namespace}:${repository?.name}`}
-          onSelectionChange={(key) => setRepository(keyToRepo(key))}
+          isOpen={selectIsOpen}
+          onOpenChange={(open) => setSelectIsOpen(open)}
+          selectedKey={selectedKey}
+          onSelectionChange={(key) => {
+            setRepository(keyToRepo(key))
+            setSelectIsOpen(false)
+          }}
           leftContent={
             selectedRepository && (
               <HelmHealthChip
@@ -146,6 +203,13 @@ export default function DeployServiceSettingsHelm({
               />
             )
           }
+          dropdownHeader={
+            selectedRepository ? <ListBoxItem label="None" /> : undefined
+          }
+          onHeaderClick={() => {
+            setRepository(null)
+            setSelectIsOpen(false)
+          }}
         >
           {(repositories || []).map((repo) => (
             <ListBoxItem
@@ -161,13 +225,15 @@ export default function DeployServiceSettingsHelm({
           ))}
         </Select>
       </FormField>
-      <ChartForm
-        charts={charts?.helmRepository?.charts || []}
-        chart={chart}
-        setChart={setChart}
-        version={version}
-        setVersion={setVersion}
-      />
+      {selectedRepository && (
+        <ChartForm
+          charts={charts?.helmRepository?.charts || []}
+          chart={chart}
+          setChart={setChart}
+          version={version}
+          setVersion={setVersion}
+        />
+      )}
     </>
   )
 }

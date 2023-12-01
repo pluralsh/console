@@ -217,6 +217,7 @@ export function ModalForm({
                   setRevisionId(original.id)
                 }}
                 reactTableOptions={{
+                  enableRowSelection: true,
                   state: { rowSelection: { [revisionId]: true } },
                 }}
               />

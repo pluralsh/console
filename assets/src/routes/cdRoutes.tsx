@@ -2,7 +2,7 @@ import { useLayoutEffect } from 'react'
 
 import ContinuousDeployment from 'components/cd/ContinuousDeployment'
 import Clusters from 'components/cd/clusters/Clusters'
-import GitRepositories from 'components/cd/repos/GitRepositories'
+import GitRepositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
 import Providers from 'components/cd/providers/Providers'
 import {

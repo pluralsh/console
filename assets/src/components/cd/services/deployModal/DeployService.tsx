@@ -2,24 +2,27 @@ import {
   Button,
   GearTrainIcon,
   GitHubIcon,
+  ListIcon,
   PadlockLockedIcon,
   Stepper,
-  Switch,
 } from '@pluralsh/design-system'
 import {
+  NamespacedName,
   useClustersTinyQuery,
   useCreateServiceDeploymentMutation,
   useGitRepositoriesQuery,
 } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { mapExistingNodes } from 'utils/graphql'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { mapExistingNodes } from 'utils/graphql'
-
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
-import ModalAlt from '../../ModalAlt'
+import {
+  RepoKind,
+  RepoKindSelector,
+} from 'components/cd/utils/RepoKindSelector'
+import ModalAlt from 'components/cd/ModalAlt'
 
 import { DeployServiceSettingsGit } from './DeployServiceSettingsGit'
 import { DeployServiceSettingsBasic } from './DeployServiceSettingsBasic'
@@ -28,11 +31,12 @@ import {
   Secret,
 } from './DeployServiceSettingsSecrets'
 import DeployServiceSettingsHelm from './DeployServiceSettingsHelm'
+import { DeployServiceSettingsHelmValues } from './DeployServiceSettingsHelmValues'
 
 enum FormState {
   Initial = 'initial',
-  Git = 'git',
-  Helm = 'helm',
+  Repository = 'repository',
+  HelmValues = 'helmValues',
   Secrets = 'secrets',
 }
 
@@ -54,10 +58,15 @@ const stepperSteps = [
     ...stepBase,
   },
   {
-    key: FormState.Git,
+    key: FormState.Repository,
     stepTitle: <StepTitle>Repository</StepTitle>,
     IconComponent: GitHubIcon,
     ...stepBase,
+  },
+  {
+    key: FormState.HelmValues,
+    stepTitle: <StepTitle>Helm values</StepTitle>,
+    IconComponent: ListIcon,
   },
   {
     key: FormState.Secrets,
@@ -66,6 +75,21 @@ const stepperSteps = [
     ...stepBase,
   },
 ]
+
+function sanitizeSecrets(secrets: Secret[]) {
+  const cfg: Record<string, string> = {}
+
+  for (const { name, value } of secrets) {
+    if (name) {
+      cfg[name] = value
+    }
+  }
+
+  return Object.entries(cfg).map(([name, value]) => ({
+    name,
+    value,
+  }))
+}
 
 export function DeployServiceModal({
   open,
@@ -81,7 +105,9 @@ export function DeployServiceModal({
   const [clusterId, setClusterId] = useState('')
   const [name, setName] = useState('')
   const [repositoryId, setRepositoryId] = useState('')
-  const [repository, setRepository] = useState(null)
+  const [helmRepository, setHelmRepository] = useState<NamespacedName | null>(
+    null
+  )
   const [chart, setChart] = useState('')
   const [version, setVersion] = useState('')
   const [gitFolder, setGitFolder] = useState('')
@@ -89,39 +115,37 @@ export function DeployServiceModal({
   const [namespace, setNamespace] = useState('')
   const [secrets, setSecrets] = useState<Secret[]>([{ name: '', value: '' }])
   const [secretsErrors, setSecretsErrors] = useState(false)
+  const [helmValuesFiles, setHelmValuesFiles] = useState<string[]>([''])
+  const [helmValues, setHelmValues] = useState('')
+  const [helmValuesErrors, setHelmValuesErrors] = useState(false)
+  const [repoTab, setRepoTab] = useState(RepoKind.Git)
 
-  const configuration = useMemo(() => {
-    const cfg: Record<string, string> = {}
+  const initialFormValid = !!(name && namespace && clusterId)
+  const allowGoToRepo = formState === FormState.Initial && initialFormValid
+  const hasHelmRepo = !!helmRepository
+  const hasGitRepo = !!repositoryId
 
-    for (const { name, value } of secrets) {
-      if (name) {
-        cfg[name] = value
-      }
-    }
+  const gitSettingsValid = hasGitRepo
+    ? !!(repositoryId && gitFolder && gitRef)
+    : hasHelmRepo
+  const helmSettingsValid = hasHelmRepo
+    ? !!(chart && version && helmRepository)
+    : hasGitRepo
+  const repoSettingsValid = helmSettingsValid && gitSettingsValid
 
-    return Object.entries(cfg).map(([name, value]) => ({
-      name,
-      value,
-    }))
-  }, [secrets])
-
-  const helm =
-    repository && chart && version ? { repository, chart, version } : null
-  const git = gitRef && gitFolder ? { ref: gitRef, folder: gitFolder } : null
+  const allowGoToHelmValues =
+    formState === FormState.Repository &&
+    initialFormValid &&
+    hasHelmRepo &&
+    repoSettingsValid
+  const allowGoToSecrets =
+    (formState === FormState.Repository &&
+      initialFormValid &&
+      repoSettingsValid) ||
+    (formState === FormState.HelmValues && !helmValuesErrors)
 
   const [mutation, { loading: mutationLoading, error: mutationError }] =
     useCreateServiceDeploymentMutation({
-      variables: {
-        clusterId,
-        attributes: {
-          repositoryId,
-          name,
-          namespace,
-          git,
-          helm,
-          configuration,
-        },
-      },
       onCompleted: () => {
         refetch?.()
         onClose()
@@ -136,38 +160,94 @@ export function DeployServiceModal({
     [clustersData?.clusters]
   )
 
-  const initialFormValid = name && namespace && clusterId
-  const allowGoToGit = formState === FormState.Initial && initialFormValid
-  const gitSettingsValid =
-    (repositoryId && gitFolder && gitRef) || (chart && version && repository)
-  const allowGoToSecrets =
-    (formState === FormState.Git || formState === FormState.Helm) &&
-    initialFormValid &&
-    gitSettingsValid
-
   const allowDeploy =
     formState === FormState.Secrets &&
     initialFormValid &&
+    repoSettingsValid &&
+    (hasHelmRepo ? !helmValuesErrors : true) &&
     !secretsErrors &&
     !mutationLoading
+
+  const deployService = useCallback(() => {
+    const helm =
+      hasHelmRepo && helmSettingsValid
+        ? {
+            repository: helmRepository,
+            chart,
+            version,
+            values: helmValues || null,
+            valuesFiles: helmValuesFiles.filter((value) => !!value),
+          }
+        : null
+
+    const git =
+      hasGitRepo && gitSettingsValid ? { ref: gitRef, folder: gitFolder } : null
+
+    const configuration = sanitizeSecrets(secrets)
+    const variables = {
+      clusterId,
+      attributes: {
+        repositoryId,
+        name,
+        namespace,
+        git,
+        helm,
+        configuration,
+      },
+    }
+
+    mutation({ variables })
+  }, [
+    chart,
+    clusterId,
+    gitFolder,
+    gitRef,
+    gitSettingsValid,
+    hasGitRepo,
+    hasHelmRepo,
+    helmRepository,
+    helmSettingsValid,
+    helmValues,
+    helmValuesFiles,
+    mutation,
+    name,
+    namespace,
+    repositoryId,
+    secrets,
+    version,
+  ])
 
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
 
-      if (allowGoToGit) {
-        setFormState(FormState.Git)
+      if (allowGoToRepo) {
+        setFormState(FormState.Repository)
+      } else if (allowGoToHelmValues) {
+        setFormState(FormState.HelmValues)
       } else if (allowGoToSecrets) {
         setFormState(FormState.Secrets)
       } else if (allowDeploy) {
-        mutation()
+        deployService()
       }
     },
-    [allowGoToGit, allowGoToSecrets, allowDeploy, mutation]
+    [
+      allowGoToRepo,
+      allowGoToHelmValues,
+      allowGoToSecrets,
+      allowDeploy,
+      deployService,
+    ]
   )
 
   const repos = mapExistingNodes(reposData?.gitRepositories).filter(
     (repo) => repo.health === 'PULLABLE'
+  )
+  const finalStepperSteps = hasHelmRepo
+    ? stepperSteps
+    : stepperSteps.filter((step) => step.key !== FormState.HelmValues)
+  const currentStepIndex = stepperSteps.findIndex(
+    (step) => step.key === formState
   )
 
   const initialLoading = !repos || !clusters
@@ -198,29 +278,33 @@ export function DeployServiceModal({
                 type="button"
                 onClick={(e) => {
                   e.preventDefault()
-                  setFormState(FormState.Git)
+                  setFormState(
+                    hasHelmRepo ? FormState.HelmValues : FormState.Repository
+                  )
                 }}
               >
                 Go back
               </Button>
             </>
-          ) : formState === FormState.Git || formState === FormState.Helm ? (
+          ) : formState === FormState.Repository ? (
             <>
-              <Button
-                type="submit"
-                disabled={!allowGoToSecrets}
-                primary
-              >
-                Add secrets
-              </Button>
-              <Switch
-                checked={formState === FormState.Helm}
-                onChange={(selected) =>
-                  setFormState(selected ? FormState.Helm : FormState.Git)
-                }
-              >
-                Use Helm Source
-              </Switch>
+              {!hasHelmRepo ? (
+                <Button
+                  type="submit"
+                  disabled={!allowGoToSecrets}
+                  primary
+                >
+                  Add secrets
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={!allowGoToHelmValues}
+                  primary
+                >
+                  Add helm values
+                </Button>
+              )}
               <Button
                 secondary
                 type="button"
@@ -232,13 +316,33 @@ export function DeployServiceModal({
                 Go back
               </Button>
             </>
+          ) : formState === FormState.HelmValues ? (
+            <>
+              <Button
+                type="submit"
+                disabled={!allowGoToSecrets}
+                primary
+              >
+                Add secrets
+              </Button>
+              <Button
+                secondary
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setFormState(FormState.Repository)
+                }}
+              >
+                Go back
+              </Button>
+            </>
           ) : (
             <Button
               type="submit"
-              disabled={!allowGoToGit}
+              disabled={!allowGoToRepo}
               primary
             >
-              Select Git repository
+              Select repository
             </Button>
           )}
           <Button
@@ -254,21 +358,17 @@ export function DeployServiceModal({
       <div
         css={{
           display: 'flex',
-          paddingBottom: theme.spacing.medium,
+          paddingBottom:
+            formState === FormState.Repository ? 0 : theme.spacing.medium,
         }}
       >
         <Stepper
           compact
-          steps={stepperSteps}
-          stepIndex={
-            formState === FormState.Initial
-              ? 0
-              : formState === FormState.Git || formState === FormState.Helm
-              ? 1
-              : 2
-          }
+          steps={finalStepperSteps}
+          stepIndex={currentStepIndex}
         />
       </div>
+
       <div
         css={{
           paddingBottom: theme.spacing.large,
@@ -291,35 +391,58 @@ export function DeployServiceModal({
               clusters,
             }}
           />
-        ) : formState === FormState.Git ? (
-          <DeployServiceSettingsGit
-            {...{
-              repos,
-              repositoryId,
-              setRepositoryId,
-              gitRef,
-              setGitRef,
-              gitFolder,
-              setGitFolder,
-            }}
-          />
-        ) : formState === FormState.Helm ? (
-          <DeployServiceSettingsHelm
-            {...{
-              repository,
-              setRepository,
-              chart,
-              setChart,
-              version,
-              setVersion,
-            }}
+        ) : formState === FormState.Repository ? (
+          <RepoKindSelector
+            onKindChange={setRepoTab}
+            selectedKind={repoTab}
+          >
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.medium,
+              }}
+            >
+              {repoTab === RepoKind.Helm ? (
+                <DeployServiceSettingsHelm
+                  {...{
+                    repository: helmRepository,
+                    setRepository: setHelmRepository,
+                    chart,
+                    setChart,
+                    version,
+                    setVersion,
+                  }}
+                />
+              ) : (
+                <DeployServiceSettingsGit
+                  {...{
+                    repos,
+                    repositoryId,
+                    setRepositoryId,
+                    gitRef,
+                    setGitRef,
+                    gitFolder,
+                    setGitFolder,
+                  }}
+                />
+              )}
+            </div>
+          </RepoKindSelector>
+        ) : formState === FormState.HelmValues ? (
+          <DeployServiceSettingsHelmValues
+            helmValues={helmValues}
+            setHelmValues={setHelmValues}
+            helmValuesFiles={helmValuesFiles}
+            setHelmValuesFiles={setHelmValuesFiles}
+            setHelmValuesErrors={setHelmValuesErrors}
           />
         ) : (
           <>
             <DeployServiceSettingsSecrets
               secrets={secrets}
-              setSecretsErrors={setSecretsErrors}
               setSecrets={setSecrets}
+              setSecretsErrors={setSecretsErrors}
             />
             {mutationError && (
               <GqlError

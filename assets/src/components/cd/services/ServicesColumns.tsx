@@ -93,7 +93,7 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
     const svc = getValue()
     const git = svc?.repository
     const helm = svc?.helmRepository
-    const url = git?.url || helm?.spec?.url || ''
+    const url = helm?.spec?.url || git?.url || ''
 
     return (
       <Tooltip
@@ -104,10 +104,10 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
           <ColWithIcon
             truncateLeft
             icon={
-              git ? (
-                <GitHubLogoIcon />
-              ) : (
+              helm ? (
                 getProviderIconURL('byok', theme.mode === 'dark')
+              ) : (
+                <GitHubLogoIcon />
               )
             }
           >
@@ -264,23 +264,27 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
                 key={MenuItemKey.MakeGlobal}
                 leftContent={<GlobeIcon />}
                 label="Make global"
+                textValue="Make global"
               />
             )}
             <ListBoxItem
               key={MenuItemKey.Permissions}
               leftContent={<PeopleIcon />}
               label="Permissions"
+              textValue="Permissions"
             />
             <ListBoxItem
               key={MenuItemKey.Settings}
               leftContent={<GearTrainIcon />}
               label="Settings"
+              textValue="Settings"
             />
             {node?.globalService?.id && (
               <ListBoxItem
                 key={MenuItemKey.DeleteGlobal}
                 leftContent={<GlobeIcon color={theme.colors['icon-danger']} />}
                 label="Delete global service"
+                textValue="Delete global service"
               />
             )}
             {!node.protect && (
@@ -290,6 +294,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
                   <TrashCanIcon color={theme.colors['icon-danger']} />
                 }
                 label="Delete service"
+                textValue="Delete service"
               />
             )}
           </MoreMenu>

@@ -6,7 +6,7 @@ import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 
-import { AuthMethodChip, DeleteGitRepository } from './GitRepositories'
+import { AuthMethodChip, DeleteGitRepository } from './Repositories'
 import { GitHealthChip, gitHealthToLabel } from './GitHealthChip'
 import { UpdateGitRepository } from './GitRepositoriesUpdateGit'
 
