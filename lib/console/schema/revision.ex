@@ -9,6 +9,7 @@ defmodule Console.Schema.Revision do
 
     embeds_one :git,  Service.Git, on_replace: :update
     embeds_one :helm, Service.Helm, on_replace: :update
+    embeds_one :kustomize, Service.Kustomize, on_replace: :update
 
     belongs_to :service, Service
     has_many :configuration, ServiceConfiguration
@@ -44,6 +45,7 @@ defmodule Console.Schema.Revision do
     |> put_change(:id, Piazza.Ecto.UUID.generate_monotonic())
     |> cast_embed(:git)
     |> cast_embed(:helm)
+    |> cast_embed(:kustomize)
     |> cast_assoc(:configuration)
     |> validate_required(~w(version)a)
   end

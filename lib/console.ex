@@ -48,11 +48,14 @@ defmodule Console do
   def dedupe(attrs, key, val) do
     as_string = Atom.to_string(key)
     case attrs do
-      %{^key => _} -> attrs
-      %{^as_string => _} -> attrs
+      %{^key => orig} -> Map.put(attrs, key, maybe_merge(orig, val))
+      %{^as_string => orig} -> Map.put(attrs, key, maybe_merge(orig, val))
       _ -> put_new(attrs, key, val)
     end
   end
+
+  defp maybe_merge(%{} = orig, %{} = val), do: Map.merge(val, orig)
+  defp maybe_merge(orig, _), do: orig
 
   def ls_r(path \\ ".") do
     cond do

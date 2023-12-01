@@ -31,12 +31,14 @@ defmodule Console.Deployments.Services do
   before sending it upstream to the given client.
   """
   @spec tarstream(Service.t) :: {:ok, File.t} | Console.error
-  def tarstream(%Service{repository_id: id, helm: %Service.Helm{values_files: [_ | _] = files}} = svc) when is_binary(id) do
+  def tarstream(%Service{repository_id: id, helm: %Service.Helm{values_files: [_ | _] = files} = helm} = svc) when is_binary(id) do
     with {:ok, f} <- Git.Discovery.fetch(svc),
          {:ok, contents} <- Tar.tar_stream(f),
          contents = Map.new(contents),
          {:ok, f, _} <- Helm.Charts.artifact(svc),
-      do: Tar.splice(f, Map.take(contents, files))
+         splice <- Map.take(contents, files)
+                   |> maybe_values(helm),
+      do: Tar.splice(f, splice)
   end
   def tarstream(%Service{helm: %Service.Helm{values: values}} = svc) when is_binary(values) do
     with {:ok, tar} <- tarfile(svc),
@@ -50,6 +52,10 @@ defmodule Console.Deployments.Services do
       do: {:ok, f}
   end
   defp tarfile(%Service{} = svc), do: Git.Discovery.fetch(svc)
+
+  defp maybe_values(files, %Service.Helm{values: vals}) when is_binary(vals),
+    do: Map.put(files, "values.yaml.liquid", vals)
+  defp maybe_values(files, _), do: files
 
   def referenced?(id) do
     [Cluster.for_service(id), ClusterProvider.for_service(id)]
@@ -222,6 +228,7 @@ defmodule Console.Deployments.Services do
       Map.take(source, [:repository_id, :sha, :name, :namespace])
       |> Console.dedupe(:git, source.git && %{ref: source.git.ref, folder: source.git.folder})
       |> Console.dedupe(:helm, source.helm && Console.mapify(source.helm))
+      |> Console.dedupe(:kustomize, source.kustomize && Console.mapify(source.kustomize))
       |> Map.merge(attrs)
       |> Map.put(:configuration, config)
       |> create_service(cluster_id, user)
@@ -285,6 +292,7 @@ defmodule Console.Deployments.Services do
       add_version(%{sha: sha, message: msg}, base.version)
       |> Console.dedupe(:git, base.git && %{ref: sha, folder: base.git.folder})
       |> Console.dedupe(:helm, base.helm && Console.mapify(base.helm))
+      |> Console.dedupe(:kustomize, base.kustomize && Console.mapify(base.kustomize))
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)
         Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
@@ -326,6 +334,7 @@ defmodule Console.Deployments.Services do
       add_version(attrs, base.version)
       |> Console.dedupe(:git, base.git && Console.mapify(base.git))
       |> Console.dedupe(:helm, base.helm && Console.mapify(base.helm))
+      |> Console.dedupe(:kustomize, base.kustomize && Console.mapify(base.kustomize))
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)
         Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
@@ -377,7 +386,8 @@ defmodule Console.Deployments.Services do
         revision_id: rev.id,
         sha: rev.sha,
         git: rev.git && Map.take(rev.git, [:ref, :folder]),
-        helm: rev.helm && Console.mapify(rev.helm)
+        helm: rev.helm && Console.mapify(rev.helm),
+        kustomize: rev.kustomize && Console.mapify(rev.kustomize),
       })
       |> Repo.update()
     end)
