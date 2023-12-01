@@ -1,5 +1,13 @@
-import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import {
+  Button,
   Chip,
   EmptyState,
   TabPanel,
@@ -27,7 +35,9 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
-import { useFetchMorePolling } from 'components/utils/tableFetchHelpers'
+import { useFetchSlice } from 'components/utils/tableFetchHelpers'
+
+import { VirtualItem } from '@tanstack/react-virtual'
 
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
@@ -82,7 +92,7 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 4,
 }
 
-const QUERY_PAGE_SIZE = 50
+const QUERY_PAGE_SIZE = 20
 
 export default function Services() {
   const theme = useTheme()
@@ -91,6 +101,19 @@ export default function Services() {
   const [searchString, setSearchString] = useState()
   const debouncedSearchString = useDebounce(searchString, 100)
   const tabStateRef = useRef<any>(null)
+  const [virtualSlice, setVirtualSlice] = useState<
+    | {
+        start: VirtualItem
+        end: VirtualItem
+      }
+    | undefined
+  >()
+
+  useEffect(() => {
+    console.log('mounted')
+  }, [])
+
+  console.log('virtualSlice', virtualSlice)
 
   const queryResult = useServiceDeploymentsQuery({
     variables: {
@@ -98,12 +121,17 @@ export default function Services() {
       q: debouncedSearchString,
       first: QUERY_PAGE_SIZE,
     },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
+    // Important so loading will be updated on fetchMore to send to Table
+    notifyOnNetworkStatusChange: true,
   })
-  const { error, refetch, loading, fetchMore, data } = queryResult
-  const pageInfo = data?.serviceDeployments?.pageInfo
+  const { error, refetch, fetchMore, loading, data } = queryResult
+  const serviceDeployments = data?.serviceDeployments
+  const pageInfo = serviceDeployments?.pageInfo
 
-  useFetchMorePolling(queryResult, 'serviceDeployments')
+  console.log('queryResult.variables', queryResult.variables)
+
+  // useFetchMorePolling(queryResult, 'serviceDeployments')
 
   useSetBreadcrumbs(
     useMemo(
@@ -118,14 +146,58 @@ export default function Services() {
     )
   )
 
+  const fetchSlice = useFetchSlice(queryResult, {
+    virtualSlice,
+    pageSize: QUERY_PAGE_SIZE,
+  })
+
   useSetCDHeaderContent(
-    useMemo(() => <DeployService refetch={refetch} />, [refetch])
+    useMemo(
+      () => (
+        <div
+          css={{
+            display: 'flex',
+            justifyContent: 'end',
+            gap: theme.spacing.small,
+          }}
+        >
+          <DeployService refetch={refetch} />
+          <Button
+            secondary
+            onClick={fetchSlice}
+          >
+            fetch slice
+          </Button>
+          <div>
+            {virtualSlice?.start.index}, {virtualSlice?.end.index}
+            <br />
+            first: {queryResult?.variables?.first}
+            <br />
+            l: {serviceDeployments?.edges?.length}
+          </div>
+        </div>
+      ),
+      [
+        fetchSlice,
+        queryResult?.variables?.first,
+        refetch,
+        serviceDeployments?.edges?.length,
+        theme.spacing.small,
+        virtualSlice?.end.index,
+        virtualSlice?.start.index,
+      ]
+    )
   )
   const [tableFilters, setTableFilters] = useState<
     Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   >({
     globalFilter: '',
   })
+
+  console.log('not fetchnextPage loading', loading)
+  console.log('not fetchnextPage datalen', serviceDeployments?.edges?.length)
+  console.log('endCursor', pageInfo?.endCursor, pageInfo)
+  console.log('ids', serviceDeployments?.edges?.[0])
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
     useMemo(
@@ -141,6 +213,8 @@ export default function Services() {
     )
 
   const fetchNextPage = useCallback(() => {
+    console.log('fetchNextPage')
+    console.log('fetchNextPage loading', loading)
     if (!pageInfo?.endCursor) {
       return
     }
@@ -153,7 +227,7 @@ export default function Services() {
           'serviceDeployments'
         ),
     })
-  }, [fetchMore, pageInfo?.endCursor])
+  }, [fetchMore, loading, pageInfo?.endCursor])
 
   if (error) {
     return <GqlError error={error} />
@@ -212,6 +286,7 @@ export default function Services() {
               isFetchingNextPage={loading}
               reactTableOptions={reactTableOptions}
               reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+              onVirtualSliceChange={setVirtualSlice}
             />
           </FullHeightTableWrap>
         ) : (

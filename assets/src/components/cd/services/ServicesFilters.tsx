@@ -6,7 +6,6 @@ import {
   ListBoxItem,
   SearchIcon,
   Select,
-  Spinner,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'

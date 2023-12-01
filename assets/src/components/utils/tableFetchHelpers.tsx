@@ -1,8 +1,15 @@
 import { InputMaybe, PageInfoFragment } from 'generated/graphql'
-import { Connection, PaginatedResult, extendConnection } from 'utils/graphql'
+import {
+  Connection,
+  PaginatedResult,
+  extendConnection,
+  updateConnection,
+} from 'utils/graphql'
 import { ApolloQueryResult, QueryResult } from '@apollo/client'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { VirtualItem } from '@tanstack/react-virtual'
+import { usePrevious } from 'honorable'
 
 type FetchMoreT<
   TData extends Partial<
@@ -91,4 +98,75 @@ export function useFetchMorePolling<
       }
     }
   }, [edges, interval, key, loading, refetch, variables])
+}
+
+export function fetchMoreAndUpdate<
+  QData extends Partial<Record<K, any>>,
+  QVariables extends {
+    first?: InputMaybe<number> | undefined
+    after?: InputMaybe<string> | undefined
+  },
+  K extends string,
+>(
+  queryResult: Pick<QueryResult<QData, QVariables>, 'fetchMore' | 'variables'>,
+  key: K,
+  queryVariables?: Nullable<QVariables>
+) {
+  const first = queryVariables?.first || queryResult.variables?.first
+  const after = queryVariables?.after || queryResult.variables?.after
+
+  queryResult.fetchMore({
+    variables: { after, first },
+    updateQuery: (prev, next) =>
+      updateConnection(prev, next.fetchMoreResult[key], key),
+  })
+}
+
+export function useFetchSlice(
+  queryResult,
+  options: {
+    virtualSlice: { start: VirtualItem; end: VirtualItem } | undefined
+    pageSize: number
+  }
+) {
+  const { virtualSlice, pageSize } = options
+  const [endCursors, setEndCursors] = useState<
+    { index: number; cursor: string }[]
+  >([])
+  const dataKey = 'serviceDeployments' as const
+  const endCursor = queryResult?.data?.[dataKey]?.pageInfo.endCursor
+  const endCursorIndex = (queryResult?.data?.[dataKey]?.edges?.length ?? 0) - 1
+  const prevEndCursor = usePrevious(endCursor)
+
+  useEffect(() => {
+    if (endCursor && endCursor !== prevEndCursor && endCursorIndex >= 0) {
+      console.log('new end cursor', endCursor)
+      setEndCursors((prev) =>
+        [...prev, { index: endCursorIndex, cursor: endCursor }].sort(
+          (a, b) => b.index - a.index
+        )
+      )
+    }
+  }, [endCursor, endCursorIndex, prevEndCursor])
+  console.log('endCursors', endCursors)
+
+  const fetchMoreThing = useCallback(() => {
+    const startIndex = virtualSlice?.start?.index ?? 0
+    const endIndex = virtualSlice?.end?.index ?? 0
+    const cursor = endCursors.find((c) => c.index < startIndex)
+    const first = Math.max(pageSize, endIndex - (cursor?.index || 0) + 1)
+
+    fetchMoreAndUpdate(queryResult, 'serviceDeployments', {
+      after: cursor?.cursor,
+      first,
+    })
+  }, [
+    endCursors,
+    pageSize,
+    queryResult,
+    virtualSlice?.end?.index,
+    virtualSlice?.start?.index,
+  ])
+
+  return fetchMoreThing
 }
