@@ -52,8 +52,6 @@ export function DeployServiceSettingsHelmValues({
   setHelmValues: Dispatch<SetStateAction<string>>
   setHelmValuesErrors: Dispatch<SetStateAction<boolean>>
 }) {
-  console.log('DeployServiceSettingsHelmValues rendering')
-
   const theme = useTheme()
 
   return (
@@ -88,7 +86,6 @@ const HelmValuesInput = memo(
     helmValues: string
     setHelmValues: Dispatch<SetStateAction<string>>
   }) => {
-    console.log('HelmValuesInput rendering')
     const [manual, setManual] = useState(true)
     const [fileName, setFileName] = useState<string | undefined>()
     const [fileError, setFileError] = useState<Nullable<string>>()
@@ -144,7 +141,6 @@ const HelmValuesInput = memo(
             height={200}
             options={{ lineNumbers: false, minimap: { enabled: false } }}
             onChange={(value) => {
-              console.log('change', value)
               setHelmValues(value)
             }}
           />
@@ -184,7 +180,6 @@ const HelmValuesFilesInput = memo(
     setHelmValuesFiles: Dispatch<SetStateAction<string[]>>
     setHelmValuesErrors: Dispatch<SetStateAction<boolean>>
   }) => {
-    console.log('valuesfiles rendering')
     const theme = useTheme()
     const { visuallyHiddenProps } = useVisuallyHidden()
     const { fileItems, errorCount } = useMemo(() => {

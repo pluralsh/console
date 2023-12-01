@@ -92,14 +92,7 @@ export function ChartForm({ charts, chart, version, setChart, setVersion }) {
 
   useLayoutEffect(() => {
     if (!isEmpty(charts)) {
-      if (
-        !charts.find((c) => {
-          console.log('chart.name', c.name)
-          console.log('chart', chart)
-
-          return c.name === chart
-        })
-      ) {
+      if (!charts.find((c) => c.name === chart)) {
         setVersion('')
         setChart('')
       } else if (!selectedChart?.versions?.find((v) => v.version === version)) {
@@ -186,8 +179,6 @@ export default function DeployServiceSettingsHelm({
   const selectedKey = repository
     ? `${repository?.namespace}:${repository?.name}`
     : ''
-
-  console.log('selectedKey', null)
 
   return (
     <>

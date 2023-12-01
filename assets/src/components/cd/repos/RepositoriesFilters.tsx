@@ -90,8 +90,6 @@ export function RepositoriesFilters({
     setStatusFilterKey(statusFilterKey)
   }, [statusFilterKey, setStatusFilterKey])
 
-  console.log('statusCounts', statusCounts)
-
   return (
     <GitRepositoryFiltersSC>
       <Input
