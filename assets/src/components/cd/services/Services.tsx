@@ -172,7 +172,6 @@ export default function Services() {
       }}
     >
       <ServicesFilters
-        serviceDeployments={data?.serviceDeployments}
         setTableFilters={setTableFilters}
         searchString={searchString}
         setSearchString={setSearchString}

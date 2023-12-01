@@ -16,6 +16,8 @@ export function updateFragment(cache, { fragment, id, update, fragmentName }) {
   })
 }
 
+// Update a connection where previous existing values are not overwritten by
+// incoming values
 export function extendConnection<
   K extends string,
   TData extends Partial<
@@ -30,6 +32,35 @@ export function extendConnection<
     [...(prev[key]?.edges ?? []), ...(edges ?? [])],
     (a, b) => (a?.node?.id ? a?.node?.id === b?.node?.id : false)
   )
+
+  return {
+    ...prev,
+    [key]: {
+      ...prev[key],
+      pageInfo,
+      edges: uniq,
+    },
+  }
+}
+
+// Update a connection where incoming values overwrite previous existing values
+export function updateConnection<
+  K extends string,
+  TData extends Partial<
+    Record<K, (Connection<any> & PaginatedResult<any>) | null>
+  >,
+>(prev: TData, next: TData[K] | null | undefined, key: K) {
+  if (!next) {
+    return prev
+  }
+  const { edges, pageInfo } = next
+
+  const uniq = uniqWith(
+    [...(prev[key]?.edges ?? []), ...(edges ?? [])].reverse(),
+    (a, b) => (a?.node?.id ? a?.node?.id === b?.node?.id : false)
+  ).reverse()
+
+  console.log('uniq', uniq)
 
   return {
     ...prev,

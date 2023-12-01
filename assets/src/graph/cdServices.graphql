@@ -293,3 +293,14 @@ query ServiceDeploymentBindings($id: ID!) {
     ...ServiceDeploymentBindings
   }
 }
+
+fragment ServiceStatusCount on ServiceStatusCount {
+  count
+  status
+}
+
+query ServiceStatuses($clusterId: ID) {
+  serviceStatuses(clusterId: $clusterId) {
+    ...ServiceStatusCount
+  }
+}

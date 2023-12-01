@@ -6,6 +6,7 @@ import {
   ListBoxItem,
   SearchIcon,
   Select,
+  Spinner,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
@@ -23,7 +24,7 @@ import { type TableState } from '@tanstack/react-table'
 import {
   ServiceDeploymentStatus,
   useClustersTinyQuery,
-  useServiceDeploymentsQuery,
+  useServiceStatusesQuery,
 } from 'generated/graphql'
 import { useParams } from 'react-router-dom'
 
@@ -31,6 +32,8 @@ import { SERVICE_PARAM_CLUSTER_ID } from 'routes/cdRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 
 import ProviderIcon from 'components/utils/Provider'
+
+import isNil from 'lodash/isNil'
 
 import {
   serviceStatusToLabel,
@@ -66,7 +69,6 @@ const ServiceFiltersSC = styled.div(({ theme }) => ({
 }))
 
 export function ServicesFilters({
-  serviceDeployments,
   setTableFilters,
   searchString,
   setSearchString,
@@ -75,9 +77,6 @@ export function ServicesFilters({
   setClusterId,
   tabStateRef,
 }: {
-  serviceDeployments: NonNullable<
-    ReturnType<typeof useServiceDeploymentsQuery>['data']
-  >['serviceDeployments']
   searchString
   setSearchString: (string) => void
   setTableFilters: (
@@ -94,33 +93,40 @@ export function ServicesFilters({
 
   clusterId = clusterId ?? clusterIdParam
 
-  const { data } = useClustersTinyQuery({ skip: !showClusterSelect })
+  const { data: clustersData } = useClustersTinyQuery({
+    skip: !showClusterSelect,
+  })
+  const { data: statusesData } = useServiceStatusesQuery()
+
+  console.log('statusesData', statusesData)
   const clusters = useMemo(
-    () => mapExistingNodes(data?.clusters),
-    [data?.clusters]
+    () => mapExistingNodes(clustersData?.clusters),
+    [clustersData?.clusters]
   )
   const selectedCluster = useMemo(
     () => clusters && clusters.find((cluster) => cluster.id === clusterId),
     [clusters, clusterId]
   )
 
-  const counts = useMemo(() => {
-    const c: Record<string, number | undefined> = {
-      ALL: serviceDeployments?.edges?.length,
-      HEALTHY: 0,
-      SYNCED: 0,
-      STALE: 0,
-      FAILED: 0,
-    }
-
-    serviceDeployments?.edges?.forEach((edge) => {
-      if (edge?.node?.status) {
-        c[edge?.node?.status] = (c[edge?.node?.status] ?? 0) + 1
-      }
-    })
-
-    return c
-  }, [serviceDeployments?.edges])
+  const counts = useMemo<Record<string, number | undefined>>(
+    () => ({
+      ALL: statusesData?.serviceStatuses?.reduce(
+        (count, status) => count + (status?.count || 0),
+        0
+      ),
+      HEALTHY: statusesData ? 0 : undefined,
+      SYNCED: statusesData ? 0 : undefined,
+      STALE: statusesData ? 0 : undefined,
+      FAILED: statusesData ? 0 : undefined,
+      ...Object.fromEntries(
+        statusesData?.serviceStatuses?.map((status) => [
+          status?.status,
+          status?.count,
+        ]) || []
+      ),
+    }),
+    [statusesData]
+  )
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
 
   const tableFilters: Partial<
@@ -150,10 +156,10 @@ export function ServicesFilters({
       {showClusterSelect && (
         <div css={{ width: 360 }}>
           <Select
-            isDisabled={!data}
+            isDisabled={!clustersData}
             isOpen={clusterSelectIsOpen}
             onOpenChange={setClusterSelectIsOpen}
-            label={!data ? 'Loading clusters..' : 'Filter by cluster'}
+            label={!clustersData ? 'Loading clusters..' : 'Filter by cluster'}
             leftContent={
               selectedCluster && (
                 <ProviderIcon
@@ -228,12 +234,15 @@ export function ServicesFilters({
             className="statusTab"
           >
             {label}
-            <Chip
-              size="small"
-              severity={serviceStatusToSeverity(key as any)}
-            >
-              {counts[key] ?? 0}
-            </Chip>
+            {!isNil(counts[key]) && (
+              <Chip
+                size="small"
+                severity={serviceStatusToSeverity(key as any)}
+                loading={isNil(counts[key])}
+              >
+                {counts[key]}
+              </Chip>
+            )}
           </SubTab>
         ))}
       </TabList>
