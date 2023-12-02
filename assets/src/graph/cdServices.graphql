@@ -157,6 +157,9 @@ query ServiceDeployments(
       }
     }
   }
+  serviceStatuses(clusterId: $clusterId) {
+    ...ServiceStatusCount
+  }
 }
 
 query ServiceDeploymentsTiny {

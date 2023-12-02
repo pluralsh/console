@@ -20,19 +20,18 @@ import {
   useState,
 } from 'react'
 import { type TableState } from '@tanstack/react-table'
+import { useParams } from 'react-router-dom'
+import isNil from 'lodash/isNil'
+import isEmpty from 'lodash/isEmpty'
+
 import {
   ServiceDeploymentStatus,
+  ServiceStatusCountFragment,
   useClustersTinyQuery,
-  useServiceStatusesQuery,
 } from 'generated/graphql'
-import { useParams } from 'react-router-dom'
-
 import { SERVICE_PARAM_CLUSTER_ID } from 'routes/cdRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
-
 import ProviderIcon from 'components/utils/Provider'
-
-import isNil from 'lodash/isNil'
 
 import {
   serviceStatusToLabel,
@@ -71,20 +70,20 @@ export function ServicesFilters({
   setTableFilters,
   searchString,
   setSearchString,
-  showClusterSelect = true,
   clusterId,
   setClusterId,
   tabStateRef,
+  statusCounts,
 }: {
   searchString
   setSearchString: (string) => void
   setTableFilters: (
     filters: Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   ) => void
-  showClusterSelect: boolean
   clusterId?: string
   setClusterId?: Dispatch<SetStateAction<string>>
   tabStateRef: MutableRefObject<any>
+  statusCounts: Nullable<Nullable<ServiceStatusCountFragment>[]>
 }) {
   const theme = useTheme()
   const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
@@ -93,11 +92,9 @@ export function ServicesFilters({
   clusterId = clusterId ?? clusterIdParam
 
   const { data: clustersData } = useClustersTinyQuery({
-    skip: !showClusterSelect,
+    skip: !setClusterId,
   })
-  const { data: statusesData } = useServiceStatusesQuery()
 
-  console.log('statusesData', statusesData)
   const clusters = useMemo(
     () => mapExistingNodes(clustersData?.clusters),
     [clustersData?.clusters]
@@ -109,22 +106,19 @@ export function ServicesFilters({
 
   const counts = useMemo<Record<string, number | undefined>>(
     () => ({
-      ALL: statusesData?.serviceStatuses?.reduce(
+      ALL: statusCounts?.reduce(
         (count, status) => count + (status?.count || 0),
         0
       ),
-      HEALTHY: statusesData ? 0 : undefined,
-      SYNCED: statusesData ? 0 : undefined,
-      STALE: statusesData ? 0 : undefined,
-      FAILED: statusesData ? 0 : undefined,
+      HEALTHY: isEmpty(statusCounts) ? 0 : undefined,
+      SYNCED: isEmpty(statusCounts) ? 0 : undefined,
+      STALE: isEmpty(statusCounts) ? 0 : undefined,
+      FAILED: isEmpty(statusCounts) ? 0 : undefined,
       ...Object.fromEntries(
-        statusesData?.serviceStatuses?.map((status) => [
-          status?.status,
-          status?.count,
-        ]) || []
+        statusCounts?.map((status) => [status?.status, status?.count]) || []
       ),
     }),
-    [statusesData]
+    [statusCounts]
   )
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
 
@@ -152,7 +146,7 @@ export function ServicesFilters({
 
   return (
     <ServiceFiltersSC>
-      {showClusterSelect && (
+      {setClusterId && (
         <div css={{ width: 360 }}>
           <Select
             isDisabled={!clustersData}
@@ -226,7 +220,7 @@ export function ServicesFilters({
           },
         }}
       >
-        {statusTabs.map(([key, { label }]) => (
+        {statusTabs?.map(([key, { label }]) => (
           <SubTab
             key={key}
             textValue={label}

@@ -7,9 +7,10 @@ import {
 } from 'utils/graphql'
 import { ApolloQueryResult, QueryResult } from '@apollo/client'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { VirtualItem } from '@tanstack/react-virtual'
 import { usePrevious } from 'honorable'
+import { FetchMoreQueryOptions } from 'apollo-boost'
 
 type FetchMoreT<
   TData extends Partial<
@@ -63,48 +64,6 @@ export function fetchMoreAndExtend<
   })
 }
 
-export function useFetchMorePolling<
-  QData extends Partial<Record<K, any>>,
-  QVariables extends {
-    first?: InputMaybe<number> | undefined
-    after?: InputMaybe<string> | undefined
-  },
-  K extends string,
->(
-  queryResult: QueryResult<QData, QVariables>,
-  { key, interval = POLL_INTERVAL }: { key: K; interval?: number }
-) {
-  const { variables, data, loading, refetch } = queryResult
-  const edges = data?.[key]?.edges
-
-  useEffect(() => {
-    if (!edges) {
-      return
-    }
-    let intervalId
-
-    if (!loading) {
-      intervalId = setInterval(() => {
-        const total = edges?.length || 0
-
-        if (!variables) {
-          return
-        }
-        refetch({
-          ...(variables || {}),
-          first: total,
-        })
-      }, interval)
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
-    }
-  }, [edges, interval, key, loading, refetch, variables])
-}
-
 export function useSlicePolling<
   QData extends Partial<Record<K, any>>,
   QVariables extends {
@@ -119,9 +78,13 @@ export function useSlicePolling<
     ...fetchSliceOpts
   }: { interval?: number } & FetchSliceOptions<K>
 ) {
-  const { variables, data, loading, refetch } = queryResult
+  const { data, loading, refetch: originalRefetch } = queryResult
   const edges = data?.[fetchSliceOpts.key]?.edges
   const fetchSlice = useFetchSlice(queryResult, fetchSliceOpts)
+  const refetch =
+    fetchSliceOpts?.virtualSlice?.start.index === 0
+      ? originalRefetch
+      : fetchSlice
 
   useEffect(() => {
     if (!edges) {
@@ -131,7 +94,7 @@ export function useSlicePolling<
 
     if (!loading) {
       intervalId = setInterval(() => {
-        fetchSlice()
+        refetch()
       }, interval)
     }
 
@@ -140,7 +103,14 @@ export function useSlicePolling<
         clearInterval(intervalId)
       }
     }
-  }, [edges, fetchSlice, interval, loading, refetch, variables])
+  }, [edges, interval, loading, refetch])
+
+  return useMemo(
+    () => ({
+      refetch,
+    }),
+    [refetch]
+  )
 }
 
 export function fetchMoreAndUpdate<
@@ -153,7 +123,10 @@ export function fetchMoreAndUpdate<
 >(
   queryResult: Pick<QueryResult<QData, QVariables>, 'fetchMore' | 'variables'>,
   key: K,
-  queryVariables?: Nullable<QVariables>
+  queryVariables?: FetchMoreQueryOptions<
+    QVariables,
+    'first' | 'after'
+  >['variables']
 ) {
   const first = queryVariables?.first || queryResult.variables?.first
   const after = queryVariables?.after || queryResult.variables?.after
@@ -183,7 +156,6 @@ export function useFetchSlice<
 
   useEffect(() => {
     if (endCursor && endCursor !== prevEndCursor && endCursorIndex >= 0) {
-      console.log('new end cursor', endCursor)
       setEndCursors((prev) =>
         [...prev, { index: endCursorIndex, cursor: endCursor }].sort(
           (a, b) => b.index - a.index
@@ -191,7 +163,6 @@ export function useFetchSlice<
       )
     }
   }, [endCursor, endCursorIndex, prevEndCursor])
-  console.log('endCursors', endCursors)
 
   const fetchMoreThing = useCallback(() => {
     const startIndex = virtualSlice?.start?.index ?? 0
@@ -199,7 +170,6 @@ export function useFetchSlice<
     const cursor = endCursors.find((c) => c.index < startIndex)
     const first = Math.max(pageSize, endIndex - (cursor?.index || 0) + 1)
 
-    // @ts-expect-error
     fetchMoreAndUpdate(queryResult, key, {
       first,
       after: cursor?.cursor,
