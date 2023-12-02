@@ -39,6 +39,8 @@ import { SideNavEntries } from 'components/layout/SideNavEntries'
 
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 
+import { POLL_INTERVAL } from 'components/cluster/constants'
+
 import ServiceSelector from '../ServiceSelector'
 
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
@@ -113,7 +115,10 @@ function ServiceDetailsBase() {
   })
   const docPageContext = useDocPageContext()
 
-  const { data: serviceListData } = useServiceDeploymentsTinyQuery()
+  const { data: serviceListData } = useServiceDeploymentsTinyQuery({
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
   const serviceList = useMemo(
     () => mapExistingNodes(serviceListData?.serviceDeployments),
     [serviceListData?.serviceDeployments]
@@ -121,6 +126,8 @@ function ServiceDetailsBase() {
 
   const { data: serviceData, error: serviceError } = useServiceDeploymentQuery({
     variables: { id: serviceId },
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
   })
   const { serviceDeployment } = serviceData || {}
   const docs = useMemo(

@@ -919,12 +919,12 @@ defmodule Console.Deployments.ServicesAsyncTest do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       svc = insert(:service,
         repository: git,
-        git: %{ref: "master", folder: "charts/console"},
+        git: %{ref: "master", folder: "test-apps/helm-values"},
         helm: %{
           chart: "podinfo",
           version: "5.0",
           repository: %{name: "podinfo", namespace: "helm-charts"},
-          values_files: ["values.yaml"]
+          values_files: ["values-podinfo.yaml"]
         }
       )
 
@@ -940,7 +940,7 @@ defmodule Console.Deployments.ServicesAsyncTest do
       {:ok, content} = Tar.tar_stream(f)
       content = Map.new(content)
 
-      assert content["values.yaml"] =~ "dkr.plural.sh"
+      assert content["values-podinfo.yaml"] =~ "tag: 6.0.0"
     end
   end
 end

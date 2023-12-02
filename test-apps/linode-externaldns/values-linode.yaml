@@ -1,0 +1,6 @@
+provider: linode
+domainFilters:
+- {{ configuration.domain }}
+txtOwnerId: plural
+linode:
+  apiToken: {{ configuration.apiToken }}
