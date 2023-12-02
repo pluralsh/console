@@ -39,10 +39,11 @@ import { SideNavEntries } from 'components/layout/SideNavEntries'
 
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 
+import { POLL_INTERVAL } from 'components/cluster/constants'
+
 import ServiceSelector from '../ServiceSelector'
 
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
-import { POLL_INTERVAL } from 'components/cluster/constants'
 
 type ServiceContextType = {
   docs: ReturnType<typeof getDocsData>
