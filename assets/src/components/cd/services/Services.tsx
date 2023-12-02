@@ -35,11 +35,18 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
-import { useFetchSlice } from 'components/utils/tableFetchHelpers'
+import {
+  useFetchSlice,
+  useSlicePolling,
+} from 'components/utils/tableFetchHelpers'
 
 import { VirtualItem } from '@tanstack/react-virtual'
 
-import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
+import {
+  CD_BASE_CRUMBS,
+  POLL_INTERVAL,
+  useSetCDHeaderContent,
+} from '../ContinuousDeployment'
 
 import {
   ColActions,
@@ -149,6 +156,14 @@ export default function Services() {
   const fetchSlice = useFetchSlice(queryResult, {
     virtualSlice,
     pageSize: QUERY_PAGE_SIZE,
+    key: 'serviceDeployments',
+  })
+
+  useSlicePolling(queryResult, {
+    virtualSlice,
+    pageSize: QUERY_PAGE_SIZE,
+    key: 'serviceDeployments',
+    interval: POLL_INTERVAL,
   })
 
   useSetCDHeaderContent(

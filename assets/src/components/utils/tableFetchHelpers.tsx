@@ -30,6 +30,12 @@ type FetchMoreT<
   }
 ) => Promise<ApolloQueryResult<TData>>
 
+type FetchSliceOptions<K extends string> = {
+  key: K
+  virtualSlice: { start: VirtualItem; end: VirtualItem } | undefined
+  pageSize: number
+}
+
 export function fetchMoreAndExtend<
   TData extends Partial<
     Record<K, (Connection<any> & PaginatedResult<any>) | null>
@@ -66,8 +72,7 @@ export function useFetchMorePolling<
   K extends string,
 >(
   queryResult: QueryResult<QData, QVariables>,
-  key: K,
-  interval: number = POLL_INTERVAL
+  { key, interval = POLL_INTERVAL }: { key: K; interval?: number }
 ) {
   const { variables, data, loading, refetch } = queryResult
   const edges = data?.[key]?.edges
@@ -100,6 +105,44 @@ export function useFetchMorePolling<
   }, [edges, interval, key, loading, refetch, variables])
 }
 
+export function useSlicePolling<
+  QData extends Partial<Record<K, any>>,
+  QVariables extends {
+    first?: InputMaybe<number> | undefined
+    after?: InputMaybe<string> | undefined
+  },
+  K extends string,
+>(
+  queryResult: QueryResult<QData, QVariables>,
+  {
+    interval = POLL_INTERVAL,
+    ...fetchSliceOpts
+  }: { interval?: number } & FetchSliceOptions<K>
+) {
+  const { variables, data, loading, refetch } = queryResult
+  const edges = data?.[fetchSliceOpts.key]?.edges
+  const fetchSlice = useFetchSlice(queryResult, fetchSliceOpts)
+
+  useEffect(() => {
+    if (!edges) {
+      return
+    }
+    let intervalId
+
+    if (!loading) {
+      intervalId = setInterval(() => {
+        fetchSlice()
+      }, interval)
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId)
+      }
+    }
+  }, [edges, fetchSlice, interval, loading, refetch, variables])
+}
+
 export function fetchMoreAndUpdate<
   QData extends Partial<Record<K, any>>,
   QVariables extends {
@@ -122,20 +165,20 @@ export function fetchMoreAndUpdate<
   })
 }
 
-export function useFetchSlice(
-  queryResult,
-  options: {
-    virtualSlice: { start: VirtualItem; end: VirtualItem } | undefined
-    pageSize: number
-  }
-) {
-  const { virtualSlice, pageSize } = options
+export function useFetchSlice<
+  QData extends Partial<Record<K, any>>,
+  QVariables extends {
+    first?: InputMaybe<number> | undefined
+    after?: InputMaybe<string> | undefined
+  },
+  K extends string,
+>(queryResult: QueryResult<QData, QVariables>, options: FetchSliceOptions<K>) {
+  const { virtualSlice, pageSize, key } = options
   const [endCursors, setEndCursors] = useState<
     { index: number; cursor: string }[]
   >([])
-  const dataKey = 'serviceDeployments' as const
-  const endCursor = queryResult?.data?.[dataKey]?.pageInfo.endCursor
-  const endCursorIndex = (queryResult?.data?.[dataKey]?.edges?.length ?? 0) - 1
+  const endCursor = queryResult?.data?.[key]?.pageInfo.endCursor
+  const endCursorIndex = (queryResult?.data?.[key]?.edges?.length ?? 0) - 1
   const prevEndCursor = usePrevious(endCursor)
 
   useEffect(() => {
@@ -156,12 +199,14 @@ export function useFetchSlice(
     const cursor = endCursors.find((c) => c.index < startIndex)
     const first = Math.max(pageSize, endIndex - (cursor?.index || 0) + 1)
 
-    fetchMoreAndUpdate(queryResult, 'serviceDeployments', {
-      after: cursor?.cursor,
+    // @ts-expect-error
+    fetchMoreAndUpdate(queryResult, key, {
       first,
+      after: cursor?.cursor,
     })
   }, [
     endCursors,
+    key,
     pageSize,
     queryResult,
     virtualSlice?.end?.index,
