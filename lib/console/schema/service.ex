@@ -50,6 +50,12 @@ defmodule Console.Schema.Service do
       model
       |> cast(attrs, ~w(values chart version values_files)a)
       |> cast_embed(:repository)
+      |> validate_change(:values_files, fn :values_files, files ->
+        case Enum.member?(files, "values.yaml") do
+          true -> [values_files: "explicitly wiring in values.yaml can corrupt helm charts, try a different filename"]
+          _ -> []
+        end
+      end)
     end
   end
 
