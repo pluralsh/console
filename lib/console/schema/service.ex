@@ -161,6 +161,10 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.owner_id == ^owner_id)
   end
 
+  def for_status(query \\ __MODULE__, status) do
+    from(s in query, where: s.status == ^status)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :cluster_id, asc: :name]) do
     from(s in query, order_by: ^order)
   end

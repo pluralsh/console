@@ -302,6 +302,7 @@ defmodule Console.GraphQl.Deployments.Service do
       middleware Authenticated
       arg :cluster_id, :id
       arg :q,          :string
+      arg :status,     :service_deployment_status
       arg :cluster,    :string, description: "the handle of the cluster for this service"
 
       safe_resolve &Deployments.list_services/2
@@ -310,6 +311,8 @@ defmodule Console.GraphQl.Deployments.Service do
     field :service_statuses, list_of(:service_status_count) do
       middleware Authenticated
       arg :cluster_id, :id
+      arg :q,          :string
+      arg :status,     :service_deployment_status
 
       safe_resolve &Deployments.service_statuses/2
     end
