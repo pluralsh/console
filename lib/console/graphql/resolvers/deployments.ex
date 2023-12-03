@@ -68,7 +68,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def list_services(args, %{context: %{current_user: user}}) do
     Service.for_user(user)
     |> service_filters(args)
-    |> maybe_search(Cluster, args)
+    |> maybe_search(Service, args)
     |> Service.ordered()
     |> paginate(args)
   end
@@ -89,6 +89,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def service_statuses(args, %{context: %{current_user: user}}) do
     Service.for_user(user)
     |> service_filters(args)
+    |> maybe_search(Service, args)
     |> Service.statuses()
     |> Console.Repo.all()
     |> ok()
@@ -101,6 +102,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     Enum.reduce(args, query, fn
       {:cluster_id, id}, q -> Service.for_cluster(q, id)
       {:cluster, handle}, q -> Service.for_cluster_handle(q, handle)
+      {:status, status}, q -> Service.for_status(q, status)
       _, q -> q
     end)
   end

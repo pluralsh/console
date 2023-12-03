@@ -3334,11 +3334,14 @@ export type RootQueryTypeServiceDeploymentsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<ServiceDeploymentStatus>;
 };
 
 
 export type RootQueryTypeServiceStatusesArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<ServiceDeploymentStatus>;
 };
 
 

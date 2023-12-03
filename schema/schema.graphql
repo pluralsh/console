@@ -182,11 +182,13 @@ type RootQueryType {
 
     q: String
 
+    status: ServiceDeploymentStatus
+
     "the handle of the cluster for this service"
     cluster: String
   ): ServiceDeploymentConnection
 
-  serviceStatuses(clusterId: ID): [ServiceStatusCount]
+  serviceStatuses(clusterId: ID, q: String, status: ServiceDeploymentStatus): [ServiceStatusCount]
 
   pipelines(after: String, first: Int, before: String, last: Int): PipelineConnection
 
