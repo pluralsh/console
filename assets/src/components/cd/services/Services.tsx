@@ -85,10 +85,10 @@ export function AuthMethodChip({
 export const SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
 >['reactVirtualOptions'] = {
-  overscan: 4,
+  overscan: 10,
 }
 
-export const SERVICES_QUERY_PAGE_SIZE = 20
+export const SERVICES_QUERY_PAGE_SIZE = 100
 
 export default function Services() {
   const theme = useTheme()
