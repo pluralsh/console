@@ -157,14 +157,15 @@ export function useFetchSlice<
   useEffect(() => {
     if (endCursor && endCursor !== prevEndCursor && endCursorIndex >= 0) {
       setEndCursors((prev) =>
-        [...prev, { index: endCursorIndex, cursor: endCursor }].sort(
-          (a, b) => b.index - a.index
-        )
+        [
+          ...(virtualSlice?.start?.index !== 0 ? prev : []),
+          { index: endCursorIndex, cursor: endCursor },
+        ].sort((a, b) => b.index - a.index)
       )
     }
-  }, [endCursor, endCursorIndex, prevEndCursor])
+  }, [endCursor, endCursorIndex, prevEndCursor, virtualSlice?.start?.index])
 
-  const fetchMoreThing = useCallback(() => {
+  const fetchSlice = useCallback(() => {
     const startIndex = virtualSlice?.start?.index ?? 0
     const endIndex = virtualSlice?.end?.index ?? 0
     const cursor = endCursors.find((c) => c.index < startIndex)
@@ -183,5 +184,5 @@ export function useFetchSlice<
     virtualSlice?.start?.index,
   ])
 
-  return fetchMoreThing
+  return fetchSlice
 }
