@@ -63,8 +63,6 @@ export function updateConnection<
     (a, b) => (a?.node?.id ? a?.node?.id === b?.node?.id : false)
   ).reverse()
 
-  console.log('uniq', uniq)
-
   return {
     ...prev,
     [key]: {
