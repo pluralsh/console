@@ -156,29 +156,9 @@ export default function Services() {
           }}
         >
           <DeployService refetch={refetch} />
-          <Button
-            secondary
-            onClick={refetch}
-          >
-            fetch slice
-          </Button>
-          <div>
-            {virtualSlice?.start.index}, {virtualSlice?.end.index}
-            <br />
-            first: {queryResult?.variables?.first}
-            <br />
-            l: {serviceDeployments?.edges?.length}
-          </div>
         </div>
       ),
-      [
-        queryResult?.variables?.first,
-        refetch,
-        serviceDeployments?.edges?.length,
-        theme.spacing.small,
-        virtualSlice?.end.index,
-        virtualSlice?.start.index,
-      ]
+      [refetch, theme.spacing.small]
     )
   )
   const [tableFilters, setTableFilters] = useState<
