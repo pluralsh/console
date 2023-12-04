@@ -143,6 +143,8 @@ export function ModalForm({
     inputRef.current?.focus?.()
   }, [])
 
+  console.log('serviceSettings', serviceDeployment)
+
   return (
     <ModalAlt
       header="Update service"
@@ -178,7 +180,7 @@ export function ModalForm({
           gap: theme.spacing.medium,
         }}
       >
-        {!serviceDeployment.helm?.chart && (
+        {serviceDeployment.repository && (
           <>
             <ServiceGitRefField
               value={state.gitRef}
