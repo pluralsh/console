@@ -81,10 +81,9 @@ export function useSlicePolling<
   const { data, loading, refetch: originalRefetch } = queryResult
   const edges = data?.[fetchSliceOpts.key]?.edges
   const fetchSlice = useFetchSlice(queryResult, fetchSliceOpts)
-  const refetch =
-    fetchSliceOpts?.virtualSlice?.start.index === 0
-      ? originalRefetch
-      : fetchSlice
+  const refetch = !fetchSliceOpts?.virtualSlice?.start?.index
+    ? originalRefetch
+    : fetchSlice
 
   useEffect(() => {
     if (!edges) {

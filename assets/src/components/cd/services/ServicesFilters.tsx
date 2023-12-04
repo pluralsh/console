@@ -110,10 +110,10 @@ export function ServicesFilters({
         (count, status) => count + (status?.count || 0),
         0
       ),
-      HEALTHY: isEmpty(statusCounts) ? 0 : undefined,
-      SYNCED: isEmpty(statusCounts) ? 0 : undefined,
-      STALE: isEmpty(statusCounts) ? 0 : undefined,
-      FAILED: isEmpty(statusCounts) ? 0 : undefined,
+      HEALTHY: statusCounts ? 0 : undefined,
+      SYNCED: statusCounts ? 0 : undefined,
+      STALE: statusCounts ? 0 : undefined,
+      FAILED: statusCounts ? 0 : undefined,
       ...Object.fromEntries(
         statusCounts?.map((status) => [status?.status, status?.count]) || []
       ),
