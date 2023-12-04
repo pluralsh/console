@@ -1,6 +1,5 @@
 import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import {
-  Button,
   Chip,
   EmptyState,
   TabPanel,
