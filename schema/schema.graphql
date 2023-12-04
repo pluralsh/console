@@ -449,6 +449,12 @@ type DeploymentSettings {
   "whether the byok cluster has been brought under self-management"
   selfManaged: Boolean
 
+  "the way we can connect to your loki instance"
+  lokiConnection: HttpConnection
+
+  "the way we can connect to your prometheus instance"
+  prometheusConnection: HttpConnection
+
   "the repo to fetch CAPI manifests from, for both providers and clusters"
   artifactRepository: GitRepository
 
@@ -472,13 +478,45 @@ type DeploymentSettings {
   updatedAt: DateTime
 }
 
+"the details of how to connect to a http service like prometheus"
+type HttpConnection {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "password to connect w\/ for basic auth"
+  password: String
+}
+
 input DeploymentSettingsAttributes {
   artifactRepositoryId: ID
+
   deployerRepositoryId: ID
+
+  "connection details for a prometheus instance to use"
+  prometheusConnection: HttpConnectionAttributes
+
+  "connection details for a loki instance to use"
+  lokiConnection: HttpConnectionAttributes
+
   readBindings: [PolicyBindingAttributes]
+
   writeBindings: [PolicyBindingAttributes]
+
   gitBindings: [PolicyBindingAttributes]
+
   createBindings: [PolicyBindingAttributes]
+}
+
+input HttpConnectionAttributes {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "password to connect w\/ for basic auth"
+  password: String
 }
 
 input RbacAttributes {
