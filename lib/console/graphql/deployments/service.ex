@@ -13,7 +13,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :docs_path,      :string
     field :sync_config,    :sync_config_attributes
     field :protect,        :boolean
-    field :repository_id,  non_null(:id)
+    field :repository_id,  :id
     field :git,            :git_ref_attributes
     field :helm,           :helm_config_attributes
     field :kustomize,      :kustomize_attributes

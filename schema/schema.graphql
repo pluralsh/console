@@ -841,7 +841,7 @@ input ServiceDeploymentAttributes {
   docsPath: String
   syncConfig: SyncConfigAttributes
   protect: Boolean
-  repositoryId: ID!
+  repositoryId: ID
   git: GitRefAttributes
   helm: HelmConfigAttributes
   kustomize: KustomizeAttributes

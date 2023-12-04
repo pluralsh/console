@@ -3691,7 +3691,7 @@ export type ServiceDeploymentAttributes = {
   namespace: Scalars['String']['input'];
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
-  repositoryId: Scalars['ID']['input'];
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
   syncConfig?: InputMaybe<SyncConfigAttributes>;
   version?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
