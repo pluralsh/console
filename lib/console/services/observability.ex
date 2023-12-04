@@ -3,7 +3,15 @@ defmodule Console.Services.Observability do
   alias Kube.{Client, Dashboard, VerticalPodAutoscaler}
   alias Prometheus.Client, as: PrometheusClient
   alias Loki.Client, as: LokiClient
+  alias Console.Schema.DeploymentSettings.Connection
   alias Kazan.Apis.Autoscaling.V1.CrossVersionObjectReference
+
+  @obs_conn :obs_conn
+
+  def put_connection(scope, %Connection{} = connection), do: Process.put({@obs_conn, scope}, connection)
+  def put_connection(_, _), do: :ok
+
+  def get_connection(scope), do: Process.get({@obs_conn, scope})
 
   def get_dashboards(name) do
     with {:ok, %{items: items}} <- Client.list_dashboards(name),
@@ -13,12 +21,14 @@ defmodule Console.Services.Observability do
   def get_dashboard(name, id), do: Client.get_dashboard(name, id)
 
   def get_logs(q, start, stop, limit) do
-    with {:ok, %{data: %{result: results}}} <- LokiClient.query(q, start, stop, limit),
+    client = get_connection(:loki)
+    with {:ok, %{data: %{result: results}}} <- LokiClient.query(client, q, start, stop, limit),
       do: {:ok, results}
   end
 
   def get_metric(q, start, stop, step) do
-    with {:ok, %{data: %{result: results}}} <- PrometheusClient.query(q, start, stop, step, %{}),
+    client = get_connection(:prometheus)
+    with {:ok, %{data: %{result: results}}} <- PrometheusClient.query(client, q, start, stop, step, %{}),
       do: {:ok, results}
   end
 

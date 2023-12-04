@@ -1028,7 +1028,11 @@ export type DeploymentSettings = {
   gitBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the way we can connect to your loki instance */
+  lokiConnection?: Maybe<HttpConnection>;
   name: Scalars['String']['output'];
+  /** the way we can connect to your prometheus instance */
+  prometheusConnection?: Maybe<HttpConnection>;
   /** read policy across all clusters */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** whether the byok cluster has been brought under self-management */
@@ -1043,6 +1047,10 @@ export type DeploymentSettingsAttributes = {
   createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   deployerRepositoryId?: InputMaybe<Scalars['ID']['input']>;
   gitBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  /** connection details for a loki instance to use */
+  lokiConnection?: InputMaybe<HttpConnectionAttributes>;
+  /** connection details for a prometheus instance to use */
+  prometheusConnection?: InputMaybe<HttpConnectionAttributes>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
@@ -1381,6 +1389,24 @@ export type HelmSpec = {
   valuesFiles?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the chart version in use currently */
   version?: Maybe<Scalars['String']['output']>;
+};
+
+/** the details of how to connect to a http service like prometheus */
+export type HttpConnection = {
+  __typename?: 'HttpConnection';
+  host: Scalars['String']['output'];
+  /** password to connect w/ for basic auth */
+  password?: Maybe<Scalars['String']['output']>;
+  /** user to connect w/ for basic auth */
+  user?: Maybe<Scalars['String']['output']>;
+};
+
+export type HttpConnectionAttributes = {
+  host: Scalars['String']['input'];
+  /** password to connect w/ for basic auth */
+  password?: InputMaybe<Scalars['String']['input']>;
+  /** user to connect w/ for basic auth */
+  user?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type HttpIngressRule = {
