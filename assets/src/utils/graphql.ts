@@ -16,8 +16,9 @@ export function updateFragment(cache, { fragment, id, update, fragmentName }) {
   })
 }
 
-// Update a connection where previous existing values are not overwritten by
-// incoming values
+/**
+ * Extend a connection where previous existing values are not overwritten by incoming values
+ */
 export function extendConnection<
   K extends string,
   TData extends Partial<
@@ -43,7 +44,9 @@ export function extendConnection<
   }
 }
 
-// Update a connection where incoming values overwrite previous existing values
+/**
+ * Update a connection where incoming values overwrite previous existing values
+ */
 export function updateConnection<
   K extends string,
   TData extends Partial<
