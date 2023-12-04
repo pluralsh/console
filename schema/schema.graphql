@@ -852,7 +852,6 @@ input ServiceDeploymentAttributes {
 
 input SyncConfigAttributes {
   namespaceMetadata: MetadataAttributes
-  diffNormalizer: DiffNormalizerAttributes
 }
 
 input HelmConfigAttributes {
@@ -864,16 +863,8 @@ input HelmConfigAttributes {
 }
 
 input MetadataAttributes {
-  labels: Map
-  annotations: Map
-}
-
-input DiffNormalizerAttributes {
-  group: String!
-  kind: String!
-  name: String!
-  namespace: String!
-  jsonPatches: [String!]
+  labels: Json
+  annotations: Json
 }
 
 input ServiceUpdateAttributes {
@@ -1525,7 +1516,7 @@ type NodePool {
   spot: Boolean
 
   "kubernetes labels to apply to the nodes in this pool, useful for node selectors"
-  labels: Json
+  labels: Map
 
   "any taints you'd want to apply to a node, for eg preventing scheduling on spot instances"
   taints: [Taint]
