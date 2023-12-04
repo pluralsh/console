@@ -13,7 +13,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :docs_path,      :string
     field :sync_config,    :sync_config_attributes
     field :protect,        :boolean
-    field :repository_id,  non_null(:id)
+    field :repository_id,  :id
     field :git,            :git_ref_attributes
     field :helm,           :helm_config_attributes
     field :kustomize,      :kustomize_attributes
@@ -24,7 +24,6 @@ defmodule Console.GraphQl.Deployments.Service do
 
   input_object :sync_config_attributes do
     field :namespace_metadata, :metadata_attributes
-    field :diff_normalizer,    :diff_normalizer_attributes
   end
 
   input_object :helm_config_attributes do
@@ -36,16 +35,8 @@ defmodule Console.GraphQl.Deployments.Service do
   end
 
   input_object :metadata_attributes do
-    field :labels,      :map
-    field :annotations, :map
-  end
-
-  input_object :diff_normalizer_attributes do
-    field :group,        non_null(:string)
-    field :kind,         non_null(:string)
-    field :name,         non_null(:string)
-    field :namespace,    non_null(:string)
-    field :json_patches, list_of(non_null(:string))
+    field :labels,      :json
+    field :annotations, :json
   end
 
   input_object :service_update_attributes do
