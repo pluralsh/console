@@ -807,7 +807,7 @@ defmodule Console.Deployments.ClustersTest do
 
       {:ok, 1} = Clusters.create_runtime_services([
         %{name: "ingress-nginx", version: "1.9.1"},
-        %{name: "istio", version: "2.0.0"}
+        %{name: "bogus", version: "2.0.0"}
       ], nil, cluster)
 
       [runtime] = Clusters.runtime_services(cluster)
@@ -817,7 +817,7 @@ defmodule Console.Deployments.ClustersTest do
       svc = insert(:service, cluster: cluster)
       {:ok, 1} = Clusters.create_runtime_services([
         %{name: "ingress-nginx", version: "1.9.1"},
-        %{name: "istio", version: "2.0.0"}
+        %{name: "bogus", version: "2.0.0"}
       ], svc.id, cluster)
 
       [runtime] = Clusters.runtime_services(cluster)
@@ -831,7 +831,7 @@ defmodule Console.Deployments.ClustersTest do
 
       {:ok, 1} = Clusters.create_runtime_services([
         %{name: "ingress-nginx", version: "v1.9.1"},
-        %{name: "istio", version: "2.0.0"}
+        %{name: "bogus", version: "2.0.0"}
       ], nil, cluster)
 
       [runtime] = Clusters.runtime_services(cluster)
