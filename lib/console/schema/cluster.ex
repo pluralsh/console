@@ -263,12 +263,12 @@ defmodule Console.Schema.Cluster do
   end
 
   defp validate_vsn(cs) do
-    case {get_change(cs, :version), cs.data.version, cs.data.current_version} do
-      {vsn, old, current} when is_binary(vsn) and is_binary(old) and is_binary(current) and old != current ->
+    case {get_change(cs, :version), cs.data.version, cs.data.current_version, valid_semver?(cs.data.version)} do
+      {vsn, old, current, true} when is_binary(vsn) and is_binary(old) and is_binary(current) and old != current ->
         add_error(cs, :version, "cannot upgrade while an upgrade is still in progress")
-      {v, _, prev} when is_binary(v) and is_binary(prev) ->
+      {v, _, prev, _} when is_binary(v) and is_binary(prev) ->
         validate_vsn(cs, v, prev)
-      {v, prev, _} when is_binary(v) and is_binary(prev) ->
+      {v, prev, _, _} when is_binary(v) and is_binary(prev) ->
         validate_vsn(cs, v, prev)
       _ -> cs
     end
@@ -285,11 +285,22 @@ defmodule Console.Schema.Cluster do
     with current when is_binary(current) <- get_field(cs, :current_version),
          vsn when is_binary(vsn) <- get_field(cs, :version),
          {:ok, current_parsed} <- Version.parse(clean_version(current)),
-         {:ok, vsn} <- Version.parse(clean_version(vsn)),
+         {:ok, vsn} <- Version.parse(minimal_coerce(vsn)),
          :gt <- Version.compare(current_parsed, vsn) do
       put_change(cs, :version, current)
     else
       _ -> cs
     end
   end
+
+  defp valid_semver?(vsn) when is_binary(vsn) do
+    case Version.parse(minimal_coerce(vsn)) do
+      {:ok, _} -> true
+      _ -> false
+    end
+  end
+  defp valid_semver?(_), do: false
+
+  defp minimal_coerce("v" <> vsn), do: vsn
+  defp minimal_coerce(vsn), do: vsn
 end

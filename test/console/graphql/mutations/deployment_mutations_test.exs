@@ -133,7 +133,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
   describe "pingCluster" do
     test "it can mark a cluster as pinged" do
-      cluster = insert(:cluster, version: "1.24")
+      cluster = insert(:cluster, version: "1.24.1")
 
       {:ok, %{data: %{"pingCluster" => pinged}}} = run_query("""
         mutation Ping($ping: ClusterPing!) {
@@ -145,11 +145,11 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
             currentVersion
           }
         }
-      """, %{"ping" => %{"currentVersion" => "1.25"}}, %{cluster: cluster})
+      """, %{"ping" => %{"currentVersion" => "1.24.2"}}, %{cluster: cluster})
 
       assert pinged["id"] == cluster.id
-      assert pinged["currentVersion"] == "1.25"
-      assert pinged["version"] == "1.25"
+      assert pinged["currentVersion"] == "1.24.2"
+      assert pinged["version"] == "1.24.2"
       assert pinged["pingedAt"]
       assert pinged["installed"]
     end
