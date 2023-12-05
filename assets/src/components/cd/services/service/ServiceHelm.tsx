@@ -1,3 +1,10 @@
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Button, usePrevious } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
+
+import isEmpty from 'lodash/isEmpty'
+
 import {
   CD_ABS_PATH,
   SERVICES_REL_PATH,
@@ -9,19 +16,11 @@ import {
   ServiceUpdateAttributes,
   useUpdateServiceDeploymentMutation,
 } from 'generated/graphql'
-import { useNavigate, useParams } from 'react-router-dom'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { useEffect, useMemo, useState } from 'react'
-import { Button, usePrevious } from '@pluralsh/design-system'
-import { GqlError } from 'components/utils/Alert'
-
-import isEmpty from 'lodash/isEmpty'
 
 import { isNonNullable } from 'utils/isNonNullable'
-
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { GqlError } from 'components/utils/Alert'
 import { useUpdateState } from 'components/hooks/useUpdateState'
-
-import { useTheme } from 'styled-components'
 
 import { ServiceSettingsHelmValues } from '../deployModal/DeployServiceSettingsHelmValues'
 

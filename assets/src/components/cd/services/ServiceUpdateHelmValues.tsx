@@ -1,12 +1,5 @@
 import { Button } from '@pluralsh/design-system'
-import {
-  HelmConfigAttributes,
-  ServiceDeploymentDetailsFragment,
-  ServiceDeploymentsRowFragment,
-  ServiceUpdateAttributes,
-  useServiceDeploymentQuery,
-  useUpdateServiceDeploymentMutation,
-} from 'generated/graphql'
+
 import { useTheme } from 'styled-components'
 import {
   FormEvent,
@@ -16,16 +9,22 @@ import {
   useRef,
   useState,
 } from 'react'
-import { GqlError } from 'components/utils/Alert'
+import isEmpty from 'lodash/isEmpty'
 
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
-import { useUpdateState } from 'components/hooks/useUpdateState'
+import {
+  HelmConfigAttributes,
+  ServiceDeploymentDetailsFragment,
+  ServiceDeploymentsRowFragment,
+  ServiceUpdateAttributes,
+  useServiceDeploymentQuery,
+  useUpdateServiceDeploymentMutation,
+} from 'generated/graphql'
 
 import { isNonNullable } from 'utils/isNonNullable'
 
-import isEmpty from 'lodash/isEmpty'
-
+import { GqlError } from 'components/utils/Alert'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { useUpdateState } from 'components/hooks/useUpdateState'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import ModalAlt from '../ModalAlt'

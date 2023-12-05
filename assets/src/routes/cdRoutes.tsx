@@ -15,12 +15,12 @@ import {
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
+import ServiceComponent from 'components/cd/services/component/ServiceComponent'
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
 import ServiceDocs from 'components/cd/services/service/ServiceDocs'
 import ServiceComponents from 'components/cd/services/service/ServiceComponents'
 import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
 import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
-import ServiceComponent from 'components/cd/services/component/ServiceComponent'
 import ServiceSettings from 'components/cd/services/service/ServiceSettings'
 import ServiceHelm from 'components/cd/services/service/ServiceHelm'
 
