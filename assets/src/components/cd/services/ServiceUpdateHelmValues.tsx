@@ -1,12 +1,20 @@
-import { Button, Switch } from '@pluralsh/design-system'
+import { Button } from '@pluralsh/design-system'
 import {
+  HelmConfigAttributes,
   ServiceDeploymentsRowFragment,
   ServiceUpdateAttributes,
   useHelmRepositoryQuery,
   useUpdateServiceDeploymentMutation,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useEffect, useMemo, useRef } from 'react'
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { GqlError } from 'components/utils/Alert'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
@@ -15,13 +23,9 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 
 import ModalAlt from '../ModalAlt'
 
-import {
-  ServiceGitFolderField,
-  ServiceGitRefField,
-} from './deployModal/DeployServiceSettingsGit'
-import { ChartForm } from './deployModal/DeployServiceSettingsHelm'
+import { ServiceSettingsHelmValues } from './deployModal/DeployServiceSettingsHelmValues'
 
-export function ServiceSettings({
+export function ServiceUpdateHelmValues({
   serviceDeployment,
   refetch,
   open,
@@ -44,26 +48,6 @@ export function ServiceSettings({
   )
 }
 
-function ChartUpdate({ repo, state, updateState }) {
-  const { data } = useHelmRepositoryQuery({
-    variables: {
-      name: repo?.name || '',
-      namespace: repo?.namespace || '',
-    },
-    skip: !repo?.name || !repo?.namespace,
-  })
-
-  return (
-    <ChartForm
-      charts={data?.helmRepository?.charts || []}
-      chart={state.helmChart}
-      setChart={(chart) => updateState({ helmChart: chart })}
-      version={state.helmVersion}
-      setVersion={(vsn) => updateState({ helmVersion: vsn })}
-    />
-  )
-}
-
 export function ModalForm({
   serviceDeployment,
   open,
@@ -76,38 +60,32 @@ export function ModalForm({
   refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
-
+  const repo = serviceDeployment.helm?.repository
+  const { data } = useHelmRepositoryQuery({
+    variables: {
+      name: repo?.name || '',
+      namespace: repo?.namespace || '',
+    },
+    skip: !repo?.name || !repo?.namespace,
+  })
+  const helmRepository = data?.helmRepository as Record<string, unknown>
   const {
     state,
     update: updateState,
     hasUpdates,
   } = useUpdateState({
-    gitRef: serviceDeployment.git?.ref ?? '',
-    gitFolder: serviceDeployment.git?.folder ?? '',
-    helmChart: serviceDeployment.helm?.chart ?? '',
-    helmVersion: serviceDeployment.helm?.version ?? '',
-    protect: !!serviceDeployment.protect,
+    helmValues: (helmRepository.values as string) ?? '',
+    helmValuesFiles: (helmRepository.valuesFiles as string[]) ?? [''],
   })
+  const [errors, setErrors] = useState(false)
 
-  const attributes = useMemo(() => {
-    const git =
-      state.gitRef && state.gitFolder
-        ? { folder: state.gitFolder, ref: state.gitRef }
-        : null
-    const helm =
-      state.helmChart && state.helmVersion
-        ? { chart: state.helmChart, version: state.helmVersion }
-        : null
-    let attributes: ServiceUpdateAttributes = { protect: state.protect }
-
-    if (git) {
-      attributes = { git, ...attributes }
-    }
-    if (helm) {
-      attributes = { helm, ...attributes }
+  const attributes = useMemo<Pick<ServiceUpdateAttributes, 'helm'>>(() => {
+    const helm: Pick<HelmConfigAttributes, 'values' | 'valuesFiles'> = {
+      values: state.helmValues || '',
+      valuesFiles: state.helmValuesFiles.filter((value) => !!value),
     }
 
-    return attributes
+    return { helm }
   }, [state])
 
   const [updateService, { loading, error }] =
@@ -125,7 +103,7 @@ export function ModalForm({
     onClose?.()
   }, [onClose])
 
-  const disabled = !hasUpdates
+  const disabled = !hasUpdates && !errors
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
@@ -145,7 +123,7 @@ export function ModalForm({
 
   return (
     <ModalAlt
-      header="Update service"
+      header="Update Helm values"
       open={open}
       portal
       onClose={closeModal}
@@ -178,39 +156,27 @@ export function ModalForm({
           gap: theme.spacing.medium,
         }}
       >
-        {serviceDeployment.repository && (
-          <>
-            <ServiceGitRefField
-              value={state.gitRef}
-              onChange={(e) => {
-                updateState({ gitRef: e.currentTarget.value })
-              }}
-            />
-            <ServiceGitFolderField
-              value={state.gitFolder}
-              onChange={(e) => {
-                updateState({ gitFolder: e.currentTarget.value })
-              }}
-            />
-          </>
-        )}
-        {serviceDeployment.helm?.chart && (
-          <ChartUpdate
-            repo={serviceDeployment.helm?.repository}
-            state={state}
-            updateState={updateState}
-          />
-        )}
-        <Switch
-          checked={state.protect}
-          onChange={(checked) => updateState({ protect: checked })}
-        >
-          Protect from deletion
-        </Switch>
+        <ServiceSettingsHelmValues
+          helmValues={state.helmValues}
+          setHelmValues={(next) =>
+            updateState({
+              helmValues:
+                typeof next === 'function' ? next(state.helmValues) : next,
+            })
+          }
+          helmValuesFiles={state.helmValuesFiles}
+          setHelmValuesFiles={(next) =>
+            updateState({
+              helmValuesFiles:
+                typeof next === 'function' ? next(state.helmValuesFiles) : next,
+            })
+          }
+          setHelmValuesErrors={setErrors}
+        />
       </div>
       {error && (
         <GqlError
-          header="Problem updating service"
+          header="Problem updating Helm values"
           error={error}
         />
       )}

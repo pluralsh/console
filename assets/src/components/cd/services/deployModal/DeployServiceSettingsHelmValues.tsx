@@ -39,7 +39,7 @@ export const HelmValuesFilesTableSC = styled.table(({ theme }) => ({
   },
 }))
 
-export function DeployServiceSettingsHelmValues({
+export function ServiceSettingsHelmValues({
   helmValuesFiles,
   setHelmValuesFiles,
   helmValues,
