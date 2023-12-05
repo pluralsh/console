@@ -4,3 +4,4 @@ names:
 - external-dns
 - argo-rollouts
 - kube-prometheus-stack
+- istio
