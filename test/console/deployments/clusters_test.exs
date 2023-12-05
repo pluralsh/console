@@ -336,24 +336,24 @@ defmodule Console.Deployments.ClustersTest do
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",
-        version: "1.25",
-        current_version: "1.25",
+        version: "1.25.0",
+        current_version: "1.25.0",
         provider_id: provider.id,
         node_pools: [
           %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
         ]
       }, user)
 
-      assert cluster.current_version == "1.25"
+      assert cluster.current_version == "1.25.0"
 
       {:ok, cluster} = Clusters.update_cluster(%{
-        version: "1.26",
+        version: "1.26.0",
         node_pools: [
           %{name: "pool", min_size: 2, max_size: 5, instance_type: "t5.large"}
         ]
       }, cluster.id, user)
 
-      assert cluster.version == "1.26"
+      assert cluster.version == "1.26.0"
 
       {:error, _} = Clusters.update_cluster(%{
         version: "1.26.5",
