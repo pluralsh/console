@@ -1,12 +1,11 @@
 defmodule Loki.Client do
   alias Loki.{Response, Data, Result, Value}
+  alias Console.Schema.DeploymentSettings.Connection
 
-  defstruct [:host, :user, :password]
-
-  def host(%__MODULE__{host: h}) when is_binary(h), do: h
+  def host(%Connection{host: h}) when is_binary(h), do: h
   def host(_), do: host()
 
-  def auth(%__MODULE__{user: u, password: p}) when is_binary(u) and is_binary(p) do
+  def auth(%Connection{user: u, password: p}) when is_binary(u) and is_binary(p) do
     [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)}]
   end
   def auth(_), do: []
