@@ -74,31 +74,17 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
 }
 
 fragment ServiceDeploymentDetails on ServiceDeployment {
-  id
-  name
+  ...ServiceDeploymentsRow
   namespace
-  componentStatus
-  status
-  cluster {
-    id
-    name
-  }
+  message
   version
   helm {
-    chart
-    version
-    repository {
-      namespace
-      name
-    }
+    values
+    valuesFiles
   }
   docs {
     content
     path
-  }
-  git {
-    folder
-    ref
   }
   components {
     apiDeprecations {
@@ -235,15 +221,7 @@ mutation UpdateServiceDeployment(
   $attributes: ServiceUpdateAttributes!
 ) {
   updateServiceDeployment(id: $id, attributes: $attributes) {
-    configuration {
-      name
-      value
-    }
-    git {
-      folder
-      ref
-    }
-    version
+    ...ServiceDeploymentDetails
   }
 }
 

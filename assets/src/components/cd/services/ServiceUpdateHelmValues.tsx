@@ -1,9 +1,10 @@
 import { Button } from '@pluralsh/design-system'
 import {
   HelmConfigAttributes,
+  ServiceDeploymentDetailsFragment,
   ServiceDeploymentsRowFragment,
   ServiceUpdateAttributes,
-  useHelmRepositoryQuery,
+  useServiceDeploymentQuery,
   useUpdateServiceDeploymentMutation,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
@@ -20,6 +21,12 @@ import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { useUpdateState } from 'components/hooks/useUpdateState'
+
+import { isNonNullable } from 'utils/isNonNullable'
+
+import isEmpty from 'lodash/isEmpty'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import ModalAlt from '../ModalAlt'
 
@@ -50,39 +57,73 @@ export function ServiceUpdateHelmValues({
 
 export function ModalForm({
   serviceDeployment,
-  open,
-  onClose,
-  refetch,
+  ...props
 }: {
   serviceDeployment: ServiceDeploymentsRowFragment
   open: boolean
   onClose: Nullable<() => void>
   refetch: Nullable<() => void>
 }) {
-  const theme = useTheme()
   const repo = serviceDeployment.helm?.repository
-  const { data } = useHelmRepositoryQuery({
+  const { data } = useServiceDeploymentQuery({
     variables: {
-      name: repo?.name || '',
-      namespace: repo?.namespace || '',
+      id: serviceDeployment.id || '',
     },
     skip: !repo?.name || !repo?.namespace,
   })
-  const helmRepository = data?.helmRepository as Record<string, unknown>
+
+  if (!data?.serviceDeployment) {
+    return <LoadingIndicator />
+  }
+
+  return (
+    <ModalFormInner
+      serviceDeployment={data.serviceDeployment}
+      {...props}
+    />
+  )
+}
+
+export function ModalFormInner({
+  serviceDeployment,
+  open,
+  onClose,
+  refetch,
+}: {
+  serviceDeployment: ServiceDeploymentDetailsFragment
+  open: boolean
+  onClose: Nullable<() => void>
+  refetch: Nullable<() => void>
+}) {
+  const theme = useTheme()
+  const repo = serviceDeployment.helm?.repository
+  const { data } = useServiceDeploymentQuery({
+    variables: {
+      id: serviceDeployment.id || '',
+    },
+    skip: !repo?.name || !repo?.namespace,
+  })
+
+  const filteredValuesFiles =
+    data?.serviceDeployment?.helm?.valuesFiles?.filter(isNonNullable)
+
   const {
     state,
     update: updateState,
     hasUpdates,
   } = useUpdateState({
-    helmValues: (helmRepository.values as string) ?? '',
-    helmValuesFiles: (helmRepository.valuesFiles as string[]) ?? [''],
+    helmValues: data?.serviceDeployment?.helm?.values ?? '',
+    helmValuesFiles:
+      filteredValuesFiles && !isEmpty(filteredValuesFiles)
+        ? filteredValuesFiles
+        : [''],
   })
   const [errors, setErrors] = useState(false)
 
   const attributes = useMemo<Pick<ServiceUpdateAttributes, 'helm'>>(() => {
     const helm: Pick<HelmConfigAttributes, 'values' | 'valuesFiles'> = {
       values: state.helmValues || '',
-      valuesFiles: state.helmValuesFiles.filter((value) => !!value),
+      valuesFiles: (state.helmValuesFiles || []).filter((value) => !!value),
     }
 
     return { helm }

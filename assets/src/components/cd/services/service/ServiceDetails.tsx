@@ -91,8 +91,9 @@ export const getDirectory = ({
       label: <ComponentProgress componentsReady={componentStatus} />,
       enabled: true,
     },
+    { path: 'settings', label: 'Settings', enabled: true },
     { path: 'secrets', label: 'Secrets', enabled: true },
-    { path: 'helm', label: 'Helm', enabled: !!helm },
+    { path: 'helm', label: 'Helm values', enabled: !!helm },
     { path: 'revisions', label: 'Revisions', enabled: true },
     {
       path: 'docs',

@@ -44,7 +44,7 @@ export function ServiceSettings({
   )
 }
 
-function ChartUpdate({ repo, state, updateState }) {
+export function ChartUpdate({ repo, state, updateState }) {
   const { data } = useHelmRepositoryQuery({
     variables: {
       name: repo?.name || '',
