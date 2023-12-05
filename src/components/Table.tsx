@@ -72,7 +72,7 @@ export type TableProps = Omit<
   stickyColumn?: boolean
   scrollTopMargin?: number
   virtualizeRows?: boolean
-  lockColumnsOnFirstScroll?: boolean
+  lockColumnsOnScroll?: boolean
   reactVirtualOptions?: Partial<
     Omit<Parameters<typeof useVirtualizer>[0], 'count' | 'getScrollElement'>
   >
@@ -83,9 +83,14 @@ export type TableProps = Omit<
   fetchNextPage?: () => void
   isFetchingNextPage?: boolean
   onVirtualSliceChange?: (slice: {
-    start: VirtualItem
-    end: VirtualItem
+    start: VirtualItem | undefined
+    end: VirtualItem | undefined
   }) => void
+}
+
+type VirtualSlice = {
+  start: VirtualItem | undefined
+  end: VirtualItem | undefined
 }
 
 const propTypes = {}
@@ -444,20 +449,30 @@ function FillerRows({
   )
 }
 
-function useOnFirstScroll(
+function useIsScrolling(
   ref: MutableRefObject<HTMLElement>,
-  onFirstScroll: () => void
+  {
+    onIsScrollingChange: onScrollingChange,
+    restDelay = 350,
+  }: { onIsScrollingChange: (isScrolling: boolean) => void; restDelay?: number }
 ) {
-  const [hasScrolled, setHasScrolled] = useState(false)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const timeout = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!hasScrolled && ref.current) {
+    onScrollingChange?.(isScrolling)
+  }, [isScrolling, onScrollingChange])
+
+  useEffect(() => {
+    if (ref.current) {
       const el = ref.current
 
       const scrollHandler = () => {
-        setHasScrolled(true)
-
-        onFirstScroll()
+        setIsScrolling(true)
+        window.clearTimeout(timeout.current)
+        timeout.current = window.setTimeout(() => {
+          setIsScrolling(false)
+        }, restDelay)
       }
 
       el.addEventListener('scroll', scrollHandler, { passive: true })
@@ -466,7 +481,7 @@ function useOnFirstScroll(
         el.removeEventListener('scroll', scrollHandler)
       }
     }
-  }, [hasScrolled, onFirstScroll, ref])
+  }, [ref, restDelay])
 }
 
 function useOnVirtualSliceChange({
@@ -476,13 +491,10 @@ function useOnVirtualSliceChange({
 }: {
   virtualRows: VirtualItem[]
   virtualizeRows: boolean
-  onVirtualSliceChange: (slice: {
-    start: VirtualItem
-    end: VirtualItem
-  }) => void
+  onVirtualSliceChange: (slice: VirtualSlice) => void
 }) {
   const sliceStartRow = virtualRows[0]
-  const sliceEndRow = virtualRows[virtualRows.length - 1]
+  const sliceEndRow: VirtualItem = virtualRows[virtualRows.length - 1]
   const prevSliceStartRow = usePrevious(virtualRows[0])
   const prevSliceEndRow = usePrevious(virtualRows[virtualRows.length - 1])
 
@@ -514,7 +526,7 @@ function TableRef(
     scrollTopMargin = 500,
     width,
     virtualizeRows = false,
-    lockColumnsOnFirstScroll,
+    lockColumnsOnScroll,
     reactVirtualOptions,
     reactTableOptions,
     onRowClick,
@@ -591,30 +603,32 @@ function TableRef(
 
   useOnVirtualSliceChange({ virtualRows, virtualizeRows, onVirtualSliceChange })
 
-  lockColumnsOnFirstScroll = lockColumnsOnFirstScroll ?? virtualizeRows
-  useOnFirstScroll(
-    tableContainerRef,
-    useCallback(() => {
-      if (lockColumnsOnFirstScroll) {
-        const thCells = tableContainerRef.current?.querySelectorAll('th')
+  lockColumnsOnScroll = lockColumnsOnScroll ?? virtualizeRows
+  useIsScrolling(tableContainerRef, {
+    onIsScrollingChange: useCallback(
+      (isScrolling) => {
+        if (lockColumnsOnScroll) {
+          const thCells = tableContainerRef.current?.querySelectorAll('th')
 
-        const columns = Array.from(thCells)
-          .map((th) => {
-            const { width } = th.getBoundingClientRect()
+          const columns = Array.from(thCells)
+            .map((th) => {
+              const { width } = th.getBoundingClientRect()
 
-            return `${width}px`
-          })
-          .join(' ')
+              return `${width}px`
+            })
+            .join(' ')
 
-        setFixedGridTemplateColumns(columns)
-      }
-    }, [lockColumnsOnFirstScroll])
-  )
+          setFixedGridTemplateColumns(isScrolling ? columns : null)
+        }
+      },
+      [lockColumnsOnScroll]
+    ),
+  })
   useEffect(() => {
-    if (!lockColumnsOnFirstScroll) {
+    if (!lockColumnsOnScroll) {
       setFixedGridTemplateColumns(null)
     }
-  }, [lockColumnsOnFirstScroll])
+  }, [lockColumnsOnScroll])
 
   const { paddingTop, paddingBottom } = useMemo(
     () => ({

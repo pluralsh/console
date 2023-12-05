@@ -132,8 +132,10 @@ const columns = [
   }),
   columnHelper.accessor((row) => row.returnedValue, {
     id: 'returnedValue',
-    cell: (info: any) => <span>{info.getValue()}</span>,
-    header: () => <span>Returned value</span>,
+    cell: (info) => (
+      <span>{info.row.index % 30 === 0 ? info.getValue() : null}</span>
+    ),
+    header: () => <span>Type</span>,
   }),
   columnHelper.accessor((row) => row.description, {
     id: 'description',
