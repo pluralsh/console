@@ -98,8 +98,8 @@ export default function Services() {
   const tabStateRef = useRef<any>(null)
   const [virtualSlice, setVirtualSlice] = useState<
     | {
-        start: VirtualItem
-        end: VirtualItem
+        start: VirtualItem | undefined
+        end: VirtualItem | undefined
       }
     | undefined
   >()

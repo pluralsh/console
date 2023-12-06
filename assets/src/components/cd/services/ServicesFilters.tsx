@@ -22,7 +22,6 @@ import {
 import { type TableState } from '@tanstack/react-table'
 import { useParams } from 'react-router-dom'
 import isNil from 'lodash/isNil'
-import isEmpty from 'lodash/isEmpty'
 
 import {
   ServiceDeploymentStatus,

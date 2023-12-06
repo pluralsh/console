@@ -33,7 +33,9 @@ type FetchMoreT<
 
 type FetchSliceOptions<K extends string> = {
   key: K
-  virtualSlice: { start: VirtualItem; end: VirtualItem } | undefined
+  virtualSlice:
+    | { start: VirtualItem | undefined; end: VirtualItem | undefined }
+    | undefined
   pageSize: number
 }
 
