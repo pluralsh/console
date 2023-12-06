@@ -39,20 +39,26 @@ export const HelmValuesFilesTableSC = styled.table(({ theme }) => ({
   },
 }))
 
-export function DeployServiceSettingsHelmValues({
+type Variant = 'large' | 'modal'
+type Options = { variant?: Variant }
+
+export function ServiceSettingsHelmValues({
   helmValuesFiles,
   setHelmValuesFiles,
   helmValues,
   setHelmValues,
   setHelmValuesErrors,
+  options,
 }: {
   helmValuesFiles: string[]
   setHelmValuesFiles: Dispatch<SetStateAction<string[]>>
   helmValues: string
   setHelmValues: Dispatch<SetStateAction<string>>
   setHelmValuesErrors: Dispatch<SetStateAction<boolean>>
+  options?: Options
 }) {
   const theme = useTheme()
+  const opts: Required<Options> = { variant: 'modal', ...(options || {}) }
 
   return (
     <div
@@ -73,6 +79,7 @@ export function DeployServiceSettingsHelmValues({
       <HelmValuesInput
         helmValues={helmValues}
         setHelmValues={setHelmValues}
+        variant={opts.variant}
       />
     </div>
   )
@@ -82,9 +89,11 @@ const HelmValuesInput = memo(
   ({
     helmValues,
     setHelmValues,
+    variant = 'modal',
   }: {
     helmValues: string
     setHelmValues: Dispatch<SetStateAction<string>>
+    variant: 'large' | 'modal'
   }) => {
     const [manual, setManual] = useState(true)
     const [fileName, setFileName] = useState<string | undefined>()
@@ -138,7 +147,7 @@ const HelmValuesInput = memo(
           <CodeEditor
             value={helmValues}
             language="yaml"
-            height={200}
+            height={variant === 'large' ? 300 : 200}
             options={{ lineNumbers: false, minimap: { enabled: false } }}
             onChange={(value) => {
               setHelmValues(value)
@@ -176,7 +185,7 @@ const HelmValuesFilesInput = memo(
     setHelmValuesFiles,
     setHelmValuesErrors,
   }: {
-    helmValuesFiles: string[]
+    helmValuesFiles: (string | null)[]
     setHelmValuesFiles: Dispatch<SetStateAction<string[]>>
     setHelmValuesErrors: Dispatch<SetStateAction<boolean>>
   }) => {
@@ -186,10 +195,12 @@ const HelmValuesFilesInput = memo(
       const filesSet = new Set<string>()
       let errorCount = 0
 
-      const items = helmValuesFiles.map((file) => {
-        const duplicate = filesSet.has(file) && !!file
+      const items = helmValuesFiles?.map((file) => {
+        const duplicate = !!file && filesSet.has(file)
 
-        filesSet.add(file)
+        if (file) {
+          filesSet.add(file)
+        }
 
         if (duplicate) {
           errorCount++
@@ -218,7 +229,7 @@ const HelmValuesFilesInput = memo(
           gap: theme.spacing.xsmall,
         }}
       >
-        {helmValuesFiles.length > 0 && (
+        {helmValuesFiles?.length > 0 && (
           <HelmValuesFilesTableSC>
             <thead>
               <tr>
@@ -230,7 +241,7 @@ const HelmValuesFilesInput = memo(
             </thead>
 
             <tr className="header displayContents" />
-            {fileItems.map(({ valuesFile, errors }, i) => (
+            {fileItems?.map(({ valuesFile, errors }, i) => (
               <tr
                 key={i}
                 className="displayContents"

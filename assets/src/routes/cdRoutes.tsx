@@ -13,12 +13,16 @@ import {
   useNavigate,
 } from 'react-router-dom'
 
+import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
+
+import ServiceComponent from 'components/cd/services/component/ServiceComponent'
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
 import ServiceDocs from 'components/cd/services/service/ServiceDocs'
 import ServiceComponents from 'components/cd/services/service/ServiceComponents'
 import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
 import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
-import ServiceComponent from 'components/cd/services/component/ServiceComponent'
+import ServiceSettings from 'components/cd/services/service/ServiceSettings'
+import ServiceHelm from 'components/cd/services/service/ServiceHelm'
 
 import ComponentInfo from 'components/component/ComponentInfo'
 import ComponentEvents from 'components/component/ComponentEvents'
@@ -27,16 +31,10 @@ import ComponentMetrics from 'components/component/ComponentMetrics'
 
 import { GlobalSettings } from 'components/cd/globalSettings/GlobalSettings'
 import { GlobalSettingsPermissions } from 'components/cd/globalSettings/GlobalSettingsPermissions'
-
 import { GlobalSettingsRepositories } from 'components/cd/globalSettings/GlobalSettingsRepositories'
-
-import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
+import SelfManage from 'components/cd/globalSettings/SelfManage'
 
 import Pipelines from 'components/cd/pipelines/Pipelines'
-
-import ServiceHelm from 'components/cd/services/service/ServiceHelm'
-
-import SelfManage from 'components/cd/globalSettings/SelfManage'
 
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
@@ -54,11 +52,8 @@ import Pod from '../components/cd/cluster/pod/Pod'
 import PodInfo from '../components/cd/cluster/pod/PodInfo'
 import ClusterMetadata from '../components/cd/cluster/ClusterMetadata'
 import PodRaw from '../components/cluster/pods/PodRaw'
-
 import PodEvents from '../components/cluster/pods/PodEvents'
-
 import Logs from '../components/cd/cluster/pod/logs/Logs'
-
 import PodShell from '../components/cd/cluster/pod/PodShell'
 
 import {
@@ -315,6 +310,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceHelm />}
       path="helm"
+    />
+    <Route
+      element={<ServiceSettings />}
+      path="settings"
     />
     <Route
       element={<ServiceDocs />}

@@ -31,7 +31,7 @@ import {
   Secret,
 } from './DeployServiceSettingsSecrets'
 import DeployServiceSettingsHelm from './DeployServiceSettingsHelm'
-import { DeployServiceSettingsHelmValues } from './DeployServiceSettingsHelmValues'
+import { ServiceSettingsHelmValues } from './DeployServiceSettingsHelmValues'
 
 enum FormState {
   Initial = 'initial',
@@ -430,7 +430,7 @@ export function DeployServiceModal({
             </div>
           </RepoKindSelector>
         ) : formState === FormState.HelmValues ? (
-          <DeployServiceSettingsHelmValues
+          <ServiceSettingsHelmValues
             helmValues={helmValues}
             setHelmValues={setHelmValues}
             helmValuesFiles={helmValuesFiles}

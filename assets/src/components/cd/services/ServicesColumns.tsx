@@ -5,6 +5,7 @@ import {
   GitHubLogoIcon,
   GlobeIcon,
   ListBoxItem,
+  ListIcon,
   PeopleIcon,
   Tooltip,
   TrashCanIcon,
@@ -33,6 +34,7 @@ import { ServiceDeprecations } from './ServiceDeprecations'
 import { CreateGlobalService } from './CreateGlobalService'
 import { DeleteGlobalService } from './DeleteGlobalService'
 import { ServiceSettings } from './ServiceSettings'
+import { ServiceUpdateHelmValues } from './ServiceUpdateHelmValues'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -216,6 +218,7 @@ enum MenuItemKey {
   DeleteGlobal = 'deleteGlobal',
   Permissions = 'permissions',
   Settings = 'settings',
+  HelmValues = 'helmValues',
   Delete = 'delete',
 }
 
@@ -273,6 +276,14 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
               label="Permissions"
               textValue="Permissions"
             />
+            {serviceDeployment.helm && (
+              <ListBoxItem
+                key={MenuItemKey.HelmValues}
+                leftContent={<ListIcon />}
+                label="Helm values"
+                textValue="Helm values"
+              />
+            )}
             <ListBoxItem
               key={MenuItemKey.Settings}
               leftContent={<GearTrainIcon />}
@@ -313,6 +324,14 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
             onClose={() => {
               setMenuKey('')
             }}
+          />
+          <ServiceUpdateHelmValues
+            serviceDeployment={serviceDeployment}
+            open={menuKey === MenuItemKey.HelmValues}
+            onClose={() => {
+              setMenuKey('')
+            }}
+            refetch={refetch}
           />
           <ServiceSettings
             serviceDeployment={serviceDeployment}
