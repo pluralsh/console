@@ -24,6 +24,8 @@ watchman-*.tar
 
 /priv/data
 
+/controller/bin/
+
 # IDE
 /.vscode/**/*
 !/.vscode/settings.json
