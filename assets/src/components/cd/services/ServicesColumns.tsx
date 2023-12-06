@@ -177,10 +177,12 @@ export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
       original: { node },
     },
   }) => (
-    <ServiceStatusChip
-      status={node?.status}
-      componentStatus={node?.componentStatus}
-    />
+    <div css={{ minWidth: 164 }}>
+      <ServiceStatusChip
+        status={node?.status}
+        componentStatus={node?.componentStatus}
+      />
+    </div>
   ),
 })
 
@@ -189,7 +191,6 @@ export const ColErrors = columnHelper.accessor(
   {
     id: 'errors',
     header: 'Errors',
-    enableSorting: true,
     enableColumnFilter: true,
     filterFn: 'equalsString',
     cell: ({
@@ -197,10 +198,10 @@ export const ColErrors = columnHelper.accessor(
         original: { node },
       },
     }) => (
-      <>
+      <div css={{ minWidth: 160 }}>
         <ServiceErrors service={node} />
         <ServiceDeprecations service={node} />
-      </>
+      </div>
     ),
   }
 )
