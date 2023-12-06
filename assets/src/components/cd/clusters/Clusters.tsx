@@ -24,7 +24,12 @@ import {
   GLOBAL_SETTINGS_ABS_PATH,
 } from 'routes/cdRoutesConsts'
 import chroma from 'chroma-js'
-import { canUpgrade, nextSupportedVersion, toNiceVersion } from 'utils/semver'
+import {
+  canUpgrade,
+  isUpgrading,
+  nextSupportedVersion,
+  toNiceVersion,
+} from 'utils/semver'
 import { roundToTwoPlaces } from 'components/cluster/utils'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import {
@@ -84,18 +89,10 @@ export const columns = [
   columnHelper.accessor(({ node }) => node, {
     id: 'cluster',
     header: 'Cluster',
-    cell: function Cell({
-      getValue,
-      row: {
-        original: { node },
-      },
-    }) {
+    cell: function Cell({ getValue }) {
       const cluster = getValue()
-      const different =
-        !node?.self &&
-        !!node?.currentVersion &&
-        !!node?.version &&
-        node?.currentVersion !== node?.version
+      const upgrading =
+        !cluster?.self && isUpgrading(cluster?.version, cluster?.currentVersion)
 
       return (
         <div css={{ display: 'flex' }}>
@@ -103,7 +100,7 @@ export const columns = [
             icon={
               <DynamicClusterIcon
                 deleting={!!cluster?.deletedAt}
-                upgrading={different}
+                upgrading={upgrading}
                 protect={!!cluster?.protect}
                 self={!!cluster?.self}
               />

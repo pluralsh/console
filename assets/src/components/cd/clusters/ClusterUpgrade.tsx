@@ -19,6 +19,7 @@ import {
   useUpdateClusterMutation,
 } from 'generated/graphql'
 import {
+  isUpgrading,
   nextSupportedVersion,
   supportedUpgrades,
   toNiceVersion,
@@ -73,12 +74,10 @@ function ClustersUpgradeNow({
     () => (!hasDeprecations ? updateCluster() : setConfirm(true)),
     [hasDeprecations, updateCluster]
   )
-  const isUpgrading =
-    !cluster?.self &&
-    !!cluster?.currentVersion &&
-    !!cluster?.version &&
-    cluster?.currentVersion !== cluster?.version
-  const tooltip = isUpgrading
+  const upgrading =
+    !cluster?.self && isUpgrading(cluster?.version, cluster?.currentVersion)
+
+  const tooltip = upgrading
     ? 'Cluster is already upgrading'
     : cluster?.deletedAt
     ? 'Cluster is being deleted'
@@ -87,13 +86,13 @@ function ClustersUpgradeNow({
   return (
     <>
       <WrapWithIf
-        condition={isUpgrading || !!cluster?.deletedAt}
+        condition={upgrading || !!cluster?.deletedAt}
         wrapper={<Tooltip label={tooltip} />}
       >
         <div>
           <Button
             small
-            disabled={!targetVersion || isUpgrading || !!cluster?.deletedAt}
+            disabled={!targetVersion || upgrading || !!cluster?.deletedAt}
             destructive={hasDeprecations}
             floating={!hasDeprecations}
             width="fit-content"
