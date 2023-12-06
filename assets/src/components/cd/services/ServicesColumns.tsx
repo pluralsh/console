@@ -39,7 +39,6 @@ const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
   id: 'deployment',
   header: 'Deployment',
-  enableSorting: true,
   cell: function Cell({ getValue }) {
     const serviceDeployment = getValue()
 
@@ -66,7 +65,6 @@ export const ColCluster = columnHelper.accessor(
   {
     id: 'clusterName',
     header: 'Cluster',
-    enableSorting: true,
     cell: ({ getValue, row: { original } }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
@@ -85,7 +83,6 @@ export const ColCluster = columnHelper.accessor(
 export const ColRepo = columnHelper.accessor(({ node }) => node, {
   id: 'repository',
   header: 'Repository',
-  enableSorting: true,
   meta: { truncate: true, gridTemplate: 'minmax(180px,1fr)' },
   cell: ({ getValue }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -122,7 +119,6 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
 export const ColRef = columnHelper.accessor(({ node }) => node, {
   id: 'gitLocation',
   header: 'Reference',
-  enableSorting: true,
   // meta: { truncate: true },
   cell: ({ getValue }) => {
     const svc = getValue()
@@ -164,7 +160,6 @@ export const ColLastActivity = columnHelper.accessor(
   {
     id: 'lastActivity',
     header: 'Activity ',
-    enableSorting: true,
     sortingFn: 'datetime',
     cell: ({ getValue }) => (
       <DateTimeCol dateString={getValue()?.toISOString()} />
@@ -175,7 +170,6 @@ export const ColLastActivity = columnHelper.accessor(
 export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   id: 'status',
   header: 'Status',
-  enableSorting: true,
   enableColumnFilter: true,
   filterFn: 'equalsString',
   cell: ({
