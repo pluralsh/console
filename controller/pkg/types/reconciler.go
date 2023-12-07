@@ -9,6 +9,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+// Reconciler is a name of reconciler supported by this controller.
 type Reconciler string
 
 const (
@@ -18,6 +19,7 @@ const (
 	ProviderReconciler          Reconciler = "provider"
 )
 
+// ToReconciler maps reconciler string to a Reconciler type.
 func ToReconciler(reconciler string) (Reconciler, error) {
 	switch Reconciler(reconciler) {
 	case GitRepositoryReconciler:
@@ -30,6 +32,7 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 	return "", fmt.Errorf("reconciler %q is not supported", reconciler)
 }
 
+// ToController creates Controller instance based on this Reconciler.
 func (sc Reconciler) ToController(mgr ctrl.Manager, logger *zap.SugaredLogger, consoleClient client.ConsoleClient) (Controller, error) {
 	unsupported := fmt.Errorf("reconciler %q is not supported", sc)
 
@@ -56,12 +59,17 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, logger *zap.SugaredLogger, c
 	}
 }
 
+// ReconcilerList is a wrapper around Reconciler array type to allow
+// defining custom functions.
 type ReconcilerList []Reconciler
 
+// Reconcilers defines a list of reconcilers that will be started by default
+// if '--reconcilers=...' flag is not provided.
 func Reconcilers() ReconcilerList {
 	return []Reconciler{GitRepositoryReconciler, ProviderReconciler}
 }
 
+// ToControllers returns a list of Controller instances based on this Reconciler array.
 func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, logger *zap.SugaredLogger, consoleClient client.ConsoleClient) ([]Controller, error) {
 	result := make([]Controller, len(rl))
 	for i, r := range rl {

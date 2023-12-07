@@ -21,11 +21,14 @@ type Reconciler struct {
 	Scheme        *runtime.Scheme
 }
 
+// Reconcile ...
+// TODO: Add kubebuilder rbac annotation
 func (p *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
+// SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
 func (p *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	p.Log.Infow("starting reconciler", "reconciler", "provider_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
