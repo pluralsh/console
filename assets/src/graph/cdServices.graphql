@@ -143,6 +143,9 @@ query ServiceDeployments(
       }
     }
   }
+  serviceStatuses(clusterId: $clusterId) {
+    ...ServiceStatusCount
+  }
 }
 
 query ServiceDeploymentsTiny {
@@ -269,5 +272,16 @@ query ServiceDeploymentBindings($id: ID!) {
   serviceDeployment(id: $id) {
     id
     ...ServiceDeploymentBindings
+  }
+}
+
+fragment ServiceStatusCount on ServiceStatusCount {
+  count
+  status
+}
+
+query ServiceStatuses($clusterId: ID) {
+  serviceStatuses(clusterId: $clusterId) {
+    ...ServiceStatusCount
   }
 }

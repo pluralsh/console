@@ -1,19 +1,24 @@
-import { useParams } from 'react-router-dom'
-import { ComponentProps, useMemo, useRef, useState } from 'react'
-import isEmpty from 'lodash/isEmpty'
+import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import { EmptyState, TabPanel, Table } from '@pluralsh/design-system'
-import { Row, TableState } from '@tanstack/react-table'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
-
-import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
-
+import type { Row, TableState } from '@tanstack/react-table'
+import isEmpty from 'lodash/isEmpty'
 import { useDebounce } from '@react-hooks-library/core'
+import { type VirtualItem } from '@tanstack/react-virtual'
+import { useParams } from 'react-router-dom'
 
 import {
-  ServiceDeploymentsRowFragment,
+  type ServiceDeploymentsRowFragment,
   useServiceDeploymentsQuery,
-} from '../../../generated/graphql'
+} from 'generated/graphql'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
+import { Edge, extendConnection } from 'utils/graphql'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useSlicePolling } from 'components/utils/tableFetchHelpers'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+
 import {
   ColActions,
   ColCluster,
@@ -24,13 +29,13 @@ import {
   ColServiceDeployment,
   ColStatus,
 } from '../services/ServicesColumns'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
-import { Edge } from '../../../utils/graphql'
-import LoadingIndicator from '../../utils/LoadingIndicator'
+
 import { ServicesFilters } from '../services/ServicesFilters'
 import { DeployService } from '../services/deployModal/DeployService'
-
-const POLL_INTERVAL = 10 * 1000
+import {
+  SERVICES_QUERY_PAGE_SIZE,
+  SERVICES_REACT_VIRTUAL_OPTIONS,
+} from '../services/Services'
 
 const columns = [
   ColServiceDeployment,
@@ -50,18 +55,46 @@ export default function ClusterServices() {
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
   const tabStateRef = useRef<any>(null)
+  const [virtualSlice, setVirtualSlice] = useState<
+    | {
+        start: VirtualItem | undefined
+        end: VirtualItem | undefined
+      }
+    | undefined
+  >()
 
-  const { data, error, refetch } = useServiceDeploymentsQuery({
-    variables: { clusterId: clusterId || '', q: debouncedSearchString },
-    pollInterval: POLL_INTERVAL,
+  const queryResult = useServiceDeploymentsQuery({
+    variables: {
+      ...(clusterId ? { clusterId } : {}),
+      q: debouncedSearchString,
+      first: SERVICES_QUERY_PAGE_SIZE,
+    },
     fetchPolicy: 'cache-and-network',
+    // Important so loading will be updated on fetchMore to send to Table
+    notifyOnNetworkStatusChange: true,
   })
+  const {
+    error,
+    fetchMore,
+    loading,
+    data: currentData,
+    previousData,
+  } = queryResult
+  const data = currentData || previousData
+  const serviceDeployments = data?.serviceDeployments
+  const pageInfo = serviceDeployments?.pageInfo
+  const { refetch } = useSlicePolling(queryResult, {
+    virtualSlice,
+    pageSize: SERVICES_QUERY_PAGE_SIZE,
+    key: 'serviceDeployments',
+    interval: POLL_INTERVAL,
+  })
+
   const [tableFilters, setTableFilters] = useState<
     Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   >({
     globalFilter: '',
   })
-
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
     useMemo(
       () => ({
@@ -72,6 +105,21 @@ export default function ClusterServices() {
       }),
       [refetch, tableFilters]
     )
+
+  const fetchNextPage = useCallback(() => {
+    if (!pageInfo?.endCursor) {
+      return
+    }
+    fetchMore({
+      variables: { after: pageInfo.endCursor },
+      updateQuery: (prev, { fetchMoreResult }) =>
+        extendConnection(
+          prev,
+          fetchMoreResult.serviceDeployments,
+          'serviceDeployments'
+        ),
+    })
+  }, [fetchMore, pageInfo?.endCursor])
 
   if (error) {
     return (
@@ -98,12 +146,11 @@ export default function ClusterServices() {
         }}
       >
         <ServicesFilters
-          serviceDeployments={data?.serviceDeployments}
           setTableFilters={setTableFilters}
-          showClusterSelect={false}
           searchString={searchString}
           setSearchString={setSearchString}
           tabStateRef={tabStateRef}
+          statusCounts={data.serviceStatuses}
         />
         <DeployService refetch={refetch} />
       </div>
@@ -131,11 +178,22 @@ export default function ClusterServices() {
                   })
                 )
               }
+              hasNextPage={pageInfo?.hasNextPage}
+              fetchNextPage={fetchNextPage}
+              isFetchingNextPage={loading}
               reactTableOptions={reactTableOptions}
+              reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
+              onVirtualSliceChange={setVirtualSlice}
             />
           </FullHeightTableWrap>
         ) : (
-          <EmptyState message="Looks like you don't have any service deployments yet." />
+          <div css={{ height: '100%' }}>
+            {searchString || clusterId ? (
+              <EmptyState message="No service deployments match your query." />
+            ) : (
+              <EmptyState message="Looks like you don't have any service deployments yet." />
+            )}
+          </div>
         )}
       </TabPanel>
     </div>

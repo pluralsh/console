@@ -20,16 +20,16 @@ import {
   useState,
 } from 'react'
 import { type TableState } from '@tanstack/react-table'
+import { useParams } from 'react-router-dom'
+import isNil from 'lodash/isNil'
+
 import {
   ServiceDeploymentStatus,
+  ServiceStatusCountFragment,
   useClustersTinyQuery,
-  useServiceDeploymentsQuery,
 } from 'generated/graphql'
-import { useParams } from 'react-router-dom'
-
 import { SERVICE_PARAM_CLUSTER_ID } from 'routes/cdRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
-
 import ProviderIcon from 'components/utils/Provider'
 
 import {
@@ -66,27 +66,23 @@ const ServiceFiltersSC = styled.div(({ theme }) => ({
 }))
 
 export function ServicesFilters({
-  serviceDeployments,
   setTableFilters,
   searchString,
   setSearchString,
-  showClusterSelect = true,
   clusterId,
   setClusterId,
   tabStateRef,
+  statusCounts,
 }: {
-  serviceDeployments: NonNullable<
-    ReturnType<typeof useServiceDeploymentsQuery>['data']
-  >['serviceDeployments']
   searchString
   setSearchString: (string) => void
   setTableFilters: (
     filters: Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   ) => void
-  showClusterSelect: boolean
   clusterId?: string
   setClusterId?: Dispatch<SetStateAction<string>>
   tabStateRef: MutableRefObject<any>
+  statusCounts: Nullable<Nullable<ServiceStatusCountFragment>[]>
 }) {
   const theme = useTheme()
   const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
@@ -94,33 +90,35 @@ export function ServicesFilters({
 
   clusterId = clusterId ?? clusterIdParam
 
-  const { data } = useClustersTinyQuery({ skip: !showClusterSelect })
+  const { data: clustersData } = useClustersTinyQuery({
+    skip: !setClusterId,
+  })
+
   const clusters = useMemo(
-    () => mapExistingNodes(data?.clusters),
-    [data?.clusters]
+    () => mapExistingNodes(clustersData?.clusters),
+    [clustersData?.clusters]
   )
   const selectedCluster = useMemo(
     () => clusters && clusters.find((cluster) => cluster.id === clusterId),
     [clusters, clusterId]
   )
 
-  const counts = useMemo(() => {
-    const c: Record<string, number | undefined> = {
-      ALL: serviceDeployments?.edges?.length,
-      HEALTHY: 0,
-      SYNCED: 0,
-      STALE: 0,
-      FAILED: 0,
-    }
-
-    serviceDeployments?.edges?.forEach((edge) => {
-      if (edge?.node?.status) {
-        c[edge?.node?.status] = (c[edge?.node?.status] ?? 0) + 1
-      }
-    })
-
-    return c
-  }, [serviceDeployments?.edges])
+  const counts = useMemo<Record<string, number | undefined>>(
+    () => ({
+      ALL: statusCounts?.reduce(
+        (count, status) => count + (status?.count || 0),
+        0
+      ),
+      HEALTHY: statusCounts ? 0 : undefined,
+      SYNCED: statusCounts ? 0 : undefined,
+      STALE: statusCounts ? 0 : undefined,
+      FAILED: statusCounts ? 0 : undefined,
+      ...Object.fromEntries(
+        statusCounts?.map((status) => [status?.status, status?.count]) || []
+      ),
+    }),
+    [statusCounts]
+  )
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
 
   const tableFilters: Partial<
@@ -147,13 +145,13 @@ export function ServicesFilters({
 
   return (
     <ServiceFiltersSC>
-      {showClusterSelect && (
+      {setClusterId && (
         <div css={{ width: 360 }}>
           <Select
-            isDisabled={!data}
+            isDisabled={!clustersData}
             isOpen={clusterSelectIsOpen}
             onOpenChange={setClusterSelectIsOpen}
-            label={!data ? 'Loading clusters..' : 'Filter by cluster'}
+            label={!clustersData ? 'Loading clusters..' : 'Filter by cluster'}
             leftContent={
               selectedCluster && (
                 <ProviderIcon
@@ -221,19 +219,22 @@ export function ServicesFilters({
           },
         }}
       >
-        {statusTabs.map(([key, { label }]) => (
+        {statusTabs?.map(([key, { label }]) => (
           <SubTab
             key={key}
             textValue={label}
             className="statusTab"
           >
             {label}
-            <Chip
-              size="small"
-              severity={serviceStatusToSeverity(key as any)}
-            >
-              {counts[key] ?? 0}
-            </Chip>
+            {!isNil(counts[key]) && (
+              <Chip
+                size="small"
+                severity={serviceStatusToSeverity(key as any)}
+                loading={isNil(counts[key])}
+              >
+                {counts[key]}
+              </Chip>
+            )}
           </SubTab>
         ))}
       </TabList>
