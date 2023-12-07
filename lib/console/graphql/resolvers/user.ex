@@ -9,6 +9,10 @@ defmodule Console.GraphQl.Resolvers.User do
   def query(RoleBinding, _), do: RoleBinding
   def query(_, _), do: User
 
+  def get_user(%{email: email}, _), do: {:ok, Users.get_user_by_email!(email)}
+
+  def get_group(%{name: name}, _), do: {:ok, Users.get_group_by_name!(name)}
+
   def login_link(%{key: k}, _) do
     Console.conf(:login_link)
     |> Map.new()
