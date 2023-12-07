@@ -24,11 +24,11 @@ type ServiceGit struct {
 
 type ServiceHelm struct {
 	// +optional
-	Values *string `json:"values,omitempty"`
+	ValuesRef corev1.ConfigMapKeySelector `json:"values,omitempty"`
 	// +optional
 	ValuesFiles []string `json:"valuesFiles,omitempty"`
 	// +optional
-	Chart *string `json:"chart,omitempty"`
+	ChartRef corev1.ConfigMapKeySelector `json:"chart,omitempty"`
 	// +optional
 	Version *string `json:"version,omitempty"`
 	// +optional
@@ -38,7 +38,7 @@ type ServiceHelm struct {
 type ServiceSpec struct {
 	// +optional
 	DocsPath *string `json:"docsPath,omitempty"`
-	// +kubebuilder:default:=0.0.1
+	// +kubebuilder:default:='0.0.1'
 	Version string `json:"version"`
 	// +optional
 	Protect bool `json:"protect,omitempty"`
