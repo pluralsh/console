@@ -324,6 +324,7 @@ func (in *ClusterSpec) DeepCopyInto(out *ClusterSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	out.ProviderRef = in.ProviderRef
 	if in.Protect != nil {
 		in, out := &in.Protect, &out.Protect
 		*out = new(bool)

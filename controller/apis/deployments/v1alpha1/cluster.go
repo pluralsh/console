@@ -1,6 +1,9 @@
 package v1alpha1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 func init() {
 	SchemeBuilder.Register(&Cluster{}, &ClusterList{})
@@ -31,11 +34,13 @@ type ClusterSpec struct {
 	// +kubebuilder:validation:Optional
 	Handle *string `json:"handle,omitempty"`
 
-	// Version of Kubernetes to use for this cluster. Optional only for BYOK.
+	// Version of Kubernetes to use for this cluster. Can be skipped only for BYOK.
 	// +kubebuilder:validation:Optional
 	Version *string `json:"version,omitempty"`
 
-	// TODO: ProviderRef
+	// ProviderRef references provider to use for this cluster. Can be skipped only for BYOK.
+	// +kubebuilder:validation:Optional
+	ProviderRef corev1.ObjectReference `json:"providerRef,omitempty"`
 
 	// Cloud provider to use for this cluster.
 	// +kubebuilder:validation:Enum=aws;azure;gcp;byok
