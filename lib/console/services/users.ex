@@ -38,10 +38,14 @@ defmodule Console.Services.Users do
 
   def get_user_by_email(email), do: Repo.get_by(User, email: email)
 
+  def get_user_by_email!(email), do: Repo.get_by!(User, email: email)
+
   @spec get_group!(binary) :: Group.t
   def get_group!(id), do: Repo.get!(Group, id)
 
   def get_group_by_name(name), do: Repo.get_by(Group, name: name)
+
+  def get_group_by_name!(name), do: Repo.get_by!(Group, name: name)
 
   @spec get_role!(binary) :: Role.t
   def get_role!(id), do: Repo.get!(Role, id)
