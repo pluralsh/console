@@ -15,6 +15,10 @@ type RootQueryType {
 
   buildInfo: BuildInfo
 
+  user(email: String!): User
+
+  group(name: String!): Group
+
   users(after: String, first: Int, before: String, last: Int, q: String): UserConnection
 
   loginInfo(redirect: String): LoginInfo

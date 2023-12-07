@@ -2913,6 +2913,7 @@ export type RootQueryType = {
   externalToken?: Maybe<Scalars['String']['output']>;
   gitRepositories?: Maybe<GitRepositoryConnection>;
   gitRepository?: Maybe<GitRepository>;
+  group?: Maybe<Group>;
   groupMembers?: Maybe<GroupMemberConnection>;
   groups?: Maybe<GroupConnection>;
   helmRepositories?: Maybe<Array<Maybe<HelmRepository>>>;
@@ -2966,6 +2967,7 @@ export type RootQueryType = {
   tokenExchange?: Maybe<User>;
   unstructuredResource?: Maybe<KubernetesUnstructured>;
   upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
+  user?: Maybe<User>;
   users?: Maybe<UserConnection>;
   webhooks?: Maybe<WebhookConnection>;
   wireguardPeer?: Maybe<WireguardPeer>;
@@ -3114,6 +3116,11 @@ export type RootQueryTypeGitRepositoriesArgs = {
 export type RootQueryTypeGitRepositoryArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   url?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeGroupArgs = {
+  name: Scalars['String']['input'];
 };
 
 
@@ -3387,6 +3394,11 @@ export type RootQueryTypeUnstructuredResourceArgs = {
   namespace?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   version: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeUserArgs = {
+  email: Scalars['String']['input'];
 };
 
 
