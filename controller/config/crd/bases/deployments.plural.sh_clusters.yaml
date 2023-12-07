@@ -1,0 +1,207 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.3
+  creationTimestamp: null
+  name: clusters.deployments.plural.sh
+spec:
+  group: deployments.plural.sh
+  names:
+    kind: Cluster
+    listKind: ClusterList
+    plural: clusters
+    singular: cluster
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - description: Repo health status
+      jsonPath: .status.health
+      name: Health
+      type: string
+    - description: Console cluster ID
+      jsonPath: .status.id
+      name: Id
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              cloud:
+                description: Cloud provider to use for this cluster.
+                enum:
+                - aws
+                - azure
+                - gcp
+                - byok
+                type: string
+                x-kubernetes-validations:
+                - message: Cloud is immutable
+                  rule: self == oldSelf
+              cloudSettings:
+                description: CloudSettings contains cloud-specific settings for this
+                  cluster.
+                properties:
+                  aws:
+                    description: AWS cluster customizations.
+                    properties:
+                      region:
+                        description: Region in AWS to deploy this cluster to.
+                        type: string
+                    required:
+                    - region
+                    type: object
+                  azure:
+                    description: Azure cluster customizations.
+                    properties:
+                      location:
+                        description: Location in Azure to deploy this cluster to,
+                          i.e. eastus.
+                        type: string
+                      network:
+                        description: Network is a name for the Azure virtual network
+                          for this cluster.
+                        type: string
+                      resourceGroup:
+                        description: ResourceGroup is a name for the Azure resource
+                          group for this cluster.
+                        type: string
+                      subscriptionId:
+                        description: SubscriptionId is GUID of the Azure subscription
+                          to hold this cluster.
+                        type: string
+                    required:
+                    - location
+                    - network
+                    - resourceGroup
+                    - subscriptionId
+                    type: object
+                  byok:
+                    description: BYOK cluster customizations.
+                    type: object
+                  gcp:
+                    description: GCP cluster customizations.
+                    type: object
+                type: object
+              handle:
+                description: Handle is a short, unique human-readable name used to
+                  identify this cluster. Does not necessarily map to the cloud resource
+                  name.
+                type: string
+              nodePools:
+                description: NodePools contains specs of node pools managed by this
+                  cluster.
+                items:
+                  properties:
+                    cloudSettings:
+                      description: CloudSettings contains cloud-specific settings
+                        for this node pool.
+                      properties:
+                        aws:
+                          description: AWS node pool customizations.
+                          properties:
+                            launchTemplateId:
+                              description: LaunchTemplateId is an ID of custom launch
+                                template for your nodes. Useful for Golden AMI setups.
+                              type: string
+                          type: object
+                      type: object
+                    instanceType:
+                      description: InstanceType contains the type of node to use.
+                        Usually cloud-specific.
+                      type: string
+                    labels:
+                      additionalProperties:
+                        type: string
+                      description: Labels to apply to the nodes in this pool. Useful
+                        for node selectors.
+                      type: object
+                    maxSize:
+                      description: MaxSize is maximum number of instances in this
+                        node pool.
+                      minimum: 1
+                      type: integer
+                    minSize:
+                      description: MinSize is minimum number of instances in this
+                        node pool.
+                      minimum: 1
+                      type: integer
+                    name:
+                      description: Name of the node pool. Must be unique.
+                      type: string
+                    taints:
+                      description: Taints you'd want to apply to a node, i.e. for
+                        preventing scheduling on spot instances.
+                      items:
+                        description: Taint represents a Kubernetes taint.
+                        properties:
+                          effect:
+                            description: Effect specifies the effect for the taint.
+                            enum:
+                            - NoSchedule
+                            - NoExecute
+                            - PreferNoSchedule
+                            type: string
+                          key:
+                            description: Key is the key of the taint.
+                            type: string
+                          value:
+                            description: Value is the value of the taint.
+                            type: string
+                        required:
+                        - effect
+                        - key
+                        - value
+                        type: object
+                      type: array
+                  required:
+                  - instanceType
+                  - maxSize
+                  - minSize
+                  - name
+                  type: object
+                type: array
+              protect:
+                description: Protect cluster from being deleted.
+                type: boolean
+              version:
+                description: Version of Kubernetes to use for this cluster. Optional
+                  only for BYOK.
+                type: string
+            required:
+            - cloud
+            - nodePools
+            type: object
+          status:
+            properties:
+              currentVersion:
+                description: CurrentVersion contains current Kubernetes version this
+                  cluster is using.
+                type: string
+              health:
+                description: Health status.
+                type: string
+              id:
+                description: Id from Console.
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
