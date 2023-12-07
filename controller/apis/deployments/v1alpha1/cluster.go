@@ -22,10 +22,20 @@ type ClusterList struct {
 // +kubebuilder:printcolumn:name="Health",type="string",JSONPath=".status.health",description="Cluster health status"
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console cluster ID"
 type Cluster struct {
-	metav1.TypeMeta   `json:",inline"`
+	metav1.TypeMeta `json:",inline"`
+
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              ClusterSpec   `json:"spec,omitempty"`
-	Status            ClusterStatus `json:"status,omitempty"`
+
+	// +kubebuilder:validation:XValidation:rule="self.cloud == 'aws' && (has(self.cloudSettings.aws)",message="AWS cloud settings are required"
+	// +kubebuilder:validation:XValidation:rule="self.cloud == 'azure' && (has(self.cloudSettings.azure)",message="Azure cloud settings are required"
+	// +kubebuilder:validation:XValidation:rule="self.cloud == 'gcp' && (has(self.cloudSettings.gcp)",message="GCP cloud settings are required"
+	// +kubebuilder:validation:XValidation:rule="self.cloud == 'aws' && (!has(self.cloudSettings.azure) && !has(self.cloudSettings.gcp)",message="Only AWS cloud settings can be specified"
+	// +kubebuilder:validation:XValidation:rule="self.cloud == 'azure' && (!has(self.cloudSettings.aws) && !has(self.cloudSettings.gcp)",message="Only Azure cloud settings can be specified"
+	// +kubebuilder:validation:XValidation:rule="self.cloud == 'gcp' && (!has(self.cloudSettings.aws) && !has(self.cloudSettings.azure)",message="Only GCP cloud settings can be specified"
+	// +kubebuilder:validation:XValidation:rule="self.cloud == 'byok' && (!has(self.cloudSettings.aws) && !has(self.cloudSettings.azure) && !has(self.cloudSettings.gcp))",message="Cloud settings can't be specified for BYOK"
+	Spec ClusterSpec `json:"spec,omitempty"`
+
+	Status ClusterStatus `json:"status,omitempty"`
 }
 
 type ClusterSpec struct {
@@ -79,10 +89,6 @@ type ClusterCloudSettings struct {
 	// GCP cluster customizations.
 	// +kubebuilder:validation:Optional
 	GCP *ClusterGCPCloudSettings `json:"gcp,omitempty"`
-
-	// BYOK cluster customizations.
-	// +kubebuilder:validation:Optional
-	BYOK *ClusterBYOKCloudSettings `json:"byok,omitempty"`
 }
 
 type ClusterAWSCloudSettings struct {
@@ -107,10 +113,6 @@ type ClusterAzureCloudSettings struct {
 type ClusterGCPCloudSettings struct {
 	// Project in GCP to deploy cluster to.
 	Project string `json:"project"`
-}
-
-type ClusterBYOKCloudSettings struct {
-	// TODO: Decide how we handle BYOK settings and how we will deploy operator.
 }
 
 type ClusterNodePool struct {
