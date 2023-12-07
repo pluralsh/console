@@ -2,7 +2,7 @@ import { useLayoutEffect } from 'react'
 
 import ContinuousDeployment from 'components/cd/ContinuousDeployment'
 import Clusters from 'components/cd/clusters/Clusters'
-import GitRepositories from 'components/cd/repos/Repositories'
+import Repositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
 import Providers from 'components/cd/providers/Providers'
 import {
@@ -71,6 +71,9 @@ import {
   NODE_REL_PATH,
   PIPELINES_REL_PATH,
   POD_REL_PATH,
+  PROVIDERS_REL_PATH,
+  REPOS_REL_PATH,
+  SERVICES_REL_PATH,
   SERVICE_COMPONENTS_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
   SERVICE_PARAM_CLUSTER_ID,
@@ -133,7 +136,7 @@ const mainRoutes = (
       element={<Clusters />}
     />
     <Route
-      path={`services/:${SERVICE_PARAM_CLUSTER_ID}?`}
+      path={`${SERVICES_REL_PATH}/:${SERVICE_PARAM_CLUSTER_ID}?`}
       element={<Services />}
     />
     <Route
@@ -142,10 +145,19 @@ const mainRoutes = (
     />
     <Route
       path="git"
-      element={<GitRepositories />}
+      element={
+        <Navigate
+          replace
+          to={REPOS_REL_PATH}
+        />
+      }
     />
     <Route
-      path="providers"
+      path={REPOS_REL_PATH}
+      element={<Repositories />}
+    />
+    <Route
+      path={PROVIDERS_REL_PATH}
       element={<Providers />}
     />
     <Route

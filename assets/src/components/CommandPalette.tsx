@@ -28,12 +28,17 @@ import {
   ApiIcon,
   ChatIcon,
   Chip,
+  ClusterIcon,
   ComponentsIcon,
   DashboardIcon,
   DocumentIcon,
   GearTrainIcon,
+  GitHubLogoIcon,
+  GitPullIcon,
   LifePreserverIcon,
   LogsIcon,
+  MarketPlusIcon,
+  PipelineIcon,
   RunBookIcon,
   ServersIcon,
 } from '@pluralsh/design-system'
@@ -41,13 +46,37 @@ import { useNavigate } from 'react-router-dom'
 import { Flex, Span } from 'honorable'
 import styled, { createGlobalStyle, useTheme } from 'styled-components'
 
+import {
+  ADDONS_REL_PATH,
+  CD_ABS_PATH,
+  CLUSTERS_REL_PATH,
+  PIPELINES_REL_PATH,
+  PROVIDERS_REL_PATH,
+  REPOS_REL_PATH,
+  SERVICES_REL_PATH,
+} from 'routes/cdRoutesConsts'
+
+import { ClusterTinyFragment, useClustersTinyQuery } from 'generated/graphql'
+
+import { Edges } from 'utils/graphql'
+
 import { getIcon, hasIcons } from './apps/misc'
 import { InstallationContext } from './Installations'
 import AppStatus from './apps/AppStatus'
 import { usePlatform } from './hooks/usePlatform'
 import { HelpMenuState, launchHelp } from './help/HelpLauncher'
 
-function buildActions(applications, nav) {
+enum PaletteSection {
+  Apps = 'Apps',
+  Cluster = 'Cluster',
+  Help = 'Help',
+  Security = 'Security',
+  Account = 'Account',
+  Cd = 'Continuous Deployment (CD)',
+  CdClusters = 'CD – Clusters',
+}
+
+function buildAppActions(applications, nav) {
   return applications
     .map((app) => [
       {
@@ -56,7 +85,7 @@ function buildActions(applications, nav) {
         app,
         icon: hasIcons(app) ? <AppIcon src={getIcon(app)} /> : null,
         shortcut: [],
-        section: 'Apps',
+        section: PaletteSection.Apps,
       },
       {
         id: `${app.name}-launch`,
@@ -124,6 +153,60 @@ function buildActions(applications, nav) {
       },
     ])
     .flat()
+}
+
+const clusterDefaultProps = (
+  cluster: ClusterTinyFragment,
+  sectionName?: string
+) => ({
+  id: `${cluster.id}${sectionName ? ` – ${sectionName?.toLowerCase()}` : ''}`,
+  name: sectionName || cluster.name,
+  section: `${PaletteSection.CdClusters}`,
+  ...(sectionName ? { parent: cluster.id } : {}),
+})
+
+function buildClusterActions(
+  clusters: Nullable<Edges<ClusterTinyFragment>>,
+  nav: ReturnType<typeof useNavigate>
+) {
+  return (
+    clusters?.map((edge) => {
+      const cluster = edge?.node
+
+      if (!cluster) {
+        return []
+      }
+
+      return [
+        {
+          ...clusterDefaultProps(cluster),
+          icon: <ClusterIcon />,
+        },
+        {
+          ...clusterDefaultProps(cluster, 'Services'),
+          perform: () =>
+            nav(
+              `${CD_ABS_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}/${SERVICES_REL_PATH}`
+            ),
+        },
+        {
+          ...clusterDefaultProps(cluster, 'Nodes'),
+          perform: () =>
+            nav(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}/nodes}`),
+        },
+        {
+          ...clusterDefaultProps(cluster, 'Pods'),
+          perform: () =>
+            nav(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}/pods}`),
+        },
+        {
+          ...clusterDefaultProps(cluster, 'Metadata'),
+          perform: () =>
+            nav(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}/metadata}`),
+        },
+      ]
+    }) || []
+  ).flat()
 }
 
 function ItemInner({ action, ancestors }) {
@@ -275,12 +358,21 @@ function RenderResults() {
   )
 }
 
-function useAppActions() {
+function useActions() {
   const { applications } = useContext(InstallationContext) as any
+  const { data: clustersData } = useClustersTinyQuery({
+    pollInterval: 120_000,
+    fetchPolicy: 'cache-and-network',
+  })
+  const clusterEdges = clustersData?.clusters?.edges
+
   const navigate = useNavigate()
   const actions = useMemo(
-    () => buildActions(applications, navigate),
-    [applications, navigate]
+    () => [
+      ...buildClusterActions(clusterEdges, navigate),
+      ...buildAppActions(applications, navigate),
+    ],
+    [applications, navigate, clusterEdges]
   )
 
   useRegisterActions(actions)
@@ -332,7 +424,7 @@ const CommandPaletteStyles = createGlobalStyle(({ theme }) => ({
 }))
 
 function Palette() {
-  useAppActions()
+  useActions()
   const theme = useTheme()
   const {
     isOpen: kbarIsOpen,
@@ -422,53 +514,99 @@ export function CommandPalette({ children }) {
         name: 'Nodes',
         shortcut: ['N'],
         icon: <ServersIcon />,
-        section: 'Cluster',
+        section: PaletteSection.Cluster,
         perform: () => navigate('/nodes'),
       }),
       createAction({
         name: 'Pods',
         shortcut: ['P'],
         icon: <ApiIcon />,
-        section: 'Cluster',
+        section: PaletteSection.Cluster,
         perform: () => navigate('/pods'),
       }),
+
+      // CD
+      createAction({
+        name: 'Clusters',
+        icon: <ClusterIcon />,
+        shortcut: ['C'],
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}`),
+      }),
+      createAction({
+        name: 'Services',
+        icon: <GitPullIcon />,
+        shortcut: [],
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${SERVICES_REL_PATH}`),
+      }),
+      createAction({
+        name: 'Repositories',
+        shortcut: [],
+        icon: <GitHubLogoIcon />,
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${REPOS_REL_PATH}`),
+      }),
+      createAction({
+        name: 'Pipelines',
+        shortcut: [],
+        icon: <PipelineIcon />,
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${PIPELINES_REL_PATH}`),
+      }),
+      createAction({
+        name: 'Providers',
+        icon: <ServersIcon />,
+        shortcut: [],
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${PROVIDERS_REL_PATH}`),
+      }),
+      createAction({
+        name: 'Add-ons',
+        icon: <MarketPlusIcon />,
+        shortcut: [],
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${ADDONS_REL_PATH}`),
+      }),
+      // End CD
+
       createAction({
         name: 'Ask Plural AI',
         shortcut: ['A'],
         icon: <ChatIcon />,
-        section: 'Help',
+        section: PaletteSection.Help,
         perform: launchAiChat,
       }),
       createAction({
         name: 'Search docs',
         shortcut: ['D'],
         icon: <DocumentIcon />,
-        section: 'Help',
+        section: PaletteSection.Help,
         perform: launchDocSearch,
       }),
       createAction({
         name: 'Contact support',
         shortcut: ['S'],
         icon: <LifePreserverIcon />,
-        section: 'Help',
+        section: PaletteSection.Help,
         perform: launchIntercom,
       }),
       createAction({
         name: 'Temporary Token',
         shortcut: ['T'],
-        section: 'Security',
+        section: PaletteSection.Security,
         perform: () => navigate('/profile/security'),
       }),
       createAction({
         name: 'VPN',
         shortcut: ['V'],
-        section: 'Security',
+        section: PaletteSection.Security,
         perform: () => navigate('/profile/vpn'),
       }),
       createAction({
         name: 'Users',
         shortcut: [],
-        section: 'Account',
+        section: PaletteSection.Account,
         perform: () => navigate('/account/users'),
       }),
     ],
