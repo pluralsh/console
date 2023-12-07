@@ -1,5 +1,10 @@
 package v1alpha1
 
+type NamespacedName struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
 type Bindings struct {
 	// Read bindings.
 	// +kubebuilder:validation:Optional
