@@ -61,9 +61,6 @@ defmodule Console.Services.Users do
   @spec get_bot!(binary) :: User.t
   def get_bot!(name), do: Repo.get_by!(User, bot_name: name)
 
-  @spec get_user_by_email!(binary) :: User.t
-  def get_user_by_email!(email), do: Repo.get_by!(User, email: email)
-
   @spec get_invite(binary) :: Invite.t | nil
   def get_invite(secure_id), do: Repo.get_by(Invite, secure_id: secure_id)
 

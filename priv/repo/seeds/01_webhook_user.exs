@@ -7,8 +7,11 @@ seed do
   %Schema.User{
     name: "console",
     email: "console@plural.sh",
-    bot_name: "console"
+    bot_name: "console",
   }
-  |> Schema.User.changeset(%{password: Ecto.UUID.generate()})
+  |> Schema.User.changeset(%{
+    password: Ecto.UUID.generate(),
+    roles: %{admin: true}
+  })
   |> Repo.insert!()
 end
