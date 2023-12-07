@@ -55,9 +55,7 @@ import {
   REPOS_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
-
 import { ClusterTinyFragment, useClustersTinyQuery } from 'generated/graphql'
-
 import { Edges } from 'utils/graphql'
 
 import { getIcon, hasIcons } from './apps/misc'
