@@ -16,7 +16,7 @@ type ClusterList struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Health",type="string",JSONPath=".status.health",description="Repo health status"
+// +kubebuilder:printcolumn:name="Health",type="string",JSONPath=".status.health",description="Cluster health status"
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console cluster ID"
 type Cluster struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -46,9 +46,13 @@ type ClusterSpec struct {
 	// +kubebuilder:validation:Optional
 	Protect *bool `json:"protect,omitempty"`
 
-	// TODO: Tags
+	// Tags used to filter clusters.
+	// +kubebuilder:validation:Optional
+	Tags map[string]string `json:"tags,omitempty"`
 
-	// TODO: Bindings
+	// Bindings contain read and write policies of this cluster
+	// +kubebuilder:validation:Optional
+	Bindings *Bindings `json:"bindings,omitempty"`
 
 	// CloudSettings contains cloud-specific settings for this cluster.
 	// +kubebuilder:validation:Optional
@@ -96,9 +100,12 @@ type ClusterAzureCloudSettings struct {
 }
 
 type ClusterGCPCloudSettings struct {
+	// Project in GCP to deploy cluster to.
+	Project string `json:"project"`
 }
 
 type ClusterBYOKCloudSettings struct {
+	// TODO: Decide how we handle BYOK settings and how we will deploy operator.
 }
 
 type ClusterNodePool struct {

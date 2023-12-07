@@ -16,7 +16,7 @@ spec:
   scope: Cluster
   versions:
   - additionalPrinterColumns:
-    - description: Repo health status
+    - description: Cluster health status
       jsonPath: .status.health
       name: Health
       type: string
@@ -42,6 +42,40 @@ spec:
             type: object
           spec:
             properties:
+              bindings:
+                description: Bindings contain read and write policies of this cluster
+                properties:
+                  read:
+                    description: Read bindings.
+                    items:
+                      properties:
+                        groupId:
+                          description: 'TODO: Add docs.'
+                          type: string
+                        id:
+                          description: 'TODO: Add docs.'
+                          type: string
+                        userId:
+                          description: 'TODO: Add docs.'
+                          type: string
+                      type: object
+                    type: array
+                  write:
+                    description: Write bindings.
+                    items:
+                      properties:
+                        groupId:
+                          description: 'TODO: Add docs.'
+                          type: string
+                        id:
+                          description: 'TODO: Add docs.'
+                          type: string
+                        userId:
+                          description: 'TODO: Add docs.'
+                          type: string
+                      type: object
+                    type: array
+                type: object
               cloud:
                 description: Cloud provider to use for this cluster.
                 enum:
@@ -96,6 +130,12 @@ spec:
                     type: object
                   gcp:
                     description: GCP cluster customizations.
+                    properties:
+                      project:
+                        description: Project in GCP to deploy cluster to.
+                        type: string
+                    required:
+                    - project
                     type: object
                 type: object
               handle:
@@ -179,6 +219,11 @@ spec:
               protect:
                 description: Protect cluster from being deleted.
                 type: boolean
+              tags:
+                additionalProperties:
+                  type: string
+                description: Tags used to filter clusters.
+                type: object
               version:
                 description: Version of Kubernetes to use for this cluster. Optional
                   only for BYOK.

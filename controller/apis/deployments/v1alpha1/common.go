@@ -1,5 +1,29 @@
 package v1alpha1
 
+type Bindings struct {
+	// Read bindings.
+	// +kubebuilder:validation:Optional
+	Read []Binding `json:"read,omitempty"`
+
+	// Write bindings.
+	// +kubebuilder:validation:Optional
+	Write []Binding `json:"write,omitempty"`
+}
+
+type Binding struct {
+	// TODO: Add docs.
+	// +kubebuilder:validation:Optional
+	Id *string `json:"id,omitempty"`
+
+	// TODO: Add docs.
+	// +kubebuilder:validation:Optional
+	UserId *string `json:"userId,omitempty"`
+
+	// TODO: Add docs.
+	// +kubebuilder:validation:Optional
+	GroupId *string `json:"groupId,omitempty"`
+}
+
 // Taint represents a Kubernetes taint.
 type Taint struct {
 	// Effect specifies the effect for the taint.
