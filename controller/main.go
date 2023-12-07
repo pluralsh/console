@@ -2,11 +2,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"github.com/pluralsh/console/controller/pkg/types"
+	"go.uber.org/zap"
 	"os"
+	"strings"
 
 	deploymentsv1alpha "github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	"github.com/pluralsh/console/controller/pkg/client"
-	gitrepositorycontroller "github.com/pluralsh/console/controller/pkg/gitrepository_controller"
 	"github.com/pluralsh/console/controller/pkg/log"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -14,7 +17,7 @@ import (
 	"k8s.io/klog"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	ctrlruntimezap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var (
@@ -33,13 +36,16 @@ type controllerRunOptions struct {
 	probeAddr            string
 	consoleUrl           string
 	consoleToken         string
+	reconcilers          types.ReconcilerList
 }
 
 func main() {
 	klog.InitFlags(nil)
 
-	opt := &controllerRunOptions{}
-	opts := zap.Options{
+	opt := &controllerRunOptions{
+		reconcilers: types.Reconcilers(),
+	}
+	opts := ctrlruntimezap.Options{
 		Development: true,
 	}
 	opts.BindFlags(flag.CommandLine)
@@ -50,10 +56,14 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&opt.consoleUrl, "console-url", "", "the url of the console api to fetch services from")
 	flag.StringVar(&opt.consoleToken, "console-token", "", "the deploy token to auth to console api with")
+	flag.Func("reconcilers", "Comma delimited list of reconciler names. Available reconcilers: gitrepository,cluster,provider,servicedeployment", func(reconcilersStr string) (err error) {
+		opt.reconcilers, err = parseReconcilers(reconcilersStr)
+		return err
+	})
 
 	flag.Parse()
 
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	ctrl.SetLogger(ctrlruntimezap.New(ctrlruntimezap.UseFlagOptions(&opts)))
 
 	if opt.consoleToken == "" {
 		opt.consoleToken = os.Getenv("CONSOLE_TOKEN")
@@ -75,20 +85,46 @@ func main() {
 	}
 
 	consoleClient := client.New(opt.consoleUrl, opt.consoleToken)
-
-	if err = (&gitrepositorycontroller.Reconciler{
-		Client:        mgr.GetClient(),
-		Log:           setupLog.Named("gitrepository-operator"),
-		ConsoleClient: consoleClient,
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "gitrepository")
+	controllers, err := opt.reconcilers.ToControllers(mgr, setupLog, consoleClient)
+	if err != nil {
+		setupLog.Error(err)
 		os.Exit(1)
+	}
+
+	runOrDie(controllers, mgr, setupLog)
+}
+
+func parseReconcilers(reconcilersStr string) (types.ReconcilerList, error) {
+	split := strings.Split(reconcilersStr, ",")
+	if len(reconcilersStr) == 0 || len(split) == 0 {
+		return nil, fmt.Errorf("reconcilers arg cannot be empty")
+	}
+
+	result := make(types.ReconcilerList, len(split))
+	for i, r := range split {
+		reconciler, err := types.ToReconciler(r)
+		if err != nil {
+			return nil, err
+		}
+
+		result[i] = reconciler
+	}
+
+	return result, nil
+}
+
+func runOrDie(controllers []types.Controller, mgr ctrl.Manager, logger *zap.SugaredLogger) {
+	for _, c := range controllers {
+		if err := c.SetupWithManager(mgr); err != nil {
+			logger.Error(err, "unable to create controller")
+			os.Exit(1)
+		}
 	}
 
 	ctx := ctrl.SetupSignalHandler()
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctx); err != nil {
-		setupLog.Error(err, "problem running manager")
+		setupLog.Error(err, "error running manager")
 		os.Exit(1)
 	}
 }
