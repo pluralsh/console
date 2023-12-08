@@ -36,6 +36,32 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
 		return ctrl.Result{}, err
 	}
+	if cluster.Status.Id == nil {
+		r.Log.Info("Cluster is not ready", service.Spec.ClusterRef.Name)
+		return ctrl.Result{
+			// update status
+			RequeueAfter: 30 * time.Second,
+		}, nil
+	}
+
+	repository := &v1alpha1.GitRepository{}
+	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
+		return ctrl.Result{}, err
+	}
+	if repository.Status.Id == nil {
+		r.Log.Info("Repository is not ready", service.Spec.RepositoryRef.Name)
+		return ctrl.Result{
+			// update status
+			RequeueAfter: 30 * time.Second,
+		}, nil
+	}
+	if repository.Status.Health == v1alpha1.GitHealthFailed {
+		r.Log.Info("Repository is not healthy", service.Spec.RepositoryRef.Name)
+		return ctrl.Result{
+			// update status
+			RequeueAfter: 30 * time.Second,
+		}, nil
+	}
 
 	existingService, err := r.ConsoleClient.GetService(*cluster.Status.Id, service.Name)
 	if err != nil {
