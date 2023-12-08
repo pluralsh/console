@@ -1,4 +1,11 @@
-import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
+import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   Chip,
   EmptyState,
@@ -91,6 +98,47 @@ export const SERVICES_QUERY_PAGE_SIZE = 100
 
 export default function Services() {
   const theme = useTheme()
+  const [refetch, setRefetch] = useState(() => () => {})
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...CD_BASE_CRUMBS,
+        {
+          label: 'services',
+          url: `/${CD_REL_PATH}/${SERVICES_REL_PATH}`,
+        },
+      ],
+      []
+    )
+  )
+
+  useSetCDHeaderContent(
+    useMemo(
+      () => (
+        <div
+          css={{
+            display: 'flex',
+            justifyContent: 'end',
+            gap: theme.spacing.small,
+          }}
+        >
+          <DeployService refetch={refetch} />
+        </div>
+      ),
+      [refetch, theme.spacing.small]
+    )
+  )
+
+  return <ServicesTable setRefetch={setRefetch} />
+}
+
+function ServicesTable({
+  setRefetch,
+}: {
+  setRefetch?: (refetch: () => void) => void
+}) {
+  const theme = useTheme()
   const navigate = useNavigate()
   const [clusterId, setClusterId] = useState<string>('')
   const [searchString, setSearchString] = useState()
@@ -131,35 +179,10 @@ export default function Services() {
     interval: POLL_INTERVAL,
   })
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...CD_BASE_CRUMBS,
-        {
-          label: 'services',
-          url: `/${CD_REL_PATH}/${SERVICES_REL_PATH}`,
-        },
-      ],
-      []
-    )
-  )
+  useEffect(() => {
+    setRefetch?.(refetch)
+  }, [refetch, setRefetch])
 
-  useSetCDHeaderContent(
-    useMemo(
-      () => (
-        <div
-          css={{
-            display: 'flex',
-            justifyContent: 'end',
-            gap: theme.spacing.small,
-          }}
-        >
-          <DeployService refetch={refetch} />
-        </div>
-      ),
-      [refetch, theme.spacing.small]
-    )
-  )
   const [tableFilters, setTableFilters] = useState<
     Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   >({
@@ -201,7 +224,7 @@ export default function Services() {
     return <LoadingIndicator />
   }
 
-  return (
+  const table = (
     <div
       css={{
         display: 'flex',
@@ -266,4 +289,6 @@ export default function Services() {
       </TabPanel>
     </div>
   )
+
+  return table
 }
