@@ -30,7 +30,9 @@ defmodule Prometheus.Client do
     |> case do
       {:ok, %{body: body, status_code: 200}} ->
         Poison.decode(body, as: %Response{data: %Data{result: [%Result{}]}})
-      error -> IO.inspect(error)
+      error ->
+        IO.inspect(error)
+        {:error, "prometheus error"}
     end
   end
 
