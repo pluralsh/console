@@ -27,6 +27,7 @@ import {
   ApiIcon,
   ChatIcon,
   Chip,
+  CloudIcon,
   ClusterIcon,
   ComponentsIcon,
   DashboardIcon,
@@ -54,8 +55,14 @@ import {
   REPOS_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
-import { ClusterTinyFragment, useClustersTinyQuery } from 'generated/graphql'
+import {
+  ClusterAddOnFragment,
+  ClusterTinyFragment,
+  useClustersTinyQuery,
+} from 'generated/graphql'
 import { Edges } from 'utils/graphql'
+
+import { toNiceVersion } from 'utils/semver'
 
 import { getIcon, hasIcons } from './apps/misc'
 import { InstallationContext } from './Installations'
@@ -64,7 +71,8 @@ import { usePlatform } from './hooks/usePlatform'
 import { HelpMenuState, launchHelp } from './help/HelpLauncher'
 import { KBarUpdateActions } from './utils/KBarUpdateActions'
 
-enum PaletteSection {
+export enum PaletteSection {
+  Actions = 'Actions',
   Apps = 'Apps',
   Cluster = 'Cluster',
   Help = 'Help',
@@ -290,9 +298,19 @@ function AppItem({ app }) {
       {hasIcons(app) && <AppIcon src={getIcon(app)} />}
       <AppName>{app.name}</AppName>
       {app.spec?.descriptor?.version && (
-        <AppVersion>v{app.spec.descriptor.version}</AppVersion>
+        <AppVersion>{toNiceVersion(app.spec.descriptor.version)}</AppVersion>
       )}
       <AppStatus app={app} />
+    </>
+  )
+}
+
+function InstallAddonItem({ addon }: { addon: ClusterAddOnFragment }) {
+  return (
+    <>
+      {addon.icon && <AppIcon src={addon.icon} />}
+      <AppName>Install {addon.name}</AppName>
+      {addon.version && <AppVersion>{toNiceVersion(addon.version)}</AppVersion>}
     </>
   )
 }
@@ -326,6 +344,8 @@ const ResultItem = forwardRef(
       >
         {action.app ? (
           <AppItem app={action.app} />
+        ) : action.addon ? (
+          <InstallAddonItem addon={action.addon} />
         ) : (
           <ItemInner
             action={action}
@@ -557,7 +577,7 @@ export function CommandPalette({ children }) {
       }),
       createAction({
         name: 'Providers',
-        icon: <ServersIcon />,
+        icon: <CloudIcon />,
         shortcut: [],
         section: PaletteSection.Cd,
         perform: () => navigate(`${CD_ABS_PATH}/${PROVIDERS_REL_PATH}`),
