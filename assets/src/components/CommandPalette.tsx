@@ -80,6 +80,7 @@ export enum PaletteSection {
   Account = 'Account',
   Cd = 'Continuous Deployment (CD)',
   CdClusters = 'CD – Clusters',
+  Addons = 'Add-ons',
 }
 
 function buildAppActions(applications, nav) {
@@ -292,26 +293,60 @@ const AppIcon = styled.img({
   width: 26,
 })
 
+const ItemContentSC = styled.div((_) => ({
+  display: 'flex',
+  alignItems: 'center',
+}))
+
+const ItemContentTextSC = styled.div((_) => ({
+  display: 'flex',
+  alignItems: 'baseline',
+}))
+
+const ItemSC = styled.div((_) => ({
+  display: 'flex',
+  width: '100%',
+  justifyContent: 'space-between',
+}))
+
 function AppItem({ app }) {
   return (
-    <>
-      {hasIcons(app) && <AppIcon src={getIcon(app)} />}
-      <AppName>{app.name}</AppName>
-      {app.spec?.descriptor?.version && (
-        <AppVersion>{toNiceVersion(app.spec.descriptor.version)}</AppVersion>
-      )}
+    <ItemSC>
+      <ItemContentSC>
+        {hasIcons(app) && <AppIcon src={getIcon(app)} />}
+        <ItemContentTextSC>
+          <AppName>{app.name}</AppName>
+          {app.spec?.descriptor?.version && (
+            <AppVersion>
+              {toNiceVersion(app.spec.descriptor.version)}
+            </AppVersion>
+          )}
+        </ItemContentTextSC>
+      </ItemContentSC>
       <AppStatus app={app} />
-    </>
+    </ItemSC>
   )
 }
 
 function InstallAddonItem({ addon }: { addon: ClusterAddOnFragment }) {
   return (
-    <>
-      {addon.icon && <AppIcon src={addon.icon} />}
-      <AppName>Install {addon.name}</AppName>
-      {addon.version && <AppVersion>{toNiceVersion(addon.version)}</AppVersion>}
-    </>
+    <ItemSC>
+      <ItemContentSC>
+        {addon.icon && <AppIcon src={addon.icon} />}
+        <ItemContentTextSC>
+          <AppName>{addon.name}</AppName>
+          {addon.version && (
+            <AppVersion>{toNiceVersion(addon.version)}</AppVersion>
+          )}
+        </ItemContentTextSC>
+      </ItemContentSC>
+      <Chip
+        clickable
+        size="small"
+      >
+        Install
+      </Chip>
+    </ItemSC>
   )
 }
 
