@@ -274,13 +274,13 @@ func (np *ClusterNodePool) Attributes() *console.NodePoolAttributes {
 	}
 
 	attrs := &console.NodePoolAttributes{
-		Name:         np.Name,
-		MinSize:      np.MinSize,
-		MaxSize:      np.MaxSize,
-		InstanceType: np.InstanceType,
+		Name:          np.Name,
+		MinSize:       np.MinSize,
+		MaxSize:       np.MaxSize,
+		InstanceType:  np.InstanceType,
+		CloudSettings: np.CloudSettings.Attributes(),
 		Taints: algorithms.Map(np.Taints,
 			func(t Taint) *console.TaintAttributes { return t.Attributes() }),
-		CloudSettings: nil, // TODO
 	}
 
 	if np.Labels != nil {
@@ -299,11 +299,31 @@ type ClusterNodePoolCloudSettings struct {
 	AWS *ClusterNodePoolAWSCloudSettings `json:"aws,omitempty"`
 }
 
+func (cs *ClusterNodePoolCloudSettings) Attributes() *console.NodePoolCloudAttributes {
+	if cs == nil {
+		return nil
+	}
+
+	return &console.NodePoolCloudAttributes{
+		Aws: cs.AWS.Attributes(),
+	}
+}
+
 type ClusterNodePoolAWSCloudSettings struct {
 	// LaunchTemplateId is an ID of custom launch template for your nodes. Useful for Golden AMI setups.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	LaunchTemplateId *string `json:"launchTemplateId,omitempty"`
+}
+
+func (cs *ClusterNodePoolAWSCloudSettings) Attributes() *console.AwsNodeCloudAttributes {
+	if cs == nil {
+		return nil
+	}
+
+	return &console.AwsNodeCloudAttributes{
+		LaunchTemplateID: cs.LaunchTemplateId,
+	}
 }
 
 type ClusterStatus struct {
