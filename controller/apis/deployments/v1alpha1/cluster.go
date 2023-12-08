@@ -31,13 +31,6 @@ type Cluster struct {
 
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// +kubebuilder:validation:XValidation:rule="self.cloud == 'aws' && (has(self.cloudSettings.aws)",message="AWS cloud settings are required"
-	// +kubebuilder:validation:XValidation:rule="self.cloud == 'azure' && (has(self.cloudSettings.azure)",message="Azure cloud settings are required"
-	// +kubebuilder:validation:XValidation:rule="self.cloud == 'gcp' && (has(self.cloudSettings.gcp)",message="GCP cloud settings are required"
-	// +kubebuilder:validation:XValidation:rule="self.cloud == 'aws' && (!has(self.cloudSettings.azure) && !has(self.cloudSettings.gcp)",message="Only AWS cloud settings can be specified"
-	// +kubebuilder:validation:XValidation:rule="self.cloud == 'azure' && (!has(self.cloudSettings.aws) && !has(self.cloudSettings.gcp)",message="Only Azure cloud settings can be specified"
-	// +kubebuilder:validation:XValidation:rule="self.cloud == 'gcp' && (!has(self.cloudSettings.aws) && !has(self.cloudSettings.azure)",message="Only GCP cloud settings can be specified"
-	// +kubebuilder:validation:XValidation:rule="self.cloud == 'byok' && (!has(self.cloudSettings.aws) && !has(self.cloudSettings.azure) && !has(self.cloudSettings.gcp))",message="Cloud settings can't be specified for BYOK"
 	Spec ClusterSpec `json:"spec,omitempty"`
 
 	Status ClusterStatus `json:"status,omitempty"`
