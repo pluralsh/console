@@ -68,6 +68,9 @@ spec:
             properties:
               health:
                 description: Health status.
+                enum:
+                - PULLABLE
+                - FAILED
                 type: string
               id:
                 description: Id of repo in console.

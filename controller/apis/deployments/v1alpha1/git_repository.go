@@ -18,10 +18,18 @@ type GitRepositorySpec struct {
 	CredentialsRef *corev1.SecretReference `json:"credentialsRef,omitempty"`
 }
 
+type GitHealth string
+
+const (
+	GitHealthPullable GitHealth = "PULLABLE"
+	GitHealthFailed   GitHealth = "FAILED"
+)
+
 type GitRepositoryStatus struct {
 	// Health status.
 	// +optional
-	Health *string `json:"health,omitempty"`
+	// +kubebuilder:validation:Enum:=PULLABLE;FAILED
+	Health GitHealth `json:"health,omitempty"`
 	// Message indicating details about last transition.
 	// +optional
 	Message *string `json:"message,omitempty"`

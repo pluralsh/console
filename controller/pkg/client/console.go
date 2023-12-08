@@ -24,13 +24,14 @@ type client struct {
 
 type ConsoleClient interface {
 	GetServices() ([]*console.ServiceDeploymentBaseFragment, error)
-	GetService(id string) (*console.ServiceDeploymentExtended, error)
+	GetService(clusterID, serviceName string) (*console.ServiceDeploymentExtended, error)
 	UpdateComponents(id string, components []*console.ComponentAttributes, errs []*console.ServiceErrorAttributes) error
 	CreateRepository(url string, privateKey, passphrase, username, password *string) (*console.CreateGitRepository, error)
 	ListRepositories() (*console.ListGitRepositories, error)
 	UpdateRepository(id string, attrs console.GitAttributes) (*console.UpdateGitRepository, error)
 	DeleteRepository(id string) error
 	GetRepository(url *string) (*console.GetGitRepository, error)
+	CreateService(clusterId *string, attributes console.ServiceDeploymentAttributes) (*console.ServiceDeploymentFragment, error)
 	GetCluster(id *string) (*console.ClusterFragment, error)
 	CreateCluster(attrs console.ClusterAttributes) (*console.CreateCluster, error)
 	ListClusters() (*console.ListClusters, error)

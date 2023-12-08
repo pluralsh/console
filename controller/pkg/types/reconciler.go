@@ -7,6 +7,7 @@ import (
 	clustercontroller "github.com/pluralsh/console/controller/pkg/cluster_controller"
 	gitrepositorycontroller "github.com/pluralsh/console/controller/pkg/gitrepository_controller"
 	providercontroller "github.com/pluralsh/console/controller/pkg/provider_controller"
+	servicecontroller "github.com/pluralsh/console/controller/pkg/service_controller"
 	"go.uber.org/zap"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -46,7 +47,11 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, logger *zap.SugaredLogger, c
 			ConsoleClient: consoleClient,
 		}, nil
 	case ServiceDeploymentReconciler:
-		return nil, unsupported
+		return &servicecontroller.Reconciler{
+			Client:        mgr.GetClient(),
+			Log:           logger,
+			ConsoleClient: consoleClient,
+		}, nil
 	case ClusterReconciler:
 		return &clustercontroller.Reconciler{
 			Client:        mgr.GetClient(),
@@ -73,7 +78,7 @@ type ReconcilerList []Reconciler
 // Reconcilers defines a list of reconcilers that will be started by default
 // if '--reconcilers=...' flag is not provided.
 func Reconcilers() ReconcilerList {
-	return []Reconciler{GitRepositoryReconciler, ProviderReconciler, ClusterReconciler}
+	return []Reconciler{GitRepositoryReconciler, ProviderReconciler, ClusterReconciler, ServiceDeploymentReconciler}
 }
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.

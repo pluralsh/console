@@ -56,13 +56,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return r.handleDelete(ctx, repo)
 	}
 
-	existingRepos, err := r.getRepository(repo.Spec.Url)
+	existingRepo, err := r.getRepository(repo.Spec.Url)
 	if err != nil {
 		if !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}
 	}
-	if existingRepos == nil {
+	if existingRepo == nil {
 		cred, err := r.getRepositoryCredentials(ctx, repo)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -71,17 +71,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		existingRepos = resp.CreateGitRepository
+		existingRepo = resp.CreateGitRepository
 	}
 	if err := kubernetes.TryAddFinalizer(ctx, r.Client, repo, RepoFinalizer); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if err := UpdateReposStatus(ctx, r.Client, repo, func(r *v1alpha1.GitRepository) {
-		r.Status.Message = existingRepos.Error
-		r.Status.Id = &existingRepos.ID
-		if existingRepos.Health != nil {
-			r.Status.Health = (*string)(existingRepos.Health)
+		r.Status.Message = existingRepo.Error
+		r.Status.Id = &existingRepo.ID
+		if existingRepo.Health != nil {
+			r.Status.Health = v1alpha1.GitHealth(*existingRepo.Health)
 		}
 
 	}); err != nil {
@@ -195,25 +195,25 @@ func (r *Reconciler) getRepository(url string) (*console.GitRepositoryFragment, 
 
 type RepoPatchFunc func(repo *v1alpha1.GitRepository)
 
-func UpdateReposStatus(ctx context.Context, client ctrlruntimeclient.Client, bootstrap *v1alpha1.GitRepository, patch RepoPatchFunc) error {
-	key := ctrlruntimeclient.ObjectKeyFromObject(bootstrap)
+func UpdateReposStatus(ctx context.Context, client ctrlruntimeclient.Client, repository *v1alpha1.GitRepository, patch RepoPatchFunc) error {
+	key := ctrlruntimeclient.ObjectKeyFromObject(repository)
 
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		// fetch the current state of the cluster
-		if err := client.Get(ctx, key, bootstrap); err != nil {
+		if err := client.Get(ctx, key, repository); err != nil {
 			return err
 		}
 
 		// modify it
-		original := bootstrap.DeepCopy()
-		patch(bootstrap)
+		original := repository.DeepCopy()
+		patch(repository)
 
 		// save some work
-		if reflect.DeepEqual(original.Status, bootstrap.Status) {
+		if reflect.DeepEqual(original.Status, repository.Status) {
 			return nil
 		}
 
 		// update the status
-		return client.Status().Patch(ctx, bootstrap, ctrlruntimeclient.MergeFrom(original))
+		return client.Status().Patch(ctx, repository, ctrlruntimeclient.MergeFrom(original))
 	})
 }
