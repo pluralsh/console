@@ -86,5 +86,5 @@ type ProviderSpec struct {
 type ProviderStatus struct {
 	// ID of the provider in the Console API.
 	// +kubebuilder:validation:Optional
-	ID string `json:"id,omitempty"`
+	ID *string `json:"id,omitempty"`
 }

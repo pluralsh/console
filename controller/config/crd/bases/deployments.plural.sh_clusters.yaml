@@ -16,11 +16,11 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: Cluster health status
-      jsonPath: .status.health
-      name: Health
+    - description: Current Kubernetes version
+      jsonPath: .status.currentVersion
+      name: CurrentVersion
       type: string
-    - description: Console cluster ID
+    - description: Console ID
       jsonPath: .status.id
       name: Id
       type: string
@@ -76,6 +76,9 @@ spec:
                       type: object
                     type: array
                 type: object
+                x-kubernetes-validations:
+                - message: Bindings are immutable
+                  rule: self == oldSelf
               cloud:
                 description: Cloud provider to use for this cluster.
                 enum:
@@ -83,6 +86,7 @@ spec:
                 - azure
                 - gcp
                 - byok
+                example: azure
                 type: string
                 x-kubernetes-validations:
                 - message: Cloud is immutable
@@ -104,16 +108,18 @@ spec:
                     description: Azure cluster customizations.
                     properties:
                       location:
-                        description: Location in Azure to deploy this cluster to,
-                          i.e. eastus.
+                        description: Location in Azure to deploy this cluster to.
+                        example: eastus
                         type: string
                       network:
                         description: Network is a name for the Azure virtual network
                           for this cluster.
+                        example: mynetwork
                         type: string
                       resourceGroup:
                         description: ResourceGroup is a name for the Azure resource
                           group for this cluster.
+                        example: myresourcegroup
                         type: string
                       subscriptionId:
                         description: SubscriptionId is GUID of the Azure subscription
@@ -135,10 +141,12 @@ spec:
                     - project
                     type: object
                 type: object
+                x-kubernetes-map-type: atomic
               handle:
                 description: Handle is a short, unique human-readable name used to
                   identify this cluster. Does not necessarily map to the cloud resource
                   name.
+                example: myclusterhandle
                 type: string
               nodePools:
                 description: NodePools contains specs of node pools managed by this
@@ -158,6 +166,7 @@ spec:
                               type: string
                           type: object
                       type: object
+                      x-kubernetes-map-type: atomic
                     instanceType:
                       description: InstanceType contains the type of node to use.
                         Usually cloud-specific.
@@ -215,6 +224,7 @@ spec:
                 type: array
               protect:
                 description: Protect cluster from being deleted.
+                example: false
                 type: boolean
               providerRef:
                 description: ProviderRef references provider to use for this cluster.
@@ -262,10 +272,10 @@ spec:
               version:
                 description: Version of Kubernetes to use for this cluster. Can be
                   skipped only for BYOK.
+                example: 1.25.11
                 type: string
             required:
             - cloud
-            - nodePools
             type: object
             x-kubernetes-validations:
             - message: AWS cloud settings are required
@@ -289,11 +299,15 @@ spec:
                 description: CurrentVersion contains current Kubernetes version this
                   cluster is using.
                 type: string
-              health:
-                description: Health status.
-                type: string
               id:
                 description: Id from Console.
+                type: string
+              kasURL:
+                description: KasURL contains KAS URL.
+                type: string
+              pingedAt:
+                description: PingedAt contains timestamp of last successful cluster
+                  ping.
                 type: string
             type: object
         type: object

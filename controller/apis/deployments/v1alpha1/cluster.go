@@ -19,8 +19,8 @@ type ClusterList struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Health",type="string",JSONPath=".status.health",description="Cluster health status"
-// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console cluster ID"
+// +kubebuilder:printcolumn:name="CurrentVersion",type="string",JSONPath=".status.currentVersion",description="Current Kubernetes version"
+// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console ID"
 type Cluster struct {
 	metav1.TypeMeta `json:",inline"`
 
@@ -42,10 +42,14 @@ type ClusterSpec struct {
 	// Handle is a short, unique human-readable name used to identify this cluster.
 	// Does not necessarily map to the cloud resource name.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:example:=myclusterhandle
 	Handle *string `json:"handle,omitempty"`
 
 	// Version of Kubernetes to use for this cluster. Can be skipped only for BYOK.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:example:="1.25.11"
 	Version *string `json:"version,omitempty"`
 
 	// ProviderRef references provider to use for this cluster. Can be skipped only for BYOK.
@@ -53,12 +57,16 @@ type ClusterSpec struct {
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 
 	// Cloud provider to use for this cluster.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:Enum=aws;azure;gcp;byok
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cloud is immutable"
+	// +kubebuilder:example:=azure
 	Cloud string `json:"cloud"`
 
 	// Protect cluster from being deleted.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:example:=false
 	Protect *bool `json:"protect,omitempty"`
 
 	// Tags used to filter clusters.
@@ -67,13 +75,16 @@ type ClusterSpec struct {
 
 	// Bindings contain read and write policies of this cluster
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Bindings are immutable"
 	Bindings *Bindings `json:"bindings,omitempty"`
 
 	// CloudSettings contains cloud-specific settings for this cluster.
 	// +kubebuilder:validation:Optional
+	// +structType=atomic
 	CloudSettings *ClusterCloudSettings `json:"cloudSettings,omitempty"`
 
 	// NodePools contains specs of node pools managed by this cluster.
+	// +kubebuilder:validation:Optional
 	NodePools []ClusterNodePool `json:"nodePools"`
 }
 
@@ -93,40 +104,61 @@ type ClusterCloudSettings struct {
 
 type ClusterAWSCloudSettings struct {
 	// Region in AWS to deploy this cluster to.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Type:=string
 	Region string `json:"region"`
 }
 
 type ClusterAzureCloudSettings struct {
 	// ResourceGroup is a name for the Azure resource group for this cluster.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:example:=myresourcegroup
 	ResourceGroup string `json:"resourceGroup"`
 
 	// Network is a name for the Azure virtual network for this cluster.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:example:=mynetwork
 	Network string `json:"network"`
 
 	// SubscriptionId is GUID of the Azure subscription to hold this cluster.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Type:=string
 	SubscriptionId string `json:"subscriptionId"`
 
-	// Location in Azure to deploy this cluster to, i.e. eastus.
+	// Location in Azure to deploy this cluster to.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:example:=eastus
 	Location string `json:"location"`
 }
 
 type ClusterGCPCloudSettings struct {
 	// Project in GCP to deploy cluster to.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Type:=string
 	Project string `json:"project"`
 }
 
 type ClusterNodePool struct {
 	// Name of the node pool. Must be unique.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Type:=string
 	Name string `json:"name"`
 
 	// InstanceType contains the type of node to use. Usually cloud-specific.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Type:=string
 	InstanceType string `json:"instanceType"`
 
 	// MinSize is minimum number of instances in this node pool.
+	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Minimum=1
 	MinSize int `json:"minSize"`
 
 	// MaxSize is maximum number of instances in this node pool.
+	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Minimum=1
 	MaxSize int `json:"maxSize"`
 
@@ -140,6 +172,7 @@ type ClusterNodePool struct {
 
 	// CloudSettings contains cloud-specific settings for this node pool.
 	// +kubebuilder:validation:Optional
+	// +structType=atomic
 	CloudSettings *ClusterNodePoolCloudSettings `json:"cloudSettings,omitempty"`
 }
 
@@ -152,19 +185,28 @@ type ClusterNodePoolCloudSettings struct {
 type ClusterNodePoolAWSCloudSettings struct {
 	// LaunchTemplateId is an ID of custom launch template for your nodes. Useful for Golden AMI setups.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
 	LaunchTemplateId *string `json:"launchTemplateId,omitempty"`
 }
 
 type ClusterStatus struct {
 	// Id from Console.
 	// +kubebuilder:validation:Optional
-	Id *string `json:"id,omitempty"`
+	// +kubebuilder:validation:Type:=string
+	ID *string `json:"id,omitempty"`
 
 	// CurrentVersion contains current Kubernetes version this cluster is using.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
 	CurrentVersion *string `json:"currentVersion,omitempty"`
 
-	// Health status.
-	// +optional
-	Health *string `json:"health,omitempty"`
+	// KasURL contains KAS URL.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	KasURL *string `json:"kasURL,omitempty"`
+
+	// PingedAt contains timestamp of last successful cluster ping.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	PingedAt *string `json:"pingedAt,omitempty"`
 }
