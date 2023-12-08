@@ -24,6 +24,7 @@ import { ClusterMetrics } from '../../cluster/nodes/ClusterMetrics'
 import { cpuParser, memoryParser } from '../../../utils/kubernetes'
 import { ResourceUsage } from '../../cluster/nodes/Nodes'
 import { getNodeDetailsPath } from '../../../routes/cdRoutesConsts'
+import { useDeploymentSettings } from 'routes/cdRoutes'
 
 export const ColActions = (clusterId?: string) =>
   columnHelper.accessor(() => null, {
@@ -42,6 +43,7 @@ export const ColActions = (clusterId?: string) =>
 
 export default function ClusterNodes() {
   const theme = useTheme()
+  const settings = useDeploymentSettings()
   const { cluster } = useOutletContext() as { cluster: Cluster }
 
   const columns: ColumnDef<TableData, any>[] = useMemo(
@@ -75,6 +77,8 @@ export default function ClusterNodes() {
     return { cpu, mem }
   }, [cluster])
 
+  console.log(settings)
+
   return (
     <div
       css={{
@@ -83,11 +87,12 @@ export default function ClusterNodes() {
         gap: theme.spacing.medium,
       }}
     >
-      {cluster?.self && (
+      {(cluster?.self || settings?.prometheusConnection) && (
         <Card padding="xlarge">
           <ClusterMetrics
             nodes={cluster?.nodes?.filter((node): node is Node => !!node) || []}
             usage={usage}
+            cluster={cluster}
           />
         </Card>
       )}

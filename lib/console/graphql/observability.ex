@@ -83,24 +83,26 @@ defmodule Console.GraphQl.Observability do
 
     field :metric, list_of(:metric_response) do
       middleware Authenticated
+
+      arg :query,      non_null(:string)
+      arg :offset,     :integer
+      arg :step,       :string
+      arg :cluster_id, :id
+
       middleware ObservabilityClient, :prometheus
-
-      arg :query,  non_null(:string)
-      arg :offset, :integer
-      arg :step,   :string
-
       safe_resolve &Observability.resolve_metric/2
     end
 
     field :logs, list_of(:log_stream) do
       middleware Authenticated
+
+      arg :query,      non_null(:string)
+      arg :start,      :long
+      arg :end,        :long
+      arg :limit,      non_null(:integer)
+      arg :cluster_id, :id
+
       middleware ObservabilityClient, :loki
-
-      arg :query, non_null(:string)
-      arg :start, :long
-      arg :end,   :long
-      arg :limit, non_null(:integer)
-
       safe_resolve &Observability.resolve_logs/2
     end
 

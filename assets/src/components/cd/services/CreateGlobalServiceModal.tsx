@@ -77,7 +77,7 @@ export function CreateGlobalServiceModal({
 
   const initialLoading = false
 
-  const globalSErviceFields = (
+  const globalServiceFields = (
     <>
       {' '}
       <FormField
@@ -167,7 +167,7 @@ export function CreateGlobalServiceModal({
               <StepH css={{ display: 'inline' }}>Service:</StepH>{' '}
               {serviceDeployment.name}
             </StepBody>
-            {globalSErviceFields}
+            {globalServiceFields}
           </>
         )}
       </div>

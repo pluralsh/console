@@ -10,11 +10,20 @@ import { CLUSTER_SATURATION } from '../queries'
 
 import { datum } from '../utils'
 
-export function SaturationGraphs({ cpu, mem }) {
+export function SaturationGraphs({
+  cpu,
+  mem,
+  clusterId,
+}: {
+  cpu: string
+  mem: string
+  clusterId?: string
+}) {
   const { data } = useQuery(CLUSTER_SATURATION, {
     variables: {
       cpuUtilization: cpu,
       memUtilization: mem,
+      clusterId: clusterId,
       offset: 2 * 60 * 60,
     },
     fetchPolicy: 'network-only',

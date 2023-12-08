@@ -1,6 +1,8 @@
-import { useLayoutEffect } from 'react'
+import { createContext, useContext, useLayoutEffect } from 'react'
 
-import ContinuousDeployment from 'components/cd/ContinuousDeployment'
+import ContinuousDeployment, {
+  POLL_INTERVAL,
+} from 'components/cd/ContinuousDeployment'
 import Clusters from 'components/cd/clusters/Clusters'
 import Repositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
@@ -11,6 +13,7 @@ import {
   Route,
   useLocation,
   useNavigate,
+  useOutletContext,
 } from 'react-router-dom'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -79,6 +82,12 @@ import {
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
+import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
+import {
+  DeploymentSettingsFragment,
+  DeploymentSettingsFragmentDoc,
+  useDeploymentSettingsQuery,
+} from 'generated/graphql'
 
 export const componentRoutes = (
   <Route
@@ -115,7 +124,19 @@ export const componentRoutes = (
 
 const defaultLocation = `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}` as const
 
+const CDContext = createContext<{
+  deploymentSettings?: DeploymentSettingsFragment | undefined | null
+}>({})
+
+export function useDeploymentSettings() {
+  const ctx = useContext(CDContext)
+  return ctx?.deploymentSettings
+}
+
 function CdRoot() {
+  const { data } = useDeploymentSettingsQuery({
+    pollInterval: POLL_INTERVAL,
+  })
   const cdIsEnabled = useCDEnabled()
   const navigate = useNavigate()
   const location = useLocation()
@@ -126,7 +147,13 @@ function CdRoot() {
     }
   }, [cdIsEnabled, location.pathname, navigate])
 
-  return <Outlet />
+  return (
+    <CDContext.Provider
+      value={{ deploymentSettings: data?.deploymentSettings }}
+    >
+      <Outlet />
+    </CDContext.Provider>
+  )
 }
 
 const mainRoutes = (
@@ -204,6 +231,10 @@ const globalSettingsRoutes = (
     <Route
       path="auto-update"
       element={<SelfManage />}
+    />
+    <Route
+      path="observability"
+      element={<GlobalSettingsObservability />}
     />
   </Route>
 )

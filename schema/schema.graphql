@@ -47,9 +47,9 @@ type RootQueryType {
 
   dashboard(repo: String!, name: String!, step: String, offset: Int, labels: [LabelInput]): Dashboard
 
-  metric(query: String!, offset: Int, step: String): [MetricResponse]
+  metric(query: String!, offset: Int, step: String, clusterId: ID): [MetricResponse]
 
-  logs(query: String!, start: Long, end: Long, limit: Int!): [LogStream]
+  logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
 
   scalingRecommendation(kind: AutoscalingTarget!, namespace: String!, name: String!): VerticalPodAutoscaler
 

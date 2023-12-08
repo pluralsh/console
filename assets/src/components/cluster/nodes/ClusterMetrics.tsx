@@ -1,5 +1,5 @@
 import { Flex } from 'honorable'
-import { Node } from 'generated/graphql'
+import { ClusterFragment, Node } from 'generated/graphql'
 
 import { ClusterMetrics as Metrics } from '../constants'
 
@@ -7,12 +7,20 @@ import { ClusterGauges } from './ClusterGauges'
 import { ResourceUsage } from './Nodes'
 import { SaturationGraphs } from './SaturationGraphs'
 
+export function replaceMetric(metric, cluster) {
+  if (!cluster) return metric
+
+  return metric.replace(`cluster=""`, `cluster="${cluster}"`)
+}
+
 export function ClusterMetrics({
   nodes,
   usage,
+  cluster,
 }: {
   nodes: Node[]
   usage: ResourceUsage
+  cluster?: ClusterFragment
 }) {
   return (
     <Flex
@@ -34,10 +42,18 @@ export function ClusterMetrics({
         <ClusterGauges
           nodes={nodes}
           usage={usage}
+          cluster={cluster}
         />
         <SaturationGraphs
-          cpu={Metrics.CPU}
-          mem={Metrics.Memory}
+          clusterId={cluster?.id}
+          cpu={replaceMetric(
+            cluster ? Metrics.CPUCD : Metrics.CPU,
+            cluster?.handle
+          )}
+          mem={replaceMetric(
+            cluster ? Metrics.MemoryCD : Metrics.Memory,
+            cluster?.handle
+          )}
         />
       </Flex>
     </Flex>

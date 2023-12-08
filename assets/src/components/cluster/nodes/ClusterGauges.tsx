@@ -3,7 +3,7 @@ import { useQuery } from '@apollo/client'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { sumBy } from 'lodash'
 
-import { MetricResponse, Node } from 'generated/graphql'
+import { ClusterFragment, MetricResponse, Node } from 'generated/graphql'
 import { cpuParser } from 'utils/kubernetes'
 
 import RadialBarChart from 'components/utils/RadialBarChart'
@@ -14,6 +14,7 @@ import { NODE_METRICS_Q } from '../queries'
 import { GaugeWrap, ResourceGauge } from '../Gauges'
 
 import { ResourceUsage } from './Nodes'
+import { replaceMetric } from './ClusterMetrics'
 
 type Capacity = { cpu?: string; pods?: string; memory?: string } | undefined
 
@@ -23,9 +24,11 @@ const datum = (data: MetricResponse[]) =>
 export function ClusterGauges({
   nodes,
   usage,
+  cluster,
 }: {
   nodes: Node[]
   usage: ResourceUsage
+  cluster?: ClusterFragment
 }) {
   const { data } = useQuery<{
     cpuRequests: MetricResponse[]
@@ -35,11 +38,22 @@ export function ClusterGauges({
     pods: MetricResponse[]
   }>(NODE_METRICS_Q, {
     variables: {
-      cpuRequests: Metrics.CPURequests,
-      cpuLimits: Metrics.CPULimits,
-      memRequests: Metrics.MemoryRequests,
-      memLimits: Metrics.MemoryLimits,
-      pods: Metrics.Pods,
+      clusterId: cluster?.id,
+      cpuRequests: cluster
+        ? replaceMetric(Metrics.CPURequestsCD, cluster?.handle)
+        : Metrics.CPURequests,
+      cpuLimits: cluster
+        ? replaceMetric(Metrics.CPULimitsCD, cluster?.handle)
+        : Metrics.CPULimits,
+      memRequests: cluster
+        ? replaceMetric(Metrics.MemoryRequestsCD, cluster?.handle)
+        : Metrics.MemoryRequests,
+      memLimits: cluster
+        ? replaceMetric(Metrics.MemoryLimitsCD, cluster?.handle)
+        : Metrics.MemoryLimits,
+      pods: cluster
+        ? replaceMetric(Metrics.PodsCD, cluster?.handle)
+        : Metrics.Pods,
       offset: 5 * 60,
     },
     fetchPolicy: 'network-only',
