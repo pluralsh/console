@@ -98,23 +98,16 @@ export default function AddOns() {
     [addOns]
   )
 
-  console.log('kbar', kbarActions)
   const filteredAddOns = useMemo(() => {
     if (!filterString) {
       return addOns || []
     }
-
     const fuse = new Fuse(addOns || [], searchOptions)
 
     return fuse.search(filterString).map((result) => result.item)
   }, [filterString, addOns])
 
-  console.log('addons', addOns)
-  // useRegisterActions(kbarActions)
-
   if (isEmpty(addOns)) {
-    console.log('LoadingIndicator')
-
     return <LoadingIndicator />
   }
   const noFilteredAddOns = isEmpty(filteredAddOns)
