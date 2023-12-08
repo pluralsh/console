@@ -2,7 +2,6 @@ package servicecontroller
 
 import (
 	"context"
-	"github.com/pluralsh/console/controller/pkg/kubernetes"
 	"reflect"
 	"time"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
+	"github.com/pluralsh/console/controller/pkg/kubernetes"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -44,7 +44,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
 		return ctrl.Result{}, err
 	}
-	if cluster.Status.Id == nil {
+	if cluster.Status.ID == nil {
 		r.Log.Info("Cluster is not ready", service.Spec.ClusterRef.Name)
 		return ctrl.Result{
 			// update status
@@ -71,7 +71,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}, nil
 	}
 
-	existingService, err := r.ConsoleClient.GetService(*cluster.Status.Id, service.Name)
+	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
 	if err != nil {
 		if !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
@@ -82,11 +82,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		_, err = r.ConsoleClient.CreateService(cluster.Status.Id, *attr)
+		_, err = r.ConsoleClient.CreateService(cluster.Status.ID, *attr)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		existingService, err = r.ConsoleClient.GetService(*cluster.Status.Id, service.Name)
+		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -124,16 +124,16 @@ func (r *Reconciler) genCreateAttr(ctx context.Context, service *v1alpha1.Servic
 
 		for _, r := range service.Spec.Bindings.Read {
 			attr.ReadBindings = append(attr.ReadBindings, &console.PolicyBindingAttributes{
-				ID:      r.Id,
-				UserID:  r.UserId,
-				GroupID: r.GroupId,
+				ID:      r.ID,
+				UserID:  r.UserID,
+				GroupID: r.GroupID,
 			})
 		}
 		for _, w := range service.Spec.Bindings.Write {
 			attr.WriteBindings = append(attr.WriteBindings, &console.PolicyBindingAttributes{
-				ID:      w.Id,
-				UserID:  w.UserId,
-				GroupID: w.GroupId,
+				ID:      w.ID,
+				UserID:  w.UserID,
+				GroupID: w.GroupID,
 			})
 		}
 	}
