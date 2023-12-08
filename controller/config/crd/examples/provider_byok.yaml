@@ -3,7 +3,6 @@ apiVersion: deployments.plural.sh/v1alpha1
 kind: Provider
 metadata:
   name: byok
-  namespace: byok
 spec:
   cloud: byok
   name: byok

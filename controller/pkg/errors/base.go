@@ -5,12 +5,15 @@ import (
 	"github.com/Yamashou/gqlgenc/client"
 )
 
-var ErrExpected = errors.New("this is a transient, expected error")
-
 type KnownError string
+
+func (k KnownError) String() string {
+	return string(k)
+}
 
 const (
 	ErrorNotFound KnownError = "could not find resource"
+	ErrExpected   KnownError = "this is a transient, expected error"
 )
 
 type wrappedErrorResponse struct {

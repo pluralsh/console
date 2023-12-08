@@ -2,6 +2,7 @@ package servicecontroller
 
 import (
 	"context"
+	"github.com/go-logr/logr"
 	"reflect"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/kubernetes"
-	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
@@ -28,7 +28,7 @@ const (
 type Reconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
-	Log           *zap.SugaredLogger
+	Log           logr.Logger
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
