@@ -50,7 +50,7 @@ type ClusterSpec struct {
 
 	// ProviderRef references provider to use for this cluster. Can be skipped only for BYOK.
 	// +kubebuilder:validation:Optional
-	ProviderRef corev1.ObjectReference `json:"providerRef,omitempty"`
+	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 
 	// Cloud provider to use for this cluster.
 	// +kubebuilder:validation:Enum=aws;azure;gcp;byok

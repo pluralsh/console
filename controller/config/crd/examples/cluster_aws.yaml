@@ -1,0 +1,41 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: aws
+  namespace: default
+spec:
+  handle: aws
+  cloud: aws
+  version: 1.24
+  protect: false
+#  providerRef:
+#    ...
+  cloudSettings:
+    aws:
+      region: us-east-1
+  nodePools:
+    - name: pool1
+      instanceType: t5.large
+      minSize: 1
+      maxSize: 5
+    - name: pool2
+      instanceType: t5.large
+      minSize: 1
+      maxSize: 3
+      labels:
+        key1: value1
+        key2: value2
+        key3: value3
+      taints:
+        - key: key
+          value: value
+          effect: NoSchedule
+    - name: pool3
+      instanceType: t5.large
+      minSize: 1
+      maxSize: 3
+      cloudSettings:
+        aws:
+          launchTemplateId: test
+  tags:
+    managed-by: plural-controller
