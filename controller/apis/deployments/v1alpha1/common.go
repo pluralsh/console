@@ -1,5 +1,9 @@
 package v1alpha1
 
+import (
+	console "github.com/pluralsh/console-client-go"
+)
+
 type NamespacedName struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
@@ -27,6 +31,18 @@ type Binding struct {
 	// TODO: Add docs.
 	// +kubebuilder:validation:Optional
 	GroupID *string `json:"groupID,omitempty"`
+}
+
+func (b *Binding) Attributes() *console.PolicyBindingAttributes {
+	if b == nil {
+		return nil
+	}
+
+	return &console.PolicyBindingAttributes{
+		ID:      b.ID,
+		UserID:  b.UserID,
+		GroupID: b.GroupID,
+	}
 }
 
 // Taint represents a Kubernetes taint.
