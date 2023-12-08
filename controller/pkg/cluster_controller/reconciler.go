@@ -51,7 +51,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	if !cluster.GetDeletionTimestamp().IsZero() {
-		return r.handleDelete(ctx, cluster)
+		return r.delete(ctx, cluster)
 	}
 
 	apiCluster, err := r.ConsoleClient.GetCluster(cluster.Status.ID)
@@ -79,7 +79,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if apiCluster == nil {
 		// TODO: Set owner ref.
-		_, err := r.ConsoleClient.CreateCluster(console.ClusterAttributes{
+		response, err := r.ConsoleClient.CreateCluster(console.ClusterAttributes{
 			Name:          "",
 			Handle:        nil,
 			ProviderID:    providerId,
@@ -96,7 +96,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		// TODO: apiCluster = resp.CreateCluster
+		apiCluster = response
 	}
 	if err := kubernetes.TryAddFinalizer(ctx, r.Client, cluster, ClusterFinalizer); err != nil {
 		return ctrl.Result{}, err
@@ -114,7 +114,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 }
 
-func (r *Reconciler) handleDelete(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
+func (r *Reconciler) delete(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
 	if controllerutil.ContainsFinalizer(cluster, ClusterFinalizer) {
 		r.Log.Info("delete cluster")
 		if cluster.Status.ID == nil {

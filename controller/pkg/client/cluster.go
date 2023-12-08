@@ -4,8 +4,30 @@ import (
 	console "github.com/pluralsh/console-client-go"
 )
 
-func (c *client) CreateCluster(attrs console.ClusterAttributes) (*console.CreateCluster, error) {
-	return c.consoleClient.CreateCluster(c.ctx, attrs)
+func (c *client) CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error) {
+	response, err := c.consoleClient.CreateCluster(c.ctx, attrs)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create cluster returns cluster fragment extended with deploy token which makes types incompatible.
+	// Doing mapping here to use the same types anywhere. Deploy token is not needed at the moment anyway.
+	return &console.ClusterFragment{
+		ID:             response.CreateCluster.ID,
+		Name:           response.CreateCluster.Name,
+		Handle:         response.CreateCluster.Handle,
+		Self:           response.CreateCluster.Self,
+		Version:        response.CreateCluster.Version,
+		InsertedAt:     response.CreateCluster.InsertedAt,
+		PingedAt:       response.CreateCluster.PingedAt,
+		Protect:        response.CreateCluster.Protect,
+		CurrentVersion: response.CreateCluster.CurrentVersion,
+		KasURL:         response.CreateCluster.KasURL,
+		Tags:           response.CreateCluster.Tags,
+		Credential:     response.CreateCluster.Credential,
+		Provider:       response.CreateCluster.Provider,
+		NodePools:      response.CreateCluster.NodePools,
+	}, nil
 }
 
 func (c *client) GetCluster(id *string) (*console.ClusterFragment, error) {
