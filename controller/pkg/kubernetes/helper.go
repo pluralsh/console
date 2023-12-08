@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/util/retry"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -98,5 +101,28 @@ func TryAddFinalizer(ctx context.Context, client ctrlruntimeclient.Client, obj c
 		return fmt.Errorf("failed to add finalizers %v to %s %s: %w", finalizers, kind, key, err)
 	}
 
+	return nil
+}
+
+func DeleteSecret(ctx context.Context, client client.Client, secretNamespace, secretName string) error {
+	if secretName == "" {
+		return nil
+	}
+
+	secret := &corev1.Secret{}
+	name := types.NamespacedName{Name: secretName, Namespace: secretNamespace}
+	err := client.Get(ctx, name, secret)
+	if apierrors.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("failed to get Secret %q: %w", name.String(), err)
+	}
+
+	if err := client.Delete(ctx, secret); err != nil {
+		return fmt.Errorf("failed to delete Secret %q: %w", name.String(), err)
+	}
+
+	// We successfully deleted the secret
 	return nil
 }

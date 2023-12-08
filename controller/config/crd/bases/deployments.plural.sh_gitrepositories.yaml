@@ -58,6 +58,9 @@ spec:
                 x-kubernetes-map-type: atomic
               url:
                 type: string
+                x-kubernetes-validations:
+                - message: Url is immutable
+                  rule: self == oldSelf
             required:
             - url
             type: object

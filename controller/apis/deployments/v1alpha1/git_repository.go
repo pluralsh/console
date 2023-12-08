@@ -10,6 +10,7 @@ func init() {
 }
 
 type GitRepositorySpec struct {
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Url is immutable"
 	Url string `json:"url"`
 
 	// CredentialsRef is a secret reference which should contain privateKey, passphrase, username and password.
