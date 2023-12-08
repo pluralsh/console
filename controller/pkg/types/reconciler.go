@@ -2,7 +2,9 @@ package types
 
 import (
 	"fmt"
+
 	"github.com/pluralsh/console/controller/pkg/client"
+	clustercontroller "github.com/pluralsh/console/controller/pkg/cluster_controller"
 	gitrepositorycontroller "github.com/pluralsh/console/controller/pkg/gitrepository_controller"
 	providercontroller "github.com/pluralsh/console/controller/pkg/provider_controller"
 	"go.uber.org/zap"
@@ -46,7 +48,12 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, logger *zap.SugaredLogger, c
 	case ServiceDeploymentReconciler:
 		return nil, unsupported
 	case ClusterReconciler:
-		return nil, unsupported
+		return &clustercontroller.Reconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Log:           logger,
+			Scheme:        mgr.GetScheme(),
+		}, nil
 	case ProviderReconciler:
 		return &providercontroller.Reconciler{
 			Client:        mgr.GetClient(),
@@ -66,7 +73,7 @@ type ReconcilerList []Reconciler
 // Reconcilers defines a list of reconcilers that will be started by default
 // if '--reconcilers=...' flag is not provided.
 func Reconcilers() ReconcilerList {
-	return []Reconciler{GitRepositoryReconciler, ProviderReconciler}
+	return []Reconciler{GitRepositoryReconciler, ProviderReconciler, ClusterReconciler}
 }
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.

@@ -31,6 +31,10 @@ type ConsoleClient interface {
 	UpdateRepository(id string, attrs console.GitAttributes) (*console.UpdateGitRepository, error)
 	DeleteRepository(id string) error
 	GetRepository(url *string) (*console.GetGitRepository, error)
+	GetCluster(id *string) (*console.ClusterFragment, error)
+	CreateCluster(attrs console.ClusterAttributes) (*console.CreateCluster, error)
+	ListClusters() (*console.ListClusters, error)
+	DeleteCluster(id string) (*console.ClusterFragment, error)
 }
 
 func New(url, token string) ConsoleClient {

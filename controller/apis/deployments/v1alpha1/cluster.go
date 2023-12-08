@@ -158,13 +158,17 @@ type ClusterNodePoolAWSCloudSettings struct {
 type ClusterStatus struct {
 	// Id from Console.
 	// +kubebuilder:validation:Optional
-	Id *string `json:"id,omitempty"`
+	ID *string `json:"id,omitempty"`
 
 	// CurrentVersion contains current Kubernetes version this cluster is using.
 	// +kubebuilder:validation:Optional
 	CurrentVersion *string `json:"currentVersion,omitempty"`
 
-	// Health status.
+	// KasURL contains KAS URL.
+	// +kubebuilder:validation:Optional
+	KasURL *string `json:"kasURL,omitempty"`
+
+	// PingedAt contains timestamp of last successful cluster ping.
 	// +optional
-	Health *string `json:"health,omitempty"`
+	PingedAt *string `json:"pingedAt,omitempty"`
 }

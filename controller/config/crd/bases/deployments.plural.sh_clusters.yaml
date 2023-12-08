@@ -289,11 +289,15 @@ spec:
                 description: CurrentVersion contains current Kubernetes version this
                   cluster is using.
                 type: string
-              health:
-                description: Health status.
-                type: string
               id:
                 description: Id from Console.
+                type: string
+              kasURL:
+                description: KasURL contains KAS URL.
+                type: string
+              pingedAt:
+                description: PingedAt contains timestamp of last successful cluster
+                  ping.
                 type: string
             type: object
         type: object
