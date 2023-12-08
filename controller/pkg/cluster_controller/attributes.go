@@ -49,7 +49,7 @@ func tagsAttribute(tags map[string]string) []*console.TagAttributes {
 		return nil
 	}
 
-	attr := make([]*console.TagAttributes, len(tags))
+	attr := make([]*console.TagAttributes, 0)
 	for name, value := range tags {
 		attr = append(attr, &console.TagAttributes{
 			Name:  name,
