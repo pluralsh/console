@@ -3,6 +3,7 @@ package cluster_controller
 import (
 	"context"
 	"fmt"
+	"github.com/go-logr/logr"
 	"reflect"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/kubernetes"
-	"go.uber.org/zap"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -30,7 +30,7 @@ const (
 type Reconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
-	Log           *zap.SugaredLogger
+	Log           logr.Logger
 	Scheme        *runtime.Scheme
 }
 
@@ -70,7 +70,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 
 		if provider.Status.ID == nil {
-			r.Log.Info(fmt.Errorf("provider does not have ID set yet"))
+			r.Log.Info("provider does not have ID set yet")
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 		}
 

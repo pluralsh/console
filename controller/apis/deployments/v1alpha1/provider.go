@@ -88,3 +88,15 @@ type ProviderStatus struct {
 	// +kubebuilder:validation:Optional
 	ID *string `json:"id,omitempty"`
 }
+
+func (p *ProviderStatus) GetID() string {
+	if !p.HasID() {
+		return ""
+	}
+
+	return *p.ID
+}
+
+func (p *ProviderStatus) HasID() bool {
+	return p.ID != nil && len(*p.ID) > 0
+}

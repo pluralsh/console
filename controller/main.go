@@ -4,13 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"github.com/pluralsh/console/controller/pkg/types"
-	"go.uber.org/zap"
 	"os"
 	"strings"
 
 	deploymentsv1alpha "github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	"github.com/pluralsh/console/controller/pkg/client"
-	"github.com/pluralsh/console/controller/pkg/log"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -22,7 +20,7 @@ import (
 
 var (
 	scheme   = runtime.NewScheme()
-	setupLog = log.Logger
+	setupLog = ctrl.Log.WithName("Setup")
 )
 
 func init() {
@@ -87,11 +85,11 @@ func main() {
 	consoleClient := client.New(opt.consoleUrl, opt.consoleToken)
 	controllers, err := opt.reconcilers.ToControllers(mgr, setupLog, consoleClient)
 	if err != nil {
-		setupLog.Error(err)
+		setupLog.Error(err, "error when creating controllers")
 		os.Exit(1)
 	}
 
-	runOrDie(controllers, mgr, setupLog)
+	runOrDie(controllers, mgr)
 }
 
 func parseReconcilers(reconcilersStr string) (types.ReconcilerList, error) {
@@ -113,10 +111,10 @@ func parseReconcilers(reconcilersStr string) (types.ReconcilerList, error) {
 	return result, nil
 }
 
-func runOrDie(controllers []types.Controller, mgr ctrl.Manager, logger *zap.SugaredLogger) {
+func runOrDie(controllers []types.Controller, mgr ctrl.Manager) {
 	for _, c := range controllers {
 		if err := c.SetupWithManager(mgr); err != nil {
-			logger.Error(err, "unable to create controller")
+			setupLog.Error(err, "unable to setup controller")
 			os.Exit(1)
 		}
 	}

@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	gqlgenclient "github.com/Yamashou/gqlgenc/client"
 	"net/http"
 
 	console "github.com/pluralsh/console-client-go"
@@ -36,6 +37,11 @@ type ConsoleClient interface {
 	CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error)
 	ListClusters() (*console.ListClusters, error)
 	DeleteCluster(id string) (*console.ClusterFragment, error)
+	CreateProvider(ctx context.Context, attributes console.ClusterProviderAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
+	GetProvider(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
+	UpdateProvider(ctx context.Context, id string, attributes console.ClusterProviderUpdateAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
+	DeleteProvider(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error
+	IsProviderExists(ctx context.Context, id string) bool
 }
 
 func New(url, token string) ConsoleClient {

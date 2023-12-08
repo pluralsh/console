@@ -2,13 +2,13 @@ package servicecontroller
 
 import (
 	"context"
+	"github.com/go-logr/logr"
 	"reflect"
 	"time"
 
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
-	"go.uber.org/zap"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -20,7 +20,7 @@ import (
 type Reconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
-	Log           *zap.SugaredLogger
+	Log           logr.Logger
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -36,7 +36,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
 		return ctrl.Result{}, err
 	}
-	if cluster.Status.Id == nil {
+	if cluster.Status.ID == nil {
 		r.Log.Info("Cluster is not ready", service.Spec.ClusterRef.Name)
 		return ctrl.Result{
 			// update status
@@ -63,7 +63,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}, nil
 	}
 
-	existingService, err := r.ConsoleClient.GetService(*cluster.Status.Id, service.Name)
+	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
 	if err != nil {
 		if !errors.IsNotFound(err) {
 			return ctrl.Result{}, err

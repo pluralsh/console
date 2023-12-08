@@ -3,6 +3,7 @@ package gitrepositorycontroller
 import (
 	"context"
 	"fmt"
+	"github.com/go-logr/logr"
 	"reflect"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/kubernetes"
-	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -41,7 +41,7 @@ type GitRepoCred struct {
 type Reconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
-	Log           *zap.SugaredLogger
+	Log           logr.Logger
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
