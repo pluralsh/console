@@ -5,20 +5,25 @@ import {
   SearchIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
 import Fuse from 'fuse.js'
+import { Priority } from 'kbar'
 
 import { ADDONS_REL_PATH, CD_ABS_PATH } from 'routes/cdRoutesConsts'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { ClusterAddOnFragment, useClusterAddOnsQuery } from 'generated/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
+import { KBarUpdateActions } from 'components/utils/KBarUpdateActions'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-import { useClusterAddOnsQuery } from 'generated/graphql'
+import { PaletteSection } from 'components/CommandPalette'
 
 import { CD_BASE_CRUMBS, POLL_INTERVAL } from '../ContinuousDeployment'
 
 import AddOnCard from './AddOnCard'
+import { InstallAddOnModal } from './InstallAddOn'
 
 function QueryEmptyState({ query, setQuery }) {
   return (
@@ -67,19 +72,44 @@ export default function AddOns() {
     pollInterval: POLL_INTERVAL,
   })
 
-  const addOns = data?.clusterAddOns
+  const addOns = useMemo(
+    () => data?.clusterAddOns?.filter(isNonNullable),
+    [data?.clusterAddOns]
+  )
+  const [installAddon, setInstallAddon] = useState<ClusterAddOnFragment | null>(
+    null
+  )
+  const [showInstall, setShowInstall] = useState(false)
+  const kbarActions = useMemo(
+    () =>
+      addOns
+        ?.map((addon) => ({
+          id: `addon-${addon?.name}`,
+          addon,
+          name: addon?.name ?? '',
+          section: PaletteSection.Addons,
+          priority: Priority.HIGH,
+          perform: () => {
+            setInstallAddon(addon)
+            setShowInstall(true)
+          },
+        }))
+        .flat() ?? [],
+    [addOns]
+  )
 
   const filteredAddOns = useMemo(() => {
     if (!filterString) {
       return addOns || []
     }
-
     const fuse = new Fuse(addOns || [], searchOptions)
 
     return fuse.search(filterString).map((result) => result.item)
   }, [filterString, addOns])
 
-  if (isEmpty(addOns)) return <LoadingIndicator />
+  if (isEmpty(addOns)) {
+    return <LoadingIndicator />
+  }
   const noFilteredAddOns = isEmpty(filteredAddOns)
 
   return (
@@ -91,6 +121,18 @@ export default function AddOns() {
         gap: theme.spacing.small,
       }}
     >
+      <KBarUpdateActions actions={kbarActions} />
+      {installAddon && (
+        <Suspense fallback={null}>
+          <ModalMountTransition open={showInstall}>
+            <InstallAddOnModal
+              addOn={installAddon as any}
+              open={showInstall}
+              onClose={() => setShowInstall(false)}
+            />
+          </ModalMountTransition>
+        </Suspense>
+      )}
       <Input
         placeholder="Search"
         startIcon={<SearchIcon />}

@@ -2,10 +2,13 @@ import {
   Button,
   GearTrainIcon,
   GitHubIcon,
+  GitPullIcon,
   ListIcon,
   PadlockLockedIcon,
   Stepper,
 } from '@pluralsh/design-system'
+import { Priority, useRegisterActions } from 'kbar'
+
 import {
   NamespacedName,
   useClustersTinyQuery,
@@ -23,6 +26,8 @@ import {
   RepoKindSelector,
 } from 'components/cd/utils/RepoKindSelector'
 import ModalAlt from 'components/cd/ModalAlt'
+
+import { PaletteSection } from 'components/CommandPalette'
 
 import { DeployServiceSettingsGit } from './DeployServiceSettingsGit'
 import { DeployServiceSettingsBasic } from './DeployServiceSettingsBasic'
@@ -459,6 +464,24 @@ export function DeployServiceModal({
 
 export function DeployService({ refetch }: { refetch: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
+  const kbarActions = useMemo(
+    () => [
+      {
+        section: PaletteSection.Actions,
+        id: `deploy-service`,
+        priority: Priority.HIGH,
+        name: `Deploy new service`,
+        icon: <GitPullIcon />,
+        shortcut: [],
+        perform: () => {
+          setIsOpen(true)
+        },
+      },
+    ],
+    []
+  )
+
+  useRegisterActions(kbarActions)
 
   return (
     <>
