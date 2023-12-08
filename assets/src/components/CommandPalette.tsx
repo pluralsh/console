@@ -8,7 +8,6 @@ import {
   createAction,
   useKBar,
   useMatches,
-  useRegisterActions,
 } from 'kbar'
 import { type Merge } from 'type-fest'
 import {
@@ -63,6 +62,7 @@ import { InstallationContext } from './Installations'
 import AppStatus from './apps/AppStatus'
 import { usePlatform } from './hooks/usePlatform'
 import { HelpMenuState, launchHelp } from './help/HelpLauncher'
+import { KbarUpdateActions } from './utils/KbarUpdateActions'
 
 enum PaletteSection {
   Apps = 'Apps',
@@ -157,7 +157,7 @@ const clusterDefaultProps = (
   cluster: ClusterTinyFragment,
   sectionName?: string
 ) => ({
-  id: `${cluster.id}${sectionName ? ` – ${sectionName?.toLowerCase()}` : ''}`,
+  id: `${cluster.id}${sectionName ? `-${sectionName?.toLowerCase()}` : ''}`,
   name: sectionName || cluster.name,
   section: `${PaletteSection.CdClusters}`,
   ...(sectionName ? { parent: cluster.id } : {}),
@@ -167,6 +167,8 @@ function buildClusterActions(
   clusters: Nullable<Edges<ClusterTinyFragment>>,
   nav: ReturnType<typeof useNavigate>
 ) {
+  console.log('clusters', clusters)
+
   return (
     clusters?.map((edge) => {
       const cluster = edge?.node
@@ -175,7 +177,7 @@ function buildClusterActions(
         return []
       }
 
-      return [
+      const ret = [
         {
           ...clusterDefaultProps(cluster),
           icon: <ClusterIcon />,
@@ -203,6 +205,10 @@ function buildClusterActions(
             nav(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}/metadata}`),
         },
       ]
+
+      console.log('ret', ret)
+
+      return ret
     }) || []
   ).flat()
 }
@@ -373,7 +379,7 @@ function useActions() {
     [applications, navigate, clusterEdges]
   )
 
-  useRegisterActions(actions)
+  return actions
 }
 
 const PaletteFooterSC = styled.div(({ theme }) => ({
@@ -422,7 +428,7 @@ const CommandPaletteStyles = createGlobalStyle(({ theme }) => ({
 }))
 
 function Palette() {
-  useActions()
+  const actions = useActions()
   const theme = useTheme()
   const {
     isOpen: kbarIsOpen,
@@ -478,6 +484,7 @@ function Palette() {
 
   return (
     <>
+      <KbarUpdateActions actions={actions} />
       <CommandPaletteStyles />
       {/* @ts-expect-error */}
       <KBarPortal style={{ zIndex: 10000 }}>
