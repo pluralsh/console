@@ -167,8 +167,6 @@ function buildClusterActions(
   clusters: Nullable<Edges<ClusterTinyFragment>>,
   nav: ReturnType<typeof useNavigate>
 ) {
-  console.log('clusters', clusters)
-
   return (
     clusters?.map((edge) => {
       const cluster = edge?.node
@@ -205,8 +203,6 @@ function buildClusterActions(
             nav(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}/metadata}`),
         },
       ]
-
-      console.log('ret', ret)
 
       return ret
     }) || []
