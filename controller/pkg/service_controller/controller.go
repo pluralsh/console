@@ -7,9 +7,8 @@ import (
 
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
-
+	"github.com/pluralsh/console/controller/pkg/errors"
 	"go.uber.org/zap"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -27,13 +26,25 @@ type Reconciler struct {
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	service := &v1alpha1.Service{}
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
-		if apierrors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, err
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 	if !service.GetDeletionTimestamp().IsZero() {
 		return r.handleDelete(ctx, service)
+	}
+
+	cluster := &v1alpha1.Cluster{}
+	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	existingService, err := r.ConsoleClient.GetService(*cluster.Status.Id, service.Name)
+	if err != nil {
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+	}
+	if existingService == nil {
+
 	}
 
 	return ctrl.Result{

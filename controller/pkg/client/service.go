@@ -13,8 +13,8 @@ func (c *client) GetServices() ([]*console.ServiceDeploymentBaseFragment, error)
 	return resp.ClusterServices, nil
 }
 
-func (c *client) GetService(id string) (*console.ServiceDeploymentExtended, error) {
-	resp, err := c.consoleClient.GetServiceDeployment(c.ctx, id)
+func (c *client) GetService(clusterID, serviceName string) (*console.ServiceDeploymentExtended, error) {
+	resp, err := c.consoleClient.GetServiceDeploymentByHandle(c.ctx, clusterID, serviceName)
 	if err != nil {
 		return nil, err
 	}

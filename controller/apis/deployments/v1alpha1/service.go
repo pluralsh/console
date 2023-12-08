@@ -49,8 +49,10 @@ type ServiceSpec struct {
 	// +optional
 	Helm *ServiceHelm `json:"helm,omitempty"`
 
+	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Repository is immutable"
 	RepositoryRef corev1.ObjectReference `json:"repositoryRef"`
+	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cluster is immutable"
 	ClusterRef corev1.ObjectReference `json:"clusterRef"`
 	// ConfigurationRef is a secret reference which should contain service configuration.
