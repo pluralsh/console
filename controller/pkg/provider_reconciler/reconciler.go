@@ -1,4 +1,4 @@
-package providercontroller
+package providerreconciler
 
 import (
 	"context"
@@ -59,7 +59,7 @@ func (p *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 
 	// Sync back Provider ID to crd
 	provider.Status.ID = &apiProvider.ID
-	// TODO: update CRD
+	// TODO: update CRD status
 
 	return requeue, nil
 }

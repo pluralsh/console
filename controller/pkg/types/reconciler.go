@@ -2,12 +2,11 @@ package types
 
 import (
 	"fmt"
-	"github.com/go-logr/logr"
+	providerreconciler "github.com/pluralsh/console/controller/pkg/provider_reconciler"
 
 	"github.com/pluralsh/console/controller/pkg/client"
 	clustercontroller "github.com/pluralsh/console/controller/pkg/cluster_controller"
 	gitrepositorycontroller "github.com/pluralsh/console/controller/pkg/gitrepository_controller"
-	providercontroller "github.com/pluralsh/console/controller/pkg/provider_controller"
 	servicecontroller "github.com/pluralsh/console/controller/pkg/service_controller"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -36,7 +35,7 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 }
 
 // ToController creates Controller instance based on this Reconciler.
-func (sc Reconciler) ToController(mgr ctrl.Manager, logger logr.Logger, consoleClient client.ConsoleClient) (Controller, error) {
+func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.ConsoleClient) (Controller, error) {
 	unsupported := fmt.Errorf("reconciler %q is not supported", sc)
 
 	switch sc {
@@ -60,7 +59,7 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, logger logr.Logger, consoleC
 			Scheme:        mgr.GetScheme(),
 		}, nil
 	case ProviderReconciler:
-		return &providercontroller.Reconciler{
+		return &providerreconciler.Reconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
@@ -81,10 +80,10 @@ func Reconcilers() ReconcilerList {
 }
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.
-func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, logger logr.Logger, consoleClient client.ConsoleClient) ([]Controller, error) {
+func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, consoleClient client.ConsoleClient) ([]Controller, error) {
 	result := make([]Controller, len(rl))
 	for i, r := range rl {
-		controller, err := r.ToController(mgr, logger, consoleClient)
+		controller, err := r.ToController(mgr, consoleClient)
 		if err != nil {
 			return nil, err
 		}
