@@ -62,7 +62,7 @@ import { InstallationContext } from './Installations'
 import AppStatus from './apps/AppStatus'
 import { usePlatform } from './hooks/usePlatform'
 import { HelpMenuState, launchHelp } from './help/HelpLauncher'
-import { KbarUpdateActions } from './utils/KbarUpdateActions'
+import { KBarUpdateActions } from './utils/KBarUpdateActions'
 
 enum PaletteSection {
   Apps = 'Apps',
@@ -480,7 +480,7 @@ function Palette() {
 
   return (
     <>
-      <KbarUpdateActions actions={actions} />
+      <KBarUpdateActions actions={actions} />
       <CommandPaletteStyles />
       {/* @ts-expect-error */}
       <KBarPortal style={{ zIndex: 10000 }}>

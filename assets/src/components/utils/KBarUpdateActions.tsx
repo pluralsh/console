@@ -14,15 +14,17 @@ function UseRegisterActions({ actions }) {
  *
  * It's important that `actions` is memoized to prevent excessive re-renders.
  */
-export const KbarUpdateActions = memo(
+export const KBarUpdateActions = memo(
   ({ actions }: { actions: Parameters<typeof useRegisterActions>[0] }) => {
-    // Increment key any time `actions` changes to force so `useRegisterActions()`
-    // to update values for kbar
-    const key = useRef(0)
+    // Increment key any time `actions` changes to force `useRegisterActions()` to update values for kbar
+    const key = useRef(Number.MIN_SAFE_INTEGER)
     const prevActions = usePrevious(actions)
 
     if (prevActions !== actions) {
-      key.current = key.current < Number.MAX_SAFE_INTEGER ? key.current + 1 : 0
+      key.current =
+        key.current < Number.MAX_SAFE_INTEGER
+          ? key.current + 1
+          : Number.MIN_SAFE_INTEGER
     }
 
     return (
