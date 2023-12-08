@@ -20,15 +20,12 @@ type Bindings struct {
 }
 
 type Binding struct {
-	// TODO: Add docs.
 	// +kubebuilder:validation:Optional
 	ID *string `json:"id,omitempty"`
 
-	// TODO: Add docs.
 	// +kubebuilder:validation:Optional
 	UserID *string `json:"UserID,omitempty"`
 
-	// TODO: Add docs.
 	// +kubebuilder:validation:Optional
 	GroupID *string `json:"groupID,omitempty"`
 }
@@ -56,6 +53,14 @@ type Taint struct {
 
 	// Value is the value of the taint.
 	Value string `json:"value"`
+}
+
+func (t *Taint) Attributes() *console.TaintAttributes {
+	return &console.TaintAttributes{
+		Key:    t.Key,
+		Value:  t.Value,
+		Effect: string(t.Effect),
+	}
 }
 
 // TaintEffect is the effect for a Kubernetes taint.

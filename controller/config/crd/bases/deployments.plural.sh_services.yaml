@@ -46,13 +46,10 @@ spec:
                     items:
                       properties:
                         UserID:
-                          description: 'TODO: Add docs.'
                           type: string
                         groupID:
-                          description: 'TODO: Add docs.'
                           type: string
                         id:
-                          description: 'TODO: Add docs.'
                           type: string
                       type: object
                     type: array
@@ -61,13 +58,10 @@ spec:
                     items:
                       properties:
                         UserID:
-                          description: 'TODO: Add docs.'
                           type: string
                         groupID:
-                          description: 'TODO: Add docs.'
                           type: string
                         id:
-                          description: 'TODO: Add docs.'
                           type: string
                       type: object
                     type: array

@@ -50,13 +50,10 @@ spec:
                     items:
                       properties:
                         UserID:
-                          description: 'TODO: Add docs.'
                           type: string
                         groupID:
-                          description: 'TODO: Add docs.'
                           type: string
                         id:
-                          description: 'TODO: Add docs.'
                           type: string
                       type: object
                     type: array
@@ -65,13 +62,10 @@ spec:
                     items:
                       properties:
                         UserID:
-                          description: 'TODO: Add docs.'
                           type: string
                         groupID:
-                          description: 'TODO: Add docs.'
                           type: string
                         id:
-                          description: 'TODO: Add docs.'
                           type: string
                       type: object
                     type: array
@@ -134,11 +128,19 @@ spec:
                   gcp:
                     description: GCP cluster customizations.
                     properties:
+                      network:
+                        description: Network in GCP to use when creating the cluster.
+                        type: string
                       project:
                         description: Project in GCP to deploy cluster to.
                         type: string
+                      region:
+                        description: Region in GCP to deploy cluster to.
+                        type: string
                     required:
+                    - network
                     - project
+                    - region
                     type: object
                 type: object
                 x-kubernetes-map-type: atomic
@@ -302,7 +304,7 @@ spec:
                   cluster is using.
                 type: string
               id:
-                description: Id from Console.
+                description: ID from Console.
                 type: string
               kasURL:
                 description: KasURL contains KAS URL.

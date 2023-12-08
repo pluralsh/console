@@ -1,10 +1,13 @@
 package v1alpha1
 
 import (
+	"bytes"
+
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/json"
 )
 
 func init() {
@@ -207,12 +210,12 @@ type ClusterGCPCloudSettings struct {
 	// +kubebuilder:validation:Type:=string
 	Project string `json:"project"`
 
-	// TODO: Add docs.
+	// Network in GCP to use when creating the cluster.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Network string `json:"network"`
 
-	// TODO: Add docs.
+	// Region in GCP to deploy cluster to.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Region string `json:"region"`
@@ -270,15 +273,24 @@ func (np *ClusterNodePool) Attributes() *console.NodePoolAttributes {
 		return nil
 	}
 
-	return &console.NodePoolAttributes{
-		Name:          np.Name,
-		MinSize:       np.MinSize,
-		MaxSize:       np.MaxSize,
-		InstanceType:  np.InstanceType,
-		Labels:        nil, // TODO
-		Taints:        nil, // TODO
+	attrs := &console.NodePoolAttributes{
+		Name:         np.Name,
+		MinSize:      np.MinSize,
+		MaxSize:      np.MaxSize,
+		InstanceType: np.InstanceType,
+		Taints: algorithms.Map(np.Taints,
+			func(t Taint) *console.TaintAttributes { return t.Attributes() }),
 		CloudSettings: nil, // TODO
 	}
+
+	if np.Labels != nil {
+		if marshalledLabels, err := json.Marshal(np.Labels); err == nil { // Ignoring errors.
+			labels := bytes.NewBuffer(marshalledLabels).String()
+			attrs.Labels = &labels
+		}
+	}
+
+	return attrs
 }
 
 type ClusterNodePoolCloudSettings struct {
@@ -295,7 +307,7 @@ type ClusterNodePoolAWSCloudSettings struct {
 }
 
 type ClusterStatus struct {
-	// Id from Console.
+	// ID from Console.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	ID *string `json:"id,omitempty"`
