@@ -28,11 +28,11 @@ type ServiceGit struct {
 
 type ServiceHelm struct {
 	// +optional
-	ValuesRef corev1.ConfigMapKeySelector `json:"values,omitempty"`
+	ValuesRef *corev1.ConfigMapKeySelector `json:"values,omitempty"`
 	// +optional
-	ValuesFiles []string `json:"valuesFiles,omitempty"`
+	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// +optional
-	ChartRef corev1.ConfigMapKeySelector `json:"chart,omitempty"`
+	ChartRef *corev1.ConfigMapKeySelector `json:"chart,omitempty"`
 	// +optional
 	Version *string `json:"version,omitempty"`
 	// +optional
