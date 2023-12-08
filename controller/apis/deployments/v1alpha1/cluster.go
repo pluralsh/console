@@ -73,6 +73,16 @@ func (c *Cluster) Attributes(providerId *string) console.ClusterAttributes {
 	return attrs
 }
 
+func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
+	return console.ClusterUpdateAttributes{
+		Handle:  c.Spec.Handle,
+		Version: c.Spec.Version,
+		Protect: c.Spec.Protect,
+		NodePools: algorithms.Map(c.Spec.NodePools,
+			func(np ClusterNodePool) *console.NodePoolAttributes { return np.Attributes() }),
+	}
+}
+
 type ClusterSpec struct {
 	// Handle is a short, unique human-readable name used to identify this cluster.
 	// Does not necessarily map to the cloud resource name.
