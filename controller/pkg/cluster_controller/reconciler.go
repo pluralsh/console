@@ -11,7 +11,6 @@ import (
 	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/kubernetes"
 	"go.uber.org/zap"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
@@ -43,10 +42,8 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, req.NamespacedName, cluster); err != nil {
-		if apierrors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, err
+		r.Log.Error(err, "unable to fetch cluster")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	if !cluster.GetDeletionTimestamp().IsZero() {
@@ -55,7 +52,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	apiCluster, err := r.ConsoleClient.GetCluster(cluster.Status.ID)
 	if err != nil && !errors.IsNotFound(err) {
-		return ctrl.Result{}, err
+		return ctrl.Result{}, err // TODO: Error handling?
 	}
 
 	// TODO: Move?
@@ -76,7 +73,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if apiCluster == nil {
 		// TODO: Set owner ref.
-		response, err := r.ConsoleClient.CreateCluster(clusterAttributes(cluster, providerId))
+		response, err := r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
 		if err != nil {
 			return ctrl.Result{}, err
 		}
