@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"time"
 
-	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
@@ -55,10 +54,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	apiCluster, err := r.ConsoleClient.GetCluster(cluster.Status.ID)
-	if err != nil {
-		if !errors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
+	if err != nil && !errors.IsNotFound(err) {
+		return ctrl.Result{}, err
 	}
 
 	// TODO: Move?
@@ -79,20 +76,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if apiCluster == nil {
 		// TODO: Set owner ref.
-		response, err := r.ConsoleClient.CreateCluster(console.ClusterAttributes{
-			Name:          "",
-			Handle:        nil,
-			ProviderID:    providerId,
-			CredentialID:  nil,
-			Version:       nil,
-			Protect:       nil,
-			Kubeconfig:    nil,
-			CloudSettings: nil,
-			NodePools:     nil,
-			ReadBindings:  nil,
-			WriteBindings: nil,
-			Tags:          nil,
-		})
+		response, err := r.ConsoleClient.CreateCluster(clusterAttributes(cluster, providerId))
 		if err != nil {
 			return ctrl.Result{}, err
 		}
