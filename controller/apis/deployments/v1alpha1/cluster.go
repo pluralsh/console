@@ -17,7 +17,7 @@ type ClusterList struct {
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Health",type="string",JSONPath=".status.health",description="Cluster health status"
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console cluster ID"
