@@ -126,3 +126,27 @@ func DeleteSecret(ctx context.Context, client client.Client, secretNamespace, se
 	// We successfully deleted the secret
 	return nil
 }
+
+func GetSecret(ctx context.Context, client client.Client, ref *corev1.SecretReference) (*corev1.Secret, error) {
+	secret := &corev1.Secret{}
+	name := types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}
+	err := client.Get(ctx, name, secret)
+	if err != nil {
+		return nil, err
+	}
+	return secret, err
+}
+
+func GetConfigMapData(ctx context.Context, client client.Client, namespace string, ref *corev1.ConfigMapKeySelector) (string, error) {
+	configMap := &corev1.ConfigMap{}
+	name := types.NamespacedName{Name: ref.Name, Namespace: namespace}
+	err := client.Get(ctx, name, configMap)
+	if err != nil {
+		return "", err
+	}
+	if configMap.Data != nil {
+		return configMap.Data[ref.Key], nil
+	}
+
+	return "", nil
+}

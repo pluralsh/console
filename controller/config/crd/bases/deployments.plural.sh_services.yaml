@@ -45,14 +45,11 @@ spec:
                     description: Read bindings.
                     items:
                       properties:
-                        groupId:
-                          description: 'TODO: Add docs.'
+                        UserID:
+                          type: string
+                        groupID:
                           type: string
                         id:
-                          description: 'TODO: Add docs.'
-                          type: string
-                        userId:
-                          description: 'TODO: Add docs.'
                           type: string
                       type: object
                     type: array
@@ -60,14 +57,11 @@ spec:
                     description: Write bindings.
                     items:
                       properties:
-                        groupId:
-                          description: 'TODO: Add docs.'
+                        UserID:
+                          type: string
+                        groupID:
                           type: string
                         id:
-                          description: 'TODO: Add docs.'
-                          type: string
-                        userId:
-                          description: 'TODO: Add docs.'
                           type: string
                       type: object
                     type: array

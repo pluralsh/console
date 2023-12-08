@@ -3,16 +3,14 @@ package cluster_controller
 import (
 	"context"
 	"fmt"
-	"github.com/go-logr/logr"
 	"reflect"
 	"time"
 
-	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/kubernetes"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
@@ -30,7 +28,7 @@ const (
 type Reconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
-	Log           logr.Logger
+	Log           *zap.SugaredLogger
 	Scheme        *runtime.Scheme
 }
 
@@ -44,10 +42,8 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, req.NamespacedName, cluster); err != nil {
-		if apierrors.IsNotFound(err) {
-			return ctrl.Result{}, nil
-		}
-		return ctrl.Result{}, err
+		r.Log.Error(err, "unable to fetch cluster")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	if !cluster.GetDeletionTimestamp().IsZero() {
@@ -55,10 +51,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	apiCluster, err := r.ConsoleClient.GetCluster(cluster.Status.ID)
-	if err != nil {
-		if !errors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
+	if err != nil && !errors.IsNotFound(err) {
+		return ctrl.Result{}, err // TODO: Error handling?
 	}
 
 	// TODO: Move?
@@ -70,7 +64,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 
 		if provider.Status.ID == nil {
-			r.Log.Info("provider does not have ID set yet")
+			r.Log.Info(fmt.Errorf("provider does not have ID set yet"))
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 		}
 
@@ -79,20 +73,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if apiCluster == nil {
 		// TODO: Set owner ref.
-		response, err := r.ConsoleClient.CreateCluster(console.ClusterAttributes{
-			Name:          "",
-			Handle:        nil,
-			ProviderID:    providerId,
-			CredentialID:  nil,
-			Version:       nil,
-			Protect:       nil,
-			Kubeconfig:    nil,
-			CloudSettings: nil,
-			NodePools:     nil,
-			ReadBindings:  nil,
-			WriteBindings: nil,
-			Tags:          nil,
-		})
+		response, err := r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
 		if err != nil {
 			return ctrl.Result{}, err
 		}

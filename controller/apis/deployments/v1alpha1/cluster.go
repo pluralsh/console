@@ -1,8 +1,13 @@
 package v1alpha1
 
 import (
+	"bytes"
+
+	console "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/polly/algorithms"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/json"
 )
 
 func init() {
@@ -36,6 +41,36 @@ type Cluster struct {
 	Spec ClusterSpec `json:"spec,omitempty"`
 
 	Status ClusterStatus `json:"status,omitempty"`
+}
+
+func (c *Cluster) Attributes(providerId *string) console.ClusterAttributes {
+	attrs := console.ClusterAttributes{
+		Name:          c.Name,
+		Handle:        c.Spec.Handle,
+		ProviderID:    providerId,
+		Version:       c.Spec.Version,
+		Protect:       c.Spec.Protect,
+		CloudSettings: c.Spec.CloudSettings.Attributes(),
+		NodePools: algorithms.Map(c.Spec.NodePools,
+			func(np ClusterNodePool) *console.NodePoolAttributes { return np.Attributes() }),
+	}
+
+	if c.Spec.Tags != nil {
+		tags := make([]*console.TagAttributes, 0)
+		for name, value := range c.Spec.Tags {
+			tags = append(tags, &console.TagAttributes{Name: name, Value: value})
+		}
+		attrs.Tags = tags
+	}
+
+	if c.Spec.Bindings != nil {
+		attrs.ReadBindings = algorithms.Map(c.Spec.Bindings.Read,
+			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+		attrs.WriteBindings = algorithms.Map(c.Spec.Bindings.Write,
+			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+	}
+
+	return attrs
 }
 
 type ClusterSpec struct {
@@ -102,11 +137,33 @@ type ClusterCloudSettings struct {
 	GCP *ClusterGCPCloudSettings `json:"gcp,omitempty"`
 }
 
+func (cs *ClusterCloudSettings) Attributes() *console.CloudSettingsAttributes {
+	if cs == nil {
+		return nil
+	}
+
+	return &console.CloudSettingsAttributes{
+		Aws:   cs.AWS.Attributes(),
+		Azure: cs.Azure.Attributes(),
+		Gcp:   cs.GCP.Attributes(),
+	}
+}
+
 type ClusterAWSCloudSettings struct {
 	// Region in AWS to deploy this cluster to.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Region string `json:"region"`
+}
+
+func (cs *ClusterAWSCloudSettings) Attributes() *console.AwsCloudAttributes {
+	if cs == nil {
+		return nil
+	}
+
+	return &console.AwsCloudAttributes{
+		Region: &cs.Region,
+	}
 }
 
 type ClusterAzureCloudSettings struct {
@@ -134,11 +191,46 @@ type ClusterAzureCloudSettings struct {
 	Location string `json:"location"`
 }
 
+func (cs *ClusterAzureCloudSettings) Attributes() *console.AzureCloudAttributes {
+	if cs == nil {
+		return nil
+	}
+
+	return &console.AzureCloudAttributes{
+		Location:       &cs.Location,
+		SubscriptionID: &cs.SubscriptionId,
+		ResourceGroup:  &cs.ResourceGroup,
+		Network:        &cs.Network,
+	}
+}
+
 type ClusterGCPCloudSettings struct {
 	// Project in GCP to deploy cluster to.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Project string `json:"project"`
+
+	// Network in GCP to use when creating the cluster.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Type:=string
+	Network string `json:"network"`
+
+	// Region in GCP to deploy cluster to.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Type:=string
+	Region string `json:"region"`
+}
+
+func (cs *ClusterGCPCloudSettings) Attributes() *console.GcpCloudAttributes {
+	if cs == nil {
+		return nil
+	}
+
+	return &console.GcpCloudAttributes{
+		Project: &cs.Project,
+		Network: &cs.Network,
+		Region:  &cs.Region,
+	}
 }
 
 type ClusterNodePool struct {
@@ -155,12 +247,12 @@ type ClusterNodePool struct {
 	// MinSize is minimum number of instances in this node pool.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Minimum=1
-	MinSize int `json:"minSize"`
+	MinSize int64 `json:"minSize"`
 
 	// MaxSize is maximum number of instances in this node pool.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Minimum=1
-	MaxSize int `json:"maxSize"`
+	MaxSize int64 `json:"maxSize"`
 
 	// Labels to apply to the nodes in this pool. Useful for node selectors.
 	// +kubebuilder:validation:Optional
@@ -174,6 +266,31 @@ type ClusterNodePool struct {
 	// +kubebuilder:validation:Optional
 	// +structType=atomic
 	CloudSettings *ClusterNodePoolCloudSettings `json:"cloudSettings,omitempty"`
+}
+
+func (np *ClusterNodePool) Attributes() *console.NodePoolAttributes {
+	if np == nil {
+		return nil
+	}
+
+	attrs := &console.NodePoolAttributes{
+		Name:         np.Name,
+		MinSize:      np.MinSize,
+		MaxSize:      np.MaxSize,
+		InstanceType: np.InstanceType,
+		Taints: algorithms.Map(np.Taints,
+			func(t Taint) *console.TaintAttributes { return t.Attributes() }),
+		CloudSettings: nil, // TODO
+	}
+
+	if np.Labels != nil {
+		if marshalledLabels, err := json.Marshal(np.Labels); err == nil { // Ignoring errors.
+			labels := bytes.NewBuffer(marshalledLabels).String()
+			attrs.Labels = &labels
+		}
+	}
+
+	return attrs
 }
 
 type ClusterNodePoolCloudSettings struct {
@@ -190,7 +307,7 @@ type ClusterNodePoolAWSCloudSettings struct {
 }
 
 type ClusterStatus struct {
-	// Id from Console.
+	// ID from Console.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	ID *string `json:"id,omitempty"`
