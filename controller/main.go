@@ -83,7 +83,7 @@ func main() {
 	}
 
 	consoleClient := client.New(opt.consoleUrl, opt.consoleToken)
-	controllers, err := opt.reconcilers.ToControllers(mgr, setupLog, consoleClient)
+	controllers, err := opt.reconcilers.ToControllers(mgr, consoleClient)
 	if err != nil {
 		setupLog.Error(err, "error when creating controllers")
 		os.Exit(1)
