@@ -14,7 +14,7 @@ func clusterAttributes(cluster *v1alpha1.Cluster, providerId *string) console.Cl
 		Version:       cluster.Spec.Version,
 		Protect:       cluster.Spec.Protect,
 		CloudSettings: nil,
-		NodePools:     nil,
+		NodePools:     nodePoolsAttribute(cluster.Spec.NodePools),
 		Tags:          tagsAttribute(cluster.Spec.Tags),
 	}
 
@@ -26,27 +26,45 @@ func clusterAttributes(cluster *v1alpha1.Cluster, providerId *string) console.Cl
 	return attrs
 }
 
-func bindingsAttribute(input []v1alpha1.Binding) []*console.PolicyBindingAttributes {
-	return algorithms.Map(input, func(v v1alpha1.Binding) *console.PolicyBindingAttributes {
-		return &console.PolicyBindingAttributes{
-			ID:      v.Id,
-			UserID:  v.UserId,
-			GroupID: v.GroupId,
+func nodePoolsAttribute(nodePools []v1alpha1.ClusterNodePool) []*console.NodePoolAttributes {
+	if nodePools == nil {
+		return nil
+	}
+
+	return algorithms.Map(nodePools, func(nodePool v1alpha1.ClusterNodePool) *console.NodePoolAttributes {
+		return &console.NodePoolAttributes{
+			Name:          nodePool.Name,
+			MinSize:       nodePool.MinSize,
+			MaxSize:       nodePool.MaxSize,
+			InstanceType:  nodePool.InstanceType,
+			Labels:        nil,
+			Taints:        nil,
+			CloudSettings: nil,
 		}
 	})
 }
 
-func tagsAttribute(input map[string]string) []*console.TagAttributes {
-	if len(input) == 0 {
+func tagsAttribute(tags map[string]string) []*console.TagAttributes {
+	if tags == nil {
 		return nil
 	}
 
-	output := make([]*console.TagAttributes, len(input))
-	for name, value := range input {
-		output = append(output, &console.TagAttributes{
+	attr := make([]*console.TagAttributes, len(tags))
+	for name, value := range tags {
+		attr = append(attr, &console.TagAttributes{
 			Name:  name,
 			Value: value,
 		})
 	}
-	return output
+	return attr
+}
+
+func bindingsAttribute(bindings []v1alpha1.Binding) []*console.PolicyBindingAttributes {
+	return algorithms.Map(bindings, func(binding v1alpha1.Binding) *console.PolicyBindingAttributes {
+		return &console.PolicyBindingAttributes{
+			ID:      binding.ID,
+			UserID:  binding.UserID,
+			GroupID: binding.GroupID,
+		}
+	})
 }

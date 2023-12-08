@@ -155,12 +155,12 @@ type ClusterNodePool struct {
 	// MinSize is minimum number of instances in this node pool.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Minimum=1
-	MinSize int `json:"minSize"`
+	MinSize int64 `json:"minSize"`
 
 	// MaxSize is maximum number of instances in this node pool.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Minimum=1
-	MaxSize int `json:"maxSize"`
+	MaxSize int64 `json:"maxSize"`
 
 	// Labels to apply to the nodes in this pool. Useful for node selectors.
 	// +kubebuilder:validation:Optional

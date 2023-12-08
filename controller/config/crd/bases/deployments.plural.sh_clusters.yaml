@@ -49,13 +49,13 @@ spec:
                     description: Read bindings.
                     items:
                       properties:
-                        groupId:
+                        UserID:
+                          description: 'TODO: Add docs.'
+                          type: string
+                        groupID:
                           description: 'TODO: Add docs.'
                           type: string
                         id:
-                          description: 'TODO: Add docs.'
-                          type: string
-                        userId:
                           description: 'TODO: Add docs.'
                           type: string
                       type: object
@@ -64,13 +64,13 @@ spec:
                     description: Write bindings.
                     items:
                       properties:
-                        groupId:
+                        UserID:
+                          description: 'TODO: Add docs.'
+                          type: string
+                        groupID:
                           description: 'TODO: Add docs.'
                           type: string
                         id:
-                          description: 'TODO: Add docs.'
-                          type: string
-                        userId:
                           description: 'TODO: Add docs.'
                           type: string
                       type: object
@@ -180,11 +180,13 @@ spec:
                     maxSize:
                       description: MaxSize is maximum number of instances in this
                         node pool.
+                      format: int64
                       minimum: 1
                       type: integer
                     minSize:
                       description: MinSize is minimum number of instances in this
                         node pool.
+                      format: int64
                       minimum: 1
                       type: integer
                     name:

@@ -18,15 +18,15 @@ type Bindings struct {
 type Binding struct {
 	// TODO: Add docs.
 	// +kubebuilder:validation:Optional
-	Id *string `json:"id,omitempty"`
+	ID *string `json:"id,omitempty"`
 
 	// TODO: Add docs.
 	// +kubebuilder:validation:Optional
-	UserId *string `json:"userId,omitempty"`
+	UserID *string `json:"UserID,omitempty"`
 
 	// TODO: Add docs.
 	// +kubebuilder:validation:Optional
-	GroupId *string `json:"groupId,omitempty"`
+	GroupID *string `json:"groupID,omitempty"`
 }
 
 // Taint represents a Kubernetes taint.
