@@ -167,14 +167,17 @@ function Metric({
   namespace,
   regex,
   duration: { step, offset },
+  cluster,
   ...props
 }) {
+  const clusterInfix = cluster ? `cluster="${cluster?.handle}",` : ''
   const { data } = useUsageQuery({
     variables: {
-      cpu: `sum(rate(container_cpu_usage_seconds_total{namespace="${namespace}",pod=~"${name}${regex}"}[5m]))`,
-      mem: `sum(container_memory_working_set_bytes{namespace="${namespace}",pod=~"${name}${regex}"})`,
-      podCpu: `sum(rate(container_cpu_usage_seconds_total{namespace="${namespace}",pod=~"${name}${regex}"}[5m])) by (pod)`,
-      podMem: `sum(container_memory_working_set_bytes{namespace="${namespace}",pod=~"${name}${regex}"}) by (pod)`,
+      cpu: `sum(rate(container_cpu_usage_seconds_total{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"}[5m]))`,
+      mem: `sum(container_memory_working_set_bytes{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"})`,
+      podCpu: `sum(rate(container_cpu_usage_seconds_total{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"}[5m])) by (pod)`,
+      podMem: `sum(container_memory_working_set_bytes{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"}) by (pod)`,
+      clusterId: cluster?.id,
       step,
       offset,
     },
@@ -231,7 +234,7 @@ const kindToRegex = {
 export default function ComponentMetrics() {
   const theme = useTheme()
   const [duration, setDuration] = useState<any>(DURATIONS[0])
-  const { component } = useOutletContext<ComponentDetailsContext>()
+  const { component, cluster } = useOutletContext<ComponentDetailsContext>()
   const componentName = component.name?.toLowerCase()
   const componentKind = component.kind?.toLowerCase()
   const componentNamespace = component.namespace?.toLowerCase()
@@ -257,6 +260,7 @@ export default function ComponentMetrics() {
         name={componentName}
         regex={kindToRegex[componentKind]}
         duration={duration}
+        cluster={cluster}
         maxHeight="100%"
         overflowY="auto"
       />

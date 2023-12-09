@@ -4314,6 +4314,7 @@ export type UsageQueryVariables = Exact<{
   podMem: Scalars['String']['input'];
   step: Scalars['String']['input'];
   offset: Scalars['Int']['input'];
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -6930,17 +6931,27 @@ export type DeleteClusterMutationHookResult = ReturnType<typeof useDeleteCluster
 export type DeleteClusterMutationResult = Apollo.MutationResult<DeleteClusterMutation>;
 export type DeleteClusterMutationOptions = Apollo.BaseMutationOptions<DeleteClusterMutation, DeleteClusterMutationVariables>;
 export const UsageDocument = gql`
-    query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!) {
-  cpu: metric(query: $cpu, offset: $offset, step: $step) {
+    query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!, $clusterId: ID) {
+  cpu: metric(clusterId: $clusterId, query: $cpu, offset: $offset, step: $step) {
     ...MetricResponse
   }
-  mem: metric(query: $mem, offset: $offset, step: $step) {
+  mem: metric(clusterId: $clusterId, query: $mem, offset: $offset, step: $step) {
     ...MetricResponse
   }
-  podCpu: metric(query: $podCpu, offset: $offset, step: $step) {
+  podCpu: metric(
+    clusterId: $clusterId
+    query: $podCpu
+    offset: $offset
+    step: $step
+  ) {
     ...MetricResponse
   }
-  podMem: metric(query: $podMem, offset: $offset, step: $step) {
+  podMem: metric(
+    clusterId: $clusterId
+    query: $podMem
+    offset: $offset
+    step: $step
+  ) {
     ...MetricResponse
   }
 }
@@ -6964,6 +6975,7 @@ export const UsageDocument = gql`
  *      podMem: // value for 'podMem'
  *      step: // value for 'step'
  *      offset: // value for 'offset'
+ *      clusterId: // value for 'clusterId'
  *   },
  * });
  */

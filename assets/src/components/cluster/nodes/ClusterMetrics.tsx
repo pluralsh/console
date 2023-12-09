@@ -10,7 +10,7 @@ import { SaturationGraphs } from './SaturationGraphs'
 export function replaceMetric(metric, cluster) {
   if (!cluster) return metric
 
-  return metric.replace(`cluster=""`, `cluster="${cluster}"`)
+  return metric.replaceAll(`cluster=""`, `cluster="${cluster}"`)
 }
 
 export function ClusterMetrics({

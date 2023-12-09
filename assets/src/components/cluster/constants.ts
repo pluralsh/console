@@ -19,10 +19,9 @@ export const ScalingTypes = {
 
 export const ClusterMetrics = {
   CPU: 'cluster:node_cpu:ratio_rate5m{cluster=""}',
-  CPUCD:
-    '100 - avg(irate(node_cpu_seconds_total{mode="idle",cluster=""}[5m]) * 100)',
+  CPUCD: '1 - avg(irate(node_cpu_seconds_total{mode="idle",cluster=""}[5m]))',
   MemoryCD:
-    '(sum(node_memory_MemTotal_bytes{job="node-exporter",cluster=""}) - sum(node_memory_MemAvailable_bytes{job="node-exporter",cluster=""})) / sum(node_memory_MemTotal_bytes{job="node-exporter",cluster=""})',
+    '(sum(node_memory_MemTotal_bytes{cluster=""}) - sum(node_memory_MemAvailable_bytes{cluster=""})) / sum(node_memory_MemTotal_bytes{cluster=""})',
   Memory:
     '1 - sum(:node_memory_MemAvailable_bytes:sum{cluster=""}) / sum(node_memory_MemTotal_bytes{job="node-exporter",cluster=""})',
   CPURequests:
