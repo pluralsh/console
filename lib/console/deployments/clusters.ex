@@ -18,7 +18,8 @@ defmodule Console.Deployments.Clusters do
     DeployToken,
     ClusterRevision,
     ProviderCredential,
-    RuntimeService
+    RuntimeService,
+    AgentMigration
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -572,6 +573,34 @@ defmodule Console.Deployments.Clusters do
     |> notify(:update, user)
   end
 
+  def create_agent_migration(attrs, %User{} = user) do
+    %AgentMigration{}
+    |> AgentMigration.changeset(attrs)
+    |> allow(user, :create)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  def apply_migration(%AgentMigration{id: id, ref: ref} = migration) when is_binary(ref) do
+    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    Service.agent()
+    |> Service.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn svc ->
+      Logger.info "applying agent migration #{id} for #{svc.id}"
+      Services.update_service(%{git: %{ref: ref, folder: svc.git.folder}}, svc.id, bot)
+    end)
+    |> Stream.run()
+
+    complete_migration(migration)
+  end
+  def apply_migration(migration), do: complete_migration(migration)
+
+  defp complete_migration(%AgentMigration{} = migration) do
+    AgentMigration.changeset(migration, %{completed: true})
+    |> Repo.update()
+  end
+
   @spec runtime_services(Cluster.t | binary) :: [RuntimeService.t]
   def runtime_services(%Cluster{id: id}), do: runtime_services(id)
   def runtime_services(id) when is_binary(id) do
@@ -771,6 +800,9 @@ defmodule Console.Deployments.Clusters do
     do: handle_notify(PubSub.ProviderCredentialCreated, prov, actor: user)
   defp notify({:ok, %ProviderCredential{} = prov}, :delete, user),
     do: handle_notify(PubSub.ProviderCredentialDeleted, prov, actor: user)
+
+  defp notify({:ok, %AgentMigration{} = migration}, :create, user),
+    do: handle_notify(PubSub.AgentMigrationCreated, migration, actor: user)
 
   defp notify(pass, _, _), do: pass
 end
