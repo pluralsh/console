@@ -72,3 +72,9 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceHardDeleted do
       do: Clusters.drained(cluster)
   end
 end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentMigrationCreated do
+  alias Console.Deployments.Clusters
+
+  def process(%{item: migration}), do: Clusters.apply_migration(migration)
+end

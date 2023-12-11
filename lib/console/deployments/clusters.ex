@@ -594,7 +594,8 @@ defmodule Console.Deployments.Clusters do
 
     complete_migration(migration)
   end
-  def apply_migration(migration), do: complete_migration(migration)
+  def apply_migration(%AgentMigration{} = migration), do: complete_migration(migration)
+  def apply_migration(_), do: :ok
 
   defp complete_migration(%AgentMigration{} = migration) do
     AgentMigration.changeset(migration, %{completed: true})
