@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-logr/logr"
+	"github.com/pluralsh/console/controller/pkg/utils"
 	"reflect"
 	"time"
 
@@ -55,6 +56,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if !repo.GetDeletionTimestamp().IsZero() {
 		return r.handleDelete(ctx, repo)
 	}
+	cred, err := r.getRepositoryCredentials(ctx, repo)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	sha, err := utils.HashObject(cred)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
 	existingRepo, err := r.getRepository(repo.Spec.Url)
 	if err != nil {
@@ -63,10 +72,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 	}
 	if existingRepo == nil {
-		cred, err := r.getRepositoryCredentials(ctx, repo)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
 		resp, err := r.ConsoleClient.CreateRepository(repo.Spec.Url, cred.PrivateKey, cred.Passphrase, cred.Username, cred.Password)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -77,12 +82,26 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
+	if repo.Status.Sha != "" && repo.Status.Sha != sha {
+		_, err := r.ConsoleClient.UpdateRepository(existingRepo.ID, console.GitAttributes{
+			URL:        repo.Spec.Url,
+			PrivateKey: cred.PrivateKey,
+			Passphrase: cred.Passphrase,
+			Username:   cred.Username,
+			Password:   cred.Password,
+		})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	if err := UpdateReposStatus(ctx, r.Client, repo, func(r *v1alpha1.GitRepository) {
 		r.Status.Message = existingRepo.Error
 		r.Status.Id = &existingRepo.ID
 		if existingRepo.Health != nil {
 			r.Status.Health = v1alpha1.GitHealth(*existingRepo.Health)
 		}
+		r.Status.Sha = sha
 
 	}); err != nil {
 		return ctrl.Result{}, err

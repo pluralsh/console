@@ -40,6 +40,14 @@ func (c *client) CreateService(clusterId *string, attributes console.ServiceDepl
 
 }
 
+func (c *client) UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error {
+	_, err := c.consoleClient.UpdateServiceDeployment(c.ctx, serviceId, attributes)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *client) UpdateComponents(id string, components []*console.ComponentAttributes, errs []*console.ServiceErrorAttributes) error {
 	_, err := c.consoleClient.UpdateServiceComponents(c.ctx, id, components, errs)
 	return err

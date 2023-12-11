@@ -77,6 +77,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+
 	sha, err := utils.HashObject(attr)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -108,7 +109,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if service.Status.Sha != "" && service.Status.Sha != sha {
 		// update service
-
+		updater := console.ServiceUpdateAttributes{
+			Version:       attr.Version,
+			Protect:       attr.Protect,
+			Git:           attr.Git,
+			Helm:          attr.Helm,
+			Configuration: attr.Configuration,
+			Kustomize:     attr.Kustomize,
+		}
+		if err := r.ConsoleClient.UpdateService(existingService.ID, updater); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	if err := UpdateServiceStatus(ctx, r.Client, service, func(r *v1alpha1.Service) {
