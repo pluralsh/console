@@ -11,6 +11,7 @@ import (
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/kubernetes"
+	"github.com/pluralsh/console/controller/pkg/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
@@ -52,10 +53,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	apiCluster, err := r.ConsoleClient.GetCluster(cluster.Status.ID)
 	if err != nil && !errors.IsNotFound(err) {
-		return ctrl.Result{}, err // TODO: Error handling?
+		return ctrl.Result{}, err
 	}
 
-	// TODO: Move?
 	var providerId *string
 	if cluster.Spec.Cloud != "byok" {
 		provider, err := r.getProvider(ctx, cluster)
@@ -68,19 +68,34 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 		}
 
+		err = controllerutil.SetOwnerReference(provider, cluster, r.Scheme)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		// TODO Patch cluster.
+
 		providerId = provider.Status.ID
 	}
 
 	if apiCluster == nil {
-		// TODO: Set owner ref.
-		response, err := r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
+		apiCluster, err = r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		apiCluster = response
 	}
 	if err := kubernetes.TryAddFinalizer(ctx, r.Client, cluster, ClusterFinalizer); err != nil {
 		return ctrl.Result{}, err
+	}
+
+	sha, err := utils.HashObject(cluster.UpdateAttributes())
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	if cluster.Status.ID != nil && cluster.Status.SHA != nil && cluster.Status.SHA != &sha {
+		apiCluster, err = r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	if err := r.updateStatus(ctx, cluster, func(r *v1alpha1.Cluster) {
@@ -88,6 +103,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		r.Status.KasURL = apiCluster.KasURL
 		r.Status.CurrentVersion = apiCluster.CurrentVersion
 		r.Status.PingedAt = apiCluster.PingedAt
+		r.Status.SHA = &sha
 	}); err != nil {
 		return ctrl.Result{}, err
 	}

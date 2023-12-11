@@ -30,6 +30,15 @@ func (c *client) CreateCluster(attrs console.ClusterAttributes) (*console.Cluste
 	}, nil
 }
 
+func (c *client) UpdateCluster(id string, attrs console.ClusterUpdateAttributes) (*console.ClusterFragment, error) {
+	response, err := c.consoleClient.UpdateCluster(c.ctx, id, attrs)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.UpdateCluster, nil
+}
+
 func (c *client) GetCluster(id *string) (*console.ClusterFragment, error) {
 	response, err := c.consoleClient.GetCluster(c.ctx, id)
 	if err != nil {

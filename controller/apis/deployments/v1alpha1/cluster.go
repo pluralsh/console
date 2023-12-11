@@ -335,6 +335,11 @@ type ClusterStatus struct {
 	// +kubebuilder:validation:Type:=string
 	ID *string `json:"id,omitempty"`
 
+	// SHA of last applied configuration.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	SHA *string `json:"sha,omitempty"`
+
 	// CurrentVersion contains current Kubernetes version this cluster is using.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string

@@ -297,6 +297,9 @@ spec:
                 description: PingedAt contains timestamp of last successful cluster
                   ping.
                 type: string
+              sha:
+                description: SHA of last applied configuration.
+                type: string
             type: object
         type: object
     served: true

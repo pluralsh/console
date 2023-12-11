@@ -3,10 +3,11 @@ package gitrepositorycontroller
 import (
 	"context"
 	"fmt"
-	"github.com/go-logr/logr"
-	"github.com/pluralsh/console/controller/pkg/utils"
 	"reflect"
 	"time"
+
+	"github.com/go-logr/logr"
+	"github.com/pluralsh/console/controller/pkg/utils"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
@@ -66,10 +67,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	existingRepo, err := r.getRepository(repo.Spec.Url)
-	if err != nil {
-		if !errors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
+	if err != nil && !errors.IsNotFound(err) {
+		return ctrl.Result{}, err
 	}
 	if existingRepo == nil {
 		resp, err := r.ConsoleClient.CreateRepository(repo.Spec.Url, cred.PrivateKey, cred.Passphrase, cred.Username, cred.Password)

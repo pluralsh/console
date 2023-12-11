@@ -2,8 +2,9 @@ package client
 
 import (
 	"context"
-	gqlgenclient "github.com/Yamashou/gqlgenc/client"
 	"net/http"
+
+	gqlgenclient "github.com/Yamashou/gqlgenc/client"
 
 	console "github.com/pluralsh/console-client-go"
 )
@@ -35,6 +36,7 @@ type ConsoleClient interface {
 	CreateService(clusterId *string, attributes console.ServiceDeploymentAttributes) (*console.ServiceDeploymentFragment, error)
 	GetCluster(id *string) (*console.ClusterFragment, error)
 	CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error)
+	UpdateCluster(id string, attrs console.ClusterUpdateAttributes) (*console.ClusterFragment, error)
 	ListClusters() (*console.ListClusters, error)
 	DeleteCluster(id string) (*console.ClusterFragment, error)
 	CreateProvider(ctx context.Context, attributes console.ClusterProviderAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
