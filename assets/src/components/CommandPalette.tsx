@@ -8,6 +8,7 @@ import {
   createAction,
   useKBar,
   useMatches,
+  useRegisterActions,
 } from 'kbar'
 import { type Merge } from 'type-fest'
 import {
@@ -69,7 +70,6 @@ import { InstallationContext } from './Installations'
 import AppStatus from './apps/AppStatus'
 import { usePlatform } from './hooks/usePlatform'
 import { HelpMenuState, launchHelp } from './help/HelpLauncher'
-import { KBarUpdateActions } from './utils/KBarUpdateActions'
 
 export enum PaletteSection {
   Actions = 'Actions',
@@ -480,6 +480,8 @@ const CommandPaletteStyles = createGlobalStyle(({ theme }) => ({
 
 function Palette() {
   const actions = useActions()
+
+  useRegisterActions(actions, [actions])
   const theme = useTheme()
   const {
     isOpen: kbarIsOpen,
@@ -535,7 +537,6 @@ function Palette() {
 
   return (
     <>
-      <KBarUpdateActions actions={actions} />
       <CommandPaletteStyles />
       {/* @ts-expect-error */}
       <KBarPortal style={{ zIndex: 10000 }}>
