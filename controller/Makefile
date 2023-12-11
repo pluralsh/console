@@ -62,9 +62,8 @@ genmock: ## generates mocks before running tests
 apply-crds: ## applies CRDs
 	kubectl apply -f config/crd/bases
 
-apply-clusters: apply-crds ## applies cluster resources
+apply-cluster-byok: apply-crds ## applies BYOK cluster
 	kubectl apply -f config/crd/examples/cluster_byok.yaml
-	kubectl apply -f config/crd/examples/cluster_aws.yaml
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))

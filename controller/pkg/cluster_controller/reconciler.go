@@ -20,9 +20,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 const (
+	RequeueAfter     = 30 * time.Second
 	ClusterFinalizer = "deployments.plural.sh/cluster-protection"
 )
 
@@ -41,7 +43,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, req.NamespacedName, cluster); err != nil {
 		r.Log.Error(err, "unable to fetch cluster")
@@ -71,7 +73,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		providerId = provider.Status.ID
 		if providerId == nil {
 			r.Log.Info("provider does not have ID set yet")
-			return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+			return ctrl.Result{RequeueAfter: RequeueAfter}, nil
 		}
 
 		err = utils.TryAddOwnerRef(ctx, r.Client, provider, cluster, r.Scheme)
@@ -111,7 +113,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+	return ctrl.Result{RequeueAfter: RequeueAfter}, nil
 }
 
 func (r *Reconciler) delete(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
