@@ -303,8 +303,8 @@ const ColActions = columnHelper.accessor(({ node }) => node, {
             <ListBoxItem
               key={MenuItemKey.Delete}
               leftContent={<TrashCanIcon color={theme.colors['icon-danger']} />}
-              label="Delete service"
-              textValue="Delete service"
+              label="Delete cluster"
+              textValue="Delete cluster"
             />
           )}
         </MoreMenu>
