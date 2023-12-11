@@ -45,3 +45,15 @@ func (c *client) IsProviderExists(ctx context.Context, id string) bool {
 	// We are assuming that if there is an error, and it is not ErrorNotFound then provider does not exist.
 	return err == nil
 }
+
+func (c *client) IsProviderDeleting(ctx context.Context, id string) bool {
+	_, err := c.GetProvider(ctx, id)
+	if err != nil {
+		return false
+	}
+
+	return false
+
+	// TODO: Update client to support DeletedAt
+	//return provider != nil && provider.DeletedAt != nil
+}

@@ -44,6 +44,7 @@ type ConsoleClient interface {
 	UpdateProvider(ctx context.Context, id string, attributes console.ClusterProviderUpdateAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
 	DeleteProvider(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error
 	IsProviderExists(ctx context.Context, id string) bool
+	IsProviderDeleting(ctx context.Context, id string) bool
 	UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error
 }
 

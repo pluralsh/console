@@ -50,7 +50,7 @@ spec:
             properties:
               cloud:
                 description: 'Cloud is the name of the cloud service for the Provider.
-                  One of (CloudProvider): [byok, gcp, aws, azure]'
+                  One of (CloudProvider): [gcp, aws, azure]'
                 enum:
                 - byok
                 - gcp
@@ -125,6 +125,9 @@ spec:
             properties:
               id:
                 description: ID of the provider in the Console API.
+                type: string
+              sha:
+                description: SHA of last applied configuration.
                 type: string
             type: object
         required:
