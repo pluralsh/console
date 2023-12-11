@@ -17,6 +17,7 @@ import { ComponentDetails } from 'components/component/ComponentDetails'
 import { GqlError } from 'components/utils/Alert'
 
 import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
+import { useDeploymentSettings } from 'routes/cdRoutes'
 
 export const getServiceComponentBreadcrumbs = ({
   service,
@@ -79,6 +80,7 @@ export default function ServiceComponent() {
   const clusterId = params[SERVICE_PARAM_CLUSTER_ID]!
   const serviceId = params[SERVICE_PARAM_ID]!
 
+  const settings = useDeploymentSettings()
   const { data, error } = useServiceDeploymentComponentsQuery({
     variables: {
       id: serviceId || '',
@@ -114,6 +116,8 @@ export default function ServiceComponent() {
         serviceComponents={components}
         clusterId={clusterId}
         serviceId={serviceId}
+        cluster={data?.serviceDeployment?.cluster}
+        hasPrometheus={!!settings?.prometheusConnection}
         pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
       />
     </BreadcrumbWrapper>

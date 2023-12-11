@@ -130,20 +130,7 @@ defmodule Console.Deployments.Cron do
   def migrate_agents() do
     AgentMigration.incomplete()
     |> Repo.all()
-    |> Stream.each(fn migration ->
-      Cluster.installable()
-      |> Cluster.stream()
-      |> Cluster.preloaded()
-      |> Repo.stream(method: :keyset)
-      |> Stream.each(fn cluster ->
-        Logger.info "installing operator on #{cluster.id}"
-        Clusters.install(cluster)
-      end)
-      |> Stream.run()
-      AgentMigration.changeset(migration, %{completed: true})
-      |> Repo.update()
-      Logger.info "migration #{migration.id} completed"
-    end)
+    |> Stream.each(&Clusters.apply_migration/1)
     |> Stream.run()
   end
 

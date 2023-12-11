@@ -139,6 +139,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :version, non_null(:string)
   end
 
+  input_object :agent_migration_attributes do
+    field :name,          :string
+    field :ref,           :string
+    field :configuration, :json
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -386,6 +392,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :version, non_null(:string)
   end
 
+  @desc "a representation of a bulk operation to be performed on all agent services"
+  object :agent_migration do
+    field :id,            non_null(:id)
+    field :name,          :string
+    field :ref,           :string
+    field :configuration, :map
+    field :completed,     :boolean
+
+    timestamps()
+  end
+
   object :tag do
     field :name,  non_null(:string)
     field :value, non_null(:string)
@@ -461,7 +478,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "fetches an individual cluster provider"
     field :cluster_provider, :cluster_provider do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,    :id
+      arg :cloud, :string
+      arg :name,  :string
 
       resolve &Deployments.resolve_provider/2
     end
@@ -552,6 +571,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :global,        :global_service_attributes
 
       resolve &Deployments.install_addon/2
+    end
+
+    field :create_agent_migration, :agent_migration do
+      middleware Authenticated
+      arg :attributes, non_null(:agent_migration_attributes)
+
+      resolve &Deployments.create_agent_migration/2
     end
   end
 end

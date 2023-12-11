@@ -138,6 +138,24 @@ export type AddonVersionBlockingArgs = {
   kubeVersion: Scalars['String']['input'];
 };
 
+/** a representation of a bulk operation to be performed on all agent services */
+export type AgentMigration = {
+  __typename?: 'AgentMigration';
+  completed?: Maybe<Scalars['Boolean']['output']>;
+  configuration?: Maybe<Scalars['Map']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  ref?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AgentMigrationAttributes = {
+  configuration?: InputMaybe<Scalars['Json']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  ref?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** a representation of a kubernetes api deprecation */
 export type ApiDeprecation = {
   __typename?: 'ApiDeprecation';
@@ -2389,6 +2407,7 @@ export type RootMutationType = {
   /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
   cloneService?: Maybe<ServiceDeployment>;
   createAccessToken?: Maybe<AccessToken>;
+  createAgentMigration?: Maybe<AgentMigration>;
   createBuild?: Maybe<Build>;
   createCluster?: Maybe<Cluster>;
   createClusterProvider?: Maybe<ClusterProvider>;
@@ -2489,6 +2508,11 @@ export type RootMutationTypeCloneServiceArgs = {
   clusterId: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeCreateAgentMigrationArgs = {
+  attributes: AgentMigrationAttributes;
 };
 
 
@@ -3039,7 +3063,9 @@ export type RootQueryTypeClusterArgs = {
 
 
 export type RootQueryTypeClusterProviderArgs = {
-  id: Scalars['ID']['input'];
+  cloud?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3186,6 +3212,7 @@ export type RootQueryTypeLoginInfoArgs = {
 
 
 export type RootQueryTypeLogsArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   end?: InputMaybe<Scalars['Long']['input']>;
   limit: Scalars['Int']['input'];
   query: Scalars['String']['input'];
@@ -3194,6 +3221,7 @@ export type RootQueryTypeLogsArgs = {
 
 
 export type RootQueryTypeMetricArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   query: Scalars['String']['input'];
   step?: InputMaybe<Scalars['String']['input']>;
@@ -4312,6 +4340,7 @@ export type UsageQueryVariables = Exact<{
   podMem: Scalars['String']['input'];
   step: Scalars['String']['input'];
   offset: Scalars['Int']['input'];
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -4382,19 +4411,21 @@ export type DeleteGlobalServiceMutationVariables = Exact<{
 
 export type DeleteGlobalServiceMutation = { __typename?: 'RootMutationType', deleteGlobalService?: { __typename?: 'GlobalService', id: string } | null };
 
-export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+export type HttpConnectionFragment = { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null };
+
+export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
 export type UpdateDeploymentSettingsMutationVariables = Exact<{
   attributes: DeploymentSettingsAttributes;
 }>;
 
 
-export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type PipelineServiceDeploymentFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null };
 
@@ -5365,6 +5396,13 @@ export const GlobalServiceFragmentDoc = gql`
   updatedAt
 }
     `;
+export const HttpConnectionFragmentDoc = gql`
+    fragment HttpConnection on HttpConnection {
+  host
+  user
+  password
+}
+    `;
 export const GitRepositoryFragmentDoc = gql`
     fragment GitRepository on GitRepository {
   id
@@ -5388,6 +5426,12 @@ export const DeploymentSettingsFragmentDoc = gql`
   selfManaged
   insertedAt
   updatedAt
+  lokiConnection {
+    ...HttpConnection
+  }
+  prometheusConnection {
+    ...HttpConnection
+  }
   artifactRepository {
     ...GitRepository
   }
@@ -5407,7 +5451,8 @@ export const DeploymentSettingsFragmentDoc = gql`
     ...PolicyBinding
   }
 }
-    ${GitRepositoryFragmentDoc}
+    ${HttpConnectionFragmentDoc}
+${GitRepositoryFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
 export const UserFragmentDoc = gql`
     fragment User on User {
@@ -6912,17 +6957,27 @@ export type DeleteClusterMutationHookResult = ReturnType<typeof useDeleteCluster
 export type DeleteClusterMutationResult = Apollo.MutationResult<DeleteClusterMutation>;
 export type DeleteClusterMutationOptions = Apollo.BaseMutationOptions<DeleteClusterMutation, DeleteClusterMutationVariables>;
 export const UsageDocument = gql`
-    query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!) {
-  cpu: metric(query: $cpu, offset: $offset, step: $step) {
+    query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!, $clusterId: ID) {
+  cpu: metric(clusterId: $clusterId, query: $cpu, offset: $offset, step: $step) {
     ...MetricResponse
   }
-  mem: metric(query: $mem, offset: $offset, step: $step) {
+  mem: metric(clusterId: $clusterId, query: $mem, offset: $offset, step: $step) {
     ...MetricResponse
   }
-  podCpu: metric(query: $podCpu, offset: $offset, step: $step) {
+  podCpu: metric(
+    clusterId: $clusterId
+    query: $podCpu
+    offset: $offset
+    step: $step
+  ) {
     ...MetricResponse
   }
-  podMem: metric(query: $podMem, offset: $offset, step: $step) {
+  podMem: metric(
+    clusterId: $clusterId
+    query: $podMem
+    offset: $offset
+    step: $step
+  ) {
     ...MetricResponse
   }
 }
@@ -6946,6 +7001,7 @@ export const UsageDocument = gql`
  *      podMem: // value for 'podMem'
  *      step: // value for 'step'
  *      offset: // value for 'offset'
+ *      clusterId: // value for 'clusterId'
  *   },
  * });
  */
@@ -9681,6 +9737,7 @@ export const namedOperations = {
     HelmRepository: 'HelmRepository',
     HelmChartVersion: 'HelmChartVersion',
     GlobalService: 'GlobalService',
+    HttpConnection: 'HttpConnection',
     DeploymentSettings: 'DeploymentSettings',
     PipelineServiceDeployment: 'PipelineServiceDeployment',
     PipelineGate: 'PipelineGate',
