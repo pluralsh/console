@@ -6,8 +6,9 @@ metadata:
 spec:
   handle: aws
   cloud: aws
-  version: 1.24
+  version: "1.24"
   protect: false
+# TODO: Add provider reference.
 #  providerRef:
 #    ...
   cloudSettings:
