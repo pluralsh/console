@@ -143,6 +143,7 @@ fragment ClustersRow on Cluster {
 }
 
 fragment Cluster on Cluster {
+  ...ClustersRow
   apiDeprecations {
     ...ApiDeprecation
   }
@@ -305,7 +306,7 @@ mutation UpdateClusterBindings($id: ID!, $rbac: RbacAttributes!) {
 
 mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
   updateCluster(id: $id, attributes: $attributes) {
-    ...ClustersRow
+    ...Cluster
   }
 }
 

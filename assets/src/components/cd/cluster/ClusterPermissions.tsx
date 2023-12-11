@@ -1,4 +1,9 @@
-import { Button, PersonIcon } from '@pluralsh/design-system'
+import {
+  Button,
+  IconFrame,
+  PeopleIcon,
+  PersonIcon,
+} from '@pluralsh/design-system'
 import { ComponentProps, ReactNode, useState } from 'react'
 
 import {
@@ -60,13 +65,14 @@ export default function ClusterPermissions({ cluster }: { cluster: Cluster }) {
 
   return (
     <>
-      <Button
-        secondary
-        startIcon={<PersonIcon />}
+      <IconFrame
+        type="secondary"
+        size="large"
+        tooltip="Cluster permissions"
+        clickable
+        icon={<PeopleIcon />}
         onClick={() => setIsOpen(true)}
-      >
-        Permissions
-      </Button>
+      />
       <ClusterPermissionsModal
         cluster={cluster}
         open={isOpen}

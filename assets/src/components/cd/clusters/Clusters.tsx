@@ -89,7 +89,7 @@ export default function Clusters() {
           css={{
             display: 'flex',
             justifyContent: 'end',
-            gap: theme.spacing.large,
+            gap: theme.spacing.medium,
           }}
         >
           <IconFrame
@@ -103,7 +103,7 @@ export default function Clusters() {
           <CreateCluster />
         </div>
       ) : null,
-    [cdIsEnabled, navigate, theme.spacing.large]
+    [cdIsEnabled, navigate, theme.spacing.medium]
   )
 
   useSetCDHeaderContent(headerActions)
