@@ -2,11 +2,11 @@ package types
 
 import (
 	"fmt"
-	providerreconciler "github.com/pluralsh/console/controller/pkg/provider_reconciler"
 
 	"github.com/pluralsh/console/controller/pkg/client"
 	clustercontroller "github.com/pluralsh/console/controller/pkg/cluster_controller"
 	gitrepositorycontroller "github.com/pluralsh/console/controller/pkg/gitrepository_controller"
+	providerreconciler "github.com/pluralsh/console/controller/pkg/provider_reconciler"
 	servicecontroller "github.com/pluralsh/console/controller/pkg/service_controller"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -25,8 +25,11 @@ const (
 func ToReconciler(reconciler string) (Reconciler, error) {
 	switch Reconciler(reconciler) {
 	case GitRepositoryReconciler:
+		fallthrough
 	case ServiceDeploymentReconciler:
+		fallthrough
 	case ClusterReconciler:
+		fallthrough
 	case ProviderReconciler:
 		return Reconciler(reconciler), nil
 	}
@@ -36,8 +39,6 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 
 // ToController creates Controller instance based on this Reconciler.
 func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.ConsoleClient) (Controller, error) {
-	unsupported := fmt.Errorf("reconciler %q is not supported", sc)
-
 	switch sc {
 	case GitRepositoryReconciler:
 		return &gitrepositorycontroller.Reconciler{
@@ -65,7 +66,7 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			Scheme:        mgr.GetScheme(),
 		}, nil
 	default:
-		return nil, unsupported
+		return nil, fmt.Errorf("reconciler %q is not supported", sc)
 	}
 }
 

@@ -56,8 +56,14 @@ docker-push: ## Push docker image with the driver.
 build: manifests generate fmt vet ## Build controller.
 	go build -o bin/deployment-controller main.go
 
-genmock: # generates mocks before running tests
+genmock: ## generates mocks before running tests
 	hack/gen-client-mocks.sh
+
+apply-crds: ## applies CRDs
+	kubectl apply -f config/crd/bases
+
+apply-cluster-byok: apply-crds ## applies BYOK cluster
+	kubectl apply -f config/crd/examples/cluster_byok.yaml
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))

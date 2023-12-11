@@ -11,7 +11,6 @@ import (
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
-	"github.com/pluralsh/console/controller/pkg/kubernetes"
 	"github.com/pluralsh/console/controller/pkg/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -20,10 +19,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 const (
-	ClusterFinalizer = "deployments.plural.sh/cluster-protection"
+	RequeueAfter  = 30 * time.Second
+	FinalizerName = "deployments.plural.sh/cluster-protection"
 )
 
 // Reconciler reconciles a Cluster object.
@@ -41,19 +42,21 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+	// Read cluster resource
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, req.NamespacedName, cluster); err != nil {
 		r.Log.Error(err, "unable to fetch cluster")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if !cluster.GetDeletionTimestamp().IsZero() {
-		return r.delete(ctx, cluster)
+	// Handle cluster resource deletion
+	ret, err := r.addOrRemoveFinalizer(ctx, cluster)
+	if ret || err != nil {
+		return ctrl.Result{}, err
 	}
 
 	var apiCluster *console.ClusterFragment
-	var err error
 	if cluster.Status.ID != nil {
 		apiCluster, err = r.ConsoleClient.GetCluster(cluster.Status.ID)
 		if err != nil && !errors.IsNotFound(err) {
@@ -71,7 +74,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		providerId = provider.Status.ID
 		if providerId == nil {
 			r.Log.Info("provider does not have ID set yet")
-			return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+			return ctrl.Result{RequeueAfter: RequeueAfter}, nil
 		}
 
 		err = utils.TryAddOwnerRef(ctx, r.Client, provider, cluster, r.Scheme)
@@ -85,9 +88,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-	}
-	if err := kubernetes.TryAddFinalizer(ctx, r.Client, cluster, ClusterFinalizer); err != nil {
-		return ctrl.Result{}, err
 	}
 
 	sha, err := utils.HashObject(cluster.UpdateAttributes())
@@ -111,33 +111,44 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+	return ctrl.Result{RequeueAfter: RequeueAfter}, nil
 }
 
-func (r *Reconciler) delete(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
-	if controllerutil.ContainsFinalizer(cluster, ClusterFinalizer) {
-		r.Log.Info("delete cluster")
-		if cluster.Status.ID == nil {
-			return ctrl.Result{}, fmt.Errorf("cluster ID can not be nil")
-		}
-
-		apiCluster, err := r.ConsoleClient.GetCluster(cluster.Status.ID)
-		if err != nil && !errors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
-
-		if apiCluster != nil {
-			if _, err := r.ConsoleClient.DeleteCluster(*cluster.Status.ID); err != nil && !errors.IsNotFound(err) {
-				return ctrl.Result{}, err
-			}
-		}
-
-		if err := kubernetes.TryRemoveFinalizer(ctx, r.Client, cluster, ClusterFinalizer); err != nil {
-			return ctrl.Result{}, err
+func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1.Cluster) (bool, error) {
+	// If object is not being deleted, so if it does not have our finalizer, then lets add the finalizer
+	// and update the object. This is equivalent to registering our finalizer.
+	if cluster.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(cluster, FinalizerName) {
+		controllerutil.AddFinalizer(cluster, FinalizerName)
+		if err := r.Update(ctx, cluster); err != nil {
+			return true, err
 		}
 	}
 
-	return ctrl.Result{}, nil
+	// If object is being deleted
+	if !cluster.ObjectMeta.DeletionTimestamp.IsZero() {
+		// TODO: Add DeletedAt to queries, check if cluster is deleting and return if it is.
+
+		// Remove cluster from Console API if it exists
+		if cluster.Status.ID != nil && r.ConsoleClient.ClusterExists(cluster.Status.ID) {
+			if _, err := r.ConsoleClient.DeleteCluster(*cluster.Status.ID); err != nil {
+				// If fail to delete the external dependency here, return with error so that it can be retried.
+				return true, err
+			}
+		}
+
+		// If our finalizer is present, remove it
+		if controllerutil.ContainsFinalizer(cluster, FinalizerName) {
+			controllerutil.RemoveFinalizer(cluster, FinalizerName)
+			if err := r.Update(ctx, cluster); err != nil {
+				return true, err
+			}
+		}
+
+		// Stop reconciliation as the item is being deleted
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (r *Reconciler) updateStatus(ctx context.Context, cluster *v1alpha1.Cluster, patch func(cluster *v1alpha1.Cluster)) error {
