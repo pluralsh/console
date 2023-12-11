@@ -48,6 +48,8 @@ defmodule Console.Deployments.Clusters do
 
   def get_provider_by_name(name), do: Console.Repo.get_by(ClusterProvider, name: name)
 
+  def get_provider_by_cloud(name), do: Console.Repo.get_by(ClusterProvider, cloud: name)
+
   def get_cluster_by_handle(handle), do: Console.Repo.get_by(Cluster, handle: handle)
 
   def get_cluster_by_handle!(handle), do: Console.Repo.get_by!(Cluster, handle: handle)

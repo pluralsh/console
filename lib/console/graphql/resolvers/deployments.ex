@@ -202,10 +202,14 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   defp actor(%{context: %{cluster: %Cluster{} = cluster}}), do: cluster
   defp actor(_), do: nil
 
-  def resolve_provider(%{id: id}, %{context: %{current_user: user}}) do
-    Clusters.get_provider!(id)
+  def resolve_provider(args, %{context: %{current_user: user}}) do
+    get_provider(args)
     |> allow(user, :read)
   end
+
+  defp get_provider(%{id: id}) when is_binary(id), do: Clusters.get_provider!(id)
+  defp get_provider(%{name: name}) when is_binary(name), do: Clusters.get_provider_by_name(name)
+  defp get_provider(%{cloud: cloud}) when is_binary(cloud), do: Clusters.get_provider_by_cloud(cloud)
 
   def docs(svc, _, _), do: Services.docs(svc)
 

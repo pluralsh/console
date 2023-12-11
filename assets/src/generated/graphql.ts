@@ -138,6 +138,24 @@ export type AddonVersionBlockingArgs = {
   kubeVersion: Scalars['String']['input'];
 };
 
+/** a representation of a bulk operation to be performed on all agent services */
+export type AgentMigration = {
+  __typename?: 'AgentMigration';
+  completed?: Maybe<Scalars['Boolean']['output']>;
+  configuration?: Maybe<Scalars['Map']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  ref?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AgentMigrationAttributes = {
+  configuration?: InputMaybe<Scalars['Json']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  ref?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** a representation of a kubernetes api deprecation */
 export type ApiDeprecation = {
   __typename?: 'ApiDeprecation';
@@ -2389,6 +2407,7 @@ export type RootMutationType = {
   /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
   cloneService?: Maybe<ServiceDeployment>;
   createAccessToken?: Maybe<AccessToken>;
+  createAgentMigration?: Maybe<AgentMigration>;
   createBuild?: Maybe<Build>;
   createCluster?: Maybe<Cluster>;
   createClusterProvider?: Maybe<ClusterProvider>;
@@ -2489,6 +2508,11 @@ export type RootMutationTypeCloneServiceArgs = {
   clusterId: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeCreateAgentMigrationArgs = {
+  attributes: AgentMigrationAttributes;
 };
 
 
@@ -3039,7 +3063,9 @@ export type RootQueryTypeClusterArgs = {
 
 
 export type RootQueryTypeClusterProviderArgs = {
-  id: Scalars['ID']['input'];
+  cloud?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
