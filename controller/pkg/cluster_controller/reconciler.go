@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
@@ -51,9 +52,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return r.delete(ctx, cluster)
 	}
 
-	apiCluster, err := r.ConsoleClient.GetCluster(cluster.Status.ID)
-	if err != nil && !errors.IsNotFound(err) {
-		return ctrl.Result{}, err
+	var apiCluster *console.ClusterFragment
+	var err error
+	if cluster.Status.ID != nil {
+		apiCluster, err = r.ConsoleClient.GetCluster(cluster.Status.ID)
+		if err != nil && !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
 	}
 
 	var providerId *string
@@ -63,18 +68,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, err
 		}
 
-		if provider.Status.ID == nil {
+		providerId = provider.Status.ID
+		if providerId == nil {
 			r.Log.Info("provider does not have ID set yet")
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 		}
 
-		err = controllerutil.SetOwnerReference(provider, cluster, r.Scheme)
+		err = utils.TryAddOwnerRef(ctx, r.Client, provider, cluster, r.Scheme)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		// TODO Patch cluster.
-
-		providerId = provider.Status.ID
 	}
 
 	if apiCluster == nil {
