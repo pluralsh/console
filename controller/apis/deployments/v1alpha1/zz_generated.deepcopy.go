@@ -388,6 +388,11 @@ func (in *ClusterStatus) DeepCopyInto(out *ClusterStatus) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.SHA != nil {
+		in, out := &in.SHA, &out.SHA
+		*out = new(string)
+		**out = **in
+	}
 	if in.CurrentVersion != nil {
 		in, out := &in.CurrentVersion, &out.CurrentVersion
 		*out = new(string)
