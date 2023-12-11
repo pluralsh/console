@@ -166,24 +166,32 @@ export function useFetchSlice<
     }
   }, [endCursor, endCursorIndex, prevEndCursor, virtualSlice?.start?.index])
 
-  const fetchSlice = useCallback(() => {
+  const { first, after } = useMemo(() => {
     const startIndex = virtualSlice?.start?.index ?? 0
     const endIndex = virtualSlice?.end?.index ?? 0
     const cursor = endCursors.find((c) => c.index < startIndex)
-    const first = Math.max(pageSize, endIndex - (cursor?.index || 0) + 1)
 
-    fetchMoreAndUpdate(queryResult, key, {
-      first,
-      after: cursor?.cursor,
-    })
+    return {
+      first:
+        Math.max(pageSize, endIndex - (cursor?.index || 0) + 1) ||
+        queryResult.variables?.first,
+      after: cursor?.cursor || queryResult.variables?.after,
+    }
   }, [
     endCursors,
-    key,
     pageSize,
-    queryResult,
+    queryResult.variables?.after,
+    queryResult.variables?.first,
     virtualSlice?.end?.index,
     virtualSlice?.start?.index,
   ])
+  const { fetchMore } = queryResult
 
-  return fetchSlice
+  return useCallback(() => {
+    fetchMore({
+      variables: { after, first },
+      updateQuery: (prev, next) =>
+        updateConnection(prev, next.fetchMoreResult[key], key),
+    })
+  }, [after, first, key, fetchMore])
 }
