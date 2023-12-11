@@ -6,16 +6,16 @@ import {
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ComponentProps, useMemo } from 'react'
+import { ComponentProps, useCallback, useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
 import { Row } from '@tanstack/react-table'
+import { VirtualItem } from '@tanstack/react-virtual'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
 
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
 
-import { Edge } from 'utils/graphql'
 import {
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
@@ -23,7 +23,10 @@ import {
   getClusterDetailsPath,
 } from 'routes/cdRoutesConsts'
 
+import { Edge, extendConnection } from 'utils/graphql'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useSlicePolling } from 'components/utils/tableFetchHelpers'
+import { GqlError } from 'components/utils/Alert'
 
 import {
   POLL_INTERVAL,
@@ -37,6 +40,8 @@ import CreateCluster from './create/CreateCluster'
 import { DemoTable } from './ClustersDemoTable'
 import { ClustersGettingStarted } from './ClustersGettingStarted'
 import { columns } from './ClustersColumns'
+
+export const CLUSTERS_QUERY_PAGE_SIZE = 100
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -78,10 +83,50 @@ export default function Clusters() {
   const theme = useTheme()
   const navigate = useNavigate()
   const cdIsEnabled = useCDEnabled()
-  const { data, refetch } = useClustersQuery({
+  const [virtualSlice, setVirtualSlice] = useState<
+    | {
+        start: VirtualItem | undefined
+        end: VirtualItem | undefined
+      }
+    | undefined
+  >()
+
+  const queryResult = useClustersQuery({
+    variables: {
+      first: CLUSTERS_QUERY_PAGE_SIZE,
+    },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    // Important so loading will be updated on fetchMore to send to Table
+    notifyOnNetworkStatusChange: true,
   })
+  const {
+    error,
+    fetchMore,
+    loading,
+    data: currentData,
+    previousData,
+  } = queryResult
+  const data = currentData || previousData
+  const clusters = data?.clusters
+  const pageInfo = clusters?.pageInfo
+  const { refetch } = useSlicePolling(queryResult, {
+    virtualSlice,
+    pageSize: CLUSTERS_QUERY_PAGE_SIZE,
+    key: 'clusters',
+    interval: POLL_INTERVAL,
+  })
+
+  const fetchNextPage = useCallback(() => {
+    if (!pageInfo?.endCursor) {
+      return
+    }
+    fetchMore({
+      variables: { after: pageInfo.endCursor },
+      updateQuery: (prev, { fetchMoreResult }) =>
+        extendConnection(prev, fetchMoreResult.clusters, 'clusters'),
+    })
+  }, [fetchMore, pageInfo?.endCursor])
+
   const headerActions = useMemo(
     () =>
       cdIsEnabled ? (
@@ -116,6 +161,9 @@ export default function Clusters() {
 
   useSetCDScrollable(showGettingStarted || isDemo)
 
+  if (error) {
+    return <GqlError error={error} />
+  }
   if (!data) {
     return <LoadingIndicator />
   }
@@ -127,6 +175,12 @@ export default function Clusters() {
           <ClustersTable
             data={tableData || []}
             refetch={refetch}
+            virtualizeRows
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
+            onVirtualSliceChange={setVirtualSlice}
           />
         </FullHeightTableWrap>
       ) : (
@@ -145,10 +199,11 @@ export const CLUSTERS_REACT_VIRTUAL_OPTIONS: ComponentProps<
 export function ClustersTable({
   refetch,
   data,
+  ...props
 }: {
   refetch?: () => void
   data: any[]
-}) {
+} & Omit<ComponentProps<typeof Table>, 'data' | 'columns'>) {
   const navigate = useNavigate()
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
     useMemo(() => ({ meta: { refetch } }), [refetch])
@@ -156,7 +211,6 @@ export function ClustersTable({
   return (
     <Table
       loose
-      virtualizeRows
       reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
       data={data || []}
       columns={columns}
@@ -172,6 +226,7 @@ export function ClustersTable({
           })
         )
       }
+      {...props}
     />
   )
 }
