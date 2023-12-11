@@ -194,7 +194,7 @@ export default function Cluster() {
             }}
           >
             <ClusterPermissions cluster={cluster} />
-            <ClusterSettings cluster={cluster} />
+            {!cluster.self && <ClusterSettings cluster={cluster} />}
           </div>
         </>
       }

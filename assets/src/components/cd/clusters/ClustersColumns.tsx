@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  GearTrainIcon,
   ListBoxItem,
   PeopleIcon,
   Tooltip,
@@ -38,6 +39,8 @@ import { roundToTwoPlaces } from 'components/cluster/utils'
 import { DeleteClusterModal } from '../providers/DeleteCluster'
 
 import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
+
+import { ClusterSettingsModal } from '../cluster/ClusterSettings'
 
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
@@ -246,6 +249,7 @@ const ColStatus = columnHelper.accessor(({ node }) => node, {
 enum MenuItemKey {
   Permissions = 'permissions',
   Delete = 'delete',
+  Settings = 'Settings',
 }
 const ColConditions = columnHelper.accessor(
   ({ node }) => node?.status?.conditions?.length ?? 0,
@@ -287,6 +291,14 @@ const ColActions = columnHelper.accessor(({ node }) => node, {
             label="Permissions"
             textValue="Permissions"
           />
+          {!cluster.self && (
+            <ListBoxItem
+              key={MenuItemKey.Settings}
+              leftContent={<GearTrainIcon />}
+              label="Settings"
+              textValue="Settings"
+            />
+          )}
           {!protect && (
             <ListBoxItem
               key={MenuItemKey.Delete}
@@ -296,7 +308,6 @@ const ColActions = columnHelper.accessor(({ node }) => node, {
             />
           )}
         </MoreMenu>
-
         {/* Modals */}
         <DeleteClusterModal
           cluster={cluster}
@@ -307,6 +318,11 @@ const ColActions = columnHelper.accessor(({ node }) => node, {
         <ClusterPermissionsModal
           cluster={cluster}
           open={menuKey === MenuItemKey.Permissions}
+          onClose={() => setMenuKey('')}
+        />
+        <ClusterSettingsModal
+          cluster={cluster}
+          open={menuKey === MenuItemKey.Settings}
           onClose={() => setMenuKey('')}
         />
       </div>
