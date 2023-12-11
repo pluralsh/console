@@ -90,6 +90,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
+		if err := kubernetes.TryAddFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 	err = r.updateReferences(ctx, service)
 	if err != nil {
@@ -164,7 +167,6 @@ func (r *Reconciler) genCreateAttr(ctx context.Context, service *v1alpha1.Servic
 				Value: &value,
 			})
 		}
-
 	}
 	if service.Spec.Helm != nil {
 		attr.Helm = &console.HelmConfigAttributes{
