@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/pluralsh/console/controller/pkg/types"
 	"os"
 	"strings"
+
+	"github.com/pluralsh/console/controller/pkg/types"
 
 	deploymentsv1alpha "github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	"github.com/pluralsh/console/controller/pkg/client"

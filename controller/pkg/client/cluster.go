@@ -2,6 +2,7 @@ package client
 
 import (
 	console "github.com/pluralsh/console-client-go"
+	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 func (c *client) CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error) {
@@ -59,4 +60,14 @@ func (c *client) DeleteCluster(id string) (*console.ClusterFragment, error) {
 	}
 
 	return response.DeleteCluster, nil
+}
+
+func (c *client) ClusterExists(id *string) bool {
+	_, err := c.GetCluster(id)
+	if errors.IsNotFound(err) {
+		return false
+	}
+
+	// We are assuming that if there is an error, and it is not ErrorNotFound then provider does not exist.
+	return err == nil
 }
