@@ -14,6 +14,7 @@ import (
 	"github.com/pluralsh/console/controller/pkg/utils"
 	"github.com/pluralsh/polly/algorithms"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -31,6 +32,7 @@ type Reconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
 	Log           logr.Logger
+	Scheme        *runtime.Scheme
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -47,7 +49,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	if cluster.Status.ID == nil {
-		r.Log.Info("Cluster is not ready", service.Spec.ClusterRef.Name)
+		r.Log.Info("Cluster is not ready")
 		return ctrl.Result{
 			// update status
 			RequeueAfter: 30 * time.Second,
@@ -59,14 +61,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	if repository.Status.Id == nil {
-		r.Log.Info("Repository is not ready", service.Spec.RepositoryRef.Name)
+		r.Log.Info("Repository is not ready")
 		return ctrl.Result{
 			// update status
 			RequeueAfter: 30 * time.Second,
 		}, nil
 	}
 	if repository.Status.Health == v1alpha1.GitHealthFailed {
-		r.Log.Info("Repository is not healthy", service.Spec.RepositoryRef.Name)
+		r.Log.Info("Repository is not healthy")
 		return ctrl.Result{
 			// update status
 			RequeueAfter: 30 * time.Second,
@@ -98,11 +100,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		if err := kubernetes.TryAddFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
-			return ctrl.Result{}, err
-		}
 	}
-	err = r.addReferenceFinalizers(ctx, service)
+	if err := kubernetes.TryAddFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	err = r.addOwnerReferences(ctx, service)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -120,6 +123,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err := r.ConsoleClient.UpdateService(existingService.ID, updater); err != nil {
 			return ctrl.Result{}, err
 		}
+	}
+
+	err = utils.TryAddOwnerRef(ctx, r.Client, cluster, service, r.Scheme)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	err = utils.TryAddOwnerRef(ctx, r.Client, repository, service, r.Scheme)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
 	if err := UpdateServiceStatus(ctx, r.Client, service, func(r *v1alpha1.Service) {
@@ -244,35 +256,40 @@ func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1
 	return attr, nil
 }
 
-func (r *Reconciler) addReferenceFinalizers(ctx context.Context, service *v1alpha1.Service) error {
+func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.Service) error {
 	if service.Spec.ConfigurationRef != nil {
 		configurationSecret, err := kubernetes.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
 		if err != nil {
 			return err
 		}
-		if err := kubernetes.TryAddFinalizer(ctx, r.Client, configurationSecret, ServiceFinalizer); err != nil {
+		err = utils.TryAddOwnerRef(ctx, r.Client, service, configurationSecret, r.Scheme)
+		if err != nil {
 			return err
 		}
+
 	}
-	if service.Spec.Helm.ValuesRef != nil {
+
+	if service.Spec.Helm != nil && service.Spec.Helm.ValuesRef != nil {
 		configMap := &corev1.ConfigMap{}
 		name := types.NamespacedName{Name: service.Spec.Helm.ValuesRef.Name, Namespace: service.Namespace}
 		err := r.Get(ctx, name, configMap)
 		if err != nil {
 			return err
 		}
-		if err := kubernetes.TryAddFinalizer(ctx, r.Client, configMap, ServiceFinalizer); err != nil {
+		err = utils.TryAddOwnerRef(ctx, r.Client, service, configMap, r.Scheme)
+		if err != nil {
 			return err
 		}
 	}
-	if service.Spec.Helm.ChartRef != nil {
+	if service.Spec.Helm != nil && service.Spec.Helm.ChartRef != nil {
 		configMap := &corev1.ConfigMap{}
 		name := types.NamespacedName{Name: service.Spec.Helm.ChartRef.Name, Namespace: service.Namespace}
 		err := r.Get(ctx, name, configMap)
 		if err != nil {
 			return err
 		}
-		if err := kubernetes.TryAddFinalizer(ctx, r.Client, configMap, ServiceFinalizer); err != nil {
+		err = utils.TryAddOwnerRef(ctx, r.Client, service, configMap, r.Scheme)
+		if err != nil {
 			return err
 		}
 	}
@@ -281,7 +298,7 @@ func (r *Reconciler) addReferenceFinalizers(ctx context.Context, service *v1alph
 }
 
 func (r *Reconciler) handleDelete(ctx context.Context, service *v1alpha1.Service) (ctrl.Result, error) {
-	if controllerutil.ContainsFinalizer(service, "") {
+	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 
 	}
 	return ctrl.Result{}, nil

@@ -7,15 +7,15 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/pluralsh/console/controller/pkg/utils"
-
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/kubernetes"
+	"github.com/pluralsh/console/controller/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -44,6 +44,7 @@ type Reconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
 	Log           logr.Logger
+	Scheme        *runtime.Scheme
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -120,28 +121,6 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *Reconciler) handleDelete(ctx context.Context, repo *v1alpha1.GitRepository) (ctrl.Result, error) {
-	if repo.Spec.CredentialsRef != nil {
-		secret := &corev1.Secret{}
-		name := types.NamespacedName{Name: repo.Spec.CredentialsRef.Name, Namespace: repo.Spec.CredentialsRef.Namespace}
-		err := r.Get(ctx, name, secret)
-		if err != nil {
-			if !apierrors.IsNotFound(err) {
-				return ctrl.Result{}, err
-			}
-		}
-		if secret.Name != "" {
-			if controllerutil.ContainsFinalizer(secret, RepoFinalizer) {
-				r.Log.Info("delete credential secret")
-				err := kubernetes.DeleteSecret(ctx, r.Client, repo.Spec.CredentialsRef.Namespace, repo.Spec.CredentialsRef.Name)
-				if err != nil {
-					return ctrl.Result{}, err
-				}
-				if err := kubernetes.TryRemoveFinalizer(ctx, r.Client, secret, RepoFinalizer); err != nil {
-					return ctrl.Result{}, err
-				}
-			}
-		}
-	}
 
 	if controllerutil.ContainsFinalizer(repo, RepoFinalizer) {
 		r.Log.Info("delete git repository")
@@ -178,7 +157,8 @@ func (r *Reconciler) getRepositoryCredentials(ctx context.Context, repo *v1alpha
 			return nil, err
 		}
 
-		if err := kubernetes.TryAddFinalizer(ctx, r.Client, secret, RepoFinalizer); err != nil {
+		err = utils.TryAddOwnerRef(ctx, r.Client, repo, secret, r.Scheme)
+		if err != nil {
 			return nil, err
 		}
 

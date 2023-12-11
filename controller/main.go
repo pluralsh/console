@@ -6,10 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pluralsh/console/controller/pkg/types"
-
 	deploymentsv1alpha "github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	"github.com/pluralsh/console/controller/pkg/client"
+	"github.com/pluralsh/console/controller/pkg/types"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
