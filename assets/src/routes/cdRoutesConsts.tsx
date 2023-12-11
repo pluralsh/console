@@ -71,20 +71,29 @@ export const ADDONS_REL_PATH = 'addons'
 export const GLOBAL_SETTINGS_REL_PATH = `settings`
 export const GLOBAL_SETTINGS_ABS_PATH = `${CD_ABS_PATH}/${GLOBAL_SETTINGS_REL_PATH}`
 
-export function getServiceDetailsPath({
+export function getClusterDetailsPath({
   clusterId,
-  serviceId,
   isRelative = false,
 }: {
   clusterId: string | null | undefined
-  serviceId: string | null | undefined
   isRelative?: boolean
 }) {
   return `${
     isRelative ? '' : `${CD_ABS_PATH}/`
-  }${CLUSTERS_REL_PATH}/${clusterId}/${SERVICES_REL_PATH}/${encodeSlashes(
-    serviceId || ''
-  )}`
+  }${CLUSTERS_REL_PATH}/${clusterId}`
+}
+
+export function getServiceDetailsPath({
+  clusterId,
+  serviceId,
+  isRelative = false,
+}: Parameters<typeof getClusterDetailsPath>[0] & {
+  serviceId: string | null | undefined
+}) {
+  return `${getClusterDetailsPath({
+    clusterId,
+    isRelative,
+  })}/${SERVICES_REL_PATH}/${encodeSlashes(serviceId || '')}`
 }
 
 export function getServiceComponentPath({

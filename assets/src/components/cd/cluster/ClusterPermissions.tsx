@@ -13,7 +13,7 @@ import { PermissionsModal } from '../utils/PermissionsModal'
 
 type Cluster = Pick<ClusterFragment, 'id' | 'name' | 'version'>
 
-export function ClusterPermissionsModal({
+function ClusterPermissionsModalInner({
   cluster,
   header,
   ...props
@@ -46,6 +46,15 @@ export function ClusterPermissionsModal({
   )
 }
 
+export function ClusterPermissionsModal(
+  props: ComponentProps<typeof ClusterPermissionsModalInner>
+) {
+  return (
+    <ModalMountTransition open={props.open}>
+      <ClusterPermissionsModalInner {...props} />
+    </ModalMountTransition>
+  )
+}
 export default function ClusterPermissions({ cluster }: { cluster: Cluster }) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -58,13 +67,11 @@ export default function ClusterPermissions({ cluster }: { cluster: Cluster }) {
       >
         Permissions
       </Button>
-      <ModalMountTransition open={isOpen}>
-        <ClusterPermissionsModal
-          cluster={cluster}
-          open={isOpen}
-          onClose={() => setIsOpen(false)}
-        />
-      </ModalMountTransition>
+      <ClusterPermissionsModal
+        cluster={cluster}
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+      />
     </>
   )
 }
