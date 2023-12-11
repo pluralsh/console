@@ -2,15 +2,17 @@ package servicecontroller
 
 import (
 	"context"
-	"github.com/go-logr/logr"
 	"reflect"
 	"time"
 
+	"github.com/go-logr/logr"
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/kubernetes"
+	"github.com/pluralsh/console/controller/pkg/utils"
+	"github.com/pluralsh/polly/algorithms"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
@@ -71,6 +73,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}, nil
 	}
 
+	attr, err := r.genServiceAttributes(ctx, service, repository.Status.Id)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	sha, err := utils.HashObject(attr)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
 	if err != nil {
 		if !errors.IsNotFound(err) {
@@ -78,10 +89,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 	}
 	if existingService == nil {
-		attr, err := r.genCreateAttr(ctx, service, repository.Status.Id)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
 		_, err = r.ConsoleClient.CreateService(cluster.Status.ID, *attr)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -94,8 +101,47 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, err
 		}
 	}
-	err = r.updateReferences(ctx, service)
+	err = r.addReferenceFinalizers(ctx, service)
 	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if service.Status.Sha != "" && service.Status.Sha != sha {
+		// update service
+
+	}
+
+	if err := UpdateServiceStatus(ctx, r.Client, service, func(r *v1alpha1.Service) {
+		r.Status.Id = &existingService.ID
+		r.Status.Sha = sha
+		if existingService.Errors != nil {
+			r.Status.Errors = algorithms.Map(existingService.Errors,
+				func(b *console.ErrorFragment) v1alpha1.ServiceError {
+					return v1alpha1.ServiceError{
+						Source:  b.Source,
+						Message: b.Message,
+					}
+				})
+		}
+		r.Status.Components = make([]v1alpha1.ServiceComponent, 0)
+		for _, c := range existingService.Components {
+			sc := v1alpha1.ServiceComponent{
+				ID:        c.ID,
+				Name:      c.Name,
+				Group:     c.Group,
+				Kind:      c.Kind,
+				Namespace: c.Namespace,
+				Synced:    c.Synced,
+				Version:   c.Version,
+			}
+			if c.State != nil {
+				state := v1alpha1.ComponentState(*c.State)
+				sc.State = &state
+			}
+			r.Status.Components = append(r.Status.Components, sc)
+		}
+
+	}); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -112,7 +158,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *Reconciler) genCreateAttr(ctx context.Context, service *v1alpha1.Service, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
+func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.Service, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
 	attr := &console.ServiceDeploymentAttributes{
 		Name:         service.Name,
 		Namespace:    service.Namespace,
@@ -124,21 +170,10 @@ func (r *Reconciler) genCreateAttr(ctx context.Context, service *v1alpha1.Servic
 	if service.Spec.Bindings != nil {
 		attr.ReadBindings = make([]*console.PolicyBindingAttributes, 0)
 		attr.WriteBindings = make([]*console.PolicyBindingAttributes, 0)
-
-		for _, r := range service.Spec.Bindings.Read {
-			attr.ReadBindings = append(attr.ReadBindings, &console.PolicyBindingAttributes{
-				ID:      r.ID,
-				UserID:  r.UserID,
-				GroupID: r.GroupID,
-			})
-		}
-		for _, w := range service.Spec.Bindings.Write {
-			attr.WriteBindings = append(attr.WriteBindings, &console.PolicyBindingAttributes{
-				ID:      w.ID,
-				UserID:  w.UserID,
-				GroupID: w.GroupID,
-			})
-		}
+		attr.ReadBindings = algorithms.Map(service.Spec.Bindings.Read,
+			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+		attr.WriteBindings = algorithms.Map(service.Spec.Bindings.Write,
+			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
 	}
 
 	if service.Spec.Kustomize != nil {
@@ -198,13 +233,35 @@ func (r *Reconciler) genCreateAttr(ctx context.Context, service *v1alpha1.Servic
 	return attr, nil
 }
 
-func (r *Reconciler) updateReferences(ctx context.Context, service *v1alpha1.Service) error {
+func (r *Reconciler) addReferenceFinalizers(ctx context.Context, service *v1alpha1.Service) error {
 	if service.Spec.ConfigurationRef != nil {
 		configurationSecret, err := kubernetes.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
 		if err != nil {
 			return err
 		}
 		if err := kubernetes.TryAddFinalizer(ctx, r.Client, configurationSecret, ServiceFinalizer); err != nil {
+			return err
+		}
+	}
+	if service.Spec.Helm.ValuesRef != nil {
+		configMap := &corev1.ConfigMap{}
+		name := types.NamespacedName{Name: service.Spec.Helm.ValuesRef.Name, Namespace: service.Namespace}
+		err := r.Get(ctx, name, configMap)
+		if err != nil {
+			return err
+		}
+		if err := kubernetes.TryAddFinalizer(ctx, r.Client, configMap, ServiceFinalizer); err != nil {
+			return err
+		}
+	}
+	if service.Spec.Helm.ChartRef != nil {
+		configMap := &corev1.ConfigMap{}
+		name := types.NamespacedName{Name: service.Spec.Helm.ChartRef.Name, Namespace: service.Namespace}
+		err := r.Get(ctx, name, configMap)
+		if err != nil {
+			return err
+		}
+		if err := kubernetes.TryAddFinalizer(ctx, r.Client, configMap, ServiceFinalizer); err != nil {
 			return err
 		}
 	}

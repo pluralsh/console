@@ -338,6 +338,8 @@ spec:
               id:
                 description: Id of service in console.
                 type: string
+              sha:
+                type: string
             type: object
         type: object
     served: true

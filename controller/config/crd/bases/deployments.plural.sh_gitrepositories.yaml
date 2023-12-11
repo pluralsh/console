@@ -78,6 +78,8 @@ spec:
               message:
                 description: Message indicating details about last transition.
                 type: string
+              sha:
+                type: string
             type: object
         type: object
     served: true

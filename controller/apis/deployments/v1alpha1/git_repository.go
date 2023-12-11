@@ -36,6 +36,8 @@ type GitRepositoryStatus struct {
 	// Id of repo in console.
 	// +optional
 	Id *string `json:"id,omitempty"`
+	// +optional
+	Sha string `json:"sha,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -75,6 +75,8 @@ type ServiceStatus struct {
 	Errors []ServiceError `json:"errors,omitempty"`
 	// +optional
 	Components []ServiceComponent `json:"components,omitempty"`
+	// +optional
+	Sha string `json:"sha,omitempty"`
 }
 
 type ServiceError struct {
