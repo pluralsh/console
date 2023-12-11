@@ -1,4 +1,4 @@
-import { createContext, useContext, useLayoutEffect } from 'react'
+import { createContext, useContext, useLayoutEffect, useMemo } from 'react'
 
 import ContinuousDeployment, {
   POLL_INTERVAL,
@@ -13,7 +13,6 @@ import {
   Route,
   useLocation,
   useNavigate,
-  useOutletContext,
 } from 'react-router-dom'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -38,6 +37,13 @@ import { GlobalSettingsRepositories } from 'components/cd/globalSettings/GlobalS
 import SelfManage from 'components/cd/globalSettings/SelfManage'
 
 import Pipelines from 'components/cd/pipelines/Pipelines'
+
+import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
+
+import {
+  DeploymentSettingsFragment,
+  useDeploymentSettingsQuery,
+} from 'generated/graphql'
 
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
@@ -82,12 +88,6 @@ import {
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
-import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
-import {
-  DeploymentSettingsFragment,
-  DeploymentSettingsFragmentDoc,
-  useDeploymentSettingsQuery,
-} from 'generated/graphql'
 
 export const componentRoutes = (
   <Route
@@ -130,6 +130,7 @@ const CDContext = createContext<{
 
 export function useDeploymentSettings() {
   const ctx = useContext(CDContext)
+
   return ctx?.deploymentSettings
 }
 
@@ -146,11 +147,13 @@ function CdRoot() {
       navigate(defaultLocation)
     }
   }, [cdIsEnabled, location.pathname, navigate])
+  const providerValue = useMemo(
+    () => ({ deploymentSettings: data?.deploymentSettings }),
+    [data?.deploymentSettings]
+  )
 
   return (
-    <CDContext.Provider
-      value={{ deploymentSettings: data?.deploymentSettings }}
-    >
+    <CDContext.Provider value={providerValue}>
       <Outlet />
     </CDContext.Provider>
   )

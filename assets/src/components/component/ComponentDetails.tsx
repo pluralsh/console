@@ -16,7 +16,6 @@ import { ViewLogsButton } from 'components/component/ViewLogsButton'
 import { directory } from 'components/component/directory'
 import {
   CertificateDocument,
-  ClusterFragment,
   CronJobDocument,
   DeploymentDocument,
   IngressDocument,

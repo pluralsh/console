@@ -1,9 +1,4 @@
-import {
-  Button,
-  IconFrame,
-  PeopleIcon,
-  PersonIcon,
-} from '@pluralsh/design-system'
+import { IconFrame, PeopleIcon } from '@pluralsh/design-system'
 import { ComponentProps, ReactNode, useState } from 'react'
 
 import {
