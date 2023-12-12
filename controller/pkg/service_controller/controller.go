@@ -2,7 +2,6 @@ package servicecontroller
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -19,10 +18,16 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const (
 	ServiceFinalizer = "deployments.plural.sh/service-protection"
+	RequeueAfter     = 30 * time.Second
+)
+
+var (
+	requeue = ctrl.Result{RequeueAfter: RequeueAfter}
 )
 
 // Reconciler reconciles a Service object
@@ -34,8 +39,8 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log := log.FromContext(ctx)
 	service := &v1alpha1.ServiceDeployment{}
-	r.Log.WithName(fmt.Sprintf("%s-%s", req.NamespacedName, req.Name))
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -45,11 +50,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	if cluster.Status.ID == nil {
-		r.Log.Info(fmt.Sprintf("Cluster %s/%s is not ready", cluster.Namespace, cluster.Name))
-		return ctrl.Result{
-			// update status
-			RequeueAfter: 30 * time.Second,
-		}, nil
+		log.Info("Cluster is not ready")
+		return requeue, nil
 	}
 	if !service.GetDeletionTimestamp().IsZero() {
 		return r.handleDelete(ctx, cluster, service)
@@ -60,18 +62,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	if repository.Status.Id == nil {
-		r.Log.Info("Repository is not ready")
-		return ctrl.Result{
-			// update status
-			RequeueAfter: 30 * time.Second,
-		}, nil
+		log.Info("Repository is not ready")
+		return requeue, nil
 	}
 	if repository.Status.Health == v1alpha1.GitHealthFailed {
-		r.Log.Info("Repository is not healthy")
-		return ctrl.Result{
-			// update status
-			RequeueAfter: 30 * time.Second,
-		}, nil
+		log.Info("Repository is not healthy")
+		return requeue, nil
 	}
 
 	attr, err := r.genServiceAttributes(ctx, service, repository.Status.Id)
@@ -141,10 +137,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{
-		// update status
-		RequeueAfter: 30 * time.Second,
-	}, nil
+	return requeue, nil
 }
 
 func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.ServiceDeploymentExtended, sha string) {
@@ -302,30 +295,28 @@ func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.S
 }
 
 func (r *Reconciler) handleDelete(ctx context.Context, cluster *v1alpha1.Cluster, service *v1alpha1.ServiceDeployment) (ctrl.Result, error) {
+	log := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
-		r.Log.Info(fmt.Sprintf("try to delete service %s/%s", service.Namespace, service.Name))
+		log.Info("try to delete service")
 		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
 		if err != nil && !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}
 		if existingService != nil && existingService.DeletedAt != nil {
+			log.Info("waiting for the console")
 			if err = utils.TryUpdateStatus[*v1alpha1.ServiceDeployment](ctx, r.Client, service, func(r *v1alpha1.ServiceDeployment, original *v1alpha1.ServiceDeployment) (any, any) {
 				updateStatus(r, existingService, "")
 				return original.Status, r.Status
 			}); err != nil {
 				return ctrl.Result{}, err
 			}
-			return ctrl.Result{
-				RequeueAfter: 30 * time.Second,
-			}, nil
+			return requeue, nil
 		}
 		if existingService != nil {
 			if err := r.ConsoleClient.DeleteService(*service.Status.Id); err != nil {
 				return ctrl.Result{}, err
 			}
-			return ctrl.Result{
-				RequeueAfter: 30 * time.Second,
-			}, nil
+			return requeue, nil
 		}
 		if err := kubernetes.TryRemoveFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
 			return ctrl.Result{}, err
