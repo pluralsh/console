@@ -67,7 +67,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	var apiCluster *console.ClusterFragment
-	if cluster.Status.ID != nil {
+	if cluster.Status.HasID() {
 		apiCluster, err = r.ConsoleClient.GetCluster(cluster.Status.ID)
 		if err != nil && !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
@@ -85,7 +85,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	if cluster.Status.ID != nil && cluster.Status.SHA != nil && cluster.Status.SHA != &sha {
+	if cluster.Status.HasID() && cluster.Status.HasSHA() && cluster.Status.SHA != &sha {
 		apiCluster, err = r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
 		if err != nil {
 			return ctrl.Result{}, err
@@ -158,8 +158,7 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 			return nil, &ctrl.Result{}, fmt.Errorf("could not get provider, got error: %+v", err)
 		}
 
-		providerId = provider.Status.ID
-		if providerId == nil {
+		if !provider.Status.HasID() {
 			r.Log.Info("provider does not have ID set yet")
 			return nil, &requeue, nil
 		}
@@ -169,7 +168,7 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 			return nil, &ctrl.Result{}, err
 		}
 
-		return providerId, nil, nil
+		return provider.Status.ID, nil, nil
 	}
 
 	return nil, nil, nil

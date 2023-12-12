@@ -363,3 +363,11 @@ type ClusterStatus struct {
 	// +kubebuilder:validation:Type:=string
 	PingedAt *string `json:"pingedAt,omitempty"`
 }
+
+func (cs *ClusterStatus) HasID() bool {
+	return cs.ID != nil && len(*cs.ID) > 0
+}
+
+func (cs *ClusterStatus) HasSHA() bool {
+	return cs.SHA != nil && len(*cs.SHA) > 0
+}
