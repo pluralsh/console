@@ -27,6 +27,10 @@ const (
 	FinalizerName = "deployments.plural.sh/cluster-protection"
 )
 
+var (
+	requeue = ctrl.Result{RequeueAfter: RequeueAfter}
+)
+
 // Reconciler reconciles a Cluster object.
 type Reconciler struct {
 	client.Client
@@ -51,9 +55,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	// Handle cluster resource deletion
-	ret, err := r.addOrRemoveFinalizer(ctx, cluster)
-	if ret || err != nil {
-		return ctrl.Result{}, err
+	result, err := r.addOrRemoveFinalizer(ctx, cluster)
+	if result != nil {
+		return *result, err
 	}
 
 	var apiCluster *console.ClusterFragment
@@ -74,7 +78,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		providerId = provider.Status.ID
 		if providerId == nil {
 			r.Log.Info("provider does not have ID set yet")
-			return ctrl.Result{RequeueAfter: RequeueAfter}, nil
+			return requeue, nil
 		}
 
 		err = utils.TryAddOwnerRef(ctx, r.Client, provider, cluster, r.Scheme)
@@ -107,32 +111,38 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		r.Status.CurrentVersion = apiCluster.CurrentVersion
 		r.Status.PingedAt = apiCluster.PingedAt
 		r.Status.SHA = &sha
+		// TODO: Conditions, i.e. readonly, exists.
 	}); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{RequeueAfter: RequeueAfter}, nil
+	return requeue, nil
 }
 
-func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1.Cluster) (bool, error) {
-	// If object is not being deleted, so if it does not have our finalizer, then lets add the finalizer
-	// and update the object. This is equivalent to registering our finalizer.
+func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1.Cluster) (*ctrl.Result, error) {
+	// If object is not being deleted, so if it does not have our finalizer,
+	// then lets add the finalizer and update the object. This is equivalent
+	// to registering our finalizer.
 	if cluster.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(cluster, FinalizerName) {
 		controllerutil.AddFinalizer(cluster, FinalizerName)
 		if err := r.Update(ctx, cluster); err != nil {
-			return true, err
+			return &ctrl.Result{}, err
 		}
 	}
 
 	// If object is being deleted
 	if !cluster.ObjectMeta.DeletionTimestamp.IsZero() {
-		// TODO: Add DeletedAt to queries, check if cluster is deleting and return if it is.
+		// If object is already being deleted from Console API requeue
+		if r.ConsoleClient.IsClusterDeleting(cluster.Status.ID) {
+			return &requeue, nil
+		}
 
-		// Remove cluster from Console API if it exists
-		if cluster.Status.ID != nil && r.ConsoleClient.ClusterExists(cluster.Status.ID) {
+		// Remove Cluster from Console API if it exists
+		if r.ConsoleClient.IsClusterExisting(cluster.Status.ID) {
 			if _, err := r.ConsoleClient.DeleteCluster(*cluster.Status.ID); err != nil {
-				// If fail to delete the external dependency here, return with error so that it can be retried.
-				return true, err
+				// if fail to delete the external dependency here, return with error
+				// so that it can be retried.
+				return &ctrl.Result{}, err
 			}
 		}
 
@@ -140,15 +150,15 @@ func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1
 		if controllerutil.ContainsFinalizer(cluster, FinalizerName) {
 			controllerutil.RemoveFinalizer(cluster, FinalizerName)
 			if err := r.Update(ctx, cluster); err != nil {
-				return true, err
+				return &ctrl.Result{}, err
 			}
 		}
 
 		// Stop reconciliation as the item is being deleted
-		return true, nil
+		return &ctrl.Result{}, nil
 	}
 
-	return false, nil
+	return nil, nil
 }
 
 func (r *Reconciler) updateStatus(ctx context.Context, cluster *v1alpha1.Cluster, patch func(cluster *v1alpha1.Cluster)) error {
