@@ -89,6 +89,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	if existingService == nil {
+		if err := kubernetes.TryAddFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
+			return ctrl.Result{}, err
+		}
 		_, err = r.ConsoleClient.CreateService(cluster.Status.ID, *attr)
 		if err != nil {
 			return ctrl.Result{}, err

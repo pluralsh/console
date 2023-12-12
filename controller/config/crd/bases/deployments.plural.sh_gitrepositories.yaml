@@ -67,7 +67,7 @@ spec:
           status:
             properties:
               existing:
-                default: false
+                default: true
                 type: boolean
               health:
                 description: Health status.
