@@ -633,7 +633,7 @@ func (in *ProviderStatus) DeepCopyInto(out *ProviderStatus) {
 	}
 	if in.Existing != nil {
 		in, out := &in.Existing, &out.Existing
-		*out = new(string)
+		*out = new(bool)
 		**out = **in
 	}
 }

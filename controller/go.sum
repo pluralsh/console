@@ -230,8 +230,8 @@ github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/pluralsh/console-client-go v0.0.54 h1:hZ7yjXuRHvoGiQ9HgbVpidNHWlf7KapxhwAMN3lP+zc=
-github.com/pluralsh/console-client-go v0.0.54/go.mod h1:u/RjzXE3wtl3L6wiWxwhQHSpxFX46+EYvpkss2mALN4=
+github.com/pluralsh/console-client-go v0.0.55 h1:+j1Ur8ixNx4se4NEfTcul87/oVhUqFs+ZdsvCzvPYFM=
+github.com/pluralsh/console-client-go v0.0.55/go.mod h1:u/RjzXE3wtl3L6wiWxwhQHSpxFX46+EYvpkss2mALN4=
 github.com/pluralsh/polly v0.1.4 h1:Kz90peCgvsfF3ERt8cujr5TR9z4wUlqQE60Eg09ZItY=
 github.com/pluralsh/polly v0.1.4/go.mod h1:Yo1/jcW+4xwhWG+ZJikZy4J4HJkMNPZ7sq5auL2c/tY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

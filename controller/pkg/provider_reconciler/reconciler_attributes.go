@@ -15,17 +15,30 @@ func (r *Reconciler) missingCredentialKeyError(key string) error {
 	return fmt.Errorf("%q key does not exist in referenced credential secret", key)
 }
 
-func (r *Reconciler) toCloudProviderSettingsAttributes(ctx context.Context, spec v1alpha1.ProviderSpec) (*console.CloudProviderSettingsAttributes, error) {
-	switch spec.Cloud {
+func (r *Reconciler) getCloudProviderSettingsSecretRef(provider v1alpha1.Provider) *corev1.SecretReference {
+	switch provider.Spec.Cloud {
 	case v1alpha1.AWS:
-		return r.toCloudProviderAWSSettingsAttributes(ctx, spec.CloudSettings.AWS)
+		return provider.Spec.CloudSettings.AWS
 	case v1alpha1.Azure:
-		return r.toCloudProviderAzureSettingsAttributes(ctx, spec.CloudSettings.Azure)
+		return provider.Spec.CloudSettings.Azure
 	case v1alpha1.GCP:
-		return r.toCloudProviderGCPSettingsAttributes(ctx, spec.CloudSettings.GCP)
+		return provider.Spec.CloudSettings.GCP
 	}
 
-	return nil, fmt.Errorf("unsupported cloud: %q", spec.Cloud)
+	return nil
+}
+
+func (r *Reconciler) toCloudProviderSettingsAttributes(ctx context.Context, provider v1alpha1.Provider) (*console.CloudProviderSettingsAttributes, error) {
+	switch provider.Spec.Cloud {
+	case v1alpha1.AWS:
+		return r.toCloudProviderAWSSettingsAttributes(ctx, provider.Spec.CloudSettings.AWS)
+	case v1alpha1.Azure:
+		return r.toCloudProviderAzureSettingsAttributes(ctx, provider.Spec.CloudSettings.Azure)
+	case v1alpha1.GCP:
+		return r.toCloudProviderGCPSettingsAttributes(ctx, provider.Spec.CloudSettings.GCP)
+	}
+
+	return nil, fmt.Errorf("unsupported cloud: %q", provider.Spec.Cloud)
 }
 
 func (r *Reconciler) toCloudProviderAWSSettingsAttributes(ctx context.Context, ref *corev1.SecretReference) (*console.CloudProviderSettingsAttributes, error) {

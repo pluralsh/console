@@ -7,7 +7,7 @@ toolchain go1.21.1
 require (
 	github.com/Yamashou/gqlgenc v0.16.0
 	github.com/go-logr/logr v1.2.3
-	github.com/pluralsh/console-client-go v0.0.54
+	github.com/pluralsh/console-client-go v0.0.55
 	github.com/pluralsh/polly v0.1.4
 	github.com/samber/lo v1.33.0
 	github.com/spf13/pflag v1.0.5

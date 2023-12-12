@@ -1,0 +1,14 @@
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Provider
+metadata:
+  name: gcp
+spec:
+  name: gcp
+  namespace: gcp-capi
+  cloud: gcp
+  cloudSettings:
+    gcp:
+      name: credentials
+      namespace: gcp-capi
+

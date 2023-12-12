@@ -16,7 +16,7 @@ func init() {
 // CloudSettingsGetter is just a helper function that can be implemented to properly
 // build Console API attributes
 // +kubebuilder:object:generate:=false
-type CloudSettingsGetter func(context.Context, ProviderSpec) (*console.CloudProviderSettingsAttributes, error)
+type CloudSettingsGetter func(context.Context, Provider) (*console.CloudProviderSettingsAttributes, error)
 
 // Hasher
 // +kubebuilder:object:generate:=false
@@ -61,12 +61,25 @@ type Provider struct {
 	Status ProviderStatus `json:"status,omitempty"`
 }
 
-func (p *Provider) GetStatus() ProviderStatus {
-	return p.Status
+func (p *Provider) Attributes(ctx context.Context, cloudSettingsGetter CloudSettingsGetter) (console.ClusterProviderAttributes, error) {
+	cloudSettings, err := cloudSettingsGetter(ctx, *p)
+	return console.ClusterProviderAttributes{
+		Name:          p.Spec.Name,
+		Namespace:     &p.Spec.Namespace,
+		Cloud:         p.Spec.Cloud.Attribute(),
+		CloudSettings: cloudSettings,
+	}, err
+}
+
+func (p *Provider) UpdateAttributes(ctx context.Context, cloudSettingsGetter CloudSettingsGetter) (console.ClusterProviderUpdateAttributes, error) {
+	cloudSettings, err := cloudSettingsGetter(ctx, *p)
+	return console.ClusterProviderUpdateAttributes{
+		CloudSettings: cloudSettings,
+	}, err
 }
 
 func (p *Provider) Diff(ctx context.Context, getter CloudSettingsGetter, hasher Hasher) (changed bool, sha string, err error) {
-	cloudSettings, err := getter(ctx, p.Spec)
+	cloudSettings, err := getter(ctx, *p)
 	if err != nil {
 		return false, "", err
 	}
@@ -89,24 +102,24 @@ type ProviderList struct {
 }
 
 // ProviderSpec ...
-// +kubebuilder:validation:Validation:rule="(self.cloud == 'aws' && has(self.cloudSettings.aws)) || (self.cloud == 'gcp' && has(self.cloudSettings.gcp)) || (self.cloud == 'azure' && has(self.cloudSettings.azure))",message="Cloud Settings must be provided only for matching Cloud."
 type ProviderSpec struct {
 	// Cloud is the name of the cloud service for the Provider.
 	// One of (CloudProvider): [gcp, aws, azure]
-	// +kubebuilder:example:=byok
+	// +kubebuilder:example:=aws
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
-	// +kubebuilder:validation:Enum:=byok;gcp;aws;azure
+	// +kubebuilder:validation:Enum:=gcp;aws;azure
 	// +kubebuilder:validation:Validation:rule="self == oldSelf",message="Cloud is immutable"
 	Cloud CloudProvider `json:"cloud"`
 	// CloudSettings reference cloud provider credentials secrets used for provisioning the Cluster.
 	// Not required when Cloud is set to CloudProvider(BYOK).
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=object
 	// +structType=atomic
-	CloudSettings *CloudProviderSettings `json:"cloudSettings,omitempty"`
+	CloudSettings *CloudProviderSettings `json:"cloudSettings"`
 	// Name is a human-readable name of the Provider.
 	// +kubebuilder:example:=gcp-provider
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Validation:rule="self == oldSelf",message="Name is immutable"
 	Name string `json:"name"`
 	// Namespace is the namespace ClusterAPI resources are deployed into.
@@ -114,23 +127,6 @@ type ProviderSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Validation:rule="self == oldSelf",message="Namespace is immutable"
 	Namespace string `json:"namespace,omitempty"`
-}
-
-func (p *ProviderSpec) Attributes(ctx context.Context, cloudSettingsGetter CloudSettingsGetter) (console.ClusterProviderAttributes, error) {
-	cloudSettings, err := cloudSettingsGetter(ctx, *p)
-	return console.ClusterProviderAttributes{
-		Name:          p.Name,
-		Namespace:     &p.Namespace,
-		Cloud:         p.Cloud.Attribute(),
-		CloudSettings: cloudSettings,
-	}, err
-}
-
-func (p *ProviderSpec) UpdateAttributes(ctx context.Context, cloudSettingsGetter CloudSettingsGetter) (console.ClusterProviderUpdateAttributes, error) {
-	cloudSettings, err := cloudSettingsGetter(ctx, *p)
-	return console.ClusterProviderUpdateAttributes{
-		CloudSettings: cloudSettings,
-	}, err
 }
 
 // ProviderStatus ...
@@ -143,10 +139,11 @@ type ProviderStatus struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	SHA *string `json:"sha,omitempty"`
-	// Existing flag.
+	// Existing flag is set to true when Console API object already exists when CRD is created.
+	// CRD is then set to read-only mode and does not update Console API from CRD.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	Existing *string `json:"existing,omitempty"`
+	// +kubebuilder:validation:Type:=boolean
+	Existing *bool `json:"existing,omitempty"`
 }
 
 func (p *ProviderStatus) GetID() string {
@@ -179,4 +176,8 @@ func (p *ProviderStatus) IsSHAEqual(sha string) bool {
 	}
 
 	return p.GetSHA() == sha
+}
+
+func (p *ProviderStatus) IsExisting() bool {
+	return p.Existing != nil && *p.Existing
 }

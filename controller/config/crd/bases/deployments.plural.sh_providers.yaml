@@ -52,11 +52,10 @@ spec:
                 description: 'Cloud is the name of the cloud service for the Provider.
                   One of (CloudProvider): [gcp, aws, azure]'
                 enum:
-                - byok
                 - gcp
                 - aws
                 - azure
-                example: byok
+                example: aws
                 type: string
               cloudSettings:
                 description: CloudSettings reference cloud provider credentials secrets
@@ -118,14 +117,15 @@ spec:
                 type: string
             required:
             - cloud
-            - name
             type: object
           status:
             description: ProviderStatus ...
             properties:
               existing:
-                description: Existing flag.
-                type: string
+                description: Existing flag is set to true when Console API object
+                  already exists when CRD is created. CRD is then set to read-only
+                  mode and does not update Console API from CRD.
+                type: boolean
               id:
                 description: ID of the provider in the Console API.
                 type: string

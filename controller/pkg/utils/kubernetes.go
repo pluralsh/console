@@ -62,7 +62,7 @@ func TryAddControllerRef(ctx context.Context, client ctrlruntimeclient.Client, o
 }
 
 // Patcher TODO ...
-type Patcher[PatchObject ctrlruntimeclient.Object] func(object PatchObject, original PatchObject) (any, any)
+type Patcher[PatchObject ctrlruntimeclient.Object] func(object PatchObject, original PatchObject) (compare any, compareTo any)
 
 // TryUpdateStatus TODO ...
 func TryUpdateStatus[PatchObject ctrlruntimeclient.Object](ctx context.Context, client ctrlruntimeclient.Client, object PatchObject, patch Patcher[PatchObject]) error {

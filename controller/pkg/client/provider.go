@@ -7,6 +7,8 @@ import (
 	gqlclient "github.com/pluralsh/console-client-go"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 )
 
 func (c *client) CreateProvider(ctx context.Context, attributes gqlclient.ClusterProviderAttributes, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
@@ -20,6 +22,23 @@ func (c *client) GetProvider(ctx context.Context, id string, options ...gqlgencl
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
 
+	if response == nil {
+		return nil, err
+	}
+
+	return response.ClusterProvider, err
+}
+
+func (c *client) GetProviderByCloud(ctx context.Context, cloud v1alpha1.CloudProvider, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
+	response, err := c.consoleClient.GetClusterProviderByCloud(ctx, string(cloud), options...)
+	if err == nil && (response == nil || response.ClusterProvider == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, string(cloud))
+	}
+
+	if response == nil {
+		return nil, err
+	}
+
 	return response.ClusterProvider, err
 }
 
@@ -27,6 +46,10 @@ func (c *client) UpdateProvider(ctx context.Context, id string, attributes gqlcl
 	response, err := c.consoleClient.UpdateClusterProvider(ctx, id, attributes, options...)
 	if err == nil && (response == nil || response.UpdateClusterProvider == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+
+	if response == nil {
+		return nil, err
 	}
 
 	return response.UpdateClusterProvider, err

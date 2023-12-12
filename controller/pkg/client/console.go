@@ -7,6 +7,8 @@ import (
 	gqlgenclient "github.com/Yamashou/gqlgenc/client"
 
 	console "github.com/pluralsh/console-client-go"
+
+	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 )
 
 type authedTransport struct {
@@ -43,6 +45,7 @@ type ConsoleClient interface {
 	IsClusterDeleting(id *string) bool
 	CreateProvider(ctx context.Context, attributes console.ClusterProviderAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
 	GetProvider(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
+	GetProviderByCloud(ctx context.Context, cloud v1alpha1.CloudProvider, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
 	UpdateProvider(ctx context.Context, id string, attributes console.ClusterProviderUpdateAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
 	DeleteProvider(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error
 	IsProviderExists(ctx context.Context, id string) bool

@@ -5,6 +5,8 @@ import (
 	"time"
 
 	console "github.com/pluralsh/console-client-go"
+	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -14,6 +16,7 @@ import (
 
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
+	"github.com/pluralsh/console/controller/pkg/kubernetes"
 	"github.com/pluralsh/console/controller/pkg/utils"
 )
 
@@ -47,12 +50,24 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// TODO: Try reading from API to see if object already exists
+	// Check if resource already exists in the API and only sync the ID
+	exists, err := r.isAlreadyExists(ctx, provider)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	if exists {
+		return r.handleExistingProvider(ctx, provider)
+	}
 
 	// Handle proper resource deletion via finalizer
 	result, err := r.addOrRemoveFinalizer(ctx, provider)
 	if result != nil {
 		return *result, err
+	}
+
+	err = r.tryAddControllerRef(ctx, provider)
+	if err != nil {
+		return ctrl.Result{}, nil
 	}
 
 	// Get Provider SHA that can be saved back in the status to check for changes
@@ -73,6 +88,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	if err = utils.TryUpdateStatus[*v1alpha1.Provider](ctx, r.Client, &provider, func(p *v1alpha1.Provider, original *v1alpha1.Provider) (any, any) {
 		p.Status.ID = &apiProvider.ID
 		p.Status.SHA = &sha
+		p.Status.Existing = lo.ToPtr(false)
 
 		return original.Status, p.Status
 	}); err != nil {
@@ -80,6 +96,41 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	return requeue, nil
+}
+
+func (r *Reconciler) handleExistingProvider(ctx context.Context, provider v1alpha1.Provider) (reconcile.Result, error) {
+	apiProvider, err := r.ConsoleClient.GetProviderByCloud(ctx, provider.Spec.Cloud)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err = utils.TryUpdateStatus[*v1alpha1.Provider](ctx, r.Client, &provider, func(p *v1alpha1.Provider, original *v1alpha1.Provider) (any, any) {
+		p.Status.ID = &apiProvider.ID
+		p.Status.Existing = lo.ToPtr(true)
+
+		return original.Status, p.Status
+	}); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return requeue, nil
+}
+
+func (r *Reconciler) isAlreadyExists(ctx context.Context, provider v1alpha1.Provider) (bool, error) {
+	if provider.Status.IsExisting() {
+		return true, nil
+	}
+
+	_, err := r.ConsoleClient.GetProviderByCloud(ctx, provider.Spec.Cloud)
+	if errors.IsNotFound(err) {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	return !provider.Status.HasID(), nil
 }
 
 func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, provider v1alpha1.Provider) (*ctrl.Result, error) {
@@ -129,7 +180,7 @@ func (r *Reconciler) updateOrGetProvider(ctx context.Context, provider v1alpha1.
 
 	// Update only if Provider has changed
 	if changed && exists {
-		attributes, err := provider.Spec.UpdateAttributes(ctx, r.toCloudProviderSettingsAttributes)
+		attributes, err := provider.UpdateAttributes(ctx, r.toCloudProviderSettingsAttributes)
 		if err != nil {
 			return nil, err
 		}
@@ -143,7 +194,7 @@ func (r *Reconciler) updateOrGetProvider(ctx context.Context, provider v1alpha1.
 	}
 
 	// Create the Provider in Console API if it doesn't exist
-	attributes, err := provider.Spec.Attributes(ctx, r.toCloudProviderSettingsAttributes)
+	attributes, err := provider.Attributes(ctx, r.toCloudProviderSettingsAttributes)
 	if err != nil {
 		return nil, err
 	}
@@ -157,4 +208,14 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Provider{}).
 		Complete(r)
+}
+
+func (r *Reconciler) tryAddControllerRef(ctx context.Context, provider v1alpha1.Provider) error {
+	secretRef := r.getCloudProviderSettingsSecretRef(provider)
+	secret, err := kubernetes.GetSecret(ctx, r.Client, secretRef)
+	if err != nil {
+		return err
+	}
+
+	return utils.TryAddControllerRef(ctx, r.Client, &provider, secret, r.Scheme)
 }
