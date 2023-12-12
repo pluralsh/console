@@ -3,7 +3,6 @@ package cluster_controller
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -14,10 +13,8 @@ import (
 	"github.com/pluralsh/console/controller/pkg/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -46,6 +43,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
+// TODO: Conditions, i.e. readonly, exists.
 func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	// Read resource from Kubernetes cluster.
 	cluster := &v1alpha1.Cluster{}
@@ -92,13 +90,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		}
 	}
 
-	if err := r.updateStatus(ctx, cluster, func(r *v1alpha1.Cluster) {
-		r.Status.ID = &apiCluster.ID
-		r.Status.KasURL = apiCluster.KasURL
-		r.Status.CurrentVersion = apiCluster.CurrentVersion
-		r.Status.PingedAt = apiCluster.PingedAt
-		r.Status.SHA = &sha
-		// TODO: Conditions, i.e. readonly, exists.
+	// Update resource status.
+	if err = utils.TryUpdateStatus[*v1alpha1.Cluster](ctx, r.Client, cluster, func(c *v1alpha1.Cluster, original *v1alpha1.Cluster) (any, any) {
+		c.Status.ID = &apiCluster.ID
+		c.Status.KasURL = apiCluster.KasURL
+		c.Status.CurrentVersion = apiCluster.CurrentVersion
+		c.Status.PingedAt = apiCluster.PingedAt
+		c.Status.SHA = &sha
+
+		return original.Status, c.Status
 	}); err != nil {
 		return ctrl.Result{}, err
 	}
@@ -172,22 +172,4 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 	}
 
 	return nil, nil, nil
-}
-
-func (r *Reconciler) updateStatus(ctx context.Context, cluster *v1alpha1.Cluster, patch func(cluster *v1alpha1.Cluster)) error {
-	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		if err := r.Client.Get(ctx, ctrlruntimeclient.ObjectKeyFromObject(cluster), cluster); err != nil {
-			return fmt.Errorf("could not fetch current cluster state, got error: %+v", err)
-		}
-
-		original := cluster.DeepCopy()
-
-		patch(cluster)
-
-		if reflect.DeepEqual(original.Status, cluster.Status) {
-			return nil
-		}
-
-		return r.Client.Status().Patch(ctx, cluster, ctrlruntimeclient.MergeFrom(original))
-	})
 }
