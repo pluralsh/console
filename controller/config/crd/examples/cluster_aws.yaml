@@ -1,4 +1,12 @@
 apiVersion: deployments.plural.sh/v1alpha1
+kind: Provider
+metadata:
+  name: aws
+spec:
+  cloud: aws
+  name: aws
+---
+apiVersion: deployments.plural.sh/v1alpha1
 kind: Cluster
 metadata:
   name: aws
@@ -8,9 +16,8 @@ spec:
   cloud: aws
   version: "1.24"
   protect: false
-# TODO: Add provider reference.
-#  providerRef:
-#    ...
+  providerRef:
+    name: aws
   cloudSettings:
     aws:
       region: us-east-1

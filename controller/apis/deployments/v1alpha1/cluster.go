@@ -79,6 +79,7 @@ func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
 type ClusterSpec struct {
 	// Handle is a short, unique human-readable name used to identify this cluster.
 	// Does not necessarily map to the cloud resource name.
+	// This has to be specified in order to adopt existing cluster.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:=myclusterhandle
@@ -95,7 +96,7 @@ type ClusterSpec struct {
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 
 	// Cloud provider to use for this cluster.
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:Enum=aws;azure;gcp;byok
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cloud is immutable"
@@ -124,6 +125,10 @@ type ClusterSpec struct {
 	// NodePools contains specs of node pools managed by this cluster.
 	// +kubebuilder:validation:Optional
 	NodePools []ClusterNodePool `json:"nodePools"`
+}
+
+func (cs *ClusterSpec) HasHandle() bool {
+	return cs.Handle != nil
 }
 
 func (cs *ClusterSpec) IsProviderRefRequired() bool {
@@ -348,6 +353,11 @@ type ClusterStatus struct {
 	// +kubebuilder:validation:Type:=string
 	SHA *string `json:"sha,omitempty"`
 
+	// Existing if set to true, then Console will not be synced with the data from this resource.
+	// It can be used to read already existing resources.
+	// +kubebuilder:validation:Optional
+	Existing *bool `json:"existing,omitempty"`
+
 	// CurrentVersion contains current Kubernetes version this cluster is using.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
@@ -370,4 +380,8 @@ func (cs *ClusterStatus) HasID() bool {
 
 func (cs *ClusterStatus) HasSHA() bool {
 	return cs.SHA != nil && len(*cs.SHA) > 0
+}
+
+func (cs *ClusterStatus) IsExisting() bool {
+	return cs.Existing != nil && *cs.Existing
 }

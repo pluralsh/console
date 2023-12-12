@@ -3,7 +3,6 @@ package cluster_controller
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -12,12 +11,11 @@ import (
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/utils"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -54,7 +52,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// Handle resource deletion both in Kubernetes cluster and in Console.
+	// Handle existing resource.
+	existing, err := r.isExistingResource(cluster)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	if existing {
+		return r.handleExistingResource(ctx, cluster)
+	}
+
+	// Handle resource deletion both in Kubernetes cluster and in Console API.
 	result, err := r.addOrRemoveFinalizer(ctx, cluster)
 	if result != nil {
 		return *result, err
@@ -66,39 +73,69 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return *result, err
 	}
 
-	var apiCluster *console.ClusterFragment
-	if cluster.Status.HasID() {
-		apiCluster, err = r.ConsoleClient.GetCluster(cluster.Status.ID)
-		if err != nil && !errors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
-	}
-
-	if apiCluster == nil {
-		apiCluster, err = r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-	}
-
+	// Calculate SHA to detect changes that should be applied in the Console API.
 	sha, err := utils.HashObject(cluster.UpdateAttributes())
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	if cluster.Status.HasID() && cluster.Status.HasSHA() && cluster.Status.SHA != &sha {
-		apiCluster, err = r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+
+	// Sync resource with Console API.
+	apiCluster, err := r.syncCluster(cluster, providerId, &sha)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
-	if err := r.updateStatus(ctx, cluster, func(r *v1alpha1.Cluster) {
-		r.Status.ID = &apiCluster.ID
-		r.Status.KasURL = apiCluster.KasURL
-		r.Status.CurrentVersion = apiCluster.CurrentVersion
-		r.Status.PingedAt = apiCluster.PingedAt
-		r.Status.SHA = &sha
-		// TODO: Conditions, i.e. readonly, exists.
+	// Update resource status.
+	if err = utils.TryUpdateStatus[*v1alpha1.Cluster](ctx, r.Client, cluster, func(c *v1alpha1.Cluster, original *v1alpha1.Cluster) (any, any) {
+		c.Status.ID = &apiCluster.ID
+		c.Status.KasURL = apiCluster.KasURL
+		c.Status.CurrentVersion = apiCluster.CurrentVersion
+		c.Status.PingedAt = apiCluster.PingedAt
+		c.Status.SHA = &sha
+		c.Status.Existing = lo.ToPtr(false)
+
+		return original.Status, c.Status
+	}); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return requeue, nil
+}
+
+func (r *Reconciler) isExistingResource(cluster *v1alpha1.Cluster) (bool, error) {
+	if cluster.Status.IsExisting() {
+		return true, nil
+	}
+
+	if !cluster.Spec.HasHandle() {
+		return false, nil
+	}
+
+	_, err := r.ConsoleClient.GetClusterByHandle(cluster.Spec.Handle)
+	if errors.IsNotFound(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+
+	return !cluster.Status.HasID(), nil
+}
+
+func (r *Reconciler) handleExistingResource(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
+	apiCluster, err := r.ConsoleClient.GetClusterByHandle(cluster.Spec.Handle)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err = utils.TryUpdateStatus[*v1alpha1.Cluster](ctx, r.Client, cluster, func(c *v1alpha1.Cluster, original *v1alpha1.Cluster) (any, any) {
+		c.Status.ID = &apiCluster.ID
+		c.Status.KasURL = apiCluster.KasURL
+		c.Status.CurrentVersion = apiCluster.CurrentVersion
+		c.Status.PingedAt = apiCluster.PingedAt
+		c.Status.Existing = lo.ToPtr(true)
+
+		return original.Status, c.Status
 	}); err != nil {
 		return ctrl.Result{}, err
 	}
@@ -154,7 +191,7 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 		}
 
 		provider := &v1alpha1.Provider{}
-		if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProviderRef.Name, Namespace: cluster.Spec.ProviderRef.Namespace}, provider); err != nil {
+		if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProviderRef.Name}, provider); err != nil {
 			return nil, &ctrl.Result{}, fmt.Errorf("could not get provider, got error: %+v", err)
 		}
 
@@ -174,20 +211,14 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 	return nil, nil, nil
 }
 
-func (r *Reconciler) updateStatus(ctx context.Context, cluster *v1alpha1.Cluster, patch func(cluster *v1alpha1.Cluster)) error {
-	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		if err := r.Client.Get(ctx, ctrlruntimeclient.ObjectKeyFromObject(cluster), cluster); err != nil {
-			return fmt.Errorf("could not fetch current cluster state, got error: %+v", err)
-		}
+func (r *Reconciler) syncCluster(cluster *v1alpha1.Cluster, providerId *string, sha *string) (*console.ClusterFragment, error) {
+	if !cluster.Status.HasID() {
+		return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
+	}
 
-		original := cluster.DeepCopy()
+	if cluster.Status.HasSHA() && cluster.Status.SHA != sha {
+		return r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
+	}
 
-		patch(cluster)
-
-		if reflect.DeepEqual(original.Status, cluster.Status) {
-			return nil
-		}
-
-		return r.Client.Status().Patch(ctx, cluster, ctrlruntimeclient.MergeFrom(original))
-	})
+	return r.ConsoleClient.GetCluster(cluster.Status.ID)
 }

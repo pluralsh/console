@@ -147,7 +147,7 @@ spec:
               handle:
                 description: Handle is a short, unique human-readable name used to
                   identify this cluster. Does not necessarily map to the cloud resource
-                  name.
+                  name. This has to be specified in order to adopt existing cluster.
                 example: myclusterhandle
                 type: string
               nodePools:
@@ -278,8 +278,6 @@ spec:
                   skipped only for BYOK.
                 example: 1.25.11
                 type: string
-            required:
-            - cloud
             type: object
           status:
             properties:
@@ -287,6 +285,11 @@ spec:
                 description: CurrentVersion contains current Kubernetes version this
                   cluster is using.
                 type: string
+              existing:
+                description: Existing if set to true, then Console will not be synced
+                  with the data from this resource. It can be used to read already
+                  existing resources.
+                type: boolean
               id:
                 description: ID from Console.
                 type: string
