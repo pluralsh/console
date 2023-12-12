@@ -2,7 +2,6 @@ package providerreconciler
 
 import (
 	"context"
-	"reflect"
 	"time"
 
 	console "github.com/pluralsh/console-client-go"
@@ -71,11 +70,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	// Sync back Provider to crd status
-	if err = utils.TryUpdateStatus[*v1alpha1.Provider](ctx, r.Client, &provider, func(p *v1alpha1.Provider, original *v1alpha1.Provider) bool {
+	if err = utils.TryUpdateStatus[*v1alpha1.Provider](ctx, r.Client, &provider, func(p *v1alpha1.Provider, original *v1alpha1.Provider) (any, any) {
 		p.Status.ID = &apiProvider.ID
 		p.Status.SHA = &sha
 
-		return reflect.DeepEqual(original.Status, p.Status)
+		return original.Status, p.Status
 	}); err != nil {
 		return ctrl.Result{}, err
 	}

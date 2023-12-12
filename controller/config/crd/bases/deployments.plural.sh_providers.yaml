@@ -123,6 +123,9 @@ spec:
           status:
             description: ProviderStatus ...
             properties:
+              existing:
+                description: Existing flag.
+                type: string
               id:
                 description: ID of the provider in the Console API.
                 type: string

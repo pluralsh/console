@@ -62,7 +62,7 @@ func TryAddControllerRef(ctx context.Context, client ctrlruntimeclient.Client, o
 }
 
 // Patcher TODO ...
-type Patcher[PatchObject ctrlruntimeclient.Object] func(object PatchObject, original PatchObject) bool
+type Patcher[PatchObject ctrlruntimeclient.Object] func(object PatchObject, original PatchObject) (any, any)
 
 // TryUpdateStatus TODO ...
 func TryUpdateStatus[PatchObject ctrlruntimeclient.Object](ctx context.Context, client ctrlruntimeclient.Client, object PatchObject, patch Patcher[PatchObject]) error {
@@ -73,7 +73,7 @@ func TryUpdateStatus[PatchObject ctrlruntimeclient.Object](ctx context.Context, 
 
 		original := object.DeepCopyObject().(PatchObject)
 
-		if patch(object, original) {
+		if reflect.DeepEqual(patch(object, original)) {
 			return nil
 		}
 
