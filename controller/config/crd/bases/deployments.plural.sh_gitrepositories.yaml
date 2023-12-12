@@ -66,6 +66,9 @@ spec:
             type: object
           status:
             properties:
+              existing:
+                default: false
+                type: boolean
               health:
                 description: Health status.
                 enum:
@@ -80,6 +83,8 @@ spec:
                 type: string
               sha:
                 type: string
+            required:
+            - existing
             type: object
         type: object
     served: true

@@ -48,6 +48,7 @@ type ConsoleClient interface {
 	IsProviderExists(ctx context.Context, id string) bool
 	IsProviderDeleting(ctx context.Context, id string) bool
 	UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error
+	DeleteService(serviceId string) error
 }
 
 func New(url, token string) ConsoleClient {

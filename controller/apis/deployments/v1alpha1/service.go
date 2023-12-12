@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	SchemeBuilder.Register(&DeploymentService{}, &DeploymentServiceList{})
+	SchemeBuilder.Register(&ServiceDeployment{}, &ServiceDeploymentList{})
 }
 
 type ComponentState string
@@ -105,7 +105,7 @@ type ServiceComponent struct {
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Console repo Id"
-type DeploymentService struct {
+type ServiceDeployment struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
@@ -116,8 +116,8 @@ type DeploymentService struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type DeploymentServiceList struct {
+type ServiceDeploymentList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []DeploymentService `json:"items"`
+	Items           []ServiceDeployment `json:"items"`
 }
