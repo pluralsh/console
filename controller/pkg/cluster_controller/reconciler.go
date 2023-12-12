@@ -53,15 +53,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	// Handle existing resource.
-	exists, err := r.isExistingResource(cluster)
+	existing, err := r.isExistingResource(cluster)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	if exists {
+	if existing {
 		return r.handleExistingResource(ctx, cluster)
 	}
 
-	// Handle resource deletion both in Kubernetes cluster and in Console.
+	// Handle resource deletion both in Kubernetes cluster and in Console API.
 	result, err := r.addOrRemoveFinalizer(ctx, cluster)
 	if result != nil {
 		return *result, err
@@ -73,32 +73,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return *result, err
 	}
 
-	// Calculate SHA to detect changes that should be applied in the console.
+	// Calculate SHA to detect changes that should be applied in the Console API.
 	sha, err := utils.HashObject(cluster.UpdateAttributes())
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	var apiCluster *console.ClusterFragment
-	if cluster.Status.HasID() {
-		apiCluster, err = r.ConsoleClient.GetCluster(cluster.Status.ID)
-		if err != nil && !errors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
-	}
-
-	if apiCluster == nil {
-		apiCluster, err = r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-	}
-
-	if cluster.Status.HasID() && cluster.Status.HasSHA() && cluster.Status.SHA != &sha {
-		apiCluster, err = r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
-		if err != nil {
-			return ctrl.Result{}, err
-		}
+	// Sync resource with Console API.
+	apiCluster, err := r.syncCluster(cluster, providerId, &sha)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
 	// Update resource status.
@@ -225,4 +209,16 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 	}
 
 	return nil, nil, nil
+}
+
+func (r *Reconciler) syncCluster(cluster *v1alpha1.Cluster, providerId *string, sha *string) (*console.ClusterFragment, error) {
+	if !cluster.Status.HasID() {
+		return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
+	}
+
+	if cluster.Status.HasSHA() && cluster.Status.SHA != sha {
+		return r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
+	}
+
+	return r.ConsoleClient.GetCluster(cluster.Status.ID)
 }
