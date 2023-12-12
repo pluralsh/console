@@ -43,7 +43,6 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-// TODO: Conditions, i.e. readonly, exists.
 func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	// Read resource from Kubernetes cluster.
 	cluster := &v1alpha1.Cluster{}
@@ -64,6 +63,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return *result, err
 	}
 
+	// Calculate SHA to detect changes that should be applied in the console.
+	sha, err := utils.HashObject(cluster.UpdateAttributes())
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	var apiCluster *console.ClusterFragment
 	if cluster.Status.HasID() {
 		apiCluster, err = r.ConsoleClient.GetCluster(cluster.Status.ID)
@@ -79,10 +84,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		}
 	}
 
-	sha, err := utils.HashObject(cluster.UpdateAttributes())
-	if err != nil {
-		return ctrl.Result{}, err
-	}
 	if cluster.Status.HasID() && cluster.Status.HasSHA() && cluster.Status.SHA != &sha {
 		apiCluster, err = r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
 		if err != nil {
@@ -97,6 +98,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		c.Status.CurrentVersion = apiCluster.CurrentVersion
 		c.Status.PingedAt = apiCluster.PingedAt
 		c.Status.SHA = &sha
+		// TODO: Existing.
 
 		return original.Status, c.Status
 	}); err != nil {

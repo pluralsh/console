@@ -287,6 +287,11 @@ spec:
                 description: CurrentVersion contains current Kubernetes version this
                   cluster is using.
                 type: string
+              existing:
+                description: Existing if set to true, then Console will not be synced
+                  with the data from this resource. It can be used to read already
+                  existing resources.
+                type: boolean
               id:
                 description: ID from Console.
                 type: string

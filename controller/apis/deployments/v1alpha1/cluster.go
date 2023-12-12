@@ -348,6 +348,11 @@ type ClusterStatus struct {
 	// +kubebuilder:validation:Type:=string
 	SHA *string `json:"sha,omitempty"`
 
+	// Existing if set to true, then Console will not be synced with the data from this resource.
+	// It can be used to read already existing resources.
+	// +kubebuilder:validation:Optional
+	Existing *bool `json:"existing,omitempty"`
+
 	// CurrentVersion contains current Kubernetes version this cluster is using.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
