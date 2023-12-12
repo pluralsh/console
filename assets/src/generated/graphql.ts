@@ -4549,6 +4549,7 @@ export type ServiceDeploymentsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   cluster?: InputMaybe<Scalars['String']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  status?: InputMaybe<ServiceDeploymentStatus>;
 }>;
 
 
@@ -7706,13 +7707,14 @@ export type DeleteClusterProviderMutationHookResult = ReturnType<typeof useDelet
 export type DeleteClusterProviderMutationResult = Apollo.MutationResult<DeleteClusterProviderMutation>;
 export type DeleteClusterProviderMutationOptions = Apollo.BaseMutationOptions<DeleteClusterProviderMutation, DeleteClusterProviderMutationVariables>;
 export const ServiceDeploymentsDocument = gql`
-    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID) {
+    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID, $status: ServiceDeploymentStatus) {
   serviceDeployments(
     first: $first
     after: $after
     q: $q
     cluster: $cluster
     clusterId: $clusterId
+    status: $status
   ) {
     pageInfo {
       ...PageInfo
@@ -7748,6 +7750,7 @@ ${ServiceStatusCountFragmentDoc}`;
  *      q: // value for 'q'
  *      cluster: // value for 'cluster'
  *      clusterId: // value for 'clusterId'
+ *      status: // value for 'status'
  *   },
  * });
  */

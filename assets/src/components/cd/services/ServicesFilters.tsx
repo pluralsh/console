@@ -12,14 +12,12 @@ import {
 import styled, { useTheme } from 'styled-components'
 import {
   Dispatch,
-  Key,
   MutableRefObject,
   SetStateAction,
   useEffect,
   useMemo,
   useState,
 } from 'react'
-import { type TableState } from '@tanstack/react-table'
 import { useParams } from 'react-router-dom'
 import isNil from 'lodash/isNil'
 
@@ -37,7 +35,7 @@ import {
   serviceStatusToSeverity,
 } from './ServiceStatusChip'
 
-type StatusTabKey = ServiceDeploymentStatus | 'ALL'
+export type StatusTabKey = ServiceDeploymentStatus | 'ALL'
 export const statusTabs = Object.entries({
   ALL: { label: 'All' },
   [ServiceDeploymentStatus.Healthy]: {
@@ -66,7 +64,8 @@ const ServiceFiltersSC = styled.div(({ theme }) => ({
 }))
 
 export function ServicesFilters({
-  setTableFilters,
+  statusFilter,
+  setStatusFilter,
   searchString,
   setSearchString,
   clusterId,
@@ -76,16 +75,14 @@ export function ServicesFilters({
 }: {
   searchString
   setSearchString: (string) => void
-  setTableFilters: (
-    filters: Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
-  ) => void
+  statusFilter: StatusTabKey
+  setStatusFilter: Dispatch<SetStateAction<StatusTabKey>>
   clusterId?: string
   setClusterId?: Dispatch<SetStateAction<string>>
   tabStateRef: MutableRefObject<any>
   statusCounts: Nullable<Nullable<ServiceStatusCountFragment>[]>
 }) {
   const theme = useTheme()
-  const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
   const clusterIdParam = useParams()[SERVICE_PARAM_CLUSTER_ID]
 
   clusterId = clusterId ?? clusterIdParam
@@ -121,27 +118,9 @@ export function ServicesFilters({
   )
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
 
-  const tableFilters: Partial<
-    Pick<TableState, 'globalFilter' | 'columnFilters'>
-  > = useMemo(
-    () => ({
-      columnFilters: [
-        ...(statusFilterKey !== 'ALL'
-          ? [
-              {
-                id: 'status',
-                value: statusFilterKey,
-              },
-            ]
-          : []),
-      ],
-    }),
-    [statusFilterKey]
-  )
-
   useEffect(() => {
-    setTableFilters(tableFilters)
-  }, [setTableFilters, tableFilters])
+    setStatusFilter(statusFilter)
+  }, [setStatusFilter, statusFilter])
 
   return (
     <ServiceFiltersSC>
@@ -213,9 +192,9 @@ export function ServicesFilters({
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',
-          selectedKey: statusFilterKey,
+          selectedKey: statusFilter,
           onSelectionChange: (key) => {
-            setStatusTabKey(key)
+            setStatusFilter(key as StatusTabKey)
           },
         }}
       >
