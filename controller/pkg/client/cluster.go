@@ -50,6 +50,15 @@ func (c *client) GetCluster(id *string) (*console.ClusterFragment, error) {
 	return response.Cluster, err
 }
 
+func (c *client) GetClusterByHandle(handle *string) (*console.ClusterFragment, error) {
+	response, err := c.consoleClient.GetClusterByHandle(c.ctx, handle)
+	if err == nil && (response == nil || response.Cluster == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *handle)
+	}
+
+	return response.Cluster, err
+}
+
 func (c *client) ListClusters() (*console.ListClusters, error) {
 	return c.consoleClient.ListClusters(c.ctx, nil, nil, nil)
 }

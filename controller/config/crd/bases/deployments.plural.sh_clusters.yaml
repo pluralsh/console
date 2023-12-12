@@ -147,7 +147,7 @@ spec:
               handle:
                 description: Handle is a short, unique human-readable name used to
                   identify this cluster. Does not necessarily map to the cloud resource
-                  name.
+                  name. This has to be specified in order to adopt existing cluster.
                 example: myclusterhandle
                 type: string
               nodePools:

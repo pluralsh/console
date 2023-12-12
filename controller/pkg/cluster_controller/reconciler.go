@@ -11,6 +11,7 @@ import (
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/utils"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -49,6 +50,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	if err := r.Get(ctx, req.NamespacedName, cluster); err != nil {
 		r.Log.Error(err, "unable to fetch cluster")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	// Handle existing resource.
+	exists, err := r.isExistingResource(cluster)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	if exists {
+		return r.handleExistingResource(ctx, cluster)
 	}
 
 	// Handle resource deletion both in Kubernetes cluster and in Console.
@@ -98,7 +108,48 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		c.Status.CurrentVersion = apiCluster.CurrentVersion
 		c.Status.PingedAt = apiCluster.PingedAt
 		c.Status.SHA = &sha
-		// TODO: Existing.
+		c.Status.Existing = lo.ToPtr(false)
+
+		return original.Status, c.Status
+	}); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return requeue, nil
+}
+
+func (r *Reconciler) isExistingResource(cluster *v1alpha1.Cluster) (bool, error) {
+	if cluster.Status.IsExisting() {
+		return true, nil
+	}
+
+	if !cluster.Spec.HasHandle() {
+		return false, nil
+	}
+
+	_, err := r.ConsoleClient.GetClusterByHandle(cluster.Spec.Handle)
+	if errors.IsNotFound(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+
+	return !cluster.Status.HasID(), nil
+}
+
+func (r *Reconciler) handleExistingResource(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
+	apiCluster, err := r.ConsoleClient.GetClusterByHandle(cluster.Spec.Handle)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err = utils.TryUpdateStatus[*v1alpha1.Cluster](ctx, r.Client, cluster, func(c *v1alpha1.Cluster, original *v1alpha1.Cluster) (any, any) {
+		c.Status.ID = &apiCluster.ID
+		c.Status.KasURL = apiCluster.KasURL
+		c.Status.CurrentVersion = apiCluster.CurrentVersion
+		c.Status.PingedAt = apiCluster.PingedAt
+		c.Status.Existing = lo.ToPtr(true)
 
 		return original.Status, c.Status
 	}); err != nil {
