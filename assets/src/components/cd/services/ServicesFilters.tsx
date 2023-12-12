@@ -23,7 +23,6 @@ import isNil from 'lodash/isNil'
 
 import {
   ServiceDeploymentStatus,
-  ServiceStatusCountFragment,
   useClustersTinyQuery,
 } from 'generated/graphql'
 import { SERVICE_PARAM_CLUSTER_ID } from 'routes/cdRoutesConsts'
@@ -80,7 +79,7 @@ export function ServicesFilters({
   clusterId?: string
   setClusterId?: Dispatch<SetStateAction<string>>
   tabStateRef: MutableRefObject<any>
-  statusCounts: Nullable<Nullable<ServiceStatusCountFragment>[]>
+  statusCounts: Record<StatusTabKey, number | undefined>
 }) {
   const theme = useTheme()
   const clusterIdParam = useParams()[SERVICE_PARAM_CLUSTER_ID]
@@ -100,22 +99,6 @@ export function ServicesFilters({
     [clusters, clusterId]
   )
 
-  const counts = useMemo<Record<string, number | undefined>>(
-    () => ({
-      ALL: statusCounts?.reduce(
-        (count, status) => count + (status?.count || 0),
-        0
-      ),
-      HEALTHY: statusCounts ? 0 : undefined,
-      SYNCED: statusCounts ? 0 : undefined,
-      STALE: statusCounts ? 0 : undefined,
-      FAILED: statusCounts ? 0 : undefined,
-      ...Object.fromEntries(
-        statusCounts?.map((status) => [status?.status, status?.count]) || []
-      ),
-    }),
-    [statusCounts]
-  )
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
 
   useEffect(() => {
@@ -205,13 +188,13 @@ export function ServicesFilters({
             className="statusTab"
           >
             {label}
-            {!isNil(counts[key]) && (
+            {!isNil(statusCounts?.[key]) && (
               <Chip
                 size="small"
                 severity={serviceStatusToSeverity(key as any)}
-                loading={isNil(counts[key])}
+                loading={isNil(statusCounts?.[key])}
               >
-                {counts[key]}
+                {statusCounts?.[key]}
               </Chip>
             )}
           </SubTab>

@@ -83,6 +83,25 @@ export function ServicesTable({
     key: 'serviceDeployments',
     interval: POLL_INTERVAL,
   })
+  const statusCounts = useMemo<Record<StatusTabKey, number | undefined>>(
+    () => ({
+      ALL: data?.serviceStatuses?.reduce(
+        (count, status) => count + (status?.count || 0),
+        0
+      ),
+      HEALTHY: data?.serviceStatuses ? 0 : undefined,
+      SYNCED: data?.serviceStatuses ? 0 : undefined,
+      STALE: data?.serviceStatuses ? 0 : undefined,
+      FAILED: data?.serviceStatuses ? 0 : undefined,
+      ...Object.fromEntries(
+        data?.serviceStatuses?.map((status) => [
+          status?.status,
+          status?.count,
+        ]) || []
+      ),
+    }),
+    [data?.serviceStatuses]
+  )
 
   useEffect(() => {
     setRefetch?.(() => refetch)
@@ -137,7 +156,7 @@ export function ServicesTable({
         clusterId={clusterId}
         setClusterId={clusterIdProp ? undefined : setClusterId}
         tabStateRef={tabStateRef}
-        statusCounts={data.serviceStatuses}
+        statusCounts={statusCounts}
       />
       <TabPanel
         stateRef={tabStateRef}
@@ -176,7 +195,7 @@ export function ServicesTable({
           </FullHeightTableWrap>
         ) : (
           <div css={{ height: '100%' }}>
-            {searchString || clusterId || statusFilter !== 'ALL' ? (
+            {statusCounts.ALL || 0 > 0 ? (
               <EmptyState message="No service deployments match your query." />
             ) : (
               <EmptyState message="Looks like you don't have any service deployments yet." />
