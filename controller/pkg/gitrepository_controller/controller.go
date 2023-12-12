@@ -45,6 +45,7 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	r.Log.WithName(fmt.Sprintf("%s-%s", req.NamespacedName, req.Name))
 	repo := &v1alpha1.GitRepository{}
 	if err := r.Get(ctx, req.NamespacedName, repo); err != nil {
 		if apierrors.IsNotFound(err) {
