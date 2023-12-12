@@ -43,10 +43,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
 		return ctrl.Result{}, err
 	}
-	cid := "ab39b5e6-690d-4620-83c4-d105ca40ecbb"
-	cluster.Status.ID = &cid
+
 	if cluster.Status.ID == nil {
-		r.Log.Info("Cluster is not ready")
+		r.Log.Info(fmt.Sprintf("Cluster %s/%s is not ready", cluster.Namespace, cluster.Name))
 		return ctrl.Result{
 			// update status
 			RequeueAfter: 30 * time.Second,
@@ -304,7 +303,7 @@ func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.S
 
 func (r *Reconciler) handleDelete(ctx context.Context, cluster *v1alpha1.Cluster, service *v1alpha1.ServiceDeployment) (ctrl.Result, error) {
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
-		r.Log.Info(fmt.Sprintf("try to delete service %s-%s", service.Namespace, service.Name))
+		r.Log.Info(fmt.Sprintf("try to delete service %s/%s", service.Namespace, service.Name))
 		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
 		if err != nil && !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
