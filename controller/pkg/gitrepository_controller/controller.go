@@ -77,12 +77,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, err
 		}
 		existingRepo = resp.CreateGitRepository
-	}
-	if err := kubernetes.TryAddFinalizer(ctx, r.Client, repo, RepoFinalizer); err != nil {
-		return ctrl.Result{}, err
+		if err := kubernetes.TryAddFinalizer(ctx, r.Client, repo, RepoFinalizer); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
-	if repo.Status.Sha != "" && repo.Status.Sha != sha {
+	if repo.Status.Sha != "" && repo.Status.Sha != sha && controllerutil.ContainsFinalizer(repo, RepoFinalizer) {
 		_, err := r.ConsoleClient.UpdateRepository(existingRepo.ID, console.GitAttributes{
 			URL:        repo.Spec.Url,
 			PrivateKey: cred.PrivateKey,

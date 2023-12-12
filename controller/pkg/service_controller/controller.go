@@ -36,7 +36,7 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	service := &v1alpha1.Service{}
+	service := &v1alpha1.DeploymentService{}
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -134,7 +134,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	if err := UpdateServiceStatus(ctx, r.Client, service, func(r *v1alpha1.Service) {
+	if err := UpdateServiceStatus(ctx, r.Client, service, func(r *v1alpha1.DeploymentService) {
 		r.Status.Id = &existingService.ID
 		r.Status.Sha = sha
 		if existingService.Errors != nil {
@@ -177,11 +177,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 // SetupWithManager sets up the controller with the Manager.
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.Service{}).
+		For(&v1alpha1.DeploymentService{}).
 		Complete(r)
 }
 
-func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.Service, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
+func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.DeploymentService, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
 	attr := &console.ServiceDeploymentAttributes{
 		Name:         service.Name,
 		Namespace:    service.Namespace,
@@ -256,7 +256,7 @@ func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1
 	return attr, nil
 }
 
-func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.Service) error {
+func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.DeploymentService) error {
 	if service.Spec.ConfigurationRef != nil {
 		configurationSecret, err := kubernetes.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
 		if err != nil {
@@ -297,16 +297,16 @@ func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.S
 	return nil
 }
 
-func (r *Reconciler) handleDelete(ctx context.Context, service *v1alpha1.Service) (ctrl.Result, error) {
+func (r *Reconciler) handleDelete(ctx context.Context, service *v1alpha1.DeploymentService) (ctrl.Result, error) {
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 
 	}
 	return ctrl.Result{}, nil
 }
 
-type RepoPatchFunc func(service *v1alpha1.Service)
+type RepoPatchFunc func(service *v1alpha1.DeploymentService)
 
-func UpdateServiceStatus(ctx context.Context, client ctrlruntimeclient.Client, service *v1alpha1.Service, patch RepoPatchFunc) error {
+func UpdateServiceStatus(ctx context.Context, client ctrlruntimeclient.Client, service *v1alpha1.DeploymentService, patch RepoPatchFunc) error {
 	key := ctrlruntimeclient.ObjectKeyFromObject(service)
 
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {

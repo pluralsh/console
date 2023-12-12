@@ -5,14 +5,14 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.11.3
   creationTimestamp: null
-  name: services.deployments.plural.sh
+  name: deploymentservices.deployments.plural.sh
 spec:
   group: deployments.plural.sh
   names:
-    kind: Service
-    listKind: ServiceList
-    plural: services
-    singular: service
+    kind: DeploymentService
+    listKind: DeploymentServiceList
+    plural: deploymentservices
+    singular: deploymentservice
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
