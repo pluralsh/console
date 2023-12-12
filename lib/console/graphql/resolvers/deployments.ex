@@ -56,6 +56,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> Cluster.for_user(user)
     |> Cluster.preloaded()
     |> maybe_search(Cluster, args)
+    |> cluster_filters(args)
     |> paginate(args)
   end
 
@@ -95,6 +96,28 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> ok()
   end
 
+  def cluster_statuses(args, %{context: %{current_user: user}}) do
+    Cluster.for_user(user)
+    |> cluster_filters(args)
+    |> maybe_search(Cluster, args)
+    |> Cluster.statistics()
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def list_tags(args, _) do
+    {order, field} = tag_args(args)
+    Tag.cluster()
+    |> tag_filters(args)
+    |> Tag.ordered(order)
+    |> Tag.select(field)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  defp tag_args(%{tag: _}), do: {[asc: :value], :value}
+  defp tag_args(_), do: {[asc: :name], :name}
+
   defp maybe_search(query, module, %{q: q}) when is_binary(q), do: module.search(query, q)
   defp maybe_search(query, _, _), do: query
 
@@ -103,6 +126,21 @@ defmodule Console.GraphQl.Resolvers.Deployments do
       {:cluster_id, id}, q -> Service.for_cluster(q, id)
       {:cluster, handle}, q -> Service.for_cluster_handle(q, handle)
       {:status, status}, q -> Service.for_status(q, status)
+      _, q -> q
+    end)
+  end
+
+  defp cluster_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:tag, %{name: n, value: v}}, q -> Cluster.with_tag(q, n, v)
+      {:healthy, h}, q -> Cluster.health(q, h)
+      _, q -> q
+    end)
+  end
+
+  defp tag_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:tag, t}, q -> Tag.for_name(q, t)
       _, q -> q
     end)
   end

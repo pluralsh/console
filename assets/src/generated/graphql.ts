@@ -709,6 +709,13 @@ export type ClusterStatus = {
   phase?: Maybe<Scalars['String']['output']>;
 };
 
+/** a cluster info data struct */
+export type ClusterStatusInfo = {
+  __typename?: 'ClusterStatusInfo';
+  count?: Maybe<Scalars['Int']['output']>;
+  healthy?: Maybe<Scalars['Boolean']['output']>;
+};
+
 export type ClusterUpdateAttributes = {
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
@@ -2922,6 +2929,8 @@ export type RootQueryType = {
   clusterProviders?: Maybe<ClusterProviderConnection>;
   /** the services deployed in the current cluster, to be polled by the deploy operator */
   clusterServices?: Maybe<Array<Maybe<ServiceDeployment>>>;
+  /** gets summary information for all healthy/unhealthy clusters in your fleet */
+  clusterStatuses?: Maybe<Array<Maybe<ClusterStatusInfo>>>;
   /** a relay connection of all clusters visible to the current user */
   clusters?: Maybe<ClusterConnection>;
   configMap?: Maybe<ConfigMap>;
@@ -2986,6 +2995,8 @@ export type RootQueryType = {
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
   statefulSet?: Maybe<StatefulSet>;
+  /** lists tags applied to any clusters in the fleet */
+  tags?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   temporaryToken?: Maybe<Scalars['String']['output']>;
   /** exchanges a kubeconfig token for user info */
   tokenExchange?: Maybe<User>;
@@ -3077,12 +3088,20 @@ export type RootQueryTypeClusterProvidersArgs = {
 };
 
 
+export type RootQueryTypeClusterStatusesArgs = {
+  q?: InputMaybe<Scalars['String']['input']>;
+  tag?: InputMaybe<TagInput>;
+};
+
+
 export type RootQueryTypeClustersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  health?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  tag?: InputMaybe<TagInput>;
 };
 
 
@@ -3407,6 +3426,11 @@ export type RootQueryTypeStatefulSetArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeTagsArgs = {
+  tag?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3955,6 +3979,11 @@ export type Tag = {
 };
 
 export type TagAttributes = {
+  name: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
+export type TagInput = {
   name: Scalars['String']['input'];
   value: Scalars['String']['input'];
 };
