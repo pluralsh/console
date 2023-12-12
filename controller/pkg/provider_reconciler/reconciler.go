@@ -42,6 +42,7 @@ var (
 // TODO: Add kubebuilder rbac annotation
 func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	log := log.FromContext(ctx)
+	log.Info("Reconciling")
 
 	// Read Provider CRD from the K8S API
 	var provider v1alpha1.Provider
@@ -56,6 +57,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return ctrl.Result{}, err
 	}
 	if exists {
+		log.Info("Provider already exists in the API, running in read-only mode")
 		return r.handleExistingProvider(ctx, provider)
 	}
 
@@ -67,7 +69,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 
 	err = r.tryAddControllerRef(ctx, provider)
 	if err != nil {
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	// Get Provider SHA that can be saved back in the status to check for changes
@@ -78,7 +80,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	// Sync Provider CRD with the Console API
-	apiProvider, err := r.updateOrGetProvider(ctx, provider, changed)
+	apiProvider, err := r.sync(ctx, provider, changed)
 	if err != nil {
 		log.Error(err, "unable to create or update provider")
 		return ctrl.Result{}, err
@@ -134,6 +136,8 @@ func (r *Reconciler) isAlreadyExists(ctx context.Context, provider v1alpha1.Prov
 }
 
 func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, provider v1alpha1.Provider) (*ctrl.Result, error) {
+	log := log.FromContext(ctx)
+
 	// If object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object. This is equivalent
 	// to registering our finalizer.
@@ -148,16 +152,22 @@ func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, provider v1alpha1
 	if !provider.ObjectMeta.DeletionTimestamp.IsZero() {
 		// If object is already being deleted from Console API requeue
 		if r.ConsoleClient.IsProviderDeleting(ctx, provider.Status.GetID()) {
+			log.Info("Waiting for provider to be deleted from Console API")
 			return &requeue, nil
 		}
 
 		// Remove Provider from Console API if it exists
 		if r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID()) {
+			log.Info("Deleting provider")
 			if err := r.ConsoleClient.DeleteProvider(ctx, provider.Status.GetID()); err != nil {
 				// if fail to delete the external dependency here, return with error
 				// so that it can be retried.
 				return &ctrl.Result{}, err
 			}
+
+			// If deletion process started requeue so that we can make sure provider
+			// has been deleted from Console API before removing the finalizer.
+			return &requeue, nil
 		}
 
 		// If our finalizer is present, remove it
@@ -175,7 +185,8 @@ func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, provider v1alpha1
 	return nil, nil
 }
 
-func (r *Reconciler) updateOrGetProvider(ctx context.Context, provider v1alpha1.Provider, changed bool) (*console.ClusterProviderFragment, error) {
+func (r *Reconciler) sync(ctx context.Context, provider v1alpha1.Provider, changed bool) (*console.ClusterProviderFragment, error) {
+	log := log.FromContext(ctx)
 	exists := r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID())
 
 	// Update only if Provider has changed
@@ -185,6 +196,7 @@ func (r *Reconciler) updateOrGetProvider(ctx context.Context, provider v1alpha1.
 			return nil, err
 		}
 
+		log.Info("Updating provider")
 		return r.ConsoleClient.UpdateProvider(ctx, provider.Status.GetID(), attributes)
 	}
 
@@ -199,15 +211,8 @@ func (r *Reconciler) updateOrGetProvider(ctx context.Context, provider v1alpha1.
 		return nil, err
 	}
 
+	log.Info("Creating provider")
 	return r.ConsoleClient.CreateProvider(ctx, attributes)
-}
-
-// SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
-func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
-	mgr.GetLogger().Info("starting reconciler", "reconciler", "provider_reconciler")
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.Provider{}).
-		Complete(r)
 }
 
 func (r *Reconciler) tryAddControllerRef(ctx context.Context, provider v1alpha1.Provider) error {
@@ -218,4 +223,12 @@ func (r *Reconciler) tryAddControllerRef(ctx context.Context, provider v1alpha1.
 	}
 
 	return utils.TryAddControllerRef(ctx, r.Client, &provider, secret, r.Scheme)
+}
+
+// SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
+func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
+	mgr.GetLogger().Info("Starting reconciler", "reconciler", "provider_reconciler")
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.Provider{}).
+		Complete(r)
 }

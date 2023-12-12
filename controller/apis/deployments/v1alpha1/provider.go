@@ -109,7 +109,7 @@ type ProviderSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:Enum:=gcp;aws;azure
-	// +kubebuilder:validation:Validation:rule="self == oldSelf",message="Cloud is immutable"
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cloud is immutable"
 	Cloud CloudProvider `json:"cloud"`
 	// CloudSettings reference cloud provider credentials secrets used for provisioning the Cluster.
 	// Not required when Cloud is set to CloudProvider(BYOK).
@@ -120,12 +120,12 @@ type ProviderSpec struct {
 	// Name is a human-readable name of the Provider.
 	// +kubebuilder:example:=gcp-provider
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Validation:rule="self == oldSelf",message="Name is immutable"
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Name is immutable"
 	Name string `json:"name"`
 	// Namespace is the namespace ClusterAPI resources are deployed into.
 	// +kubebuilder:example:=capi-gcp
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Validation:rule="self == oldSelf",message="Namespace is immutable"
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Namespace is immutable"
 	Namespace string `json:"namespace,omitempty"`
 }
 
