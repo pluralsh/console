@@ -83,7 +83,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	// Sync resource with Console API.
-	apiCluster, err := r.syncCluster(cluster, providerId, &sha)
+	apiCluster, err := r.syncCluster(ctx, cluster, providerId, &sha)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -207,7 +207,7 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 
 		err = utils.TryAddOwnerRef(ctx, r.Client, provider, cluster, r.Scheme)
 		if err != nil {
-			return nil, &ctrl.Result{}, err
+			return nil, &ctrl.Result{}, fmt.Errorf("could not set cluster owner reference, got error: %+v", err)
 		}
 
 		return provider.Status.ID, nil, nil
@@ -216,14 +216,20 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 	return nil, nil, nil
 }
 
-func (r *Reconciler) syncCluster(cluster *v1alpha1.Cluster, providerId *string, sha *string) (*console.ClusterFragment, error) {
-	if !cluster.Status.HasID() {
-		return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
-	}
+func (r *Reconciler) syncCluster(ctx context.Context, cluster *v1alpha1.Cluster, providerId *string, sha *string) (*console.ClusterFragment, error) {
+	exists := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
+	logger := log.FromContext(ctx)
 
-	if cluster.Status.HasSHA() && cluster.Status.SHA != sha {
+	if cluster.Status.IsSHAChanged(sha) && exists {
+		logger.Info("detected changes, updating cluster")
 		return r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
 	}
 
-	return r.ConsoleClient.GetCluster(cluster.Status.ID)
+	if exists {
+		logger.Info("no changes detected, updating cluster")
+		return r.ConsoleClient.GetCluster(cluster.Status.ID)
+	}
+
+	logger.Info("cluster does not exist, creating new one")
+	return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
 }
