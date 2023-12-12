@@ -3,7 +3,6 @@ package gitrepositorycontroller
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -17,10 +16,8 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
@@ -48,7 +45,6 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	existing := true
 	repo := &v1alpha1.GitRepository{}
 	if err := r.Get(ctx, req.NamespacedName, repo); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -73,16 +69,26 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	if existingRepo == nil && repo.Status.Existing == true {
-		msg := "existing Git repository was deleted from console"
+		msg := "existing Git repository was deleted from the console"
 		r.Log.Info(msg)
-		if err := UpdateReposStatus(ctx, r.Client, repo, func(r *v1alpha1.GitRepository) {
+		if err = utils.TryUpdateStatus[*v1alpha1.GitRepository](ctx, r.Client, repo, func(r *v1alpha1.GitRepository, original *v1alpha1.GitRepository) (any, any) {
 			r.Status.Message = &msg
-			r.Status.Id = nil
-			r.Status.Existing = existing
+			r.Status.Health = v1alpha1.GitHealthFailed
+			return original.Status, r.Status
 		}); err != nil {
 			return ctrl.Result{}, err
 		}
-		return ctrl.Result{}, nil
+		return ctrl.Result{
+			RequeueAfter: 30 * time.Second,
+		}, nil
+	}
+	if repo.Status.Id == nil {
+		if err = utils.TryUpdateStatus[*v1alpha1.GitRepository](ctx, r.Client, repo, func(r *v1alpha1.GitRepository, original *v1alpha1.GitRepository) (any, any) {
+			r.Status.Existing = true
+			return original.Status, r.Status
+		}); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 	if existingRepo == nil {
 		if err := kubernetes.TryAddFinalizer(ctx, r.Client, repo, RepoFinalizer); err != nil {
@@ -92,11 +98,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
+		if err = utils.TryUpdateStatus[*v1alpha1.GitRepository](ctx, r.Client, repo, func(r *v1alpha1.GitRepository, original *v1alpha1.GitRepository) (any, any) {
+			r.Status.Existing = false
+			return original.Status, r.Status
+		}); err != nil {
+			return ctrl.Result{}, err
+		}
 		existingRepo = resp.CreateGitRepository
-		existing = false
+
 	}
 
-	if repo.Status.Sha != "" && repo.Status.Sha != sha && !existing {
+	if repo.Status.Sha != "" && repo.Status.Sha != sha && !repo.Status.Existing {
 		_, err := r.ConsoleClient.UpdateRepository(existingRepo.ID, console.GitAttributes{
 			URL:        repo.Spec.Url,
 			PrivateKey: cred.PrivateKey,
@@ -109,15 +121,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 	}
 
-	if err := UpdateReposStatus(ctx, r.Client, repo, func(r *v1alpha1.GitRepository) {
+	if err = utils.TryUpdateStatus[*v1alpha1.GitRepository](ctx, r.Client, repo, func(r *v1alpha1.GitRepository, original *v1alpha1.GitRepository) (any, any) {
 		r.Status.Message = existingRepo.Error
 		r.Status.Id = &existingRepo.ID
 		if existingRepo.Health != nil {
 			r.Status.Health = v1alpha1.GitHealth(*existingRepo.Health)
 		}
 		r.Status.Sha = sha
-		r.Status.Existing = existing
-
+		return original.Status, r.Status
 	}); err != nil {
 		return ctrl.Result{}, err
 	}
@@ -204,29 +215,4 @@ func (r *Reconciler) getRepository(url string) (*console.GitRepositoryFragment, 
 	}
 
 	return existingRepos.GitRepository, nil
-}
-
-type RepoPatchFunc func(repo *v1alpha1.GitRepository)
-
-func UpdateReposStatus(ctx context.Context, client ctrlruntimeclient.Client, repository *v1alpha1.GitRepository, patch RepoPatchFunc) error {
-	key := ctrlruntimeclient.ObjectKeyFromObject(repository)
-
-	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		// fetch the current state of the cluster
-		if err := client.Get(ctx, key, repository); err != nil {
-			return err
-		}
-
-		// modify it
-		original := repository.DeepCopy()
-		patch(repository)
-
-		// save some work
-		if reflect.DeepEqual(original.Status, repository.Status) {
-			return nil
-		}
-
-		// update the status
-		return client.Status().Patch(ctx, repository, ctrlruntimeclient.MergeFrom(original))
-	})
 }
