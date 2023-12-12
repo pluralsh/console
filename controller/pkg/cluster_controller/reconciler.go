@@ -191,7 +191,7 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 		}
 
 		provider := &v1alpha1.Provider{}
-		if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProviderRef.Name, Namespace: cluster.Spec.ProviderRef.Namespace}, provider); err != nil {
+		if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProviderRef.Name}, provider); err != nil {
 			return nil, &ctrl.Result{}, fmt.Errorf("could not get provider, got error: %+v", err)
 		}
 
