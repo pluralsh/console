@@ -57,6 +57,9 @@ spec:
                 - azure
                 example: aws
                 type: string
+                x-kubernetes-validations:
+                - message: Cloud is immutable
+                  rule: self == oldSelf
               cloudSettings:
                 description: CloudSettings reference cloud provider credentials secrets
                   used for provisioning the Cluster. Not required when Cloud is set
@@ -110,11 +113,17 @@ spec:
                 description: Name is a human-readable name of the Provider.
                 example: gcp-provider
                 type: string
+                x-kubernetes-validations:
+                - message: Name is immutable
+                  rule: self == oldSelf
               namespace:
                 description: Namespace is the namespace ClusterAPI resources are deployed
                   into.
                 example: capi-gcp
                 type: string
+                x-kubernetes-validations:
+                - message: Namespace is immutable
+                  rule: self == oldSelf
             required:
             - cloud
             type: object
