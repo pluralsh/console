@@ -45,12 +45,14 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			Client:        mgr.GetClient(),
 			Log:           mgr.GetLogger(),
 			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
 		}, nil
 	case ServiceDeploymentReconciler:
 		return &servicecontroller.Reconciler{
 			Client:        mgr.GetClient(),
 			Log:           mgr.GetLogger(),
 			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
 		}, nil
 	case ClusterReconciler:
 		return &clustercontroller.Reconciler{
