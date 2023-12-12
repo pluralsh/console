@@ -214,12 +214,33 @@ fragment ClusterTiny on Cluster {
 }
 
 query ClustersTiny {
-  clusters(first: 100) {
+  clusters(first: 200) {
     edges {
       node {
         ...ClusterTiny
       }
     }
+  }
+}
+
+query ClusterSelector(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $currentClusterId: ID
+) {
+  clusters(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterTiny
+      }
+    }
+  }
+  cluster(id: $currentClusterId) {
+    ...ClusterTiny
   }
 }
 

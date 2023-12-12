@@ -1,33 +1,23 @@
 import {
   Chip,
-  ClusterIcon,
   Input,
-  ListBoxFooter,
-  ListBoxItem,
   SearchIcon,
-  Select,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import {
   Dispatch,
   MutableRefObject,
   SetStateAction,
+  useCallback,
   useEffect,
-  useMemo,
-  useState,
 } from 'react'
-import { useParams } from 'react-router-dom'
 import isNil from 'lodash/isNil'
 
-import {
-  ServiceDeploymentStatus,
-  useClustersTinyQuery,
-} from 'generated/graphql'
-import { SERVICE_PARAM_CLUSTER_ID } from 'routes/cdRoutesConsts'
-import { mapExistingNodes } from 'utils/graphql'
-import ProviderIcon from 'components/utils/Provider'
+import { ServiceDeploymentStatus } from 'generated/graphql'
+
+import ClusterSelector from '../utils/ClusterSelector'
 
 import {
   serviceStatusToLabel,
@@ -81,85 +71,25 @@ export function ServicesFilters({
   tabStateRef: MutableRefObject<any>
   statusCounts: Record<StatusTabKey, number | undefined>
 }) {
-  const theme = useTheme()
-  const clusterIdParam = useParams()[SERVICE_PARAM_CLUSTER_ID]
-
-  clusterId = clusterId ?? clusterIdParam
-
-  const { data: clustersData } = useClustersTinyQuery({
-    skip: !setClusterId,
-  })
-
-  const clusters = useMemo(
-    () => mapExistingNodes(clustersData?.clusters),
-    [clustersData?.clusters]
-  )
-  const selectedCluster = useMemo(
-    () => clusters && clusters.find((cluster) => cluster.id === clusterId),
-    [clusters, clusterId]
-  )
-
-  const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
-
   useEffect(() => {
     setStatusFilter(statusFilter)
   }, [setStatusFilter, statusFilter])
+  const onClusterChange = useCallback(
+    (cluster) => {
+      setClusterId?.(cluster?.id || '')
+    },
+    [setClusterId]
+  )
 
   return (
     <ServiceFiltersSC>
       {setClusterId && (
         <div css={{ width: 360 }}>
-          <Select
-            isDisabled={!clustersData}
-            isOpen={clusterSelectIsOpen}
-            onOpenChange={setClusterSelectIsOpen}
-            label={!clustersData ? 'Loading clusters..' : 'Filter by cluster'}
-            leftContent={
-              selectedCluster && (
-                <ProviderIcon
-                  provider={selectedCluster.provider?.cloud || ''}
-                  width={16}
-                />
-              )
-            }
-            titleContent={
-              <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-                <ClusterIcon />
-                Cluster
-              </div>
-            }
-            {...(clusterId
-              ? {
-                  dropdownFooterFixed: (
-                    <ListBoxFooter
-                      onClick={() => {
-                        setClusterSelectIsOpen(false)
-                        setClusterId?.('')
-                      }}
-                      leftContent={<ClusterIcon />}
-                    >
-                      Show all clusters
-                    </ListBoxFooter>
-                  ),
-                }
-              : {})}
-            selectedKey={clusterId || ''}
-            onSelectionChange={(key) => setClusterId?.(key as string)}
-          >
-            {(clusters || []).map((cluster) => (
-              <ListBoxItem
-                key={cluster.id}
-                label={cluster.name}
-                textValue={cluster.name}
-                leftContent={
-                  <ProviderIcon
-                    provider={cluster.provider?.cloud || ''}
-                    width={16}
-                  />
-                }
-              />
-            ))}
-          </Select>
+          <ClusterSelector
+            clusterId={clusterId}
+            allowDeselect
+            onClusterChange={onClusterChange}
+          />
         </div>
       )}
       <Input
