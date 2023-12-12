@@ -278,8 +278,6 @@ spec:
                   skipped only for BYOK.
                 example: 1.25.11
                 type: string
-            required:
-            - cloud
             type: object
           status:
             properties:

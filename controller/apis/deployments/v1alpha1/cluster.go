@@ -96,7 +96,7 @@ type ClusterSpec struct {
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 
 	// Cloud provider to use for this cluster.
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:Enum=aws;azure;gcp;byok
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cloud is immutable"
