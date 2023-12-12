@@ -51,16 +51,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	// Read resource from Kubernetes cluster.
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, req.NamespacedName, cluster); err != nil {
-		logger.Error(err, "unable to fetch cluster")
+		logger.Error(err, "Unable to fetch cluster")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	// Handle existing resource.
 	existing, err := r.isExistingResource(cluster)
 	if err != nil {
-		return ctrl.Result{}, err
+		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
 	if existing {
+		logger.Info("Cluster already exists in the API, running in read-only mode")
 		return r.handleExistingResource(ctx, cluster)
 	}
 
@@ -77,6 +78,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
+	// TODO: Ensure that element order stays the same to avoid fake diffs.
 	sha, err := utils.HashObject(cluster.UpdateAttributes())
 	if err != nil {
 		return ctrl.Result{}, err
@@ -201,7 +203,7 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 		}
 
 		if !provider.Status.HasID() {
-			logger.Info("provider does not have ID set yet")
+			logger.Info("Provider does not have ID set yet")
 			return nil, &requeue, nil
 		}
 
@@ -221,15 +223,15 @@ func (r *Reconciler) syncCluster(ctx context.Context, cluster *v1alpha1.Cluster,
 	logger := log.FromContext(ctx)
 
 	if cluster.Status.IsSHAChanged(sha) && exists {
-		logger.Info("detected changes, updating cluster")
+		logger.Info("Detected changes, updating cluster")
 		return r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
 	}
 
 	if exists {
-		logger.Info("no changes detected, updating cluster")
+		logger.Info("No changes detected, updating cluster")
 		return r.ConsoleClient.GetCluster(cluster.Status.ID)
 	}
 
-	logger.Info("cluster does not exist, creating new one")
+	logger.Info("Cluster does not exist, creating new one")
 	return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
 }
