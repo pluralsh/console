@@ -17,6 +17,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -45,10 +46,12 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+	logger := log.FromContext(ctx)
+
 	// Read resource from Kubernetes cluster.
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, req.NamespacedName, cluster); err != nil {
-		r.Log.Error(err, "unable to fetch cluster")
+		logger.Error(err, "unable to fetch cluster")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -185,6 +188,8 @@ func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1
 }
 
 func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v1alpha1.Cluster) (providerId *string, result *ctrl.Result, err error) {
+	logger := log.FromContext(ctx)
+
 	if cluster.Spec.IsProviderRefRequired() {
 		if !cluster.Spec.HasProviderRef() {
 			return nil, &ctrl.Result{}, fmt.Errorf("could not get provider, reference is not set but required")
@@ -196,7 +201,7 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 		}
 
 		if !provider.Status.HasID() {
-			r.Log.Info("provider does not have ID set yet")
+			logger.Info("provider does not have ID set yet")
 			return nil, &requeue, nil
 		}
 
