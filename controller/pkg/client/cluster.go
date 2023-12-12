@@ -37,6 +37,9 @@ func (c *client) UpdateCluster(id string, attrs console.ClusterUpdateAttributes)
 	if err == nil && (response == nil || response.UpdateCluster == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
+	if response == nil {
+		return nil, err
+	}
 
 	return response.UpdateCluster, err
 }
@@ -46,6 +49,9 @@ func (c *client) GetCluster(id *string) (*console.ClusterFragment, error) {
 	if err == nil && (response == nil || response.Cluster == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, *id)
 	}
+	if response == nil {
+		return nil, err
+	}
 
 	return response.Cluster, err
 }
@@ -54,6 +60,9 @@ func (c *client) GetClusterByHandle(handle *string) (*console.ClusterFragment, e
 	response, err := c.consoleClient.GetClusterByHandle(c.ctx, handle)
 	if err == nil && (response == nil || response.Cluster == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, *handle)
+	}
+	if response == nil {
+		return nil, err
 	}
 
 	return response.Cluster, err
@@ -66,6 +75,9 @@ func (c *client) ListClusters() (*console.ListClusters, error) {
 func (c *client) DeleteCluster(id string) (*console.ClusterFragment, error) {
 	response, err := c.consoleClient.DeleteCluster(c.ctx, id)
 	if err != nil {
+		return nil, err
+	}
+	if response == nil {
 		return nil, err
 	}
 
