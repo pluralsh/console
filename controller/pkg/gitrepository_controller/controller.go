@@ -19,14 +19,20 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const (
 	RepoFinalizer = "deployments.plural.sh/gitrepo-protection"
+	RequeueAfter  = 30 * time.Second
 	privateKey    = "privateKey"
 	passphrase    = "passphrase"
 	username      = "username"
 	password      = "password"
+)
+
+var (
+	requeue = ctrl.Result{RequeueAfter: RequeueAfter}
 )
 
 type GitRepoCred struct {
@@ -45,7 +51,7 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	r.Log.WithName(fmt.Sprintf("%s-%s", req.NamespacedName, req.Name))
+	log := log.FromContext(ctx)
 	repo := &v1alpha1.GitRepository{}
 	if err := r.Get(ctx, req.NamespacedName, repo); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -71,7 +77,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 	if existingRepo == nil && repo.Status.Existing == true {
 		msg := "existing Git repository was deleted from the console"
-		r.Log.Info(msg)
+		log.Info(msg)
 		if err = utils.TryUpdateStatus[*v1alpha1.GitRepository](ctx, r.Client, repo, func(r *v1alpha1.GitRepository, original *v1alpha1.GitRepository) (any, any) {
 			r.Status.Message = &msg
 			r.Status.Health = v1alpha1.GitHealthFailed
@@ -79,9 +85,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}); err != nil {
 			return ctrl.Result{}, err
 		}
-		return ctrl.Result{
-			RequeueAfter: 30 * time.Second,
-		}, nil
+		return requeue, nil
 	}
 	if repo.Status.Id == nil {
 		if err = utils.TryUpdateStatus[*v1alpha1.GitRepository](ctx, r.Client, repo, func(r *v1alpha1.GitRepository, original *v1alpha1.GitRepository) (any, any) {
@@ -99,6 +103,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
+		log.Info("repository created")
 		if err = utils.TryUpdateStatus[*v1alpha1.GitRepository](ctx, r.Client, repo, func(r *v1alpha1.GitRepository, original *v1alpha1.GitRepository) (any, any) {
 			r.Status.Existing = false
 			return original.Status, r.Status
@@ -120,6 +125,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
+		log.Info("repository updated")
 	}
 
 	if err = utils.TryUpdateStatus[*v1alpha1.GitRepository](ctx, r.Client, repo, func(r *v1alpha1.GitRepository, original *v1alpha1.GitRepository) (any, any) {
@@ -134,10 +140,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{
-		// update status
-		RequeueAfter: 30 * time.Second,
-	}, nil
+	return requeue, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -148,9 +151,9 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *Reconciler) handleDelete(ctx context.Context, repo *v1alpha1.GitRepository) (ctrl.Result, error) {
-
+	log := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(repo, RepoFinalizer) {
-		r.Log.Info("delete git repository")
+		log.Info("delete git repository")
 		if repo.Status.Id == nil {
 			return ctrl.Result{}, fmt.Errorf("the repoository ID can not be nil")
 		}
