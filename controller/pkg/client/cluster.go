@@ -3,6 +3,7 @@ package client
 import (
 	console "github.com/pluralsh/console-client-go"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func (c *client) CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error) {
@@ -33,20 +34,20 @@ func (c *client) CreateCluster(attrs console.ClusterAttributes) (*console.Cluste
 
 func (c *client) UpdateCluster(id string, attrs console.ClusterUpdateAttributes) (*console.ClusterFragment, error) {
 	response, err := c.consoleClient.UpdateCluster(c.ctx, id, attrs)
-	if err != nil {
-		return nil, err
+	if err == nil && (response == nil || response.UpdateCluster == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
 
-	return response.UpdateCluster, nil
+	return response.UpdateCluster, err
 }
 
 func (c *client) GetCluster(id *string) (*console.ClusterFragment, error) {
 	response, err := c.consoleClient.GetCluster(c.ctx, id)
-	if err != nil {
-		return nil, err
+	if err == nil && (response == nil || response.Cluster == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *id)
 	}
 
-	return response.Cluster, nil
+	return response.Cluster, err
 }
 
 func (c *client) ListClusters() (*console.ListClusters, error) {
@@ -62,7 +63,7 @@ func (c *client) DeleteCluster(id string) (*console.ClusterFragment, error) {
 	return response.DeleteCluster, nil
 }
 
-func (c *client) ClusterExists(id *string) bool {
+func (c *client) IsClusterExisting(id *string) bool {
 	_, err := c.GetCluster(id)
 	if errors.IsNotFound(err) {
 		return false
@@ -70,4 +71,13 @@ func (c *client) ClusterExists(id *string) bool {
 
 	// We are assuming that if there is an error, and it is not ErrorNotFound then provider does not exist.
 	return err == nil
+}
+
+func (c *client) IsClusterDeleting(id *string) bool {
+	cluster, err := c.GetCluster(id)
+	if err != nil {
+		return false
+	}
+
+	return cluster != nil && cluster.DeletedAt != nil
 }

@@ -27,6 +27,10 @@ const (
 	FinalizerName = "deployments.plural.sh/cluster-protection"
 )
 
+var (
+	requeue = ctrl.Result{RequeueAfter: RequeueAfter}
+)
+
 // Reconciler reconciles a Cluster object.
 type Reconciler struct {
 	client.Client
@@ -43,42 +47,29 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
-	// Read cluster resource
+	// Read resource from Kubernetes cluster.
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, req.NamespacedName, cluster); err != nil {
 		r.Log.Error(err, "unable to fetch cluster")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// Handle cluster resource deletion
-	ret, err := r.addOrRemoveFinalizer(ctx, cluster)
-	if ret || err != nil {
-		return ctrl.Result{}, err
+	// Handle resource deletion both in Kubernetes cluster and in Console.
+	result, err := r.addOrRemoveFinalizer(ctx, cluster)
+	if result != nil {
+		return *result, err
+	}
+
+	// Get Provider ID from the reference if it is set and ensure that owner reference is set properly.
+	providerId, result, err := r.getProviderIdAndSetOwnerRef(ctx, cluster)
+	if result != nil {
+		return *result, err
 	}
 
 	var apiCluster *console.ClusterFragment
 	if cluster.Status.ID != nil {
 		apiCluster, err = r.ConsoleClient.GetCluster(cluster.Status.ID)
 		if err != nil && !errors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
-	}
-
-	var providerId *string
-	if cluster.Spec.Cloud != "byok" {
-		provider, err := r.getProvider(ctx, cluster)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
-		providerId = provider.Status.ID
-		if providerId == nil {
-			r.Log.Info("provider does not have ID set yet")
-			return ctrl.Result{RequeueAfter: RequeueAfter}, nil
-		}
-
-		err = utils.TryAddOwnerRef(ctx, r.Client, provider, cluster, r.Scheme)
-		if err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -107,48 +98,81 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		r.Status.CurrentVersion = apiCluster.CurrentVersion
 		r.Status.PingedAt = apiCluster.PingedAt
 		r.Status.SHA = &sha
+		// TODO: Conditions, i.e. readonly, exists.
 	}); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{RequeueAfter: RequeueAfter}, nil
+	return requeue, nil
 }
 
-func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1.Cluster) (bool, error) {
+func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1.Cluster) (*ctrl.Result, error) {
 	// If object is not being deleted, so if it does not have our finalizer, then lets add the finalizer
 	// and update the object. This is equivalent to registering our finalizer.
 	if cluster.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(cluster, FinalizerName) {
 		controllerutil.AddFinalizer(cluster, FinalizerName)
 		if err := r.Update(ctx, cluster); err != nil {
-			return true, err
+			return &ctrl.Result{}, err
 		}
 	}
 
-	// If object is being deleted
+	// If object is being deleted.
 	if !cluster.ObjectMeta.DeletionTimestamp.IsZero() {
-		// TODO: Add DeletedAt to queries, check if cluster is deleting and return if it is.
+		// If object is already being deleted from Console API requeue.
+		if r.ConsoleClient.IsClusterDeleting(cluster.Status.ID) {
+			return &requeue, nil
+		}
 
-		// Remove cluster from Console API if it exists
-		if cluster.Status.ID != nil && r.ConsoleClient.ClusterExists(cluster.Status.ID) {
+		// Remove Cluster from Console API if it exists.
+		if r.ConsoleClient.IsClusterExisting(cluster.Status.ID) {
 			if _, err := r.ConsoleClient.DeleteCluster(*cluster.Status.ID); err != nil {
-				// If fail to delete the external dependency here, return with error so that it can be retried.
-				return true, err
+				// if fail to delete the external dependency here, return with error
+				// so that it can be retried.
+				return &ctrl.Result{}, err
 			}
 		}
 
-		// If our finalizer is present, remove it
+		// If our finalizer is present, remove it.
 		if controllerutil.ContainsFinalizer(cluster, FinalizerName) {
 			controllerutil.RemoveFinalizer(cluster, FinalizerName)
 			if err := r.Update(ctx, cluster); err != nil {
-				return true, err
+				return &ctrl.Result{}, err
 			}
 		}
 
-		// Stop reconciliation as the item is being deleted
-		return true, nil
+		// Stop reconciliation as the item is being deleted.
+		return &ctrl.Result{}, nil
 	}
 
-	return false, nil
+	return nil, nil
+}
+
+func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v1alpha1.Cluster) (providerId *string, result *ctrl.Result, err error) {
+	if cluster.Spec.IsProviderRefRequired() {
+		if !cluster.Spec.HasProviderRef() {
+			return nil, &ctrl.Result{}, fmt.Errorf("could not get provider, reference is not set but required")
+		}
+
+		provider := &v1alpha1.Provider{}
+		if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProviderRef.Name, Namespace: cluster.Spec.ProviderRef.Namespace}, provider); err != nil {
+			return nil, &ctrl.Result{}, fmt.Errorf("could not get provider, got error: %+v", err)
+		}
+
+		providerId = provider.Status.ID
+		if providerId == nil {
+			r.Log.Info("provider does not have ID set yet")
+			return nil, &requeue, nil
+		}
+
+		err = utils.TryAddOwnerRef(ctx, r.Client, provider, cluster, r.Scheme)
+		if err != nil {
+			return nil, &ctrl.Result{}, err
+		}
+
+		return providerId, nil, nil
+	}
+
+	return nil, nil, nil
 }
 
 func (r *Reconciler) updateStatus(ctx context.Context, cluster *v1alpha1.Cluster, patch func(cluster *v1alpha1.Cluster)) error {
@@ -167,21 +191,4 @@ func (r *Reconciler) updateStatus(ctx context.Context, cluster *v1alpha1.Cluster
 
 		return r.Client.Status().Patch(ctx, cluster, ctrlruntimeclient.MergeFrom(original))
 	})
-}
-
-func (r *Reconciler) getProvider(ctx context.Context, cluster *v1alpha1.Cluster) (*v1alpha1.Provider, error) {
-	if cluster.Spec.ProviderRef == nil {
-		return nil, fmt.Errorf("could not get provider, reference is not set")
-	}
-
-	provider := &v1alpha1.Provider{}
-	err := r.Get(ctx, types.NamespacedName{
-		Name:      cluster.Spec.ProviderRef.Name,
-		Namespace: cluster.Spec.ProviderRef.Namespace,
-	}, provider)
-	if err != nil {
-		return nil, fmt.Errorf("could not get provider, got error: %+v", err)
-	}
-
-	return provider, nil
 }

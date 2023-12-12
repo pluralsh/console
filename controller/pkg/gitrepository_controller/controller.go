@@ -48,6 +48,7 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	existing := true
 	repo := &v1alpha1.GitRepository{}
 	if err := r.Get(ctx, req.NamespacedName, repo); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -71,6 +72,18 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err != nil && !errors.IsNotFound(err) {
 		return ctrl.Result{}, err
 	}
+	if existingRepo == nil && repo.Status.Existing == true {
+		msg := "existing Git repository was deleted from console"
+		r.Log.Info(msg)
+		if err := UpdateReposStatus(ctx, r.Client, repo, func(r *v1alpha1.GitRepository) {
+			r.Status.Message = &msg
+			r.Status.Id = nil
+			r.Status.Existing = existing
+		}); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, nil
+	}
 	if existingRepo == nil {
 		if err := kubernetes.TryAddFinalizer(ctx, r.Client, repo, RepoFinalizer); err != nil {
 			return ctrl.Result{}, err
@@ -80,9 +93,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, err
 		}
 		existingRepo = resp.CreateGitRepository
+		existing = false
 	}
 
-	if repo.Status.Sha != "" && repo.Status.Sha != sha && controllerutil.ContainsFinalizer(repo, RepoFinalizer) {
+	if repo.Status.Sha != "" && repo.Status.Sha != sha && !existing {
 		_, err := r.ConsoleClient.UpdateRepository(existingRepo.ID, console.GitAttributes{
 			URL:        repo.Spec.Url,
 			PrivateKey: cred.PrivateKey,
@@ -102,6 +116,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			r.Status.Health = v1alpha1.GitHealth(*existingRepo.Health)
 		}
 		r.Status.Sha = sha
+		r.Status.Existing = existing
 
 	}); err != nil {
 		return ctrl.Result{}, err

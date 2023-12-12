@@ -126,6 +126,14 @@ type ClusterSpec struct {
 	NodePools []ClusterNodePool `json:"nodePools"`
 }
 
+func (cs *ClusterSpec) IsProviderRefRequired() bool {
+	return cs.Cloud != "byok"
+}
+
+func (cs *ClusterSpec) HasProviderRef() bool {
+	return cs.ProviderRef != nil
+}
+
 type ClusterCloudSettings struct {
 	// AWS cluster customizations.
 	// +kubebuilder:validation:Optional
