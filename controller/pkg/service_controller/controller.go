@@ -36,14 +36,10 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	service := &v1alpha1.DeploymentService{}
+	service := &v1alpha1.ServiceDeployment{}
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	if !service.GetDeletionTimestamp().IsZero() {
-		return r.handleDelete(ctx, service)
-	}
-
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
 		return ctrl.Result{}, err
@@ -54,6 +50,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			// update status
 			RequeueAfter: 30 * time.Second,
 		}, nil
+	}
+	if !service.GetDeletionTimestamp().IsZero() {
+		return r.handleDelete(ctx, cluster, service)
 	}
 
 	repository := &v1alpha1.GitRepository{}
@@ -86,10 +85,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
-	if err != nil {
-		if !errors.IsNotFound(err) {
-			return ctrl.Result{}, err
-		}
+	if err != nil && !errors.IsNotFound(err) {
+		return ctrl.Result{}, err
 	}
 	if existingService == nil {
 		_, err = r.ConsoleClient.CreateService(cluster.Status.ID, *attr)
@@ -100,9 +97,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-	}
-	if err := kubernetes.TryAddFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
-		return ctrl.Result{}, err
+		if err := kubernetes.TryAddFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	err = r.addOwnerReferences(ctx, service)
@@ -134,7 +131,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	if err := UpdateServiceStatus(ctx, r.Client, service, func(r *v1alpha1.DeploymentService) {
+	if err := UpdateServiceStatus(ctx, r.Client, service, func(r *v1alpha1.ServiceDeployment) {
 		r.Status.Id = &existingService.ID
 		r.Status.Sha = sha
 		if existingService.Errors != nil {
@@ -177,11 +174,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 // SetupWithManager sets up the controller with the Manager.
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.DeploymentService{}).
+		For(&v1alpha1.ServiceDeployment{}).
 		Complete(r)
 }
 
-func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.DeploymentService, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
+func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
 	attr := &console.ServiceDeploymentAttributes{
 		Name:         service.Name,
 		Namespace:    service.Namespace,
@@ -256,7 +253,7 @@ func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1
 	return attr, nil
 }
 
-func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.DeploymentService) error {
+func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
 	if service.Spec.ConfigurationRef != nil {
 		configurationSecret, err := kubernetes.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
 		if err != nil {
@@ -297,16 +294,28 @@ func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.D
 	return nil
 }
 
-func (r *Reconciler) handleDelete(ctx context.Context, service *v1alpha1.DeploymentService) (ctrl.Result, error) {
+func (r *Reconciler) handleDelete(ctx context.Context, cluster *v1alpha1.Cluster, service *v1alpha1.ServiceDeployment) (ctrl.Result, error) {
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
-
+		r.Log.Info("delete service")
+		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
+		if err != nil && !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if existingService != nil {
+			if err := r.ConsoleClient.DeleteService(*service.Status.Id); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+		if err := kubernetes.TryRemoveFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 	return ctrl.Result{}, nil
 }
 
-type RepoPatchFunc func(service *v1alpha1.DeploymentService)
+type RepoPatchFunc func(service *v1alpha1.ServiceDeployment)
 
-func UpdateServiceStatus(ctx context.Context, client ctrlruntimeclient.Client, service *v1alpha1.DeploymentService, patch RepoPatchFunc) error {
+func UpdateServiceStatus(ctx context.Context, client ctrlruntimeclient.Client, service *v1alpha1.ServiceDeployment, patch RepoPatchFunc) error {
 	key := ctrlruntimeclient.ObjectKeyFromObject(service)
 
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {

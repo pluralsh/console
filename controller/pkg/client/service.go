@@ -52,3 +52,11 @@ func (c *client) UpdateComponents(id string, components []*console.ComponentAttr
 	_, err := c.consoleClient.UpdateServiceComponents(c.ctx, id, components, errs)
 	return err
 }
+
+func (c *client) DeleteService(serviceId string) error {
+	_, err := c.consoleClient.DeleteServiceDeployment(c.ctx, serviceId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
