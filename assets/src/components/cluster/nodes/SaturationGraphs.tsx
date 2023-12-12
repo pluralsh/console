@@ -23,7 +23,7 @@ export function SaturationGraphs({
     variables: {
       cpuUtilization: cpu,
       memUtilization: mem,
-      clusterId: clusterId,
+      clusterId,
       offset: 2 * 60 * 60,
     },
     fetchPolicy: 'network-only',

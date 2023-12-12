@@ -4,20 +4,25 @@ import {
   Input,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import {
-  getGlobalSettingsBreadcrumbs,
-  useGlobalSettingsContext,
-} from './GlobalSettings'
+
 import { FormEventHandler, useCallback, useMemo } from 'react'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useTheme } from 'styled-components'
-import { StepH } from '../ModalAlt'
+
 import { useUpdateDeploymentSettingsMutation } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 
+import { StepH } from '../ModalAlt'
+
+import {
+  getGlobalSettingsBreadcrumbs,
+  useGlobalSettingsContext,
+} from './GlobalSettings'
+
 function HttpForm({ name, connection, setConnection }) {
   const theme = useTheme()
+
   return (
     <div
       css={{
@@ -69,6 +74,7 @@ function prune(connection) {
 
 function SubmitRow({ allowSubmit, loading, formState }) {
   const theme = useTheme()
+
   return (
     <div
       css={{

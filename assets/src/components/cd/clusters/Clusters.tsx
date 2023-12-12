@@ -1,317 +1,51 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   Breadcrumb,
-  CaretRightIcon,
   GearTrainIcon,
   IconFrame,
   Table,
-  Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
-import { ComponentProps, useMemo } from 'react'
+import { ComponentProps, useCallback, useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { createColumnHelper } from '@tanstack/react-table'
-import { Link, useNavigate } from 'react-router-dom'
+import { Row } from '@tanstack/react-table'
+import { VirtualItem } from '@tanstack/react-virtual'
+import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
-import { Edge } from 'utils/graphql'
+import chroma from 'chroma-js'
+
+import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
+
 import {
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
   GLOBAL_SETTINGS_ABS_PATH,
+  getClusterDetailsPath,
 } from 'routes/cdRoutesConsts'
-import chroma from 'chroma-js'
-import {
-  canUpgrade,
-  isUpgrading,
-  nextSupportedVersion,
-  toNiceVersion,
-} from 'utils/semver'
-import { roundToTwoPlaces } from 'components/cluster/utils'
-import { BasicLink } from 'components/utils/typography/BasicLink'
-import {
-  cpuFormat,
-  cpuParser,
-  memoryFormat,
-  memoryParser,
-} from 'utils/kubernetes'
-import { UsageBar } from 'components/cluster/nodes/UsageBar'
-import { TableText } from 'components/cluster/TableElements'
+
+import { Edge, extendConnection } from 'utils/graphql'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useSlicePolling } from 'components/utils/tableFetchHelpers'
+import { GqlError } from 'components/utils/Alert'
 
 import {
   POLL_INTERVAL,
   useSetCDHeaderContent,
   useSetCDScrollable,
 } from '../ContinuousDeployment'
-import { DeleteCluster } from '../providers/DeleteCluster'
 import { useCDEnabled } from '../utils/useCDEnabled'
 import { DEMO_CLUSTERS } from '../utils/demoData'
 
-import ClusterUpgrade from './ClusterUpgrade'
-import { ClusterHealth } from './ClusterHealthChip'
 import CreateCluster from './create/CreateCluster'
-import { ClusterConditions } from './ClusterConditions'
-import { DynamicClusterIcon } from './DynamicClusterIcon'
 import { DemoTable } from './ClustersDemoTable'
 import { ClustersGettingStarted } from './ClustersGettingStarted'
+import { columns } from './ClustersColumns'
+
+export const CLUSTERS_QUERY_PAGE_SIZE = 100
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
   { label: 'clusters', url: `${CD_REL_PATH}/${CLUSTERS_REL_PATH}` },
-]
-
-const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
-
-export function StackedText({ first, second }) {
-  const theme = useTheme()
-
-  return (
-    <>
-      <div>{first}</div>
-      {second && (
-        <div
-          css={{
-            ...theme.partials.text.caption,
-            color: theme.colors['text-xlight'],
-          }}
-        >
-          {second}
-        </div>
-      )}
-    </>
-  )
-}
-
-export const columns = [
-  columnHelper.accessor(({ node }) => node, {
-    id: 'cluster',
-    header: 'Cluster',
-    cell: function Cell({ getValue }) {
-      const cluster = getValue()
-      const upgrading =
-        !cluster?.self && isUpgrading(cluster?.version, cluster?.currentVersion)
-
-      return (
-        <div css={{ display: 'flex' }}>
-          <ColWithIcon
-            icon={
-              <DynamicClusterIcon
-                deleting={!!cluster?.deletedAt}
-                upgrading={upgrading}
-                protect={!!cluster?.protect}
-                self={!!cluster?.self}
-              />
-            }
-          >
-            <StackedText
-              first={
-                <BasicLink
-                  as={Link}
-                  to={`/cd/clusters/${cluster?.id}`}
-                  css={{ whiteSpace: 'nowrap' }}
-                >
-                  {cluster?.name}
-                </BasicLink>
-              }
-              second={`handle: ${cluster?.handle}`}
-            />
-          </ColWithIcon>
-        </div>
-      )
-    },
-  }),
-  columnHelper.accessor(({ node }) => node?.provider, {
-    id: 'cloud',
-    header: 'Cloud',
-    cell: function Cell({ getValue }) {
-      const provider = getValue()
-      const theme = useTheme()
-
-      return (
-        <ColWithIcon
-          icon={getProviderIconURL(
-            provider?.cloud ?? '',
-            theme.mode === 'dark'
-          )}
-        >
-          {getProviderName(provider?.cloud)}
-        </ColWithIcon>
-      )
-    },
-  }),
-  columnHelper.accessor(({ node }) => node, {
-    id: 'health',
-    header: 'Health',
-    cell: ({ getValue }) => <ClusterHealth cluster={getValue() || undefined} />,
-  }),
-  columnHelper.accessor(({ node }) => node, {
-    id: 'version',
-    header: 'Version',
-    cell: function Cell({
-      row: {
-        original: { node },
-      },
-    }) {
-      return (
-        <div>
-          {node?.currentVersion && (
-            <StackedText
-              first={`Current: ${toNiceVersion(node?.currentVersion)}`}
-              second={
-                node?.self || !node?.version
-                  ? null
-                  : `Target: ${toNiceVersion(node?.version)}`
-              }
-            />
-          )}
-          {!node?.currentVersion && <>-</>}
-        </div>
-      )
-    },
-  }),
-  columnHelper.accessor(({ node }) => node, {
-    id: 'cpu',
-    header: 'CPU',
-    cell: ({ getValue }) => {
-      const cluster = getValue()
-      const usage = cluster?.nodeMetrics?.reduce(
-        (acc, current) => acc + (cpuParser(current?.usage?.cpu) ?? 0),
-        0
-      )
-      const capacity = cluster?.nodes?.reduce(
-        (acc, current) =>
-          // @ts-ignore
-          acc + (cpuParser(current?.status?.capacity?.cpu) ?? 0),
-        0
-      )
-      const display = `${usage ? cpuFormat(roundToTwoPlaces(usage)) : '—'} / ${
-        capacity ? cpuFormat(capacity) : '—'
-      }`
-
-      return usage !== undefined && !!capacity ? (
-        <Tooltip
-          label={display}
-          placement="top"
-        >
-          <TableText>
-            <UsageBar
-              usage={usage / capacity}
-              width={120}
-            />
-          </TableText>
-        </Tooltip>
-      ) : (
-        display
-      )
-    },
-  }),
-  columnHelper.accessor(({ node }) => node, {
-    id: 'memory',
-    header: 'Memory',
-    cell: ({ getValue }) => {
-      const cluster = getValue()
-      const usage = cluster?.nodeMetrics?.reduce(
-        (acc, current) => acc + (memoryParser(current?.usage?.memory) ?? 0),
-        0
-      )
-      const capacity = cluster?.nodes?.reduce(
-        (acc, current) =>
-          // @ts-ignore
-          acc + (memoryParser(current?.status?.capacity?.memory) ?? 0),
-        0
-      )
-
-      const display = `${usage ? memoryFormat(usage) : '—'} / ${
-        capacity ? memoryFormat(capacity) : '—'
-      }`
-
-      return usage !== undefined && !!capacity ? (
-        <Tooltip
-          label={display}
-          placement="top"
-        >
-          <TableText>
-            <UsageBar
-              usage={usage / capacity}
-              width={120}
-            />
-          </TableText>
-        </Tooltip>
-      ) : (
-        display
-      )
-    },
-  }),
-  columnHelper.accessor(({ node }) => node, {
-    id: 'status',
-    header: 'Status',
-    cell: ({ table, getValue }) => {
-      const cluster = getValue()
-      const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
-      const upgrade = nextSupportedVersion(
-        cluster?.version,
-        cluster?.provider?.supportedVersions
-      )
-      const { refetch } = table.options.meta as { refetch?: () => void }
-
-      if (
-        !upgrade &&
-        !hasDeprecations &&
-        !(!cluster?.provider && canUpgrade(cluster?.currentVersion ?? '0.0.0'))
-      ) {
-        return null
-      }
-
-      return (
-        <ClusterUpgrade
-          cluster={cluster}
-          refetch={refetch}
-        />
-      )
-    },
-  }),
-  columnHelper.accessor(({ node }) => node?.status?.conditions?.length ?? 0, {
-    id: 'conditions',
-    header: 'Conditions',
-    cell: ({ row: { original } }) =>
-      original?.node?.status?.conditions && (
-        <ClusterConditions cluster={original.node} />
-      ),
-  }),
-  columnHelper.accessor(({ node }) => node, {
-    id: 'actions',
-    header: '',
-    cell: function Cell({ table, getValue }) {
-      const navigate = useNavigate()
-      const cluster = getValue()
-      const { refetch } = table.options.meta as { refetch?: () => void }
-
-      return (
-        <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
-          {cluster && (
-            <DeleteCluster
-              cluster={cluster}
-              refetch={refetch}
-            />
-          )}
-          <IconFrame
-            clickable
-            onClick={() =>
-              navigate(`/${CD_REL_PATH}/${CLUSTERS_REL_PATH}/${cluster?.id}`)
-            }
-            size="medium"
-            icon={<CaretRightIcon />}
-            textValue="Go to cluster details"
-            tooltip
-            type="tertiary"
-          />
-        </div>
-      )
-    },
-  }),
 ]
 
 type TableWrapperSCProps = {
@@ -349,10 +83,50 @@ export default function Clusters() {
   const theme = useTheme()
   const navigate = useNavigate()
   const cdIsEnabled = useCDEnabled()
-  const { data, refetch } = useClustersQuery({
+  const [virtualSlice, setVirtualSlice] = useState<
+    | {
+        start: VirtualItem | undefined
+        end: VirtualItem | undefined
+      }
+    | undefined
+  >()
+
+  const queryResult = useClustersQuery({
+    variables: {
+      first: CLUSTERS_QUERY_PAGE_SIZE,
+    },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    // Important so loading will be updated on fetchMore to send to Table
+    notifyOnNetworkStatusChange: true,
   })
+  const {
+    error,
+    fetchMore,
+    loading,
+    data: currentData,
+    previousData,
+  } = queryResult
+  const data = currentData || previousData
+  const clusters = data?.clusters
+  const pageInfo = clusters?.pageInfo
+  const { refetch } = useSlicePolling(queryResult, {
+    virtualSlice,
+    pageSize: CLUSTERS_QUERY_PAGE_SIZE,
+    key: 'clusters',
+    interval: POLL_INTERVAL,
+  })
+
+  const fetchNextPage = useCallback(() => {
+    if (!pageInfo?.endCursor) {
+      return
+    }
+    fetchMore({
+      variables: { after: pageInfo.endCursor },
+      updateQuery: (prev, { fetchMoreResult }) =>
+        extendConnection(prev, fetchMoreResult.clusters, 'clusters'),
+    })
+  }, [fetchMore, pageInfo?.endCursor])
+
   const headerActions = useMemo(
     () =>
       cdIsEnabled ? (
@@ -360,7 +134,7 @@ export default function Clusters() {
           css={{
             display: 'flex',
             justifyContent: 'end',
-            gap: theme.spacing.large,
+            gap: theme.spacing.medium,
           }}
         >
           <IconFrame
@@ -374,7 +148,7 @@ export default function Clusters() {
           <CreateCluster />
         </div>
       ) : null,
-    [cdIsEnabled, navigate, theme.spacing.large]
+    [cdIsEnabled, navigate, theme.spacing.medium]
   )
 
   useSetCDHeaderContent(headerActions)
@@ -387,6 +161,9 @@ export default function Clusters() {
 
   useSetCDScrollable(showGettingStarted || isDemo)
 
+  if (error) {
+    return <GqlError error={error} />
+  }
   if (!data) {
     return <LoadingIndicator />
   }
@@ -398,6 +175,12 @@ export default function Clusters() {
           <ClustersTable
             data={tableData || []}
             refetch={refetch}
+            virtualizeRows
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
+            onVirtualSliceChange={setVirtualSlice}
           />
         </FullHeightTableWrap>
       ) : (
@@ -407,20 +190,28 @@ export default function Clusters() {
     </>
   )
 }
+export const CLUSTERS_REACT_VIRTUAL_OPTIONS: ComponentProps<
+  typeof Table
+>['reactVirtualOptions'] = {
+  overscan: 10,
+}
 
 export function ClustersTable({
   refetch,
   data,
+  ...props
 }: {
   refetch?: () => void
   data: any[]
-}) {
+} & Omit<ComponentProps<typeof Table>, 'data' | 'columns'>) {
+  const navigate = useNavigate()
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
     useMemo(() => ({ meta: { refetch } }), [refetch])
 
   return (
     <Table
       loose
+      reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
       data={data || []}
       columns={columns}
       reactTableOptions={reactTableOptions}
@@ -428,6 +219,14 @@ export function ClustersTable({
         maxHeight: 'unset',
         height: '100%',
       }}
+      onRowClick={(_e, { original }: Row<Edge<ClustersRowFragment>>) =>
+        navigate(
+          getClusterDetailsPath({
+            clusterId: original.node?.id,
+          })
+        )
+      }
+      {...props}
     />
   )
 }

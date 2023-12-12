@@ -33,8 +33,8 @@ export function DynamicClusterIcon({
   const tooltip = useMemo(() => {
     if (deleting) return 'Cluster is being deleted'
     if (upgrading) return 'Cluster is being upgraded'
-    if (protect) return PROTECT_TT_TEXT('cluster')
     if (self) return 'Management cluster'
+    if (protect) return PROTECT_TT_TEXT('cluster')
 
     return ''
   }, [deleting, upgrading, protect, self])

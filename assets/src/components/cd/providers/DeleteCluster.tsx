@@ -1,61 +1,50 @@
-import { useState } from 'react'
 import { useTheme } from 'styled-components'
-
-import { Div } from 'honorable'
 
 import { Confirm } from '../../utils/Confirm'
 import {
   ClustersRowFragment,
   useDeleteClusterMutation,
 } from '../../../generated/graphql'
-import { DeleteIconButton } from '../../utils/IconButtons'
-import { PROTECT_TT_TEXT } from '../clusters/ProtectBadge'
 
-export function DeleteCluster({
+export function DeleteClusterModal({
   cluster,
   refetch,
+  open,
+  onClose,
 }: {
   cluster: ClustersRowFragment
   refetch: Nullable<() => void>
+  open: boolean
+  onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const [confirm, setConfirm] = useState(false)
   const [mutation, { loading, error }] = useDeleteClusterMutation({
     variables: { id: cluster.id },
     onCompleted: () => {
-      setConfirm(false)
+      onClose?.()
       refetch?.()
     },
   })
-  const protect = cluster.protect || cluster.self || !!cluster.deletedAt
 
   return (
-    <Div onClick={(e) => e.stopPropagation()}>
-      <DeleteIconButton
-        onClick={protect ? undefined : () => setConfirm(true)}
-        tooltip
-        textValue={protect ? PROTECT_TT_TEXT('cluster') : 'Delete cluster'}
-        disabled={protect}
-      />
-      <Confirm
-        close={() => setConfirm(false)}
-        destructive
-        label="Delete"
-        loading={loading}
-        error={error}
-        open={confirm}
-        submit={() => mutation()}
-        title="Delete cluster provider"
-        text={
-          <>
-            Are you sure you want to delete the{' '}
-            <span css={{ color: theme.colors['text-danger'] }}>
-              “{cluster.name}”
-            </span>{' '}
-            cluster?
-          </>
-        }
-      />
-    </Div>
+    <Confirm
+      close={() => onClose?.()}
+      destructive
+      label="Delete"
+      loading={loading}
+      error={error}
+      open={open}
+      submit={() => mutation()}
+      title="Delete cluster provider"
+      text={
+        <>
+          Are you sure you want to delete the{' '}
+          <span css={{ color: theme.colors['text-danger'] }}>
+            “{cluster.name}”
+          </span>{' '}
+          cluster?
+        </>
+      }
+    />
   )
 }

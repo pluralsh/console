@@ -2,7 +2,7 @@ import { Button, GitHubLogoIcon } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { ApiDeprecation } from 'generated/graphql'
 
-import { StackedText } from './Clusters'
+import { StackedText } from 'components/utils/table/StackedText'
 
 const columnHelperDeprecations = createColumnHelper<ApiDeprecation>()
 

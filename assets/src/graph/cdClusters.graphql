@@ -143,6 +143,7 @@ fragment ClustersRow on Cluster {
 }
 
 fragment Cluster on Cluster {
+  ...ClustersRow
   apiDeprecations {
     ...ApiDeprecation
   }
@@ -191,8 +192,8 @@ fragment Cluster on Cluster {
   }
 }
 
-query Clusters {
-  clusters(first: 100) {
+query Clusters($first: Int = 100, $after: String, $q: String) {
+  clusters(first: $first, after: $after, q: $q) {
     pageInfo {
       ...PageInfo
     }
@@ -305,7 +306,7 @@ mutation UpdateClusterBindings($id: ID!, $rbac: RbacAttributes!) {
 
 mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
   updateCluster(id: $id, attributes: $attributes) {
-    ...ClustersRow
+    ...Cluster
   }
 }
 

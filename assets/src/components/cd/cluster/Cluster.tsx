@@ -40,6 +40,7 @@ import ProviderIcon from '../../utils/Provider'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import ClusterPermissions from './ClusterPermissions'
+import ClusterSettings from './ClusterSettings'
 
 const directory = [
   { path: CLUSTER_SERVICES_PATH, label: 'Services' },
@@ -98,7 +99,6 @@ export default function Cluster() {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
-
   const cluster = data?.cluster
 
   const crumbs: Breadcrumb[] = useMemo(
@@ -190,10 +190,11 @@ export default function Cluster() {
               justifyContent: 'end',
               display: 'flex',
               flexGrow: 1,
-              gap: theme.spacing.large,
+              gap: theme.spacing.small,
             }}
           >
             <ClusterPermissions cluster={cluster} />
+            {!cluster.self && <ClusterSettings cluster={cluster} />}
           </div>
         </>
       }

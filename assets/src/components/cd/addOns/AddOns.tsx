@@ -9,13 +9,12 @@ import { Suspense, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
 import Fuse from 'fuse.js'
-import { Priority } from 'kbar'
+import { Priority, useRegisterActions } from 'kbar'
 
 import { ADDONS_REL_PATH, CD_ABS_PATH } from 'routes/cdRoutesConsts'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ClusterAddOnFragment, useClusterAddOnsQuery } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-import { KBarUpdateActions } from 'components/utils/KBarUpdateActions'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { PaletteSection } from 'components/CommandPalette'
@@ -98,6 +97,8 @@ export default function AddOns() {
     [addOns]
   )
 
+  useRegisterActions(kbarActions, [kbarActions])
+
   const filteredAddOns = useMemo(() => {
     if (!filterString) {
       return addOns || []
@@ -121,7 +122,6 @@ export default function AddOns() {
         gap: theme.spacing.small,
       }}
     >
-      <KBarUpdateActions actions={kbarActions} />
       {installAddon && (
         <Suspense fallback={null}>
           <ModalMountTransition open={showInstall}>

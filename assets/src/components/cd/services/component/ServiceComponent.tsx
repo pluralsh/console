@@ -16,8 +16,9 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ComponentDetails } from 'components/component/ComponentDetails'
 import { GqlError } from 'components/utils/Alert'
 
-import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
 import { useDeploymentSettings } from 'routes/cdRoutes'
+
+import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
 
 export const getServiceComponentBreadcrumbs = ({
   service,

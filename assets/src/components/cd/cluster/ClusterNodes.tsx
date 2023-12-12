@@ -5,6 +5,8 @@ import { Card } from '@pluralsh/design-system'
 import sumBy from 'lodash/sumBy'
 import { useTheme } from 'styled-components'
 
+import { useDeploymentSettings } from 'routes/cdRoutes'
+
 import { Cluster, Node } from '../../../generated/graphql'
 import {
   ColCpuTotal,
@@ -24,7 +26,6 @@ import { ClusterMetrics } from '../../cluster/nodes/ClusterMetrics'
 import { cpuParser, memoryParser } from '../../../utils/kubernetes'
 import { ResourceUsage } from '../../cluster/nodes/Nodes'
 import { getNodeDetailsPath } from '../../../routes/cdRoutesConsts'
-import { useDeploymentSettings } from 'routes/cdRoutes'
 
 export const ColActions = (clusterId?: string) =>
   columnHelper.accessor(() => null, {
@@ -76,8 +77,6 @@ export default function ClusterNodes() {
 
     return { cpu, mem }
   }, [cluster])
-
-  console.log(settings)
 
   return (
     <div
