@@ -2,20 +2,20 @@ package providerreconciler
 
 import (
 	"context"
-	"fmt"
-	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
-	consoleclient "github.com/pluralsh/console/controller/pkg/client"
-	"github.com/pluralsh/console/controller/pkg/utils"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/util/retry"
 	"reflect"
+	"time"
+
+	console "github.com/pluralsh/console-client-go"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"time"
+
+	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
+	consoleclient "github.com/pluralsh/console/controller/pkg/client"
+	"github.com/pluralsh/console/controller/pkg/utils"
 )
 
 // Reconciler reconciles a v1alpha1.Provider object.
@@ -48,30 +48,34 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// Handle resource deletion
+	// TODO: Try reading from API to see if object already exists
+
+	// Handle proper resource deletion via finalizer
 	result, err := r.addOrRemoveFinalizer(ctx, provider)
 	if result != nil {
 		return *result, err
 	}
 
 	// Get Provider SHA that can be saved back in the status to check for changes
-	_, sha, err := provider.Diff(ctx, r.toCloudProviderSettingsAttributes, utils.HashObject)
+	changed, sha, err := provider.Diff(ctx, r.toCloudProviderSettingsAttributes, utils.HashObject)
 	if err != nil {
 		log.Error(err, "unable to calculate provider SHA")
 		return ctrl.Result{}, err
 	}
 
 	// Sync Provider CRD with the Console API
-	apiProvider, err := r.updateOrGetProvider(ctx, provider)
+	apiProvider, err := r.updateOrGetProvider(ctx, provider, changed)
 	if err != nil {
 		log.Error(err, "unable to create or update provider")
 		return ctrl.Result{}, err
 	}
 
 	// Sync back Provider to crd status
-	if err = r.updateStatus(ctx, &provider, func(p *v1alpha1.Provider) {
+	if err = utils.TryUpdateStatus[*v1alpha1.Provider](ctx, r.Client, &provider, func(p *v1alpha1.Provider, original *v1alpha1.Provider) bool {
 		p.Status.ID = &apiProvider.ID
 		p.Status.SHA = &sha
+
+		return reflect.DeepEqual(original.Status, p.Status)
 	}); err != nil {
 		return ctrl.Result{}, err
 	}
@@ -121,8 +125,7 @@ func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, provider v1alpha1
 	return nil, nil
 }
 
-func (r *Reconciler) updateOrGetProvider(ctx context.Context, provider v1alpha1.Provider) (*console.ClusterProviderFragment, error) {
-	changed, _, _ := provider.Diff(ctx, r.toCloudProviderSettingsAttributes, utils.HashObject)
+func (r *Reconciler) updateOrGetProvider(ctx context.Context, provider v1alpha1.Provider, changed bool) (*console.ClusterProviderFragment, error) {
 	exists := r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID())
 
 	// Update only if Provider has changed
@@ -147,23 +150,6 @@ func (r *Reconciler) updateOrGetProvider(ctx context.Context, provider v1alpha1.
 	}
 
 	return r.ConsoleClient.CreateProvider(ctx, attributes)
-}
-
-func (r *Reconciler) updateStatus(ctx context.Context, provider *v1alpha1.Provider, patch func(provider *v1alpha1.Provider)) error {
-	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		if err := r.Get(ctx, client.ObjectKeyFromObject(provider), provider); err != nil {
-			return fmt.Errorf("could not fetch current provider state, got error: %+v", err)
-		}
-
-		original := provider.DeepCopy()
-		patch(provider)
-
-		if reflect.DeepEqual(original.Status, provider.Status) {
-			return nil
-		}
-
-		return r.Client.Status().Patch(ctx, provider, client.MergeFrom(original))
-	})
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

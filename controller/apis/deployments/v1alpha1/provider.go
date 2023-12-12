@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	"context"
+
 	console "github.com/pluralsh/console-client-go"
 	"github.com/samber/lo"
 	v1 "k8s.io/api/core/v1"
@@ -58,6 +59,10 @@ type Provider struct {
 	Spec ProviderSpec `json:"spec"`
 	// +kubebuilder:validation:Optional
 	Status ProviderStatus `json:"status,omitempty"`
+}
+
+func (p *Provider) GetStatus() ProviderStatus {
+	return p.Status
 }
 
 func (p *Provider) Diff(ctx context.Context, getter CloudSettingsGetter, hasher Hasher) (changed bool, sha string, err error) {
@@ -132,11 +137,16 @@ func (p *ProviderSpec) UpdateAttributes(ctx context.Context, cloudSettingsGetter
 type ProviderStatus struct {
 	// ID of the provider in the Console API.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
 	ID *string `json:"id,omitempty"`
 	// SHA of last applied configuration.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	SHA *string `json:"sha,omitempty"`
+	// Existing flag.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	Existing *string `json:"existing,omitempty"`
 }
 
 func (p *ProviderStatus) GetID() string {

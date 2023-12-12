@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+
 	gqlgenclient "github.com/Yamashou/gqlgenc/client"
 	gqlclient "github.com/pluralsh/console-client-go"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -47,13 +48,10 @@ func (c *client) IsProviderExists(ctx context.Context, id string) bool {
 }
 
 func (c *client) IsProviderDeleting(ctx context.Context, id string) bool {
-	_, err := c.GetProvider(ctx, id)
+	provider, err := c.GetProvider(ctx, id)
 	if err != nil {
 		return false
 	}
 
-	return false
-
-	// TODO: Update client to support DeletedAt
-	//return provider != nil && provider.DeletedAt != nil
+	return provider != nil && provider.DeletedAt != nil
 }
