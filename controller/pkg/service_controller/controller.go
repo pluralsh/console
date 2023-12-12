@@ -2,7 +2,7 @@ package servicecontroller
 
 import (
 	"context"
-	"reflect"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -16,10 +16,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
@@ -37,6 +35,7 @@ type Reconciler struct {
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	service := &v1alpha1.ServiceDeployment{}
+	r.Log.WithName(fmt.Sprintf("%s-%s", req.NamespacedName, req.Name))
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -44,8 +43,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
 		return ctrl.Result{}, err
 	}
+
 	if cluster.Status.ID == nil {
-		r.Log.Info("Cluster is not ready")
+		r.Log.Info(fmt.Sprintf("Cluster %s/%s is not ready", cluster.Namespace, cluster.Name))
 		return ctrl.Result{
 			// update status
 			RequeueAfter: 30 * time.Second,
@@ -134,36 +134,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	if err := UpdateServiceStatus(ctx, r.Client, service, func(r *v1alpha1.ServiceDeployment) {
-		r.Status.Id = &existingService.ID
-		r.Status.Sha = sha
-		if existingService.Errors != nil {
-			r.Status.Errors = algorithms.Map(existingService.Errors,
-				func(b *console.ErrorFragment) v1alpha1.ServiceError {
-					return v1alpha1.ServiceError{
-						Source:  b.Source,
-						Message: b.Message,
-					}
-				})
-		}
-		r.Status.Components = make([]v1alpha1.ServiceComponent, 0)
-		for _, c := range existingService.Components {
-			sc := v1alpha1.ServiceComponent{
-				ID:        c.ID,
-				Name:      c.Name,
-				Group:     c.Group,
-				Kind:      c.Kind,
-				Namespace: c.Namespace,
-				Synced:    c.Synced,
-				Version:   c.Version,
-			}
-			if c.State != nil {
-				state := v1alpha1.ComponentState(*c.State)
-				sc.State = &state
-			}
-			r.Status.Components = append(r.Status.Components, sc)
-		}
-
+	if err = utils.TryUpdateStatus[*v1alpha1.ServiceDeployment](ctx, r.Client, service, func(r *v1alpha1.ServiceDeployment, original *v1alpha1.ServiceDeployment) (any, any) {
+		updateStatus(r, existingService, sha)
+		return original.Status, r.Status
 	}); err != nil {
 		return ctrl.Result{}, err
 	}
@@ -172,6 +145,37 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		// update status
 		RequeueAfter: 30 * time.Second,
 	}, nil
+}
+
+func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.ServiceDeploymentExtended, sha string) {
+	r.Status.Id = &existingService.ID
+	r.Status.Sha = sha
+	if existingService.Errors != nil {
+		r.Status.Errors = algorithms.Map(existingService.Errors,
+			func(b *console.ErrorFragment) v1alpha1.ServiceError {
+				return v1alpha1.ServiceError{
+					Source:  b.Source,
+					Message: b.Message,
+				}
+			})
+	}
+	r.Status.Components = make([]v1alpha1.ServiceComponent, 0)
+	for _, c := range existingService.Components {
+		sc := v1alpha1.ServiceComponent{
+			ID:        c.ID,
+			Name:      c.Name,
+			Group:     c.Group,
+			Kind:      c.Kind,
+			Namespace: c.Namespace,
+			Synced:    c.Synced,
+			Version:   c.Version,
+		}
+		if c.State != nil {
+			state := v1alpha1.ComponentState(*c.State)
+			sc.State = &state
+		}
+		r.Status.Components = append(r.Status.Components, sc)
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -299,44 +303,33 @@ func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.S
 
 func (r *Reconciler) handleDelete(ctx context.Context, cluster *v1alpha1.Cluster, service *v1alpha1.ServiceDeployment) (ctrl.Result, error) {
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
-		r.Log.Info("delete service")
+		r.Log.Info(fmt.Sprintf("try to delete service %s/%s", service.Namespace, service.Name))
 		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
 		if err != nil && !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
+		}
+		if existingService != nil && existingService.DeletedAt != nil {
+			if err = utils.TryUpdateStatus[*v1alpha1.ServiceDeployment](ctx, r.Client, service, func(r *v1alpha1.ServiceDeployment, original *v1alpha1.ServiceDeployment) (any, any) {
+				updateStatus(r, existingService, "")
+				return original.Status, r.Status
+			}); err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{
+				RequeueAfter: 30 * time.Second,
+			}, nil
 		}
 		if existingService != nil {
 			if err := r.ConsoleClient.DeleteService(*service.Status.Id); err != nil {
 				return ctrl.Result{}, err
 			}
+			return ctrl.Result{
+				RequeueAfter: 30 * time.Second,
+			}, nil
 		}
 		if err := kubernetes.TryRemoveFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 	return ctrl.Result{}, nil
-}
-
-type RepoPatchFunc func(service *v1alpha1.ServiceDeployment)
-
-func UpdateServiceStatus(ctx context.Context, client ctrlruntimeclient.Client, service *v1alpha1.ServiceDeployment, patch RepoPatchFunc) error {
-	key := ctrlruntimeclient.ObjectKeyFromObject(service)
-
-	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		// fetch the current state of the cluster
-		if err := client.Get(ctx, key, service); err != nil {
-			return err
-		}
-
-		// modify it
-		original := service.DeepCopy()
-		patch(service)
-
-		// save some work
-		if reflect.DeepEqual(original.Status, service.Status) {
-			return nil
-		}
-
-		// update the status
-		return client.Status().Patch(ctx, service, ctrlruntimeclient.MergeFrom(original))
-	})
 }
