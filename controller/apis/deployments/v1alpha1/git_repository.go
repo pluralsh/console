@@ -37,9 +37,8 @@ type GitRepositoryStatus struct {
 	// +optional
 	Id *string `json:"id,omitempty"`
 	// +optional
-	Sha string `json:"sha,omitempty"`
-	// +kubebuilder:default:=true
-	Existing bool `json:"existing"`
+	Sha      string `json:"sha,omitempty"`
+	Existing bool   `json:"existing"`
 }
 
 // +kubebuilder:object:root=true
