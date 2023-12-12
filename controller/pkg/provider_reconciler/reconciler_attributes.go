@@ -3,10 +3,12 @@ package providerreconciler
 import (
 	"context"
 	"fmt"
+
 	console "github.com/pluralsh/console-client-go"
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	"github.com/pluralsh/console/controller/pkg/kubernetes"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func (r *Reconciler) missingCredentialKeyError(key string) error {

@@ -65,3 +65,11 @@ func (t *Taint) Attributes() *console.TaintAttributes {
 
 // TaintEffect is the effect for a Kubernetes taint.
 type TaintEffect string
+
+// ConditionType TODO ...
+type ConditionType string
+
+const (
+	ReadOnlyConditionType     = "readonly"
+	SynchronizedConditionType = "synchronized"
+)
