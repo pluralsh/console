@@ -227,10 +227,10 @@ func (r *Reconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster, provid
 	}
 
 	if exists {
-		logger.V(9).Info(fmt.Sprintf("No changes detected for cluster %s", cluster.Name))
+		logger.V(9).Info(fmt.Sprintf("No changes detected for %s cluster", cluster.Name))
 		return r.ConsoleClient.GetCluster(cluster.Status.ID)
 	}
 
-	logger.Info(fmt.Sprintf("Cluster %s does not exist, creating new one", cluster.Name))
+	logger.Info(fmt.Sprintf("%s cluster does not exist, creating it", cluster.Name))
 	return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
 }
