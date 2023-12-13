@@ -282,6 +282,17 @@ spec:
                 x-kubernetes-validations:
                 - message: Repository is immutable
                   rule: self == oldSelf
+              syncConfig:
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                type: object
               version:
                 default: '''0.0.1'''
                 type: string
