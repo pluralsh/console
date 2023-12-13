@@ -56,13 +56,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	// Handle existing resource.
-	existing, err := r.isExistingResource(cluster)
+	existing, err := r.isExisting(cluster)
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
 	if existing {
 		logger.Info("Cluster already exists in the API, running in read-only mode")
-		return r.handleExistingResource(ctx, cluster)
+		return r.handleExisting(ctx, cluster)
 	}
 
 	// Handle resource deletion both in Kubernetes cluster and in Console API.
@@ -106,9 +106,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	return requeue, nil
 }
 
-func (r *Reconciler) isExistingResource(cluster *v1alpha1.Cluster) (bool, error) {
-	if cluster.Status.IsExisting() {
-		return true, nil
+func (r *Reconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
+	if cluster.Status.HasExisting() {
+		return *cluster.Status.Existing, nil
 	}
 
 	if !cluster.Spec.HasHandle() {
@@ -126,7 +126,7 @@ func (r *Reconciler) isExistingResource(cluster *v1alpha1.Cluster) (bool, error)
 	return !cluster.Status.HasID(), nil
 }
 
-func (r *Reconciler) handleExistingResource(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
+func (r *Reconciler) handleExisting(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
 	apiCluster, err := r.ConsoleClient.GetClusterByHandle(cluster.Spec.Handle)
 	if err != nil {
 		return ctrl.Result{}, err

@@ -392,6 +392,6 @@ func (cs *ClusterStatus) IsSHAChanged(sha *string) bool {
 	return cs.HasSHA() && cs.SHA != sha
 }
 
-func (cs *ClusterStatus) IsExisting() bool {
-	return cs.Existing != nil && *cs.Existing
+func (cs *ClusterStatus) HasExisting() bool {
+	return cs.Existing != nil
 }
