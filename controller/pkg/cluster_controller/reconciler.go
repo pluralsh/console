@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	RequeueAfter  = 5 * time.Second
+	RequeueAfter  = 30 * time.Second
 	FinalizerName = "deployments.plural.sh/cluster-protection"
 )
 
