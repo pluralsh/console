@@ -5,15 +5,10 @@ import {
   Input,
   ListBoxItem,
 } from '@pluralsh/design-system'
-import {
-  ChangeEvent,
-  Dispatch,
-  EventHandler,
-  SetStateAction,
-  useMemo,
-  useState,
-} from 'react'
+import { ChangeEvent, EventHandler, useMemo, useState } from 'react'
 import { compareItems, rankItem } from '@tanstack/match-sorter-utils'
+import useOnUnMount from 'components/hooks/useOnUnMount'
+import { InlineLink } from 'components/utils/typography/InlineLink'
 
 export function DeployServiceSettingsGit({
   repos,
@@ -26,15 +21,40 @@ export function DeployServiceSettingsGit({
 }: {
   repos: any
   repositoryId: string
-  setRepositoryId: Dispatch<SetStateAction<string>>
+  setRepositoryId: (repositoryId: string) => void
   gitRef: string
-  setGitRef: Dispatch<SetStateAction<string>>
+  setGitRef: (gitRef: string) => void
   gitFolder: string
-  setGitFolder: Dispatch<SetStateAction<string>>
+  setGitFolder: (gitFolder: string) => void
 }) {
+  useOnUnMount(() => {
+    if (!(repositoryId && gitRef && gitFolder)) {
+      setRepoId('')
+      setGitFolder('')
+      setGitRef('')
+    }
+  })
+
   return (
     <>
-      <FormField label="Connect your repository">
+      <FormField
+        label="Connect your repository"
+        {...(repositoryId
+          ? {
+              caption: (
+                <InlineLink
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setRepoId('')
+                  }}
+                >
+                  Deselect
+                </InlineLink>
+              ),
+            }
+          : {})}
+      >
         <RepositorySelector
           repositories={repos}
           repositoryId={repositoryId}
@@ -134,7 +154,7 @@ export function RepositorySelector({
     [comboBoxInput, repositories]
   )
 
-  const comboBox = (
+  return (
     <ComboBox
       inputValue={comboBoxInput}
       onInputChange={(inputVal) => setComboBoxInput(inputVal)}
@@ -166,6 +186,4 @@ export function RepositorySelector({
       ))}
     </ComboBox>
   )
-
-  return comboBox
 }
