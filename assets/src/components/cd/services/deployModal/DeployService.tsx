@@ -400,6 +400,10 @@ export function DeployServiceModal({
           <RepoKindSelector
             onKindChange={setRepoTab}
             selectedKind={repoTab}
+            validKinds={{
+              [RepoKind.Git]: hasGitRepo && gitSettingsValid,
+              [RepoKind.Helm]: hasHelmRepo && helmSettingsValid,
+            }}
           >
             <div
               css={{
