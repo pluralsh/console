@@ -2,10 +2,12 @@ package providerreconciler
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/samber/lo"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -47,7 +49,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	// Read Provider CRD from the K8S API
 	var provider v1alpha1.Provider
 	if err := r.Get(ctx, req.NamespacedName, &provider); err != nil {
-		log.Error(err, "unable to fetch provider")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -119,8 +120,8 @@ func (r *Reconciler) handleExistingProvider(ctx context.Context, provider v1alph
 }
 
 func (r *Reconciler) isAlreadyExists(ctx context.Context, provider v1alpha1.Provider) (bool, error) {
-	if provider.Status.IsExisting() {
-		return true, nil
+	if provider.Status.HasExisting() {
+		return *provider.Status.Existing, nil
 	}
 
 	_, err := r.ConsoleClient.GetProviderByCloud(ctx, provider.Spec.Cloud)
@@ -217,6 +218,10 @@ func (r *Reconciler) sync(ctx context.Context, provider v1alpha1.Provider, chang
 
 func (r *Reconciler) tryAddControllerRef(ctx context.Context, provider v1alpha1.Provider) error {
 	secretRef := r.getCloudProviderSettingsSecretRef(provider)
+	if secretRef == nil {
+		return fmt.Errorf("could not find secret ref configuration for cloud %q", provider.Spec.Cloud)
+	}
+
 	secret, err := kubernetes.GetSecret(ctx, r.Client, secretRef)
 	if err != nil {
 		return err
@@ -230,5 +235,6 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "provider_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Provider{}).
+		Owns(&corev1.Secret{}).
 		Complete(r)
 }

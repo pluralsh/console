@@ -178,6 +178,6 @@ func (p *ProviderStatus) IsSHAEqual(sha string) bool {
 	return p.GetSHA() == sha
 }
 
-func (p *ProviderStatus) IsExisting() bool {
-	return p.Existing != nil && *p.Existing
+func (p *ProviderStatus) HasExisting() bool {
+	return p.Existing != nil
 }
