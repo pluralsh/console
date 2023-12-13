@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+# Exit on error
+set -e
 
 cd $(dirname $0)/..
 
