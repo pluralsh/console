@@ -6,9 +6,6 @@ import (
 	"os"
 	"strings"
 
-	deploymentsv1alpha "github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
-	"github.com/pluralsh/console/controller/pkg/client"
-	"github.com/pluralsh/console/controller/pkg/types"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -16,11 +13,19 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	ctrlruntimezap "sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	deploymentsv1alpha "github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/pkg/client"
+	"github.com/pluralsh/console/controller/pkg/types"
 )
 
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("Setup")
+	// version is managed by GoReleaser, see: https://goreleaser.com/cookbooks/using-main.version/
+	version = "dev"
+	// commit is managed by GoReleaser, see: https://goreleaser.com/cookbooks/using-main.version/
+	commit = "none"
 )
 
 func init() {
@@ -44,7 +49,7 @@ func main() {
 		reconcilers: types.Reconcilers(),
 	}
 	opts := ctrlruntimezap.Options{
-		Development: true,
+		Development: version == "dev",
 	}
 	opts.BindFlags(flag.CommandLine)
 	flag.StringVar(&opt.metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
@@ -60,6 +65,10 @@ func main() {
 	})
 
 	flag.Parse()
+	if flag.Arg(0) == "version" {
+		versionInfo()
+		return
+	}
 
 	ctrl.SetLogger(ctrlruntimezap.New(ctrlruntimezap.UseFlagOptions(&opts)))
 
@@ -125,4 +134,10 @@ func runOrDie(controllers []types.Controller, mgr ctrl.Manager) {
 		setupLog.Error(err, "error running manager")
 		os.Exit(1)
 	}
+}
+
+func versionInfo() {
+	fmt.Println("PLURAL CONTROLLER:")
+	fmt.Printf("   version\t%s\n", version)
+	fmt.Printf("   git commit\t%s\n", commit)
 }

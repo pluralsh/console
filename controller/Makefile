@@ -1,4 +1,5 @@
 IMG ?= deployment-controller:latest # Image URL to use all building/pushing image targets
+CONTROLLER_GEN = $(shell which controller-gen)
 
 ifndef GOPATH
 $(error $$GOPATH environment variable not set)
