@@ -7,10 +7,6 @@ import (
 
 	"github.com/go-logr/logr"
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
-	consoleclient "github.com/pluralsh/console/controller/pkg/client"
-	"github.com/pluralsh/console/controller/pkg/errors"
-	"github.com/pluralsh/console/controller/pkg/utils"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -19,6 +15,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
+	consoleclient "github.com/pluralsh/console/controller/pkg/client"
+	"github.com/pluralsh/console/controller/pkg/errors"
+	"github.com/pluralsh/console/controller/pkg/utils"
 )
 
 const (
@@ -71,8 +72,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return *result, err
 	}
 
-	// Get Provider ID from the reference if it is set and ensure that owner reference is set properly.
-	providerId, result, err := r.getProviderIdAndSetOwnerRef(ctx, cluster)
+	// Get Provider ID from the reference if it is set and ensure that controller reference is set properly.
+	providerId, result, err := r.getProviderIdAndSetControllerRef(ctx, cluster)
 	if result != nil {
 		return *result, err
 	}
@@ -171,6 +172,10 @@ func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1
 				// so that it can be retried.
 				return &ctrl.Result{}, err
 			}
+
+			// If deletion process started requeue so that we can make sure provider
+			// has been deleted from Console API before removing the finalizer.
+			return &requeue, nil
 		}
 
 		// If our finalizer is present, remove it.
@@ -188,7 +193,7 @@ func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1
 	return nil, nil
 }
 
-func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v1alpha1.Cluster) (providerId *string, result *ctrl.Result, err error) {
+func (r *Reconciler) getProviderIdAndSetControllerRef(ctx context.Context, cluster *v1alpha1.Cluster) (providerId *string, result *ctrl.Result, err error) {
 	logger := log.FromContext(ctx)
 
 	if cluster.Spec.IsProviderRefRequired() {
@@ -206,7 +211,7 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 			return nil, &requeue, nil
 		}
 
-		err = utils.TryAddOwnerRef(ctx, r.Client, provider, cluster, r.Scheme)
+		err = utils.TryAddControllerRef(ctx, r.Client, provider, cluster, r.Scheme)
 		if err != nil {
 			return nil, &ctrl.Result{}, fmt.Errorf("could not set cluster owner reference, got error: %+v", err)
 		}

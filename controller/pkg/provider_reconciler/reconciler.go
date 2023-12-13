@@ -37,7 +37,8 @@ const (
 	RequeueAfter = 30 * time.Second
 	// FinalizerName defines name for the main finalizer that synchronizes
 	// resource deletion from the Console API prior to removing the CRD.
-	FinalizerName = "providers.deployments.plural.sh/finalizer"
+	FinalizerName                   = "providers.deployments.plural.sh/finalizer"
+	ForegroundDeletionFinalizerName = "foregroundDeletion"
 )
 
 var (
@@ -54,6 +55,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	var provider v1alpha1.Provider
 	if err := r.Get(ctx, req.NamespacedName, &provider); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	if err := kubernetes.TryAddFinalizer(ctx, r.Client, &provider, ForegroundDeletionFinalizerName); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	// Check if resource already exists in the API and only sync the ID
