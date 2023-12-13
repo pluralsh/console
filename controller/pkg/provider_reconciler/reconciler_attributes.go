@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
-	"github.com/pluralsh/console/controller/pkg/kubernetes"
 )
 
 func (r *Reconciler) missingCredentialKeyError(key string) error {
@@ -45,7 +45,7 @@ func (r *Reconciler) toCloudProviderAWSSettingsAttributes(ctx context.Context, r
 	const accessKeyIDKeyName = "accessKeyId"
 	const secretAccessKeyName = "secretAccessKey"
 
-	secret, err := kubernetes.GetSecret(ctx, r.Client, ref)
+	secret, err := utils.GetSecret(ctx, r.Client, ref)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (r *Reconciler) toCloudProviderAzureSettingsAttributes(ctx context.Context,
 	const clientIDKeyName = "clientId"
 	const clientSecretKeyName = "clientSecret"
 
-	secret, err := kubernetes.GetSecret(ctx, r.Client, ref)
+	secret, err := utils.GetSecret(ctx, r.Client, ref)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (r *Reconciler) toCloudProviderAzureSettingsAttributes(ctx context.Context,
 func (r *Reconciler) toCloudProviderGCPSettingsAttributes(ctx context.Context, ref *corev1.SecretReference) (*console.CloudProviderSettingsAttributes, error) {
 	const applicationCredentialsKeyName = "applicationCredentials"
 
-	secret, err := kubernetes.GetSecret(ctx, r.Client, ref)
+	secret, err := utils.GetSecret(ctx, r.Client, ref)
 	if err != nil {
 		return nil, err
 	}

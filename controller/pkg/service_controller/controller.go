@@ -11,7 +11,6 @@ import (
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
-	"github.com/pluralsh/console/controller/pkg/kubernetes"
 	"github.com/pluralsh/console/controller/pkg/utils"
 	"github.com/pluralsh/polly/algorithms"
 	corev1 "k8s.io/api/core/v1"
@@ -82,7 +81,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	if existingService == nil {
-		if err := kubernetes.TryAddFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
+		if err := utils.TryAddFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
 			return ctrl.Result{}, err
 		}
 		_, err = r.ConsoleClient.CreateService(cluster.Status.ID, *attr)
@@ -93,7 +92,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		if err := kubernetes.TryAddFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
+		if err := utils.TryAddFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -241,14 +240,14 @@ func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1
 			}
 		}
 		if service.Spec.Helm.ValuesRef != nil {
-			val, err := kubernetes.GetConfigMapData(ctx, r.Client, service.Namespace, service.Spec.Helm.ValuesRef)
+			val, err := utils.GetConfigMapData(ctx, r.Client, service.Namespace, service.Spec.Helm.ValuesRef)
 			if err != nil {
 				return nil, err
 			}
 			attr.Helm.Values = &val
 		}
 		if service.Spec.Helm.ChartRef != nil {
-			val, err := kubernetes.GetConfigMapData(ctx, r.Client, service.Namespace, service.Spec.Helm.ChartRef)
+			val, err := utils.GetConfigMapData(ctx, r.Client, service.Namespace, service.Spec.Helm.ChartRef)
 			if err != nil {
 				return nil, err
 			}
@@ -287,7 +286,7 @@ func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1
 
 func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
 	if service.Spec.ConfigurationRef != nil {
-		configurationSecret, err := kubernetes.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
+		configurationSecret, err := utils.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
 		if err != nil {
 			return err
 		}
@@ -349,7 +348,7 @@ func (r *Reconciler) handleDelete(ctx context.Context, cluster *v1alpha1.Cluster
 			}
 			return requeue, nil
 		}
-		if err := kubernetes.TryRemoveFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
+		if err := utils.TryRemoveFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
