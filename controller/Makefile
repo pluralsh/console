@@ -39,7 +39,6 @@ docker-build: ## build Docker image with the driver
 docker-push: ## push Docker image with the driver
 	docker push ${IMG}
 
-
 ##@ Codegen
 
 .PHONY: manifests
