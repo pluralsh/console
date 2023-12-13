@@ -841,7 +841,7 @@ function TableRef(
           onClick={() =>
             tableContainerRef?.current?.scrollTo({
               top: 0,
-              behavior: 'smooth',
+              behavior: virtualizeRows ? 'instant' : 'smooth',
             })
           }
         >
