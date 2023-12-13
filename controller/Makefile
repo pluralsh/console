@@ -8,23 +8,6 @@ ifeq (,$(findstring $(GOPATH)/bin,$(PATH)))
 $(error $$GOPATH/bin directory is not in your $$PATH)
 endif
 
-##@ Build
-
-docker-build: ## Build docker image with the driver.
-	docker build --no-cache -t ${IMG} .
-
-docker-push: ## Push docker image with the driver.
-	docker push ${IMG}
-
-genmock: ## generates mocks before running tests
-	hack/gen-client-mocks.sh
-
-apply-crds: ## applies CRDs
-	kubectl apply -f config/crd/bases
-
-apply-cluster-byok: apply-crds ## applies BYOK cluster
-	kubectl apply -f config/crd/examples/cluster_byok.yaml
-
 ##@ General
 
 .PHONY: help
@@ -50,6 +33,13 @@ install-tools: ## install required tools
 build: manifests generate ## build
 	go build -o bin/deployment-controller main.go
 
+docker-build: ## build Docker image with the driver
+	docker build --no-cache -t ${IMG} .
+
+docker-push: ## push Docker image with the driver
+	docker push ${IMG}
+
+
 ##@ Codegen
 
 .PHONY: manifests
@@ -61,10 +51,14 @@ generate: install-tools ## generate code containing DeepCopy, DeepCopyInto, and 
 	go generate ./pkg/...
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
+.PHONY: genmock
+genmock: ## generates mocks before running tests
+	hack/gen-client-mocks.sh
+
 ##@ Tests
 
 .PHONY: test
-test: ## run tests
+test: genmock ## run tests
 	go test ./... -v
 
 .PHONY: lint
@@ -74,3 +68,8 @@ lint: install-tools ## run linters
 .PHONY: fix
 fix: install-tools ## fix issues found by linters
 	golangci-lint run --fix ./...
+
+##@ Utils
+
+apply-crds: ## applies CRDs
+	kubectl apply -f config/crd/bases
