@@ -78,7 +78,7 @@ export function RepoKindSelector({
           {validKinds?.[RepoKind.Git] && (
             <CheckOutlineIcon
               size={16}
-              color={theme.colors['text-success-light']}
+              color={theme.colors['icon-success']}
             />
           )}
         </SubTab>
@@ -100,7 +100,7 @@ export function RepoKindSelector({
           {validKinds?.[RepoKind.Helm] && (
             <CheckOutlineIcon
               size={16}
-              color={theme.colors['text-success-light']}
+              color={theme.colors['icon-success']}
             />
           )}
         </SubTab>
