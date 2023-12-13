@@ -259,8 +259,7 @@ func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.S
 		if err != nil {
 			return err
 		}
-		err = utils.TryAddOwnerRef(ctx, r.Client, service, configurationSecret, r.Scheme)
-		if err != nil {
+		if err := utils.TryAddControllerRef(ctx, r.Client, service, configurationSecret, r.Scheme); err != nil {
 			return err
 		}
 
@@ -273,7 +272,7 @@ func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.S
 		if err != nil {
 			return err
 		}
-		err = utils.TryAddOwnerRef(ctx, r.Client, service, configMap, r.Scheme)
+		err = utils.TryAddControllerRef(ctx, r.Client, service, configMap, r.Scheme)
 		if err != nil {
 			return err
 		}
@@ -285,7 +284,7 @@ func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.S
 		if err != nil {
 			return err
 		}
-		err = utils.TryAddOwnerRef(ctx, r.Client, service, configMap, r.Scheme)
+		err = utils.TryAddControllerRef(ctx, r.Client, service, configMap, r.Scheme)
 		if err != nil {
 			return err
 		}
