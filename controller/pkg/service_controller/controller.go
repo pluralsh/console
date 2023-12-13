@@ -254,33 +254,32 @@ func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1
 			}
 			attr.Helm.Chart = &val
 		}
-		if service.Spec.SyncConfig != nil {
-			var annotations *string
-			var labels *string
-			if service.Spec.SyncConfig.Annotations != nil {
-				result, err := json.Marshal(service.Spec.SyncConfig.Annotations)
-				if err != nil {
-					return nil, err
-				}
-				rawAnnotations := string(result)
-				annotations = &rawAnnotations
+	}
+	if service.Spec.SyncConfig != nil {
+		var annotations *string
+		var labels *string
+		if service.Spec.SyncConfig.Annotations != nil {
+			result, err := json.Marshal(service.Spec.SyncConfig.Annotations)
+			if err != nil {
+				return nil, err
 			}
-			if service.Spec.SyncConfig.Labels != nil {
-				result, err := json.Marshal(service.Spec.SyncConfig.Labels)
-				if err != nil {
-					return nil, err
-				}
-				rawLabels := string(result)
-				labels = &rawLabels
-			}
-			attr.SyncConfig = &console.SyncConfigAttributes{
-				NamespaceMetadata: &console.MetadataAttributes{
-					Labels:      labels,
-					Annotations: annotations,
-				},
-			}
+			rawAnnotations := string(result)
+			annotations = &rawAnnotations
 		}
-
+		if service.Spec.SyncConfig.Labels != nil {
+			result, err := json.Marshal(service.Spec.SyncConfig.Labels)
+			if err != nil {
+				return nil, err
+			}
+			rawLabels := string(result)
+			labels = &rawLabels
+		}
+		attr.SyncConfig = &console.SyncConfigAttributes{
+			NamespaceMetadata: &console.MetadataAttributes{
+				Labels:      labels,
+				Annotations: annotations,
+			},
+		}
 	}
 
 	return attr, nil
