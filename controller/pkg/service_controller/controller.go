@@ -62,6 +62,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
 		return ctrl.Result{}, err
 	}
+	if !repository.DeletionTimestamp.IsZero() {
+		log.Info("deleting service after repository deletion")
+		if err := r.Delete(ctx, service); err != nil {
+			return ctrl.Result{}, err
+		}
+		return requeue, nil
+	}
+
 	if repository.Status.Id == nil {
 		log.Info("Repository is not ready")
 		return requeue, nil
@@ -101,7 +109,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	sort.Slice(attr.Configuration, func(i, j int) bool {
-		return attr.Configuration[i].Name < attr.Configuration[i].Name
+		return attr.Configuration[i].Name < attr.Configuration[j].Name
 	})
 	updater := console.ServiceUpdateAttributes{
 		Version:       attr.Version,
