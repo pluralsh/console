@@ -34,6 +34,10 @@ install-tools: ## install required tools
 build: manifests generate ## build
 	go build -o bin/deployment-controller main.go
 
+.PHONY: release
+release: manifests generate ## builds release version of the app. Requires GoReleaser to work.
+	goreleaser build --clean --single-target --snapshot
+
 docker-build: ## build Docker image with the driver
 	docker build --no-cache -t ${IMG} .
 
