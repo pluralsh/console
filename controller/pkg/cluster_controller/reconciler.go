@@ -61,7 +61,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
 	if existing {
-		logger.V(0).Info("Cluster already exists in the API, running in read-only mode")
+		logger.V(9).Info("Cluster already exists in the API, running in read-only mode")
 		return r.handleExisting(ctx, cluster)
 	}
 
@@ -227,7 +227,7 @@ func (r *Reconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster, provid
 	}
 
 	if exists {
-		logger.V(0).Info(fmt.Sprintf("No changes detected for cluster %s", cluster.Name))
+		logger.V(9).Info(fmt.Sprintf("No changes detected for cluster %s", cluster.Name))
 		return r.ConsoleClient.GetCluster(cluster.Status.ID)
 	}
 
