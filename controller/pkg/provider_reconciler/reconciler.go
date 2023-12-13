@@ -32,7 +32,11 @@ type Reconciler struct {
 }
 
 const (
-	RequeueAfter  = 30 * time.Second
+	// RequeueAfter is the time between scheduled reconciles if there are no
+	// changes to the CRD.
+	RequeueAfter = 30 * time.Second
+	// FinalizerName defines name for the main finalizer that synchronizes
+	// resource deletion from the Console API prior to removing the CRD.
 	FinalizerName = "providers.deployments.plural.sh/finalizer"
 )
 
@@ -58,7 +62,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return ctrl.Result{}, err
 	}
 	if exists {
-		log.Info("Provider already exists in the API, running in read-only mode")
 		return r.handleExistingProvider(ctx, provider)
 	}
 
@@ -133,7 +136,12 @@ func (r *Reconciler) isAlreadyExists(ctx context.Context, provider v1alpha1.Prov
 		return false, err
 	}
 
-	return !provider.Status.HasID(), nil
+	if !provider.Status.HasID() {
+		log.FromContext(ctx).Info("Provider already exists in the API, running in read-only mode")
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, provider v1alpha1.Provider) (*ctrl.Result, error) {
