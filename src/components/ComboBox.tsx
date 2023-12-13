@@ -57,7 +57,9 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
   inputProps?: InputProps
   filter?: ComboBoxStateOptions<object>['defaultFilter']
   loading?: boolean
-} & Omit<
+  titleContent?: ReactNode
+} & Pick<InputProps, 'suffix' | 'prefix' | 'titleContent' | 'showClearButton'> &
+  Omit<
     ComboBoxStateOptions<object>,
     'onLoadMore' | 'isLoading' | 'validationState' | 'placeholder'
   >
@@ -152,6 +154,7 @@ function ComboBoxInput({
   isOpen,
   onInputClick,
   loading,
+  ...props
 }: ComboBoxInputProps & InputProps) {
   outerInputProps = {
     ...outerInputProps,
@@ -170,37 +173,16 @@ function ComboBoxInput({
 
   let themeExtension: any = {}
 
-  if (startIcon) {
-    themeExtension = mergeTheme(themeExtension, {
-      Input: {
-        Root: [
-          {
-            position: 'relative',
-            paddingLeft: 0,
-          },
-        ],
-        InputBase: [{ paddingLeft: theme.spacing.xxlarge }],
-        StartIcon: [
-          {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            pointerEvents: 'none',
-          },
-        ],
-      },
-    })
-  }
-
   if (showArrow) {
     themeExtension = mergeTheme(themeExtension, {
       Input: {
         Root: [{ paddingRight: 0 }],
+        InputBase: [{ paddingRight: 0 }],
         EndIcon: [
           {
             alignSelf: 'stretch',
-            paddingHorizontal: 0,
+            paddingLeft: 0,
+            paddingRight: 0,
             marginLeft: 0,
             marginRight: 0,
           },
@@ -230,6 +212,7 @@ function ComboBoxInput({
         ...innerInputProps,
       }}
       {...outerInputProps}
+      {...props}
     />
   )
 }
@@ -258,6 +241,10 @@ function ComboBox({
   maxHeight,
   inputProps: outerInputProps = {},
   loading,
+  suffix,
+  prefix,
+  titleContent,
+  showClearButton,
   ...props
 }: ComboBoxProps) {
   const nextFocusedKeyRef = useRef<Key>(null)
@@ -406,6 +393,10 @@ function ComboBox({
         buttonProps={buttonProps}
         showArrow={showArrow}
         isOpen={state.isOpen}
+        suffix={suffix}
+        prefix={prefix}
+        titleContent={titleContent}
+        showClearButton={showClearButton}
         setIsOpen={setIsOpen}
         startIcon={startIcon}
         outerInputProps={outerInputProps}

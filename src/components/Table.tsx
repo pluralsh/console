@@ -54,7 +54,7 @@ export type TableProps = Omit<
   | 'scrollTopMargin'
   | 'virtualizeRows'
   | 'virtualizerOptions'
-  | 'lockColumnsOnFirstScroll'
+  | 'lockColumnsOnScroll'
   | 'reactVirtualOptions'
   | 'reactTableOptions'
   | 'onRowClick'
