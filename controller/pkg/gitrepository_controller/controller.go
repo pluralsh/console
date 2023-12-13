@@ -62,13 +62,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 		return ctrl.Result{}, err
 	}
-	if !repo.GetDeletionTimestamp().IsZero() {
-		return r.handleDelete(ctx, repo)
-	}
-	cred, err := r.getRepositoryCredentials(ctx, repo)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
 
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(repo)
@@ -79,7 +72,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		logger.Info("repository already exists in the API, running in read-only mode")
 		return r.handleExistingRepo(ctx, repo)
 	}
-
+	if !repo.GetDeletionTimestamp().IsZero() {
+		return r.handleDelete(ctx, repo)
+	}
+	cred, err := r.getRepositoryCredentials(ctx, repo)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 	sha, err := utils.HashObject(cred)
 	if err != nil {
 		return ctrl.Result{}, err

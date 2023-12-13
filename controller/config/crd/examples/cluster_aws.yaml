@@ -14,7 +14,7 @@ metadata:
 spec:
   handle: aws
   cloud: aws
-  version: "1.25"
+  version: "1.26"
   protect: false
   providerRef:
     name: aws

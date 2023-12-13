@@ -56,13 +56,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	// Handle existing resource.
-	existing, err := r.isExistingResource(cluster)
+	existing, err := r.isExisting(cluster)
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
 	if existing {
-		logger.Info("Cluster already exists in the API, running in read-only mode")
-		return r.handleExistingResource(ctx, cluster)
+		logger.V(9).Info("Cluster already exists in the API, running in read-only mode")
+		return r.handleExisting(ctx, cluster)
 	}
 
 	// Handle resource deletion both in Kubernetes cluster and in Console API.
@@ -78,14 +78,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
-	// TODO: Ensure that element order stays the same to avoid fake diffs.
 	sha, err := utils.HashObject(cluster.UpdateAttributes())
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
 	// Sync resource with Console API.
-	apiCluster, err := r.syncCluster(ctx, cluster, providerId, &sha)
+	apiCluster, err := r.sync(ctx, cluster, providerId, sha)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -107,9 +106,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	return requeue, nil
 }
 
-func (r *Reconciler) isExistingResource(cluster *v1alpha1.Cluster) (bool, error) {
-	if cluster.Status.IsExisting() {
-		return true, nil
+func (r *Reconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
+	if cluster.Status.HasExisting() {
+		return *cluster.Status.Existing, nil
 	}
 
 	if !cluster.Spec.HasHandle() {
@@ -127,7 +126,7 @@ func (r *Reconciler) isExistingResource(cluster *v1alpha1.Cluster) (bool, error)
 	return !cluster.Status.HasID(), nil
 }
 
-func (r *Reconciler) handleExistingResource(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
+func (r *Reconciler) handleExisting(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
 	apiCluster, err := r.ConsoleClient.GetClusterByHandle(cluster.Spec.Handle)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -218,20 +217,20 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 	return nil, nil, nil
 }
 
-func (r *Reconciler) syncCluster(ctx context.Context, cluster *v1alpha1.Cluster, providerId *string, sha *string) (*console.ClusterFragment, error) {
+func (r *Reconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster, providerId *string, sha string) (*console.ClusterFragment, error) {
 	exists := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
 	logger := log.FromContext(ctx)
 
 	if cluster.Status.IsSHAChanged(sha) && exists {
-		logger.Info("Detected changes, updating cluster")
+		logger.Info(fmt.Sprintf("Detected changes, updating %s cluster", cluster.Name))
 		return r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
 	}
 
 	if exists {
-		logger.Info("No changes detected, updating cluster")
+		logger.V(9).Info(fmt.Sprintf("No changes detected for %s cluster", cluster.Name))
 		return r.ConsoleClient.GetCluster(cluster.Status.ID)
 	}
 
-	logger.Info("Cluster does not exist, creating new one")
+	logger.Info(fmt.Sprintf("%s cluster does not exist, creating it", cluster.Name))
 	return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
 }

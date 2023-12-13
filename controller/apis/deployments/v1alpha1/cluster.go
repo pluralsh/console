@@ -2,6 +2,8 @@ package v1alpha1
 
 import (
 	"bytes"
+	"slices"
+	"strings"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
@@ -67,12 +69,14 @@ func (c *Cluster) Attributes(providerId *string) console.ClusterAttributes {
 }
 
 func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
+	nodePools := algorithms.Map(c.Spec.NodePools, func(np ClusterNodePool) *console.NodePoolAttributes { return np.Attributes() })
+	slices.SortFunc(nodePools, func(a, b *console.NodePoolAttributes) int { return strings.Compare(a.Name, b.Name) })
+
 	return console.ClusterUpdateAttributes{
-		Handle:  c.Spec.Handle,
-		Version: c.Spec.Version,
-		Protect: c.Spec.Protect,
-		NodePools: algorithms.Map(c.Spec.NodePools,
-			func(np ClusterNodePool) *console.NodePoolAttributes { return np.Attributes() }),
+		Handle:    c.Spec.Handle,
+		Version:   c.Spec.Version,
+		Protect:   c.Spec.Protect,
+		NodePools: nodePools,
 	}
 }
 
@@ -289,14 +293,16 @@ func (np *ClusterNodePool) Attributes() *console.NodePoolAttributes {
 		return nil
 	}
 
+	taints := algorithms.Map(np.Taints, func(t Taint) *console.TaintAttributes { return t.Attributes() })
+	slices.SortFunc(taints, func(a, b *console.TaintAttributes) int { return strings.Compare(a.Key, b.Key) })
+
 	attrs := &console.NodePoolAttributes{
 		Name:          np.Name,
 		MinSize:       np.MinSize,
 		MaxSize:       np.MaxSize,
 		InstanceType:  np.InstanceType,
 		CloudSettings: np.CloudSettings.Attributes(),
-		Taints: algorithms.Map(np.Taints,
-			func(t Taint) *console.TaintAttributes { return t.Attributes() }),
+		Taints:        taints,
 	}
 
 	if np.Labels != nil {
@@ -382,10 +388,10 @@ func (cs *ClusterStatus) HasSHA() bool {
 	return cs.SHA != nil && len(*cs.SHA) > 0
 }
 
-func (cs *ClusterStatus) IsSHAChanged(sha *string) bool {
-	return cs.HasSHA() && cs.SHA != sha
+func (cs *ClusterStatus) IsSHAChanged(sha string) bool {
+	return cs.HasSHA() && *cs.SHA != sha
 }
 
-func (cs *ClusterStatus) IsExisting() bool {
-	return cs.Existing != nil && *cs.Existing
+func (cs *ClusterStatus) HasExisting() bool {
+	return cs.Existing != nil
 }
