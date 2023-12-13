@@ -400,6 +400,7 @@ defmodule Console.Deployments.Services do
   """
   @spec update_components(map, binary | Service.t) :: service_resp
   def update_components(attrs, %Service{} = service) do
+    Logger.info "updating components for #{service.id}: #{inspect(attrs)}"
     start_transaction()
     |> add_operation(:service, fn _ ->
       svc = Console.Repo.preload(service, [:components, :errors])
@@ -434,15 +435,18 @@ defmodule Console.Deployments.Services do
       do: update_components(attrs, svc)
   end
 
-  defp stabilize(%{components: new_components} = attrs, %{components: components}) do
+  def stabilize(%{components: new_components} = attrs, %{components: components}) do
     components = Map.new(components, fn %{id: id} = comp -> {component_key(comp), id} end)
     new_components = Enum.map(new_components, &Map.put(&1, :id, components[component_key(&1)]))
     Map.put(attrs, :components, new_components)
   end
-  defp stabilize(attrs, _), do: attrs
+  def stabilize(attrs, _), do: attrs
 
-  defp component_key(%{group: g, version: v, kind: k, namespace: ns, name: n}), do: {g, v, k, ns, n}
+  defp component_key(%{group: g, version: v, kind: k, namespace: ns, name: n}), do: {nilify(g), v, k, nilify(ns), n}
   defp component_key(_), do: nil
+
+  defp nilify(""), do: nil
+  defp nilify(v), do: v
 
   @doc """
   Find and insert any deprecations for this service's components
