@@ -78,7 +78,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
-	// TODO: Ensure that element order stays the same to avoid fake diffs.
 	sha, err := utils.HashObject(cluster.UpdateAttributes())
 	if err != nil {
 		return ctrl.Result{}, err
