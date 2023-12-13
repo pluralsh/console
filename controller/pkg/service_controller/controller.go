@@ -175,6 +175,8 @@ func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.Servic
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.ServiceDeployment{}).
+		Owns(&corev1.Secret{}).
+		Owns(&corev1.ConfigMap{}).
 		Complete(r)
 }
 
