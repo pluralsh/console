@@ -3,6 +3,7 @@ package servicecontroller
 import (
 	"context"
 	"encoding/json"
+	"sort"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -100,7 +101,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-
+	sort.Slice(attr.Configuration, func(i, j int) bool {
+		return attr.Configuration[i].Name < attr.Configuration[i].Name
+	})
 	updater := console.ServiceUpdateAttributes{
 		Version:       attr.Version,
 		Protect:       attr.Protect,
