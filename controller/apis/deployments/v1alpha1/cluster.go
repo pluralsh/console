@@ -388,8 +388,8 @@ func (cs *ClusterStatus) HasSHA() bool {
 	return cs.SHA != nil && len(*cs.SHA) > 0
 }
 
-func (cs *ClusterStatus) IsSHAChanged(sha *string) bool {
-	return cs.HasSHA() && cs.SHA != sha
+func (cs *ClusterStatus) IsSHAChanged(sha string) bool {
+	return cs.HasSHA() && *cs.SHA != sha
 }
 
 func (cs *ClusterStatus) HasExisting() bool {

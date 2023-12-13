@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	RequeueAfter  = 30 * time.Second
+	RequeueAfter  = 5 * time.Second
 	FinalizerName = "deployments.plural.sh/cluster-protection"
 )
 
@@ -61,7 +61,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
 	if existing {
-		logger.Info("Cluster already exists in the API, running in read-only mode")
+		logger.V(0).Info("Cluster already exists in the API, running in read-only mode")
 		return r.handleExisting(ctx, cluster)
 	}
 
@@ -84,7 +84,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	}
 
 	// Sync resource with Console API.
-	apiCluster, err := r.syncCluster(ctx, cluster, providerId, &sha)
+	apiCluster, err := r.sync(ctx, cluster, providerId, sha)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -217,20 +217,20 @@ func (r *Reconciler) getProviderIdAndSetOwnerRef(ctx context.Context, cluster *v
 	return nil, nil, nil
 }
 
-func (r *Reconciler) syncCluster(ctx context.Context, cluster *v1alpha1.Cluster, providerId *string, sha *string) (*console.ClusterFragment, error) {
+func (r *Reconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster, providerId *string, sha string) (*console.ClusterFragment, error) {
 	exists := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
 	logger := log.FromContext(ctx)
 
 	if cluster.Status.IsSHAChanged(sha) && exists {
-		logger.Info("Detected changes, updating cluster")
+		logger.Info(fmt.Sprintf("Detected changes, updating %s cluster", cluster.Name))
 		return r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
 	}
 
 	if exists {
-		logger.Info("No changes detected, updating cluster")
+		logger.V(0).Info(fmt.Sprintf("No changes detected for cluster %s", cluster.Name))
 		return r.ConsoleClient.GetCluster(cluster.Status.ID)
 	}
 
-	logger.Info("Cluster does not exist, creating new one")
+	logger.Info(fmt.Sprintf("Cluster %s does not exist, creating new one", cluster.Name))
 	return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
 }
