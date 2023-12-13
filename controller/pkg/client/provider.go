@@ -13,6 +13,10 @@ import (
 
 func (c *client) CreateProvider(ctx context.Context, attributes gqlclient.ClusterProviderAttributes, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
 	response, err := c.consoleClient.CreateClusterProvider(ctx, attributes, options...)
+	if err != nil {
+		return nil, err
+	}
+
 	return response.CreateClusterProvider, err
 }
 

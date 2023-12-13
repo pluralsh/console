@@ -35,10 +35,9 @@ const (
 	// RequeueAfter is the time between scheduled reconciles if there are no
 	// changes to the CRD.
 	RequeueAfter = 30 * time.Second
-	// FinalizerName defines name for the main finalizer that synchronizes
+	// ProviderProtectionFinalizerName defines name for the main finalizer that synchronizes
 	// resource deletion from the Console API prior to removing the CRD.
-	FinalizerName                   = "providers.deployments.plural.sh/finalizer"
-	ForegroundDeletionFinalizerName = "foregroundDeletion"
+	ProviderProtectionFinalizerName = "providers.deployments.plural.sh/provider-protection"
 )
 
 var (
@@ -55,10 +54,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	var provider v1alpha1.Provider
 	if err := r.Get(ctx, req.NamespacedName, &provider); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
-	}
-
-	if err := kubernetes.TryAddFinalizer(ctx, r.Client, &provider, ForegroundDeletionFinalizerName); err != nil {
-		return ctrl.Result{}, err
 	}
 
 	// Check if resource already exists in the API and only sync the ID
@@ -155,8 +150,8 @@ func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, provider v1alpha1
 	// If object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object. This is equivalent
 	// to registering our finalizer.
-	if provider.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(&provider, FinalizerName) {
-		controllerutil.AddFinalizer(&provider, FinalizerName)
+	if provider.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(&provider, ProviderProtectionFinalizerName) {
+		controllerutil.AddFinalizer(&provider, ProviderProtectionFinalizerName)
 		if err := r.Update(ctx, &provider); err != nil {
 			return &ctrl.Result{}, err
 		}
@@ -185,8 +180,8 @@ func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, provider v1alpha1
 		}
 
 		// If our finalizer is present, remove it
-		if controllerutil.ContainsFinalizer(&provider, FinalizerName) {
-			controllerutil.RemoveFinalizer(&provider, FinalizerName)
+		if controllerutil.ContainsFinalizer(&provider, ProviderProtectionFinalizerName) {
+			controllerutil.RemoveFinalizer(&provider, ProviderProtectionFinalizerName)
 			if err := r.Update(ctx, &provider); err != nil {
 				return &ctrl.Result{}, err
 			}

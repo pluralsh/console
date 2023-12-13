@@ -25,7 +25,7 @@ metadata:
 spec:
   handle: gcp
   cloud: gcp
-  version: "1.25.14"
+  version: "1.25.13"
   protect: false
   providerRef:
     name: gcp
