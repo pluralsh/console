@@ -1,5 +1,4 @@
-# Image URL to use all building/pushing image targets
-IMG ?= deployment-controller:latest
+IMG ?= deployment-controller:latest # Image URL to use all building/pushing image targets
 
 ifndef GOPATH
 $(error $$GOPATH environment variable not set)
@@ -8,16 +7,6 @@ endif
 ifeq (,$(findstring $(GOPATH)/bin,$(PATH)))
 $(error $$GOPATH/bin directory is not in your $$PATH)
 endif
-
-ifeq (,$(shell go env GOBIN))
-GOBIN=$(shell go env GOPATH)/bin
-else
-GOBIN=$(shell go env GOBIN)
-endif
-
-CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
-controller-gen: ## Download controller-gen locally if necessary.
-	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.11.3)
 
 ##@ Build
 
@@ -35,20 +24,6 @@ apply-crds: ## applies CRDs
 
 apply-cluster-byok: apply-crds ## applies BYOK cluster
 	kubectl apply -f config/crd/examples/cluster_byok.yaml
-
-# go-get-tool will 'go get' any package $2 and install it to $1.
-PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
-define go-get-tool
-@[ -f $(1) ] || { \
-set -e ;\
-TMP_DIR=$$(mktemp -d) ;\
-cd $$TMP_DIR ;\
-go mod init tmp ;\
-echo "Downloading $(2)" ;\
-GOBIN=$(PROJECT_DIR)/bin go install $(2) ;\
-rm -rf $$TMP_DIR ;\
-}
-endef
 
 ##@ General
 
@@ -78,11 +53,11 @@ build: manifests generate ## build
 ##@ Codegen
 
 .PHONY: manifests
-manifests: controller-gen ## generate Kubernetes manifests
+manifests: install-tools ## generate Kubernetes manifests
 	$(CONTROLLER_GEN) crd rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
-generate: controller-gen ## generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations
+generate: install-tools ## generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations
 	go generate ./pkg/...
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
