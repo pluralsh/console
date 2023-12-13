@@ -157,9 +157,11 @@ func (r *Reconciler) handleDelete(ctx context.Context, repo *v1alpha1.GitReposit
 		}
 		if existingRepos != nil {
 			if err := r.ConsoleClient.DeleteRepository(*repo.Status.Id); err != nil {
-				if !errors.IsNotFound(err) {
+				if !errors.IsDeleteRepository(err) {
 					return ctrl.Result{}, err
 				}
+				logger.Info("waiting for the services")
+				return requeue, nil
 			}
 		}
 		if err := utils.TryRemoveFinalizer(ctx, r.Client, repo, RepoFinalizer); err != nil {

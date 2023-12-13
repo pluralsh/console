@@ -42,6 +42,7 @@ type GitRepositoryStatus struct {
 	// CRD is then set to read-only mode and does not update Console API from CRD.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=boolean
+	// +kubebuilder:default:=false
 	Existing *bool `json:"existing,omitempty"`
 }
 

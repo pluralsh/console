@@ -12,8 +12,9 @@ func (k KnownError) String() string {
 }
 
 const (
-	ErrorNotFound KnownError = "could not find resource"
-	ErrExpected   KnownError = "this is a transient, expected error"
+	ErrorNotFound       KnownError = "could not find resource"
+	ErrExpected         KnownError = "this is a transient, expected error"
+	ErrDeleteRepository            = "could not delete repository"
 )
 
 type wrappedErrorResponse struct {
@@ -52,4 +53,18 @@ func IsNotFound(err error) bool {
 	}
 
 	return newAPIError(errorResponse).Has(ErrorNotFound)
+}
+
+func IsDeleteRepository(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errorResponse := new(client.ErrorResponse)
+	ok := errors.As(err, &errorResponse)
+	if !ok {
+		return false
+	}
+
+	return newAPIError(errorResponse).Has(ErrDeleteRepository)
 }

@@ -67,6 +67,7 @@ spec:
           status:
             properties:
               existing:
+                default: false
                 description: Existing flag is set to true when Console API object
                   already exists when CRD is created. CRD is then set to read-only
                   mode and does not update Console API from CRD.
