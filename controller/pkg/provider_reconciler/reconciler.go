@@ -18,7 +18,6 @@ import (
 
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
-	"github.com/pluralsh/console/controller/pkg/kubernetes"
 	"github.com/pluralsh/console/controller/pkg/utils"
 )
 
@@ -57,7 +56,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if err := kubernetes.TryAddFinalizer(ctx, r.Client, &provider, ForegroundDeletionFinalizerName); err != nil {
+	if err := utils.TryAddFinalizer(ctx, r.Client, &provider, ForegroundDeletionFinalizerName); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -235,7 +234,7 @@ func (r *Reconciler) tryAddControllerRef(ctx context.Context, provider v1alpha1.
 		return fmt.Errorf("could not find secret ref configuration for cloud %q", provider.Spec.Cloud)
 	}
 
-	secret, err := kubernetes.GetSecret(ctx, r.Client, secretRef)
+	secret, err := utils.GetSecret(ctx, r.Client, secretRef)
 	if err != nil {
 		return err
 	}

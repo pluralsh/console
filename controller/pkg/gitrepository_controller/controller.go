@@ -13,7 +13,6 @@ import (
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
-	"github.com/pluralsh/console/controller/pkg/kubernetes"
 	"github.com/pluralsh/console/controller/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -88,7 +87,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	if existingRepo == nil {
-		if err := kubernetes.TryAddFinalizer(ctx, r.Client, repo, RepoFinalizer); err != nil {
+		if err := utils.TryAddFinalizer(ctx, r.Client, repo, RepoFinalizer); err != nil {
 			return ctrl.Result{}, err
 		}
 		resp, err := r.ConsoleClient.CreateRepository(repo.Spec.Url, cred.PrivateKey, cred.Passphrase, cred.Username, cred.Password)
@@ -163,7 +162,7 @@ func (r *Reconciler) handleDelete(ctx context.Context, repo *v1alpha1.GitReposit
 				}
 			}
 		}
-		if err := kubernetes.TryRemoveFinalizer(ctx, r.Client, repo, RepoFinalizer); err != nil {
+		if err := utils.TryRemoveFinalizer(ctx, r.Client, repo, RepoFinalizer); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
