@@ -39,6 +39,14 @@ type ServiceHelm struct {
 	Repository *NamespacedName `json:"repository,omitempty"`
 }
 
+type SyncConfigAttributes struct {
+	// +optional
+	Labels map[string]string `json:"labels,omitempty"`
+
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
 type ServiceSpec struct {
 	// +optional
 	DocsPath *string `json:"docsPath,omitempty"`
@@ -52,7 +60,8 @@ type ServiceSpec struct {
 	Git *ServiceGit `json:"git,omitempty"`
 	// +optional
 	Helm *ServiceHelm `json:"helm,omitempty"`
-
+	// +optional
+	SyncConfig *SyncConfigAttributes `json:"syncConfig,omitempty"`
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Repository is immutable"
 	RepositoryRef corev1.ObjectReference `json:"repositoryRef"`

@@ -2,6 +2,7 @@ package servicecontroller
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -75,11 +76,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	sha, err := utils.HashObject(attr)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
 	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
 	if err != nil && !errors.IsNotFound(err) {
 		return ctrl.Result{}, err
@@ -100,22 +96,27 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, err
 		}
 	}
-
 	err = r.addOwnerReferences(ctx, service)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	updater := console.ServiceUpdateAttributes{
+		Version:       attr.Version,
+		Protect:       attr.Protect,
+		Git:           attr.Git,
+		Helm:          attr.Helm,
+		Configuration: attr.Configuration,
+		Kustomize:     attr.Kustomize,
+	}
+
+	sha, err := utils.HashObject(updater)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if service.Status.Sha != "" && service.Status.Sha != sha {
 		// update service
-		updater := console.ServiceUpdateAttributes{
-			Version:       attr.Version,
-			Protect:       attr.Protect,
-			Git:           attr.Git,
-			Helm:          attr.Helm,
-			Configuration: attr.Configuration,
-			Kustomize:     attr.Kustomize,
-		}
 		if err := r.ConsoleClient.UpdateService(existingService.ID, updater); err != nil {
 			return ctrl.Result{}, err
 		}
@@ -250,8 +251,35 @@ func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1
 			}
 			attr.Helm.Chart = &val
 		}
+		if service.Spec.SyncConfig != nil {
+			var annotations *string
+			var labels *string
+			if service.Spec.SyncConfig.Annotations != nil {
+				result, err := json.Marshal(service.Spec.SyncConfig.Annotations)
+				if err != nil {
+					return nil, err
+				}
+				rawAnnotations := string(result)
+				annotations = &rawAnnotations
+			}
+			if service.Spec.SyncConfig.Labels != nil {
+				result, err := json.Marshal(service.Spec.SyncConfig.Labels)
+				if err != nil {
+					return nil, err
+				}
+				rawLabels := string(result)
+				labels = &rawLabels
+			}
+			attr.SyncConfig = &console.SyncConfigAttributes{
+				NamespaceMetadata: &console.MetadataAttributes{
+					Labels:      labels,
+					Annotations: annotations,
+				},
+			}
+		}
 
 	}
+
 	return attr, nil
 }
 
