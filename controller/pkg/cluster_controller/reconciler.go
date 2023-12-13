@@ -208,7 +208,7 @@ func (r *Reconciler) getProviderIdAndSetControllerRef(ctx context.Context, clust
 
 		// Once provider is marked with deletion timestamp we should delete cluster as well.
 		// Provider cannot be deleted until cluster exists so that ensures cascading deletion.
-		if provider.DeletionTimestamp != nil {
+		if !provider.DeletionTimestamp.IsZero() {
 			err := r.Delete(ctx, cluster)
 			if err != nil {
 				return nil, &ctrl.Result{}, err
