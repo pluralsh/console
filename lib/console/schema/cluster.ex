@@ -177,6 +177,30 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: c.provider_id == ^provider_id)
   end
 
+  def statistics(query \\ __MODULE__) do
+    expired = health_threshold()
+    nested = from(c in __MODULE__, select: %{healthy: c.pinged_at > ^expired, id: c.id})
+    from(c in query,
+      join: n in subquery(nested),
+        on: n.id == c.id,
+      group_by: n.healthy,
+      select: %{healthy: n.healthy, count: count(c.id, :distinct)}
+    )
+  end
+
+  def health(query \\ __MODULE__, health)
+  def health(query, true) do
+    expired = health_threshold()
+    from(c in query, where: c.pinged_at > ^expired)
+  end
+
+  def health(query, _) do
+    expired = health_threshold()
+    from(c in query, where: c.pinged_at <= ^expired)
+  end
+
+  defp health_threshold(), do: Timex.now() |> Timex.shift(minutes: -5)
+
   def with_tag(query \\ __MODULE__, name, value) do
     from(c in query,
       join: t in assoc(c, :tags),

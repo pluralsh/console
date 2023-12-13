@@ -19,7 +19,13 @@ defmodule Console.Cached.ClusterNodes do
 
   def handle_info(:warm, s) do
     Logger.info "warming cluster info caches"
-    Cron.cache_warm()
+    try do
+      Cron.cache_warm()
+    rescue
+      e ->
+        Logger.info "hit error trying to warm node caches"
+        Logger.error(Exception.format(:error, e, __STACKTRACE__))
+    end
     {:noreply, s}
   end
 end

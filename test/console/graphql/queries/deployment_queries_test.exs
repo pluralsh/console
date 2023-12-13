@@ -825,4 +825,50 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert chart["appVersion"]
     end
   end
+
+  describe "clusterStatuses" do
+    test "it can aggregate statuses for all visible clusters" do
+      admin = admin_user()
+      insert_list(2, :cluster, pinged_at: Timex.now())
+      insert_list(3, :cluster, pinged_at: Timex.now() |> Timex.shift(days: -1))
+      insert(:cluster)
+
+      {:ok, %{data: %{"clusterStatuses" => res}}} = run_query("""
+        query {
+          clusterStatuses {
+            healthy
+            count
+          }
+        }
+      """, %{}, %{current_user: admin})
+
+      assert length(res) == 3
+      as_map = Map.new(res, & {&1["healthy"], &1})
+      assert as_map[true]["count"] == 2
+      assert as_map[false]["count"] == 3
+      assert as_map[nil]["count"] == 1
+    end
+  end
+
+  describe "tags" do
+    test "it can list cluster tag names and values" do
+      user = insert(:user)
+      cluster = insert(:cluster)
+      insert(:tag, cluster: cluster, name: "first", value: "value")
+      insert(:tag, cluster: cluster, name: "second", value: "value")
+      insert(:tag, cluster: build(:cluster), name: "first", value: "value2")
+
+      {:ok, %{data: %{"tags" => ["first", "second"]}}} = run_query("""
+        query {
+          tags
+        }
+      """, %{}, %{current_user: user})
+
+      {:ok, %{data: %{"tags" => ["value", "value2"]}}} = run_query("""
+        query {
+          tags(tag: "first")
+        }
+      """, %{}, %{current_user: user})
+    end
+  end
 end

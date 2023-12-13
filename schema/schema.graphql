@@ -159,7 +159,13 @@ type RootQueryType {
   tokenExchange(token: String!): User
 
   "a relay connection of all clusters visible to the current user"
-  clusters(after: String, first: Int, before: String, last: Int, q: String): ClusterConnection
+  clusters(after: String, first: Int, before: String, last: Int, q: String, health: Boolean, tag: TagInput): ClusterConnection
+
+  "gets summary information for all healthy\/unhealthy clusters in your fleet"
+  clusterStatuses(q: String, tag: TagInput): [ClusterStatusInfo]
+
+  "lists tags applied to any clusters in the fleet"
+  tags(tag: String): [String]
 
   "a relay connection of all providers visible to the current user"
   clusterProviders(after: String, first: Int, before: String, last: Int): ClusterProviderConnection
@@ -1400,6 +1406,11 @@ input AgentMigrationAttributes {
   configuration: Json
 }
 
+input TagInput {
+  name: String!
+  value: String!
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -1761,6 +1772,12 @@ type AgentMigration {
 type Tag {
   name: String!
   value: String!
+}
+
+"a cluster info data struct"
+type ClusterStatusInfo {
+  healthy: Boolean
+  count: Int
 }
 
 type ClusterConnection {

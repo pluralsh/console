@@ -145,6 +145,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :configuration, :json
   end
 
+  input_object :tag_input do
+    field :name,  non_null(:string)
+    field :value, non_null(:string)
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -408,6 +413,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :value, non_null(:string)
   end
 
+  @desc "a cluster info data struct"
+  object :cluster_status_info do
+    field :healthy, :boolean
+    field :count,   :integer
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -453,10 +464,29 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     @desc "a relay connection of all clusters visible to the current user"
     connection field :clusters, node_type: :cluster do
-      arg :q, :string
       middleware Authenticated
+      arg :q,      :string
+      arg :health, :boolean
+      arg :tag,    :tag_input
 
       resolve &Deployments.list_clusters/2
+    end
+
+    @desc "gets summary information for all healthy/unhealthy clusters in your fleet"
+    field :cluster_statuses, list_of(:cluster_status_info) do
+      middleware Authenticated
+      arg :q,      :string
+      arg :tag,    :tag_input
+
+      resolve &Deployments.cluster_statuses/2
+    end
+
+    @desc "lists tags applied to any clusters in the fleet"
+    field :tags, list_of(:string) do
+      middleware Authenticated
+      arg :tag, :string
+
+      resolve &Deployments.list_tags/2
     end
 
     @desc "a relay connection of all providers visible to the current user"
