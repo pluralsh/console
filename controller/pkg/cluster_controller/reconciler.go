@@ -206,6 +206,17 @@ func (r *Reconciler) getProviderIdAndSetControllerRef(ctx context.Context, clust
 			return nil, &ctrl.Result{}, fmt.Errorf("could not get provider, got error: %+v", err)
 		}
 
+		// Once provider is marked with deletion timestamp we should delete cluster as well.
+		// Provider cannot be deleted until cluster exists so that ensures cascading deletion.
+		if provider.DeletionTimestamp != nil {
+			err := r.Delete(ctx, cluster)
+			if err != nil {
+				return nil, &ctrl.Result{}, err
+			}
+
+			return nil, &requeue, nil
+		}
+
 		if !provider.Status.HasID() {
 			logger.Info("Provider does not have ID set yet")
 			return nil, &requeue, nil
