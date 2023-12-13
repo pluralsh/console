@@ -67,6 +67,9 @@ spec:
           status:
             properties:
               existing:
+                description: Existing flag is set to true when Console API object
+                  already exists when CRD is created. CRD is then set to read-only
+                  mode and does not update Console API from CRD.
                 type: boolean
               health:
                 description: Health status.
@@ -82,8 +85,6 @@ spec:
                 type: string
               sha:
                 type: string
-            required:
-            - existing
             type: object
         type: object
     served: true

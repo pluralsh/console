@@ -37,8 +37,12 @@ type GitRepositoryStatus struct {
 	// +optional
 	Id *string `json:"id,omitempty"`
 	// +optional
-	Sha      string `json:"sha,omitempty"`
-	Existing bool   `json:"existing"`
+	Sha string `json:"sha,omitempty"`
+	// Existing flag is set to true when Console API object already exists when CRD is created.
+	// CRD is then set to read-only mode and does not update Console API from CRD.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=boolean
+	Existing *bool `json:"existing,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -60,4 +64,12 @@ type GitRepositoryList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []GitRepository `json:"items"`
+}
+
+func (p *GitRepositoryStatus) IsExisting() bool {
+	return p.Existing != nil && *p.Existing
+}
+
+func (p *GitRepositoryStatus) HasID() bool {
+	return p.Id != nil && len(*p.Id) > 0
 }
