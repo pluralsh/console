@@ -37,7 +37,7 @@ export function ServicesTable({
   setRefetch,
   clusterId: clusterIdProp,
 }: {
-  setRefetch?: (refetch: () => void) => void
+  setRefetch?: (refetch: () => () => void) => void
   clusterId?: string
 }) {
   const theme = useTheme()
@@ -83,7 +83,7 @@ export function ServicesTable({
   })
 
   useEffect(() => {
-    setRefetch?.(refetch)
+    setRefetch?.(() => refetch)
   }, [refetch, setRefetch])
 
   const [tableFilters, setTableFilters] = useState<
