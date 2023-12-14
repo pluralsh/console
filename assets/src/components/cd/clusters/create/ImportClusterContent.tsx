@@ -98,7 +98,7 @@ function ImportClusterContentPage2({ deployToken }: { deployToken: string }) {
           </StepBody>
         </div>
         <Code showLineNumbers={false}>
-          {`plural cd install --url https://${window.location.host}/ext/gql -- token ${deployToken}`}
+          {`plural cd install --url https://${window.location.host}/gql --token ${deployToken}`}
         </Code>
       </div>
       <div>
