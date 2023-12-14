@@ -4,10 +4,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/controller/pkg/client"
-	clustercontroller "github.com/pluralsh/console/controller/pkg/cluster_controller"
-	gitrepositorycontroller "github.com/pluralsh/console/controller/pkg/gitrepository_controller"
-	providerreconciler "github.com/pluralsh/console/controller/pkg/provider_reconciler"
-	servicecontroller "github.com/pluralsh/console/controller/pkg/service_controller"
+	"github.com/pluralsh/console/controller/pkg/reconciler"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -41,28 +38,28 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.ConsoleClient) (Controller, error) {
 	switch sc {
 	case GitRepositoryReconciler:
-		return &gitrepositorycontroller.Reconciler{
+		return &reconciler.GitRepositoryReconciler{
 			Client:        mgr.GetClient(),
 			Log:           mgr.GetLogger(),
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
 		}, nil
 	case ServiceDeploymentReconciler:
-		return &servicecontroller.Reconciler{
+		return &reconciler.ServiceReconciler{
 			Client:        mgr.GetClient(),
 			Log:           mgr.GetLogger(),
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
 		}, nil
 	case ClusterReconciler:
-		return &clustercontroller.Reconciler{
+		return &reconciler.ClusterReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
 			Log:           mgr.GetLogger(),
 			Scheme:        mgr.GetScheme(),
 		}, nil
 	case ProviderReconciler:
-		return &providerreconciler.Reconciler{
+		return &reconciler.ProviderReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),

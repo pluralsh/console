@@ -1,4 +1,4 @@
-package providerreconciler
+package reconciler
 
 import (
 	"context"
@@ -11,11 +11,11 @@ import (
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 )
 
-func (r *Reconciler) missingCredentialKeyError(key string) error {
+func (r *ProviderReconciler) missingCredentialKeyError(key string) error {
 	return fmt.Errorf("%q key does not exist in referenced credential secret", key)
 }
 
-func (r *Reconciler) getCloudProviderSettingsSecretRef(provider v1alpha1.Provider) *corev1.SecretReference {
+func (r *ProviderReconciler) getCloudProviderSettingsSecretRef(provider v1alpha1.Provider) *corev1.SecretReference {
 	switch provider.Spec.Cloud {
 	case v1alpha1.AWS:
 		return provider.Spec.CloudSettings.AWS
@@ -28,7 +28,7 @@ func (r *Reconciler) getCloudProviderSettingsSecretRef(provider v1alpha1.Provide
 	return nil
 }
 
-func (r *Reconciler) toCloudProviderSettingsAttributes(ctx context.Context, provider v1alpha1.Provider) (*console.CloudProviderSettingsAttributes, error) {
+func (r *ProviderReconciler) toCloudProviderSettingsAttributes(ctx context.Context, provider v1alpha1.Provider) (*console.CloudProviderSettingsAttributes, error) {
 	switch provider.Spec.Cloud {
 	case v1alpha1.AWS:
 		return r.toCloudProviderAWSSettingsAttributes(ctx, provider.Spec.CloudSettings.AWS)
@@ -41,7 +41,7 @@ func (r *Reconciler) toCloudProviderSettingsAttributes(ctx context.Context, prov
 	return nil, fmt.Errorf("unsupported cloud: %q", provider.Spec.Cloud)
 }
 
-func (r *Reconciler) toCloudProviderAWSSettingsAttributes(ctx context.Context, ref *corev1.SecretReference) (*console.CloudProviderSettingsAttributes, error) {
+func (r *ProviderReconciler) toCloudProviderAWSSettingsAttributes(ctx context.Context, ref *corev1.SecretReference) (*console.CloudProviderSettingsAttributes, error) {
 	const accessKeyIDKeyName = "accessKeyId"
 	const secretAccessKeyName = "secretAccessKey"
 
@@ -68,7 +68,7 @@ func (r *Reconciler) toCloudProviderAWSSettingsAttributes(ctx context.Context, r
 	}, nil
 }
 
-func (r *Reconciler) toCloudProviderAzureSettingsAttributes(ctx context.Context, ref *corev1.SecretReference) (*console.CloudProviderSettingsAttributes, error) {
+func (r *ProviderReconciler) toCloudProviderAzureSettingsAttributes(ctx context.Context, ref *corev1.SecretReference) (*console.CloudProviderSettingsAttributes, error) {
 	const tenantIDKeyName = "tenantId"
 	const subscriptionIDKeyName = "subscriptionId"
 	const clientIDKeyName = "clientId"
@@ -109,7 +109,7 @@ func (r *Reconciler) toCloudProviderAzureSettingsAttributes(ctx context.Context,
 	}, nil
 }
 
-func (r *Reconciler) toCloudProviderGCPSettingsAttributes(ctx context.Context, ref *corev1.SecretReference) (*console.CloudProviderSettingsAttributes, error) {
+func (r *ProviderReconciler) toCloudProviderGCPSettingsAttributes(ctx context.Context, ref *corev1.SecretReference) (*console.CloudProviderSettingsAttributes, error) {
 	const applicationCredentialsKeyName = "applicationCredentials"
 
 	secret, err := utils.GetSecret(ctx, r.Client, ref)

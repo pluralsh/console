@@ -1,14 +1,15 @@
-package gitrepositorycontroller_test
+package reconciler_test
 
 import (
 	"context"
-	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/samber/lo"
-	"github.com/stretchr/testify/mock"
 	"testing"
 
+	gqlclient "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/pkg/reconciler"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
-	gitrepositorycontroller "github.com/pluralsh/console/controller/pkg/gitrepository_controller"
 	"github.com/pluralsh/console/controller/pkg/test/mocks"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -90,7 +91,7 @@ func TestCreateNewRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &gitrepositorycontroller.Reconciler{
+			target := &reconciler.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Log:           ctrl.Log.WithName("controllers").WithName("GitRepoController"),
 				Scheme:        scheme.Scheme,

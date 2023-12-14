@@ -1,10 +1,9 @@
-package servicecontroller
+package reconciler
 
 import (
 	"context"
 	"encoding/json"
 	"sort"
-	"time"
 
 	"github.com/go-logr/logr"
 	console "github.com/pluralsh/console-client-go"
@@ -24,22 +23,17 @@ import (
 
 const (
 	ServiceFinalizer = "deployments.plural.sh/service-protection"
-	RequeueAfter     = 30 * time.Second
 )
 
-var (
-	requeue = ctrl.Result{RequeueAfter: RequeueAfter}
-)
-
-// Reconciler reconciles a Service object
-type Reconciler struct {
+// ServiceReconciler reconciles a Service object
+type ServiceReconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
 	Log           logr.Logger
 	Scheme        *runtime.Scheme
 }
 
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	service := &v1alpha1.ServiceDeployment{}
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
@@ -183,7 +177,7 @@ func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.Servic
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.ServiceDeployment{}).
 		Owns(&corev1.Secret{}).
@@ -191,7 +185,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
+func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
 	attr := &console.ServiceDeploymentAttributes{
 		Name:         service.Name,
 		Namespace:    service.Namespace,
@@ -292,7 +286,7 @@ func (r *Reconciler) genServiceAttributes(ctx context.Context, service *v1alpha1
 	return attr, nil
 }
 
-func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
+func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {
 	if service.Spec.ConfigurationRef != nil {
 		configurationSecret, err := utils.GetSecret(ctx, r.Client, service.Spec.ConfigurationRef)
 		if err != nil {
@@ -332,7 +326,7 @@ func (r *Reconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.S
 	return nil
 }
 
-func (r *Reconciler) handleDelete(ctx context.Context, cluster *v1alpha1.Cluster, service *v1alpha1.ServiceDeployment) (ctrl.Result, error) {
+func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.Cluster, service *v1alpha1.ServiceDeployment) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 		log.Info("try to delete service")

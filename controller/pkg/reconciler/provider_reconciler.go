@@ -1,9 +1,8 @@
-package providerreconciler
+package reconciler
 
 import (
 	"context"
 	"fmt"
-	"time"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/samber/lo"
@@ -21,9 +20,9 @@ import (
 	"github.com/pluralsh/console/controller/pkg/utils"
 )
 
-// Reconciler reconciles a v1alpha1.Provider object.
+// ProviderReconciler reconciles a v1alpha1.Provider object.
 // Implements reconcile.Reconciler and types.Controller
-type Reconciler struct {
+type ProviderReconciler struct {
 	client.Client
 
 	ConsoleClient consoleclient.ConsoleClient
@@ -31,21 +30,14 @@ type Reconciler struct {
 }
 
 const (
-	// RequeueAfter is the time between scheduled reconciles if there are no
-	// changes to the CRD.
-	RequeueAfter = 30 * time.Second
 	// ProviderProtectionFinalizerName defines name for the main finalizer that synchronizes
 	// resource deletion from the Console API prior to removing the CRD.
 	ProviderProtectionFinalizerName = "providers.deployments.plural.sh/provider-protection"
 )
 
-var (
-	requeue = ctrl.Result{RequeueAfter: RequeueAfter}
-)
-
 // Reconcile ...
 // TODO: Add kubebuilder rbac annotation
-func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	log := log.FromContext(ctx)
 	log.Info("Reconciling")
 
@@ -103,7 +95,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	return requeue, nil
 }
 
-func (r *Reconciler) handleExistingProvider(ctx context.Context, provider v1alpha1.Provider) (reconcile.Result, error) {
+func (r *ProviderReconciler) handleExistingProvider(ctx context.Context, provider v1alpha1.Provider) (reconcile.Result, error) {
 	apiProvider, err := r.ConsoleClient.GetProviderByCloud(ctx, provider.Spec.Cloud)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -121,7 +113,7 @@ func (r *Reconciler) handleExistingProvider(ctx context.Context, provider v1alph
 	return requeue, nil
 }
 
-func (r *Reconciler) isAlreadyExists(ctx context.Context, provider v1alpha1.Provider) (bool, error) {
+func (r *ProviderReconciler) isAlreadyExists(ctx context.Context, provider v1alpha1.Provider) (bool, error) {
 	if provider.Status.HasExisting() {
 		return *provider.Status.Existing, nil
 	}
@@ -143,7 +135,7 @@ func (r *Reconciler) isAlreadyExists(ctx context.Context, provider v1alpha1.Prov
 	return false, nil
 }
 
-func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, provider v1alpha1.Provider) (*ctrl.Result, error) {
+func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider v1alpha1.Provider) (*ctrl.Result, error) {
 	log := log.FromContext(ctx)
 
 	// If object is not being deleted, so if it does not have our finalizer,
@@ -193,7 +185,7 @@ func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, provider v1alpha1
 	return nil, nil
 }
 
-func (r *Reconciler) sync(ctx context.Context, provider v1alpha1.Provider, changed bool) (*console.ClusterProviderFragment, error) {
+func (r *ProviderReconciler) sync(ctx context.Context, provider v1alpha1.Provider, changed bool) (*console.ClusterProviderFragment, error) {
 	log := log.FromContext(ctx)
 	exists := r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID())
 
@@ -223,7 +215,7 @@ func (r *Reconciler) sync(ctx context.Context, provider v1alpha1.Provider, chang
 	return r.ConsoleClient.CreateProvider(ctx, attributes)
 }
 
-func (r *Reconciler) tryAddControllerRef(ctx context.Context, provider v1alpha1.Provider) error {
+func (r *ProviderReconciler) tryAddControllerRef(ctx context.Context, provider v1alpha1.Provider) error {
 	secretRef := r.getCloudProviderSettingsSecretRef(provider)
 	if secretRef == nil {
 		return fmt.Errorf("could not find secret ref configuration for cloud %q", provider.Spec.Cloud)
@@ -238,7 +230,7 @@ func (r *Reconciler) tryAddControllerRef(ctx context.Context, provider v1alpha1.
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
-func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ProviderReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "provider_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Provider{}).

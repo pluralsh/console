@@ -1,9 +1,8 @@
-package gitrepositorycontroller
+package reconciler
 
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/samber/lo"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -26,15 +25,10 @@ import (
 
 const (
 	RepoFinalizer = "deployments.plural.sh/gitrepo-protection"
-	RequeueAfter  = 30 * time.Second
 	privateKey    = "privateKey"
 	passphrase    = "passphrase"
 	username      = "username"
 	password      = "password"
-)
-
-var (
-	requeue = ctrl.Result{RequeueAfter: RequeueAfter}
 )
 
 type GitRepoCred struct {
@@ -44,15 +38,15 @@ type GitRepoCred struct {
 	Password   *string
 }
 
-// Reconciler reconciles a GitRepository object
-type Reconciler struct {
+// GitRepositoryReconciler reconciles a GitRepository object
+type GitRepositoryReconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
 	Log           logr.Logger
 	Scheme        *runtime.Scheme
 }
 
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	repo := &v1alpha1.GitRepository{}
 	if err := r.Get(ctx, req.NamespacedName, repo); err != nil {
@@ -136,13 +130,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *GitRepositoryReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.GitRepository{}).
 		Complete(r)
 }
 
-func (r *Reconciler) handleDelete(ctx context.Context, repo *v1alpha1.GitRepository) (ctrl.Result, error) {
+func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alpha1.GitRepository) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(repo, RepoFinalizer) {
 		logger.Info("delete git repository")
@@ -171,7 +165,7 @@ func (r *Reconciler) handleDelete(ctx context.Context, repo *v1alpha1.GitReposit
 	return ctrl.Result{}, nil
 }
 
-func (r *Reconciler) getRepositoryCredentials(ctx context.Context, repo *v1alpha1.GitRepository) (*GitRepoCred, error) {
+func (r *GitRepositoryReconciler) getRepositoryCredentials(ctx context.Context, repo *v1alpha1.GitRepository) (*GitRepoCred, error) {
 	cred := &GitRepoCred{}
 	if repo.Spec.CredentialsRef != nil {
 		secret := &corev1.Secret{}
@@ -206,7 +200,7 @@ func (r *Reconciler) getRepositoryCredentials(ctx context.Context, repo *v1alpha
 	return cred, nil
 }
 
-func (r *Reconciler) getRepository(url string) (*console.GitRepositoryFragment, error) {
+func (r *GitRepositoryReconciler) getRepository(url string) (*console.GitRepositoryFragment, error) {
 	existingRepos, err := r.ConsoleClient.GetRepository(&url)
 	if err != nil {
 		return nil, err
@@ -215,7 +209,7 @@ func (r *Reconciler) getRepository(url string) (*console.GitRepositoryFragment, 
 	return existingRepos.GitRepository, nil
 }
 
-func (r *Reconciler) isAlreadyExists(repository *v1alpha1.GitRepository) (bool, error) {
+func (r *GitRepositoryReconciler) isAlreadyExists(repository *v1alpha1.GitRepository) (bool, error) {
 	if repository.Status.IsExisting() {
 		return true, nil
 	}
@@ -232,7 +226,7 @@ func (r *Reconciler) isAlreadyExists(repository *v1alpha1.GitRepository) (bool, 
 	return !repository.Status.HasID(), nil
 }
 
-func (r *Reconciler) handleExistingRepo(ctx context.Context, repo *v1alpha1.GitRepository) (reconcile.Result, error) {
+func (r *GitRepositoryReconciler) handleExistingRepo(ctx context.Context, repo *v1alpha1.GitRepository) (reconcile.Result, error) {
 	logger := log.FromContext(ctx)
 	existingRepo, err := r.getRepository(repo.Spec.Url)
 	if err != nil && !errors.IsNotFound(err) {

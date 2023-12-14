@@ -1,9 +1,8 @@
-package cluster_controller
+package reconciler
 
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/go-logr/logr"
 	console "github.com/pluralsh/console-client-go"
@@ -23,16 +22,11 @@ import (
 )
 
 const (
-	RequeueAfter  = 30 * time.Second
 	FinalizerName = "deployments.plural.sh/cluster-protection"
 )
 
-var (
-	requeue = ctrl.Result{RequeueAfter: RequeueAfter}
-)
-
-// Reconciler reconciles a Cluster object.
-type Reconciler struct {
+// ClusterReconciler reconciles a Cluster object.
+type ClusterReconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
 	Log           logr.Logger
@@ -40,13 +34,13 @@ type Reconciler struct {
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Cluster{}).
 		Complete(r)
 }
 
-func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	logger := log.FromContext(ctx)
 
 	// Read resource from Kubernetes cluster.
@@ -107,7 +101,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 	return requeue, nil
 }
 
-func (r *Reconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
+func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
 	if cluster.Status.HasExisting() {
 		return *cluster.Status.Existing, nil
 	}
@@ -127,7 +121,7 @@ func (r *Reconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
 	return !cluster.Status.HasID(), nil
 }
 
-func (r *Reconciler) handleExisting(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
+func (r *ClusterReconciler) handleExisting(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
 	apiCluster, err := r.ConsoleClient.GetClusterByHandle(cluster.Spec.Handle)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -148,7 +142,7 @@ func (r *Reconciler) handleExisting(ctx context.Context, cluster *v1alpha1.Clust
 	return requeue, nil
 }
 
-func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1.Cluster) (*ctrl.Result, error) {
+func (r *ClusterReconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1.Cluster) (*ctrl.Result, error) {
 	// If object is not being deleted, so if it does not have our finalizer, then lets add the finalizer
 	// and update the object. This is equivalent to registering our finalizer.
 	if cluster.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(cluster, FinalizerName) {
@@ -193,7 +187,7 @@ func (r *Reconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1
 	return nil, nil
 }
 
-func (r *Reconciler) getProviderIdAndSetControllerRef(ctx context.Context, cluster *v1alpha1.Cluster) (providerId *string, result *ctrl.Result, err error) {
+func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context, cluster *v1alpha1.Cluster) (providerId *string, result *ctrl.Result, err error) {
 	logger := log.FromContext(ctx)
 
 	if cluster.Spec.IsProviderRefRequired() {
@@ -234,7 +228,7 @@ func (r *Reconciler) getProviderIdAndSetControllerRef(ctx context.Context, clust
 	return nil, nil, nil
 }
 
-func (r *Reconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster, providerId *string, sha string) (*console.ClusterFragment, error) {
+func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster, providerId *string, sha string) (*console.ClusterFragment, error) {
 	exists := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
 	logger := log.FromContext(ctx)
 
