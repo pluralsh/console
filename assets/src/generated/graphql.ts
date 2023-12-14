@@ -4293,6 +4293,16 @@ export type ClustersTinyQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ClustersTinyQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
 
+export type ClusterSelectorQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  currentClusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ClusterSelectorQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+
 export type ClusterQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -4549,6 +4559,7 @@ export type ServiceDeploymentsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   cluster?: InputMaybe<Scalars['String']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  status?: InputMaybe<ServiceDeploymentStatus>;
 }>;
 
 
@@ -6591,7 +6602,7 @@ export type ClustersSuspenseQueryHookResult = ReturnType<typeof useClustersSuspe
 export type ClustersQueryResult = Apollo.QueryResult<ClustersQuery, ClustersQueryVariables>;
 export const ClustersTinyDocument = gql`
     query ClustersTiny {
-  clusters(first: 100) {
+  clusters(first: 200) {
     edges {
       node {
         ...ClusterTiny
@@ -6632,6 +6643,60 @@ export type ClustersTinyQueryHookResult = ReturnType<typeof useClustersTinyQuery
 export type ClustersTinyLazyQueryHookResult = ReturnType<typeof useClustersTinyLazyQuery>;
 export type ClustersTinySuspenseQueryHookResult = ReturnType<typeof useClustersTinySuspenseQuery>;
 export type ClustersTinyQueryResult = Apollo.QueryResult<ClustersTinyQuery, ClustersTinyQueryVariables>;
+export const ClusterSelectorDocument = gql`
+    query ClusterSelector($first: Int = 100, $after: String, $q: String, $currentClusterId: ID) {
+  clusters(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterTiny
+      }
+    }
+  }
+  cluster(id: $currentClusterId) {
+    ...ClusterTiny
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClusterTinyFragmentDoc}`;
+
+/**
+ * __useClusterSelectorQuery__
+ *
+ * To run a query within a React component, call `useClusterSelectorQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterSelectorQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterSelectorQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      q: // value for 'q'
+ *      currentClusterId: // value for 'currentClusterId'
+ *   },
+ * });
+ */
+export function useClusterSelectorQuery(baseOptions?: Apollo.QueryHookOptions<ClusterSelectorQuery, ClusterSelectorQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterSelectorQuery, ClusterSelectorQueryVariables>(ClusterSelectorDocument, options);
+      }
+export function useClusterSelectorLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterSelectorQuery, ClusterSelectorQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterSelectorQuery, ClusterSelectorQueryVariables>(ClusterSelectorDocument, options);
+        }
+export function useClusterSelectorSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterSelectorQuery, ClusterSelectorQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterSelectorQuery, ClusterSelectorQueryVariables>(ClusterSelectorDocument, options);
+        }
+export type ClusterSelectorQueryHookResult = ReturnType<typeof useClusterSelectorQuery>;
+export type ClusterSelectorLazyQueryHookResult = ReturnType<typeof useClusterSelectorLazyQuery>;
+export type ClusterSelectorSuspenseQueryHookResult = ReturnType<typeof useClusterSelectorSuspenseQuery>;
+export type ClusterSelectorQueryResult = Apollo.QueryResult<ClusterSelectorQuery, ClusterSelectorQueryVariables>;
 export const ClusterDocument = gql`
     query Cluster($id: ID!) {
   cluster(id: $id) {
@@ -7706,13 +7771,14 @@ export type DeleteClusterProviderMutationHookResult = ReturnType<typeof useDelet
 export type DeleteClusterProviderMutationResult = Apollo.MutationResult<DeleteClusterProviderMutation>;
 export type DeleteClusterProviderMutationOptions = Apollo.BaseMutationOptions<DeleteClusterProviderMutation, DeleteClusterProviderMutationVariables>;
 export const ServiceDeploymentsDocument = gql`
-    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID) {
+    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID, $status: ServiceDeploymentStatus) {
   serviceDeployments(
     first: $first
     after: $after
     q: $q
     cluster: $cluster
     clusterId: $clusterId
+    status: $status
   ) {
     pageInfo {
       ...PageInfo
@@ -7748,6 +7814,7 @@ ${ServiceStatusCountFragmentDoc}`;
  *      q: // value for 'q'
  *      cluster: // value for 'cluster'
  *      clusterId: // value for 'clusterId'
+ *      status: // value for 'status'
  *   },
  * });
  */
@@ -9668,6 +9735,7 @@ export const namedOperations = {
     ClusterAddOns: 'ClusterAddOns',
     Clusters: 'Clusters',
     ClustersTiny: 'ClustersTiny',
+    ClusterSelector: 'ClusterSelector',
     Cluster: 'Cluster',
     ClusterPods: 'ClusterPods',
     ClusterNamespaces: 'ClusterNamespaces',

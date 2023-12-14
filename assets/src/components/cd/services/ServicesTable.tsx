@@ -9,7 +9,7 @@ import {
 import { EmptyState, TabPanel, Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
-import type { Row, TableState } from '@tanstack/react-table'
+import type { Row } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { useDebounce } from '@react-hooks-library/core'
 import { type VirtualItem } from '@tanstack/react-virtual'
@@ -26,7 +26,7 @@ import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 
 import { POLL_INTERVAL } from '../ContinuousDeployment'
 
-import { ServicesFilters } from './ServicesFilters'
+import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import {
   SERVICES_QUERY_PAGE_SIZE,
   SERVICES_REACT_VIRTUAL_OPTIONS,
@@ -47,6 +47,7 @@ export function ServicesTable({
   const [searchString, setSearchString] = useState()
   const debouncedSearchString = useDebounce(searchString, 100)
   const tabStateRef = useRef<any>(null)
+  const [statusFilter, setStatusFilter] = useState<StatusTabKey>('ALL')
   const [virtualSlice, setVirtualSlice] = useState<
     | {
         start: VirtualItem | undefined
@@ -60,6 +61,7 @@ export function ServicesTable({
       ...(clusterId ? { clusterId } : {}),
       q: debouncedSearchString,
       first: SERVICES_QUERY_PAGE_SIZE,
+      ...(statusFilter !== 'ALL' ? { status: statusFilter } : {}),
     },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
@@ -81,28 +83,38 @@ export function ServicesTable({
     key: 'serviceDeployments',
     interval: POLL_INTERVAL,
   })
+  const statusCounts = useMemo<Record<StatusTabKey, number | undefined>>(
+    () => ({
+      ALL: data?.serviceStatuses?.reduce(
+        (count, status) => count + (status?.count || 0),
+        0
+      ),
+      HEALTHY: data?.serviceStatuses ? 0 : undefined,
+      SYNCED: data?.serviceStatuses ? 0 : undefined,
+      STALE: data?.serviceStatuses ? 0 : undefined,
+      FAILED: data?.serviceStatuses ? 0 : undefined,
+      ...Object.fromEntries(
+        data?.serviceStatuses?.map((status) => [
+          status?.status,
+          status?.count,
+        ]) || []
+      ),
+    }),
+    [data?.serviceStatuses]
+  )
 
   useEffect(() => {
     setRefetch?.(() => refetch)
   }, [refetch, setRefetch])
 
-  const [tableFilters, setTableFilters] = useState<
-    Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
-  >({
-    globalFilter: '',
-  })
-
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
     useMemo(
       () => ({
-        state: {
-          ...tableFilters,
-        },
         meta: {
           refetch,
         },
       }),
-      [refetch, tableFilters]
+      [refetch]
     )
 
   const fetchNextPage = useCallback(() => {
@@ -137,13 +149,14 @@ export function ServicesTable({
       }}
     >
       <ServicesFilters
-        setTableFilters={setTableFilters}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
         searchString={searchString}
         setSearchString={setSearchString}
         clusterId={clusterId}
         setClusterId={clusterIdProp ? undefined : setClusterId}
         tabStateRef={tabStateRef}
-        statusCounts={data.serviceStatuses}
+        statusCounts={statusCounts}
       />
       <TabPanel
         stateRef={tabStateRef}
@@ -182,7 +195,7 @@ export function ServicesTable({
           </FullHeightTableWrap>
         ) : (
           <div css={{ height: '100%' }}>
-            {searchString || clusterId ? (
+            {statusCounts.ALL || 0 > 0 ? (
               <EmptyState message="No service deployments match your query." />
             ) : (
               <EmptyState message="Looks like you don't have any service deployments yet." />

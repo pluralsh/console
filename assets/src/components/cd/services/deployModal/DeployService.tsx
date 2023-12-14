@@ -11,7 +11,6 @@ import { Priority, useRegisterActions } from 'kbar'
 
 import {
   NamespacedName,
-  useClustersTinyQuery,
   useCreateServiceDeploymentMutation,
   useGitRepositoriesQuery,
 } from 'generated/graphql'
@@ -159,12 +158,6 @@ export function DeployServiceModal({
 
   const { data: reposData } = useGitRepositoriesQuery()
 
-  const { data: clustersData } = useClustersTinyQuery()
-  const clusters = useMemo(
-    () => mapExistingNodes(clustersData?.clusters),
-    [clustersData?.clusters]
-  )
-
   const allowDeploy =
     formState === FormState.Secrets &&
     initialFormValid &&
@@ -255,7 +248,7 @@ export function DeployServiceModal({
     (step) => step.key === formState
   )
 
-  const initialLoading = !repos || !clusters
+  const initialLoading = !repos
 
   return (
     <ModalAlt
@@ -393,7 +386,6 @@ export function DeployServiceModal({
               setNamespace,
               clusterId,
               setClusterId,
-              clusters,
             }}
           />
         ) : formState === FormState.Repository ? (

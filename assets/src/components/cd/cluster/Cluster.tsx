@@ -1,14 +1,11 @@
 import {
   Breadcrumb,
-  ClusterIcon,
-  ListBoxItem,
-  Select,
   SubTab,
   TabList,
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useMemo, useRef } from 'react'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import {
   Outlet,
@@ -27,17 +24,13 @@ import {
   CLUSTER_PODS_PATH,
   CLUSTER_SERVICES_PATH,
 } from 'routes/cdRoutesConsts'
-import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
 
-import {
-  ClusterFragment,
-  useClusterQuery,
-  useClustersTinyQuery,
-} from '../../../generated/graphql'
+import { ClusterFragment, useClusterQuery } from '../../../generated/graphql'
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
-import ProviderIcon from '../../utils/Provider'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+
+import ClusterSelector from '../utils/ClusterSelector'
 
 import ClusterPermissions from './ClusterPermissions'
 import ClusterSettings from './ClusterSettings'
@@ -88,11 +81,7 @@ export default function Cluster() {
   const { clusterId } = useParams<{ clusterId: string }>()
   const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab`)?.params?.tab || ''
 
-  const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
   const currentTab = directory.find(({ path }) => path === tab)
-
-  const { data: clustersData } = useClustersTinyQuery()
-  const clusterEdges = clustersData?.clusters?.edges
 
   const { data, refetch } = useClusterQuery({
     variables: { id: clusterId || '' },
@@ -119,45 +108,17 @@ export default function Cluster() {
       scrollable={tab !== 'services' && tab !== 'pods'}
       headingContent={
         <>
-          {clusterEdges && !isEmpty(clusterEdges) && (
-            <div css={{ width: 360 }}>
-              <Select
-                isOpen={clusterSelectIsOpen}
-                onOpenChange={setClusterSelectIsOpen}
-                label="Cluster"
-                titleContent={
-                  <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-                    <ClusterIcon />
-                    Cluster
-                  </div>
+          <div css={{ width: 360 }}>
+            <ClusterSelector
+              clusterId={clusterId}
+              allowDeselect={false}
+              onClusterChange={(c) => {
+                if (c?.id) {
+                  navigate(`/cd/clusters/${c.id}/${tab}`)
                 }
-                leftContent={
-                  <ProviderIcon
-                    provider={data?.cluster?.provider?.cloud || ''}
-                    width={16}
-                  />
-                }
-                selectedKey={clusterId}
-                onSelectionChange={(key) =>
-                  navigate(`/cd/clusters/${key}/${tab}`)
-                }
-              >
-                {clusterEdges.map((edge) => (
-                  <ListBoxItem
-                    key={edge?.node?.id}
-                    label={edge?.node?.name}
-                    textValue={edge?.node?.name}
-                    leftContent={
-                      <ProviderIcon
-                        provider={edge?.node?.provider?.cloud || ''}
-                        width={16}
-                      />
-                    }
-                  />
-                ))}
-              </Select>
-            </div>
-          )}
+              }}
+            />
+          </div>
           <TabList
             gap="xxsmall"
             stateRef={tabStateRef}

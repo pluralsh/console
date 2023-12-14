@@ -126,6 +126,7 @@ query ServiceDeployments(
   $q: String
   $cluster: String
   $clusterId: ID
+  $status: ServiceDeploymentStatus
 ) {
   serviceDeployments(
     first: $first
@@ -133,6 +134,7 @@ query ServiceDeployments(
     q: $q
     cluster: $cluster
     clusterId: $clusterId
+    status: $status
   ) {
     pageInfo {
       ...PageInfo

@@ -1,43 +1,30 @@
 import {
   Chip,
-  ClusterIcon,
   Input,
-  ListBoxFooter,
-  ListBoxItem,
   SearchIcon,
-  Select,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import {
   Dispatch,
-  Key,
   MutableRefObject,
   SetStateAction,
+  useCallback,
   useEffect,
-  useMemo,
-  useState,
 } from 'react'
-import { type TableState } from '@tanstack/react-table'
-import { useParams } from 'react-router-dom'
 import isNil from 'lodash/isNil'
 
-import {
-  ServiceDeploymentStatus,
-  ServiceStatusCountFragment,
-  useClustersTinyQuery,
-} from 'generated/graphql'
-import { SERVICE_PARAM_CLUSTER_ID } from 'routes/cdRoutesConsts'
-import { mapExistingNodes } from 'utils/graphql'
-import ProviderIcon from 'components/utils/Provider'
+import { ServiceDeploymentStatus } from 'generated/graphql'
+
+import ClusterSelector from '../utils/ClusterSelector'
 
 import {
   serviceStatusToLabel,
   serviceStatusToSeverity,
 } from './ServiceStatusChip'
 
-type StatusTabKey = ServiceDeploymentStatus | 'ALL'
+export type StatusTabKey = ServiceDeploymentStatus | 'ALL'
 export const statusTabs = Object.entries({
   ALL: { label: 'All' },
   [ServiceDeploymentStatus.Healthy]: {
@@ -66,7 +53,8 @@ const ServiceFiltersSC = styled.div(({ theme }) => ({
 }))
 
 export function ServicesFilters({
-  setTableFilters,
+  statusFilter,
+  setStatusFilter,
   searchString,
   setSearchString,
   clusterId,
@@ -76,128 +64,32 @@ export function ServicesFilters({
 }: {
   searchString
   setSearchString: (string) => void
-  setTableFilters: (
-    filters: Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
-  ) => void
+  statusFilter: StatusTabKey
+  setStatusFilter: Dispatch<SetStateAction<StatusTabKey>>
   clusterId?: string
   setClusterId?: Dispatch<SetStateAction<string>>
   tabStateRef: MutableRefObject<any>
-  statusCounts: Nullable<Nullable<ServiceStatusCountFragment>[]>
+  statusCounts: Record<StatusTabKey, number | undefined>
 }) {
-  const theme = useTheme()
-  const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
-  const clusterIdParam = useParams()[SERVICE_PARAM_CLUSTER_ID]
-
-  clusterId = clusterId ?? clusterIdParam
-
-  const { data: clustersData } = useClustersTinyQuery({
-    skip: !setClusterId,
-  })
-
-  const clusters = useMemo(
-    () => mapExistingNodes(clustersData?.clusters),
-    [clustersData?.clusters]
-  )
-  const selectedCluster = useMemo(
-    () => clusters && clusters.find((cluster) => cluster.id === clusterId),
-    [clusters, clusterId]
-  )
-
-  const counts = useMemo<Record<string, number | undefined>>(
-    () => ({
-      ALL: statusCounts?.reduce(
-        (count, status) => count + (status?.count || 0),
-        0
-      ),
-      HEALTHY: statusCounts ? 0 : undefined,
-      SYNCED: statusCounts ? 0 : undefined,
-      STALE: statusCounts ? 0 : undefined,
-      FAILED: statusCounts ? 0 : undefined,
-      ...Object.fromEntries(
-        statusCounts?.map((status) => [status?.status, status?.count]) || []
-      ),
-    }),
-    [statusCounts]
-  )
-  const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
-
-  const tableFilters: Partial<
-    Pick<TableState, 'globalFilter' | 'columnFilters'>
-  > = useMemo(
-    () => ({
-      columnFilters: [
-        ...(statusFilterKey !== 'ALL'
-          ? [
-              {
-                id: 'status',
-                value: statusFilterKey,
-              },
-            ]
-          : []),
-      ],
-    }),
-    [statusFilterKey]
-  )
-
   useEffect(() => {
-    setTableFilters(tableFilters)
-  }, [setTableFilters, tableFilters])
+    setStatusFilter(statusFilter)
+  }, [setStatusFilter, statusFilter])
+  const onClusterChange = useCallback(
+    (cluster) => {
+      setClusterId?.(cluster?.id || '')
+    },
+    [setClusterId]
+  )
 
   return (
     <ServiceFiltersSC>
       {setClusterId && (
         <div css={{ width: 360 }}>
-          <Select
-            isDisabled={!clustersData}
-            isOpen={clusterSelectIsOpen}
-            onOpenChange={setClusterSelectIsOpen}
-            label={!clustersData ? 'Loading clusters..' : 'Filter by cluster'}
-            leftContent={
-              selectedCluster && (
-                <ProviderIcon
-                  provider={selectedCluster.provider?.cloud || ''}
-                  width={16}
-                />
-              )
-            }
-            titleContent={
-              <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-                <ClusterIcon />
-                Cluster
-              </div>
-            }
-            {...(clusterId
-              ? {
-                  dropdownFooterFixed: (
-                    <ListBoxFooter
-                      onClick={() => {
-                        setClusterSelectIsOpen(false)
-                        setClusterId?.('')
-                      }}
-                      leftContent={<ClusterIcon />}
-                    >
-                      Show all clusters
-                    </ListBoxFooter>
-                  ),
-                }
-              : {})}
-            selectedKey={clusterId || ''}
-            onSelectionChange={(key) => setClusterId?.(key as string)}
-          >
-            {(clusters || []).map((cluster) => (
-              <ListBoxItem
-                key={cluster.id}
-                label={cluster.name}
-                textValue={cluster.name}
-                leftContent={
-                  <ProviderIcon
-                    provider={cluster.provider?.cloud || ''}
-                    width={16}
-                  />
-                }
-              />
-            ))}
-          </Select>
+          <ClusterSelector
+            clusterId={clusterId}
+            allowDeselect
+            onClusterChange={onClusterChange}
+          />
         </div>
       )}
       <Input
@@ -213,9 +105,9 @@ export function ServicesFilters({
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',
-          selectedKey: statusFilterKey,
+          selectedKey: statusFilter,
           onSelectionChange: (key) => {
-            setStatusTabKey(key)
+            setStatusFilter(key as StatusTabKey)
           },
         }}
       >
@@ -226,13 +118,13 @@ export function ServicesFilters({
             className="statusTab"
           >
             {label}
-            {!isNil(counts[key]) && (
+            {!isNil(statusCounts?.[key]) && (
               <Chip
                 size="small"
                 severity={serviceStatusToSeverity(key as any)}
-                loading={isNil(counts[key])}
+                loading={isNil(statusCounts?.[key])}
               >
-                {counts[key]}
+                {statusCounts?.[key]}
               </Chip>
             )}
           </SubTab>
