@@ -1,0 +1,35 @@
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: podinfo
+spec:
+  provider: nginx
+  progressDeadlineSeconds: 600
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: podinfo
+  autoscalerRef:
+    apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
+    name: podinfo
+  service:
+    name: podinfo
+    port: 80
+    targetPort: 9898
+    portName: http
+    portDiscovery: true
+  skipAnalysis: false
+  analysis:
+    interval: 15s
+    threshold: 10
+    stepWeights: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+    metrics:
+    - name: request-success-rate
+      thresholdRange:
+        min: 99
+      interval: 1m
+    - name: request-duration
+      thresholdRange:
+        max: 500
+      interval: 30s
