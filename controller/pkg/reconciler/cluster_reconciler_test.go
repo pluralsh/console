@@ -143,3 +143,85 @@ func TestCreateNewCluster(t *testing.T) {
 		})
 	}
 }
+
+func TestAdoptExistingCluster(t *testing.T) {
+	const (
+		clusterName      = "test-cluster"
+		clusterConsoleID = "12345-67890"
+	)
+
+	tests := []struct {
+		name                          string
+		cluster                       string
+		returnGetClusterByHandle      *gqlclient.ClusterFragment
+		returnErrorGetClusterByHandle error
+		existingObjects               []ctrlruntimeclient.Object
+		expectedStatus                v1alpha1.ClusterStatus
+	}{
+		{
+			name:    "scenario 1: adopt existing AWS cluster",
+			cluster: clusterName,
+			expectedStatus: v1alpha1.ClusterStatus{
+				ID:       lo.ToPtr(clusterConsoleID),
+				Existing: lo.ToPtr(true),
+			},
+			returnGetClusterByHandle:      &gqlclient.ClusterFragment{ID: clusterConsoleID},
+			returnErrorGetClusterByHandle: nil,
+			existingObjects: []ctrlruntimeclient.Object{
+				&v1alpha1.Cluster{
+					ObjectMeta: metav1.ObjectMeta{Name: clusterName},
+					Spec:       v1alpha1.ClusterSpec{Handle: lo.ToPtr(clusterName)},
+				},
+			},
+		},
+		{
+			name:    "scenario 2: adopt existing BYOK cluster",
+			cluster: clusterName,
+			expectedStatus: v1alpha1.ClusterStatus{
+				ID:             lo.ToPtr(clusterConsoleID),
+				Existing:       lo.ToPtr(true),
+				CurrentVersion: lo.ToPtr("1.24.11"),
+			},
+			returnGetClusterByHandle: &gqlclient.ClusterFragment{
+				ID:             clusterConsoleID,
+				CurrentVersion: lo.ToPtr("1.24.11"),
+			},
+			returnErrorGetClusterByHandle: nil,
+			existingObjects: []ctrlruntimeclient.Object{
+				&v1alpha1.Cluster{
+					ObjectMeta: metav1.ObjectMeta{Name: clusterName},
+					Spec: v1alpha1.ClusterSpec{
+						Handle: lo.ToPtr(clusterName),
+						Cloud:  "byok",
+					},
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(test.existingObjects...).Build()
+
+			fakeConsoleClient := mocks.NewConsoleClient(t)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(test.returnGetClusterByHandle, test.returnErrorGetClusterByHandle)
+
+			ctx := context.Background()
+
+			target := &reconciler.ClusterReconciler{
+				Client:        fakeClient,
+				Log:           ctrl.Log.WithName("reconcilers").WithName("ClusterReconciler"),
+				Scheme:        scheme.Scheme,
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := target.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: test.cluster}})
+			assert.NoError(t, err)
+
+			existingCluster := &v1alpha1.Cluster{}
+			err = fakeClient.Get(ctx, ctrlruntimeclient.ObjectKey{Name: test.cluster}, existingCluster)
+			assert.NoError(t, err)
+			assert.EqualValues(t, test.expectedStatus, existingCluster.Status)
+		})
+	}
+}
