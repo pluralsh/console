@@ -80,6 +80,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.Namespace
   import_types Console.GraphQl.Kubernetes.VPN
   import_types Console.GraphQl.Kubernetes.Config
+  import_types Console.GraphQl.Kubernetes.Canary
 
   delta :application
 
@@ -251,6 +252,15 @@ defmodule Console.GraphQl.Kubernetes do
       cluster_authorized :read
 
       safe_resolve &Kubernetes.resolve_node_metrics/2
+    end
+
+    field :canary, :canary do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+      service_authorized :read
+
+      safe_resolve &Kubernetes.resolve_canary/2
     end
 
     field :configuration_overlays, list_of(:configuration_overlay) do

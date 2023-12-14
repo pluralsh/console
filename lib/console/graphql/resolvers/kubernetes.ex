@@ -90,9 +90,9 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> Kube.Utils.run()
   end
 
-  def resolve_certificate(%{namespace: ns, name: name}, _) do
-    Client.get_certificate(ns, name)
-  end
+  def resolve_canary(%{namespace: ns, name: name}, _), do: Client.get_canary(ns, name)
+
+  def resolve_certificate(%{namespace: ns, name: name}, _), do: Client.get_certificate(ns, name)
 
   def ingress_certificates(%{metadata: %{namespace: ns}, spec: %{tls: [_ | _] = tls}}) do
     names = MapSet.new(tls, & &1.secret_name)
