@@ -400,7 +400,7 @@ defmodule Console.Deployments.Services do
   """
   @spec update_components(map, binary | Service.t) :: service_resp
   def update_components(attrs, %Service{} = service) do
-    Logger.info "updating components for #{service.id}: #{inspect(attrs)}"
+    Logger.info "updating components for #{service.id}"
     start_transaction()
     |> add_operation(:service, fn _ ->
       svc = Console.Repo.preload(service, [:components, :errors])
