@@ -6,6 +6,8 @@ defmodule Console.Deployments.InitTest do
   describe "#setup/0" do
     test "it will setup some initial resources" do
       insert(:user, bot_name: "console", roles: %{admin: true})
+      expect(Kube.Utils, :get_secret, fn _, _ -> {:error, "not found"} end)
+      expect(Kube.Utils, :create_secret, fn "console", "console-auth-token", data -> {:ok, data} end)
       {:ok, res} = Init.setup()
 
       assert res.provider.name == "aws"
@@ -33,6 +35,8 @@ defmodule Console.Deployments.InitTest do
     test "it can properly init when byok" do
       expect(Console, :byok?, fn -> true end)
       insert(:user, bot_name: "console", roles: %{admin: true})
+      expect(Kube.Utils, :get_secret, fn _, _ -> {:error, "not found"} end)
+      expect(Kube.Utils, :create_secret, fn "console", "console-auth-token", data -> {:ok, data} end)
       {:ok, res} = Init.setup()
 
       refute res.provider.id
