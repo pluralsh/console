@@ -9,17 +9,19 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: podinfo
-  service:
+  ingressRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
     name: podinfo
+  service:
     port: 80
     targetPort: 9898
-    portName: http
-    portDiscovery: true
   skipAnalysis: false
   analysis:
     interval: 15s
     threshold: 10
-    stepWeights: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+    maxWeight: 50
+    stepWeight: 5
     metrics:
     - name: request-success-rate
       thresholdRange:

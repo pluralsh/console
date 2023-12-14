@@ -24,12 +24,15 @@ defmodule Console.GraphQl.Kubernetes.Canary do
   object :canary_spec do
     field :autoscaler_ref, :target_ref
     field :target_ref,     :target_ref
+    field :ingress_ref,    :target_ref
     field :analysis,       :canary_analysis
     field :provider,       :string
   end
 
   object :canary_analysis do
     field :interval,     :string
+    field :max_weight,   :integer
+    field :step_weight,  :integer
     field :step_weights, list_of(:integer)
     field :threshold,    :integer
   end
