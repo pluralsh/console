@@ -117,25 +117,21 @@ func TestCreateNewCluster(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			fakeClient := fake.
-				NewClientBuilder().
-				WithScheme(scheme.Scheme).
-				WithObjects(test.existingObjects...).
-				Build()
+			fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(test.existingObjects...).Build()
 
 			fakeConsoleClient := mocks.NewConsoleClient(t)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(test.returnGetClusterByHandle, test.returnErrorGetClusterByHandle)
+			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(test.returnIsClusterExisting)
+			fakeConsoleClient.On("CreateCluster", mock.Anything).Return(test.returnCreateCluster, test.returnErrorCreateCluster)
 
 			ctx := context.Background()
+
 			target := &reconciler.ClusterReconciler{
 				Client:        fakeClient,
 				Log:           ctrl.Log.WithName("reconcilers").WithName("ClusterReconciler"),
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
 			}
-
-			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(test.returnGetClusterByHandle, test.returnErrorGetClusterByHandle)
-			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(test.returnIsClusterExisting)
-			fakeConsoleClient.On("CreateCluster", mock.Anything).Return(test.returnCreateCluster, test.returnErrorCreateCluster)
 
 			_, err := target.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: test.cluster}})
 			assert.NoError(t, err)
