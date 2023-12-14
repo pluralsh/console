@@ -1,0 +1,122 @@
+package reconciler_test
+
+import (
+	"context"
+	"encoding/json"
+	"testing"
+
+	gqlclient "github.com/pluralsh/console-client-go"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/pluralsh/console/controller/pkg/reconciler"
+
+	"github.com/stretchr/testify/assert"
+	"k8s.io/apimachinery/pkg/types"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/kubernetes/scheme"
+	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/pkg/test/mocks"
+)
+
+func init() {
+	utilruntime.Must(v1alpha1.AddToScheme(scheme.Scheme))
+}
+
+func TestCreateNewProvider(t *testing.T) {
+	tests := []struct {
+		name                          string
+		providerName                  string
+		returnCreateProvider          *gqlclient.ClusterProviderFragment
+		returnGetProviderByCloudError error
+		existingObjects               []ctrlruntimeclient.Object
+		expectedStatus                v1alpha1.ProviderStatus
+	}{
+		{
+			name:         "scenario 1: create a new provider",
+			providerName: "gcp-provider",
+			returnCreateProvider: &gqlclient.ClusterProviderFragment{
+				ID:        "1234",
+				Name:      "gcp-provider",
+				Namespace: "gcp",
+				Cloud:     "gcp",
+			},
+			returnGetProviderByCloudError: errors.NewNotFound(schema.GroupResource{}, "gcp-provider"),
+			existingObjects: []ctrlruntimeclient.Object{
+				&v1alpha1.Provider{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "gcp-provider",
+					},
+					Spec: v1alpha1.ProviderSpec{
+						Cloud: "gcp",
+						CloudSettings: &v1alpha1.CloudProviderSettings{
+							GCP: &corev1.SecretReference{
+								Name: "credentials",
+							},
+						},
+						Name:      "gcp-provider",
+						Namespace: "gcp",
+					},
+				},
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "credentials",
+					},
+					Data: map[string][]byte{
+						"applicationCredentials": []byte("mock"),
+					},
+				},
+			},
+			expectedStatus: v1alpha1.ProviderStatus{
+				ID:       lo.ToPtr("1234"),
+				SHA:      lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
+				Existing: lo.ToPtr(false),
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// set up the test scenario
+			fakeClient := fake.
+				NewClientBuilder().
+				WithScheme(scheme.Scheme).
+				WithObjects(test.existingObjects...).
+				Build()
+
+			fakeConsoleClient := mocks.NewConsoleClient(t)
+
+			// act
+			ctx := context.Background()
+			providerReconciler := &reconciler.ProviderReconciler{
+				Client:        fakeClient,
+				Scheme:        scheme.Scheme,
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			fakeConsoleClient.On("GetProviderByCloud", mock.Anything, v1alpha1.GCP).Return(nil, test.returnGetProviderByCloudError)
+			fakeConsoleClient.On("IsProviderExists", mock.Anything, mock.Anything).Return(false)
+			fakeConsoleClient.On("CreateProvider", mock.Anything, mock.Anything).Return(test.returnCreateProvider, nil)
+
+			_, err := providerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: test.providerName}})
+			assert.NoError(t, err)
+
+			existingProvider := &v1alpha1.Provider{}
+			err = fakeClient.Get(ctx, ctrlruntimeclient.ObjectKey{Name: test.providerName}, existingProvider)
+
+			existingProviderStatusJson, err := json.Marshal(existingProvider.Status)
+			expectedStatusJson, err := json.Marshal(test.expectedStatus)
+
+			assert.NoError(t, err)
+			assert.EqualValues(t, string(existingProviderStatusJson), string(expectedStatusJson))
+		})
+	}
+}

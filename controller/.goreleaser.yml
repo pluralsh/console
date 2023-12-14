@@ -7,7 +7,7 @@ partial:
 project_name: plural-controller
 
 monorepo:
-  tag_prefix: controller/
+  tag_prefix: v
 
 before:
   hooks:
@@ -55,7 +55,7 @@ changelog:
       - '^test:'
 
 release:
-  name_template: "{{.ProjectName}}-v{{.Version}}"
+  name_template: "{{ .ProjectName }}-v{{ .Version }}"
   header: |
     ## Plural Controller release ({{ .Date }})
     Welcome to this new release of the Plural Controller!

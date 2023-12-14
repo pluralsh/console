@@ -5,8 +5,9 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/pluralsh/console/controller/pkg/utils"
 
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 )
@@ -16,6 +17,10 @@ func (r *ProviderReconciler) missingCredentialKeyError(key string) error {
 }
 
 func (r *ProviderReconciler) getCloudProviderSettingsSecretRef(provider v1alpha1.Provider) *corev1.SecretReference {
+	if provider.Spec.CloudSettings == nil {
+		return nil
+	}
+
 	switch provider.Spec.Cloud {
 	case v1alpha1.AWS:
 		return provider.Spec.CloudSettings.AWS
