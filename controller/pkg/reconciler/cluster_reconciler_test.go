@@ -30,7 +30,6 @@ func init() {
 
 func TestCreateNewCluster(t *testing.T) {
 	const (
-		cloud             = "aws"
 		clusterName       = "test-cluster"
 		clusterConsoleID  = "12345-67890"
 		providerName      = "test-provider"
@@ -50,7 +49,7 @@ func TestCreateNewCluster(t *testing.T) {
 		expectedStatus                v1alpha1.ClusterStatus
 	}{
 		{
-			name:    "scenario 1: create a new cluster",
+			name:    "scenario 1: create a new AWS cluster",
 			cluster: clusterName,
 			expectedStatus: v1alpha1.ClusterStatus{
 				ID:       lo.ToPtr(clusterConsoleID),
@@ -60,9 +59,7 @@ func TestCreateNewCluster(t *testing.T) {
 			returnGetClusterByHandle:      nil,
 			returnErrorGetClusterByHandle: errors.NewNotFound(schema.GroupResource{}, clusterName),
 			returnIsClusterExisting:       false,
-			returnCreateCluster: &gqlclient.ClusterFragment{
-				ID: clusterConsoleID,
-			},
+			returnCreateCluster:           &gqlclient.ClusterFragment{ID: clusterConsoleID},
 			existingObjects: []ctrlruntimeclient.Object{
 				&v1alpha1.Cluster{
 					ObjectMeta: metav1.ObjectMeta{
@@ -71,7 +68,7 @@ func TestCreateNewCluster(t *testing.T) {
 					Spec: v1alpha1.ClusterSpec{
 						Handle:  lo.ToPtr(clusterName),
 						Version: lo.ToPtr("1.24"),
-						Cloud:   cloud,
+						Cloud:   "aws",
 						ProviderRef: &corev1.ObjectReference{
 							Name: providerName,
 						},
@@ -82,12 +79,36 @@ func TestCreateNewCluster(t *testing.T) {
 						Name: providerName,
 					},
 					Spec: v1alpha1.ProviderSpec{
-						Cloud:     cloud,
+						Cloud:     "aws",
 						Name:      providerName,
 						Namespace: providerNamespace,
 					},
 					Status: v1alpha1.ProviderStatus{
 						ID: lo.ToPtr(providerConsoleID),
+					},
+				},
+			},
+		},
+		{
+			name:    "scenario 2: create a new BYOK cluster",
+			cluster: clusterName,
+			expectedStatus: v1alpha1.ClusterStatus{
+				ID:       lo.ToPtr(clusterConsoleID),
+				SHA:      lo.ToPtr("XGLLQCLXY5LEQV2UAQDUSOZ2MN24L67HDIGWRK2MA5STBBRNMVDA===="),
+				Existing: lo.ToPtr(false),
+			},
+			returnGetClusterByHandle:      nil,
+			returnErrorGetClusterByHandle: errors.NewNotFound(schema.GroupResource{}, clusterName),
+			returnIsClusterExisting:       false,
+			returnCreateCluster:           &gqlclient.ClusterFragment{ID: clusterConsoleID},
+			existingObjects: []ctrlruntimeclient.Object{
+				&v1alpha1.Cluster{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: clusterName,
+					},
+					Spec: v1alpha1.ClusterSpec{
+						Handle: lo.ToPtr(clusterName),
+						Cloud:  "byok",
 					},
 				},
 			},
