@@ -7,6 +7,7 @@ import (
 	"github.com/go-logr/logr"
 	console "github.com/pluralsh/console-client-go"
 	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -17,7 +18,6 @@ import (
 
 	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
-	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/utils"
 )
 
