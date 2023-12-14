@@ -90,7 +90,6 @@ export const runtimeColumns = [
   columnHelperRuntime.accessor((row) => row?.version, {
     id: 'version',
     header: 'Version',
-    // meta: { truncate: true },
     cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
   }),
   columnHelperRuntime.accessor((row) => row?.addonVersion, {
