@@ -2,7 +2,7 @@ defmodule Console.Schema.ServiceComponent do
   use Piazza.Ecto.Schema
   alias Console.Schema.{Service, ApiDeprecation}
 
-  defenum State, running: 0, pending: 1, failed: 2
+  defenum State, running: 0, pending: 1, failed: 2, paused: 3
 
   schema "service_components" do
     field :state,      State
