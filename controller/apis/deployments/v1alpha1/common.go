@@ -87,3 +87,13 @@ const (
 	ReadonlyConditionReason ConditionReason = "Readonly"
 	ReadyConditionReason    ConditionReason = "Ready"
 )
+
+type ConditionMessage string
+
+func (c ConditionMessage) String() string {
+	return string(c)
+}
+
+const (
+	ReadonlyTrueConditionMessage ConditionMessage = "Running in read-only mode. Resource already exists upstream and will not be synced."
+)

@@ -93,6 +93,10 @@ func (p *Provider) Diff(ctx context.Context, getter CloudSettingsGetter, hasher 
 	return !p.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
+func (p *Provider) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&p.Status.Conditions, condition)
+}
+
 // ProviderList ...
 // +kubebuilder:object:root=true
 type ProviderList struct {

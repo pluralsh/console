@@ -5,10 +5,10 @@ metadata:
   name: gcp
 spec:
   name: gcp
-  namespace: gcp-capi
+  namespace: operator
   cloud: gcp
   cloudSettings:
     gcp:
       name: credentials
-      namespace: gcp-capi
+      namespace: operator
 

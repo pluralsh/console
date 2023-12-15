@@ -36,29 +36,29 @@ spec:
       project: pluralsh-test-384515
   tags:
     managed-by: plural-operator
-#---
-#apiVersion: deployments.plural.sh/v1alpha1
-#kind: GitRepository
-#metadata:
-#  name: k8s-helm
-#spec:
-#  url: https://github.com/zreigz/k8s-helm.git
-#---
-#apiVersion: deployments.plural.sh/v1alpha1
-#kind: ServiceDeployment
-#metadata:
-#  name: zreigz-test
-#  namespace: operator
-#spec:
-#  version: 0.0.1
-#  git:
-#    folder: nginx
-#    ref: master
-#  repositoryRef:
-#    kind: GitRepository
-#    name: k8s-helm
-#    namespace: operator
-#  clusterRef:
-#    kind: Cluster
-#    name: gcp
-#    namespace: operator
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: k8s-helm
+spec:
+  url: https://github.com/zreigz/k8s-helm.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ServiceDeployment
+metadata:
+  name: zreigz-test
+  namespace: operator
+spec:
+  version: 0.0.1
+  git:
+    folder: nginx
+    ref: master
+  repositoryRef:
+    kind: GitRepository
+    name: k8s-helm
+    namespace: operator
+  clusterRef:
+    kind: Cluster
+    name: gcp
+    namespace: operator
