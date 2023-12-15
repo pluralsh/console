@@ -216,7 +216,7 @@ func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context
 			return nil, &requeue, nil
 		}
 
-		err = utils.TryAddControllerRef(ctx, r.Client, provider, cluster, r.Scheme)
+		err := controllerutil.SetOwnerReference(provider, cluster, r.Scheme)
 		if err != nil {
 			return nil, &ctrl.Result{}, fmt.Errorf("could not set cluster owner reference, got error: %+v", err)
 		}

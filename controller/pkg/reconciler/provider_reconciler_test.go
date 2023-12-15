@@ -76,9 +76,8 @@ func TestCreateNewProvider(t *testing.T) {
 			},
 		},
 		expectedStatus: v1alpha1.ProviderStatus{
-			ID:       lo.ToPtr("1234"),
-			SHA:      lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
-			Existing: lo.ToPtr(false),
+			ID:  lo.ToPtr("1234"),
+			SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
 		},
 	}
 
@@ -160,8 +159,7 @@ func TestAdoptProvider(t *testing.T) {
 			},
 		},
 		expectedStatus: v1alpha1.ProviderStatus{
-			ID:       lo.ToPtr("1234"),
-			Existing: lo.ToPtr(true),
+			ID: lo.ToPtr("1234"),
 		},
 	}
 
@@ -231,9 +229,8 @@ func TestUpdateProvider(t *testing.T) {
 					Namespace: "gcp",
 				},
 				Status: v1alpha1.ProviderStatus{
-					ID:       lo.ToPtr("1234"),
-					SHA:      lo.ToPtr(""),
-					Existing: lo.ToPtr(false),
+					ID:  lo.ToPtr("1234"),
+					SHA: lo.ToPtr(""),
 				},
 			},
 			&corev1.Secret{
@@ -246,9 +243,8 @@ func TestUpdateProvider(t *testing.T) {
 			},
 		},
 		expectedStatus: v1alpha1.ProviderStatus{
-			ID:       lo.ToPtr("1234"),
-			SHA:      lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
-			Existing: lo.ToPtr(false),
+			ID:  lo.ToPtr("1234"),
+			SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
 		},
 	}
 

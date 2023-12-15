@@ -2,6 +2,7 @@ package reconciler_test
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
@@ -26,6 +27,15 @@ import (
 
 func init() {
 	utilruntime.Must(v1alpha1.AddToScheme(scheme.Scheme))
+}
+
+func sanitizeClusterStatus(status v1alpha1.ClusterStatus) v1alpha1.ClusterStatus {
+	for i := range status.Conditions {
+		status.Conditions[i].LastTransitionTime = metav1.Time{}
+		status.Conditions[i].ObservedGeneration = 0
+	}
+
+	return status
 }
 
 func TestCreateNewCluster(t *testing.T) {
@@ -58,13 +68,13 @@ func TestCreateNewCluster(t *testing.T) {
 					{
 						Type:    v1alpha1.ReadonlyConditionType.String(),
 						Status:  metav1.ConditionFalse,
-						Reason:  "",
+						Reason:  v1alpha1.ReadonlyConditionReason.String(),
 						Message: "",
 					},
 					{
-						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Type:    v1alpha1.ReadyConditionType.String(),
 						Status:  metav1.ConditionTrue,
-						Reason:  "",
+						Reason:  v1alpha1.ReadyConditionReason.String(),
 						Message: "",
 					},
 				},
@@ -104,13 +114,13 @@ func TestCreateNewCluster(t *testing.T) {
 					{
 						Type:    v1alpha1.ReadonlyConditionType.String(),
 						Status:  metav1.ConditionFalse,
-						Reason:  "",
+						Reason:  v1alpha1.ReadonlyConditionReason.String(),
 						Message: "",
 					},
 					{
-						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Type:    v1alpha1.ReadyConditionType.String(),
 						Status:  metav1.ConditionTrue,
-						Reason:  "",
+						Reason:  v1alpha1.ReadyConditionReason.String(),
 						Message: "",
 					},
 				},
@@ -154,8 +164,11 @@ func TestCreateNewCluster(t *testing.T) {
 
 			existingCluster := &v1alpha1.Cluster{}
 			err = fakeClient.Get(ctx, ctrlruntimeclient.ObjectKey{Name: test.cluster}, existingCluster)
+			existingStatusJson, _ := json.Marshal(sanitizeClusterStatus(existingCluster.Status))
+			expectedStatusJson, _ := json.Marshal(sanitizeClusterStatus(test.expectedStatus))
+
 			assert.NoError(t, err)
-			assert.EqualValues(t, test.expectedStatus, existingCluster.Status)
+			assert.EqualValues(t, string(expectedStatusJson), string(existingStatusJson))
 		})
 	}
 }
@@ -188,13 +201,13 @@ func TestUpdateCluster(t *testing.T) {
 					{
 						Type:    v1alpha1.ReadonlyConditionType.String(),
 						Status:  metav1.ConditionFalse,
-						Reason:  "",
+						Reason:  v1alpha1.ReadonlyConditionReason.String(),
 						Message: "",
 					},
 					{
-						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Type:    v1alpha1.ReadyConditionType.String(),
 						Status:  metav1.ConditionTrue,
-						Reason:  "",
+						Reason:  v1alpha1.ReadyConditionReason.String(),
 						Message: "",
 					},
 				},
@@ -217,13 +230,13 @@ func TestUpdateCluster(t *testing.T) {
 							{
 								Type:    v1alpha1.ReadonlyConditionType.String(),
 								Status:  metav1.ConditionFalse,
-								Reason:  "",
+								Reason:  v1alpha1.ReadonlyConditionReason.String(),
 								Message: "",
 							},
 							{
-								Type:    v1alpha1.ReadonlyConditionType.String(),
+								Type:    v1alpha1.ReadyConditionType.String(),
 								Status:  metav1.ConditionTrue,
-								Reason:  "",
+								Reason:  v1alpha1.ReadyConditionReason.String(),
 								Message: "",
 							},
 						},
@@ -250,13 +263,13 @@ func TestUpdateCluster(t *testing.T) {
 					{
 						Type:    v1alpha1.ReadonlyConditionType.String(),
 						Status:  metav1.ConditionFalse,
-						Reason:  "",
+						Reason:  v1alpha1.ReadonlyConditionReason.String(),
 						Message: "",
 					},
 					{
-						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Type:    v1alpha1.ReadyConditionType.String(),
 						Status:  metav1.ConditionTrue,
-						Reason:  "",
+						Reason:  v1alpha1.ReadyConditionReason.String(),
 						Message: "",
 					},
 				},
@@ -315,8 +328,12 @@ func TestUpdateCluster(t *testing.T) {
 
 			existingCluster := &v1alpha1.Cluster{}
 			err = fakeClient.Get(ctx, ctrlruntimeclient.ObjectKey{Name: test.cluster}, existingCluster)
+
+			existingStatusJson, _ := json.Marshal(sanitizeClusterStatus(existingCluster.Status))
+			expectedStatusJson, _ := json.Marshal(sanitizeClusterStatus(test.expectedStatus))
+
 			assert.NoError(t, err)
-			assert.EqualValues(t, test.expectedStatus, existingCluster.Status)
+			assert.EqualValues(t, string(expectedStatusJson), string(existingStatusJson))
 		})
 	}
 }
@@ -344,13 +361,13 @@ func TestAdoptExistingCluster(t *testing.T) {
 					{
 						Type:    v1alpha1.ReadonlyConditionType.String(),
 						Status:  metav1.ConditionTrue,
-						Reason:  "",
-						Message: "",
+						Reason:  v1alpha1.ReadonlyConditionReason.String(),
+						Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
 					},
 					{
-						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Type:    v1alpha1.ReadyConditionType.String(),
 						Status:  metav1.ConditionTrue,
-						Reason:  "",
+						Reason:  v1alpha1.ReadyConditionReason.String(),
 						Message: "",
 					},
 				},
@@ -374,13 +391,13 @@ func TestAdoptExistingCluster(t *testing.T) {
 					{
 						Type:    v1alpha1.ReadonlyConditionType.String(),
 						Status:  metav1.ConditionTrue,
-						Reason:  "",
-						Message: "",
+						Reason:  v1alpha1.ReadonlyConditionReason.String(),
+						Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
 					},
 					{
-						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Type:    v1alpha1.ReadyConditionType.String(),
 						Status:  metav1.ConditionTrue,
-						Reason:  "",
+						Reason:  v1alpha1.ReadyConditionReason.String(),
 						Message: "",
 					},
 				},
@@ -423,8 +440,12 @@ func TestAdoptExistingCluster(t *testing.T) {
 
 			existingCluster := &v1alpha1.Cluster{}
 			err = fakeClient.Get(ctx, ctrlruntimeclient.ObjectKey{Name: test.cluster}, existingCluster)
+
+			existingStatusJson, _ := json.Marshal(sanitizeClusterStatus(existingCluster.Status))
+			expectedStatusJson, _ := json.Marshal(sanitizeClusterStatus(test.expectedStatus))
+
 			assert.NoError(t, err)
-			assert.EqualValues(t, test.expectedStatus, existingCluster.Status)
+			assert.EqualValues(t, string(expectedStatusJson), string(existingStatusJson))
 		})
 	}
 }
