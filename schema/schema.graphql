@@ -1005,6 +1005,9 @@ type ServiceDeployment {
   "description of how helm charts should be applied"
   helm: HelmSpec
 
+  "whether manual canary promotions can proceed"
+  proceed: Boolean
+
   "if true, deletion of this service is not allowed"
   protect: Boolean
 

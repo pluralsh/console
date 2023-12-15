@@ -43,9 +43,8 @@ export function ServiceDetailsSidecar({
           margin: theme.spacing.small,
         }}
       >
-        {status === ServiceDeploymentStatus.Paused && (
-          <ServicePromote id={id} />
-        )}
+        {status === ServiceDeploymentStatus.Paused &&
+          !serviceDeployment.proceed && <ServicePromote id={id} />}
       </div>
       <PropsContainer>
         {name && <Prop title="Service name"> {name}</Prop>}

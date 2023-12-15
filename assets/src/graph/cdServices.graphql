@@ -19,6 +19,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   id
   name
   protect
+  proceed
   message
   git {
     ref

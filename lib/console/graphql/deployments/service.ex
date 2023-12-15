@@ -102,6 +102,7 @@ defmodule Console.GraphQl.Deployments.Service do
         {:ok, Map.put(helm, :parent, svc)}
       svc, _, _ -> {:ok, svc.helm}
     end
+    field :proceed,          :boolean, description: "whether manual canary promotions can proceed"
     field :protect,          :boolean, description: "if true, deletion of this service is not allowed"
     field :sha,              :string, description: "latest git sha we pulled from"
     field :tarball,          :string, resolve: &Deployments.tarball/3, description: "https url to fetch the latest tarball of kubernetes manifests"
