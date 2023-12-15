@@ -5,6 +5,9 @@ import (
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/pkg/reconciler"
+	"github.com/pluralsh/console/controller/pkg/test/mocks"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -19,10 +22,6 @@ import (
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
-	"github.com/pluralsh/console/controller/pkg/reconciler"
-	"github.com/pluralsh/console/controller/pkg/test/mocks"
 )
 
 func init() {
@@ -55,6 +54,20 @@ func TestCreateNewCluster(t *testing.T) {
 			expectedStatus: v1alpha1.ClusterStatus{
 				ID:  lo.ToPtr(clusterConsoleID),
 				SHA: lo.ToPtr("DU5PTA62PGOS35CPPCNSRG6PGXUUIWTXVBK5BFXCCGCAAM2K6HYA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnGetClusterByHandle:      nil,
 			returnErrorGetClusterByHandle: errors.NewNotFound(schema.GroupResource{}, clusterName),
@@ -87,6 +100,20 @@ func TestCreateNewCluster(t *testing.T) {
 			expectedStatus: v1alpha1.ClusterStatus{
 				ID:  lo.ToPtr(clusterConsoleID),
 				SHA: lo.ToPtr("XGLLQCLXY5LEQV2UAQDUSOZ2MN24L67HDIGWRK2MA5STBBRNMVDA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnGetClusterByHandle:      nil,
 			returnErrorGetClusterByHandle: errors.NewNotFound(schema.GroupResource{}, clusterName),
@@ -157,6 +184,20 @@ func TestUpdateCluster(t *testing.T) {
 			expectedStatus: v1alpha1.ClusterStatus{
 				ID:  lo.ToPtr(clusterConsoleID),
 				SHA: lo.ToPtr("DU5PTA62PGOS35CPPCNSRG6PGXUUIWTXVBK5BFXCCGCAAM2K6HYA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnIsClusterExisting: true,
 			returnUpdateCluster:     &gqlclient.ClusterFragment{ID: clusterConsoleID},
@@ -172,6 +213,20 @@ func TestUpdateCluster(t *testing.T) {
 					Status: v1alpha1.ClusterStatus{
 						ID:  lo.ToPtr(clusterConsoleID),
 						SHA: lo.ToPtr("XGLLQCLXY5LEQV2UAQDUSOZ2MN24L67HDIGWRK2MA5STBBRNMVDA===="),
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.ReadonlyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  "",
+								Message: "",
+							},
+							{
+								Type:    v1alpha1.ReadonlyConditionType.String(),
+								Status:  metav1.ConditionTrue,
+								Reason:  "",
+								Message: "",
+							},
+						},
 					},
 				},
 				&v1alpha1.Provider{
@@ -191,6 +246,20 @@ func TestUpdateCluster(t *testing.T) {
 			expectedStatus: v1alpha1.ClusterStatus{
 				ID:  lo.ToPtr(clusterConsoleID),
 				SHA: lo.ToPtr("XGLLQCLXY5LEQV2UAQDUSOZ2MN24L67HDIGWRK2MA5STBBRNMVDA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnIsClusterExisting: true,
 			returnUpdateCluster:     &gqlclient.ClusterFragment{ID: clusterConsoleID},
@@ -204,6 +273,20 @@ func TestUpdateCluster(t *testing.T) {
 					Status: v1alpha1.ClusterStatus{
 						ID:  lo.ToPtr(clusterConsoleID),
 						SHA: lo.ToPtr("DU5PTA62PGOS35CPPCNSRG6PGXUUIWTXVBK5BFXCCGCAAM2K6HYA===="),
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.ReadonlyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  "",
+								Message: "",
+							},
+							{
+								Type:    v1alpha1.ReadonlyConditionType.String(),
+								Status:  metav1.ConditionTrue,
+								Reason:  "",
+								Message: "",
+							},
+						},
 					},
 				},
 			},
@@ -257,6 +340,20 @@ func TestAdoptExistingCluster(t *testing.T) {
 			cluster: clusterName,
 			expectedStatus: v1alpha1.ClusterStatus{
 				ID: lo.ToPtr(clusterConsoleID),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnGetClusterByHandle:      &gqlclient.ClusterFragment{ID: clusterConsoleID},
 			returnErrorGetClusterByHandle: nil,
@@ -273,6 +370,20 @@ func TestAdoptExistingCluster(t *testing.T) {
 			expectedStatus: v1alpha1.ClusterStatus{
 				ID:             lo.ToPtr(clusterConsoleID),
 				CurrentVersion: lo.ToPtr("1.24.11"),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnGetClusterByHandle: &gqlclient.ClusterFragment{
 				ID:             clusterConsoleID,

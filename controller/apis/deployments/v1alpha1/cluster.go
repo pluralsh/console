@@ -39,6 +39,10 @@ type Cluster struct {
 	Status ClusterStatus `json:"status,omitempty"`
 }
 
+func (c *Cluster) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&c.Status.Conditions, condition)
+}
+
 func (c *Cluster) Attributes(providerId *string) console.ClusterAttributes {
 	attrs := console.ClusterAttributes{
 		Name:          c.Name,
