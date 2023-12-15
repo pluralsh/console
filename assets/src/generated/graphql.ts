@@ -816,6 +816,7 @@ export type ComponentAttributes = {
 
 export enum ComponentState {
   Failed = 'FAILED',
+  Paused = 'PAUSED',
   Pending = 'PENDING',
   Running = 'RUNNING'
 }

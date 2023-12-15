@@ -38,12 +38,14 @@ const stateToDisplay = {
   [ComponentState.Running]: 'Running',
   [ComponentState.Pending]: 'In progress',
   [ComponentState.Failed]: 'Failed',
+  [ComponentState.Paused]: 'Paused',
 } as const satisfies Record<ComponentState, string>
 
 const stateToSeverity = {
   [ComponentState.Running]: 'success',
   [ComponentState.Pending]: 'warning',
   [ComponentState.Failed]: 'error',
+  [ComponentState.Paused]: 'info',
 } as const satisfies Record<
   ComponentState,
   ComponentProps<typeof Chip>['severity']
