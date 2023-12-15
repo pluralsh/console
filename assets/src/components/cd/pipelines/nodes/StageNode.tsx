@@ -31,6 +31,7 @@ const serviceStateToCardStatus = {
   [ServiceDeploymentStatus.Synced]: 'ok',
   [ServiceDeploymentStatus.Stale]: 'pending',
   [ServiceDeploymentStatus.Failed]: 'closed',
+  [ServiceDeploymentStatus.Paused]: 'pending',
 } as const satisfies Record<ServiceDeploymentStatus, CardStatus>
 
 export enum StageStatus {

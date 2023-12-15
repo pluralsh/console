@@ -326,6 +326,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def delete_service(%{id: id}, %{context: %{current_user: user}}),
     do: Services.delete_service(id, user)
 
+  def proceed(args, %{context: %{current_user: user}}) do
+    fetch_service(args)
+    |> Services.proceed(user)
+  end
+
   def clone_service(%{cluster: _, name: _, cluster_id: cid, attributes: attrs} = args, %{context: %{current_user: user}}) do
     svc = fetch_service(args)
     Services.clone_service(attrs, svc.id, cid, user)
@@ -417,6 +422,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   defp rbac_args(%{cluster_id: id}) when is_binary(id), do: {&Clusters.rbac/3, id}
   defp rbac_args(%{service_id: id}) when is_binary(id), do: {&Services.rbac/3, id}
 
+  defp fetch_service(%{id: id}) when is_binary(id), do: Services.get_service!(id)
   defp fetch_service(%{cluster: cluster, name: name}) do
     cluster = Clusters.find!(cluster)
     Services.get_service_by_name!(cluster.id, name)

@@ -430,6 +430,43 @@ export enum BuildType {
   Install = 'INSTALL'
 }
 
+export type Canary = {
+  __typename?: 'Canary';
+  events?: Maybe<Array<Maybe<Event>>>;
+  metadata: Metadata;
+  raw: Scalars['String']['output'];
+  spec: CanarySpec;
+  status: CanaryStatus;
+};
+
+export type CanaryAnalysis = {
+  __typename?: 'CanaryAnalysis';
+  interval?: Maybe<Scalars['String']['output']>;
+  maxWeight?: Maybe<Scalars['Int']['output']>;
+  stepWeight?: Maybe<Scalars['Int']['output']>;
+  stepWeights?: Maybe<Array<Maybe<Scalars['Int']['output']>>>;
+  threshold?: Maybe<Scalars['Int']['output']>;
+};
+
+export type CanarySpec = {
+  __typename?: 'CanarySpec';
+  analysis?: Maybe<CanaryAnalysis>;
+  autoscalerRef?: Maybe<TargetRef>;
+  ingressRef?: Maybe<TargetRef>;
+  provider?: Maybe<Scalars['String']['output']>;
+  targetRef?: Maybe<TargetRef>;
+};
+
+export type CanaryStatus = {
+  __typename?: 'CanaryStatus';
+  canaryWeight?: Maybe<Scalars['Int']['output']>;
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
+  failedChecks?: Maybe<Scalars['Int']['output']>;
+  iterations?: Maybe<Scalars['Int']['output']>;
+  lastTransitionTime?: Maybe<Scalars['String']['output']>;
+  phase?: Maybe<Scalars['String']['output']>;
+};
+
 export type Certificate = {
   __typename?: 'Certificate';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -2464,6 +2501,8 @@ export type RootMutationType = {
   overlayConfiguration?: Maybe<Build>;
   /** a regular status ping to be sent by the deploy operator */
   pingCluster?: Maybe<Cluster>;
+  /** marks a service as being able to proceed to the next stage of a canary rollout */
+  proceed?: Maybe<ServiceDeployment>;
   readNotifications?: Maybe<User>;
   /** registers a list of runtime services discovered for the current cluster */
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
@@ -2770,6 +2809,13 @@ export type RootMutationTypePingClusterArgs = {
 };
 
 
+export type RootMutationTypeProceedArgs = {
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootMutationTypeRegisterRuntimeServicesArgs = {
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   services?: InputMaybe<Array<InputMaybe<RuntimeServiceAttributes>>>;
@@ -2916,6 +2962,7 @@ export type RootQueryType = {
   buildInfo?: Maybe<BuildInfo>;
   builds?: Maybe<BuildConnection>;
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
+  canary?: Maybe<Canary>;
   certificate?: Maybe<Certificate>;
   /** fetches an individual cluster */
   cluster?: Maybe<Cluster>;
@@ -3057,6 +3104,13 @@ export type RootQueryTypeBuildsArgs = {
 
 export type RootQueryTypeCachedPodsArgs = {
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
+export type RootQueryTypeCanaryArgs = {
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -3802,6 +3856,7 @@ export type ServiceDeploymentEdge = {
 export enum ServiceDeploymentStatus {
   Failed = 'FAILED',
   Healthy = 'HEALTHY',
+  Paused = 'PAUSED',
   Stale = 'STALE',
   Synced = 'SYNCED'
 }
@@ -4000,6 +4055,13 @@ export type TaintAttributes = {
   effect: Scalars['String']['input'];
   key: Scalars['String']['input'];
   value: Scalars['String']['input'];
+};
+
+export type TargetRef = {
+  __typename?: 'TargetRef';
+  apiVersion?: Maybe<Scalars['String']['output']>;
+  kind?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
 };
 
 export type TerminatedState = {

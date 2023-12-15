@@ -1043,6 +1043,22 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "proceed" do
+    test "it can proceed a service through canary deployment" do
+      admin = admin_user()
+      svc = insert(:service)
+
+      {:ok, %{data: %{"proceed" => res}}} = run_query("""
+        mutation Proceed($id: ID!) {
+          proceed(id: $id) { id }
+        }
+      """, %{"id" => svc.id}, %{current_user: admin})
+
+      assert res["id"] == svc.id
+      assert refetch(svc).proceed
+    end
+  end
+
   describe "selfManage" do
     test "it can self-manage a byok console" do
       admin = admin_user()

@@ -36,6 +36,9 @@ export const statusTabs = Object.entries({
   [ServiceDeploymentStatus.Stale]: {
     label: serviceStatusToLabel(ServiceDeploymentStatus.Stale),
   },
+  [ServiceDeploymentStatus.Paused]: {
+    label: serviceStatusToLabel(ServiceDeploymentStatus.Paused),
+  },
   [ServiceDeploymentStatus.Failed]: {
     label: serviceStatusToLabel(ServiceDeploymentStatus.Failed),
   },

@@ -103,6 +103,8 @@ type RootQueryType {
 
   nodeMetric(name: String!, clusterId: ID): NodeMetric
 
+  canary(namespace: String!, name: String!, serviceId: ID): Canary
+
   configurationOverlays(namespace: String!): [ConfigurationOverlay]
 
   audits(after: String, first: Int, before: String, last: Int, repo: String): AuditConnection
@@ -387,6 +389,16 @@ type RootMutationType {
   ): ServiceDeployment
 
   selfManage(values: String!): ServiceDeployment
+
+  "marks a service as being able to proceed to the next stage of a canary rollout"
+  proceed(
+    id: ID
+
+    "the handle of the cluster for this service"
+    cluster: String
+
+    name: String
+  ): ServiceDeployment
 
   createGlobalService(
     serviceId: ID
@@ -882,6 +894,7 @@ enum ServiceDeploymentStatus {
   SYNCED
   HEALTHY
   FAILED
+  PAUSED
 }
 
 input ServiceDeploymentAttributes {
@@ -2400,6 +2413,45 @@ type KubernetesUnstructured {
 type ApplicationDelta {
   delta: Delta
   payload: Application
+}
+
+type Canary {
+  metadata: Metadata!
+  status: CanaryStatus!
+  spec: CanarySpec!
+  raw: String!
+  events: [Event]
+}
+
+type CanaryStatus {
+  conditions: [StatusCondition]
+  failedChecks: Int
+  canaryWeight: Int
+  iterations: Int
+  lastTransitionTime: String
+  phase: String
+}
+
+type CanarySpec {
+  autoscalerRef: TargetRef
+  targetRef: TargetRef
+  ingressRef: TargetRef
+  analysis: CanaryAnalysis
+  provider: String
+}
+
+type CanaryAnalysis {
+  interval: String
+  maxWeight: Int
+  stepWeight: Int
+  stepWeights: [Int]
+  threshold: Int
+}
+
+type TargetRef {
+  apiVersion: String
+  kind: String
+  name: String
 }
 
 type ConfigMap {
