@@ -6,7 +6,11 @@ import (
 
 	"github.com/go-logr/logr"
 	console "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
+	consoleclient "github.com/pluralsh/console/controller/pkg/client"
+	"github.com/pluralsh/console/controller/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -14,10 +18,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
-	consoleclient "github.com/pluralsh/console/controller/pkg/client"
-	"github.com/pluralsh/console/controller/pkg/utils"
 )
 
 const (
@@ -53,6 +53,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	scope, err := NewClusterScope(ctx, r.Client, cluster)
 	if err != nil {
 		logger.Error(err, "Failed to create cluster scope")
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 	defer func() {
@@ -64,11 +65,12 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Handle existing resource.
 	existing, err := r.isExisting(cluster)
 	if err != nil {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
 	if existing {
 		logger.V(9).Info("Cluster already exists in the API, running in read-only mode")
-		return r.handleExisting(ctx, cluster)
+		return r.handleExisting(cluster)
 	}
 
 	// Handle resource deletion both in Kubernetes cluster and in Console API.
@@ -79,18 +81,21 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Get Provider ID from the reference if it is set and ensure that controller reference is set properly.
 	providerId, result, err := r.getProviderIdAndSetControllerRef(ctx, cluster)
 	if result != nil {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return *result, err
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
 	sha, err := utils.HashObject(cluster.UpdateAttributes())
 	if err != nil {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	// Sync resource with Console API.
 	apiCluster, err := r.sync(ctx, cluster, providerId, sha)
 	if err != nil {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -100,7 +105,8 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
 	cluster.Status.PingedAt = apiCluster.PingedAt
 	cluster.Status.SHA = &sha
-	// TODO cluster.Status.Existing = lo.ToPtr(false)
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
 }
@@ -125,9 +131,10 @@ func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) 
 	return !cluster.Status.HasID(), nil
 }
 
-func (r *ClusterReconciler) handleExisting(ctx context.Context, cluster *v1alpha1.Cluster) (ctrl.Result, error) {
+func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Result, error) {
 	apiCluster, err := r.ConsoleClient.GetClusterByHandle(cluster.Spec.Handle)
 	if err != nil {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -135,30 +142,20 @@ func (r *ClusterReconciler) handleExisting(ctx context.Context, cluster *v1alpha
 	cluster.Status.KasURL = apiCluster.KasURL
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
 	cluster.Status.PingedAt = apiCluster.PingedAt
-	// TODO c.Status.Existing = lo.ToPtr(true)
-
-	//meta.SetStatusCondition(&cluster.Status.Conditions, v1.Condition{
-	//	Type:    v1alpha1.ReadonlyConditionType.String(),
-	//	Status:  v1.ConditionTrue,
-	//	Reason:  v1alpha1.ReadonlyConditionReason.String(),
-	//	Message: "Cluster already exists, running in read-only mode where only status will be updated and no changes in Console will be made",
-	//})
-	//	// Existing if set to true, then Console will not be synced with the data from this resource.
-	//	// It can be used to read already existing resources.
-	//	// +kubebuilder:validation:Optional
-	//	Existing *bool `json:"existing,omitempty"`
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
 }
 
 func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctrl.Result {
-	// If object is not being deleted, so if it does not have our finalizer, then lets add the finalizer
-	// and update the object. This is equivalent to registering our finalizer.
+	/// If object is not being deleted and if it does not have our finalizer,
+	// then lets add the finalizer. This is equivalent to registering our finalizer.
 	if cluster.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(cluster, FinalizerName) {
 		controllerutil.AddFinalizer(cluster, FinalizerName)
 	}
 
-	// If object is being deleted.
+	// If object is being deleted cleanup and remove the finalizer.
 	if !cluster.ObjectMeta.DeletionTimestamp.IsZero() {
 		// If object is already being deleted from Console API requeue.
 		if r.ConsoleClient.IsClusterDeleting(cluster.Status.ID) {
@@ -168,8 +165,9 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 		// Remove Cluster from Console API if it exists.
 		if r.ConsoleClient.IsClusterExisting(cluster.Status.ID) {
 			if _, err := r.ConsoleClient.DeleteCluster(*cluster.Status.ID); err != nil {
-				// if fail to delete the external dependency here, return with error
+				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
+				utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 				return &ctrl.Result{}
 			}
 
