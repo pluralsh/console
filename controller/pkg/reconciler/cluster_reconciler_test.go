@@ -6,9 +6,6 @@ import (
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
-	"github.com/pluralsh/console/controller/pkg/reconciler"
-	"github.com/pluralsh/console/controller/pkg/test/mocks"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -23,6 +20,10 @@ import (
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/pkg/reconciler"
+	"github.com/pluralsh/console/controller/pkg/test/mocks"
 )
 
 func init() {
