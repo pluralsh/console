@@ -94,9 +94,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		if err := utils.TryAddFinalizer(ctx, r.Client, service, ServiceFinalizer); err != nil {
-			return ctrl.Result{}, err
-		}
 	}
 	err = r.addOwnerReferences(ctx, service)
 	if err != nil {
