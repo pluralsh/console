@@ -16,7 +16,7 @@ func (r *ProviderReconciler) missingCredentialKeyError(key string) error {
 	return fmt.Errorf("%q key does not exist in referenced credential secret", key)
 }
 
-func (r *ProviderReconciler) getCloudProviderSettingsSecretRef(provider v1alpha1.Provider) *corev1.SecretReference {
+func (r *ProviderReconciler) getCloudProviderSettingsSecretRef(provider *v1alpha1.Provider) *corev1.SecretReference {
 	if provider.Spec.CloudSettings == nil {
 		return nil
 	}

@@ -6,6 +6,7 @@ import (
 	console "github.com/pluralsh/console-client-go"
 	"github.com/samber/lo"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -139,13 +140,7 @@ type ProviderStatus struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	SHA *string `json:"sha,omitempty"`
-	// Existing flag is set to true when Console API object already exists when CRD is created.
-	// CRD is then set to read-only mode and does not update Console API from CRD.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=boolean
-	Existing *bool `json:"existing,omitempty"`
 	// Represents the observations of a Provider's current state.
-	// Known .status.conditions.type are: "Available", "Progressing", and "Degraded"
 	// +patchMergeKey=type
 	// +patchStrategy=merge
 	// +listType=map
@@ -185,6 +180,10 @@ func (p *ProviderStatus) IsSHAEqual(sha string) bool {
 	return p.GetSHA() == sha
 }
 
-func (p *ProviderStatus) HasExisting() bool {
-	return p.Existing != nil
+func (p *ProviderStatus) HasReadonlyCondition() bool {
+	return meta.FindStatusCondition(p.Conditions, ReadonlyConditionType.String()) != nil
+}
+
+func (p *ProviderStatus) IsReadonly() bool {
+	return meta.IsStatusConditionTrue(p.Conditions, ReadonlyConditionType.String())
 }

@@ -14,6 +14,8 @@ import (
 	"k8s.io/client-go/util/retry"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
 )
 
 func TryAddOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, object ctrlruntimeclient.Object, scheme *runtime.Scheme) error {
@@ -201,4 +203,8 @@ func GetConfigMapData(ctx context.Context, client ctrlruntimeclient.Client, name
 	}
 
 	return "", nil
+}
+
+func MarkCondition(setter func(), conditionType v1alpha1.ConditionType, conditionStatus corev1.ConditionStatus, conditionReason v1alpha1.ConditionReason, message string) {
+
 }

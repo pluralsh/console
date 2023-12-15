@@ -23,6 +23,7 @@ package v1alpha1
 
 import (
 	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -641,10 +642,12 @@ func (in *ProviderStatus) DeepCopyInto(out *ProviderStatus) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.Existing != nil {
-		in, out := &in.Existing, &out.Existing
-		*out = new(bool)
-		**out = **in
+	if in.Conditions != nil {
+		in, out := &in.Conditions, &out.Conditions
+		*out = make([]metav1.Condition, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 }
 
