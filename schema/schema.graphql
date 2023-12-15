@@ -2419,6 +2419,10 @@ type Canary {
   metadata: Metadata!
   status: CanaryStatus!
   spec: CanarySpec!
+  primaryDeployment: Deployment
+  canaryDeployment: Deployment
+  ingress: Ingress
+  ingressPrimary: Ingress
   raw: String!
   events: [Event]
 }

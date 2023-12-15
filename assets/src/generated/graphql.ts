@@ -432,8 +432,12 @@ export enum BuildType {
 
 export type Canary = {
   __typename?: 'Canary';
+  canaryDeployment?: Maybe<Deployment>;
   events?: Maybe<Array<Maybe<Event>>>;
+  ingress?: Maybe<Ingress>;
+  ingressPrimary?: Maybe<Ingress>;
   metadata: Metadata;
+  primaryDeployment?: Maybe<Deployment>;
   raw: Scalars['String']['output'];
   spec: CanarySpec;
   status: CanaryStatus;
