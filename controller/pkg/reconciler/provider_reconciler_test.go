@@ -33,10 +33,8 @@ func init() {
 
 func sanitizeConditions(status v1alpha1.ProviderStatus) v1alpha1.ProviderStatus {
 	for i := range status.Conditions {
-		c := status.Conditions[i]
-		c.LastTransitionTime = metav1.Time{}
-		c.ObservedGeneration = 0
-		status.Conditions[i] = c
+		status.Conditions[i].LastTransitionTime = metav1.Time{}
+		status.Conditions[i].ObservedGeneration = 0
 	}
 
 	return status
@@ -91,16 +89,14 @@ func TestCreateNewProvider(t *testing.T) {
 			SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
 			Conditions: []metav1.Condition{
 				{
-					Type:    v1alpha1.ReadonlyConditionType.String(),
-					Status:  metav1.ConditionFalse,
-					Reason:  v1alpha1.ReadonlyConditionReason.String(),
-					Message: "",
+					Type:   v1alpha1.ReadonlyConditionType.String(),
+					Status: metav1.ConditionFalse,
+					Reason: v1alpha1.ReadonlyConditionReason.String(),
 				},
 				{
-					Type:    v1alpha1.ReadyConditionType.String(),
-					Status:  metav1.ConditionTrue,
-					Reason:  v1alpha1.ReadyConditionReason.String(),
-					Message: "",
+					Type:   v1alpha1.ReadyConditionType.String(),
+					Status: metav1.ConditionTrue,
+					Reason: v1alpha1.ReadyConditionReason.String(),
 				},
 			},
 		},
@@ -193,10 +189,9 @@ func TestAdoptProvider(t *testing.T) {
 					Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
 				},
 				{
-					Type:    v1alpha1.ReadyConditionType.String(),
-					Status:  metav1.ConditionTrue,
-					Reason:  v1alpha1.ReadyConditionReason.String(),
-					Message: "",
+					Type:   v1alpha1.ReadyConditionType.String(),
+					Status: metav1.ConditionTrue,
+					Reason: v1alpha1.ReadyConditionReason.String(),
 				},
 			},
 		},
@@ -272,10 +267,9 @@ func TestUpdateProvider(t *testing.T) {
 					SHA: lo.ToPtr(""),
 					Conditions: []metav1.Condition{
 						{
-							Type:    v1alpha1.ReadonlyConditionType.String(),
-							Status:  metav1.ConditionFalse,
-							Reason:  v1alpha1.ReadonlyConditionReason.String(),
-							Message: "",
+							Type:   v1alpha1.ReadonlyConditionType.String(),
+							Status: metav1.ConditionFalse,
+							Reason: v1alpha1.ReadonlyConditionReason.String(),
 						},
 					},
 				},
@@ -294,16 +288,14 @@ func TestUpdateProvider(t *testing.T) {
 			SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
 			Conditions: []metav1.Condition{
 				{
-					Type:    v1alpha1.ReadonlyConditionType.String(),
-					Status:  metav1.ConditionFalse,
-					Reason:  v1alpha1.ReadonlyConditionReason.String(),
-					Message: "",
+					Type:   v1alpha1.ReadonlyConditionType.String(),
+					Status: metav1.ConditionFalse,
+					Reason: v1alpha1.ReadonlyConditionReason.String(),
 				},
 				{
-					Type:    v1alpha1.ReadyConditionType.String(),
-					Status:  metav1.ConditionTrue,
-					Reason:  v1alpha1.ReadyConditionReason.String(),
-					Message: "",
+					Type:   v1alpha1.ReadyConditionType.String(),
+					Status: metav1.ConditionTrue,
+					Reason: v1alpha1.ReadyConditionReason.String(),
 				},
 			},
 		},
