@@ -33,3 +33,6 @@ spec:
       - name: "promotion gate"
         type: confirm-promotion
         url: https://console.cd-demo.onplural.sh/ext/v1/gate/cd-demo/canary
+      - name: rollback
+        type: rollback
+        url: https://console.cd-demo.onplural.sh/ext/v1/rollback/cd-demo/canary
