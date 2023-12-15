@@ -22,6 +22,11 @@ defmodule Console.Deployments.Services do
     |> Repo.get_by!(name: name)
   end
 
+  def get_service_by_handle(handle, name) do
+    Service.for_cluster_handle(handle)
+    |> Repo.get_by(name: name)
+  end
+
   def get_revision!(id), do: Repo.get!(Revision, id)
 
   def tarball(%Service{id: id}), do: api_url("v1/git/tarballs?id=#{id}")
@@ -396,6 +401,24 @@ defmodule Console.Deployments.Services do
   end
 
   @doc """
+  Marks a service as being able to proceed to the next stage of a canary deployment
+  """
+  @spec proceed(Service.t, User.t) :: service_resp
+  def proceed(%Service{} = service, %User{} = user) do
+    service
+    |> Ecto.Changeset.change(%{proceed: true, status: :stale})
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
+  Determine if a canary can proceed for a service
+  """
+  @spec proceed?(Service.t) :: boolean
+  def proceed?(%Service{proceed: true}), do: true
+  def proceed?(_), do: false
+
+  @doc """
   Updates the list of service components, separate operation to avoid creating a no-op revision
   """
   @spec update_components(map, binary | Service.t) :: service_resp
@@ -413,13 +436,15 @@ defmodule Console.Deployments.Services do
     |> add_operation(:updated, fn %{service: %Service{components: components} = service} ->
       running = Enum.all?(components, & &1.state == :running || is_nil(&1.state))
       failed = Enum.any?(components, & &1.state == :failed)
+      paused = Enum.any?(components, & &1.state == :paused)
       unsynced = Enum.any?(components, & !&1.synced)
       num_healthy = Enum.count(components, & (&1.state == :running || is_nil(&1.state)) && &1.synced)
       component_status = "#{num_healthy} / #{length(components)}"
-      case {failed, running, unsynced} do
-        {true, _, _} -> update_status(service, :failed, component_status)
-        {_, _, true} -> update_status(service, :stale, component_status)
-        {_, true, _} -> update_status(service, :healthy, component_status)
+      case {failed, paused, running, unsynced} do
+        {true, _, _, _} -> update_status(service, :failed, component_status)
+        {_, true, _, _} -> update_status(service, :paused, component_status)
+        {_, _, _, true} -> update_status(service, :stale, component_status)
+        {_, _, true, _} -> update_status(service, :healthy, component_status)
         _ -> update_status(service, :stale, component_status)
       end
     end)
@@ -591,7 +616,7 @@ defmodule Console.Deployments.Services do
   end
 
   defp update_status(%Service{} = svc, status, component_status) do
-    Ecto.Changeset.change(svc, %{status: status, component_status: component_status})
+    Ecto.Changeset.change(svc, %{status: status, proceed: false, component_status: component_status})
     |> Repo.update()
   end
 

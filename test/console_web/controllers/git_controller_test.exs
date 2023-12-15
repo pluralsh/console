@@ -36,4 +36,26 @@ defmodule ConsoleWeb.GitControllerTest do
       |> response(403)
     end
   end
+
+  describe "#proceed" do
+    test "if a service has been marked it will 200", %{conn: conn} do
+      svc = insert(:service, proceed: true)
+
+      conn
+      |> get("/ext/v1/gate/#{svc.id}")
+      |> response(200)
+
+      conn
+      |> get("/ext/v1/gate/#{svc.cluster.handle}/#{svc.name}")
+      |> response(200)
+    end
+
+    test "if a service hasn't been marked it will 402", %{conn: conn} do
+      svc = insert(:service)
+
+      conn
+      |> get("/ext/v1/gate/#{svc.id}")
+      |> response(402)
+    end
+  end
 end

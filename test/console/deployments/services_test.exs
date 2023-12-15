@@ -884,6 +884,25 @@ defmodule Console.Deployments.ServicesAsyncTest do
     end
   end
 
+  describe "#proceed/1" do
+    test "it will mark a service as being able to proceed and set status to stale" do
+      user = insert(:user)
+      service = insert(:service, status: :paused, write_bindings: [%{user_id: user.id}])
+
+      {:ok, svc} = Services.proceed(service, user)
+
+      assert svc.proceed
+      assert svc.status == :stale
+    end
+
+    test "non-writers cannot proceed services" do
+      user = insert(:user)
+      service = insert(:service, status: :paused)
+
+      {:error, _} = Services.proceed(service, user)
+    end
+  end
+
   describe "#tarstream/1" do
     test "it can fetch a chart for a helm service" do
       svc = insert(:service, helm: %{chart: "podinfo", version: "5.0", repository: %{name: "podinfo", namespace: "helm-charts"}})

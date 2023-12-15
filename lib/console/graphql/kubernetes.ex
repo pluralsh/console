@@ -52,8 +52,14 @@ defmodule Console.GraphQl.Kubernetes do
   end
 
   object :kubernetes_unstructured do
-    field :raw, :map
+    field :raw, :map, resolve: fn
+      %{raw: %{"metadata" => %{"managedFields" => _}} = raw}, _, _ ->
+        {:ok, put_in(raw["metadata"]["managedFields"], [])}
+      %{raw: raw}, _, _ -> {:ok, raw}
+    end
+
     field :metadata, non_null(:metadata)
+
     field :events,   list_of(:event), resolve: fn
       %{raw: %{"metadata" => %{"namespace" => ns, "uid" => uid}}}, _, _ ->
         Kubernetes.list_events(%{metadata: %{uid: uid, namespace: ns}})
@@ -80,6 +86,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.Namespace
   import_types Console.GraphQl.Kubernetes.VPN
   import_types Console.GraphQl.Kubernetes.Config
+  import_types Console.GraphQl.Kubernetes.Canary
 
   delta :application
 
@@ -251,6 +258,15 @@ defmodule Console.GraphQl.Kubernetes do
       cluster_authorized :read
 
       safe_resolve &Kubernetes.resolve_node_metrics/2
+    end
+
+    field :canary, :canary do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+      service_authorized :read
+
+      safe_resolve &Kubernetes.resolve_canary/2
     end
 
     field :configuration_overlays, list_of(:configuration_overlay) do

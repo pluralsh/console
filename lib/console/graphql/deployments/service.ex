@@ -377,6 +377,16 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.self_manage/2
     end
 
+    @desc "marks a service as being able to proceed to the next stage of a canary rollout"
+    field :proceed, :service_deployment do
+      middleware Authenticated
+      arg :id,      :id
+      arg :cluster, :string, description: "the handle of the cluster for this service"
+      arg :name,    :string
+
+      resolve &Deployments.proceed/2
+    end
+
     field :create_global_service, :global_service do
       middleware Authenticated
       arg :service_id, :id

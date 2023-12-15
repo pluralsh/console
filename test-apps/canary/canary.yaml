@@ -1,0 +1,32 @@
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: podinfo
+spec:
+  provider: nginx
+  progressDeadlineSeconds: 600
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: podinfo
+  ingressRef:
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    name: podinfo
+  service:
+    port: 80
+    targetPort: 9898
+  skipAnalysis: false
+  analysis:
+    interval: 15s
+    threshold: 10
+    maxWeight: 50
+    stepWeight: 5
+    webhooks:
+      - name: acceptance-test
+        type: pre-rollout
+        url: http://flagger-loadtester.flagger/
+        timeout: 30s
+        metadata:
+          type: bash
+          cmd: "curl -sd 'test' http://podinfo-canary.canary/token | grep token"
