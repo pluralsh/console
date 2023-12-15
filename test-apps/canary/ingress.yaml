@@ -2,15 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: podinfo
-  annotations:
-    kubernetes.io/tls-acme: "true"
-    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
-  tls:
-  - hosts:
-    - {{ configuration.host }}
-    secretName: podinfo-tls
   rules:
   - host: {{ configuration.host }}
     http:
