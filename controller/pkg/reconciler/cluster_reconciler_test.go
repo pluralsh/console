@@ -52,9 +52,22 @@ func TestCreateNewCluster(t *testing.T) {
 			name:    "scenario 1: create a new AWS cluster",
 			cluster: clusterName,
 			expectedStatus: v1alpha1.ClusterStatus{
-				ID:       lo.ToPtr(clusterConsoleID),
-				SHA:      lo.ToPtr("DU5PTA62PGOS35CPPCNSRG6PGXUUIWTXVBK5BFXCCGCAAM2K6HYA===="),
-				Existing: lo.ToPtr(false),
+				ID:  lo.ToPtr(clusterConsoleID),
+				SHA: lo.ToPtr("DU5PTA62PGOS35CPPCNSRG6PGXUUIWTXVBK5BFXCCGCAAM2K6HYA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnGetClusterByHandle:      nil,
 			returnErrorGetClusterByHandle: errors.NewNotFound(schema.GroupResource{}, clusterName),
@@ -85,9 +98,22 @@ func TestCreateNewCluster(t *testing.T) {
 			name:    "scenario 2: create a new BYOK cluster",
 			cluster: clusterName,
 			expectedStatus: v1alpha1.ClusterStatus{
-				ID:       lo.ToPtr(clusterConsoleID),
-				SHA:      lo.ToPtr("XGLLQCLXY5LEQV2UAQDUSOZ2MN24L67HDIGWRK2MA5STBBRNMVDA===="),
-				Existing: lo.ToPtr(false),
+				ID:  lo.ToPtr(clusterConsoleID),
+				SHA: lo.ToPtr("XGLLQCLXY5LEQV2UAQDUSOZ2MN24L67HDIGWRK2MA5STBBRNMVDA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnGetClusterByHandle:      nil,
 			returnErrorGetClusterByHandle: errors.NewNotFound(schema.GroupResource{}, clusterName),
@@ -156,9 +182,22 @@ func TestUpdateCluster(t *testing.T) {
 			name:    "scenario 1: update AWS cluster",
 			cluster: clusterName,
 			expectedStatus: v1alpha1.ClusterStatus{
-				ID:       lo.ToPtr(clusterConsoleID),
-				SHA:      lo.ToPtr("DU5PTA62PGOS35CPPCNSRG6PGXUUIWTXVBK5BFXCCGCAAM2K6HYA===="),
-				Existing: lo.ToPtr(false),
+				ID:  lo.ToPtr(clusterConsoleID),
+				SHA: lo.ToPtr("DU5PTA62PGOS35CPPCNSRG6PGXUUIWTXVBK5BFXCCGCAAM2K6HYA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnIsClusterExisting: true,
 			returnUpdateCluster:     &gqlclient.ClusterFragment{ID: clusterConsoleID},
@@ -172,9 +211,22 @@ func TestUpdateCluster(t *testing.T) {
 						ProviderRef: &corev1.ObjectReference{Name: providerName},
 					},
 					Status: v1alpha1.ClusterStatus{
-						ID:       lo.ToPtr(clusterConsoleID),
-						SHA:      lo.ToPtr("XGLLQCLXY5LEQV2UAQDUSOZ2MN24L67HDIGWRK2MA5STBBRNMVDA===="),
-						Existing: lo.ToPtr(false),
+						ID:  lo.ToPtr(clusterConsoleID),
+						SHA: lo.ToPtr("XGLLQCLXY5LEQV2UAQDUSOZ2MN24L67HDIGWRK2MA5STBBRNMVDA===="),
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.ReadonlyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  "",
+								Message: "",
+							},
+							{
+								Type:    v1alpha1.ReadonlyConditionType.String(),
+								Status:  metav1.ConditionTrue,
+								Reason:  "",
+								Message: "",
+							},
+						},
 					},
 				},
 				&v1alpha1.Provider{
@@ -192,9 +244,22 @@ func TestUpdateCluster(t *testing.T) {
 			name:    "scenario 2: update BYOK cluster",
 			cluster: clusterName,
 			expectedStatus: v1alpha1.ClusterStatus{
-				ID:       lo.ToPtr(clusterConsoleID),
-				SHA:      lo.ToPtr("XGLLQCLXY5LEQV2UAQDUSOZ2MN24L67HDIGWRK2MA5STBBRNMVDA===="),
-				Existing: lo.ToPtr(false),
+				ID:  lo.ToPtr(clusterConsoleID),
+				SHA: lo.ToPtr("XGLLQCLXY5LEQV2UAQDUSOZ2MN24L67HDIGWRK2MA5STBBRNMVDA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnIsClusterExisting: true,
 			returnUpdateCluster:     &gqlclient.ClusterFragment{ID: clusterConsoleID},
@@ -206,9 +271,22 @@ func TestUpdateCluster(t *testing.T) {
 						Cloud:  "byok",
 					},
 					Status: v1alpha1.ClusterStatus{
-						ID:       lo.ToPtr(clusterConsoleID),
-						SHA:      lo.ToPtr("DU5PTA62PGOS35CPPCNSRG6PGXUUIWTXVBK5BFXCCGCAAM2K6HYA===="),
-						Existing: lo.ToPtr(false),
+						ID:  lo.ToPtr(clusterConsoleID),
+						SHA: lo.ToPtr("DU5PTA62PGOS35CPPCNSRG6PGXUUIWTXVBK5BFXCCGCAAM2K6HYA===="),
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.ReadonlyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  "",
+								Message: "",
+							},
+							{
+								Type:    v1alpha1.ReadonlyConditionType.String(),
+								Status:  metav1.ConditionTrue,
+								Reason:  "",
+								Message: "",
+							},
+						},
 					},
 				},
 			},
@@ -261,8 +339,21 @@ func TestAdoptExistingCluster(t *testing.T) {
 			name:    "scenario 1: adopt existing AWS cluster",
 			cluster: clusterName,
 			expectedStatus: v1alpha1.ClusterStatus{
-				ID:       lo.ToPtr(clusterConsoleID),
-				Existing: lo.ToPtr(true),
+				ID: lo.ToPtr(clusterConsoleID),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnGetClusterByHandle:      &gqlclient.ClusterFragment{ID: clusterConsoleID},
 			returnErrorGetClusterByHandle: nil,
@@ -278,8 +369,21 @@ func TestAdoptExistingCluster(t *testing.T) {
 			cluster: clusterName,
 			expectedStatus: v1alpha1.ClusterStatus{
 				ID:             lo.ToPtr(clusterConsoleID),
-				Existing:       lo.ToPtr(true),
 				CurrentVersion: lo.ToPtr("1.24.11"),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  "",
+						Message: "",
+					},
+				},
 			},
 			returnGetClusterByHandle: &gqlclient.ClusterFragment{
 				ID:             clusterConsoleID,
