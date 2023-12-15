@@ -31,6 +31,17 @@ func init() {
 	utilruntime.Must(v1alpha1.AddToScheme(scheme.Scheme))
 }
 
+func sanitizeConditions(status v1alpha1.ProviderStatus) v1alpha1.ProviderStatus {
+	for i := range status.Conditions {
+		c := status.Conditions[i]
+		c.LastTransitionTime = metav1.Time{}
+		c.ObservedGeneration = 0
+		status.Conditions[i] = c
+	}
+
+	return status
+}
+
 func TestCreateNewProvider(t *testing.T) {
 	test := struct {
 		name                          string
@@ -76,9 +87,22 @@ func TestCreateNewProvider(t *testing.T) {
 			},
 		},
 		expectedStatus: v1alpha1.ProviderStatus{
-			ID:       lo.ToPtr("1234"),
-			SHA:      lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
-			Existing: lo.ToPtr(false),
+			ID:  lo.ToPtr("1234"),
+			SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
+			Conditions: []metav1.Condition{
+				{
+					Type:    v1alpha1.ReadonlyConditionType.String(),
+					Status:  metav1.ConditionFalse,
+					Reason:  v1alpha1.ReadonlyConditionReason.String(),
+					Message: "",
+				},
+				{
+					Type:    v1alpha1.ReadyConditionType.String(),
+					Status:  metav1.ConditionTrue,
+					Reason:  v1alpha1.ReadyConditionReason.String(),
+					Message: "",
+				},
+			},
 		},
 	}
 
@@ -110,8 +134,8 @@ func TestCreateNewProvider(t *testing.T) {
 		existingProvider := &v1alpha1.Provider{}
 		err = fakeClient.Get(ctx, ctrlruntimeclient.ObjectKey{Name: test.providerName}, existingProvider)
 
-		existingProviderStatusJson, err := json.Marshal(existingProvider.Status)
-		expectedStatusJson, err := json.Marshal(test.expectedStatus)
+		existingProviderStatusJson, err := json.Marshal(sanitizeConditions(existingProvider.Status))
+		expectedStatusJson, err := json.Marshal(sanitizeConditions(test.expectedStatus))
 
 		assert.NoError(t, err)
 		assert.EqualValues(t, string(expectedStatusJson), string(existingProviderStatusJson))
@@ -160,8 +184,21 @@ func TestAdoptProvider(t *testing.T) {
 			},
 		},
 		expectedStatus: v1alpha1.ProviderStatus{
-			ID:       lo.ToPtr("1234"),
-			Existing: lo.ToPtr(true),
+			ID: lo.ToPtr("1234"),
+			Conditions: []metav1.Condition{
+				{
+					Type:    v1alpha1.ReadonlyConditionType.String(),
+					Status:  metav1.ConditionTrue,
+					Reason:  v1alpha1.ReadonlyConditionReason.String(),
+					Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
+				},
+				{
+					Type:    v1alpha1.ReadyConditionType.String(),
+					Status:  metav1.ConditionTrue,
+					Reason:  v1alpha1.ReadyConditionReason.String(),
+					Message: "",
+				},
+			},
 		},
 	}
 
@@ -191,8 +228,8 @@ func TestAdoptProvider(t *testing.T) {
 		existingProvider := &v1alpha1.Provider{}
 		err = fakeClient.Get(ctx, ctrlruntimeclient.ObjectKey{Name: test.providerName}, existingProvider)
 
-		existingProviderStatusJson, err := json.Marshal(existingProvider.Status)
-		expectedStatusJson, err := json.Marshal(test.expectedStatus)
+		existingProviderStatusJson, err := json.Marshal(sanitizeConditions(existingProvider.Status))
+		expectedStatusJson, err := json.Marshal(sanitizeConditions(test.expectedStatus))
 
 		assert.NoError(t, err)
 		assert.EqualValues(t, string(expectedStatusJson), string(existingProviderStatusJson))
@@ -231,9 +268,16 @@ func TestUpdateProvider(t *testing.T) {
 					Namespace: "gcp",
 				},
 				Status: v1alpha1.ProviderStatus{
-					ID:       lo.ToPtr("1234"),
-					SHA:      lo.ToPtr(""),
-					Existing: lo.ToPtr(false),
+					ID:  lo.ToPtr("1234"),
+					SHA: lo.ToPtr(""),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadonlyConditionReason.String(),
+							Message: "",
+						},
+					},
 				},
 			},
 			&corev1.Secret{
@@ -246,9 +290,22 @@ func TestUpdateProvider(t *testing.T) {
 			},
 		},
 		expectedStatus: v1alpha1.ProviderStatus{
-			ID:       lo.ToPtr("1234"),
-			SHA:      lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
-			Existing: lo.ToPtr(false),
+			ID:  lo.ToPtr("1234"),
+			SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
+			Conditions: []metav1.Condition{
+				{
+					Type:    v1alpha1.ReadonlyConditionType.String(),
+					Status:  metav1.ConditionFalse,
+					Reason:  v1alpha1.ReadonlyConditionReason.String(),
+					Message: "",
+				},
+				{
+					Type:    v1alpha1.ReadyConditionType.String(),
+					Status:  metav1.ConditionTrue,
+					Reason:  v1alpha1.ReadyConditionReason.String(),
+					Message: "",
+				},
+			},
 		},
 	}
 
@@ -279,8 +336,8 @@ func TestUpdateProvider(t *testing.T) {
 		existingProvider := &v1alpha1.Provider{}
 		err = fakeClient.Get(ctx, ctrlruntimeclient.ObjectKey{Name: test.providerName}, existingProvider)
 
-		existingProviderStatusJson, err := json.Marshal(existingProvider.Status)
-		expectedStatusJson, err := json.Marshal(test.expectedStatus)
+		existingProviderStatusJson, err := json.Marshal(sanitizeConditions(existingProvider.Status))
+		expectedStatusJson, err := json.Marshal(sanitizeConditions(test.expectedStatus))
 
 		assert.NoError(t, err)
 		assert.EqualValues(t, string(expectedStatusJson), string(existingProviderStatusJson))
