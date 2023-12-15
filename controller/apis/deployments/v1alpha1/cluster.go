@@ -8,6 +8,7 @@ import (
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/json"
 )
@@ -359,10 +360,12 @@ type ClusterStatus struct {
 	// +kubebuilder:validation:Type:=string
 	SHA *string `json:"sha,omitempty"`
 
-	// Existing if set to true, then Console will not be synced with the data from this resource.
-	// It can be used to read already existing resources.
-	// +kubebuilder:validation:Optional
-	Existing *bool `json:"existing,omitempty"`
+	// Represents the observations of a Cluster current state.
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=type
+	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 
 	// CurrentVersion contains current Kubernetes version this cluster is using.
 	// +kubebuilder:validation:Optional
@@ -392,6 +395,10 @@ func (cs *ClusterStatus) IsSHAChanged(sha string) bool {
 	return cs.HasSHA() && *cs.SHA != sha
 }
 
-func (cs *ClusterStatus) HasExisting() bool {
-	return cs.Existing != nil
+func (cs *ClusterStatus) HasReadonlyCondition() bool {
+	return meta.FindStatusCondition(cs.Conditions, ReadonlyConditionType.String()) != nil
+}
+
+func (cs *ClusterStatus) IsReadonly() bool {
+	return meta.IsStatusConditionTrue(cs.Conditions, ReadonlyConditionType.String())
 }

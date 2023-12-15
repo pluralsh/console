@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-logr/logr"
 	console "github.com/pluralsh/console-client-go"
-	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -40,7 +39,7 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	// Read resource from Kubernetes cluster.
@@ -49,6 +48,18 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 		logger.Error(err, "Unable to fetch cluster")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
+	// Ensure that status updates will always be persisted when exiting this function.
+	scope, err := NewClusterScope(ctx, r.Client, cluster)
+	if err != nil {
+		logger.Error(err, "Failed to create cluster scope")
+		return ctrl.Result{}, err
+	}
+	defer func() {
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
+		}
+	}()
 
 	// Handle existing resource.
 	existing, err := r.isExisting(cluster)
@@ -61,9 +72,8 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}
 
 	// Handle resource deletion both in Kubernetes cluster and in Console API.
-	result, err := r.addOrRemoveFinalizer(ctx, cluster)
-	if result != nil {
-		return *result, err
+	if result := r.addOrRemoveFinalizer(cluster); result != nil {
+		return *result, nil
 	}
 
 	// Get Provider ID from the reference if it is set and ensure that controller reference is set properly.
@@ -85,25 +95,19 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}
 
 	// Update resource status.
-	if err = utils.TryUpdateStatus[*v1alpha1.Cluster](ctx, r.Client, cluster, func(c *v1alpha1.Cluster, original *v1alpha1.Cluster) (any, any) {
-		c.Status.ID = &apiCluster.ID
-		c.Status.KasURL = apiCluster.KasURL
-		c.Status.CurrentVersion = apiCluster.CurrentVersion
-		c.Status.PingedAt = apiCluster.PingedAt
-		c.Status.SHA = &sha
-		c.Status.Existing = lo.ToPtr(false)
-
-		return original.Status, c.Status
-	}); err != nil {
-		return ctrl.Result{}, err
-	}
+	cluster.Status.ID = &apiCluster.ID
+	cluster.Status.KasURL = apiCluster.KasURL
+	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
+	cluster.Status.PingedAt = apiCluster.PingedAt
+	cluster.Status.SHA = &sha
+	// TODO cluster.Status.Existing = lo.ToPtr(false)
 
 	return requeue, nil
 }
 
 func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
-	if cluster.Status.HasExisting() {
-		return *cluster.Status.Existing, nil
+	if cluster.Status.HasReadonlyCondition() {
+		return cluster.Status.IsReadonly(), nil
 	}
 
 	if !cluster.Spec.HasHandle() {
@@ -127,36 +131,38 @@ func (r *ClusterReconciler) handleExisting(ctx context.Context, cluster *v1alpha
 		return ctrl.Result{}, err
 	}
 
-	if err = utils.TryUpdateStatus[*v1alpha1.Cluster](ctx, r.Client, cluster, func(c *v1alpha1.Cluster, original *v1alpha1.Cluster) (any, any) {
-		c.Status.ID = &apiCluster.ID
-		c.Status.KasURL = apiCluster.KasURL
-		c.Status.CurrentVersion = apiCluster.CurrentVersion
-		c.Status.PingedAt = apiCluster.PingedAt
-		c.Status.Existing = lo.ToPtr(true)
+	cluster.Status.ID = &apiCluster.ID
+	cluster.Status.KasURL = apiCluster.KasURL
+	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
+	cluster.Status.PingedAt = apiCluster.PingedAt
+	// TODO c.Status.Existing = lo.ToPtr(true)
 
-		return original.Status, c.Status
-	}); err != nil {
-		return ctrl.Result{}, err
-	}
+	//meta.SetStatusCondition(&cluster.Status.Conditions, v1.Condition{
+	//	Type:    v1alpha1.ReadonlyConditionType.String(),
+	//	Status:  v1.ConditionTrue,
+	//	Reason:  v1alpha1.ReadonlyConditionReason.String(),
+	//	Message: "Cluster already exists, running in read-only mode where only status will be updated and no changes in Console will be made",
+	//})
+	//	// Existing if set to true, then Console will not be synced with the data from this resource.
+	//	// It can be used to read already existing resources.
+	//	// +kubebuilder:validation:Optional
+	//	Existing *bool `json:"existing,omitempty"`
 
 	return requeue, nil
 }
 
-func (r *ClusterReconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v1alpha1.Cluster) (*ctrl.Result, error) {
+func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctrl.Result {
 	// If object is not being deleted, so if it does not have our finalizer, then lets add the finalizer
 	// and update the object. This is equivalent to registering our finalizer.
 	if cluster.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(cluster, FinalizerName) {
 		controllerutil.AddFinalizer(cluster, FinalizerName)
-		if err := r.Update(ctx, cluster); err != nil {
-			return &ctrl.Result{}, err
-		}
 	}
 
 	// If object is being deleted.
 	if !cluster.ObjectMeta.DeletionTimestamp.IsZero() {
 		// If object is already being deleted from Console API requeue.
 		if r.ConsoleClient.IsClusterDeleting(cluster.Status.ID) {
-			return &requeue, nil
+			return &requeue
 		}
 
 		// Remove Cluster from Console API if it exists.
@@ -164,27 +170,22 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(ctx context.Context, cluster *v
 			if _, err := r.ConsoleClient.DeleteCluster(*cluster.Status.ID); err != nil {
 				// if fail to delete the external dependency here, return with error
 				// so that it can be retried.
-				return &ctrl.Result{}, err
+				return &ctrl.Result{}
 			}
 
 			// If deletion process started requeue so that we can make sure provider
 			// has been deleted from Console API before removing the finalizer.
-			return &requeue, nil
+			return &requeue
 		}
 
 		// If our finalizer is present, remove it.
-		if controllerutil.ContainsFinalizer(cluster, FinalizerName) {
-			controllerutil.RemoveFinalizer(cluster, FinalizerName)
-			if err := r.Update(ctx, cluster); err != nil {
-				return &ctrl.Result{}, err
-			}
-		}
+		controllerutil.RemoveFinalizer(cluster, FinalizerName)
 
 		// Stop reconciliation as the item is being deleted.
-		return &ctrl.Result{}, nil
+		return &ctrl.Result{}
 	}
 
-	return nil, nil
+	return nil
 }
 
 func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context, cluster *v1alpha1.Cluster) (providerId *string, result *ctrl.Result, err error) {
