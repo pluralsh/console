@@ -406,7 +406,7 @@ defmodule Console.Deployments.Services do
   @spec proceed(Service.t, User.t) :: service_resp
   def proceed(%Service{} = service, %User{} = user) do
     service
-    |> Ecto.Changeset.change(%{proceed: true, status: :stale})
+    |> Ecto.Changeset.change(%{proceed: true})
     |> allow(user, :write)
     |> when_ok(:update)
   end
@@ -616,9 +616,12 @@ defmodule Console.Deployments.Services do
   end
 
   defp update_status(%Service{} = svc, status, component_status) do
-    Ecto.Changeset.change(svc, %{status: status, proceed: false, component_status: component_status})
+    Ecto.Changeset.change(svc, revert_proceed(%{status: status, component_status: component_status}, status))
     |> Repo.update()
   end
+
+  defp revert_proceed(args, :paused), do: args
+  defp revert_proceed(args, _), do: Map.put(args, :proceed, false)
 
   def api_url(path) do
     Path.join([Console.conf(:ext_url), "ext", path])

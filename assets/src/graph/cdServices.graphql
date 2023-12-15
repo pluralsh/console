@@ -251,6 +251,12 @@ mutation RollbackService($id: ID, $revisionId: ID!) {
   }
 }
 
+mutation ProceedService($id: ID!) {
+  proceed(id: $id) {
+    ...ServiceDeploymentDetails
+  }
+}
+
 mutation UpdateRbac($serviceId: ID, $clusterId: ID, $rbac: RbacAttributes!) {
   updateRbac(serviceId: $serviceId, clusterId: $clusterId, rbac: $rbac)
 }
