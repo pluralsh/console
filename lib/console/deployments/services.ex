@@ -416,7 +416,6 @@ defmodule Console.Deployments.Services do
   """
   @spec proceed?(Service.t) :: boolean
   def proceed?(%Service{promotion: :proceed}), do: true
-  def proceed?(%Service{proceed: true}), do: true
   def proceed?(_), do: false
 
 

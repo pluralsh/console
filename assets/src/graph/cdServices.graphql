@@ -252,8 +252,8 @@ mutation RollbackService($id: ID, $revisionId: ID!) {
   }
 }
 
-mutation ProceedService($id: ID!) {
-  proceed(id: $id) {
+mutation ProceedService($id: ID!, $promotion: ServicePromotion) {
+  proceed(id: $id, promotion: $promotion) {
     ...ServiceDeploymentDetails
   }
 }

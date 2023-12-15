@@ -4716,6 +4716,7 @@ export type RollbackServiceMutation = { __typename?: 'RootMutationType', rollbac
 
 export type ProceedServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
+  promotion?: InputMaybe<ServicePromotion>;
 }>;
 
 
@@ -8322,8 +8323,8 @@ export type RollbackServiceMutationHookResult = ReturnType<typeof useRollbackSer
 export type RollbackServiceMutationResult = Apollo.MutationResult<RollbackServiceMutation>;
 export type RollbackServiceMutationOptions = Apollo.BaseMutationOptions<RollbackServiceMutation, RollbackServiceMutationVariables>;
 export const ProceedServiceDocument = gql`
-    mutation ProceedService($id: ID!) {
-  proceed(id: $id) {
+    mutation ProceedService($id: ID!, $promotion: ServicePromotion) {
+  proceed(id: $id, promotion: $promotion) {
     ...ServiceDeploymentDetails
   }
 }
@@ -8344,6 +8345,7 @@ export type ProceedServiceMutationFn = Apollo.MutationFunction<ProceedServiceMut
  * const [proceedServiceMutation, { data, loading, error }] = useProceedServiceMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      promotion: // value for 'promotion'
  *   },
  * });
  */
