@@ -767,7 +767,7 @@ defmodule Console.Deployments.ServicesTest do
     end
 
     test "it will revert proceed state when relevant" do
-      service = insert(:service, proceed: true)
+      service = insert(:service, promotion: :proceed)
 
       {:ok, service} = Services.update_components(%{
         components: [%{
@@ -781,7 +781,7 @@ defmodule Console.Deployments.ServicesTest do
         }],
       }, service)
 
-      assert refetch(service).proceed
+      assert refetch(service).promotion == :proceed
 
       {:ok, service} = Services.update_components(%{
         components: [%{
@@ -795,7 +795,7 @@ defmodule Console.Deployments.ServicesTest do
         }],
       }, service)
 
-      refute refetch(service).proceed
+      assert refetch(service).promotion == :ignore
     end
 
     test "it will persist api deprecations if found" do
@@ -923,7 +923,7 @@ defmodule Console.Deployments.ServicesAsyncTest do
 
       {:ok, svc} = Services.proceed(service, user)
 
-      assert svc.proceed
+      assert svc.promotion == :proceed
       assert svc.status == :paused
     end
 

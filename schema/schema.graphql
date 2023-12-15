@@ -398,6 +398,8 @@ type RootMutationType {
     cluster: String
 
     name: String
+
+    promotion: ServicePromotion
   ): ServiceDeployment
 
   createGlobalService(
@@ -898,6 +900,12 @@ enum ServiceDeploymentStatus {
   PAUSED
 }
 
+enum ServicePromotion {
+  IGNORE
+  PROCEED
+  ROLLBACK
+}
+
 input ServiceDeploymentAttributes {
   name: String!
   namespace: String!
@@ -1005,8 +1013,8 @@ type ServiceDeployment {
   "description of how helm charts should be applied"
   helm: HelmSpec
 
-  "whether manual canary promotions can proceed"
-  proceed: Boolean
+  "how you'd like to perform a canary promotion"
+  promotion: ServicePromotion
 
   "if true, deletion of this service is not allowed"
   protect: Boolean

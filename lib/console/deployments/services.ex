@@ -403,10 +403,10 @@ defmodule Console.Deployments.Services do
   @doc """
   Marks a service as being able to proceed to the next stage of a canary deployment
   """
-  @spec proceed(Service.t, User.t) :: service_resp
-  def proceed(%Service{} = service, %User{} = user) do
+  @spec proceed(:proceed | :rollback, Service.t, User.t) :: service_resp
+  def proceed(promotion \\ :proceed, %Service{} = service, %User{} = user) do
     service
-    |> Ecto.Changeset.change(%{proceed: true})
+    |> Ecto.Changeset.change(%{promotion: promotion})
     |> allow(user, :write)
     |> when_ok(:update)
   end
@@ -415,8 +415,17 @@ defmodule Console.Deployments.Services do
   Determine if a canary can proceed for a service
   """
   @spec proceed?(Service.t) :: boolean
+  def proceed?(%Service{promotion: :proceed}), do: true
   def proceed?(%Service{proceed: true}), do: true
   def proceed?(_), do: false
+
+
+  @doc """
+  Determine if a canary should be forcibly rolled back
+  """
+  @spec rollback?(Service.t) :: boolean
+  def rollback?(%Service{promotion: :rollback}), do: true
+  def rollback?(_), do: false
 
   @doc """
   Updates the list of service components, separate operation to avoid creating a no-op revision
@@ -621,7 +630,7 @@ defmodule Console.Deployments.Services do
   end
 
   defp revert_proceed(args, :paused), do: args
-  defp revert_proceed(args, _), do: Map.put(args, :proceed, false)
+  defp revert_proceed(args, _), do: Map.put(args, :promotion, :ignore)
 
   def api_url(path) do
     Path.join([Console.conf(:ext_url), "ext", path])

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import {
   ServiceDeploymentDetailsFragment,
   ServiceDeploymentStatus,
+  ServicePromotion,
 } from 'generated/graphql'
 import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
 import { toNiceVersion } from 'utils/semver'
@@ -44,7 +45,9 @@ export function ServiceDetailsSidecar({
         }}
       >
         {status === ServiceDeploymentStatus.Paused &&
-          !serviceDeployment.proceed && <ServicePromote id={id} />}
+          serviceDeployment.promotion !== ServicePromotion.Ignore && (
+            <ServicePromote id={id} />
+          )}
       </div>
       <PropsContainer>
         {name && <Prop title="Service name"> {name}</Prop>}

@@ -13,6 +13,15 @@ defmodule ConsoleWeb.GitController do
     end
   end
 
+  def rollback(conn, params) do
+    with %Service{} = svc <- get_service(params),
+         true <- Services.rollback?(svc) do
+      json(conn, %{open: true})
+    else
+      _ -> send_resp(conn, 402, "closed")
+    end
+  end
+
   def tarball(conn, %{"id" => service_id}) do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),
