@@ -48,6 +48,14 @@ defmodule ConsoleWeb.GitControllerTest do
       conn
       |> get("/ext/v1/gate/#{svc.cluster.handle}/#{svc.name}")
       |> response(200)
+
+      conn
+      |> post("/ext/v1/gate/#{svc.id}")
+      |> response(200)
+
+      conn
+      |> post("/ext/v1/gate/#{svc.cluster.handle}/#{svc.name}")
+      |> response(200)
     end
 
     test "if a service hasn't been marked it will 402", %{conn: conn} do
@@ -55,6 +63,10 @@ defmodule ConsoleWeb.GitControllerTest do
 
       conn
       |> get("/ext/v1/gate/#{svc.id}")
+      |> response(402)
+
+      conn
+      |> post("/ext/v1/gate/#{svc.id}")
       |> response(402)
     end
   end

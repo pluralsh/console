@@ -32,6 +32,8 @@ defmodule ConsoleWeb.Router do
       get "/git/tarballs", GitController, :tarball
       get "/gate/:cluster/:name", GitController, :proceed
       get "/gate/:id", GitController, :proceed
+      post "/gate/:cluster/:name", GitController, :proceed
+      post "/gate/:id", GitController, :proceed
     end
   end
 
