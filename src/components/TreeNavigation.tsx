@@ -15,7 +15,7 @@ import {
   useState,
 } from 'react'
 import classNames from 'classnames'
-import { useSpring } from 'react-spring'
+import { useSpring } from '@react-spring/web'
 import useMeasure from 'react-use-measure'
 import styled, { useTheme } from 'styled-components'
 import { type ImmerReducer, useImmerReducer } from 'use-immer'

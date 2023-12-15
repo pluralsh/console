@@ -149,6 +149,7 @@ function CalendarGrid({
                   date={date}
                 />
               ) : (
+                // eslint-disable-next-line jsx-a11y/control-has-associated-label
                 <td key={i} />
               )
             )}

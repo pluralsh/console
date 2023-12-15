@@ -98,6 +98,8 @@ describe('URL utils', () => {
     expect(isSubrouteOf('/something', '/')).toBeTruthy()
     expect(isSubrouteOf('/a/b/cdefg/h/', '/a/b/cdefg/h/')).toBeTruthy()
     expect(isSubrouteOf('/a/b/cdefg/h/ijk', '/a/b/cdefg/h/')).toBeTruthy()
+    expect(isSubrouteOf('/a/b/cdefg/', '/a/b/cdefg/h/')).toBeFalsy()
+    expect(isSubrouteOf('/a/b/cdefg/i/', '/a/b/cdefg/h/')).toBeFalsy()
     expect(
       isSubrouteOf('http://google.com/?x=something', 'http://google.com')
     ).toBeTruthy()

@@ -20,7 +20,7 @@ import {
 } from 'react'
 import { CSSTransition } from 'react-transition-group'
 
-import { useIsomorphicLayoutEffect } from 'react-spring'
+import { useIsomorphicLayoutEffect } from '@react-spring/web'
 
 import useResizeObserver from '../hooks/useResizeObserver'
 

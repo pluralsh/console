@@ -1,8 +1,13 @@
-import { type ReactElement, type Ref, forwardRef } from 'react'
-import { Div, Flex, type FlexProps, Text } from 'honorable'
+import {
+  type ComponentProps,
+  type ReactElement,
+  type Ref,
+  forwardRef,
+} from 'react'
 import PropTypes from 'prop-types'
+import styled from 'styled-components'
 
-type EmptyStateProps = Omit<FlexProps, 'message' | 'description' | 'icon'> & {
+type EmptyStateProps = ComponentProps<typeof EmptyStateSC> & {
   message: string
   description?: string
   icon?: ReactElement
@@ -14,37 +19,42 @@ const propTypes = {
   icon: PropTypes.element,
 }
 
+const EmptyStateSC = styled.div(({ theme }) => ({
+  padding: theme.spacing.xxlarge,
+  gap: theme.spacing.medium,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+}))
+const MessageSC = styled.p(({ theme }) => ({
+  ...theme.partials.text.subtitle1,
+  margin: 0,
+  textAlign: 'center',
+}))
+const DescriptionSC = styled.p(({ theme }) => ({
+  ...theme.partials.text.body1,
+  color: 'text-light',
+  margin: 0,
+  textAlign: 'center',
+}))
+const IconSC = styled.div(({ theme }) => ({
+  marginBottom: theme.spacing.large,
+}))
+
 function EmptyStateRef(
   { message, description, icon = null, children, ...props }: EmptyStateProps,
   ref: Ref<any>
 ) {
   return (
-    <Flex
+    <EmptyStateSC
       ref={ref}
-      padding="xxlarge"
-      gap="medium"
-      direction="column"
-      align="center"
       {...props}
     >
-      {icon && <Div marginBottom="large">{icon}</Div>}
-      <Text
-        subtitle1
-        textAlign="center"
-      >
-        {message}
-      </Text>
-      {description && (
-        <Text
-          body1
-          color="text-light"
-          textAlign="center"
-        >
-          {description}
-        </Text>
-      )}
+      {icon && <IconSC>{icon}</IconSC>}
+      <MessageSC>{message}</MessageSC>
+      {description && <DescriptionSC>{description}</DescriptionSC>}
       {children}
-    </Flex>
+    </EmptyStateSC>
   )
 }
 

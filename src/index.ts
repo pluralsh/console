@@ -115,8 +115,10 @@ export { Switch } from './components/Switch'
 export { LightDarkSwitch } from './components/LightDarkSwitch'
 export { AnimatedDiv } from './components/AnimatedDiv'
 export { Spinner } from './components/Spinner'
+export { SetInert } from './components/SetInert'
 
 // Hooks
+export { useInert } from './hooks/useInert'
 export { default as usePrevious } from './hooks/usePrevious'
 export { default as useUnmount } from './hooks/useUnmount'
 export { useFloatingDropdown } from './hooks/useFloatingDropdown'

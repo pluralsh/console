@@ -1,9 +1,16 @@
-import { type DivProps, Flex, Img } from 'honorable'
 import PropTypes from 'prop-types'
-import { type ReactNode, type Ref, forwardRef } from 'react'
+import {
+  type ComponentProps,
+  type ReactElement,
+  type Ref,
+  cloneElement,
+  forwardRef,
+} from 'react'
 import { last } from 'lodash-es'
 
-import { type DefaultTheme, useTheme } from 'styled-components'
+import styled, { type DefaultTheme, useTheme } from 'styled-components'
+
+import { type ValueOf } from 'type-fest'
 
 import { type styledTheme as theme } from '../theme'
 
@@ -24,18 +31,18 @@ type AppIconHue = (typeof HUES)[number]
 type AppIconSize = (typeof SIZES)[number]
 type AppIconSpacing = (typeof SPACINGS)[number]
 
-type AppIconProps = Omit<DivProps, 'size'> & {
+type AppIconProps = {
   size?: AppIconSize
   spacing?: AppIconSpacing
   hue?: AppIconHue
   clickable?: boolean
   url?: string
-  icon?: ReactNode
+  icon?: ReactElement
   alt?: string
   name?: string
   initials?: string
+  className?: string
   onClose?: () => void
-  [x: string]: unknown
 }
 
 const propTypes = {
@@ -111,6 +118,50 @@ export function toInitials(name: string) {
   return initials.join('')
 }
 
+const AppIconSC = styled.div<{
+  $color: ValueOf<typeof hueToColor>
+  $borderColor: ValueOf<typeof hueToBorderColor>
+  $hasBorder: boolean
+  $boxSize: number
+  $clickable: boolean
+}>(({ theme, $color, $borderColor, $hasBorder, $boxSize, $clickable }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: theme.colors[$color],
+  borderRadius: theme.borderRadiuses.medium,
+  border: $hasBorder ? theme.borders.default : 'none',
+  borderColor: theme.colors[$borderColor],
+  width: $boxSize,
+  height: $boxSize,
+  minWidth: $boxSize,
+  minHeight: $boxSize,
+  cursor: $clickable ? 'pointer' : 'auto',
+  overflow: 'hidden',
+  _hover: $clickable ? { backgroundColor: $borderColor } : null,
+}))
+
+const InitialsSC = styled.div<{
+  $size: AppIconSize
+}>(({ theme, $size }) => ({
+  display: 'flex',
+  width: '100%',
+  height: '100%',
+  alignItems: 'center',
+  justifyContent: 'center',
+  userSelect: 'none',
+  textTransform: 'uppercase',
+  ...sizeToFont($size, theme),
+}))
+
+const ImgSC = styled.img<{
+  $iconWidth: number
+}>(({ $iconWidth }) => ({
+  width: $iconWidth,
+  height: $iconWidth,
+  objectFit: 'cover',
+}))
+
 function AppIconRef(
   {
     size = 'medium',
@@ -124,63 +175,53 @@ function AppIconRef(
     initials,
     onClose,
     ...props
-  }: AppIconProps,
+  }: AppIconProps & ComponentProps<typeof AppIconSC>,
   ref: Ref<any>
 ) {
+  const theme = useTheme()
   const parentFillLevel = useFillLevel()
 
   hue = hue || parentFillLevelToHue[parentFillLevel]
   const boxSize = sizeToWidth[size]
-  const iconSize =
+  const iconWidth =
     spacing === 'padding' ? sizeToIconWidth[size] : sizeToWidth[size] + 1
   const color = hueToColor[hue]
   const borderColor = hueToBorderColor[hue]
   const hasBorder = spacing === 'padding'
-  const theme = useTheme()
+
+  if (icon) {
+    icon = cloneElement(icon, {
+      color: theme.colors['icon-default'],
+      width: iconWidth,
+      ...(icon?.props || {}),
+    })
+  }
 
   return (
-    <Flex
-      backgroundColor={color}
-      borderRadius="medium"
-      border={hasBorder ? '1px solid border' : 'none'}
-      borderColor={borderColor}
-      width={boxSize}
-      height={boxSize}
-      minWidth={boxSize}
-      minHeight={boxSize}
-      align="center"
-      justify="center"
-      cursor={clickable ? 'pointer' : 'auto'}
-      overflow="hidden"
-      _hover={clickable ? { backgroundColor: borderColor } : null}
+    <AppIconSC
+      $color={color}
+      $borderColor={borderColor}
+      $hasBorder={hasBorder}
+      $boxSize={boxSize}
+      $clickable={clickable}
       onClick={clickable ? onClose : null}
+      {...props}
     >
       {url ? (
-        <Img
+        <ImgSC
           ref={ref}
           src={url}
           alt={alt}
-          width={iconSize}
-          height={iconSize}
-          objectFit="cover"
-          {...props}
+          $iconWidth={iconWidth}
         />
       ) : (
         icon || (
-          <Flex
-            width="100%"
-            height="100%"
-            alignItems="center"
-            justifyContent="center"
-            userSelect="none"
-            textTransform="uppercase"
-            {...sizeToFont(size, theme)}
-          >
+          <InitialsSC $size={size}>
             {initials || (name ? toInitials(name) : '')}
-          </Flex>
+          </InitialsSC>
         )
       )}
-    </Flex>
+    </AppIconSC>
   )
 }
 

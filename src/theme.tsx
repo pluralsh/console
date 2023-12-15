@@ -25,6 +25,7 @@ import { getFocusPartials } from './theme/focus'
 import { resetPartials } from './theme/resets'
 import { marketingTextPartials } from './theme/marketingText'
 import gradients from './theme/gradients'
+import { visuallyHidden } from './theme/visuallyHidden'
 
 export const COLOR_THEME_KEY = 'theme-mode'
 
@@ -811,6 +812,7 @@ const getStyledTheme = ({ mode }: { mode: ColorMode }) =>
         focus: getFocusPartials(),
         scrollBar,
         reset: resetPartials,
+        visuallyHidden,
         dropdown: {
           arrowTransition: ({ isOpen = false }) => ({
             transition: 'transform 0.1s ease',

@@ -2,7 +2,7 @@ import { Children, useMemo } from 'react'
 import { Div } from 'honorable'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { isExternalUrl, removeTrailingSlashes } from '../utils/urls'
 
@@ -173,10 +173,20 @@ function MarkdownImage({
   mainBranch = 'master',
   ...props
 }: any) {
+  const theme = useTheme()
+
   // Convert local image paths to full path on github
   if (gitUrl && src && !isExternalUrl(src)) {
     src = src.replace(/^\//, '')
     src = `${removeTrailingSlashes(gitUrl)}/raw/${mainBranch}/${src}`
+  }
+  // Check for github's light/dark mode tags
+  // https://github.blog/changelog/2021-11-24-specify-theme-context-for-images-in-markdown/
+  if (
+    (src?.endsWith?.('#gh-light-mode-only') && theme.mode === 'dark') ||
+    (src?.endsWith?.('#gh-dark-mode-only') && theme.mode === 'light')
+  ) {
+    style = { ...style, display: 'none' }
   }
 
   return (

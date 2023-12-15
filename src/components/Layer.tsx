@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { type UseTransitionProps, useTransition } from 'react-spring'
+import { type UseTransitionProps, useTransition } from '@react-spring/web'
 import { isNil } from 'lodash-es'
 import styled, { useTheme } from 'styled-components'
 

@@ -1,5 +1,5 @@
 import styled, { useTheme } from 'styled-components'
-import { animated, useTransition } from 'react-spring'
+import { animated, useTransition } from '@react-spring/web'
 
 import {
   FloatingPortal,

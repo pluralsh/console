@@ -1,7 +1,7 @@
 import { type ListState } from 'react-stately'
 import { type AriaListBoxOptions } from 'react-aria'
 import styled, { useTheme } from 'styled-components'
-import { animated, to, useTransition } from 'react-spring'
+import { animated, to, useTransition } from '@react-spring/web'
 
 import {
   FloatingPortal,

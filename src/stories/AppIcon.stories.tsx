@@ -1,6 +1,6 @@
 import { Flex, H3 } from 'honorable'
 
-import { Card, WrapWithIf } from '..'
+import { Card, PluralLogoMark, WrapWithIf } from '..'
 
 import AppIcon from '../components/AppIcon'
 
@@ -9,20 +9,9 @@ export default {
   component: AppIcon,
   argTypes: {
     icon: {
-      options: [
-        '/logos/plural-logomark-only-black.svg',
-        '/logos/plural-logomark-only-white.svg',
-        '/logos/airflow-logo.svg',
-        '/logos/airbyte-logo.svg',
-      ],
+      options: ['Plural', 'Airflow', 'Airbyte'],
       control: {
         type: 'select',
-        labels: {
-          '/logos/plural-logomark-only-black.svg': 'Plural Black',
-          '/logos/plural-logomark-only-white.svg': 'Plural White',
-          '/logos/airflow-logo.svg': 'Airflow',
-          '/logos/airbyte-logo.svg': 'Airbyte',
-        },
       },
     },
     hue: {
@@ -56,6 +45,13 @@ const sizes = [
 ]
 
 function Template({ onFillLevel, icon, ...args }: any) {
+  const iconProps =
+    icon === 'Airflow'
+      ? { url: '/logos/airflow-logo.svg' }
+      : icon === 'Airbyte'
+      ? { url: '/logos/airbyte-logo.svg' }
+      : { icon: <PluralLogoMark /> }
+
   return (
     <Flex
       gap={16}
@@ -79,7 +75,7 @@ function Template({ onFillLevel, icon, ...args }: any) {
             >
               <AppIcon
                 size={size}
-                url={icon}
+                {...iconProps}
                 {...args}
               />
               <AppIcon
@@ -112,7 +108,6 @@ export const Default = Template.bind({})
 Default.args = {
   name: 'Michael J Guarino',
   initials: '',
-  icon: '/logos/plural-logomark-only-black.svg',
   onFillLevel: 0,
   hue: undefined,
   clickable: false,

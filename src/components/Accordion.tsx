@@ -10,7 +10,7 @@ import {
   useState,
 } from 'react'
 import React from 'react'
-import { useSpring } from 'react-spring'
+import { useSpring } from '@react-spring/web'
 import styled, { useTheme } from 'styled-components'
 
 import useResizeObserver from '../hooks/useResizeObserver'

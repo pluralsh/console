@@ -1,4 +1,4 @@
-import { Div, Flex, H1, Text } from 'honorable'
+import { Div, Flex, H1, P } from 'honorable'
 
 import { IconFrame, type IconFrameProps, TrashCanIcon } from '../index'
 
@@ -43,7 +43,7 @@ function Template({
       >
         {sizes.map((size) => (
           <>
-            <Text caption>size="{size}"</Text>
+            <P caption>size="{size}"</P>
             <IconFrame
               size={size || 'medium'}
               clickable={clickable === undefined ? true : clickable}
