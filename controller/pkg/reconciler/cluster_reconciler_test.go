@@ -290,13 +290,13 @@ func TestUpdateCluster(t *testing.T) {
 							{
 								Type:    v1alpha1.ReadonlyConditionType.String(),
 								Status:  metav1.ConditionFalse,
-								Reason:  "",
+								Reason:  v1alpha1.ReadonlyConditionReason.String(),
 								Message: "",
 							},
 							{
-								Type:    v1alpha1.ReadonlyConditionType.String(),
+								Type:    v1alpha1.ReadyConditionType.String(),
 								Status:  metav1.ConditionTrue,
-								Reason:  "",
+								Reason:  v1alpha1.ReadyConditionReason.String(),
 								Message: "",
 							},
 						},
