@@ -8,7 +8,7 @@ defmodule Console.GraphQl.Kubernetes.Base do
   end
 
   defp prune(%{metadata: %MetaV1.ObjectMeta{} = meta} = object),
-    do: put_in(object.metadata.managed_fields, %{})
+    do: put_in(object.metadata.managed_fields, [])
   defp prune(obj), do: obj
 
   defmacro namespace_args() do

@@ -52,8 +52,14 @@ defmodule Console.GraphQl.Kubernetes do
   end
 
   object :kubernetes_unstructured do
-    field :raw, :map
+    field :raw, :map, resolve: fn
+      %{raw: %{"metadata" => %{"managedFields" => res}} = raw}, _, _ ->
+        {:ok, put_in(raw["metadata"]["managedFields"], [])}
+      %{raw: raw}, _, _ -> {:ok, raw}
+    end
+
     field :metadata, non_null(:metadata)
+
     field :events,   list_of(:event), resolve: fn
       %{raw: %{"metadata" => %{"namespace" => ns, "uid" => uid}}}, _, _ ->
         Kubernetes.list_events(%{metadata: %{uid: uid, namespace: ns}})
