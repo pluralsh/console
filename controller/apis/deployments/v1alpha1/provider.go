@@ -144,6 +144,13 @@ type ProviderStatus struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=boolean
 	Existing *bool `json:"existing,omitempty"`
+	// Represents the observations of a Provider's current state.
+	// Known .status.conditions.type are: "Available", "Progressing", and "Degraded"
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=type
+	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 func (p *ProviderStatus) GetID() string {
