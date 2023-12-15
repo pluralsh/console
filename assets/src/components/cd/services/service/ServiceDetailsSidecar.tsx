@@ -45,7 +45,7 @@ export function ServiceDetailsSidecar({
         }}
       >
         {status === ServiceDeploymentStatus.Paused &&
-          serviceDeployment.promotion !== ServicePromotion.Ignore && (
+          serviceDeployment.promotion === ServicePromotion.Ignore && (
             <ServicePromote id={id} />
           )}
       </div>
