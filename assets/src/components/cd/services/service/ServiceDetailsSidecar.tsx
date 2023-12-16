@@ -11,11 +11,12 @@ import { InlineLink } from 'components/utils/typography/InlineLink'
 import { useMemo } from 'react'
 import { Chip, ErrorIcon, Prop, PropsContainer } from '@pluralsh/design-system'
 
+import { useTheme } from 'styled-components'
+
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
 import { countDeprecations } from './deprecationUtils'
 import ServicePromote from './ServicePromote'
-import { useTheme } from 'styled-components'
 
 export function ServiceDetailsSidecar({
   serviceDeployment,
