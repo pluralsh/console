@@ -71,6 +71,8 @@ type RootQueryType {
 
   statefulSet(namespace: String!, name: String!, serviceId: ID): StatefulSet
 
+  daemonSet(namespace: String!, name: String!, serviceId: ID): DaemonSet
+
   ingress(namespace: String!, name: String!, serviceId: ID): Ingress
 
   nodes: [Node]
@@ -2425,6 +2427,25 @@ type KubernetesUnstructured {
 type ApplicationDelta {
   delta: Delta
   payload: Application
+}
+
+type DaemonSet {
+  metadata: Metadata!
+  status: DaemonSetStatus!
+  spec: DaemonSetSpec!
+  pods: [Pod]
+  raw: String!
+  events: [Event]
+}
+
+type DaemonSetStatus {
+  currentNumberScheduled: Int
+  desiredNumberScheduled: Int
+  numberReady: Int
+}
+
+type DaemonSetSpec {
+  strategy: DeploymentStrategy
 }
 
 type Canary {

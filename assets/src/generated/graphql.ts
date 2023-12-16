@@ -1024,6 +1024,28 @@ export type CrossVersionResourceTarget = {
   name?: Maybe<Scalars['String']['output']>;
 };
 
+export type DaemonSet = {
+  __typename?: 'DaemonSet';
+  events?: Maybe<Array<Maybe<Event>>>;
+  metadata: Metadata;
+  pods?: Maybe<Array<Maybe<Pod>>>;
+  raw: Scalars['String']['output'];
+  spec: DaemonSetSpec;
+  status: DaemonSetStatus;
+};
+
+export type DaemonSetSpec = {
+  __typename?: 'DaemonSetSpec';
+  strategy?: Maybe<DeploymentStrategy>;
+};
+
+export type DaemonSetStatus = {
+  __typename?: 'DaemonSetStatus';
+  currentNumberScheduled?: Maybe<Scalars['Int']['output']>;
+  desiredNumberScheduled?: Maybe<Scalars['Int']['output']>;
+  numberReady?: Maybe<Scalars['Int']['output']>;
+};
+
 export type Dashboard = {
   __typename?: 'Dashboard';
   id: Scalars['String']['output'];
@@ -2992,6 +3014,7 @@ export type RootQueryType = {
   configurationOverlays?: Maybe<Array<Maybe<ConfigurationOverlay>>>;
   context?: Maybe<Array<Maybe<RepositoryContext>>>;
   cronJob?: Maybe<CronJob>;
+  daemonSet?: Maybe<DaemonSet>;
   dashboard?: Maybe<Dashboard>;
   dashboards?: Maybe<Array<Maybe<Dashboard>>>;
   deployment?: Maybe<Deployment>;
@@ -3183,6 +3206,13 @@ export type RootQueryTypeConfigurationOverlaysArgs = {
 
 
 export type RootQueryTypeCronJobArgs = {
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeDaemonSetArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
