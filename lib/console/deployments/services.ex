@@ -363,7 +363,7 @@ defmodule Console.Deployments.Services do
     else
       err ->
         Logger.info "failed to fetch docs tarball: #{inspect(err)}"
-        {:error, "could not fetch docs"}
+        {:ok, []}
     end
   end
   def docs(_), do: {:ok, []}
