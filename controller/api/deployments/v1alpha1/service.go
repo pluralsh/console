@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -77,15 +78,24 @@ type ServiceSpec struct {
 }
 
 type ServiceStatus struct {
-	// Id of service in console.
-	// +optional
-	Id *string `json:"id,omitempty"`
 	// +optional
 	Errors []ServiceError `json:"errors,omitempty"`
 	// +optional
 	Components []ServiceComponent `json:"components,omitempty"`
-	// +optional
-	Sha string `json:"sha,omitempty"`
+	// ID of the provider in the Console API.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	ID *string `json:"id,omitempty"`
+	// SHA of last applied configuration.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	SHA *string `json:"sha,omitempty"`
+	// Represents the observations of Repository current state.
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=type
+	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 type ServiceError struct {
@@ -129,4 +139,48 @@ type ServiceDeploymentList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []ServiceDeployment `json:"items"`
+}
+
+func (p *ServiceStatus) HasReadonlyCondition() bool {
+	return meta.FindStatusCondition(p.Conditions, ReadonlyConditionType.String()) != nil
+}
+
+func (p *ServiceStatus) IsReadonly() bool {
+	return meta.IsStatusConditionTrue(p.Conditions, ReadonlyConditionType.String())
+}
+
+func (p *ServiceStatus) IsSHAEqual(sha string) bool {
+	if !p.HasSHA() {
+		return false
+	}
+
+	return p.GetSHA() == sha
+}
+
+func (p *ServiceStatus) GetSHA() string {
+	if !p.HasSHA() {
+		return ""
+	}
+
+	return *p.SHA
+}
+
+func (p *ServiceStatus) HasSHA() bool {
+	return p.SHA != nil && len(*p.SHA) > 0
+}
+
+func (p *ServiceStatus) GetID() string {
+	if !p.HasID() {
+		return ""
+	}
+
+	return *p.ID
+}
+
+func (p *ServiceStatus) HasID() bool {
+	return p.ID != nil && len(*p.ID) > 0
+}
+
+func (p *ServiceDeployment) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&p.Status.Conditions, condition)
 }

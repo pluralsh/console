@@ -218,6 +218,9 @@ func (r *GitRepositoryReconciler) getRepository(url string) (*console.GitReposit
 }
 
 func (r *GitRepositoryReconciler) isAlreadyExists(repository *v1alpha1.GitRepository) (bool, error) {
+	if controllerutil.ContainsFinalizer(repository, RepoFinalizer) {
+		return false, nil
+	}
 	if repository.Status.HasReadonlyCondition() {
 		return repository.Status.IsReadonly(), nil
 	}
