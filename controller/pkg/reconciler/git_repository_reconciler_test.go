@@ -117,7 +117,6 @@ func TestCreateNewRepository(t *testing.T) {
 			assert.NoError(t, err)
 			expectedStatusJson, err := json.Marshal(sanitizeRepoConditions(test.expectedStatus))
 			assert.NoError(t, err)
-			assert.NoError(t, err)
 			assert.EqualValues(t, string(expectedStatusJson), string(existingStatusJson))
 		})
 	}
