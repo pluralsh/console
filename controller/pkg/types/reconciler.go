@@ -40,14 +40,12 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 	case GitRepositoryReconciler:
 		return &reconciler.GitRepositoryReconciler{
 			Client:        mgr.GetClient(),
-			Log:           mgr.GetLogger(),
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
 		}, nil
 	case ServiceDeploymentReconciler:
 		return &reconciler.ServiceReconciler{
 			Client:        mgr.GetClient(),
-			Log:           mgr.GetLogger(),
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
 		}, nil

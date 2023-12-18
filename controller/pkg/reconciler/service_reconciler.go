@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"sort"
 
-	"github.com/go-logr/logr"
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
@@ -29,7 +28,6 @@ const (
 type ServiceReconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
-	Log           logr.Logger
 	Scheme        *runtime.Scheme
 }
 
@@ -64,7 +62,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return requeue, nil
 	}
 
-	if repository.Status.Id == nil {
+	if repository.Status.ID == nil {
 		log.Info("Repository is not ready")
 		return requeue, nil
 	}
@@ -73,7 +71,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return requeue, nil
 	}
 
-	attr, err := r.genServiceAttributes(ctx, service, repository.Status.Id)
+	attr, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
 	if err != nil {
 		return ctrl.Result{}, err
 	}

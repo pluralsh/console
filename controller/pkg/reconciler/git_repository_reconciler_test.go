@@ -2,6 +2,7 @@ package reconciler_test
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
@@ -17,7 +18,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -42,11 +42,20 @@ func TestCreateNewRepository(t *testing.T) {
 			name:       "scenario 1: create a new repository",
 			repository: "test",
 			expectedStatus: v1alpha1.GitRepositoryStatus{
-				Health:   "",
-				Message:  nil,
-				Id:       lo.ToPtr("123"),
-				Sha:      "TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA====",
-				Existing: lo.ToPtr(false),
+				ID:  lo.ToPtr("123"),
+				SHA: lo.ToPtr("TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:   v1alpha1.ReadonlyConditionType.String(),
+						Status: metav1.ConditionFalse,
+						Reason: v1alpha1.ReadonlyConditionReason.String(),
+					},
+					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.ReadyConditionReason.String(),
+					},
+				},
 			},
 			returnGetRepository: &gqlclient.GetGitRepository{
 				GitRepository: nil,
@@ -93,7 +102,6 @@ func TestCreateNewRepository(t *testing.T) {
 			ctx := context.Background()
 			target := &reconciler.GitRepositoryReconciler{
 				Client:        fakeClient,
-				Log:           ctrl.Log.WithName("controllers").WithName("GitRepoController"),
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
 			}
@@ -105,7 +113,12 @@ func TestCreateNewRepository(t *testing.T) {
 			existingRepo := &v1alpha1.GitRepository{}
 			err = fakeClient.Get(ctx, ctrlruntimeclient.ObjectKey{Name: test.repository}, existingRepo)
 			assert.NoError(t, err)
-			assert.EqualValues(t, test.expectedStatus, existingRepo.Status)
+			existingStatusJson, err := json.Marshal(sanitizeRepoConditions(existingRepo.Status))
+			assert.NoError(t, err)
+			expectedStatusJson, err := json.Marshal(sanitizeRepoConditions(test.expectedStatus))
+			assert.NoError(t, err)
+			assert.NoError(t, err)
+			assert.EqualValues(t, string(expectedStatusJson), string(existingStatusJson))
 		})
 	}
 }
@@ -123,11 +136,20 @@ func TestUpdateRepository(t *testing.T) {
 			name:       "scenario 1: update credentials",
 			repository: "test",
 			expectedStatus: v1alpha1.GitRepositoryStatus{
-				Health:   "",
-				Message:  nil,
-				Id:       lo.ToPtr("123"),
-				Sha:      "TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA====",
-				Existing: lo.ToPtr(false),
+				ID:  lo.ToPtr("123"),
+				SHA: lo.ToPtr("TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:   v1alpha1.ReadonlyConditionType.String(),
+						Status: metav1.ConditionFalse,
+						Reason: v1alpha1.ReadonlyConditionReason.String(),
+					},
+					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.ReadyConditionReason.String(),
+					},
+				},
 			},
 			returnGetRepository: &gqlclient.GetGitRepository{
 				GitRepository: &gqlclient.GitRepositoryFragment{
@@ -147,11 +169,10 @@ func TestUpdateRepository(t *testing.T) {
 						},
 					},
 					Status: v1alpha1.GitRepositoryStatus{
-						Health:   "",
-						Message:  nil,
-						Id:       lo.ToPtr("123"),
-						Sha:      "ABC",
-						Existing: lo.ToPtr(false),
+						Health:  "",
+						Message: nil,
+						ID:      lo.ToPtr("123"),
+						SHA:     lo.ToPtr("ABC"),
 					},
 				},
 				&corev1.Secret{
@@ -179,7 +200,6 @@ func TestUpdateRepository(t *testing.T) {
 			ctx := context.Background()
 			target := &reconciler.GitRepositoryReconciler{
 				Client:        fakeClient,
-				Log:           ctrl.Log.WithName("controllers").WithName("GitRepoController"),
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
 			}
@@ -191,7 +211,12 @@ func TestUpdateRepository(t *testing.T) {
 			existingRepo := &v1alpha1.GitRepository{}
 			err = fakeClient.Get(ctx, ctrlruntimeclient.ObjectKey{Name: test.repository}, existingRepo)
 			assert.NoError(t, err)
-			assert.EqualValues(t, test.expectedStatus, existingRepo.Status)
+			existingStatusJson, err := json.Marshal(sanitizeRepoConditions(existingRepo.Status))
+			assert.NoError(t, err)
+			expectedStatusJson, err := json.Marshal(sanitizeRepoConditions(test.expectedStatus))
+			assert.NoError(t, err)
+			assert.NoError(t, err)
+			assert.EqualValues(t, string(expectedStatusJson), string(existingStatusJson))
 		})
 	}
 }
@@ -209,10 +234,20 @@ func TestImportRepository(t *testing.T) {
 			name:       "scenario 1: update credentials",
 			repository: "test",
 			expectedStatus: v1alpha1.GitRepositoryStatus{
-				Health:   "",
-				Message:  nil,
-				Id:       lo.ToPtr("123"),
-				Existing: lo.ToPtr(true),
+				ID: lo.ToPtr("123"),
+				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.ReadonlyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  v1alpha1.ReadonlyConditionReason.String(),
+						Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
+					},
+					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.ReadyConditionReason.String(),
+					},
+				},
 			},
 			returnGetRepository: &gqlclient.GetGitRepository{
 				GitRepository: &gqlclient.GitRepositoryFragment{
@@ -248,7 +283,6 @@ func TestImportRepository(t *testing.T) {
 			ctx := context.Background()
 			target := &reconciler.GitRepositoryReconciler{
 				Client:        fakeClient,
-				Log:           ctrl.Log.WithName("controllers").WithName("GitRepoController"),
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
 			}
@@ -259,7 +293,21 @@ func TestImportRepository(t *testing.T) {
 			existingRepo := &v1alpha1.GitRepository{}
 			err = fakeClient.Get(ctx, ctrlruntimeclient.ObjectKey{Name: test.repository}, existingRepo)
 			assert.NoError(t, err)
-			assert.EqualValues(t, test.expectedStatus, existingRepo.Status)
+			existingStatusJson, err := json.Marshal(sanitizeRepoConditions(existingRepo.Status))
+			assert.NoError(t, err)
+			expectedStatusJson, err := json.Marshal(sanitizeRepoConditions(test.expectedStatus))
+			assert.NoError(t, err)
+			assert.NoError(t, err)
+			assert.EqualValues(t, string(expectedStatusJson), string(existingStatusJson))
 		})
 	}
+}
+
+func sanitizeRepoConditions(status v1alpha1.GitRepositoryStatus) v1alpha1.GitRepositoryStatus {
+	for i := range status.Conditions {
+		status.Conditions[i].LastTransitionTime = metav1.Time{}
+		status.Conditions[i].ObservedGeneration = 0
+	}
+
+	return status
 }

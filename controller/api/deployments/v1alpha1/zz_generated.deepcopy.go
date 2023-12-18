@@ -514,15 +514,22 @@ func (in *GitRepositoryStatus) DeepCopyInto(out *GitRepositoryStatus) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.Id != nil {
-		in, out := &in.Id, &out.Id
+	if in.ID != nil {
+		in, out := &in.ID, &out.ID
 		*out = new(string)
 		**out = **in
 	}
-	if in.Existing != nil {
-		in, out := &in.Existing, &out.Existing
-		*out = new(bool)
+	if in.SHA != nil {
+		in, out := &in.SHA, &out.SHA
+		*out = new(string)
 		**out = **in
+	}
+	if in.Conditions != nil {
+		in, out := &in.Conditions, &out.Conditions
+		*out = make([]metav1.Condition, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 }
 

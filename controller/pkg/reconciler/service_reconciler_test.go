@@ -18,7 +18,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -77,7 +76,7 @@ func TestCreateNewService(t *testing.T) {
 						Name: repoName,
 					},
 					Status: v1alpha1.GitRepositoryStatus{
-						Id:     lo.ToPtr("123"),
+						ID:     lo.ToPtr("123"),
 						Health: v1alpha1.GitHealthPullable,
 					},
 				},
@@ -98,7 +97,6 @@ func TestCreateNewService(t *testing.T) {
 
 			target := &reconciler.ServiceReconciler{
 				Client:        fakeClient,
-				Log:           ctrl.Log.WithName("reconcilers").WithName("ServiceReconciler"),
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
 			}
@@ -170,7 +168,7 @@ func TestDeleteService(t *testing.T) {
 						Name: repoName,
 					},
 					Status: v1alpha1.GitRepositoryStatus{
-						Id:     lo.ToPtr("123"),
+						ID:     lo.ToPtr("123"),
 						Health: v1alpha1.GitHealthPullable,
 					},
 				},
@@ -188,7 +186,6 @@ func TestDeleteService(t *testing.T) {
 
 			target := &reconciler.ServiceReconciler{
 				Client:        fakeClient,
-				Log:           ctrl.Log.WithName("reconcilers").WithName("ServiceReconciler"),
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
 			}
@@ -256,7 +253,7 @@ func TestUpdateService(t *testing.T) {
 						Name: repoName,
 					},
 					Status: v1alpha1.GitRepositoryStatus{
-						Id:     lo.ToPtr("123"),
+						ID:     lo.ToPtr("123"),
 						Health: v1alpha1.GitHealthPullable,
 					},
 				},
@@ -276,7 +273,6 @@ func TestUpdateService(t *testing.T) {
 
 			target := &reconciler.ServiceReconciler{
 				Client:        fakeClient,
-				Log:           ctrl.Log.WithName("reconcilers").WithName("ServiceReconciler"),
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
 			}
