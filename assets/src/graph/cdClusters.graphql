@@ -140,6 +140,10 @@ fragment ClustersRow on Cluster {
     }
   }
   version
+  tags {
+    name
+    value
+  }
 }
 
 fragment Cluster on Cluster {

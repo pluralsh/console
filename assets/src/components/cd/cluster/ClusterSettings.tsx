@@ -1,11 +1,14 @@
 import {
   Button,
+  FormField,
   GearTrainIcon,
   IconFrame,
   Modal,
   Switch,
 } from '@pluralsh/design-system'
-import { ComponentProps, useState } from 'react'
+import { ComponentProps, useMemo, useState } from 'react'
+import isEqual from 'lodash/isEqual'
+import { useTheme } from 'styled-components'
 
 import {
   ClusterFragment,
@@ -13,10 +16,13 @@ import {
   useUpdateClusterMutation,
 } from 'generated/graphql'
 
+import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { useUpdateState } from 'components/hooks/useUpdateState'
-import { useTheme } from 'styled-components'
+
+import { tagsToNameValue } from '../services/CreateGlobalService'
+import { TagSelection } from '../services/TagSelection'
 
 type Cluster = Pick<ClusterFragment, 'id' | 'name' | 'version'>
 
@@ -28,16 +34,32 @@ function ClusterSettingsModalInner({
 }: ComponentProps<typeof Modal> & {
   cluster: ClustersRowFragment
 }) {
+  console.log('cluster.tags', cluster.tags)
   const theme = useTheme()
+  const initialTags: Record<string, string> = useMemo(
+    () =>
+      Object.fromEntries(
+        cluster?.tags
+          ?.map((tag) => [tag?.name, tag?.value || ''])
+          .filter((t) => !!t[0]) || []
+      ),
+    [cluster?.tags]
+  )
+
   const {
     state,
     update: updateState,
     hasUpdates,
-  } = useUpdateState({
-    protect: !!cluster?.protect,
-  })
-  const [mutation, { loading }] = useUpdateClusterMutation({
-    variables: { id: cluster.id, attributes: { protect: state.protect } },
+  } = useUpdateState(
+    {
+      protect: !!cluster?.protect,
+      tags: initialTags,
+    },
+    {
+      tags: (a, b) => !isEqual(a, b),
+    }
+  )
+  const [mutation, { loading, error }] = useUpdateClusterMutation({
     onCompleted: () => {
       onClose?.()
     },
@@ -59,7 +81,15 @@ function ClusterSettingsModalInner({
         onSubmit: (e) => {
           e.preventDefault()
           if (allowSubmit) {
-            mutation()
+            mutation({
+              variables: {
+                id: cluster.id,
+                attributes: {
+                  protect: state.protect,
+                  tags: tagsToNameValue(state.tags),
+                },
+              },
+            })
           }
         },
       }}
@@ -92,12 +122,27 @@ function ClusterSettingsModalInner({
       }
       {...props}
     >
-      <Switch
-        checked={state.protect}
-        onChange={(checked) => updateState({ protect: checked })}
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.medium,
+        }}
       >
-        Protect from deletion
-      </Switch>
+        <Switch
+          checked={state.protect}
+          onChange={(checked) => updateState({ protect: checked })}
+        >
+          Protect from deletion
+        </Switch>
+        <FormField label="Tags">
+          <TagSelection
+            tags={state.tags}
+            setTags={(tags) => updateState({ tags })}
+          />
+        </FormField>
+        {error && <GqlError error={error} />}
+      </div>
     </Modal>
   )
 }
