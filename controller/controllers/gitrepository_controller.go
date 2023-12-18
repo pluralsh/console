@@ -1,4 +1,4 @@
-package reconciler
+package controllers
 
 import (
 	"context"
@@ -42,6 +42,9 @@ type GitRepositoryReconciler struct {
 	ConsoleClient consoleclient.ConsoleClient
 	Scheme        *runtime.Scheme
 }
+
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=gitrepositories,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=gitrepositories/status,verbs=get;update;patch
 
 func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)

@@ -1,4 +1,4 @@
-package reconciler_test
+package controllers_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/pkg/reconciler"
+	"github.com/pluralsh/console/controller/controllers"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 
@@ -100,7 +100,7 @@ func TestCreateNewRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &reconciler.GitRepositoryReconciler{
+			target := &controllers.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
@@ -198,7 +198,7 @@ func TestUpdateRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &reconciler.GitRepositoryReconciler{
+			target := &controllers.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
@@ -281,7 +281,7 @@ func TestImportRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &reconciler.GitRepositoryReconciler{
+			target := &controllers.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
