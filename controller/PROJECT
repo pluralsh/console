@@ -3,6 +3,9 @@
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
 domain: plural.sh
+layout:
+  - go.kubebuilder.io/v4
+projectName: controller
 repo: github.com/pluralsh/console/controller
 resources:
 - api:
