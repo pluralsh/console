@@ -19,6 +19,12 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - clusters/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - clusters/status
   verbs:
   - get
