@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/internal/controllers"
+	"github.com/pluralsh/console/controller/internal/controller"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 
@@ -100,7 +100,7 @@ func TestCreateNewRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &controllers.GitRepositoryReconciler{
+			target := &controller.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
@@ -197,7 +197,7 @@ func TestUpdateRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &controllers.GitRepositoryReconciler{
+			target := &controller.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
@@ -280,7 +280,7 @@ func TestImportRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &controllers.GitRepositoryReconciler{
+			target := &controller.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,

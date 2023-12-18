@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/internal/controllers"
+	"github.com/pluralsh/console/controller/internal/controller"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -112,7 +112,7 @@ func TestCreateNewProvider(t *testing.T) {
 
 		// act
 		ctx := context.Background()
-		providerReconciler := &controllers.ProviderReconciler{
+		providerReconciler := &controller.ProviderReconciler{
 			Client:        fakeClient,
 			Scheme:        scheme.Scheme,
 			ConsoleClient: fakeConsoleClient,
@@ -207,7 +207,7 @@ func TestAdoptProvider(t *testing.T) {
 
 		// act
 		ctx := context.Background()
-		providerReconciler := &controllers.ProviderReconciler{
+		providerReconciler := &controller.ProviderReconciler{
 			Client:        fakeClient,
 			Scheme:        scheme.Scheme,
 			ConsoleClient: fakeConsoleClient,
@@ -311,7 +311,7 @@ func TestUpdateProvider(t *testing.T) {
 
 		// act
 		ctx := context.Background()
-		providerReconciler := &controllers.ProviderReconciler{
+		providerReconciler := &controller.ProviderReconciler{
 			Client:        fakeClient,
 			Scheme:        scheme.Scheme,
 			ConsoleClient: fakeConsoleClient,
