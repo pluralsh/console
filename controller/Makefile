@@ -11,10 +11,11 @@ KUSTOMIZE ?= $(shell which kustomize)
 CONTROLLER_GEN ?= $(shell which controller-gen)
 ENVTEST ?= $(shell which setup-envtest)
 GOLANGCI_LINT ?= $(shell which golangci-lint)
+MOCKERY ?= $(shell which mockery)
 
 # Tool versions
 KUBEBUILDER_VERSION := 3.11.1
-ENVTEST_VERSION := 1.28.3
+ENVTEST_K8S_VERSION := 1.28.3
 
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
@@ -72,8 +73,8 @@ generate: controller-gen ## generate code containing DeepCopy, DeepCopyInto, and
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./api/...
 
 .PHONY: genmock
-genmock: ## generates mocks before running tests
-	hack/gen-client-mocks.sh
+genmock: mockery ## generates mocks before running tests
+	@$(MOCKERY)
 
 ##@ Tests
 
@@ -85,10 +86,6 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	@go vet ./...
 
-.PHONY: test
-test: manifests generate genmock fmt vet envtest ## run tests
-	@go test $$(go list ./... | grep -v /e2e) -v
-
 .PHONY: lint
 lint: golangci-lint ## run linters
 	@$(GOLANGCI_LINT) run ./...
@@ -96,6 +93,14 @@ lint: golangci-lint ## run linters
 .PHONY: fix
 fix: golangci-lint ## fix issues found by linters
 	@$(GOLANGCI_LINT) run --fix ./...
+
+.PHONY: test
+test: manifests generate genmock fmt vet envtest ## run tests
+	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(GOPATH)/bin -p path)" go test $$(go list ./... | grep -v /e2e) -v
+
+.PHONY: e2e
+e2e: ## run e2e tests
+	@go test ./internal/test/e2e/ -v -ginkgo.v
 
 ##@ Deployment
 
@@ -150,8 +155,11 @@ golangci-lint: --tool ## Download and install golangci-lint in the $GOPATH/bin
 
 .PHONY: envtest
 envtest: TOOL = setup-envtest
-envtest: --tool ## Download and install setup-envtest in $GOPATH/bin and configure envtest
-	@$(ENVTEST) use $(ENVTEST_VERSION) --bin-dir ${GOPATH}/bin
+envtest: --tool ## Download and install setup-envtest in the $GOPATH/bin
+
+.PHONY: mockery
+mockery: TOOL = mockery
+mockery: --tool
 
 .PHONY: kubebuilder
 kubebuilder: ## install kubebuilder

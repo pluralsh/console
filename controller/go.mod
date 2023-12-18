@@ -7,7 +7,7 @@ toolchain go1.21.1
 // Dependencies
 require (
 	github.com/Yamashou/gqlgenc v0.16.0
-	github.com/go-logr/logr v1.3.0
+	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/pluralsh/console-client-go v0.0.59
 	github.com/pluralsh/polly v0.1.4
 	github.com/samber/lo v1.39.0
@@ -25,6 +25,7 @@ require (
 // Tools
 require (
 	github.com/golangci/golangci-lint v1.55.2
+	github.com/vektra/mockery/v2 v2.38.0
 	sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20231215020716-1b80b9629af8
 	sigs.k8s.io/controller-tools v0.13.0
 	sigs.k8s.io/kustomize/kustomize/v5 v5.3.0
@@ -259,11 +260,16 @@ require (
 require github.com/onsi/ginkgo/v2 v2.13.1
 
 require (
+	github.com/chigopher/pathlib v0.15.0 // indirect
 	github.com/go-errors/errors v1.4.2 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
+	github.com/huandu/xstrings v1.4.0 // indirect
+	github.com/iancoleman/strcase v0.2.0 // indirect
+	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
+	github.com/rs/zerolog v1.29.0 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
 	go.starlark.net v0.0.0-20230525235612-a134d8f9ddca // indirect
 	gopkg.in/evanphx/json-patch.v5 v5.6.0 // indirect
