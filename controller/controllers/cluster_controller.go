@@ -1,4 +1,4 @@
-package reconciler
+package controllers
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-logr/logr"
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -38,6 +38,9 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&v1alpha1.Cluster{}).
 		Complete(r)
 }
+
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=clusters,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=clusters/status,verbs=get;update;patch
 
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)

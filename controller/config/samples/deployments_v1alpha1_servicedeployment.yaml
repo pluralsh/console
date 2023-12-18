@@ -1,0 +1,6 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ServiceDeployment
+metadata:
+  name: servicedeployment-sample
+spec:
+  # TODO(user): Add fields here

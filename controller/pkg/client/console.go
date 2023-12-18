@@ -8,7 +8,7 @@ import (
 
 	console "github.com/pluralsh/console-client-go"
 
-	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
 )
 
 type authedTransport struct {

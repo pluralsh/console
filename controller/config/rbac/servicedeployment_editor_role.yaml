@@ -1,0 +1,24 @@
+# permissions for end users to edit servicedeployments.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: servicedeployment-editor-role
+rules:
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - servicedeployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - servicedeployments/status
+  verbs:
+  - get

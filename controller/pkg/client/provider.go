@@ -8,7 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
 )
 
 func (c *client) CreateProvider(ctx context.Context, attributes gqlclient.ClusterProviderAttributes, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {

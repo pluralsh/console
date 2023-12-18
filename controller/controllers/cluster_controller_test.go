@@ -1,4 +1,4 @@
-package reconciler_test
+package controllers_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/controllers"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -21,8 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
-	"github.com/pluralsh/console/controller/pkg/reconciler"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/pkg/test/mocks"
 )
 
@@ -149,7 +149,7 @@ func TestCreateNewCluster(t *testing.T) {
 
 			ctx := context.Background()
 
-			target := &reconciler.ClusterReconciler{
+			target := &controllers.ClusterReconciler{
 				Client:        fakeClient,
 				Log:           ctrl.Log.WithName("reconcilers").WithName("ClusterReconciler"),
 				Scheme:        scheme.Scheme,
@@ -305,7 +305,7 @@ func TestUpdateCluster(t *testing.T) {
 
 			ctx := context.Background()
 
-			target := &reconciler.ClusterReconciler{
+			target := &controllers.ClusterReconciler{
 				Client:        fakeClient,
 				Log:           ctrl.Log.WithName("reconcilers").WithName("ClusterReconciler"),
 				Scheme:        scheme.Scheme,
@@ -415,7 +415,7 @@ func TestAdoptExistingCluster(t *testing.T) {
 
 			ctx := context.Background()
 
-			target := &reconciler.ClusterReconciler{
+			target := &controllers.ClusterReconciler{
 				Client:        fakeClient,
 				Log:           ctrl.Log.WithName("reconcilers").WithName("ClusterReconciler"),
 				Scheme:        scheme.Scheme,

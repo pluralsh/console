@@ -1,11 +1,11 @@
-package reconciler
+package controllers
 
 import (
 	"context"
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/errors"
 	"github.com/pluralsh/console/controller/pkg/utils"
@@ -42,6 +42,9 @@ type GitRepositoryReconciler struct {
 	ConsoleClient consoleclient.ConsoleClient
 	Scheme        *runtime.Scheme
 }
+
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=gitrepositories,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=gitrepositories/status,verbs=get;update;patch
 
 func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
@@ -215,6 +218,9 @@ func (r *GitRepositoryReconciler) getRepository(url string) (*console.GitReposit
 }
 
 func (r *GitRepositoryReconciler) isAlreadyExists(repository *v1alpha1.GitRepository) (bool, error) {
+	if controllerutil.ContainsFinalizer(repository, RepoFinalizer) {
+		return false, nil
+	}
 	if repository.Status.HasReadonlyCondition() {
 		return repository.Status.IsReadonly(), nil
 	}

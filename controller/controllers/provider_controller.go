@@ -1,4 +1,4 @@
-package reconciler
+package controllers
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/pkg/client"
 	"github.com/pluralsh/console/controller/pkg/utils"
 )
@@ -34,6 +34,9 @@ const (
 	// resource deletion from the Console API prior to removing the CRD.
 	ProviderProtectionFinalizerName = "providers.deployments.plural.sh/provider-protection"
 )
+
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=providers,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=providers/status,verbs=get;update;patch
 
 // Reconcile ...
 // TODO: Add kubebuilder rbac annotation

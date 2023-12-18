@@ -1,4 +1,4 @@
-package reconciler_test
+package controllers_test
 
 import (
 	"context"
@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/pkg/reconciler"
+	"github.com/pluralsh/console/controller/controllers"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/pkg/test/mocks"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -100,7 +100,7 @@ func TestCreateNewRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &reconciler.GitRepositoryReconciler{
+			target := &controllers.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
@@ -116,7 +116,6 @@ func TestCreateNewRepository(t *testing.T) {
 			existingStatusJson, err := json.Marshal(sanitizeRepoConditions(existingRepo.Status))
 			assert.NoError(t, err)
 			expectedStatusJson, err := json.Marshal(sanitizeRepoConditions(test.expectedStatus))
-			assert.NoError(t, err)
 			assert.NoError(t, err)
 			assert.EqualValues(t, string(expectedStatusJson), string(existingStatusJson))
 		})
@@ -198,7 +197,7 @@ func TestUpdateRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &reconciler.GitRepositoryReconciler{
+			target := &controllers.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
@@ -281,7 +280,7 @@ func TestImportRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &reconciler.GitRepositoryReconciler{
+			target := &controllers.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
