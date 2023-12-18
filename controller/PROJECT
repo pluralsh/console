@@ -5,16 +5,40 @@
 domain: plural.sh
 repo: github.com/pluralsh/console/controller
 resources:
-- group: deployments
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: plural.sh
+  group: deployments
   kind: Cluster
+  path: github.com/pluralsh/console/controller/api/v1alpha1
   version: v1alpha1
-- group: deployments
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: plural.sh
+  group: deployments
   kind: Provider
+  path: github.com/pluralsh/console/controller/api/v1alpha1
   version: v1alpha1
-- group: deployments
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: plural.sh
+  group: deployments
   kind: ServiceDeployment
+  path: github.com/pluralsh/console/controller/api/v1alpha1
   version: v1alpha1
-- group: deployments
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: plural.sh
+  group: deployments
   kind: GitRepository
+  path: github.com/pluralsh/console/controller/api/v1alpha1
   version: v1alpha1
-version: "2"
+version: "3"

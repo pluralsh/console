@@ -1,14 +1,13 @@
-package controllers
+package controller
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/go-logr/logr"
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/controller/pkg/client"
-	"github.com/pluralsh/console/controller/pkg/utils"
+	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/utils"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -28,7 +27,6 @@ const (
 type ClusterReconciler struct {
 	client.Client
 	ConsoleClient consoleclient.ConsoleClient
-	Log           logr.Logger
 	Scheme        *runtime.Scheme
 }
 
@@ -41,6 +39,7 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=clusters,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=clusters/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=clusters/finalizers,verbs=update
 
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)

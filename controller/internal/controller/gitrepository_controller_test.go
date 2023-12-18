@@ -1,4 +1,4 @@
-package controllers_test
+package controller_test
 
 import (
 	"context"
@@ -6,12 +6,12 @@ import (
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/controllers"
+	"github.com/pluralsh/console/controller/internal/controller"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/pkg/test/mocks"
+	"github.com/pluralsh/console/controller/internal/test/mocks"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -100,7 +100,7 @@ func TestCreateNewRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &controllers.GitRepositoryReconciler{
+			target := &controller.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
@@ -197,7 +197,7 @@ func TestUpdateRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &controllers.GitRepositoryReconciler{
+			target := &controller.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
@@ -280,7 +280,7 @@ func TestImportRepository(t *testing.T) {
 
 			// act
 			ctx := context.Background()
-			target := &controllers.GitRepositoryReconciler{
+			target := &controller.GitRepositoryReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,

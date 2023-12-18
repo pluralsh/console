@@ -1,4 +1,4 @@
-package controllers_test
+package controller_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/controllers"
+	"github.com/pluralsh/console/controller/internal/controller"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -17,13 +17,12 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/pkg/test/mocks"
+	"github.com/pluralsh/console/controller/internal/test/mocks"
 )
 
 func init() {
@@ -149,9 +148,8 @@ func TestCreateNewCluster(t *testing.T) {
 
 			ctx := context.Background()
 
-			target := &controllers.ClusterReconciler{
+			target := &controller.ClusterReconciler{
 				Client:        fakeClient,
-				Log:           ctrl.Log.WithName("reconcilers").WithName("ClusterReconciler"),
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
 			}
@@ -305,9 +303,8 @@ func TestUpdateCluster(t *testing.T) {
 
 			ctx := context.Background()
 
-			target := &controllers.ClusterReconciler{
+			target := &controller.ClusterReconciler{
 				Client:        fakeClient,
-				Log:           ctrl.Log.WithName("reconcilers").WithName("ClusterReconciler"),
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
 			}
@@ -415,9 +412,8 @@ func TestAdoptExistingCluster(t *testing.T) {
 
 			ctx := context.Background()
 
-			target := &controllers.ClusterReconciler{
+			target := &controller.ClusterReconciler{
 				Client:        fakeClient,
-				Log:           ctrl.Log.WithName("reconcilers").WithName("ClusterReconciler"),
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
 			}

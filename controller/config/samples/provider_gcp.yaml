@@ -1,6 +1,7 @@
+---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Provider
 metadata:
-  name: provider-sample
-spec:
-  # TODO(user): Add fields here
+  name: gcp
+
+

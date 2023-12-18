@@ -48,7 +48,7 @@ update-dependencies: ## update dependencies
 
 .PHONY: build
 build: manifests generate ## build
-	go build -o bin/deployment-controller main.go
+	go build -o bin/deployment-controller cmd/main.go
 
 .PHONY: release
 release: manifests generate ## builds release version of the app. Requires GoReleaser to work.

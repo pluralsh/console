@@ -1,4 +1,4 @@
-package controllers_test
+package controller_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/controllers"
+	"github.com/pluralsh/console/controller/internal/controller"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -22,7 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/pkg/test/mocks"
+	"github.com/pluralsh/console/controller/internal/test/mocks"
 )
 
 func init() {
@@ -112,7 +112,7 @@ func TestCreateNewProvider(t *testing.T) {
 
 		// act
 		ctx := context.Background()
-		providerReconciler := &controllers.ProviderReconciler{
+		providerReconciler := &controller.ProviderReconciler{
 			Client:        fakeClient,
 			Scheme:        scheme.Scheme,
 			ConsoleClient: fakeConsoleClient,
@@ -207,7 +207,7 @@ func TestAdoptProvider(t *testing.T) {
 
 		// act
 		ctx := context.Background()
-		providerReconciler := &controllers.ProviderReconciler{
+		providerReconciler := &controller.ProviderReconciler{
 			Client:        fakeClient,
 			Scheme:        scheme.Scheme,
 			ConsoleClient: fakeConsoleClient,
@@ -311,7 +311,7 @@ func TestUpdateProvider(t *testing.T) {
 
 		// act
 		ctx := context.Background()
-		providerReconciler := &controllers.ProviderReconciler{
+		providerReconciler := &controller.ProviderReconciler{
 			Client:        fakeClient,
 			Scheme:        scheme.Scheme,
 			ConsoleClient: fakeConsoleClient,

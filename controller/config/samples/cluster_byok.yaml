@@ -4,8 +4,4 @@ metadata:
   name: byok
   namespace: default
 spec:
-  handle: byok
-  cloud: byok
-  protect: false
-  tags:
-    managed-by: plural-controller
+  cloud: "byok"
