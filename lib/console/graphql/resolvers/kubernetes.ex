@@ -60,6 +60,12 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> Kube.Utils.run()
   end
 
+  def resolve_daemon_set(%{namespace: ns, name: name}, _) do
+    Console.namespace(ns)
+    |> Apps.read_namespaced_daemon_set!(name)
+    |> Kube.Utils.run()
+  end
+
   def resolve_ingress(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
     |> Networking.read_namespaced_ingress!(name)

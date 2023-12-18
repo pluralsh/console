@@ -19,6 +19,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   id
   name
   protect
+  promotion
   message
   git {
     ref
@@ -248,6 +249,12 @@ mutation DeleteServiceDeployment($id: ID!) {
 mutation RollbackService($id: ID, $revisionId: ID!) {
   rollbackService(id: $id, revisionId: $revisionId) {
     ...ServiceDeploymentsRow
+  }
+}
+
+mutation ProceedService($id: ID!, $promotion: ServicePromotion) {
+  proceed(id: $id, promotion: $promotion) {
+    ...ServiceDeploymentDetails
   }
 }
 

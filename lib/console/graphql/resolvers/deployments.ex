@@ -327,8 +327,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     do: Services.delete_service(id, user)
 
   def proceed(args, %{context: %{current_user: user}}) do
-    fetch_service(args)
-    |> Services.proceed(user)
+    svc = fetch_service(args)
+    Services.proceed(args[:promotion] || :proceed, svc, user)
   end
 
   def clone_service(%{cluster: _, name: _, cluster_id: cid, attributes: attrs} = args, %{context: %{current_user: user}}) do

@@ -1055,7 +1055,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       """, %{"id" => svc.id}, %{current_user: admin})
 
       assert res["id"] == svc.id
-      assert refetch(svc).proceed
+      assert refetch(svc).promotion == :proceed
     end
   end
 

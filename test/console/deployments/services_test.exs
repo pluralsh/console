@@ -766,6 +766,38 @@ defmodule Console.Deployments.ServicesTest do
       assert error.source == "sync"
     end
 
+    test "it will revert proceed state when relevant" do
+      service = insert(:service, promotion: :proceed)
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :paused,
+          synced: true,
+          group: "networking.k8s.io",
+          version: "v1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api"
+        }],
+      }, service)
+
+      assert refetch(service).promotion == :proceed
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :running,
+          synced: true,
+          group: "networking.k8s.io",
+          version: "v1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api"
+        }],
+      }, service)
+
+      assert refetch(service).promotion == :ignore
+    end
+
     test "it will persist api deprecations if found" do
       service = insert(:service)
 
@@ -891,8 +923,8 @@ defmodule Console.Deployments.ServicesAsyncTest do
 
       {:ok, svc} = Services.proceed(service, user)
 
-      assert svc.proceed
-      assert svc.status == :stale
+      assert svc.promotion == :proceed
+      assert svc.status == :paused
     end
 
     test "non-writers cannot proceed services" do

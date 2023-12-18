@@ -87,6 +87,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.VPN
   import_types Console.GraphQl.Kubernetes.Config
   import_types Console.GraphQl.Kubernetes.Canary
+  import_types Console.GraphQl.Kubernetes.DaemonSet
 
   delta :application
 
@@ -133,6 +134,15 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_stateful_set/2
+    end
+
+    field :daemon_set, :daemon_set do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+      service_authorized :read
+
+      safe_resolve &Kubernetes.resolve_daemon_set/2
     end
 
     field :ingress, :ingress do

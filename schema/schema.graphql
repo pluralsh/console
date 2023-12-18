@@ -71,6 +71,8 @@ type RootQueryType {
 
   statefulSet(namespace: String!, name: String!, serviceId: ID): StatefulSet
 
+  daemonSet(namespace: String!, name: String!, serviceId: ID): DaemonSet
+
   ingress(namespace: String!, name: String!, serviceId: ID): Ingress
 
   nodes: [Node]
@@ -398,6 +400,8 @@ type RootMutationType {
     cluster: String
 
     name: String
+
+    promotion: ServicePromotion
   ): ServiceDeployment
 
   createGlobalService(
@@ -898,6 +902,12 @@ enum ServiceDeploymentStatus {
   PAUSED
 }
 
+enum ServicePromotion {
+  IGNORE
+  PROCEED
+  ROLLBACK
+}
+
 input ServiceDeploymentAttributes {
   name: String!
   namespace: String!
@@ -1004,6 +1014,9 @@ type ServiceDeployment {
 
   "description of how helm charts should be applied"
   helm: HelmSpec
+
+  "how you'd like to perform a canary promotion"
+  promotion: ServicePromotion
 
   "if true, deletion of this service is not allowed"
   protect: Boolean
@@ -2414,6 +2427,25 @@ type KubernetesUnstructured {
 type ApplicationDelta {
   delta: Delta
   payload: Application
+}
+
+type DaemonSet {
+  metadata: Metadata!
+  status: DaemonSetStatus!
+  spec: DaemonSetSpec!
+  pods: [Pod]
+  raw: String!
+  events: [Event]
+}
+
+type DaemonSetStatus {
+  currentNumberScheduled: Int
+  desiredNumberScheduled: Int
+  numberReady: Int
+}
+
+type DaemonSetSpec {
+  strategy: DeploymentStrategy
 }
 
 type Canary {
