@@ -3,4 +3,5 @@ kind: Cluster
 metadata:
   name: byok
   namespace: default
-
+spec:
+  cloud: "byok"
