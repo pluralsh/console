@@ -20,13 +20,21 @@ import (
 	"github.com/pluralsh/console/controller/internal/test/mocks"
 )
 
+func sanitizeClusterStatus(status v1alpha1.ClusterStatus) v1alpha1.ClusterStatus {
+	for i := range status.Conditions {
+		status.Conditions[i].LastTransitionTime = metav1.Time{}
+		status.Conditions[i].ObservedGeneration = 0
+	}
+
+	return status
+}
+
 var _ = Describe("Cluster Controller", func() {
 	Context("When reconciling a resource", func() {
 		const (
 			clusterName       = "test-cluster"
 			clusterConsoleID  = "12345-67890"
 			providerName      = "test-provider"
-			providerNamespace = "test-provider"
 			providerConsoleID = "12345-67890"
 		)
 
@@ -53,26 +61,27 @@ var _ = Describe("Cluster Controller", func() {
 						Handle:      lo.ToPtr(clusterName),
 						Version:     lo.ToPtr("1.24"),
 						Cloud:       "aws",
-						ProviderRef: &corev1.ObjectReference{Name: providerName, Namespace: providerNamespace},
+						ProviderRef: &corev1.ObjectReference{Name: providerName},
 					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}
 
 			By("creating the custom resource for the Kind Provider")
-			err = k8sClient.Get(ctx, typeNamespacedName, provider)
+			err = k8sClient.Get(ctx, types.NamespacedName{Name: providerName}, provider)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &v1alpha1.Provider{
 					ObjectMeta: metav1.ObjectMeta{Name: providerName},
 					Spec: v1alpha1.ProviderSpec{
-						Cloud:     "aws",
-						Name:      providerName,
-						Namespace: providerNamespace,
+						Cloud: "aws",
+						Name:  providerName,
 					},
 					Status: v1alpha1.ProviderStatus{ID: lo.ToPtr(providerConsoleID)},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
-				Expect(k8sClient.Status().Update(ctx, resource)).To(Succeed())
+				Expect(k8sClient.Get(ctx, types.NamespacedName{Name: providerName}, provider)).To(Succeed())
+				provider.Status = v1alpha1.ProviderStatus{ID: lo.ToPtr(providerConsoleID)}
+				Expect(k8sClient.Status().Update(ctx, provider)).To(Succeed())
 			}
 		})
 
@@ -138,9 +147,7 @@ var _ = Describe("Cluster Controller", func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, cluster)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(cluster.Status).To(Equal(test.expectedStatus))
-			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
-			// Example: If you expect a certain status condition after reconciliation, verify it here.
+			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(test.expectedStatus)))
 		})
 	})
 })
