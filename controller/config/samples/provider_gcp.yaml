@@ -1,0 +1,7 @@
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Provider
+metadata:
+  name: gcp
+
+
