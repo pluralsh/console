@@ -9,7 +9,7 @@ import (
 
 	"github.com/pluralsh/console/controller/pkg/utils"
 
-	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
 )
 
 func (r *ProviderReconciler) missingCredentialKeyError(key string) error {

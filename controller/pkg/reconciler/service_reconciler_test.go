@@ -6,7 +6,7 @@ import (
 	"time"
 
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
 	"github.com/pluralsh/console/controller/pkg/reconciler"
 	"github.com/pluralsh/console/controller/pkg/test/mocks"
 	"github.com/samber/lo"

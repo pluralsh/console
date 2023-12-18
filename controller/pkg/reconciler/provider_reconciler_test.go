@@ -23,7 +23,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/pluralsh/console/controller/apis/deployments/v1alpha1"
+	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
 	"github.com/pluralsh/console/controller/pkg/test/mocks"
 )
 

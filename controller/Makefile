@@ -1,5 +1,6 @@
 IMG ?= deployment-controller:latest # Image URL to use all building/pushing image targets
 CONTROLLER_GEN = $(shell which controller-gen)
+CRD_OPTIONS ?= "crd"
 
 ifndef GOPATH
 $(error $$GOPATH environment variable not set)
@@ -48,12 +49,12 @@ docker-push: ## push Docker image with the driver
 
 .PHONY: manifests
 manifests: install-tools ## generate Kubernetes manifests
-	$(CONTROLLER_GEN) crd rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
 generate: install-tools ## generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations
 	go generate ./pkg/...
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./api/...
 
 .PHONY: genmock
 genmock: ## generates mocks before running tests
