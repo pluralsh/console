@@ -147,12 +147,14 @@ export const ColVolume = columnHelper.accessor(
   }
 )
 
-const statusToSeverity = (status: string | null | undefined) => {
+const statusToSeverity = (
+  status: string | null | undefined
+): ComponentProps<typeof Chip>['severity'] => {
   if (!status) {
     return 'warning'
   }
   if (status.match(/fail/m)) {
-    return 'error'
+    return 'danger'
   }
   if (status.match(/running/i)) {
     return 'success'

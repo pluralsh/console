@@ -62,8 +62,10 @@ export default function Runbooks() {
       {runbooks?.length < 1 && (
         <Flex justify="center">
           <EmptyState
-            marginTop={96}
-            width={600}
+            css={{
+              marginTop: 96,
+              width: 600,
+            }}
             icon={<RunBookIcon size={64} />}
             message="No runbooks available"
             description={

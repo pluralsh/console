@@ -66,9 +66,9 @@ function ExpandedItem({
 
 const ChipList = styled.div(({ theme }) => ({
   display: 'flex',
-  flexDiretion: 'row',
+  flexDirection: 'row',
   flexWrap: 'wrap',
-  justifyContent: 'start',
+  justifyContent: 'flex-start',
   gap: theme.spacing.xsmall,
 }))
 

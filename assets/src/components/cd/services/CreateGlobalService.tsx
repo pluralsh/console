@@ -27,7 +27,7 @@ import { GlobalServiceFields } from './GlobalServiceFields'
 
 export const ChipList = styled(ListBoxItemChipList)(({ theme }) => ({
   marginTop: theme.spacing.small,
-  justifyContent: 'start',
+  justifyContent: 'flex-start',
 }))
 
 export const validateTagName = (name) => {

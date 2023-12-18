@@ -1,9 +1,12 @@
+import { ComponentProps } from 'react'
 import { Chip } from '@pluralsh/design-system'
 
-function getChipSeverity(severity: string) {
+function getChipSeverity(
+  severity: string
+): ComponentProps<typeof Chip>['severity'] {
   switch (severity) {
     case 'critical':
-      return 'error'
+      return 'danger'
     case 'high':
       return 'warning'
     default:
