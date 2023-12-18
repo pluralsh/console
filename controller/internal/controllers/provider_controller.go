@@ -16,8 +16,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/controller/pkg/client"
-	"github.com/pluralsh/console/controller/pkg/utils"
+	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/utils"
 )
 
 // ProviderReconciler reconciles a v1alpha1.Provider object.

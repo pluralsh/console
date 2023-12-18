@@ -7,7 +7,7 @@ import (
 	console "github.com/pluralsh/console-client-go"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/pluralsh/console/controller/pkg/utils"
+	"github.com/pluralsh/console/controller/internal/utils"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 )

@@ -3,8 +3,8 @@ package types
 import (
 	"fmt"
 
-	"github.com/pluralsh/console/controller/controllers"
-	"github.com/pluralsh/console/controller/pkg/client"
+	"github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/controllers"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 

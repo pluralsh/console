@@ -8,8 +8,8 @@ import (
 
 	gqlclient "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/controllers"
-	"github.com/pluralsh/console/controller/pkg/test/mocks"
+	"github.com/pluralsh/console/controller/internal/controllers"
+	"github.com/pluralsh/console/controller/internal/test/mocks"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

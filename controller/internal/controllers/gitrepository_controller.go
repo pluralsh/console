@@ -6,9 +6,9 @@ import (
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/controller/pkg/client"
-	"github.com/pluralsh/console/controller/pkg/errors"
-	"github.com/pluralsh/console/controller/pkg/utils"
+	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/errors"
+	"github.com/pluralsh/console/controller/internal/utils"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
