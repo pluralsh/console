@@ -7,8 +7,8 @@ import (
 	"time"
 
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/api/deployments/v1alpha1"
-	"github.com/pluralsh/console/controller/pkg/reconciler"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/controllers"
 	"github.com/pluralsh/console/controller/pkg/test/mocks"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
@@ -103,7 +103,7 @@ func TestCreateNewService(t *testing.T) {
 
 			ctx := context.Background()
 
-			target := &reconciler.ServiceReconciler{
+			target := &controllers.ServiceReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
@@ -165,7 +165,7 @@ func TestDeleteService(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:              serviceName,
 						DeletionTimestamp: &metav1.Time{Time: time.Date(1998, time.May, 5, 5, 5, 5, 0, time.UTC)},
-						Finalizers:        []string{reconciler.ServiceFinalizer},
+						Finalizers:        []string{controllers.ServiceFinalizer},
 					},
 					Spec: v1alpha1.ServiceSpec{
 						Version:       "1.24",
@@ -205,7 +205,7 @@ func TestDeleteService(t *testing.T) {
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(nil, nil).Once()
 			ctx := context.Background()
 
-			target := &reconciler.ServiceReconciler{
+			target := &controllers.ServiceReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
@@ -299,7 +299,7 @@ func TestUpdateService(t *testing.T) {
 
 			ctx := context.Background()
 
-			target := &reconciler.ServiceReconciler{
+			target := &controllers.ServiceReconciler{
 				Client:        fakeClient,
 				Scheme:        scheme.Scheme,
 				ConsoleClient: fakeConsoleClient,
