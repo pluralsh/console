@@ -63,13 +63,13 @@ docker-push: ## push Docker image with the driver
 ##@ Codegen
 
 .PHONY: manifests
-manifests: controller-gen ## generate Kubernetes manifests
+manifests: controller-gen ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
 generate: controller-gen ## generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations
 	go generate ./pkg/...
-	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./api/...
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: genmock
 genmock: ## generates mocks before running tests
@@ -78,11 +78,11 @@ genmock: ## generates mocks before running tests
 ##@ Tests
 
 .PHONY: fmt
-fmt: ## Run go fmt against code.
+fmt: ## run go fmt against code
 	@go fmt ./...
 
 .PHONY: vet
-vet: ## Run go vet against code.
+vet: ## run go vet against code
 	@go vet ./...
 
 .PHONY: test
