@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -33,17 +34,20 @@ type GitRepositoryStatus struct {
 	// Message indicating details about last transition.
 	// +optional
 	Message *string `json:"message,omitempty"`
-	// Id of repo in console.
-	// +optional
-	Id *string `json:"id,omitempty"`
-	// +optional
-	Sha string `json:"sha,omitempty"`
-	// Existing flag is set to true when Console API object already exists when CRD is created.
-	// CRD is then set to read-only mode and does not update Console API from CRD.
+	// ID of the provider in the Console API.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=boolean
-	// +kubebuilder:default:=false
-	Existing *bool `json:"existing,omitempty"`
+	// +kubebuilder:validation:Type:=string
+	ID *string `json:"id,omitempty"`
+	// SHA of last applied configuration.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	SHA *string `json:"sha,omitempty"`
+	// Represents the observations of Repository current state.
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=type
+	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 // +kubebuilder:object:root=true
@@ -67,10 +71,46 @@ type GitRepositoryList struct {
 	Items           []GitRepository `json:"items"`
 }
 
-func (p *GitRepositoryStatus) IsExisting() bool {
-	return p.Existing != nil && *p.Existing
+func (p *GitRepositoryStatus) HasReadonlyCondition() bool {
+	return meta.FindStatusCondition(p.Conditions, ReadonlyConditionType.String()) != nil
+}
+
+func (p *GitRepositoryStatus) IsReadonly() bool {
+	return meta.IsStatusConditionTrue(p.Conditions, ReadonlyConditionType.String())
+}
+
+func (p *GitRepositoryStatus) IsSHAEqual(sha string) bool {
+	if !p.HasSHA() {
+		return false
+	}
+
+	return p.GetSHA() == sha
+}
+
+func (p *GitRepositoryStatus) GetSHA() string {
+	if !p.HasSHA() {
+		return ""
+	}
+
+	return *p.SHA
+}
+
+func (p *GitRepositoryStatus) HasSHA() bool {
+	return p.SHA != nil && len(*p.SHA) > 0
+}
+
+func (p *GitRepositoryStatus) GetID() string {
+	if !p.HasID() {
+		return ""
+	}
+
+	return *p.ID
 }
 
 func (p *GitRepositoryStatus) HasID() bool {
-	return p.Id != nil && len(*p.Id) > 0
+	return p.ID != nil && len(*p.ID) > 0
+}
+
+func (p *GitRepository) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&p.Status.Conditions, condition)
 }
