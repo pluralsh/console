@@ -1,6 +1,6 @@
 //go:build tools
 
-package main
+package tools
 
 import (
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"

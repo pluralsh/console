@@ -1,24 +1,40 @@
+run:
+  deadline: 5m
+  allow-parallel-runners: true
+
 issues:
-  max-per-linter: 0
-  max-same-issues: 0
+  # don't skip warning about doc comments
+  # don't exclude the default set of lint
+  exclude-use-default: false
+  # restore some of the defaults
+  # (fill in the rest as needed)
+  exclude-rules:
+    - path: "api/*"
+      linters:
+        - lll
+    - path: "internal/*"
+      linters:
+        - dupl
+        - lll
 linters:
   disable-all: true
   enable:
-    - durationcheck
+    - dupl
     - errcheck
     - exportloopref
-    - forcetypeassert
-    - godot
+    - goconst
+    - gocyclo
     - gofmt
+    - goimports
     - gosimple
+    - govet
     - ineffassign
-    - makezero
+    - lll
     - misspell
-    - nilerr
-    - predeclared
+    - nakedret
+    - prealloc
     - staticcheck
-    - tenv
+    - typecheck
     - unconvert
     - unparam
     - unused
-    - vet

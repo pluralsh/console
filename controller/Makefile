@@ -48,11 +48,15 @@ update-dependencies: ## update dependencies
 ##@ Build
 
 .PHONY: build
-build: manifests generate ## build
-	go build -o bin/deployment-controller cmd/main.go
+build: manifests generate fmt vet ## build manager binary
+	go build -o bin/manager cmd/main.go
+
+.PHONY: run
+run: manifests generate fmt vet ## run a controller from your host
+	go run ./cmd/main.go
 
 .PHONY: release
-release: manifests generate ## builds release version of the app. Requires GoReleaser to work.
+release: manifests generate fmt vet ## builds release version of the app. Requires GoReleaser to work.
 	goreleaser build --clean --single-target --snapshot
 
 docker-build: ## build Docker image with the driver
@@ -64,13 +68,13 @@ docker-push: ## push Docker image with the driver
 ##@ Codegen
 
 .PHONY: manifests
-manifests: controller-gen ## generate Kubernetes manifests
+manifests: controller-gen ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
 generate: controller-gen ## generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations
 	go generate ./pkg/...
-	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths=./api/...
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: genmock
 genmock: mockery ## generates mocks before running tests
@@ -79,11 +83,11 @@ genmock: mockery ## generates mocks before running tests
 ##@ Tests
 
 .PHONY: fmt
-fmt: ## Run go fmt against code.
+fmt: ## run go fmt against code
 	@go fmt ./...
 
 .PHONY: vet
-vet: ## Run go vet against code.
+vet: ## run go vet against code
 	@go vet ./...
 
 .PHONY: lint
@@ -124,11 +128,6 @@ deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in
 .PHONY: undeploy
 undeploy: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/default | $(KUBECTL) delete --ignore-not-found=$(ignore-not-found) -f -
-
-###@ Utils
-#
-#apply-crds: ## applies CRDs
-#	kubectl apply -f config/crd/bases
 
 ##@ Build Dependencies
 
