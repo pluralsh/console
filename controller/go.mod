@@ -8,7 +8,7 @@ toolchain go1.21.1
 require (
 	github.com/Yamashou/gqlgenc v0.16.0
 	github.com/go-logr/logr v1.3.0
-	github.com/pluralsh/console-client-go v0.0.57
+	github.com/pluralsh/console-client-go v0.0.59
 	github.com/pluralsh/polly v0.1.4
 	github.com/samber/lo v1.39.0
 	github.com/spf13/pflag v1.0.5
@@ -164,7 +164,7 @@ require (
 	github.com/nishanths/predeclared v0.2.2 // indirect
 	github.com/nunnatsa/ginkgolinter v0.14.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/onsi/gomega v1.30.0 // indirect
+	github.com/onsi/gomega v1.30.0
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
@@ -256,8 +256,12 @@ require (
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
+require github.com/onsi/ginkgo/v2 v2.13.1
+
 require (
 	github.com/go-errors/errors v1.4.2 // indirect
+	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
+	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
