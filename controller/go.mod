@@ -7,7 +7,6 @@ toolchain go1.21.1
 // Dependencies
 require (
 	github.com/Yamashou/gqlgenc v0.16.0
-	github.com/go-logr/logr v1.3.0
 	github.com/pluralsh/console-client-go v0.0.59
 	github.com/pluralsh/polly v0.1.4
 	github.com/samber/lo v1.39.0
@@ -81,6 +80,7 @@ require (
 	github.com/fzipp/gocyclo v0.6.0 // indirect
 	github.com/ghostiam/protogetter v0.2.3 // indirect
 	github.com/go-critic/go-critic v0.9.0 // indirect
+	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-logr/zapr v1.2.4 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
