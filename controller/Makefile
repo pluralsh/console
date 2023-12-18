@@ -1,6 +1,11 @@
+ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+
+include $(ROOT_DIRECTORY)/hack/include/build.mk
+
 IMG ?= deployment-controller:latest # Image URL to use all building/pushing image targets
 CONTROLLER_GEN = $(shell which controller-gen)
 CRD_OPTIONS ?= "crd"
+KUBEBUILDER_VERSION := 3.11.1
 
 ifndef GOPATH
 $(error $$GOPATH environment variable not set)
@@ -28,6 +33,12 @@ update-dependencies: ## update dependencies
 .PHONY: install-tools
 install-tools: ## install required tools
 	@cat tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI {} go install {}
+
+.PHONY: install-kubebuilder
+install-kubebuilder: ## install kubebuilder
+	@curl -L -O --output-dir bin/ "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${KUBEBUILDER_VERSION}/kubebuilder_${OS}_${ARCH}"
+	@chmod +x bin/kubebuilder_${OS}_${ARCH}
+	@mv bin/kubebuilder_${OS}_${ARCH} ${GOPATH}/bin/kubebuilder
 
 ##@ Build
 

@@ -8,12 +8,12 @@ toolchain go1.21.1
 require (
 	github.com/Yamashou/gqlgenc v0.16.0
 	github.com/go-logr/logr v1.3.0
-	github.com/pluralsh/console-client-go v0.0.55
+	github.com/pluralsh/console-client-go v0.0.59
 	github.com/pluralsh/polly v0.1.4
 	github.com/samber/lo v1.39.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
-	go.uber.org/zap v1.25.0
+	go.uber.org/zap v1.26.0
 	k8s.io/api v0.28.4
 	k8s.io/apimachinery v0.28.4
 	k8s.io/client-go v0.28.4
@@ -24,8 +24,10 @@ require (
 
 // Tools
 require (
-	github.com/golangci/golangci-lint v1.55.1
+	github.com/golangci/golangci-lint v1.55.2
+	sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20231215020716-1b80b9629af8
 	sigs.k8s.io/controller-tools v0.13.0
+	sigs.k8s.io/kustomize/kustomize/v5 v5.3.0
 )
 
 // Indirect dependencies
@@ -162,7 +164,7 @@ require (
 	github.com/nishanths/predeclared v0.2.2 // indirect
 	github.com/nunnatsa/ginkgolinter v0.14.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/onsi/gomega v1.30.0 // indirect
+	github.com/onsi/gomega v1.30.0
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
@@ -219,10 +221,9 @@ require (
 	gitlab.com/bosi/decorder v0.4.1 // indirect
 	go-simpler.org/sloglint v0.1.2 // indirect
 	go.tmz.dev/musttag v0.7.2 // indirect
-	go.uber.org/goleak v1.3.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.15.0 // indirect
-	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
+	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/exp/typeparams v0.0.0-20230307190834-24139beb5833 // indirect
 	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/net v0.18.0 // indirect
@@ -243,14 +244,30 @@ require (
 	honnef.co/go/tools v0.4.6 // indirect
 	k8s.io/apiextensions-apiserver v0.28.4 // indirect
 	k8s.io/component-base v0.28.4 // indirect
-	k8s.io/klog/v2 v2.100.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20230717233707-2695361300d9 // indirect
-	k8s.io/utils v0.0.0-20230406110748-d93618cff8a2 // indirect
+	k8s.io/klog/v2 v2.110.1 // indirect
+	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
+	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect
 	mvdan.cc/gofumpt v0.5.0 // indirect
 	mvdan.cc/interfacer v0.0.0-20180901003855-c20040233aed // indirect
 	mvdan.cc/lint v0.0.0-20170908181259-adc824a0674b // indirect
 	mvdan.cc/unparam v0.0.0-20221223090309-7455f1af531d // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
+	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
+)
+
+require github.com/onsi/ginkgo/v2 v2.13.1
+
+require (
+	github.com/go-errors/errors v1.4.2 // indirect
+	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
+	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect
+	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
+	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
+	github.com/xlab/treeprint v1.2.0 // indirect
+	go.starlark.net v0.0.0-20230525235612-a134d8f9ddca // indirect
+	gopkg.in/evanphx/json-patch.v5 v5.6.0 // indirect
+	sigs.k8s.io/kustomize/api v0.16.0 // indirect
+	sigs.k8s.io/kustomize/cmd/config v0.13.0 // indirect
+	sigs.k8s.io/kustomize/kyaml v0.16.0 // indirect
 )
