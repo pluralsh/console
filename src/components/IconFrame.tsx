@@ -1,4 +1,5 @@
 import {
+  type ComponentProps,
   type ReactElement,
   type ReactNode,
   cloneElement,
@@ -143,7 +144,10 @@ const IconFrameSC = styled(Flex)<{
     : {}),
 }))
 
-const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
+const IconFrame = forwardRef<
+  HTMLDivElement,
+  IconFrameProps & ComponentProps<typeof IconFrameSC>
+>(
   (
     {
       icon,
@@ -154,6 +158,7 @@ const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
       tooltip,
       tooltipProps,
       type = 'tertiary',
+      as,
       ...props
     },
     ref
@@ -162,6 +167,7 @@ const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
     if (tooltip && typeof tooltip === 'boolean') {
       tooltip = textValue
     }
+    const forwardedAs = as || (clickable ? ButtonBase : undefined)
 
     let content = (
       <IconFrameSC
@@ -172,9 +178,8 @@ const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
         ref={ref}
         flex={false}
         aria-label={textValue}
-        forwardedAs={(props as any).as}
+        {...(forwardedAs ? { forwardedAs } : {})}
         {...(clickable && {
-          forwardedAs: (props as any).as || ButtonBase,
           tabIndex: 0,
           role: 'button',
           type: 'button',
