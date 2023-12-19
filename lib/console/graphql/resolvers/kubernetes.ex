@@ -103,7 +103,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   def ingress_certificates(%{metadata: %{namespace: ns}, spec: %{tls: [_ | _] = tls}}) do
     names = MapSet.new(tls, & &1.secret_name)
     with {:ok, %{items: certs}} <- Client.list_certificate(ns) do
-      {:ok, %{items: Enum.filter(certs, &MapSet.member?(names, &1.metadata.name)) |> IO.inspect()}}
+      {:ok, Enum.filter(certs, &MapSet.member?(names, &1.metadata.name))}
     end
   end
   def ingress_certificates(_), do: {:ok, []}
