@@ -126,15 +126,17 @@ function ClusterSettingsModalInner({
         css={{
           display: 'flex',
           flexDirection: 'column',
-          gap: theme.spacing.medium,
+          gap: theme.spacing.large,
         }}
       >
-        <Switch
-          checked={state.protect}
-          onChange={(checked) => updateState({ protect: checked })}
-        >
-          Protect from deletion
-        </Switch>
+        {!cluster.self && (
+          <Switch
+            checked={state.protect}
+            onChange={(checked) => updateState({ protect: checked })}
+          >
+            Protect from deletion
+          </Switch>
+        )}
         <FormField label="Tags">
           <TagSelection
             tags={state.tags}
