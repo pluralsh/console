@@ -263,7 +263,10 @@ defmodule Console.Schema.Cluster do
   def update_changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(version)a)
+    |> semver(:version)
     |> cast_assoc(:node_pools)
+    |> cast_assoc(:tags)
+    |> validate_vsn()
   end
 
   def ping_changeset(model, attrs \\ %{}) do
