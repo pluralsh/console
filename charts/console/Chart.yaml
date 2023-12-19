@@ -8,3 +8,6 @@ dependencies:
 - name: kas
   version: 0.0.3
   repository: file://../../plural/helm/kas
+- name: controller
+  version: 0.0.1
+  repository: file://../controller
