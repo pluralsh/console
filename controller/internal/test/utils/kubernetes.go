@@ -31,3 +31,21 @@ func MaybeCreate[O client.Object](c client.Client, object O, patch Patcher[O]) e
 
 	return c.Status().Patch(ctx, object, client.MergeFrom(original))
 }
+
+func MaybePatch[O client.Object](c client.Client, object O, patch Patcher[O]) error {
+	ctx := context.Background()
+	original := object.DeepCopyObject().(O)
+
+	err := c.Get(ctx, client.ObjectKey{Name: object.GetName(), Namespace: object.GetNamespace()}, object)
+	if err != nil {
+		return err
+	}
+
+	if patch == nil {
+		return nil
+	}
+
+	patch(object)
+
+	return c.Status().Patch(ctx, object, client.MergeFrom(original))
+}
