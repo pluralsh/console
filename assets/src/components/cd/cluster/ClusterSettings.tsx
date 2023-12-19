@@ -34,7 +34,6 @@ function ClusterSettingsModalInner({
 }: ComponentProps<typeof Modal> & {
   cluster: ClustersRowFragment
 }) {
-  console.log('cluster.tags', cluster.tags)
   const theme = useTheme()
   const initialTags: Record<string, string> = useMemo(
     () =>
