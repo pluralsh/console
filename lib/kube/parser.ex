@@ -112,7 +112,7 @@ defmodule Kube.Parser do
     }
   end
 
-  defp model_props(%{kind: _} = props, kind, api_version) do
+  defp model_props(%{} = props, kind, api_version) do
     other = Map.drop(props, ~w(kind api_version)a) |> Map.keys()
     other ++ [kind: kind, api_version: api_version]
   end

@@ -107,6 +107,8 @@ type RootQueryType {
 
   canary(namespace: String!, name: String!, serviceId: ID): Canary
 
+  upgradePlan(namespace: String!, name: String!, serviceId: ID): UpgradePlan
+
   configurationOverlays(namespace: String!): [ConfigurationOverlay]
 
   audits(after: String, first: Int, before: String, last: Int, repo: String): AuditConnection
@@ -2449,6 +2451,25 @@ type DaemonSetStatus {
 
 type DaemonSetSpec {
   strategy: DeploymentStrategy
+}
+
+type UpgradePlan {
+  metadata: Metadata!
+  status: UpgradePlanStatus!
+  spec: UpgradePlanSpec!
+  pods: [Pod]
+  raw: String!
+  events: [Event]
+}
+
+type UpgradePlanStatus {
+  conditions: [StatusCondition]
+}
+
+type UpgradePlanSpec {
+  version: String
+  cordon: Boolean
+  concurrency: Int
 }
 
 type Canary {
