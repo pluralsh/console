@@ -36,9 +36,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :version,    :string
     field :handle,     :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :service,    :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
-    field :kubeconfig, :kubeconfig_attributes
+    field :kubeconfig, :kubeconfig_attributes, description: "pass a kubeconfig for this cluster (DEPRECATED)"
     field :protect,    :boolean
     field :node_pools, list_of(:node_pool_attributes)
+    field :tags,       list_of(:tag_attributes)
   end
 
   input_object :cluster_service_attributes do

@@ -312,7 +312,7 @@ defmodule Console.Deployments.Clusters do
     start_transaction()
     |> add_operation(:cluster, fn _ ->
       get_cluster!(id)
-      |> Console.Repo.preload([:node_pools, :service])
+      |> Console.Repo.preload([:node_pools, :service, :tags])
       |> Cluster.changeset(attrs)
       |> allow(user, :write)
       |> when_ok(:update)

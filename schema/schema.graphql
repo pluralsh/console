@@ -1320,11 +1320,14 @@ input ClusterUpdateAttributes {
   "if you optionally want to reconfigure the git repository for the cluster service"
   service: ClusterServiceAttributes
 
+  "pass a kubeconfig for this cluster (DEPRECATED)"
   kubeconfig: KubeconfigAttributes
 
   protect: Boolean
 
   nodePools: [NodePoolAttributes]
+
+  tags: [TagAttributes]
 }
 
 input ClusterServiceAttributes {

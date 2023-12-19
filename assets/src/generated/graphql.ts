@@ -760,11 +760,13 @@ export type ClusterStatusInfo = {
 export type ClusterUpdateAttributes = {
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
+  /** pass a kubeconfig for this cluster (DEPRECATED) */
   kubeconfig?: InputMaybe<KubeconfigAttributes>;
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   /** if you optionally want to reconfigure the git repository for the cluster service */
   service?: InputMaybe<ClusterServiceAttributes>;
+  tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
   version?: InputMaybe<Scalars['String']['input']>;
 };
 
