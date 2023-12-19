@@ -139,6 +139,7 @@ endif
 
 .PHONY: helm
 helm: manifests kustomize helmify
+	@rm -rf ../charts/controller
 	$(KUSTOMIZE) build config/default | $(HELMIFY) controller
 	@mv controller ../charts
 
