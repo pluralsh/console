@@ -4,7 +4,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
   labels:
-    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/managed-by: helm
     app.kubernetes.io/part-of: plural-deployment-controller
     app.kubernetes.io/version: dev
   name: providers.deployments.plural.sh
