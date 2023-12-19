@@ -123,7 +123,7 @@ fix: golangci-lint ## fix issues found by linters
 
 .PHONY: test
 test: manifests generate genmock fmt vet envtest ## run tests
-	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(GOPATH)/bin -p path)" go test $$(go list ./... | grep -v /e2e)
+	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(GOPATH)/bin -p path)" go test $$(go list ./... | grep -v /e2e) -v
 
 .PHONY: e2e
 e2e: ## run e2e tests
