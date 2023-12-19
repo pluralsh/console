@@ -291,14 +291,12 @@ const ColActions = columnHelper.accessor(({ node }) => node, {
             label="Permissions"
             textValue="Permissions"
           />
-          {!cluster.self && (
-            <ListBoxItem
-              key={MenuItemKey.Settings}
-              leftContent={<GearTrainIcon />}
-              label="Settings"
-              textValue="Settings"
-            />
-          )}
+          <ListBoxItem
+            key={MenuItemKey.Settings}
+            leftContent={<GearTrainIcon />}
+            label="Settings"
+            textValue="Settings"
+          />
           {!protect && (
             <ListBoxItem
               key={MenuItemKey.Delete}
