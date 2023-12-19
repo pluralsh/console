@@ -23,6 +23,7 @@ require (
 
 // Tools
 require (
+	github.com/a8m/envsubst v1.4.2
 	github.com/golangci/golangci-lint v1.55.2
 	github.com/vektra/mockery/v2 v2.38.0
 	sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20231215020716-1b80b9629af8
@@ -260,7 +261,6 @@ require github.com/onsi/ginkgo/v2 v2.13.1
 
 require (
 	github.com/chigopher/pathlib v0.15.0 // indirect
-	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/go-errors/errors v1.4.2 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect

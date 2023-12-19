@@ -12,6 +12,7 @@ CONTROLLER_GEN ?= $(shell which controller-gen)
 ENVTEST ?= $(shell which setup-envtest)
 GOLANGCI_LINT ?= $(shell which golangci-lint)
 MOCKERY ?= $(shell which mockery)
+ENVSUBST ?= $(shell which envsubst)
 
 # Tool versions
 KUBEBUILDER_VERSION := 3.11.1
@@ -144,10 +145,14 @@ uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified 
 	$(KUSTOMIZE) build config/crd | $(KUBECTL) delete --ignore-not-found=$(ignore-not-found) -f -
 
 .PHONY: deploy
-deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	@echo asd > /tmp/config.env
-	$(KUSTOMIZE) build config/default | $(KUBECTL) apply -f -
-	@rm /tmp/config.env
+deploy: manifests kustomize envsubst ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+ifndef PLURAL_CONSOLE_URL
+$(error $$PLURAL_CONSOLE_URL environment variable not set)
+endif
+ifndef PLURAL_CONSOLE_TOKEN
+$(error $$PLURAL_CONSOLE_TOKEN environment variable not set)
+endif
+	$(KUSTOMIZE) build config/default | $(ENVSUBST) | $(KUBECTL) apply -f -
 
 .PHONY: undeploy
 undeploy: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
@@ -183,6 +188,10 @@ envtest: --tool ## Download and install setup-envtest in the $GOPATH/bin
 .PHONY: mockery
 mockery: TOOL = mockery
 mockery: --tool
+
+.PHONY: envsubst
+envsubst: TOOL = envsubst
+envsubst: --tool
 
 .PHONY: kubebuilder
 kubebuilder: ## install kubebuilder
