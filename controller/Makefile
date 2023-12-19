@@ -139,7 +139,7 @@ endif
 
 .PHONY: helm
 helm: manifests kustomize helmify
-	@cd ../charts && $(KUSTOMIZE) build ../controller/config/default | $(HELMIFY) controller
+	$(KUSTOMIZE) build config/default | $(HELMIFY) -generate-defaults -image-pull-secrets -crd-dir ../charts/controller
 
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.

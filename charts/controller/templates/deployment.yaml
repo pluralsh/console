@@ -78,6 +78,7 @@ spec:
           }}
         securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
           | nindent 10 }}
+      imagePullSecrets: {{ .Values.imagePullSecrets | default list | toJson }}
       securityContext:
         runAsNonRoot: true
         seccompProfile:

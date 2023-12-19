@@ -46,6 +46,7 @@ controllerManager:
   replicas: 1
   serviceAccount:
     annotations: {}
+imagePullSecrets: []
 kubernetesClusterDomain: cluster.local
 secrets:
   consoleToken: ""
