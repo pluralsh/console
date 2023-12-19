@@ -26,9 +26,6 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	deploymentsv1alpha "github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/internal/client"
-	"github.com/pluralsh/console/controller/internal/types"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -37,7 +34,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	ctrlruntimezap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
-	//+kubebuilder:scaffold:imports
+
+	deploymentsv1alpha "github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/types"
 )
 
 var (
@@ -53,8 +53,6 @@ func init() {
 	utilruntime.Must(corev1.AddToScheme(scheme))
 
 	utilruntime.Must(deploymentsv1alpha.AddToScheme(scheme))
-
-	//+kubebuilder:scaffold:scheme
 }
 
 type controllerRunOptions struct {
@@ -122,8 +120,6 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-
-	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")

@@ -1,4 +1,6 @@
 ## Append samples of your project ##
 resources:
-- deployments_v1alpha1_cluster.yaml
-#+kubebuilder:scaffold:manifestskustomizesamples
+- provider_aws_readonly.yaml
+- git_repository.yaml
+- cluster_byok.yaml
+- service_deployment.yaml

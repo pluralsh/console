@@ -1,2 +1,8 @@
 resources:
 - manager.yaml
+- service_account.yaml
+
+secretGenerator:
+  - name: secrets
+    envs: [/tmp/config.env]
+    behavior: create

@@ -7,9 +7,17 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
   - secrets
   verbs:
   - get
+  - list
 - apiGroups:
   - deployments.plural.sh
   resources:
@@ -48,6 +56,12 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - gitrepositories/finalizers
+  verbs:
+  - update
 - apiGroups:
   - deployments.plural.sh
   resources:
@@ -94,6 +108,12 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - servicedeployments/finalizers
+  verbs:
+  - update
 - apiGroups:
   - deployments.plural.sh
   resources:
