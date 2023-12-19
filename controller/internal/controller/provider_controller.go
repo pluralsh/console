@@ -38,7 +38,7 @@ const (
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=providers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=providers/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=providers/finalizers,verbs=update
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the v1alpha1.Provider closer to the desired state

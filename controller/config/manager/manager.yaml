@@ -32,8 +32,8 @@ spec:
             - /manager
           args:
             - --leader-elect
-            - --console-url="$(CONSOLE_URL)"
-            - --console-token=$CONSOLE_TOKEN
+            - --console-url=$(CONSOLE_URL)
+            - --console-token=$(CONSOLE_TOKEN)
           image: deployment-controller:latest
           imagePullPolicy: Never
           name: manager
