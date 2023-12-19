@@ -30,93 +30,78 @@ func sanitizeClusterStatus(status v1alpha1.ClusterStatus) v1alpha1.ClusterStatus
 	return status
 }
 
-var _ = Describe("Cluster Controller", func() {
-	Context("When reconciling a resource", func() {
+var _ = Describe("Cluster Controller", Ordered, func() {
+	Context("When creating a resource", func() {
 		const (
-			clusterName       = "test-cluster"
-			clusterConsoleID  = "12345-67890"
-			providerName      = "test-provider"
+			awsProviderName   = "aws-test-provider"
 			providerConsoleID = "12345-67890"
+			awsClusterName    = "aws-test-cluster"
+			byokClusterName   = "byok-test-cluster"
+			clusterConsoleID  = "12345-67890"
 		)
 
 		ctx := context.Background()
-		typeNamespacedName := types.NamespacedName{
-			Name:      clusterName,
-			Namespace: "default",
-		}
+		awsNamespacedName := types.NamespacedName{Name: awsClusterName, Namespace: "default"}
+		byokNamespacedName := types.NamespacedName{Name: awsClusterName, Namespace: "default"}
 
-		BeforeEach(func() {
-			By("creating the custom resource for the Kind Cluster")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      clusterName,
-					Namespace: "default",
-				},
-				Spec: v1alpha1.ClusterSpec{
-					Handle:      lo.ToPtr(clusterName),
-					Version:     lo.ToPtr("1.24"),
-					Cloud:       "aws",
-					ProviderRef: &corev1.ObjectReference{Name: providerName},
-				},
-			}, nil)).To(Succeed())
-
-			By("creating the custom resource for the Kind Provider")
+		BeforeAll(func() {
+			By("creating AWS provider")
 			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Provider{
-				ObjectMeta: metav1.ObjectMeta{Name: providerName},
+				ObjectMeta: metav1.ObjectMeta{Name: awsProviderName},
 				Spec: v1alpha1.ProviderSpec{
 					Cloud: "aws",
-					Name:  providerName,
+					Name:  awsProviderName,
 				},
 			}, func(p *v1alpha1.Provider) {
 				p.Status.ID = lo.ToPtr(providerConsoleID)
 			})).To(Succeed())
-		})
 
-		AfterEach(func() {
-			resource := &v1alpha1.Cluster{}
-			err := k8sClient.Get(ctx, typeNamespacedName, resource)
-			Expect(err).NotTo(HaveOccurred())
-
-			By("Cleanup the specific resource instance Cluster")
-			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
-		})
-
-		It("should successfully reconcile the resource", func() {
-			By("Reconciling the created resource")
-			test := struct {
-				returnGetClusterByHandle      *gqlclient.ClusterFragment
-				returnErrorGetClusterByHandle error
-				returnIsClusterExisting       bool
-				returnCreateCluster           *gqlclient.ClusterFragment
-				returnErrorCreateCluster      error
-				expectedStatus                v1alpha1.ClusterStatus
-			}{
-				returnGetClusterByHandle:      nil,
-				returnErrorGetClusterByHandle: errors.NewNotFound(schema.GroupResource{}, clusterName),
-				returnIsClusterExisting:       false,
-				returnCreateCluster:           &gqlclient.ClusterFragment{ID: clusterConsoleID},
-				expectedStatus: v1alpha1.ClusterStatus{
-					ID:  lo.ToPtr(clusterConsoleID),
-					SHA: lo.ToPtr("DU5PTA62PGOS35CPPCNSRG6PGXUUIWTXVBK5BFXCCGCAAM2K6HYA===="),
-					Conditions: []metav1.Condition{
-						{
-							Type:   v1alpha1.ReadonlyConditionType.String(),
-							Status: metav1.ConditionFalse,
-							Reason: v1alpha1.ReadonlyConditionReason.String(),
-						},
-						{
-							Type:   v1alpha1.ReadyConditionType.String(),
-							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.ReadyConditionReason.String(),
-						},
-					},
+			By("creating AWS cluster")
+			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      awsClusterName,
+					Namespace: "default",
 				},
-			}
+				Spec: v1alpha1.ClusterSpec{
+					Handle:      lo.ToPtr(awsClusterName),
+					Version:     lo.ToPtr("1.24"),
+					Cloud:       "aws",
+					ProviderRef: &corev1.ObjectReference{Name: awsProviderName},
+				},
+			}, nil)).To(Succeed())
 
+			By("creating BYOK cluster")
+			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      byokClusterName,
+					Namespace: "default",
+				},
+				Spec: v1alpha1.ClusterSpec{
+					Handle: lo.ToPtr(byokClusterName),
+					Cloud:  "byok",
+				},
+			}, nil)).To(Succeed())
+		})
+
+		AfterAll(func() {
+			awsCluster := &v1alpha1.Cluster{}
+			err := k8sClient.Get(ctx, awsNamespacedName, awsCluster)
+			Expect(err).NotTo(HaveOccurred())
+			By("Cleanup the specific resource instance Cluster")
+			Expect(k8sClient.Delete(ctx, awsCluster)).To(Succeed())
+
+			byokCluster := &v1alpha1.Cluster{}
+			err = k8sClient.Get(ctx, byokNamespacedName, byokCluster)
+			Expect(err).NotTo(HaveOccurred())
+			By("cleanup BYOK cluster")
+			Expect(k8sClient.Delete(ctx, byokCluster)).To(Succeed())
+		})
+
+		It("should successfully reconcile AWS cluster", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(test.returnGetClusterByHandle, test.returnErrorGetClusterByHandle)
-			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(test.returnIsClusterExisting)
-			fakeConsoleClient.On("CreateCluster", mock.Anything).Return(test.returnCreateCluster, test.returnErrorCreateCluster)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(nil, errors.NewNotFound(schema.GroupResource{}, awsClusterName))
+			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(false)
+			fakeConsoleClient.On("CreateCluster", mock.Anything).Return(&gqlclient.ClusterFragment{ID: clusterConsoleID}, nil)
 
 			controllerReconciler := &ClusterReconciler{
 				Client:        k8sClient,
@@ -124,17 +109,64 @@ var _ = Describe("Cluster Controller", func() {
 				ConsoleClient: fakeConsoleClient,
 			}
 
-			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
-				NamespacedName: typeNamespacedName,
-			})
-
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: awsNamespacedName})
 			Expect(err).NotTo(HaveOccurred())
 
 			cluster := &v1alpha1.Cluster{}
-			err = k8sClient.Get(ctx, typeNamespacedName, cluster)
-
+			err = k8sClient.Get(ctx, awsNamespacedName, cluster)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(test.expectedStatus)))
+			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
+				ID:  lo.ToPtr(clusterConsoleID),
+				SHA: lo.ToPtr("CI5QLJIIR62PCOX2PVNBUEUUO2XXJ7SYZNQE2ZNY7N3F4ADISJNA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:   v1alpha1.ReadonlyConditionType.String(),
+						Status: metav1.ConditionFalse,
+						Reason: v1alpha1.ReadonlyConditionReason.String(),
+					},
+					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.ReadyConditionReason.String(),
+					},
+				},
+			})))
+		})
+
+		It("should successfully reconcile BYOK cluster", func() {
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(nil, errors.NewNotFound(schema.GroupResource{}, awsClusterName))
+			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(false)
+			fakeConsoleClient.On("CreateCluster", mock.Anything).Return(&gqlclient.ClusterFragment{ID: clusterConsoleID}, nil)
+
+			controllerReconciler := &ClusterReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: byokNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			cluster := &v1alpha1.Cluster{}
+			err = k8sClient.Get(ctx, awsNamespacedName, cluster)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
+				ID:  lo.ToPtr(clusterConsoleID),
+				SHA: lo.ToPtr("CI5QLJIIR62PCOX2PVNBUEUUO2XXJ7SYZNQE2ZNY7N3F4ADISJNA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:   v1alpha1.ReadonlyConditionType.String(),
+						Status: metav1.ConditionFalse,
+						Reason: v1alpha1.ReadonlyConditionReason.String(),
+					},
+					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.ReadyConditionReason.String(),
+					},
+				},
+			})))
 		})
 	})
 })
