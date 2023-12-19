@@ -27,6 +27,11 @@ fragment Ingress on Ingress {
       }
     }
   }
+  certificates {
+    metadata {
+      name
+    }
+  }
   raw
 }
 
