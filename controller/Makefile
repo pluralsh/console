@@ -8,6 +8,7 @@ IMG ?= deployment-controller:latest
 # Tool binaries
 KUBECTL ?= $(shell which kubectl)
 KUSTOMIZE ?= $(shell which kustomize)
+HELMIFY ?= $(shell which helmify)
 CONTROLLER_GEN ?= $(shell which controller-gen)
 ENVTEST ?= $(shell which setup-envtest)
 GOLANGCI_LINT ?= $(shell which golangci-lint)
@@ -136,6 +137,11 @@ ifndef ignore-not-found
   ignore-not-found = false
 endif
 
+.PHONY: helm
+helm: manifests kustomize helmify
+	$(KUSTOMIZE) build config/default | $(HELMIFY) controller
+	@mv controller ../charts
+
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | $(KUBECTL) apply -f -
@@ -146,12 +152,12 @@ uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified 
 
 .PHONY: deploy
 deploy: manifests kustomize envsubst ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-ifndef PLURAL_CONSOLE_URL
-$(error $$PLURAL_CONSOLE_URL environment variable not set)
-endif
-ifndef PLURAL_CONSOLE_TOKEN
-$(error $$PLURAL_CONSOLE_TOKEN environment variable not set)
-endif
+	ifndef PLURAL_CONSOLE_URL
+	$(error $$PLURAL_CONSOLE_URL environment variable not set)
+	endif
+	ifndef PLURAL_CONSOLE_TOKEN
+	$(error $$PLURAL_CONSOLE_TOKEN environment variable not set)
+	endif
 	$(KUSTOMIZE) build config/default | $(ENVSUBST) | $(KUBECTL) apply -f -
 
 .PHONY: undeploy
@@ -176,6 +182,10 @@ controller-gen: --tool ## Download and install controller-gen in the $GOPATH/bin
 .PHONY: kustomize
 kustomize: TOOL = kustomize
 kustomize: --tool ## Download and install kustomize in the $GOPATH/bin
+
+.PHONY: helmify
+helmify: TOOL = helmify
+helmify: --tool ## Download and install helmify in the $GOPATH/bin
 
 .PHONY: golangci-lint
 golangci-lint: TOOL = golangci-lint

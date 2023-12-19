@@ -24,6 +24,7 @@ require (
 // Tools
 require (
 	github.com/a8m/envsubst v1.4.2
+	github.com/arttor/helmify v0.4.10
 	github.com/golangci/golangci-lint v1.55.2
 	github.com/vektra/mockery/v2 v2.38.0
 	sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20231215020716-1b80b9629af8
@@ -123,7 +124,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
-	github.com/imdario/mergo v0.3.13 // indirect
+	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jgautheron/goconst v1.6.0 // indirect
 	github.com/jingyugao/rowserrcheck v1.1.1 // indirect
@@ -260,6 +261,7 @@ require (
 require github.com/onsi/ginkgo/v2 v2.13.1
 
 require (
+	dario.cat/mergo v1.0.0 // indirect
 	github.com/chigopher/pathlib v0.15.0 // indirect
 	github.com/go-errors/errors v1.4.2 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
