@@ -10,7 +10,7 @@ spec:
   replicas: {{ .Values.controllerManager.replicas }}
   selector:
     matchLabels:
-      app.kubernetes.io/managed-by: kustomize
+      app.kubernetes.io/managed-by: helm
       app.kubernetes.io/part-of: plural-deployment-controller
       app.kubernetes.io/version: dev
     {{- include "controller.selectorLabels" . | nindent 6 }}
@@ -18,7 +18,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/component: manager
-        app.kubernetes.io/managed-by: kustomize
+        app.kubernetes.io/managed-by: helm
         app.kubernetes.io/name: controller-manager
         app.kubernetes.io/part-of: plural-deployment-controller
         app.kubernetes.io/version: dev
