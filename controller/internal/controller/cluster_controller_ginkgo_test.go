@@ -18,6 +18,7 @@ import (
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/test/mocks"
+	"github.com/pluralsh/console/controller/internal/test/utils"
 )
 
 func sanitizeClusterStatus(status v1alpha1.ClusterStatus) v1alpha1.ClusterStatus {
@@ -39,50 +40,36 @@ var _ = Describe("Cluster Controller", func() {
 		)
 
 		ctx := context.Background()
-
 		typeNamespacedName := types.NamespacedName{
 			Name:      clusterName,
 			Namespace: "default",
 		}
 
-		cluster := &v1alpha1.Cluster{}
-		provider := &v1alpha1.Provider{}
-
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind Cluster")
-			err := k8sClient.Get(ctx, typeNamespacedName, cluster)
-			if err != nil && errors.IsNotFound(err) {
-				resource := &v1alpha1.Cluster{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      clusterName,
-						Namespace: "default",
-					},
-					Spec: v1alpha1.ClusterSpec{
-						Handle:      lo.ToPtr(clusterName),
-						Version:     lo.ToPtr("1.24"),
-						Cloud:       "aws",
-						ProviderRef: &corev1.ObjectReference{Name: providerName},
-					},
-				}
-				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
-			}
+			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      clusterName,
+					Namespace: "default",
+				},
+				Spec: v1alpha1.ClusterSpec{
+					Handle:      lo.ToPtr(clusterName),
+					Version:     lo.ToPtr("1.24"),
+					Cloud:       "aws",
+					ProviderRef: &corev1.ObjectReference{Name: providerName},
+				},
+			}, nil)).To(Succeed())
 
 			By("creating the custom resource for the Kind Provider")
-			err = k8sClient.Get(ctx, types.NamespacedName{Name: providerName}, provider)
-			if err != nil && errors.IsNotFound(err) {
-				resource := &v1alpha1.Provider{
-					ObjectMeta: metav1.ObjectMeta{Name: providerName},
-					Spec: v1alpha1.ProviderSpec{
-						Cloud: "aws",
-						Name:  providerName,
-					},
-					Status: v1alpha1.ProviderStatus{ID: lo.ToPtr(providerConsoleID)},
-				}
-				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
-				Expect(k8sClient.Get(ctx, types.NamespacedName{Name: providerName}, provider)).To(Succeed())
-				provider.Status = v1alpha1.ProviderStatus{ID: lo.ToPtr(providerConsoleID)}
-				Expect(k8sClient.Status().Update(ctx, provider)).To(Succeed())
-			}
+			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Provider{
+				ObjectMeta: metav1.ObjectMeta{Name: providerName},
+				Spec: v1alpha1.ProviderSpec{
+					Cloud: "aws",
+					Name:  providerName,
+				},
+			}, func(p *v1alpha1.Provider) {
+				p.Status.ID = lo.ToPtr(providerConsoleID)
+			})).To(Succeed())
 		})
 
 		AfterEach(func() {

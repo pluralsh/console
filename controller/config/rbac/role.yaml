@@ -1,18 +1,15 @@
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  labels:
-    app.kubernetes.io/name: clusterrole
-    app.kubernetes.io/instance: manager-role
-    app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: test
-    app.kubernetes.io/part-of: test
-    app.kubernetes.io/managed-by: kustomize
   name: manager-role
 rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
 - apiGroups:
   - deployments.plural.sh
   resources:
@@ -71,6 +68,12 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - providers/finalizers
+  verbs:
+  - update
 - apiGroups:
   - deployments.plural.sh
   resources:

@@ -35,11 +35,14 @@ const (
 	ProviderProtectionFinalizerName = "providers.deployments.plural.sh/provider-protection"
 )
 
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=providers,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=deployments.plural.sh,resources=providers/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=providers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=providers/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=providers/finalizers,verbs=update
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get
 
-// Reconcile ...
-// TODO: Add kubebuilder rbac annotation
+// Reconcile is part of the main kubernetes reconciliation loop which aims to
+// move the current state of the v1alpha1.Provider closer to the desired state
+// and syncs it with the Console API state.
 func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	log := log.FromContext(ctx)
 	log.Info("Reconciling")
