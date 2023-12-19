@@ -204,6 +204,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   def list_pods_for_node(%{metadata: %{name:  name}}) do
     Core.list_pod_for_all_namespaces!(field_selector: "spec.nodeName=#{name}")
     |> Kube.Utils.run()
+    |> IO.inspect()
     |> items_response()
   end
 
