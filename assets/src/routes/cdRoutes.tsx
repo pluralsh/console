@@ -30,6 +30,7 @@ import ComponentInfo from 'components/component/ComponentInfo'
 import ComponentEvents from 'components/component/ComponentEvents'
 import ComponentRaw from 'components/component/ComponentRaw'
 import ComponentMetrics from 'components/component/ComponentMetrics'
+import ComponentCertificates from 'components/component/ComponentCertificates'
 
 import { GlobalSettings } from 'components/cd/globalSettings/GlobalSettings'
 import { GlobalSettingsPermissions } from 'components/cd/globalSettings/GlobalSettingsPermissions'
@@ -118,6 +119,10 @@ export const componentRoutes = (
     <Route
       path="raw"
       element={<ComponentRaw />}
+    />
+    <Route
+      path="certificates"
+      element={<ComponentCertificates />}
     />
   </Route>
 )
