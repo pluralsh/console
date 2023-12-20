@@ -18,6 +18,7 @@ ENVTEST ?= $(shell which setup-envtest)
 GOLANGCI_LINT ?= $(shell which golangci-lint)
 MOCKERY ?= $(shell which mockery)
 ENVSUBST ?= $(shell which envsubst)
+HELM ?= $(shell which helm)
 
 # Tool versions
 KUBEBUILDER_VERSION := 3.11.1
@@ -103,11 +104,11 @@ docker-buildx: ## Build and push docker image for the manager for cross-platform
 
 .PHONY: manifests
 manifests: controller-gen ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	@$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
 generate: controller-gen ## generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+	@$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: genmock
 genmock: mockery ## generates mocks before running tests
@@ -158,9 +159,21 @@ install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~
 uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/crd | $(KUBECTL) delete --ignore-not-found=$(ignore-not-found) -f -
 
+.PHONY: uninstall-helm
+uninstall-helm: NAMESPACE := console
+uninstall-helm: RELEASE_NAME := controller-manager
+uninstall-helm: manifests
+	@$(HELM) uninstall --namespace $(NAMESPACE) $(RELEASE_NAME)
+
 .PHONY: deploy
 deploy: manifests kustomize envsubst ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | $(ENVSUBST) | $(KUBECTL) apply -f -
+
+.PHONY: deploy-helm
+deploy-helm: NAMESPACE := console
+deploy-helm: RELEASE_NAME := controller-manager
+deploy-helm: manifests
+	@$(HELM) upgrade --install --create-namespace --namespace $(NAMESPACE) --set consoleUrl=$(PLURAL_CONSOLE_URL) $(RELEASE_NAME) ../charts/controller
 
 .PHONY: undeploy
 undeploy: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
