@@ -10,6 +10,7 @@ import {
 import { Priority, useRegisterActions } from 'kbar'
 
 import {
+  ClusterTinyFragment,
   NamespacedName,
   useCreateServiceDeploymentMutation,
   useGitRepositoriesQuery,
@@ -99,14 +100,18 @@ export function DeployServiceModal({
   open,
   onClose,
   refetch,
+  cluster: clusterProp,
 }: {
   open: boolean
   onClose: () => void
   refetch: () => void
+  cluster?: Nullable<ClusterTinyFragment>
 }) {
   const theme = useTheme()
   const [formState, setFormState] = useState<FormState>(FormState.Initial)
-  const [clusterId, setClusterId] = useState('')
+  const [clusterId, setClusterId] = useState(
+    clusterProp?.id ? clusterProp?.id : ''
+  )
   const [name, setName] = useState('')
   const [repositoryId, setRepositoryId] = useState('')
   const [helmRepository, setHelmRepository] = useState<NamespacedName | null>(
@@ -253,7 +258,7 @@ export function DeployServiceModal({
   return (
     <ModalAlt
       css={{ '&& .form': { gap: 0 } }}
-      header="Deploy service"
+      header={`Deploy service${clusterProp ? ` to ${clusterProp.name}` : ''}`}
       open={open}
       portal
       onClose={onClose}
@@ -386,6 +391,7 @@ export function DeployServiceModal({
               setNamespace,
               clusterId,
               setClusterId,
+              showClusterSelector: !clusterProp,
             }}
           />
         ) : formState === FormState.Repository ? (
@@ -458,7 +464,13 @@ export function DeployServiceModal({
   )
 }
 
-export function DeployService({ refetch }: { refetch: () => void }) {
+export function DeployService({
+  refetch,
+  cluster,
+}: {
+  refetch: () => void
+  cluster?: ClusterTinyFragment
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const kbarActions = useMemo(
     () => [
@@ -466,7 +478,7 @@ export function DeployService({ refetch }: { refetch: () => void }) {
         section: PaletteSection.Actions,
         id: `deploy-service`,
         priority: Priority.HIGH,
-        name: `Deploy new service`,
+        name: `Deploy new service${cluster ? ` to ${cluster.name}` : ''}`,
         icon: <GitPullIcon />,
         shortcut: [],
         perform: () => {
@@ -474,10 +486,10 @@ export function DeployService({ refetch }: { refetch: () => void }) {
         },
       },
     ],
-    []
+    [cluster]
   )
 
-  useRegisterActions(kbarActions)
+  useRegisterActions(kbarActions, [kbarActions])
 
   return (
     <>
@@ -491,6 +503,7 @@ export function DeployService({ refetch }: { refetch: () => void }) {
       </Button>
       <ModalMountTransition open={isOpen}>
         <DeployServiceModal
+          cluster={cluster}
           refetch={refetch}
           open={isOpen}
           onClose={() => setIsOpen(false)}
