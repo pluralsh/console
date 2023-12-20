@@ -1,0 +1,73 @@
+name: CD / Controller
+
+on:
+  pull_request:
+    branches:
+      - "master"
+    paths:
+      - "controller/**"
+  push:
+    tags:
+    - 'v*.*.*'
+
+permissions:
+  contents: read
+
+env:
+  GOPATH: /home/runner/go/
+  PATH: $PATH:$GOPATH/bin
+  GOPROXY: "https://proxy.golang.org"
+
+jobs:
+  test:
+    name: Unit test
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version-file: go.mod
+        check-latest: true
+    - name: Test
+      run: make test
+  publish-docker:
+    name: Build and push controller container
+    runs-on: ubuntu-20.04
+    needs: [ test ]
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      packages: 'write'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: |
+          ghcr.io/pluralsh/deployment-controller
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: "."
+        file: "./Dockerfile"
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        platforms: linux/amd64,linux/arm64
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          GIT_COMMIT=${{ github.sha }}
+          VERSION=${{ steps.meta.outputs.version }}
