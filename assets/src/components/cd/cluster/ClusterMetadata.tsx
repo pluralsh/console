@@ -213,7 +213,7 @@ function ClusterStatusChip({
           phase?.toLowerCase() === 'provisioned'
             ? 'success'
             : failureReason || failureMessage
-            ? 'error'
+            ? 'danger'
             : 'neutral'
         }
       >

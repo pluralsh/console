@@ -15,9 +15,8 @@ const WS_URL = process.env.BASE_URL
   : 'wss://console.plural.sh'
 
 // https://vitejs.dev/config/
-export default mergeConfig(
-  vitestConfig,
-  defineConfig({
+export default defineConfig(() =>
+  mergeConfig(vitestConfig as any, {
     plugins: [
       basicSsl(),
       react({

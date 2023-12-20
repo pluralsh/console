@@ -55,7 +55,7 @@ export const ColStatus = columnHelper.accessor((row) => row?.status, {
             lStatus === 'true'
               ? 'success'
               : lStatus === 'false'
-              ? 'error'
+              ? 'danger'
               : 'neutral'
           }
         >

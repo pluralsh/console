@@ -29,7 +29,7 @@ function QueryEmptyState({ query, setQuery }) {
     <EmptyState
       message="No add-ons found."
       description={query ? `"${query}" did not match any add-ons.` : ''}
-      width={600}
+      css={{ width: 600 }}
     >
       {query && (
         <Button

@@ -23,7 +23,7 @@ export const statusToBorder = {
 export const statusToSeverity = {
   [Readiness.Ready]: 'success',
   [Readiness.InProgress]: 'warning',
-  [Readiness.Failed]: 'error',
+  [Readiness.Failed]: 'danger',
   [Readiness.Complete]: 'success',
 } as const satisfies Record<ReadinessT, ComponentProps<typeof Chip>['severity']>
 
@@ -44,7 +44,7 @@ const stateToDisplay = {
 const stateToSeverity = {
   [ComponentState.Running]: 'success',
   [ComponentState.Pending]: 'warning',
-  [ComponentState.Failed]: 'error',
+  [ComponentState.Failed]: 'danger',
   [ComponentState.Paused]: 'info',
 } as const satisfies Record<
   ComponentState,
