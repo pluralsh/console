@@ -2,7 +2,6 @@ import { Chip, EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { CertificateFragment } from 'generated/graphql'
-import { produce } from 'immer'
 import { ComponentProps, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -24,51 +23,20 @@ export const toSeverity = {
   unhealthy: 'danger',
 } as const satisfies Record<string, ComponentProps<typeof Chip>['severity']>
 
-const ColStatus = columnHelper.accessor((row) => row.status?.conditions, {
-  id: 'status',
-  header: 'Status',
-  meta: { gridTemplate: 'minmax(max-content, 1fr)' },
-  cell: function Cell({ row }) {
-    const theme = useTheme()
-
-    console.log(row?.original)
-    const conditions = row.original?.status?.conditions ?? []
-
-    return (
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.xsmall,
-        }}
-      >
-        {conditions.map(
-          (c) =>
-            c && (
-              <Chip
-                severity={toSeverity[c.type.toLowerCase()] || 'neutral'}
-                toolTip={c.message || undefined}
-              >
-                {c.type}
-              </Chip>
-            )
-        )}
-      </div>
-    )
-  },
-})
-
-const ColStatusMessage = columnHelper.accessor(
-  (row) => row.status?.conditions,
+const ColStatus = columnHelper.accessor(
+  (row) =>
+    row?.status?.conditions?.find?.((c) => c?.type?.toLowerCase() === 'ready')
+      ?.status,
   {
-    id: 'statusMsg',
-    header: 'Status message',
+    id: 'status',
+    header: 'Status',
     meta: { gridTemplate: 'minmax(max-content, 1fr)' },
-    cell: function Cell({ row }) {
+    cell: function Cell({ getValue }) {
       const theme = useTheme()
 
-      console.log(row?.original)
-      const conditions = row.original?.status?.conditions ?? []
+      const status = getValue()?.toLowerCase()
+
+      console.log('status')
 
       return (
         <div
@@ -78,7 +46,49 @@ const ColStatusMessage = columnHelper.accessor(
             gap: theme.spacing.xsmall,
           }}
         >
-          {conditions.map((c) => c && <p>{c?.message}</p>)}
+          <Chip
+            severity={
+              status === 'true'
+                ? 'success'
+                : status === 'false'
+                ? 'danger'
+                : 'neutral'
+            }
+          >
+            {status === 'true'
+              ? 'Ready'
+              : status === 'false'
+              ? 'Unhealthy'
+              : 'Unknown'}
+          </Chip>
+        </div>
+      )
+    },
+  }
+)
+
+const ColStatusMessage = columnHelper.accessor(
+  (row) =>
+    row?.status?.conditions?.find?.((c) => c?.type?.toLowerCase() === 'ready')
+      ?.message,
+  {
+    id: 'statusMsg',
+    header: 'Status message',
+    meta: { gridTemplate: 'minmax(max-content, 1fr)' },
+    cell: function Cell({ getValue }) {
+      const theme = useTheme()
+
+      const message = getValue()
+
+      return (
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.xsmall,
+          }}
+        >
+          {message && <p>{message}</p>}
         </div>
       )
     },
