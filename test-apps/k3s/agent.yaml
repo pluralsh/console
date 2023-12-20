@@ -6,6 +6,9 @@ metadata:
 spec:
   concurrency: 1
   cordon: true
+  drain:
+    ignoreDaemonSets: true
+    force: true
   nodeSelector:
     matchExpressions:
     - key: node-role.kubernetes.io/control-plane
