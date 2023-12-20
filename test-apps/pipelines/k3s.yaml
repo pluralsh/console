@@ -1,0 +1,18 @@
+name: k3s-update
+stages:
+- name: dev
+  services:
+  - name: mjg-k3s-dev/upgrade-plan
+- name: prod
+  services:
+  - name: mjg-k3s/upgrade-plan
+    criteria:
+      source: mjg-k3s-dev/upgrade-plan
+      secrets:
+      - version
+edges:
+- from: dev
+  to: prod
+  gates:
+  - name: Approve
+    type: approval
