@@ -4,11 +4,13 @@ import {
   GitHubLogoIcon,
   Input,
   ListBoxItem,
+  Select,
 } from '@pluralsh/design-system'
 import { ChangeEvent, EventHandler, useMemo, useState } from 'react'
 import { compareItems, rankItem } from '@tanstack/match-sorter-utils'
 import useOnUnMount from 'components/hooks/useOnUnMount'
 import { InlineLink } from 'components/utils/typography/InlineLink'
+import { useGitRepositoryQuery } from 'generated/graphql'
 
 export function DeployServiceSettingsGit({
   repos,
@@ -34,6 +36,8 @@ export function DeployServiceSettingsGit({
       setGitRef('')
     }
   })
+
+  const { data } = useGitRepositoryQuery({ variables: { id: repositoryId } })
 
   return (
     <>
@@ -65,8 +69,9 @@ export function DeployServiceSettingsGit({
         <>
           <ServiceGitRefField
             required
+            refs={data?.gitRepository?.refs}
             value={gitRef}
-            onChange={(e) => setGitRef(e.currentTarget.value)}
+            setValue={setGitRef}
           />
           <ServiceGitFolderField
             required
@@ -80,13 +85,15 @@ export function DeployServiceSettingsGit({
 }
 
 export function ServiceGitRefField({
+  refs,
   value,
-  onChange,
+  setValue,
   required,
 }: {
   value: string
-  onChange: EventHandler<ChangeEvent<HTMLInputElement>>
+  setValue: (ref: string) => void
   required?: boolean
+  refs?: string[] | null
 }) {
   return (
     <FormField
@@ -94,10 +101,26 @@ export function ServiceGitRefField({
       required={required}
       hint="Branch name, tag name, or commit SHA"
     >
-      <Input
-        value={value}
-        onChange={onChange}
-      />
+      {refs && (
+        <Select
+          label="Select a branch or tag"
+          selectedKey={value}
+          onSelectionChange={(ref) => setValue(ref as string)}
+        >
+          {(refs || []).map((ref) => (
+            <ListBoxItem
+              key={ref}
+              label={ref}
+            />
+          ))}
+        </Select>
+      )}
+      {!refs && (
+        <Input
+          value={value}
+          onChange={(e) => setValue(e.currentTarget.value)}
+        />
+      )}
     </FormField>
   )
 }

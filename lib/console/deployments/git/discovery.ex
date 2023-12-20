@@ -23,6 +23,11 @@ defmodule Console.Deployments.Git.Discovery do
       do: Agent.addons(pid)
   end
 
+  def refs(%GitRepository{} = repo) do
+    with {:ok, pid} <- find(repo),
+      do: Agent.refs(pid)
+  end
+
   def find(%GitRepository{} = repo) do
     case start(repo) do
       {:ok, pid} -> {:ok, pid}

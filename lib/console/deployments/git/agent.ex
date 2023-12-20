@@ -24,6 +24,8 @@ defmodule Console.Deployments.Git.Agent do
 
   def docs(pid, %Service{} = svc), do: GenServer.call(pid, {:docs, svc}, 30_000)
 
+  def refs(pid), do: GenServer.call(pid, :refs, 30_000)
+
   def addons(pid), do: GenServer.call(pid, :addons, 30_000)
 
   def start(%GitRepository{} = repo) do
@@ -61,6 +63,10 @@ defmodule Console.Deployments.Git.Agent do
       err -> {:reply, err, state}
     end
   end
+
+  def handle_call(:refs, _, %State{cache: %Cache{heads: %{} = heads}} = state),
+    do: {:reply, Map.keys(heads), state}
+  def handle_call(:refs, _, state), do: {:reply, [], state}
 
   def handle_call({:fetch, %Service{git: %{ref: ref, folder: path}} = svc}, _, %State{cache: cache} = state) do
     svc = Console.Repo.preload(svc, [:revision])
