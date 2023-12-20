@@ -15,6 +15,7 @@ permissions:
 
 env:
   GOPATH: /home/runner/go
+  GOBIN: /home/runner/go/bin
   GOPROXY: "https://proxy.golang.org"
 
 jobs:
@@ -36,8 +37,10 @@ jobs:
         cache: true
     - name: Download dependencies
       run: go mod download
+    - name: List Go deps
+      run: ls $GOBIN
     - name: Test
-      run: PATH=$PATH:$GOPATH/bin make test
+      run: make test
   publish-docker:
     name: Build and push controller container
     runs-on: ubuntu-20.04
