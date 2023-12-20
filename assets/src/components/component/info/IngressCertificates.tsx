@@ -1,10 +1,10 @@
-import { Chip, EmptyState, Table } from '@pluralsh/design-system'
+import { Chip, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { CertificateFragment } from 'generated/graphql'
-import { ComponentProps, useMemo } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { ComponentProps } from 'react'
 import { useTheme } from 'styled-components'
+
+import { InfoSectionH3 } from './common'
 
 const columnHelper = createColumnHelper<CertificateFragment>()
 
@@ -111,30 +111,28 @@ function CertificatesTable({
   )
 }
 
-export default function ComponentCertificates() {
-  const { data } = useOutletContext<any>()
-
-  // To avoid mapping between component types and fields of data returned by API
-  // we are picking first available value from API object for now.
-  const certificates = useMemo(
-    () =>
-      data
-        ? (Object.values(data).find((value) => value !== undefined) as any)
-            ?.certificates ?? null
-        : null,
-    [data]
-  )
+export default function IngressCertificates({
+  certificates,
+}: {
+  certificates: Nullable<Nullable<CertificateFragment>[]>
+}) {
+  const theme = useTheme()
 
   if (!certificates) {
-    return <EmptyState message="This component has no certificates" />
+    return null
   }
 
   return (
-    <FullHeightTableWrap>
-      <CertificatesTable
-        certificates={certificates}
-        css={{ maxHeight: '100%' }}
-      />
-    </FullHeightTableWrap>
+    <>
+      <InfoSectionH3
+        css={{
+          marginBottom: theme.spacing.medium,
+          marginTop: theme.spacing.large,
+        }}
+      >
+        Certificates
+      </InfoSectionH3>
+      <CertificatesTable certificates={certificates} />
+    </>
   )
 }

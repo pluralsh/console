@@ -1,7 +1,7 @@
 import { useOutletContext } from 'react-router-dom'
 import { useMemo } from 'react'
 
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import Pods from './info/Pods'
 import Job from './info/Job'
@@ -48,6 +48,13 @@ function getInfo(kind: string): JSX.Element | undefined {
   }
 }
 
+const Section = styled.section((_) => ({
+  display: 'flex',
+  flexDirection: 'row',
+  flexBasis: '50%',
+  flexGrow: 1,
+}))
+
 export default function ComponentInfo() {
   const theme = useTheme()
   const {
@@ -76,28 +83,10 @@ export default function ComponentInfo() {
     >
       {hasPods(componentKind) && <Pods pods={value?.pods} />}
       <div css={{ display: 'flex', gap: theme.spacing.large }}>
-        {info && (
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'row',
-              flexBasis: '50%',
-              flexGrow: 1,
-            }}
-          >
-            {info}
-          </div>
-        )}
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'row',
-            flexBasis: '50%',
-            flexGrow: 1,
-          }}
-        >
+        {info && <Section>{info}</Section>}
+        <Section>
           <Metadata />
-        </div>
+        </Section>
       </div>
     </div>
   )

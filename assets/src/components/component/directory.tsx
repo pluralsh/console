@@ -22,9 +22,4 @@ export const directory: {
     label: 'Raw',
     path: 'raw',
   },
-  {
-    label: 'Certificates',
-    path: 'certificates',
-    onlyFor: ['ingress'],
-  },
 ]

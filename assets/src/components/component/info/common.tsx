@@ -19,4 +19,5 @@ export const PaddedCard = styled(Card)(({ theme }) => ({
 
 export const PropWideBold = styled(PropWide)({
   fontWeight: 600,
+  fontVariantNumeric: 'lining-nums',
 })
