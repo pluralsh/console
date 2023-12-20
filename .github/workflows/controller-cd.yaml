@@ -21,6 +21,10 @@ jobs:
   test:
     name: Unit test
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: controller
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -34,6 +38,10 @@ jobs:
   publish-docker:
     name: Build and push controller container
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: controller
     needs: [ test ]
     permissions:
       contents: 'read'
