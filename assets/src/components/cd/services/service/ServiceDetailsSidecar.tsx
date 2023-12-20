@@ -5,7 +5,6 @@ import {
   ServicePromotion,
 } from 'generated/graphql'
 import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
-import { toNiceVersion } from 'utils/semver'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
 import { useMemo } from 'react'
@@ -33,7 +32,7 @@ export function ServiceDetailsSidecar({
   if (!serviceDeployment) {
     return null
   }
-  const { id, name, version, status, cluster, git, helm } = serviceDeployment
+  const { id, name, status, cluster, git, helm } = serviceDeployment
 
   return (
     <>
@@ -52,9 +51,6 @@ export function ServiceDetailsSidecar({
       </div>
       <PropsContainer>
         {name && <Prop title="Service name"> {name}</Prop>}
-        {version && (
-          <Prop title="Current version">{toNiceVersion(version)}</Prop>
-        )}
         <Prop title="Status">
           <ServiceStatusChip status={status} />
         </Prop>
