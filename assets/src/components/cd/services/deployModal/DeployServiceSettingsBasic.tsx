@@ -9,6 +9,7 @@ export function DeployServiceSettingsBasic({
   setNamespace,
   clusterId,
   setClusterId,
+  showClusterSelector,
 }: {
   name: string
   setName: (name: string) => void
@@ -16,6 +17,7 @@ export function DeployServiceSettingsBasic({
   setNamespace: (namespace: string) => void
   clusterId: string
   setClusterId: (clusterId: string) => void
+  showClusterSelector: boolean
 }): any {
   const inputRef = useRef<HTMLInputElement>()
 
@@ -44,20 +46,22 @@ export function DeployServiceSettingsBasic({
           onChange={(e) => setNamespace(e.currentTarget.value)}
         />
       </FormField>
-      <FormField
-        required
-        label="Cluster"
-      >
-        <ClusterSelector
-          clusterId={clusterId}
-          allowDeselect={false}
-          onClusterChange={(c) => {
-            if (c?.id) {
-              setClusterId(c.id)
-            }
-          }}
-        />
-      </FormField>
+      {showClusterSelector && (
+        <FormField
+          required
+          label="Cluster"
+        >
+          <ClusterSelector
+            clusterId={clusterId}
+            allowDeselect={false}
+            onClusterChange={(c) => {
+              if (c?.id) {
+                setClusterId(c.id)
+              }
+            }}
+          />
+        </FormField>
+      )}
     </>
   )
 }

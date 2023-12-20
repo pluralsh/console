@@ -5,7 +5,7 @@ import {
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { Suspense, useMemo, useRef } from 'react'
+import { Suspense, useMemo, useRef, useState } from 'react'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import {
   Outlet,
@@ -29,8 +29,8 @@ import { useTheme } from 'styled-components'
 import { ClusterFragment, useClusterQuery } from '../../../generated/graphql'
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-
 import ClusterSelector from '../utils/ClusterSelector'
+import { DeployService } from '../services/deployModal/DeployService'
 
 import ClusterPermissions from './ClusterPermissions'
 import ClusterSettings from './ClusterSettings'
@@ -80,10 +80,11 @@ export default function Cluster() {
   const tabStateRef = useRef<any>(null)
   const { clusterId } = useParams<{ clusterId: string }>()
   const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab`)?.params?.tab || ''
+  const [refetchServices, setRefetchServices] = useState(() => () => {})
 
   const currentTab = directory.find(({ path }) => path === tab)
 
-  const { data, refetch } = useClusterQuery({
+  const { data, refetch: refetchCluster } = useClusterQuery({
     variables: { id: clusterId || '' },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
@@ -151,9 +152,16 @@ export default function Cluster() {
               justifyContent: 'end',
               display: 'flex',
               flexGrow: 1,
+              flexShrink: 0,
               gap: theme.spacing.small,
             }}
           >
+            {tab === 'services' && (
+              <DeployService
+                refetch={refetchServices}
+                cluster={cluster}
+              />
+            )}
             <ClusterPermissions cluster={cluster} />
             {!cluster.self && <ClusterSettings cluster={cluster} />}
           </div>
@@ -165,7 +173,15 @@ export default function Cluster() {
         stateRef={tabStateRef}
       >
         <Suspense fallback={<LoadingIndicator />}>
-          <Outlet context={{ cluster, refetch } satisfies ClusterContextType} />
+          <Outlet
+            context={
+              {
+                cluster,
+                refetch: refetchCluster,
+                setRefetchServices,
+              } satisfies ClusterContextType
+            }
+          />
         </Suspense>
       </TabPanel>
     </ResponsivePageFullWidth>
@@ -175,6 +191,7 @@ export default function Cluster() {
 type ClusterContextType = {
   cluster: ClusterFragment
   refetch: () => void
+  setRefetchServices: (refetch: () => () => void) => void
 }
 
 export function useClusterContext() {
