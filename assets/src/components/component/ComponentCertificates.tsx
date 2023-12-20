@@ -33,10 +33,7 @@ const ColStatus = columnHelper.accessor(
     meta: { gridTemplate: 'minmax(max-content, 1fr)' },
     cell: function Cell({ getValue }) {
       const theme = useTheme()
-
       const status = getValue()?.toLowerCase()
-
-      console.log('status')
 
       return (
         <div
@@ -77,7 +74,6 @@ const ColStatusMessage = columnHelper.accessor(
     meta: { gridTemplate: 'minmax(max-content, 1fr)' },
     cell: function Cell({ getValue }) {
       const theme = useTheme()
-
       const message = getValue()
 
       return (
