@@ -7,7 +7,7 @@ import {
   SearchIcon,
 } from '@pluralsh/design-system'
 
-import { Div, Flex } from 'honorable'
+import { useTheme } from 'styled-components'
 
 import LogsLabels from './LogsLabels'
 import { LogsCard } from './LogsCard'
@@ -24,6 +24,7 @@ export default function LogsFullScreen({
   addLabel,
   removeLabel,
 }) {
+  const theme = useTheme()
   const [open, setOpen] = useState<boolean>(false)
 
   return (
@@ -36,19 +37,20 @@ export default function LogsFullScreen({
         textValue="Fullscreen logs"
         type="secondary"
         onClick={() => setOpen(true)}
-        height={40}
-        width={40}
+        css={{ width: 40, height: 40 }}
       />
       {open && (
-        <Div
-          backgroundColor="rgba(23, 26, 33, 0.8)"
-          padding="xxxxlarge"
-          position="fixed"
-          top="0"
-          left="0"
-          height="100vh"
-          width="100vw"
-          zIndex={10}
+        <div
+          css={{
+            backgroundColor: theme.colors['modal-backdrop'],
+            padding: theme.spacing.xxxxlarge,
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            height: '100vh',
+            width: '100vw',
+            zIndex: 10,
+          }}
         >
           <IconFrame
             icon={<CloseIcon />}
@@ -57,16 +59,22 @@ export default function LogsFullScreen({
             type="floating"
             clickable
             onClick={() => setOpen(false)}
-            height={40}
-            width={40}
-            top={0}
-            right={0}
-            margin="large"
-            position="fixed"
+            css={
+              {
+                position: 'fixed',
+                height: 40,
+                width: 40,
+                top: 0,
+                right: 0,
+                margin: theme.spacing.large,
+              } as const
+            }
           />
-          <Flex
-            gap="medium"
-            grow={1}
+          <div
+            css={{
+              gap: 'medium',
+              grow: 1,
+            }}
           >
             <Input
               backgroundColor="fill-one"
@@ -84,7 +92,7 @@ export default function LogsFullScreen({
               setLabels={setLabels}
               fullscreen
             />
-          </Flex>
+          </div>
           <LogsLabels
             labels={labelList}
             removeLabel={removeLabel}
@@ -96,7 +104,7 @@ export default function LogsFullScreen({
             height="100%"
             fullscreen
           />
-        </Div>
+        </div>
       )}
     </>
   )
