@@ -3,7 +3,8 @@ ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 include $(ROOT_DIRECTORY)/hack/include/build.mk
 
 # Image URL to use all building/pushing image targets
-IMG ?= deployment-controller:latest
+IMG_NAME ?= deployment-controller
+IMG_TAG ?= pr-538
 
 # Config variables used for testing
 DEFAULT_PLURAL_CONSOLE_URL := "https://console.aws-capi.onplural.sh")
@@ -78,10 +79,10 @@ release: manifests generate fmt vet ## builds release version of the app. Requir
 # (i.e. docker build --platform linux/arm64). However, you must enable docker buildKit for it.
 # More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 docker-build: ## build Docker image with the manager
-	docker build --no-cache -t ${IMG} .
+	docker build --no-cache -t ${IMG_NAME}:${IMG_TAG} .
 
 docker-push: ## push docker image with the manager
-	docker push ${IMG}
+	docker push ${IMG_NAME}:${IMG_TAG}
 
 # PLATFORMS defines the target platforms for the manager image be built to provide support to multiple
 # architectures. (i.e. make docker-buildx IMG=myregistry/mypoperator:0.0.1). To use this option you need to:
@@ -173,7 +174,7 @@ deploy: manifests kustomize envsubst ## Deploy controller to the K8s cluster spe
 deploy-helm: NAMESPACE := console
 deploy-helm: RELEASE_NAME := controller-manager
 deploy-helm: manifests
-	@$(HELM) upgrade --install --create-namespace --namespace $(NAMESPACE) --set consoleUrl=$(PLURAL_CONSOLE_URL) $(RELEASE_NAME) ../charts/controller
+	@$(HELM) upgrade --install --create-namespace --namespace $(NAMESPACE) --set consoleUrl=$(PLURAL_CONSOLE_URL) $(RELEASE_NAME) --set controllerManager.manager.image.tag=$(IMG_TAG) ../charts/controller
 
 .PHONY: undeploy
 undeploy: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
