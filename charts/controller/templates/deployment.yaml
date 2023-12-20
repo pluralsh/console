@@ -42,20 +42,16 @@ spec:
           10 }}
         securityContext: {{- toYaml .Values.controllerManager.kubeRbacProxy.containerSecurityContext
           | nindent 10 }}
-      - args: {{- toYaml .Values.controllerManager.manager.args | nindent 8 }}
+      - args:
+        {{- toYaml .Values.controllerManager.manager.args | nindent 8 }}
+        - --console-url={{ .Values.consoleUrl }}/gql
+        - --console-token=$(CONSOLE_TOKEN)
         command:
         - /manager
         env:
-        - name: CONSOLE_URL
-          valueFrom:
-            secretKeyRef:
-              key: consoleUrl
-              name: {{ include "controller.fullname" . }}-secrets
         - name: CONSOLE_TOKEN
           valueFrom:
-            secretKeyRef:
-              key: consoleToken
-              name: {{ include "controller.fullname" . }}-secrets
+            secretKeyRef: {{- toYaml .Values.tokenSecretRef | nindent 14 }}
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
         image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag

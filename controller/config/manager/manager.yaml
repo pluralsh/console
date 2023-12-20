@@ -32,22 +32,15 @@ spec:
             - /manager
           args:
             - --leader-elect
-            - --console-url=$(CONSOLE_URL)
-            - --console-token=$(CONSOLE_TOKEN)
           image: deployment-controller:latest
           imagePullPolicy: Never
           name: manager
           env:
-            - name: CONSOLE_URL
-              valueFrom:
-                secretKeyRef:
-                  key: consoleUrl
-                  name: secrets
             - name: CONSOLE_TOKEN
               valueFrom:
                 secretKeyRef:
-                  key: consoleToken
-                  name: secrets
+                  key: access-token
+                  name: console-auth-token
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

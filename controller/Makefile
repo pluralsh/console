@@ -5,6 +5,10 @@ include $(ROOT_DIRECTORY)/hack/include/build.mk
 # Image URL to use all building/pushing image targets
 IMG ?= deployment-controller:latest
 
+# Config variables used for testing
+DEFAULT_PLURAL_CONSOLE_URL := "https://console.aws-capi.onplural.sh")
+PLURAL_CONSOLE_URL := $(if $(PLURAL_CONSOLE_URL),$(PLURAL_CONSOLE_URL),$(DEFAULT_PLURAL_CONSOLE_URL))
+
 # Tool binaries
 KUBECTL ?= $(shell which kubectl)
 KUSTOMIZE ?= $(shell which kustomize)
@@ -14,6 +18,7 @@ ENVTEST ?= $(shell which setup-envtest)
 GOLANGCI_LINT ?= $(shell which golangci-lint)
 MOCKERY ?= $(shell which mockery)
 ENVSUBST ?= $(shell which envsubst)
+HELM ?= $(shell which helm)
 
 # Tool versions
 KUBEBUILDER_VERSION := 3.11.1
@@ -24,8 +29,13 @@ ENVTEST_K8S_VERSION := 1.28.3
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
+# Validate required env variables
 ifndef GOPATH
 $(error $$GOPATH environment variable not set)
+endif
+
+ifndef PLURAL_CONSOLE_TOKEN
+$(warning $$PLURAL_CONSOLE_TOKEN environment variable not set. Deploy will not work.)
 endif
 
 ifeq (,$(findstring $(GOPATH)/bin,$(PATH)))
@@ -94,12 +104,11 @@ docker-buildx: ## Build and push docker image for the manager for cross-platform
 
 .PHONY: manifests
 manifests: controller-gen ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	@$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
 generate: controller-gen ## generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations
-	go generate ./pkg/...
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+	@$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: genmock
 genmock: mockery ## generates mocks before running tests
@@ -139,8 +148,8 @@ endif
 
 .PHONY: helm
 helm: manifests kustomize helmify
-	$(KUSTOMIZE) build config/default | $(HELMIFY) -generate-defaults -image-pull-secrets -crd-dir ../charts/controller
-	find ../charts/controller -type f -exec sed -i 's/app.kubernetes.io\/managed-by: kustomize/app.kubernetes.io\/managed-by: helm/g' {} \;
+	@$(KUSTOMIZE) build config/default | $(HELMIFY) -generate-defaults -image-pull-secrets -crd-dir ../charts/controller
+	@find ../charts/controller -type f -exec sed -i 's/app.kubernetes.io\/managed-by: kustomize/app.kubernetes.io\/managed-by: helm/g' {} \;
 
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
@@ -150,15 +159,21 @@ install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~
 uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/crd | $(KUBECTL) delete --ignore-not-found=$(ignore-not-found) -f -
 
+.PHONY: uninstall-helm
+uninstall-helm: NAMESPACE := console
+uninstall-helm: RELEASE_NAME := controller-manager
+uninstall-helm: manifests
+	@$(HELM) uninstall --namespace $(NAMESPACE) $(RELEASE_NAME)
+
 .PHONY: deploy
 deploy: manifests kustomize envsubst ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	ifndef PLURAL_CONSOLE_URL
-	$(error $$PLURAL_CONSOLE_URL environment variable not set)
-	endif
-	ifndef PLURAL_CONSOLE_TOKEN
-	$(error $$PLURAL_CONSOLE_TOKEN environment variable not set)
-	endif
 	$(KUSTOMIZE) build config/default | $(ENVSUBST) | $(KUBECTL) apply -f -
+
+.PHONY: deploy-helm
+deploy-helm: NAMESPACE := console
+deploy-helm: RELEASE_NAME := controller-manager
+deploy-helm: manifests
+	@$(HELM) upgrade --install --create-namespace --namespace $(NAMESPACE) --set consoleUrl=$(PLURAL_CONSOLE_URL) $(RELEASE_NAME) ../charts/controller
 
 .PHONY: undeploy
 undeploy: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
