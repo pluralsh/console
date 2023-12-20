@@ -176,7 +176,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			})))
 		})
 
-		It("should successfully reconcile and update AWS cluster that was created in previous unit test", func() {
+		It("should successfully reconcile and update previously created AWS cluster", func() {
 			Expect(utils.MaybePatch(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{Name: awsClusterName, Namespace: "default"},
 			}, func(p *v1alpha1.Cluster) {
@@ -255,7 +255,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			})))
 		})
 
-		It("should successfully reconcile and update BYOK cluster that was created in previous unit test", func() {
+		It("should successfully reconcile and update previously created BYOK cluster", func() {
 			Expect(utils.MaybePatch(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{Name: byokClusterName, Namespace: "default"},
 			}, func(p *v1alpha1.Cluster) {
