@@ -15,7 +15,6 @@ permissions:
 
 env:
   GOPATH: /home/runner/go/
-  PATH: $PATH:$GOPATH/bin
   GOPROXY: "https://proxy.golang.org"
 
 jobs:
@@ -31,7 +30,7 @@ jobs:
         go-version-file: go.mod
         check-latest: true
     - name: Test
-      run: make test
+      run: $PATH:$GOPATH/bin make test
   publish-docker:
     name: Build and push controller container
     runs-on: ubuntu-20.04
