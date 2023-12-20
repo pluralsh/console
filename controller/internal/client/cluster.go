@@ -2,6 +2,7 @@ package client
 
 import (
 	console "github.com/pluralsh/console-client-go"
+	internalerror "github.com/pluralsh/console/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -34,6 +35,9 @@ func (c *client) CreateCluster(attrs console.ClusterAttributes) (*console.Cluste
 
 func (c *client) UpdateCluster(id string, attrs console.ClusterUpdateAttributes) (*console.ClusterFragment, error) {
 	response, err := c.consoleClient.UpdateCluster(c.ctx, id, attrs)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
 	if err == nil && (response == nil || response.UpdateCluster == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
@@ -46,6 +50,9 @@ func (c *client) UpdateCluster(id string, attrs console.ClusterUpdateAttributes)
 
 func (c *client) GetCluster(id *string) (*console.ClusterFragment, error) {
 	response, err := c.consoleClient.GetCluster(c.ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *id)
+	}
 	if err == nil && (response == nil || response.Cluster == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, *id)
 	}
@@ -58,6 +65,9 @@ func (c *client) GetCluster(id *string) (*console.ClusterFragment, error) {
 
 func (c *client) GetClusterByHandle(handle *string) (*console.ClusterFragment, error) {
 	response, err := c.consoleClient.GetClusterByHandle(c.ctx, handle)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *handle)
+	}
 	if err == nil && (response == nil || response.Cluster == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, *handle)
 	}
