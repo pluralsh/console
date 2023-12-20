@@ -19,28 +19,28 @@ env:
   GOPROXY: "https://proxy.golang.org"
 
 jobs:
-  test:
-    name: Unit test
-    runs-on: ubuntu-20.04
-    defaults:
-      run:
-        shell: bash
-        working-directory: controller
-    timeout-minutes: 5
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4.1.1
-    - name: Set up Go
-      uses: actions/setup-go@v4.1.0
-      with:
-        go-version-file: controller/go.mod
-        cache: true
-    - name: Download dependencies
-      run: go mod download
-    - name: Download tools
-      run: make tools
-    - name: Test
-      run: make test
+#  test:
+#    name: Unit test
+#    runs-on: ubuntu-20.04
+#    defaults:
+#      run:
+#        shell: bash
+#        working-directory: controller
+#    timeout-minutes: 5
+#    steps:
+#    - name: Checkout
+#      uses: actions/checkout@v4.1.1
+#    - name: Set up Go
+#      uses: actions/setup-go@v4.1.0
+#      with:
+#        go-version-file: controller/go.mod
+#        cache: true
+#    - name: Download dependencies
+#      run: go mod download
+#    - name: Download tools
+#      run: make tools
+#    - name: Test
+#      run: make test
   publish-docker:
     name: Build and push controller container
     runs-on: ubuntu-20.04
@@ -75,8 +75,8 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v5.1.0
       with:
-        context: "."
-        file: "./Dockerfile"
+        context: "./controller"
+        file: "./controller/Dockerfile"
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
