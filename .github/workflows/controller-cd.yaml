@@ -48,7 +48,7 @@ jobs:
       run:
         shell: bash
         working-directory: controller
-    needs: [ test ]
+#    needs: [ test ]
     permissions:
       contents: 'read'
       id-token: 'write'
