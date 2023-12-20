@@ -5,6 +5,10 @@ include $(ROOT_DIRECTORY)/hack/include/build.mk
 # Image URL to use all building/pushing image targets
 IMG ?= deployment-controller:latest
 
+# Config variables used for testing
+DEFAULT_PLURAL_CONSOLE_URL := "https://console.aws-capi.onplural.sh")
+PLURAL_CONSOLE_URL := $(if $(PLURAL_CONSOLE_URL),$(PLURAL_CONSOLE_URL),$(DEFAULT_PLURAL_CONSOLE_URL))
+
 # Tool binaries
 KUBECTL ?= $(shell which kubectl)
 KUSTOMIZE ?= $(shell which kustomize)
@@ -24,8 +28,13 @@ ENVTEST_K8S_VERSION := 1.28.3
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
+# Validate required env variables
 ifndef GOPATH
 $(error $$GOPATH environment variable not set)
+endif
+
+ifndef PLURAL_CONSOLE_TOKEN
+$(warning $$PLURAL_CONSOLE_TOKEN environment variable not set. Deploy will not work.)
 endif
 
 ifeq (,$(findstring $(GOPATH)/bin,$(PATH)))
@@ -152,12 +161,6 @@ uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified 
 
 .PHONY: deploy
 deploy: manifests kustomize envsubst ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	ifndef PLURAL_CONSOLE_URL
-	$(error $$PLURAL_CONSOLE_URL environment variable not set)
-	endif
-	ifndef PLURAL_CONSOLE_TOKEN
-	$(error $$PLURAL_CONSOLE_TOKEN environment variable not set)
-	endif
 	$(KUSTOMIZE) build config/default | $(ENVSUBST) | $(KUBECTL) apply -f -
 
 .PHONY: undeploy

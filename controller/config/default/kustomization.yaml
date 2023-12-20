@@ -1,5 +1,5 @@
 # Adds namespace to all resources.
-namespace: plural-deployment-controller
+namespace: console
 
 # Value of this field is prepended to the
 # names of all resources, e.g. a deployment named
@@ -28,4 +28,16 @@ patches:
 # If you want your controller-manager to expose the /metrics
 # endpoint w/o any authn/z, please comment the following line.
 - path: manager_auth_proxy_patch.yaml
+- patch: |-
+    - op: add
+      path: /spec/template/spec/containers/1/args/-
+      value: --console-url=$PLURAL_CONSOLE_URL/gql
+  target:
+    kind: Deployment
+- patch: |-
+    - op: add
+      path: /spec/template/spec/containers/1/args/-
+      value: --console-token=$(CONSOLE_TOKEN)
+  target:
+    kind: Deployment
 
