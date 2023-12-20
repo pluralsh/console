@@ -35,7 +35,7 @@ controllerManager:
         drop:
         - ALL
     image:
-      repository: deployment-controller
+      repository: ghcr.io/pluralsh/deployment-controller
       tag: latest
     imagePullPolicy: Never
     resources:
