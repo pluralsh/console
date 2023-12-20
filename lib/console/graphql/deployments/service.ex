@@ -5,6 +5,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   ecto_enum :component_state, ServiceComponent.State
   ecto_enum :service_deployment_status, Service.Status
+  ecto_enum :service_promotion, Service.Promotion
 
   input_object :service_deployment_attributes do
     field :name,           non_null(:string)
@@ -102,6 +103,7 @@ defmodule Console.GraphQl.Deployments.Service do
         {:ok, Map.put(helm, :parent, svc)}
       svc, _, _ -> {:ok, svc.helm}
     end
+    field :promotion,        :service_promotion, description: "how you'd like to perform a canary promotion"
     field :protect,          :boolean, description: "if true, deletion of this service is not allowed"
     field :sha,              :string, description: "latest git sha we pulled from"
     field :tarball,          :string, resolve: &Deployments.tarball/3, description: "https url to fetch the latest tarball of kubernetes manifests"
@@ -375,6 +377,17 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :values, non_null(:string)
 
       resolve &Deployments.self_manage/2
+    end
+
+    @desc "marks a service as being able to proceed to the next stage of a canary rollout"
+    field :proceed, :service_deployment do
+      middleware Authenticated
+      arg :id,        :id
+      arg :cluster,   :string, description: "the handle of the cluster for this service"
+      arg :name,      :string
+      arg :promotion, :service_promotion
+
+      resolve &Deployments.proceed/2
     end
 
     field :create_global_service, :global_service do

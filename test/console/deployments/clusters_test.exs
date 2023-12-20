@@ -859,6 +859,59 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "#create_agent_migration/2" do
+    test "admins can create agent migrations" do
+      user = admin_user()
+
+      {:ok, migration} = Clusters.create_agent_migration(%{ref: "agent-v0.3.30"}, user)
+
+      assert migration.ref == "agent-v0.3.30"
+      refute migration.completed
+
+      assert_receive {:event, %PubSub.AgentMigrationCreated{item: ^migration}}
+    end
+
+    test "global writers can create agent migrations" do
+      user = insert(:user)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, migration} = Clusters.create_agent_migration(%{ref: "agent-v0.3.30"}, user)
+
+      assert migration.ref == "agent-v0.3.30"
+      refute migration.completed
+
+      assert_receive {:event, %PubSub.AgentMigrationCreated{item: ^migration}}
+    end
+
+    test "random users cannot create" do
+      user = insert(:user)
+      {:error, _} = Clusters.create_agent_migration(%{ref: "agent-v0.3.30"}, user)
+    end
+  end
+
+  describe "#apply_migration/1" do
+    test "it will rewire the git ref for all agent services in a fleet" do
+      user = admin_user()
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, _} = Clusters.create_cluster(%{name: "test"}, user)
+      {:ok, _} = Clusters.create_cluster(%{name: "test2"}, user)
+
+      migration = insert(:agent_migration)
+      {:ok, completed} = Clusters.apply_migration(migration)
+
+      assert completed.id == migration.id
+      assert completed.completed
+
+      [first, second] = Console.Schema.Service.agent()
+                        |> Console.Repo.all()
+
+      assert first.git.ref == migration.ref
+      assert second.git.ref == migration.ref
+    end
+  end
+
   describe "#install/1" do
     test "it can install the operator in a ready cluster" do
       %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =

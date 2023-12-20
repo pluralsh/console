@@ -1,5 +1,6 @@
 import { MutableRefObject, ReactNode, useRef } from 'react'
 import {
+  CheckOutlineIcon,
   GitHubLogoIcon,
   SubTab,
   TabList,
@@ -22,10 +23,12 @@ export function RepoKindSelector({
   onKindChange,
   selectedKind,
   children,
+  validKinds,
 }: {
   onKindChange: any
   selectedKind: Nullable<string>
   children?: ReactNode
+  validKinds?: Record<string, boolean>
 }) {
   const theme = useTheme()
   const tabStateRef: MutableRefObject<any> = useRef()
@@ -72,6 +75,12 @@ export function RepoKindSelector({
         >
           <GitHubLogoIcon fullColor />
           {repoKindToLabel(RepoKind.Git)}
+          {validKinds?.[RepoKind.Git] && (
+            <CheckOutlineIcon
+              size={16}
+              color={theme.colors['icon-success']}
+            />
+          )}
         </SubTab>
         <SubTab
           css={{
@@ -88,6 +97,12 @@ export function RepoKindSelector({
             />
           </div>
           {repoKindToLabel(RepoKind.Helm)}
+          {validKinds?.[RepoKind.Helm] && (
+            <CheckOutlineIcon
+              size={16}
+              color={theme.colors['icon-success']}
+            />
+          )}
         </SubTab>
       </TabList>
       <TabPanel

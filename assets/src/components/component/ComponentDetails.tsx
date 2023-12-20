@@ -52,6 +52,7 @@ export type ComponentDetailsContext = {
   data: any
   loading: boolean
   clusterName?: string
+  cluster?: any
   serviceId?: string
   serviceComponents?:
     | (ServiceDeploymentComponentFragment | null | undefined)[]
@@ -63,13 +64,17 @@ export function ComponentDetails({
   component,
   pathMatchString,
   clusterId,
+  cluster,
   serviceId,
   serviceComponents,
+  hasPrometheus,
 }: {
   component: DetailsComponent
   pathMatchString: string
   clusterId?: string
+  cluster?: any
   serviceId?: string
+  hasPrometheus?: boolean
   serviceComponents?: ComponentDetailsContext['serviceComponents']
 }) {
   const theme = useTheme()
@@ -118,10 +123,20 @@ export function ComponentDetails({
       loading,
       refetch,
       clusterId,
+      cluster,
       serviceId,
       serviceComponents,
     }),
-    [clusterId, component, data, loading, refetch, serviceComponents, serviceId]
+    [
+      clusterId,
+      cluster,
+      component,
+      data,
+      loading,
+      refetch,
+      serviceComponents,
+      serviceId,
+    ]
   )
 
   if (error) {
@@ -130,8 +145,9 @@ export function ComponentDetails({
   if (!me || !data) return <LoadingIndicator />
 
   const filteredDirectory = directory.filter(
-    ({ onlyFor }) =>
-      !onlyFor || (componentKind && onlyFor.includes(componentKind))
+    ({ onlyFor, prometheus }) =>
+      (!onlyFor || (componentKind && onlyFor.includes(componentKind))) &&
+      (!prometheus || !clusterId || hasPrometheus)
   )
   const currentTab = filteredDirectory.find(({ path }) => path === subpath)
 

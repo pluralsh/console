@@ -17,7 +17,8 @@ defmodule Console.Schema.Service do
     StageService
   }
 
-  defenum Status, stale: 0, synced: 1, healthy: 2, failed: 3
+  defenum Promotion, ignore: 0, proceed: 1, rollback: 2
+  defenum Status, stale: 0, synced: 1, healthy: 2, failed: 3, paused: 4
 
   defmodule Git do
     use Piazza.Ecto.Schema
@@ -63,6 +64,8 @@ defmodule Console.Schema.Service do
     field :name,             :string
     field :component_status, :string
     field :version,          :string
+    field :promotion,        Promotion
+    field :proceed,          :boolean, default: false
     field :sha,              :string
     field :namespace,        :string
     field :docs_path,        :string

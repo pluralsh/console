@@ -181,6 +181,20 @@ defmodule Console.GraphQl.Users do
   delta :notification
 
   object :user_queries do
+    field :user, :user do
+      middleware Authenticated
+      arg :email, non_null(:string)
+
+      resolve &User.get_user/2
+    end
+
+    field :group, :group do
+      middleware Authenticated
+      arg :name, non_null(:string)
+
+      resolve &User.get_group/2
+    end
+
     connection field :users, node_type: :user do
       middleware Authenticated
       arg :q, :string

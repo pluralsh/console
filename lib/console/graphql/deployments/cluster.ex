@@ -36,9 +36,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :version,    :string
     field :handle,     :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :service,    :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
-    field :kubeconfig, :kubeconfig_attributes
+    field :kubeconfig, :kubeconfig_attributes, description: "pass a kubeconfig for this cluster (DEPRECATED)"
     field :protect,    :boolean
     field :node_pools, list_of(:node_pool_attributes)
+    field :tags,       list_of(:tag_attributes)
   end
 
   input_object :cluster_service_attributes do
@@ -137,6 +138,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
   input_object :runtime_service_attributes do
     field :name,    non_null(:string)
     field :version, non_null(:string)
+  end
+
+  input_object :agent_migration_attributes do
+    field :name,          :string
+    field :ref,           :string
+    field :configuration, :json
+  end
+
+  input_object :tag_input do
+    field :name,  non_null(:string)
+    field :value, non_null(:string)
   end
 
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -386,9 +398,26 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :version, non_null(:string)
   end
 
+  @desc "a representation of a bulk operation to be performed on all agent services"
+  object :agent_migration do
+    field :id,            non_null(:id)
+    field :name,          :string
+    field :ref,           :string
+    field :configuration, :map
+    field :completed,     :boolean
+
+    timestamps()
+  end
+
   object :tag do
     field :name,  non_null(:string)
     field :value, non_null(:string)
+  end
+
+  @desc "a cluster info data struct"
+  object :cluster_status_info do
+    field :healthy, :boolean
+    field :count,   :integer
   end
 
   connection node_type: :cluster
@@ -436,10 +465,29 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     @desc "a relay connection of all clusters visible to the current user"
     connection field :clusters, node_type: :cluster do
-      arg :q, :string
       middleware Authenticated
+      arg :q,      :string
+      arg :health, :boolean
+      arg :tag,    :tag_input
 
       resolve &Deployments.list_clusters/2
+    end
+
+    @desc "gets summary information for all healthy/unhealthy clusters in your fleet"
+    field :cluster_statuses, list_of(:cluster_status_info) do
+      middleware Authenticated
+      arg :q,      :string
+      arg :tag,    :tag_input
+
+      resolve &Deployments.cluster_statuses/2
+    end
+
+    @desc "lists tags applied to any clusters in the fleet"
+    field :tags, list_of(:string) do
+      middleware Authenticated
+      arg :tag, :string
+
+      resolve &Deployments.list_tags/2
     end
 
     @desc "a relay connection of all providers visible to the current user"
@@ -461,7 +509,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "fetches an individual cluster provider"
     field :cluster_provider, :cluster_provider do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,    :id
+      arg :cloud, :string
+      arg :name,  :string
 
       resolve &Deployments.resolve_provider/2
     end
@@ -552,6 +602,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :global,        :global_service_attributes
 
       resolve &Deployments.install_addon/2
+    end
+
+    field :create_agent_migration, :agent_migration do
+      middleware Authenticated
+      arg :attributes, non_null(:agent_migration_attributes)
+
+      resolve &Deployments.create_agent_migration/2
     end
   end
 end

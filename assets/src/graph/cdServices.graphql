@@ -19,6 +19,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   id
   name
   protect
+  promotion
   message
   git {
     ref
@@ -126,6 +127,7 @@ query ServiceDeployments(
   $q: String
   $cluster: String
   $clusterId: ID
+  $status: ServiceDeploymentStatus
 ) {
   serviceDeployments(
     first: $first
@@ -133,6 +135,7 @@ query ServiceDeployments(
     q: $q
     cluster: $cluster
     clusterId: $clusterId
+    status: $status
   ) {
     pageInfo {
       ...PageInfo
@@ -142,6 +145,9 @@ query ServiceDeployments(
         ...ServiceDeploymentsRow
       }
     }
+  }
+  serviceStatuses(clusterId: $clusterId) {
+    ...ServiceStatusCount
   }
 }
 
@@ -246,6 +252,12 @@ mutation RollbackService($id: ID, $revisionId: ID!) {
   }
 }
 
+mutation ProceedService($id: ID!, $promotion: ServicePromotion) {
+  proceed(id: $id, promotion: $promotion) {
+    ...ServiceDeploymentDetails
+  }
+}
+
 mutation UpdateRbac($serviceId: ID, $clusterId: ID, $rbac: RbacAttributes!) {
   updateRbac(serviceId: $serviceId, clusterId: $clusterId, rbac: $rbac)
 }
@@ -269,5 +281,16 @@ query ServiceDeploymentBindings($id: ID!) {
   serviceDeployment(id: $id) {
     id
     ...ServiceDeploymentBindings
+  }
+}
+
+fragment ServiceStatusCount on ServiceStatusCount {
+  count
+  status
+}
+
+query ServiceStatuses($clusterId: ID) {
+  serviceStatuses(clusterId: $clusterId) {
+    ...ServiceStatusCount
   }
 }

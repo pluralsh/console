@@ -1027,6 +1027,38 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "createAgentMigration" do
+    test "admins can create an agent migration" do
+      admin = admin_user()
+
+      {:ok, %{data: %{"createAgentMigration" => create}}} = run_query("""
+        mutation Create($attrs: AgentMigrationAttributes!) {
+          createAgentMigration(attributes: $attrs) {
+            ref
+          }
+        }
+      """, %{"attrs" => %{"ref" => "agent-v0.3.30"}}, %{current_user: admin})
+
+      assert create["ref"] == "agent-v0.3.30"
+    end
+  end
+
+  describe "proceed" do
+    test "it can proceed a service through canary deployment" do
+      admin = admin_user()
+      svc = insert(:service)
+
+      {:ok, %{data: %{"proceed" => res}}} = run_query("""
+        mutation Proceed($id: ID!) {
+          proceed(id: $id) { id }
+        }
+      """, %{"id" => svc.id}, %{current_user: admin})
+
+      assert res["id"] == svc.id
+      assert refetch(svc).promotion == :proceed
+    end
+  end
+
   describe "selfManage" do
     test "it can self-manage a byok console" do
       admin = admin_user()

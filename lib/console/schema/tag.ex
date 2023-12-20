@@ -12,6 +12,19 @@ defmodule Console.Schema.Tag do
     timestamps()
   end
 
+  def cluster(query \\ __MODULE__), do: from(t in query, where: not is_nil(t.cluster_id))
+
+  def for_name(query \\ __MODULE__, name), do: from(t in query, where: t.name == ^name)
+
+  def ordered(query \\ __MODULE__, order \\ [asc: :name]), do: from(t in query, order_by: ^order)
+
+  def select(query \\ __MODULE__, field) do
+    from(t in query,
+      select: field(t, ^field),
+      distinct: true
+    )
+  end
+
   def as_map(tags), do: Map.new(tags, & {&1.name, &1.value})
 
   @valid ~w(name value cluster_id service_id)a

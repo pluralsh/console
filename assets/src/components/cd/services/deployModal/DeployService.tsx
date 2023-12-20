@@ -2,13 +2,15 @@ import {
   Button,
   GearTrainIcon,
   GitHubIcon,
+  GitPullIcon,
   ListIcon,
   PadlockLockedIcon,
   Stepper,
 } from '@pluralsh/design-system'
+import { Priority, useRegisterActions } from 'kbar'
+
 import {
   NamespacedName,
-  useClustersTinyQuery,
   useCreateServiceDeploymentMutation,
   useGitRepositoriesQuery,
 } from 'generated/graphql'
@@ -23,6 +25,8 @@ import {
   RepoKindSelector,
 } from 'components/cd/utils/RepoKindSelector'
 import ModalAlt from 'components/cd/ModalAlt'
+
+import { PaletteSection } from 'components/CommandPalette'
 
 import { DeployServiceSettingsGit } from './DeployServiceSettingsGit'
 import { DeployServiceSettingsBasic } from './DeployServiceSettingsBasic'
@@ -154,12 +158,6 @@ export function DeployServiceModal({
 
   const { data: reposData } = useGitRepositoriesQuery()
 
-  const { data: clustersData } = useClustersTinyQuery()
-  const clusters = useMemo(
-    () => mapExistingNodes(clustersData?.clusters),
-    [clustersData?.clusters]
-  )
-
   const allowDeploy =
     formState === FormState.Secrets &&
     initialFormValid &&
@@ -250,7 +248,7 @@ export function DeployServiceModal({
     (step) => step.key === formState
   )
 
-  const initialLoading = !repos || !clusters
+  const initialLoading = !repos
 
   return (
     <ModalAlt
@@ -388,13 +386,16 @@ export function DeployServiceModal({
               setNamespace,
               clusterId,
               setClusterId,
-              clusters,
             }}
           />
         ) : formState === FormState.Repository ? (
           <RepoKindSelector
             onKindChange={setRepoTab}
             selectedKind={repoTab}
+            validKinds={{
+              [RepoKind.Git]: hasGitRepo && gitSettingsValid,
+              [RepoKind.Helm]: hasHelmRepo && helmSettingsValid,
+            }}
           >
             <div
               css={{
@@ -459,6 +460,24 @@ export function DeployServiceModal({
 
 export function DeployService({ refetch }: { refetch: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
+  const kbarActions = useMemo(
+    () => [
+      {
+        section: PaletteSection.Actions,
+        id: `deploy-service`,
+        priority: Priority.HIGH,
+        name: `Deploy new service`,
+        icon: <GitPullIcon />,
+        shortcut: [],
+        perform: () => {
+          setIsOpen(true)
+        },
+      },
+    ],
+    []
+  )
+
+  useRegisterActions(kbarActions)
 
   return (
     <>

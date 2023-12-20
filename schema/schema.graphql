@@ -15,6 +15,10 @@ type RootQueryType {
 
   buildInfo: BuildInfo
 
+  user(email: String!): User
+
+  group(name: String!): Group
+
   users(after: String, first: Int, before: String, last: Int, q: String): UserConnection
 
   loginInfo(redirect: String): LoginInfo
@@ -43,9 +47,9 @@ type RootQueryType {
 
   dashboard(repo: String!, name: String!, step: String, offset: Int, labels: [LabelInput]): Dashboard
 
-  metric(query: String!, offset: Int, step: String): [MetricResponse]
+  metric(query: String!, offset: Int, step: String, clusterId: ID): [MetricResponse]
 
-  logs(query: String!, start: Long, end: Long, limit: Int!): [LogStream]
+  logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
 
   scalingRecommendation(kind: AutoscalingTarget!, namespace: String!, name: String!): VerticalPodAutoscaler
 
@@ -66,6 +70,8 @@ type RootQueryType {
   deployment(namespace: String!, name: String!, serviceId: ID): Deployment
 
   statefulSet(namespace: String!, name: String!, serviceId: ID): StatefulSet
+
+  daemonSet(namespace: String!, name: String!, serviceId: ID): DaemonSet
 
   ingress(namespace: String!, name: String!, serviceId: ID): Ingress
 
@@ -98,6 +104,8 @@ type RootQueryType {
   nodeMetrics(clusterId: ID): [NodeMetric]
 
   nodeMetric(name: String!, clusterId: ID): NodeMetric
+
+  canary(namespace: String!, name: String!, serviceId: ID): Canary
 
   configurationOverlays(namespace: String!): [ConfigurationOverlay]
 
@@ -155,7 +163,13 @@ type RootQueryType {
   tokenExchange(token: String!): User
 
   "a relay connection of all clusters visible to the current user"
-  clusters(after: String, first: Int, before: String, last: Int, q: String): ClusterConnection
+  clusters(after: String, first: Int, before: String, last: Int, q: String, health: Boolean, tag: TagInput): ClusterConnection
+
+  "gets summary information for all healthy\/unhealthy clusters in your fleet"
+  clusterStatuses(q: String, tag: TagInput): [ClusterStatusInfo]
+
+  "lists tags applied to any clusters in the fleet"
+  tags(tag: String): [String]
 
   "a relay connection of all providers visible to the current user"
   clusterProviders(after: String, first: Int, before: String, last: Int): ClusterProviderConnection
@@ -164,7 +178,7 @@ type RootQueryType {
   cluster(id: ID, handle: String): Cluster
 
   "fetches an individual cluster provider"
-  clusterProvider(id: ID!): ClusterProvider
+  clusterProvider(id: ID, cloud: String, name: String): ClusterProvider
 
   "list all addons currently resident in the artifacts repo"
   clusterAddOns: [ClusterAddOn]
@@ -323,6 +337,8 @@ type RootMutationType {
 
   installAddOn(name: String!, configuration: [ConfigAttributes], clusterId: ID!, global: GlobalServiceAttributes): ServiceDeployment
 
+  createAgentMigration(attributes: AgentMigrationAttributes!): AgentMigration
+
   createServiceDeployment(
     clusterId: ID
 
@@ -375,6 +391,18 @@ type RootMutationType {
   ): ServiceDeployment
 
   selfManage(values: String!): ServiceDeployment
+
+  "marks a service as being able to proceed to the next stage of a canary rollout"
+  proceed(
+    id: ID
+
+    "the handle of the cluster for this service"
+    cluster: String
+
+    name: String
+
+    promotion: ServicePromotion
+  ): ServiceDeployment
 
   createGlobalService(
     serviceId: ID
@@ -863,6 +891,7 @@ enum ComponentState {
   RUNNING
   PENDING
   FAILED
+  PAUSED
 }
 
 enum ServiceDeploymentStatus {
@@ -870,6 +899,13 @@ enum ServiceDeploymentStatus {
   SYNCED
   HEALTHY
   FAILED
+  PAUSED
+}
+
+enum ServicePromotion {
+  IGNORE
+  PROCEED
+  ROLLBACK
 }
 
 input ServiceDeploymentAttributes {
@@ -978,6 +1014,9 @@ type ServiceDeployment {
 
   "description of how helm charts should be applied"
   helm: HelmSpec
+
+  "how you'd like to perform a canary promotion"
+  promotion: ServicePromotion
 
   "if true, deletion of this service is not allowed"
   protect: Boolean
@@ -1281,11 +1320,14 @@ input ClusterUpdateAttributes {
   "if you optionally want to reconfigure the git repository for the cluster service"
   service: ClusterServiceAttributes
 
+  "pass a kubeconfig for this cluster (DEPRECATED)"
   kubeconfig: KubeconfigAttributes
 
   protect: Boolean
 
   nodePools: [NodePoolAttributes]
+
+  tags: [TagAttributes]
 }
 
 input ClusterServiceAttributes {
@@ -1386,6 +1428,17 @@ input AzureSettingsAttributes {
 input RuntimeServiceAttributes {
   name: String!
   version: String!
+}
+
+input AgentMigrationAttributes {
+  name: String
+  ref: String
+  configuration: Json
+}
+
+input TagInput {
+  name: String!
+  value: String!
 }
 
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -1735,9 +1788,26 @@ type VersionReference {
   version: String!
 }
 
+"a representation of a bulk operation to be performed on all agent services"
+type AgentMigration {
+  id: ID!
+  name: String
+  ref: String
+  configuration: Map
+  completed: Boolean
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type Tag {
   name: String!
   value: String!
+}
+
+"a cluster info data struct"
+type ClusterStatusInfo {
+  healthy: Boolean
+  count: Int
 }
 
 type ClusterConnection {
@@ -2360,6 +2430,68 @@ type KubernetesUnstructured {
 type ApplicationDelta {
   delta: Delta
   payload: Application
+}
+
+type DaemonSet {
+  metadata: Metadata!
+  status: DaemonSetStatus!
+  spec: DaemonSetSpec!
+  pods: [Pod]
+  raw: String!
+  events: [Event]
+}
+
+type DaemonSetStatus {
+  currentNumberScheduled: Int
+  desiredNumberScheduled: Int
+  numberReady: Int
+}
+
+type DaemonSetSpec {
+  strategy: DeploymentStrategy
+}
+
+type Canary {
+  metadata: Metadata!
+  status: CanaryStatus!
+  spec: CanarySpec!
+  primaryDeployment: Deployment
+  canaryDeployment: Deployment
+  ingress: Ingress
+  ingressPrimary: Ingress
+  raw: String!
+  events: [Event]
+}
+
+type CanaryStatus {
+  conditions: [StatusCondition]
+  failedChecks: Int
+  canaryWeight: Int
+  iterations: Int
+  lastTransitionTime: String
+  phase: String
+}
+
+type CanarySpec {
+  autoscalerRef: TargetRef
+  targetRef: TargetRef
+  ingressRef: TargetRef
+  analysis: CanaryAnalysis
+  provider: String
+}
+
+type CanaryAnalysis {
+  interval: String
+  maxWeight: Int
+  stepWeight: Int
+  stepWeights: [Int]
+  threshold: Int
+}
+
+type TargetRef {
+  apiVersion: String
+  kind: String
+  name: String
 }
 
 type ConfigMap {

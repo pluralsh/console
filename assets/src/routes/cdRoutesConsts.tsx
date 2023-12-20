@@ -7,6 +7,8 @@ export const CD_ABS_PATH = `/${CD_REL_PATH}` as const
 export const CLUSTERS_REL_PATH = 'clusters' as const
 export const SERVICES_REL_PATH = 'services' as const
 export const PIPELINES_REL_PATH = 'pipelines' as const
+export const PROVIDERS_REL_PATH = 'providers' as const
+export const REPOS_REL_PATH = 'repos' as const
 export const CD_DEFAULT_REL_PATH = CLUSTERS_REL_PATH
 
 export const CLUSTER_REL_PATH = `${CLUSTERS_REL_PATH}/:clusterId` as const
@@ -69,20 +71,29 @@ export const ADDONS_REL_PATH = 'addons'
 export const GLOBAL_SETTINGS_REL_PATH = `settings`
 export const GLOBAL_SETTINGS_ABS_PATH = `${CD_ABS_PATH}/${GLOBAL_SETTINGS_REL_PATH}`
 
-export function getServiceDetailsPath({
+export function getClusterDetailsPath({
   clusterId,
-  serviceId,
   isRelative = false,
 }: {
   clusterId: string | null | undefined
-  serviceId: string | null | undefined
   isRelative?: boolean
 }) {
   return `${
     isRelative ? '' : `${CD_ABS_PATH}/`
-  }${CLUSTERS_REL_PATH}/${clusterId}/${SERVICES_REL_PATH}/${encodeSlashes(
-    serviceId || ''
-  )}`
+  }${CLUSTERS_REL_PATH}/${clusterId}`
+}
+
+export function getServiceDetailsPath({
+  clusterId,
+  serviceId,
+  isRelative = false,
+}: Parameters<typeof getClusterDetailsPath>[0] & {
+  serviceId: string | null | undefined
+}) {
+  return `${getClusterDetailsPath({
+    clusterId,
+    isRelative,
+  })}/${SERVICES_REL_PATH}/${encodeSlashes(serviceId || '')}`
 }
 
 export function getServiceComponentPath({

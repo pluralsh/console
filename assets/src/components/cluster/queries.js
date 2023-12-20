@@ -101,21 +101,38 @@ export const NODE_METRICS_Q = gql`
     $memRequests: String!
     $memLimits: String!
     $pods: String!
+    $clusterId: ID
     $offset: Int
   ) {
-    cpuRequests: metric(query: $cpuRequests, offset: $offset) {
+    cpuRequests: metric(
+      clusterId: $clusterId
+      query: $cpuRequests
+      offset: $offset
+    ) {
       ...MetricResponseFragment
     }
-    cpuLimits: metric(query: $cpuLimits, offset: $offset) {
+    cpuLimits: metric(
+      clusterId: $clusterId
+      query: $cpuLimits
+      offset: $offset
+    ) {
       ...MetricResponseFragment
     }
-    memRequests: metric(query: $memRequests, offset: $offset) {
+    memRequests: metric(
+      clusterId: $clusterId
+      query: $memRequests
+      offset: $offset
+    ) {
       ...MetricResponseFragment
     }
-    memLimits: metric(query: $memLimits, offset: $offset) {
+    memLimits: metric(
+      clusterId: $clusterId
+      query: $memLimits
+      offset: $offset
+    ) {
       ...MetricResponseFragment
     }
-    pods: metric(query: $pods, offset: $offset) {
+    pods: metric(clusterId: $clusterId, query: $pods, offset: $offset) {
       ...MetricResponseFragment
     }
   }
@@ -126,12 +143,21 @@ export const CLUSTER_SATURATION = gql`
   query Metrics(
     $cpuUtilization: String!
     $memUtilization: String!
+    $clusterId: ID
     $offset: Int
   ) {
-    cpuUtilization: metric(query: $cpuUtilization, offset: $offset) {
+    cpuUtilization: metric(
+      clusterId: $clusterId
+      query: $cpuUtilization
+      offset: $offset
+    ) {
       ...MetricResponseFragment
     }
-    memUtilization: metric(query: $memUtilization, offset: $offset) {
+    memUtilization: metric(
+      clusterId: $clusterId
+      query: $memUtilization
+      offset: $offset
+    ) {
       ...MetricResponseFragment
     }
   }

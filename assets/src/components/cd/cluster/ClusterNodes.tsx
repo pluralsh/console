@@ -5,6 +5,8 @@ import { Card } from '@pluralsh/design-system'
 import sumBy from 'lodash/sumBy'
 import { useTheme } from 'styled-components'
 
+import { useDeploymentSettings } from 'routes/cdRoutes'
+
 import { Cluster, Node } from '../../../generated/graphql'
 import {
   ColCpuTotal,
@@ -42,6 +44,7 @@ export const ColActions = (clusterId?: string) =>
 
 export default function ClusterNodes() {
   const theme = useTheme()
+  const settings = useDeploymentSettings()
   const { cluster } = useOutletContext() as { cluster: Cluster }
 
   const columns: ColumnDef<TableData, any>[] = useMemo(
@@ -83,11 +86,12 @@ export default function ClusterNodes() {
         gap: theme.spacing.medium,
       }}
     >
-      {cluster?.self && (
+      {(cluster?.self || settings?.prometheusConnection) && (
         <Card padding="xlarge">
           <ClusterMetrics
             nodes={cluster?.nodes?.filter((node): node is Node => !!node) || []}
             usage={usage}
+            cluster={cluster}
           />
         </Card>
       )}

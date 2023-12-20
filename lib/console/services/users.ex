@@ -38,10 +38,14 @@ defmodule Console.Services.Users do
 
   def get_user_by_email(email), do: Repo.get_by(User, email: email)
 
+  def get_user_by_email!(email), do: Repo.get_by!(User, email: email)
+
   @spec get_group!(binary) :: Group.t
   def get_group!(id), do: Repo.get!(Group, id)
 
   def get_group_by_name(name), do: Repo.get_by(Group, name: name)
+
+  def get_group_by_name!(name), do: Repo.get_by!(Group, name: name)
 
   @spec get_role!(binary) :: Role.t
   def get_role!(id), do: Repo.get!(Role, id)
@@ -56,9 +60,6 @@ defmodule Console.Services.Users do
 
   @spec get_bot!(binary) :: User.t
   def get_bot!(name), do: Repo.get_by!(User, bot_name: name)
-
-  @spec get_user_by_email!(binary) :: User.t
-  def get_user_by_email!(email), do: Repo.get_by!(User, email: email)
 
   @spec get_invite(binary) :: Invite.t | nil
   def get_invite(secure_id), do: Repo.get_by(Invite, secure_id: secure_id)

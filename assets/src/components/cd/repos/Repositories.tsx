@@ -24,7 +24,7 @@ import { createMapperWithFallback } from 'utils/mapping'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { removeConnection, updateCache } from 'utils/graphql'
 
-import { CD_REL_PATH } from 'routes/cdRoutesConsts'
+import { CD_REL_PATH, REPOS_REL_PATH } from 'routes/cdRoutesConsts'
 
 import {
   CD_BASE_CRUMBS,
@@ -54,7 +54,10 @@ import {
 } from './RepositoriesFilters'
 import { GitRepositoriesTable } from './GitRepositoriesTable'
 
-const crumbs = [...CD_BASE_CRUMBS, { label: 'git', url: `/${CD_REL_PATH}/git` }]
+const crumbs = [
+  ...CD_BASE_CRUMBS,
+  { label: 'repositories', url: `/${CD_REL_PATH}/${REPOS_REL_PATH}` },
+]
 
 // Will need to update once delete mutation exists in API
 export function DeleteGitRepository({
@@ -128,7 +131,7 @@ export function AuthMethodChip({
   return <Chip severity="neutral">{authMethodToLabel(authMethod)}</Chip>
 }
 
-export default function GitRepositories() {
+export default function Repositories() {
   const [repoKind, setRepoKind] = useState(RepoKind.Git)
   const kindLabel = repoKindToLabel(repoKind)
   const theme = useTheme()
