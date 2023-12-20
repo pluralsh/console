@@ -37,6 +37,7 @@ export default defineConfig(() =>
     ],
     server: {
       port: 3000,
+      https: true,
       proxy: {
         '/v1': API_URL,
         '/gql': API_URL,
