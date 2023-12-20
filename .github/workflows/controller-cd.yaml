@@ -34,6 +34,8 @@ jobs:
       with:
         go-version-file: controller/go.mod
         cache: true
+    - name: Download dependencies
+      run: go mod download
     - name: Test
       run: PATH=$PATH:$GOPATH/bin make test
   publish-docker:
