@@ -182,9 +182,7 @@ export function ModalForm({
           <>
             <ServiceGitRefField
               value={state.gitRef}
-              onChange={(e) => {
-                updateState({ gitRef: e.currentTarget.value })
-              }}
+              setValue={(ref) => updateState({ gitRef: ref })}
             />
             <ServiceGitFolderField
               value={state.gitFolder}
