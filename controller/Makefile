@@ -188,7 +188,7 @@ tools: --tool
 .PHONY: --tool
 %--tool: TOOL = .*
 --tool: # INTERNAL: installs tool with name provided via $(TOOL) variable or all tools.
-	@cat tools.go | grep _ | awk -F'"' '$$2 ~ /$(TOOL)/ {print $$2}' | xargs -I {} go install {}
+	cat tools.go | grep _ | awk -F'"' '$$2 ~ /$(TOOL)/ {print $$2}' | xargs -I {} go install {}
 
 .PHONY: controller-gen
 controller-gen: TOOL = controller-gen

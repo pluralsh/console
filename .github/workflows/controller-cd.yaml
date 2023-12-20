@@ -37,8 +37,8 @@ jobs:
         cache: true
     - name: Download dependencies
       run: go mod download
-    - name: List Go deps
-      run: ls $GOBIN
+    - name: Download all tools
+      run: make tools
     - name: Test
       run: make test
   publish-docker:
