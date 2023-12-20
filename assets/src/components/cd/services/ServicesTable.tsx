@@ -14,6 +14,7 @@ import isEmpty from 'lodash/isEmpty'
 import { useDebounce } from '@react-hooks-library/core'
 import { type VirtualItem } from '@tanstack/react-virtual'
 import {
+  ServiceDeploymentStatus,
   type ServiceDeploymentsRowFragment,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
@@ -89,10 +90,11 @@ export function ServicesTable({
         (count, status) => count + (status?.count || 0),
         0
       ),
-      HEALTHY: data?.serviceStatuses ? 0 : undefined,
-      SYNCED: data?.serviceStatuses ? 0 : undefined,
-      STALE: data?.serviceStatuses ? 0 : undefined,
-      FAILED: data?.serviceStatuses ? 0 : undefined,
+      [ServiceDeploymentStatus.Healthy]: data?.serviceStatuses ? 0 : undefined,
+      [ServiceDeploymentStatus.Synced]: data?.serviceStatuses ? 0 : undefined,
+      [ServiceDeploymentStatus.Stale]: data?.serviceStatuses ? 0 : undefined,
+      [ServiceDeploymentStatus.Paused]: data?.serviceStatuses ? 0 : undefined,
+      [ServiceDeploymentStatus.Failed]: data?.serviceStatuses ? 0 : undefined,
       ...Object.fromEntries(
         data?.serviceStatuses?.map((status) => [
           status?.status,

@@ -87,6 +87,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.VPN
   import_types Console.GraphQl.Kubernetes.Config
   import_types Console.GraphQl.Kubernetes.Canary
+  import_types Console.GraphQl.Kubernetes.UpgradePlan
   import_types Console.GraphQl.Kubernetes.DaemonSet
 
   delta :application
@@ -277,6 +278,16 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_canary/2
+    end
+
+
+    field :upgrade_plan, :upgrade_plan do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+      service_authorized :read
+
+      safe_resolve &Kubernetes.resolve_upgrade_plan/2
     end
 
     field :configuration_overlays, list_of(:configuration_overlay) do

@@ -1,20 +1,38 @@
+fragment StatusCondition on StatusCondition {
+  message
+  reason
+  status
+  type
+}
+
+fragment CertificateStatus on CertificateStatus {
+  renewalTime
+  notBefore
+  notAfter
+  conditions {
+    ...StatusCondition
+  }
+}
+
+fragment CertificateSpec on CertificateSpec {
+  dnsNames
+  secretName
+  issuerRef {
+    group
+    kind
+    name
+  }
+}
+
 fragment Certificate on Certificate {
   metadata {
     ...Metadata
   }
   status {
-    renewalTime
-    notBefore
-    notAfter
+    ...CertificateStatus
   }
   spec {
-    dnsNames
-    secretName
-    issuerRef {
-      group
-      kind
-      name
-    }
+    ...CertificateSpec
   }
   raw
 }

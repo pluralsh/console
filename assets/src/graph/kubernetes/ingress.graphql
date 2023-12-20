@@ -27,6 +27,9 @@ fragment Ingress on Ingress {
       }
     }
   }
+  certificates {
+    ...Certificate
+  }
   raw
 }
 

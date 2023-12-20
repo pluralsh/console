@@ -11,7 +11,7 @@ defmodule Console.GraphQl.Kubernetes.Pod do
     field :raw, non_null(:string), resolve: fn model, _, _ -> encode(model) end
 
     field :logs, list_of(:string) do
-      arg :container, non_null(:string)
+      arg :container,     non_null(:string)
       arg :since_seconds, non_null(:integer)
 
       resolve &Kubernetes.read_pod_logs/3
@@ -23,23 +23,23 @@ defmodule Console.GraphQl.Kubernetes.Pod do
   end
 
   object :pod_status do
-    field :message,            :string
-    field :phase,              :string
-    field :host_ip,            :string
-    field :pod_ip,             :string
-    field :reason,             :string
-    field :conditions,         list_of(:pod_condition)
-    field :container_statuses, list_of(:container_status)
+    field :message,                 :string
+    field :phase,                   :string
+    field :host_ip,                 :string
+    field :pod_ip,                  :string
+    field :reason,                  :string
+    field :conditions,              list_of(:pod_condition)
+    field :container_statuses,      list_of(:container_status)
     field :init_container_statuses, list_of(:container_status)
   end
 
   object :pod_condition do
-    field :last_probe_time, :string
+    field :last_probe_time,      :string
     field :last_transition_time, :string
-    field :message, :string
-    field :reason,  :string
-    field :status,  :string
-    field :type,    :string
+    field :message,              :string
+    field :reason,               :string
+    field :status,               :string
+    field :type,                 :string
   end
 
   object :container_status do
@@ -75,9 +75,9 @@ defmodule Console.GraphQl.Kubernetes.Pod do
 
   object :pod_spec do
     field :service_account_name, :string
-    field :node_name, :string
-    field :containers, list_of(:container)
-    field :init_containers, list_of(:container)
+    field :node_name,            :string
+    field :containers,           list_of(:container)
+    field :init_containers,      list_of(:container)
   end
 
   object :container do
