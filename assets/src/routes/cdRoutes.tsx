@@ -172,7 +172,12 @@ const mainRoutes = (
     <Route
       path={PIPELINES_REL_PATH}
       element={<Pipelines />}
-    />
+    >
+      <Route
+        path=":pipelineId"
+        element={<Pipelines />}
+      />
+    </Route>
     <Route
       path="git"
       element={

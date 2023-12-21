@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import {
   AppIcon,
   Card,
@@ -9,17 +9,18 @@ import {
 import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 import { ReactFlowProvider } from 'reactflow'
+import { NetworkStatus } from '@apollo/client'
+import { useNavigate, useParams } from 'react-router-dom'
+
 import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
-
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-
 import { Edge, extendConnection } from 'utils/graphql'
 
-import { NetworkStatus } from '@apollo/client'
-
-import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
-
-import { VirtualList, type VirtualListRenderer } from '../../utils/VirtualList'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import {
+  VirtualList,
+  type VirtualListRenderer,
+} from 'components/utils/VirtualList'
+import { CD_BASE_CRUMBS } from 'components/cd/ContinuousDeployment'
 
 import { Pipeline } from './Pipeline'
 
@@ -105,17 +106,22 @@ function Pipelines() {
   })
   const pageInfo = data?.pipelines?.pageInfo
   const pipeEdges = data?.pipelines?.edges
-  const [selectedPipeline, setSelectedPipeline] = useState(
-    pipeEdges?.[0]?.node?.id ?? ''
+  const selectedPipeline = useParams().pipelineId
+  const navigate = useNavigate()
+  const setSelectedPipeline = useCallback(
+    (pipelineId: string) => {
+      navigate(pipelineId)
+    },
+    [navigate]
   )
 
-  useEffect(() => {
+  if (!selectedPipeline) {
     const firstId = pipeEdges?.[0]?.node?.id
 
-    if (firstId && !selectedPipeline) {
+    if (firstId) {
       setSelectedPipeline(firstId)
     }
-  }, [pipeEdges, selectedPipeline])
+  }
 
   useSetBreadcrumbs(PIPELINES_CRUMBS)
 
@@ -135,7 +141,7 @@ function Pipelines() {
       selectedId: selectedPipeline,
       setSelectedId: setSelectedPipeline,
     }),
-    [selectedPipeline]
+    [selectedPipeline, setSelectedPipeline]
   )
   const pipeline = useMemo(
     () => pipeEdges?.find((p) => p?.node?.id === selectedPipeline)?.node,
@@ -173,7 +179,12 @@ function Pipelines() {
             meta={meta}
           />
           <PipelineEditAreaSC>
-            {pipeline && <Pipeline pipeline={pipeline} />}
+            {pipeline && (
+              <Pipeline
+                pipeline={pipeline}
+                key={pipeline.id}
+              />
+            )}
           </PipelineEditAreaSC>
         </div>
       ) : (

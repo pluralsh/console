@@ -27,7 +27,7 @@ import styled, { useTheme } from 'styled-components'
 import { TestsNode } from './nodes/TestsNode'
 import { StageNode } from './nodes/StageNode'
 import { ApprovalNode } from './nodes/ApprovalNode'
-import { DagreDirection, getLayoutedElements } from './utils/nodeLayouter'
+import { type DagreDirection, getLayoutedElements } from './utils/nodeLayouter'
 import { EdgeLineMarkerDefs, edgeTypes } from './EdgeLine'
 import { NodeType, getNodesAndEdges } from './utils/getNodesAndEdges'
 
