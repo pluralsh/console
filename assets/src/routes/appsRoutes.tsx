@@ -1,11 +1,13 @@
 import { Navigate, Route } from 'react-router-dom'
 
+import Apps from 'components/apps/Apps'
+
 import { lazyC } from './utils'
 
 export const appsRoutes = [
   <Route
     index
-    lazy={lazyC(import('components/apps/Apps'))}
+    element={<Apps />}
   />,
   <Route
     path="apps/:appName"
