@@ -67,14 +67,9 @@ export const appsRoutes = [
       lazy={lazyC(import('components/apps/app/config/Configuration'))}
     />
     <Route
-      path="docs"
+      path="docs/:docName?"
       lazy={lazyC(import('components/apps/app/docs/AppDocs'))}
-    >
-      <Route
-        path=":docName"
-        lazy={lazyC(import('components/apps/app/docs/AppDocs'))}
-      />
-    </Route>
+    />
   </Route>,
 
   /* COMPONENTS */

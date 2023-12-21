@@ -53,7 +53,14 @@ export default function AppDocs() {
   const navigate = useNavigate()
 
   if (!currentDoc) {
-    navigate(location.pathname.split('/').slice(0, -1).join('/'))
+    const firstDoc = docs?.[0]
+    const baseUrl = location.pathname.split('/docs').slice(0, -1).join('/docs')
+
+    if (firstDoc) {
+      navigate(`${baseUrl}/${firstDoc.path}`)
+    } else {
+      navigate(baseUrl)
+    }
 
     return null
   }
