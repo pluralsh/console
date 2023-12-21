@@ -1,38 +1,15 @@
 import { Navigate, Route } from 'react-router-dom'
 
-import ComponentMetrics from 'components/component/ComponentMetrics'
-
-import AppDocs from 'components/apps/app/docs/AppDocs'
-
-import Credentials from 'components/apps/app/credentials/Credentials'
-
-import Uninstall from 'components/apps/app/uninstall/Uninstall'
-
-import AppComponents from 'components/apps/app/components/AppComponents'
-
-import AddOns from '../components/apps/Apps'
-import App from '../components/apps/app/App'
-import Dashboards from '../components/apps/app/dashboards/Dashboards'
-import Runbooks from '../components/apps/app/runbooks/Runbooks'
-import CostAnalysis from '../components/apps/app/cost/CostAnalysis'
-import Dashboard from '../components/apps/app/dashboards/dashboard/Dashboard'
-import Runbook from '../components/apps/app/runbooks/runbook/Runbook'
-import Logs from '../components/apps/app/logs/Logs'
-import UserManagement from '../components/apps/app/oidc/UserManagement'
-import Configuration from '../components/apps/app/config/Configuration'
-import AppComponent from '../components/apps/app/components/component/AppComponent'
-import ComponentInfo from '../components/component/ComponentInfo'
-import ComponentEvents from '../components/component/ComponentEvents'
-import ComponentRaw from '../components/component/ComponentRaw'
+import { lazyC } from './utils'
 
 export const appsRoutes = [
   <Route
     index
-    element={<AddOns />}
+    lazy={lazyC(import('components/apps/Apps'))}
   />,
   <Route
     path="apps/:appName"
-    element={<App />}
+    lazy={lazyC(import('components/apps/app/App'))}
   >
     <Route
       index
@@ -45,55 +22,55 @@ export const appsRoutes = [
     />
     <Route
       path="dashboards"
-      element={<Dashboards />}
+      lazy={lazyC(import('components/apps/app/dashboards/Dashboards'))}
     />
     <Route
       path="dashboards/:dashboardId"
-      element={<Dashboard />}
+      lazy={lazyC(import('components/apps/app/dashboards/dashboard/Dashboard'))}
     />
     <Route
       path="runbooks"
-      element={<Runbooks />}
+      lazy={lazyC(import('components/apps/app/runbooks/Runbooks'))}
     />
     <Route
       path="credentials"
-      element={<Credentials />}
+      lazy={lazyC(import('components/apps/app/credentials/Credentials'))}
     />
     <Route
       path="runbooks/:runbookName"
-      element={<Runbook />}
+      lazy={lazyC(import('components/apps/app/runbooks/runbook/Runbook'))}
     />
     <Route
       path="components"
-      element={<AppComponents />}
+      lazy={lazyC(import('components/apps/app/components/AppComponents'))}
     />
     <Route
       path="logs"
-      element={<Logs />}
+      lazy={lazyC(import('components/apps/app/logs/Logs'))}
     />
     <Route
       path="cost"
-      element={<CostAnalysis />}
+      lazy={lazyC(import('components/apps/app/cost/CostAnalysis'))}
     />
     <Route
       path="oidc"
-      element={<UserManagement />}
+      lazy={lazyC(import('components/apps/app/oidc/UserManagement'))}
     />
     <Route
       path="uninstall"
-      element={<Uninstall />}
+      lazy={lazyC(import('components/apps/app/uninstall/Uninstall'))}
     />
     <Route
       path="config"
-      element={<Configuration />}
+      lazy={lazyC(import('components/apps/app/config/Configuration'))}
     />
     <Route
       path="docs"
-      element={<AppDocs />}
+      lazy={lazyC(import('components/apps/app/docs/AppDocs'))}
     >
       <Route
         path=":docName"
-        element={<AppDocs />}
+        lazy={lazyC(import('components/apps/app/docs/AppDocs'))}
       />
     </Route>
   </Route>,
@@ -101,7 +78,9 @@ export const appsRoutes = [
   /* COMPONENTS */
   <Route
     path="apps/:appName/components/:componentKind/:componentName"
-    element={<AppComponent />}
+    lazy={lazyC(
+      import('components/apps/app/components/component/AppComponent')
+    )}
   >
     <Route
       index
@@ -114,19 +93,19 @@ export const appsRoutes = [
     />
     <Route
       path="info"
-      element={<ComponentInfo />}
+      lazy={lazyC(import('components/component/ComponentInfo'))}
     />
     <Route
       path="metrics"
-      element={<ComponentMetrics />}
+      lazy={lazyC(import('components/component/ComponentMetrics'))}
     />
     <Route
       path="events"
-      element={<ComponentEvents />}
+      lazy={lazyC(import('components/component/ComponentEvents'))}
     />
     <Route
       path="raw"
-      element={<ComponentRaw />}
+      lazy={lazyC(import('components/component/ComponentRaw'))}
     />
   </Route>,
 ]
