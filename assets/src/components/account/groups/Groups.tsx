@@ -11,7 +11,7 @@ import { GroupsList } from './GroupsList'
 import GroupCreate from './GroupCreate'
 import GroupSearchHeader from './GroupsSearchHeader'
 
-export function Groups() {
+export default function Groups() {
   const [q, setQ] = useState('')
   const { availableFeatures } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.userManagement

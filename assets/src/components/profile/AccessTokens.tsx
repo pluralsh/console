@@ -285,7 +285,7 @@ const tokenColumns = [
   }),
 ]
 
-export function AccessTokens() {
+export default function AccessTokens() {
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
   const { data } = useAccessTokensQuery()
   const [mutation, { loading }] = useCreateAccessTokenMutation({

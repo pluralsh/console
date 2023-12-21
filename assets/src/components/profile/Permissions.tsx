@@ -26,7 +26,7 @@ function sanitizeBinding({ user, group }) {
   if (group) return { group: { name: group.name } }
 }
 
-export function Permissions() {
+export default function Permissions() {
   const { me } = useContext<any>(LoginContext)
   const [role, setRole] = useState<any>(undefined)
   const raw = useMemo(() => (role ? stringify(sanitize(role)) : ''), [role])

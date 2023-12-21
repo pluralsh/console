@@ -4,7 +4,7 @@ import { Flex } from 'honorable'
 import SecurityAccess from './SecurityAccess'
 import SecurityPassword from './SecurityPassword'
 
-export function Security() {
+export default function Security() {
   return (
     <ScrollablePage heading="Security">
       <Flex

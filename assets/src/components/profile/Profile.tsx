@@ -12,7 +12,7 @@ import { ValidationResponse } from '@pluralsh/design-system/dist/components/Vali
 import { isValidEmail } from 'utils/email'
 import { isEmpty } from 'lodash'
 
-export function Profile() {
+export default function Profile() {
   const { me } = useContext<any>(LoginContext)
   const [name, setName] = useState<string>(me.name)
   const [email, setEmail] = useState<string>(me.email)

@@ -28,7 +28,7 @@ import { SHORT_POLL_INTERVAL } from '../../cluster/constants'
 
 import { VPNHeaderActions } from './VPNHeaderActions'
 
-function VPN() {
+export default function VPN() {
   const {
     data: { wireguardPeers } = {},
     loading,
@@ -118,5 +118,3 @@ function VPN() {
     </ResponsivePageFullWidth>
   )
 }
-
-export { VPN as AccountVPN }

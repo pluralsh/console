@@ -16,7 +16,7 @@ import { MyWireguardPeers } from '../vpn/graphql/queries'
 import { RootQueryType } from '../../generated/graphql'
 import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth'
 
-function VPN() {
+export default function VPN() {
   const {
     data: { myWireguardPeers } = {},
     loading,
@@ -54,5 +54,3 @@ function VPN() {
     </ResponsivePageFullWidth>
   )
 }
-
-export { VPN as ProfileVPN }

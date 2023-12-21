@@ -1,55 +1,18 @@
 import { Navigate, Route } from 'react-router-dom'
 
-import Builds from 'components/builds/Builds'
-import Build from 'components/builds/build/Build'
-import Changelog from 'components/builds/build/changelog/Changelog'
-import Progress from 'components/builds/build/progress/Progress'
-import AuditsTable from 'components/audits/table/AuditTable'
-import AuditsGraph from 'components/audits/graph/AuditsGraph'
-
-import MyProfile from 'components/profile/MyProfile'
-
-import { Profile } from 'components/profile/Profile'
-
-import { Security } from 'components/profile/Security'
-
-import { Permissions } from 'components/profile/Permissions'
-
-import Account from 'components/account/Account'
-
-import { Groups } from 'components/account/groups/Groups'
-
-import Audits from 'components/audits/Audits'
-
-import Roles from 'components/account/roles/Roles'
-
-import { Webhooks } from 'components/account/webhooks/Webhooks'
-
-import Users from 'components/account/users/Users'
-
-import EmailSettings from 'components/account/email/EmailSettings'
-
-import AccountSettings from 'components/account/settings/AccountSettings'
-import CookieSettings from 'components/account/settings/CookieSettings'
-
-import { AccessTokens } from 'components/profile/AccessTokens'
-
-import { ProfileVPN } from '../components/profile/VPN'
-
-import { AccountVPN } from '../components/account/vpn/VPN'
-
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
 import { cdRoutes } from './cdRoutes'
+import { lazyC } from './utils'
 
 const buildsRoutes = [
   <Route
     path="builds"
-    element={<Builds />}
+    lazy={lazyC(import('components/builds/Builds'))}
   />,
   <Route
+    lazy={lazyC(import('components/builds/build/Build'))}
     path="builds/:buildId"
-    element={<Build />}
   >
     <Route
       index
@@ -62,11 +25,11 @@ const buildsRoutes = [
     />
     <Route
       path="progress"
-      element={<Progress />}
+      lazy={lazyC(import('components/builds/build/progress/Progress'))}
     />
     <Route
       path="changelog"
-      element={<Changelog />}
+      lazy={lazyC(import('components/builds/build/changelog/Changelog'))}
     />
   </Route>,
 ]
@@ -74,7 +37,7 @@ const buildsRoutes = [
 const auditsRoutes = [
   <Route
     path="audits"
-    element={<Audits />}
+    lazy={lazyC(import('components/audits/Audits'))}
   >
     <Route
       index
@@ -87,11 +50,11 @@ const auditsRoutes = [
     />
     <Route
       path="table"
-      element={<AuditsTable />}
+      lazy={lazyC(import('components/audits/table/AuditTable'))}
     />
     <Route
       path="graph"
-      element={<AuditsGraph />}
+      lazy={lazyC(import('components/audits/graph/AuditsGraph'))}
     />
   </Route>,
 ]
@@ -99,7 +62,7 @@ const auditsRoutes = [
 const profileRoutes = [
   <Route
     path="profile"
-    element={<MyProfile />}
+    lazy={lazyC(import('components/profile/MyProfile'))}
   >
     <Route
       index
@@ -112,23 +75,23 @@ const profileRoutes = [
     />
     <Route
       path="me"
-      element={<Profile />}
+      lazy={lazyC(import('components/profile/Profile'))}
     />
     <Route
       path="security"
-      element={<Security />}
+      lazy={lazyC(import('components/profile/Security'))}
     />
     <Route
       path="permissions"
-      element={<Permissions />}
+      lazy={lazyC(import('components/profile/Permissions'))}
     />
     <Route
       path="vpn"
-      element={<ProfileVPN />}
+      lazy={lazyC(import('components/profile/VPN'))}
     />
     <Route
       path="access-tokens"
-      element={<AccessTokens />}
+      lazy={lazyC(import('components/profile/AccessTokens'))}
     />
   </Route>,
 ]
@@ -136,7 +99,7 @@ const profileRoutes = [
 const accountRoutes = [
   <Route
     path="account"
-    element={<Account />}
+    lazy={lazyC(import('components/account/Account'))}
   >
     <Route
       index
@@ -149,35 +112,35 @@ const accountRoutes = [
     />
     <Route
       path="users"
-      element={<Users />}
+      lazy={lazyC(import('components/account/users/Users'))}
     />
     <Route
       path="groups"
-      element={<Groups />}
+      lazy={lazyC(import('components/account/groups/Groups'))}
     />
     <Route
       path="roles"
-      element={<Roles />}
+      lazy={lazyC(import('components/account/roles/Roles'))}
     />
     <Route
       path="webhooks"
-      element={<Webhooks />}
+      lazy={lazyC(import('components/account/webhooks/Webhooks'))}
     />
     <Route
       path="vpn"
-      element={<AccountVPN />}
+      lazy={lazyC(import('components/account/vpn/VPN'))}
     />
     <Route
       path="email"
-      element={<EmailSettings />}
+      lazy={lazyC(import('components/account/email/EmailSettings'))}
     />
     <Route
       path="settings"
-      element={<AccountSettings />}
+      lazy={lazyC(import('components/account/settings/AccountSettings'))}
     />
     <Route
       path="cookies"
-      element={<CookieSettings />}
+      lazy={lazyC(import('components/account/settings/CookieSettings'))}
     />
   </Route>,
 ]

@@ -19,6 +19,6 @@ export function lazyC<P>(
     const Component = (await i).default
 
     // @ts-expect-error
-    return { element: <Component {...props} /> }
+    return { element: <Component {...(props || {})} /> }
   }
 }

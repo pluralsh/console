@@ -5,7 +5,7 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import WebhooksHeader from './WebhooksHeader'
 import WebhooksList from './WebhooksList'
 
-export function Webhooks() {
+export default function Webhooks() {
   return (
     <ScrollablePage
       scrollable={false}
