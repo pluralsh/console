@@ -28,7 +28,7 @@ defmodule Kube.Client do
   get_request :get_helm_repository, Kube.HelmRepository
   get_request :get_helm_chart, Kube.HelmChart
   get_request :get_canary, Kube.Canary
-  get_request :get_plan, Kube.UpgradePlan
+  get_request :get_upgrade_plan, Kube.UpgradePlan
 
   delete_request :delete_wireguard_peer, Kube.WireguardPeer
   delete_request :delete_certificate, Kube.Certificate
