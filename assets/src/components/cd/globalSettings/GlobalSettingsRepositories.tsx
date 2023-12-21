@@ -18,7 +18,7 @@ import { GqlError } from 'components/utils/Alert'
 
 import { RepositorySelector } from '../services/deployModal/DeployServiceSettingsGit'
 
-export function GlobalSettingsRepositories() {
+export default function GlobalSettingsRepositories() {
   const theme = useTheme()
   const { deploymentSettings, refetch } = useGlobalSettingsContext()
 

@@ -1,29 +1,26 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { splitBindings } from 'components/account/roles/RoleFormBindings'
 import {
   getGlobalSettingsBreadcrumbs,
   useGlobalSettingsContext,
 } from 'components/cd/globalSettings/GlobalSettings'
 import { GqlError } from 'components/utils/Alert'
-import { BindingInput } from 'components/utils/BindingInput'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import {
-  PolicyBindingFragment,
-  useUpdateDeploymentSettingsMutation,
-} from 'generated/graphql'
+import { useUpdateDeploymentSettingsMutation } from 'generated/graphql'
 import { upperFirst } from 'lodash'
 import { useCallback, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
-type SetBindingsType = (
+import ReadWriteBindings from './ReadWriteBindings'
+
+export type SetBindingsType = (
   bindings: Nullable<{
     group?: Nullable<{ id: string }>
     user?: Nullable<{ id: string }>
   }>[]
 ) => void
 
-export function GlobalSettingsPermissions({
+export default function GlobalSettingsPermissions({
   type,
 }: {
   type: 'write' | 'read' | 'git' | 'create'
@@ -95,66 +92,5 @@ export function GlobalSettingsPermissions({
         {error && <GqlError error={error} />}
       </div>
     </ScrollablePage>
-  )
-}
-
-export default function ReadWriteBindings({
-  bindings: bindingsProp,
-  setBindings,
-  hints,
-}: {
-  bindings: Nullable<Nullable<PolicyBindingFragment>[]>
-  setBindings: SetBindingsType
-  hints?: { user?: string; group?: string }
-}) {
-  const theme = useTheme()
-  const bindings = (bindingsProp || []).filter(isNonNullable)
-
-  const { userBindings, groupBindings } = useMemo(() => {
-    const { userBindings, groupBindings } = splitBindings(bindings)
-
-    return {
-      userBindings: (userBindings || []).map(({ user }) => user?.email),
-      groupBindings: (groupBindings || []).map(({ group }) => group?.name),
-    }
-  }, [bindings])
-
-  return (
-    <div
-      css={{
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'row',
-        gap: theme.spacing.xlarge,
-        '& > *': {
-          flexBasis: '50%',
-          flexGrow: 1,
-          flexShrink: 1,
-        },
-      }}
-    >
-      <BindingInput
-        type="user"
-        hint={hints?.user || 'Users that will receive this role'}
-        bindings={userBindings}
-        add={(user) => setBindings([...bindings, { user }])}
-        remove={(email) =>
-          setBindings(
-            bindings.filter(({ user }) => !user || user.email !== email)
-          )
-        }
-      />
-      <BindingInput
-        type="group"
-        hint={hints?.group || 'Groups that will receive this role'}
-        bindings={groupBindings}
-        add={(group) => setBindings([...bindings, { group }])}
-        remove={(name) =>
-          setBindings(
-            bindings.filter(({ group }) => !group || group.name !== name)
-          )
-        }
-      />
-    </div>
   )
 }

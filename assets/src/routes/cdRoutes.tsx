@@ -1,12 +1,6 @@
 import { createContext, useContext, useLayoutEffect, useMemo } from 'react'
 
-import ContinuousDeployment, {
-  POLL_INTERVAL,
-} from 'components/cd/ContinuousDeployment'
-import Clusters from 'components/cd/clusters/Clusters'
-import Repositories from 'components/cd/repos/Repositories'
-import Services from 'components/cd/services/Services'
-import Providers from 'components/cd/providers/Providers'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   Navigate,
   Outlet,
@@ -17,53 +11,10 @@ import {
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
-import ServiceComponent from 'components/cd/services/component/ServiceComponent'
-import ServiceDetails from 'components/cd/services/service/ServiceDetails'
-import ServiceDocs from 'components/cd/services/service/ServiceDocs'
-import ServiceComponents from 'components/cd/services/service/ServiceComponents'
-import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
-import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
-import ServiceSettings from 'components/cd/services/service/ServiceSettings'
-import ServiceHelm from 'components/cd/services/service/ServiceHelm'
-
-import ComponentInfo from 'components/component/ComponentInfo'
-import ComponentEvents from 'components/component/ComponentEvents'
-import ComponentRaw from 'components/component/ComponentRaw'
-import ComponentMetrics from 'components/component/ComponentMetrics'
-
-import { GlobalSettings } from 'components/cd/globalSettings/GlobalSettings'
-import { GlobalSettingsPermissions } from 'components/cd/globalSettings/GlobalSettingsPermissions'
-import { GlobalSettingsRepositories } from 'components/cd/globalSettings/GlobalSettingsRepositories'
-import SelfManage from 'components/cd/globalSettings/SelfManage'
-
-import Pipelines from 'components/cd/pipelines/Pipelines'
-
-import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
-
 import {
   DeploymentSettingsFragment,
   useDeploymentSettingsQuery,
 } from 'generated/graphql'
-
-import Cluster from '../components/cd/cluster/Cluster'
-import ClusterServices from '../components/cd/cluster/ClusterServices'
-import ClusterNodes from '../components/cd/cluster/ClusterNodes'
-import ClusterPods from '../components/cd/cluster/ClusterPods'
-
-import Node from '../components/cd/cluster/node/Node'
-import NodeInfo from '../components/cd/cluster/node/NodeInfo'
-import NodeEvents from '../components/cd/cluster/node/NodeEvents'
-import NodeRaw from '../components/cd/cluster/node/NodeRaw'
-import NodeMetadata from '../components/cd/cluster/node/NodeMetadata'
-
-import AddOns from '../components/cd/addOns/AddOns'
-import Pod from '../components/cd/cluster/pod/Pod'
-import PodInfo from '../components/cd/cluster/pod/PodInfo'
-import ClusterMetadata from '../components/cd/cluster/ClusterMetadata'
-import PodRaw from '../components/cluster/pods/PodRaw'
-import PodEvents from '../components/cluster/pods/PodEvents'
-import Logs from '../components/cd/cluster/pod/logs/Logs'
-import PodShell from '../components/cd/cluster/pod/PodShell'
 
 import {
   ADDONS_REL_PATH,
@@ -88,11 +39,12 @@ import {
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
+import { lazyC } from './utils'
 
 export const componentRoutes = (
   <Route
     path={SERVICE_COMPONENT_PATH_MATCHER_REL}
-    element={<ServiceComponent />}
+    lazy={lazyC(import('components/cd/services/component/ServiceComponent'))}
   >
     <Route
       index
@@ -105,19 +57,19 @@ export const componentRoutes = (
     />
     <Route
       path="info"
-      element={<ComponentInfo />}
+      lazy={lazyC(import('components/component/ComponentInfo'))}
     />
     <Route
       path="metrics"
-      element={<ComponentMetrics />}
+      lazy={lazyC(import('components/component/ComponentMetrics'))}
     />
     <Route
       path="events"
-      element={<ComponentEvents />}
+      lazy={lazyC(import('components/component/ComponentEvents'))}
     />
     <Route
       path="raw"
-      element={<ComponentRaw />}
+      lazy={lazyC(import('components/component/ComponentRaw'))}
     />
   </Route>
 )
@@ -160,22 +112,22 @@ function CdRoot() {
 }
 
 const mainRoutes = (
-  <Route element={<ContinuousDeployment />}>
+  <Route lazy={lazyC(import('components/cd/ContinuousDeployment'))}>
     <Route
       path={CLUSTERS_REL_PATH}
-      element={<Clusters />}
+      lazy={lazyC(import('components/cd/clusters/Clusters'))}
     />
     <Route
       path={`${SERVICES_REL_PATH}/:${SERVICE_PARAM_CLUSTER_ID}?`}
-      element={<Services />}
+      lazy={lazyC(import('components/cd/services/Services'))}
     />
     <Route
       path={PIPELINES_REL_PATH}
-      element={<Pipelines />}
+      lazy={lazyC(import('components/cd/pipelines/Pipelines'))}
     >
       <Route
         path=":pipelineId"
-        element={<Pipelines />}
+        lazy={lazyC(import('components/cd/pipelines/Pipelines'))}
       />
     </Route>
     <Route
@@ -189,15 +141,15 @@ const mainRoutes = (
     />
     <Route
       path={REPOS_REL_PATH}
-      element={<Repositories />}
+      lazy={lazyC(import('components/cd/repos/Repositories'))}
     />
     <Route
       path={PROVIDERS_REL_PATH}
-      element={<Providers />}
+      lazy={lazyC(import('components/cd/providers/Providers'))}
     />
     <Route
       path={ADDONS_REL_PATH}
-      element={<AddOns />}
+      lazy={lazyC(import('components/cd/addOns/AddOns'))}
     />
   </Route>
 )
@@ -205,7 +157,7 @@ const mainRoutes = (
 const globalSettingsRoutes = (
   <Route
     path={GLOBAL_SETTINGS_REL_PATH}
-    element={<GlobalSettings />}
+    lazy={lazyC(import('components/cd/globalSettings/GlobalSettings'))}
   >
     <Route
       index
@@ -218,31 +170,47 @@ const globalSettingsRoutes = (
     />
     <Route
       path="permissions/read"
-      element={<GlobalSettingsPermissions type="read" />}
+      lazy={lazyC(
+        import('components/cd/globalSettings/GlobalSettingsPermissions'),
+        { type: 'read' }
+      )}
     />
     <Route
       path="permissions/write"
-      element={<GlobalSettingsPermissions type="write" />}
+      lazy={lazyC(
+        import('components/cd/globalSettings/GlobalSettingsPermissions'),
+        { type: 'write' }
+      )}
     />
     <Route
       path="permissions/create"
-      element={<GlobalSettingsPermissions type="create" />}
+      lazy={lazyC(
+        import('components/cd/globalSettings/GlobalSettingsPermissions'),
+        { type: 'create' }
+      )}
     />
     <Route
       path="permissions/git"
-      element={<GlobalSettingsPermissions type="git" />}
+      lazy={lazyC(
+        import('components/cd/globalSettings/GlobalSettingsPermissions'),
+        { type: 'git' }
+      )}
     />
     <Route
       path="repositories"
-      element={<GlobalSettingsRepositories />}
+      lazy={lazyC(
+        import('components/cd/globalSettings/GlobalSettingsRepositories')
+      )}
     />
     <Route
       path="auto-update"
-      element={<SelfManage />}
+      lazy={lazyC(import('components/cd/globalSettings/SelfManage'))}
     />
     <Route
       path="observability"
-      element={<GlobalSettingsObservability />}
+      lazy={lazyC(
+        import('components/cd/globalSettings/GlobalSettingsObservability')
+      )}
     />
   </Route>
 )
@@ -250,7 +218,7 @@ const globalSettingsRoutes = (
 const clusterDetailsRoutes = (
   <Route
     path={CLUSTER_REL_PATH}
-    element={<Cluster />}
+    lazy={lazyC(import('components/cd/cluster/Cluster'))}
   >
     <Route
       index
@@ -263,19 +231,19 @@ const clusterDetailsRoutes = (
     />
     <Route
       path={CLUSTER_SERVICES_PATH}
-      element={<ClusterServices />}
+      lazy={lazyC(import('components/cd/cluster/ClusterServices'))}
     />
     <Route
       path={CLUSTER_NODES_PATH}
-      element={<ClusterNodes />}
+      lazy={lazyC(import('components/cd/cluster/ClusterNodes'))}
     />
     <Route
       path={CLUSTER_PODS_PATH}
-      element={<ClusterPods />}
+      lazy={lazyC(import('components/cd/cluster/ClusterPods'))}
     />
     <Route
       path={CLUSTER_METADATA_PATH}
-      element={<ClusterMetadata />}
+      lazy={lazyC(import('components/cd/cluster/ClusterMetadata'))}
     />
   </Route>
 )
@@ -283,23 +251,23 @@ const clusterDetailsRoutes = (
 const nodeDetailsRoutes = (
   <Route
     path={NODE_REL_PATH}
-    element={<Node />}
+    lazy={lazyC(import('components/cd/cluster/node/Node'))}
   >
     <Route
       index
-      element={<NodeInfo />}
+      lazy={lazyC(import('components/cd/cluster/node/NodeInfo'))}
     />
     <Route
       path="events"
-      element={<NodeEvents />}
+      lazy={lazyC(import('components/cd/cluster/node/NodeEvents'))}
     />
     <Route
       path="raw"
-      element={<NodeRaw />}
+      lazy={lazyC(import('components/cd/cluster/node/NodeRaw'))}
     />
     <Route
       path="metadata"
-      element={<NodeMetadata />}
+      lazy={lazyC(import('components/cd/cluster/node/NodeMetadata'))}
     />
   </Route>
 )
@@ -307,27 +275,27 @@ const nodeDetailsRoutes = (
 const podDetailsRoutes = (
   <Route
     path={POD_REL_PATH}
-    element={<Pod />}
+    lazy={lazyC(import('components/cd/cluster/pod/Pod'))}
   >
     <Route
       index
-      element={<PodInfo />}
+      lazy={lazyC(import('components/cd/cluster/pod/PodInfo'))}
     />
     <Route
       path="events"
-      element={<PodEvents />}
+      lazy={lazyC(import('components/cluster/pods/PodEvents'))}
     />
     <Route
       path="raw"
-      element={<PodRaw />}
+      lazy={lazyC(import('components/cluster/pods/PodRaw'))}
     />
     <Route
       path="logs"
-      element={<Logs />}
+      lazy={lazyC(import('components/cd/cluster/pod/logs/Logs'))}
     />
     <Route
       path="shell"
-      element={<PodShell />}
+      lazy={lazyC(import('components/cd/cluster/pod/PodShell'))}
     />
   </Route>
 )
@@ -335,7 +303,7 @@ const podDetailsRoutes = (
 const serviceDetailsRoutes = (
   <Route
     path={SERVICE_REL_PATH}
-    element={<ServiceDetails />}
+    lazy={lazyC(import('components/cd/services/service/ServiceDetails'))}
   >
     <Route
       index
@@ -347,32 +315,32 @@ const serviceDetailsRoutes = (
       }
     />
     <Route
-      element={<ServiceComponents />}
+      lazy={lazyC(import('components/cd/services/service/ServiceComponents'))}
       path={SERVICE_COMPONENTS_PATH}
     />
     <Route
-      element={<ServiceSecrets />}
+      lazy={lazyC(import('components/cd/services/service/ServiceSecrets'))}
       path="secrets"
     />
     <Route
-      element={<ServiceRevisions />}
+      lazy={lazyC(import('components/cd/services/service/ServiceRevisions'))}
       path="revisions"
     />
     <Route
-      element={<ServiceHelm />}
+      lazy={lazyC(import('components/cd/services/service/ServiceHelm'))}
       path="helm"
     />
     <Route
-      element={<ServiceSettings />}
+      lazy={lazyC(import('components/cd/services/service/ServiceSettings'))}
       path="settings"
     />
     <Route
-      element={<ServiceDocs />}
+      lazy={lazyC(import('components/cd/services/service/ServiceDocs'))}
       path="docs"
     >
       <Route
+        lazy={lazyC(import('components/cd/services/service/ServiceDocs'))}
         path=":docName"
-        element={<ServiceDocs />}
       />
     </Route>
   </Route>

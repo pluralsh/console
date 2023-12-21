@@ -67,7 +67,7 @@ type GlobalSettingsContextType = {
 export const useGlobalSettingsContext = () =>
   useOutletContext<GlobalSettingsContextType>()
 
-export function GlobalSettings() {
+export default function GlobalSettings() {
   const theme = useTheme()
   const { pathname } = useLocation()
   const { configuration } = useContext<any>(LoginContext)
