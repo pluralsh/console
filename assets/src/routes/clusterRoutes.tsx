@@ -1,52 +1,37 @@
 import { Route, redirect } from 'react-router-dom'
 
-import NodeInfo from 'components/cluster/nodes/NodeInfo'
-import Pods from 'components/cluster/pods/Pods'
-import Pod from 'components/cluster/pods/Pod'
-import PodInfo from 'components/cluster/pods/PodInfo'
-import PodEvents from 'components/cluster/pods/PodEvents'
-import PodLogs from 'components/cluster/pods/PodLogs'
-import Node from 'components/cluster/nodes/Node'
-import Nodes from 'components/cluster/nodes/Nodes'
-import NodeEvents from 'components/cluster/nodes/NodeEvents'
-import NodeRaw from 'components/cluster/nodes/NodeRaw'
-import NodeMetadata from 'components/cluster/nodes/NodeMetadata'
-import Container from 'components/cluster/containers/Container'
-import ContainerShell from 'components/cluster/containers/ContainerShell'
-import ContainerMetadata from 'components/cluster/containers/ContainerMetadata'
-import DatabaseManagement from 'components/db-management/DatabaseManagement'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 
-import PodRaw from '../components/cluster/pods/PodRaw'
+import { lazyC } from './utils'
 
 export const clusterRoutes = [
   /* Pods */
   <Route
     path="pods/:namespace?"
     index
-    element={<Pods />}
+    lazy={lazyC(import('components/cluster/pods/Pods'))}
   />,
 
   /* Pod Details */
   <Route
     path="pods/:namespace/:name"
-    element={<Pod />}
+    lazy={lazyC(import('components/cluster/pods/Pod'))}
   >
     <Route
       index
-      element={<PodInfo />}
+      lazy={lazyC(import('components/cluster/pods/PodInfo'))}
     />
     <Route
       path="events"
-      element={<PodEvents />}
+      lazy={lazyC(import('components/cluster/pods/PodEvents'))}
     />
     <Route
       path="raw"
-      element={<PodRaw />}
+      lazy={lazyC(import('components/cluster/pods/PodRaw'))}
     />
     <Route
       path="logs"
-      element={<PodLogs />}
+      lazy={lazyC(import('components/cluster/pods/PodLogs'))}
     />
   </Route>,
 
@@ -54,44 +39,44 @@ export const clusterRoutes = [
   <Route
     path="nodes"
     index
-    element={<Nodes />}
+    lazy={lazyC(import('components/cluster/nodes/Nodes'))}
   />,
 
   /* Node Details */
   <Route
     path="nodes/:name"
-    element={<Node />}
+    lazy={lazyC(import('components/cluster/nodes/Node'))}
   >
     <Route
       index
-      element={<NodeInfo />}
+      lazy={lazyC(import('components/cluster/nodes/NodeInfo'))}
     />
     <Route
       path="events"
-      element={<NodeEvents />}
+      lazy={lazyC(import('components/cluster/nodes/NodeEvents'))}
     />
     <Route
       path="raw"
-      element={<NodeRaw />}
+      lazy={lazyC(import('components/cluster/nodes/NodeRaw'))}
     />
     <Route
       path="metadata"
-      element={<NodeMetadata />}
+      lazy={lazyC(import('components/cluster/nodes/NodeMetadata'))}
     />
   </Route>,
 
   /* Pod Shell */
   <Route
     path="pods/:namespace/:name/shell/:container"
-    element={<Container />}
+    lazy={lazyC(import('components/cluster/containers/Container'))}
   >
     <Route
       index
-      element={<ContainerShell />}
+      lazy={lazyC(import('components/cluster/containers/ContainerShell'))}
     />
     <Route
       path="metadata"
-      element={<ContainerMetadata />}
+      lazy={lazyC(import('components/cluster/containers/ContainerMetadata'))}
     />
   </Route>,
   /* Redirect old routes */
@@ -106,6 +91,6 @@ export const clusterRoutes = [
   <Route
     path={`${DB_MANAGEMENT_PATH}/:namespace?`}
     index
-    element={<DatabaseManagement />}
+    lazy={lazyC(import('components/db-management/DatabaseManagement'))}
   />,
 ]
