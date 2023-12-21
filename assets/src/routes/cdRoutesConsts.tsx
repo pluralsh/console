@@ -7,6 +7,8 @@ export const CD_ABS_PATH = `/${CD_REL_PATH}` as const
 export const CLUSTERS_REL_PATH = 'clusters' as const
 export const SERVICES_REL_PATH = 'services' as const
 export const PIPELINES_REL_PATH = 'pipelines' as const
+export const PIPELINES_ABS_PATH =
+  `${CD_ABS_PATH}/${PIPELINES_REL_PATH}` as const
 export const PROVIDERS_REL_PATH = 'providers' as const
 export const REPOS_REL_PATH = 'repos' as const
 export const CD_DEFAULT_REL_PATH = CLUSTERS_REL_PATH

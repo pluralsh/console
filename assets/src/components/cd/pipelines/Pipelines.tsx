@@ -17,6 +17,8 @@ import { Edge, extendConnection } from 'utils/graphql'
 
 import { NetworkStatus } from '@apollo/client'
 
+import { useNavigate, useParams } from 'react-router-dom'
+
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 import { VirtualList, type VirtualListRenderer } from '../../utils/VirtualList'
@@ -105,17 +107,22 @@ function Pipelines() {
   })
   const pageInfo = data?.pipelines?.pageInfo
   const pipeEdges = data?.pipelines?.edges
-  const [selectedPipeline, setSelectedPipeline] = useState(
-    pipeEdges?.[0]?.node?.id ?? ''
+  const selectedPipeline = useParams().pipelineId
+  const navigate = useNavigate()
+  const setSelectedPipeline = useCallback(
+    (pipelineId: string) => {
+      navigate(pipelineId)
+    },
+    [navigate]
   )
 
-  useEffect(() => {
+  if (!selectedPipeline) {
     const firstId = pipeEdges?.[0]?.node?.id
 
-    if (firstId && !selectedPipeline) {
+    if (firstId) {
       setSelectedPipeline(firstId)
     }
-  }, [pipeEdges, selectedPipeline])
+  }
 
   useSetBreadcrumbs(PIPELINES_CRUMBS)
 
