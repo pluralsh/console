@@ -122,14 +122,9 @@ const mainRoutes = (
       lazy={lazyC(import('components/cd/services/Services'))}
     />
     <Route
-      path={PIPELINES_REL_PATH}
+      path={`${PIPELINES_REL_PATH}/:pipelineId?`}
       lazy={lazyC(import('components/cd/pipelines/Pipelines'))}
-    >
-      <Route
-        path=":pipelineId"
-        lazy={lazyC(import('components/cd/pipelines/Pipelines'))}
-      />
-    </Route>
+    />
     <Route
       path="git"
       element={
