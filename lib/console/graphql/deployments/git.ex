@@ -27,6 +27,10 @@ defmodule Console.GraphQl.Deployments.Git do
     field :https_path,   :string, description: "the https url for this git repo"
     field :url_format,   :string, description: "a format string to get the http url for a subfolder in a git repo"
 
+    field :refs, list_of(non_null(:string)), description: "named refs like branches/tags for a repository", resolve: fn
+      git, _, _ -> Deployments.git_refs(git)
+    end
+
     field :editable, :boolean,
       resolve: &Deployments.editable/3,
       description: "whether the current user can edit this repo"

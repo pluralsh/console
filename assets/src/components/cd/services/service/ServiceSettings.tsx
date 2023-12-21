@@ -122,9 +122,7 @@ export default function ServiceSettings() {
               <ServiceGitRefField
                 value={state.gitRef}
                 required
-                onChange={(e) => {
-                  updateState({ gitRef: e.currentTarget.value })
-                }}
+                setValue={(v) => updateState({ gitRef: v })}
               />
               <ServiceGitFolderField
                 value={state.gitFolder}

@@ -1881,6 +1881,9 @@ type GitRepository {
   "a format string to get the http url for a subfolder in a git repo"
   urlFormat: String
 
+  "named refs like branches\/tags for a repository"
+  refs: [String!]
+
   "whether the current user can edit this repo"
   editable: Boolean
 

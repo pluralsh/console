@@ -66,6 +66,12 @@ query HelmRepository($namespace: String!, $name: String!) {
   }
 }
 
+query GitRepository($id: ID!) {
+  gitRepository(id: $id) {
+    refs
+  }
+}
+
 mutation CreateGitRepository($attributes: GitAttributes!) {
   createGitRepository(attributes: $attributes) {
     ...GitRepository

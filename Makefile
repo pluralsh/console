@@ -68,6 +68,10 @@ update-schema:
 	cd assets && yarn graphql:codegen
 
 
+k3s:  ## starts a k3d cluster for testing
+	@read -p "cluster name: " name; \
+	k3d cluster create $$name --image docker.io/rancher/k3s:v1.26.11-k3s2
+
 delete-tag:  ## deletes a tag from git locally and upstream
 	@read -p "Version: " tag; \
 	git tag -d $$tag; \

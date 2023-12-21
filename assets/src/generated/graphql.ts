@@ -1316,6 +1316,8 @@ export type GitRepository = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the last successsful git pull timestamp */
   pulledAt?: Maybe<Scalars['DateTime']['output']>;
+  /** named refs like branches/tags for a repository */
+  refs?: Maybe<Array<Scalars['String']['output']>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the git url of the repository, either https or ssh supported */
   url: Scalars['String']['output'];
@@ -4551,6 +4553,13 @@ export type HelmRepositoryQueryVariables = Exact<{
 
 export type HelmRepositoryQuery = { __typename?: 'RootQueryType', helmRepository?: { __typename?: 'HelmRepository', charts?: Array<{ __typename?: 'HelmChartEntry', name?: string | null, versions?: Array<{ __typename?: 'HelmChartVersion', name?: string | null, appVersion?: string | null, version?: string | null, digest?: string | null } | null> | null } | null> | null, metadata: { __typename?: 'Metadata', namespace?: string | null, name: string }, spec: { __typename?: 'HelmRepositorySpec', url: string, type?: string | null, provider?: string | null }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null };
 
+export type GitRepositoryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GitRepositoryQuery = { __typename?: 'RootQueryType', gitRepository?: { __typename?: 'GitRepository', refs?: Array<string> | null } | null };
+
 export type CreateGitRepositoryMutationVariables = Exact<{
   attributes: GitAttributes;
 }>;
@@ -7442,6 +7451,46 @@ export type HelmRepositoryQueryHookResult = ReturnType<typeof useHelmRepositoryQ
 export type HelmRepositoryLazyQueryHookResult = ReturnType<typeof useHelmRepositoryLazyQuery>;
 export type HelmRepositorySuspenseQueryHookResult = ReturnType<typeof useHelmRepositorySuspenseQuery>;
 export type HelmRepositoryQueryResult = Apollo.QueryResult<HelmRepositoryQuery, HelmRepositoryQueryVariables>;
+export const GitRepositoryDocument = gql`
+    query GitRepository($id: ID!) {
+  gitRepository(id: $id) {
+    refs
+  }
+}
+    `;
+
+/**
+ * __useGitRepositoryQuery__
+ *
+ * To run a query within a React component, call `useGitRepositoryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGitRepositoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGitRepositoryQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGitRepositoryQuery(baseOptions: Apollo.QueryHookOptions<GitRepositoryQuery, GitRepositoryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GitRepositoryQuery, GitRepositoryQueryVariables>(GitRepositoryDocument, options);
+      }
+export function useGitRepositoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GitRepositoryQuery, GitRepositoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GitRepositoryQuery, GitRepositoryQueryVariables>(GitRepositoryDocument, options);
+        }
+export function useGitRepositorySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GitRepositoryQuery, GitRepositoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GitRepositoryQuery, GitRepositoryQueryVariables>(GitRepositoryDocument, options);
+        }
+export type GitRepositoryQueryHookResult = ReturnType<typeof useGitRepositoryQuery>;
+export type GitRepositoryLazyQueryHookResult = ReturnType<typeof useGitRepositoryLazyQuery>;
+export type GitRepositorySuspenseQueryHookResult = ReturnType<typeof useGitRepositorySuspenseQuery>;
+export type GitRepositoryQueryResult = Apollo.QueryResult<GitRepositoryQuery, GitRepositoryQueryVariables>;
 export const CreateGitRepositoryDocument = gql`
     mutation CreateGitRepository($attributes: GitAttributes!) {
   createGitRepository(attributes: $attributes) {
@@ -9963,6 +10012,7 @@ export const namedOperations = {
     GitRepositories: 'GitRepositories',
     HelmRepositories: 'HelmRepositories',
     HelmRepository: 'HelmRepository',
+    GitRepository: 'GitRepository',
     DeploymentSettings: 'DeploymentSettings',
     Pipelines: 'Pipelines',
     Pipeline: 'Pipeline',

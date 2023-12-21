@@ -11,8 +11,9 @@ defmodule Console.Deployments.Helm.RepositoryTest do
         }
       }
 
-      {:ok, [%{name: "console", versions: [chart | _]}]} = Repository.charts(repo)
+      {:ok, charts} = Repository.charts(repo)
 
+      %{versions: [chart | _]} = Enum.find(charts, & &1.name == "console")
       assert chart.name
       assert chart.version
       assert chart.app_version

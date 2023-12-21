@@ -5,7 +5,7 @@ stages:
   - name: mjg-k3s-dev/upgrade-plan
 - name: prod
   services:
-  - name: mjg-k3s/upgrade-plan
+  - name: mjg-k3s-prod/upgrade-plan
     criteria:
       source: mjg-k3s-dev/upgrade-plan
       secrets:
