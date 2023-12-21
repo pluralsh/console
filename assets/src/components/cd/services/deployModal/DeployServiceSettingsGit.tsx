@@ -38,11 +38,9 @@ export function DeployServiceSettingsGit({
     }
   })
 
-  const { data, error } = useGitRepositoryQuery({
+  const { data } = useGitRepositoryQuery({
     variables: { id: repositoryId },
   })
-  console.log(data)
-  console.log(error)
 
   return (
     <>

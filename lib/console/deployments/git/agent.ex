@@ -65,8 +65,8 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def handle_call(:refs, _, %State{cache: %Cache{heads: %{} = heads}} = state),
-    do: {:reply, Map.keys(heads), state}
-  def handle_call(:refs, _, state), do: {:reply, [], state}
+    do: {:reply, {:ok, Map.keys(heads)}, state}
+  def handle_call(:refs, _, state), do: {:reply, {:ok, []}, state}
 
   def handle_call({:fetch, %Service{git: %{ref: ref, folder: path}} = svc}, _, %State{cache: cache} = state) do
     svc = Console.Repo.preload(svc, [:revision])
