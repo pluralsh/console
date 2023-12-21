@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react'
 import {
   AppIcon,
   Card,
@@ -120,15 +120,17 @@ function Pipelines() {
     [pipeEdges, selectedPipeline]
   )
 
-  if (data && !pipeline) {
-    const firstId = pipeEdges?.[0]?.node?.id
+  useLayoutEffect(() => {
+    if (data && !pipeline) {
+      const firstId = pipeEdges?.[0]?.node?.id
 
-    if (firstId) {
-      setSelectedPipeline(firstId)
-    } else if (selectedPipeline) {
-      setSelectedPipeline('')
+      if (firstId) {
+        setSelectedPipeline(firstId)
+      } else if (selectedPipeline) {
+        setSelectedPipeline('')
+      }
     }
-  }
+  }, [data, pipeEdges, pipeline, selectedPipeline, setSelectedPipeline])
 
   useSetBreadcrumbs(PIPELINES_CRUMBS)
 
