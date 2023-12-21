@@ -11,6 +11,7 @@ import { compareItems, rankItem } from '@tanstack/match-sorter-utils'
 import useOnUnMount from 'components/hooks/useOnUnMount'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { useGitRepositoryQuery } from 'generated/graphql'
+import { trimStart } from 'lodash'
 
 export function DeployServiceSettingsGit({
   repos,
@@ -37,7 +38,11 @@ export function DeployServiceSettingsGit({
     }
   })
 
-  const { data } = useGitRepositoryQuery({ variables: { id: repositoryId } })
+  const { data, error } = useGitRepositoryQuery({
+    variables: { id: repositoryId },
+  })
+  console.log(data)
+  console.log(error)
 
   return (
     <>
@@ -84,6 +89,9 @@ export function DeployServiceSettingsGit({
   )
 }
 
+const cleanRefs = (refs: string[] | null) =>
+  (refs || []).map((ref) => trimStart(ref, '/refs/heads/'))
+
 export function ServiceGitRefField({
   refs,
   value,
@@ -107,7 +115,7 @@ export function ServiceGitRefField({
           selectedKey={value}
           onSelectionChange={(ref) => setValue(ref as string)}
         >
-          {(refs || []).map((ref) => (
+          {cleanRefs(refs).map((ref) => (
             <ListBoxItem
               key={ref}
               label={ref}
