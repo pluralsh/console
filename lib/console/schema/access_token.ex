@@ -6,6 +6,11 @@ defmodule Console.Schema.AccessToken do
     field :token,        :string
     field :last_used_at, :utc_datetime_usec
 
+    embeds_many :scopes, Scope, on_replace: :delete do
+      field :api,        :string
+      field :identifier, :string
+    end
+
     belongs_to :user,    User
 
     timestamps()
@@ -25,7 +30,14 @@ defmodule Console.Schema.AccessToken do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:token_id)
+    |> cast_embed(:scopes, with: &scope_changeset/2)
     |> put_new_change(:token, fn -> "console-#{Console.rand_alphanum(30)}" end)
     |> validate_required(~w(user_id token)a)
+  end
+
+  def scope_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(api identifier)a)
+    |> validate_required(~w(api identifier)a)
   end
 end

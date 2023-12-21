@@ -4,6 +4,14 @@ defmodule Console.Deployments.Policies do
   alias Console.Deployments.Services
   alias Console.Schema.{User, Cluster, Service, PipelineGate}
 
+  def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
+    res = resource(res)
+    case Console.Users.AccessTokens.scopes_match?(scopes, api, Map.get(res, :id)) do
+      true -> can?(%{user | scopes: nil}, res, action)
+      false -> {:error, "token scopes not satisfied"}
+    end
+  end
+
   def can?(user, %Ecto.Changeset{} = cs, action),
     do: can?(user, apply_changes(cs), action)
 
@@ -47,4 +55,7 @@ defmodule Console.Deployments.Policies do
     do: rbac(resource, user, action)
 
   def can?(_, _, _), do: {:error, :forbidden}
+
+  defp resource(%Ecto.Changeset{} = cs), do: apply_changes(cs)
+  defp resource(res), do: res
 end

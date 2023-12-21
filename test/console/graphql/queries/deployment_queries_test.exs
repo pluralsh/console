@@ -872,3 +872,25 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
     end
   end
 end
+
+defmodule Console.GraphQl.Mutations.SyncDeploymentQueriesTest do
+  use Console.DataCase, async: false
+  use Mimic
+
+  describe "gitRepository" do
+    test "it can fetch the refs from a git repository" do
+      admin = admin_user()
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+
+      {:ok, %{data: %{"gitRepository" => %{"refs" => refs}}}} = run_query("""
+        query Git($id: ID!) {
+          gitRepository(id: $id) {
+            refs
+          }
+        }
+      """, %{"id" => git.id}, %{current_user: admin})
+
+      assert Enum.member?(refs, "refs/heads/master")
+    end
+  end
+end

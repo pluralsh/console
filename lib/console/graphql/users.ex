@@ -20,12 +20,24 @@ defmodule Console.GraphQl.Users do
     field :roles,    :user_role_attributes
   end
 
+  input_object :service_account_attributes do
+    field :name,             :string
+    field :email,            :string
+    field :roles,            :user_role_attributes
+    field :assume_bindings,  list_of(:policy_binding_attributes)
+  end
+
   input_object :user_role_attributes do
     field :admin, :boolean
   end
 
   input_object :invite_attributes do
     field :email, :string
+  end
+
+  input_object :scope_attributes do
+    field :api,        :string
+    field :identifier, :string
   end
 
   input_object :group_attributes do
@@ -58,6 +70,7 @@ defmodule Console.GraphQl.Users do
     field :read_timestamp,  :datetime
     field :build_timestamp, :datetime
 
+    field :assume_bindings, list_of(:policy_binding), resolve: dataloader(User)
     field :groups, list_of(:group), resolve: dataloader(User)
     field :bound_roles,     list_of(:role), resolve: fn user, _, _ ->
       {:ok, Console.Schema.User.roles(user)}
@@ -148,12 +161,19 @@ defmodule Console.GraphQl.Users do
     field :id,    :id
     field :token, :string
 
+    field :scopes, list_of(:access_token_scope)
+
     connection field :audits, node_type: :access_token_audit do
       middleware Feature, :audit
       resolve &User.list_token_audits/2
     end
 
     timestamps()
+  end
+
+  object :access_token_scope do
+    field :api,        non_null(:string)
+    field :identifier, :string
   end
 
   object :access_token_audit do
@@ -200,6 +220,13 @@ defmodule Console.GraphQl.Users do
       arg :q, :string
 
       resolve &User.list_users/2
+    end
+
+    connection field :service_accounts, node_type: :user do
+      middleware Authenticated
+      arg :q, :string
+
+      resolve &User.list_service_accounts/2
     end
 
     field :login_info, :login_info do
@@ -321,6 +348,23 @@ defmodule Console.GraphQl.Users do
       safe_resolve &User.create_invite/2
     end
 
+    field :create_service_account, :user do
+      middleware Authenticated
+      middleware AdminRequired
+      arg :attributes, non_null(:service_account_attributes)
+
+      resolve &User.create_service_account/2
+    end
+
+    field :update_service_account, :user do
+      middleware Authenticated
+      middleware AdminRequired
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:service_account_attributes)
+
+      resolve &User.update_service_account/2
+    end
+
     field :update_user, :user do
       middleware Authenticated
       middleware Sandboxed
@@ -423,8 +467,18 @@ defmodule Console.GraphQl.Users do
 
     field :create_access_token, :access_token do
       middleware Authenticated
+      arg :scopes, list_of(:scope_attributes)
 
       safe_resolve &User.create_access_token/2
+    end
+
+    field :create_service_account_token, :access_token do
+      middleware Authenticated
+      middleware AdminRequired
+      arg :id,     non_null(:id)
+      arg :scopes, list_of(:scope_attributes)
+
+      resolve &User.create_access_token/2
     end
 
     field :delete_access_token, :access_token do

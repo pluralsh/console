@@ -34,6 +34,7 @@ export type AccessToken = {
   audits?: Maybe<AccessTokenAuditConnection>;
   id?: Maybe<Scalars['ID']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  scopes?: Maybe<Array<Maybe<AccessTokenScope>>>;
   token?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -82,6 +83,12 @@ export type AccessTokenEdge = {
   __typename?: 'AccessTokenEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<AccessToken>;
+};
+
+export type AccessTokenScope = {
+  __typename?: 'AccessTokenScope';
+  api: Scalars['String']['output'];
+  identifier?: Maybe<Scalars['String']['output']>;
 };
 
 export type Account = {
@@ -2494,6 +2501,8 @@ export type RootMutationType = {
   createPeer?: Maybe<WireguardPeer>;
   createProviderCredential?: Maybe<ProviderCredential>;
   createRole?: Maybe<Role>;
+  createServiceAccount?: Maybe<User>;
+  createServiceAccountToken?: Maybe<AccessToken>;
   createServiceDeployment?: Maybe<ServiceDeployment>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
@@ -2556,6 +2565,7 @@ export type RootMutationType = {
   /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
   updateRole?: Maybe<Role>;
+  updateServiceAccount?: Maybe<User>;
   /** updates only the components of a given service, to be sent after deploy operator syncs */
   updateServiceComponents?: Maybe<ServiceDeployment>;
   updateServiceDeployment?: Maybe<ServiceDeployment>;
@@ -2585,6 +2595,11 @@ export type RootMutationTypeCloneServiceArgs = {
   clusterId: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeCreateAccessTokenArgs = {
+  scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
 };
 
 
@@ -2652,6 +2667,17 @@ export type RootMutationTypeCreateProviderCredentialArgs = {
 
 export type RootMutationTypeCreateRoleArgs = {
   attributes: RoleAttributes;
+};
+
+
+export type RootMutationTypeCreateServiceAccountArgs = {
+  attributes: ServiceAccountAttributes;
+};
+
+
+export type RootMutationTypeCreateServiceAccountTokenArgs = {
+  id: Scalars['ID']['input'];
+  scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
 };
 
 
@@ -2955,6 +2981,12 @@ export type RootMutationTypeUpdateRoleArgs = {
 };
 
 
+export type RootMutationTypeUpdateServiceAccountArgs = {
+  attributes: ServiceAccountAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateServiceComponentsArgs = {
   components?: InputMaybe<Array<InputMaybe<ComponentAttributes>>>;
   errors?: InputMaybe<Array<InputMaybe<ServiceErrorAttributes>>>;
@@ -3068,6 +3100,7 @@ export type RootQueryType = {
   secret?: Maybe<Secret>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
+  serviceAccounts?: Maybe<UserConnection>;
   /** fetches details of this service deployment, and can be called by the deploy operator */
   serviceDeployment?: Maybe<ServiceDeployment>;
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
@@ -3486,6 +3519,15 @@ export type RootQueryTypeServiceArgs = {
 };
 
 
+export type RootQueryTypeServiceAccountsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypeServiceDeploymentArgs = {
   cluster?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -3739,6 +3781,11 @@ export type RuntimeServiceAttributes = {
   version: Scalars['String']['input'];
 };
 
+export type ScopeAttributes = {
+  api?: InputMaybe<Scalars['String']['input']>;
+  identifier?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Secret = {
   __typename?: 'Secret';
   data: Scalars['Map']['output'];
@@ -3760,6 +3807,13 @@ export type Service = {
   raw: Scalars['String']['output'];
   spec: ServiceSpec;
   status: ServiceStatus;
+};
+
+export type ServiceAccountAttributes = {
+  assumeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  roles?: InputMaybe<UserRoleAttributes>;
 };
 
 export type ServiceCloneAttributes = {
@@ -4186,6 +4240,7 @@ export enum UpgradePolicyType {
 
 export type User = {
   __typename?: 'User';
+  assumeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   backgroundColor?: Maybe<Scalars['String']['output']>;
   boundRoles?: Maybe<Array<Maybe<Role>>>;
   buildTimestamp?: Maybe<Scalars['DateTime']['output']>;
