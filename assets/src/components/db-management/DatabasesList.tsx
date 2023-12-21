@@ -18,7 +18,7 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { isNil } from 'lodash'
-import moment from 'moment-timezone'
+import moment from 'moment'
 import { fromNowMin } from 'utils/time'
 
 import { TableText, Usage, numishSort } from '../cluster/TableElements'

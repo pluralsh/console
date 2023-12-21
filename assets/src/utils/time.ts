@@ -1,4 +1,4 @@
-import moment, { Moment } from 'moment-timezone'
+import moment, { Moment } from 'moment'
 
 export const MINUTE_TO_SECONDS = 60
 export const HOUR_TO_SECONDS = MINUTE_TO_SECONDS * 60
