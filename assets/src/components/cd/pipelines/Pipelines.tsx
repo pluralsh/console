@@ -173,7 +173,12 @@ function Pipelines() {
             meta={meta}
           />
           <PipelineEditAreaSC>
-            {pipeline && <Pipeline pipeline={pipeline} />}
+            {pipeline && (
+              <Pipeline
+                pipeline={pipeline}
+                key={pipeline.id}
+              />
+            )}
           </PipelineEditAreaSC>
         </div>
       ) : (

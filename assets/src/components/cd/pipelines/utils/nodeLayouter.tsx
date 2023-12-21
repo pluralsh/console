@@ -1,8 +1,6 @@
 import { type Node as FlowNode } from 'reactflow'
 import Dagre from '@dagrejs/dagre'
 
-const dagre = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
-
 function measureNode(node: FlowNode, zoom) {
   let domNode
 
@@ -35,6 +33,7 @@ export const getLayoutedElements = (
     margin: number
   }
 ) => {
+  const dagre = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
   const { direction, zoom, gridGap, margin } = options
 
   dagre.setGraph({
