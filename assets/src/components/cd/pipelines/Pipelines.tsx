@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import {
   AppIcon,
   Card,
@@ -14,6 +14,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
 import { Edge, extendConnection } from 'utils/graphql'
+import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
@@ -110,16 +111,22 @@ function Pipelines() {
   const navigate = useNavigate()
   const setSelectedPipeline = useCallback(
     (pipelineId: string) => {
-      navigate(pipelineId)
+      navigate(`${PIPELINES_ABS_PATH}/${pipelineId}`)
     },
     [navigate]
   )
+  const pipeline = useMemo(
+    () => pipeEdges?.find((p) => p?.node?.id === selectedPipeline)?.node,
+    [pipeEdges, selectedPipeline]
+  )
 
-  if (!selectedPipeline) {
+  if (data && !pipeline) {
     const firstId = pipeEdges?.[0]?.node?.id
 
     if (firstId) {
       setSelectedPipeline(firstId)
+    } else if (selectedPipeline) {
+      setSelectedPipeline('')
     }
   }
 
@@ -143,13 +150,12 @@ function Pipelines() {
     }),
     [selectedPipeline, setSelectedPipeline]
   )
-  const pipeline = useMemo(
-    () => pipeEdges?.find((p) => p?.node?.id === selectedPipeline)?.node,
-    [pipeEdges, selectedPipeline]
+  const emptyState = (
+    <EmptyState message="Looks like you don't have any pipelines yet." />
   )
 
   if (error) {
-    return <EmptyState message="Looks like you don't have any providers yet." />
+    return emptyState
   }
   if (!data) {
     return <LoadingIndicator />
@@ -188,7 +194,7 @@ function Pipelines() {
           </PipelineEditAreaSC>
         </div>
       ) : (
-        <EmptyState message="Looks like you don't have any pipelines yet." />
+        emptyState
       )}
     </div>
   )
