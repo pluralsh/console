@@ -25,7 +25,8 @@ defmodule Console.Schema.Tag do
     )
   end
 
-  def as_map(tags), do: Map.new(tags, & {&1.name, &1.value})
+  def as_map([_ | _] = tags), do: Map.new(tags, & {&1.name, &1.value})
+  def as_map(_), do: %{}
 
   @valid ~w(name value cluster_id service_id)a
 

@@ -124,7 +124,11 @@ defmodule Console.Deployments.Global do
   end
 
   defp matches_tags?([], _), do: true
-  defp matches_tags?(tags, other_tags), do: Tag.as_map(tags) == Tag.as_map(other_tags)
+  defp matches_tags?(tags, other_tags) do
+    dest = Tag.as_map(other_tags)
+    Tag.as_map(tags)
+    |> Enum.all?(fn {k, v} -> dest[k] == v end)
+  end
 
   defp missing_source?(source, dest) do
     Enum.any?(source, fn {k, v} -> dest[k] != v end)

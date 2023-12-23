@@ -88,7 +88,9 @@ export type AccessTokenEdge = {
 export type AccessTokenScope = {
   __typename?: 'AccessTokenScope';
   api: Scalars['String']['output'];
+  apis?: Maybe<Array<Scalars['String']['output']>>;
   identifier?: Maybe<Scalars['String']['output']>;
+  ids?: Maybe<Array<Scalars['String']['output']>>;
 };
 
 export type Account = {
@@ -3809,7 +3811,9 @@ export type RuntimeServiceAttributes = {
 
 export type ScopeAttributes = {
   api?: InputMaybe<Scalars['String']['input']>;
+  apis?: InputMaybe<Array<Scalars['String']['input']>>;
   identifier?: InputMaybe<Scalars['String']['input']>;
+  ids?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type Secret = {

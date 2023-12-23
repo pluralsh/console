@@ -3176,7 +3176,9 @@ input InviteAttributes {
 
 input ScopeAttributes {
   api: String
+  apis: [String!]
   identifier: String
+  ids: [String!]
 }
 
 input GroupAttributes {
@@ -3292,7 +3294,9 @@ type AccessToken {
 
 type AccessTokenScope {
   api: String!
+  apis: [String!]
   identifier: String
+  ids: [String!]
 }
 
 type AccessTokenAudit {
