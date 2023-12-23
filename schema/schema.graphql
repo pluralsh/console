@@ -991,9 +991,18 @@ input ServiceErrorAttributes {
   message: String!
 }
 
+"A reference for a globalized service, which targets clusters based on the configured criteria"
 input GlobalServiceAttributes {
+  "name for this global service"
   name: String!
+
+  "the cluster tags to target"
   tags: [TagAttributes]
+
+  "kubernetes distribution to target"
+  distro: ClusterDistro
+
+  "cluster api provider to target"
   providerId: ID
 }
 
@@ -1230,6 +1239,9 @@ type GlobalService {
   "a set of tags to select clusters for this global service"
   tags: [Tag]
 
+  "the kubernetes distribution to target with this global service"
+  distro: ClusterDistro
+
   "the service to replicate across clusters"
   service: ServiceDeployment
 
@@ -1280,6 +1292,15 @@ type RevisionConnection {
   edges: [RevisionEdge]
 }
 
+enum ClusterDistro {
+  GENERIC
+  EKS
+  AKS
+  GKE
+  RKE
+  K3S
+}
+
 input ClusterAttributes {
   name: String!
 
@@ -1292,6 +1313,10 @@ input ClusterAttributes {
   credentialId: ID
 
   version: String
+
+  distro: ClusterDistro
+
+  metadata: Json
 
   protect: Boolean
 
@@ -1319,6 +1344,7 @@ input TagAttributes {
 
 input ClusterPing {
   currentVersion: String!
+  distro: ClusterDistro
 }
 
 input ClusterUpdateAttributes {
@@ -1334,6 +1360,10 @@ input ClusterUpdateAttributes {
   kubeconfig: KubeconfigAttributes
 
   protect: Boolean
+
+  distro: ClusterDistro
+
+  metadata: Json
 
   nodePools: [NodePoolAttributes]
 
@@ -1518,6 +1548,12 @@ type Cluster {
 
   "desired k8s version for the cluster"
   version: String
+
+  "the distribution of kubernetes this cluster is running"
+  distro: ClusterDistro
+
+  "arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)"
+  metadata: Map
 
   "current k8s version as told to us by the deployment operator"
   currentVersion: String

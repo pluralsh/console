@@ -48,12 +48,17 @@ defmodule Console.Deployments.Global do
   Determines if a global service is eligible for this cluster
   """
   @spec match?(GlobalService.t, Cluster.t) :: boolean
-  def match?(%GlobalService{provider_id: gpid, tags: gtags}, %Cluster{provider_id: pid, tags: tags}) do
-    case {gpid, pid, gtags, tags} do
-      {nil, _, gtags, tags} -> matches_tags?(gtags, tags)
-      {pid, pid, gtags, tags} -> matches_tags?(gtags, tags)
-      _ -> false
-    end
+  def match?(%GlobalService{} = global, %Cluster{} = cluster) do
+    Enum.all?([
+      {:field, global.distro, cluster.distro},
+      {:field, global.provider_id, cluster.provider_id},
+      {:tags, global.tags, cluster.tags},
+    ], fn
+      {:field, nil, _} -> true
+      {:field, v, v} -> true
+      {:field, _, _} -> false
+      {:tags, t1, t2} -> matches_tags?(t1, t2)
+    end)
   end
 
   @doc """

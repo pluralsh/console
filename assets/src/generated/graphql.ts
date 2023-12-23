@@ -553,6 +553,8 @@ export type Cluster = {
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a auth token to be used by the deploy operator, only readable on create */
   deployToken?: Maybe<Scalars['String']['output']>;
+  /** the distribution of kubernetes this cluster is running */
+  distro?: Maybe<ClusterDistro>;
   /** whether the current user can edit this cluster */
   editable?: Maybe<Scalars['Boolean']['output']>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
@@ -564,6 +566,8 @@ export type Cluster = {
   installed?: Maybe<Scalars['Boolean']['output']>;
   /** the url of the kas server you can access this cluster from */
   kasUrl?: Maybe<Scalars['String']['output']>;
+  /** arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons) */
+  metadata?: Maybe<Scalars['Map']['output']>;
   /** human readable name of this cluster, will also translate to cloud k8s name */
   name: Scalars['String']['output'];
   /** list the cached node metrics for a cluster, can also be stale up to 5m */
@@ -628,9 +632,11 @@ export type ClusterAttributes = {
   cloudSettings?: InputMaybe<CloudSettingsAttributes>;
   /** a cloud credential to use when provisioning this cluster */
   credentialId?: InputMaybe<Scalars['ID']['input']>;
+  distro?: InputMaybe<ClusterDistro>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
   kubeconfig?: InputMaybe<KubeconfigAttributes>;
+  metadata?: InputMaybe<Scalars['Json']['input']>;
   name: Scalars['String']['input'];
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
@@ -658,6 +664,15 @@ export type ClusterConnection = {
   pageInfo: PageInfo;
 };
 
+export enum ClusterDistro {
+  Aks = 'AKS',
+  Eks = 'EKS',
+  Generic = 'GENERIC',
+  Gke = 'GKE',
+  K3S = 'K3S',
+  Rke = 'RKE'
+}
+
 export type ClusterEdge = {
   __typename?: 'ClusterEdge';
   cursor?: Maybe<Scalars['String']['output']>;
@@ -674,6 +689,7 @@ export type ClusterInfo = {
 
 export type ClusterPing = {
   currentVersion: Scalars['String']['input'];
+  distro?: InputMaybe<ClusterDistro>;
 };
 
 /** a CAPI provider for a cluster, cloud is inferred from name if not provided manually */
@@ -765,10 +781,12 @@ export type ClusterStatusInfo = {
 };
 
 export type ClusterUpdateAttributes = {
+  distro?: InputMaybe<ClusterDistro>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
   /** pass a kubeconfig for this cluster (DEPRECATED) */
   kubeconfig?: InputMaybe<KubeconfigAttributes>;
+  metadata?: InputMaybe<Scalars['Json']['input']>;
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   /** if you optionally want to reconfigure the git repository for the cluster service */
@@ -1353,6 +1371,8 @@ export type GitStatus = {
 /** a rules based mechanism to redeploy a service across a fleet of clusters */
 export type GlobalService = {
   __typename?: 'GlobalService';
+  /** the kubernetes distribution to target with this global service */
+  distro?: Maybe<ClusterDistro>;
   /** internal id of this global service */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -1367,9 +1387,15 @@ export type GlobalService = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+/** A reference for a globalized service, which targets clusters based on the configured criteria */
 export type GlobalServiceAttributes = {
+  /** kubernetes distribution to target */
+  distro?: InputMaybe<ClusterDistro>;
+  /** name for this global service */
   name: Scalars['String']['input'];
+  /** cluster api provider to target */
   providerId?: InputMaybe<Scalars['ID']['input']>;
+  /** the cluster tags to target */
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
 };
 
