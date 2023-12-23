@@ -15,6 +15,8 @@ defmodule Console.Schema.Cluster do
     ServiceError
   }
 
+  defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
+
   defmodule Kubeconfig do
     use Piazza.Ecto.Schema
     alias Console.Schema.NamespacedName
@@ -82,6 +84,8 @@ defmodule Console.Schema.Cluster do
     field :self,            :boolean, default: false
     field :installed,       :boolean, default: false
     field :protect,         :boolean, default: false
+    field :distro,          Distro, default: :generic
+    field :metadata,        :map
 
     field :version,         :string
     field :current_version, :string
@@ -141,8 +145,9 @@ defmodule Console.Schema.Cluster do
   end
 
   def target(query \\ __MODULE__, %GlobalService{} = global) do
-    Map.take(global, [:provider_id, :tags])
+    Map.take(global, [:provider_id, :tags, :distro])
     |> Enum.reduce(query, fn
+      {:distro, distro}, q when not is_nil(distro) -> for_distro(q, distro)
       {:provider_id, prov_id}, q when is_binary(prov_id) -> for_provider(q, prov_id)
       {:tags, [_ | _] = tags}, q -> for_tags(q, tags)
       _, q -> q
@@ -175,6 +180,10 @@ defmodule Console.Schema.Cluster do
 
   def for_provider(query \\ __MODULE__, provider_id) do
     from(c in query, where: c.provider_id == ^provider_id)
+  end
+
+  def for_distro(query \\ __MODULE__, distro) do
+    from(c in query, where: c.distro == ^distro)
   end
 
   def statistics(query \\ __MODULE__) do
@@ -232,7 +241,7 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id protect service_id credential_id self version current_version name handle installed)a
+  @valid ~w(provider_id distro metadata protect service_id credential_id self version current_version name handle installed)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -271,7 +280,7 @@ defmodule Console.Schema.Cluster do
 
   def ping_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(pinged_at current_version installed)a)
+    |> cast(attrs, ~w(pinged_at distro current_version installed)a)
     |> update_vsn()
   end
 

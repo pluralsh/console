@@ -1,8 +1,10 @@
 defmodule Console.GraphQl.Deployments.Cluster do
   use Console.GraphQl.Schema.Base
-  alias Console.Schema.ClusterProvider
+  alias Console.Schema.{ClusterProvider, Cluster}
   alias Console.Deployments.Compatibilities
   alias Console.GraphQl.Resolvers.{Deployments}
+
+  ecto_enum :cluster_distro, Cluster.Distro
 
   input_object :cluster_attributes do
     field :name,           non_null(:string)
@@ -10,6 +12,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :provider_id,    :id
     field :credential_id,  :id, description: "a cloud credential to use when provisioning this cluster"
     field :version,        :string
+    field :distro,         :cluster_distro
+    field :metadata,       :json
     field :protect,        :boolean
     field :kubeconfig,     :kubeconfig_attributes
     field :cloud_settings, :cloud_settings_attributes
@@ -30,6 +34,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   input_object :cluster_ping do
     field :current_version, non_null(:string)
+    field :distro,          :cluster_distro
   end
 
   input_object :cluster_update_attributes do
@@ -38,6 +43,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :service,    :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
     field :kubeconfig, :kubeconfig_attributes, description: "pass a kubeconfig for this cluster (DEPRECATED)"
     field :protect,    :boolean
+    field :distro,     :cluster_distro
+    field :metadata,   :json
     field :node_pools, list_of(:node_pool_attributes)
     field :tags,       list_of(:tag_attributes)
   end
@@ -187,6 +194,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :name,            non_null(:string), description: "human readable name of this cluster, will also translate to cloud k8s name"
     field :protect,         :boolean, description: "if true, this cluster cannot be deleted"
     field :version,         :string, description: "desired k8s version for the cluster"
+    field :distro,          :cluster_distro, description: "the distribution of kubernetes this cluster is running"
+    field :metadata,        :map, description: "arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)"
     field :current_version, :string, description: "current k8s version as told to us by the deployment operator"
     field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :installed,       :boolean, description: "whether the deploy operator has been registered for this cluster"
