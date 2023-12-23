@@ -103,6 +103,8 @@ defmodule Console.Deployments.Global do
         configuration: Enum.map(Map.merge(dest_secrets, source_secrets), fn {k, v} -> %{name: k, value: v} end),
         repository_id: source.repository_id,
         git: clean(source.git),
+        helm: clean(source.helm),
+        kustomize: clean(source.kustomize),
       }, dest.id, user)
     else
       err -> Logger.info "did not sync service due to: #{inspect(err)}"
@@ -119,8 +121,8 @@ defmodule Console.Deployments.Global do
       do: diff?(source, dest, source_secrets, dest_secrets)
   end
 
-  defp diff?(%Service{git: git_source} = s, %Service{git: git_dest} = d, source, dest) do
-    missing_source?(source, dest) || clean(git_source) != clean(git_dest) || s.repository_id != d.repository_id || s.namespace != d.namespace
+  defp diff?(%Service{} = s, %Service{} = d, source, dest) do
+    missing_source?(source, dest) || specs_different?(s, d) || s.repository_id != d.repository_id || s.namespace != d.namespace
   end
 
   defp matches_tags?([], _), do: true
@@ -134,7 +136,20 @@ defmodule Console.Deployments.Global do
     Enum.any?(source, fn {k, v} -> dest[k] != v end)
   end
 
-  defp clean(git), do: Map.take(git, [:ref, :folder])
+  defp specs_different?(source, dest) do
+    Enum.any?(~w(helm git kustomize)a, fn key ->
+      s = Map.get(source, key)
+      d = Map.get(dest, key)
+      clean(s) != clean(d)
+    end)
+  end
+
+  defp clean(val) do
+    case Console.mapify(val) do
+      %{id: _} = m -> Map.delete(m, :id)
+      r -> r
+    end
+  end
 
   def notify({:ok, %GlobalService{} = svc}, :create, user),
     do: handle_notify(PubSub.GlobalServiceCreated, svc, actor: user)

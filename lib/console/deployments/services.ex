@@ -231,9 +231,9 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:create, fn %{source: source, config: config} ->
       Map.take(source, [:repository_id, :sha, :name, :namespace])
-      |> Console.dedupe(:git, source.git && %{ref: source.git.ref, folder: source.git.folder})
-      |> Console.dedupe(:helm, source.helm && Console.mapify(source.helm))
-      |> Console.dedupe(:kustomize, source.kustomize && Console.mapify(source.kustomize))
+      |> Console.dedupe(:git, Console.mapify(source.git))
+      |> Console.dedupe(:helm, Console.mapify(source.helm))
+      |> Console.dedupe(:kustomize, Console.mapify(source.kustomize))
       |> Map.merge(attrs)
       |> Map.put(:configuration, config)
       |> create_service(cluster_id, user)
@@ -296,8 +296,8 @@ defmodule Console.Deployments.Services do
     |> add_operation(:revision, fn %{base: base} ->
       add_version(%{sha: sha, message: msg}, base.version)
       |> Console.dedupe(:git, base.git && %{ref: sha, folder: base.git.folder})
-      |> Console.dedupe(:helm, base.helm && Console.mapify(base.helm))
-      |> Console.dedupe(:kustomize, base.kustomize && Console.mapify(base.kustomize))
+      |> Console.dedupe(:helm, Console.mapify(base.helm))
+      |> Console.dedupe(:kustomize, Console.mapify(base.kustomize))
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)
         Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
@@ -337,9 +337,9 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:revision, fn %{base: base} ->
       add_version(attrs, base.version)
-      |> Console.dedupe(:git, base.git && Console.mapify(base.git))
-      |> Console.dedupe(:helm, base.helm && Console.mapify(base.helm))
-      |> Console.dedupe(:kustomize, base.kustomize && Console.mapify(base.kustomize))
+      |> Console.dedupe(:git, Console.mapify(base.git))
+      |> Console.dedupe(:helm, Console.mapify(base.helm))
+      |> Console.dedupe(:kustomize, Console.mapify(base.kustomize))
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)
         Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
@@ -390,9 +390,9 @@ defmodule Console.Deployments.Services do
         status: :stale,
         revision_id: rev.id,
         sha: rev.sha,
-        git: rev.git && Map.take(rev.git, [:ref, :folder]),
-        helm: rev.helm && Console.mapify(rev.helm),
-        kustomize: rev.kustomize && Console.mapify(rev.kustomize),
+        git: Console.mapify(rev.git),
+        helm: Console.mapify(rev.helm),
+        kustomize: Console.mapify(rev.kustomize),
       })
       |> Repo.update()
     end)

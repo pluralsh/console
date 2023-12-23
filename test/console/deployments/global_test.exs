@@ -67,6 +67,41 @@ defmodule Console.Deployments.GlobalTest do
       assert secrets["name"] == "value"
     end
 
+    test "it will sync on helm differences too" do
+      git = insert(:git_repository)
+      admin = admin_user()
+
+      {:ok, source} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        helm: %{chart: "my-chart", version: "0.1.1"},
+        configuration: [%{name: "name", value: "value"}]
+      }, insert(:cluster), admin)
+
+      {:ok, dest} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        helm: %{chart: "my-chart", version: "0.1.0"},
+        configuration: [%{name: "name", value: "value"}]
+      }, insert(:cluster), admin)
+
+      {:ok, synced} = Global.sync_service(source, dest, admin)
+
+      assert synced.name == "source"
+      assert synced.namespace == "my-service"
+      assert synced.git.ref == "main"
+      assert synced.git.folder == "k8s"
+      assert synced.helm.version == "0.1.1"
+      assert synced.repository_id == git.id
+
+      {:ok, secrets} = Services.configuration(synced)
+      assert secrets["name"] == "value"
+    end
+
     test "if there's no difference they won't sync" do
       git = insert(:git_repository)
       admin = admin_user()
