@@ -37,7 +37,9 @@ defmodule Console.GraphQl.Users do
 
   input_object :scope_attributes do
     field :api,        :string
+    field :apis,       list_of(non_null(:string))
     field :identifier, :string
+    field :ids,        list_of(non_null(:string))
   end
 
   input_object :group_attributes do
@@ -173,7 +175,9 @@ defmodule Console.GraphQl.Users do
 
   object :access_token_scope do
     field :api,        non_null(:string)
+    field :apis,       list_of(non_null(:string))
     field :identifier, :string
+    field :ids,        list_of(non_null(:string))
   end
 
   object :access_token_audit do

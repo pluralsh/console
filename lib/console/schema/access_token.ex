@@ -7,8 +7,10 @@ defmodule Console.Schema.AccessToken do
     field :last_used_at, :utc_datetime_usec
 
     embeds_many :scopes, Scope, on_replace: :delete do
+      field :apis,       {:array, :string}
       field :api,        :string
       field :identifier, :string
+      field :ids,        {:array, :string}
     end
 
     belongs_to :user,    User
@@ -37,7 +39,6 @@ defmodule Console.Schema.AccessToken do
 
   def scope_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(api identifier)a)
-    |> validate_required(~w(api identifier)a)
+    |> cast(attrs, ~w(api apis ids identifier)a)
   end
 end
