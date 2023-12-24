@@ -59,7 +59,7 @@
   "inflex": {:hex, :inflex, "2.0.0", "db69d542b8fdb23ac667f9bc0c2395a3983fa2da6ae2efa7ab5dc541928f7a75", [:mix], [], "hexpm", "c018852409bd48b03ad96ed53594186bc074bdd1519043a0ad1fa5697aac4399"},
   "jason": {:hex, :jason, "1.4.1", "af1504e35f629ddcdd6addb3513c3853991f694921b1b9368b0bd32beb9f1b63", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "fbb01ecdfd565b56261302f7e1fcc27c4fb8f32d56eab74db621fc154604a7a1"},
   "jose": {:hex, :jose, "1.11.2", "f4c018ccf4fdce22c71e44d471f15f723cb3efab5d909ab2ba202b5bf35557b3", [:mix, :rebar3], [], "hexpm", "98143fbc48d55f3a18daba82d34fe48959d44538e9697c08f34200fa5f0947d2"},
-  "kazan": {:git, "https://github.com/michaeljguarino/kazan.git", "e26d21b324fd8b09bbc20ffde783d10a314684d9", [ref: "e26d21b324fd8b09bbc20ffde783d10a314684d9"]},
+  "kazan": {:git, "https://github.com/michaeljguarino/kazan.git", "ef2050c547ab74c283ef02397925d48637bd67a1", [ref: "ef2050c547ab74c283ef02397925d48637bd67a1"]},
   "libcluster": {:hex, :libcluster, "3.2.1", "b2cd5b447cde25d5897749bee6f7aaeb6c96ac379481024e9b6ba495dabeb97d", [:mix], [{:jason, "~> 1.1", [hex: :jason, repo: "hexpm", optional: false]}], "hexpm", "89f225612d135edce9def56f43bf18d575d88ac4680e3f6161283f2e55cadca4"},
   "libring": {:hex, :libring, "1.5.0", "44313eb6862f5c9168594a061e9d5f556a9819da7c6444706a9e2da533396d70", [:mix], [], "hexpm", "04e843d4fdcff49a62d8e03778d17c6cb2a03fe2d14020d3825a1761b55bd6cc"},
   "merkle_map": {:hex, :merkle_map, "0.2.1", "01a88c87a6b9fb594c67c17ebaf047ee55ffa34e74297aa583ed87148006c4c8", [:mix], [], "hexpm", "fed4d143a5c8166eee4fa2b49564f3c4eace9cb252f0a82c1613bba905b2d04d"},

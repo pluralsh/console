@@ -56,6 +56,23 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterCreated do
   end
 end
 
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterPinged do
+  alias Console.Repo
+  alias Console.Deployments.Global
+  alias Console.Schema.{Cluster, GlobalService}
+
+  def process(%{item: %Cluster{distro_changed: true} = cluster}) do
+    cluster = Repo.preload(cluster, [:tags])
+    GlobalService.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.filter(&Global.match?(&1, cluster))
+    |> Stream.each(&Global.add_to_cluster(&1, cluster))
+    |> Stream.run()
+  end
+  def process(_), do: :ok
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.GlobalServiceCreated do
   alias Console.Deployments.Global
 

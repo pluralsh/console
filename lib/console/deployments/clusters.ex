@@ -61,9 +61,9 @@ defmodule Console.Deployments.Clusters do
   end
 
   @spec control_plane(Cluster.t) :: Kazan.Server.t | {:error, term}
-  def control_plane(%Cluster{id: id, self: true}), do: Kazan.Server.in_cluster()
-  def control_plane(%Cluster{id: id, kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
-  def control_plane(%Cluster{id: id} = cluster), do: control_plane(cluster, Users.console(), %{"cached" => true})
+  def control_plane(%Cluster{self: true}), do: Kazan.Server.in_cluster()
+  def control_plane(%Cluster{kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
+  def control_plane(%Cluster{} = cluster), do: control_plane(cluster, Users.console(), %{"cached" => true})
 
   def control_plane(%Cluster{id: id}, %User{} = user, claims \\ %{}) do
     with {:ok, token, _} <- Console.Guardian.encode_and_sign(user, claims) do
@@ -397,6 +397,7 @@ defmodule Console.Deployments.Clusters do
     get_cluster(id)
     |> Cluster.ping_changeset(attrs)
     |> Repo.update()
+    |> notify(:ping)
   end
 
   @doc """
@@ -787,6 +788,10 @@ defmodule Console.Deployments.Clusters do
     |> Cluster.changeset(%{service_errors: errors})
     |> Repo.update()
   end
+
+  defp notify({:ok, %Cluster{} = cluster}, :ping),
+    do: handle_notify(PubSub.ClusterPinged, cluster)
+  defp notify(pass, _), do: pass
 
   defp notify({:ok, %Cluster{} = cluster}, :create, user),
     do: handle_notify(PubSub.ClusterCreated, cluster, actor: user)

@@ -13,12 +13,15 @@ import Deployment from './info/Deployment'
 import StatefulSet from './info/StatefulSet'
 import Metadata from './info/Metadata'
 import { ComponentDetailsContext } from './ComponentDetails'
+import DaemonSet from './info/Daemonset'
+import CanaryInfo from './info/Canary'
 
 const componentsWithPods: string[] = [
   'deployment',
   'job',
   'service',
   'statefulset',
+  'daemonset',
 ]
 
 export const componentsWithLogs: string[] = ['deployment', 'statefulset']
@@ -43,6 +46,10 @@ function getInfo(kind: string): JSX.Element | undefined {
       return <Service />
     case 'statefulset':
       return <StatefulSet />
+    case 'daemonset':
+      return <DaemonSet />
+    case 'canary':
+      return <CanaryInfo />
     default:
       return undefined
   }

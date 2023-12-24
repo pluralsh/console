@@ -66,8 +66,7 @@ defmodule Console.Deployments.Global do
   """
   @spec add_to_cluster(GlobalService.t, Cluster.t) :: Services.service_resp
   def add_to_cluster(%GlobalService{id: gid, service_id: sid}, %Cluster{id: cid}) do
-    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
-    Services.clone_service(%{owner_id: gid}, sid, cid, bot)
+    Services.clone_service(%{owner_id: gid}, sid, cid, bot())
   end
 
   @doc """
@@ -76,7 +75,7 @@ defmodule Console.Deployments.Global do
   @spec sync_clusters(GlobalService.t) :: :ok
   def sync_clusters(%GlobalService{id: gid} = global) do
     %{service: svc} = Console.Repo.preload(global, [:service])
-    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    bot = bot()
     Cluster.ignore_ids([svc.cluster_id])
     |> Cluster.target(global)
     |> Repo.all()
@@ -88,6 +87,8 @@ defmodule Console.Deployments.Global do
       end
     end)
   end
+
+  defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 
   @doc """
   it can resync a service owned by a global service

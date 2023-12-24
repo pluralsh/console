@@ -444,7 +444,7 @@ export type Canary = {
   canaryDeployment?: Maybe<Deployment>;
   events?: Maybe<Array<Maybe<Event>>>;
   ingress?: Maybe<Ingress>;
-  ingressPrimary?: Maybe<Ingress>;
+  ingressCanary?: Maybe<Ingress>;
   metadata: Metadata;
   primaryDeployment?: Maybe<Deployment>;
   raw: Scalars['String']['output'];
@@ -1572,6 +1572,7 @@ export type IngressRule = {
 
 export type IngressSpec = {
   __typename?: 'IngressSpec';
+  ingressClassName?: Maybe<Scalars['String']['output']>;
   rules?: Maybe<Array<Maybe<IngressRule>>>;
   tls?: Maybe<Array<Maybe<IngressTls>>>;
 };
@@ -5003,6 +5004,21 @@ export type DeleteGroupMutationVariables = Exact<{
 
 export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
+export type CanaryStatusFragment = { __typename?: 'CanaryStatus', failedChecks?: number | null, canaryWeight?: number | null, iterations?: number | null, phase?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
+
+export type CanarySpecFragment = { __typename?: 'CanarySpec', provider?: string | null, analysis?: { __typename?: 'CanaryAnalysis', interval?: string | null, maxWeight?: number | null, stepWeight?: number | null, stepWeights?: Array<number | null> | null, threshold?: number | null } | null };
+
+export type CanaryFragment = { __typename?: 'Canary', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CanaryStatus', failedChecks?: number | null, canaryWeight?: number | null, iterations?: number | null, phase?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, spec: { __typename?: 'CanarySpec', provider?: string | null, analysis?: { __typename?: 'CanaryAnalysis', interval?: string | null, maxWeight?: number | null, stepWeight?: number | null, stepWeights?: Array<number | null> | null, threshold?: number | null } | null } };
+
+export type CanaryQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CanaryQuery = { __typename?: 'RootQueryType', canary?: { __typename?: 'Canary', raw: string, canaryDeployment?: { __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DeploymentStatus', availableReplicas?: number | null, replicas?: number | null, unavailableReplicas?: number | null }, spec: { __typename?: 'DeploymentSpec', replicas?: number | null, strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null } } | null, primaryDeployment?: { __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DeploymentStatus', availableReplicas?: number | null, replicas?: number | null, unavailableReplicas?: number | null }, spec: { __typename?: 'DeploymentSpec', replicas?: number | null, strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null } } | null, ingress?: { __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null, hostname?: string | null } | null> | null } | null }, spec: { __typename?: 'IngressSpec', ingressClassName?: string | null, tls?: Array<{ __typename?: 'IngressTls', hosts?: Array<string | null> | null } | null> | null, rules?: Array<{ __typename?: 'IngressRule', host?: string | null, http?: { __typename?: 'HttpIngressRule', paths?: Array<{ __typename?: 'IngressPath', path?: string | null, backend?: { __typename?: 'IngressBackend', serviceName?: string | null, servicePort?: string | null } | null } | null> | null } | null } | null> | null }, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, spec: { __typename?: 'CertificateSpec', dnsNames?: Array<string | null> | null, secretName: string, issuerRef?: { __typename?: 'IssuerRef', group?: string | null, kind?: string | null, name?: string | null } | null } } | null> | null } | null, ingressCanary?: { __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null, hostname?: string | null } | null> | null } | null }, spec: { __typename?: 'IngressSpec', ingressClassName?: string | null, tls?: Array<{ __typename?: 'IngressTls', hosts?: Array<string | null> | null } | null> | null, rules?: Array<{ __typename?: 'IngressRule', host?: string | null, http?: { __typename?: 'HttpIngressRule', paths?: Array<{ __typename?: 'IngressPath', path?: string | null, backend?: { __typename?: 'IngressBackend', serviceName?: string | null, servicePort?: string | null } | null } | null> | null } | null } | null> | null }, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, spec: { __typename?: 'CertificateSpec', dnsNames?: Array<string | null> | null, secretName: string, issuerRef?: { __typename?: 'IssuerRef', group?: string | null, kind?: string | null, name?: string | null } | null } } | null> | null } | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CanaryStatus', failedChecks?: number | null, canaryWeight?: number | null, iterations?: number | null, phase?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, spec: { __typename?: 'CanarySpec', provider?: string | null, analysis?: { __typename?: 'CanaryAnalysis', interval?: string | null, maxWeight?: number | null, stepWeight?: number | null, stepWeights?: Array<number | null> | null, threshold?: number | null } | null } } | null };
+
 export type StatusConditionFragment = { __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string };
 
 export type CertificateStatusFragment = { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
@@ -5031,6 +5047,21 @@ export type CronJobQueryVariables = Exact<{
 
 export type CronJobQuery = { __typename?: 'RootQueryType', cronJob?: { __typename?: 'CronJob', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, jobs?: Array<{ __typename?: 'Job', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null } } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CronStatus', lastScheduleTime?: string | null }, spec: { __typename?: 'CronSpec', schedule: string, suspend?: boolean | null, concurrencyPolicy?: string | null } } | null };
 
+export type DaemonSetStatusFragment = { __typename?: 'DaemonSetStatus', currentNumberScheduled?: number | null, desiredNumberScheduled?: number | null, numberReady?: number | null };
+
+export type DaemonSetSpecFragment = { __typename?: 'DaemonSetSpec', strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null };
+
+export type DaemonSetFragment = { __typename?: 'DaemonSet', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DaemonSetStatus', currentNumberScheduled?: number | null, desiredNumberScheduled?: number | null, numberReady?: number | null }, spec: { __typename?: 'DaemonSetSpec', strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null };
+
+export type DaemonSetQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type DaemonSetQuery = { __typename?: 'RootQueryType', daemonSet?: { __typename?: 'DaemonSet', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DaemonSetStatus', currentNumberScheduled?: number | null, desiredNumberScheduled?: number | null, numberReady?: number | null }, spec: { __typename?: 'DaemonSetSpec', strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null } | null };
+
 export type DeploymentFragment = { __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DeploymentStatus', availableReplicas?: number | null, replicas?: number | null, unavailableReplicas?: number | null }, spec: { __typename?: 'DeploymentSpec', replicas?: number | null, strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null } };
 
 export type DeploymentQueryVariables = Exact<{
@@ -5042,7 +5073,7 @@ export type DeploymentQueryVariables = Exact<{
 
 export type DeploymentQuery = { __typename?: 'RootQueryType', deployment?: { __typename?: 'Deployment', raw: string, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DeploymentStatus', availableReplicas?: number | null, replicas?: number | null, unavailableReplicas?: number | null }, spec: { __typename?: 'DeploymentSpec', replicas?: number | null, strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null } } | null };
 
-export type IngressFragment = { __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null, hostname?: string | null } | null> | null } | null }, spec: { __typename?: 'IngressSpec', tls?: Array<{ __typename?: 'IngressTls', hosts?: Array<string | null> | null } | null> | null, rules?: Array<{ __typename?: 'IngressRule', host?: string | null, http?: { __typename?: 'HttpIngressRule', paths?: Array<{ __typename?: 'IngressPath', path?: string | null, backend?: { __typename?: 'IngressBackend', serviceName?: string | null, servicePort?: string | null } | null } | null> | null } | null } | null> | null }, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, spec: { __typename?: 'CertificateSpec', dnsNames?: Array<string | null> | null, secretName: string, issuerRef?: { __typename?: 'IssuerRef', group?: string | null, kind?: string | null, name?: string | null } | null } } | null> | null };
+export type IngressFragment = { __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null, hostname?: string | null } | null> | null } | null }, spec: { __typename?: 'IngressSpec', ingressClassName?: string | null, tls?: Array<{ __typename?: 'IngressTls', hosts?: Array<string | null> | null } | null> | null, rules?: Array<{ __typename?: 'IngressRule', host?: string | null, http?: { __typename?: 'HttpIngressRule', paths?: Array<{ __typename?: 'IngressPath', path?: string | null, backend?: { __typename?: 'IngressBackend', serviceName?: string | null, servicePort?: string | null } | null } | null> | null } | null } | null> | null }, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, spec: { __typename?: 'CertificateSpec', dnsNames?: Array<string | null> | null, secretName: string, issuerRef?: { __typename?: 'IssuerRef', group?: string | null, kind?: string | null, name?: string | null } | null } } | null> | null };
 
 export type IngressQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5051,7 +5082,7 @@ export type IngressQueryVariables = Exact<{
 }>;
 
 
-export type IngressQuery = { __typename?: 'RootQueryType', ingress?: { __typename?: 'Ingress', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null, hostname?: string | null } | null> | null } | null }, spec: { __typename?: 'IngressSpec', tls?: Array<{ __typename?: 'IngressTls', hosts?: Array<string | null> | null } | null> | null, rules?: Array<{ __typename?: 'IngressRule', host?: string | null, http?: { __typename?: 'HttpIngressRule', paths?: Array<{ __typename?: 'IngressPath', path?: string | null, backend?: { __typename?: 'IngressBackend', serviceName?: string | null, servicePort?: string | null } | null } | null> | null } | null } | null> | null }, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, spec: { __typename?: 'CertificateSpec', dnsNames?: Array<string | null> | null, secretName: string, issuerRef?: { __typename?: 'IssuerRef', group?: string | null, kind?: string | null, name?: string | null } | null } } | null> | null } | null };
+export type IngressQuery = { __typename?: 'RootQueryType', ingress?: { __typename?: 'Ingress', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null, hostname?: string | null } | null> | null } | null }, spec: { __typename?: 'IngressSpec', ingressClassName?: string | null, tls?: Array<{ __typename?: 'IngressTls', hosts?: Array<string | null> | null } | null> | null, rules?: Array<{ __typename?: 'IngressRule', host?: string | null, http?: { __typename?: 'HttpIngressRule', paths?: Array<{ __typename?: 'IngressPath', path?: string | null, backend?: { __typename?: 'IngressBackend', serviceName?: string | null, servicePort?: string | null } | null } | null> | null } | null } | null> | null }, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, spec: { __typename?: 'CertificateSpec', dnsNames?: Array<string | null> | null, secretName: string, issuerRef?: { __typename?: 'IssuerRef', group?: string | null, kind?: string | null, name?: string | null } | null } } | null> | null } | null };
 
 export type JobFragment = { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null };
 
@@ -6151,6 +6182,53 @@ export const GroupMemberFragmentDoc = gql`
 }
     ${UserFragmentDoc}
 ${GroupFragmentDoc}`;
+export const StatusConditionFragmentDoc = gql`
+    fragment StatusCondition on StatusCondition {
+  message
+  reason
+  status
+  type
+}
+    `;
+export const CanaryStatusFragmentDoc = gql`
+    fragment CanaryStatus on CanaryStatus {
+  failedChecks
+  canaryWeight
+  iterations
+  phase
+  conditions {
+    ...StatusCondition
+  }
+}
+    ${StatusConditionFragmentDoc}`;
+export const CanarySpecFragmentDoc = gql`
+    fragment CanarySpec on CanarySpec {
+  provider
+  analysis {
+    interval
+    maxWeight
+    stepWeight
+    stepWeights
+    threshold
+  }
+}
+    `;
+export const CanaryFragmentDoc = gql`
+    fragment Canary on Canary {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...CanaryStatus
+  }
+  spec {
+    ...CanarySpec
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${CanaryStatusFragmentDoc}
+${CanarySpecFragmentDoc}`;
 export const CronJobFragmentDoc = gql`
     fragment CronJob on CronJob {
   metadata {
@@ -6167,114 +6245,18 @@ export const CronJobFragmentDoc = gql`
   raw
 }
     ${MetadataFragmentDoc}`;
-export const DeploymentFragmentDoc = gql`
-    fragment Deployment on Deployment {
-  metadata {
-    ...Metadata
-  }
-  status {
-    availableReplicas
-    replicas
-    unavailableReplicas
-  }
-  spec {
-    replicas
-    strategy {
-      type
-    }
-  }
-  raw
-}
-    ${MetadataFragmentDoc}`;
-export const StatusConditionFragmentDoc = gql`
-    fragment StatusCondition on StatusCondition {
-  message
-  reason
-  status
-  type
+export const DaemonSetStatusFragmentDoc = gql`
+    fragment DaemonSetStatus on DaemonSetStatus {
+  currentNumberScheduled
+  desiredNumberScheduled
+  numberReady
 }
     `;
-export const CertificateStatusFragmentDoc = gql`
-    fragment CertificateStatus on CertificateStatus {
-  renewalTime
-  notBefore
-  notAfter
-  conditions {
-    ...StatusCondition
+export const DaemonSetSpecFragmentDoc = gql`
+    fragment DaemonSetSpec on DaemonSetSpec {
+  strategy {
+    type
   }
-}
-    ${StatusConditionFragmentDoc}`;
-export const CertificateSpecFragmentDoc = gql`
-    fragment CertificateSpec on CertificateSpec {
-  dnsNames
-  secretName
-  issuerRef {
-    group
-    kind
-    name
-  }
-}
-    `;
-export const CertificateFragmentDoc = gql`
-    fragment Certificate on Certificate {
-  metadata {
-    ...Metadata
-  }
-  status {
-    ...CertificateStatus
-  }
-  spec {
-    ...CertificateSpec
-  }
-  raw
-}
-    ${MetadataFragmentDoc}
-${CertificateStatusFragmentDoc}
-${CertificateSpecFragmentDoc}`;
-export const IngressFragmentDoc = gql`
-    fragment Ingress on Ingress {
-  metadata {
-    ...Metadata
-  }
-  status {
-    loadBalancer {
-      ingress {
-        ip
-        hostname
-      }
-    }
-  }
-  spec {
-    tls {
-      hosts
-    }
-    rules {
-      host
-      http {
-        paths {
-          path
-          backend {
-            serviceName
-            servicePort
-          }
-        }
-      }
-    }
-  }
-  certificates {
-    ...Certificate
-  }
-  raw
-}
-    ${MetadataFragmentDoc}
-${CertificateFragmentDoc}`;
-export const JobStatusFragmentDoc = gql`
-    fragment JobStatus on JobStatus {
-  active
-  completionTime
-  succeeded
-  failed
-  startTime
 }
     `;
 export const ContainerStatusFragmentDoc = gql`
@@ -6350,6 +6332,129 @@ export const PodFragmentDoc = gql`
     ${MetadataFragmentDoc}
 ${ContainerStatusFragmentDoc}
 ${ContainerFragmentDoc}`;
+export const DaemonSetFragmentDoc = gql`
+    fragment DaemonSet on DaemonSet {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...DaemonSetStatus
+  }
+  spec {
+    ...DaemonSetSpec
+  }
+  pods {
+    ...Pod
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${DaemonSetStatusFragmentDoc}
+${DaemonSetSpecFragmentDoc}
+${PodFragmentDoc}`;
+export const DeploymentFragmentDoc = gql`
+    fragment Deployment on Deployment {
+  metadata {
+    ...Metadata
+  }
+  status {
+    availableReplicas
+    replicas
+    unavailableReplicas
+  }
+  spec {
+    replicas
+    strategy {
+      type
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const CertificateStatusFragmentDoc = gql`
+    fragment CertificateStatus on CertificateStatus {
+  renewalTime
+  notBefore
+  notAfter
+  conditions {
+    ...StatusCondition
+  }
+}
+    ${StatusConditionFragmentDoc}`;
+export const CertificateSpecFragmentDoc = gql`
+    fragment CertificateSpec on CertificateSpec {
+  dnsNames
+  secretName
+  issuerRef {
+    group
+    kind
+    name
+  }
+}
+    `;
+export const CertificateFragmentDoc = gql`
+    fragment Certificate on Certificate {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...CertificateStatus
+  }
+  spec {
+    ...CertificateSpec
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${CertificateStatusFragmentDoc}
+${CertificateSpecFragmentDoc}`;
+export const IngressFragmentDoc = gql`
+    fragment Ingress on Ingress {
+  metadata {
+    ...Metadata
+  }
+  status {
+    loadBalancer {
+      ingress {
+        ip
+        hostname
+      }
+    }
+  }
+  spec {
+    ingressClassName
+    tls {
+      hosts
+    }
+    rules {
+      host
+      http {
+        paths {
+          path
+          backend {
+            serviceName
+            servicePort
+          }
+        }
+      }
+    }
+  }
+  certificates {
+    ...Certificate
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${CertificateFragmentDoc}`;
+export const JobStatusFragmentDoc = gql`
+    fragment JobStatus on JobStatus {
+  active
+  completionTime
+  succeeded
+  failed
+  startTime
+}
+    `;
 export const JobFragmentDoc = gql`
     fragment Job on Job {
   metadata {
@@ -9182,6 +9287,66 @@ export function useDeleteGroupMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteGroupMutationHookResult = ReturnType<typeof useDeleteGroupMutation>;
 export type DeleteGroupMutationResult = Apollo.MutationResult<DeleteGroupMutation>;
 export type DeleteGroupMutationOptions = Apollo.BaseMutationOptions<DeleteGroupMutation, DeleteGroupMutationVariables>;
+export const CanaryDocument = gql`
+    query Canary($name: String!, $namespace: String!, $serviceId: ID) {
+  canary(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Canary
+    canaryDeployment {
+      ...Deployment
+    }
+    primaryDeployment {
+      ...Deployment
+    }
+    ingress {
+      ...Ingress
+    }
+    ingressCanary {
+      ...Ingress
+    }
+    events {
+      ...Event
+    }
+  }
+}
+    ${CanaryFragmentDoc}
+${DeploymentFragmentDoc}
+${IngressFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useCanaryQuery__
+ *
+ * To run a query within a React component, call `useCanaryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCanaryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCanaryQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useCanaryQuery(baseOptions: Apollo.QueryHookOptions<CanaryQuery, CanaryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CanaryQuery, CanaryQueryVariables>(CanaryDocument, options);
+      }
+export function useCanaryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CanaryQuery, CanaryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CanaryQuery, CanaryQueryVariables>(CanaryDocument, options);
+        }
+export function useCanarySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CanaryQuery, CanaryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CanaryQuery, CanaryQueryVariables>(CanaryDocument, options);
+        }
+export type CanaryQueryHookResult = ReturnType<typeof useCanaryQuery>;
+export type CanaryLazyQueryHookResult = ReturnType<typeof useCanaryLazyQuery>;
+export type CanarySuspenseQueryHookResult = ReturnType<typeof useCanarySuspenseQuery>;
+export type CanaryQueryResult = Apollo.QueryResult<CanaryQuery, CanaryQueryVariables>;
 export const CertificateDocument = gql`
     query Certificate($name: String!, $namespace: String!, $serviceId: ID) {
   certificate(name: $name, namespace: $namespace, serviceId: $serviceId) {
@@ -9284,6 +9449,52 @@ export type CronJobQueryHookResult = ReturnType<typeof useCronJobQuery>;
 export type CronJobLazyQueryHookResult = ReturnType<typeof useCronJobLazyQuery>;
 export type CronJobSuspenseQueryHookResult = ReturnType<typeof useCronJobSuspenseQuery>;
 export type CronJobQueryResult = Apollo.QueryResult<CronJobQuery, CronJobQueryVariables>;
+export const DaemonSetDocument = gql`
+    query DaemonSet($name: String!, $namespace: String!, $serviceId: ID) {
+  daemonSet(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...DaemonSet
+    events {
+      ...Event
+    }
+  }
+}
+    ${DaemonSetFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useDaemonSetQuery__
+ *
+ * To run a query within a React component, call `useDaemonSetQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDaemonSetQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDaemonSetQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useDaemonSetQuery(baseOptions: Apollo.QueryHookOptions<DaemonSetQuery, DaemonSetQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DaemonSetQuery, DaemonSetQueryVariables>(DaemonSetDocument, options);
+      }
+export function useDaemonSetLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DaemonSetQuery, DaemonSetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DaemonSetQuery, DaemonSetQueryVariables>(DaemonSetDocument, options);
+        }
+export function useDaemonSetSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DaemonSetQuery, DaemonSetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DaemonSetQuery, DaemonSetQueryVariables>(DaemonSetDocument, options);
+        }
+export type DaemonSetQueryHookResult = ReturnType<typeof useDaemonSetQuery>;
+export type DaemonSetLazyQueryHookResult = ReturnType<typeof useDaemonSetLazyQuery>;
+export type DaemonSetSuspenseQueryHookResult = ReturnType<typeof useDaemonSetSuspenseQuery>;
+export type DaemonSetQueryResult = Apollo.QueryResult<DaemonSetQuery, DaemonSetQueryVariables>;
 export const DeploymentDocument = gql`
     query Deployment($name: String!, $namespace: String!, $serviceId: ID) {
   deployment(name: $name, namespace: $namespace, serviceId: $serviceId) {
@@ -10115,8 +10326,10 @@ export const namedOperations = {
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
+    Canary: 'Canary',
     Certificate: 'Certificate',
     CronJob: 'CronJob',
+    DaemonSet: 'DaemonSet',
     Deployment: 'Deployment',
     Ingress: 'Ingress',
     Job: 'Job',
@@ -10221,11 +10434,17 @@ export const namedOperations = {
     DatabaseTableRow: 'DatabaseTableRow',
     GroupMember: 'GroupMember',
     Group: 'Group',
+    CanaryStatus: 'CanaryStatus',
+    CanarySpec: 'CanarySpec',
+    Canary: 'Canary',
     StatusCondition: 'StatusCondition',
     CertificateStatus: 'CertificateStatus',
     CertificateSpec: 'CertificateSpec',
     Certificate: 'Certificate',
     CronJob: 'CronJob',
+    DaemonSetStatus: 'DaemonSetStatus',
+    DaemonSetSpec: 'DaemonSetSpec',
+    DaemonSet: 'DaemonSet',
     Deployment: 'Deployment',
     Ingress: 'Ingress',
     Job: 'Job',

@@ -921,6 +921,19 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "#ping/2" do
+    test "it can register a ping on a cluster" do
+      cluster = insert(:cluster)
+
+      {:ok, pinged} = Clusters.ping(%{distro: :eks, current_version: "1.25.1"}, cluster)
+
+      assert pinged.current_version == "1.25.1"
+      assert pinged.distro == :eks
+
+      assert_receive {:event, %PubSub.ClusterPinged{item: ^pinged}}
+    end
+  end
+
   describe "#install/1" do
     test "it can install the operator in a ready cluster" do
       %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =

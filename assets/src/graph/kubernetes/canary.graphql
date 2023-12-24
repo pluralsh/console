@@ -1,0 +1,54 @@
+fragment CanaryStatus on CanaryStatus {
+  failedChecks
+  canaryWeight
+  iterations
+  phase
+  conditions {
+    ...StatusCondition
+  }
+}
+
+fragment CanarySpec on CanarySpec {
+  provider
+  analysis {
+    interval
+    maxWeight
+    stepWeight
+    stepWeights
+    threshold
+  }
+}
+
+fragment Canary on Canary {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...CanaryStatus
+  }
+  spec {
+    ...CanarySpec
+  }
+  raw
+}
+
+query Canary($name: String!, $namespace: String!, $serviceId: ID) {
+  canary(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Canary
+    canaryDeployment {
+      ...Deployment
+    }
+    primaryDeployment {
+      ...Deployment
+    }
+    ingress {
+      ...Ingress
+    }
+    ingressCanary {
+      ...Ingress
+    }
+    events {
+      ...Event
+    }
+  }
+}

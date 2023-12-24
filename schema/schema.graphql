@@ -2526,7 +2526,7 @@ type Canary {
   primaryDeployment: Deployment
   canaryDeployment: Deployment
   ingress: Ingress
-  ingressPrimary: Ingress
+  ingressCanary: Ingress
   raw: String!
   events: [Event]
 }
@@ -2810,6 +2810,7 @@ type Ingress {
 }
 
 type IngressSpec {
+  ingressClassName: String
   rules: [IngressRule]
   tls: [IngressTls]
 }
