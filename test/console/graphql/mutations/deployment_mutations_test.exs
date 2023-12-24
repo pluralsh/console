@@ -527,6 +527,69 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert conf["name"] == "new-name"
       assert conf["value"] == "new-value"
     end
+
+    test "enforces scopes" do
+      cluster = insert(:cluster, handle: "test")
+      user = admin_user()
+      git = insert(:git_repository)
+      expect(Console.Features, :available?, 2, fn :cd -> true end)
+      {:ok, service} = create_service(cluster, user, [
+        name: "test",
+        namespace: "test",
+        git_ref: %{ref: "master", folder: "k8s"},
+        repository_id: git.id,
+        configuration: [%{name: "name", value: "value"}]
+      ])
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation update($cluster: String!, $name: String!, $attributes: ServiceUpdateAttributes!) {
+          updateServiceDeployment(cluster: $cluster, name: $name, attributes: $attributes) {
+            name
+            namespace
+            git { ref folder }
+            repository { id }
+            configuration { name value }
+            editable
+          }
+        }
+      """, %{
+        "attributes" => %{
+          "git" => %{"ref" => "main", "folder" => "k8s"},
+          "configuration" => [%{"name" => "new-name", "value" => "new-value"}],
+        },
+        "cluster" => cluster.handle,
+        "name" => service.name,
+      }, %{current_user: %{user | scopes: [build(:scope, api: "updateServiceDeployment", identifier: insert(:service).id)]}})
+
+      {:ok, %{data: %{"updateServiceDeployment" => updated}}} = run_query("""
+        mutation update($cluster: String!, $name: String!, $attributes: ServiceUpdateAttributes!) {
+          updateServiceDeployment(cluster: $cluster, name: $name, attributes: $attributes) {
+            name
+            namespace
+            git { ref folder }
+            repository { id }
+            configuration { name value }
+            editable
+          }
+        }
+      """, %{
+        "attributes" => %{
+          "git" => %{"ref" => "main", "folder" => "k8s"},
+          "configuration" => [%{"name" => "new-name", "value" => "new-value"}],
+        },
+        "cluster" => cluster.handle,
+        "name" => service.name,
+      }, %{current_user: %{user | scopes: [build(:scope, api: "updateServiceDeployment", identifier: service.id)]}})
+
+      assert updated["git"]["ref"] == "main"
+      assert updated["git"]["folder"] == "k8s"
+      assert updated["repository"]["id"] == git.id
+      assert updated["editable"]
+
+      [conf] = updated["configuration"]
+      assert conf["name"] == "new-name"
+      assert conf["value"] == "new-value"
+    end
   end
 
   describe "cloneService" do

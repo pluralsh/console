@@ -338,6 +338,10 @@ defmodule Console.Factory do
     %Schema.Tag{}
   end
 
+  def scope_factory do
+    %Schema.AccessToken.Scope{}
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

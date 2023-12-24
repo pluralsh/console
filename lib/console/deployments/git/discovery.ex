@@ -6,23 +6,27 @@ defmodule Console.Deployments.Git.Discovery do
   alias Console.Deployments.Git.{Agent, Supervisor}
   alias Console.Schema.{GitRepository, Service}
 
+  @spec fetch(Service.t) :: {:ok, File.t} | Console.error
   def fetch(%Service{} = svc) do
     %{repository: repo} = Console.Repo.preload(svc, [:repository])
     with {:ok, pid} <- find(repo),
       do: Agent.fetch(pid, svc)
   end
 
+  @spec docs(Service.t) :: {:ok, File.t} | Console.error
   def docs(%Service{} = svc) do
     %{repository: repo} = Console.Repo.preload(svc, [:repository])
     with {:ok, pid} <- find(repo),
       do: Agent.docs(pid, svc)
   end
 
+  @spec addons(GitRepository.t) :: [Console.Deployments.AddOn.t]
   def addons(%GitRepository{} = repo) do
     with {:ok, pid} <- find(repo),
       do: Agent.addons(pid)
   end
 
+  @spec refs(GitRepository.t) :: {:ok, [binary]}
   def refs(%GitRepository{} = repo) do
     with {:ok, pid} <- find(repo),
       do: Agent.refs(pid)

@@ -88,7 +88,7 @@ export function DeployServiceSettingsGit({
 }
 
 const cleanRefs = (refs: string[] | null) =>
-  (refs || []).map((ref) => trimStart(ref, '/refs/heads/'))
+  (refs || []).map((ref) => trimStart(trimStart(ref, '/'), 'refs/heads/'))
 
 export function ServiceGitRefField({
   refs,

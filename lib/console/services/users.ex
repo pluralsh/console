@@ -31,7 +31,7 @@ defmodule Console.Services.Users do
     Repo.get_by(AccessToken, token: token)
     |> Repo.preload([:user])
     |> case do
-      %AccessToken{user: %User{} = user} = token -> %{user | token: token}
+      %AccessToken{user: %User{} = user, scopes: scopes} = token -> %{user | token: token, scopes: scopes}
       _ -> nil
     end
   end
@@ -126,10 +126,23 @@ defmodule Console.Services.Users do
     |> execute(extract: :user)
   end
 
+  def create_service_account(attrs) do
+    %User{service_account: true}
+    |> User.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_service_account(attrs, id) do
+    get_user!(id)
+    |> Repo.preload([:assume_bindings])
+    |> User.changeset(attrs)
+    |> Repo.update()
+  end
+
   @spec create_access_token(User.t) :: token_resp
-  def create_access_token(%User{id: id}) do
+  def create_access_token(args \\ %{}, %User{id: id}) do
     %AccessToken{user_id: id}
-    |> AccessToken.changeset()
+    |> AccessToken.changeset(args)
     |> Repo.insert()
   end
 

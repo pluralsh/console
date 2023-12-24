@@ -1,12 +1,13 @@
 defmodule Console.GraphQl.Resolvers.User do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.User
-  alias Console.Schema.{Group, GroupMember, Role, RoleBinding, Notification, AccessToken, AccessTokenAudit}
+  alias Console.Schema.{Group, GroupMember, Role, RoleBinding, Notification, AccessToken, AccessTokenAudit, PolicyBinding}
   alias Console.Services.Users
   require Logger
 
   def query(Group, _), do: Group
   def query(Role, _), do: Role
   def query(RoleBinding, _), do: RoleBinding
+  def query(PolicyBinding, _), do: PolicyBinding
   def query(_, _), do: User
 
   def get_user(%{email: email}, _), do: {:ok, Users.get_user_by_email!(email)}
@@ -23,6 +24,13 @@ defmodule Console.GraphQl.Resolvers.User do
         |> with_jwt()
       _ -> {:error, "unauthorized"}
     end
+  end
+
+  def list_service_accounts(args, _) do
+    User.service_account()
+    |> User.ordered()
+    |> maybe_search(User, args)
+    |> paginate(args)
   end
 
   def list_users(args, _) do
@@ -178,8 +186,19 @@ defmodule Console.GraphQl.Resolvers.User do
 
   def delete_role(%{id: id}, _), do: Users.delete_role(id)
 
-  def create_access_token(_, %{context: %{current_user: user}}),
-    do: Users.create_access_token(user)
+  def create_service_account(%{attributes: attrs}, _), do: Users.create_service_account(attrs)
+
+  def update_service_account(%{attributes: attrs, id: id}, _), do: Users.update_service_account(attrs, id)
+
+  def create_access_token(%{id: id} = args, _) do
+    case Users.get_user!(id) do
+      %User{service_account: true} = user -> Users.create_access_token(Map.take(args, [:scopes]), user)
+      _ -> {:error, "forbidden"}
+    end
+  end
+
+  def create_access_token(args, %{context: %{current_user: user}}),
+    do: Users.create_access_token(args, user)
 
   def delete_access_token(%{token: token}, %{context: %{current_user: user}}),
     do: Users.delete_access_token(token, user)

@@ -627,7 +627,9 @@ defmodule Console.Deployments.Clusters do
   """
   @spec create_runtime_services([map], binary, Cluster.t) :: {:ok, integer} | Console.error
   def create_runtime_services(svcs, service_id, %Cluster{id: id}) do
-    replace = if is_nil(service_id), do: [:name, :version], else: [:name, :version, :service_id]
+    replace = if is_nil(service_id),
+                do: [:name, :version],
+                else: [:name, :version, :service_id]
     Enum.filter(svcs, fn
       %{name: n} -> Table.fetch(n)
       _ -> false
@@ -650,6 +652,7 @@ defmodule Console.Deployments.Clusters do
           on_conflict: {:replace, replace},
           conflict_target: [:cluster_id, :name]
         )
+        Logger.info "persisted #{count} runtime services out of #{length(services)} sent"
         {:ok, count}
 
       _ -> {:ok, 0}

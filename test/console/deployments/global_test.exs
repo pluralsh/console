@@ -67,6 +67,41 @@ defmodule Console.Deployments.GlobalTest do
       assert secrets["name"] == "value"
     end
 
+    test "it will sync on helm differences too" do
+      git = insert(:git_repository)
+      admin = admin_user()
+
+      {:ok, source} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        helm: %{chart: "my-chart", version: "0.1.1"},
+        configuration: [%{name: "name", value: "value"}]
+      }, insert(:cluster), admin)
+
+      {:ok, dest} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        helm: %{chart: "my-chart", version: "0.1.0"},
+        configuration: [%{name: "name", value: "value"}]
+      }, insert(:cluster), admin)
+
+      {:ok, synced} = Global.sync_service(source, dest, admin)
+
+      assert synced.name == "source"
+      assert synced.namespace == "my-service"
+      assert synced.git.ref == "main"
+      assert synced.git.folder == "k8s"
+      assert synced.helm.version == "0.1.1"
+      assert synced.repository_id == git.id
+
+      {:ok, secrets} = Services.configuration(synced)
+      assert secrets["name"] == "value"
+    end
+
     test "if there's no difference they won't sync" do
       git = insert(:git_repository)
       admin = admin_user()
@@ -110,6 +145,34 @@ defmodule Console.Deployments.GlobalTest do
       sync = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
       ignore1 = insert(:cluster, provider: cluster.provider)
       ignore2 = insert(:cluster, tags: [%{name: "sync", value: "test"}])
+
+      :ok = Global.sync_clusters(global)
+
+      refute Services.get_service_by_name(ignore1.id, "source")
+      refute Services.get_service_by_name(ignore2.id, "source")
+
+      synced = Services.get_service_by_name(sync.id, "source")
+      refute Global.diff?(source, synced)
+    end
+
+    test "it will sync by distro" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository)
+      cluster = insert(:cluster)
+      admin = admin_user()
+
+      {:ok, source} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster, admin)
+
+      global = insert(:global_service, service: source, distro: :eks, tags: [%{name: "sync", value: "test"}])
+      sync = insert(:cluster, distro: :eks, tags: [%{name: "sync", value: "test"}])
+      ignore1 = insert(:cluster, distro: :eks)
+      ignore2 = insert(:cluster, distro: :k3s, tags: [%{name: "sync", value: "test"}])
 
       :ok = Global.sync_clusters(global)
 

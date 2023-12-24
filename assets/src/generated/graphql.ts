@@ -34,6 +34,7 @@ export type AccessToken = {
   audits?: Maybe<AccessTokenAuditConnection>;
   id?: Maybe<Scalars['ID']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  scopes?: Maybe<Array<Maybe<AccessTokenScope>>>;
   token?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -82,6 +83,14 @@ export type AccessTokenEdge = {
   __typename?: 'AccessTokenEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<AccessToken>;
+};
+
+export type AccessTokenScope = {
+  __typename?: 'AccessTokenScope';
+  api: Scalars['String']['output'];
+  apis?: Maybe<Array<Scalars['String']['output']>>;
+  identifier?: Maybe<Scalars['String']['output']>;
+  ids?: Maybe<Array<Scalars['String']['output']>>;
 };
 
 export type Account = {
@@ -546,6 +555,8 @@ export type Cluster = {
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a auth token to be used by the deploy operator, only readable on create */
   deployToken?: Maybe<Scalars['String']['output']>;
+  /** the distribution of kubernetes this cluster is running */
+  distro?: Maybe<ClusterDistro>;
   /** whether the current user can edit this cluster */
   editable?: Maybe<Scalars['Boolean']['output']>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
@@ -557,6 +568,8 @@ export type Cluster = {
   installed?: Maybe<Scalars['Boolean']['output']>;
   /** the url of the kas server you can access this cluster from */
   kasUrl?: Maybe<Scalars['String']['output']>;
+  /** arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons) */
+  metadata?: Maybe<Scalars['Map']['output']>;
   /** human readable name of this cluster, will also translate to cloud k8s name */
   name: Scalars['String']['output'];
   /** list the cached node metrics for a cluster, can also be stale up to 5m */
@@ -621,9 +634,11 @@ export type ClusterAttributes = {
   cloudSettings?: InputMaybe<CloudSettingsAttributes>;
   /** a cloud credential to use when provisioning this cluster */
   credentialId?: InputMaybe<Scalars['ID']['input']>;
+  distro?: InputMaybe<ClusterDistro>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
   kubeconfig?: InputMaybe<KubeconfigAttributes>;
+  metadata?: InputMaybe<Scalars['Json']['input']>;
   name: Scalars['String']['input'];
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
@@ -651,6 +666,15 @@ export type ClusterConnection = {
   pageInfo: PageInfo;
 };
 
+export enum ClusterDistro {
+  Aks = 'AKS',
+  Eks = 'EKS',
+  Generic = 'GENERIC',
+  Gke = 'GKE',
+  K3S = 'K3S',
+  Rke = 'RKE'
+}
+
 export type ClusterEdge = {
   __typename?: 'ClusterEdge';
   cursor?: Maybe<Scalars['String']['output']>;
@@ -667,6 +691,7 @@ export type ClusterInfo = {
 
 export type ClusterPing = {
   currentVersion: Scalars['String']['input'];
+  distro?: InputMaybe<ClusterDistro>;
 };
 
 /** a CAPI provider for a cluster, cloud is inferred from name if not provided manually */
@@ -758,10 +783,12 @@ export type ClusterStatusInfo = {
 };
 
 export type ClusterUpdateAttributes = {
+  distro?: InputMaybe<ClusterDistro>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
   /** pass a kubeconfig for this cluster (DEPRECATED) */
   kubeconfig?: InputMaybe<KubeconfigAttributes>;
+  metadata?: InputMaybe<Scalars['Json']['input']>;
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   /** if you optionally want to reconfigure the git repository for the cluster service */
@@ -1346,6 +1373,8 @@ export type GitStatus = {
 /** a rules based mechanism to redeploy a service across a fleet of clusters */
 export type GlobalService = {
   __typename?: 'GlobalService';
+  /** the kubernetes distribution to target with this global service */
+  distro?: Maybe<ClusterDistro>;
   /** internal id of this global service */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -1360,9 +1389,15 @@ export type GlobalService = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+/** A reference for a globalized service, which targets clusters based on the configured criteria */
 export type GlobalServiceAttributes = {
+  /** kubernetes distribution to target */
+  distro?: InputMaybe<ClusterDistro>;
+  /** name for this global service */
   name: Scalars['String']['input'];
+  /** cluster api provider to target */
   providerId?: InputMaybe<Scalars['ID']['input']>;
+  /** the cluster tags to target */
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
 };
 
@@ -2494,6 +2529,8 @@ export type RootMutationType = {
   createPeer?: Maybe<WireguardPeer>;
   createProviderCredential?: Maybe<ProviderCredential>;
   createRole?: Maybe<Role>;
+  createServiceAccount?: Maybe<User>;
+  createServiceAccountToken?: Maybe<AccessToken>;
   createServiceDeployment?: Maybe<ServiceDeployment>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
@@ -2556,6 +2593,7 @@ export type RootMutationType = {
   /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
   updateRole?: Maybe<Role>;
+  updateServiceAccount?: Maybe<User>;
   /** updates only the components of a given service, to be sent after deploy operator syncs */
   updateServiceComponents?: Maybe<ServiceDeployment>;
   updateServiceDeployment?: Maybe<ServiceDeployment>;
@@ -2585,6 +2623,11 @@ export type RootMutationTypeCloneServiceArgs = {
   clusterId: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeCreateAccessTokenArgs = {
+  scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
 };
 
 
@@ -2652,6 +2695,17 @@ export type RootMutationTypeCreateProviderCredentialArgs = {
 
 export type RootMutationTypeCreateRoleArgs = {
   attributes: RoleAttributes;
+};
+
+
+export type RootMutationTypeCreateServiceAccountArgs = {
+  attributes: ServiceAccountAttributes;
+};
+
+
+export type RootMutationTypeCreateServiceAccountTokenArgs = {
+  id: Scalars['ID']['input'];
+  scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
 };
 
 
@@ -2955,6 +3009,12 @@ export type RootMutationTypeUpdateRoleArgs = {
 };
 
 
+export type RootMutationTypeUpdateServiceAccountArgs = {
+  attributes: ServiceAccountAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateServiceComponentsArgs = {
   components?: InputMaybe<Array<InputMaybe<ComponentAttributes>>>;
   errors?: InputMaybe<Array<InputMaybe<ServiceErrorAttributes>>>;
@@ -3068,6 +3128,7 @@ export type RootQueryType = {
   secret?: Maybe<Secret>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
+  serviceAccounts?: Maybe<UserConnection>;
   /** fetches details of this service deployment, and can be called by the deploy operator */
   serviceDeployment?: Maybe<ServiceDeployment>;
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
@@ -3486,6 +3547,15 @@ export type RootQueryTypeServiceArgs = {
 };
 
 
+export type RootQueryTypeServiceAccountsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypeServiceDeploymentArgs = {
   cluster?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -3739,6 +3809,13 @@ export type RuntimeServiceAttributes = {
   version: Scalars['String']['input'];
 };
 
+export type ScopeAttributes = {
+  api?: InputMaybe<Scalars['String']['input']>;
+  apis?: InputMaybe<Array<Scalars['String']['input']>>;
+  identifier?: InputMaybe<Scalars['String']['input']>;
+  ids?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
 export type Secret = {
   __typename?: 'Secret';
   data: Scalars['Map']['output'];
@@ -3760,6 +3837,13 @@ export type Service = {
   raw: Scalars['String']['output'];
   spec: ServiceSpec;
   status: ServiceStatus;
+};
+
+export type ServiceAccountAttributes = {
+  assumeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  roles?: InputMaybe<UserRoleAttributes>;
 };
 
 export type ServiceCloneAttributes = {
@@ -4186,6 +4270,7 @@ export enum UpgradePolicyType {
 
 export type User = {
   __typename?: 'User';
+  assumeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   backgroundColor?: Maybe<Scalars['String']['output']>;
   boundRoles?: Maybe<Array<Maybe<Role>>>;
   buildTimestamp?: Maybe<Scalars['DateTime']['output']>;

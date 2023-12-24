@@ -806,6 +806,15 @@ defmodule Console.Deployments.ClustersTest do
       cluster = insert(:cluster)
 
       {:ok, 1} = Clusters.create_runtime_services([
+        %{name: "ingress-nginx", version: "1.8.1"},
+        %{name: "bogus", version: "2.0.0"}
+      ], nil, cluster)
+
+      [runtime] = Clusters.runtime_services(cluster)
+      assert runtime.name == "ingress-nginx"
+      assert runtime.version == "1.8.1"
+
+      {:ok, 1} = Clusters.create_runtime_services([
         %{name: "ingress-nginx", version: "1.9.1"},
         %{name: "bogus", version: "2.0.0"}
       ], nil, cluster)

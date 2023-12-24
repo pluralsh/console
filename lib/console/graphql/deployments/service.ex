@@ -80,10 +80,12 @@ defmodule Console.GraphQl.Deployments.Service do
     field :message, non_null(:string)
   end
 
+  @desc "A reference for a globalized service, which targets clusters based on the configured criteria"
   input_object :global_service_attributes do
-    field :name,        non_null(:string)
-    field :tags,        list_of(:tag_attributes)
-    field :provider_id, :id
+    field :name,        non_null(:string), description: "name for this global service"
+    field :tags,        list_of(:tag_attributes), description: "the cluster tags to target"
+    field :distro,      :cluster_distro, description: "kubernetes distribution to target"
+    field :provider_id, :id, description: "cluster api provider to target"
   end
 
   input_object :kustomize_attributes do
@@ -215,12 +217,13 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "a rules based mechanism to redeploy a service across a fleet of clusters"
   object :global_service do
-    field :id,   non_null(:id), description: "internal id of this global service"
-    field :name, non_null(:string), description: "a human readable name for this global service"
-    field :tags, list_of(:tag), description: "a set of tags to select clusters for this global service"
+    field :id,     non_null(:id), description: "internal id of this global service"
+    field :name,   non_null(:string), description: "a human readable name for this global service"
+    field :tags,   list_of(:tag), description: "a set of tags to select clusters for this global service"
+    field :distro, :cluster_distro, description: "the kubernetes distribution to target with this global service"
 
     field :service,  :service_deployment, resolve: dataloader(Deployments), description: "the service to replicate across clusters"
-    field :provider, :cluster_provider, resolve: dataloader(Deployments), description: "whether to only apply to clusters with this provider"
+    field :provider, :cluster_provider,   resolve: dataloader(Deployments), description: "whether to only apply to clusters with this provider"
 
     timestamps()
   end
@@ -325,6 +328,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :update_service_deployment, :service_deployment do
       middleware Authenticated
       middleware Feature, :cd
+      middleware Scope, api: "updateServiceDeployment"
       arg :id,         :id
       arg :cluster,    :string, description: "the handle of the cluster for this service"
       arg :name,       :string
