@@ -933,6 +933,21 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "updateGlobalService" do
+    test "it can delete a global service record" do
+      global = insert(:global_service)
+
+      {:ok, %{data: %{"updateGlobalService" => updated}}} = run_query("""
+        mutation Delete($id: ID!, $attributes: GlobalServiceAttributes!) {
+          updateGlobalService(id: $id, attributes: $attributes) { id distro }
+        }
+      """, %{"id" => global.id, "attributes" => %{"name" => global.name, "distro" => "EKS"}}, %{current_user: admin_user()})
+
+      assert updated["id"] == global.id
+      assert updated["distro"] == "EKS"
+    end
+  end
+
   describe "deleteGlobalService" do
     test "it can delete a global service record" do
       global = insert(:global_service)
@@ -1003,7 +1018,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
       assert pipeline["id"]
       assert pipeline["name"] == "test"
-      [dev, prod] = pipeline["stages"]
+      %{"dev" => dev, "prod" => prod} = Map.new(pipeline["stages"], & {&1["name"], &1})
 
       assert dev["name"] == "dev"
       assert hd(dev["services"])["service"]["id"] == svc.id

@@ -1283,6 +1283,8 @@ export type GcpSettingsAttributes = {
 };
 
 export type GitAttributes = {
+  /** whether to run plural crypto on this repo */
+  decrypt?: InputMaybe<Scalars['Boolean']['input']>;
   /** a manually supplied https path for non standard git setups.  This is auto-inferred in many cases */
   httpsPath?: InputMaybe<Scalars['String']['input']>;
   /** a passphrase to decrypt the given private key */
@@ -1330,6 +1332,8 @@ export type GitRepository = {
   __typename?: 'GitRepository';
   /** whether its a http or ssh url */
   authMethod?: Maybe<AuthMethod>;
+  /** whether to run plural crypto unlock on this repo */
+  decrypt?: Maybe<Scalars['Boolean']['output']>;
   /** whether the current user can edit this repo */
   editable?: Maybe<Scalars['Boolean']['output']>;
   /** the error message if there were any pull errors */
@@ -2590,6 +2594,7 @@ export type RootMutationType = {
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
   updateGate?: Maybe<PipelineGate>;
   updateGitRepository?: Maybe<GitRepository>;
+  updateGlobalService?: Maybe<GlobalService>;
   updateGroup?: Maybe<Group>;
   /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
@@ -2986,6 +2991,12 @@ export type RootMutationTypeUpdateGateArgs = {
 
 export type RootMutationTypeUpdateGitRepositoryArgs = {
   attributes: GitAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateGlobalServiceArgs = {
+  attributes: GlobalServiceAttributes;
   id: Scalars['ID']['input'];
 };
 

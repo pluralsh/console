@@ -425,6 +425,8 @@ type RootMutationType {
     attributes: GlobalServiceAttributes!
   ): GlobalService
 
+  updateGlobalService(id: ID!, attributes: GlobalServiceAttributes!): GlobalService
+
   deleteGlobalService(id: ID!): GlobalService
 
   "upserts a pipeline with a given name"
@@ -1897,6 +1899,9 @@ input GitAttributes {
 
   "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}\/tree\/{ref}\/{folder}"
   urlFormat: String
+
+  "whether to run plural crypto on this repo"
+  decrypt: Boolean
 }
 
 "a git repository available for deployments"
@@ -1924,6 +1929,9 @@ type GitRepository {
 
   "a format string to get the http url for a subfolder in a git repo"
   urlFormat: String
+
+  "whether to run plural crypto unlock on this repo"
+  decrypt: Boolean
 
   "named refs like branches\/tags for a repository"
   refs: [String!]

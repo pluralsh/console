@@ -73,7 +73,7 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterPinged do
   def process(_), do: :ok
 end
 
-defimpl Console.PubSub.Recurse, for: Console.PubSub.GlobalServiceCreated do
+defimpl Console.PubSub.Recurse, for: [Console.PubSub.GlobalServiceCreated, Console.PubSub.GlobalServiceUpdated] do
   alias Console.Deployments.Global
 
   def process(%{item: global}), do: Global.sync_clusters(global)

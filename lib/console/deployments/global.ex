@@ -25,6 +25,17 @@ defmodule Console.Deployments.Global do
 
 
   @doc """
+  Updates a global service by id
+  """
+  def update(attrs, id, %User{} = user) do
+    get!(id)
+    |> GlobalService.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
   Deletes a global service and delinks any created services
   """
   @spec delete(binary, User.t) :: global_resp
@@ -154,6 +165,8 @@ defmodule Console.Deployments.Global do
 
   def notify({:ok, %GlobalService{} = svc}, :create, user),
     do: handle_notify(PubSub.GlobalServiceCreated, svc, actor: user)
+  def notify({:ok, %GlobalService{} = svc}, :update, user),
+    do: handle_notify(PubSub.GlobalServiceUpdated, svc, actor: user)
   def notify({:ok, %GlobalService{} = svc}, :delete, user),
     do: handle_notify(PubSub.GlobalServiceDeleted, svc, actor: user)
   def notify(pass, _, _), do: pass
