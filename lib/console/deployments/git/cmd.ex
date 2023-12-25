@@ -65,11 +65,19 @@ defmodule Console.Deployments.Git.Cmd do
   def clone(%GitRepository{dir: dir} = git) when is_binary(dir) do
     with {:ok, _} = res <- git(git, "clone", ["--filter=blob:none", url(git), git.dir]),
          :ok <- branches(git),
+         :ok <- unlock(git),
       do: res
   end
 
   def git(%GitRepository{} = git, cmd, args \\ []) do
     case System.cmd("git", [cmd | args], opts(git)) do
+      {out, 0} -> {:ok, out}
+      {out, _} -> {:error, out}
+    end
+  end
+
+  def plural(%GitRepository{} = git, cmd, args \\ []) do
+    case System.cmd("plural", [cmd | args], opts(git)) do
       {out, 0} -> {:ok, out}
       {out, _} -> {:error, out}
     end
@@ -82,6 +90,13 @@ defmodule Console.Deployments.Git.Cmd do
     URI.to_string(%{uri | userinfo: username})
   end
   def url(%GitRepository{url: url}), do: url
+
+  defp unlock(%GitRepository{decrypt: true} = git) do
+    with {:ok, _} <- plural(git, ["crypto", "init"]),
+         {:ok, _} <- plural(git, ["crypto", "unlock"]),
+      do: :ok
+  end
+  defp unlock(_), do: :ok
 
   defp opts(%GitRepository{dir: dir} = repo), do: [env: env(repo), cd: dir, stderr_to_stdout: true]
 

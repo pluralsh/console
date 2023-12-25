@@ -17,6 +17,7 @@ defmodule Console.Schema.GitRepository do
     field :error,        :string
     field :https_path,   :string
     field :url_format,   :string
+    field :decrypt,      :boolean
 
     field :dir,              :string, virtual: true
     field :private_key_file, :string, virtual: true
@@ -28,7 +29,7 @@ defmodule Console.Schema.GitRepository do
     from(g in query, order_by: ^order)
   end
 
-  @valid ~w(url pulled_at private_key passphrase username password https_path url_format)a
+  @valid ~w(url pulled_at private_key decrypt passphrase username password https_path url_format)a
 
   def changeset(model, attrs \\ %{}) do
     model

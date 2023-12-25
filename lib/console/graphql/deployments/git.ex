@@ -14,6 +14,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :password,    :string, description: "the http password for http authenticated repos"
     field :https_path,  :string, description: "a manually supplied https path for non standard git setups.  This is auto-inferred in many cases"
     field :url_format,  :string, description: "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder}"
+    field :decrypt,     :boolean, description: "whether to run plural crypto on this repo"
   end
 
   @desc "a git repository available for deployments"
@@ -26,6 +27,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :error,        :string, description: "the error message if there were any pull errors"
     field :https_path,   :string, description: "the https url for this git repo"
     field :url_format,   :string, description: "a format string to get the http url for a subfolder in a git repo"
+    field :decrypt,      :boolean, description: "whether to run plural crypto unlock on this repo"
 
     field :refs, list_of(non_null(:string)), description: "named refs like branches/tags for a repository", resolve: fn
       git, _, _ -> Deployments.git_refs(git)
