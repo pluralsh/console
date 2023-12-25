@@ -46,7 +46,8 @@ config :console,
   cache_adapter: Console.Cache,
   local_cache: Console.LocalCache,
   version: Mix.Project.config[:version],
-  kas_dns: "https://kas.example.com"
+  kas_dns: "https://kas.example.com",
+  qps: 40
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
@@ -92,5 +93,9 @@ config :console, Console.PartitionedCache,
   ]
 
 config :console, :login_link, []
+
+config :hammer,
+  backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60 * 4,
+                                 cleanup_interval_ms: 60_000 * 10]}
 
 import_config "#{Mix.env()}.exs"

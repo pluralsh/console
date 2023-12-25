@@ -132,7 +132,9 @@ defmodule Console.MixProject do
       {:phoenix_client, "~> 0.11", git: "https://github.com/michaeljguarino/phoenix_client.git", branch: "mguarino/channel-listen"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:elixpath, "~> 0.1.1", git: "https://github.com/mtannaan/elixpath.git"},
-      {:mimic, "~> 1.1", only: :test}
+      {:mimic, "~> 1.1", only: :test},
+      {:hammer, "~> 6.0"},
+      {:hammer_plug, "~> 3.0", git: "https://github.com/pluralsh/hammer-plug.git", branch: "runtime-config"}
     ]
   end
 
