@@ -7,7 +7,7 @@ defmodule Console.GraphQl.Kubernetes.Base do
     Jason.encode(data)
   end
 
-  defp prune(%{metadata: %MetaV1.ObjectMeta{} = meta} = object),
+  defp prune(%{metadata: %MetaV1.ObjectMeta{}} = object),
     do: put_in(object.metadata.managed_fields, [])
   defp prune(obj), do: obj
 

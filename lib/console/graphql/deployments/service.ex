@@ -404,6 +404,14 @@ defmodule Console.GraphQl.Deployments.Service do
       safe_resolve &Deployments.create_global_service/2
     end
 
+    field :update_global_service, :global_service do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:global_service_attributes)
+
+      safe_resolve &Deployments.update_global_service/2
+    end
+
     field :delete_global_service, :global_service do
       middleware Authenticated
       arg :id, non_null(:id)

@@ -19,6 +19,18 @@ defmodule Console.Deployments.GlobalTest do
     end
   end
 
+  describe "#update/2" do
+    test "an admin can update a global service" do
+      global = insert(:global_service)
+
+      {:ok, updated} = Global.update(%{distro: :eks}, global.id, admin_user())
+
+      assert updated.distro == :eks
+
+      assert_receive {:event, %PubSub.GlobalServiceUpdated{item: ^updated}}
+    end
+  end
+
   describe "#delete/2" do
     test "it can delete a global service and wipe ownership pointers" do
       global = insert(:global_service)

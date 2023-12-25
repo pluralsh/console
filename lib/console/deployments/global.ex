@@ -25,6 +25,17 @@ defmodule Console.Deployments.Global do
 
 
   @doc """
+  Updates a global service by id
+  """
+  def update(attrs, id, %User{} = user) do
+    get!(id)
+    |> GlobalService.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
   Deletes a global service and delinks any created services
   """
   @spec delete(binary, User.t) :: global_resp
@@ -66,8 +77,7 @@ defmodule Console.Deployments.Global do
   """
   @spec add_to_cluster(GlobalService.t, Cluster.t) :: Services.service_resp
   def add_to_cluster(%GlobalService{id: gid, service_id: sid}, %Cluster{id: cid}) do
-    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
-    Services.clone_service(%{owner_id: gid}, sid, cid, bot)
+    Services.clone_service(%{owner_id: gid}, sid, cid, bot())
   end
 
   @doc """
@@ -76,7 +86,7 @@ defmodule Console.Deployments.Global do
   @spec sync_clusters(GlobalService.t) :: :ok
   def sync_clusters(%GlobalService{id: gid} = global) do
     %{service: svc} = Console.Repo.preload(global, [:service])
-    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    bot = bot()
     Cluster.ignore_ids([svc.cluster_id])
     |> Cluster.target(global)
     |> Repo.all()
@@ -88,6 +98,8 @@ defmodule Console.Deployments.Global do
       end
     end)
   end
+
+  defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 
   @doc """
   it can resync a service owned by a global service
@@ -153,6 +165,8 @@ defmodule Console.Deployments.Global do
 
   def notify({:ok, %GlobalService{} = svc}, :create, user),
     do: handle_notify(PubSub.GlobalServiceCreated, svc, actor: user)
+  def notify({:ok, %GlobalService{} = svc}, :update, user),
+    do: handle_notify(PubSub.GlobalServiceUpdated, svc, actor: user)
   def notify({:ok, %GlobalService{} = svc}, :delete, user),
     do: handle_notify(PubSub.GlobalServiceDeleted, svc, actor: user)
   def notify(pass, _, _), do: pass

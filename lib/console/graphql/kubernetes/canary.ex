@@ -26,9 +26,9 @@ defmodule Console.GraphQl.Kubernetes.Canary do
       _, _, _ -> {:ok, nil}
     end
 
-    field :ingress_primary, :ingress, resolve: fn
+    field :ingress_canary, :ingress, resolve: fn
       %{spec: %{ingress_ref: %{name: name}}, metadata: %{namespace: ns}}, _, ctx ->
-        Kubernetes.resolve_ingress(%{namespace: ns, name: "#{name}-primary"}, ctx)
+        Kubernetes.resolve_ingress(%{namespace: ns, name: "#{name}-canary"}, ctx)
       _, _, _ -> {:ok, nil}
     end
 

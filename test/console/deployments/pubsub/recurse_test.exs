@@ -170,6 +170,27 @@ defmodule Console.Deployments.PubSub.RecurseTest do
     end
   end
 
+  describe "ClusterPinged" do
+    test "it will apply global services" do
+      bot("console")
+      cluster = insert(:cluster, distro: :eks, tags: [%{name: "test", value: "tag"}])
+      global  = insert(:global_service, provider: cluster.provider)
+      global2 = insert(:global_service, tags: [%{name: "test", value: "tag"}])
+      global3 = insert(:global_service, distro: :eks)
+      ignore  = insert(:global_service, tags: [%{name: "ignore", value: "tag"}])
+      ignore1 = insert(:global_service, provider: insert(:cluster_provider))
+      ignore2 = insert(:global_service, distro: :gke)
+
+      event = %PubSub.ClusterCreated{item: cluster}
+      :ok = Recurse.handle_event(event)
+
+      for gs <- [global, global2, global3],
+        do: assert Services.get_service_by_name(cluster.id, gs.service.name)
+      for gs <- [ignore, ignore1, ignore2],
+        do: refute Services.get_service_by_name(cluster.id, gs.service.name)
+    end
+  end
+
   describe "GlobalServiceCreated" do
     test "it will sync all relevant clusters" do
       insert(:user, bot_name: "console", roles: %{admin: true})

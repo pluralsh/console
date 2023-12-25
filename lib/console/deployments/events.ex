@@ -7,6 +7,7 @@ defmodule Console.PubSub.ServiceHardDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ClusterCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ClusterUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ClusterDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.ClusterPinged, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.ProviderCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ProviderUpdated, do: use Piazza.PubSub.Event
@@ -24,6 +25,7 @@ defmodule Console.PubSub.GitRepositoryDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.DeploymentSettingsUpdated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.GlobalServiceCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.GlobalServiceUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.GlobalServiceDeleted, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.PipelineUpserted, do: use Piazza.PubSub.Event

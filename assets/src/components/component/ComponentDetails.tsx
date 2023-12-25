@@ -15,8 +15,10 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ViewLogsButton } from 'components/component/ViewLogsButton'
 import { directory } from 'components/component/directory'
 import {
+  CanaryDocument,
   CertificateDocument,
   CronJobDocument,
+  DaemonSetDocument,
   DeploymentDocument,
   IngressDocument,
   JobDocument,
@@ -36,6 +38,8 @@ export const kindToQuery = {
   job: JobDocument,
   service: ServiceDocument,
   statefulset: StatefulSetDocument,
+  daemonset: DaemonSetDocument,
+  canary: CanaryDocument,
 } as const
 
 type DetailsComponent = {

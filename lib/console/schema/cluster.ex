@@ -95,6 +95,7 @@ defmodule Console.Schema.Cluster do
     field :deleted_at,      :utc_datetime_usec
     field :pinged_at,       :utc_datetime_usec
 
+    field :distro_changed,  :boolean, default: false, virtual: true
     field :token_readable,  :boolean, default: false, virtual: true
 
     embeds_one :resource,       NamespacedName
@@ -281,6 +282,7 @@ defmodule Console.Schema.Cluster do
   def ping_changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(pinged_at distro current_version installed)a)
+    |> change_markers(distro: :distro_changed)
     |> update_vsn()
   end
 

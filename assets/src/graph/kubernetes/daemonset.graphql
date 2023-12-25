@@ -1,0 +1,36 @@
+fragment DaemonSetStatus on DaemonSetStatus {
+  currentNumberScheduled
+  desiredNumberScheduled
+  numberReady
+}
+
+fragment DaemonSetSpec on DaemonSetSpec {
+  strategy {
+    type
+  }
+}
+
+fragment DaemonSet on DaemonSet {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...DaemonSetStatus
+  }
+  spec {
+    ...DaemonSetSpec
+  }
+  pods {
+    ...Pod
+  }
+  raw
+}
+
+query DaemonSet($name: String!, $namespace: String!, $serviceId: ID) {
+  daemonSet(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...DaemonSet
+    events {
+      ...Event
+    }
+  }
+}
