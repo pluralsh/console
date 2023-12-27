@@ -52,5 +52,10 @@ defmodule ConsoleWeb.Endpoint do
     key: "_watchman_key",
     signing_salt: "cyhBqo3d"
 
+  plug Hammer.Plug, [
+    rate_limit: &Console.rate_limit/0,
+    by: :ip
+  ]
+
   plug ConsoleWeb.Router
 end

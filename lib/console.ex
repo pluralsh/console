@@ -1,6 +1,8 @@
 defmodule Console do
   @type error :: {:error, term}
 
+  def rate_limit(), do: {"global", :timer.seconds(1), Console.conf(:qps)}
+
   def provider(), do: Console.conf(:provider)
 
   def byok?() do
