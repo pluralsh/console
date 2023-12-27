@@ -21,7 +21,7 @@ import { InfoSectionH2 } from './common'
 
 export default function Pods({ pods }) {
   const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
-  const { refetch } = useOutletContext<any>()
+  const { refetch, ...rest } = useOutletContext<any>()
   const theme = useTheme()
   const columns = useMemo(
     () => [
@@ -55,6 +55,7 @@ export default function Pods({ pods }) {
       <PodsList
         pods={pods}
         columns={columns}
+        serviceId={rest?.serviceId}
         {...(clusterId
           ? {
               linkBasePath: getPodDetailsPath({ clusterId }),

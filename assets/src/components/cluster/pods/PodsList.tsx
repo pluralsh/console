@@ -1,7 +1,14 @@
 import { A, Div, Flex, Span } from 'honorable'
 import { Link, useNavigate } from 'react-router-dom'
 import { Row, createColumnHelper } from '@tanstack/react-table'
-import { ComponentProps, memo, useMemo, useState } from 'react'
+import {
+  ComponentProps,
+  createContext,
+  memo,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 import { filesize } from 'filesize'
 
 import type { Application, Maybe, Pod } from 'generated/graphql'
@@ -34,11 +41,21 @@ import { ContainerStatuses } from '../ContainerStatuses'
 
 import { getPodResources } from './getPodResources'
 
-function DeletePod({ name, namespace, refetch }) {
+function DeletePod({
+  name,
+  namespace,
+  refetch,
+  serviceId,
+}: {
+  name: string
+  namespace: string
+  refetch: any
+  serviceId?: string | null
+}) {
   const [confirm, setConfirm] = useState(false)
 
   const [mutation, { loading }] = useMutation(DELETE_POD, {
-    variables: { name, namespace },
+    variables: { name, namespace, serviceId },
     onCompleted: () => {
       setConfirm(false)
       refetch()
@@ -260,13 +277,18 @@ export const ColActions = (refetch) =>
 export const ColDelete = (refetch) =>
   columnHelper.accessor((row) => row.name, {
     id: 'delete',
-    cell: ({ row: { original } }) => (
-      <DeletePod
-        name={original.name}
-        namespace={original.namespace}
-        refetch={refetch}
-      />
-    ),
+    cell: ({ row: { original } }) => {
+      const ctx = useContext(PodsListContext)
+
+      return (
+        <DeletePod
+          name={original.name || ''}
+          namespace={original.namespace || ''}
+          refetch={refetch}
+          serviceId={ctx?.serviceId}
+        />
+      )
+    },
     header: '',
   })
 
@@ -278,6 +300,7 @@ type PodListProps = Omit<ComponentProps<typeof Table>, 'data'> & {
   applications?: Maybe<Maybe<Application>[]>
   columns: any[]
   linkBasePath?: string
+  serviceId?: string | null
 }
 
 function getRestarts(status: Pod['status']) {
@@ -304,11 +327,14 @@ function getPodImages(spec: Pod['spec']) {
   ]
 }
 
+const PodsListContext = createContext<any>({})
+
 export const PodsList = memo(
   ({
     pods,
     applications,
     columns,
+    serviceId,
     linkBasePath = `/pods`,
     ...props
   }: PodListProps) => {
@@ -356,15 +382,17 @@ export const PodsList = memo(
     }
 
     return (
-      <Table
-        data={tableData}
-        columns={columns}
-        virtualizeRows
-        {...props}
-        onRowClick={(_e, { original }: Row<PodTableRow>) =>
-          navigate(`${linkBasePath}/${original.namespace}/${original.name}`)
-        }
-      />
+      <PodsListContext.Provider value={{ serviceId }}>
+        <Table
+          data={tableData}
+          columns={columns}
+          virtualizeRows
+          {...props}
+          onRowClick={(_e, { original }: Row<PodTableRow>) =>
+            navigate(`${linkBasePath}/${original.namespace}/${original.name}`)
+          }
+        />
+      </PodsListContext.Provider>
     )
   }
 )
