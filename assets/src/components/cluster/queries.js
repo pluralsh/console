@@ -14,8 +14,8 @@ import {
 } from 'components/graphql/kubernetes'
 
 export const DELETE_POD = gql`
-  mutation DeletePod($name: String!, $namespace: String!) {
-    deletePod(name: $name, namespace: $namespace) {
+  mutation DeletePod($name: String!, $namespace: String!, $serviceId: ID) {
+    deletePod(name: $name, namespace: $namespace, serviceId: $serviceId) {
       ...PodFragment
     }
   }
