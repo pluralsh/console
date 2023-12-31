@@ -6,6 +6,14 @@ replicaCount: 2
 
 homeDir: /root
 
+secrets:
+  cluster_name: test
+  jwt: REPLACEME
+  erlang: REPLACEME
+  admin_name: test
+  admin_email: admin@example.com
+  admin_password: REPLACEME
+
 image:
   repository: dkr.plural.sh/console/console
   tag: ~

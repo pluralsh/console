@@ -2,10 +2,14 @@
 ingress:
   console_dns: {{ configuration.consoleDns }}
   kas_dns: {{ configuration.kasDns }}
+  {% if configuration.clusterIssuer %}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ configuration.clusterIssuer }}
+  {% endif %}
 
 {% if configuration.provider %}
 provider: {{ configuration.provider }}
-{% end %}
+{% endif %}
 
 secrets:
   jwt: {{ configuration.jwt }}
@@ -41,6 +45,10 @@ kas:
 
   ingress:
     kas_dns: {{ configuration.kasDns }}
+    {% if configuration.clusterIssuer %}
+    annotations:
+      cert-manager.io/cluster-issuer: {{ configuration.clusterIssuer }}
+    {% endif %}
 
   redis:
     auth:
