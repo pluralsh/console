@@ -3,6 +3,21 @@ entries:
   console:
   - apiVersion: v2
     appVersion: 0.7.7
+    created: "2024-01-01T16:10:14.542726105Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.0.3
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: 0714e0ef48f5cf085a0e80323e567b1d2839b6c89bfc5bb5f052195c4b7d8482
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.1.16/console-0.1.16.tgz
+    version: 0.1.16
+  - apiVersion: v2
+    appVersion: 0.7.7
     created: "2023-12-29T02:32:39.153844425Z"
     dependencies:
     - name: kas
@@ -222,4 +237,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/console-chart-v0.1.0/system-upgrade-controller-0.1.0.tgz
     version: 0.1.0
-generated: "2023-12-29T02:32:39.153947527Z"
+generated: "2024-01-01T16:10:14.542840639Z"
