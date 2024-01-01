@@ -1,0 +1,61 @@
+
+ingress:
+  console_dns: {{ configuration.consoleDns }}
+  kas_dns: {{ configuration.kasDns }}
+  {% if configuration.clusterIssuer %}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ configuration.clusterIssuer }}
+  {% endif %}
+
+{% if configuration.provider %}
+provider: {{ configuration.provider }}
+{% endif %}
+
+secrets:
+  jwt: {{ configuration.jwt }}
+  admin_name: {{ configuration.adminName }}
+  aes_key: {{ configuration.aesKey }}
+  erlang: {{ configuration.erlang }}
+  admin_email: {{ configuration.adminEmail }}
+  admin_password: {{ configuration.adminPassword }}
+  cluster_name: {{ configuration.clusterName }}
+  {% if configuration.pluralClientId %}
+  plural_client_id: {{ configuration.pluralClientId }}
+  {% endif %}
+  {% if configuration.pluralClientSecret %}
+  plural_client_secret: {{ configuration.pluralClientSecret }}
+  {% endif %}
+  {% if configuration.key %}
+  key: {{ configuration.key }}
+  {% endif %}
+  {% if configuration.identity %}
+  identity: {{ configuration.identity }}
+  {% endif %}
+
+extraSecretEnv:
+  PLURAL_TOKEN: {{ configuration.pluralToken }}
+  KAS_API_SECRET: {{ configuration.kasApi }}
+  KAS_PRIVATE_API_SECRET: {{ configuration.kasPrivateApi }}
+  KAS_REDIS_SECRET: {{ configuration.kasRedis }}
+  POSTGRES_URL: {{ configuration.postgresUrl }}
+  CONSOLE_BYOK: 'true'
+
+kas:
+  enabled: true
+  consoleUrl: {{ configuration.consoleDns }}
+
+  secrets:
+    api: {{ configuration.kasApi }}
+    privateapi: {{ configuration.kasPrivateApi }}
+    redis: {{ configuration.kasRedis }}
+
+  ingress:
+    kas_dns: {{ configuration.kasDns }}
+    {% if configuration.clusterIssuer %}
+    annotations:
+      cert-manager.io/cluster-issuer: {{ configuration.clusterIssuer }}
+    {% endif %}
+
+  redis:
+    auth:
+      password: {{ configuration.kasRedis }}

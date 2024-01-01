@@ -49,8 +49,10 @@ defmodule Console.GraphQl.Resolvers.Plural do
   end
 
   def list_applications(_, _) do
-    with {:ok, %{items: items}} <- Client.list_applications(),
-      do: {:ok, items}
+    case Client.list_applications() do
+      {:ok, %{items: items}} -> {:ok, items}
+      _ -> {:ok, []}
+    end
   end
 
   def resolve_application(%{name: name}, _), do: Client.get_application(name)

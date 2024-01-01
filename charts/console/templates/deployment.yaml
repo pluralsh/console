@@ -58,6 +58,10 @@ spec:
           mountPath: /usr/local/bin/plural
           subPath: plural
         {{- end }}
+        {{- if or .Values.secrets.identity .Values.secrets.key }}
+        - name: console-conf
+          mountPath: {{ .Values.homeDir }}/.plural
+        {{- end }}
         ports:
         - name: http
           containerPort: {{ .Values.service.port }}
@@ -87,4 +91,9 @@ spec:
       {{ if .Values.cliContainer.enabled }}
       - name: cli-override
         emptyDir: {}
+      {{- end }}
+      {{- if or .Values.secrets.identity .Values.secrets.key }}
+      - name: console-conf
+        secret:
+          secretName: console-conf
       {{- end }}
