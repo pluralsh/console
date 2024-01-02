@@ -6,8 +6,9 @@ defmodule Console do
   def provider(), do: Console.conf(:provider)
 
   def byok?() do
-    case provider() do
-      prov when prov in ~w(aws gcp azure generic)a -> false
+    case {provider(), Console.conf(:byok)} do
+      {_, true} -> true
+      {prov, _} when prov in ~w(aws gcp azure generic)a -> false
       _ -> true
     end
   end
