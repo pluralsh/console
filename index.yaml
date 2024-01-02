@@ -231,6 +231,17 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/console-chart-v0.1.1/console-0.1.1.tgz
     version: 0.1.1
+  controller:
+  - apiVersion: v2
+    appVersion: 0.7.5
+    created: "2024-01-02T15:12:57.056522402Z"
+    description: A Helm chart for Kubernetes
+    digest: f722eb4669853148eb85efee9624b2947f2c1020a42f645f9fb8ca1a10080f7a
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.1/controller-0.0.1.tgz
+    version: 0.0.1
   system-upgrade-controller:
   - apiVersion: v2
     appVersion: v0.13.1
@@ -252,4 +263,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/console-chart-v0.1.0/system-upgrade-controller-0.1.0.tgz
     version: 0.1.0
-generated: "2024-01-01T16:42:14.347273403Z"
+generated: "2024-01-02T15:12:57.056583936Z"
