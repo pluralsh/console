@@ -1,0 +1,16 @@
+# Adds namespace to all resources.
+namespace: plural-deployment-controller
+
+# Labels to add to all resources and selectors.
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/part-of: plural-deployment-controller
+      app.kubernetes.io/version: dev
+      app.kubernetes.io/managed-by: kustomize
+
+resources:
+  - bases/deployments.plural.sh_providers.yaml
+  - bases/deployments.plural.sh_gitrepositories.yaml
+  - bases/deployments.plural.sh_clusters.yaml
+  - bases/deployments.plural.sh_servicedeployments.yaml

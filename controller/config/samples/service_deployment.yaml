@@ -1,0 +1,18 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ServiceDeployment
+metadata:
+  name: k8saws
+  namespace: default
+spec:
+  version: 0.0.1
+  git:
+    folder: nginx
+    ref: master
+  repositoryRef:
+    kind: GitRepository
+    name: k8shelm
+    namespace: default
+  clusterRef:
+    kind: Cluster
+    name: aws
+    namespace: default
