@@ -4,6 +4,6 @@ dependencies:
   version: 0.1.10
 - name: controller
   repository: file://../../../charts/controller
-  version: 0.0.2
-digest: sha256:ab3c9d6d4d728887b596bbd60d9e4860a0a61a854c06a00759396769bcbd5858
-generated: "2024-01-02T12:30:40.966289-05:00"
+  version: 0.0.3
+digest: sha256:1e7af1fd88a25616de2b85d24ab2c7c62f754e2878fb12adfd40eb1b884fac9b
+generated: "2024-01-02T17:46:41.398455-05:00"

@@ -10,6 +10,7 @@ dep ?= forge-core
 GIT_COMMIT ?= abd123
 TARGETARCH ?= amd64
 ERLANG_VERSION ?= `grep erlang .tool-versions | cut -d' ' -f2`
+REPO_ROOT ?= `pwd`
 
 help:
 	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -26,6 +27,10 @@ build: ## Build the Docker image
 		-t $(APP_NAME):latest \
 		-t gcr.io/$(GCP_PROJECT)/$(APP_NAME):$(APP_VSN) \
 		-t $(DKR_HOST)/console/$(APP_NAME):$(APP_VSN) .
+
+helm-dependencies:
+	cd charts/console && helm dependency update && \
+	cd ../../plural/helm/console && helm dependency update
 
 push: ## push to gcr
 	docker push gcr.io/$(GCP_PROJECT)/$(APP_NAME):$(APP_VSN)
