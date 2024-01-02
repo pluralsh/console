@@ -37,7 +37,7 @@ controllerManager:
     image:
       repository: ghcr.io/pluralsh/deployment-controller
       tag: ~
-    imagePullPolicy: Never
+    imagePullPolicy: IfNotPresent
     resources:
       limits:
         cpu: 500m
