@@ -152,6 +152,11 @@ jobs:
       with:
         path: ./charts/console
         release: ${{github.ref_name}}
+    - name: push controller chart
+      uses: pluralsh/chart-releaser@v0.1.3
+      with:
+        path: ./charts/controller
+        release: ${{github.ref_name}}
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
       with:

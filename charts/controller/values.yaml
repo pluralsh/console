@@ -1,4 +1,4 @@
-consoleUrl: ""
+consoleUrl: ~
 tokenSecretRef:
   name: console-auth-token
   key: access-token
@@ -36,7 +36,7 @@ controllerManager:
         - ALL
     image:
       repository: ghcr.io/pluralsh/deployment-controller
-      tag: latest
+      tag: ~
     imagePullPolicy: Never
     resources:
       limits:
