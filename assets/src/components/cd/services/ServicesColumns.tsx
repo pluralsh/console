@@ -19,7 +19,7 @@ import { shortenSha1 } from 'utils/sha'
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { getProviderIconURL } from 'components/utils/Provider'
+import { getProviderIconUrl } from 'components/utils/Provider'
 import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { ProtectBadge } from '../clusters/ProtectBadge'
@@ -74,7 +74,7 @@ export const ColCluster = columnHelper.accessor(
       const clusterName = getValue()
 
       return (
-        <ColWithIcon icon={getProviderIconURL(cloud, theme.mode === 'dark')}>
+        <ColWithIcon icon={getProviderIconUrl(cloud, theme.mode)}>
           {clusterName}
         </ColWithIcon>
       )
@@ -103,11 +103,7 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
           <ColWithIcon
             truncateLeft
             icon={
-              helm ? (
-                getProviderIconURL('byok', theme.mode === 'dark')
-              ) : (
-                <GitHubLogoIcon />
-              )
+              helm ? getProviderIconUrl('byok', theme.mode) : <GitHubLogoIcon />
             }
           >
             <span>{url}</span>

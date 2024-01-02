@@ -16,6 +16,7 @@ import { Key, useCallback, useContext, useMemo, useState } from 'react'
 import { ApolloError, useMutation } from '@apollo/client'
 import { appendConnection, updateCache } from 'utils/graphql'
 import Fuse from 'fuse.js'
+import { useTheme } from 'styled-components'
 
 const BUILD_TYPES = [
   { key: BuildTypes.DEPLOY, value: 'Deployment' },
@@ -29,6 +30,7 @@ const searchOptions = {
 }
 
 export default function CreateBuild() {
+  const theme = useTheme()
   const { applications } = useContext<any>(InstallationContext)
   const [open, setOpen] = useState<boolean>(false)
   const [inputValue, setInputValue] = useState('')
@@ -140,7 +142,7 @@ export default function CreateBuild() {
                 startIcon={
                   !!currentApp && hasIcons(currentApp) ? (
                     <img
-                      src={getIcon(currentApp)}
+                      src={getIcon(currentApp, theme.mode)}
                       height={16}
                     />
                   ) : undefined
@@ -156,7 +158,7 @@ export default function CreateBuild() {
                     leftContent={
                       hasIcons(app) ? (
                         <img
-                          src={getIcon(app)}
+                          src={getIcon(app, theme.mode)}
                           height={16}
                         />
                       ) : undefined

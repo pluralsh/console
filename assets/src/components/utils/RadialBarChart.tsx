@@ -5,9 +5,7 @@ import { ComponentProps, useMemo } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
-import { Div } from 'honorable'
-
-import { CHART_THEME } from './charts'
+import { useChartTheme } from './charts'
 import { ChartTooltip } from './ChartTooltip'
 
 const COLOR_MAP = {
@@ -93,7 +91,18 @@ export const createCenteredMetric = (val, label, { fontSize = 25 } = {}) =>
     )
   }
 
-function RadialBarChartUnstyled({
+const RadialBarChartSC = styled.div<{ $width: number; $height: number }>(
+  ({ $width, $height }) => ({
+    width: $width,
+    height: $height,
+    // Hide radial tick labels without hiding bar labels
+    'text[text-anchor="middle"]': {
+      display: 'none',
+    },
+  })
+)
+
+function RadialBarChart({
   data /* see data tab */,
   className,
   width,
@@ -109,16 +118,17 @@ function RadialBarChartUnstyled({
   centerLabel?: string
   data: ComponentProps<typeof ResponsiveRadialBar>['data']
 } & Omit<Partial<ComponentProps<typeof ResponsiveRadialBar>>, 'data'>) {
+  const chartTheme = useChartTheme()
   const CenteredMetric = useMemo(
     () => (true ? createCenteredMetric(centerVal, centerLabel) : () => null),
     [centerLabel, centerVal]
   )
 
   return (
-    <Div
+    <RadialBarChartSC
       className={`${className}`}
-      width={width ?? 180}
-      height={height ?? 180}
+      $width={width ?? 180}
+      $height={height ?? 180}
     >
       <ResponsiveRadialBar
         colors={[
@@ -140,7 +150,7 @@ function RadialBarChartUnstyled({
         }}
         radialAxisStart={{ tickSize: 0, tickPadding: 8, tickRotation: 0 }}
         circularAxisOuter={{ tickSize: 0, tickPadding: 12, tickRotation: 0 }}
-        theme={CHART_THEME}
+        theme={chartTheme}
         enableCircularGrid={false}
         enableRadialGrid
         tooltip={(props) => (
@@ -153,15 +163,8 @@ function RadialBarChartUnstyled({
         layers={['grid', 'bars', CenteredMetric]}
         {...props}
       />
-    </Div>
+    </RadialBarChartSC>
   )
 }
-
-const RadialBarChart = styled(RadialBarChartUnstyled)((_) => ({
-  // Hide radial tick labels without hiding bar labels
-  'text[text-anchor="middle"]': {
-    display: 'none',
-  },
-}))
 
 export default RadialBarChart

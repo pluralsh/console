@@ -1,74 +1,53 @@
-import { useContext } from 'react'
-import { Box, Text, ThemeContext } from 'grommet'
+import { useTheme } from 'styled-components'
 import { ResponsiveChoropleth } from '@nivo/geo'
-
 import { max } from 'lodash'
 
-import { normalizeColor } from 'grommet/utils'
-
-import { useColorMap } from 'utils/color'
+import { ChartTooltip } from './ChartTooltip'
 
 import countries from './world_countries.json'
-
-const COLOR_MAP = [
-  'blue-light-2',
-  'blue-light',
-  'blue',
-  'blue-dark',
-  'blue-dark-2',
-]
 
 function Tooltip({ feature }) {
   if (!feature.data) return null
   const { id, value } = feature.data
 
   return (
-    <Box
-      flex={false}
-      direction="row"
-      pad="xsmall"
-      round="2px"
-      gap="xsmall"
-      background="white"
-      align="center"
+    <ChartTooltip
+      color={feature.color}
+      label={id}
+      value={value}
     >
-      <Box
-        flex={false}
-        height="12px"
-        width="12px"
-        background={feature.color}
-      />
-      <Text
-        size="12px"
-        weight={500}
-      >
-        {id} {value}
-      </Text>
-    </Box>
+      {id} {value}
+    </ChartTooltip>
   )
 }
 
 export function Chloropleth({ data }) {
   const maximum = max(data.map(({ value }) => value))
-  const theme = useContext(ThemeContext)
-  const colors = useColorMap(theme, COLOR_MAP)
+  const styledTheme = useTheme()
+  const colors = [
+    styledTheme.colors.blue[400],
+    styledTheme.colors.blue[500],
+    styledTheme.colors.blue[600],
+    styledTheme.colors.blue[700],
+    styledTheme.colors.blue[800],
+  ]
 
   return (
     <ResponsiveChoropleth
       data={data}
-      theme={{ textColor: normalizeColor('dark-5', theme) }}
+      theme={{ textColor: styledTheme.colors.text }}
       features={countries.features}
       label="properties.name"
       valueFormat=".2s"
       domain={[0, maximum + 1]}
       colors={colors}
-      unknownColor={normalizeColor('dark-5', theme)}
+      unknownColor={styledTheme.colors['fill-two']}
       enableGraticule
-      graticuleLineColor={normalizeColor('card', theme)}
+      graticuleLineColor={styledTheme.colors.border}
       borderWidth={0.5}
       isInteractive
       onClick={console.log}
-      borderColor={normalizeColor('cardHover', theme)}
+      borderColor={styledTheme.colors['border-fill-two']}
       projectionType="naturalEarth1"
       tooltip={Tooltip}
       legends={[

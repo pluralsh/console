@@ -5,7 +5,7 @@ import { Edge } from 'utils/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { useTheme } from 'styled-components'
 
-import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
+import { getProviderIconUrl, getProviderName } from 'components/utils/Provider'
 
 import DecoratedName from '../services/DecoratedName'
 
@@ -26,9 +26,7 @@ export const ColProvider = columnHelper.accessor(({ node }) => node?.cloud, {
     const theme = useTheme()
 
     return (
-      <ColWithIcon
-        icon={getProviderIconURL(getValue() || '', theme.mode !== 'light')}
-      >
+      <ColWithIcon icon={getProviderIconUrl(getValue() || '', theme.mode)}>
         {getProviderName(getValue())}
       </ColWithIcon>
     )
