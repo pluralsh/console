@@ -812,10 +812,10 @@ func (in *ServiceHelm) DeepCopyInto(out *ServiceHelm) {
 			}
 		}
 	}
-	if in.ChartRef != nil {
-		in, out := &in.ChartRef, &out.ChartRef
-		*out = new(v1.ConfigMapKeySelector)
-		(*in).DeepCopyInto(*out)
+	if in.Chart != nil {
+		in, out := &in.Chart, &out.Chart
+		*out = new(string)
+		**out = **in
 	}
 	if in.Version != nil {
 		in, out := &in.Version, &out.Version

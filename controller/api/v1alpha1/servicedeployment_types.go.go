@@ -33,7 +33,7 @@ type ServiceHelm struct {
 	// +optional
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// +optional
-	ChartRef *corev1.ConfigMapKeySelector `json:"chart,omitempty"`
+	Chart *string `json:"chart,omitempty"`
 	// +optional
 	Version *string `json:"version,omitempty"`
 	// +optional
@@ -51,6 +51,7 @@ type SyncConfigAttributes struct {
 type ServiceSpec struct {
 	// +optional
 	DocsPath *string `json:"docsPath,omitempty"`
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:default:='0.0.1'
 	Version string `json:"version"`
 	// +optional
