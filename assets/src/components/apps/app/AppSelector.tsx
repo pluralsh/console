@@ -44,8 +44,6 @@ export default function AppSelector({ applications, currentApp, directory }) {
     [navigate, pathname, paths]
   )
 
-  console.log('selectors')
-
   return (
     <AppSelectorSC>
       <Select

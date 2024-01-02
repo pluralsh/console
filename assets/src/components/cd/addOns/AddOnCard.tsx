@@ -47,8 +47,6 @@ export default function AddOnCard({ addOn }: { addOn: ClusterAddOnFragment }) {
 
   const { name, global, icon, version } = addOn
 
-  console.log('addon', addOn)
-
   return (
     <AddOnCardSC>
       {icon && (

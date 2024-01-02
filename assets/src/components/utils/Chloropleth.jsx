@@ -46,7 +46,6 @@ export function Chloropleth({ data }) {
       graticuleLineColor={styledTheme.colors.border}
       borderWidth={0.5}
       isInteractive
-      onClick={console.log}
       borderColor={styledTheme.colors['border-fill-two']}
       projectionType="naturalEarth1"
       tooltip={Tooltip}

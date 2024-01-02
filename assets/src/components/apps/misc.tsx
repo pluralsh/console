@@ -28,7 +28,6 @@ export const getIcon = (app: Application, mode: typeof styledTheme.mode) => {
   } = app
 
   if (!hasIcons(app)) return undefined
-  console.log('mode', mode)
 
   if ((mode !== 'light' && descriptor?.icons?.length) || 0 > 1)
     return descriptor?.icons?.[1] || descriptor?.icons?.[0] || undefined

@@ -1,10 +1,4 @@
-import {
-  ComponentType,
-  MutableRefObject,
-  ReactNode,
-  useCallback,
-  useRef,
-} from 'react'
+import { MutableRefObject, ReactNode, useCallback, useRef } from 'react'
 import {
   SubTab,
   TabList,
@@ -12,9 +6,10 @@ import {
   TabPanel,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { IconProps } from 'honorable'
 
-import { ProviderToDisplayName, ProviderToLogo } from './helpers'
+import { getProviderIconUrl } from 'components/utils/Provider'
+
+import { ProviderToDisplayName } from './helpers'
 import { ProviderCloud } from './types'
 
 export function ProviderTabSelector({
@@ -58,19 +53,28 @@ export function ProviderTabSelector({
         }}
       >
         {Object.values(ProviderCloud).map((p) => {
-          const Logo: ComponentType<IconProps> = ProviderToLogo[p]
+          const logoUrl = getProviderIconUrl(p, theme.mode)
 
           return (
             <SubTab
               css={{
                 display: 'flex',
                 gap: theme.spacing.xsmall,
+                alignItems: 'center',
               }}
               disabled={isDisabled(p)}
               key={p}
               textValue={ProviderToDisplayName[p]}
             >
-              <Logo fullColor />
+              <img
+                src={logoUrl}
+                css={{
+                  width: 16,
+                  ...(isDisabled(p)
+                    ? { filter: 'grayscale(100%)', opacity: '50%' }
+                    : {}),
+                }}
+              />
               {ProviderToDisplayName[p]}
             </SubTab>
           )

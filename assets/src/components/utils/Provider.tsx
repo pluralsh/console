@@ -38,19 +38,20 @@ export function getProviderIconUrl(
   mode: typeof styledTheme.mode
 ) {
   return (
-    {
-      GCP: mode === 'light' ? GCP_ICON_LIGHT : GCP_ICON_DARK,
-      AWS: mode === 'light' ? AWS_ICON_LIGHT : AWS_ICON_DARK,
-      AZURE: mode === 'light' ? AZURE_ICON_LIGHT : AZURE_ICON_DARK,
-      EQUINIX: mode === 'light' ? EQUINIX_ICON_LIGHT : EQUINIX_ICON_DARK,
-      KIND: mode === 'light' ? KIND_ICON_LIGHT : KIND_ICON_DARK,
-      GENERIC: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
-      CUSTOM: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
-      KUBERNETES: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
-    } as const satisfies Record<Provider, string>
-  )[provider?.toUpperCase()] ?? mode === 'light'
-    ? CHART_ICON_LIGHT
-    : CHART_ICON_DARK
+    (
+      {
+        GCP: mode === 'light' ? GCP_ICON_LIGHT : GCP_ICON_DARK,
+        AWS: mode === 'light' ? AWS_ICON_LIGHT : AWS_ICON_DARK,
+        AZURE: mode === 'light' ? AZURE_ICON_LIGHT : AZURE_ICON_DARK,
+        EQUINIX: mode === 'light' ? EQUINIX_ICON_LIGHT : EQUINIX_ICON_DARK,
+        KIND: mode === 'light' ? KIND_ICON_LIGHT : KIND_ICON_DARK,
+        GENERIC: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
+        CUSTOM: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
+        KUBERNETES: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
+      } as const satisfies Record<Provider, string>
+    )[provider?.toUpperCase()] ??
+    (mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK)
+  )
 }
 
 export default function ProviderIcon({
