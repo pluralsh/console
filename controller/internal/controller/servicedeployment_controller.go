@@ -269,12 +269,8 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			}
 			attr.Helm.Values = &val
 		}
-		if service.Spec.Helm.ChartRef != nil {
-			val, err := utils.GetConfigMapData(ctx, r.Client, service.Namespace, service.Spec.Helm.ChartRef)
-			if err != nil {
-				return nil, err
-			}
-			attr.Helm.Chart = &val
+		if service.Spec.Helm.Chart != nil {
+			attr.Helm.Chart = service.Spec.Helm.Chart
 		}
 	}
 	if service.Spec.SyncConfig != nil {
@@ -322,18 +318,6 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 	if service.Spec.Helm != nil && service.Spec.Helm.ValuesRef != nil {
 		configMap := &corev1.ConfigMap{}
 		name := types.NamespacedName{Name: service.Spec.Helm.ValuesRef.Name, Namespace: service.Namespace}
-		err := r.Get(ctx, name, configMap)
-		if err != nil {
-			return err
-		}
-		err = utils.TryAddControllerRef(ctx, r.Client, service, configMap, r.Scheme)
-		if err != nil {
-			return err
-		}
-	}
-	if service.Spec.Helm != nil && service.Spec.Helm.ChartRef != nil {
-		configMap := &corev1.ConfigMap{}
-		name := types.NamespacedName{Name: service.Spec.Helm.ChartRef.Name, Namespace: service.Namespace}
 		err := r.Get(ctx, name, configMap)
 		if err != nil {
 			return err
