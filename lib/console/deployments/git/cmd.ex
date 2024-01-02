@@ -92,8 +92,8 @@ defmodule Console.Deployments.Git.Cmd do
   def url(%GitRepository{url: url}), do: url
 
   defp unlock(%GitRepository{decrypt: true} = git) do
-    with {:ok, _} <- plural(git, ["crypto", "init"]),
-         {:ok, _} <- plural(git, ["crypto", "unlock"]),
+    with {:ok, _} <- plural(git, "crypto", ["init"]),
+         {:ok, _} <- plural(git, "crypto", ["unlock"]),
       do: :ok
   end
   defp unlock(_), do: :ok
