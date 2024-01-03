@@ -15,14 +15,12 @@ function Tooltip({ feature }) {
       color={feature.color}
       label={id}
       value={value}
-    >
-      {id} {value}
-    </ChartTooltip>
+    />
   )
 }
 
 export function Chloropleth({ data }) {
-  const maximum = max(data.map(({ value }) => value))
+  const maximum: number = max(data.map(({ value }) => value)) ?? 0
   const theme = useTheme()
   const colors = [
     theme.colors.blue[400],
