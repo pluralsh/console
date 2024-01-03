@@ -8,15 +8,14 @@ import { Grommet } from 'grommet'
 import { IntercomProvider } from 'react-use-intercom'
 import { ApolloProvider } from '@apollo/client'
 import { mergeDeep } from '@apollo/client/utilities'
-
 import {
   GlobalStyle,
   theme as honorableThemeDark,
   honorableThemeLight,
   styledThemeDark,
   styledThemeLight,
+  useThemeColorMode,
 } from '@pluralsh/design-system'
-import { useThemeColorMode } from '@pluralsh/design-system/dist/theme'
 
 import { CssBaseline, ThemeProvider } from 'honorable'
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'

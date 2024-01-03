@@ -1,15 +1,11 @@
 import { Flex } from 'honorable'
-import { LightDarkSwitch } from '@pluralsh/design-system'
+import { LightDarkSwitch, setThemeColorMode } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 
 import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
-
 import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
-
 import CommandPaletteLauncher from 'components/CommandPaletteLauncher'
-
-import { setThemeColorMode } from '@pluralsh/design-system/dist/theme'
 
 import DemoBanner from './DemoBanner'
 
