@@ -3,6 +3,7 @@ import {
   type HTMLAttributes,
   forwardRef,
 } from 'react'
+import { useTheme } from 'styled-components'
 
 import PluralLogomarkBottomLeft from './icons/plural-animated/PluralLogomarkBottomLeft'
 import PluralLogomarkBottomRight from './icons/plural-animated/PluralLogomarkBottomRight'
@@ -23,8 +24,11 @@ export const scaling = (scale: number): { transform: string } =>
 const LoopingLogo = forwardRef<
   HTMLDivElement,
   LoopingLogoProps & HTMLAttributes<HTMLDivElement>
->(
-  ({ isDark = false, animated = true, scale, ...props }, ref): JSX.Element => (
+>(({ animated = true, scale, ...props }, ref): JSX.Element => {
+  const theme = useTheme()
+  const color = theme.colors['icon-light']
+
+  return (
     <LoopingLogoWrapper
       ref={ref}
       {...props}
@@ -40,35 +44,35 @@ const LoopingLogo = forwardRef<
             <div className="plrl-logo-layer bottom-left">
               <div className="plrl-logo-layer-mask">
                 <div className="plrl-logo-layer-mask-inner">
-                  <PluralLogomarkBottomLeft color={isDark ? '#000' : '#FFF'} />
+                  <PluralLogomarkBottomLeft color={color} />
                 </div>
               </div>
             </div>
             <div className="plrl-logo-layer bottom-right">
               <div className="plrl-logo-layer-mask">
                 <div className="plrl-logo-layer-mask-inner">
-                  <PluralLogomarkBottomRight color={isDark ? '#000' : '#FFF'} />
+                  <PluralLogomarkBottomRight color={color} />
                 </div>
               </div>
             </div>
             <div className="plrl-logo-layer top-left">
               <div className="plrl-logo-layer-mask">
                 <div className="plrl-logo-layer-mask-inner">
-                  <PluralLogomarkTopLeft color={isDark ? '#000' : '#FFF'} />
+                  <PluralLogomarkTopLeft color={color} />
                 </div>
               </div>
             </div>
             <div className="plrl-logo-layer top-right">
               <div className="plrl-logo-layer-mask">
                 <div className="plrl-logo-layer-mask-inner">
-                  <PluralLogomarkTopRight color={isDark ? '#000' : '#FFF'} />
+                  <PluralLogomarkTopRight color={color} />
                 </div>
               </div>
             </div>
             <div className="plrl-logo-layer dot">
               <div className="plrl-logo-layer-mask">
                 <div className="plrl-logo-layer-mask-inner">
-                  <PluralLogomarkDot color={isDark ? '#000' : '#FFF'} />
+                  <PluralLogomarkDot color={color} />
                 </div>
               </div>
             </div>
@@ -77,6 +81,6 @@ const LoopingLogo = forwardRef<
       </div>
     </LoopingLogoWrapper>
   )
-)
+})
 
 export default LoopingLogo

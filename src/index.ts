@@ -146,10 +146,13 @@ export { ColorModeProvider } from './components/contexts/ColorModeProvider'
 // Theme
 export {
   honorableThemeDark as theme,
+  honorableThemeLight,
+  honorableThemeDark,
   styledTheme,
   styledThemeLight,
-  honorableThemeLight,
   styledThemeDark,
+  setThemeColorMode,
+  useThemeColorMode,
 } from './theme'
 export type { SemanticColorKey, SemanticColorCssVar } from './theme/colors'
 export { semanticColorKeys, semanticColorCssVars } from './theme/colors'
