@@ -23,30 +23,30 @@ function Tooltip({ feature }) {
 
 export function Chloropleth({ data }) {
   const maximum = max(data.map(({ value }) => value))
-  const styledTheme = useTheme()
+  const theme = useTheme()
   const colors = [
-    styledTheme.colors.blue[400],
-    styledTheme.colors.blue[500],
-    styledTheme.colors.blue[600],
-    styledTheme.colors.blue[700],
-    styledTheme.colors.blue[800],
+    theme.colors.blue[400],
+    theme.colors.blue[500],
+    theme.colors.blue[600],
+    theme.colors.blue[700],
+    theme.colors.blue[800],
   ]
 
   return (
     <ResponsiveChoropleth
       data={data}
-      theme={{ textColor: styledTheme.colors.text }}
+      theme={{ textColor: theme.colors.text }}
       features={countries.features}
       label="properties.name"
       valueFormat=".2s"
       domain={[0, maximum + 1]}
       colors={colors}
-      unknownColor={styledTheme.colors['fill-two']}
+      unknownColor={theme.colors['fill-two']}
       enableGraticule
-      graticuleLineColor={styledTheme.colors.border}
+      graticuleLineColor={theme.colors.border}
       borderWidth={0.5}
       isInteractive
-      borderColor={styledTheme.colors['border-fill-two']}
+      borderColor={theme.colors['border-fill-two']}
       projectionType="naturalEarth1"
       tooltip={Tooltip}
       legends={[

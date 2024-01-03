@@ -57,7 +57,6 @@ export default function Header() {
         <LightDarkSwitch
           checked={theme.mode === 'dark'}
           onChange={(val) => {
-            console.info('Switched changed to', val)
             setThemeColorMode(val ? 'dark' : 'light')
           }}
         />
