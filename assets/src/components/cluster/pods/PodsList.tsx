@@ -277,7 +277,7 @@ export const ColActions = (refetch) =>
 export const ColDelete = (refetch) =>
   columnHelper.accessor((row) => row.name, {
     id: 'delete',
-    cell: ({ row: { original } }) => {
+    cell: function Cell({ row: { original } }) {
       const ctx = useContext(PodsListContext)
 
       return (
@@ -376,13 +376,19 @@ export const PodsList = memo(
           }),
       [applications, pods]
     )
+    const contextVal = useMemo(
+      () => ({
+        serviceId,
+      }),
+      [serviceId]
+    )
 
     if (!pods || pods.length === 0) {
       return <>No pods available.</>
     }
 
     return (
-      <PodsListContext.Provider value={{ serviceId }}>
+      <PodsListContext.Provider value={contextVal}>
         <Table
           data={tableData}
           columns={columns}
