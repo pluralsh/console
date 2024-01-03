@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode } from 'react'
 import {
   RouterProvider,
   createBrowserRouter,
@@ -8,7 +8,6 @@ import { Grommet } from 'grommet'
 import { IntercomProvider } from 'react-use-intercom'
 import { ApolloProvider } from '@apollo/client'
 import { mergeDeep } from '@apollo/client/utilities'
-import { useMutationObserver } from '@react-hooks-library/core'
 
 import {
   GlobalStyle,
@@ -17,7 +16,7 @@ import {
   styledThemeDark,
   styledThemeLight,
 } from '@pluralsh/design-system'
-import { ColorMode } from '@pluralsh/design-system/dist/theme'
+import { useThemeColorMode } from '@pluralsh/design-system/dist/theme'
 
 import { CssBaseline, ThemeProvider } from 'honorable'
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'
@@ -52,57 +51,6 @@ export default function App() {
       </IntercomProvider>
     </ApolloProvider>
   )
-}
-
-const COLOR_THEME_KEY = 'theme-mode'
-
-// function setThemeColorMode(
-//   mode: ColorMode,
-//   {
-//     dataAttrName = COLOR_THEME_KEY,
-//     element = document?.documentElement,
-//   }: {
-//     dataAttrName?: string
-//     element?: HTMLElement
-//   } = {}
-// ) {
-//   if (!element) {
-//     return
-//   }
-//   localStorage.setItem(dataAttrName, mode)
-//   element.setAttribute(`data-${dataAttrName}`, mode)
-// }
-
-export function useThemeColorMode({
-  dataAttrName = COLOR_THEME_KEY,
-  defaultMode = 'dark',
-  element = document?.documentElement,
-}: {
-  dataAttrName?: string
-  defaultMode?: ColorMode
-  element?: HTMLElement
-} = {}) {
-  const attrName = `data-${dataAttrName}`
-  const [thisTheme, setThisTheme] = useState(
-    element?.getAttribute(attrName) || defaultMode
-  )
-
-  useMutationObserver(
-    element,
-    (mutations) => {
-      mutations.forEach((mutation) => {
-        if (
-          mutation?.attributeName === attrName &&
-          mutation.target instanceof HTMLElement
-        ) {
-          setThisTheme(mutation.target.getAttribute(attrName) || defaultMode)
-        }
-      })
-    },
-    { attributeFilter: [attrName] }
-  )
-
-  return thisTheme
 }
 
 function ThemeProviders({ children }: { children: ReactNode }) {
