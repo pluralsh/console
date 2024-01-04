@@ -73,8 +73,12 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}
 	if existing {
 		logger.V(9).Info("Cluster already exists in the API, running in read-only mode")
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return r.handleExisting(cluster)
 	}
+
+	// Mark resource as managed by this operator.
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
 	// Handle resource deletion both in Kubernetes cluster and in Console API.
 	if result := r.addOrRemoveFinalizer(cluster); result != nil {
@@ -84,7 +88,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Get Provider ID from the reference if it is set and ensure that controller reference is set properly.
 	providerId, result, err := r.getProviderIdAndSetControllerRef(ctx, cluster)
 	if result != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, fmt.Sprintf("%s", err))
 		return *result, err
 	}
@@ -92,7 +95,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Calculate SHA to detect changes that should be applied in the Console API.
 	sha, err := utils.HashObject(cluster.UpdateAttributes())
 	if err != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -100,7 +102,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Sync resource with Console API.
 	apiCluster, err := r.sync(ctx, cluster, providerId, sha)
 	if err != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -111,7 +112,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
 	cluster.Status.PingedAt = apiCluster.PingedAt
 	cluster.Status.SHA = &sha
-	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
@@ -152,7 +152,6 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	cluster.Status.KasURL = apiCluster.KasURL
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
 	cluster.Status.PingedAt = apiCluster.PingedAt
-	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil

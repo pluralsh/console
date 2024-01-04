@@ -95,12 +95,14 @@ func (c *client) DeleteCluster(id string) (*console.ClusterFragment, error) {
 }
 
 func (c *client) IsClusterExisting(id *string) bool {
-	_, err := c.GetCluster(id)
+	cluster, err := c.GetCluster(id)
+	if cluster != nil {
+		return true
+	}
 	if errors.IsNotFound(err) {
 		return false
 	}
 
-	// We are assuming that if there is an error, and it is not ErrorNotFound then provider does not exist.
 	return err == nil
 }
 
