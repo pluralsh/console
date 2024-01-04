@@ -108,7 +108,7 @@ jobs:
       - name: update schema
         run: MIX_ENV=test mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
       - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v13
+        uses: tj-actions/verify-changed-files@v14
         id: verify-changed-files
         with:
           files: |
