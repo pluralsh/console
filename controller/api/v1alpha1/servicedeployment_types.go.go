@@ -49,6 +49,9 @@ type SyncConfigAttributes struct {
 }
 
 type ServiceSpec struct {
+	// the namespace this service will be deployed into, if not provided deploys to the ServiceDeployment's own namespace
+	// +optional
+	Namespace *string `json:"namespace,omitempty"`
 	// +optional
 	DocsPath *string `json:"docsPath,omitempty"`
 	// +kubebuilder:validation:Optional
@@ -83,7 +86,7 @@ type ServiceStatus struct {
 	Errors []ServiceError `json:"errors,omitempty"`
 	// +optional
 	Components []ServiceComponent `json:"components,omitempty"`
-	// ID of the provider in the Console API.
+	// ID of the service in the Console API.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	ID *string `json:"id,omitempty"`
