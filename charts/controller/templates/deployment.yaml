@@ -1,4 +1,4 @@
-{{ $consoleUrl := .Values.consoleUrl | default (printf "http://console.%s" .Release.Namespace) }}
+{{ $consoleUrl := .Values.consoleUrl | default (printf "http://console.%s:4000" .Release.Namespace) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

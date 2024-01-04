@@ -157,6 +157,21 @@ jobs:
       with:
         path: ./charts/controller
         release: ${{github.ref_name}}
+    - name: controller version
+      id: controller_vsn
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq ".version" charts/controller/Chart.yaml
+    - name: update byok
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' charts/console/Chart.yaml
+    - name: update byok
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' plural/helm/console/Chart.yaml
+    - name: helm-dependencies
+      run: make helm-dependencies
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
       with:

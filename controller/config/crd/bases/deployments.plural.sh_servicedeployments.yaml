@@ -200,6 +200,10 @@ spec:
                 required:
                 - path
                 type: object
+              namespace:
+                description: the namespace this service will be deployed into, if
+                  not provided deploys to the ServiceDeployment's own namespace
+                type: string
               protect:
                 type: boolean
               repositoryRef:
@@ -401,7 +405,7 @@ spec:
                   type: object
                 type: array
               id:
-                description: ID of the provider in the Console API.
+                description: ID of the service in the Console API.
                 type: string
               sha:
                 description: SHA of last applied configuration.
