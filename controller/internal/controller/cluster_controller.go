@@ -73,8 +73,12 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}
 	if existing {
 		logger.V(9).Info("Cluster already exists in the API, running in read-only mode")
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return r.handleExisting(cluster)
 	}
+
+	// Mark resource as managed by this operator.
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
 	// Handle resource deletion both in Kubernetes cluster and in Console API.
 	if result := r.addOrRemoveFinalizer(cluster); result != nil {
@@ -108,7 +112,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
 	cluster.Status.PingedAt = apiCluster.PingedAt
 	cluster.Status.SHA = &sha
-	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
@@ -117,6 +120,10 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
 	if cluster.Status.HasReadonlyCondition() {
 		return cluster.Status.IsReadonly(), nil
+	}
+
+	if controllerutil.ContainsFinalizer(cluster, FinalizerName) {
+		return false, nil
 	}
 
 	if !cluster.Spec.HasHandle() {
@@ -145,7 +152,6 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	cluster.Status.KasURL = apiCluster.KasURL
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
 	cluster.Status.PingedAt = apiCluster.PingedAt
-	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
