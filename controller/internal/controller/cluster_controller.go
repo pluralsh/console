@@ -84,6 +84,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Get Provider ID from the reference if it is set and ensure that controller reference is set properly.
 	providerId, result, err := r.getProviderIdAndSetControllerRef(ctx, cluster)
 	if result != nil {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, fmt.Sprintf("%s", err))
 		return *result, err
 	}
@@ -91,6 +92,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Calculate SHA to detect changes that should be applied in the Console API.
 	sha, err := utils.HashObject(cluster.UpdateAttributes())
 	if err != nil {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -98,6 +100,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Sync resource with Console API.
 	apiCluster, err := r.sync(ctx, cluster, providerId, sha)
 	if err != nil {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -117,6 +120,10 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
 	if cluster.Status.HasReadonlyCondition() {
 		return cluster.Status.IsReadonly(), nil
+	}
+
+	if controllerutil.ContainsFinalizer(cluster, FinalizerName) {
+		return false, nil
 	}
 
 	if !cluster.Spec.HasHandle() {
