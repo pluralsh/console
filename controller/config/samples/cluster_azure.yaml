@@ -1,32 +1,33 @@
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Provider
 metadata:
-  name: gcp
+  name: azure
 spec:
-  cloud: gcp
-  name: gcp
+  cloud: azure
+  name: azure
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Cluster
 metadata:
-  name: gcp
+  name: azure
   namespace: default
 spec:
-  handle: gcp
-  version: "1.25.14"
+  handle: azure
+  version: "1.25.11"
   providerRef:
-    name: gcp
+    name: azure
     namespace: default
-  cloud: gcp
+  cloud: azure
   protect: false
   cloudSettings:
-    gcp:
-      project: pluralsh-test-384515
-      network: testgcp
-      region: europe-central2
+    azure:
+      location: eastus
+      network: azure-vnet
+      resourceGroup: azure-rg
+      subscriptionId: "" # Required
   nodePools:
-    - name: test
-      instanceType: e2-standard-2
+    - name: pool1
+      instanceType: Standard_D2as_v5
       minSize: 1
       maxSize: 3
   tags:
