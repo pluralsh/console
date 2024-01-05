@@ -54,8 +54,11 @@ type ConsoleClient interface {
 	UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error
 	DeleteService(serviceId string) error
 	SavePipeline(name string, attrs console.PipelineAttributes) (*console.PipelineFragment, error)
+	DeletePipeline(id string) (*console.PipelineFragment, error)
 	GetPipeline(id string) (*console.PipelineFragment, error)
 	ListPipelines() (*console.GetPipelines, error)
+	IsPipelineExisting(id string) bool
+	IsPipelineDeleting(id string) bool
 }
 
 func New(url, token string) ConsoleClient {

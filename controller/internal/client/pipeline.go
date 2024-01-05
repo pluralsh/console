@@ -34,3 +34,37 @@ func (c *client) GetPipeline(id string) (*console.PipelineFragment, error) {
 func (c *client) ListPipelines() (*console.GetPipelines, error) {
 	return c.consoleClient.GetPipelines(c.ctx, nil, nil, nil)
 }
+
+func (c *client) DeletePipeline(id string) (*console.PipelineFragment, error) {
+	// TODO: response, err := c.consoleClient.DeletePipeline(c.ctx, id)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if response == nil {
+	//	return nil, err
+	//}
+	//
+	//return response.DeleteCluster, nil
+	return nil, nil
+}
+
+func (c *client) IsPipelineExisting(id string) bool {
+	pipeline, err := c.GetPipeline(id)
+	if pipeline != nil {
+		return true
+	}
+	if errors.IsNotFound(err) {
+		return false
+	}
+
+	return err == nil
+}
+
+func (c *client) IsPipelineDeleting(id string) bool {
+	pipeline, err := c.GetPipeline(id)
+	if err != nil {
+		return false
+	}
+
+	return pipeline != nil // TODO && pipeline.DeletedAt != nil
+}

@@ -193,6 +193,14 @@ func (ps *PipelineStatus) HasID() bool {
 	return ps.ID != nil && len(*ps.ID) > 0
 }
 
+func (ps *PipelineStatus) GetID() string {
+	if !ps.HasID() {
+		return ""
+	}
+
+	return *ps.ID
+}
+
 func (ps *PipelineStatus) HasSHA() bool {
 	return ps.SHA != nil && len(*ps.SHA) > 0
 }
@@ -212,6 +220,14 @@ type Pipeline struct {
 
 	Spec   PipelineSpec   `json:"spec,omitempty"`
 	Status PipelineStatus `json:"status,omitempty"`
+}
+
+// TODO
+func (p *Pipeline) Attributes() console.PipelineAttributes {
+	return console.PipelineAttributes{
+		Stages: make([]*console.PipelineStageAttributes, 0),
+		Edges:  make([]*console.PipelineEdgeAttributes, 0),
+	}
 }
 
 func (p *Pipeline) SetCondition(condition metav1.Condition) {

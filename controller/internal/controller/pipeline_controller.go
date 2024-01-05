@@ -18,7 +18,9 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
+	console "github.com/pluralsh/console-client-go"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
 	"github.com/pluralsh/console/controller/internal/utils"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -62,7 +64,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	// Ensure that status updates will always be persisted when exiting this function.
 	scope, err := NewPipelineScope(ctx, r.Client, pipeline)
 	if err != nil {
-		logger.Error(err, "Failed to create cluster scope")
+		logger.Error(err, "Failed to create pipeline scope")
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -78,13 +80,21 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
-	sha := ""
+	sha, err := utils.HashObject(pipeline.Attributes())
+	if err != nil {
+		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		return ctrl.Result{}, err
+	}
 
 	// Sync resource with Console API.
-	apiPipelineID := ""
+	apiPipeline, err := r.sync(ctx, pipeline, sha)
+	if err != nil {
+		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		return ctrl.Result{}, err
+	}
 
 	// Update resource status.
-	pipeline.Status.ID = &apiPipelineID
+	pipeline.Status.ID = &apiPipeline.ID
 	pipeline.Status.SHA = &sha
 	utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
@@ -101,13 +111,13 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 	// If object is being deleted cleanup and remove the finalizer.
 	if !pipeline.ObjectMeta.DeletionTimestamp.IsZero() {
 		// If object is already being deleted from Console API requeue.
-		if r.ConsoleClient.IsClusterDeleting(pipeline.Status.ID) {
+		if r.ConsoleClient.IsPipelineDeleting(pipeline.Status.GetID()) {
 			return &requeue
 		}
 
-		// Remove Cluster from Console API if it exists.
-		if r.ConsoleClient.IsClusterExisting(pipeline.Status.ID) {
-			if _, err := r.ConsoleClient.DeleteCluster(*pipeline.Status.ID); err != nil {
+		// Remove Pipeline from Console API if it exists.
+		if r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID()) {
+			if _, err := r.ConsoleClient.DeletePipeline(*pipeline.Status.ID); err != nil {
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
@@ -127,6 +137,23 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 	}
 
 	return nil
+}
+
+func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeline, sha string) (*console.PipelineFragment, error) {
+	exists := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
+	logger := log.FromContext(ctx)
+
+	if exists && !pipeline.Status.IsSHAChanged(sha) {
+		logger.V(9).Info(fmt.Sprintf("No changes detected for %s pipeline", pipeline.Name))
+		return r.ConsoleClient.GetPipeline(pipeline.Status.GetID())
+	}
+
+	if exists {
+		logger.Info(fmt.Sprintf("Detected changes, saving %s pipeline", pipeline.Name))
+	} else {
+		logger.Info(fmt.Sprintf("%s pipeline does not exist, saving it", pipeline.Name))
+	}
+	return r.ConsoleClient.SavePipeline(pipeline.Name, pipeline.Attributes())
 }
 
 // SetupWithManager sets up the controller with the Manager.
