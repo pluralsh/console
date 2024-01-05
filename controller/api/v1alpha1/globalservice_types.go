@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	console "github.com/pluralsh/console-client-go"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,17 +27,6 @@ func init() {
 	SchemeBuilder.Register(&GlobalService{}, &GlobalServiceList{})
 }
 
-type ClusterDistro string
-
-const (
-	ClusterDistroGeneric ClusterDistro = "GENERIC"
-	ClusterDistroEks     ClusterDistro = "EKS"
-	ClusterDistroAks     ClusterDistro = "AKS"
-	ClusterDistroGke     ClusterDistro = "GKE"
-	ClusterDistroRke     ClusterDistro = "RKE"
-	ClusterDistroK3s     ClusterDistro = "K3S"
-)
-
 // GlobalServiceSpec defines the desired state of GlobalService
 type GlobalServiceSpec struct {
 	// Tags a set of tags to select clusters for this global service
@@ -45,7 +35,7 @@ type GlobalServiceSpec struct {
 
 	// Distro of kubernetes this cluster is running
 	// +optional
-	Distro *ClusterDistro `json:"distro,omitempty"`
+	Distro *console.ClusterDistro `json:"distro,omitempty"`
 
 	// ServiceRef to replicate across clusters
 	// +kubebuilder:validation:Required

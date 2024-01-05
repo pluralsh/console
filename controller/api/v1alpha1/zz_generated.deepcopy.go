@@ -21,6 +21,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	console_client_go "github.com/pluralsh/console-client-go"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -614,7 +615,7 @@ func (in *GlobalServiceSpec) DeepCopyInto(out *GlobalServiceSpec) {
 	}
 	if in.Distro != nil {
 		in, out := &in.Distro, &out.Distro
-		*out = new(ClusterDistro)
+		*out = new(console_client_go.ClusterDistro)
 		**out = **in
 	}
 	out.ServiceRef = in.ServiceRef
