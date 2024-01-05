@@ -236,6 +236,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> allow(user, :read)
   end
 
+  def resolve_global(%{id: id}, %{context: %{current_user: user}}) do
+    Global.get!(id)
+    |> allow(user, :read)
+  end
+
   defp actor(%{context: %{current_user: %User{} = user}}), do: user
   defp actor(%{context: %{cluster: %Cluster{} = cluster}}), do: cluster
   defp actor(_), do: nil

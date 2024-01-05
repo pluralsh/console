@@ -32,7 +32,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :name,       non_null(:string), description: "the name of this gate"
     field :type,       non_null(:gate_type), description: "the type of gate this is"
     field :cluster,    :string, description: "the handle of a cluster this gate will execute on"
-    field :cluster_id, :string, description: "the id of the cluster this gate will execute on"
+    field :cluster_id, :id, description: "the id of the cluster this gate will execute on"
     field :spec,       :gate_spec_attributes, description: "a specification for more complex gate types"
   end
 
@@ -96,7 +96,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   input_object :promotion_criteria_attributes do
     field :handle,    :string, description: "the handle of the cluster for the source service"
     field :name,      :string, description: "the name of the source service"
-    field :source_id, :string, description: "the id of the service to promote from"
+    field :source_id, :id, description: "the id of the service to promote from"
     field :secrets,   list_of(:string), description: "the secrets to copy over in a promotion"
   end
 
@@ -143,6 +143,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :state, non_null(:gate_state), description: "the current state of this gate"
     field :spec,  :gate_spec, description: "more detailed specification for complex gates"
 
+    field :cluster,  :cluster, description: "the cluster this gate can run on", resolve: dataloader(Deployments)
     field :approver, :user, description: "the last user to approve this gate", resolve: dataloader(User)
 
     timestamps()

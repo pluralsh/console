@@ -2062,6 +2062,8 @@ export type PipelineGate = {
   __typename?: 'PipelineGate';
   /** the last user to approve this gate */
   approver?: Maybe<User>;
+  /** the cluster this gate can run on */
+  cluster?: Maybe<Cluster>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of this gate as seen in the UI */
@@ -2080,7 +2082,7 @@ export type PipelineGateAttributes = {
   /** the handle of a cluster this gate will execute on */
   cluster?: InputMaybe<Scalars['String']['input']>;
   /** the id of the cluster this gate will execute on */
-  clusterId?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** the name of this gate */
   name: Scalars['String']['input'];
   /** a specification for more complex gate types */
@@ -2310,7 +2312,7 @@ export type PromotionCriteriaAttributes = {
   /** the secrets to copy over in a promotion */
   secrets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the id of the service to promote from */
-  sourceId?: InputMaybe<Scalars['String']['input']>;
+  sourceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** a service to be potentially promoted */
@@ -3098,6 +3100,7 @@ export type RootQueryType = {
   externalToken?: Maybe<Scalars['String']['output']>;
   gitRepositories?: Maybe<GitRepositoryConnection>;
   gitRepository?: Maybe<GitRepository>;
+  globalService?: Maybe<GlobalService>;
   group?: Maybe<Group>;
   groupMembers?: Maybe<GroupMemberConnection>;
   groups?: Maybe<GroupConnection>;
@@ -3329,6 +3332,11 @@ export type RootQueryTypeGitRepositoriesArgs = {
 export type RootQueryTypeGitRepositoryArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   url?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeGlobalServiceArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
