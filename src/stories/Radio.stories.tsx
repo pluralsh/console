@@ -1,7 +1,7 @@
-import { Button, Div } from 'honorable'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
+import Button from '../components/Button'
 import Radio from '../components/Radio'
 import RadioGroup from '../components/RadioGroup'
 
@@ -34,7 +34,6 @@ const H1 = styled.h1(({ theme }) => ({
 
 function Template(args: any) {
   const [selectedValueRG, setSelectedValueRG] = useState(undefined)
-  const [selectedValueManual, setSelectedValueManual] = useState(undefined)
   const theme = useTheme()
 
   return (
@@ -58,31 +57,6 @@ function Template(args: any) {
         marginTop={theme.spacing.medium}
         onClick={() => {
           setSelectedValueRG(null)
-        }}
-      >
-        Reset
-      </Button>
-
-      <H1>Manually Controlled</H1>
-      <Div>
-        {radios.map(({ value, label }) => (
-          <Radio
-            name="manually-controlled"
-            value={value}
-            checked={selectedValueManual === value}
-            onChange={({ target: { checked } }: any) => {
-              if (checked) setSelectedValueManual(value)
-            }}
-            {...args}
-          >
-            {label}
-          </Radio>
-        ))}
-      </Div>
-      <Button
-        marginTop={theme.spacing.medium}
-        onClick={() => {
-          setSelectedValueManual(null)
         }}
       >
         Reset
