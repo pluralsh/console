@@ -55,8 +55,7 @@ type ServiceSpec struct {
 	// +optional
 	DocsPath *string `json:"docsPath,omitempty"`
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default:='0.0.1'
-	Version string `json:"version"`
+	Version *string `json:"version"`
 	// +optional
 	Protect bool `json:"protect,omitempty"`
 	// +optional
