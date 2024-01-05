@@ -17,25 +17,62 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+func init() {
+	SchemeBuilder.Register(&GlobalService{}, &GlobalServiceList{})
+}
+
+type ClusterDistro string
+
+const (
+	ClusterDistroGeneric ClusterDistro = "GENERIC"
+	ClusterDistroEks     ClusterDistro = "EKS"
+	ClusterDistroAks     ClusterDistro = "AKS"
+	ClusterDistroGke     ClusterDistro = "GKE"
+	ClusterDistroRke     ClusterDistro = "RKE"
+	ClusterDistroK3s     ClusterDistro = "K3S"
+)
 
 // GlobalServiceSpec defines the desired state of GlobalService
 type GlobalServiceSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Tags a set of tags to select clusters for this global service
+	// +optional
+	Tags map[string]string `json:"tags,omitempty"`
 
-	// Foo is an example field of GlobalService. Edit globalservice_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Distro of kubernetes this cluster is running
+	// +optional
+	Distro *ClusterDistro `json:"distro,omitempty"`
+
+	// ServiceRef to replicate across clusters
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Service is immutable"
+	ServiceRef corev1.ObjectReference `json:"serviceRef"`
+	// ProviderRef apply to clusters with this provider
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Provider is immutable"
+	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 }
 
 // GlobalServiceStatus defines the observed state of GlobalService
 type GlobalServiceStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// ID of the global service in the Console API.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	ID *string `json:"id,omitempty"`
+	// SHA of last applied configuration.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	SHA *string `json:"sha,omitempty"`
+	// Represents the observations of GlobalService current state.
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=type
+	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 //+kubebuilder:object:root=true
@@ -59,6 +96,38 @@ type GlobalServiceList struct {
 	Items           []GlobalService `json:"items"`
 }
 
-func init() {
-	SchemeBuilder.Register(&GlobalService{}, &GlobalServiceList{})
+func (p *GlobalServiceStatus) IsSHAEqual(sha string) bool {
+	if !p.HasSHA() {
+		return false
+	}
+
+	return p.GetSHA() == sha
+}
+
+func (p *GlobalServiceStatus) GetSHA() string {
+	if !p.HasSHA() {
+		return ""
+	}
+
+	return *p.SHA
+}
+
+func (p *GlobalServiceStatus) HasSHA() bool {
+	return p.SHA != nil && len(*p.SHA) > 0
+}
+
+func (p *GlobalServiceStatus) GetID() string {
+	if !p.HasID() {
+		return ""
+	}
+
+	return *p.ID
+}
+
+func (p *GlobalServiceStatus) HasID() bool {
+	return p.ID != nil && len(*p.ID) > 0
+}
+
+func (p *GlobalService) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&p.Status.Conditions, condition)
 }
