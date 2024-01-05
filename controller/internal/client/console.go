@@ -53,6 +53,9 @@ type ConsoleClient interface {
 	IsProviderDeleting(ctx context.Context, id string) bool
 	UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error
 	DeleteService(serviceId string) error
+	SavePipeline(name string, attrs console.PipelineAttributes) (*console.PipelineFragment, error)
+	GetPipeline(id string) (*console.PipelineFragment, error)
+	ListPipelines() (*console.GetPipelines, error)
 }
 
 func New(url, token string) ConsoleClient {
