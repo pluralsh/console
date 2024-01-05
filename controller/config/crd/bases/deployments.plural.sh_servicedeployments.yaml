@@ -281,7 +281,6 @@ spec:
                     type: object
                 type: object
               version:
-                default: '''0.0.1'''
                 type: string
             required:
             - clusterRef

@@ -867,6 +867,11 @@ func (in *ServiceSpec) DeepCopyInto(out *ServiceSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Version != nil {
+		in, out := &in.Version, &out.Version
+		*out = new(string)
+		**out = **in
+	}
 	if in.Kustomize != nil {
 		in, out := &in.Kustomize, &out.Kustomize
 		*out = new(ServiceKustomize)

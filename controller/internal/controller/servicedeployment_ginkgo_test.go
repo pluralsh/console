@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+
 	"github.com/pluralsh/console/controller/internal/test/utils"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -58,7 +59,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 						Namespace: namespace,
 					},
 					Spec: v1alpha1.ServiceSpec{
-						Version:       "1.24",
+						Version:       lo.ToPtr("1.24"),
 						ClusterRef:    corev1.ObjectReference{Name: clusterName, Namespace: namespace},
 						RepositoryRef: corev1.ObjectReference{Name: repoName, Namespace: namespace},
 					},

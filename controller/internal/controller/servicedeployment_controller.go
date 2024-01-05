@@ -214,7 +214,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 	attr := &console.ServiceDeploymentAttributes{
 		Name:         service.Name,
 		Namespace:    namespace,
-		Version:      &service.Spec.Version,
+		Version:      service.Spec.Version,
 		DocsPath:     service.Spec.DocsPath,
 		Protect:      &service.Spec.Protect,
 		RepositoryID: repositoryId,
