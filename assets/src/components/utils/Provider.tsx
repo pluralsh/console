@@ -15,6 +15,8 @@ export const KIND_ICON_DARK = '/providers/kind-icon.png'
 export const KIND_ICON_LIGHT = '/providers/kind-icon.png'
 export const AWS_ICON_DARK = '/providers/aws-icon-dark.png'
 export const AWS_ICON_LIGHT = '/providers/aws-icon-light.png'
+export const LINODE_ICON_DARK = '/providers/linode-icon.png'
+export const LINODE_ICON_LIGHT = '/providers/linode-icon.png'
 
 const ProviderNames = {
   aws: 'AWS',
@@ -25,6 +27,7 @@ const ProviderNames = {
   generic: 'Generic',
   custom: 'Custom',
   kubernetes: 'Kubernetes',
+  linode: 'Linode',
 } as const satisfies Record<Lowercase<Provider>, string>
 
 export function getProviderName(provider?: string | null) {
@@ -48,6 +51,7 @@ export function getProviderIconUrl(
         GENERIC: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
         CUSTOM: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
         KUBERNETES: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
+        LINODE: mode === 'light' ? LINODE_ICON_LIGHT : LINODE_ICON_DARK,
       } as const satisfies Record<Provider, string>
     )[provider?.toUpperCase()] ??
     (mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK)
