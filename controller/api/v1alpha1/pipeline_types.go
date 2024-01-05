@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	console "github.com/pluralsh/console-client-go"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -188,16 +189,16 @@ type PipelineStatus struct {
 	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
-func (cs *PipelineStatus) HasID() bool {
-	return cs.ID != nil && len(*cs.ID) > 0
+func (ps *PipelineStatus) HasID() bool {
+	return ps.ID != nil && len(*ps.ID) > 0
 }
 
-func (cs *PipelineStatus) HasSHA() bool {
-	return cs.SHA != nil && len(*cs.SHA) > 0
+func (ps *PipelineStatus) HasSHA() bool {
+	return ps.SHA != nil && len(*ps.SHA) > 0
 }
 
-func (cs *PipelineStatus) IsSHAChanged(sha string) bool {
-	return cs.HasSHA() && *cs.SHA != sha
+func (ps *PipelineStatus) IsSHAChanged(sha string) bool {
+	return ps.HasSHA() && *ps.SHA != sha
 }
 
 // Pipeline is the Schema for the pipelines API
@@ -211,6 +212,10 @@ type Pipeline struct {
 
 	Spec   PipelineSpec   `json:"spec,omitempty"`
 	Status PipelineStatus `json:"status,omitempty"`
+}
+
+func (p *Pipeline) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&p.Status.Conditions, condition)
 }
 
 // PipelineList contains a list of Pipeline

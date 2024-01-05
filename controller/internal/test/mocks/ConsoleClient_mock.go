@@ -607,6 +607,64 @@ func (_c *ConsoleClientMock_GetClusterByHandle_Call) RunAndReturn(run func(*stri
 	return _c
 }
 
+// GetPipeline provides a mock function with given fields: id
+func (_m *ConsoleClientMock) GetPipeline(id string) (*gqlclient.PipelineFragment, error) {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPipeline")
+	}
+
+	var r0 *gqlclient.PipelineFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*gqlclient.PipelineFragment, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(string) *gqlclient.PipelineFragment); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.PipelineFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetPipeline_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPipeline'
+type ConsoleClientMock_GetPipeline_Call struct {
+	*mock.Call
+}
+
+// GetPipeline is a helper method to define mock.On call
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetPipeline(id interface{}) *ConsoleClientMock_GetPipeline_Call {
+	return &ConsoleClientMock_GetPipeline_Call{Call: _e.mock.On("GetPipeline", id)}
+}
+
+func (_c *ConsoleClientMock_GetPipeline_Call) Run(run func(id string)) *ConsoleClientMock_GetPipeline_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPipeline_Call) Return(_a0 *gqlclient.PipelineFragment, _a1 error) *ConsoleClientMock_GetPipeline_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPipeline_Call) RunAndReturn(run func(string) (*gqlclient.PipelineFragment, error)) *ConsoleClientMock_GetPipeline_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetProvider provides a mock function with given fields: ctx, id, options
 func (_m *ConsoleClientMock) GetProvider(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
 	_va := make([]interface{}, len(options))
@@ -1172,6 +1230,63 @@ func (_c *ConsoleClientMock_ListClusters_Call) RunAndReturn(run func() (*gqlclie
 	return _c
 }
 
+// ListPipelines provides a mock function with given fields:
+func (_m *ConsoleClientMock) ListPipelines() (*gqlclient.GetPipelines, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListPipelines")
+	}
+
+	var r0 *gqlclient.GetPipelines
+	var r1 error
+	if rf, ok := ret.Get(0).(func() (*gqlclient.GetPipelines, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() *gqlclient.GetPipelines); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.GetPipelines)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_ListPipelines_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListPipelines'
+type ConsoleClientMock_ListPipelines_Call struct {
+	*mock.Call
+}
+
+// ListPipelines is a helper method to define mock.On call
+func (_e *ConsoleClientMock_Expecter) ListPipelines() *ConsoleClientMock_ListPipelines_Call {
+	return &ConsoleClientMock_ListPipelines_Call{Call: _e.mock.On("ListPipelines")}
+}
+
+func (_c *ConsoleClientMock_ListPipelines_Call) Run(run func()) *ConsoleClientMock_ListPipelines_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_ListPipelines_Call) Return(_a0 *gqlclient.GetPipelines, _a1 error) *ConsoleClientMock_ListPipelines_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_ListPipelines_Call) RunAndReturn(run func() (*gqlclient.GetPipelines, error)) *ConsoleClientMock_ListPipelines_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListRepositories provides a mock function with given fields:
 func (_m *ConsoleClientMock) ListRepositories() (*gqlclient.ListGitRepositories, error) {
 	ret := _m.Called()
@@ -1225,6 +1340,65 @@ func (_c *ConsoleClientMock_ListRepositories_Call) Return(_a0 *gqlclient.ListGit
 }
 
 func (_c *ConsoleClientMock_ListRepositories_Call) RunAndReturn(run func() (*gqlclient.ListGitRepositories, error)) *ConsoleClientMock_ListRepositories_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SavePipeline provides a mock function with given fields: name, attrs
+func (_m *ConsoleClientMock) SavePipeline(name string, attrs gqlclient.PipelineAttributes) (*gqlclient.PipelineFragment, error) {
+	ret := _m.Called(name, attrs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SavePipeline")
+	}
+
+	var r0 *gqlclient.PipelineFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, gqlclient.PipelineAttributes) (*gqlclient.PipelineFragment, error)); ok {
+		return rf(name, attrs)
+	}
+	if rf, ok := ret.Get(0).(func(string, gqlclient.PipelineAttributes) *gqlclient.PipelineFragment); ok {
+		r0 = rf(name, attrs)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.PipelineFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, gqlclient.PipelineAttributes) error); ok {
+		r1 = rf(name, attrs)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_SavePipeline_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SavePipeline'
+type ConsoleClientMock_SavePipeline_Call struct {
+	*mock.Call
+}
+
+// SavePipeline is a helper method to define mock.On call
+//   - name string
+//   - attrs gqlclient.PipelineAttributes
+func (_e *ConsoleClientMock_Expecter) SavePipeline(name interface{}, attrs interface{}) *ConsoleClientMock_SavePipeline_Call {
+	return &ConsoleClientMock_SavePipeline_Call{Call: _e.mock.On("SavePipeline", name, attrs)}
+}
+
+func (_c *ConsoleClientMock_SavePipeline_Call) Run(run func(name string, attrs gqlclient.PipelineAttributes)) *ConsoleClientMock_SavePipeline_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(gqlclient.PipelineAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_SavePipeline_Call) Return(_a0 *gqlclient.PipelineFragment, _a1 error) *ConsoleClientMock_SavePipeline_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_SavePipeline_Call) RunAndReturn(run func(string, gqlclient.PipelineAttributes) (*gqlclient.PipelineFragment, error)) *ConsoleClientMock_SavePipeline_Call {
 	_c.Call.Return(run)
 	return _c
 }
