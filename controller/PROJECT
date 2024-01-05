@@ -4,7 +4,7 @@
 # More info: https://book.kubebuilder.io/reference/project-config.html
 domain: plural.sh
 layout:
-  - go.kubebuilder.io/v4
+- go.kubebuilder.io/v4
 projectName: controller
 repo: github.com/pluralsh/console/controller
 resources:
@@ -42,6 +42,24 @@ resources:
   domain: plural.sh
   group: deployments
   kind: GitRepository
+  path: github.com/pluralsh/console/controller/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: plural.sh
+  group: deployments
+  kind: Pipeline
+  path: github.com/pluralsh/console/controller/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: plural.sh
+  group: deployments
+  kind: GlobalService
   path: github.com/pluralsh/console/controller/api/v1alpha1
   version: v1alpha1
 version: "3"
