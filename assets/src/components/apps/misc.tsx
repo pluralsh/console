@@ -1,5 +1,7 @@
 import { Readiness } from 'utils/status'
 import styled from 'styled-components'
+import { type styledTheme } from '@pluralsh/design-system'
+import { Application } from 'generated/graphql'
 
 export const ListItemBorder = styled.div<{
   color?: string
@@ -20,16 +22,17 @@ export const ListItemBorder = styled.div<{
 export const hasIcons = ({ spec: { descriptor } }) =>
   descriptor?.icons?.length > 0
 
-export const getIcon = (app, dark = true) => {
+export const getIcon = (app: Application, mode: typeof styledTheme.mode) => {
   const {
     spec: { descriptor },
   } = app
 
   if (!hasIcons(app)) return undefined
 
-  if (dark && descriptor.icons.length > 1) return descriptor.icons[1]
+  if ((mode !== 'light' && descriptor?.icons?.length) || 0 > 1)
+    return descriptor?.icons?.[1] || descriptor?.icons?.[0] || undefined
 
-  return descriptor.icons[0]
+  return descriptor?.icons?.[0] || undefined
 }
 
 export function appState({ status: { conditions } }) {

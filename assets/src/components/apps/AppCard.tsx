@@ -96,7 +96,7 @@ export default function AppCard({ app }: any) {
       >
         {hasIcons(app) && (
           <AppIcon
-            url={getIcon(app, theme.mode === 'dark')}
+            url={getIcon(app, theme.mode)}
             size="xsmall"
           />
         )}

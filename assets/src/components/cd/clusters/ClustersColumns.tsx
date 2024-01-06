@@ -28,7 +28,7 @@ import {
 } from 'utils/kubernetes'
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
+import { getProviderIconUrl, getProviderName } from 'components/utils/Provider'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -95,9 +95,7 @@ const ColCloud = columnHelper.accessor(({ node }) => node?.provider, {
     const theme = useTheme()
 
     return (
-      <ColWithIcon
-        icon={getProviderIconURL(provider?.cloud ?? '', theme.mode === 'dark')}
-      >
+      <ColWithIcon icon={getProviderIconUrl(provider?.cloud ?? '', theme.mode)}>
         {getProviderName(provider?.cloud)}
       </ColWithIcon>
     )

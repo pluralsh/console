@@ -210,7 +210,7 @@ export function StatusPanel({ statuses, open, onClose }) {
             }}
             last={i === apps.length - 1}
           >
-            {hasIcons(app) && <AppIcon src={getIcon(app)} />}
+            {hasIcons(app) && <AppIcon src={getIcon(app, theme.mode)} />}
             <AppName>{app.name}</AppName>
             {app.spec?.descriptor?.version && (
               <AppVersion>v{app.spec.descriptor.version}</AppVersion>

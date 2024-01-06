@@ -1,7 +1,7 @@
 import { ResponsivePie } from '@nivo/pie'
 import { ComponentProps } from 'react'
 
-import { CHART_THEME } from './charts'
+import { useChartTheme } from './charts'
 import { ChartTooltip } from './ChartTooltip'
 
 export type PieChartData = {
@@ -17,6 +17,8 @@ export function PieChart({
   ComponentProps<typeof ResponsivePie>,
   'data'
 >) {
+  const chartTheme = useChartTheme()
+
   return (
     <ResponsivePie
       activeOuterRadiusOffset={3}
@@ -39,7 +41,7 @@ export function PieChart({
           value={datum.formattedValue}
         />
       )}
-      theme={CHART_THEME}
+      theme={chartTheme}
       {...props}
     />
   )

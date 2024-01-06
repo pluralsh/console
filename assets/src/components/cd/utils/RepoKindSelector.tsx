@@ -8,7 +8,8 @@ import {
   TabPanel,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import ProviderIcon, { ProviderIcons } from 'components/utils/Provider'
+import ProviderIcon from 'components/utils/Provider'
+import { Provider } from 'generated/graphql-plural'
 
 export enum RepoKind {
   Git = 'Git',
@@ -73,7 +74,7 @@ export function RepoKindSelector({
           key={RepoKind.Git}
           textValue={repoKindToLabel(RepoKind.Git)}
         >
-          <GitHubLogoIcon fullColor />
+          <GitHubLogoIcon color={theme.colors['icon-default']} />
           {repoKindToLabel(RepoKind.Git)}
           {validKinds?.[RepoKind.Git] && (
             <CheckOutlineIcon
@@ -92,7 +93,7 @@ export function RepoKindSelector({
         >
           <div css={{ display: 'flex', alignItems: 'center' }}>
             <ProviderIcon
-              provider={ProviderIcons.GENERIC}
+              provider={Provider.Generic}
               width={16}
             />
           </div>

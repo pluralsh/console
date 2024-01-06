@@ -2,7 +2,9 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { GitHealth, type HelmRepositoryFragment } from 'generated/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { DEFAULT_CHART_ICON } from 'components/utils/Provider'
+import { CHART_ICON_DARK, CHART_ICON_LIGHT } from 'components/utils/Provider'
+
+import { useTheme } from 'styled-components'
 
 import { HelmHealthChip } from './HelmHealthChip'
 
@@ -13,14 +15,18 @@ export const ColName = columnHelper.accessor((repo) => repo?.metadata.name, {
   header: 'Name',
   enableSorting: true,
   enableGlobalFilter: true,
-  cell: ({ getValue }) => (
-    <ColWithIcon
-      truncateLeft
-      icon={DEFAULT_CHART_ICON}
-    >
-      {getValue()}
-    </ColWithIcon>
-  ),
+  cell: function Cell({ getValue }) {
+    const theme = useTheme()
+
+    return (
+      <ColWithIcon
+        truncateLeft
+        icon={theme.mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK}
+      >
+        {getValue()}
+      </ColWithIcon>
+    )
+  },
 })
 export const ColNamespace = columnHelper.accessor(
   (repo) => repo?.metadata.namespace,

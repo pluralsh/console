@@ -11,7 +11,7 @@ export default function WebhooksHeader() {
       padding="medium"
     >
       <IconFrame
-        icon={<SlackLogoIcon />}
+        icon={<SlackLogoIcon fullColor />}
         size="large"
         textValue="Slack"
         type="floating"

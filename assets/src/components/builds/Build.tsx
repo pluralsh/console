@@ -4,6 +4,7 @@ import {
   Chip,
   InstallIcon,
 } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import { BuildTypes } from 'components/types'
@@ -23,6 +24,7 @@ export const BUILD_TYPE_DISPLAY_NAMES = {
 }
 
 export default function Build({ build }) {
+  const theme = useTheme()
   const { id, repository, status, insertedAt, message, type } = build
   const navigate = useNavigate()
   const { applications } = useContext<any>(InstallationContext)
@@ -42,7 +44,7 @@ export default function Build({ build }) {
     >
       {app && hasIcons(app) && (
         <AppIcon
-          url={getIcon(app)}
+          url={getIcon(app, theme.mode)}
           size="xsmall"
         />
       )}

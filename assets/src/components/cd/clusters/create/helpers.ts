@@ -1,11 +1,4 @@
 import { CSSProp } from 'styled-components'
-import { ComponentType } from 'react'
-import {
-  AwsLogoIcon,
-  AzureLogoIcon,
-  GoogleLogoIcon,
-} from '@pluralsh/design-system'
-
 import { v4 } from 'uuid'
 
 import { AWSNodeGroup, NodeGroup, ProviderCloud } from './types'
@@ -25,12 +18,6 @@ const ProviderToDisplayName: { readonly [key in ProviderCloud]: string } = {
   [ProviderCloud.AWS]: 'AWS',
   [ProviderCloud.GCP]: 'GCP',
   [ProviderCloud.Azure]: 'Azure',
-}
-
-const ProviderToLogo: { readonly [key in ProviderCloud]: ComponentType } = {
-  [ProviderCloud.AWS]: AwsLogoIcon,
-  [ProviderCloud.GCP]: GoogleLogoIcon,
-  [ProviderCloud.Azure]: AzureLogoIcon,
 }
 
 const RegionsForProvider: { readonly [key in ProviderCloud]: Array<string> } = {
@@ -127,5 +114,4 @@ export {
   DefaultRegionForProvider,
   NewNodeGroup,
   ProviderToDisplayName,
-  ProviderToLogo,
 }

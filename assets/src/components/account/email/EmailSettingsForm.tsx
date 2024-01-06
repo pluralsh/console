@@ -1,8 +1,8 @@
 import { useMutation } from '@apollo/client'
 import { Button, Card, ValidatedInput } from '@pluralsh/design-system'
 import { UPDATE_SMTP } from 'components/graphql/plural'
-import { Div, Flex } from 'honorable'
 import { useState } from 'react'
+import { useTheme } from 'styled-components'
 
 const clean = (smtp) => {
   const { __typename, ...vals } = smtp || {}
@@ -11,6 +11,7 @@ const clean = (smtp) => {
 }
 
 export default function EmailSettingsForm({ smtp }) {
+  const theme = useTheme()
   const [form, setForm] = useState(clean(smtp))
   const [mutation, { loading }] = useMutation(UPDATE_SMTP, {
     variables: { smtp: form },
@@ -18,17 +19,22 @@ export default function EmailSettingsForm({ smtp }) {
 
   return (
     <Card
-      direction="column"
-      maxHeight="100%"
-      overflow="auto"
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        maxHeight: '100%',
+        overflow: 'auto',
+      }}
     >
-      <Div
-        direction="column"
-        gap="small"
-        overflowY="auto"
-        height="calc(100% - 88px)"
-        paddingHorizontal={128}
-        paddingVertical="xlarge"
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.small,
+          overflowY: 'auto',
+          height: 'calc(100% - 88px)',
+          padding: `${theme.spacing.xlarge}px 128px`,
+        }}
       >
         <ValidatedInput
           label="Server"
@@ -76,13 +82,15 @@ export default function EmailSettingsForm({ smtp }) {
             setForm({ ...form, password: value })
           }
         />
-      </Div>
-      <Flex
-        align="end"
-        height={88}
-        justifyContent="end"
-        paddingHorizontal={134}
-        paddingBottom="xlarge"
+      </div>
+      <div
+        css={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          height: 88,
+          justifyContent: 'end',
+          padding: `${theme.spacing.xlarge}px 134px`,
+        }}
       >
         <Button
           onClick={() => mutation()}
@@ -90,7 +98,7 @@ export default function EmailSettingsForm({ smtp }) {
         >
           Update
         </Button>
-      </Flex>
+      </div>
     </Card>
   )
 }
