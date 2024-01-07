@@ -9,6 +9,7 @@ import {
   Sidebar as DSSidebar,
   DatabaseIcon,
   DiscordIcon,
+  GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
   ListIcon,
@@ -60,6 +61,11 @@ const MENU_ITEMS: MenuItem[] = [
     icon: <GitPullIcon />,
     path: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}`,
     pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
+  },
+  {
+    text: 'Deployment Settings',
+    icon: <GearTrainIcon />,
+    path: `${CD_ABS_PATH}/settings`,
   },
   {
     text: 'Builds',
