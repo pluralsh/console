@@ -222,7 +222,7 @@ defmodule Console.Schema.Cluster do
     Enum.reduce(tags, query, fn %{name: n, value: v}, q -> with_tag(q, n, v) end)
   end
 
-  def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
+  def ordered(query \\ __MODULE__, order \\ [desc: :self, asc: :name]) do
     from(c in query, order_by: ^order)
   end
 
