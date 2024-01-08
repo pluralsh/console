@@ -117,7 +117,7 @@ function isActiveMenuItem(
     (path === '/' ? currentPath === path : currentPath.startsWith(path)) ||
     (pathRegexp &&
       (currentPath.match(pathRegexp)?.length ?? 0 > 0) &&
-      (!ignoreRegexp || (currentPath.match(ignoreRegexp).length ?? 0) === 0))
+      (!ignoreRegexp || (currentPath.match(ignoreRegexp)?.length ?? 0) === 0))
   )
 }
 
