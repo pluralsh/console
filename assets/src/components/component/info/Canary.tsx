@@ -18,6 +18,7 @@ import {
 import { ConditionsTable } from './Conditions'
 import { IngressBase } from './Ingress'
 import { MetadataBase } from './Metadata'
+import { DeploymentBase } from './Deployment'
 
 const deploymentHelper = createColumnHelper<Deployment>()
 const ingressHelper = createColumnHelper<Ingress>()
@@ -33,7 +34,46 @@ function StatusChip({ healthy }) {
 const ColDepName = deploymentHelper.accessor((row) => row.metadata?.name, {
   id: 'name',
   header: 'Name',
-  cell: ({ getValue }) => getValue(),
+  cell: function Cell({ row: { original }, getValue }) {
+    const [isOpen, setIsOpen] = useState(false)
+    const theme = useTheme()
+
+    return (
+      <>
+        <InlineLink
+          onClick={(e) => {
+            e.preventDefault()
+            setIsOpen((val) => !val)
+          }}
+        >
+          {getValue()}
+        </InlineLink>
+        <ModalMountTransition open={isOpen}>
+          <Modal
+            portal
+            open={isOpen}
+            onClose={() => setIsOpen(false)}
+            header={`Deployment – ${original.metadata.name}`}
+            size="large"
+          >
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.large,
+              }}
+            >
+              <DeploymentBase deployment={original} />
+              <MetadataBase
+                component={original}
+                metadata={original.metadata}
+              />
+            </div>
+          </Modal>
+        </ModalMountTransition>
+      </>
+    )
+  },
 })
 
 const ColDepStatus = deploymentHelper.accessor((row) => row.status, {

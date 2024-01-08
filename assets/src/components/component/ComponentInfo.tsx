@@ -9,7 +9,7 @@ import CronJob from './info/CronJob'
 import Certificate from './info/Certificate'
 import Service from './info/Service'
 import IngressOutlet from './info/Ingress'
-import Deployment from './info/Deployment'
+import DeploymentOutlet from './info/Deployment'
 import StatefulSet from './info/StatefulSet'
 import MetadataOutlet from './info/Metadata'
 import { ComponentDetailsContext } from './ComponentDetails'
@@ -37,7 +37,7 @@ function getInfo(kind: string): JSX.Element | undefined {
     case 'cronjob':
       return <CronJob />
     case 'deployment':
-      return <Deployment />
+      return <DeploymentOutlet />
     case 'ingress':
       return <IngressOutlet />
     case 'job':

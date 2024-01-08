@@ -53,7 +53,7 @@ export function MetadataBase({
       <MetadataGrid>
         {(metadata?.name || component?.name) && (
           <MetadataItem heading="Name">
-            {metadata?.name || component?.name}x
+            {metadata?.name || component?.name}
           </MetadataItem>
         )}
         {(metadata?.namespace || component?.namespace) && (
