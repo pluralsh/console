@@ -23,6 +23,7 @@ import (
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
+	v1 "k8s.io/api/core/v1"
 )
 
 func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1.Pipeline) (*console.PipelineAttributes, error) {
@@ -119,7 +120,7 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 }
 
 func (r *PipelineReconciler) pipelineEdgeGateAttributes(ctx context.Context, gate v1alpha1.PipelineGate) (*console.PipelineGateAttributes, error) {
-	cluster, err := utils.GetCluster(ctx, r.Client, &gate.ClusterRef)
+	clusterRef, err := r.pipelineEdgeGateClusterIDAttribute(ctx, gate.ClusterRef)
 	if err != nil {
 		return nil, err
 	}
@@ -128,9 +129,22 @@ func (r *PipelineReconciler) pipelineEdgeGateAttributes(ctx context.Context, gat
 		Name:      gate.Name,
 		Type:      gate.Type,
 		Cluster:   nil, // Using ClusterID instead.
-		ClusterID: cluster.Status.ID,
+		ClusterID: clusterRef,
 		Spec:      r.pipelineEdgeGateSpecAttributes(gate.Spec),
 	}, nil
+}
+
+func (r *PipelineReconciler) pipelineEdgeGateClusterIDAttribute(ctx context.Context, clusterRef *v1.ObjectReference) (*string, error) {
+	if clusterRef == nil {
+		return nil, nil
+	}
+
+	cluster, err := utils.GetCluster(ctx, r.Client, clusterRef)
+	if err != nil {
+		return nil, err
+	}
+
+	return cluster.Status.ID, nil
 }
 
 func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateSpec) *console.GateSpecAttributes {

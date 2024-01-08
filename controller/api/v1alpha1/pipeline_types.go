@@ -94,7 +94,7 @@ type PipelineGate struct {
 	Type console.GateType `json:"type"`
 
 	// ClusterRef of a Cluster this gate will execute on.
-	ClusterRef v1.ObjectReference `json:"clusterRef,omitempty"`
+	ClusterRef *v1.ObjectReference `json:"clusterRef,omitempty"`
 
 	// Spec contains specification for more complex gate types.
 	Spec *GateSpec `json:"spec,omitempty"`

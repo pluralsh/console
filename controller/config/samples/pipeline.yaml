@@ -127,7 +127,7 @@ spec:
         - name: job-gate
           type: JOB
           clusterRef:
-            name: aws
+            name: dev
             namespace: default
           spec:
             job:
