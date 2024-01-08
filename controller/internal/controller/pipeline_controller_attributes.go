@@ -17,20 +17,28 @@ limitations under the License.
 package controller
 
 import (
+	"context"
+
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/polly/algorithms"
+	"github.com/pluralsh/console/controller/internal/utils"
 )
 
-func (r *PipelineReconciler) pipelineAttributes(p *v1alpha1.Pipeline) console.PipelineAttributes {
+func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1.Pipeline) (*console.PipelineAttributes, error) {
 	stages := make([]*console.PipelineStageAttributes, 0)
 	for _, stage := range p.Spec.Stages {
+		services := make([]*console.StageServiceAttributes, 0)
+		for _, service := range stage.Services {
+			service, err := r.pipelineStageServiceAttributes(ctx, service)
+			if err != nil {
+				return nil, err
+			}
+			services = append(services, service)
+		}
+
 		stages = append(stages, &console.PipelineStageAttributes{
-			Name: stage.Name,
-			Services: algorithms.Map(stage.Services,
-				func(s v1alpha1.PipelineStageService) *console.StageServiceAttributes {
-					return r.pipelineStageServiceAttributes(s)
-				}),
+			Name:     stage.Name,
+			Services: services,
 		})
 	}
 
@@ -45,23 +53,53 @@ func (r *PipelineReconciler) pipelineAttributes(p *v1alpha1.Pipeline) console.Pi
 		})
 	}
 
-	return console.PipelineAttributes{
+	return &console.PipelineAttributes{
 		Stages: stages,
 		Edges:  edges,
-	}
+	}, nil
 }
 
-func (r *PipelineReconciler) pipelineStageServiceAttributes(p v1alpha1.PipelineStageService) *console.StageServiceAttributes {
+func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context, p v1alpha1.PipelineStageService) (*console.StageServiceAttributes, error) {
+	service, err := utils.GetServiceDeployment(ctx, r.Client, p.ServiceRef)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Extracting cluster ref from the service, not from the user provided config. Is it okay?
+	cluster, err := utils.GetCluster(ctx, r.Client, &service.Spec.ClusterRef)
+	if err != nil {
+		return nil, err
+	}
+
+	criteria, err := r.pipelineStageServiceCriteriaAttributes(ctx, p.Criteria)
+	if err != nil {
+		return nil, err
+	}
 
 	return &console.StageServiceAttributes{
-		Handle:    nil,
-		Name:      nil,
-		ServiceID: nil,
-		Criteria: &console.PromotionCriteriaAttributes{
-			Handle:   nil,
-			Name:     nil,
-			SourceID: nil,
-			Secrets:  p.Criteria.Secrets,
-		},
+		Handle:    cluster.Status.ID, // TODO: Using cluster ID instead of handle. Will it work?
+		Name:      nil,               // Using ServiceID instead.
+		ServiceID: service.Status.ID,
+		Criteria:  criteria,
+	}, nil
+}
+
+func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.Context, p *v1alpha1.PipelineStageServicePromotionCriteria) (*console.PromotionCriteriaAttributes, error) {
+	service, err := utils.GetServiceDeployment(ctx, r.Client, p.ServiceRef)
+	if err != nil {
+		return nil, err
 	}
+
+	// TODO: Extracting cluster ref from the service, not from the user provided config. Is it okay?
+	cluster, err := utils.GetCluster(ctx, r.Client, &service.Spec.ClusterRef)
+	if err != nil {
+		return nil, err
+	}
+
+	return &console.PromotionCriteriaAttributes{
+		Handle:   cluster.Status.ID, // TODO: Using cluster ID instead of handle. Will it work?
+		Name:     nil,               // Using SourceID instead.
+		SourceID: service.Status.ID,
+		Secrets:  p.Secrets,
+	}, nil
 }

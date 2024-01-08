@@ -80,17 +80,21 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	}
 
 	// Prepare attributes object that is used to calculate SHA and save changes.
-	attrs := r.pipelineAttributes(pipeline)
+	attrs, err := r.pipelineAttributes(ctx, pipeline)
+	if err != nil {
+		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		return ctrl.Result{}, err
+	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
-	sha, err := utils.HashObject(attrs)
+	sha, err := utils.HashObject(*attrs)
 	if err != nil {
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	// Sync resource with Console API.
-	apiPipeline, err := r.sync(ctx, pipeline, attrs, sha)
+	apiPipeline, err := r.sync(ctx, pipeline, *attrs, sha)
 	if err != nil {
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
