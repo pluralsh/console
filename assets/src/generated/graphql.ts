@@ -2552,6 +2552,7 @@ export type RootMutationType = {
   deleteJob?: Maybe<Job>;
   deleteNode?: Maybe<Node>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
+  deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
   deleteProviderCredential?: Maybe<ProviderCredential>;
   deleteRole?: Maybe<Role>;
@@ -2790,6 +2791,11 @@ export type RootMutationTypeDeleteNodeArgs = {
 
 export type RootMutationTypeDeletePeerArgs = {
   name: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeDeletePipelineArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

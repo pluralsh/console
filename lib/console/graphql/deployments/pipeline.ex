@@ -273,6 +273,13 @@ defmodule Console.GraphQl.Deployments.Pipeline do
       resolve &Deployments.upsert_pipeline/2
     end
 
+    field :delete_pipeline, :pipeline do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_pipeline/2
+    end
+
     @desc "approves an approval pipeline gate"
     field :approve_gate, :pipeline_gate do
       middleware Authenticated

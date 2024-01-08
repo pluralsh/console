@@ -398,6 +398,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def upsert_pipeline(%{name: name, attributes: attrs}, %{context: %{current_user: user}}),
     do: Pipelines.upsert(attrs, name, user)
 
+  def delete_pipeline(%{id: id}, %{context: %{current_user: user}}),
+    do: Pipelines.delete(id, user)
+
   def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
 
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),

@@ -180,6 +180,18 @@ defmodule Console.Deployments.PipelinesTest do
     end
   end
 
+  describe "#delete/2" do
+    test "it can delete a pipeline by id" do
+      admin = admin_user()
+      pipe = insert(:pipeline)
+
+      {:ok, del} = Pipelines.delete(pipe.id, admin)
+
+      assert del.id == pipe.id
+      refute refetch(pipe)
+    end
+  end
+
   describe "#build_promotion/1" do
     test "it will create a new promotion for a pipeline stage and mark all gates pending" do
       admin = admin_user()

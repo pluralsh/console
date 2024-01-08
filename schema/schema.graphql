@@ -434,6 +434,8 @@ type RootMutationType {
   "upserts a pipeline with a given name"
   savePipeline(name: String!, attributes: PipelineAttributes!): Pipeline
 
+  deletePipeline(id: ID!): Pipeline
+
   "approves an approval pipeline gate"
   approveGate(id: ID!): PipelineGate
 
