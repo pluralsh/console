@@ -999,7 +999,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
                 criteria { source { id } secrets }
               }
             }
-            edges { from { id } to { id } gates { type name } }
+            edges { from { id } to { id } gates { type name cluster { id } } }
           }
         }
       """, %{"name" => "test", "attributes" => %{
@@ -1013,7 +1013,11 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
             }}
           ]}
         ],
-        "edges" => [%{"from" => "dev", "to" => "prod", "gates" => [%{"type" => "APPROVAL", "name" => "approve"}]}]
+        "edges" => [
+          %{"from" => "dev", "to" => "prod", "gates" => [
+            %{"type" => "JOB", "clusterId" => svc2.cluster_id, "name" => "approve"}
+          ]}
+        ]
       }}, %{current_user: user})
 
       assert pipeline["id"]
@@ -1036,8 +1040,9 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
       [gate] = edge["gates"]
 
-      assert gate["type"] == "APPROVAL"
+      assert gate["type"] == "JOB"
       assert gate["name"] == "approve"
+      assert gate["cluster"]["id"] == svc2.cluster_id
     end
   end
 

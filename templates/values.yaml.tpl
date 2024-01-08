@@ -19,6 +19,7 @@ secrets:
   admin_email: {{ .Values.adminEmail }}
   admin_password: {{ .Values.adminPassword }}
   cluster_name: {{ .Values.clusterName }}
+  git_url: {{ repoUrl }}
   {{ if .Values.pluralClientId }}
   plural_client_id: {{ .Values.pluralClientId }}
   {{ end }}

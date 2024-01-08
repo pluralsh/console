@@ -7,11 +7,6 @@ metadata:
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
-    {{- if eq "nginx" $.Values.ingress.ingressClass }}
-    nginx.ingress.kubernetes.io/proxy-buffering: "off"
-    nginx.ingress.kubernetes.io/custom-http-errors: ""
-    nginx.ingress.kubernetes.io/backend-protocol: https
-    {{- end }}
   {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.ingressClass }}

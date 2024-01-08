@@ -312,6 +312,13 @@ defmodule Console.GraphQl.Deployments.Service do
 
       safe_resolve &Deployments.service_statuses/2
     end
+
+    field :global_service, :global_service do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.resolve_global/2
+    end
   end
 
   object :service_mutations do
