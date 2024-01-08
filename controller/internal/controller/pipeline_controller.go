@@ -79,15 +79,18 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return *result, nil
 	}
 
+	// Prepare attributes object that is used to calculate SHA and save changes.
+	attrs := r.pipelineAttributes(pipeline)
+
 	// Calculate SHA to detect changes that should be applied in the Console API.
-	sha, err := utils.HashObject(pipeline.Attributes())
+	sha, err := utils.HashObject(attrs)
 	if err != nil {
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	// Sync resource with Console API.
-	apiPipeline, err := r.sync(ctx, pipeline, sha)
+	apiPipeline, err := r.sync(ctx, pipeline, attrs, sha)
 	if err != nil {
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
@@ -134,7 +137,7 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 	return nil
 }
 
-func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeline, sha string) (*console.PipelineFragment, error) {
+func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeline, attrs console.PipelineAttributes, sha string) (*console.PipelineFragment, error) {
 	exists := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
 	logger := log.FromContext(ctx)
 
@@ -148,7 +151,7 @@ func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeli
 	} else {
 		logger.Info(fmt.Sprintf("%s pipeline does not exist, saving it", pipeline.Name))
 	}
-	return r.ConsoleClient.SavePipeline(pipeline.Name, pipeline.Attributes())
+	return r.ConsoleClient.SavePipeline(pipeline.Name, attrs)
 }
 
 // SetupWithManager sets up the controller with the Manager.

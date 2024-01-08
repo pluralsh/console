@@ -63,7 +63,7 @@ type PipelineStageServicePromotionCriteria struct {
 	ServiceRef *v1.ObjectReference `json:"serviceRef,omitempty"`
 
 	// Secrets to copy over in a promotion.
-	Secrets []string `json:"secrets,omitempty"`
+	Secrets []*string `json:"secrets,omitempty"`
 }
 
 // PipelineEdge is a specification of an edge between two pipeline stages.
@@ -220,14 +220,6 @@ type Pipeline struct {
 
 	Spec   PipelineSpec   `json:"spec,omitempty"`
 	Status PipelineStatus `json:"status,omitempty"`
-}
-
-// TODO
-func (p *Pipeline) Attributes() console.PipelineAttributes {
-	return console.PipelineAttributes{
-		Stages: make([]*console.PipelineStageAttributes, 0),
-		Edges:  make([]*console.PipelineEdgeAttributes, 0),
-	}
 }
 
 func (p *Pipeline) SetCondition(condition metav1.Condition) {
