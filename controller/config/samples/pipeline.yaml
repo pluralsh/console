@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: operator
+  name: guestbook
 ---
 # Assumes that provider already exists. It will be handled in readonly mode.
 apiVersion: deployments.plural.sh/v1alpha1
@@ -140,9 +140,9 @@ spec:
             job:
               namespace: default
               labels:
-                - test: true
+                test: test
               annotations:
-                - plural.sh/annotation: test
+                plural.sh/annotation: test
               serviceAccount: default
               containers:
                 - image: alpine:3.7
