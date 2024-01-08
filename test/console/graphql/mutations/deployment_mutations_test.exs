@@ -1160,6 +1160,22 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert svc["name"] == "console"
     end
   end
+
+  describe "deletePipeline" do
+    test "it can delete a pipeline by id" do
+      admin = admin_user()
+      pipe = insert(:pipeline)
+
+      {:ok, %{data: %{"deletePipeline" => del}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deletePipeline(id: $id) { id }
+        }
+      """, %{"id" => pipe.id}, %{current_user: admin})
+
+      assert del["id"] == pipe.id
+      refute refetch(pipe)
+    end
+  end
 end
 
 defmodule Console.GraphQl.Mutations.SyncDeploymentMutationsTest do
