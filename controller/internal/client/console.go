@@ -35,7 +35,7 @@ type ConsoleClient interface {
 	UpdateRepository(id string, attrs console.GitAttributes) (*console.UpdateGitRepository, error)
 	DeleteRepository(id string) error
 	GetRepository(url *string) (*console.GetGitRepository, error)
-	CreateService(clusterId *string, attributes console.ServiceDeploymentAttributes) (*console.ServiceDeploymentFragment, error)
+	CreateService(clusterId *string, attributes console.ServiceDeploymentAttributes) (*console.ServiceDeploymentExtended, error)
 	GetCluster(id *string) (*console.ClusterFragment, error)
 	GetClusterByHandle(handle *string) (*console.ClusterFragment, error)
 	CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error)

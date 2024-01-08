@@ -46,9 +46,6 @@ type PipelineStage struct {
 // PipelineStageService is the configuration of a service within a pipeline stage,
 // including optional promotion criteria.
 type PipelineStageService struct {
-	// ClusterRef of this service.
-	ClusterRef *v1.ObjectReference `json:"clusterRef,omitempty"`
-
 	ServiceRef *v1.ObjectReference `json:"serviceRef,omitempty"`
 
 	Criteria *PipelineStageServicePromotionCriteria `json:"criteria,omitempty"`
@@ -56,9 +53,6 @@ type PipelineStageService struct {
 
 // PipelineStageServicePromotionCriteria represents actions to perform if this stage service were promoted.
 type PipelineStageServicePromotionCriteria struct {
-	// ClusterRef of the Cluster for the source service.
-	ClusterRef *v1.ObjectReference `json:"clusterRef,omitempty"`
-
 	// ServiceRef pointing to source service to promote from.
 	ServiceRef *v1.ObjectReference `json:"serviceRef,omitempty"`
 

@@ -221,23 +221,23 @@ func (_c *ConsoleClientMock_CreateRepository_Call) RunAndReturn(run func(string,
 }
 
 // CreateService provides a mock function with given fields: clusterId, attributes
-func (_m *ConsoleClientMock) CreateService(clusterId *string, attributes gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentFragment, error) {
+func (_m *ConsoleClientMock) CreateService(clusterId *string, attributes gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentExtended, error) {
 	ret := _m.Called(clusterId, attributes)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateService")
 	}
 
-	var r0 *gqlclient.ServiceDeploymentFragment
+	var r0 *gqlclient.ServiceDeploymentExtended
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*string, gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentFragment, error)); ok {
+	if rf, ok := ret.Get(0).(func(*string, gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentExtended, error)); ok {
 		return rf(clusterId, attributes)
 	}
-	if rf, ok := ret.Get(0).(func(*string, gqlclient.ServiceDeploymentAttributes) *gqlclient.ServiceDeploymentFragment); ok {
+	if rf, ok := ret.Get(0).(func(*string, gqlclient.ServiceDeploymentAttributes) *gqlclient.ServiceDeploymentExtended); ok {
 		r0 = rf(clusterId, attributes)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*gqlclient.ServiceDeploymentFragment)
+			r0 = ret.Get(0).(*gqlclient.ServiceDeploymentExtended)
 		}
 	}
 
@@ -269,12 +269,12 @@ func (_c *ConsoleClientMock_CreateService_Call) Run(run func(clusterId *string, 
 	return _c
 }
 
-func (_c *ConsoleClientMock_CreateService_Call) Return(_a0 *gqlclient.ServiceDeploymentFragment, _a1 error) *ConsoleClientMock_CreateService_Call {
+func (_c *ConsoleClientMock_CreateService_Call) Return(_a0 *gqlclient.ServiceDeploymentExtended, _a1 error) *ConsoleClientMock_CreateService_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ConsoleClientMock_CreateService_Call) RunAndReturn(run func(*string, gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentFragment, error)) *ConsoleClientMock_CreateService_Call {
+func (_c *ConsoleClientMock_CreateService_Call) RunAndReturn(run func(*string, gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentExtended, error)) *ConsoleClientMock_CreateService_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -333,6 +333,64 @@ func (_c *ConsoleClientMock_DeleteCluster_Call) Return(_a0 *gqlclient.ClusterFra
 }
 
 func (_c *ConsoleClientMock_DeleteCluster_Call) RunAndReturn(run func(string) (*gqlclient.ClusterFragment, error)) *ConsoleClientMock_DeleteCluster_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeletePipeline provides a mock function with given fields: id
+func (_m *ConsoleClientMock) DeletePipeline(id string) (*gqlclient.PipelineFragment, error) {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeletePipeline")
+	}
+
+	var r0 *gqlclient.PipelineFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*gqlclient.PipelineFragment, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(string) *gqlclient.PipelineFragment); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.PipelineFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_DeletePipeline_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeletePipeline'
+type ConsoleClientMock_DeletePipeline_Call struct {
+	*mock.Call
+}
+
+// DeletePipeline is a helper method to define mock.On call
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeletePipeline(id interface{}) *ConsoleClientMock_DeletePipeline_Call {
+	return &ConsoleClientMock_DeletePipeline_Call{Call: _e.mock.On("DeletePipeline", id)}
+}
+
+func (_c *ConsoleClientMock_DeletePipeline_Call) Run(run func(id string)) *ConsoleClientMock_DeletePipeline_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePipeline_Call) Return(_a0 *gqlclient.PipelineFragment, _a1 error) *ConsoleClientMock_DeletePipeline_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePipeline_Call) RunAndReturn(run func(string) (*gqlclient.PipelineFragment, error)) *ConsoleClientMock_DeletePipeline_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1075,6 +1133,52 @@ func (_c *ConsoleClientMock_IsClusterExisting_Call) Return(_a0 bool) *ConsoleCli
 }
 
 func (_c *ConsoleClientMock_IsClusterExisting_Call) RunAndReturn(run func(*string) bool) *ConsoleClientMock_IsClusterExisting_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsPipelineExisting provides a mock function with given fields: id
+func (_m *ConsoleClientMock) IsPipelineExisting(id string) bool {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsPipelineExisting")
+	}
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(string) bool); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_IsPipelineExisting_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsPipelineExisting'
+type ConsoleClientMock_IsPipelineExisting_Call struct {
+	*mock.Call
+}
+
+// IsPipelineExisting is a helper method to define mock.On call
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsPipelineExisting(id interface{}) *ConsoleClientMock_IsPipelineExisting_Call {
+	return &ConsoleClientMock_IsPipelineExisting_Call{Call: _e.mock.On("IsPipelineExisting", id)}
+}
+
+func (_c *ConsoleClientMock_IsPipelineExisting_Call) Run(run func(id string)) *ConsoleClientMock_IsPipelineExisting_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPipelineExisting_Call) Return(_a0 bool) *ConsoleClientMock_IsPipelineExisting_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPipelineExisting_Call) RunAndReturn(run func(string) bool) *ConsoleClientMock_IsPipelineExisting_Call {
 	_c.Call.Return(run)
 	return _c
 }
