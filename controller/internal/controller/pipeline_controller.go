@@ -110,11 +110,6 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !pipeline.ObjectMeta.DeletionTimestamp.IsZero() {
-		// If object is already being deleted from Console API requeue.
-		if r.ConsoleClient.IsPipelineDeleting(pipeline.Status.GetID()) {
-			return &requeue
-		}
-
 		// Remove Pipeline from Console API if it exists.
 		if r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID()) {
 			if _, err := r.ConsoleClient.DeletePipeline(*pipeline.Status.ID); err != nil {

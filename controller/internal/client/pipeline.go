@@ -59,12 +59,3 @@ func (c *client) IsPipelineExisting(id string) bool {
 
 	return err == nil
 }
-
-func (c *client) IsPipelineDeleting(id string) bool {
-	pipeline, err := c.GetPipeline(id)
-	if err != nil {
-		return false
-	}
-
-	return pipeline != nil // TODO && pipeline.DeletedAt != nil
-}

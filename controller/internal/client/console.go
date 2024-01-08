@@ -58,7 +58,6 @@ type ConsoleClient interface {
 	GetPipeline(id string) (*console.PipelineFragment, error)
 	ListPipelines() (*console.GetPipelines, error)
 	IsPipelineExisting(id string) bool
-	IsPipelineDeleting(id string) bool
 }
 
 func New(url, token string) ConsoleClient {
