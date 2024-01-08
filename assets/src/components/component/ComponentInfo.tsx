@@ -8,10 +8,10 @@ import Job from './info/Job'
 import CronJob from './info/CronJob'
 import Certificate from './info/Certificate'
 import Service from './info/Service'
-import Ingress from './info/Ingress'
+import IngressOutlet from './info/Ingress'
 import Deployment from './info/Deployment'
 import StatefulSet from './info/StatefulSet'
-import Metadata from './info/Metadata'
+import MetadataOutlet from './info/Metadata'
 import { ComponentDetailsContext } from './ComponentDetails'
 import DaemonSet from './info/Daemonset'
 import CanaryInfo from './info/Canary'
@@ -39,7 +39,7 @@ function getInfo(kind: string): JSX.Element | undefined {
     case 'deployment':
       return <Deployment />
     case 'ingress':
-      return <Ingress />
+      return <IngressOutlet />
     case 'job':
       return <Job />
     case 'service':
@@ -92,7 +92,7 @@ export default function ComponentInfo() {
       <div css={{ display: 'flex', gap: theme.spacing.large }}>
         {info && <Section>{info}</Section>}
         <Section>
-          <Metadata />
+          <MetadataOutlet />
         </Section>
       </div>
     </div>

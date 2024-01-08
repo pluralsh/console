@@ -10,8 +10,7 @@ import { InfoSectionH2 } from './common'
 
 export const componentsWithLogs: string[] = ['deployment', 'statefulset']
 
-export default function Metadata() {
-  const theme = useTheme()
+export default function MetadataOutlet() {
   const { component, data } = useOutletContext<any>()
 
   // To avoid mapping between component types and fields of data returned by API
@@ -25,6 +24,23 @@ export default function Metadata() {
   const metadata: Record<string, any> | null | undefined = value?.metadata
 
   return (
+    <MetadataBase
+      component={component}
+      metadata={metadata}
+    />
+  )
+}
+
+export function MetadataBase({
+  component,
+  metadata,
+}: {
+  component: Nullable<Record<string, any>>
+  metadata: Nullable<Record<string, any>>
+}) {
+  const theme = useTheme()
+
+  return (
     <div
       css={{
         flexDirection: 'column',
@@ -35,24 +51,28 @@ export default function Metadata() {
         Metadata
       </InfoSectionH2>
       <MetadataGrid>
-        {(metadata?.name || component.name) && (
+        {(metadata?.name || component?.name) && (
           <MetadataItem heading="Name">
-            {metadata?.name || component?.name}
+            {metadata?.name || component?.name}x
           </MetadataItem>
         )}
-        {(metadata?.namespace || component.namespace) && (
+        {(metadata?.namespace || component?.namespace) && (
           <MetadataItem heading="Namespace">
             {metadata?.namespace || component?.namespace}
           </MetadataItem>
         )}
-        <MetadataItem heading="Kind">
-          <>
-            {component?.group || 'v1'}/{component?.kind}
-          </>
-        </MetadataItem>
-        <MetadataItem heading="Status">
-          <ComponentStatusChip status={component?.status} />
-        </MetadataItem>
+        {component?.kind && (
+          <MetadataItem heading="Kind">
+            <>
+              {component?.group || 'v1'}/{component?.kind}
+            </>
+          </MetadataItem>
+        )}
+        {component?.status && typeof component?.status === 'string' && (
+          <MetadataItem heading="Status">
+            <ComponentStatusChip status={component?.status} />
+          </MetadataItem>
+        )}
       </MetadataGrid>
       {metadata && (
         <LabelsAnnotations
