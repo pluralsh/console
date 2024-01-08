@@ -24,7 +24,7 @@ func (c *client) GetService(clusterID, serviceName string) (*console.ServiceDepl
 	return resp.ServiceDeployment, nil
 }
 
-func (c *client) CreateService(clusterId *string, attributes console.ServiceDeploymentAttributes) (*console.ServiceDeploymentFragment, error) {
+func (c *client) CreateService(clusterId *string, attributes console.ServiceDeploymentAttributes) (*console.ServiceDeploymentExtended, error) {
 	if clusterId == nil {
 		return nil, fmt.Errorf("clusterId and clusterName can not be null")
 	}

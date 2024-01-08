@@ -35,7 +35,7 @@ type ConsoleClient interface {
 	UpdateRepository(id string, attrs console.GitAttributes) (*console.UpdateGitRepository, error)
 	DeleteRepository(id string) error
 	GetRepository(url *string) (*console.GetGitRepository, error)
-	CreateService(clusterId *string, attributes console.ServiceDeploymentAttributes) (*console.ServiceDeploymentFragment, error)
+	CreateService(clusterId *string, attributes console.ServiceDeploymentAttributes) (*console.ServiceDeploymentExtended, error)
 	GetCluster(id *string) (*console.ClusterFragment, error)
 	GetClusterByHandle(handle *string) (*console.ClusterFragment, error)
 	CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error)
@@ -53,6 +53,10 @@ type ConsoleClient interface {
 	IsProviderDeleting(ctx context.Context, id string) bool
 	UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error
 	DeleteService(serviceId string) error
+	GetGlobalService(id string) (*console.GlobalServiceFragment, error)
+	CreateGlobalService(serviceID, cluster, name string, attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error)
+	DeleteGlobalService(id string) error
+	UpdateGlobalService(id string, attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error)
 }
 
 func New(url, token string) ConsoleClient {
