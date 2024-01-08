@@ -56,8 +56,6 @@ type PipelineStageServicePromotionCriteria struct {
 	// ServiceRef pointing to source service to promote from.
 	ServiceRef *v1.ObjectReference `json:"serviceRef,omitempty"`
 
-	SourceID *string `json:"sourceID,omitempty"`
-
 	// Secrets to copy over in a promotion.
 	Secrets []*string `json:"secrets,omitempty"`
 }

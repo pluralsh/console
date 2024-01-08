@@ -257,8 +257,6 @@ spec:
                                     type: string
                                 type: object
                                 x-kubernetes-map-type: atomic
-                              sourceID:
-                                type: string
                             type: object
                           serviceRef:
                             description: "ObjectReference contains enough information

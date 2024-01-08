@@ -1037,11 +1037,6 @@ func (in *PipelineStageServicePromotionCriteria) DeepCopyInto(out *PipelineStage
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
-	if in.SourceID != nil {
-		in, out := &in.SourceID, &out.SourceID
-		*out = new(string)
-		**out = **in
-	}
 	if in.Secrets != nil {
 		in, out := &in.Secrets, &out.Secrets
 		*out = make([]*string, len(*in))
