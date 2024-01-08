@@ -132,10 +132,11 @@ spec:
           spec:
             job:
               namespace: default
-              labels:
-                test: test
-              annotations:
-                plural.sh/annotation: test
+# TODO: Uncomment after fixing struct issue.
+#              labels:
+#                test: test
+#              annotations:
+#                plural.sh/annotation: test
               serviceAccount: default
               containers:
                 - image: alpine:3.7
