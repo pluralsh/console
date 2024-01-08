@@ -142,6 +142,7 @@ const NotificationsCountSC = styled.div(({ theme }) => ({
   position: 'absolute',
   left: 16,
   top: 2,
+  userSelect: 'none',
 }))
 
 export default function Sidebar() {
