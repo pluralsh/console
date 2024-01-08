@@ -16,13 +16,25 @@ export function StatusChart({
   unavailable: number
   pending: number
 }) {
+  const theme = useTheme()
   const data = useMemo(
     () => [
-      { id: 'Available', value: available, color: '#99F5D5' },
-      { id: 'Unavailable', value: unavailable, color: '#F599A8' },
-      { id: 'Pending', value: pending, color: '#FFF9C2' },
+      { id: 'Available', value: available, color: theme.colors.semanticGreen },
+      {
+        id: 'Unavailable',
+        value: unavailable,
+        color: theme.colors.semanticRedLight,
+      },
+      { id: 'Pending', value: pending, color: theme.colors.semanticYellow },
     ],
-    [available, unavailable, pending]
+    [
+      available,
+      unavailable,
+      pending,
+      theme.colors.semanticGreen,
+      theme.colors.semanticRedLight,
+      theme.colors.semanticYellow,
+    ]
   )
 
   return <PieChart data={data} />
