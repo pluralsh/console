@@ -18,11 +18,13 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
+	"github.com/samber/lo"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -125,12 +127,17 @@ func (r *PipelineReconciler) pipelineEdgeGateAttributes(ctx context.Context, gat
 		return nil, err
 	}
 
+	spec, err := r.pipelineEdgeGateSpecAttributes(gate.Spec)
+	if err != nil {
+		return nil, err
+	}
+
 	return &console.PipelineGateAttributes{
 		Name:      gate.Name,
 		Type:      gate.Type,
 		Cluster:   nil, // Using ClusterID instead.
 		ClusterID: clusterRef,
-		Spec:      r.pipelineEdgeGateSpecAttributes(gate.Spec),
+		Spec:      spec,
 	}, nil
 }
 
@@ -147,19 +154,40 @@ func (r *PipelineReconciler) pipelineEdgeGateClusterIDAttribute(ctx context.Cont
 	return cluster.Status.ID, nil
 }
 
-func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateSpec) *console.GateSpecAttributes {
+func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateSpec) (*console.GateSpecAttributes, error) {
 	if spec == nil {
-		return nil
+		return nil, nil
+	}
+
+	job, err := r.pipelineEdgeGateSpecJobAttributes(spec.Job)
+	if err != nil {
+		return nil, err
 	}
 
 	return &console.GateSpecAttributes{
-		Job: r.pipelineEdgeGateSpecJobAttributes(spec.Job),
-	}
+		Job: job,
+	}, nil
 }
 
-func (r *PipelineReconciler) pipelineEdgeGateSpecJobAttributes(job *v1alpha1.GateJob) *console.GateJobAttributes {
+func (r *PipelineReconciler) pipelineEdgeGateSpecJobAttributes(job *v1alpha1.GateJob) (*console.GateJobAttributes, error) {
 	if job == nil {
-		return nil
+		return nil, nil
+	}
+
+	var annotations, labels *string
+	if job.Annotations != nil {
+		result, err := json.Marshal(job.Annotations)
+		if err != nil {
+			return nil, err
+		}
+		annotations = lo.ToPtr(string(result))
+	}
+	if job.Labels != nil {
+		result, err := json.Marshal(job.Labels)
+		if err != nil {
+			return nil, err
+		}
+		labels = lo.ToPtr(string(result))
 	}
 
 	return &console.GateJobAttributes{
@@ -184,8 +212,8 @@ func (r *PipelineReconciler) pipelineEdgeGateSpecJobAttributes(job *v1alpha1.Gat
 					}),
 				}
 			}),
-		Labels:         utils.ToMapStringAny(job.Labels),
-		Annotations:    utils.ToMapStringAny(job.Annotations),
+		Labels:         labels,
+		Annotations:    annotations,
 		ServiceAccount: job.ServiceAccount,
-	}
+	}, nil
 }
