@@ -33,19 +33,19 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 		const (
 			cloud                = "aws"
 			namespace            = "default"
-			providerName         = "provider"
-			providerConsoleID    = "provider-console-id"
-			devClusterName       = "dev"
-			devClusterConsoleID  = "dev-console-id"
-			prodClusterName      = "prod"
-			prodClusterConsoleID = "prod-console-id"
-			repositoryName       = "repository"
-			repositoryUrl        = "repository-url"
-			repositoryConsoleID  = "repository-console-id"
-			devServiceName       = "dev-service"
-			devServiceConsoleID  = "dev-service-console-id"
-			prodServiceName      = "prod-service"
-			prodServiceConsoleID = "prod-service-console-id"
+			providerName         = "pipeline-provider"
+			providerConsoleID    = "pipeline-provider-console-id"
+			devClusterName       = "pipeline-dev"
+			devClusterConsoleID  = "pipeline-dev-console-id"
+			prodClusterName      = "pipeline-prod"
+			prodClusterConsoleID = "pipeline-prod-console-id"
+			repositoryName       = "pipeline-repository"
+			repositoryUrl        = "pipeline-repository-url"
+			repositoryConsoleID  = "pipeline-repository-console-id"
+			devServiceName       = "pipeline-dev-service"
+			devServiceConsoleID  = "dpipeline-ev-service-console-id"
+			prodServiceName      = "pipeline-prod-service"
+			prodServiceConsoleID = "pipeline-prod-service-console-id"
 			pipelineName         = "pipeline"
 			pipelineConsoleID    = "pipeline-console-id"
 			devStageName         = "dev"
@@ -233,7 +233,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 
 		It("should successfully reconcile pipeline", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("IsPipelineExisting", mock.AnythingOfType("*string")).Return(false)
+			fakeConsoleClient.On("IsPipelineExisting", mock.AnythingOfType("string")).Return(false)
 			fakeConsoleClient.On("SavePipeline", mock.AnythingOfType("string"), mock.Anything).Return(&gqlclient.PipelineFragment{ID: pipelineConsoleID}, nil)
 
 			controllerReconciler := &PipelineReconciler{
@@ -250,7 +250,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizePipelineStatus(pipeline.Status)).To(Equal(sanitizePipelineStatus(v1alpha1.PipelineStatus{
 				ID:  lo.ToPtr(pipelineConsoleID),
-				SHA: lo.ToPtr("J7CMSICIXLWV7MCWNPBZUA6FEOI3HGTQMNVLYD6VZXX6Y66S6ETQ===="),
+				SHA: lo.ToPtr("CD336FRXMBI6RSIWXEOVKHEFYYX7YQCCUDT52PXCBMQZCGMQYSNA===="),
 				Conditions: []metav1.Condition{
 					{
 						Type:   v1alpha1.ReadyConditionType.String(),
@@ -261,47 +261,40 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			})))
 		})
 
-		//	It("should successfully reconcile and update previously created AWS cluster", func() {
-		//		Expect(utils.MaybePatch(k8sClient, &v1alpha1.Cluster{
-		//			ObjectMeta: metav1.ObjectMeta{Name: awsClusterName, Namespace: "default"},
-		//		}, func(p *v1alpha1.Cluster) {
-		//			p.Status.SHA = lo.ToPtr("diff-sha")
-		//		})).To(Succeed())
-		//
-		//		fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-		//		fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(true)
-		//		fakeConsoleClient.On("UpdateCluster", mock.AnythingOfType("string"), mock.Anything).Return(
-		//			&gqlclient.ClusterFragment{ID: awsClusterConsoleID, CurrentVersion: lo.ToPtr("1.25.6")}, nil)
-		//
-		//		controllerReconciler := &ClusterReconciler{
-		//			Client:        k8sClient,
-		//			Scheme:        k8sClient.Scheme(),
-		//			ConsoleClient: fakeConsoleClient,
-		//		}
-		//
-		//		_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: awsNamespacedName})
-		//		Expect(err).NotTo(HaveOccurred())
-		//
-		//		cluster := &v1alpha1.Cluster{}
-		//		err = k8sClient.Get(ctx, awsNamespacedName, cluster)
-		//		Expect(err).NotTo(HaveOccurred())
-		//		Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
-		//			ID:             lo.ToPtr(awsClusterConsoleID),
-		//			SHA:            lo.ToPtr("J7CMSICIXLWV7MCWNPBZUA6FEOI3HGTQMNVLYD6VZXX6Y66S6ETQ===="),
-		//			CurrentVersion: lo.ToPtr("1.25.6"),
-		//			Conditions: []metav1.Condition{
-		//				{
-		//					Type:   v1alpha1.ReadonlyConditionType.String(),
-		//					Status: metav1.ConditionFalse,
-		//					Reason: v1alpha1.ReadonlyConditionReason.String(),
-		//				},
-		//				{
-		//					Type:   v1alpha1.ReadyConditionType.String(),
-		//					Status: metav1.ConditionTrue,
-		//					Reason: v1alpha1.ReadyConditionReason.String(),
-		//				},
-		//			},
-		//		})))
-		//	})
+		It("should successfully reconcile and update previously created pipeline", func() {
+			Expect(utils.MaybePatch(k8sClient, &v1alpha1.Pipeline{
+				ObjectMeta: metav1.ObjectMeta{Name: pipelineName, Namespace: namespace},
+			}, func(p *v1alpha1.Pipeline) {
+				p.Status.SHA = lo.ToPtr("diff-sha")
+			})).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("IsPipelineExisting", mock.AnythingOfType("string")).Return(false)
+			fakeConsoleClient.On("SavePipeline", mock.AnythingOfType("string"), mock.Anything).Return(&gqlclient.PipelineFragment{ID: pipelineConsoleID}, nil)
+
+			controllerReconciler := &PipelineReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: pipelineNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			pipeline := &v1alpha1.Pipeline{}
+			err = k8sClient.Get(ctx, pipelineNamespacedName, pipeline)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sanitizePipelineStatus(pipeline.Status)).To(Equal(sanitizePipelineStatus(v1alpha1.PipelineStatus{
+				ID:  lo.ToPtr(pipelineConsoleID),
+				SHA: lo.ToPtr("CD336FRXMBI6RSIWXEOVKHEFYYX7YQCCUDT52PXCBMQZCGMQYSNA===="),
+				Conditions: []metav1.Condition{
+					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.ReadyConditionReason.String(),
+					},
+				},
+			})))
+		})
 	})
 })
