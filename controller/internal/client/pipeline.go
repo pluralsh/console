@@ -36,16 +36,15 @@ func (c *client) ListPipelines() (*console.GetPipelines, error) {
 }
 
 func (c *client) DeletePipeline(id string) (*console.PipelineFragment, error) {
-	// TODO: response, err := c.consoleClient.DeletePipeline(c.ctx, id)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if response == nil {
-	//	return nil, err
-	//}
-	//
-	//return response.DeleteCluster, nil
-	return nil, nil
+	response, err := c.consoleClient.DeletePipeline(c.ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.DeletePipeline, nil
 }
 
 func (c *client) IsPipelineExisting(id string) bool {
