@@ -76,7 +76,7 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 		return nil, err
 	}
 
-	// TODO: Extracting cluster ref from the service, not from the custom resource field. Is it okay?
+	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageService.ClusterRef).
 	cluster, err := utils.GetCluster(ctx, r.Client, &service.Spec.ClusterRef)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 	}
 
 	return &console.StageServiceAttributes{
-		Handle:    cluster.Status.ID, // TODO: Using cluster ID instead of handle. Will it work?
+		Handle:    cluster.Status.ID, // Using cluster ID instead of handle.
 		Name:      nil,               // Using ServiceID instead.
 		ServiceID: service.Status.ID,
 		Criteria:  criteria,
@@ -105,14 +105,14 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 		return nil, err
 	}
 
-	// TODO: Extracting cluster ref from the service, not from the custom resource field. Is it okay?
+	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageServicePromotionCriteria.ClusterRef).
 	cluster, err := utils.GetCluster(ctx, r.Client, &service.Spec.ClusterRef)
 	if err != nil {
 		return nil, err
 	}
 
 	return &console.PromotionCriteriaAttributes{
-		Handle:   cluster.Status.ID, // TODO: Using cluster ID instead of handle. Will it work?
+		Handle:   cluster.Status.ID, // Using cluster ID instead of handle.
 		Name:     nil,               // Using SourceID instead.
 		SourceID: service.Status.ID,
 		Secrets:  criteria.Secrets,
