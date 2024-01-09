@@ -73,6 +73,17 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return r.handleDelete(ctx, cluster, service)
 	}
 
+	for _, dep := range service.Spec.Dependencies {
+		serviceDep := &v1alpha1.ServiceDeployment{}
+		if err := r.Get(ctx, client.ObjectKey{Name: dep.Name, Namespace: dep.Namespace}, serviceDep); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		if !isServiceReady(serviceDep.Status.Components) {
+			return requeue, nil
+		}
+	}
+
 	repository := &v1alpha1.GitRepository{}
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
 		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
@@ -359,4 +370,21 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 		controllerutil.RemoveFinalizer(service, ServiceFinalizer)
 	}
 	return ctrl.Result{}, nil
+}
+
+func isServiceReady(components []v1alpha1.ServiceComponent) bool {
+	if len(components) == 0 {
+		return false
+	}
+
+	for _, c := range components {
+		if !c.Synced {
+			return false
+		}
+		if c.State != nil && *c.State != v1alpha1.ComponentStateRunning {
+			return false
+		}
+	}
+
+	return true
 }

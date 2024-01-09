@@ -78,6 +78,9 @@ type ServiceSpec struct {
 	// Bindings contain read and write policies of this cluster
 	// +optional
 	Bindings *Bindings `json:"bindings,omitempty"`
+	// Dependencies contain dependent services
+	// +optional
+	Dependencies []corev1.ObjectReference `json:"dependencies,omitempty"`
 }
 
 type ServiceStatus struct {
