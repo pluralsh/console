@@ -25,6 +25,21 @@ export default {
         type: 'select',
       },
     },
+    secondaryColor: {
+      options: [
+        '',
+        'fill-zero',
+        'fill-one',
+        'fill-two',
+        'fill-three',
+        'black',
+        'white',
+        'transparent',
+      ],
+      control: {
+        type: 'select',
+      },
+    },
   },
 }
 
@@ -53,12 +68,18 @@ const AppIcon = styled.div<{ $backgroundColor: string }>(
   })
 )
 
-function Template({ backgroundColor, ...args }: any) {
+function Template({ backgroundColor, color, secondaryColor, ...args }: any) {
   const theme = useTheme()
   const bgColor =
     (typeof (theme.colors as any)[backgroundColor] === 'string' &&
       (theme.colors as any)[backgroundColor]) ||
     backgroundColor
+
+  // @ts-ignore
+  color = theme.colors[color] ?? (color || undefined)
+  secondaryColor =
+    // @ts-ignore
+    theme.colors[secondaryColor as string] ?? (secondaryColor || undefined)
 
   return (
     <div
@@ -74,7 +95,7 @@ function Template({ backgroundColor, ...args }: any) {
           $backgroundColor={bgColor}
         >
           <div style={{ justifySelf: 'flex-end' }}>
-            {createElement(icon as any, { ...args })}
+            {createElement(icon as any, { color, secondaryColor, ...args })}
           </div>
           <span
             dangerouslySetInnerHTML={{
