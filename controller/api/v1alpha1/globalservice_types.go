@@ -67,6 +67,7 @@ type GlobalServiceStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Global service Id"
 
 // GlobalService is the Schema for the globalservices API
 type GlobalService struct {
