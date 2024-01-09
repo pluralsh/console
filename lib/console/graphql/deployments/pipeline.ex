@@ -61,8 +61,8 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :namespace,       non_null(:string)
     field :raw,             :string, description: "if you'd rather define the job spec via straight k8s yaml"
     field :containers,      list_of(:container_attributes)
-    field :labels,          :map
-    field :annotations,     :map
+    field :labels,          :json
+    field :annotations,     :json
     field :service_account, :string
   end
 

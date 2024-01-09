@@ -1222,9 +1222,9 @@ export type FileContent = {
 
 /** spec for a job gate */
 export type GateJobAttributes = {
-  annotations?: InputMaybe<Scalars['Map']['input']>;
+  annotations?: InputMaybe<Scalars['Json']['input']>;
   containers?: InputMaybe<Array<InputMaybe<ContainerAttributes>>>;
-  labels?: InputMaybe<Scalars['Map']['input']>;
+  labels?: InputMaybe<Scalars['Json']['input']>;
   namespace: Scalars['String']['input'];
   /** if you'd rather define the job spec via straight k8s yaml */
   raw?: InputMaybe<Scalars['String']['input']>;
