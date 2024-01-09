@@ -657,9 +657,9 @@ input GateJobAttributes {
 
   containers: [ContainerAttributes]
 
-  labels: Map
+  labels: Json
 
-  annotations: Map
+  annotations: Json
 
   serviceAccount: String
 }
