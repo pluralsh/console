@@ -112,10 +112,6 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{}, err
 	}
 
-	if err := utils.TryAddControllerRef(ctx, r.Client, service, globalService, r.Scheme); err != nil {
-		utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
-		return ctrl.Result{}, err
-	}
 	attr := console.GlobalServiceAttributes{
 		Name:       globalService.Name,
 		Distro:     globalService.Spec.Distro,
@@ -132,14 +128,15 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	if !globalService.Status.HasID() {
 		controllerutil.AddFinalizer(globalService, GlobalServiceFinalizer)
-		createGlobalService, err := r.ConsoleClient.CreateGlobalService(*service.Status.ID, *cluster.Status.ID, globalService.Name, attr)
+		createGlobalService, err := r.ConsoleClient.CreateGlobalService(*service.Status.ID, attr)
 		if err != nil {
 			utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
 		globalService.Status.ID = &createGlobalService.ID
 		globalService.Status.SHA = &sha
-		return requeue, nil
+		utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+		return ctrl.Result{}, nil
 	}
 
 	existingGlobalService, err := r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
@@ -156,8 +153,13 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		}
 	}
 
+	if err := utils.TryAddControllerRef(ctx, r.Client, service, globalService, r.Scheme); err != nil {
+		utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		return ctrl.Result{}, err
+	}
+
 	globalService.Status.SHA = &sha
-	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return ctrl.Result{}, nil
 }
 
@@ -165,18 +167,20 @@ func (r *GlobalServiceReconciler) handleDelete(ctx context.Context, service *v1a
 	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(service, GlobalServiceFinalizer) {
 		logger.Info("try to delete global service")
-		existingGlobalService, err := r.ConsoleClient.GetGlobalService(service.Status.GetID())
-		if err != nil && !errors.IsNotFound(err) {
-			utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
-			return ctrl.Result{}, err
-		}
-		if existingGlobalService != nil {
-			if err := r.ConsoleClient.DeleteService(*service.Status.ID); err != nil {
+		if service.Status.GetID() != "" {
+			existingGlobalService, err := r.ConsoleClient.GetGlobalService(service.Status.GetID())
+			if err != nil && !errors.IsNotFound(err) {
 				utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 				return ctrl.Result{}, err
 			}
+			if existingGlobalService != nil {
+				if err := r.ConsoleClient.DeleteGlobalService(*service.Status.ID); err != nil {
+					utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+					return ctrl.Result{}, err
+				}
+			}
 		}
-		controllerutil.RemoveFinalizer(service, ServiceFinalizer)
+		controllerutil.RemoveFinalizer(service, GlobalServiceFinalizer)
 	}
 	return ctrl.Result{}, nil
 }

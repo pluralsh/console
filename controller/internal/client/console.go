@@ -54,7 +54,7 @@ type ConsoleClient interface {
 	UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error
 	DeleteService(serviceId string) error
 	GetGlobalService(id string) (*console.GlobalServiceFragment, error)
-	CreateGlobalService(serviceID, cluster, name string, attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error)
+	CreateGlobalService(serviceID string, attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error)
 	DeleteGlobalService(id string) error
 	UpdateGlobalService(id string, attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error)
 }

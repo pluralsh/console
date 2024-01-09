@@ -15,8 +15,8 @@ func (c *client) GetGlobalService(id string) (*console.GlobalServiceFragment, er
 	return resp.GlobalService, nil
 }
 
-func (c *client) CreateGlobalService(serviceID, cluster, name string, attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error) {
-	result, err := c.consoleClient.CreateGlobalServiceDeployment(c.ctx, serviceID, cluster, name, attributes)
+func (c *client) CreateGlobalService(serviceID string, attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error) {
+	result, err := c.consoleClient.CreateGlobalServiceDeployment(c.ctx, serviceID, attributes)
 	if err != nil {
 		return nil, err
 	}

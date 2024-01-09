@@ -84,6 +84,65 @@ func (_c *ConsoleClientMock_CreateCluster_Call) RunAndReturn(run func(gqlclient.
 	return _c
 }
 
+// CreateGlobalService provides a mock function with given fields: serviceID, attributes
+func (_m *ConsoleClientMock) CreateGlobalService(serviceID string, attributes gqlclient.GlobalServiceAttributes) (*gqlclient.GlobalServiceFragment, error) {
+	ret := _m.Called(serviceID, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateGlobalService")
+	}
+
+	var r0 *gqlclient.GlobalServiceFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, gqlclient.GlobalServiceAttributes) (*gqlclient.GlobalServiceFragment, error)); ok {
+		return rf(serviceID, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(string, gqlclient.GlobalServiceAttributes) *gqlclient.GlobalServiceFragment); ok {
+		r0 = rf(serviceID, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.GlobalServiceFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, gqlclient.GlobalServiceAttributes) error); ok {
+		r1 = rf(serviceID, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateGlobalService_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateGlobalService'
+type ConsoleClientMock_CreateGlobalService_Call struct {
+	*mock.Call
+}
+
+// CreateGlobalService is a helper method to define mock.On call
+//   - serviceID string
+//   - attributes gqlclient.GlobalServiceAttributes
+func (_e *ConsoleClientMock_Expecter) CreateGlobalService(serviceID interface{}, attributes interface{}) *ConsoleClientMock_CreateGlobalService_Call {
+	return &ConsoleClientMock_CreateGlobalService_Call{Call: _e.mock.On("CreateGlobalService", serviceID, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreateGlobalService_Call) Run(run func(serviceID string, attributes gqlclient.GlobalServiceAttributes)) *ConsoleClientMock_CreateGlobalService_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(gqlclient.GlobalServiceAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateGlobalService_Call) Return(_a0 *gqlclient.GlobalServiceFragment, _a1 error) *ConsoleClientMock_CreateGlobalService_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateGlobalService_Call) RunAndReturn(run func(string, gqlclient.GlobalServiceAttributes) (*gqlclient.GlobalServiceFragment, error)) *ConsoleClientMock_CreateGlobalService_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateProvider provides a mock function with given fields: ctx, attributes, options
 func (_m *ConsoleClientMock) CreateProvider(ctx context.Context, attributes gqlclient.ClusterProviderAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
 	_va := make([]interface{}, len(options))
@@ -221,23 +280,23 @@ func (_c *ConsoleClientMock_CreateRepository_Call) RunAndReturn(run func(string,
 }
 
 // CreateService provides a mock function with given fields: clusterId, attributes
-func (_m *ConsoleClientMock) CreateService(clusterId *string, attributes gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentFragment, error) {
+func (_m *ConsoleClientMock) CreateService(clusterId *string, attributes gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentExtended, error) {
 	ret := _m.Called(clusterId, attributes)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateService")
 	}
 
-	var r0 *gqlclient.ServiceDeploymentFragment
+	var r0 *gqlclient.ServiceDeploymentExtended
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*string, gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentFragment, error)); ok {
+	if rf, ok := ret.Get(0).(func(*string, gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentExtended, error)); ok {
 		return rf(clusterId, attributes)
 	}
-	if rf, ok := ret.Get(0).(func(*string, gqlclient.ServiceDeploymentAttributes) *gqlclient.ServiceDeploymentFragment); ok {
+	if rf, ok := ret.Get(0).(func(*string, gqlclient.ServiceDeploymentAttributes) *gqlclient.ServiceDeploymentExtended); ok {
 		r0 = rf(clusterId, attributes)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*gqlclient.ServiceDeploymentFragment)
+			r0 = ret.Get(0).(*gqlclient.ServiceDeploymentExtended)
 		}
 	}
 
@@ -269,12 +328,12 @@ func (_c *ConsoleClientMock_CreateService_Call) Run(run func(clusterId *string, 
 	return _c
 }
 
-func (_c *ConsoleClientMock_CreateService_Call) Return(_a0 *gqlclient.ServiceDeploymentFragment, _a1 error) *ConsoleClientMock_CreateService_Call {
+func (_c *ConsoleClientMock_CreateService_Call) Return(_a0 *gqlclient.ServiceDeploymentExtended, _a1 error) *ConsoleClientMock_CreateService_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ConsoleClientMock_CreateService_Call) RunAndReturn(run func(*string, gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentFragment, error)) *ConsoleClientMock_CreateService_Call {
+func (_c *ConsoleClientMock_CreateService_Call) RunAndReturn(run func(*string, gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentExtended, error)) *ConsoleClientMock_CreateService_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -333,6 +392,52 @@ func (_c *ConsoleClientMock_DeleteCluster_Call) Return(_a0 *gqlclient.ClusterFra
 }
 
 func (_c *ConsoleClientMock_DeleteCluster_Call) RunAndReturn(run func(string) (*gqlclient.ClusterFragment, error)) *ConsoleClientMock_DeleteCluster_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteGlobalService provides a mock function with given fields: id
+func (_m *ConsoleClientMock) DeleteGlobalService(id string) error {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteGlobalService")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteGlobalService_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteGlobalService'
+type ConsoleClientMock_DeleteGlobalService_Call struct {
+	*mock.Call
+}
+
+// DeleteGlobalService is a helper method to define mock.On call
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteGlobalService(id interface{}) *ConsoleClientMock_DeleteGlobalService_Call {
+	return &ConsoleClientMock_DeleteGlobalService_Call{Call: _e.mock.On("DeleteGlobalService", id)}
+}
+
+func (_c *ConsoleClientMock_DeleteGlobalService_Call) Run(run func(id string)) *ConsoleClientMock_DeleteGlobalService_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteGlobalService_Call) Return(_a0 error) *ConsoleClientMock_DeleteGlobalService_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteGlobalService_Call) RunAndReturn(run func(string) error) *ConsoleClientMock_DeleteGlobalService_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -603,6 +708,64 @@ func (_c *ConsoleClientMock_GetClusterByHandle_Call) Return(_a0 *gqlclient.Clust
 }
 
 func (_c *ConsoleClientMock_GetClusterByHandle_Call) RunAndReturn(run func(*string) (*gqlclient.ClusterFragment, error)) *ConsoleClientMock_GetClusterByHandle_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetGlobalService provides a mock function with given fields: id
+func (_m *ConsoleClientMock) GetGlobalService(id string) (*gqlclient.GlobalServiceFragment, error) {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetGlobalService")
+	}
+
+	var r0 *gqlclient.GlobalServiceFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*gqlclient.GlobalServiceFragment, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(string) *gqlclient.GlobalServiceFragment); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.GlobalServiceFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetGlobalService_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetGlobalService'
+type ConsoleClientMock_GetGlobalService_Call struct {
+	*mock.Call
+}
+
+// GetGlobalService is a helper method to define mock.On call
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetGlobalService(id interface{}) *ConsoleClientMock_GetGlobalService_Call {
+	return &ConsoleClientMock_GetGlobalService_Call{Call: _e.mock.On("GetGlobalService", id)}
+}
+
+func (_c *ConsoleClientMock_GetGlobalService_Call) Run(run func(id string)) *ConsoleClientMock_GetGlobalService_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGlobalService_Call) Return(_a0 *gqlclient.GlobalServiceFragment, _a1 error) *ConsoleClientMock_GetGlobalService_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGlobalService_Call) RunAndReturn(run func(string) (*gqlclient.GlobalServiceFragment, error)) *ConsoleClientMock_GetGlobalService_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1332,6 +1495,65 @@ func (_c *ConsoleClientMock_UpdateComponents_Call) Return(_a0 error) *ConsoleCli
 }
 
 func (_c *ConsoleClientMock_UpdateComponents_Call) RunAndReturn(run func(string, []*gqlclient.ComponentAttributes, []*gqlclient.ServiceErrorAttributes) error) *ConsoleClientMock_UpdateComponents_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateGlobalService provides a mock function with given fields: id, attributes
+func (_m *ConsoleClientMock) UpdateGlobalService(id string, attributes gqlclient.GlobalServiceAttributes) (*gqlclient.GlobalServiceFragment, error) {
+	ret := _m.Called(id, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateGlobalService")
+	}
+
+	var r0 *gqlclient.GlobalServiceFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, gqlclient.GlobalServiceAttributes) (*gqlclient.GlobalServiceFragment, error)); ok {
+		return rf(id, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(string, gqlclient.GlobalServiceAttributes) *gqlclient.GlobalServiceFragment); ok {
+		r0 = rf(id, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.GlobalServiceFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, gqlclient.GlobalServiceAttributes) error); ok {
+		r1 = rf(id, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateGlobalService_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateGlobalService'
+type ConsoleClientMock_UpdateGlobalService_Call struct {
+	*mock.Call
+}
+
+// UpdateGlobalService is a helper method to define mock.On call
+//   - id string
+//   - attributes gqlclient.GlobalServiceAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateGlobalService(id interface{}, attributes interface{}) *ConsoleClientMock_UpdateGlobalService_Call {
+	return &ConsoleClientMock_UpdateGlobalService_Call{Call: _e.mock.On("UpdateGlobalService", id, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpdateGlobalService_Call) Run(run func(id string, attributes gqlclient.GlobalServiceAttributes)) *ConsoleClientMock_UpdateGlobalService_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(gqlclient.GlobalServiceAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateGlobalService_Call) Return(_a0 *gqlclient.GlobalServiceFragment, _a1 error) *ConsoleClientMock_UpdateGlobalService_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateGlobalService_Call) RunAndReturn(run func(string, gqlclient.GlobalServiceAttributes) (*gqlclient.GlobalServiceFragment, error)) *ConsoleClientMock_UpdateGlobalService_Call {
 	_c.Call.Return(run)
 	return _c
 }
