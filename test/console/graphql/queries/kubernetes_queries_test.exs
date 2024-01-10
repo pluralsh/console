@@ -690,4 +690,70 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       """, %{"svc" => svc.id}, %{current_user: user})
     end
   end
+
+  describe "pluralCluster" do
+    test "it can fetch a cluster by ns/name" do
+      admin = admin_user()
+      cluster = insert(:cluster)
+      expect(Kube.Utils, :run, fn _ -> {:ok, plural_cluster("name", cluster.id)} end)
+
+      {:ok, %{data: %{"pluralCluster" => found}}} = run_query("""
+        query Cluster($name: String!) {
+          pluralCluster(name: $name, namespace: $name) {
+            metadata { name namespace }
+            reference { id }
+            status { id }
+          }
+        }
+      """, %{"name" => "name"}, %{current_user: admin})
+
+      assert found["metadata"]["name"] == "name"
+      assert found["reference"]["id"] == cluster.id
+      assert found["status"]["id"] == cluster.id
+    end
+  end
+
+  describe "pluralServiceDeployment" do
+    test "it can fetch a cluster by ns/name" do
+      admin = admin_user()
+      service = insert(:service)
+      expect(Kube.Utils, :run, fn _ -> {:ok, service_deployment("name", service.id)} end)
+
+      {:ok, %{data: %{"pluralServiceDeployment" => found}}} = run_query("""
+        query service($name: String!) {
+          pluralServiceDeployment(name: $name, namespace: $name) {
+            metadata { name namespace }
+            reference { id }
+            status { id }
+          }
+        }
+      """, %{"name" => "name"}, %{current_user: admin})
+
+      assert found["metadata"]["name"] == "name"
+      assert found["reference"]["id"] == service.id
+      assert found["status"]["id"] == service.id
+    end
+  end
+
+  describe "pluralGitRepository" do
+    test "it can fetch a cluster by ns/name" do
+      admin = admin_user()
+      git_repository = insert(:git_repository)
+      expect(Kube.Utils, :run, fn _ -> {:ok, git_repository("name", git_repository.id)} end)
+
+      {:ok, %{data: %{"pluralGitRepository" => found}}} = run_query("""
+        query service($name: String!) {
+          pluralGitRepository(name: $name, namespace: $name) {
+            metadata { name namespace }
+            reference { id }
+            status { id }
+          }
+        }
+      """, %{"name" => "name"}, %{current_user: admin})
+
+      assert found["metadata"]["name"] == "name"
+      assert found["reference"]["id"] == git_repository.id
+      assert found["status"]["id"] == git_repository.id
+    end
+  end
 end

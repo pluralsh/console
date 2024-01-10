@@ -89,6 +89,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.Canary
   import_types Console.GraphQl.Kubernetes.UpgradePlan
   import_types Console.GraphQl.Kubernetes.DaemonSet
+  import_types Console.GraphQl.Kubernetes.Plural
 
   delta :application
 
@@ -298,6 +299,7 @@ defmodule Console.GraphQl.Kubernetes do
     end
 
     import_fields :config_queries
+    import_fields :plural_kubernetes_queries
   end
 
   object :kubernetes_mutations do

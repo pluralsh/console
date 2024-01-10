@@ -63,6 +63,12 @@ type RootQueryType {
 
   secrets(namespace: String!): [Secret]
 
+  pluralCluster(namespace: String!, name: String!, serviceId: ID): PluralCluster
+
+  pluralServiceDeployment(namespace: String!, name: String!, serviceId: ID): PluralServiceDeployment
+
+  pluralGitRepository(namespace: String!, name: String!, serviceId: ID): PluralGitRepository
+
   unstructuredResource(group: String, version: String!, kind: String!, namespace: String, name: String!, serviceId: ID): KubernetesUnstructured
 
   service(namespace: String!, name: String!, serviceId: ID): Service
@@ -2494,6 +2500,35 @@ type KubernetesUnstructured {
 type ApplicationDelta {
   delta: Delta
   payload: Application
+}
+
+type PluralCluster {
+  status: PluralObjectStatus!
+  metadata: Metadata!
+  reference: Cluster
+  raw: String!
+  events: [Event]
+}
+
+type PluralServiceDeployment {
+  status: PluralObjectStatus!
+  metadata: Metadata!
+  reference: ServiceDeployment
+  raw: String!
+  events: [Event]
+}
+
+type PluralGitRepository {
+  status: PluralObjectStatus!
+  metadata: Metadata!
+  reference: GitRepository
+  raw: String!
+  events: [Event]
+}
+
+type PluralObjectStatus {
+  id: String
+  conditions: [StatusCondition]
 }
 
 type DaemonSet {
