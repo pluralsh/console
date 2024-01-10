@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button, usePrevious } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
@@ -78,6 +78,14 @@ export default function ServiceHelm() {
     },
   })
 
+  // TODO: Replace with API call
+  const [dryRunLoading, setDryRunLoading] = useState(false)
+  const dryRun = useCallback(() => {
+    setDryRunLoading(true)
+    setTimeout(() => setDryRunLoading(false), 1000)
+    // TODO: Open modal
+  }, [setDryRunLoading])
+
   if (!service) {
     navigate(`${CD_ABS_PATH}/${SERVICES_REL_PATH}`)
 
@@ -148,6 +156,18 @@ export default function ServiceHelm() {
             disabled={!hasUpdates && !errors}
           >
             Save
+          </Button>
+          <Button
+            secondary
+            type="button"
+            loading={dryRunLoading}
+            disabled={!hasUpdates && !errors}
+            onClick={(e) => {
+              e.preventDefault()
+              dryRun()
+            }}
+          >
+            Dry run
           </Button>
           <Button
             secondary
