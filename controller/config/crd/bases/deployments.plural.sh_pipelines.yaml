@@ -171,6 +171,10 @@ spec:
                             type: object
                           type:
                             description: Type of gate this is.
+                            enum:
+                            - APPROVAL
+                            - WINDOW
+                            - JOB
                             type: string
                         required:
                         - name

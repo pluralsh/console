@@ -396,6 +396,52 @@ func (_c *ConsoleClientMock_DeleteCluster_Call) RunAndReturn(run func(string) (*
 	return _c
 }
 
+// DeleteGlobalService provides a mock function with given fields: id
+func (_m *ConsoleClientMock) DeleteGlobalService(id string) error {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteGlobalService")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteGlobalService_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteGlobalService'
+type ConsoleClientMock_DeleteGlobalService_Call struct {
+	*mock.Call
+}
+
+// DeleteGlobalService is a helper method to define mock.On call
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteGlobalService(id interface{}) *ConsoleClientMock_DeleteGlobalService_Call {
+	return &ConsoleClientMock_DeleteGlobalService_Call{Call: _e.mock.On("DeleteGlobalService", id)}
+}
+
+func (_c *ConsoleClientMock_DeleteGlobalService_Call) Run(run func(id string)) *ConsoleClientMock_DeleteGlobalService_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteGlobalService_Call) Return(_a0 error) *ConsoleClientMock_DeleteGlobalService_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteGlobalService_Call) RunAndReturn(run func(string) error) *ConsoleClientMock_DeleteGlobalService_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeletePipeline provides a mock function with given fields: id
 func (_m *ConsoleClientMock) DeletePipeline(id string) (*gqlclient.PipelineFragment, error) {
 	ret := _m.Called(id)
@@ -450,52 +496,6 @@ func (_c *ConsoleClientMock_DeletePipeline_Call) Return(_a0 *gqlclient.PipelineF
 }
 
 func (_c *ConsoleClientMock_DeletePipeline_Call) RunAndReturn(run func(string) (*gqlclient.PipelineFragment, error)) *ConsoleClientMock_DeletePipeline_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// DeleteGlobalService provides a mock function with given fields: id
-func (_m *ConsoleClientMock) DeleteGlobalService(id string) error {
-	ret := _m.Called(id)
-
-	if len(ret) == 0 {
-		panic("no return value specified for DeleteGlobalService")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(id)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// ConsoleClientMock_DeleteGlobalService_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteGlobalService'
-type ConsoleClientMock_DeleteGlobalService_Call struct {
-	*mock.Call
-}
-
-// DeleteGlobalService is a helper method to define mock.On call
-//   - id string
-func (_e *ConsoleClientMock_Expecter) DeleteGlobalService(id interface{}) *ConsoleClientMock_DeleteGlobalService_Call {
-	return &ConsoleClientMock_DeleteGlobalService_Call{Call: _e.mock.On("DeleteGlobalService", id)}
-}
-
-func (_c *ConsoleClientMock_DeleteGlobalService_Call) Run(run func(id string)) *ConsoleClientMock_DeleteGlobalService_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
-	})
-	return _c
-}
-
-func (_c *ConsoleClientMock_DeleteGlobalService_Call) Return(_a0 error) *ConsoleClientMock_DeleteGlobalService_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *ConsoleClientMock_DeleteGlobalService_Call) RunAndReturn(run func(string) error) *ConsoleClientMock_DeleteGlobalService_Call {
 	_c.Call.Return(run)
 	return _c
 }

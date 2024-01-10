@@ -48,6 +48,7 @@ type PipelineStage struct {
 type PipelineStageService struct {
 	ServiceRef *v1.ObjectReference `json:"serviceRef,omitempty"`
 
+	// +kubebuilder:validation:Optional
 	Criteria *PipelineStageServicePromotionCriteria `json:"criteria,omitempty"`
 }
 
@@ -57,24 +58,29 @@ type PipelineStageServicePromotionCriteria struct {
 	ServiceRef *v1.ObjectReference `json:"serviceRef,omitempty"`
 
 	// Secrets to copy over in a promotion.
+	// +kubebuilder:validation:Optional
 	Secrets []*string `json:"secrets,omitempty"`
 }
 
 // PipelineEdge is a specification of an edge between two pipeline stages.
 type PipelineEdge struct {
 	// FromID is stage ID the edge is from, can also be specified by name.
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	FromID *string `json:"fromId,omitempty"`
 
 	// ToID is stage ID the edge is to, can also be specified by name.
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	ToID *string `json:"toId,omitempty"`
 
 	// From is the name of the pipeline stage this edge emits from.
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	From *string `json:"from,omitempty"`
 
 	// To is the name of the pipeline stage this edge points to.
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	To *string `json:"to,omitempty"`
 
@@ -91,17 +97,22 @@ type PipelineGate struct {
 	Name string `json:"name"`
 
 	// Type of gate this is.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum=APPROVAL;WINDOW;JOB
 	Type console.GateType `json:"type"`
 
 	// ClusterRef of a Cluster this gate will execute on.
+	// +kubebuilder:validation:Optional
 	ClusterRef *v1.ObjectReference `json:"clusterRef,omitempty"`
 
 	// Spec contains specification for more complex gate types.
+	// +kubebuilder:validation:Optional
 	Spec *GateSpec `json:"spec,omitempty"`
 }
 
 // GateSpec is a more refined spec for parameters needed for complex gates.
 type GateSpec struct {
+	// +kubebuilder:validation:Optional
 	Job *GateJob `json:"job,omitempty"`
 }
 
