@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -230,4 +231,33 @@ func MarkCondition(set func(condition metav1.Condition), conditionType v1alpha1.
 		Reason:  conditionReason.String(),
 		Message: fmt.Sprintf(message, messageArgs...),
 	})
+}
+
+func SyncCondition(set func(condition metav1.Condition), conditionType, status, reason, message *string) {
+	condition := metav1.Condition{}
+
+	if status != nil {
+		lowercaseStatus := strings.ToLower(*status)
+		if lowercaseStatus == "true" {
+			condition.Status = metav1.ConditionTrue
+		} else if lowercaseStatus == "false" {
+			condition.Status = metav1.ConditionFalse
+		} else {
+			condition.Status = metav1.ConditionUnknown
+		}
+	}
+
+	if reason != nil {
+		condition.Reason = *reason
+	}
+
+	if conditionType != nil {
+		condition.Type = *conditionType
+	}
+
+	if message != nil {
+		condition.Message = *message
+	}
+
+	set(condition)
 }

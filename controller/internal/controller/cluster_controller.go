@@ -112,6 +112,11 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
 	cluster.Status.PingedAt = apiCluster.PingedAt
 	cluster.Status.SHA = &sha
+	if apiCluster.Status != nil {
+		for _, condition := range apiCluster.Status.Conditions {
+			utils.SyncCondition(cluster.SetCondition, condition.Type, condition.Status, condition.Reason, condition.Message)
+		}
+	}
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
