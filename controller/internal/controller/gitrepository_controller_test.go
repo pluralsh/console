@@ -191,6 +191,7 @@ var _ = Describe("Repository Controller", Ordered, func() {
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 
 			err = k8sClient.Get(ctx, types.NamespacedName{Name: secretName, Namespace: namespace}, secret)
+			Expect(err).NotTo(HaveOccurred())
 			By("Cleanup the specific resource instance Secret")
 			Expect(k8sClient.Delete(ctx, secret)).To(Succeed())
 		})
