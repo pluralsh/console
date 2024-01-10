@@ -236,6 +236,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> allow(user, :read)
   end
 
+  def resolve_global(%{id: id}, %{context: %{current_user: user}}) do
+    Global.get!(id)
+    |> allow(user, :read)
+  end
+
   defp actor(%{context: %{current_user: %User{} = user}}), do: user
   defp actor(%{context: %{cluster: %Cluster{} = cluster}}), do: cluster
   defp actor(_), do: nil
@@ -392,6 +397,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def upsert_pipeline(%{name: name, attributes: attrs}, %{context: %{current_user: user}}),
     do: Pipelines.upsert(attrs, name, user)
+
+  def delete_pipeline(%{id: id}, %{context: %{current_user: user}}),
+    do: Pipelines.delete(id, user)
 
   def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
 

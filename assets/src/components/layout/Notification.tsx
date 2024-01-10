@@ -6,10 +6,12 @@ import { Flex, P } from 'honorable'
 import moment from 'moment'
 import { useContext, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 import NotificationSeverity from './NotificationSeverity'
 
 export default function Notification({ notification, closePanel }: any) {
+  const theme = useTheme()
   const navigate = useNavigate()
   const [open, setOpen] = useState<boolean>(false)
   const { applications } = useContext<any>(InstallationContext)
@@ -35,7 +37,7 @@ export default function Notification({ notification, closePanel }: any) {
       >
         {hasIcons(app) && (
           <AppIcon
-            url={getIcon(app)}
+            url={getIcon(app, theme.mode)}
             hue="lighter"
             size="xxsmall"
           />

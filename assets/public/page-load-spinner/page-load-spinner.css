@@ -113,6 +113,9 @@
   margin-top: 24px;
   text-align: center;
 }
+html[data-theme-mode='light'] #loading-placeholder h1 {
+  color: #5d626f;
+}
 
 #loading-placeholder .dot {
   visibility: hidden;

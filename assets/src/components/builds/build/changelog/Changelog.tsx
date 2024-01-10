@@ -5,6 +5,7 @@ import {
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import { AnsiText } from 'components/utils/AnsiText'
@@ -15,6 +16,7 @@ import { Key, useContext, useMemo, useRef, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
 export default function Changelog() {
+  const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { applications } = useContext<any>(InstallationContext)
   const {
@@ -50,7 +52,7 @@ export default function Changelog() {
           leftContent={
             !!currentRepo && hasIcons(currentRepo) ? (
               <img
-                src={getIcon(currentRepo)}
+                src={getIcon(currentRepo, theme.mode)}
                 height={16}
               />
             ) : undefined
@@ -66,7 +68,7 @@ export default function Changelog() {
               leftContent={
                 hasIcons(r) ? (
                   <img
-                    src={getIcon(r)}
+                    src={getIcon(r, theme.mode)}
                     height={16}
                   />
                 ) : undefined

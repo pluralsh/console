@@ -73,11 +73,20 @@ function Routes({ rules }) {
   )
 }
 
-export default function Ingress() {
-  const theme = useTheme()
+export default function IngressOutlet() {
   const { data } = useOutletContext<any>()
 
   const ingress = data?.ingress as Nullable<IngressFragment>
+
+  return <IngressBase ingress={ingress} />
+}
+
+export function IngressBase({
+  ingress,
+}: {
+  ingress: Nullable<IngressFragment>
+}) {
+  const theme = useTheme()
 
   if (!ingress) return null
 

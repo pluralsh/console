@@ -1222,9 +1222,9 @@ export type FileContent = {
 
 /** spec for a job gate */
 export type GateJobAttributes = {
-  annotations?: InputMaybe<Scalars['Map']['input']>;
+  annotations?: InputMaybe<Scalars['Json']['input']>;
   containers?: InputMaybe<Array<InputMaybe<ContainerAttributes>>>;
-  labels?: InputMaybe<Scalars['Map']['input']>;
+  labels?: InputMaybe<Scalars['Json']['input']>;
   namespace: Scalars['String']['input'];
   /** if you'd rather define the job spec via straight k8s yaml */
   raw?: InputMaybe<Scalars['String']['input']>;
@@ -2062,6 +2062,8 @@ export type PipelineGate = {
   __typename?: 'PipelineGate';
   /** the last user to approve this gate */
   approver?: Maybe<User>;
+  /** the cluster this gate can run on */
+  cluster?: Maybe<Cluster>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of this gate as seen in the UI */
@@ -2080,7 +2082,7 @@ export type PipelineGateAttributes = {
   /** the handle of a cluster this gate will execute on */
   cluster?: InputMaybe<Scalars['String']['input']>;
   /** the id of the cluster this gate will execute on */
-  clusterId?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** the name of this gate */
   name: Scalars['String']['input'];
   /** a specification for more complex gate types */
@@ -2310,7 +2312,7 @@ export type PromotionCriteriaAttributes = {
   /** the secrets to copy over in a promotion */
   secrets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the id of the service to promote from */
-  sourceId?: InputMaybe<Scalars['String']['input']>;
+  sourceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** a service to be potentially promoted */
@@ -2550,6 +2552,7 @@ export type RootMutationType = {
   deleteJob?: Maybe<Job>;
   deleteNode?: Maybe<Node>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
+  deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
   deleteProviderCredential?: Maybe<ProviderCredential>;
   deleteRole?: Maybe<Role>;
@@ -2788,6 +2791,11 @@ export type RootMutationTypeDeleteNodeArgs = {
 
 export type RootMutationTypeDeletePeerArgs = {
   name: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeDeletePipelineArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3098,6 +3106,7 @@ export type RootQueryType = {
   externalToken?: Maybe<Scalars['String']['output']>;
   gitRepositories?: Maybe<GitRepositoryConnection>;
   gitRepository?: Maybe<GitRepository>;
+  globalService?: Maybe<GlobalService>;
   group?: Maybe<Group>;
   groupMembers?: Maybe<GroupMemberConnection>;
   groups?: Maybe<GroupConnection>;
@@ -3329,6 +3338,11 @@ export type RootQueryTypeGitRepositoriesArgs = {
 export type RootQueryTypeGitRepositoryArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   url?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeGlobalServiceArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

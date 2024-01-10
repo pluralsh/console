@@ -208,6 +208,8 @@ type RootQueryType {
 
   serviceStatuses(clusterId: ID, q: String, status: ServiceDeploymentStatus): [ServiceStatusCount]
 
+  globalService(id: ID!): GlobalService
+
   pipelines(after: String, first: Int, before: String, last: Int): PipelineConnection
 
   pipeline(id: ID!): Pipeline
@@ -432,6 +434,8 @@ type RootMutationType {
   "upserts a pipeline with a given name"
   savePipeline(name: String!, attributes: PipelineAttributes!): Pipeline
 
+  deletePipeline(id: ID!): Pipeline
+
   "approves an approval pipeline gate"
   approveGate(id: ID!): PipelineGate
 
@@ -618,7 +622,7 @@ input PipelineGateAttributes {
   cluster: String
 
   "the id of the cluster this gate will execute on"
-  clusterId: String
+  clusterId: ID
 
   "a specification for more complex gate types"
   spec: GateSpecAttributes
@@ -653,9 +657,9 @@ input GateJobAttributes {
 
   containers: [ContainerAttributes]
 
-  labels: Map
+  labels: Json
 
-  annotations: Map
+  annotations: Json
 
   serviceAccount: String
 }
@@ -701,7 +705,7 @@ input PromotionCriteriaAttributes {
   name: String
 
   "the id of the service to promote from"
-  sourceId: String
+  sourceId: ID
 
   "the secrets to copy over in a promotion"
   secrets: [String]
@@ -776,6 +780,9 @@ type PipelineGate {
 
   "more detailed specification for complex gates"
   spec: GateSpec
+
+  "the cluster this gate can run on"
+  cluster: Cluster
 
   "the last user to approve this gate"
   approver: User

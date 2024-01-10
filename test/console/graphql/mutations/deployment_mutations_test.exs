@@ -999,7 +999,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
                 criteria { source { id } secrets }
               }
             }
-            edges { from { id } to { id } gates { type name } }
+            edges { from { id } to { id } gates { type name cluster { id } } }
           }
         }
       """, %{"name" => "test", "attributes" => %{
@@ -1013,7 +1013,11 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
             }}
           ]}
         ],
-        "edges" => [%{"from" => "dev", "to" => "prod", "gates" => [%{"type" => "APPROVAL", "name" => "approve"}]}]
+        "edges" => [
+          %{"from" => "dev", "to" => "prod", "gates" => [
+            %{"type" => "JOB", "clusterId" => svc2.cluster_id, "name" => "approve"}
+          ]}
+        ]
       }}, %{current_user: user})
 
       assert pipeline["id"]
@@ -1036,8 +1040,9 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
       [gate] = edge["gates"]
 
-      assert gate["type"] == "APPROVAL"
+      assert gate["type"] == "JOB"
       assert gate["name"] == "approve"
+      assert gate["cluster"]["id"] == svc2.cluster_id
     end
   end
 
@@ -1153,6 +1158,22 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       """, %{"values" => "value: bogus"}, %{current_user: admin})
 
       assert svc["name"] == "console"
+    end
+  end
+
+  describe "deletePipeline" do
+    test "it can delete a pipeline by id" do
+      admin = admin_user()
+      pipe = insert(:pipeline)
+
+      {:ok, %{data: %{"deletePipeline" => del}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deletePipeline(id: $id) { id }
+        }
+      """, %{"id" => pipe.id}, %{current_user: admin})
+
+      assert del["id"] == pipe.id
+      refute refetch(pipe)
     end
   end
 end

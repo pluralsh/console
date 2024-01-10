@@ -9,6 +9,7 @@ import {
   Sidebar as DSSidebar,
   DatabaseIcon,
   DiscordIcon,
+  GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
   ListIcon,
@@ -44,6 +45,7 @@ type MenuItem = {
   path: string
   pathRegexp?: RegExp
   sandboxed?: boolean
+  ignoreRegexp?: RegExp
   plural?: boolean
 }
 
@@ -60,6 +62,13 @@ const MENU_ITEMS: MenuItem[] = [
     icon: <GitPullIcon />,
     path: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}`,
     pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
+    ignoreRegexp: /^\/cd\/settings.*$/,
+  },
+  {
+    text: 'Deployment Settings',
+    icon: <GearTrainIcon />,
+    path: `${CD_ABS_PATH}/settings`,
+    pathRegexp: /^\/cd\/settings.*$/,
   },
   {
     text: 'Builds',
@@ -97,12 +106,18 @@ const MENU_ITEMS: MenuItem[] = [
 ]
 
 function isActiveMenuItem(
-  { path, pathRegexp }: Pick<MenuItem, 'path' | 'pathRegexp'>,
+  {
+    path,
+    pathRegexp,
+    ignoreRegexp,
+  }: Pick<MenuItem, 'path' | 'pathRegexp' | 'ignoreRegexp'>,
   currentPath
 ) {
   return (
     (path === '/' ? currentPath === path : currentPath.startsWith(path)) ||
-    (pathRegexp && (currentPath.match(pathRegexp)?.length ?? 0 > 0))
+    (pathRegexp &&
+      (currentPath.match(pathRegexp)?.length ?? 0 > 0) &&
+      (!ignoreRegexp || (currentPath.match(ignoreRegexp)?.length ?? 0) === 0))
   )
 }
 
@@ -127,6 +142,7 @@ const NotificationsCountSC = styled.div(({ theme }) => ({
   position: 'absolute',
   left: 16,
   top: 2,
+  userSelect: 'none',
 }))
 
 export default function Sidebar() {

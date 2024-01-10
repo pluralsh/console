@@ -53,6 +53,10 @@ type ConsoleClient interface {
 	IsProviderDeleting(ctx context.Context, id string) bool
 	UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error
 	DeleteService(serviceId string) error
+	GetGlobalService(id string) (*console.GlobalServiceFragment, error)
+	CreateGlobalService(serviceID string, attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error)
+	DeleteGlobalService(id string) error
+	UpdateGlobalService(id string, attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error)
 	SavePipeline(name string, attrs console.PipelineAttributes) (*console.PipelineFragment, error)
 	DeletePipeline(id string) (*console.PipelineFragment, error)
 	GetPipeline(id string) (*console.PipelineFragment, error)

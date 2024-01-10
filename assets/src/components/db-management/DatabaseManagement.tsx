@@ -209,10 +209,10 @@ function DatabaseManagementContent({
 
       return {
         name,
-        icon: icons?.[1] || icons?.[0],
+        icon: (theme.mode !== 'light' && icons?.[1]) || icons?.[0],
       }
     })
-  }, [postgresDatabases, applications])
+  }, [postgresDatabases, applications, theme.mode])
 
   const filteredDbs = useMemo(() => {
     if (!postgresDatabases) {

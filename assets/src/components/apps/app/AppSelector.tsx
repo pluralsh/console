@@ -1,14 +1,32 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
-import { Div, P, Span } from 'honorable'
 import { isEmpty } from 'lodash'
 import { useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { toNiceVersion } from 'utils/semver'
 
+import styled, { useTheme } from 'styled-components'
+
 import { getIcon, hasIcons } from '../misc'
 
+const AppSelectorSC = styled.div(({ theme }) => ({
+  marginBottom: theme.spacing.medium,
+  width: 240,
+}))
+const AppLabelSC = styled.p((_) => ({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  maxWidth: 140,
+  whiteSpace: 'nowrap',
+}))
+const AppLabelVersionSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  marginLeft: theme.spacing.small,
+}))
+
 export default function AppSelector({ applications, currentApp, directory }) {
+  const theme = useTheme()
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
@@ -27,17 +45,14 @@ export default function AppSelector({ applications, currentApp, directory }) {
   )
 
   return (
-    <Div
-      marginBottom="medium"
-      width={240}
-    >
+    <AppSelectorSC>
       <Select
         aria-label="app"
         leftContent={
           hasIcons(currentApp) ? (
             <img
               style={{ display: 'block' }}
-              src={getIcon(currentApp)}
+              src={getIcon(currentApp, theme.mode)}
               height={16}
               width={16}
             />
@@ -50,30 +65,21 @@ export default function AppSelector({ applications, currentApp, directory }) {
           <ListBoxItem
             key={app.name}
             label={
-              <P
-                overflow="hidden"
-                textOverflow="ellipsis"
-                maxWidth={140}
-                whiteSpace="nowrap"
-              >
+              <AppLabelSC>
                 {app.name}
                 {app.spec?.descriptor?.version && (
-                  <Span
-                    caption
-                    color="text-xlight"
-                    marginLeft="small"
-                  >
+                  <AppLabelVersionSC>
                     {toNiceVersion(app.spec.descriptor.version)}
-                  </Span>
+                  </AppLabelVersionSC>
                 )}
-              </P>
+              </AppLabelSC>
             }
             textValue={app.name}
             leftContent={
               hasIcons(app) ? (
                 <img
                   style={{ display: 'block' }}
-                  src={getIcon(app)}
+                  src={getIcon(app, theme.mode)}
                   height={16}
                   width={16}
                 />
@@ -82,6 +88,6 @@ export default function AppSelector({ applications, currentApp, directory }) {
           />
         ))}
       </Select>
-    </Div>
+    </AppSelectorSC>
   )
 }

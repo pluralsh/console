@@ -1,54 +1,62 @@
-import { Div, Flex, Img } from 'honorable'
-import { theme } from '@pluralsh/design-system'
+import { Flex } from 'honorable'
+import { LightDarkSwitch, setThemeColorMode } from '@pluralsh/design-system'
+import styled, { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 
 import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
-
 import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
-
 import CommandPaletteLauncher from 'components/CommandPaletteLauncher'
-
-import { LoginContext } from 'components/contexts'
-
-import { useContext } from 'react'
-
-import { InstallerModal } from '../repos/installer/Modal'
 
 import DemoBanner from './DemoBanner'
 
-const APP_ICON = '/console-logo-white.png'
+const APP_ICON_LIGHT = '/header-logo-light.png'
+const APP_ICON_DARK = '/header-logo-dark.png'
+
+const HeaderSC = styled.div(({ theme }) => ({
+  backgroundColor:
+    theme.mode === 'light' ? theme.colors['fill-one'] : theme.colors.grey[950],
+  borderBottom: theme.borders.default,
+}))
+
+const HeaderContentSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.medium,
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px`,
+}))
+
+const LogoSC = styled.img(({ theme }) => ({
+  cursor: 'pointer',
+  marginLeft: -2.0 /* Optically center with sidebar buttons */,
+  height: 32,
+  marginTop: theme.spacing.xxsmall,
+  marginBottom: theme.spacing.xxsmall,
+}))
 
 export default function Header() {
-  const { configuration } = useContext<any>(LoginContext)
   const navigate = useNavigate()
+  const theme = useTheme()
 
   return (
-    <Div
-      backgroundColor={theme.colors?.grey[950]}
-      borderBottom="1px solid border"
-    >
+    <HeaderSC>
       <DemoBanner />
-      <Flex
-        align="center"
-        gap="medium"
-        paddingHorizontal="large"
-        paddingVertical="xsmall"
-      >
-        <Img
-          cursor="pointer"
-          height={32}
-          marginVertical={4}
-          src={APP_ICON}
+      <HeaderContentSC>
+        <LogoSC
+          src={theme.mode === 'light' ? APP_ICON_LIGHT : APP_ICON_DARK}
           alt="Plural console"
-          marginLeft={-2.0} /* Optically center with sidebar buttons */
           onClick={() => navigate('/')}
         />
         <Flex grow={1} />
         <BillingLegacyUserMessage />
         <BillingSubscriptionChip />
         <CommandPaletteLauncher />
-        {!configuration.byok && <InstallerModal />}
-      </Flex>
-    </Div>
+        <LightDarkSwitch
+          checked={theme.mode === 'dark'}
+          onChange={(val) => {
+            setThemeColorMode(val ? 'dark' : 'light')
+          }}
+        />
+      </HeaderContentSC>
+    </HeaderSC>
   )
 }

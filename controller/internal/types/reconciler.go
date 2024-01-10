@@ -16,6 +16,7 @@ const (
 	ServiceDeploymentReconciler Reconciler = "servicedeployment"
 	ClusterReconciler           Reconciler = "cluster"
 	ProviderReconciler          Reconciler = "provider"
+	GlobalServiceReconciler     Reconciler = "globalservice"
 	PipelineReconciler          Reconciler = "pipeline"
 )
 
@@ -27,6 +28,8 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 	case ServiceDeploymentReconciler:
 		fallthrough
 	case ClusterReconciler:
+		fallthrough
+	case GlobalServiceReconciler:
 		fallthrough
 	case PipelineReconciler:
 		fallthrough
@@ -70,6 +73,12 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
 		}, nil
+	case GlobalServiceReconciler:
+		return &controller.GlobalServiceReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}, nil
 	default:
 		return nil, fmt.Errorf("reconciler %q is not supported", sc)
 	}
@@ -82,7 +91,7 @@ type ReconcilerList []Reconciler
 // Reconcilers defines a list of reconcilers that will be started by default
 // if '--reconcilers=...' flag is not provided.
 func Reconcilers() ReconcilerList {
-	return []Reconciler{GitRepositoryReconciler, ProviderReconciler, ClusterReconciler, ServiceDeploymentReconciler, PipelineReconciler}
+	return []Reconciler{GitRepositoryReconciler, ProviderReconciler, ClusterReconciler, ServiceDeploymentReconciler, GlobalServiceReconciler, PipelineReconciler}
 }
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.

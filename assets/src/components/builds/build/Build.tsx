@@ -36,6 +36,8 @@ import { deepUpdate } from 'utils/graphql'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import { useTheme } from 'styled-components'
+
 import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 
 import { BuildTimer } from './BuildTimer'
@@ -66,6 +68,7 @@ const DIRECTORY = [
 ]
 
 export default function Build() {
+  const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { applications } = useContext<any>(InstallationContext)
   const { pathname } = useLocation()
@@ -134,7 +137,7 @@ export default function Build() {
         >
           {app && hasIcons(app) && (
             <AppIcon
-              url={getIcon(app)}
+              url={getIcon(app, theme.mode)}
               size="small"
             />
           )}

@@ -1,8 +1,9 @@
 import { PieChart } from 'components/utils/PieChart'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
-
 import { useTheme } from 'styled-components'
+
+import { DeploymentFragment } from 'generated/graphql'
 
 import { InfoSectionH2, PaddedCard, PropWideBold } from './common'
 
@@ -15,30 +16,49 @@ export function StatusChart({
   unavailable: number
   pending: number
 }) {
+  const theme = useTheme()
   const data = useMemo(
     () => [
-      { id: 'Available', value: available, color: '#99F5D5' },
-      { id: 'Unavailable', value: unavailable, color: '#F599A8' },
-      { id: 'Pending', value: pending, color: '#FFF9C2' },
+      { id: 'Available', value: available, color: theme.colors.semanticGreen },
+      {
+        id: 'Unavailable',
+        value: unavailable,
+        color: theme.colors.semanticRedLight,
+      },
+      { id: 'Pending', value: pending, color: theme.colors.semanticYellow },
     ],
-    [available, unavailable, pending]
+    [
+      available,
+      unavailable,
+      pending,
+      theme.colors.semanticGreen,
+      theme.colors.semanticRedLight,
+      theme.colors.semanticYellow,
+    ]
   )
 
   return <PieChart data={data} />
 }
 
-export default function Deployment() {
-  const theme = useTheme()
+export default function DeploymentOutlet() {
   const { data } = useOutletContext<any>()
 
-  if (!data?.deployment) return null
+  return <DeploymentBase deployment={data?.deployment} />
+}
+
+export function DeploymentBase({
+  deployment,
+}: {
+  deployment: Nullable<DeploymentFragment>
+}) {
+  const theme = useTheme()
+
+  if (!deployment) return null
 
   const {
-    deployment: {
-      spec,
-      status: { availableReplicas, replicas, unavailableReplicas },
-    },
-  } = data
+    spec,
+    status: { availableReplicas, replicas, unavailableReplicas },
+  } = deployment
 
   return (
     <div
@@ -66,9 +86,13 @@ export default function Deployment() {
             }}
           >
             <StatusChart
-              available={availableReplicas}
-              unavailable={unavailableReplicas}
-              pending={replicas - availableReplicas - unavailableReplicas}
+              available={availableReplicas ?? 0}
+              unavailable={unavailableReplicas ?? 0}
+              pending={
+                (replicas ?? 0) -
+                (availableReplicas ?? 0) -
+                (unavailableReplicas ?? 0)
+              }
             />
           </div>
           <div

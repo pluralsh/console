@@ -2,24 +2,36 @@ import { ReactNode, useRef } from 'react'
 import { AnimatedDiv, Card } from '@pluralsh/design-system'
 import { useSpring } from 'react-spring'
 import styled, { useTheme } from 'styled-components'
-import { Div } from 'honorable'
 import { createPortal } from 'react-dom'
 
 import { useCursorPosition } from './CursorPosition'
 
-const ChartTooltipWrap = styled(Card).attrs(() => ({
+const ChartTooltipSC = styled.div.attrs(() => ({}))((_) => ({
+  width: '0',
+  height: '0',
+}))
+const ChartTooltipContentSC = styled(Card).attrs(() => ({
   fillLevel: 2,
 }))(({ theme }) => ({
-  ...theme.partials.text.caption,
-  display: 'flex',
-  paddingLeft: theme.spacing.xsmall,
-  paddingRight: theme.spacing.xsmall,
-  paddingBottom: theme.spacing.xxsmall,
-  paddingTop: theme.spacing.xxsmall,
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: theme.spacing.xsmall,
-  transform: `translate(-50%, calc(-${theme.spacing.small}px - 100%))`,
+  '&&': {
+    ...theme.partials.text.caption,
+    display: 'flex',
+    paddingLeft: theme.spacing.xsmall,
+    paddingRight: theme.spacing.xsmall,
+    paddingBottom: theme.spacing.xxsmall,
+    paddingTop: theme.spacing.xxsmall,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.xsmall,
+    transform: `translate(-50%, calc(-${theme.spacing.small}px - 100%))`,
+  },
+}))
+const ChartTooltipSwatchSC = styled.div.attrs(() => ({
+  'aria-hidden': true,
+}))<{ $color: string }>(({ $color }) => ({
+  width: 12,
+  height: 12,
+  backgroundColor: $color,
 }))
 const springConfig = {
   mass: 1,
@@ -60,27 +72,18 @@ export function ChartTooltip({
         ...springProps,
       }}
     >
-      <ChartTooltipWrap>
-        <Div
-          width={12}
-          height={12}
-          backgroundColor={color}
-          aria-hidden
-        />
+      <ChartTooltipContentSC>
+        <ChartTooltipSwatchSC $color={color} />
         <div>
           {label}: <b>{value}</b>
         </div>
-      </ChartTooltipWrap>
+      </ChartTooltipContentSC>
     </AnimatedDiv>
   )
 
   return (
-    <Div
-      width="0"
-      height="0"
-      ref={ref as any}
-    >
+    <ChartTooltipSC ref={ref as any}>
       {createPortal(content, document.body)}
-    </Div>
+    </ChartTooltipSC>
   )
 }

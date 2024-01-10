@@ -1,10 +1,13 @@
+import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
+import { Chip, Modal, Table } from '@pluralsh/design-system'
 
 import { Canary, Deployment, Ingress } from 'generated/graphql'
 
-import { Chip, Table } from '@pluralsh/design-system'
+import { InlineLink } from 'components/utils/typography/InlineLink'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import {
   InfoSectionH2,
@@ -13,6 +16,9 @@ import {
   PropWideBold,
 } from './common'
 import { ConditionsTable } from './Conditions'
+import { IngressBase } from './Ingress'
+import { MetadataBase } from './Metadata'
+import { DeploymentBase } from './Deployment'
 
 const deploymentHelper = createColumnHelper<Deployment>()
 const ingressHelper = createColumnHelper<Ingress>()
@@ -28,7 +34,46 @@ function StatusChip({ healthy }) {
 const ColDepName = deploymentHelper.accessor((row) => row.metadata?.name, {
   id: 'name',
   header: 'Name',
-  cell: ({ getValue }) => getValue(),
+  cell: function Cell({ row: { original }, getValue }) {
+    const [isOpen, setIsOpen] = useState(false)
+    const theme = useTheme()
+
+    return (
+      <>
+        <InlineLink
+          onClick={(e) => {
+            e.preventDefault()
+            setIsOpen((val) => !val)
+          }}
+        >
+          {getValue()}
+        </InlineLink>
+        <ModalMountTransition open={isOpen}>
+          <Modal
+            portal
+            open={isOpen}
+            onClose={() => setIsOpen(false)}
+            header={`Deployment – ${original.metadata.name}`}
+            size="large"
+          >
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.large,
+              }}
+            >
+              <DeploymentBase deployment={original} />
+              <MetadataBase
+                component={original}
+                metadata={original.metadata}
+              />
+            </div>
+          </Modal>
+        </ModalMountTransition>
+      </>
+    )
+  },
 })
 
 const ColDepStatus = deploymentHelper.accessor((row) => row.status, {
@@ -67,7 +112,46 @@ const depColumns = [ColDepName, ColDepStatus, ColDepReplicas, ColDepAvailable]
 const ColIngName = ingressHelper.accessor((row) => row.metadata?.name, {
   id: 'name',
   header: 'Name',
-  cell: ({ getValue }) => getValue(),
+  cell: function Cell({ row: { original }, getValue }) {
+    const [isOpen, setIsOpen] = useState(false)
+    const theme = useTheme()
+
+    return (
+      <>
+        <InlineLink
+          onClick={(e) => {
+            e.preventDefault()
+            setIsOpen((val) => !val)
+          }}
+        >
+          {getValue()}
+        </InlineLink>
+        <ModalMountTransition open={isOpen}>
+          <Modal
+            portal
+            open={isOpen}
+            onClose={() => setIsOpen(false)}
+            header={`Ingress – ${original.metadata.name}`}
+            size="large"
+          >
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.large,
+              }}
+            >
+              <IngressBase ingress={original} />
+              <MetadataBase
+                component={original}
+                metadata={original.metadata}
+              />
+            </div>
+          </Modal>
+        </ModalMountTransition>
+      </>
+    )
+  },
 })
 
 const ColIngStatus = ingressHelper.accessor((row) => row.status, {
@@ -119,6 +203,10 @@ function CanaryDeployments({ canary }: { canary: Canary }) {
 
 function CanaryIngresses({ canary }: { canary: Canary }) {
   const theme = useTheme()
+  const ingresses = useMemo(
+    () => [canary.ingress, canary.ingressCanary].filter((v) => !!v),
+    [canary.ingress, canary.ingressCanary]
+  )
 
   return (
     <>
@@ -131,7 +219,7 @@ function CanaryIngresses({ canary }: { canary: Canary }) {
         Ingresses
       </InfoSectionH3>
       <Table
-        data={[canary.ingress, canary.ingressCanary].filter((v) => !!v)}
+        data={ingresses}
         columns={ingressColumns}
       />
     </>
@@ -161,7 +249,7 @@ export default function CanaryInfo() {
       <InfoSectionH2
         css={{
           marginBottom: theme.spacing.medium,
-          marginTop: theme.spacing.medium,
+          marginTop: theme.spacing.xlarge,
         }}
       >
         Status

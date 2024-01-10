@@ -44,7 +44,6 @@ import {
   ServersIcon,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
-import { Flex, Span } from 'honorable'
 import styled, { createGlobalStyle, useTheme } from 'styled-components'
 
 import {
@@ -83,14 +82,14 @@ export enum PaletteSection {
   Addons = 'Add-ons',
 }
 
-function buildAppActions(applications, nav) {
+function buildAppActions(applications, nav, theme) {
   return applications
     .map((app) => [
       {
         id: app.name,
         name: app.name,
         app,
-        icon: hasIcons(app) ? <AppIcon src={getIcon(app)} /> : null,
+        icon: hasIcons(app) ? <AppIcon src={getIcon(app, theme.mode)} /> : null,
         shortcut: [],
         section: PaletteSection.Apps,
       },
@@ -219,38 +218,47 @@ function buildClusterActions(
 }
 
 function ItemInner({ action, ancestors }) {
+  const theme = useTheme()
+
   return (
     <>
-      <Flex
-        gap="8px"
-        fontSize={14}
-        alignItems="center"
+      <div
+        css={{
+          display: 'flex',
+          gap: theme.spacing.xsmall,
+          fontSize: 14,
+          alignItems: 'center',
+        }}
       >
         {action.icon && action.icon}
-        <Flex flexDirection="column">
-          <Flex flexDirection="row">
-            <Flex fill="horizontal">
+        <div css={{ display: 'flex', flexDirection: 'column' }}>
+          <div css={{ display: 'flex', flexDirection: 'row' }}>
+            <div css={{ display: 'flex' }}>
               {ancestors.length > 0 &&
                 ancestors.map((ancestor) => (
                   <Fragment key={ancestor.id}>
-                    <Span
-                      opacity={0.5}
-                      marginRight={8}
+                    <span
+                      css={{
+                        opacity: 0.5,
+                        marginRight: theme.spacing.xsmall,
+                      }}
                     >
                       {ancestor.name}
-                    </Span>
-                    <Span marginRight={8}>&rsaquo;</Span>
+                    </span>
+                    <span css={{ marginRight: theme.spacing.xsmall }}>
+                      &rsaquo;
+                    </span>
                   </Fragment>
                 ))}
               <span>{action.name}</span>
-            </Flex>
+            </div>
             {action.suffix}
-          </Flex>
+          </div>
           {action.subtitle && (
             <span style={{ fontSize: 12 }}>{action.subtitle}</span>
           )}
-        </Flex>
-      </Flex>
+        </div>
+      </div>
       {action.shortcut?.length ? (
         <div
           aria-hidden
@@ -310,10 +318,12 @@ const ItemSC = styled.div((_) => ({
 }))
 
 function AppItem({ app }) {
+  const theme = useTheme()
+
   return (
     <ItemSC>
       <ItemContentSC>
-        {hasIcons(app) && <AppIcon src={getIcon(app)} />}
+        {hasIcons(app) && <AppIcon src={getIcon(app, theme.mode)} />}
         <ItemContentTextSC>
           <AppName>{app.name}</AppName>
           {app.spec?.descriptor?.version && (
@@ -352,6 +362,7 @@ function InstallAddonItem({ addon }: { addon: ClusterAddOnFragment }) {
 
 const ResultItem = forwardRef(
   ({ action, active, currentRootActionId }, ref: Ref<any>) => {
+    const theme = useTheme()
     const ancestors = useMemo(() => {
       if (!currentRootActionId) return action.ancestors
       const index = action.ancestors.findIndex(
@@ -366,16 +377,21 @@ const ResultItem = forwardRef(
     }, [action.ancestors, currentRootActionId])
 
     return (
-      <Flex
+      <div
         ref={ref}
-        alignItems="center"
-        padding="xsmall"
-        background={active ? 'fill-one-hover' : 'transparent'}
-        borderLeftColor={active ? 'border-primary' : 'transparent'}
-        borderLeftWidth="3px"
-        borderLeftStyle="solid"
-        justifyContent="space-between"
-        cursor="pointer"
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: theme.spacing.xsmall,
+          background: active ? theme.colors['fill-one-hover'] : 'transparent',
+          borderLeftColor: active
+            ? theme.colors['border-primary']
+            : 'transparent',
+          borderLeftWidth: 3,
+          borderLeftStyle: 'solid',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+        }}
       >
         {action.app ? (
           <AppItem app={action.app} />
@@ -387,7 +403,7 @@ const ResultItem = forwardRef(
             ancestors={ancestors}
           />
         )}
-      </Flex>
+      </div>
     )
   }
 )
@@ -414,6 +430,7 @@ function RenderResults() {
 }
 
 function useActions() {
+  const theme = useTheme()
   const { applications } = useContext(InstallationContext) as any
   const { data: clustersData } = useClustersTinyQuery({
     pollInterval: 120_000,
@@ -425,9 +442,9 @@ function useActions() {
   const actions = useMemo(
     () => [
       ...buildClusterActions(clusterEdges, navigate),
-      ...buildAppActions(applications, navigate),
+      ...buildAppActions(applications, navigate, theme),
     ],
-    [applications, navigate, clusterEdges]
+    [clusterEdges, navigate, applications, theme]
   )
 
   return actions
