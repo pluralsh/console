@@ -1,8 +1,5 @@
 import {
   Breadcrumb,
-  ClusterIcon,
-  ListBoxItem,
-  Select,
   SubTab,
   TabList,
   TabPanel,
@@ -27,19 +24,16 @@ import {
   CLUSTER_PODS_PATH,
   CLUSTER_SERVICES_PATH,
 } from 'routes/cdRoutesConsts'
-import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
 
-import {
-  ClusterFragment,
-  useClusterQuery,
-  useClustersTinyQuery,
-} from '../../../generated/graphql'
+import { ClusterFragment, useClusterQuery } from '../../../generated/graphql'
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
-import ProviderIcon from '../../utils/Provider'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import ClusterSelector from '../utils/ClusterSelector'
+import { DeployService } from '../services/deployModal/DeployService'
 
 import ClusterPermissions from './ClusterPermissions'
+import ClusterSettings from './ClusterSettings'
 
 const directory = [
   { path: CLUSTER_SERVICES_PATH, label: 'Services' },
@@ -86,19 +80,15 @@ export default function Cluster() {
   const tabStateRef = useRef<any>(null)
   const { clusterId } = useParams<{ clusterId: string }>()
   const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab`)?.params?.tab || ''
+  const [refetchServices, setRefetchServices] = useState(() => () => {})
 
-  const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
   const currentTab = directory.find(({ path }) => path === tab)
 
-  const { data: clustersData } = useClustersTinyQuery()
-  const clusterEdges = clustersData?.clusters?.edges
-
-  const { data, refetch } = useClusterQuery({
+  const { data, refetch: refetchCluster } = useClusterQuery({
     variables: { id: clusterId || '' },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
-
   const cluster = data?.cluster
 
   const crumbs: Breadcrumb[] = useMemo(
@@ -119,45 +109,17 @@ export default function Cluster() {
       scrollable={tab !== 'services' && tab !== 'pods'}
       headingContent={
         <>
-          {clusterEdges && !isEmpty(clusterEdges) && (
-            <div css={{ width: 360 }}>
-              <Select
-                isOpen={clusterSelectIsOpen}
-                onOpenChange={setClusterSelectIsOpen}
-                label="Cluster"
-                titleContent={
-                  <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-                    <ClusterIcon />
-                    Cluster
-                  </div>
+          <div css={{ width: 360 }}>
+            <ClusterSelector
+              clusterId={clusterId}
+              allowDeselect={false}
+              onClusterChange={(c) => {
+                if (c?.id) {
+                  navigate(`/cd/clusters/${c.id}/${tab}`)
                 }
-                leftContent={
-                  <ProviderIcon
-                    provider={data?.cluster?.provider?.cloud || ''}
-                    width={16}
-                  />
-                }
-                selectedKey={clusterId}
-                onSelectionChange={(key) =>
-                  navigate(`/cd/clusters/${key}/${tab}`)
-                }
-              >
-                {clusterEdges.map((edge) => (
-                  <ListBoxItem
-                    key={edge?.node?.id}
-                    label={edge?.node?.name}
-                    textValue={edge?.node?.name}
-                    leftContent={
-                      <ProviderIcon
-                        provider={edge?.node?.provider?.cloud || ''}
-                        width={16}
-                      />
-                    }
-                  />
-                ))}
-              </Select>
-            </div>
-          )}
+              }}
+            />
+          </div>
           <TabList
             gap="xxsmall"
             stateRef={tabStateRef}
@@ -190,10 +152,18 @@ export default function Cluster() {
               justifyContent: 'end',
               display: 'flex',
               flexGrow: 1,
-              gap: theme.spacing.large,
+              flexShrink: 0,
+              gap: theme.spacing.small,
             }}
           >
+            {tab === 'services' && (
+              <DeployService
+                refetch={refetchServices}
+                cluster={cluster}
+              />
+            )}
             <ClusterPermissions cluster={cluster} />
+            {!cluster.self && <ClusterSettings cluster={cluster} />}
           </div>
         </>
       }
@@ -203,7 +173,15 @@ export default function Cluster() {
         stateRef={tabStateRef}
       >
         <Suspense fallback={<LoadingIndicator />}>
-          <Outlet context={{ cluster, refetch } satisfies ClusterContextType} />
+          <Outlet
+            context={
+              {
+                cluster,
+                refetch: refetchCluster,
+                setRefetchServices,
+              } satisfies ClusterContextType
+            }
+          />
         </Suspense>
       </TabPanel>
     </ResponsivePageFullWidth>
@@ -213,6 +191,7 @@ export default function Cluster() {
 type ClusterContextType = {
   cluster: ClusterFragment
   refetch: () => void
+  setRefetchServices: (refetch: () => () => void) => void
 }
 
 export function useClusterContext() {

@@ -12,6 +12,7 @@ export const serviceStatusToLabel = createMapperWithFallback<
     HEALTHY: 'Healthy',
     STALE: 'Stale',
     SYNCED: 'Synced',
+    PAUSED: 'Paused',
   },
   'Unknown'
 )
@@ -25,6 +26,7 @@ export const serviceStatusToSeverity = createMapperWithFallback<
     HEALTHY: 'success',
     STALE: 'warning',
     SYNCED: 'info',
+    PAUSED: 'info',
   },
   'neutral'
 )

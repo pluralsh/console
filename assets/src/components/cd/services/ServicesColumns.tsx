@@ -5,6 +5,7 @@ import {
   GitHubLogoIcon,
   GlobeIcon,
   ListBoxItem,
+  ListIcon,
   PeopleIcon,
   Tooltip,
   TrashCanIcon,
@@ -18,7 +19,7 @@ import { shortenSha1 } from 'utils/sha'
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { getProviderIconURL } from 'components/utils/Provider'
+import { getProviderIconUrl } from 'components/utils/Provider'
 import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { ProtectBadge } from '../clusters/ProtectBadge'
@@ -33,13 +34,13 @@ import { ServiceDeprecations } from './ServiceDeprecations'
 import { CreateGlobalService } from './CreateGlobalService'
 import { DeleteGlobalService } from './DeleteGlobalService'
 import { ServiceSettings } from './ServiceSettings'
+import { ServiceUpdateHelmValues } from './ServiceUpdateHelmValues'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
 export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
   id: 'deployment',
   header: 'Deployment',
-  enableSorting: true,
   cell: function Cell({ getValue }) {
     const serviceDeployment = getValue()
 
@@ -66,7 +67,6 @@ export const ColCluster = columnHelper.accessor(
   {
     id: 'clusterName',
     header: 'Cluster',
-    enableSorting: true,
     cell: ({ getValue, row: { original } }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
@@ -74,7 +74,7 @@ export const ColCluster = columnHelper.accessor(
       const clusterName = getValue()
 
       return (
-        <ColWithIcon icon={getProviderIconURL(cloud, theme.mode === 'dark')}>
+        <ColWithIcon icon={getProviderIconUrl(cloud, theme.mode)}>
           {clusterName}
         </ColWithIcon>
       )
@@ -85,7 +85,6 @@ export const ColCluster = columnHelper.accessor(
 export const ColRepo = columnHelper.accessor(({ node }) => node, {
   id: 'repository',
   header: 'Repository',
-  enableSorting: true,
   meta: { truncate: true, gridTemplate: 'minmax(180px,1fr)' },
   cell: ({ getValue }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -104,11 +103,7 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
           <ColWithIcon
             truncateLeft
             icon={
-              helm ? (
-                getProviderIconURL('byok', theme.mode === 'dark')
-              ) : (
-                <GitHubLogoIcon />
-              )
+              helm ? getProviderIconUrl('byok', theme.mode) : <GitHubLogoIcon />
             }
           >
             <span>{url}</span>
@@ -122,7 +117,6 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
 export const ColRef = columnHelper.accessor(({ node }) => node, {
   id: 'gitLocation',
   header: 'Reference',
-  enableSorting: true,
   // meta: { truncate: true },
   cell: ({ getValue }) => {
     const svc = getValue()
@@ -164,7 +158,6 @@ export const ColLastActivity = columnHelper.accessor(
   {
     id: 'lastActivity',
     header: 'Activity ',
-    enableSorting: true,
     sortingFn: 'datetime',
     cell: ({ getValue }) => (
       <DateTimeCol dateString={getValue()?.toISOString()} />
@@ -175,7 +168,6 @@ export const ColLastActivity = columnHelper.accessor(
 export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   id: 'status',
   header: 'Status',
-  enableSorting: true,
   enableColumnFilter: true,
   filterFn: 'equalsString',
   cell: ({
@@ -183,10 +175,12 @@ export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
       original: { node },
     },
   }) => (
-    <ServiceStatusChip
-      status={node?.status}
-      componentStatus={node?.componentStatus}
-    />
+    <div css={{ minWidth: 164 }}>
+      <ServiceStatusChip
+        status={node?.status}
+        componentStatus={node?.componentStatus}
+      />
+    </div>
   ),
 })
 
@@ -195,7 +189,6 @@ export const ColErrors = columnHelper.accessor(
   {
     id: 'errors',
     header: 'Errors',
-    enableSorting: true,
     enableColumnFilter: true,
     filterFn: 'equalsString',
     cell: ({
@@ -203,10 +196,10 @@ export const ColErrors = columnHelper.accessor(
         original: { node },
       },
     }) => (
-      <>
+      <div css={{ minWidth: 160 }}>
         <ServiceErrors service={node} />
         <ServiceDeprecations service={node} />
-      </>
+      </div>
     ),
   }
 )
@@ -216,6 +209,7 @@ enum MenuItemKey {
   DeleteGlobal = 'deleteGlobal',
   Permissions = 'permissions',
   Settings = 'settings',
+  HelmValues = 'helmValues',
   Delete = 'delete',
 }
 
@@ -273,6 +267,14 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
               label="Permissions"
               textValue="Permissions"
             />
+            {serviceDeployment.helm && (
+              <ListBoxItem
+                key={MenuItemKey.HelmValues}
+                leftContent={<ListIcon />}
+                label="Helm values"
+                textValue="Helm values"
+              />
+            )}
             <ListBoxItem
               key={MenuItemKey.Settings}
               leftContent={<GearTrainIcon />}
@@ -313,6 +315,14 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
             onClose={() => {
               setMenuKey('')
             }}
+          />
+          <ServiceUpdateHelmValues
+            serviceDeployment={serviceDeployment}
+            open={menuKey === MenuItemKey.HelmValues}
+            onClose={() => {
+              setMenuKey('')
+            }}
+            refetch={refetch}
           />
           <ServiceSettings
             serviceDeployment={serviceDeployment}

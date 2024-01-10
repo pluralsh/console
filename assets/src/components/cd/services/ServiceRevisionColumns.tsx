@@ -12,10 +12,9 @@ import { useState } from 'react'
 
 import { Confirm } from 'components/utils/Confirm'
 import { SelectedIcon } from 'components/utils/SelectedIcon'
+import { StackedText } from 'components/utils/table/StackedText'
 
 import { CaptionText } from 'components/cluster/TableElements'
-
-import { StackedText } from '../clusters/Clusters'
 
 import { useServiceContext } from './service/ServiceDetails'
 

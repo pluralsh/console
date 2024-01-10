@@ -1,8 +1,10 @@
 defmodule Console.GraphQl.Deployments.Cluster do
   use Console.GraphQl.Schema.Base
-  alias Console.Schema.ClusterProvider
+  alias Console.Schema.{ClusterProvider, Cluster}
   alias Console.Deployments.Compatibilities
   alias Console.GraphQl.Resolvers.{Deployments}
+
+  ecto_enum :cluster_distro, Cluster.Distro
 
   input_object :cluster_attributes do
     field :name,           non_null(:string)
@@ -10,6 +12,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :provider_id,    :id
     field :credential_id,  :id, description: "a cloud credential to use when provisioning this cluster"
     field :version,        :string
+    field :distro,         :cluster_distro
+    field :metadata,       :json
     field :protect,        :boolean
     field :kubeconfig,     :kubeconfig_attributes
     field :cloud_settings, :cloud_settings_attributes
@@ -30,15 +34,19 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   input_object :cluster_ping do
     field :current_version, non_null(:string)
+    field :distro,          :cluster_distro
   end
 
   input_object :cluster_update_attributes do
     field :version,    :string
     field :handle,     :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :service,    :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
-    field :kubeconfig, :kubeconfig_attributes
+    field :kubeconfig, :kubeconfig_attributes, description: "pass a kubeconfig for this cluster (DEPRECATED)"
     field :protect,    :boolean
+    field :distro,     :cluster_distro
+    field :metadata,   :json
     field :node_pools, list_of(:node_pool_attributes)
+    field :tags,       list_of(:tag_attributes)
   end
 
   input_object :cluster_service_attributes do
@@ -139,6 +147,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :version, non_null(:string)
   end
 
+  input_object :agent_migration_attributes do
+    field :name,          :string
+    field :ref,           :string
+    field :configuration, :json
+  end
+
+  input_object :tag_input do
+    field :name,  non_null(:string)
+    field :value, non_null(:string)
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -175,6 +194,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :name,            non_null(:string), description: "human readable name of this cluster, will also translate to cloud k8s name"
     field :protect,         :boolean, description: "if true, this cluster cannot be deleted"
     field :version,         :string, description: "desired k8s version for the cluster"
+    field :distro,          :cluster_distro, description: "the distribution of kubernetes this cluster is running"
+    field :metadata,        :map, description: "arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)"
     field :current_version, :string, description: "current k8s version as told to us by the deployment operator"
     field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :installed,       :boolean, description: "whether the deploy operator has been registered for this cluster"
@@ -241,7 +262,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :max_size,       non_null(:integer), description: "maximum number of instances in this node pool"
     field :instance_type,  non_null(:string), description: "the type of node to use (usually cloud-specific)"
     field :spot,           :boolean, description: "whether this is a spot pool or not"
-    field :labels,         :json, description: "kubernetes labels to apply to the nodes in this pool, useful for node selectors"
+    field :labels,         :map, description: "kubernetes labels to apply to the nodes in this pool, useful for node selectors"
     field :taints,         list_of(:taint), description: "any taints you'd want to apply to a node, for eg preventing scheduling on spot instances"
     field :cloud_settings, :node_cloud_settings, description: "cloud specific settings for the node groups"
 
@@ -386,9 +407,26 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :version, non_null(:string)
   end
 
+  @desc "a representation of a bulk operation to be performed on all agent services"
+  object :agent_migration do
+    field :id,            non_null(:id)
+    field :name,          :string
+    field :ref,           :string
+    field :configuration, :map
+    field :completed,     :boolean
+
+    timestamps()
+  end
+
   object :tag do
     field :name,  non_null(:string)
     field :value, non_null(:string)
+  end
+
+  @desc "a cluster info data struct"
+  object :cluster_status_info do
+    field :healthy, :boolean
+    field :count,   :integer
   end
 
   connection node_type: :cluster
@@ -436,10 +474,29 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     @desc "a relay connection of all clusters visible to the current user"
     connection field :clusters, node_type: :cluster do
-      arg :q, :string
       middleware Authenticated
+      arg :q,      :string
+      arg :health, :boolean
+      arg :tag,    :tag_input
 
       resolve &Deployments.list_clusters/2
+    end
+
+    @desc "gets summary information for all healthy/unhealthy clusters in your fleet"
+    field :cluster_statuses, list_of(:cluster_status_info) do
+      middleware Authenticated
+      arg :q,      :string
+      arg :tag,    :tag_input
+
+      resolve &Deployments.cluster_statuses/2
+    end
+
+    @desc "lists tags applied to any clusters in the fleet"
+    field :tags, list_of(:string) do
+      middleware Authenticated
+      arg :tag, :string
+
+      resolve &Deployments.list_tags/2
     end
 
     @desc "a relay connection of all providers visible to the current user"
@@ -461,7 +518,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "fetches an individual cluster provider"
     field :cluster_provider, :cluster_provider do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,    :id
+      arg :cloud, :string
+      arg :name,  :string
 
       resolve &Deployments.resolve_provider/2
     end
@@ -552,6 +611,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :global,        :global_service_attributes
 
       resolve &Deployments.install_addon/2
+    end
+
+    field :create_agent_migration, :agent_migration do
+      middleware Authenticated
+      arg :attributes, non_null(:agent_migration_attributes)
+
+      resolve &Deployments.create_agent_migration/2
     end
   end
 end

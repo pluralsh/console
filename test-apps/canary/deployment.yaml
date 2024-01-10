@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: podinfo
+  template:
+    metadata:
+      labels:
+        app: podinfo
+      annotations:
+        prometheus.io/scrape: 'true'
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: podinfo
+          image: ghcr.io/stefanprodan/podinfo:{{ configuration.tag }}
+          command:
+            - ./podinfo
+            - --port=9898
+            - --config-path=/podinfo/config
+          env:
+          - name: PODINFO_UI_COLOR
+            value: "#34577c"
+          ports:
+            - name: http
+              containerPort: 9898
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+              - podcli
+              - check
+              - http
+              - localhost:9898/healthz
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+              - podcli
+              - check
+              - http
+              - localhost:9898/readyz
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          volumeMounts:
+          - name: data
+            mountPath: /data
+          - name: config
+            mountPath: /podinfo/config
+            readOnly: true
+          resources:
+            limits:
+              memory: 500Mi
+              cpu: 250m
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: config
+        configMap:
+          name: podinfo-configmap

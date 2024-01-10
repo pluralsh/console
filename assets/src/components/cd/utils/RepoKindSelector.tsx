@@ -1,5 +1,6 @@
 import { MutableRefObject, ReactNode, useRef } from 'react'
 import {
+  CheckOutlineIcon,
   GitHubLogoIcon,
   SubTab,
   TabList,
@@ -7,7 +8,8 @@ import {
   TabPanel,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import ProviderIcon, { ProviderIcons } from 'components/utils/Provider'
+import ProviderIcon from 'components/utils/Provider'
+import { Provider } from 'generated/graphql-plural'
 
 export enum RepoKind {
   Git = 'Git',
@@ -22,10 +24,12 @@ export function RepoKindSelector({
   onKindChange,
   selectedKind,
   children,
+  validKinds,
 }: {
   onKindChange: any
   selectedKind: Nullable<string>
   children?: ReactNode
+  validKinds?: Record<string, boolean>
 }) {
   const theme = useTheme()
   const tabStateRef: MutableRefObject<any> = useRef()
@@ -70,8 +74,14 @@ export function RepoKindSelector({
           key={RepoKind.Git}
           textValue={repoKindToLabel(RepoKind.Git)}
         >
-          <GitHubLogoIcon fullColor />
+          <GitHubLogoIcon color={theme.colors['icon-default']} />
           {repoKindToLabel(RepoKind.Git)}
+          {validKinds?.[RepoKind.Git] && (
+            <CheckOutlineIcon
+              size={16}
+              color={theme.colors['icon-success']}
+            />
+          )}
         </SubTab>
         <SubTab
           css={{
@@ -83,11 +93,17 @@ export function RepoKindSelector({
         >
           <div css={{ display: 'flex', alignItems: 'center' }}>
             <ProviderIcon
-              provider={ProviderIcons.GENERIC}
+              provider={Provider.Generic}
               width={16}
             />
           </div>
           {repoKindToLabel(RepoKind.Helm)}
+          {validKinds?.[RepoKind.Helm] && (
+            <CheckOutlineIcon
+              size={16}
+              color={theme.colors['icon-success']}
+            />
+          )}
         </SubTab>
       </TabList>
       <TabPanel

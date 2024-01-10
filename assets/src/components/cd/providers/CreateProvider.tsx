@@ -1,9 +1,16 @@
-import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
+import {
+  Button,
+  CloudIcon,
+  FormField,
+  Input,
+  Modal,
+} from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { produce } from 'immer'
 import isEmpty from 'lodash/isEmpty'
 import merge from 'lodash/merge'
 import { PartialDeep } from 'type-fest'
+import { Priority, useRegisterActions } from 'kbar'
 
 import {
   CloudProviderSettingsAttributes,
@@ -15,12 +22,15 @@ import {
   ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
 } from 'react'
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { PaletteSection } from 'components/CommandPalette'
 
 import ModalAlt from '../ModalAlt'
 import { ProviderTabSelector } from '../clusters/create/ProviderTabSelector'
@@ -266,6 +276,24 @@ export function CreateProvider({
   providers: Nullable<Nullable<ClusterProviderFragment>[]>
 }) {
   const [isOpen, setIsOpen] = useState(false)
+  const kbarActions = useMemo(
+    () => [
+      {
+        section: PaletteSection.Actions,
+        id: `create-provider`,
+        priority: Priority.HIGH,
+        name: `Create a provider`,
+        icon: <CloudIcon />,
+        shortcut: [],
+        perform: () => {
+          setIsOpen(true)
+        },
+      },
+    ],
+    []
+  )
+
+  useRegisterActions(kbarActions)
 
   return (
     <>

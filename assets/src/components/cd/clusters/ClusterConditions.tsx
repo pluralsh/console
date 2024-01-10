@@ -55,7 +55,7 @@ export const ColStatus = columnHelper.accessor((row) => row?.status, {
             lStatus === 'true'
               ? 'success'
               : lStatus === 'false'
-              ? 'error'
+              ? 'danger'
               : 'neutral'
           }
         >
@@ -140,9 +140,13 @@ export function ClusterConditions({
 
 export function ClusterConditionsTable({
   cluster,
+  ...props
 }: {
   cluster: Nullable<ClustersRowFragment>
-}) {
+} & Omit<
+  ComponentProps<typeof Table>,
+  'columns' | 'data' | 'reactTableOptions'
+>) {
   return (
     <Table
       columns={columns}
@@ -152,6 +156,7 @@ export function ClusterConditionsTable({
           return originalRow.type ?? i
         },
       }}
+      {...props}
     />
   )
 }

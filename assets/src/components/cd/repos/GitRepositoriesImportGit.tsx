@@ -17,12 +17,15 @@ import {
   SetStateAction,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
+import { Priority, useRegisterActions } from 'kbar'
 
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { PaletteSection } from 'components/CommandPalette'
 
 import ModalAlt, { StepH } from '../ModalAlt'
 import { PrepareGitStep } from '../PrepareGitStep'
@@ -31,6 +34,24 @@ import SshKeyUpload from '../utils/SshKeyUpload'
 export function ImportGit({ refetch }: { refetch: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
   const closeModal = useCallback(() => setIsOpen(false), [])
+  const kbarActions = useMemo(
+    () => [
+      {
+        section: PaletteSection.Actions,
+        id: `import-git-repo`,
+        priority: Priority.HIGH,
+        name: `Import Git repository`,
+        icon: <GitHubLogoIcon />,
+        shortcut: [],
+        perform: () => {
+          setIsOpen(true)
+        },
+      },
+    ],
+    []
+  )
+
+  useRegisterActions(kbarActions)
 
   return (
     <>

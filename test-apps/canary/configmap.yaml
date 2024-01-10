@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: podinfo-configmap
+data:
+  config.yaml: |-
+    # http settings
+    http-client-timeout: 1m
+    http-server-timeout: 30s
+    http-server-shutdown-timeout: 5s

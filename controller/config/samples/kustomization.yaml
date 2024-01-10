@@ -1,0 +1,6 @@
+## Append samples of your project ##
+resources:
+- provider_aws_readonly.yaml
+- git_repository.yaml
+- cluster_byok.yaml
+- service_deployment.yaml

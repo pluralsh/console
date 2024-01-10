@@ -48,14 +48,14 @@ export default function LogsDownloader({ query, repo }) {
     <>
       <IconFrame
         icon={<DownloadIcon />}
+        size="medium"
         tooltip
         tooltipProps={{ placement: 'bottom' }}
         clickable
         textValue="Download logs"
         type="secondary"
         onClick={() => setOpen(true)}
-        height={40}
-        width={40}
+        css={{ width: 40, height: 40 }}
       />
       <Modal
         header="Download logs"

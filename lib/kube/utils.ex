@@ -62,6 +62,16 @@ defmodule Kube.Utils do
     |> Kazan.run()
   end
 
+  @spec create_secret(binary, binary, %{binary => binary}) :: secret_resp
+  def create_secret(ns, name, data) do
+    %CoreV1.Secret{
+      metadata: %MetaV1.ObjectMeta{namespace: ns, name: name},
+      data: Map.new(data, fn {k, v} -> {k, Base.encode64(v)} end)
+    }
+    |> CoreV1.create_namespaced_secret!(ns)
+    |> Kazan.run()
+  end
+
   @spec copy_secret(binary, binary, binary) :: secret_resp
   def copy_secret(ns, name, new_name) do
     with {:ok, secret} <- get_secret(ns, name) do

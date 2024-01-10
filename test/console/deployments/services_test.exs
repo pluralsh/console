@@ -766,6 +766,38 @@ defmodule Console.Deployments.ServicesTest do
       assert error.source == "sync"
     end
 
+    test "it will revert proceed state when relevant" do
+      service = insert(:service, promotion: :proceed)
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :paused,
+          synced: true,
+          group: "networking.k8s.io",
+          version: "v1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api"
+        }],
+      }, service)
+
+      assert refetch(service).promotion == :proceed
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :running,
+          synced: true,
+          group: "networking.k8s.io",
+          version: "v1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api"
+        }],
+      }, service)
+
+      assert refetch(service).promotion == :ignore
+    end
+
     test "it will persist api deprecations if found" do
       service = insert(:service)
 
@@ -884,6 +916,25 @@ defmodule Console.Deployments.ServicesAsyncTest do
     end
   end
 
+  describe "#proceed/1" do
+    test "it will mark a service as being able to proceed and set status to stale" do
+      user = insert(:user)
+      service = insert(:service, status: :paused, write_bindings: [%{user_id: user.id}])
+
+      {:ok, svc} = Services.proceed(service, user)
+
+      assert svc.promotion == :proceed
+      assert svc.status == :paused
+    end
+
+    test "non-writers cannot proceed services" do
+      user = insert(:user)
+      service = insert(:service, status: :paused)
+
+      {:error, _} = Services.proceed(service, user)
+    end
+  end
+
   describe "#tarstream/1" do
     test "it can fetch a chart for a helm service" do
       svc = insert(:service, helm: %{chart: "podinfo", version: "5.0", repository: %{name: "podinfo", namespace: "helm-charts"}})
@@ -919,12 +970,12 @@ defmodule Console.Deployments.ServicesAsyncTest do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       svc = insert(:service,
         repository: git,
-        git: %{ref: "master", folder: "charts/console"},
+        git: %{ref: "master", folder: "test-apps/helm-values"},
         helm: %{
           chart: "podinfo",
           version: "5.0",
           repository: %{name: "podinfo", namespace: "helm-charts"},
-          values_files: ["values.yaml"]
+          values_files: ["values-podinfo.yaml"]
         }
       )
 
@@ -940,7 +991,7 @@ defmodule Console.Deployments.ServicesAsyncTest do
       {:ok, content} = Tar.tar_stream(f)
       content = Map.new(content)
 
-      assert content["values.yaml"] =~ "dkr.plural.sh"
+      assert content["values-podinfo.yaml"] =~ "tag: 6.0.0"
     end
   end
 end

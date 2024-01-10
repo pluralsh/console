@@ -1,20 +1,31 @@
 defmodule Loki.Client do
   alias Loki.{Response, Data, Result, Value}
+  alias Console.Schema.DeploymentSettings.Connection
+
+  def host(%Connection{host: h}) when is_binary(h), do: h
+  def host(_), do: host()
+
+  def auth(%Connection{user: u, password: p}) when is_binary(u) and is_binary(p) do
+    [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)}]
+  end
+  def auth(_), do: []
 
   def host(), do: Application.get_env(:console, :loki)
 
-  def query(query, start_ts, end_ts, limit) do
+  def query(client \\ nil, query, start_ts, end_ts, limit) do
     query = URI.encode_query(%{"query" => query, "start" => start_ts, "end" => end_ts, "limit" => limit})
 
-    host()
+    host(client)
     |> Path.join("/loki/api/v1/query_range?#{query}")
-    |> HTTPoison.get(headers())
+    |> HTTPoison.get(headers() ++ auth(client))
     |> case do
       {:ok, %{body: body, status_code: 200}} ->
         {:ok, body
               |> Poison.decode(as: %Response{data: %Data{result: [%Result{}]}})
               |> convert()}
-      error -> error
+      error ->
+        IO.inspect(error)
+        {:error, "loki error"}
     end
   end
 

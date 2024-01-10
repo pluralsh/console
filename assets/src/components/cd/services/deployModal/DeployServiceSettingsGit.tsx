@@ -4,16 +4,14 @@ import {
   GitHubLogoIcon,
   Input,
   ListBoxItem,
+  Select,
 } from '@pluralsh/design-system'
-import {
-  ChangeEvent,
-  Dispatch,
-  EventHandler,
-  SetStateAction,
-  useMemo,
-  useState,
-} from 'react'
+import { ChangeEvent, EventHandler, useMemo, useState } from 'react'
 import { compareItems, rankItem } from '@tanstack/match-sorter-utils'
+import useOnUnMount from 'components/hooks/useOnUnMount'
+import { InlineLink } from 'components/utils/typography/InlineLink'
+import { useGitRepositoryQuery } from 'generated/graphql'
+import { trimStart } from 'lodash'
 
 export function DeployServiceSettingsGit({
   repos,
@@ -26,15 +24,44 @@ export function DeployServiceSettingsGit({
 }: {
   repos: any
   repositoryId: string
-  setRepositoryId: Dispatch<SetStateAction<string>>
+  setRepositoryId: (repositoryId: string) => void
   gitRef: string
-  setGitRef: Dispatch<SetStateAction<string>>
+  setGitRef: (gitRef: string) => void
   gitFolder: string
-  setGitFolder: Dispatch<SetStateAction<string>>
+  setGitFolder: (gitFolder: string) => void
 }) {
+  useOnUnMount(() => {
+    if (!(repositoryId && gitRef && gitFolder)) {
+      setRepoId('')
+      setGitFolder('')
+      setGitRef('')
+    }
+  })
+
+  const { data } = useGitRepositoryQuery({
+    variables: { id: repositoryId },
+  })
+
   return (
     <>
-      <FormField label="Connect your repository">
+      <FormField
+        label="Connect your repository"
+        {...(repositoryId
+          ? {
+              caption: (
+                <InlineLink
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setRepoId('')
+                  }}
+                >
+                  Deselect
+                </InlineLink>
+              ),
+            }
+          : {})}
+      >
         <RepositorySelector
           repositories={repos}
           repositoryId={repositoryId}
@@ -45,8 +72,9 @@ export function DeployServiceSettingsGit({
         <>
           <ServiceGitRefField
             required
+            refs={data?.gitRepository?.refs}
             value={gitRef}
-            onChange={(e) => setGitRef(e.currentTarget.value)}
+            setValue={setGitRef}
           />
           <ServiceGitFolderField
             required
@@ -59,14 +87,19 @@ export function DeployServiceSettingsGit({
   )
 }
 
+const cleanRefs = (refs: string[] | null) =>
+  (refs || []).map((ref) => trimStart(trimStart(ref, '/'), 'refs/heads/'))
+
 export function ServiceGitRefField({
+  refs,
   value,
-  onChange,
+  setValue,
   required,
 }: {
   value: string
-  onChange: EventHandler<ChangeEvent<HTMLInputElement>>
+  setValue: (ref: string) => void
   required?: boolean
+  refs?: string[] | null
 }) {
   return (
     <FormField
@@ -74,10 +107,26 @@ export function ServiceGitRefField({
       required={required}
       hint="Branch name, tag name, or commit SHA"
     >
-      <Input
-        value={value}
-        onChange={onChange}
-      />
+      {refs && (
+        <Select
+          label="Select a branch or tag"
+          selectedKey={value}
+          onSelectionChange={(ref) => setValue(ref as string)}
+        >
+          {cleanRefs(refs).map((ref) => (
+            <ListBoxItem
+              key={ref}
+              label={ref}
+            />
+          ))}
+        </Select>
+      )}
+      {!refs && (
+        <Input
+          value={value}
+          onChange={(e) => setValue(e.currentTarget.value)}
+        />
+      )}
     </FormField>
   )
 }
@@ -134,7 +183,7 @@ export function RepositorySelector({
     [comboBoxInput, repositories]
   )
 
-  const comboBox = (
+  return (
     <ComboBox
       inputValue={comboBoxInput}
       onInputChange={(inputVal) => setComboBoxInput(inputVal)}
@@ -166,6 +215,4 @@ export function RepositorySelector({
       ))}
     </ComboBox>
   )
-
-  return comboBox
 }

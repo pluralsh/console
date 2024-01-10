@@ -1,14 +1,6 @@
 import { Children, useMemo } from 'react'
-import ReactMarkdown from 'react-markdown'
-import {
-  type CodeProps,
-  type LiProps,
-  type UnorderedListProps,
-} from 'react-markdown/lib/ast-to-react'
+import ReactMarkdown, { type ExtraProps } from 'react-markdown'
 import styled from 'styled-components'
-
-// import { InlineCode, Code as MultilineCode } from '@pluralsh/design-system'
-import { Merge } from 'type-fest'
 
 type MarkdownProps = {
   text: string
@@ -58,7 +50,7 @@ function MdInlineCode({
   inline: _inline,
   children,
   ...props
-}: CodeProps) {
+}: any) {
   const stringChild = getLastStringChild(children) || ''
 
   return <MarkdownInlineCodeSC {...props}>{stringChild}</MarkdownInlineCodeSC>
@@ -92,7 +84,7 @@ function MdPre({
   inline: _inline,
   children,
   ...props
-}: CodeProps) {
+}: ExtraProps & Record<string, any>) {
   //   let lang
   //   const className = (children as any)?.[0]?.props?.className
 
@@ -116,16 +108,12 @@ const MdListSC = styled.ul.withConfig(commonCfg)(({ theme }) => ({
 
 // eslint-disable-next-line react/function-component-definition
 const MdList = ({
+  node: _node,
   depth: _depth,
   ordered,
   className: _className,
   ...props
-}: Merge<
-  UnorderedListProps,
-  {
-    ordered: boolean
-  }
->) => (
+}: ExtraProps & Record<string, any>) => (
   <MdListSC
     {...props}
     as={ordered ? 'ol' : 'ul'}
@@ -153,7 +141,7 @@ function MdLi({
   checked: _checked,
   children,
   ...props
-}: LiProps) {
+}: any) {
   return (
     <MdLiSC {...props}>
       <div className="index">
@@ -176,7 +164,7 @@ const MdASC = styled.a.withConfig(commonCfg)(({ theme }) => ({
   ...theme.partials.text.inlineLink,
 }))
 
-function MdA({ node: _node, ...props }) {
+function MdA({ node: _node, ...props }: ExtraProps) {
   return (
     <MdASC
       {...props}

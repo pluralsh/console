@@ -1,0 +1,6 @@
+apiVersion: v2
+name: system-upgrade-controller
+description: chart for managing the k3s and rke system upgrade controller
+type: application
+version: 0.1.1
+appVersion: "v0.13.1"

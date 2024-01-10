@@ -1,7 +1,6 @@
-import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
-import { ClusterTinyFragment } from 'generated/graphql'
-import { Dispatch, SetStateAction, useEffect, useRef } from 'react'
-import ProviderIcon from 'components/utils/Provider'
+import { FormField, Input } from '@pluralsh/design-system'
+import { useEffect, useRef } from 'react'
+import ClusterSelector from 'components/cd/utils/ClusterSelector'
 
 export function DeployServiceSettingsBasic({
   name,
@@ -10,19 +9,17 @@ export function DeployServiceSettingsBasic({
   setNamespace,
   clusterId,
   setClusterId,
-  clusters,
+  showClusterSelector,
 }: {
   name: string
-  setName: Dispatch<SetStateAction<string>>
+  setName: (name: string) => void
   namespace: string
-  setNamespace: Dispatch<SetStateAction<string>>
-
+  setNamespace: (namespace: string) => void
   clusterId: string
-  setClusterId: Dispatch<SetStateAction<string>>
-  clusters: ClusterTinyFragment[]
+  setClusterId: (clusterId: string) => void
+  showClusterSelector: boolean
 }): any {
   const inputRef = useRef<HTMLInputElement>()
-  const selectedCluster = clusters.find(({ id }) => clusterId === id)
 
   useEffect(() => {
     inputRef.current?.focus?.()
@@ -49,39 +46,22 @@ export function DeployServiceSettingsBasic({
           onChange={(e) => setNamespace(e.currentTarget.value)}
         />
       </FormField>
-      <FormField
-        required
-        label="Cluster"
-      >
-        <Select
-          label="Select cluster"
-          leftContent={
-            selectedCluster && (
-              <ProviderIcon
-                provider={selectedCluster.provider?.cloud || ''}
-                width={16}
-              />
-            )
-          }
-          selectedKey={clusterId || ''}
-          onSelectionChange={(key) => {
-            setClusterId(key as any)
-          }}
+      {showClusterSelector && (
+        <FormField
+          required
+          label="Cluster"
         >
-          {(clusters || []).map((cluster) => (
-            <ListBoxItem
-              key={cluster.id}
-              label={cluster.name}
-              leftContent={
-                <ProviderIcon
-                  provider={cluster.provider?.cloud || ''}
-                  width={16}
-                />
+          <ClusterSelector
+            clusterId={clusterId}
+            allowDeselect={false}
+            onClusterChange={(c) => {
+              if (c?.id) {
+                setClusterId(c.id)
               }
-            />
-          ))}
-        </Select>
-      </FormField>
+            }}
+          />
+        </FormField>
+      )}
     </>
   )
 }

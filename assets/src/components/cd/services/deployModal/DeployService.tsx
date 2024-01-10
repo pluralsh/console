@@ -2,13 +2,16 @@ import {
   Button,
   GearTrainIcon,
   GitHubIcon,
+  GitPullIcon,
   ListIcon,
   PadlockLockedIcon,
   Stepper,
 } from '@pluralsh/design-system'
+import { Priority, useRegisterActions } from 'kbar'
+
 import {
+  ClusterTinyFragment,
   NamespacedName,
-  useClustersTinyQuery,
   useCreateServiceDeploymentMutation,
   useGitRepositoriesQuery,
 } from 'generated/graphql'
@@ -24,6 +27,8 @@ import {
 } from 'components/cd/utils/RepoKindSelector'
 import ModalAlt from 'components/cd/ModalAlt'
 
+import { PaletteSection } from 'components/CommandPalette'
+
 import { DeployServiceSettingsGit } from './DeployServiceSettingsGit'
 import { DeployServiceSettingsBasic } from './DeployServiceSettingsBasic'
 import {
@@ -31,7 +36,7 @@ import {
   Secret,
 } from './DeployServiceSettingsSecrets'
 import DeployServiceSettingsHelm from './DeployServiceSettingsHelm'
-import { DeployServiceSettingsHelmValues } from './DeployServiceSettingsHelmValues'
+import { ServiceSettingsHelmValues } from './DeployServiceSettingsHelmValues'
 
 enum FormState {
   Initial = 'initial',
@@ -95,14 +100,18 @@ export function DeployServiceModal({
   open,
   onClose,
   refetch,
+  cluster: clusterProp,
 }: {
   open: boolean
   onClose: () => void
   refetch: () => void
+  cluster?: Nullable<ClusterTinyFragment>
 }) {
   const theme = useTheme()
   const [formState, setFormState] = useState<FormState>(FormState.Initial)
-  const [clusterId, setClusterId] = useState('')
+  const [clusterId, setClusterId] = useState(
+    clusterProp?.id ? clusterProp?.id : ''
+  )
   const [name, setName] = useState('')
   const [repositoryId, setRepositoryId] = useState('')
   const [helmRepository, setHelmRepository] = useState<NamespacedName | null>(
@@ -153,12 +162,6 @@ export function DeployServiceModal({
     })
 
   const { data: reposData } = useGitRepositoriesQuery()
-
-  const { data: clustersData } = useClustersTinyQuery()
-  const clusters = useMemo(
-    () => mapExistingNodes(clustersData?.clusters),
-    [clustersData?.clusters]
-  )
 
   const allowDeploy =
     formState === FormState.Secrets &&
@@ -250,12 +253,12 @@ export function DeployServiceModal({
     (step) => step.key === formState
   )
 
-  const initialLoading = !repos || !clusters
+  const initialLoading = !repos
 
   return (
     <ModalAlt
       css={{ '&& .form': { gap: 0 } }}
-      header="Deploy service"
+      header={`Deploy service${clusterProp ? ` to ${clusterProp.name}` : ''}`}
       open={open}
       portal
       onClose={onClose}
@@ -388,13 +391,17 @@ export function DeployServiceModal({
               setNamespace,
               clusterId,
               setClusterId,
-              clusters,
+              showClusterSelector: !clusterProp,
             }}
           />
         ) : formState === FormState.Repository ? (
           <RepoKindSelector
             onKindChange={setRepoTab}
             selectedKind={repoTab}
+            validKinds={{
+              [RepoKind.Git]: hasGitRepo && gitSettingsValid,
+              [RepoKind.Helm]: hasHelmRepo && helmSettingsValid,
+            }}
           >
             <div
               css={{
@@ -430,7 +437,7 @@ export function DeployServiceModal({
             </div>
           </RepoKindSelector>
         ) : formState === FormState.HelmValues ? (
-          <DeployServiceSettingsHelmValues
+          <ServiceSettingsHelmValues
             helmValues={helmValues}
             setHelmValues={setHelmValues}
             helmValuesFiles={helmValuesFiles}
@@ -457,8 +464,32 @@ export function DeployServiceModal({
   )
 }
 
-export function DeployService({ refetch }: { refetch: () => void }) {
+export function DeployService({
+  refetch,
+  cluster,
+}: {
+  refetch: () => void
+  cluster?: ClusterTinyFragment
+}) {
   const [isOpen, setIsOpen] = useState(false)
+  const kbarActions = useMemo(
+    () => [
+      {
+        section: PaletteSection.Actions,
+        id: `deploy-service`,
+        priority: Priority.HIGH,
+        name: `Deploy new service${cluster ? ` to ${cluster.name}` : ''}`,
+        icon: <GitPullIcon />,
+        shortcut: [],
+        perform: () => {
+          setIsOpen(true)
+        },
+      },
+    ],
+    [cluster]
+  )
+
+  useRegisterActions(kbarActions, [kbarActions])
 
   return (
     <>
@@ -472,6 +503,7 @@ export function DeployService({ refetch }: { refetch: () => void }) {
       </Button>
       <ModalMountTransition open={isOpen}>
         <DeployServiceModal
+          cluster={cluster}
           refetch={refetch}
           open={isOpen}
           onClose={() => setIsOpen(false)}

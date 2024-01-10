@@ -22,6 +22,11 @@ defmodule Console.Deployments.Services do
     |> Repo.get_by!(name: name)
   end
 
+  def get_service_by_handle(handle, name) do
+    Service.for_cluster_handle(handle)
+    |> Repo.get_by(name: name)
+  end
+
   def get_revision!(id), do: Repo.get!(Revision, id)
 
   def tarball(%Service{id: id}), do: api_url("v1/git/tarballs?id=#{id}")
@@ -226,9 +231,9 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:create, fn %{source: source, config: config} ->
       Map.take(source, [:repository_id, :sha, :name, :namespace])
-      |> Console.dedupe(:git, source.git && %{ref: source.git.ref, folder: source.git.folder})
-      |> Console.dedupe(:helm, source.helm && Console.mapify(source.helm))
-      |> Console.dedupe(:kustomize, source.kustomize && Console.mapify(source.kustomize))
+      |> Console.dedupe(:git, Console.mapify(source.git))
+      |> Console.dedupe(:helm, Console.mapify(source.helm))
+      |> Console.dedupe(:kustomize, Console.mapify(source.kustomize))
       |> Map.merge(attrs)
       |> Map.put(:configuration, config)
       |> create_service(cluster_id, user)
@@ -291,8 +296,8 @@ defmodule Console.Deployments.Services do
     |> add_operation(:revision, fn %{base: base} ->
       add_version(%{sha: sha, message: msg}, base.version)
       |> Console.dedupe(:git, base.git && %{ref: sha, folder: base.git.folder})
-      |> Console.dedupe(:helm, base.helm && Console.mapify(base.helm))
-      |> Console.dedupe(:kustomize, base.kustomize && Console.mapify(base.kustomize))
+      |> Console.dedupe(:helm, Console.mapify(base.helm))
+      |> Console.dedupe(:kustomize, Console.mapify(base.kustomize))
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)
         Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
@@ -332,9 +337,9 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:revision, fn %{base: base} ->
       add_version(attrs, base.version)
-      |> Console.dedupe(:git, base.git && Console.mapify(base.git))
-      |> Console.dedupe(:helm, base.helm && Console.mapify(base.helm))
-      |> Console.dedupe(:kustomize, base.kustomize && Console.mapify(base.kustomize))
+      |> Console.dedupe(:git, Console.mapify(base.git))
+      |> Console.dedupe(:helm, Console.mapify(base.helm))
+      |> Console.dedupe(:kustomize, Console.mapify(base.kustomize))
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)
         Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
@@ -358,7 +363,7 @@ defmodule Console.Deployments.Services do
     else
       err ->
         Logger.info "failed to fetch docs tarball: #{inspect(err)}"
-        {:error, "could not fetch docs"}
+        {:ok, []}
     end
   end
   def docs(_), do: {:ok, []}
@@ -385,9 +390,9 @@ defmodule Console.Deployments.Services do
         status: :stale,
         revision_id: rev.id,
         sha: rev.sha,
-        git: rev.git && Map.take(rev.git, [:ref, :folder]),
-        helm: rev.helm && Console.mapify(rev.helm),
-        kustomize: rev.kustomize && Console.mapify(rev.kustomize),
+        git: Console.mapify(rev.git),
+        helm: Console.mapify(rev.helm),
+        kustomize: Console.mapify(rev.kustomize),
       })
       |> Repo.update()
     end)
@@ -396,10 +401,37 @@ defmodule Console.Deployments.Services do
   end
 
   @doc """
+  Marks a service as being able to proceed to the next stage of a canary deployment
+  """
+  @spec proceed(:proceed | :rollback, Service.t, User.t) :: service_resp
+  def proceed(promotion \\ :proceed, %Service{} = service, %User{} = user) do
+    service
+    |> Ecto.Changeset.change(%{promotion: promotion})
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
+  Determine if a canary can proceed for a service
+  """
+  @spec proceed?(Service.t) :: boolean
+  def proceed?(%Service{promotion: :proceed}), do: true
+  def proceed?(_), do: false
+
+
+  @doc """
+  Determine if a canary should be forcibly rolled back
+  """
+  @spec rollback?(Service.t) :: boolean
+  def rollback?(%Service{promotion: :rollback}), do: true
+  def rollback?(_), do: false
+
+  @doc """
   Updates the list of service components, separate operation to avoid creating a no-op revision
   """
   @spec update_components(map, binary | Service.t) :: service_resp
   def update_components(attrs, %Service{} = service) do
+    Logger.info "updating components for #{service.id}"
     start_transaction()
     |> add_operation(:service, fn _ ->
       svc = Console.Repo.preload(service, [:components, :errors])
@@ -412,13 +444,15 @@ defmodule Console.Deployments.Services do
     |> add_operation(:updated, fn %{service: %Service{components: components} = service} ->
       running = Enum.all?(components, & &1.state == :running || is_nil(&1.state))
       failed = Enum.any?(components, & &1.state == :failed)
+      paused = Enum.any?(components, & &1.state == :paused)
       unsynced = Enum.any?(components, & !&1.synced)
       num_healthy = Enum.count(components, & (&1.state == :running || is_nil(&1.state)) && &1.synced)
       component_status = "#{num_healthy} / #{length(components)}"
-      case {failed, running, unsynced} do
-        {true, _, _} -> update_status(service, :failed, component_status)
-        {_, _, true} -> update_status(service, :stale, component_status)
-        {_, true, _} -> update_status(service, :healthy, component_status)
+      case {failed, paused, running, unsynced} do
+        {true, _, _, _} -> update_status(service, :failed, component_status)
+        {_, true, _, _} -> update_status(service, :paused, component_status)
+        {_, _, _, true} -> update_status(service, :stale, component_status)
+        {_, _, true, _} -> update_status(service, :healthy, component_status)
         _ -> update_status(service, :stale, component_status)
       end
     end)
@@ -434,15 +468,18 @@ defmodule Console.Deployments.Services do
       do: update_components(attrs, svc)
   end
 
-  defp stabilize(%{components: new_components} = attrs, %{components: components}) do
+  def stabilize(%{components: new_components} = attrs, %{components: components}) do
     components = Map.new(components, fn %{id: id} = comp -> {component_key(comp), id} end)
     new_components = Enum.map(new_components, &Map.put(&1, :id, components[component_key(&1)]))
     Map.put(attrs, :components, new_components)
   end
-  defp stabilize(attrs, _), do: attrs
+  def stabilize(attrs, _), do: attrs
 
-  defp component_key(%{group: g, version: v, kind: k, namespace: ns, name: n}), do: {g, v, k, ns, n}
+  defp component_key(%{group: g, version: v, kind: k, namespace: ns, name: n}), do: {nilify(g), v, k, nilify(ns), n}
   defp component_key(_), do: nil
+
+  defp nilify(""), do: nil
+  defp nilify(v), do: v
 
   @doc """
   Find and insert any deprecations for this service's components
@@ -587,9 +624,12 @@ defmodule Console.Deployments.Services do
   end
 
   defp update_status(%Service{} = svc, status, component_status) do
-    Ecto.Changeset.change(svc, %{status: status, component_status: component_status})
+    Ecto.Changeset.change(svc, revert_proceed(%{status: status, component_status: component_status}, status))
     |> Repo.update()
   end
+
+  defp revert_proceed(args, :paused), do: args
+  defp revert_proceed(args, _), do: Map.put(args, :promotion, :ignore)
 
   def api_url(path) do
     Path.join([Console.conf(:ext_url), "ext", path])

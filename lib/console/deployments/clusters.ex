@@ -18,7 +18,8 @@ defmodule Console.Deployments.Clusters do
     DeployToken,
     ClusterRevision,
     ProviderCredential,
-    RuntimeService
+    RuntimeService,
+    AgentMigration
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -47,6 +48,8 @@ defmodule Console.Deployments.Clusters do
 
   def get_provider_by_name(name), do: Console.Repo.get_by(ClusterProvider, name: name)
 
+  def get_provider_by_cloud(name), do: Console.Repo.get_by(ClusterProvider, cloud: name)
+
   def get_cluster_by_handle(handle), do: Console.Repo.get_by(Cluster, handle: handle)
 
   def get_cluster_by_handle!(handle), do: Console.Repo.get_by!(Cluster, handle: handle)
@@ -58,9 +61,9 @@ defmodule Console.Deployments.Clusters do
   end
 
   @spec control_plane(Cluster.t) :: Kazan.Server.t | {:error, term}
-  def control_plane(%Cluster{id: id, self: true}), do: Kazan.Server.in_cluster()
-  def control_plane(%Cluster{id: id, kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
-  def control_plane(%Cluster{id: id} = cluster), do: control_plane(cluster, Users.console(), %{"cached" => true})
+  def control_plane(%Cluster{self: true}), do: Kazan.Server.in_cluster()
+  def control_plane(%Cluster{kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
+  def control_plane(%Cluster{} = cluster), do: control_plane(cluster, Users.console(), %{"cached" => true})
 
   def control_plane(%Cluster{id: id}, %User{} = user, claims \\ %{}) do
     with {:ok, token, _} <- Console.Guardian.encode_and_sign(user, claims) do
@@ -309,7 +312,7 @@ defmodule Console.Deployments.Clusters do
     start_transaction()
     |> add_operation(:cluster, fn _ ->
       get_cluster!(id)
-      |> Console.Repo.preload([:node_pools, :service])
+      |> Console.Repo.preload([:node_pools, :service, :tags])
       |> Cluster.changeset(attrs)
       |> allow(user, :write)
       |> when_ok(:update)
@@ -394,6 +397,7 @@ defmodule Console.Deployments.Clusters do
     get_cluster(id)
     |> Cluster.ping_changeset(attrs)
     |> Repo.update()
+    |> notify(:ping)
   end
 
   @doc """
@@ -572,6 +576,35 @@ defmodule Console.Deployments.Clusters do
     |> notify(:update, user)
   end
 
+  def create_agent_migration(attrs, %User{} = user) do
+    %AgentMigration{}
+    |> AgentMigration.changeset(attrs)
+    |> allow(user, :create)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  def apply_migration(%AgentMigration{id: id, ref: ref} = migration) when is_binary(ref) do
+    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    Service.agent()
+    |> Service.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn svc ->
+      Logger.info "applying agent migration #{id} for #{svc.id}"
+      Services.update_service(%{git: %{ref: ref, folder: svc.git.folder}}, svc.id, bot)
+    end)
+    |> Stream.run()
+
+    complete_migration(migration)
+  end
+  def apply_migration(%AgentMigration{} = migration), do: complete_migration(migration)
+  def apply_migration(_), do: :ok
+
+  defp complete_migration(%AgentMigration{} = migration) do
+    AgentMigration.changeset(migration, %{completed: true})
+    |> Repo.update()
+  end
+
   @spec runtime_services(Cluster.t | binary) :: [RuntimeService.t]
   def runtime_services(%Cluster{id: id}), do: runtime_services(id)
   def runtime_services(id) when is_binary(id) do
@@ -595,7 +628,9 @@ defmodule Console.Deployments.Clusters do
   """
   @spec create_runtime_services([map], binary, Cluster.t) :: {:ok, integer} | Console.error
   def create_runtime_services(svcs, service_id, %Cluster{id: id}) do
-    replace = if is_nil(service_id), do: [:name, :version], else: [:name, :version, :service_id]
+    replace = if is_nil(service_id),
+                do: [:name, :version],
+                else: [:name, :version, :service_id]
     Enum.filter(svcs, fn
       %{name: n} -> Table.fetch(n)
       _ -> false
@@ -618,6 +653,7 @@ defmodule Console.Deployments.Clusters do
           on_conflict: {:replace, replace},
           conflict_target: [:cluster_id, :name]
         )
+        Logger.info "persisted #{count} runtime services out of #{length(services)} sent"
         {:ok, count}
 
       _ -> {:ok, 0}
@@ -753,6 +789,10 @@ defmodule Console.Deployments.Clusters do
     |> Repo.update()
   end
 
+  defp notify({:ok, %Cluster{} = cluster}, :ping),
+    do: handle_notify(PubSub.ClusterPinged, cluster)
+  defp notify(pass, _), do: pass
+
   defp notify({:ok, %Cluster{} = cluster}, :create, user),
     do: handle_notify(PubSub.ClusterCreated, cluster, actor: user)
   defp notify({:ok, %Cluster{} = cluster}, :update, user),
@@ -771,6 +811,9 @@ defmodule Console.Deployments.Clusters do
     do: handle_notify(PubSub.ProviderCredentialCreated, prov, actor: user)
   defp notify({:ok, %ProviderCredential{} = prov}, :delete, user),
     do: handle_notify(PubSub.ProviderCredentialDeleted, prov, actor: user)
+
+  defp notify({:ok, %AgentMigration{} = migration}, :create, user),
+    do: handle_notify(PubSub.AgentMigrationCreated, migration, actor: user)
 
   defp notify(pass, _, _), do: pass
 end

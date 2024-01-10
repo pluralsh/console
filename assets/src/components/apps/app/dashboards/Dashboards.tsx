@@ -52,8 +52,10 @@ export default function Dashboards() {
       {dashboards?.length < 1 && (
         <Flex justify="center">
           <EmptyState
-            marginTop={96}
-            width={500}
+            css={{
+              marginTop: 96,
+              width: 500,
+            }}
             icon={<DashboardIcon size={64} />}
             message="No dashboards available"
             description={

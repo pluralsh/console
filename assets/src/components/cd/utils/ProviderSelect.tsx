@@ -1,6 +1,6 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import ProviderIcon, { getProviderIconURL } from 'components/utils/Provider'
+import ProviderIcon, { getProviderIconUrl } from 'components/utils/Provider'
 import { SelectProps } from '@pluralsh/design-system/dist/components/Select'
 
 import { ReactNode } from 'react'
@@ -45,7 +45,7 @@ export function ClusterProviderSelect({
               <img
                 width={16}
                 height={16}
-                src={getProviderIconURL(p.cloud, theme.mode === 'dark')}
+                src={getProviderIconUrl(p.cloud, theme.mode)}
               />
             )
           }

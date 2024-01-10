@@ -102,7 +102,7 @@ export function InstallAddOnModal({
   open,
   onClose,
 }: {
-  addOn: SetReqNonNull<ClusterAddOnFragment, 'name'>
+  addOn?: SetReqNonNull<ClusterAddOnFragment, 'name'>
   open: boolean
   onClose: Nullable<() => void>
 }) {
@@ -172,7 +172,7 @@ export function InstallAddOnModal({
   const [mutation, { loading, error }] = useInstallAddOnMutation({
     variables: {
       clusterId,
-      name: addOn.name,
+      name: addOn?.name ?? '',
       configuration: filteredConfiguration,
       ...(isGlobal ? { global: globalProps } : {}),
     },
@@ -191,13 +191,14 @@ export function InstallAddOnModal({
     ? formState === FormState.Global
     : formState === FormState.Basic
 
-  const initialPropsComplete = addOn.name && clusterId && configIsValid
+  const initialPropsComplete = addOn?.name && clusterId && configIsValid
   const globalPropsComplete = globalProps.name
 
   const allowSubmit =
-    formState === FormState.Basic
+    addOn &&
+    (formState === FormState.Basic
       ? initialPropsComplete
-      : initialPropsComplete && globalPropsComplete
+      : initialPropsComplete && globalPropsComplete)
 
   const onSubmit = useCallback(
     (e: FormEvent) => {
@@ -259,7 +260,7 @@ export function InstallAddOnModal({
             >
               Cancel
             </Button>
-            {addOn.global && formState === FormState.Basic && (
+            {addOn?.global && formState === FormState.Basic && (
               <div css={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
                 <Switch
                   onChange={(checked) => {
@@ -352,7 +353,7 @@ export function InstallAddOnModal({
               gap: theme.spacing.small,
             }}
           >
-            <Body2P>Successfully installed {addOn.name}.</Body2P>
+            <Body2P>Successfully installed {addOn?.name}.</Body2P>
             <Body2P>
               <InlineLink
                 as={Link}

@@ -6,6 +6,10 @@ import { useOutletContext } from 'react-router-dom'
 
 import { useTheme } from 'styled-components'
 
+import { IngressFragment } from 'generated/graphql'
+
+import IngressCertificates from './IngressCertificates'
+
 import {
   InfoSectionH2,
   InfoSectionH3,
@@ -69,15 +73,28 @@ function Routes({ rules }) {
   )
 }
 
-export default function Ingress() {
-  const theme = useTheme()
+export default function IngressOutlet() {
   const { data } = useOutletContext<any>()
 
-  if (!data?.ingress) return null
+  const ingress = data?.ingress as Nullable<IngressFragment>
 
-  const { ingress } = data
+  return <IngressBase ingress={ingress} />
+}
+
+export function IngressBase({
+  ingress,
+}: {
+  ingress: Nullable<IngressFragment>
+}) {
+  const theme = useTheme()
+
+  if (!ingress) return null
+
   const loadBalancer = ingress.status?.loadBalancer
-  const hasIngress = !!loadBalancer?.ingress && !isEmpty(loadBalancer.ingress)
+  const balancerIngress =
+    !!loadBalancer?.ingress && !isEmpty(loadBalancer.ingress)
+      ? loadBalancer.ingress
+      : null
   const rules = ingress.spec?.rules || []
 
   return (
@@ -88,7 +105,7 @@ export default function Ingress() {
         flexGrow: 1,
       }}
     >
-      {hasIngress && (
+      {balancerIngress && (
         <>
           <InfoSectionH2
             css={{
@@ -98,25 +115,21 @@ export default function Ingress() {
             Status
           </InfoSectionH2>
           <PaddedCard>
-            <PropWideBold
-              title={loadBalancer.ingress[0].ip ? 'IP' : 'Hostname'}
-            >
-              {loadBalancer.ingress[0].ip ||
-                loadBalancer.ingress[0].hostname ||
-                '-'}
+            <PropWideBold title={balancerIngress[0]?.ip ? 'IP' : 'Hostname'}>
+              {balancerIngress[0]?.ip || balancerIngress[0]?.hostname || '-'}
             </PropWideBold>
           </PaddedCard>
         </>
       )}
       <InfoSectionH2
         css={{
-          marginBottom: theme.spacing.medium,
           marginTop: theme.spacing.large,
         }}
       >
         Spec
       </InfoSectionH2>
       <Routes rules={rules} />
+      <IngressCertificates certificates={ingress.certificates} />
     </div>
   )
 }

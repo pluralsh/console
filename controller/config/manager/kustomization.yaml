@@ -1,0 +1,4 @@
+resources:
+- manager.yaml
+- service_account.yaml
+- secret.yaml

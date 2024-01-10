@@ -298,4 +298,25 @@ defmodule KubernetesScaffolds do
       status: %Kube.Cluster.Status{control_plane_ready: ready}
     }
   end
+
+  def plural_cluster(name, id) do
+    %Kube.PluralCluster{
+      metadata: %ObjectMeta{name: name, namespace: name},
+      status: %Kube.PluralCluster.Status{id: id}
+    }
+  end
+
+  def service_deployment(name, id) do
+    %Kube.ServiceDeployment{
+      metadata: %ObjectMeta{name: name, namespace: name},
+      status: %Kube.ServiceDeployment.Status{id: id}
+    }
+  end
+
+  def git_repository(name, id) do
+    %Kube.GitRepository{
+      metadata: %ObjectMeta{name: name, namespace: name},
+      status: %Kube.GitRepository.Status{id: id}
+    }
+  end
 end

@@ -44,7 +44,7 @@ export function ServiceSettings({
   )
 }
 
-function ChartUpdate({ repo, state, updateState }) {
+export function ChartUpdate({ repo, state, updateState }) {
   const { data } = useHelmRepositoryQuery({
     variables: {
       name: repo?.name || '',
@@ -178,13 +178,11 @@ export function ModalForm({
           gap: theme.spacing.medium,
         }}
       >
-        {!serviceDeployment.helm?.chart && (
+        {serviceDeployment.repository && (
           <>
             <ServiceGitRefField
               value={state.gitRef}
-              onChange={(e) => {
-                updateState({ gitRef: e.currentTarget.value })
-              }}
+              setValue={(ref) => updateState({ gitRef: ref })}
             />
             <ServiceGitFolderField
               value={state.gitFolder}

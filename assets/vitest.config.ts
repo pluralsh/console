@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 // https://vitest.dev/config/
 export default defineConfig({
@@ -11,19 +12,11 @@ export default defineConfig({
       dir: '../node_modules',
     },
   },
+  plugins: [tsconfigPaths() as any],
   optimizeDeps: {
     include: ['pluralsh-absinthe-socket-apollo-link'],
   },
   resolve: {
     mainFields: ['module'],
-    alias: {
-      components: 'components',
-      utils: 'utils',
-      generated: 'generated',
-      helpers: 'helpers',
-      routes: 'routes',
-      markdoc: 'markdoc',
-      theme: 'theme.ts',
-    },
   },
 })

@@ -1,14 +1,22 @@
 import { useTheme } from 'styled-components'
+import { type styledTheme } from '@pluralsh/design-system'
 
 import { Provider } from 'generated/graphql-plural'
 
-export const DEFAULT_CHART_ICON = '/chart.png'
-export const DEFAULT_GCP_ICON = '/gcp.png'
-export const DEFAULT_AZURE_ICON = '/azure.png'
-export const DEFAULT_AWS_ICON = '/aws.png'
-export const DEFAULT_EQUINIX_ICON = '/equinix-metal.png'
-export const DEFAULT_KIND_ICON = '/kind.png'
-export const DARK_AWS_ICON = '/aws-icon.png'
+export const CHART_ICON_DARK = '/providers/chart-icon.png'
+export const CHART_ICON_LIGHT = '/providers/chart-icon.png'
+export const GCP_ICON_DARK = '/providers/gcp-icon.png'
+export const GCP_ICON_LIGHT = '/providers/gcp-icon.png'
+export const AZURE_ICON_DARK = '/providers/azure-icon.png'
+export const AZURE_ICON_LIGHT = '/providers/azure-icon.png'
+export const EQUINIX_ICON_DARK = '/providers/equinix-icon.png'
+export const EQUINIX_ICON_LIGHT = '/providers/equinix-icon.png'
+export const KIND_ICON_DARK = '/providers/kind-icon.png'
+export const KIND_ICON_LIGHT = '/providers/kind-icon.png'
+export const AWS_ICON_DARK = '/providers/aws-icon-dark.png'
+export const AWS_ICON_LIGHT = '/providers/aws-icon-light.png'
+export const LINODE_ICON_DARK = '/providers/linode-icon.png'
+export const LINODE_ICON_LIGHT = '/providers/linode-icon.png'
 
 const ProviderNames = {
   aws: 'AWS',
@@ -19,6 +27,7 @@ const ProviderNames = {
   generic: 'Generic',
   custom: 'Custom',
   kubernetes: 'Kubernetes',
+  linode: 'Linode',
 } as const satisfies Record<Lowercase<Provider>, string>
 
 export function getProviderName(provider?: string | null) {
@@ -27,30 +36,26 @@ export function getProviderName(provider?: string | null) {
   return p && ProviderNames[p] ? ProviderNames[p] : 'BYOK'
 }
 
-export const ProviderIcons = {
-  GCP: DEFAULT_GCP_ICON,
-  AWS: DEFAULT_AWS_ICON,
-  AZURE: DEFAULT_AZURE_ICON,
-  EQUINIX: DEFAULT_EQUINIX_ICON,
-  KIND: DEFAULT_KIND_ICON,
-  GENERIC: DEFAULT_CHART_ICON,
-  CUSTOM: DEFAULT_CHART_ICON,
-  KUBERNETES: DEFAULT_CHART_ICON,
-} as const satisfies Record<Provider, string>
-
-export const DarkProviderIcons = {
-  AWS: DARK_AWS_ICON,
-}
-
-export function getProviderIconURL(
-  provider: string | null | undefined,
-  dark: boolean
-): string {
-  const p = provider ? provider.toUpperCase() : ''
-
-  return dark && DarkProviderIcons[p]
-    ? DarkProviderIcons[p]
-    : ProviderIcons[p] || DEFAULT_CHART_ICON
+export function getProviderIconUrl(
+  provider: string,
+  mode: typeof styledTheme.mode
+) {
+  return (
+    (
+      {
+        GCP: mode === 'light' ? GCP_ICON_LIGHT : GCP_ICON_DARK,
+        AWS: mode === 'light' ? AWS_ICON_LIGHT : AWS_ICON_DARK,
+        AZURE: mode === 'light' ? AZURE_ICON_LIGHT : AZURE_ICON_DARK,
+        EQUINIX: mode === 'light' ? EQUINIX_ICON_LIGHT : EQUINIX_ICON_DARK,
+        KIND: mode === 'light' ? KIND_ICON_LIGHT : KIND_ICON_DARK,
+        GENERIC: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
+        CUSTOM: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
+        KUBERNETES: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
+        LINODE: mode === 'light' ? LINODE_ICON_LIGHT : LINODE_ICON_DARK,
+      } as const satisfies Record<Provider, string>
+    )[provider?.toUpperCase()] ??
+    (mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK)
+  )
 }
 
 export default function ProviderIcon({
@@ -66,7 +71,7 @@ export default function ProviderIcon({
     <div css={{ display: 'flex', justifyContent: 'center', width }}>
       <img
         alt={getProviderName(provider) || provider}
-        src={getProviderIconURL(provider, theme.mode !== 'light')}
+        src={getProviderIconUrl(provider, theme.mode)}
         width={width}
       />
     </div>

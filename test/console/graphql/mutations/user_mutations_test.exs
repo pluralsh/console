@@ -393,4 +393,54 @@ defmodule Console.GraphQl.UserMutationsTest do
       assert refetch(token)
     end
   end
+
+  describe "createServiceAccount" do
+    test "admins can create service accounts" do
+      admin = admin_user()
+
+      {:ok, %{data: %{"createServiceAccount" => svc}}} = run_query("""
+        mutation create($attrs: ServiceAccountAttributes!) {
+          createServiceAccount(attributes: $attrs) { name }
+        }
+      """, %{"attrs" => %{"name" => "name", "email" => "someone@example.com"}}, %{current_user: admin})
+
+      assert svc["name"] == "name"
+    end
+
+    test "nonadmins cannot create service accounts" do
+      admin = insert(:user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation create($attrs: ServiceAccountAttributes!) {
+          createServiceAccount(attributes: $attrs) { name }
+        }
+      """, %{"attrs" => %{"name" => "name", "email" => "someone@example.com"}}, %{current_user: admin})
+    end
+  end
+
+  describe "createServiceAccountToken" do
+    test "admins can create service accounts" do
+      admin = admin_user()
+      svc = insert(:user, service_account: true)
+
+      {:ok, %{data: %{"createServiceAccountToken" => token}}} = run_query("""
+        mutation create($id: ID!) {
+          createServiceAccountToken(id: $id) { token }
+        }
+      """, %{"id" => svc.id}, %{current_user: admin})
+
+      assert token["token"]
+    end
+
+    test "nonadmins cannot create service accounts" do
+      admin = insert(:user)
+      svc = insert(:user, service_account: true)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation create($id: ID!) {
+          createServiceAccountToken(id: $id) { token }
+        }
+      """, %{"id" => svc.id}, %{current_user: admin})
+    end
+  end
 end

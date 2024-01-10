@@ -296,6 +296,19 @@ defmodule Console.Services.UsersTest do
       assert token.token
       assert token.user_id == user.id
     end
+
+    test "a user can create an access token with scopes" do
+      user = insert(:user)
+
+      {:ok, token} = Users.create_access_token(%{
+        scopes: [%{api: "updateServiceDeployment", identifier: Ecto.UUID.generate()}]
+      }, user)
+
+      assert token.token
+      assert token.user_id == user.id
+      [scope] = token.scopes
+      assert scope.api == "updateServiceDeployment"
+    end
   end
 
   describe "#delete_access_token/2" do

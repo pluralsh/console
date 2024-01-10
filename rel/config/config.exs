@@ -50,4 +50,8 @@ if get_env("GRAFANA_TENANT") do
   config :console, :grafana_tenant, get_env("GRAFANA_TENANT")
 end
 
+if get_env("CONSOLE_QPS") do
+  config :console, :qps, String.to_integer(get_env("CONSOLE_QPS"))
+end
+
 config :elixir, :ansi_enabled, true

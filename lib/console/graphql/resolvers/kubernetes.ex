@@ -60,6 +60,12 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> Kube.Utils.run()
   end
 
+  def resolve_daemon_set(%{namespace: ns, name: name}, _) do
+    Console.namespace(ns)
+    |> Apps.read_namespaced_daemon_set!(name)
+    |> Kube.Utils.run()
+  end
+
   def resolve_ingress(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
     |> Networking.read_namespaced_ingress!(name)
@@ -90,14 +96,21 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> Kube.Utils.run()
   end
 
-  def resolve_certificate(%{namespace: ns, name: name}, _) do
-    Client.get_certificate(ns, name)
-  end
+  def resolve_canary(%{namespace: ns, name: name}, _), do: Client.get_canary(ns, name)
+
+  def resolve_upgrade_plan(%{namespace: ns, name: name}, _), do: Client.get_upgrade_plan(ns, name)
+
+  ## plural cd resources
+  def resolve_plural_cluster(%{namespace: ns, name: name}, _), do: Client.get_plural_cluster(ns, name)
+  def resolve_git_repository(%{namespace: ns, name: name}, _), do: Client.get_git_repository(ns, name)
+  def resolve_service_deployment(%{namespace: ns, name: name}, _), do: Client.get_service_deployment(ns, name)
+
+  def resolve_certificate(%{namespace: ns, name: name}, _), do: Client.get_certificate(ns, name)
 
   def ingress_certificates(%{metadata: %{namespace: ns}, spec: %{tls: [_ | _] = tls}}) do
     names = MapSet.new(tls, & &1.secret_name)
     with {:ok, %{items: certs}} <- Client.list_certificate(ns) do
-      {:ok, %{items: Enum.filter(certs, &MapSet.member?(names, &1.metadata.name))}}
+      {:ok, Enum.filter(certs, &MapSet.member?(names, &1.metadata.name))}
     end
   end
   def ingress_certificates(_), do: {:ok, []}
@@ -275,7 +288,15 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   defp items_connection({:ok, %{items: items, metadata: %{continue: cursor}}}) do
     edges = Enum.map(items, &%{node: &1})
-    {:ok, %{edges: edges, page_info: %{end_cursor: cursor, has_next_page: is_binary(cursor) and byte_size(cursor) != 0}}}
+    {:ok, %{
+      edges: edges,
+      page_info: %{
+        end_cursor: cursor,
+        has_next_page: is_binary(cursor) and byte_size(cursor) != 0,
+        has_previous_page: false,
+      }
+    }
+  }
   end
   defp items_connection(err), do: err
 

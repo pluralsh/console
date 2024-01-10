@@ -1,5 +1,4 @@
 import { normalizeColor } from 'grommet/utils'
-import { randomColor } from 'randomcolor'
 import { useMemo } from 'react'
 
 export const COLORS = [
@@ -51,10 +50,6 @@ export function shadeColor(color, percent) {
   return `#${(0x1000000 + coerce(R) * 0x10000 + coerce(B) * 0x100 + coerce(G))
     .toString(16)
     .slice(1)}`
-}
-
-export function generateColor(i = -1) {
-  return i >= 0 && i < COLORS.length ? COLORS[i] : randomColor()
 }
 
 export function useColorMap(theme, colors = COLORS) {

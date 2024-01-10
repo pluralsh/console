@@ -2,5 +2,8 @@ dependencies:
 - name: test-base
   repository: https://pluralsh.github.io/module-library
   version: 0.1.10
-digest: sha256:c06b16641a45c3fb3c429b1d8cb5e61a860a58976b87b02b6e01c1826b10f13c
-generated: "2023-06-14T16:25:44.06288-04:00"
+- name: controller
+  repository: file://../../../charts/controller
+  version: 0.0.7
+digest: sha256:8ae24715ad930078db28561c1510638aff314655cde4ad555b81da1ce9af311d
+generated: "2024-01-08T17:51:34.983234308Z"

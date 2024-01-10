@@ -36,4 +36,72 @@ defmodule ConsoleWeb.GitControllerTest do
       |> response(403)
     end
   end
+
+  describe "#proceed" do
+    test "if a service has been marked it will 200", %{conn: conn} do
+      svc = insert(:service, promotion: :proceed)
+
+      conn
+      |> get("/ext/v1/gate/#{svc.id}")
+      |> response(200)
+
+      conn
+      |> get("/ext/v1/gate/#{svc.cluster.handle}/#{svc.name}")
+      |> response(200)
+
+      conn
+      |> post("/ext/v1/gate/#{svc.id}")
+      |> response(200)
+
+      conn
+      |> post("/ext/v1/gate/#{svc.cluster.handle}/#{svc.name}")
+      |> response(200)
+    end
+
+    test "if a service hasn't been marked it will 402", %{conn: conn} do
+      svc = insert(:service)
+
+      conn
+      |> get("/ext/v1/gate/#{svc.id}")
+      |> response(402)
+
+      conn
+      |> post("/ext/v1/gate/#{svc.id}")
+      |> response(402)
+    end
+  end
+
+  describe "#rollback" do
+    test "if a service has been marked it will 200", %{conn: conn} do
+      svc = insert(:service, promotion: :rollback)
+
+      conn
+      |> get("/ext/v1/rollback/#{svc.id}")
+      |> response(200)
+
+      conn
+      |> get("/ext/v1/rollback/#{svc.cluster.handle}/#{svc.name}")
+      |> response(200)
+
+      conn
+      |> post("/ext/v1/rollback/#{svc.id}")
+      |> response(200)
+
+      conn
+      |> post("/ext/v1/rollback/#{svc.cluster.handle}/#{svc.name}")
+      |> response(200)
+    end
+
+    test "if a service hasn't been marked it will 402", %{conn: conn} do
+      svc = insert(:service)
+
+      conn
+      |> get("/ext/v1/rollback/#{svc.id}")
+      |> response(402)
+
+      conn
+      |> post("/ext/v1/rollback/#{svc.id}")
+      |> response(402)
+    end
+  end
 end

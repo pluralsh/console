@@ -1,4 +1,4 @@
-import { createContext, useCallback, useState } from 'react'
+import { createContext, useCallback, useMemo, useState } from 'react'
 import { GearTrainIcon, IconFrame, Modal } from '@pluralsh/design-system'
 
 import UpgradePoliciesList from './UpgradePoliciesList'
@@ -8,10 +8,10 @@ export const PolicyContext = createContext({})
 export function UpgradePolicies() {
   const [modal, setModal] = useState<any>(null)
   const close = useCallback(() => setModal(null), [setModal])
+  const contextVal = useMemo(() => ({ modal, setModal, close }), [close, modal])
 
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <PolicyContext.Provider value={{ modal, setModal, close }}>
+    <PolicyContext.Provider value={contextVal}>
       <>
         <IconFrame
           icon={<GearTrainIcon />}
@@ -19,8 +19,6 @@ export function UpgradePolicies() {
           tooltip
           type="secondary"
           size="medium"
-          height={40}
-          width={40}
           clickable
           onClick={() =>
             setModal({
@@ -28,6 +26,7 @@ export function UpgradePolicies() {
               content: <UpgradePoliciesList />,
             })
           }
+          css={{ width: 40, height: 40 }}
         />
         <Modal
           header={modal?.header}

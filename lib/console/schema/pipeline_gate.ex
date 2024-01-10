@@ -58,7 +58,7 @@ defmodule Console.Schema.PipelineGate do
     from(g in query, order_by: ^order)
   end
 
-  @valid ~w(name state type edge_id approver_id)a
+  @valid ~w(name state type edge_id cluster_id approver_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

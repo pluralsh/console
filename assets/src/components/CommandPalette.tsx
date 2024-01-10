@@ -28,18 +28,41 @@ import {
   ApiIcon,
   ChatIcon,
   Chip,
+  CloudIcon,
+  ClusterIcon,
   ComponentsIcon,
   DashboardIcon,
   DocumentIcon,
   GearTrainIcon,
+  GitHubLogoIcon,
+  GitPullIcon,
   LifePreserverIcon,
   LogsIcon,
+  MarketPlusIcon,
+  PipelineIcon,
   RunBookIcon,
   ServersIcon,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
-import { Flex, Span } from 'honorable'
 import styled, { createGlobalStyle, useTheme } from 'styled-components'
+
+import {
+  ADDONS_REL_PATH,
+  CD_ABS_PATH,
+  CLUSTERS_REL_PATH,
+  PIPELINES_REL_PATH,
+  PROVIDERS_REL_PATH,
+  REPOS_REL_PATH,
+  SERVICES_REL_PATH,
+} from 'routes/cdRoutesConsts'
+import {
+  ClusterAddOnFragment,
+  ClusterTinyFragment,
+  useClustersTinyQuery,
+} from 'generated/graphql'
+import { Edges } from 'utils/graphql'
+
+import { toNiceVersion } from 'utils/semver'
 
 import { getIcon, hasIcons } from './apps/misc'
 import { InstallationContext } from './Installations'
@@ -47,16 +70,28 @@ import AppStatus from './apps/AppStatus'
 import { usePlatform } from './hooks/usePlatform'
 import { HelpMenuState, launchHelp } from './help/HelpLauncher'
 
-function buildActions(applications, nav) {
+export enum PaletteSection {
+  Actions = 'Actions',
+  Apps = 'Apps',
+  Cluster = 'Cluster',
+  Help = 'Help',
+  Security = 'Security',
+  Account = 'Account',
+  Cd = 'Continuous Deployment (CD)',
+  CdClusters = 'CD – Clusters',
+  Addons = 'Add-ons',
+}
+
+function buildAppActions(applications, nav, theme) {
   return applications
     .map((app) => [
       {
         id: app.name,
         name: app.name,
         app,
-        icon: hasIcons(app) ? <AppIcon src={getIcon(app)} /> : null,
+        icon: hasIcons(app) ? <AppIcon src={getIcon(app, theme.mode)} /> : null,
         shortcut: [],
-        section: 'Apps',
+        section: PaletteSection.Apps,
       },
       {
         id: `${app.name}-launch`,
@@ -126,39 +161,104 @@ function buildActions(applications, nav) {
     .flat()
 }
 
+const clusterDefaultProps = (
+  cluster: ClusterTinyFragment,
+  sectionName?: string
+) => ({
+  id: `${cluster.id}${sectionName ? `-${sectionName?.toLowerCase()}` : ''}`,
+  name: sectionName || cluster.name,
+  section: `${PaletteSection.CdClusters}`,
+  ...(sectionName ? { parent: cluster.id } : {}),
+})
+
+function buildClusterActions(
+  clusters: Nullable<Edges<ClusterTinyFragment>>,
+  nav: ReturnType<typeof useNavigate>
+) {
+  return (
+    clusters?.map((edge) => {
+      const cluster = edge?.node
+
+      if (!cluster) {
+        return []
+      }
+
+      const ret = [
+        {
+          ...clusterDefaultProps(cluster),
+          icon: <ClusterIcon />,
+        },
+        {
+          ...clusterDefaultProps(cluster, 'Services'),
+          perform: () =>
+            nav(
+              `${CD_ABS_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}/${SERVICES_REL_PATH}`
+            ),
+        },
+        {
+          ...clusterDefaultProps(cluster, 'Nodes'),
+          perform: () =>
+            nav(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}/nodes}`),
+        },
+        {
+          ...clusterDefaultProps(cluster, 'Pods'),
+          perform: () =>
+            nav(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}/pods}`),
+        },
+        {
+          ...clusterDefaultProps(cluster, 'Metadata'),
+          perform: () =>
+            nav(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}/metadata}`),
+        },
+      ]
+
+      return ret
+    }) || []
+  ).flat()
+}
+
 function ItemInner({ action, ancestors }) {
+  const theme = useTheme()
+
   return (
     <>
-      <Flex
-        gap="8px"
-        fontSize={14}
-        alignItems="center"
+      <div
+        css={{
+          display: 'flex',
+          gap: theme.spacing.xsmall,
+          fontSize: 14,
+          alignItems: 'center',
+        }}
       >
         {action.icon && action.icon}
-        <Flex flexDirection="column">
-          <Flex flexDirection="row">
-            <Flex fill="horizontal">
+        <div css={{ display: 'flex', flexDirection: 'column' }}>
+          <div css={{ display: 'flex', flexDirection: 'row' }}>
+            <div css={{ display: 'flex' }}>
               {ancestors.length > 0 &&
                 ancestors.map((ancestor) => (
                   <Fragment key={ancestor.id}>
-                    <Span
-                      opacity={0.5}
-                      marginRight={8}
+                    <span
+                      css={{
+                        opacity: 0.5,
+                        marginRight: theme.spacing.xsmall,
+                      }}
                     >
                       {ancestor.name}
-                    </Span>
-                    <Span marginRight={8}>&rsaquo;</Span>
+                    </span>
+                    <span css={{ marginRight: theme.spacing.xsmall }}>
+                      &rsaquo;
+                    </span>
                   </Fragment>
                 ))}
               <span>{action.name}</span>
-            </Flex>
+            </div>
             {action.suffix}
-          </Flex>
+          </div>
           {action.subtitle && (
             <span style={{ fontSize: 12 }}>{action.subtitle}</span>
           )}
-        </Flex>
-      </Flex>
+        </div>
+      </div>
       {action.shortcut?.length ? (
         <div
           aria-hidden
@@ -201,21 +301,68 @@ const AppIcon = styled.img({
   width: 26,
 })
 
+const ItemContentSC = styled.div((_) => ({
+  display: 'flex',
+  alignItems: 'center',
+}))
+
+const ItemContentTextSC = styled.div((_) => ({
+  display: 'flex',
+  alignItems: 'baseline',
+}))
+
+const ItemSC = styled.div((_) => ({
+  display: 'flex',
+  width: '100%',
+  justifyContent: 'space-between',
+}))
+
 function AppItem({ app }) {
+  const theme = useTheme()
+
   return (
-    <>
-      {hasIcons(app) && <AppIcon src={getIcon(app)} />}
-      <AppName>{app.name}</AppName>
-      {app.spec?.descriptor?.version && (
-        <AppVersion>v{app.spec.descriptor.version}</AppVersion>
-      )}
+    <ItemSC>
+      <ItemContentSC>
+        {hasIcons(app) && <AppIcon src={getIcon(app, theme.mode)} />}
+        <ItemContentTextSC>
+          <AppName>{app.name}</AppName>
+          {app.spec?.descriptor?.version && (
+            <AppVersion>
+              {toNiceVersion(app.spec.descriptor.version)}
+            </AppVersion>
+          )}
+        </ItemContentTextSC>
+      </ItemContentSC>
       <AppStatus app={app} />
-    </>
+    </ItemSC>
+  )
+}
+
+function InstallAddonItem({ addon }: { addon: ClusterAddOnFragment }) {
+  return (
+    <ItemSC>
+      <ItemContentSC>
+        {addon.icon && <AppIcon src={addon.icon} />}
+        <ItemContentTextSC>
+          <AppName>{addon.name}</AppName>
+          {addon.version && (
+            <AppVersion>{toNiceVersion(addon.version)}</AppVersion>
+          )}
+        </ItemContentTextSC>
+      </ItemContentSC>
+      <Chip
+        clickable
+        size="small"
+      >
+        Install
+      </Chip>
+    </ItemSC>
   )
 }
 
 const ResultItem = forwardRef(
   ({ action, active, currentRootActionId }, ref: Ref<any>) => {
+    const theme = useTheme()
     const ancestors = useMemo(() => {
       if (!currentRootActionId) return action.ancestors
       const index = action.ancestors.findIndex(
@@ -230,26 +377,33 @@ const ResultItem = forwardRef(
     }, [action.ancestors, currentRootActionId])
 
     return (
-      <Flex
+      <div
         ref={ref}
-        alignItems="center"
-        padding="xsmall"
-        background={active ? 'fill-one-hover' : 'transparent'}
-        borderLeftColor={active ? 'border-primary' : 'transparent'}
-        borderLeftWidth="3px"
-        borderLeftStyle="solid"
-        justifyContent="space-between"
-        cursor="pointer"
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: theme.spacing.xsmall,
+          background: active ? theme.colors['fill-one-hover'] : 'transparent',
+          borderLeftColor: active
+            ? theme.colors['border-primary']
+            : 'transparent',
+          borderLeftWidth: 3,
+          borderLeftStyle: 'solid',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+        }}
       >
         {action.app ? (
           <AppItem app={action.app} />
+        ) : action.addon ? (
+          <InstallAddonItem addon={action.addon} />
         ) : (
           <ItemInner
             action={action}
             ancestors={ancestors}
           />
         )}
-      </Flex>
+      </div>
     )
   }
 )
@@ -275,15 +429,25 @@ function RenderResults() {
   )
 }
 
-function useAppActions() {
+function useActions() {
+  const theme = useTheme()
   const { applications } = useContext(InstallationContext) as any
+  const { data: clustersData } = useClustersTinyQuery({
+    pollInterval: 120_000,
+    fetchPolicy: 'cache-and-network',
+  })
+  const clusterEdges = clustersData?.clusters?.edges
+
   const navigate = useNavigate()
   const actions = useMemo(
-    () => buildActions(applications, navigate),
-    [applications, navigate]
+    () => [
+      ...buildClusterActions(clusterEdges, navigate),
+      ...buildAppActions(applications, navigate, theme),
+    ],
+    [clusterEdges, navigate, applications, theme]
   )
 
-  useRegisterActions(actions)
+  return actions
 }
 
 const PaletteFooterSC = styled.div(({ theme }) => ({
@@ -332,7 +496,9 @@ const CommandPaletteStyles = createGlobalStyle(({ theme }) => ({
 }))
 
 function Palette() {
-  useAppActions()
+  const actions = useActions()
+
+  useRegisterActions(actions, [actions])
   const theme = useTheme()
   const {
     isOpen: kbarIsOpen,
@@ -422,53 +588,99 @@ export function CommandPalette({ children }) {
         name: 'Nodes',
         shortcut: ['N'],
         icon: <ServersIcon />,
-        section: 'Cluster',
+        section: PaletteSection.Cluster,
         perform: () => navigate('/nodes'),
       }),
       createAction({
         name: 'Pods',
         shortcut: ['P'],
         icon: <ApiIcon />,
-        section: 'Cluster',
+        section: PaletteSection.Cluster,
         perform: () => navigate('/pods'),
       }),
+
+      // CD
+      createAction({
+        name: 'Clusters',
+        icon: <ClusterIcon />,
+        shortcut: ['C'],
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}`),
+      }),
+      createAction({
+        name: 'Services',
+        icon: <GitPullIcon />,
+        shortcut: [],
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${SERVICES_REL_PATH}`),
+      }),
+      createAction({
+        name: 'Repositories',
+        shortcut: [],
+        icon: <GitHubLogoIcon />,
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${REPOS_REL_PATH}`),
+      }),
+      createAction({
+        name: 'Pipelines',
+        shortcut: [],
+        icon: <PipelineIcon />,
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${PIPELINES_REL_PATH}`),
+      }),
+      createAction({
+        name: 'Providers',
+        icon: <CloudIcon />,
+        shortcut: [],
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${PROVIDERS_REL_PATH}`),
+      }),
+      createAction({
+        name: 'Add-ons',
+        icon: <MarketPlusIcon />,
+        shortcut: [],
+        section: PaletteSection.Cd,
+        perform: () => navigate(`${CD_ABS_PATH}/${ADDONS_REL_PATH}`),
+      }),
+      // End CD
+
       createAction({
         name: 'Ask Plural AI',
         shortcut: ['A'],
         icon: <ChatIcon />,
-        section: 'Help',
+        section: PaletteSection.Help,
         perform: launchAiChat,
       }),
       createAction({
         name: 'Search docs',
         shortcut: ['D'],
         icon: <DocumentIcon />,
-        section: 'Help',
+        section: PaletteSection.Help,
         perform: launchDocSearch,
       }),
       createAction({
         name: 'Contact support',
         shortcut: ['S'],
         icon: <LifePreserverIcon />,
-        section: 'Help',
+        section: PaletteSection.Help,
         perform: launchIntercom,
       }),
       createAction({
         name: 'Temporary Token',
         shortcut: ['T'],
-        section: 'Security',
+        section: PaletteSection.Security,
         perform: () => navigate('/profile/security'),
       }),
       createAction({
         name: 'VPN',
         shortcut: ['V'],
-        section: 'Security',
+        section: PaletteSection.Security,
         perform: () => navigate('/profile/vpn'),
       }),
       createAction({
         name: 'Users',
         shortcut: [],
-        section: 'Account',
+        section: PaletteSection.Account,
         perform: () => navigate('/account/users'),
       }),
     ],

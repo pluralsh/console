@@ -59,7 +59,7 @@ function ClusterHealthChip({
       }
     >
       <Chip
-        severity={pinged ? (healthy ? 'success' : 'error') : 'warning'}
+        severity={pinged ? (healthy ? 'success' : 'danger') : 'warning'}
         size={size}
         clickable
       >

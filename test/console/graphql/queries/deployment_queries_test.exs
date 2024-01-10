@@ -3,6 +3,21 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
   alias Kube.HelmRepository
   use Mimic
 
+  describe "globalService" do
+    test "a reader can fetch global services" do
+      user = admin_user()
+      global = insert(:global_service)
+
+      {:ok, %{data: %{"globalService" => svc}}} = run_query("""
+        query Global($id: ID!) {
+          globalService(id: $id) { id }
+        }
+      """, %{"id" => global.id}, %{current_user: user})
+
+      assert svc["id"] == global.id
+    end
+  end
+
   describe "gitRepositories" do
     test "it can list git repositories" do
       repos = insert_list(3, :git_repository)
@@ -823,6 +838,74 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert chart["name"] == "console"
       assert chart["version"]
       assert chart["appVersion"]
+    end
+  end
+
+  describe "clusterStatuses" do
+    test "it can aggregate statuses for all visible clusters" do
+      admin = admin_user()
+      insert_list(2, :cluster, pinged_at: Timex.now())
+      insert_list(3, :cluster, pinged_at: Timex.now() |> Timex.shift(days: -1))
+      insert(:cluster)
+
+      {:ok, %{data: %{"clusterStatuses" => res}}} = run_query("""
+        query {
+          clusterStatuses {
+            healthy
+            count
+          }
+        }
+      """, %{}, %{current_user: admin})
+
+      assert length(res) == 3
+      as_map = Map.new(res, & {&1["healthy"], &1})
+      assert as_map[true]["count"] == 2
+      assert as_map[false]["count"] == 3
+      assert as_map[nil]["count"] == 1
+    end
+  end
+
+  describe "tags" do
+    test "it can list cluster tag names and values" do
+      user = insert(:user)
+      cluster = insert(:cluster)
+      insert(:tag, cluster: cluster, name: "first", value: "value")
+      insert(:tag, cluster: cluster, name: "second", value: "value")
+      insert(:tag, cluster: build(:cluster), name: "first", value: "value2")
+
+      {:ok, %{data: %{"tags" => ["first", "second"]}}} = run_query("""
+        query {
+          tags
+        }
+      """, %{}, %{current_user: user})
+
+      {:ok, %{data: %{"tags" => ["value", "value2"]}}} = run_query("""
+        query {
+          tags(tag: "first")
+        }
+      """, %{}, %{current_user: user})
+    end
+  end
+end
+
+defmodule Console.GraphQl.Mutations.SyncDeploymentQueriesTest do
+  use Console.DataCase, async: false
+  use Mimic
+
+  describe "gitRepository" do
+    test "it can fetch the refs from a git repository" do
+      admin = admin_user()
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+
+      {:ok, %{data: %{"gitRepository" => %{"refs" => refs}}}} = run_query("""
+        query Git($id: ID!) {
+          gitRepository(id: $id) {
+            refs
+          }
+        }
+      """, %{"id" => git.id}, %{current_user: admin})
+
+      assert Enum.member?(refs, "refs/heads/master")
     end
   end
 end

@@ -5,6 +5,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   ecto_enum :component_state, ServiceComponent.State
   ecto_enum :service_deployment_status, Service.Status
+  ecto_enum :service_promotion, Service.Promotion
 
   input_object :service_deployment_attributes do
     field :name,           non_null(:string)
@@ -13,7 +14,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :docs_path,      :string
     field :sync_config,    :sync_config_attributes
     field :protect,        :boolean
-    field :repository_id,  non_null(:id)
+    field :repository_id,  :id
     field :git,            :git_ref_attributes
     field :helm,           :helm_config_attributes
     field :kustomize,      :kustomize_attributes
@@ -24,7 +25,6 @@ defmodule Console.GraphQl.Deployments.Service do
 
   input_object :sync_config_attributes do
     field :namespace_metadata, :metadata_attributes
-    field :diff_normalizer,    :diff_normalizer_attributes
   end
 
   input_object :helm_config_attributes do
@@ -36,16 +36,8 @@ defmodule Console.GraphQl.Deployments.Service do
   end
 
   input_object :metadata_attributes do
-    field :labels,      :map
-    field :annotations, :map
-  end
-
-  input_object :diff_normalizer_attributes do
-    field :group,        non_null(:string)
-    field :kind,         non_null(:string)
-    field :name,         non_null(:string)
-    field :namespace,    non_null(:string)
-    field :json_patches, list_of(non_null(:string))
+    field :labels,      :json
+    field :annotations, :json
   end
 
   input_object :service_update_attributes do
@@ -88,10 +80,12 @@ defmodule Console.GraphQl.Deployments.Service do
     field :message, non_null(:string)
   end
 
+  @desc "A reference for a globalized service, which targets clusters based on the configured criteria"
   input_object :global_service_attributes do
-    field :name,        non_null(:string)
-    field :tags,        list_of(:tag_attributes)
-    field :provider_id, :id
+    field :name,        non_null(:string), description: "name for this global service"
+    field :tags,        list_of(:tag_attributes), description: "the cluster tags to target"
+    field :distro,      :cluster_distro, description: "kubernetes distribution to target"
+    field :provider_id, :id, description: "cluster api provider to target"
   end
 
   input_object :kustomize_attributes do
@@ -111,6 +105,7 @@ defmodule Console.GraphQl.Deployments.Service do
         {:ok, Map.put(helm, :parent, svc)}
       svc, _, _ -> {:ok, svc.helm}
     end
+    field :promotion,        :service_promotion, description: "how you'd like to perform a canary promotion"
     field :protect,          :boolean, description: "if true, deletion of this service is not allowed"
     field :sha,              :string, description: "latest git sha we pulled from"
     field :tarball,          :string, resolve: &Deployments.tarball/3, description: "https url to fetch the latest tarball of kubernetes manifests"
@@ -222,12 +217,13 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "a rules based mechanism to redeploy a service across a fleet of clusters"
   object :global_service do
-    field :id,   non_null(:id), description: "internal id of this global service"
-    field :name, non_null(:string), description: "a human readable name for this global service"
-    field :tags, list_of(:tag), description: "a set of tags to select clusters for this global service"
+    field :id,     non_null(:id), description: "internal id of this global service"
+    field :name,   non_null(:string), description: "a human readable name for this global service"
+    field :tags,   list_of(:tag), description: "a set of tags to select clusters for this global service"
+    field :distro, :cluster_distro, description: "the kubernetes distribution to target with this global service"
 
     field :service,  :service_deployment, resolve: dataloader(Deployments), description: "the service to replicate across clusters"
-    field :provider, :cluster_provider, resolve: dataloader(Deployments), description: "whether to only apply to clusters with this provider"
+    field :provider, :cluster_provider,   resolve: dataloader(Deployments), description: "whether to only apply to clusters with this provider"
 
     timestamps()
   end
@@ -302,6 +298,7 @@ defmodule Console.GraphQl.Deployments.Service do
       middleware Authenticated
       arg :cluster_id, :id
       arg :q,          :string
+      arg :status,     :service_deployment_status
       arg :cluster,    :string, description: "the handle of the cluster for this service"
 
       safe_resolve &Deployments.list_services/2
@@ -310,8 +307,17 @@ defmodule Console.GraphQl.Deployments.Service do
     field :service_statuses, list_of(:service_status_count) do
       middleware Authenticated
       arg :cluster_id, :id
+      arg :q,          :string
+      arg :status,     :service_deployment_status
 
       safe_resolve &Deployments.service_statuses/2
+    end
+
+    field :global_service, :global_service do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.resolve_global/2
     end
   end
 
@@ -329,6 +335,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :update_service_deployment, :service_deployment do
       middleware Authenticated
       middleware Feature, :cd
+      middleware Scope, api: "updateServiceDeployment"
       arg :id,         :id
       arg :cluster,    :string, description: "the handle of the cluster for this service"
       arg :name,       :string
@@ -383,6 +390,17 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.self_manage/2
     end
 
+    @desc "marks a service as being able to proceed to the next stage of a canary rollout"
+    field :proceed, :service_deployment do
+      middleware Authenticated
+      arg :id,        :id
+      arg :cluster,   :string, description: "the handle of the cluster for this service"
+      arg :name,      :string
+      arg :promotion, :service_promotion
+
+      resolve &Deployments.proceed/2
+    end
+
     field :create_global_service, :global_service do
       middleware Authenticated
       arg :service_id, :id
@@ -391,6 +409,14 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :attributes, non_null(:global_service_attributes)
 
       safe_resolve &Deployments.create_global_service/2
+    end
+
+    field :update_global_service, :global_service do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:global_service_attributes)
+
+      safe_resolve &Deployments.update_global_service/2
     end
 
     field :delete_global_service, :global_service do

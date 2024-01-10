@@ -1,4 +1,4 @@
-defmodule Console.GraphQl.Deployments do
+ defmodule Console.GraphQl.Deployments do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.{User, Deployments}
 
@@ -21,10 +21,12 @@ defmodule Console.GraphQl.Deployments do
 
   @desc "global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator"
   object :deployment_settings do
-    field :id,             non_null(:id)
-    field :enabled,        non_null(:boolean), description: "whether you've yet to enable CD for this instance"
-    field :name,           non_null(:string)
-    field :self_managed,   :boolean, description: "whether the byok cluster has been brought under self-management"
+    field :id,                    non_null(:id)
+    field :enabled,               non_null(:boolean), description: "whether you've yet to enable CD for this instance"
+    field :name,                  non_null(:string)
+    field :self_managed,          :boolean, description: "whether the byok cluster has been brought under self-management"
+    field :loki_connection,       :http_connection, description: "the way we can connect to your loki instance"
+    field :prometheus_connection, :http_connection, description: "the way we can connect to your prometheus instance"
 
     field :artifact_repository, :git_repository, resolve: dataloader(Deployments), description: "the repo to fetch CAPI manifests from, for both providers and clusters"
     field :deployer_repository, :git_repository, resolve: dataloader(Deployments), description: "the repo to fetch the deploy operators manifests from"
@@ -37,13 +39,28 @@ defmodule Console.GraphQl.Deployments do
     timestamps()
   end
 
+  @desc "the details of how to connect to a http service like prometheus"
+  object :http_connection do
+    field :host,     non_null(:string)
+    field :user,     :string, description: "user to connect w/ for basic auth"
+    field :password, :string, description: "password to connect w/ for basic auth"
+  end
+
   input_object :deployment_settings_attributes do
     field :artifact_repository_id, :id
     field :deployer_repository_id, :id
+    field :prometheus_connection,  :http_connection_attributes, description: "connection details for a prometheus instance to use"
+    field :loki_connection,        :http_connection_attributes, description: "connection details for a loki instance to use"
     field :read_bindings,          list_of(:policy_binding_attributes)
     field :write_bindings,         list_of(:policy_binding_attributes)
     field :git_bindings,           list_of(:policy_binding_attributes)
     field :create_bindings,        list_of(:policy_binding_attributes)
+  end
+
+  input_object :http_connection_attributes do
+    field :host,     non_null(:string)
+    field :user,     :string, description: "user to connect w/ for basic auth"
+    field :password, :string, description: "password to connect w/ for basic auth"
   end
 
   input_object :rbac_attributes do

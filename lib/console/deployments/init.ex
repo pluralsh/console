@@ -4,7 +4,11 @@ defmodule Console.Deployments.Init do
   """
   use Console.Services.Base
   alias Console.Services.Users
+  alias Console.Schema.AccessToken
+  alias Kube.Utils
   alias Console.Deployments.{Clusters, Git, Settings}
+
+  @secret_name "console-auth-token"
 
   def setup() do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
@@ -46,6 +50,28 @@ defmodule Console.Deployments.Init do
         deployer_repository_id: drepo.id,
       })
     end)
+    |> add_operation(:secret, fn _ -> ensure_secret() end)
     |> execute()
   end
+
+  def ensure_secret() do
+    case Utils.get_secret(namespace(), @secret_name) do
+      {:ok, _} = res -> res
+      _ -> create_auth_secret()
+    end
+  end
+
+  defp create_auth_secret() do
+    console = Users.get_bot!("console")
+    start_transaction()
+    |> add_operation(:token, fn _ ->
+      Users.create_access_token(console)
+    end)
+    |> add_operation(:secret, fn %{token: %AccessToken{token: token}} ->
+      Utils.create_secret(namespace(), @secret_name, %{"access-token" => token})
+    end)
+    |> execute(extract: :secret)
+  end
+
+  defp namespace(), do: System.get_env("NAMESPACE") || "console"
 end

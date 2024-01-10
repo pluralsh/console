@@ -1,8 +1,10 @@
-import { useLayoutEffect } from 'react'
+import { createContext, useContext, useLayoutEffect, useMemo } from 'react'
 
-import ContinuousDeployment from 'components/cd/ContinuousDeployment'
+import ContinuousDeployment, {
+  POLL_INTERVAL,
+} from 'components/cd/ContinuousDeployment'
 import Clusters from 'components/cd/clusters/Clusters'
-import GitRepositories from 'components/cd/repos/Repositories'
+import Repositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
 import Providers from 'components/cd/providers/Providers'
 import {
@@ -13,12 +15,16 @@ import {
   useNavigate,
 } from 'react-router-dom'
 
+import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
+
+import ServiceComponent from 'components/cd/services/component/ServiceComponent'
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
 import ServiceDocs from 'components/cd/services/service/ServiceDocs'
 import ServiceComponents from 'components/cd/services/service/ServiceComponents'
 import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
 import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
-import ServiceComponent from 'components/cd/services/component/ServiceComponent'
+import ServiceSettings from 'components/cd/services/service/ServiceSettings'
+import ServiceHelm from 'components/cd/services/service/ServiceHelm'
 
 import ComponentInfo from 'components/component/ComponentInfo'
 import ComponentEvents from 'components/component/ComponentEvents'
@@ -27,16 +33,17 @@ import ComponentMetrics from 'components/component/ComponentMetrics'
 
 import { GlobalSettings } from 'components/cd/globalSettings/GlobalSettings'
 import { GlobalSettingsPermissions } from 'components/cd/globalSettings/GlobalSettingsPermissions'
-
 import { GlobalSettingsRepositories } from 'components/cd/globalSettings/GlobalSettingsRepositories'
-
-import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
+import SelfManage from 'components/cd/globalSettings/SelfManage'
 
 import Pipelines from 'components/cd/pipelines/Pipelines'
 
-import ServiceHelm from 'components/cd/services/service/ServiceHelm'
+import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
 
-import SelfManage from 'components/cd/globalSettings/SelfManage'
+import {
+  DeploymentSettingsFragment,
+  useDeploymentSettingsQuery,
+} from 'generated/graphql'
 
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
@@ -54,11 +61,8 @@ import Pod from '../components/cd/cluster/pod/Pod'
 import PodInfo from '../components/cd/cluster/pod/PodInfo'
 import ClusterMetadata from '../components/cd/cluster/ClusterMetadata'
 import PodRaw from '../components/cluster/pods/PodRaw'
-
 import PodEvents from '../components/cluster/pods/PodEvents'
-
 import Logs from '../components/cd/cluster/pod/logs/Logs'
-
 import PodShell from '../components/cd/cluster/pod/PodShell'
 
 import {
@@ -76,6 +80,9 @@ import {
   NODE_REL_PATH,
   PIPELINES_REL_PATH,
   POD_REL_PATH,
+  PROVIDERS_REL_PATH,
+  REPOS_REL_PATH,
+  SERVICES_REL_PATH,
   SERVICE_COMPONENTS_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
   SERVICE_PARAM_CLUSTER_ID,
@@ -117,7 +124,20 @@ export const componentRoutes = (
 
 const defaultLocation = `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}` as const
 
+const CDContext = createContext<{
+  deploymentSettings?: DeploymentSettingsFragment | undefined | null
+}>({})
+
+export function useDeploymentSettings() {
+  const ctx = useContext(CDContext)
+
+  return ctx?.deploymentSettings
+}
+
 function CdRoot() {
+  const { data } = useDeploymentSettingsQuery({
+    pollInterval: POLL_INTERVAL,
+  })
   const cdIsEnabled = useCDEnabled()
   const navigate = useNavigate()
   const location = useLocation()
@@ -127,8 +147,16 @@ function CdRoot() {
       navigate(defaultLocation)
     }
   }, [cdIsEnabled, location.pathname, navigate])
+  const providerValue = useMemo(
+    () => ({ deploymentSettings: data?.deploymentSettings }),
+    [data?.deploymentSettings]
+  )
 
-  return <Outlet />
+  return (
+    <CDContext.Provider value={providerValue}>
+      <Outlet />
+    </CDContext.Provider>
+  )
 }
 
 const mainRoutes = (
@@ -138,19 +166,33 @@ const mainRoutes = (
       element={<Clusters />}
     />
     <Route
-      path={`services/:${SERVICE_PARAM_CLUSTER_ID}?`}
+      path={`${SERVICES_REL_PATH}/:${SERVICE_PARAM_CLUSTER_ID}?`}
       element={<Services />}
     />
     <Route
       path={PIPELINES_REL_PATH}
       element={<Pipelines />}
-    />
+    >
+      <Route
+        path=":pipelineId"
+        element={<Pipelines />}
+      />
+    </Route>
     <Route
       path="git"
-      element={<GitRepositories />}
+      element={
+        <Navigate
+          replace
+          to={REPOS_REL_PATH}
+        />
+      }
     />
     <Route
-      path="providers"
+      path={REPOS_REL_PATH}
+      element={<Repositories />}
+    />
+    <Route
+      path={PROVIDERS_REL_PATH}
       element={<Providers />}
     />
     <Route
@@ -197,6 +239,10 @@ const globalSettingsRoutes = (
     <Route
       path="auto-update"
       element={<SelfManage />}
+    />
+    <Route
+      path="observability"
+      element={<GlobalSettingsObservability />}
     />
   </Route>
 )
@@ -315,6 +361,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceHelm />}
       path="helm"
+    />
+    <Route
+      element={<ServiceSettings />}
+      path="settings"
     />
     <Route
       element={<ServiceDocs />}

@@ -2,7 +2,10 @@ defmodule Console.Schema.AgentMigration do
   use Piazza.Ecto.Schema
 
   schema "agent_migrations" do
-    field :completed, :boolean, default: false
+    field :name,          :string
+    field :ref,           :string
+    field :completed,     :boolean, default: false
+    field :configuration, :map
 
     timestamps()
   end
@@ -11,6 +14,7 @@ defmodule Console.Schema.AgentMigration do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, [:completed])
+    |> cast(attrs, [:completed, :ref, :name])
+    |> unique_constraint(:name)
   end
 end

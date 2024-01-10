@@ -1,21 +1,30 @@
 defmodule Console.Schema.User do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{RoleBinding, Group, AccessToken}
+  alias Console.Schema.{RoleBinding, Group, AccessToken, PolicyBinding}
 
   @email_re ~r/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-\.]+\.[a-zA-Z]{2,}$/
 
   schema "watchman_users" do
-    field :name,            :string
-    field :email,           :string
-    field :bot_name,        :string
-    field :password_hash,   :string
-    field :profile,         :string
-    field :plural_id,       :string
-    field :password,        :string, virtual: true
-    field :jwt,             :string, virtual: true
-    field :deleted_at,      :utc_datetime_usec
-    field :read_timestamp,  :utc_datetime_usec
-    field :build_timestamp, :utc_datetime_usec
+    field :name,             :string
+    field :email,            :string
+    field :bot_name,         :string
+    field :password_hash,    :string
+    field :profile,          :string
+    field :plural_id,        :string
+    field :password,         :string, virtual: true
+    field :jwt,              :string, virtual: true
+    field :service_account,  :boolean
+    field :deleted_at,       :utc_datetime_usec
+    field :read_timestamp,   :utc_datetime_usec
+    field :build_timestamp,  :utc_datetime_usec
+    field :assume_policy_id, :binary_id
+    field :scopes,           :map, virtual: true
+    field :api,              :string, virtual: true
+
+    has_many :assume_bindings, PolicyBinding,
+      on_replace: :delete,
+      foreign_key: :policy_id,
+      references: :assume_policy_id
 
     embeds_one :roles,  Roles, on_replace: :update do
       field :admin, :boolean, default: false
@@ -27,6 +36,10 @@ defmodule Console.Schema.User do
     has_one :token, AccessToken
 
     timestamps()
+  end
+
+  def service_account(query \\ __MODULE__) do
+    from(u in query, where: u.service_account)
   end
 
   def with_emails(query \\ __MODULE__, emails) do
@@ -47,10 +60,12 @@ defmodule Console.Schema.User do
     from(u in query, order_by: ^order)
   end
 
-  @valid ~w(name email password deleted_at profile plural_id)a
+  @valid ~w(name email password deleted_at profile plural_id service_account)a
+
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_assoc(:assume_bindings)
     |> cast_embed(:roles, with: &role_changeset/2)
     |> unique_constraint(:email)
     |> unique_constraint(:bot_name)
@@ -58,6 +73,7 @@ defmodule Console.Schema.User do
     |> validate_length(:email, max: 255)
     |> validate_format(:email, @email_re)
     |> validate_required([:email, :name])
+    |> put_new_change(:assume_policy_id, &Ecto.UUID.generate/0)
     |> hash_password()
   end
 

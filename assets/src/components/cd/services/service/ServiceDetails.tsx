@@ -39,6 +39,8 @@ import { SideNavEntries } from 'components/layout/SideNavEntries'
 
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 
+import { POLL_INTERVAL } from 'components/cluster/constants'
+
 import ServiceSelector from '../ServiceSelector'
 
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
@@ -89,8 +91,9 @@ export const getDirectory = ({
       label: <ComponentProgress componentsReady={componentStatus} />,
       enabled: true,
     },
+    { path: 'settings', label: 'Settings', enabled: true },
     { path: 'secrets', label: 'Secrets', enabled: true },
-    { path: 'helm', label: 'Helm', enabled: !!helm },
+    { path: 'helm', label: 'Helm values', enabled: !!helm },
     { path: 'revisions', label: 'Revisions', enabled: true },
     {
       path: 'docs',
@@ -113,7 +116,10 @@ function ServiceDetailsBase() {
   })
   const docPageContext = useDocPageContext()
 
-  const { data: serviceListData } = useServiceDeploymentsTinyQuery()
+  const { data: serviceListData } = useServiceDeploymentsTinyQuery({
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
   const serviceList = useMemo(
     () => mapExistingNodes(serviceListData?.serviceDeployments),
     [serviceListData?.serviceDeployments]
@@ -121,6 +127,8 @@ function ServiceDetailsBase() {
 
   const { data: serviceData, error: serviceError } = useServiceDeploymentQuery({
     variables: { id: serviceId },
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
   })
   const { serviceDeployment } = serviceData || {}
   const docs = useMemo(

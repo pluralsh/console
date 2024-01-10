@@ -103,7 +103,7 @@ defmodule Console.MixProject do
       {:poison, "~> 5.0", override: true},
       {:ets, "~> 0.9"},
       {:reverse_proxy_plug, "~> 1.2.1"},
-      {:kazan, "~> 0.11", github: "michaeljguarino/kazan", ref: "e26d21b324fd8b09bbc20ffde783d10a314684d9"},
+      {:kazan, "~> 0.11", github: "michaeljguarino/kazan", ref: "ef2050c547ab74c283ef02397925d48637bd67a1"},
       {:comeonin, "~> 5.1.2"},
       {:argon2_elixir, "~> 2.0"},
       {:prometheus_ex, "~> 3.0"},
@@ -132,7 +132,9 @@ defmodule Console.MixProject do
       {:phoenix_client, "~> 0.11", git: "https://github.com/michaeljguarino/phoenix_client.git", branch: "mguarino/channel-listen"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:elixpath, "~> 0.1.1", git: "https://github.com/mtannaan/elixpath.git"},
-      {:mimic, "~> 1.1", only: :test}
+      {:mimic, "~> 1.1", only: :test},
+      {:hammer, "~> 6.0"},
+      {:hammer_plug, "~> 3.0", git: "https://github.com/pluralsh/hammer-plug.git", branch: "runtime-config"}
     ]
   end
 

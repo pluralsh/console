@@ -11,7 +11,8 @@ defmodule Console.Deployments.Policies.Rbac do
     GlobalService,
     ProviderCredential,
     Pipeline,
-    PipelineGate
+    PipelineGate,
+    AgentMigration
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -39,6 +40,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(pipe, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%Service{} = svc, %User{} = user, action),
     do: recurse(svc, user, action, & &1.cluster)
+  def evaluate(%AgentMigration{}, %User{} = user, action),
+    do: recurse(Settings.fetch(), user, action)
   def evaluate(%Cluster{} = cluster, %User{} = user, action),
     do: recurse(cluster, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%ClusterProvider{} = cluster, %User{} = user, action),

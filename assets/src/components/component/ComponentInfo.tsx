@@ -1,7 +1,7 @@
 import { useOutletContext } from 'react-router-dom'
 import { useMemo } from 'react'
 
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import Pods from './info/Pods'
 import Job from './info/Job'
@@ -13,12 +13,15 @@ import Deployment from './info/Deployment'
 import StatefulSet from './info/StatefulSet'
 import Metadata from './info/Metadata'
 import { ComponentDetailsContext } from './ComponentDetails'
+import DaemonSet from './info/Daemonset'
+import CanaryInfo from './info/Canary'
 
 const componentsWithPods: string[] = [
   'deployment',
   'job',
   'service',
   'statefulset',
+  'daemonset',
 ]
 
 export const componentsWithLogs: string[] = ['deployment', 'statefulset']
@@ -43,10 +46,21 @@ function getInfo(kind: string): JSX.Element | undefined {
       return <Service />
     case 'statefulset':
       return <StatefulSet />
+    case 'daemonset':
+      return <DaemonSet />
+    case 'canary':
+      return <CanaryInfo />
     default:
       return undefined
   }
 }
+
+const Section = styled.section((_) => ({
+  display: 'flex',
+  flexDirection: 'row',
+  flexBasis: '50%',
+  flexGrow: 1,
+}))
 
 export default function ComponentInfo() {
   const theme = useTheme()
@@ -76,28 +90,10 @@ export default function ComponentInfo() {
     >
       {hasPods(componentKind) && <Pods pods={value?.pods} />}
       <div css={{ display: 'flex', gap: theme.spacing.large }}>
-        {info && (
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'row',
-              flexBasis: '50%',
-              flexGrow: 1,
-            }}
-          >
-            {info}
-          </div>
-        )}
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'row',
-            flexBasis: '50%',
-            flexGrow: 1,
-          }}
-        >
+        {info && <Section>{info}</Section>}
+        <Section>
           <Metadata />
-        </div>
+        </Section>
       </div>
     </div>
   )

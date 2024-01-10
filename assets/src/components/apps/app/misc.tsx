@@ -71,7 +71,6 @@ export function ListItem({
         {icon && (
           <IconFrame
             icon={icon}
-            minWidth={40}
             size="large"
             textValue={title}
             type="floating"

@@ -15,6 +15,8 @@ defmodule Console.Schema.Cluster do
     ServiceError
   }
 
+  defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
+
   defmodule Kubeconfig do
     use Piazza.Ecto.Schema
     alias Console.Schema.NamespacedName
@@ -82,6 +84,8 @@ defmodule Console.Schema.Cluster do
     field :self,            :boolean, default: false
     field :installed,       :boolean, default: false
     field :protect,         :boolean, default: false
+    field :distro,          Distro, default: :generic
+    field :metadata,        :map
 
     field :version,         :string
     field :current_version, :string
@@ -91,6 +95,7 @@ defmodule Console.Schema.Cluster do
     field :deleted_at,      :utc_datetime_usec
     field :pinged_at,       :utc_datetime_usec
 
+    field :distro_changed,  :boolean, default: false, virtual: true
     field :token_readable,  :boolean, default: false, virtual: true
 
     embeds_one :resource,       NamespacedName
@@ -141,8 +146,9 @@ defmodule Console.Schema.Cluster do
   end
 
   def target(query \\ __MODULE__, %GlobalService{} = global) do
-    Map.take(global, [:provider_id, :tags])
+    Map.take(global, [:provider_id, :tags, :distro])
     |> Enum.reduce(query, fn
+      {:distro, distro}, q when not is_nil(distro) -> for_distro(q, distro)
       {:provider_id, prov_id}, q when is_binary(prov_id) -> for_provider(q, prov_id)
       {:tags, [_ | _] = tags}, q -> for_tags(q, tags)
       _, q -> q
@@ -177,6 +183,34 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: c.provider_id == ^provider_id)
   end
 
+  def for_distro(query \\ __MODULE__, distro) do
+    from(c in query, where: c.distro == ^distro)
+  end
+
+  def statistics(query \\ __MODULE__) do
+    expired = health_threshold()
+    nested = from(c in __MODULE__, select: %{healthy: c.pinged_at > ^expired, id: c.id})
+    from(c in query,
+      join: n in subquery(nested),
+        on: n.id == c.id,
+      group_by: n.healthy,
+      select: %{healthy: n.healthy, count: count(c.id, :distinct)}
+    )
+  end
+
+  def health(query \\ __MODULE__, health)
+  def health(query, true) do
+    expired = health_threshold()
+    from(c in query, where: c.pinged_at > ^expired)
+  end
+
+  def health(query, _) do
+    expired = health_threshold()
+    from(c in query, where: c.pinged_at <= ^expired)
+  end
+
+  defp health_threshold(), do: Timex.now() |> Timex.shift(minutes: -5)
+
   def with_tag(query \\ __MODULE__, name, value) do
     from(c in query,
       join: t in assoc(c, :tags),
@@ -188,7 +222,7 @@ defmodule Console.Schema.Cluster do
     Enum.reduce(tags, query, fn %{name: n, value: v}, q -> with_tag(q, n, v) end)
   end
 
-  def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
+  def ordered(query \\ __MODULE__, order \\ [desc: :self, asc: :name]) do
     from(c in query, order_by: ^order)
   end
 
@@ -208,7 +242,7 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id protect service_id credential_id self version current_version name handle installed)a
+  @valid ~w(provider_id distro metadata protect service_id credential_id self version current_version name handle installed)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -239,12 +273,16 @@ defmodule Console.Schema.Cluster do
   def update_changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(version)a)
+    |> semver(:version)
     |> cast_assoc(:node_pools)
+    |> cast_assoc(:tags)
+    |> validate_vsn()
   end
 
   def ping_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(pinged_at current_version installed)a)
+    |> cast(attrs, ~w(pinged_at distro current_version installed)a)
+    |> change_markers(distro: :distro_changed)
     |> update_vsn()
   end
 
@@ -263,12 +301,12 @@ defmodule Console.Schema.Cluster do
   end
 
   defp validate_vsn(cs) do
-    case {get_change(cs, :version), cs.data.version, cs.data.current_version} do
-      {vsn, old, current} when is_binary(vsn) and is_binary(old) and is_binary(current) and old != current ->
+    case {get_change(cs, :version), cs.data.version, cs.data.current_version, valid_semver?(cs.data.version)} do
+      {vsn, old, current, true} when is_binary(vsn) and is_binary(old) and is_binary(current) and old != current ->
         add_error(cs, :version, "cannot upgrade while an upgrade is still in progress")
-      {v, _, prev} when is_binary(v) and is_binary(prev) ->
+      {v, _, prev, _} when is_binary(v) and is_binary(prev) ->
         validate_vsn(cs, v, prev)
-      {v, prev, _} when is_binary(v) and is_binary(prev) ->
+      {v, prev, _, _} when is_binary(v) and is_binary(prev) ->
         validate_vsn(cs, v, prev)
       _ -> cs
     end
@@ -285,11 +323,22 @@ defmodule Console.Schema.Cluster do
     with current when is_binary(current) <- get_field(cs, :current_version),
          vsn when is_binary(vsn) <- get_field(cs, :version),
          {:ok, current_parsed} <- Version.parse(clean_version(current)),
-         {:ok, vsn} <- Version.parse(clean_version(vsn)),
+         {:ok, vsn} <- Version.parse(minimal_coerce(vsn)),
          :gt <- Version.compare(current_parsed, vsn) do
       put_change(cs, :version, current)
     else
       _ -> cs
     end
   end
+
+  defp valid_semver?(vsn) when is_binary(vsn) do
+    case Version.parse(minimal_coerce(vsn)) do
+      {:ok, _} -> true
+      _ -> false
+    end
+  end
+  defp valid_semver?(_), do: false
+
+  defp minimal_coerce("v" <> vsn), do: vsn
+  defp minimal_coerce(vsn), do: vsn
 end

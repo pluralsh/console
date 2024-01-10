@@ -1,0 +1,8 @@
+filename: "{{.InterfaceName}}_mock.go"
+dir: "internal/test/mocks"
+mockname: "{{.InterfaceName}}Mock"
+outpkg: "mocks"
+packages:
+  github.com/pluralsh/console/controller/internal/client:
+    interfaces:
+      ConsoleClient:

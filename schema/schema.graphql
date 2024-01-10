@@ -15,7 +15,13 @@ type RootQueryType {
 
   buildInfo: BuildInfo
 
+  user(email: String!): User
+
+  group(name: String!): Group
+
   users(after: String, first: Int, before: String, last: Int, q: String): UserConnection
+
+  serviceAccounts(after: String, first: Int, before: String, last: Int, q: String): UserConnection
 
   loginInfo(redirect: String): LoginInfo
 
@@ -43,9 +49,9 @@ type RootQueryType {
 
   dashboard(repo: String!, name: String!, step: String, offset: Int, labels: [LabelInput]): Dashboard
 
-  metric(query: String!, offset: Int, step: String): [MetricResponse]
+  metric(query: String!, offset: Int, step: String, clusterId: ID): [MetricResponse]
 
-  logs(query: String!, start: Long, end: Long, limit: Int!): [LogStream]
+  logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
 
   scalingRecommendation(kind: AutoscalingTarget!, namespace: String!, name: String!): VerticalPodAutoscaler
 
@@ -57,6 +63,12 @@ type RootQueryType {
 
   secrets(namespace: String!): [Secret]
 
+  pluralCluster(namespace: String!, name: String!, serviceId: ID): PluralCluster
+
+  pluralServiceDeployment(namespace: String!, name: String!, serviceId: ID): PluralServiceDeployment
+
+  pluralGitRepository(namespace: String!, name: String!, serviceId: ID): PluralGitRepository
+
   unstructuredResource(group: String, version: String!, kind: String!, namespace: String, name: String!, serviceId: ID): KubernetesUnstructured
 
   service(namespace: String!, name: String!, serviceId: ID): Service
@@ -66,6 +78,8 @@ type RootQueryType {
   deployment(namespace: String!, name: String!, serviceId: ID): Deployment
 
   statefulSet(namespace: String!, name: String!, serviceId: ID): StatefulSet
+
+  daemonSet(namespace: String!, name: String!, serviceId: ID): DaemonSet
 
   ingress(namespace: String!, name: String!, serviceId: ID): Ingress
 
@@ -98,6 +112,10 @@ type RootQueryType {
   nodeMetrics(clusterId: ID): [NodeMetric]
 
   nodeMetric(name: String!, clusterId: ID): NodeMetric
+
+  canary(namespace: String!, name: String!, serviceId: ID): Canary
+
+  upgradePlan(namespace: String!, name: String!, serviceId: ID): UpgradePlan
 
   configurationOverlays(namespace: String!): [ConfigurationOverlay]
 
@@ -155,7 +173,13 @@ type RootQueryType {
   tokenExchange(token: String!): User
 
   "a relay connection of all clusters visible to the current user"
-  clusters(after: String, first: Int, before: String, last: Int, q: String): ClusterConnection
+  clusters(after: String, first: Int, before: String, last: Int, q: String, health: Boolean, tag: TagInput): ClusterConnection
+
+  "gets summary information for all healthy\/unhealthy clusters in your fleet"
+  clusterStatuses(q: String, tag: TagInput): [ClusterStatusInfo]
+
+  "lists tags applied to any clusters in the fleet"
+  tags(tag: String): [String]
 
   "a relay connection of all providers visible to the current user"
   clusterProviders(after: String, first: Int, before: String, last: Int): ClusterProviderConnection
@@ -164,7 +188,7 @@ type RootQueryType {
   cluster(id: ID, handle: String): Cluster
 
   "fetches an individual cluster provider"
-  clusterProvider(id: ID!): ClusterProvider
+  clusterProvider(id: ID, cloud: String, name: String): ClusterProvider
 
   "list all addons currently resident in the artifacts repo"
   clusterAddOns: [ClusterAddOn]
@@ -182,11 +206,15 @@ type RootQueryType {
 
     q: String
 
+    status: ServiceDeploymentStatus
+
     "the handle of the cluster for this service"
     cluster: String
   ): ServiceDeploymentConnection
 
-  serviceStatuses(clusterId: ID): [ServiceStatusCount]
+  serviceStatuses(clusterId: ID, q: String, status: ServiceDeploymentStatus): [ServiceStatusCount]
+
+  globalService(id: ID!): GlobalService
 
   pipelines(after: String, first: Int, before: String, last: Int): PipelineConnection
 
@@ -234,6 +262,10 @@ type RootMutationType {
 
   createInvite(attributes: InviteAttributes!): Invite
 
+  createServiceAccount(attributes: ServiceAccountAttributes!): User
+
+  updateServiceAccount(id: ID!, attributes: ServiceAccountAttributes!): User
+
   updateUser(id: ID, attributes: UserAttributes!): User
 
   deleteUser(id: ID!): User
@@ -256,7 +288,9 @@ type RootMutationType {
 
   deleteRole(id: ID!): Role
 
-  createAccessToken: AccessToken
+  createAccessToken(scopes: [ScopeAttributes]): AccessToken
+
+  createServiceAccountToken(id: ID!, scopes: [ScopeAttributes]): AccessToken
 
   deleteAccessToken(token: String!): AccessToken
 
@@ -321,6 +355,8 @@ type RootMutationType {
 
   installAddOn(name: String!, configuration: [ConfigAttributes], clusterId: ID!, global: GlobalServiceAttributes): ServiceDeployment
 
+  createAgentMigration(attributes: AgentMigrationAttributes!): AgentMigration
+
   createServiceDeployment(
     clusterId: ID
 
@@ -374,6 +410,18 @@ type RootMutationType {
 
   selfManage(values: String!): ServiceDeployment
 
+  "marks a service as being able to proceed to the next stage of a canary rollout"
+  proceed(
+    id: ID
+
+    "the handle of the cluster for this service"
+    cluster: String
+
+    name: String
+
+    promotion: ServicePromotion
+  ): ServiceDeployment
+
   createGlobalService(
     serviceId: ID
 
@@ -385,10 +433,14 @@ type RootMutationType {
     attributes: GlobalServiceAttributes!
   ): GlobalService
 
+  updateGlobalService(id: ID!, attributes: GlobalServiceAttributes!): GlobalService
+
   deleteGlobalService(id: ID!): GlobalService
 
   "upserts a pipeline with a given name"
   savePipeline(name: String!, attributes: PipelineAttributes!): Pipeline
+
+  deletePipeline(id: ID!): Pipeline
 
   "approves an approval pipeline gate"
   approveGate(id: ID!): PipelineGate
@@ -447,6 +499,12 @@ type DeploymentSettings {
   "whether the byok cluster has been brought under self-management"
   selfManaged: Boolean
 
+  "the way we can connect to your loki instance"
+  lokiConnection: HttpConnection
+
+  "the way we can connect to your prometheus instance"
+  prometheusConnection: HttpConnection
+
   "the repo to fetch CAPI manifests from, for both providers and clusters"
   artifactRepository: GitRepository
 
@@ -470,13 +528,45 @@ type DeploymentSettings {
   updatedAt: DateTime
 }
 
+"the details of how to connect to a http service like prometheus"
+type HttpConnection {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "password to connect w\/ for basic auth"
+  password: String
+}
+
 input DeploymentSettingsAttributes {
   artifactRepositoryId: ID
+
   deployerRepositoryId: ID
+
+  "connection details for a prometheus instance to use"
+  prometheusConnection: HttpConnectionAttributes
+
+  "connection details for a loki instance to use"
+  lokiConnection: HttpConnectionAttributes
+
   readBindings: [PolicyBindingAttributes]
+
   writeBindings: [PolicyBindingAttributes]
+
   gitBindings: [PolicyBindingAttributes]
+
   createBindings: [PolicyBindingAttributes]
+}
+
+input HttpConnectionAttributes {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "password to connect w\/ for basic auth"
+  password: String
 }
 
 input RbacAttributes {
@@ -538,7 +628,7 @@ input PipelineGateAttributes {
   cluster: String
 
   "the id of the cluster this gate will execute on"
-  clusterId: String
+  clusterId: ID
 
   "a specification for more complex gate types"
   spec: GateSpecAttributes
@@ -573,9 +663,9 @@ input GateJobAttributes {
 
   containers: [ContainerAttributes]
 
-  labels: Map
+  labels: Json
 
-  annotations: Map
+  annotations: Json
 
   serviceAccount: String
 }
@@ -621,7 +711,7 @@ input PromotionCriteriaAttributes {
   name: String
 
   "the id of the service to promote from"
-  sourceId: String
+  sourceId: ID
 
   "the secrets to copy over in a promotion"
   secrets: [String]
@@ -696,6 +786,9 @@ type PipelineGate {
 
   "more detailed specification for complex gates"
   spec: GateSpec
+
+  "the cluster this gate can run on"
+  cluster: Cluster
 
   "the last user to approve this gate"
   approver: User
@@ -823,6 +916,7 @@ enum ComponentState {
   RUNNING
   PENDING
   FAILED
+  PAUSED
 }
 
 enum ServiceDeploymentStatus {
@@ -830,6 +924,13 @@ enum ServiceDeploymentStatus {
   SYNCED
   HEALTHY
   FAILED
+  PAUSED
+}
+
+enum ServicePromotion {
+  IGNORE
+  PROCEED
+  ROLLBACK
 }
 
 input ServiceDeploymentAttributes {
@@ -839,7 +940,7 @@ input ServiceDeploymentAttributes {
   docsPath: String
   syncConfig: SyncConfigAttributes
   protect: Boolean
-  repositoryId: ID!
+  repositoryId: ID
   git: GitRefAttributes
   helm: HelmConfigAttributes
   kustomize: KustomizeAttributes
@@ -850,7 +951,6 @@ input ServiceDeploymentAttributes {
 
 input SyncConfigAttributes {
   namespaceMetadata: MetadataAttributes
-  diffNormalizer: DiffNormalizerAttributes
 }
 
 input HelmConfigAttributes {
@@ -862,16 +962,8 @@ input HelmConfigAttributes {
 }
 
 input MetadataAttributes {
-  labels: Map
-  annotations: Map
-}
-
-input DiffNormalizerAttributes {
-  group: String!
-  kind: String!
-  name: String!
-  namespace: String!
-  jsonPatches: [String!]
+  labels: Json
+  annotations: Json
 }
 
 input ServiceUpdateAttributes {
@@ -914,9 +1006,18 @@ input ServiceErrorAttributes {
   message: String!
 }
 
+"A reference for a globalized service, which targets clusters based on the configured criteria"
 input GlobalServiceAttributes {
+  "name for this global service"
   name: String!
+
+  "the cluster tags to target"
   tags: [TagAttributes]
+
+  "kubernetes distribution to target"
+  distro: ClusterDistro
+
+  "cluster api provider to target"
   providerId: ID
 }
 
@@ -947,6 +1048,9 @@ type ServiceDeployment {
 
   "description of how helm charts should be applied"
   helm: HelmSpec
+
+  "how you'd like to perform a canary promotion"
+  promotion: ServicePromotion
 
   "if true, deletion of this service is not allowed"
   protect: Boolean
@@ -1150,6 +1254,9 @@ type GlobalService {
   "a set of tags to select clusters for this global service"
   tags: [Tag]
 
+  "the kubernetes distribution to target with this global service"
+  distro: ClusterDistro
+
   "the service to replicate across clusters"
   service: ServiceDeployment
 
@@ -1200,6 +1307,15 @@ type RevisionConnection {
   edges: [RevisionEdge]
 }
 
+enum ClusterDistro {
+  GENERIC
+  EKS
+  AKS
+  GKE
+  RKE
+  K3S
+}
+
 input ClusterAttributes {
   name: String!
 
@@ -1212,6 +1328,10 @@ input ClusterAttributes {
   credentialId: ID
 
   version: String
+
+  distro: ClusterDistro
+
+  metadata: Json
 
   protect: Boolean
 
@@ -1239,6 +1359,7 @@ input TagAttributes {
 
 input ClusterPing {
   currentVersion: String!
+  distro: ClusterDistro
 }
 
 input ClusterUpdateAttributes {
@@ -1250,11 +1371,18 @@ input ClusterUpdateAttributes {
   "if you optionally want to reconfigure the git repository for the cluster service"
   service: ClusterServiceAttributes
 
+  "pass a kubeconfig for this cluster (DEPRECATED)"
   kubeconfig: KubeconfigAttributes
 
   protect: Boolean
 
+  distro: ClusterDistro
+
+  metadata: Json
+
   nodePools: [NodePoolAttributes]
+
+  tags: [TagAttributes]
 }
 
 input ClusterServiceAttributes {
@@ -1357,6 +1485,17 @@ input RuntimeServiceAttributes {
   version: String!
 }
 
+input AgentMigrationAttributes {
+  name: String
+  ref: String
+  configuration: Json
+}
+
+input TagInput {
+  name: String!
+  value: String!
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -1424,6 +1563,12 @@ type Cluster {
 
   "desired k8s version for the cluster"
   version: String
+
+  "the distribution of kubernetes this cluster is running"
+  distro: ClusterDistro
+
+  "arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)"
+  metadata: Map
 
   "current k8s version as told to us by the deployment operator"
   currentVersion: String
@@ -1523,7 +1668,7 @@ type NodePool {
   spot: Boolean
 
   "kubernetes labels to apply to the nodes in this pool, useful for node selectors"
-  labels: Json
+  labels: Map
 
   "any taints you'd want to apply to a node, for eg preventing scheduling on spot instances"
   taints: [Taint]
@@ -1704,9 +1849,26 @@ type VersionReference {
   version: String!
 }
 
+"a representation of a bulk operation to be performed on all agent services"
+type AgentMigration {
+  id: ID!
+  name: String
+  ref: String
+  configuration: Map
+  completed: Boolean
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type Tag {
   name: String!
   value: String!
+}
+
+"a cluster info data struct"
+type ClusterStatusInfo {
+  healthy: Boolean
+  count: Int
 }
 
 type ClusterConnection {
@@ -1750,6 +1912,9 @@ input GitAttributes {
 
   "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}\/tree\/{ref}\/{folder}"
   urlFormat: String
+
+  "whether to run plural crypto on this repo"
+  decrypt: Boolean
 }
 
 "a git repository available for deployments"
@@ -1777,6 +1942,12 @@ type GitRepository {
 
   "a format string to get the http url for a subfolder in a git repo"
   urlFormat: String
+
+  "whether to run plural crypto unlock on this repo"
+  decrypt: Boolean
+
+  "named refs like branches\/tags for a repository"
+  refs: [String!]
 
   "whether the current user can edit this repo"
   editable: Boolean
@@ -2331,6 +2502,116 @@ type ApplicationDelta {
   payload: Application
 }
 
+type PluralCluster {
+  status: PluralObjectStatus!
+  metadata: Metadata!
+  reference: Cluster
+  raw: String!
+  events: [Event]
+}
+
+type PluralServiceDeployment {
+  status: PluralObjectStatus!
+  metadata: Metadata!
+  reference: ServiceDeployment
+  raw: String!
+  events: [Event]
+}
+
+type PluralGitRepository {
+  status: PluralObjectStatus!
+  metadata: Metadata!
+  reference: GitRepository
+  raw: String!
+  events: [Event]
+}
+
+type PluralObjectStatus {
+  id: String
+  conditions: [StatusCondition]
+}
+
+type DaemonSet {
+  metadata: Metadata!
+  status: DaemonSetStatus!
+  spec: DaemonSetSpec!
+  pods: [Pod]
+  raw: String!
+  events: [Event]
+}
+
+type DaemonSetStatus {
+  currentNumberScheduled: Int
+  desiredNumberScheduled: Int
+  numberReady: Int
+}
+
+type DaemonSetSpec {
+  strategy: DeploymentStrategy
+}
+
+type UpgradePlan {
+  metadata: Metadata!
+  status: UpgradePlanStatus!
+  spec: UpgradePlanSpec!
+  pods: [Pod]
+  raw: String!
+  events: [Event]
+}
+
+type UpgradePlanStatus {
+  conditions: [StatusCondition]
+}
+
+type UpgradePlanSpec {
+  version: String
+  cordon: Boolean
+  concurrency: Int
+}
+
+type Canary {
+  metadata: Metadata!
+  status: CanaryStatus!
+  spec: CanarySpec!
+  primaryDeployment: Deployment
+  canaryDeployment: Deployment
+  ingress: Ingress
+  ingressCanary: Ingress
+  raw: String!
+  events: [Event]
+}
+
+type CanaryStatus {
+  conditions: [StatusCondition]
+  failedChecks: Int
+  canaryWeight: Int
+  iterations: Int
+  lastTransitionTime: String
+  phase: String
+}
+
+type CanarySpec {
+  autoscalerRef: TargetRef
+  targetRef: TargetRef
+  ingressRef: TargetRef
+  analysis: CanaryAnalysis
+  provider: String
+}
+
+type CanaryAnalysis {
+  interval: String
+  maxWeight: Int
+  stepWeight: Int
+  stepWeights: [Int]
+  threshold: Int
+}
+
+type TargetRef {
+  apiVersion: String
+  kind: String
+  name: String
+}
+
 type ConfigMap {
   metadata: Metadata!
   data: Map!
@@ -2579,6 +2860,7 @@ type Ingress {
 }
 
 type IngressSpec {
+  ingressClassName: String
   rules: [IngressRule]
   tls: [IngressTls]
 }
@@ -2928,12 +3210,26 @@ input UserAttributes {
   roles: UserRoleAttributes
 }
 
+input ServiceAccountAttributes {
+  name: String
+  email: String
+  roles: UserRoleAttributes
+  assumeBindings: [PolicyBindingAttributes]
+}
+
 input UserRoleAttributes {
   admin: Boolean
 }
 
 input InviteAttributes {
   email: String
+}
+
+input ScopeAttributes {
+  api: String
+  apis: [String!]
+  identifier: String
+  ids: [String!]
 }
 
 input GroupAttributes {
@@ -2965,6 +3261,7 @@ type User {
   roles: UserRoles
   readTimestamp: DateTime
   buildTimestamp: DateTime
+  assumeBindings: [PolicyBinding]
   groups: [Group]
   boundRoles: [Role]
   jwt: String
@@ -3040,9 +3337,17 @@ type Notification {
 type AccessToken {
   id: ID
   token: String
+  scopes: [AccessTokenScope]
   audits(after: String, first: Int, before: String, last: Int): AccessTokenAuditConnection
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+type AccessTokenScope {
+  api: String!
+  apis: [String!]
+  identifier: String
+  ids: [String!]
 }
 
 type AccessTokenAudit {

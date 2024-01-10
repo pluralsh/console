@@ -56,7 +56,24 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterCreated do
   end
 end
 
-defimpl Console.PubSub.Recurse, for: Console.PubSub.GlobalServiceCreated do
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterPinged do
+  alias Console.Repo
+  alias Console.Deployments.Global
+  alias Console.Schema.{Cluster, GlobalService}
+
+  def process(%{item: %Cluster{distro_changed: true} = cluster}) do
+    cluster = Repo.preload(cluster, [:tags])
+    GlobalService.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.filter(&Global.match?(&1, cluster))
+    |> Stream.each(&Global.add_to_cluster(&1, cluster))
+    |> Stream.run()
+  end
+  def process(_), do: :ok
+end
+
+defimpl Console.PubSub.Recurse, for: [Console.PubSub.GlobalServiceCreated, Console.PubSub.GlobalServiceUpdated] do
   alias Console.Deployments.Global
 
   def process(%{item: global}), do: Global.sync_clusters(global)
@@ -71,4 +88,10 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceHardDeleted do
          {:draining, false} <- {:draining, Clusters.draining?(cluster)},
       do: Clusters.drained(cluster)
   end
+end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentMigrationCreated do
+  alias Console.Deployments.Clusters
+
+  def process(%{item: migration}), do: Clusters.apply_migration(migration)
 end

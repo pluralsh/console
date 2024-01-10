@@ -17,7 +17,8 @@ defmodule Console.Schema.Service do
     StageService
   }
 
-  defenum Status, stale: 0, synced: 1, healthy: 2, failed: 3
+  defenum Promotion, ignore: 0, proceed: 1, rollback: 2
+  defenum Status, stale: 0, synced: 1, healthy: 2, failed: 3, paused: 4
 
   defmodule Git do
     use Piazza.Ecto.Schema
@@ -50,6 +51,12 @@ defmodule Console.Schema.Service do
       model
       |> cast(attrs, ~w(values chart version values_files)a)
       |> cast_embed(:repository)
+      |> validate_change(:values_files, fn :values_files, files ->
+        case Enum.member?(files, "values.yaml") do
+          true -> [values_files: "explicitly wiring in values.yaml can corrupt helm charts, try a different filename"]
+          _ -> []
+        end
+      end)
     end
   end
 
@@ -57,6 +64,8 @@ defmodule Console.Schema.Service do
     field :name,             :string
     field :component_status, :string
     field :version,          :string
+    field :promotion,        Promotion
+    field :proceed,          :boolean, default: false
     field :sha,              :string
     field :namespace,        :string
     field :docs_path,        :string
@@ -153,6 +162,10 @@ defmodule Console.Schema.Service do
 
   def for_owner(query \\ __MODULE__, owner_id) do
     from(s in query, where: s.owner_id == ^owner_id)
+  end
+
+  def for_status(query \\ __MODULE__, status) do
+    from(s in query, where: s.status == ^status)
   end
 
   def ordered(query \\ __MODULE__, order \\ [asc: :cluster_id, asc: :name]) do

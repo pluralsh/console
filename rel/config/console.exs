@@ -94,7 +94,8 @@ config :console,
   is_sandbox: !!get_env("CONSOLE_SANDBOX"),
   provider: provider,
   build_id: get_env("CONSOLE_BUILD_ID"),
-  kas_dns: get_env("KAS_DNS")
+  kas_dns: get_env("KAS_DNS"),
+  byok: get_env("CONSOLE_BYOK") == "true"
 
 if git_url && String.starts_with?(git_url, "https") do
   config :console,

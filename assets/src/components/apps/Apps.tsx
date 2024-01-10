@@ -69,7 +69,7 @@ function QueryEmptyState({ query, setQuery }) {
       icon={<AppsIcon size={64} />}
       message="No apps found."
       description={`"${query}" did not match any of your installed applications.`}
-      width={600}
+      css={{ width: 600 }}
     >
       <Button
         secondary
@@ -89,7 +89,7 @@ function ReadyEmptyState() {
       icon={<LifePreserverIcon size={64} />}
       message="That's awkward."
       description="None of your apps appear to be ready. Don't worry — we're here to help."
-      width={400}
+      css={{ width: 400 }}
     >
       <Button
         as="a"
@@ -137,7 +137,7 @@ function PendingFailedEmptyState({ filter }) {
           </>
         ) as any // Workaround as JSX elements are not allowed here.
       }
-      width={500}
+      css={{ width: 500 }}
     />
   )
 }

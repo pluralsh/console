@@ -1,8 +1,26 @@
 defmodule ConsoleWeb.GitController do
   use ConsoleWeb, :controller
   alias Console.Deployments.Services
-  alias Console.Schema.Cluster
+  alias Console.Schema.{Cluster, Service}
   require Logger
+
+  def proceed(conn, params) do
+    with %Service{} = svc <- get_service(params),
+         true <- Services.proceed?(svc) do
+      json(conn, %{open: true})
+    else
+      _ -> send_resp(conn, 402, "closed")
+    end
+  end
+
+  def rollback(conn, params) do
+    with %Service{} = svc <- get_service(params),
+         true <- Services.rollback?(svc) do
+      json(conn, %{open: true})
+    else
+      _ -> send_resp(conn, 402, "closed")
+    end
+  end
 
   def tarball(conn, %{"id" => service_id}) do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
@@ -34,4 +52,8 @@ defmodule ConsoleWeb.GitController do
         send_resp(conn, 403, "Forbidden")
     end
   end
+
+  defp get_service(%{"id" => id}), do: Services.get_service(id)
+  defp get_service(%{"cluster" => cluster, "name" => name}), do: Services.get_service_by_handle(cluster, name)
+  defp get_service(_), do: nil
 end

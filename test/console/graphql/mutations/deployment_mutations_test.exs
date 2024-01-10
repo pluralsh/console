@@ -133,7 +133,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
   describe "pingCluster" do
     test "it can mark a cluster as pinged" do
-      cluster = insert(:cluster, version: "1.24")
+      cluster = insert(:cluster, version: "1.24.1")
 
       {:ok, %{data: %{"pingCluster" => pinged}}} = run_query("""
         mutation Ping($ping: ClusterPing!) {
@@ -145,11 +145,11 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
             currentVersion
           }
         }
-      """, %{"ping" => %{"currentVersion" => "1.25"}}, %{cluster: cluster})
+      """, %{"ping" => %{"currentVersion" => "1.24.2"}}, %{cluster: cluster})
 
       assert pinged["id"] == cluster.id
-      assert pinged["currentVersion"] == "1.25"
-      assert pinged["version"] == "1.25"
+      assert pinged["currentVersion"] == "1.24.2"
+      assert pinged["version"] == "1.24.2"
       assert pinged["pingedAt"]
       assert pinged["installed"]
     end
@@ -527,6 +527,69 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert conf["name"] == "new-name"
       assert conf["value"] == "new-value"
     end
+
+    test "enforces scopes" do
+      cluster = insert(:cluster, handle: "test")
+      user = admin_user()
+      git = insert(:git_repository)
+      expect(Console.Features, :available?, 2, fn :cd -> true end)
+      {:ok, service} = create_service(cluster, user, [
+        name: "test",
+        namespace: "test",
+        git_ref: %{ref: "master", folder: "k8s"},
+        repository_id: git.id,
+        configuration: [%{name: "name", value: "value"}]
+      ])
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation update($cluster: String!, $name: String!, $attributes: ServiceUpdateAttributes!) {
+          updateServiceDeployment(cluster: $cluster, name: $name, attributes: $attributes) {
+            name
+            namespace
+            git { ref folder }
+            repository { id }
+            configuration { name value }
+            editable
+          }
+        }
+      """, %{
+        "attributes" => %{
+          "git" => %{"ref" => "main", "folder" => "k8s"},
+          "configuration" => [%{"name" => "new-name", "value" => "new-value"}],
+        },
+        "cluster" => cluster.handle,
+        "name" => service.name,
+      }, %{current_user: %{user | scopes: [build(:scope, api: "updateServiceDeployment", identifier: insert(:service).id)]}})
+
+      {:ok, %{data: %{"updateServiceDeployment" => updated}}} = run_query("""
+        mutation update($cluster: String!, $name: String!, $attributes: ServiceUpdateAttributes!) {
+          updateServiceDeployment(cluster: $cluster, name: $name, attributes: $attributes) {
+            name
+            namespace
+            git { ref folder }
+            repository { id }
+            configuration { name value }
+            editable
+          }
+        }
+      """, %{
+        "attributes" => %{
+          "git" => %{"ref" => "main", "folder" => "k8s"},
+          "configuration" => [%{"name" => "new-name", "value" => "new-value"}],
+        },
+        "cluster" => cluster.handle,
+        "name" => service.name,
+      }, %{current_user: %{user | scopes: [build(:scope, api: "updateServiceDeployment", identifier: service.id)]}})
+
+      assert updated["git"]["ref"] == "main"
+      assert updated["git"]["folder"] == "k8s"
+      assert updated["repository"]["id"] == git.id
+      assert updated["editable"]
+
+      [conf] = updated["configuration"]
+      assert conf["name"] == "new-name"
+      assert conf["value"] == "new-value"
+    end
   end
 
   describe "cloneService" do
@@ -870,6 +933,21 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "updateGlobalService" do
+    test "it can delete a global service record" do
+      global = insert(:global_service)
+
+      {:ok, %{data: %{"updateGlobalService" => updated}}} = run_query("""
+        mutation Delete($id: ID!, $attributes: GlobalServiceAttributes!) {
+          updateGlobalService(id: $id, attributes: $attributes) { id distro }
+        }
+      """, %{"id" => global.id, "attributes" => %{"name" => global.name, "distro" => "EKS"}}, %{current_user: admin_user()})
+
+      assert updated["id"] == global.id
+      assert updated["distro"] == "EKS"
+    end
+  end
+
   describe "deleteGlobalService" do
     test "it can delete a global service record" do
       global = insert(:global_service)
@@ -921,7 +999,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
                 criteria { source { id } secrets }
               }
             }
-            edges { from { id } to { id } gates { type name } }
+            edges { from { id } to { id } gates { type name cluster { id } } }
           }
         }
       """, %{"name" => "test", "attributes" => %{
@@ -935,12 +1013,16 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
             }}
           ]}
         ],
-        "edges" => [%{"from" => "dev", "to" => "prod", "gates" => [%{"type" => "APPROVAL", "name" => "approve"}]}]
+        "edges" => [
+          %{"from" => "dev", "to" => "prod", "gates" => [
+            %{"type" => "JOB", "clusterId" => svc2.cluster_id, "name" => "approve"}
+          ]}
+        ]
       }}, %{current_user: user})
 
       assert pipeline["id"]
       assert pipeline["name"] == "test"
-      [dev, prod] = pipeline["stages"]
+      %{"dev" => dev, "prod" => prod} = Map.new(pipeline["stages"], & {&1["name"], &1})
 
       assert dev["name"] == "dev"
       assert hd(dev["services"])["service"]["id"] == svc.id
@@ -958,8 +1040,9 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
       [gate] = edge["gates"]
 
-      assert gate["type"] == "APPROVAL"
+      assert gate["type"] == "JOB"
       assert gate["name"] == "approve"
+      assert gate["cluster"]["id"] == svc2.cluster_id
     end
   end
 
@@ -1027,6 +1110,38 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "createAgentMigration" do
+    test "admins can create an agent migration" do
+      admin = admin_user()
+
+      {:ok, %{data: %{"createAgentMigration" => create}}} = run_query("""
+        mutation Create($attrs: AgentMigrationAttributes!) {
+          createAgentMigration(attributes: $attrs) {
+            ref
+          }
+        }
+      """, %{"attrs" => %{"ref" => "agent-v0.3.30"}}, %{current_user: admin})
+
+      assert create["ref"] == "agent-v0.3.30"
+    end
+  end
+
+  describe "proceed" do
+    test "it can proceed a service through canary deployment" do
+      admin = admin_user()
+      svc = insert(:service)
+
+      {:ok, %{data: %{"proceed" => res}}} = run_query("""
+        mutation Proceed($id: ID!) {
+          proceed(id: $id) { id }
+        }
+      """, %{"id" => svc.id}, %{current_user: admin})
+
+      assert res["id"] == svc.id
+      assert refetch(svc).promotion == :proceed
+    end
+  end
+
   describe "selfManage" do
     test "it can self-manage a byok console" do
       admin = admin_user()
@@ -1043,6 +1158,22 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       """, %{"values" => "value: bogus"}, %{current_user: admin})
 
       assert svc["name"] == "console"
+    end
+  end
+
+  describe "deletePipeline" do
+    test "it can delete a pipeline by id" do
+      admin = admin_user()
+      pipe = insert(:pipeline)
+
+      {:ok, %{data: %{"deletePipeline" => del}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deletePipeline(id: $id) { id }
+        }
+      """, %{"id" => pipe.id}, %{current_user: admin})
+
+      assert del["id"] == pipe.id
+      refute refetch(pipe)
     end
   end
 end

@@ -13,17 +13,38 @@ query Usage(
   $podMem: String!
   $step: String!
   $offset: Int!
+  $clusterId: ID
 ) {
-  cpu: metric(query: $cpu, offset: $offset, step: $step) {
+  cpu: metric(
+    clusterId: $clusterId
+    query: $cpu
+    offset: $offset
+    step: $step
+  ) {
     ...MetricResponse
   }
-  mem: metric(query: $mem, offset: $offset, step: $step) {
+  mem: metric(
+    clusterId: $clusterId
+    query: $mem
+    offset: $offset
+    step: $step
+  ) {
     ...MetricResponse
   }
-  podCpu: metric(query: $podCpu, offset: $offset, step: $step) {
+  podCpu: metric(
+    clusterId: $clusterId
+    query: $podCpu
+    offset: $offset
+    step: $step
+  ) {
     ...MetricResponse
   }
-  podMem: metric(query: $podMem, offset: $offset, step: $step) {
+  podMem: metric(
+    clusterId: $clusterId
+    query: $podMem
+    offset: $offset
+    step: $step
+  ) {
     ...MetricResponse
   }
 }

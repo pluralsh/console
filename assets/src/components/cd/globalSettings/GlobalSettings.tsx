@@ -50,6 +50,10 @@ const directory = [
     label: 'Repositories',
   },
   {
+    path: 'observability',
+    label: 'Observability Settings',
+  },
+  {
     path: 'auto-update',
     label: 'Auto Update',
   },

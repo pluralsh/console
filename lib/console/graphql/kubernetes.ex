@@ -52,8 +52,14 @@ defmodule Console.GraphQl.Kubernetes do
   end
 
   object :kubernetes_unstructured do
-    field :raw, :map
+    field :raw, :map, resolve: fn
+      %{raw: %{"metadata" => %{"managedFields" => _}} = raw}, _, _ ->
+        {:ok, put_in(raw["metadata"]["managedFields"], [])}
+      %{raw: raw}, _, _ -> {:ok, raw}
+    end
+
     field :metadata, non_null(:metadata)
+
     field :events,   list_of(:event), resolve: fn
       %{raw: %{"metadata" => %{"namespace" => ns, "uid" => uid}}}, _, _ ->
         Kubernetes.list_events(%{metadata: %{uid: uid, namespace: ns}})
@@ -80,6 +86,10 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.Namespace
   import_types Console.GraphQl.Kubernetes.VPN
   import_types Console.GraphQl.Kubernetes.Config
+  import_types Console.GraphQl.Kubernetes.Canary
+  import_types Console.GraphQl.Kubernetes.UpgradePlan
+  import_types Console.GraphQl.Kubernetes.DaemonSet
+  import_types Console.GraphQl.Kubernetes.Plural
 
   delta :application
 
@@ -126,6 +136,15 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_stateful_set/2
+    end
+
+    field :daemon_set, :daemon_set do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+      service_authorized :read
+
+      safe_resolve &Kubernetes.resolve_daemon_set/2
     end
 
     field :ingress, :ingress do
@@ -253,6 +272,25 @@ defmodule Console.GraphQl.Kubernetes do
       safe_resolve &Kubernetes.resolve_node_metrics/2
     end
 
+    field :canary, :canary do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+      service_authorized :read
+
+      safe_resolve &Kubernetes.resolve_canary/2
+    end
+
+
+    field :upgrade_plan, :upgrade_plan do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+      service_authorized :read
+
+      safe_resolve &Kubernetes.resolve_upgrade_plan/2
+    end
+
     field :configuration_overlays, list_of(:configuration_overlay) do
       middleware Authenticated
       arg :namespace, non_null(:string)
@@ -261,6 +299,7 @@ defmodule Console.GraphQl.Kubernetes do
     end
 
     import_fields :config_queries
+    import_fields :plural_kubernetes_queries
   end
 
   object :kubernetes_mutations do

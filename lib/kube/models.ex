@@ -7,6 +7,8 @@ Kube.Parser.parse(path: "crds/application.yaml", module: Kube.Application)
 Kube.Parser.parse(path: "crds/clusters.cluster.x-k8s.io.yaml", module: Kube.Cluster)
 Kube.Parser.parse(path: "crds/helmrepository.yaml", module: Kube.HelmRepository)
 Kube.Parser.parse(path: "crds/helmchart.yaml", module: Kube.HelmChart)
+Kube.Parser.parse(path: "crds/flagger-canary.yaml", module: Kube.Canary)
+Kube.Parser.parse(path: "crds/upgrade-plan.yaml", module: Kube.UpgradePlan)
 
 # plural crds
 Kube.Parser.parse(path: "crds/license.yaml", module: Kube.License)
@@ -16,6 +18,11 @@ Kube.Parser.parse(path: "crds/slashcommand.yaml", module: Kube.SlashCommand)
 Kube.Parser.parse(path: "crds/ss-resize.yaml", module: Kube.StatefulSetResize)
 Kube.Parser.parse(path: "crds/dashboard.yaml", module: Kube.Dashboard)
 Kube.Parser.parse(path: "crds/runbook.yaml", module: Kube.Runbook)
+
+# plural cd crds
+Kube.Parser.parse(path: "crds/plural-cluster.yaml", module: Kube.PluralCluster)
+Kube.Parser.parse(path: "crds/plural-gitrepo.yaml", module: Kube.GitRepository)
+Kube.Parser.parse(path: "crds/plural-service.yaml", module: Kube.ServiceDeployment)
 
 Kube.Parser.parse(path: "crds/wireguardserver.yaml", module: Kube.WireguardServer)
 Kube.Parser.parse(path: "crds/wireguardpeer.yaml", module: Kube.WireguardPeer, ovveride: [

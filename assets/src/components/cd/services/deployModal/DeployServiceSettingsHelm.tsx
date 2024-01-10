@@ -1,7 +1,10 @@
 import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import { HelmHealthChip } from 'components/cd/repos/HelmHealthChip'
+import useOnUnMount from 'components/hooks/useOnUnMount'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { InlineLink } from 'components/utils/typography/InlineLink'
 import {
+  NamespacedName,
   useHelmRepositoriesQuery,
   useHelmRepositoryQuery,
 } from 'generated/graphql'
@@ -153,6 +156,13 @@ export default function DeployServiceSettingsHelm({
   setChart,
   version,
   setVersion,
+}: {
+  repository: NamespacedName | null
+  setRepository: (repository: NamespacedName | null) => void
+  chart: string
+  setChart: (chart: string) => void
+  version: string
+  setVersion: (version: string) => void
 }) {
   const { data, loading } = useHelmRepositoriesQuery({
     fetchPolicy: 'cache-and-network',
@@ -165,6 +175,14 @@ export default function DeployServiceSettingsHelm({
       namespace: repository?.namespace || '',
     },
     skip: !repository?.name || !repository?.namespace,
+  })
+
+  useOnUnMount(() => {
+    if (!(repository && chart && version)) {
+      setRepository(null)
+      setChart('')
+      setVersion('')
+    }
   })
 
   if (!data?.helmRepositories) return <EmptyState loading={loading} />
@@ -185,6 +203,21 @@ export default function DeployServiceSettingsHelm({
       <FormField
         label="Repository"
         hint="Select a chart repository to fetch your chart from"
+        {...(repository
+          ? {
+              caption: (
+                <InlineLink
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setRepository(null)
+                  }}
+                >
+                  Deselect
+                </InlineLink>
+              ),
+            }
+          : {})}
       >
         <Select
           label="Select Repository"

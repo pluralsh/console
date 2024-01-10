@@ -1,3 +1,9 @@
+fragment HttpConnection on HttpConnection {
+  host
+  user
+  password
+}
+
 fragment DeploymentSettings on DeploymentSettings {
   id
   name
@@ -5,6 +11,12 @@ fragment DeploymentSettings on DeploymentSettings {
   selfManaged
   insertedAt
   updatedAt
+  lokiConnection {
+    ...HttpConnection
+  }
+  prometheusConnection {
+    ...HttpConnection
+  }
   artifactRepository {
     ...GitRepository
   }

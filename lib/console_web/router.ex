@@ -30,6 +30,16 @@ defmodule ConsoleWeb.Router do
 
     scope "/v1", ConsoleWeb do
       get "/git/tarballs", GitController, :tarball
+
+      get "/gate/:cluster/:name", GitController, :proceed
+      get "/gate/:id", GitController, :proceed
+      post "/gate/:cluster/:name", GitController, :proceed
+      post "/gate/:id", GitController, :proceed
+
+      get "/rollback/:cluster/:name", GitController, :rollback
+      get "/rollback/:id", GitController, :rollback
+      post "/rollback/:cluster/:name", GitController, :rollback
+      post "/rollback/:id", GitController, :rollback
     end
   end
 

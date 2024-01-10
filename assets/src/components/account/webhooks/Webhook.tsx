@@ -39,11 +39,10 @@ export default function Webhook({ hook: { id, url, health, insertedAt } }) {
         padding="small"
       >
         <IconFrame
-          icon={<SlackLogoIcon />}
+          icon={<SlackLogoIcon fullColor />}
           size="medium"
           textValue="Slack"
           type="floating"
-          minWidth={32}
         />
         <Div
           flexGrow={1}

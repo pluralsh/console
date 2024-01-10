@@ -18,6 +18,8 @@ import {
   CD_DEFAULT_REL_PATH,
   CLUSTERS_REL_PATH,
   PIPELINES_REL_PATH,
+  PROVIDERS_REL_PATH,
+  REPOS_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
 
@@ -80,9 +82,9 @@ export const CD_BASE_CRUMBS = [
 const directory = [
   { path: CLUSTERS_REL_PATH, label: 'Clusters' },
   { path: SERVICES_REL_PATH, label: 'Services' },
-  { path: 'git', label: 'Repositories' },
+  { path: REPOS_REL_PATH, label: 'Repositories' },
   { path: PIPELINES_REL_PATH, label: 'Pipelines' },
-  { path: 'providers', label: 'Providers' },
+  { path: PROVIDERS_REL_PATH, label: 'Providers' },
   { path: ADDONS_REL_PATH, label: 'Add-ons' },
 ] as const
 
@@ -90,6 +92,7 @@ export default function ContinuousDeployment() {
   const theme = useTheme()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [scrollable, setScrollable] = useState(false)
+
   const cdContext = useMemo(
     () => ({
       setHeaderContent,

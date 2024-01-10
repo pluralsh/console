@@ -1,0 +1,6 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: k8shelm
+spec:
+  url: https://github.com/zreigz/k8s-helm.git

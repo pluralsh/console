@@ -15,8 +15,9 @@ defmodule Console.GraphQl.Kubernetes.Ingress do
   end
 
   object :ingress_spec do
-    field :rules, list_of(:ingress_rule)
-    field :tls,   list_of(:ingress_tls)
+    field :ingress_class_name, :string
+    field :rules,              list_of(:ingress_rule)
+    field :tls,                list_of(:ingress_tls)
   end
 
   object :ingress_rule do

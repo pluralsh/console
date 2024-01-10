@@ -12,6 +12,7 @@ defmodule Kube.Client do
   list_request :list_certificate, Kube.Certificate.List
   list_request :list_postgresqls, Kube.Postgresql.List
   list_request :list_clusters, Kube.Cluster.List
+  list_request :list_canaries, Kube.Canary.List
 
   get_request :get_dashboard, Kube.Dashboard
   get_request :get_slashcommand, Kube.SlashCommand
@@ -26,6 +27,11 @@ defmodule Kube.Client do
   get_request :get_cluster, Kube.Cluster
   get_request :get_helm_repository, Kube.HelmRepository
   get_request :get_helm_chart, Kube.HelmChart
+  get_request :get_canary, Kube.Canary
+  get_request :get_upgrade_plan, Kube.UpgradePlan
+  get_request :get_plural_cluster, Kube.PluralCluster
+  get_request :get_git_repository, Kube.GitRepository
+  get_request :get_service_deployment, Kube.ServiceDeployment
 
   delete_request :delete_wireguard_peer, Kube.WireguardPeer
   delete_request :delete_certificate, Kube.Certificate

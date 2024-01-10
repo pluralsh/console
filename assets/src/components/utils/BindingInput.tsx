@@ -102,7 +102,7 @@ export function groupSuggestion({ name, description, id }: any) {
 
 const ChipList = styled(ListBoxItemChipList)(({ theme }) => ({
   marginTop: theme.spacing.small,
-  justifyContent: 'start',
+  justifyContent: 'flex-start',
 }))
 
 export function BindingInput({

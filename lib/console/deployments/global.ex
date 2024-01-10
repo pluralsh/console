@@ -25,6 +25,17 @@ defmodule Console.Deployments.Global do
 
 
   @doc """
+  Updates a global service by id
+  """
+  def update(attrs, id, %User{} = user) do
+    get!(id)
+    |> GlobalService.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
   Deletes a global service and delinks any created services
   """
   @spec delete(binary, User.t) :: global_resp
@@ -48,12 +59,17 @@ defmodule Console.Deployments.Global do
   Determines if a global service is eligible for this cluster
   """
   @spec match?(GlobalService.t, Cluster.t) :: boolean
-  def match?(%GlobalService{provider_id: gpid, tags: gtags}, %Cluster{provider_id: pid, tags: tags}) do
-    case {gpid, pid, gtags, tags} do
-      {nil, _, gtags, tags} -> matches_tags?(gtags, tags)
-      {pid, pid, gtags, tags} -> matches_tags?(gtags, tags)
-      _ -> false
-    end
+  def match?(%GlobalService{} = global, %Cluster{} = cluster) do
+    Enum.all?([
+      {:field, global.distro, cluster.distro},
+      {:field, global.provider_id, cluster.provider_id},
+      {:tags, global.tags, cluster.tags},
+    ], fn
+      {:field, nil, _} -> true
+      {:field, v, v} -> true
+      {:field, _, _} -> false
+      {:tags, t1, t2} -> matches_tags?(t1, t2)
+    end)
   end
 
   @doc """
@@ -61,8 +77,7 @@ defmodule Console.Deployments.Global do
   """
   @spec add_to_cluster(GlobalService.t, Cluster.t) :: Services.service_resp
   def add_to_cluster(%GlobalService{id: gid, service_id: sid}, %Cluster{id: cid}) do
-    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
-    Services.clone_service(%{owner_id: gid}, sid, cid, bot)
+    Services.clone_service(%{owner_id: gid}, sid, cid, bot())
   end
 
   @doc """
@@ -71,7 +86,7 @@ defmodule Console.Deployments.Global do
   @spec sync_clusters(GlobalService.t) :: :ok
   def sync_clusters(%GlobalService{id: gid} = global) do
     %{service: svc} = Console.Repo.preload(global, [:service])
-    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    bot = bot()
     Cluster.ignore_ids([svc.cluster_id])
     |> Cluster.target(global)
     |> Repo.all()
@@ -83,6 +98,8 @@ defmodule Console.Deployments.Global do
       end
     end)
   end
+
+  defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 
   @doc """
   it can resync a service owned by a global service
@@ -98,6 +115,8 @@ defmodule Console.Deployments.Global do
         configuration: Enum.map(Map.merge(dest_secrets, source_secrets), fn {k, v} -> %{name: k, value: v} end),
         repository_id: source.repository_id,
         git: clean(source.git),
+        helm: clean(source.helm),
+        kustomize: clean(source.kustomize),
       }, dest.id, user)
     else
       err -> Logger.info "did not sync service due to: #{inspect(err)}"
@@ -114,21 +133,40 @@ defmodule Console.Deployments.Global do
       do: diff?(source, dest, source_secrets, dest_secrets)
   end
 
-  defp diff?(%Service{git: git_source} = s, %Service{git: git_dest} = d, source, dest) do
-    missing_source?(source, dest) || clean(git_source) != clean(git_dest) || s.repository_id != d.repository_id || s.namespace != d.namespace
+  defp diff?(%Service{} = s, %Service{} = d, source, dest) do
+    missing_source?(source, dest) || specs_different?(s, d) || s.repository_id != d.repository_id || s.namespace != d.namespace
   end
 
   defp matches_tags?([], _), do: true
-  defp matches_tags?(tags, other_tags), do: Tag.as_map(tags) == Tag.as_map(other_tags)
+  defp matches_tags?(tags, other_tags) do
+    dest = Tag.as_map(other_tags)
+    Tag.as_map(tags)
+    |> Enum.all?(fn {k, v} -> dest[k] == v end)
+  end
 
   defp missing_source?(source, dest) do
     Enum.any?(source, fn {k, v} -> dest[k] != v end)
   end
 
-  defp clean(git), do: Map.take(git, [:ref, :folder])
+  defp specs_different?(source, dest) do
+    Enum.any?(~w(helm git kustomize)a, fn key ->
+      s = Map.get(source, key)
+      d = Map.get(dest, key)
+      clean(s) != clean(d)
+    end)
+  end
+
+  defp clean(val) do
+    case Console.mapify(val) do
+      %{id: _} = m -> Map.delete(m, :id)
+      r -> r
+    end
+  end
 
   def notify({:ok, %GlobalService{} = svc}, :create, user),
     do: handle_notify(PubSub.GlobalServiceCreated, svc, actor: user)
+  def notify({:ok, %GlobalService{} = svc}, :update, user),
+    do: handle_notify(PubSub.GlobalServiceUpdated, svc, actor: user)
   def notify({:ok, %GlobalService{} = svc}, :delete, user),
     do: handle_notify(PubSub.GlobalServiceDeleted, svc, actor: user)
   def notify(pass, _, _), do: pass

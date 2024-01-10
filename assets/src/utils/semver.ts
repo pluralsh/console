@@ -2,10 +2,36 @@ import semver, { coerce } from 'semver'
 
 import { ProviderCloud } from '../components/cd/clusters/create/types'
 
+import { Maybe } from '../generated/graphql'
+
 import { isNonNullable } from './isNonNullable'
 
 export function canUpgrade(version: string) {
   return !version || semver.lt(version, '1.28.0')
+}
+
+export function isUpgrading(
+  version?: Maybe<string>,
+  currentVersion?: Maybe<string>
+): boolean {
+  if (!version || !currentVersion) return false
+
+  const coercedVersion = semver.coerce(version)
+  const coercedCurrentVersion = semver.coerce(currentVersion)
+
+  if (!coercedVersion || !coercedCurrentVersion) return false
+
+  const dots = (version.match(/\./g) || []).length
+
+  if (coercedVersion.major !== coercedCurrentVersion?.major) {
+    return true
+  }
+
+  if (dots > 0 && coercedVersion?.minor !== coercedCurrentVersion?.minor) {
+    return true
+  }
+
+  return dots > 1 && coercedVersion?.patch !== coercedCurrentVersion?.patch
 }
 
 export function nextSupportedVersion(

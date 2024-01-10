@@ -1,9 +1,10 @@
 defmodule Console.Schema.GlobalService do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, ClusterProvider}
+  alias Console.Schema.{Service, Cluster, ClusterProvider}
 
   schema "global_services" do
     field :name, :string
+    field :distro, Cluster.Distro
 
     embeds_many :tags, Tag, on_replace: :delete do
       field :name,  :string
@@ -22,7 +23,7 @@ defmodule Console.Schema.GlobalService do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name service_id provider_id)a
+  @valid ~w(name service_id distro provider_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

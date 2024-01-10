@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import {
   AppIcon,
   Card,
@@ -9,17 +9,19 @@ import {
 import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 import { ReactFlowProvider } from 'reactflow'
+import { NetworkStatus } from '@apollo/client'
+import { useNavigate, useParams } from 'react-router-dom'
+
 import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
+import { Edge, extendConnection } from 'utils/graphql'
+import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-
-import { Edge, extendConnection } from 'utils/graphql'
-
-import { NetworkStatus } from '@apollo/client'
-
-import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
-
-import { VirtualList, type VirtualListRenderer } from '../../utils/VirtualList'
+import {
+  VirtualList,
+  type VirtualListRenderer,
+} from 'components/utils/VirtualList'
+import { CD_BASE_CRUMBS } from 'components/cd/ContinuousDeployment'
 
 import { Pipeline } from './Pipeline'
 
@@ -105,17 +107,28 @@ function Pipelines() {
   })
   const pageInfo = data?.pipelines?.pageInfo
   const pipeEdges = data?.pipelines?.edges
-  const [selectedPipeline, setSelectedPipeline] = useState(
-    pipeEdges?.[0]?.node?.id ?? ''
+  const selectedPipeline = useParams().pipelineId
+  const navigate = useNavigate()
+  const setSelectedPipeline = useCallback(
+    (pipelineId: string) => {
+      navigate(`${PIPELINES_ABS_PATH}/${pipelineId}`)
+    },
+    [navigate]
+  )
+  const pipeline = useMemo(
+    () => pipeEdges?.find((p) => p?.node?.id === selectedPipeline)?.node,
+    [pipeEdges, selectedPipeline]
   )
 
-  useEffect(() => {
+  if (data && !pipeline) {
     const firstId = pipeEdges?.[0]?.node?.id
 
-    if (firstId && !selectedPipeline) {
+    if (firstId) {
       setSelectedPipeline(firstId)
+    } else if (selectedPipeline) {
+      setSelectedPipeline('')
     }
-  }, [pipeEdges, selectedPipeline])
+  }
 
   useSetBreadcrumbs(PIPELINES_CRUMBS)
 
@@ -135,15 +148,14 @@ function Pipelines() {
       selectedId: selectedPipeline,
       setSelectedId: setSelectedPipeline,
     }),
-    [selectedPipeline]
+    [selectedPipeline, setSelectedPipeline]
   )
-  const pipeline = useMemo(
-    () => pipeEdges?.find((p) => p?.node?.id === selectedPipeline)?.node,
-    [pipeEdges, selectedPipeline]
+  const emptyState = (
+    <EmptyState message="Looks like you don't have any pipelines yet." />
   )
 
   if (error) {
-    return <EmptyState message="Looks like you don't have any providers yet." />
+    return emptyState
   }
   if (!data) {
     return <LoadingIndicator />
@@ -173,11 +185,16 @@ function Pipelines() {
             meta={meta}
           />
           <PipelineEditAreaSC>
-            {pipeline && <Pipeline pipeline={pipeline} />}
+            {pipeline && (
+              <Pipeline
+                pipeline={pipeline}
+                key={pipeline.id}
+              />
+            )}
           </PipelineEditAreaSC>
         </div>
       ) : (
-        <EmptyState message="Looks like you don't have any pipelines yet." />
+        emptyState
       )}
     </div>
   )

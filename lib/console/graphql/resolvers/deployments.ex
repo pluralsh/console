@@ -56,6 +56,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> Cluster.for_user(user)
     |> Cluster.preloaded()
     |> maybe_search(Cluster, args)
+    |> cluster_filters(args)
     |> paginate(args)
   end
 
@@ -68,7 +69,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def list_services(args, %{context: %{current_user: user}}) do
     Service.for_user(user)
     |> service_filters(args)
-    |> maybe_search(Cluster, args)
+    |> maybe_search(Service, args)
     |> Service.ordered()
     |> paginate(args)
   end
@@ -89,10 +90,33 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def service_statuses(args, %{context: %{current_user: user}}) do
     Service.for_user(user)
     |> service_filters(args)
+    |> maybe_search(Service, args)
     |> Service.statuses()
     |> Console.Repo.all()
     |> ok()
   end
+
+  def cluster_statuses(args, %{context: %{current_user: user}}) do
+    Cluster.for_user(user)
+    |> cluster_filters(args)
+    |> maybe_search(Cluster, args)
+    |> Cluster.statistics()
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def list_tags(args, _) do
+    {order, field} = tag_args(args)
+    Tag.cluster()
+    |> tag_filters(args)
+    |> Tag.ordered(order)
+    |> Tag.select(field)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  defp tag_args(%{tag: _}), do: {[asc: :value], :value}
+  defp tag_args(_), do: {[asc: :name], :name}
 
   defp maybe_search(query, module, %{q: q}) when is_binary(q), do: module.search(query, q)
   defp maybe_search(query, _, _), do: query
@@ -101,6 +125,22 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     Enum.reduce(args, query, fn
       {:cluster_id, id}, q -> Service.for_cluster(q, id)
       {:cluster, handle}, q -> Service.for_cluster_handle(q, handle)
+      {:status, status}, q -> Service.for_status(q, status)
+      _, q -> q
+    end)
+  end
+
+  defp cluster_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:tag, %{name: n, value: v}}, q -> Cluster.with_tag(q, n, v)
+      {:healthy, h}, q -> Cluster.health(q, h)
+      _, q -> q
+    end)
+  end
+
+  defp tag_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:tag, t}, q -> Tag.for_name(q, t)
       _, q -> q
     end)
   end
@@ -196,16 +236,27 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> allow(user, :read)
   end
 
+  def resolve_global(%{id: id}, %{context: %{current_user: user}}) do
+    Global.get!(id)
+    |> allow(user, :read)
+  end
+
   defp actor(%{context: %{current_user: %User{} = user}}), do: user
   defp actor(%{context: %{cluster: %Cluster{} = cluster}}), do: cluster
   defp actor(_), do: nil
 
-  def resolve_provider(%{id: id}, %{context: %{current_user: user}}) do
-    Clusters.get_provider!(id)
+  def resolve_provider(args, %{context: %{current_user: user}}) do
+    get_provider(args)
     |> allow(user, :read)
   end
 
+  defp get_provider(%{id: id}) when is_binary(id), do: Clusters.get_provider!(id)
+  defp get_provider(%{name: name}) when is_binary(name), do: Clusters.get_provider_by_name(name)
+  defp get_provider(%{cloud: cloud}) when is_binary(cloud), do: Clusters.get_provider_by_cloud(cloud)
+
   def docs(svc, _, _), do: Services.docs(svc)
+
+  def git_refs(git), do: Git.Discovery.refs(git)
 
   def deploy_token(%{deploy_token: token} = cluster, _, %{context: %{current_user: user}}) do
     case allow(cluster, user, :write) do
@@ -282,6 +333,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def delete_service(%{id: id}, %{context: %{current_user: user}}),
     do: Services.delete_service(id, user)
 
+  def proceed(args, %{context: %{current_user: user}}) do
+    svc = fetch_service(args)
+    Services.proceed(args[:promotion] || :proceed, svc, user)
+  end
+
   def clone_service(%{cluster: _, name: _, cluster_id: cid, attributes: attrs} = args, %{context: %{current_user: user}}) do
     svc = fetch_service(args)
     Services.clone_service(attrs, svc.id, cid, user)
@@ -321,6 +377,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def create_global_service(%{service_id: sid, attributes: attrs}, %{context: %{current_user: user}}),
     do: Global.create(attrs, sid, user)
 
+  def update_global_service(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Global.update(attrs, id, user)
+
   def delete_global_service(%{id: id}, %{context: %{current_user: user}}),
     do: Global.delete(id, user)
 
@@ -339,6 +398,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def upsert_pipeline(%{name: name, attributes: attrs}, %{context: %{current_user: user}}),
     do: Pipelines.upsert(attrs, name, user)
 
+  def delete_pipeline(%{id: id}, %{context: %{current_user: user}}),
+    do: Pipelines.delete(id, user)
+
   def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
 
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),
@@ -346,6 +408,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def create_runtime_services(%{services: svcs} = args, %{context: %{cluster: cluster}}),
     do: Clusters.create_runtime_services(svcs, args[:service_id], cluster)
+
+  def create_agent_migration(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Clusters.create_agent_migration(attrs, user)
 
   def editable(resource, _, %{context: %{current_user: user}}) do
     case allow(resource, user, :write) do
@@ -370,6 +435,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   defp rbac_args(%{cluster_id: id}) when is_binary(id), do: {&Clusters.rbac/3, id}
   defp rbac_args(%{service_id: id}) when is_binary(id), do: {&Services.rbac/3, id}
 
+  defp fetch_service(%{id: id}) when is_binary(id), do: Services.get_service!(id)
   defp fetch_service(%{cluster: cluster, name: name}) do
     cluster = Clusters.find!(cluster)
     Services.get_service_by_name!(cluster.id, name)

@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.Observability do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Observability
+  alias Console.Middleware.ObservabilityClient
 
   enum :autoscaling_target do
     value :statefulset
@@ -82,20 +83,26 @@ defmodule Console.GraphQl.Observability do
 
     field :metric, list_of(:metric_response) do
       middleware Authenticated
-      arg :query,  non_null(:string)
-      arg :offset, :integer
-      arg :step,   :string
 
+      arg :query,      non_null(:string)
+      arg :offset,     :integer
+      arg :step,       :string
+      arg :cluster_id, :id
+
+      middleware ObservabilityClient, :prometheus
       safe_resolve &Observability.resolve_metric/2
     end
 
     field :logs, list_of(:log_stream) do
       middleware Authenticated
-      arg :query, non_null(:string)
-      arg :start, :long
-      arg :end,   :long
-      arg :limit, non_null(:integer)
 
+      arg :query,      non_null(:string)
+      arg :start,      :long
+      arg :end,        :long
+      arg :limit,      non_null(:integer)
+      arg :cluster_id, :id
+
+      middleware ObservabilityClient, :loki
       safe_resolve &Observability.resolve_logs/2
     end
 

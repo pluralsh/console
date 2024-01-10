@@ -1,7 +1,8 @@
 import { ResponsivePie } from '@nivo/pie'
-import { ComponentProps } from 'react'
+import { ComponentProps, useMemo } from 'react'
+import { useTheme } from 'styled-components'
 
-import { CHART_THEME } from './charts'
+import { useChartTheme } from './charts'
 import { ChartTooltip } from './ChartTooltip'
 
 export type PieChartData = {
@@ -17,12 +18,33 @@ export function PieChart({
   ComponentProps<typeof ResponsivePie>,
   'data'
 >) {
+  const chartTheme = useChartTheme()
+  const theme = useTheme()
+  const isEmpty = useMemo(
+    () => !(data || []).reduce((count, elt) => count + elt.value || 0, 0),
+    [data]
+  )
+  const pieData = useMemo(
+    () =>
+      isEmpty
+        ? [
+            {
+              id: '',
+              label: '',
+              value: 1,
+              color: theme.colors['fill-three'],
+            },
+          ]
+        : data,
+    [data, isEmpty, theme.colors]
+  )
+
   return (
     <ResponsivePie
       activeOuterRadiusOffset={3}
       borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
       colors={{ datum: 'data.color' }}
-      data={data}
+      data={pieData}
       enableArcLabels={false}
       enableArcLinkLabels={false}
       innerRadius={0.75}
@@ -39,8 +61,9 @@ export function PieChart({
           value={datum.formattedValue}
         />
       )}
-      theme={CHART_THEME}
+      theme={chartTheme}
       {...props}
+      {...(isEmpty ? { isInteractive: false } : {})}
     />
   )
 }

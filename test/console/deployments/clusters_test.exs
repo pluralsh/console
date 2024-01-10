@@ -336,24 +336,24 @@ defmodule Console.Deployments.ClustersTest do
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",
-        version: "1.25",
-        current_version: "1.25",
+        version: "1.25.0",
+        current_version: "1.25.0",
         provider_id: provider.id,
         node_pools: [
           %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
         ]
       }, user)
 
-      assert cluster.current_version == "1.25"
+      assert cluster.current_version == "1.25.0"
 
       {:ok, cluster} = Clusters.update_cluster(%{
-        version: "1.26",
+        version: "1.26.0",
         node_pools: [
           %{name: "pool", min_size: 2, max_size: 5, instance_type: "t5.large"}
         ]
       }, cluster.id, user)
 
-      assert cluster.version == "1.26"
+      assert cluster.version == "1.26.0"
 
       {:error, _} = Clusters.update_cluster(%{
         version: "1.26.5",
@@ -806,8 +806,17 @@ defmodule Console.Deployments.ClustersTest do
       cluster = insert(:cluster)
 
       {:ok, 1} = Clusters.create_runtime_services([
+        %{name: "ingress-nginx", version: "1.8.1"},
+        %{name: "bogus", version: "2.0.0"}
+      ], nil, cluster)
+
+      [runtime] = Clusters.runtime_services(cluster)
+      assert runtime.name == "ingress-nginx"
+      assert runtime.version == "1.8.1"
+
+      {:ok, 1} = Clusters.create_runtime_services([
         %{name: "ingress-nginx", version: "1.9.1"},
-        %{name: "istio", version: "2.0.0"}
+        %{name: "bogus", version: "2.0.0"}
       ], nil, cluster)
 
       [runtime] = Clusters.runtime_services(cluster)
@@ -817,7 +826,7 @@ defmodule Console.Deployments.ClustersTest do
       svc = insert(:service, cluster: cluster)
       {:ok, 1} = Clusters.create_runtime_services([
         %{name: "ingress-nginx", version: "1.9.1"},
-        %{name: "istio", version: "2.0.0"}
+        %{name: "bogus", version: "2.0.0"}
       ], svc.id, cluster)
 
       [runtime] = Clusters.runtime_services(cluster)
@@ -831,7 +840,7 @@ defmodule Console.Deployments.ClustersTest do
 
       {:ok, 1} = Clusters.create_runtime_services([
         %{name: "ingress-nginx", version: "v1.9.1"},
-        %{name: "istio", version: "2.0.0"}
+        %{name: "bogus", version: "2.0.0"}
       ], nil, cluster)
 
       [runtime] = Clusters.runtime_services(cluster)
@@ -856,6 +865,72 @@ defmodule Console.Deployments.ClustersTest do
       expect(Clusters, :refresh_kubeconfig, fn %{id: ^id} -> :ok end)
 
       :ok = Clusters.refresh_kubeconfig(credential.namespace, cluster.name)
+    end
+  end
+
+  describe "#create_agent_migration/2" do
+    test "admins can create agent migrations" do
+      user = admin_user()
+
+      {:ok, migration} = Clusters.create_agent_migration(%{ref: "agent-v0.3.30"}, user)
+
+      assert migration.ref == "agent-v0.3.30"
+      refute migration.completed
+
+      assert_receive {:event, %PubSub.AgentMigrationCreated{item: ^migration}}
+    end
+
+    test "global writers can create agent migrations" do
+      user = insert(:user)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, migration} = Clusters.create_agent_migration(%{ref: "agent-v0.3.30"}, user)
+
+      assert migration.ref == "agent-v0.3.30"
+      refute migration.completed
+
+      assert_receive {:event, %PubSub.AgentMigrationCreated{item: ^migration}}
+    end
+
+    test "random users cannot create" do
+      user = insert(:user)
+      {:error, _} = Clusters.create_agent_migration(%{ref: "agent-v0.3.30"}, user)
+    end
+  end
+
+  describe "#apply_migration/1" do
+    test "it will rewire the git ref for all agent services in a fleet" do
+      user = admin_user()
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, _} = Clusters.create_cluster(%{name: "test"}, user)
+      {:ok, _} = Clusters.create_cluster(%{name: "test2"}, user)
+
+      migration = insert(:agent_migration)
+      {:ok, completed} = Clusters.apply_migration(migration)
+
+      assert completed.id == migration.id
+      assert completed.completed
+
+      [first, second] = Console.Schema.Service.agent()
+                        |> Console.Repo.all()
+
+      assert first.git.ref == migration.ref
+      assert second.git.ref == migration.ref
+    end
+  end
+
+  describe "#ping/2" do
+    test "it can register a ping on a cluster" do
+      cluster = insert(:cluster)
+
+      {:ok, pinged} = Clusters.ping(%{distro: :eks, current_version: "1.25.1"}, cluster)
+
+      assert pinged.current_version == "1.25.1"
+      assert pinged.distro == :eks
+
+      assert_receive {:event, %PubSub.ClusterPinged{item: ^pinged}}
     end
   end
 
