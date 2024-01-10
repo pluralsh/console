@@ -56,7 +56,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	scope, err := NewProviderScope(ctx, r.Client, provider)
 	if err != nil {
 		log.Error(err, "failed to create scope")
-		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -70,7 +70,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, provider)
 	if err != nil {
-		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 	if exists {
@@ -85,7 +85,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 
 	err = r.tryAddControllerRef(ctx, provider)
 	if err != nil {
-		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -93,7 +93,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	changed, sha, err := provider.Diff(ctx, r.toCloudProviderSettingsAttributes, utils.HashObject)
 	if err != nil {
 		log.Error(err, "unable to calculate provider SHA")
-		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -101,14 +101,14 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	apiProvider, err := r.sync(ctx, provider, changed)
 	if err != nil {
 		log.Error(err, "unable to create or update provider")
-		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	provider.Status.ID = &apiProvider.ID
 	provider.Status.SHA = &sha
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
-	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
 }
@@ -116,13 +116,13 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 func (r *ProviderReconciler) handleExistingProvider(ctx context.Context, provider *v1alpha1.Provider) (reconcile.Result, error) {
 	apiProvider, err := r.ConsoleClient.GetProviderByCloud(ctx, provider.Spec.Cloud)
 	if err != nil {
-		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	provider.Status.ID = &apiProvider.ID
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
 }
@@ -172,7 +172,7 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 			if err := r.ConsoleClient.DeleteProvider(ctx, provider.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
-				utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+				utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 				return &ctrl.Result{}, err
 			}
 

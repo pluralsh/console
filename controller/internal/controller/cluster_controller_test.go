@@ -168,9 +168,9 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 						Reason: v1alpha1.ReadonlyConditionReason.String(),
 					},
 					{
-						Type:   v1alpha1.ReadyConditionType.String(),
+						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.ReadyConditionReason.String(),
+						Reason: v1alpha1.SynchronizedConditionReason.String(),
 					},
 				},
 			})))
@@ -211,9 +211,9 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 						Reason: v1alpha1.ReadonlyConditionReason.String(),
 					},
 					{
-						Type:   v1alpha1.ReadyConditionType.String(),
+						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.ReadyConditionReason.String(),
+						Reason: v1alpha1.SynchronizedConditionReason.String(),
 					},
 				},
 			})))
@@ -247,9 +247,9 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 						Reason: v1alpha1.ReadonlyConditionReason.String(),
 					},
 					{
-						Type:   v1alpha1.ReadyConditionType.String(),
+						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.ReadyConditionReason.String(),
+						Reason: v1alpha1.SynchronizedConditionReason.String(),
 					},
 				},
 			})))
@@ -291,9 +291,9 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 						Reason: v1alpha1.ReadonlyConditionReason.String(),
 					},
 					{
-						Type:   v1alpha1.ReadyConditionType.String(),
+						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.ReadyConditionReason.String(),
+						Reason: v1alpha1.SynchronizedConditionReason.String(),
 					},
 				},
 			})))
@@ -328,9 +328,9 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 						Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
 					},
 					{
-						Type:   v1alpha1.ReadyConditionType.String(),
+						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.ReadyConditionReason.String(),
+						Reason: v1alpha1.SynchronizedConditionReason.String(),
 					},
 				},
 				CurrentVersion: lo.ToPtr("1.24.11"),
@@ -366,9 +366,9 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 						Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
 					},
 					{
-						Type:   v1alpha1.ReadyConditionType.String(),
+						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.ReadyConditionReason.String(),
+						Reason: v1alpha1.SynchronizedConditionReason.String(),
 					},
 				},
 				CurrentVersion: lo.ToPtr("1.24.11"),

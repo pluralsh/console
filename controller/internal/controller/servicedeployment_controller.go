@@ -48,7 +48,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	scope, err := NewServiceScope(ctx, r.Client, service)
 	if err != nil {
 		logger.Error(err, "failed to create scope")
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 	// Always patch object when exiting this function, so we can persist any object changes.
@@ -60,13 +60,13 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	if cluster.Status.ID == nil {
 		logger.Info("Cluster is not ready")
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "cluster is not ready")
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
 		return requeue, nil
 	}
 	if !service.GetDeletionTimestamp().IsZero() {
@@ -86,13 +86,13 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 
 	repository := &v1alpha1.GitRepository{}
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 	if !repository.DeletionTimestamp.IsZero() {
 		logger.Info("deleting service after repository deletion")
 		if err := r.Delete(ctx, service); err != nil {
-			utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
 		return requeue, nil
@@ -100,7 +100,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 
 	if repository.Status.ID == nil {
 		logger.Info("Repository is not ready")
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "repository is not ready")
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
 		return requeue, nil
 	}
 	if repository.Status.Health == v1alpha1.GitHealthFailed {
@@ -110,31 +110,31 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 
 	attr, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
 	if err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
 	if err != nil && !errors.IsNotFound(err) {
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 	if existingService == nil {
 		controllerutil.AddFinalizer(service, ServiceFinalizer)
 		_, err = r.ConsoleClient.CreateService(cluster.Status.ID, *attr)
 		if err != nil {
-			utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
 		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
 		if err != nil {
-			utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
 	}
 	err = r.addOwnerReferences(ctx, service)
 	if err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 	sort.Slice(attr.Configuration, func(i, j int) bool {
@@ -151,28 +151,28 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 
 	sha, err := utils.HashObject(updater)
 	if err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	if service.Status.HasSHA() && !service.Status.IsSHAEqual(sha) {
 		// update service
 		if err := r.ConsoleClient.UpdateService(existingService.ID, updater); err != nil {
-			utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
 	}
 	if err := controllerutil.SetOwnerReference(cluster, service, r.Scheme); err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 	if err = controllerutil.SetOwnerReference(cluster, service, r.Scheme); err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	updateStatus(service, existingService, sha)
-	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
 }
@@ -352,7 +352,7 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 		log.Info("try to delete service")
 		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
 		if err != nil && !errors.IsNotFound(err) {
-			utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
 		if existingService != nil && existingService.DeletedAt != nil {
@@ -362,7 +362,7 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 		}
 		if existingService != nil {
 			if err := r.ConsoleClient.DeleteService(*service.Status.ID); err != nil {
-				utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 				return ctrl.Result{}, err
 			}
 			return requeue, nil

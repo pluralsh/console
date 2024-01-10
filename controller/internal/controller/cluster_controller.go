@@ -56,7 +56,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	scope, err := NewClusterScope(ctx, r.Client, cluster)
 	if err != nil {
 		logger.Error(err, "Failed to create cluster scope")
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 	defer func() {
@@ -68,7 +68,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Handle existing resource.
 	existing, err := r.isExisting(cluster)
 	if err != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
 	if existing {
@@ -88,21 +88,21 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Get Provider ID from the reference if it is set and ensure that controller reference is set properly.
 	providerId, result, err := r.getProviderIdAndSetControllerRef(ctx, cluster)
 	if result != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return *result, err
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
 	sha, err := utils.HashObject(cluster.UpdateAttributes())
 	if err != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	// Sync resource with Console API.
 	apiCluster, err := r.sync(ctx, cluster, providerId, sha)
 	if err != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -112,7 +112,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
 	cluster.Status.PingedAt = apiCluster.PingedAt
 	cluster.Status.SHA = &sha
-	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
 }
@@ -144,7 +144,7 @@ func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) 
 func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Result, error) {
 	apiCluster, err := r.ConsoleClient.GetClusterByHandle(cluster.Spec.Handle)
 	if err != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -152,7 +152,7 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	cluster.Status.KasURL = apiCluster.KasURL
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
 	cluster.Status.PingedAt = apiCluster.PingedAt
-	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
 }
@@ -176,7 +176,7 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 			if _, err := r.ConsoleClient.DeleteCluster(*cluster.Status.ID); err != nil {
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
-				utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+				utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 				return &ctrl.Result{}
 			}
 

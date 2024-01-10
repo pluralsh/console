@@ -253,9 +253,9 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 				SHA: lo.ToPtr("CD336FRXMBI6RSIWXEOVKHEFYYX7YQCCUDT52PXCBMQZCGMQYSNA===="),
 				Conditions: []metav1.Condition{
 					{
-						Type:   v1alpha1.ReadyConditionType.String(),
+						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.ReadyConditionReason.String(),
+						Reason: v1alpha1.SynchronizedConditionReason.String(),
 					},
 				},
 			})))
@@ -289,9 +289,9 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 				SHA: lo.ToPtr("CD336FRXMBI6RSIWXEOVKHEFYYX7YQCCUDT52PXCBMQZCGMQYSNA===="),
 				Conditions: []metav1.Condition{
 					{
-						Type:   v1alpha1.ReadyConditionType.String(),
+						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.ReadyConditionReason.String(),
+						Reason: v1alpha1.SynchronizedConditionReason.String(),
 					},
 				},
 			})))

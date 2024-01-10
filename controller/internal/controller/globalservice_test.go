@@ -134,9 +134,9 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 					SHA: lo.ToPtr("WAXTBLTM6PFWW6BBRLCPV2ILX2J4EOHQKDISWH4QAM5IODNRMBJQ===="),
 					Conditions: []metav1.Condition{
 						{
-							Type:   v1alpha1.ReadyConditionType.String(),
+							Type:   v1alpha1.SynchronizedConditionType.String(),
 							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.ReadyConditionReason.String(),
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
 						},
 					},
 				},
