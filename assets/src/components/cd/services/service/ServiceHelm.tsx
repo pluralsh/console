@@ -24,7 +24,10 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 
 import { ServiceSettingsHelmValues } from '../deployModal/DeployServiceSettingsHelmValues'
 
+import { ModalMountTransition } from '../../../utils/ModalMountTransition'
+
 import { useServiceContext } from './ServiceDetails'
+import { ServiceHelmDryRunModal } from './ServiceHelmDryRunModal'
 
 export default function ServiceHelm() {
   const theme = useTheme()
@@ -79,12 +82,15 @@ export default function ServiceHelm() {
   })
 
   // TODO: Replace with API call
+  const [open, setOpen] = useState(false)
   const [dryRunLoading, setDryRunLoading] = useState(false)
   const dryRun = useCallback(() => {
     setDryRunLoading(true)
-    setTimeout(() => setDryRunLoading(false), 1000)
-    // TODO: Open modal
-  }, [setDryRunLoading])
+    setTimeout(() => {
+      setDryRunLoading(false)
+      setOpen(true)
+    }, 1000)
+  }, [setDryRunLoading, setOpen])
 
   if (!service) {
     navigate(`${CD_ABS_PATH}/${SERVICES_REL_PATH}`)
@@ -169,6 +175,14 @@ export default function ServiceHelm() {
           >
             Dry run
           </Button>
+          <ModalMountTransition open={open}>
+            <ServiceHelmDryRunModal
+              open={open}
+              onClose={() => {
+                setOpen(false)
+              }}
+            />
+          </ModalMountTransition>
           <Button
             secondary
             type="button"
