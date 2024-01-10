@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	FinalizerName = "deployments.plural.sh/cluster-protection"
+	ClusterFinalizer = "deployments.plural.sh/cluster-protection"
 )
 
 // ClusterReconciler reconciles a Cluster object.
@@ -88,7 +88,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	// Get Provider ID from the reference if it is set and ensure that controller reference is set properly.
 	providerId, result, err := r.getProviderIdAndSetControllerRef(ctx, cluster)
 	if result != nil {
-		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, fmt.Sprintf("%s", err))
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return *result, err
 	}
 
@@ -122,7 +122,7 @@ func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) 
 		return cluster.Status.IsReadonly(), nil
 	}
 
-	if controllerutil.ContainsFinalizer(cluster, FinalizerName) {
+	if controllerutil.ContainsFinalizer(cluster, ClusterFinalizer) {
 		return false, nil
 	}
 
@@ -160,8 +160,8 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctrl.Result {
 	/// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if cluster.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(cluster, FinalizerName) {
-		controllerutil.AddFinalizer(cluster, FinalizerName)
+	if cluster.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(cluster, ClusterFinalizer) {
+		controllerutil.AddFinalizer(cluster, ClusterFinalizer)
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
@@ -186,7 +186,7 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 		}
 
 		// If our finalizer is present, remove it.
-		controllerutil.RemoveFinalizer(cluster, FinalizerName)
+		controllerutil.RemoveFinalizer(cluster, ClusterFinalizer)
 
 		// Stop reconciliation as the item is being deleted.
 		return &ctrl.Result{}

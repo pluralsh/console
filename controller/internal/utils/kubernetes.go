@@ -192,6 +192,24 @@ func GetSecret(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1
 	return secret, nil
 }
 
+func GetCluster(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1.ObjectReference) (*v1alpha1.Cluster, error) {
+	cluster := &v1alpha1.Cluster{}
+	if err := client.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, cluster); err != nil {
+		return nil, err
+	}
+
+	return cluster, nil
+}
+
+func GetServiceDeployment(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1.ObjectReference) (*v1alpha1.ServiceDeployment, error) {
+	service := &v1alpha1.ServiceDeployment{}
+	if err := client.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, service); err != nil {
+		return nil, err
+	}
+
+	return service, nil
+}
+
 func GetConfigMapData(ctx context.Context, client ctrlruntimeclient.Client, namespace string, ref *corev1.ConfigMapKeySelector) (string, error) {
 	configMap := &corev1.ConfigMap{}
 	if err := client.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: namespace}, configMap); err != nil {

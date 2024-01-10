@@ -57,6 +57,11 @@ type ConsoleClient interface {
 	CreateGlobalService(serviceID string, attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error)
 	DeleteGlobalService(id string) error
 	UpdateGlobalService(id string, attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error)
+	SavePipeline(name string, attrs console.PipelineAttributes) (*console.PipelineFragment, error)
+	DeletePipeline(id string) (*console.PipelineFragment, error)
+	GetPipeline(id string) (*console.PipelineFragment, error)
+	ListPipelines() (*console.GetPipelines, error)
+	IsPipelineExisting(id string) bool
 }
 
 func New(url, token string) ConsoleClient {
