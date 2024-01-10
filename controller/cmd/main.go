@@ -40,6 +40,9 @@ import (
 	"github.com/pluralsh/console/controller/internal/types"
 )
 
+const reconcilersUsage = "Comma delimited list of reconciler names. Available reconcilers: gitrepository,cluster," +
+	"provider,servicedeployment"
+
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
@@ -81,7 +84,7 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&opt.consoleUrl, "console-url", "", "The url of the console api to fetch services from")
 	flag.StringVar(&opt.consoleToken, "console-token", "", "The console token to auth to console api with")
-	flag.Func("reconcilers", "Comma delimited list of reconciler names. Available reconcilers: gitrepository,cluster,provider,servicedeployment", func(reconcilersStr string) (err error) {
+	flag.Func("reconcilers", reconcilersUsage, func(reconcilersStr string) (err error) {
 		opt.reconcilers, err = parseReconcilers(reconcilersStr)
 		return err
 	})
