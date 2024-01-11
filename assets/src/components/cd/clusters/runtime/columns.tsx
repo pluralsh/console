@@ -200,7 +200,6 @@ export const runtimeColumns = [
   colChartVersion,
   colKubVersion,
   colBlocking,
-  colGit,
 ]
 
 export const clusterAddonsColumns = [
