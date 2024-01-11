@@ -116,7 +116,7 @@ const HonorableLabelStyled = styled(Label)<{
     ? {
         ':hover': {
           color: theme.colors.text,
-          '> span': {
+          '.box': {
             backgroundColor: theme.colors['action-input-hover'],
           },
         },

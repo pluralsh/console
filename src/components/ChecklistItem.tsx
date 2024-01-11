@@ -13,6 +13,7 @@ import CaretDownIcon from './icons/CaretDownIcon'
 import SuccessIcon from './icons/SuccessIcon'
 
 const heightAnimationDuration = 333 // 333ms
+const CIRCLE_WIDTH = 32
 
 const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
   ({ theme, completed, selected }) => ({
@@ -24,15 +25,11 @@ const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
       display: 'flex',
       gap: 12,
       alignItems: 'center',
-      color: selected
-        ? theme.colors['action-link-active']
-        : theme.colors['action-link-inactive'],
+      color: selected ? theme.colors.text : theme.colors['text-light'],
       cursor: 'pointer',
-
       ':hover': {
         background: theme.colors['fill-two-hover'],
       },
-
       ':focus': {
         outline: `${theme.colors['border-outline-focused']} solid 1px`,
       },
@@ -42,8 +39,8 @@ const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: 32,
-        height: 32,
+        width: CIRCLE_WIDTH,
+        height: CIRCLE_WIDTH,
         borderRadius: '100%',
         background: theme.colors['fill-three'],
         ...theme.partials.text.body2,
@@ -76,9 +73,9 @@ const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
           border: '1px solid transparent',
 
           ...(selected && {
-            borderTopColor: theme.colors['action-link-active'],
-            borderRightColor: theme.colors['action-link-active'],
-            borderBottomColor: theme.colors['action-link-active'],
+            borderTopColor: theme.colors['border-selected'],
+            borderRightColor: theme.colors['border-selected'],
+            borderBottomColor: theme.colors['border-selected'],
 
             transition: `
             border-top-color 0.1s linear,
@@ -91,7 +88,7 @@ const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
           border: '0 solid transparent',
 
           ...(selected && {
-            borderTop: `1px solid ${theme.colors['action-link-active']}`,
+            borderTop: `1px solid ${theme.colors['border-selected']}`,
             borderLeftWidth: '1px',
             borderRightWidth: '1px',
             transform: 'rotate(270deg)',
@@ -110,15 +107,15 @@ const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
     '.itemContainer': {
       padding: `0 ${theme.spacing.large}px`,
       display: 'flex',
-      gap: 28,
+      gap: theme.spacing.small,
       color: theme.colors['text-light'],
-
       '.itemLine': {
-        width: 1,
-        background: theme.colors['action-link-active'],
-        marginLeft: 16,
+        position: 'relative',
+        flexShrink: 0,
+        width: CIRCLE_WIDTH,
+        transform: 'translate(50%)',
+        borderLeft: theme.borders.selected,
       },
-
       '.itemContent': {
         padding: `${theme.spacing.xsmall}px 0`,
       },

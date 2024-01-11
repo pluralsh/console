@@ -35,7 +35,11 @@ export const semanticColorsDark = {
   'action-primary-disabled': grey[825],
   // link
   'action-link-inactive': grey[200],
+  'action-link-inactive-hover': grey[100],
+  'action-link-inactive-disabled': grey[700],
   'action-link-active': grey[50],
+  'action-link-active-hover': grey[50],
+  'action-link-active-disabled': grey[675],
   // link-inline
   'action-link-inline': blue[200],
   'action-link-inline-hover': blue[100],
@@ -94,6 +98,14 @@ export const semanticColorsDark = {
   'icon-danger': red[200],
   'icon-danger-critical': red[400],
   'icon-always-white': grey[100],
+
+  // Graph
+  //
+  'graph-blue': blue[200],
+  'graph-lilac': '#D596F4',
+  'graph-green': green[200],
+  'graph-purple': purple[200],
+  'graph-red': red[200],
 
   // Marketing
   //

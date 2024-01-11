@@ -9,14 +9,14 @@ export const colorsCloudShellDark = prefixKeys(
     [`dark-red`]: '#F2788D',
     [`light-red`]: '#F599A8',
     [`green`]: '#3CECAF',
-    [`dark-yellow`]: '#3CECAF',
+    [`dark-yellow`]: '#FFF48F',
     [`light-yellow`]: '#FFF9C2',
     [`blue`]: '#8FD6FF',
     [`dark-lilac`]: '#BE5EEB',
     [`light-lilac`]: '#D596F4',
     [`dark-purple`]: '#7075F5',
     [`light-purple`]: '#969AF8',
-    [`light-grey`]: '#969AF8',
+    [`light-grey`]: '#EBEFF0',
   } as const satisfies Record<string, CSSProperties['color']>,
   'cloud-shell-'
 )

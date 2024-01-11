@@ -48,8 +48,8 @@ const SwitchSC = styled.label<SwitchStyleProps>(
             },
             [SwitchHandleSC]: {
               backgroundColor: $checked
-                ? theme.colors['action-always-white']
-                : theme.colors['action-link-active'],
+                ? theme.colors['action-link-active-hover']
+                : theme.colors['action-link-inactive-hover'],
             },
           },
         }),
@@ -87,9 +87,11 @@ const SwitchToggleSC = styled.div<SwitchStyleProps>(
 const SwitchHandleSC = styled.div<SwitchStyleProps>(
   ({ $checked, $disabled, theme }) => ({
     backgroundColor: $disabled
-      ? theme.colors['border-disabled']
+      ? $checked
+        ? theme.colors['action-link-active-disabled']
+        : theme.colors['action-link-inactive-disabled']
       : $checked
-      ? theme.colors['action-always-white']
+      ? theme.colors['action-link-active']
       : theme.colors['action-link-inactive'],
     position: 'absolute',
     width: 16,

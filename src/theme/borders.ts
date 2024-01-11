@@ -15,9 +15,10 @@ export const borders = {
   default: `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars.border}`,
   'fill-one': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars.border}`,
   'fill-two': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-fill-two']}`,
-  'fill-three': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-input']}`,
+  'fill-three': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-fill-three']}`,
   input: `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-input']}`,
   'outline-focused': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-outline-focused']}`,
+  selected: `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-selected']}`,
 } as const satisfies Record<string, CSSProperties['border']>
 
 export const borderRadiuses = {

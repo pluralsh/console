@@ -10,7 +10,7 @@ export const semanticColorsLight = {
   // Fill
   //
   // fill-zero
-  'fill-zero': '#F3F5F7',
+  'fill-zero': '#F3F5F6',
   'fill-zero-hover': '#F5F5F5',
   'fill-zero-selected': '#E5E6E7',
   // fill-one
@@ -36,15 +36,19 @@ export const semanticColorsLight = {
   'action-primary-hover': purple[350],
   'action-primary-disabled': grey[100],
   // link
-  'action-link-inactive': '#A9AFBC',
-  'action-link-active': '#CDD1D2',
+  'action-link-inactive': grey[300],
+  'action-link-inactive-hover': grey[350],
+  'action-link-inactive-disabled': grey[100],
+  'action-link-active': grey[50],
+  'action-link-active-hover': grey[50],
+  'action-link-active-disabled': grey[200],
   // link-inline
   'action-link-inline': '#539AC3',
   'action-link-inline-hover': blue[600],
   'action-link-inline-visited': purple[300],
   'action-link-inline-visited-hover': purple[200],
   // input
-  'action-input-hover': `${chroma('#C3C3C4').alpha(0.04)}`, // text color w/ alpha
+  'action-input-hover': `${chroma('#C3C3C4').alpha(0.1)}`, // text color w/ alpha
   // always white
   'action-always-white': semanticColorsDark['action-always-white'],
 
@@ -55,7 +59,7 @@ export const semanticColorsLight = {
   'border-fill-three': grey[400],
   'border-selected': grey[600],
   'border-input': '#C6CBD7',
-  'border-disabled': grey[200],
+  'border-disabled': grey[100],
   'border-primary': purple[400],
   'border-secondary': blue[400],
   'border-info': blue[300],
@@ -77,7 +81,7 @@ export const semanticColorsLight = {
   'text-primary-disabled': grey[400],
   'text-success': green[700],
   'text-success-light': green[600],
-  'text-warning': '#FADA5E',
+  'text-warning': '#FF9900',
   'text-warning-light': '#DCBC40',
   'text-danger': '#E54064',
   'text-danger-light': red[300],
@@ -123,6 +127,14 @@ export const semanticColorsLight = {
   semanticYellow: '#C3B853',
   semanticRedLight: '#F599A8',
   semanticRedDark: '#E95374',
+
+  // Graph
+  //
+  'graph-blue': blue[500],
+  'graph-lilac': '#BE5EEB',
+  'graph-green': green[500],
+  'graph-purple': purple[350],
+  'graph-red': red[400],
 
   // Deprecated (Remove after all 'error' colors converted to 'danger' in app)
   //

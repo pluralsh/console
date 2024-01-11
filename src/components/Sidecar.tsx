@@ -2,73 +2,70 @@ import {
   Button,
   type ButtonProps,
   Div,
-  type DivProps,
   type FlexProps,
-  H1,
-  type H1Props,
-  H2,
   Section,
+  type SectionProps,
 } from 'honorable'
-import { type ReactNode, forwardRef } from 'react'
+import { type ComponentProps, type ReactNode, forwardRef } from 'react'
+import styled from 'styled-components'
 
 export type SidecarProps = {
   heading?: ReactNode
-  headingProps?: H1Props
-  contentProps?: DivProps
-} & FlexProps
+  headingProps?: ComponentProps<typeof ItemHeadingSC>
+  contentProps?: ComponentProps<typeof ItemContentSC>
+}
 
-const Sidecar = forwardRef<HTMLElement, SidecarProps>(
+const SidecarSC = styled(Section)(({ theme }) => ({
+  border: theme.borders.default,
+  borderRadius: theme.borderRadiuses.medium,
+  padding: theme.spacing.medium,
+}))
+const SidecarHeadingSC = styled.h1(({ theme }) => ({
+  ...theme.partials.text.overline,
+  color: theme.colors['text-xlight'],
+  marginBottom: theme.spacing.medium,
+}))
+
+const Sidecar = forwardRef<HTMLElement, SidecarProps & SectionProps>(
   ({ heading, headingProps, children, ...props }, ref) => (
-    <Section
+    <SidecarSC
       ref={ref}
-      border="1px solid border"
-      borderRadius="medium"
-      padding="medium"
       {...props}
     >
       {heading && (
-        <H1
-          overline
-          color="text-xlight"
-          marginBottom="medium"
-          {...headingProps}
-        >
-          {heading}
-        </H1>
+        <SidecarHeadingSC {...headingProps}>{heading}</SidecarHeadingSC>
       )}
       {children}
-    </Section>
+    </SidecarSC>
   )
 )
 
-const SidecarItem = forwardRef<HTMLDivElement, SidecarProps>(
+const ItemSC = styled(Div)(({ theme }) => ({
+  marginBottom: theme.spacing.large,
+  '&:last-of-type': {
+    marginBottom: 0,
+  },
+}))
+const ItemHeadingSC = styled.h2(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  marginBottom: theme.spacing.xxsmall,
+}))
+const ItemContentSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.body2,
+  color: theme.colors.text,
+  overflowWrap: 'anywhere',
+}))
+
+const SidecarItem = forwardRef<HTMLDivElement, SidecarProps & FlexProps>(
   ({ heading, headingProps, contentProps, children, ...props }, ref) => (
-    <Div
+    <ItemSC
       ref={ref}
-      marginBottom="large"
-      _last={{ marginBottom: 0 }}
       {...props}
     >
-      {heading && (
-        <H2
-          caption
-          color="text-xlight"
-          marginBottom="xxsmall"
-          {...headingProps}
-        >
-          {heading}
-        </H2>
-      )}
-      {children && (
-        <Div
-          body
-          overflowWrap="anywhere"
-          {...contentProps}
-        >
-          {children}
-        </Div>
-      )}
-    </Div>
+      {heading && <ItemHeadingSC {...headingProps}>{heading}</ItemHeadingSC>}
+      {children && <ItemContentSC {...contentProps}>{children}</ItemContentSC>}
+    </ItemSC>
   )
 )
 
