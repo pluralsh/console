@@ -45,14 +45,13 @@ import {
   useDeploymentSettingsQuery,
 } from 'generated/graphql'
 
-import ClusterAddOns from 'components/cd/cluster/ClusterAddOns'
-
-import ClusterAddOnDetails from 'components/cd/cluster/addon/ClusterAddOnDetails'
-
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
 import ClusterPods from '../components/cd/cluster/ClusterPods'
+import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
+import ClusterAddOnDetails from '../components/cd/cluster/addon/ClusterAddOnDetails'
+import ClusterAddOnCompatibility from '../components/cd/cluster/addon/ClusterAddOnCompatibility'
 
 import Node from '../components/cd/cluster/node/Node'
 import NodeInfo from '../components/cd/cluster/node/NodeInfo'
@@ -303,7 +302,7 @@ const clusterDetailsRoutes = [
     />
     <Route
       path="compatibility"
-      element={<div>compatibility</div>}
+      element={<ClusterAddOnCompatibility />}
     />
   </Route>,
 ]

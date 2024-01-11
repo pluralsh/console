@@ -1,6 +1,7 @@
 import {
   Outlet,
   useLocation,
+  useNavigate,
   useOutletContext,
   useParams,
 } from 'react-router-dom'
@@ -33,13 +34,23 @@ import { POLL_INTERVAL } from 'components/cluster/constants'
 
 import { getClusterKubeVersion } from 'components/cd/clusters/runtime/RuntimeServices'
 
+import {
+  ListBoxItem,
+  LoopingLogo,
+  Select,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+
+import { useMemo } from 'react'
+
 import ClusterAddOnDetailsSidecar from './ClusterAddOnDetailsSidecar'
 
-type AddOnContextType = {
+type ClusterAddOnContextType = {
   addOn: RuntimeServiceFragment
 }
 
-export const useServiceContext = () => useOutletContext<AddOnContextType>()
+export const useServiceContext = () =>
+  useOutletContext<ClusterAddOnContextType>()
 
 export const getAddOnDetailsBreadcrumbs = ({
   cluster,
@@ -54,7 +65,7 @@ export const getAddOnDetailsBreadcrumbs = ({
       clusterId: cluster.id,
     })}/${CLUSTER_ADDONS_REL_PATH}`,
   },
-  ...(addOn.id && cluster.id
+  ...(addOn.name && cluster.name
     ? [
         {
           label: addOn?.name || addOn?.id,
@@ -77,6 +88,7 @@ const DIRECTORY = [
 
 export default function ClusterAddOnDetails() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const { pathname } = useLocation()
   const params = useParams()
   const addOnId = params[CLUSTER_ADDONS_PARAM_ID] as string
@@ -98,11 +110,23 @@ export default function ClusterAddOnDetails() {
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-  const rts = rtsData?.cluster?.runtimeServices?.find(
-    (rts) => rts?.id === addOnId
-  )
 
-  const directory = DIRECTORY
+  const runtimeServices = rtsData?.cluster?.runtimeServices
+  const rts = runtimeServices?.find((rts) => rts?.id === addOnId)
+
+  useSetBreadcrumbs(
+    useMemo(
+      () =>
+        getAddOnDetailsBreadcrumbs({
+          cluster: cluster ?? { id: clusterId },
+          addOn: rts || { name: '', id: addOnId },
+        }),
+      [addOnId, cluster, clusterId, rts]
+    )
+  )
+  if (!runtimeServices) {
+    return <LoopingLogo />
+  }
 
   return (
     <ResponsiveLayoutPage>
@@ -116,6 +140,43 @@ export default function ClusterAddOnDetails() {
             maxHeight: '100%',
           }}
         >
+          <Select
+            selectedKey={rts?.id}
+            onSelectionChange={(id) => {
+              if (id) {
+                navigate(
+                  getClusterAddOnDetailsPath({
+                    clusterId: cluster?.id,
+                    addOnId: id as string,
+                  })
+                )
+              }
+            }}
+            leftContent={
+              rts?.addon?.icon ? (
+                <img
+                  src={rts?.addon?.icon}
+                  css={{ width: theme.spacing.medium }}
+                />
+              ) : undefined
+            }
+          >
+            {runtimeServices.map((r) => (
+              <ListBoxItem
+                key={r?.id}
+                label={r?.name}
+                textValue=""
+                leftContent={
+                  r?.addon?.icon ? (
+                    <img
+                      src={r?.addon?.icon}
+                      css={{ width: theme.spacing.medium }}
+                    />
+                  ) : undefined
+                }
+              />
+            ))}
+          </Select>
           <div
             css={{
               overflowY: 'auto',
@@ -123,7 +184,7 @@ export default function ClusterAddOnDetails() {
             }}
           >
             <SideNavEntries
-              directory={directory}
+              directory={DIRECTORY}
               pathname={pathname}
               pathPrefix={pathPrefix}
             />
@@ -139,7 +200,7 @@ export default function ClusterAddOnDetails() {
             context={
               {
                 addOn: rts,
-              } satisfies AddOnContextType
+              } satisfies ClusterAddOnContextType
             }
           />
         ) : (
@@ -152,4 +213,8 @@ export default function ClusterAddOnDetails() {
       <ResponsiveLayoutSpacer />
     </ResponsiveLayoutPage>
   )
+}
+
+export function useClusterAddOnContext() {
+  return useOutletContext<ClusterAddOnContextType>()
 }
