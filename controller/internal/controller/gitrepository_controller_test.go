@@ -90,6 +90,12 @@ var _ = Describe("Repository Controller", Ordered, func() {
 					ID: lo.ToPtr("123"),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "The repository is not pullable yet",
+						},
+						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
 							Status:  metav1.ConditionTrue,
 							Reason:  v1alpha1.ReadonlyConditionReason.String(),

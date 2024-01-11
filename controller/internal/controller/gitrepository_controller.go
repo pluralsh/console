@@ -267,6 +267,10 @@ func (r *GitRepositoryReconciler) handleExistingRepo(ctx context.Context, repo *
 		repo.Status.Health = v1alpha1.GitHealth(*existingRepo.Health)
 	}
 
+	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "The repository is not pullable yet")
+	if existingRepo.Health != nil && *existingRepo.Health == console.GitHealthPullable {
+		utils.MarkCondition(repo.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	}
 	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 	utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	return requeue, nil
