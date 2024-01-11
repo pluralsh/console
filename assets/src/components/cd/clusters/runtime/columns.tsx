@@ -114,10 +114,10 @@ function ChartVersion({
         <VersionArrowLinkSC
           clickable
           forwardedAs={Link}
-          to={getClusterAddOnDetailsPath({
+          to={`${getClusterAddOnDetailsPath({
             clusterId,
             addOnId: runtimeService?.id,
-          })}
+          })}/compatibility`}
           icon={<ArrowTopRightIcon />}
           tooltip="View compatibility matrix"
           tooltipProps={{
