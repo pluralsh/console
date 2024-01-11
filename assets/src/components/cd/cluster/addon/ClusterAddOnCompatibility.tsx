@@ -42,7 +42,7 @@ const Compatibility = memo(
             // eslint-disable-next-line react/jsx-no-useless-fragment
             <CloseIcon
               color={theme.colors['icon-default']}
-              css={{ opacity: 0.08 }}
+              css={{ opacity: theme.mode === 'light' ? 0.2 : 0.1 }}
             />
           )
         }
