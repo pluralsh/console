@@ -107,6 +107,12 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 
 	provider.Status.ID = &apiProvider.ID
 	provider.Status.SHA = &sha
+
+	if isProviderReady(apiProvider) {
+		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	} else {
+		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "Not all provider service components are running")
+	}
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
@@ -123,6 +129,11 @@ func (r *ProviderReconciler) handleExistingProvider(ctx context.Context, provide
 	provider.Status.ID = &apiProvider.ID
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	if isProviderReady(apiProvider) {
+		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	} else {
+		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "The provider service components are not ready yet")
+	}
 
 	return requeue, nil
 }
@@ -240,4 +251,18 @@ func (r *ProviderReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&v1alpha1.Provider{}).
 		Owns(&corev1.Secret{}).
 		Complete(r)
+}
+
+func isProviderReady(provider *console.ClusterProviderFragment) bool {
+	if provider.Service == nil {
+		return true // Retuning true as management cluster will not have any service, and it should be considered as ready.
+	}
+
+	for _, component := range provider.Service.Components {
+		if component.State == nil || *component.State != console.ComponentStateRunning {
+			return false
+		}
+	}
+
+	return true
 }

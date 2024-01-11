@@ -131,6 +131,11 @@ var _ = Describe("Provider Controller", Ordered, func() {
 				SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
 				Conditions: []metav1.Condition{
 					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.ReadyConditionType.String(),
+					},
+					{
 						Type:   v1alpha1.ReadonlyConditionType.String(),
 						Status: metav1.ConditionFalse,
 						Reason: v1alpha1.ReadonlyConditionReason.String(),
@@ -176,6 +181,11 @@ var _ = Describe("Provider Controller", Ordered, func() {
 				ID:  lo.ToPtr(providerConsoleID),
 				SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
 				Conditions: []metav1.Condition{
+					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.ReadyConditionType.String(),
+					},
 					{
 						Type:   v1alpha1.ReadonlyConditionType.String(),
 						Status: metav1.ConditionFalse,
@@ -224,6 +234,11 @@ var _ = Describe("Provider Controller", Ordered, func() {
 						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
 						Reason: v1alpha1.SynchronizedConditionReason.String(),
+					},
+					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.ReadyConditionType.String(),
 					},
 				},
 			})))
