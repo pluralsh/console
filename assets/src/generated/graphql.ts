@@ -2145,6 +2145,15 @@ export type Plan = {
   period?: Maybe<Scalars['String']['output']>;
 };
 
+export type PluralCluster = {
+  __typename?: 'PluralCluster';
+  events?: Maybe<Array<Maybe<Event>>>;
+  metadata: Metadata;
+  raw: Scalars['String']['output'];
+  reference?: Maybe<Cluster>;
+  status: PluralObjectStatus;
+};
+
 export type PluralContext = {
   __typename?: 'PluralContext';
   buckets?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -2152,11 +2161,35 @@ export type PluralContext = {
   domains?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
 };
 
+export type PluralGitRepository = {
+  __typename?: 'PluralGitRepository';
+  events?: Maybe<Array<Maybe<Event>>>;
+  metadata: Metadata;
+  raw: Scalars['String']['output'];
+  reference?: Maybe<GitRepository>;
+  status: PluralObjectStatus;
+};
+
 export type PluralManifest = {
   __typename?: 'PluralManifest';
   bucketPrefix?: Maybe<Scalars['String']['output']>;
   cluster?: Maybe<Scalars['String']['output']>;
   network?: Maybe<ManifestNetwork>;
+};
+
+export type PluralObjectStatus = {
+  __typename?: 'PluralObjectStatus';
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
+  id?: Maybe<Scalars['String']['output']>;
+};
+
+export type PluralServiceDeployment = {
+  __typename?: 'PluralServiceDeployment';
+  events?: Maybe<Array<Maybe<Event>>>;
+  metadata: Metadata;
+  raw: Scalars['String']['output'];
+  reference?: Maybe<ServiceDeployment>;
+  status: PluralObjectStatus;
 };
 
 export type PluralSubscription = {
@@ -3132,7 +3165,10 @@ export type RootQueryType = {
   notifications?: Maybe<NotificationConnection>;
   pipeline?: Maybe<Pipeline>;
   pipelines?: Maybe<PipelineConnection>;
+  pluralCluster?: Maybe<PluralCluster>;
   pluralContext?: Maybe<PluralContext>;
+  pluralGitRepository?: Maybe<PluralGitRepository>;
+  pluralServiceDeployment?: Maybe<PluralServiceDeployment>;
   pod?: Maybe<Pod>;
   pods?: Maybe<PodConnection>;
   postgresDatabase?: Maybe<Postgresql>;
@@ -3470,6 +3506,27 @@ export type RootQueryTypePipelinesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypePluralClusterArgs = {
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypePluralGitRepositoryArgs = {
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypePluralServiceDeploymentArgs = {
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 

@@ -117,6 +117,12 @@ var _ = Describe("Service Controller", Ordered, func() {
 							Status: metav1.ConditionTrue,
 							Reason: v1alpha1.SynchronizedConditionReason.String(),
 						},
+						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "The service components are not ready yet",
+						},
 					},
 				},
 				returnGetService: &gqlclient.ServiceDeploymentExtended{
@@ -160,6 +166,12 @@ var _ = Describe("Service Controller", Ordered, func() {
 							Type:   v1alpha1.SynchronizedConditionType.String(),
 							Status: metav1.ConditionTrue,
 							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
+						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "The service components are not ready yet",
 						},
 					},
 				},

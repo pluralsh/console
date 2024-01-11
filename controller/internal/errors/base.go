@@ -2,6 +2,7 @@ package errors
 
 import (
 	"errors"
+
 	"github.com/Yamashou/gqlgenc/client"
 )
 

@@ -19,6 +19,11 @@ Kube.Parser.parse(path: "crds/ss-resize.yaml", module: Kube.StatefulSetResize)
 Kube.Parser.parse(path: "crds/dashboard.yaml", module: Kube.Dashboard)
 Kube.Parser.parse(path: "crds/runbook.yaml", module: Kube.Runbook)
 
+# plural cd crds
+Kube.Parser.parse(path: "crds/plural-cluster.yaml", module: Kube.PluralCluster)
+Kube.Parser.parse(path: "crds/plural-gitrepo.yaml", module: Kube.GitRepository)
+Kube.Parser.parse(path: "crds/plural-service.yaml", module: Kube.ServiceDeployment)
+
 Kube.Parser.parse(path: "crds/wireguardserver.yaml", module: Kube.WireguardServer)
 Kube.Parser.parse(path: "crds/wireguardpeer.yaml", module: Kube.WireguardPeer, ovveride: [
   {"configRef", Kazan.Apis.Core.V1.SecretKeySelector}

@@ -100,6 +100,11 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def resolve_upgrade_plan(%{namespace: ns, name: name}, _), do: Client.get_upgrade_plan(ns, name)
 
+  ## plural cd resources
+  def resolve_plural_cluster(%{namespace: ns, name: name}, _), do: Client.get_plural_cluster(ns, name)
+  def resolve_git_repository(%{namespace: ns, name: name}, _), do: Client.get_git_repository(ns, name)
+  def resolve_service_deployment(%{namespace: ns, name: name}, _), do: Client.get_service_deployment(ns, name)
+
   def resolve_certificate(%{namespace: ns, name: name}, _), do: Client.get_certificate(ns, name)
 
   def ingress_certificates(%{metadata: %{namespace: ns}, spec: %{tls: [_ | _] = tls}}) do

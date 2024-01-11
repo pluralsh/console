@@ -73,7 +73,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}()
 
 	if !globalService.GetDeletionTimestamp().IsZero() {
-		return r.handleDelete(ctx, globalService)
+		return ctrl.Result{}, r.handleDelete(ctx, globalService)
 	}
 
 	service := &v1alpha1.ServiceDeployment{}
@@ -163,7 +163,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	return ctrl.Result{}, nil
 }
 
-func (r *GlobalServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.GlobalService) (ctrl.Result, error) {
+func (r *GlobalServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.GlobalService) error {
 	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(service, GlobalServiceFinalizer) {
 		logger.Info("try to delete global service")
@@ -171,18 +171,18 @@ func (r *GlobalServiceReconciler) handleDelete(ctx context.Context, service *v1a
 			existingGlobalService, err := r.ConsoleClient.GetGlobalService(service.Status.GetID())
 			if err != nil && !errors.IsNotFound(err) {
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-				return ctrl.Result{}, err
+				return err
 			}
 			if existingGlobalService != nil {
 				if err := r.ConsoleClient.DeleteGlobalService(*service.Status.ID); err != nil {
 					utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-					return ctrl.Result{}, err
+					return err
 				}
 			}
 		}
 		controllerutil.RemoveFinalizer(service, GlobalServiceFinalizer)
 	}
-	return ctrl.Result{}, nil
+	return nil
 }
 
 func genGlobalServiceTags(existing map[string]string) []*console.TagAttributes {
