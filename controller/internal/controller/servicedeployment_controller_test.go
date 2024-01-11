@@ -113,15 +113,15 @@ var _ = Describe("Service Controller", Ordered, func() {
 					SHA: lo.ToPtr("E2KK4GJDZD4C62CW2OXWRDOWPOQ6XQJ4XHGZYFTANUMGIN7SGTPQ===="),
 					Conditions: []metav1.Condition{
 						{
-							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.SynchronizedConditionReason.String(),
-						},
-						{
 							Type:    v1alpha1.ReadyConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.ReadyConditionReason.String(),
 							Message: "The service components are not ready yet",
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
 						},
 					},
 				},
@@ -163,15 +163,15 @@ var _ = Describe("Service Controller", Ordered, func() {
 					SHA: lo.ToPtr("E2KK4GJDZD4C62CW2OXWRDOWPOQ6XQJ4XHGZYFTANUMGIN7SGTPQ===="),
 					Conditions: []metav1.Condition{
 						{
-							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.SynchronizedConditionReason.String(),
-						},
-						{
 							Type:    v1alpha1.ReadyConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.ReadyConditionReason.String(),
 							Message: "The service components are not ready yet",
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
 						},
 					},
 				},
