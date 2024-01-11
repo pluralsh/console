@@ -144,6 +144,7 @@ fragment ClustersRow on Cluster {
     name
     value
   }
+  distro
 }
 
 fragment Cluster on Cluster {

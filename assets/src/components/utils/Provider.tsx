@@ -3,6 +3,8 @@ import { type styledTheme } from '@pluralsh/design-system'
 
 import { Provider } from 'generated/graphql-plural'
 
+import { ClusterDistro } from '../../generated/graphql'
+
 export const CHART_ICON_DARK = '/providers/chart-icon.png'
 export const CHART_ICON_LIGHT = '/providers/chart-icon.png'
 export const GCP_ICON_DARK = '/providers/gcp-icon.png'
@@ -34,6 +36,23 @@ export function getProviderName(provider?: string | null) {
   const p = provider?.toLowerCase()
 
   return p && ProviderNames[p] ? ProviderNames[p] : 'BYOK'
+}
+
+const DistributionNames = {
+  aks: 'AKS',
+  eks: 'EKS',
+  generic: 'Generic',
+  gke: 'GKE',
+  k3s: 'K3s',
+  rke: 'RKE',
+} as const satisfies Record<Lowercase<ClusterDistro>, string>
+
+export function getDistributionName(distro?: ClusterDistro | null) {
+  const d = distro?.toLowerCase()
+
+  return d && DistributionNames[d]
+    ? DistributionNames[d]
+    : DistributionNames.generic
 }
 
 export function getProviderIconUrl(

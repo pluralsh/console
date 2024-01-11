@@ -28,7 +28,11 @@ import {
 } from 'utils/kubernetes'
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { getProviderIconUrl, getProviderName } from 'components/utils/Provider'
+import {
+  getDistributionName,
+  getProviderIconUrl,
+  getProviderName,
+} from 'components/utils/Provider'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -90,13 +94,21 @@ const ColCluster = columnHelper.accessor(({ node }) => node, {
 const ColCloud = columnHelper.accessor(({ node }) => node?.provider, {
   id: 'cloud',
   header: 'Cloud',
-  cell: function Cell({ getValue }) {
+  cell: function Cell({
+    getValue,
+    row: {
+      original: { node },
+    },
+  }) {
     const provider = getValue()
     const theme = useTheme()
 
     return (
       <ColWithIcon icon={getProviderIconUrl(provider?.cloud ?? '', theme.mode)}>
-        {getProviderName(provider?.cloud)}
+        <StackedText
+          first={getDistributionName(node?.distro)}
+          second={getProviderName(provider?.cloud)}
+        />
       </ColWithIcon>
     )
   },
