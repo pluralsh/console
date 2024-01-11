@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"sort"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -26,6 +27,10 @@ func sanitizeClusterStatus(status v1alpha1.ClusterStatus) v1alpha1.ClusterStatus
 		status.Conditions[i].LastTransitionTime = metav1.Time{}
 		status.Conditions[i].ObservedGeneration = 0
 	}
+
+	sort.Slice(status.Conditions, func(i, j int) bool {
+		return status.Conditions[i].Type < status.Conditions[j].Type
+	})
 
 	return status
 }

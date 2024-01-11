@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"sort"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -26,6 +27,10 @@ func sanitizeProviderStatus(status v1alpha1.ProviderStatus) v1alpha1.ProviderSta
 		status.Conditions[i].LastTransitionTime = metav1.Time{}
 		status.Conditions[i].ObservedGeneration = 0
 	}
+
+	sort.Slice(status.Conditions, func(i, j int) bool {
+		return status.Conditions[i].Type < status.Conditions[j].Type
+	})
 
 	return status
 }
@@ -131,14 +136,14 @@ var _ = Describe("Provider Controller", Ordered, func() {
 				SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
 				Conditions: []metav1.Condition{
 					{
-						Type:   v1alpha1.ReadyConditionType.String(),
-						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.ReadyConditionType.String(),
-					},
-					{
 						Type:   v1alpha1.ReadonlyConditionType.String(),
 						Status: metav1.ConditionFalse,
 						Reason: v1alpha1.ReadonlyConditionReason.String(),
+					},
+					{
+						Type:   v1alpha1.ReadyConditionType.String(),
+						Status: metav1.ConditionTrue,
+						Reason: v1alpha1.ReadyConditionType.String(),
 					},
 					{
 						Type:   v1alpha1.SynchronizedConditionType.String(),

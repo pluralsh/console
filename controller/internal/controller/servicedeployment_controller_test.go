@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"sort"
 
 	"github.com/pluralsh/console/controller/internal/test/utils"
 
@@ -26,6 +27,10 @@ func sanitizeServiceConditions(status v1alpha1.ServiceStatus) v1alpha1.ServiceSt
 		status.Conditions[i].LastTransitionTime = metav1.Time{}
 		status.Conditions[i].ObservedGeneration = 0
 	}
+
+	sort.Slice(status.Conditions, func(i, j int) bool {
+		return status.Conditions[i].Type < status.Conditions[j].Type
+	})
 
 	return status
 }
