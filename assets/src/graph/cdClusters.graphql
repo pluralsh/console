@@ -81,6 +81,20 @@ fragment RuntimeService on RuntimeService {
       ...AddonVersion
     }
   }
+  service {
+    git {
+      ref
+      folder
+    }
+    repository {
+      httpsPath
+      urlFormat
+    }
+  }
+  addonVersion {
+    blocking(kubeVersion: $kubeVersion)
+    ...AddonVersion
+  }
 }
 
 fragment AddonVersion on AddonVersion {
@@ -309,20 +323,6 @@ query RuntimeServices($id: ID!, $kubeVersion: String!) {
   cluster(id: $id) {
     runtimeServices {
       ...RuntimeService
-      service {
-        git {
-          ref
-          folder
-        }
-        repository {
-          httpsPath
-          urlFormat
-        }
-      }
-      addonVersion {
-        blocking(kubeVersion: $kubeVersion)
-        ...AddonVersion
-      }
     }
   }
 }

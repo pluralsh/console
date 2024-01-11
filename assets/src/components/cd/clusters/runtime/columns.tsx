@@ -4,12 +4,15 @@ import { RuntimeServicesQuery } from 'generated/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { TableText } from 'components/cluster/TableElements'
 import {
-  CaretDownIcon,
-  CaretRightIcon,
-  ErrorIcon,
+  ArrowTopRightIcon,
+  BlockedIcon,
+  CollapseIcon,
+  IconFrame,
 } from '@pluralsh/design-system'
 
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
+
+import { Link } from 'react-router-dom'
 
 import { GitPointer } from '../deprecationsColumns'
 
@@ -24,7 +27,7 @@ type AddOnVersion = NonNullable<
 const columnHelperRuntime = createColumnHelper<RuntimeService>()
 const columnHelperExpanded = createColumnHelper<AddOnVersion>()
 
-function AddOnName({ addon, row, expanded }) {
+function AddOnName({ addon, row }) {
   const theme = useTheme()
 
   return (
@@ -37,17 +40,6 @@ function AddOnName({ addon, row, expanded }) {
         }}
       >
         {row.original?.name}
-        {expanded ? (
-          <CaretDownIcon
-            size={12}
-            onClick={row.getToggleExpandedHandler()}
-          />
-        ) : (
-          <CaretRightIcon
-            size={12}
-            onClick={row.getToggleExpandedHandler()}
-          />
-        )}
       </div>
     </ColWithIcon>
   )
@@ -68,61 +60,165 @@ export const expandedColumns = [
   }),
 ]
 
-export const runtimeColumns = [
-  columnHelperRuntime.accessor((row) => row?.addon, {
-    id: 'name',
-    header: 'Name',
-    cell: ({ getValue, row }) => {
-      const addon = getValue()
-      const expanded = row.getIsExpanded()
+const ExpandButtonSC = styled(CollapseIcon).attrs(() => ({ size: 8 }))((_) => ({
+  cursor: 'pointer',
+  transform: 'rotate(180deg)',
+  transitionDuration: '.2s',
+  transitionProperty: 'transform',
+  '&.expanded': {
+    transform: 'rotate(270deg)',
+    transitionDuration: '.2s',
+    transitionProperty: 'transform',
+  },
+}))
 
-      if (!addon) return null
+const colExpander = columnHelperRuntime.accessor((row) => row?.id, {
+  id: 'expander',
+  header: () => {},
+  cell: ({ row }: any) =>
+    row.getCanExpand() && (
+      <ExpandButtonSC
+        className={row.getIsExpanded() ? 'expanded' : ''}
+        onClick={row.getToggleExpandedHandler()}
+      />
+    ),
+})
 
-      return (
-        <AddOnName
-          addon={addon}
-          expanded={expanded}
-          row={row}
+const colName = columnHelperRuntime.accessor((row) => row?.addon, {
+  id: 'name',
+  header: 'Name',
+  cell: ({ getValue, row }) => {
+    const addon = getValue()
+
+    if (!addon) return null
+
+    return (
+      <AddOnName
+        addon={addon}
+        row={row}
+      />
+    )
+  },
+})
+const colChartVersion = columnHelperRuntime.accessor(
+  (row) => row?.addonVersion?.version,
+  {
+    id: 'chartVersion',
+    header: 'Chart version',
+
+    cell: ({ getValue }) => (
+      <div css={{ display: 'flex', gap: '' }}>
+        <TableText>{getValue()}</TableText>
+      </div>
+    ),
+  }
+)
+
+const VersionSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  width: '100%',
+}))
+const VersionArrowLinkSC = styled(IconFrame)(({ theme }) => ({
+  ...theme.partials.text.inlineLink,
+}))
+
+function ChartVersion({
+  runtimeService,
+  showLinkOut = false,
+}: {
+  runtimeService: RuntimeService
+  showLinkOut?: boolean
+}) {
+  return (
+    <VersionSC>
+      <TableText>{runtimeService?.addonVersion?.version}</TableText>
+      {showLinkOut && (
+        <VersionArrowLinkSC
+          clickable
+          forwardedAs={Link}
+          to="#"
+          icon={<ArrowTopRightIcon />}
         />
-      )
-    },
-  }),
-  columnHelperRuntime.accessor((row) => row?.version, {
+      )}
+    </VersionSC>
+  )
+}
+const colVersion = columnHelperRuntime.accessor(
+  (row) => row?.addonVersion?.version,
+  {
     id: 'version',
     header: 'Version',
-    cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
-  }),
-  columnHelperRuntime.accessor((row) => row?.addonVersion, {
-    id: 'kube-version',
-    header: 'Kubernetes Versions',
-    meta: { truncate: true },
-    cell: ({ getValue }) => {
-      const addonVersion = getValue()
-
-      if (!addonVersion) return null
-
-      return <TableText>{(addonVersion.kube || []).join(', ')}</TableText>
+    cell({ row: { original } }) {
+      return <ChartVersion runtimeService={original} />
     },
-  }),
-  columnHelperRuntime.accessor((row) => row?.addonVersion, {
-    id: 'blocking',
-    header: 'Blocks Upgrade',
-    cell: ({ getValue }) => {
-      const addonVersion = getValue()
-
-      if (!addonVersion?.blocking) return null
-
+  }
+)
+const colVersionWithLink = columnHelperRuntime.accessor(
+  (row) => row?.addonVersion?.version,
+  {
+    id: 'version-with-link',
+    header: 'Version',
+    cell({ row: { original } }) {
       return (
-        <ErrorIcon
-          color="icon-danger"
-          size={16}
+        <ChartVersion
+          runtimeService={original}
+          showLinkOut
         />
       )
     },
-  }),
-  columnHelperRuntime.accessor((row) => row?.service, {
-    id: 'git',
-    header: 'Repository',
-    cell: ({ getValue }) => <GitPointer service={getValue()} />,
-  }),
+  }
+)
+
+const colKubVersion = columnHelperRuntime.accessor((row) => row?.addonVersion, {
+  id: 'kube-version',
+  header: 'Compatible k8s versions',
+  meta: { truncate: true },
+  cell: ({ getValue }) => {
+    const addonVersion = getValue()
+
+    return <TableText>{(addonVersion?.kube || []).join(', ')}</TableText>
+  },
+})
+const colBlocking = columnHelperRuntime.accessor((row) => row?.addonVersion, {
+  id: 'blocking',
+  header: 'Blocks k8s upgrade',
+  cell: ({ getValue }) => {
+    const addonVersion = getValue()
+
+    if (!addonVersion?.blocking) return null
+
+    return (
+      <BlockedIcon
+        color="icon-danger"
+        size={16}
+      />
+    )
+  },
+})
+const colGit = columnHelperRuntime.accessor((row) => row?.service, {
+  id: 'git',
+  header: 'Repository',
+  cell: ({ getValue }) => <GitPointer service={getValue()} />,
+})
+
+export const runtimeColumns = [
+  colExpander,
+  colName,
+  colVersionWithLink,
+  colChartVersion,
+  colKubVersion,
+  colBlocking,
+  colGit,
+]
+
+export const clusterAddonsColumns = [
+  colName,
+  colVersion,
+  colChartVersion,
+  colKubVersion,
+  colBlocking,
+  colGit,
 ]
