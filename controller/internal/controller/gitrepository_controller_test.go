@@ -211,6 +211,12 @@ var _ = Describe("Repository Controller", Ordered, func() {
 					SHA: lo.ToPtr("TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "The repository is not pullable yet",
+						},
+						{
 							Type:   v1alpha1.ReadonlyConditionType.String(),
 							Status: metav1.ConditionFalse,
 							Reason: v1alpha1.ReadonlyConditionReason.String(),
@@ -267,6 +273,12 @@ var _ = Describe("Repository Controller", Ordered, func() {
 					ID:  lo.ToPtr(repoID),
 					SHA: lo.ToPtr("TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA===="),
 					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "The repository is not pullable yet",
+						},
 						{
 							Type:   v1alpha1.ReadonlyConditionType.String(),
 							Status: metav1.ConditionFalse,
