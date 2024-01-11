@@ -75,6 +75,7 @@ export default function RuntimeServices({
           renderExpanded={({ row }) => (
             <ExpandedColumn runtimeService={row.original} />
           )}
+          reactTableOptions={{ meta: { clusterId: cluster?.id } }}
           css={{
             maxHeight: 258,
             height: '100%',

@@ -85,7 +85,6 @@ export default function ClusterAddOnCompatibility() {
         <FullHeightTableWrap>
           <Table
             data={addOn?.addon?.versions || []}
-            //   data={[1, 2, 3]}
             columns={columns}
             reactTableOptions={{
               getRowId: (row) => row.version,

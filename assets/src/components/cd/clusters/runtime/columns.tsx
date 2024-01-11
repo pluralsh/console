@@ -14,6 +14,8 @@ import styled, { useTheme } from 'styled-components'
 
 import { Link } from 'react-router-dom'
 
+import { getClusterAddOnDetailsPath } from 'routes/cdRoutesConsts'
+
 import { GitPointer } from '../deprecationsColumns'
 
 type RuntimeServiceCluster = NonNullable<RuntimeServicesQuery['cluster']>
@@ -126,20 +128,25 @@ const VersionArrowLinkSC = styled(IconFrame)(({ theme }) => ({
 }))
 
 function ChartVersion({
+  clusterId,
   runtimeService,
   showLinkOut = false,
 }: {
+  clusterId?: Nullable<string>
   runtimeService: RuntimeService
   showLinkOut?: boolean
 }) {
   return (
     <VersionSC>
       <TableText>{runtimeService?.addonVersion?.version}</TableText>
-      {showLinkOut && (
+      {showLinkOut && clusterId && (
         <VersionArrowLinkSC
           clickable
           forwardedAs={Link}
-          to="#"
+          to={getClusterAddOnDetailsPath({
+            clusterId,
+            addOnId: runtimeService?.id,
+          })}
           icon={<ArrowTopRightIcon />}
         />
       )}
@@ -161,11 +168,17 @@ const colVersionWithLink = columnHelperRuntime.accessor(
   {
     id: 'version-with-link',
     header: 'Version',
-    cell({ row: { original } }) {
+    cell({
+      row: { original },
+      table: {
+        options: { meta },
+      },
+    }) {
       return (
         <ChartVersion
           runtimeService={original}
           showLinkOut
+          clusterId={(meta as any)?.clusterId}
         />
       )
     },
