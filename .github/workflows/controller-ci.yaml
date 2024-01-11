@@ -33,7 +33,7 @@ jobs:
           go-version-file: controller/go.mod
           cache: true
       - run: go mod download
-      - run: go build -v .
+      - run: PATH=$PATH:$GOPATH/bin make build
   unit-test:
     name: Unit tests
     runs-on: ubuntu-latest
