@@ -24,7 +24,7 @@ const Compatibility = memo(
   }) => {
     const theme = useTheme()
     const label = isCurrentVersion
-      ? 'Current version'
+      ? 'Current'
       : isCompatible
       ? 'Compatible'
       : 'Not compatible'
@@ -130,7 +130,7 @@ export default function ClusterAddOnCompatibility() {
               getRowId: (row) => row.version,
               meta: {
                 kubeVersion,
-                version: rts.version,
+                version: rts?.addonVersion?.version,
               },
             }}
             css={{

@@ -270,7 +270,7 @@ function ClusterUpgradeModal({
             data={cluster?.apiDeprecations || []}
             columns={deprecationsColumns}
             css={{
-              maxHeight: 180,
+              maxHeight: 181,
               height: '100%',
             }}
           />
