@@ -1,8 +1,8 @@
 import { A, Div, Flex } from 'honorable'
 import {
   Button,
-  Prop,
-  PropsContainer,
+  Sidecar,
+  SidecarItem,
   TreeNav,
   TreeNavEntry,
   WrapWithIf,
@@ -308,13 +308,15 @@ function AppWithoutContext() {
           direction="column"
           marginTop={validLinks?.length > 0 ? 0 : 56}
         >
-          <PropsContainer title="App">
-            <Prop title="Current version">{toNiceVersion(version)}</Prop>
-            <Prop title="Status">
+          <Sidecar heading="App">
+            <SidecarItem heading="Current version">
+              {toNiceVersion(version)}
+            </SidecarItem>
+            <SidecarItem heading="Status">
               <AppStatus app={currentApp} />
-            </Prop>
+            </SidecarItem>
             {validLinks?.length > 1 && (
-              <Prop title="Other links">
+              <SidecarItem heading="Other links">
                 {validLinks.slice(1).map(({ url }) => (
                   <A
                     inline
@@ -326,21 +328,25 @@ function AppWithoutContext() {
                     {url}
                   </A>
                 ))}
-              </Prop>
+              </SidecarItem>
             )}
-          </PropsContainer>
+          </Sidecar>
           {dashboardId && dashboard && (
-            <PropsContainer title="Dashboard">
-              <Prop title="Description">{dashboard.spec?.description}</Prop>
-            </PropsContainer>
+            <Sidecar heading="Dashboard">
+              <SidecarItem heading="Description">
+                {dashboard.spec?.description}
+              </SidecarItem>
+            </Sidecar>
           )}
           {runbookName && runbook && (
-            <PropsContainer title="Runbook">
-              <Prop title="Description">{runbook.spec?.description}</Prop>
-              <Prop title="Status">
+            <Sidecar heading="Runbook">
+              <SidecarItem heading="Description">
+                {runbook.spec?.description}
+              </SidecarItem>
+              <SidecarItem heading="Status">
                 <RunbookStatus runbook={runbook} />
-              </Prop>
-            </PropsContainer>
+              </SidecarItem>
+            </Sidecar>
           )}
           {currentTab?.path === 'logs' && <LogsLegend />}
         </Flex>
