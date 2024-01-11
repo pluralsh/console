@@ -65,7 +65,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	scope, err := NewPipelineScope(ctx, r.Client, pipeline)
 	if err != nil {
 		logger.Error(err, "Failed to create pipeline scope")
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 	defer func() {
@@ -82,28 +82,28 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	// Prepare attributes object that is used to calculate SHA and save changes.
 	attrs, err := r.pipelineAttributes(ctx, pipeline)
 	if err != nil {
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
 	sha, err := utils.HashObject(*attrs)
 	if err != nil {
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	// Sync resource with Console API.
 	apiPipeline, err := r.sync(ctx, pipeline, *attrs, sha)
 	if err != nil {
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	// Update resource status.
 	pipeline.Status.ID = &apiPipeline.ID
 	pipeline.Status.SHA = &sha
-	utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
 }
@@ -122,7 +122,7 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 			if _, err := r.ConsoleClient.DeletePipeline(*pipeline.Status.ID); err != nil {
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
-				utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+				utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 				return &ctrl.Result{}
 			}
 

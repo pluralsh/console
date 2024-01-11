@@ -73,8 +73,9 @@ func (c ConditionType) String() string {
 }
 
 const (
-	ReadonlyConditionType ConditionType = "Readonly"
-	ReadyConditionType    ConditionType = "Ready"
+	ReadonlyConditionType     ConditionType = "Readonly"
+	ReadyConditionType        ConditionType = "Ready"
+	SynchronizedConditionType ConditionType = "Synchronized"
 )
 
 type ConditionReason string
@@ -84,8 +85,9 @@ func (c ConditionReason) String() string {
 }
 
 const (
-	ReadonlyConditionReason ConditionReason = "Readonly"
-	ReadyConditionReason    ConditionReason = "Ready"
+	ReadonlyConditionReason     ConditionReason = "Readonly"
+	ReadyConditionReason        ConditionReason = "Ready"
+	SynchronizedConditionReason ConditionReason = "Synchronized"
 )
 
 type ConditionMessage string

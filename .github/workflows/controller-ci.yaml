@@ -33,21 +33,29 @@ jobs:
           go-version-file: controller/go.mod
           cache: true
       - run: go mod download
-      - run: go build -v .
+      - run: PATH=$PATH:$GOPATH/bin make build
   unit-test:
     name: Unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     defaults:
       run:
         shell: bash
         working-directory: controller
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+      - name: Set up Go
+        uses: actions/setup-go@v4.1.0
         with:
           go-version-file: controller/go.mod
-          check-latest: true
-      - run: PATH=$PATH:$GOPATH/bin make test
+          cache: true
+      - name: Download dependencies
+        run: go mod download
+      - name: Download tools
+        run: PATH=$PATH:$GOPATH/bin make tools
+      - name: Test
+        run: PATH=$PATH:$GOPATH/bin make test
   lint:
     name: Lint
     runs-on: ubuntu-latest

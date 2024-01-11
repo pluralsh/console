@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"sort"
 
 	"github.com/pluralsh/console/controller/internal/test/utils"
 
@@ -26,6 +27,10 @@ func sanitizeServiceConditions(status v1alpha1.ServiceStatus) v1alpha1.ServiceSt
 		status.Conditions[i].LastTransitionTime = metav1.Time{}
 		status.Conditions[i].ObservedGeneration = 0
 	}
+
+	sort.Slice(status.Conditions, func(i, j int) bool {
+		return status.Conditions[i].Type < status.Conditions[j].Type
+	})
 
 	return status
 }
@@ -118,6 +123,11 @@ var _ = Describe("Service Controller", Ordered, func() {
 							Reason:  v1alpha1.ReadyConditionReason.String(),
 							Message: "The service components are not ready yet",
 						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
 					},
 				},
 				returnGetService: &gqlclient.ServiceDeploymentExtended{
@@ -162,6 +172,11 @@ var _ = Describe("Service Controller", Ordered, func() {
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.ReadyConditionReason.String(),
 							Message: "The service components are not ready yet",
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
 						},
 					},
 				},

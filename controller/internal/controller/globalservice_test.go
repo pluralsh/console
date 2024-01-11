@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"sort"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -17,6 +18,19 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
+
+func sanitizeGlobalServiceConditions(status v1alpha1.GlobalServiceStatus) v1alpha1.GlobalServiceStatus {
+	for i := range status.Conditions {
+		status.Conditions[i].LastTransitionTime = metav1.Time{}
+		status.Conditions[i].ObservedGeneration = 0
+	}
+
+	sort.Slice(status.Conditions, func(i, j int) bool {
+		return status.Conditions[i].Type < status.Conditions[j].Type
+	})
+
+	return status
+}
 
 var _ = Describe("Global Service Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
@@ -134,9 +148,9 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 					SHA: lo.ToPtr("WAXTBLTM6PFWW6BBRLCPV2ILX2J4EOHQKDISWH4QAM5IODNRMBJQ===="),
 					Conditions: []metav1.Condition{
 						{
-							Type:   v1alpha1.ReadyConditionType.String(),
+							Type:   v1alpha1.SynchronizedConditionType.String(),
 							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.ReadyConditionReason.String(),
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
 						},
 					},
 				},
@@ -210,12 +224,3 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 	})
 
 })
-
-func sanitizeGlobalServiceConditions(status v1alpha1.GlobalServiceStatus) v1alpha1.GlobalServiceStatus {
-	for i := range status.Conditions {
-		status.Conditions[i].LastTransitionTime = metav1.Time{}
-		status.Conditions[i].ObservedGeneration = 0
-	}
-
-	return status
-}
