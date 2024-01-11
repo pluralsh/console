@@ -1,13 +1,13 @@
-import { Table } from '@pluralsh/design-system'
+import { EmptyState, Table } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { useRuntimeServicesQuery } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getClusterAddOnDetailsPath } from 'routes/cdRoutesConsts'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-
-import { useRuntimeServicesQuery } from '../../../generated/graphql'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { clusterAddonsColumns } from '../clusters/runtime/columns'
 import { POLL_INTERVAL } from '../ContinuousDeployment'
@@ -24,6 +24,7 @@ export default function ClusterAddOns() {
   const { data } = useRuntimeServicesQuery({
     variables: {
       kubeVersion,
+      hasKubeVersion: !!kubeVersion,
       id: cluster?.id ?? '',
     },
     fetchPolicy: 'cache-and-network',
@@ -34,7 +35,12 @@ export default function ClusterAddOns() {
     [data?.cluster?.runtimeServices]
   )
 
-  if ((data?.cluster?.runtimeServices || []).length <= 0) return null
+  if (!data) {
+    return <LoadingIndicator />
+  }
+
+  if ((data?.cluster?.runtimeServices || []).length <= 0)
+    return <EmptyState message="This cluster doesn’t have any add-ons." />
 
   return (
     <FullHeightTableWrap>

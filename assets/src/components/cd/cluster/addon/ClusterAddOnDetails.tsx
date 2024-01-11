@@ -12,7 +12,6 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import {
   RuntimeServiceFragment,
-  useClusterQuery,
   useRuntimeServicesQuery,
 } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
@@ -32,8 +31,6 @@ import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 
 import { POLL_INTERVAL } from 'components/cluster/constants'
 
-import { getClusterKubeVersion } from 'components/cd/clusters/runtime/RuntimeServices'
-
 import {
   ListBoxItem,
   LoopingLogo,
@@ -41,12 +38,13 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import ClusterAddOnDetailsSidecar from './ClusterAddOnDetailsSidecar'
 
 type ClusterAddOnContextType = {
-  addOn: RuntimeServiceFragment
+  runtimeService: RuntimeServiceFragment
+  kubeVersion: Nullable<string>
 }
 
 export const useServiceContext = () =>
@@ -97,21 +95,23 @@ export default function ClusterAddOnDetails() {
     clusterId,
     addOnId,
   })
-  const { data } = useClusterQuery({
-    variables: { id: clusterId || '' },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
-  const cluster = data?.cluster
-  const kubeVersion = getClusterKubeVersion(cluster)
+  const [kubeVersionVar, setKubeVersionVar] = useState('')
 
-  const { data: rtsData, error: rtsError } = useRuntimeServicesQuery({
-    variables: { kubeVersion, id: clusterId },
+  const { data, error, previousData } = useRuntimeServicesQuery({
+    variables: {
+      kubeVersion: kubeVersionVar,
+      hasKubeVersion: !!kubeVersionVar,
+      id: clusterId,
+    },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
+  const rtsData = data || previousData
+  const cluster = rtsData?.cluster
+  const runtimeServices = cluster?.runtimeServices
+  const kubeVersion = cluster?.currentVersion || cluster?.version || ''
 
-  const runtimeServices = rtsData?.cluster?.runtimeServices
+  useEffect(() => setKubeVersionVar(kubeVersion), [kubeVersion])
   const rts = runtimeServices?.find((rts) => rts?.id === addOnId)
 
   useSetBreadcrumbs(
@@ -193,13 +193,14 @@ export default function ClusterAddOnDetails() {
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer role="main">
-        {rtsError ? (
-          <GqlError error={rtsError} />
+        {error ? (
+          <GqlError error={error} />
         ) : rts ? (
           <Outlet
             context={
               {
-                addOn: rts,
+                runtimeService: rts,
+                kubeVersion,
               } satisfies ClusterAddOnContextType
             }
           />
@@ -208,7 +209,10 @@ export default function ClusterAddOnDetails() {
         )}
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer>
-        <ClusterAddOnDetailsSidecar runtimeService={rts} />
+        <ClusterAddOnDetailsSidecar
+          runtimeService={rts}
+          kubeVersion={kubeVersion}
+        />
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
     </ResponsiveLayoutPage>

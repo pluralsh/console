@@ -4603,9 +4603,11 @@ export type NodePoolFragment = { __typename?: 'NodePool', id: string, name: stri
 
 export type ApiDeprecationFragment = { __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null };
 
-export type RuntimeServiceFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null };
+export type RuntimeServiceFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null };
 
 export type AddonVersionFragment = { __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null };
+
+export type AddonVersionBlockingFragment = { __typename?: 'AddonVersion', blocking?: boolean | null };
 
 export type ClustersRowFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, distro?: ClusterDistro | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
 
@@ -4673,10 +4675,11 @@ export type ClusterBindingsQuery = { __typename?: 'RootQueryType', cluster?: { _
 export type RuntimeServicesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   kubeVersion: Scalars['String']['input'];
+  hasKubeVersion: Scalars['Boolean']['input'];
 }>;
 
 
-export type RuntimeServicesQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null } | null };
+export type RuntimeServicesQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null } | null };
 
 export type UpdateClusterBindingsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5530,6 +5533,11 @@ export const AddonVersionFragmentDoc = gql`
   }
 }
     `;
+export const AddonVersionBlockingFragmentDoc = gql`
+    fragment AddonVersionBlocking on AddonVersion {
+  blocking(kubeVersion: $kubeVersion)
+}
+    `;
 export const RuntimeServiceFragmentDoc = gql`
     fragment RuntimeService on RuntimeService {
   id
@@ -5550,13 +5558,17 @@ export const RuntimeServiceFragmentDoc = gql`
       httpsPath
       urlFormat
     }
+    helm {
+      version
+    }
   }
   addonVersion {
-    blocking(kubeVersion: $kubeVersion)
+    ...AddonVersionBlocking @include(if: $hasKubeVersion)
     ...AddonVersion
   }
 }
-    ${AddonVersionFragmentDoc}`;
+    ${AddonVersionFragmentDoc}
+${AddonVersionBlockingFragmentDoc}`;
 export const ApiDeprecationFragmentDoc = gql`
     fragment ApiDeprecation on ApiDeprecation {
   availableIn
@@ -7377,8 +7389,12 @@ export type ClusterBindingsLazyQueryHookResult = ReturnType<typeof useClusterBin
 export type ClusterBindingsSuspenseQueryHookResult = ReturnType<typeof useClusterBindingsSuspenseQuery>;
 export type ClusterBindingsQueryResult = Apollo.QueryResult<ClusterBindingsQuery, ClusterBindingsQueryVariables>;
 export const RuntimeServicesDocument = gql`
-    query RuntimeServices($id: ID!, $kubeVersion: String!) {
+    query RuntimeServices($id: ID!, $kubeVersion: String!, $hasKubeVersion: Boolean!) {
   cluster(id: $id) {
+    id
+    name
+    currentVersion
+    version
     runtimeServices {
       ...RuntimeService
     }
@@ -7400,6 +7416,7 @@ export const RuntimeServicesDocument = gql`
  *   variables: {
  *      id: // value for 'id'
  *      kubeVersion: // value for 'kubeVersion'
+ *      hasKubeVersion: // value for 'hasKubeVersion'
  *   },
  * });
  */
@@ -10510,6 +10527,7 @@ export const namedOperations = {
     ApiDeprecation: 'ApiDeprecation',
     RuntimeService: 'RuntimeService',
     AddonVersion: 'AddonVersion',
+    AddonVersionBlocking: 'AddonVersionBlocking',
     ClustersRow: 'ClustersRow',
     Cluster: 'Cluster',
     ClusterTiny: 'ClusterTiny',

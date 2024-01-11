@@ -6,8 +6,8 @@ import { TableText } from 'components/cluster/TableElements'
 import {
   ArrowTopRightIcon,
   BlockedIcon,
-  CollapseIcon,
   IconFrame,
+  Tooltip,
 } from '@pluralsh/design-system'
 
 import styled, { useTheme } from 'styled-components'
@@ -62,30 +62,6 @@ export const expandedColumns = [
   }),
 ]
 
-const ExpandButtonSC = styled(CollapseIcon).attrs(() => ({ size: 8 }))((_) => ({
-  cursor: 'pointer',
-  transform: 'rotate(180deg)',
-  transitionDuration: '.2s',
-  transitionProperty: 'transform',
-  '&.expanded': {
-    transform: 'rotate(270deg)',
-    transitionDuration: '.2s',
-    transitionProperty: 'transform',
-  },
-}))
-
-const colExpander = columnHelperRuntime.accessor((row) => row?.id, {
-  id: 'expander',
-  header: () => {},
-  cell: ({ row }: any) =>
-    row.getCanExpand() && (
-      <ExpandButtonSC
-        className={row.getIsExpanded() ? 'expanded' : ''}
-        onClick={row.getToggleExpandedHandler()}
-      />
-    ),
-})
-
 const colName = columnHelperRuntime.accessor((row) => row?.addon, {
   id: 'name',
   header: 'Name',
@@ -103,16 +79,11 @@ const colName = columnHelperRuntime.accessor((row) => row?.addon, {
   },
 })
 const colChartVersion = columnHelperRuntime.accessor(
-  (row) => row?.addonVersion?.version,
+  (row) => row?.service?.helm?.version,
   {
     id: 'chartVersion',
     header: 'Chart version',
-
-    cell: ({ getValue }) => (
-      <div css={{ display: 'flex', gap: '' }}>
-        <TableText>{getValue()}</TableText>
-      </div>
-    ),
+    cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
   }
 )
 
@@ -148,6 +119,10 @@ function ChartVersion({
             addOnId: runtimeService?.id,
           })}
           icon={<ArrowTopRightIcon />}
+          tooltip="View compatibility matrix"
+          tooltipProps={{
+            placement: 'right',
+          }}
         />
       )}
     </VersionSC>
@@ -204,10 +179,12 @@ const colBlocking = columnHelperRuntime.accessor((row) => row?.addonVersion, {
     if (!addonVersion?.blocking) return null
 
     return (
-      <BlockedIcon
-        color="icon-danger"
-        size={16}
-      />
+      <Tooltip label="Blocking">
+        <BlockedIcon
+          color="icon-danger"
+          size={16}
+        />
+      </Tooltip>
     )
   },
 })
@@ -218,7 +195,6 @@ const colGit = columnHelperRuntime.accessor((row) => row?.service, {
 })
 
 export const runtimeColumns = [
-  colExpander,
   colName,
   colVersionWithLink,
   colChartVersion,
