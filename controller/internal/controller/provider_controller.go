@@ -44,8 +44,8 @@ const (
 // move the current state of the v1alpha1.Provider closer to the desired state
 // and syncs it with the Console API state.
 func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
-	log := log.FromContext(ctx)
-	log.Info("Reconciling")
+	logger := log.FromContext(ctx)
+	logger.Info("Reconciling")
 
 	// Read Provider CRD from the K8S API
 	provider := new(v1alpha1.Provider)
@@ -55,7 +55,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 
 	scope, err := NewProviderScope(ctx, r.Client, provider)
 	if err != nil {
-		log.Error(err, "failed to create scope")
+		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -74,8 +74,13 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 		return ctrl.Result{}, err
 	}
 	if exists {
+		logger.V(9).Info("Provider already exists in the API, running in read-only mode")
+		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return r.handleExistingProvider(ctx, provider)
 	}
+
+	// Mark resource as managed by this operator.
+	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
 	result, err := r.addOrRemoveFinalizer(ctx, provider)
@@ -92,7 +97,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	// Get Provider SHA that can be saved back in the status to check for changes
 	changed, sha, err := provider.Diff(ctx, r.toCloudProviderSettingsAttributes, utils.HashObject)
 	if err != nil {
-		log.Error(err, "unable to calculate provider SHA")
+		logger.Error(err, "unable to calculate provider SHA")
 		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -100,7 +105,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	// Sync Provider CRD with the Console API
 	apiProvider, err := r.sync(ctx, provider, changed)
 	if err != nil {
-		log.Error(err, "unable to create or update provider")
+		logger.Error(err, "unable to create or update provider")
 		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -111,9 +116,8 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	if isProviderReady(apiProvider) {
 		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	} else {
-		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "Not all provider service components are running")
+		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "Not all provider service components are running.")
 	}
-	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
@@ -127,12 +131,11 @@ func (r *ProviderReconciler) handleExistingProvider(ctx context.Context, provide
 	}
 
 	provider.Status.ID = &apiProvider.ID
-	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	if isProviderReady(apiProvider) {
 		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	} else {
-		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "The provider service components are not ready yet")
+		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "Not all provider service components are running.")
 	}
 
 	return requeue, nil
@@ -161,7 +164,7 @@ func (r *ProviderReconciler) isAlreadyExists(ctx context.Context, provider *v1al
 }
 
 func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider *v1alpha1.Provider) (*ctrl.Result, error) {
-	log := log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
@@ -173,13 +176,13 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 	if !provider.ObjectMeta.DeletionTimestamp.IsZero() {
 		// If object is already being deleted from Console API requeue
 		if r.ConsoleClient.IsProviderDeleting(ctx, provider.Status.GetID()) {
-			log.Info("Waiting for provider to be deleted from Console API")
+			logger.Info("Waiting for provider to be deleted from Console API")
 			return &requeue, nil
 		}
 
 		// Remove Provider from Console API if it exists
 		if r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID()) {
-			log.Info("Deleting provider")
+			logger.Info("Deleting provider")
 			if err := r.ConsoleClient.DeleteProvider(ctx, provider.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
@@ -201,7 +204,7 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 }
 
 func (r *ProviderReconciler) sync(ctx context.Context, provider *v1alpha1.Provider, changed bool) (*console.ClusterProviderFragment, error) {
-	log := log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 	exists := r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID())
 
 	// Update only if Provider has changed
@@ -211,7 +214,7 @@ func (r *ProviderReconciler) sync(ctx context.Context, provider *v1alpha1.Provid
 			return nil, err
 		}
 
-		log.Info("Updating provider")
+		logger.Info("Updating provider")
 		return r.ConsoleClient.UpdateProvider(ctx, provider.Status.GetID(), attributes)
 	}
 
@@ -226,7 +229,7 @@ func (r *ProviderReconciler) sync(ctx context.Context, provider *v1alpha1.Provid
 		return nil, err
 	}
 
-	log.Info("Creating provider")
+	logger.Info("Creating provider")
 	return r.ConsoleClient.CreateProvider(ctx, attributes)
 }
 
