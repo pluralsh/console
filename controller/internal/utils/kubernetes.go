@@ -249,6 +249,8 @@ func SyncCondition(set func(condition metav1.Condition), conditionType, status, 
 
 	if reason != nil {
 		condition.Reason = *reason
+	} else if conditionType != nil {
+		condition.Reason = *conditionType
 	}
 
 	if conditionType != nil {
