@@ -365,7 +365,7 @@ const serviceDetailsRoutes = (
     />
     <Route
       element={<ServiceDryRun />}
-      path="helm"
+      path="dryrun"
     />
     <Route
       element={<ServiceSettings />}
