@@ -1,12 +1,11 @@
 import { ReactElement, useMemo } from 'react'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import {
   ClusterIcon,
+  IconFrame,
   ManagementClusterIcon,
-  ProtectedClusterIcon,
+  ShieldLockIcon,
   Spinner,
-  Tooltip,
-  WrapWithIf,
 } from '@pluralsh/design-system'
 
 import { PROTECT_TT_TEXT } from './ProtectBadge'
@@ -18,6 +17,23 @@ interface DynamicClusterIconProps {
   self?: boolean
 }
 
+const DynamicClusterIconSC = styled.div((_) => ({
+  position: 'relative',
+}))
+const IconFrameSC = styled(IconFrame)(({ theme }) => ({
+  position: 'relative',
+  border: 'none',
+  backgroundColor: theme.colors['fill-two'],
+}))
+const ProtectedIconSC = styled(ShieldLockIcon).attrs(() => ({ size: 14 }))(
+  (_) => ({
+    position: 'absolute',
+    top: -7,
+    right: -5,
+    pointerEvents: 'none',
+  })
+)
+
 export function DynamicClusterIcon({
   deleting = false,
   upgrading = false,
@@ -26,10 +42,6 @@ export function DynamicClusterIcon({
 }: DynamicClusterIconProps): ReactElement {
   const theme = useTheme()
 
-  const condition = useMemo(
-    () => deleting || upgrading || protect || self,
-    [deleting, upgrading, protect, self]
-  )
   const tooltip = useMemo(() => {
     if (deleting) return 'Cluster is being deleted'
     if (upgrading) return 'Cluster is being upgraded'
@@ -41,32 +53,28 @@ export function DynamicClusterIcon({
   const pending = useMemo(() => deleting || upgrading, [deleting, upgrading])
 
   return (
-    <WrapWithIf
-      condition={condition}
-      wrapper={
-        <Tooltip
-          label={tooltip}
-          placement="top"
-        />
-      }
-    >
-      <div
-        css={{
-          display: 'flex',
-        }}
-      >
-        {pending && (
-          <Spinner
-            size={16}
-            color={
-              deleting ? theme.colors['icon-danger'] : theme.colors['icon-info']
-            }
-          />
-        )}
-        {!pending && !self && protect && <ProtectedClusterIcon size={16} />}
-        {!pending && !self && !protect && <ClusterIcon size={16} />}
-        {!pending && self && <ManagementClusterIcon size={16} />}
-      </div>
-    </WrapWithIf>
+    <DynamicClusterIconSC>
+      <IconFrameSC
+        size="medium"
+        type="secondary"
+        tooltip={tooltip}
+        icon={
+          pending ? (
+            <Spinner
+              color={
+                deleting
+                  ? theme.colors['icon-danger']
+                  : theme.colors['icon-info']
+              }
+            />
+          ) : self ? (
+            <ManagementClusterIcon />
+          ) : (
+            <ClusterIcon />
+          )
+        }
+      />
+      {(protect || self) && <ProtectedIconSC />}
+    </DynamicClusterIconSC>
   )
 }

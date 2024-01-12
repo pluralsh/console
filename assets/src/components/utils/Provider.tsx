@@ -1,10 +1,11 @@
 import { useTheme } from 'styled-components'
 import { IconFrame, type styledTheme } from '@pluralsh/design-system'
 
+import { ClusterDistro } from 'generated/graphql'
 import { Provider } from 'generated/graphql-plural'
 import { ComponentProps } from 'react'
 
-import { ClusterDistro } from '../../generated/graphql'
+import { getDistroProviderIconUrl } from './ClusterDistro'
 
 export const CHART_ICON_DARK = '/providers/chart-icon.png'
 export const CHART_ICON_LIGHT = '/providers/chart-icon.png'
@@ -20,11 +21,6 @@ export const AWS_ICON_DARK = '/providers/aws-icon-dark.png'
 export const AWS_ICON_LIGHT = '/providers/aws-icon-light.png'
 export const LINODE_ICON_DARK = '/providers/linode-icon.png'
 export const LINODE_ICON_LIGHT = '/providers/linode-icon.png'
-export const AKS_ICON = '/providers/aks-icon.png'
-export const EKS_ICON = '/providers/eks-icon.png'
-export const GKE_ICON = '/providers/gke-icon.png'
-export const K3S_ICON = '/providers/k3s-icon.png'
-export const RKE_ICON = '/providers/rke-icon.png'
 
 const ProviderNames = {
   aws: 'AWS',
@@ -44,46 +40,21 @@ export function getProviderName(provider?: string | null) {
   return p && ProviderNames[p] ? ProviderNames[p] : 'BYOK'
 }
 
-const DistributionNames = {
-  aks: 'AKS',
-  eks: 'EKS',
-  generic: 'Generic',
-  gke: 'GKE',
-  k3s: 'K3s',
-  rke: 'RKE',
-} as const satisfies Record<Lowercase<ClusterDistro>, string>
-
-export function getDistributionName(distro?: ClusterDistro | null) {
-  const d = distro?.toLowerCase()
-
-  return d && DistributionNames[d]
-    ? DistributionNames[d]
-    : DistributionNames.generic
-}
-
-export function getClusterIconUrl(
-  distro: ClusterDistro | null | undefined,
-  provider: string | null | undefined,
+export function getClusterIconUrl({
+  cluster,
+  mode,
+}: {
+  cluster: Nullable<{
+    distro?: Nullable<ClusterDistro>
+    provider?: Nullable<{ cloud?: Nullable<string> }>
+  }>
   mode: typeof styledTheme.mode
-) {
-  const distroIconUrl = distro ? getDistroIconUrl(distro) : null
-
-  return distroIconUrl ?? getProviderIconUrl(provider ?? '', mode)
-}
-
-function getDistroIconUrl(distro: ClusterDistro) {
-  return (
-    (
-      {
-        AKS: AKS_ICON,
-        EKS: EKS_ICON,
-        GKE: GKE_ICON,
-        K3S: K3S_ICON,
-        RKE: RKE_ICON,
-        GENERIC: null,
-      } as const satisfies Record<ClusterDistro, string | null>
-    )[distro?.toUpperCase()] ?? null
-  )
+}) {
+  return getDistroProviderIconUrl({
+    distro: cluster?.distro,
+    provider: cluster?.provider?.cloud,
+    mode,
+  })
 }
 
 export function getProviderIconUrl(
@@ -105,30 +76,6 @@ export function getProviderIconUrl(
       } as const satisfies Record<Provider, string>
     )[provider?.toUpperCase() ?? ''] ??
     (mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK)
-  )
-}
-
-export function ClusterProviderIcon({
-  distro,
-  provider,
-  width,
-}: {
-  distro?: ClusterDistro | null
-  provider: string
-  width: number
-}) {
-  const theme = useTheme()
-
-  return (
-    <div css={{ display: 'flex', justifyContent: 'center', width }}>
-      <img
-        alt={`${getDistributionName(distro)} / ${
-          getProviderName(provider) || provider
-        }`}
-        src={getClusterIconUrl(distro, provider, theme.mode)}
-        width={width}
-      />
-    </div>
   )
 }
 

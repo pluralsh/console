@@ -4,9 +4,11 @@ import { IconFrame, type styledTheme } from '@pluralsh/design-system'
 
 import { ClusterDistro } from 'generated/graphql'
 
+import { getProviderIconUrl } from './Provider'
+
 const DISTRO_ICON_PATH = '/cluster-distros' as const
 
-export const ClusterDistroIcons = {
+export const ClusterProviderIcons = {
   [ClusterDistro.Aks]: {
     dark: `${DISTRO_ICON_PATH}/aks.svg`,
     light: `${DISTRO_ICON_PATH}/aks.svg`,
@@ -65,36 +67,48 @@ export function getClusterDistroName(
   return p && distroNames[p] ? distroNames[p] : 'Unknown distro'
 }
 
-export function getClusterDistroIconUrl(
-  distro: Nullable<ClusterDistro>,
+export function getDistroProviderIconUrl({
+  distro,
+  provider,
+  mode,
+}: {
+  distro: Nullable<ClusterDistro>
+  provider: Nullable<string>
   mode: typeof styledTheme.mode
-) {
-  return (
-    ClusterDistroIcons[distro?.toUpperCase() ?? ''][mode] ||
-    ClusterDistroIcons[ClusterDistro.Generic][mode] ||
-    ClusterDistroIcons[ClusterDistro.Generic].dark
-  )
+}) {
+  return ClusterProviderIcons[distro?.toUpperCase() ?? '']?.[mode] || provider
+    ? getProviderIconUrl(provider, mode)
+    : ClusterProviderIcons[ClusterDistro.Generic]?.[mode] ||
+        ClusterProviderIcons[ClusterDistro.Generic]?.dark
 }
 
-export function useClusterDistroIconUrl(distro: Nullable<ClusterDistro>) {
+export function useDistroProviderIconUrl({
+  distro,
+  provider,
+}: {
+  distro: Nullable<ClusterDistro>
+  provider: Nullable<string>
+}) {
   const theme = useTheme()
 
-  return getClusterDistroIconUrl(distro, theme.mode)
+  return getDistroProviderIconUrl({ distro, provider, mode: theme.mode })
 }
 
-export function ClusterDistroIcon({
+export function DistroProviderIcon({
   distro,
+  provider,
   size,
   ...props
 }: {
   distro: Nullable<ClusterDistro>
+  provider: Nullable<string>
   size?: number
 } & ComponentProps<'img'>) {
-  const src = useClusterDistroIconUrl(distro)
+  const src = useDistroProviderIconUrl({ distro, provider })
 
   return (
     <img
-      alt={ClusterDistroLongNames[distro ?? ''] || 'Unknown distro'}
+      alt={ClusterDistroLongNames[distro ?? ''] || 'Unknown provider'}
       src={src}
       {...props}
       {...(size ? { width: size } : {})}
@@ -102,17 +116,24 @@ export function ClusterDistroIcon({
   )
 }
 
-export function ClusterDistroIconFrame({
+export function DistroProviderIconFrame({
   distro,
+  provider,
   ...props
 }: {
   distro: Nullable<ClusterDistro>
+  provider?: Nullable<string>
 } & Omit<ComponentProps<typeof IconFrame>, 'icon'>) {
   return (
     <IconFrame
       textValue={getClusterDistroName(distro, 'long')}
       tooltip={getClusterDistroName(distro, 'short')}
-      icon={<ClusterDistroIcon distro={distro} />}
+      icon={
+        <DistroProviderIcon
+          distro={distro}
+          provider={provider}
+        />
+      }
       {...props}
     />
   )

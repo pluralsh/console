@@ -3,16 +3,17 @@ import {
   Breadcrumb,
   GearTrainIcon,
   IconFrame,
+  TabPanel,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
-import { isEmpty } from 'lodash'
+import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import { Row } from '@tanstack/react-table'
 import { VirtualItem } from '@tanstack/react-virtual'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
+import { useDebounce } from '@react-hooks-library/core'
 
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
 
@@ -35,6 +36,11 @@ import {
 } from '../ContinuousDeployment'
 import { useCDEnabled } from '../utils/useCDEnabled'
 import { DEMO_CLUSTERS } from '../utils/demoData'
+
+import {
+  ClusterStatusTabKey,
+  ClustersFilters,
+} from '../services/ClustersFilters'
 
 import CreateCluster from './create/CreateCluster'
 import { DemoTable } from './ClustersDemoTable'
@@ -83,6 +89,11 @@ export default function Clusters() {
   const theme = useTheme()
   const navigate = useNavigate()
   const cdIsEnabled = useCDEnabled()
+  const [searchString, setSearchString] = useState()
+  const debouncedSearchString = useDebounce(searchString, 100)
+  const tabStateRef = useRef<any>(null)
+  const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
+
   const [virtualSlice, setVirtualSlice] = useState<
     | {
         start: VirtualItem | undefined
@@ -93,7 +104,9 @@ export default function Clusters() {
 
   const queryResult = useClustersQuery({
     variables: {
+      q: debouncedSearchString,
       first: CLUSTERS_QUERY_PAGE_SIZE,
+      ...(statusFilter !== 'ALL' ? { health: statusFilter === 'HEALTHY' } : {}),
     },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
@@ -126,6 +139,23 @@ export default function Clusters() {
         extendConnection(prev, fetchMoreResult.clusters, 'clusters'),
     })
   }, [fetchMore, pageInfo?.endCursor])
+  const statusCounts = useMemo<Record<ClusterStatusTabKey, number | undefined>>(
+    () => ({
+      ALL: data?.clusterStatuses?.reduce(
+        (count, status) => count + (status?.count || 0),
+        0
+      ),
+      HEALTHY: data?.clusterStatuses ? 0 : undefined,
+      UNHEALTHY: data?.clusterStatuses ? 0 : undefined,
+      ...Object.fromEntries(
+        data?.clusterStatuses?.map((status) => [
+          status?.healthy ? 'HEALTHY' : 'UNHEALTHY',
+          status?.count,
+        ]) || []
+      ),
+    }),
+    [data?.clusterStatuses]
+  )
 
   const headerActions = useMemo(
     () =>
@@ -155,9 +185,9 @@ export default function Clusters() {
   useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)
 
   const clusterEdges = data?.clusters?.edges
-  const isDemo = isEmpty(clusterEdges) || !cdIsEnabled
+  const isDemo = statusCounts.ALL === 0 || !cdIsEnabled
   const tableData = isDemo ? DEMO_CLUSTERS : clusterEdges
-  const showGettingStarted = isDemo || (clusterEdges?.length ?? 0) < 2
+  const showGettingStarted = isDemo || (statusCounts.ALL ?? 0) < 2
 
   useSetCDScrollable(showGettingStarted || isDemo)
 
@@ -171,18 +201,42 @@ export default function Clusters() {
   return (
     <>
       {!isDemo ? (
-        <FullHeightTableWrap>
-          <ClustersTable
-            data={tableData || []}
-            refetch={refetch}
-            virtualizeRows
-            hasNextPage={pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={loading}
-            reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
-            onVirtualSliceChange={setVirtualSlice}
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.small,
+            height: '100%',
+          }}
+        >
+          <ClustersFilters
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            searchString={searchString}
+            setSearchString={setSearchString}
+            // clusterId={clusterId}
+            // setClusterId={clusterIdProp ? undefined : setClusterId}
+            tabStateRef={tabStateRef}
+            statusCounts={statusCounts}
           />
-        </FullHeightTableWrap>
+          <TabPanel
+            stateRef={tabStateRef}
+            css={{ height: '100%', overflow: 'hidden' }}
+          >
+            <FullHeightTableWrap>
+              <ClustersTable
+                data={tableData || []}
+                refetch={refetch}
+                virtualizeRows
+                hasNextPage={pageInfo?.hasNextPage}
+                fetchNextPage={fetchNextPage}
+                isFetchingNextPage={loading}
+                reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
+                onVirtualSliceChange={setVirtualSlice}
+              />
+            </FullHeightTableWrap>
+          </TabPanel>
+        </div>
       ) : (
         <DemoTable mode={cdIsEnabled ? 'empty' : 'disabled'} />
       )}

@@ -219,8 +219,13 @@ fragment Cluster on Cluster {
   }
 }
 
-query Clusters($first: Int = 100, $after: String, $q: String) {
-  clusters(first: $first, after: $after, q: $q) {
+query Clusters(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $health: Boolean
+) {
+  clusters(first: $first, after: $after, q: $q, health: $health) {
     pageInfo {
       ...PageInfo
     }
@@ -229,6 +234,9 @@ query Clusters($first: Int = 100, $after: String, $q: String) {
         ...ClustersRow
       }
     }
+  }
+  clusterStatuses {
+    ...ClusterStatusInfo
   }
 }
 
@@ -363,5 +371,16 @@ mutation CreateCluster($attributes: ClusterAttributes!) {
 mutation DeleteCluster($id: ID!) {
   deleteCluster(id: $id) {
     ...Cluster
+  }
+}
+
+fragment ClusterStatusInfo on ClusterStatusInfo {
+  count
+  healthy
+}
+
+query ClusterStatuses($clusterId: ID) {
+  clusterStatuses {
+    ...ClusterStatusInfo
   }
 }
