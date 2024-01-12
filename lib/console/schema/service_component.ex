@@ -1,6 +1,6 @@
 defmodule Console.Schema.ServiceComponent do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, ApiDeprecation}
+  alias Console.Schema.{Service, ApiDeprecation, Content}
 
   defenum State, running: 0, pending: 1, failed: 2, paused: 3
 
@@ -15,6 +15,7 @@ defmodule Console.Schema.ServiceComponent do
 
     belongs_to :service, Service
     has_many :api_deprecations, ApiDeprecation, foreign_key: :component_id
+    has_one :content, ComponentContent, foreign_key: :component_id
 
     timestamps()
   end
@@ -28,6 +29,7 @@ defmodule Console.Schema.ServiceComponent do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_assoc(:content)
     |> foreign_key_constraint(:service)
     |> validate_required([:kind, :name])
   end

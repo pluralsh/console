@@ -72,6 +72,7 @@ defmodule Console.MixProject do
       {:distillery, "~> 2.1"},
       {:libcluster, "~> 3.2"},
       {:horde, "~> 0.8"},
+      {:tentacat, "~> 2.0"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix, "~> 1.5"},
       {:phoenix_view, "~> 2.0"},
