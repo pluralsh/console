@@ -127,6 +127,7 @@ fragment ClustersRow on Cluster {
   protect
   name
   handle
+  distro
   nodes {
     status {
       capacity

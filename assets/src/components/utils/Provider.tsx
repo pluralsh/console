@@ -1,7 +1,8 @@
 import { useTheme } from 'styled-components'
-import { type styledTheme } from '@pluralsh/design-system'
+import { IconFrame, type styledTheme } from '@pluralsh/design-system'
 
 import { Provider } from 'generated/graphql-plural'
+import { ComponentProps } from 'react'
 
 import { ClusterDistro } from '../../generated/graphql'
 
@@ -86,7 +87,7 @@ function getDistroIconUrl(distro: ClusterDistro) {
 }
 
 export function getProviderIconUrl(
-  provider: string,
+  provider: Nullable<string>,
   mode: typeof styledTheme.mode
 ) {
   return (
@@ -102,7 +103,7 @@ export function getProviderIconUrl(
         KUBERNETES: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
         LINODE: mode === 'light' ? LINODE_ICON_LIGHT : LINODE_ICON_DARK,
       } as const satisfies Record<Provider, string>
-    )[provider?.toUpperCase()] ??
+    )[provider?.toUpperCase() ?? ''] ??
     (mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK)
   )
 }
@@ -134,11 +135,17 @@ export function ClusterProviderIcon({
 export default function ProviderIcon({
   provider,
   width,
+  size,
 }: {
-  provider: string
-  width: number
+  provider: Nullable<string>
+  width?: number
+  size?: number
 }) {
   const theme = useTheme()
+
+  if (size) {
+    width = size
+  }
 
   return (
     <div css={{ display: 'flex', justifyContent: 'center', width }}>
@@ -148,5 +155,23 @@ export default function ProviderIcon({
         width={width}
       />
     </div>
+  )
+}
+
+export function ProviderIconFrame({
+  provider,
+  ...props
+}: {
+  provider: Nullable<string>
+} & Omit<ComponentProps<typeof IconFrame>, 'icon'>) {
+  const providerName = getProviderName(provider) || provider
+
+  return (
+    <IconFrame
+      textValue={providerName}
+      tooltip={providerName}
+      icon={<ProviderIcon provider={provider} />}
+      {...props}
+    />
   )
 }
