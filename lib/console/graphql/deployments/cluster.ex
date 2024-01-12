@@ -475,9 +475,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "a relay connection of all clusters visible to the current user"
     connection field :clusters, node_type: :cluster do
       middleware Authenticated
-      arg :q,      :string
-      arg :health, :boolean
-      arg :tag,    :tag_input
+      arg :q,       :string
+      arg :healthy, :boolean
+      arg :tag,     :tag_input
 
       resolve &Deployments.list_clusters/2
     end

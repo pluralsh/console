@@ -3,17 +3,29 @@ defmodule Console.Deployments.Git do
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Deployments.Settings
-  alias Console.Schema.{GitRepository, User, DeploymentSettings}
+  alias Console.Schema.{GitRepository, User, DeploymentSettings, ScmConnection, ScmWebhook, PrAutomation}
 
   @type repository_resp :: {:ok, GitRepository.t} | Console.error
+  @type connection_resp :: {:ok, ScmConnection.t} | Console.error
+  @type webhook_resp :: {:ok, ScmWebhook.t} | Console.error
+  @type automation_resp :: {:ok, PrAutomation.t} | Console.error
 
-  def get_repository(id), do: Console.Repo.get(GitRepository, id)
+  def get_repository(id), do: Repo.get(GitRepository, id)
 
-  def get_repository!(id), do: Console.Repo.get!(GitRepository, id)
+  def get_repository!(id), do: Repo.get!(GitRepository, id)
 
-  def get_by_url!(url), do: Console.Repo.get_by!(GitRepository, url: url)
+  def get_by_url!(url), do: Repo.get_by!(GitRepository, url: url)
 
-  def get_by_url(url), do: Console.Repo.get_by(GitRepository, url: url)
+  def get_by_url(url), do: Repo.get_by(GitRepository, url: url)
+
+  def get_scm_connection(id), do: Repo.get(ScmConnection, id)
+  def get_scm_connection!(id), do: Repo.get!(ScmConnection, id)
+
+  def get_scm_webhook(id), do: Repo.get(ScmWebhook, id)
+  def get_scm_webhook!(id), do: Repo.get!(ScmWebhook, id)
+
+  def get_pr_automation(id), do: Repo.get(PrAutomation, id)
+  def get_pr_automation!(id), do: Repo.get!(PrAutomation, id)
 
   def deploy_url(), do: "https://github.com/pluralsh/deployment-operator.git"
 
@@ -71,6 +83,102 @@ defmodule Console.Deployments.Git do
       # foreign key constraint violated
       _ -> {:error, "could not delete repository"}
     end
+  end
+
+  @doc """
+
+  """
+  @spec create_scm_connection(map, User.t) :: connection_resp
+  def create_scm_connection(attrs, %User{} = user) do
+    %ScmConnection{}
+    |> ScmConnection.changeset(attrs)
+    |> allow(user, :edit)
+    |> when_ok(:insert)
+  end
+
+  @doc """
+
+  """
+  @spec update_scm_connection(map, binary, User.t) :: connection_resp
+  def update_scm_connection(attrs, id, %User{} = user) do
+    get_scm_connection!(id)
+    |> ScmConnection.changeset(attrs)
+    |> allow(user, :edit)
+    |> when_ok(:update)
+  end
+
+  @doc """
+
+  """
+  @spec delete_scm_connection(binary, User.t) :: connection_resp
+  def delete_scm_connection(id, %User{} = user) do
+    get_scm_connection!(id)
+    |> allow(user, :edit)
+    |> when_ok(:delete)
+  end
+
+  @doc """
+
+  """
+  @spec create_scm_webhook(map, User.t) :: webhook_resp
+  def create_scm_webhook(attrs, %User{} = user) do
+    %ScmWebhook{}
+    |> ScmWebhook.changeset(attrs)
+    |> allow(user, :edit)
+    |> when_ok(:insert)
+  end
+
+  @doc """
+
+  """
+  @spec update_scm_webhook(map, binary, User.t) :: webhook_resp
+  def update_scm_webhook(attrs, id, %User{} = user) do
+    get_scm_webhook!(id)
+    |> ScmWebhook.changeset(attrs)
+    |> allow(user, :edit)
+    |> when_ok(:update)
+  end
+
+  @doc """
+
+  """
+  @spec delete_scm_webhook(binary, User.t) :: webhook_resp
+  def delete_scm_webhook(id, %User{} = user) do
+    get_scm_webhook!(id)
+    |> allow(user, :edit)
+    |> when_ok(:delete)
+  end
+
+  @doc """
+
+  """
+  @spec create_pr_automation(map, User.t) :: automation_resp
+  def create_pr_automation(attrs, %User{} = user) do
+    %PrAutomation{}
+    |> PrAutomation.changeset(attrs)
+    |> allow(user, :edit)
+    |> when_ok(:insert)
+  end
+
+  @doc """
+
+  """
+  @spec update_pr_automation(map, binary, User.t) :: automation_resp
+  def update_pr_automation(attrs, id, %User{} = user) do
+    get_pr_automation!(id)
+    |> PrAutomation.changeset(attrs)
+    |> allow(user, :edit)
+    |> when_ok(:update)
+  end
+
+  @doc """
+
+  """
+  @spec delete_pr_automation(binary, User.t) :: automation_resp
+  def delete_pr_automation(id, %User{} = user) do
+    get_pr_automation!(id)
+    |> allow(user, :edit)
+    |> when_ok(:delete)
   end
 
   @doc """

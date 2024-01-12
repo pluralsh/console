@@ -173,7 +173,7 @@ type RootQueryType {
   tokenExchange(token: String!): User
 
   "a relay connection of all clusters visible to the current user"
-  clusters(after: String, first: Int, before: String, last: Int, q: String, health: Boolean, tag: TagInput): ClusterConnection
+  clusters(after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput): ClusterConnection
 
   "gets summary information for all healthy\/unhealthy clusters in your fleet"
   clusterStatuses(q: String, tag: TagInput): [ClusterStatusInfo]
@@ -941,6 +941,7 @@ input ServiceDeploymentAttributes {
   syncConfig: SyncConfigAttributes
   protect: Boolean
   repositoryId: ID
+  dryRun: Boolean
   git: GitRefAttributes
   helm: HelmConfigAttributes
   kustomize: KustomizeAttributes
@@ -999,6 +1000,15 @@ input ComponentAttributes {
   kind: String!
   namespace: String!
   name: String!
+  content: ComponentContentAttributes
+}
+
+"the content of a component when visualized in dry run state"
+input ComponentContentAttributes {
+  "the desired state of a service component as determined from the configured manifests"
+  desired: String
+
+  live: String
 }
 
 input ServiceErrorAttributes {
@@ -1043,6 +1053,9 @@ type ServiceDeployment {
   "semver of this service"
   version: String!
 
+  "the desired sync interval for this service"
+  interval: String
+
   "description on where in git the service's manifests should be fetched"
   git: GitRef
 
@@ -1075,6 +1088,9 @@ type ServiceDeployment {
 
   "the time this service was scheduled for deletion"
   deletedAt: DateTime
+
+  "whether this service should not actively reconcile state and instead simply report pending changes"
+  dryRun: Boolean
 
   "fetches the \/docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries"
   docs: [GitFile]
@@ -1215,11 +1231,28 @@ type ServiceComponent {
   "kubernetes name of this resource"
   name: String!
 
+  "the live and desired states of this service component"
+  content: ComponentContent
+
   "the service this component belongs to"
   service: ServiceDeployment
 
   "any api deprecations discovered from this component"
   apiDeprecations: [ApiDeprecation]
+}
+
+"dry run content of a service component"
+type ComponentContent {
+  id: ID!
+
+  live: String
+
+  "the inferred desired state of this component"
+  desired: String
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 "a representation of a kubernetes api deprecation"
