@@ -104,7 +104,9 @@ export default function ClusterAddOnCompatibility() {
       })
     })
 
-    return [...kubeVs].sort((a, b) => compare(coerce(a) || '', coerce(b) || ''))
+    return [...kubeVs].sort(
+      (a, b) => -compare(coerce(a) || '', coerce(b) || '')
+    )
   }, [rts.addon?.versions])
 
   const columns = useMemo(
