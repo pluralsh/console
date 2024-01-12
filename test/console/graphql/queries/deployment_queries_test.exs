@@ -425,6 +425,47 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
     end
   end
 
+  describe "runtimeService" do
+    test "it can fetch an individual runtime service by id" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}], current_version: "1.25")
+      runtime = insert(:runtime_service, cluster: cluster, name: "ingress-nginx", version: "1.5.1")
+
+      {:ok, %{data: %{"runtimeService" => rs}}} = run_query("""
+        query Runtime($id: ID!) {
+          runtimeService(id: $id) {
+            id
+            addon {
+              versions { version kube }
+              readme
+            }
+          }
+        }
+      """, %{"id" => runtime.id}, %{current_user: user})
+
+      assert rs["id"] == runtime.id
+      assert rs["addon"]["readme"]
+    end
+
+    test "users w/o cluster read cannot fetch a runtime service by id" do
+      user = insert(:user)
+      cluster = insert(:cluster, current_version: "1.25")
+      runtime = insert(:runtime_service, cluster: cluster, name: "ingress-nginx", version: "1.5.1")
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Runtime($id: ID!) {
+          runtimeService(id: $id) {
+            id
+            addon {
+              versions { version kube }
+              readme
+            }
+          }
+        }
+      """, %{"id" => runtime.id}, %{current_user: user})
+    end
+  end
+
   describe "serviceDeployment" do
     test "it can fetch a services configuration and revisions" do
       user = admin_user()

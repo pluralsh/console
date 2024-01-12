@@ -205,6 +205,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> allow(user, :read)
   end
 
+  def resolve_runtime_service(%{id: id}, %{context: %{current_user: user}}) do
+    Clusters.get_runtime_service(id)
+    |> allow(user, :read)
+  end
+
   def resolve_cluster_status(cluster, _, _) do
     case Clusters.cluster_crd(cluster) do
       {:ok, %{status: status}} -> {:ok, status}

@@ -193,6 +193,9 @@ type RootQueryType {
   "list all addons currently resident in the artifacts repo"
   clusterAddOns: [ClusterAddOn]
 
+  "fetch an individual runtime service for more thorough detail views"
+  runtimeService(id: ID!): RuntimeService
+
   serviceDeployments(
     after: String
 
@@ -959,12 +962,21 @@ input HelmConfigAttributes {
   valuesFiles: [String]
   chart: String
   version: String
+  set: HelmValueAttributes
   repository: NamespacedName
 }
 
 input MetadataAttributes {
   labels: Json
   annotations: Json
+}
+
+input HelmValueAttributes {
+  "helm value name, can be deeply nested via dot like `image.tag`"
+  name: String
+
+  "value of the attribute"
+  value: String
 }
 
 input ServiceUpdateAttributes {
@@ -1190,12 +1202,21 @@ type HelmSpec {
   "the chart version in use currently"
   version: String
 
+  "a list of helm name\/value pairs to precisely set individual values"
+  set: [HelmValue]
+
   "a list of relative paths to values files to use for helm applies"
   valuesFiles: [String]
 }
 
 "a configuration item k\/v pair"
 type ServiceConfiguration {
+  name: String!
+  value: String!
+}
+
+"a (possibly nested) helm value pair"
+type HelmValue {
   name: String!
   value: String!
 }
@@ -1855,6 +1876,15 @@ type RuntimeAddon {
   "an icon to identify this runtime add-on"
   icon: String
 
+  "the url to the add-ons git repository"
+  gitUrl: String
+
+  "the add-on's readme, this is a heavy operation that should not be performed w\/in lists"
+  readme: String
+
+  "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
+  releaseUrl(version: String!): String
+
   versions: [AddonVersion]
 }
 
@@ -1871,6 +1901,9 @@ type AddonVersion {
 
   "any add-ons this might break"
   incompatibilities: [VersionReference]
+
+  "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
+  releaseUrl(version: String!): String
 
   "checks if this is blocking a specific kubernetes upgrade"
   blocking(kubeVersion: String!): Boolean

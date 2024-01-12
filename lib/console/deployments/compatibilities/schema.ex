@@ -40,7 +40,7 @@ defmodule Console.Deployments.Compatibilities.AddOn do
 
   @type t :: %__MODULE__{versions: [%Compatibilities.Version{}]}
 
-  defstruct [:versions, :icon]
+  defstruct [:versions, :icon, :git_url, :release_url, :readme_url]
 
   def spec() do
     %__MODULE__{

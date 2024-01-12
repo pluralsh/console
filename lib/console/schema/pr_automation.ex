@@ -44,6 +44,6 @@ defmodule Console.Schema.PrAutomation do
   end
 
   def spec_changeset(model, attrs \\ %{}) do
-    cast(model, attrs, ~w(regexes files yq)a)
+    cast(model, attrs, ~w(regexes files yq replace_template match_strategy)a)
   end
 end
