@@ -135,6 +135,8 @@ export type AddonVersion = {
   incompatibilities?: Maybe<Array<Maybe<VersionReference>>>;
   /** kubernetes versions this add-on works with */
   kube?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the release page for a runtime service at a version, this is a heavy operation not suitable for lists */
+  releaseUrl?: Maybe<Scalars['String']['output']>;
   /** any other add-ons this might require */
   requirements?: Maybe<Array<Maybe<VersionReference>>>;
   /** add-on version, semver formatted */
@@ -145,6 +147,12 @@ export type AddonVersion = {
 /** the specification of a runtime service at a specific version */
 export type AddonVersionBlockingArgs = {
   kubeVersion: Scalars['String']['input'];
+};
+
+
+/** the specification of a runtime service at a specific version */
+export type AddonVersionReleaseUrlArgs = {
+  version: Scalars['String']['input'];
 };
 
 /** a representation of a bulk operation to be performed on all agent services */
@@ -1497,6 +1505,7 @@ export type HelmChartVersion = {
 export type HelmConfigAttributes = {
   chart?: InputMaybe<Scalars['String']['input']>;
   repository?: InputMaybe<NamespacedName>;
+  set?: InputMaybe<HelmValueAttributes>;
   values?: InputMaybe<Scalars['String']['input']>;
   valuesFiles?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   version?: InputMaybe<Scalars['String']['input']>;
@@ -1534,12 +1543,28 @@ export type HelmSpec = {
   chart?: Maybe<Scalars['String']['output']>;
   /** pointer to the flux helm repository resource used for this chart */
   repository?: Maybe<ObjectReference>;
+  /** a list of helm name/value pairs to precisely set individual values */
+  set?: Maybe<Array<Maybe<HelmValue>>>;
   /** a helm values file to use with this service, requires auth and so is heavy to query */
   values?: Maybe<Scalars['String']['output']>;
   /** a list of relative paths to values files to use for helm applies */
   valuesFiles?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the chart version in use currently */
   version?: Maybe<Scalars['String']['output']>;
+};
+
+/** a (possibly nested) helm value pair */
+export type HelmValue = {
+  __typename?: 'HelmValue';
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type HelmValueAttributes = {
+  /** helm value name, can be deeply nested via dot like `image.tag` */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** value of the attribute */
+  value?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** the details of how to connect to a http service like prometheus */
@@ -3200,6 +3225,8 @@ export type RootQueryType = {
   roles?: Maybe<RoleConnection>;
   runbook?: Maybe<Runbook>;
   runbooks?: Maybe<Array<Maybe<Runbook>>>;
+  /** fetch an individual runtime service for more thorough detail views */
+  runtimeService?: Maybe<RuntimeService>;
   scalingRecommendation?: Maybe<VerticalPodAutoscaler>;
   secret?: Maybe<Secret>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
@@ -3623,6 +3650,11 @@ export type RootQueryTypeRunbooksArgs = {
 };
 
 
+export type RootQueryTypeRuntimeServiceArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootQueryTypeScalingRecommendationArgs = {
   kind: AutoscalingTarget;
   name: Scalars['String']['input'];
@@ -3883,9 +3915,21 @@ export type RunningState = {
 /** a full specification of a kubernetes runtime component's requirements */
 export type RuntimeAddon = {
   __typename?: 'RuntimeAddon';
+  /** the url to the add-ons git repository */
+  gitUrl?: Maybe<Scalars['String']['output']>;
   /** an icon to identify this runtime add-on */
   icon?: Maybe<Scalars['String']['output']>;
+  /** the add-on's readme, this is a heavy operation that should not be performed w/in lists */
+  readme?: Maybe<Scalars['String']['output']>;
+  /** the release page for a runtime service at a version, this is a heavy operation not suitable for lists */
+  releaseUrl?: Maybe<Scalars['String']['output']>;
   versions?: Maybe<Array<Maybe<AddonVersion>>>;
+};
+
+
+/** a full specification of a kubernetes runtime component's requirements */
+export type RuntimeAddonReleaseUrlArgs = {
+  version: Scalars['String']['input'];
 };
 
 /** a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api */

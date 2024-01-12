@@ -44,6 +44,11 @@ defmodule Console.Schema.Service do
       field :version,      :string
       field :values_files, {:array, :string}
 
+      embeds_many :set, HelmValue, on_replace: :delete do
+        field :name, :string
+        field :value, Piazza.Ecto.EncryptedString
+      end
+
       embeds_one :repository, Console.Schema.NamespacedName
     end
 
@@ -51,12 +56,19 @@ defmodule Console.Schema.Service do
       model
       |> cast(attrs, ~w(values chart version values_files)a)
       |> cast_embed(:repository)
+      |> cast_embed(:set)
       |> validate_change(:values_files, fn :values_files, files ->
         case Enum.member?(files, "values.yaml") do
           true -> [values_files: "explicitly wiring in values.yaml can corrupt helm charts, try a different filename"]
           _ -> []
         end
       end)
+    end
+
+    def set_changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(name value)a)
+      |> validate_required(~w(name value)a)
     end
   end
 

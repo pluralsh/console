@@ -1,4 +1,6 @@
 icon: https://raw.githubusercontent.com/pluralsh/plural-artifacts/main/istio/plural/icons/istio.png?raw=true
+git_url: https://github.com/istio/istio
+release_url: https://github.com/istio/istio/releases/tag/{vsn}
 versions:
 - version: 1.20.0
   kube: ['1.28', '1.27', '1.26', '1.25']

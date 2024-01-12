@@ -12,7 +12,8 @@ defmodule Console.Deployments.Policies.Rbac do
     ProviderCredential,
     Pipeline,
     PipelineGate,
-    AgentMigration
+    AgentMigration,
+    RuntimeService
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -40,6 +41,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(pipe, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%Service{} = svc, %User{} = user, action),
     do: recurse(svc, user, action, & &1.cluster)
+  def evaluate(%RuntimeService{} = svc, %User{} = user, action),
+    do: recurse(svc, user, action, & &1.cluster)
   def evaluate(%AgentMigration{}, %User{} = user, action),
     do: recurse(Settings.fetch(), user, action)
   def evaluate(%Cluster{} = cluster, %User{} = user, action),
@@ -62,6 +65,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(service, [:read_bindings, :write_bindings, cluster: [:read_bindings, :write_bindings]])
   def preload(%Cluster{} = cluster),
     do: Repo.preload(cluster, [:read_bindings, :write_bindings])
+  def preload(%RuntimeService{} = cluster),
+    do: Repo.preload(cluster, [cluster: [:read_bindings, :write_bindings]])
   def preload(%ClusterProvider{} = cluster),
     do: Repo.preload(cluster, [:read_bindings, :write_bindings])
   def preload(%ProviderCredential{} = cred),

@@ -33,12 +33,18 @@ defmodule Console.GraphQl.Deployments.Service do
     field :values_files, list_of(:string)
     field :chart,        :string
     field :version,      :string
+    field :set,          :helm_value_attributes
     field :repository,   :namespaced_name
   end
 
   input_object :metadata_attributes do
     field :labels,      :json
     field :annotations, :json
+  end
+
+  input_object :helm_value_attributes do
+    field :name,  :string, description: "helm value name, can be deeply nested via dot like `image.tag`"
+    field :value, :string, description: "value of the attribute"
   end
 
   input_object :service_update_attributes do
@@ -181,15 +187,23 @@ defmodule Console.GraphQl.Deployments.Service do
 
   object :helm_spec do
     field :chart,        :string, description: "the name of the chart this service is using"
-    field :values,       :string, description: "a helm values file to use with this service, requires auth and so is heavy to query",
+    field :values,       :string,
+      description: "a helm values file to use with this service, requires auth and so is heavy to query",
       resolve: &Deployments.helm_values/3
     field :repository,   :object_reference, description: "pointer to the flux helm repository resource used for this chart"
     field :version,      :string, description: "the chart version in use currently"
+    field :set,          list_of(:helm_value), description: "a list of helm name/value pairs to precisely set individual values"
     field :values_files, list_of(:string), description: "a list of relative paths to values files to use for helm applies"
   end
 
   @desc "a configuration item k/v pair"
   object :service_configuration do
+    field :name,  non_null(:string)
+    field :value, non_null(:string)
+  end
+
+  @desc "a (possibly nested) helm value pair"
+  object :helm_value do
     field :name,  non_null(:string)
     field :value, non_null(:string)
   end

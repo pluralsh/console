@@ -1,6 +1,6 @@
 defmodule Console.Schema.ServiceComponent do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, ApiDeprecation, Content}
+  alias Console.Schema.{Service, ApiDeprecation, ComponentContent}
 
   defenum State, running: 0, pending: 1, failed: 2, paused: 3
 
