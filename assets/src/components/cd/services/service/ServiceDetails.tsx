@@ -84,6 +84,7 @@ export const getDirectory = ({
     return []
   }
   const { name, componentStatus, helm } = serviceDeployment
+  const dryRun = true // TODO: Get that from service deployment.
 
   return [
     {
@@ -94,6 +95,7 @@ export const getDirectory = ({
     { path: 'settings', label: 'Settings', enabled: true },
     { path: 'secrets', label: 'Secrets', enabled: true },
     { path: 'helm', label: 'Helm values', enabled: !!helm },
+    { path: 'dryrun', label: 'Dry run', enabled: dryRun },
     { path: 'revisions', label: 'Revisions', enabled: true },
     {
       path: 'docs',
