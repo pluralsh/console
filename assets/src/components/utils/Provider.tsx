@@ -19,6 +19,11 @@ export const AWS_ICON_DARK = '/providers/aws-icon-dark.png'
 export const AWS_ICON_LIGHT = '/providers/aws-icon-light.png'
 export const LINODE_ICON_DARK = '/providers/linode-icon.png'
 export const LINODE_ICON_LIGHT = '/providers/linode-icon.png'
+export const AKS_ICON = '/providers/aks-icon.png'
+export const EKS_ICON = '/providers/eks-icon.png'
+export const GKE_ICON = '/providers/gke-icon.png'
+export const K3S_ICON = '/providers/k3s-icon.png'
+export const RKE_ICON = '/providers/rke-icon.png'
 
 const ProviderNames = {
   aws: 'AWS',
@@ -53,6 +58,31 @@ export function getDistributionName(distro?: ClusterDistro | null) {
   return d && DistributionNames[d]
     ? DistributionNames[d]
     : DistributionNames.generic
+}
+
+export function getClusterIconUrl(
+  distro: ClusterDistro | null | undefined,
+  provider: string | null | undefined,
+  mode: typeof styledTheme.mode
+) {
+  const distroIconUrl = distro ? getDistroIconUrl(distro) : null
+
+  return distroIconUrl ?? getProviderIconUrl(provider ?? '', mode)
+}
+
+function getDistroIconUrl(distro: ClusterDistro) {
+  return (
+    (
+      {
+        AKS: AKS_ICON,
+        EKS: EKS_ICON,
+        GKE: GKE_ICON,
+        K3S: K3S_ICON,
+        RKE: RKE_ICON,
+        GENERIC: null,
+      } as const satisfies Record<ClusterDistro, string | null>
+    )[distro?.toUpperCase()] ?? null
+  )
 }
 
 export function getProviderIconUrl(

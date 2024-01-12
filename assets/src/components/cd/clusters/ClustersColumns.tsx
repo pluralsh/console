@@ -29,8 +29,8 @@ import {
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import {
+  getClusterIconUrl,
   getDistributionName,
-  getProviderIconUrl,
   getProviderName,
 } from 'components/utils/Provider'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -91,23 +91,27 @@ const ColCluster = columnHelper.accessor(({ node }) => node, {
   },
 })
 
-const ColCloud = columnHelper.accessor(({ node }) => node?.provider, {
+const ColCloud = columnHelper.accessor(({ node }) => node, {
   id: 'cloud',
   header: 'Cloud',
   cell: function Cell({
-    getValue,
     row: {
       original: { node },
     },
   }) {
-    const provider = getValue()
     const theme = useTheme()
 
     return (
-      <ColWithIcon icon={getProviderIconUrl(provider?.cloud ?? '', theme.mode)}>
+      <ColWithIcon
+        icon={getClusterIconUrl(
+          node?.distro,
+          node?.provider?.cloud ?? '',
+          theme.mode
+        )}
+      >
         <StackedText
           first={getDistributionName(node?.distro)}
-          second={getProviderName(provider?.cloud)}
+          second={getProviderName(node?.provider?.cloud)}
         />
       </ColWithIcon>
     )
