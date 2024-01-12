@@ -214,8 +214,6 @@ export default function Clusters() {
             setStatusFilter={setStatusFilter}
             searchString={searchString}
             setSearchString={setSearchString}
-            // clusterId={clusterId}
-            // setClusterId={clusterIdProp ? undefined : setClusterId}
             tabStateRef={tabStateRef}
             statusCounts={statusCounts}
           />
