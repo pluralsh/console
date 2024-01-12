@@ -1,11 +1,11 @@
-import { useTheme } from 'styled-components'
+import { ComponentProps } from 'react'
 import { IconFrame, type styledTheme } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
 
 import { ClusterDistro } from 'generated/graphql'
 import { Provider } from 'generated/graphql-plural'
-import { ComponentProps } from 'react'
 
-import { getDistroProviderIconUrl } from './ClusterDistro'
+import { DistroProviderIcon, getDistroProviderIconUrl } from './ClusterDistro'
 
 export const CHART_ICON_DARK = '/providers/chart-icon.png'
 export const CHART_ICON_LIGHT = '/providers/chart-icon.png'
@@ -55,6 +55,24 @@ export function getClusterIconUrl({
     provider: cluster?.provider?.cloud,
     mode,
   })
+}
+
+export function ClusterProviderIcon({
+  cluster,
+  ...props
+}: {
+  cluster: Nullable<{
+    distro?: Nullable<ClusterDistro>
+    provider?: Nullable<{ cloud?: Nullable<string> }>
+  }>
+} & Omit<ComponentProps<typeof DistroProviderIcon>, 'distro' | 'provider'>) {
+  return (
+    <DistroProviderIcon
+      distro={cluster?.distro}
+      provider={cluster?.provider?.cloud}
+      {...props}
+    />
+  )
 }
 
 export function getProviderIconUrl(

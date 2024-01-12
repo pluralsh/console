@@ -106,8 +106,10 @@ const ColProvider = columnHelper.accessor(
         <ColClusterSC>
           <DistroProviderIconFrame
             distro={node?.distro}
+            provider={node?.provider?.cloud}
+            tooltip
             size="medium"
-            type="tertiary"
+            type="secondary"
           />
           <StackedText
             first={getClusterDistroName(node?.distro, 'short')}

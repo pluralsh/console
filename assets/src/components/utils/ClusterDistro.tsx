@@ -76,10 +76,13 @@ export function getDistroProviderIconUrl({
   provider: Nullable<string>
   mode: typeof styledTheme.mode
 }) {
-  return ClusterProviderIcons[distro?.toUpperCase() ?? '']?.[mode] || provider
-    ? getProviderIconUrl(provider, mode)
-    : ClusterProviderIcons[ClusterDistro.Generic]?.[mode] ||
-        ClusterProviderIcons[ClusterDistro.Generic]?.dark
+  return (
+    ClusterProviderIcons[distro?.toUpperCase() ?? '']?.[mode] ||
+    (provider
+      ? getProviderIconUrl(provider, mode)
+      : ClusterProviderIcons[ClusterDistro.Generic]?.[mode] ||
+        ClusterProviderIcons[ClusterDistro.Generic]?.dark)
+  )
 }
 
 export function useDistroProviderIconUrl({
@@ -119,15 +122,23 @@ export function DistroProviderIcon({
 export function DistroProviderIconFrame({
   distro,
   provider,
+  tooltip,
   ...props
 }: {
   distro: Nullable<ClusterDistro>
   provider?: Nullable<string>
+  tooltip?: boolean | ComponentProps<typeof IconFrame>['tooltip']
 } & Omit<ComponentProps<typeof IconFrame>, 'icon'>) {
   return (
     <IconFrame
       textValue={getClusterDistroName(distro, 'long')}
-      tooltip={getClusterDistroName(distro, 'short')}
+      tooltip={
+        typeof tooltip === 'boolean'
+          ? tooltip
+            ? getClusterDistroName(distro, 'short')
+            : undefined
+          : tooltip
+      }
       icon={
         <DistroProviderIcon
           distro={distro}
