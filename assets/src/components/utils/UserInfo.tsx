@@ -1,14 +1,11 @@
 import { AppIcon } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { ComponentProps } from 'react'
 
 export default function UserInfo({
   user: { email, name, avatar },
-  hue = 'lighter',
   className,
 }: {
   user: { email: string; name: string; avatar: string }
-  hue?: ComponentProps<typeof AppIcon>['hue']
   className?: string
 }) {
   const theme = useTheme()
@@ -27,7 +24,6 @@ export default function UserInfo({
         name={name}
         spacing={avatar ? 'none' : undefined}
         size="xsmall"
-        hue={hue}
       />
       <div css={{ display: 'flex', flexDirection: 'column' }}>
         <span css={{ fontWeight: 'bold' }}>{name}</span>
