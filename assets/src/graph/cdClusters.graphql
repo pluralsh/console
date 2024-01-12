@@ -238,6 +238,7 @@ query Clusters(
   clusterStatuses {
     ...ClusterStatusInfo
   }
+  tags
 }
 
 fragment ClusterTiny on Cluster {
