@@ -144,6 +144,7 @@ fragment ClustersRow on Cluster {
     name
     value
   }
+  distro
 }
 
 fragment Cluster on Cluster {
@@ -215,6 +216,7 @@ fragment ClusterTiny on Cluster {
   provider {
     cloud
   }
+  distro
 }
 
 query ClustersTiny {

@@ -19,7 +19,10 @@ import { shortenSha1 } from 'utils/sha'
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { getProviderIconUrl } from 'components/utils/Provider'
+import {
+  getClusterIconUrl,
+  getProviderIconUrl,
+} from 'components/utils/Provider'
 import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { ProtectBadge } from '../clusters/ProtectBadge'
@@ -74,7 +77,13 @@ export const ColCluster = columnHelper.accessor(
       const clusterName = getValue()
 
       return (
-        <ColWithIcon icon={getProviderIconUrl(cloud, theme.mode)}>
+        <ColWithIcon
+          icon={getClusterIconUrl(
+            original?.node?.cluster?.distro,
+            cloud,
+            theme.mode
+          )}
+        >
           {clusterName}
         </ColWithIcon>
       )
