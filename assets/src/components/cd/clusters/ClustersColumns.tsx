@@ -107,7 +107,6 @@ const ColProvider = columnHelper.accessor(
           <DistroProviderIconFrame
             distro={node?.distro}
             provider={node?.provider?.cloud}
-            tooltip
             size="medium"
             type="secondary"
           />
