@@ -19,8 +19,10 @@ import {
   CD_ABS_PATH,
   CLUSTERS_REL_PATH,
   CLUSTER_ABS_PATH,
+  CLUSTER_ADDONS_REL_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
+  CLUSTER_PARAM_ID,
   CLUSTER_PODS_PATH,
   CLUSTER_SERVICES_PATH,
 } from 'routes/cdRoutesConsts'
@@ -40,6 +42,7 @@ const directory = [
   { path: CLUSTER_NODES_PATH, label: 'Nodes' },
   { path: CLUSTER_PODS_PATH, label: 'Pods' },
   { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
+  { path: CLUSTER_ADDONS_REL_PATH, label: 'Add-ons' },
 ] as const
 
 const POLL_INTERVAL = 10 * 1000
@@ -106,7 +109,7 @@ export default function Cluster() {
 
   return (
     <ResponsivePageFullWidth
-      scrollable={tab !== 'services' && tab !== 'pods'}
+      scrollable={tab !== 'services' && tab !== 'pods' && tab !== 'addons'}
       headingContent={
         <>
           <div css={{ width: 360 }}>
@@ -134,7 +137,7 @@ export default function Cluster() {
                 key={path}
                 textValue={label}
                 to={`${CLUSTER_ABS_PATH}/${path}`.replace(
-                  ':clusterId',
+                  `:${CLUSTER_PARAM_ID}`,
                   clusterId ?? ''
                 )}
               >

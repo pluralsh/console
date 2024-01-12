@@ -13,8 +13,8 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import {
   AppIcon,
   InstallIcon,
-  Prop,
-  PropsContainer,
+  Sidecar,
+  SidecarItem,
   Tab,
   TabList,
   TabPanel,
@@ -204,46 +204,54 @@ export default function Build() {
           direction="column"
           paddingTop="xsmall"
         >
-          <PropsContainer>
-            <Prop title="Status">
+          <Sidecar>
+            <SidecarItem heading="Status">
               <BuildTimer
                 insertedAt={build.insertedAt}
                 completedAt={build.completedAt}
                 status={build.status}
               />
-            </Prop>
-            <Prop title="App">{build.repository}</Prop>
-            <Prop title="Build type">
+            </SidecarItem>
+            <SidecarItem heading="App">{build.repository}</SidecarItem>
+            <SidecarItem heading="Build type">
               {BUILD_TYPE_DISPLAY_NAMES[build.type] || build.type}
-            </Prop>
-            <Prop title="ID">{buildId}</Prop>
+            </SidecarItem>
+            <SidecarItem heading="ID">{buildId}</SidecarItem>
             {creator && (
-              <Prop
-                title="Creator"
-                display="flex"
-                gap="xsmall"
-              >
-                <AppIcon
-                  size="xxsmall"
-                  name={creator.name}
-                />
-                <Flex align="center">{creator.email}</Flex>
-              </Prop>
+              <SidecarItem heading="Creator">
+                <div
+                  css={{
+                    display: 'flex',
+                    gap: theme.spacing.xsmall,
+                    alignItems: 'center',
+                  }}
+                >
+                  <AppIcon
+                    size="xxsmall"
+                    name={creator.name}
+                  />
+                  {creator.email}
+                </div>
+              </SidecarItem>
             )}
             {approver && (
-              <Prop
-                title="Approver"
-                display="flex"
-                gap="xsmall"
-              >
-                <AppIcon
-                  size="xxsmall"
-                  name={approver.name}
-                />
-                <Flex align="center">{approver.email}</Flex>
-              </Prop>
+              <SidecarItem heading="Approver">
+                <div
+                  css={{
+                    display: 'flex',
+                    gap: theme.spacing.xsmall,
+                    alignItems: 'center',
+                  }}
+                >
+                  <AppIcon
+                    size="xxsmall"
+                    name={approver.name}
+                  />
+                  {approver.email}
+                </div>
+              </SidecarItem>
             )}
-          </PropsContainer>
+          </Sidecar>
         </Flex>
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />

@@ -81,6 +81,23 @@ fragment RuntimeService on RuntimeService {
       ...AddonVersion
     }
   }
+  service {
+    git {
+      ref
+      folder
+    }
+    repository {
+      httpsPath
+      urlFormat
+    }
+    helm {
+      version
+    }
+  }
+  addonVersion {
+    ...AddonVersionBlocking @include(if: $hasKubeVersion)
+    ...AddonVersion
+  }
 }
 
 fragment AddonVersion on AddonVersion {
@@ -94,6 +111,10 @@ fragment AddonVersion on AddonVersion {
     version
     name
   }
+}
+
+fragment AddonVersionBlocking on AddonVersion {
+  blocking(kubeVersion: $kubeVersion)
 }
 
 fragment ClustersRow on Cluster {
@@ -305,24 +326,18 @@ query ClusterBindings($id: ID!) {
   }
 }
 
-query RuntimeServices($id: ID!, $kubeVersion: String!) {
+query RuntimeServices(
+  $id: ID!
+  $kubeVersion: String!
+  $hasKubeVersion: Boolean!
+) {
   cluster(id: $id) {
+    id
+    name
+    currentVersion
+    version
     runtimeServices {
       ...RuntimeService
-      service {
-        git {
-          ref
-          folder
-        }
-        repository {
-          httpsPath
-          urlFormat
-        }
-      }
-      addonVersion {
-        blocking(kubeVersion: $kubeVersion)
-        ...AddonVersion
-      }
     }
   }
 }

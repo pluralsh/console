@@ -3,11 +3,11 @@ import {
   Chip,
   ChipList,
   IconFrame,
-  Prop,
+  SidecarItem,
   Tooltip,
   WrapWithIf,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import moment from 'moment/moment'
 import isEmpty from 'lodash/isEmpty'
 
@@ -28,6 +28,10 @@ import { ClusterProviderIcon } from '../../utils/Provider'
 
 import { useClusterContext } from './Cluster'
 import { NodePoolsSection } from './ClusterNodePools'
+
+const MetadataPropSC = styled(SidecarItem)((_) => ({
+  margin: 0,
+}))
 
 function MetadataCard({
   cluster,
@@ -61,22 +65,13 @@ function MetadataCard({
         <div
           css={{ display: 'flex', gap: theme.spacing.xlarge, flexWrap: 'wrap' }}
         >
-          <Prop
-            title="Cluster name"
-            margin={0}
-          >
+          <MetadataPropSC heading="Cluster name">
             {cluster?.name}
-          </Prop>
-          <Prop
-            title="Current K8s version"
-            margin={0}
-          >
+          </MetadataPropSC>
+          <MetadataPropSC heading="Current K8s version">
             {toNiceVersion(cluster?.currentVersion)}
-          </Prop>
-          <Prop
-            title="Cloud"
-            margin={0}
-          >
+          </MetadataPropSC>
+          <MetadataPropSC heading="Cloud">
             <IconFrame
               type="secondary"
               icon={
@@ -87,12 +82,9 @@ function MetadataCard({
                 />
               }
             />
-          </Prop>
+          </MetadataPropSC>
           {!cluster?.self && (
-            <Prop
-              title="Service"
-              margin={0}
-            >
+            <MetadataPropSC heading="Service">
               <InlineLink
                 as={Link}
                 to={getServiceDetailsPath({
@@ -102,12 +94,9 @@ function MetadataCard({
               >
                 {cluster?.service?.name}
               </InlineLink>
-            </Prop>
+            </MetadataPropSC>
           )}
-          <Prop
-            title="Warnings"
-            margin={0}
-          >
+          <MetadataPropSC heading="Warnings">
             {upgradeVersion || hasDeprecations ? (
               <ClusterUpgrade
                 cluster={cluster}
@@ -116,41 +105,29 @@ function MetadataCard({
             ) : (
               '-'
             )}
-          </Prop>
+          </MetadataPropSC>
           {status && (
             <>
-              <Prop
-                title="Conditions"
-                margin={0}
-              >
+              <MetadataPropSC heading="Conditions">
                 {!isEmpty(status?.conditions) ? (
                   <ClusterConditions cluster={cluster} />
                 ) : (
                   '-'
                 )}
-              </Prop>
-              <Prop
-                title="Control plane"
-                margin={0}
-              >
+              </MetadataPropSC>
+              <MetadataPropSC heading="Control plane">
                 <Chip
                   severity={status?.controlPlaneReady ? 'success' : 'warning'}
                 >
                   {status?.controlPlaneReady ? 'Ready' : 'Not ready'}
                 </Chip>
-              </Prop>
-              <Prop
-                title="Status"
-                margin={0}
-              >
+              </MetadataPropSC>
+              <MetadataPropSC heading="Status">
                 <ClusterStatusChip status={status} />
-              </Prop>
+              </MetadataPropSC>
             </>
           )}
-          <Prop
-            title="Last pinged"
-            margin={0}
-          >
+          <MetadataPropSC heading="Last pinged">
             {cluster?.pingedAt ? (
               <Tooltip
                 label={moment(cluster?.pingedAt).format('lll')}
@@ -161,7 +138,7 @@ function MetadataCard({
             ) : (
               '-'
             )}
-          </Prop>
+          </MetadataPropSC>
         </div>
       </section>
       {cluster?.tags && !isEmpty(cluster.tags) && (

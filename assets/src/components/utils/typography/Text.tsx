@@ -28,3 +28,6 @@ export const Title2H1 = styled.h1(({ theme }) => ({
   ...theme.partials.text.title2,
 }))
 export const A = styled.a``
+export const TabularNums = styled.span({
+  fontVariantNumeric: 'tabular-nums',
+})

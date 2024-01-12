@@ -1,4 +1,3 @@
-import { Flex } from 'honorable'
 import {
   AppIcon,
   ArrowTopRightIcon,
@@ -88,11 +87,14 @@ export default function AppCard({ app }: any) {
       onClick={() => navigate(`/apps/${name}`)}
     >
       <ListItemBorder color={borderColor} />
-      <Flex
-        align="center"
-        gap="small"
-        maxWidth="90%"
-        padding="small"
+      <div
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: theme.spacing.small,
+          maxWidth: '90%',
+          padding: theme.spacing.small,
+        }}
       >
         {hasIcons(app) && (
           <AppIcon
@@ -100,22 +102,35 @@ export default function AppCard({ app }: any) {
             size="xsmall"
           />
         )}
-        <Flex direction="column">
-          <Flex
-            align="center"
-            gap="small"
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <div
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: theme.spacing.small,
+            }}
           >
             <Body1BoldP as="h3">{name}</Body1BoldP>
             <AppStatus app={app} />
-          </Flex>
-          {version && <Flex>{toNiceVersion(version)}</Flex>}
-        </Flex>
-      </Flex>
-      <Flex grow={1} />
-      <Flex
-        align="center"
-        gap="16px"
-        padding="small"
+          </div>
+          {version && (
+            <div css={{ display: 'flex' }}>{toNiceVersion(version)}</div>
+          )}
+        </div>
+      </div>
+      <div css={{ flexGrow: 1 }} />
+      <div
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: theme.spacing.medium,
+          padding: theme.spacing.small,
+        }}
       >
         {validLinks?.length > 0 && (
           <Button
@@ -168,7 +183,7 @@ export default function AppCard({ app }: any) {
             />
           ))}
         </Select>
-      </Flex>
+      </div>
     </AppCardSC>
   )
 }

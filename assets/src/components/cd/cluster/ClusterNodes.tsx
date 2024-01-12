@@ -4,10 +4,11 @@ import { useMemo } from 'react'
 import { Card } from '@pluralsh/design-system'
 import sumBy from 'lodash/sumBy'
 import { useTheme } from 'styled-components'
+import isEmpty from 'lodash/isEmpty'
 
 import { useDeploymentSettings } from 'routes/cdRoutes'
+import { Cluster, Node } from 'generated/graphql'
 
-import { Cluster, Node } from '../../../generated/graphql'
 import {
   ColCpuTotal,
   ColCpuUsage,
@@ -86,15 +87,18 @@ export default function ClusterNodes() {
         gap: theme.spacing.medium,
       }}
     >
-      {(cluster?.self || settings?.prometheusConnection) && (
-        <Card padding="xlarge">
-          <ClusterMetrics
-            nodes={cluster?.nodes?.filter((node): node is Node => !!node) || []}
-            usage={usage}
-            cluster={cluster}
-          />
-        </Card>
-      )}
+      {!isEmpty(cluster.nodes) &&
+        (cluster?.self || settings?.prometheusConnection) && (
+          <Card padding="xlarge">
+            <ClusterMetrics
+              nodes={
+                cluster?.nodes?.filter((node): node is Node => !!node) || []
+              }
+              usage={usage}
+              cluster={cluster}
+            />
+          </Card>
+        )}
       <NodesList
         nodes={cluster?.nodes || []}
         nodeMetrics={cluster?.nodeMetrics || []}

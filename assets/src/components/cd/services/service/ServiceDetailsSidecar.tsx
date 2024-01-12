@@ -8,7 +8,7 @@ import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
 import { useMemo } from 'react'
-import { Chip, ErrorIcon, Prop, PropsContainer } from '@pluralsh/design-system'
+import { Chip, ErrorIcon, Sidecar, SidecarItem } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
 
@@ -49,12 +49,12 @@ export function ServiceDetailsSidecar({
             <ServicePromote id={id} />
           )}
       </div>
-      <PropsContainer>
-        {name && <Prop title="Service name"> {name}</Prop>}
-        <Prop title="Status">
+      <Sidecar>
+        {name && <SidecarItem heading="Service name"> {name}</SidecarItem>}
+        <SidecarItem heading="Status">
           <ServiceStatusChip status={status} />
-        </Prop>
-        <Prop title="Warnings">
+        </SidecarItem>
+        <SidecarItem heading="Warnings">
           {deprecationCount > 0 ? (
             <Chip
               icon={<ErrorIcon />}
@@ -65,40 +65,40 @@ export function ServiceDetailsSidecar({
           ) : (
             <Chip severity="success">None</Chip>
           )}
-        </Prop>
-        {helm && <Prop title="Helm Chart">{helm.chart}</Prop>}
+        </SidecarItem>
+        {helm && <SidecarItem heading="Helm Chart">{helm.chart}</SidecarItem>}
         {helm && (
-          <Prop
-            title="Chart Version"
+          <SidecarItem
+            heading="Chart Version"
             css={{
               wordBreak: 'break-word',
             }}
           >
             {helm.version}
-          </Prop>
+          </SidecarItem>
         )}
-        {git && <Prop title="Git folder">{git.folder}</Prop>}
+        {git && <SidecarItem heading="Git folder">{git.folder}</SidecarItem>}
         {git && (
-          <Prop
-            title="Git ref"
+          <SidecarItem
+            heading="Git ref"
             css={{
               wordBreak: 'break-word',
             }}
           >
             {git.ref}
-          </Prop>
+          </SidecarItem>
         )}
         {cluster?.name && (
-          <Prop title="Cluster name">
+          <SidecarItem heading="Cluster name">
             <InlineLink
               as={Link}
               to={`/${CD_REL_PATH}/${CLUSTERS_REL_PATH}/${cluster.id}`}
             >
               {cluster.name}
             </InlineLink>
-          </Prop>
+          </SidecarItem>
         )}
-      </PropsContainer>
+      </Sidecar>
     </>
   )
 }
