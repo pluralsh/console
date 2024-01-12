@@ -4661,7 +4661,7 @@ export type ClustersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
-  health?: InputMaybe<Scalars['Boolean']['input']>;
+  healthy?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -7132,8 +7132,8 @@ export type InstallAddOnMutationHookResult = ReturnType<typeof useInstallAddOnMu
 export type InstallAddOnMutationResult = Apollo.MutationResult<InstallAddOnMutation>;
 export type InstallAddOnMutationOptions = Apollo.BaseMutationOptions<InstallAddOnMutation, InstallAddOnMutationVariables>;
 export const ClustersDocument = gql`
-    query Clusters($first: Int = 100, $after: String, $q: String, $health: Boolean) {
-  clusters(first: $first, after: $after, q: $q, health: $health) {
+    query Clusters($first: Int = 100, $after: String, $q: String, $healthy: Boolean) {
+  clusters(first: $first, after: $after, q: $q, healthy: $healthy) {
     pageInfo {
       ...PageInfo
     }
@@ -7167,7 +7167,7 @@ ${ClusterStatusInfoFragmentDoc}`;
  *      first: // value for 'first'
  *      after: // value for 'after'
  *      q: // value for 'q'
- *      health: // value for 'health'
+ *      healthy: // value for 'healthy'
  *   },
  * });
  */

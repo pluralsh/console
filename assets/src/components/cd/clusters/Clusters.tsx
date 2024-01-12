@@ -106,7 +106,9 @@ export default function Clusters() {
     variables: {
       q: debouncedSearchString,
       first: CLUSTERS_QUERY_PAGE_SIZE,
-      ...(statusFilter !== 'ALL' ? { health: statusFilter === 'HEALTHY' } : {}),
+      ...(statusFilter !== 'ALL'
+        ? { healthy: statusFilter === 'HEALTHY' }
+        : {}),
     },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table

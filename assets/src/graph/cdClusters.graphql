@@ -223,9 +223,9 @@ query Clusters(
   $first: Int = 100
   $after: String
   $q: String
-  $health: Boolean
+  $healthy: Boolean
 ) {
-  clusters(first: $first, after: $after, q: $q, health: $health) {
+  clusters(first: $first, after: $after, q: $q, healthy: $healthy) {
     pageInfo {
       ...PageInfo
     }
