@@ -40,13 +40,10 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { UsageBar } from 'components/cluster/nodes/UsageBar'
 import { TableText, TabularNumbers } from 'components/cluster/TableElements'
 import { roundToTwoPlaces } from 'components/cluster/utils'
-
 import { ClusterDistroIconFrame } from 'components/utils/ClusterDistro'
 
 import { DeleteClusterModal } from '../providers/DeleteCluster'
-
 import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
-
 import { ClusterSettingsModal } from '../cluster/ClusterSettings'
 
 import ClusterUpgrade from './ClusterUpgrade'
@@ -291,19 +288,21 @@ enum MenuItemKey {
   Settings = 'Settings',
 }
 
-// const ColConditions = columnHelper.accessor(
-//   ({ node }) => node?.status?.conditions?.length ?? 0,
-//   {
-//     id: 'conditions',
-//     header: 'Conditions',
-//     cell: ({ row: { original } }) =>
-//       original?.node?.status?.conditions && (
-//         <div onClick={(e) => e.stopPropagation()}>
-//           <ClusterConditions cluster={original.node} />
-//         </div>
-//       ),
-//   }
-// )
+/*
+const ColConditions = columnHelper.accessor(
+  ({ node }) => node?.status?.conditions?.length ?? 0,
+  {
+    id: 'conditions',
+    header: 'Conditions',
+    cell: ({ row: { original } }) =>
+      original?.node?.status?.conditions && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <ClusterConditions cluster={original.node} />
+        </div>
+      ),
+  }
+)
+*/
 
 const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',

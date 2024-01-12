@@ -12,16 +12,16 @@ export const ClusterDistroIcons = {
     light: `${DISTRO_ICON_PATH}/aks.svg`,
   },
   [ClusterDistro.Eks]: {
-    dark: `${DISTRO_ICON_PATH}/eks.svg`,
-    light: `${DISTRO_ICON_PATH}/eks.svg`,
+    dark: `${DISTRO_ICON_PATH}/eks-dark.svg`,
+    light: `${DISTRO_ICON_PATH}/eks-light.svg`,
   },
   [ClusterDistro.Gke]: {
-    dark: `${DISTRO_ICON_PATH}/gke.svg`,
-    light: `${DISTRO_ICON_PATH}/gke.svg`,
+    dark: `${DISTRO_ICON_PATH}/gke-dark.svg`,
+    light: `${DISTRO_ICON_PATH}/gke-light.svg`,
   },
   [ClusterDistro.K3S]: {
-    dark: `${DISTRO_ICON_PATH}/k3s.svg`,
-    light: `${DISTRO_ICON_PATH}/k3s.svg`,
+    dark: `${DISTRO_ICON_PATH}/k3s-dark.svg`,
+    light: `${DISTRO_ICON_PATH}/k3s-light.svg`,
   },
   [ClusterDistro.Rke]: {
     dark: `${DISTRO_ICON_PATH}/rke.svg`,
