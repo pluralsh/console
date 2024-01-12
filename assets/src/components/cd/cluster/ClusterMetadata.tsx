@@ -17,13 +17,14 @@ import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
 import { Link } from 'react-router-dom'
 
 import { SubTitle } from '../../cluster/nodes/SubTitle'
-import ProviderIcon from '../../utils/Provider'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { ClusterConditions } from '../clusters/ClusterConditions'
 
 import { getServiceDetailsPath } from '../../../routes/cdRoutesConsts'
 
 import { InlineLink } from '../../utils/typography/InlineLink'
+
+import { ClusterProviderIcon } from '../../utils/Provider'
 
 import { useClusterContext } from './Cluster'
 import { NodePoolsSection } from './ClusterNodePools'
@@ -79,7 +80,8 @@ function MetadataCard({
             <IconFrame
               type="secondary"
               icon={
-                <ProviderIcon
+                <ClusterProviderIcon
+                  distro={cluster?.distro}
                   provider={cluster?.provider?.cloud || 'BYOK'}
                   width={16}
                 />

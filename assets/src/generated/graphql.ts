@@ -4594,12 +4594,12 @@ export type ClustersQueryVariables = Exact<{
 
 export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, distro?: ClusterDistro | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null } | null> | null } | null };
 
-export type ClusterTinyFragment = { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
+export type ClusterTinyFragment = { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
 
 export type ClustersTinyQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ClustersTinyQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
+export type ClustersTinyQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
 
 export type ClusterSelectorQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -4609,7 +4609,7 @@ export type ClusterSelectorQueryVariables = Exact<{
 }>;
 
 
-export type ClusterSelectorQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+export type ClusterSelectorQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
 export type ClusterQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5724,6 +5724,7 @@ export const ClusterTinyFragmentDoc = gql`
   provider {
     cloud
   }
+  distro
 }
     `;
 export const PolicyBindingFragmentDoc = gql`

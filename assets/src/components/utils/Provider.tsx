@@ -107,6 +107,30 @@ export function getProviderIconUrl(
   )
 }
 
+export function ClusterProviderIcon({
+  distro,
+  provider,
+  width,
+}: {
+  distro?: ClusterDistro | null
+  provider: string
+  width: number
+}) {
+  const theme = useTheme()
+
+  return (
+    <div css={{ display: 'flex', justifyContent: 'center', width }}>
+      <img
+        alt={`${getDistributionName(distro)} / ${
+          getProviderName(provider) || provider
+        }`}
+        src={getClusterIconUrl(distro, provider, theme.mode)}
+        width={width}
+      />
+    </div>
+  )
+}
+
 export default function ProviderIcon({
   provider,
   width,

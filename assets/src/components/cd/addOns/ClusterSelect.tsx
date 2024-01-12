@@ -6,7 +6,7 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { ClusterTinyFragment } from 'generated/graphql'
-import ProviderIcon from 'components/utils/Provider'
+import { ClusterProviderIcon } from 'components/utils/Provider'
 
 export function ClusterSelect({
   clusters,
@@ -26,7 +26,8 @@ export function ClusterSelect({
         </div>
       }
       leftContent={
-        <ProviderIcon
+        <ClusterProviderIcon
+          distro={currentCluster?.distro}
           provider={currentCluster?.provider?.cloud || ''}
           width={16}
         />
@@ -39,7 +40,8 @@ export function ClusterSelect({
           label={cluster.name}
           textValue={cluster.name}
           leftContent={
-            <ProviderIcon
+            <ClusterProviderIcon
+              distro={cluster.distro}
               provider={cluster.provider?.cloud || ''}
               width={16}
             />

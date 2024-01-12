@@ -216,6 +216,7 @@ fragment ClusterTiny on Cluster {
   provider {
     cloud
   }
+  distro
 }
 
 query ClustersTiny {
