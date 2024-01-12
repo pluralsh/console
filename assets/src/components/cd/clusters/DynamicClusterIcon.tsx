@@ -20,11 +20,6 @@ interface DynamicClusterIconProps {
 const DynamicClusterIconSC = styled.div((_) => ({
   position: 'relative',
 }))
-const IconFrameSC = styled(IconFrame)(({ theme }) => ({
-  position: 'relative',
-  border: 'none',
-  backgroundColor: theme.colors['fill-two'],
-}))
 const ProtectedIconSC = styled(ShieldLockIcon).attrs(() => ({ size: 14 }))(
   (_) => ({
     position: 'absolute',
@@ -54,7 +49,7 @@ export function DynamicClusterIcon({
 
   return (
     <DynamicClusterIconSC>
-      <IconFrameSC
+      <IconFrame
         size="medium"
         type="secondary"
         tooltip={tooltip}
