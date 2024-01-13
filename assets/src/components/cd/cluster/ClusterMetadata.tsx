@@ -76,9 +76,8 @@ function MetadataCard({
               type="secondary"
               icon={
                 <ClusterProviderIcon
-                  distro={cluster?.distro}
-                  provider={cluster?.provider?.cloud || 'BYOK'}
-                  width={16}
+                  cluster={cluster}
+                  size={16}
                 />
               }
             />

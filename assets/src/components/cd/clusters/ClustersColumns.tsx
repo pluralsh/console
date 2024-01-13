@@ -8,7 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 import { Link } from 'react-router-dom'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { ClustersRowFragment } from 'generated/graphql'
@@ -27,23 +27,20 @@ import {
   memoryParser,
 } from 'utils/kubernetes'
 
-import { ColWithIcon } from 'components/utils/table/ColWithIcon'
+import { getProviderName } from 'components/utils/Provider'
 import {
-  getClusterIconUrl,
-  getDistributionName,
-  getProviderName,
-} from 'components/utils/Provider'
+  DistroProviderIconFrame,
+  getClusterDistroName,
+} from 'components/utils/ClusterDistro'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import { StackedText } from 'components/utils/table/StackedText'
 import { UsageBar } from 'components/cluster/nodes/UsageBar'
-import { TableText } from 'components/cluster/TableElements'
+import { TableText, TabularNumbers } from 'components/cluster/TableElements'
 import { roundToTwoPlaces } from 'components/cluster/utils'
 
 import { DeleteClusterModal } from '../providers/DeleteCluster'
-
 import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
-
 import { ClusterSettingsModal } from '../cluster/ClusterSettings'
 
 import ClusterUpgrade from './ClusterUpgrade'
@@ -52,6 +49,12 @@ import { ClusterConditions } from './ClusterConditions'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
+
+const ColClusterSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+}))
 
 const ColCluster = columnHelper.accessor(({ node }) => node, {
   id: 'cluster',
@@ -62,61 +65,60 @@ const ColCluster = columnHelper.accessor(({ node }) => node, {
       !cluster?.self && isUpgrading(cluster?.version, cluster?.currentVersion)
 
     return (
-      <div css={{ display: 'flex' }}>
-        <ColWithIcon
-          icon={
-            <DynamicClusterIcon
-              deleting={!!cluster?.deletedAt}
-              upgrading={upgrading}
-              protect={!!cluster?.protect}
-              self={!!cluster?.self}
-            />
-          }
-        >
-          <StackedText
-            first={
-              <BasicLink
-                as={Link}
-                to={`/cd/clusters/${cluster?.id}`}
-                css={{ whiteSpace: 'nowrap' }}
-              >
-                {cluster?.name}
-              </BasicLink>
-            }
-            second={`handle: ${cluster?.handle}`}
-          />
-        </ColWithIcon>
-      </div>
-    )
-  },
-})
-
-const ColCloud = columnHelper.accessor(({ node }) => node, {
-  id: 'cloud',
-  header: 'Cloud',
-  cell: function Cell({
-    row: {
-      original: { node },
-    },
-  }) {
-    const theme = useTheme()
-
-    return (
-      <ColWithIcon
-        icon={getClusterIconUrl(
-          node?.distro,
-          node?.provider?.cloud ?? '',
-          theme.mode
-        )}
-      >
-        <StackedText
-          first={getDistributionName(node?.distro)}
-          second={getProviderName(node?.provider?.cloud)}
+      <ColClusterSC>
+        <DynamicClusterIcon
+          deleting={!!cluster?.deletedAt}
+          upgrading={upgrading}
+          protect={!!cluster?.protect}
+          self={!!cluster?.self}
         />
-      </ColWithIcon>
+        <StackedText
+          first={
+            <BasicLink
+              as={Link}
+              to={`/cd/clusters/${cluster?.id}`}
+              css={{ whiteSpace: 'nowrap' }}
+            >
+              {cluster?.name}
+            </BasicLink>
+          }
+          second={`handle: ${cluster?.handle}`}
+        />
+      </ColClusterSC>
     )
   },
 })
+
+const ColProvider = columnHelper.accessor(
+  ({ node }) =>
+    `${getClusterDistroName(node?.distro, 'short')} – ${getProviderName(
+      node?.provider?.cloud
+    )}`,
+  {
+    id: 'provider',
+    header: 'Provider',
+    cell: function Cell({
+      row: {
+        original: { node },
+      },
+    }) {
+      return (
+        <ColClusterSC>
+          <DistroProviderIconFrame
+            distro={node?.distro}
+            provider={node?.provider?.cloud}
+            size="medium"
+            type="secondary"
+          />
+          <StackedText
+            first={getClusterDistroName(node?.distro, 'short')}
+            second={getProviderName(node?.provider?.cloud)}
+          />
+        </ColClusterSC>
+      )
+    },
+  }
+)
 
 const ColHealth = columnHelper.accessor(({ node }) => node, {
   id: 'health',
@@ -126,7 +128,7 @@ const ColHealth = columnHelper.accessor(({ node }) => node, {
 
 const ColVersion = columnHelper.accessor(({ node }) => node, {
   id: 'version',
-  header: 'Version',
+  header: 'Deployed version',
   cell: function Cell({
     row: {
       original: { node },
@@ -136,11 +138,17 @@ const ColVersion = columnHelper.accessor(({ node }) => node, {
       <div>
         {node?.currentVersion && (
           <StackedText
-            first={`Current: ${toNiceVersion(node?.currentVersion)}`}
+            first={
+              <TabularNumbers>
+                Current: {toNiceVersion(node?.currentVersion)}
+              </TabularNumbers>
+            }
             second={
-              node?.self || !node?.version
-                ? null
-                : `Target: ${toNiceVersion(node?.version)}`
+              node?.self || !node?.version ? null : (
+                <TabularNumbers>{`Target: ${toNiceVersion(
+                  node?.version
+                )}`}</TabularNumbers>
+              )
             }
           />
         )}
@@ -225,10 +233,14 @@ const ColMemory = columnHelper.accessor(({ node }) => node, {
   },
 })
 
+const ColStatusSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.small,
+}))
 const ColStatus = columnHelper.accessor(({ node }) => node, {
   id: 'status',
   header: 'Status',
-  cell: ({ table, getValue }) => {
+  cell: ({ table, getValue, row: { original } }) => {
     const cluster = getValue()
     const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
     const upgrade = nextSupportedVersion(
@@ -246,7 +258,7 @@ const ColStatus = columnHelper.accessor(({ node }) => node, {
     }
 
     return (
-      <div
+      <ColStatusSC
         onClick={(e) => {
           e.stopPropagation()
         }}
@@ -255,7 +267,8 @@ const ColStatus = columnHelper.accessor(({ node }) => node, {
           cluster={cluster}
           refetch={refetch}
         />
-      </div>
+        <ClusterConditions cluster={original.node} />
+      </ColStatusSC>
     )
   },
 })
@@ -265,6 +278,8 @@ enum MenuItemKey {
   Delete = 'delete',
   Settings = 'Settings',
 }
+
+/*
 const ColConditions = columnHelper.accessor(
   ({ node }) => node?.status?.conditions?.length ?? 0,
   {
@@ -278,6 +293,7 @@ const ColConditions = columnHelper.accessor(
       ),
   }
 )
+*/
 
 const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',
@@ -344,12 +360,11 @@ const ColActions = columnHelper.accessor(({ node }) => node, {
 
 export const columns = [
   ColCluster,
-  ColCloud,
+  ColProvider,
   ColHealth,
   ColVersion,
   ColCpu,
   ColMemory,
   ColStatus,
-  ColConditions,
   ColActions,
 ]

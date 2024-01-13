@@ -84,9 +84,8 @@ export default function ClusterSelector({
           <SearchIcon />
         ) : (
           <ClusterProviderIcon
-            distro={selectedCluster?.distro}
-            provider={selectedCluster?.provider?.cloud || ''}
-            width={16}
+            cluster={selectedCluster}
+            size={16}
           />
         )
       }
@@ -153,9 +152,8 @@ export default function ClusterSelector({
           textValue={cluster?.name}
           leftContent={
             <ClusterProviderIcon
-              distro={cluster?.distro}
-              provider={cluster?.provider?.cloud || ''}
-              width={16}
+              cluster={cluster}
+              size={16}
             />
           }
         />

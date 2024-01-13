@@ -25,7 +25,6 @@ export default function GroupMembers({ group, edit = false }: any) {
     <List
       minHeight="230px"
       position="relative"
-      hue="lighter"
     >
       <Div flexGrow="1">
         <StandardScroller

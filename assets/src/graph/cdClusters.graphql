@@ -127,6 +127,7 @@ fragment ClustersRow on Cluster {
   protect
   name
   handle
+  distro
   nodes {
     status {
       capacity
@@ -218,8 +219,13 @@ fragment Cluster on Cluster {
   }
 }
 
-query Clusters($first: Int = 100, $after: String, $q: String) {
-  clusters(first: $first, after: $after, q: $q) {
+query Clusters(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $healthy: Boolean
+) {
+  clusters(first: $first, after: $after, q: $q, healthy: $healthy) {
     pageInfo {
       ...PageInfo
     }
@@ -229,6 +235,10 @@ query Clusters($first: Int = 100, $after: String, $q: String) {
       }
     }
   }
+  clusterStatuses {
+    ...ClusterStatusInfo
+  }
+  tags
 }
 
 fragment ClusterTiny on Cluster {
@@ -362,5 +372,16 @@ mutation CreateCluster($attributes: ClusterAttributes!) {
 mutation DeleteCluster($id: ID!) {
   deleteCluster(id: $id) {
     ...Cluster
+  }
+}
+
+fragment ClusterStatusInfo on ClusterStatusInfo {
+  count
+  healthy
+}
+
+query ClusterStatuses($clusterId: ID) {
+  clusterStatuses {
+    ...ClusterStatusInfo
   }
 }

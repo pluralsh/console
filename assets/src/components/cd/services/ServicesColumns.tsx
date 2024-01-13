@@ -73,16 +73,14 @@ export const ColCluster = columnHelper.accessor(
     cell: ({ getValue, row: { original } }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
-      const cloud = original?.node?.cluster?.provider?.cloud || ''
       const clusterName = getValue()
 
       return (
         <ColWithIcon
-          icon={getClusterIconUrl(
-            original?.node?.cluster?.distro,
-            cloud,
-            theme.mode
-          )}
+          icon={getClusterIconUrl({
+            cluster: original?.node?.cluster,
+            mode: theme.mode,
+          })}
         >
           {clusterName}
         </ColWithIcon>

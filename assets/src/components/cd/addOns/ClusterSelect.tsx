@@ -27,9 +27,8 @@ export function ClusterSelect({
       }
       leftContent={
         <ClusterProviderIcon
-          distro={currentCluster?.distro}
-          provider={currentCluster?.provider?.cloud || ''}
-          width={16}
+          cluster={currentCluster}
+          size={16}
         />
       }
       {...props}
@@ -41,9 +40,8 @@ export function ClusterSelect({
           textValue={cluster.name}
           leftContent={
             <ClusterProviderIcon
-              distro={cluster.distro}
-              provider={cluster.provider?.cloud || ''}
-              width={16}
+              cluster={cluster}
+              size={16}
             />
           }
         />
