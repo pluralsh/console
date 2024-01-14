@@ -35,12 +35,10 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       {:ok, %{data: %{"serviceDeployments" => found}}} = run_query("""
         query Services($clusterId: ID!) {
           serviceDeployments(clusterId: $clusterId, first: 5) {
-            edges {
-              node {
+            edges { node {
                 id
                 helmRepository { spec { url } }
-              }
-            }
+            } }
           }
         }
       """, %{"clusterId" => cluster.id}, %{current_user: admin_user()})
