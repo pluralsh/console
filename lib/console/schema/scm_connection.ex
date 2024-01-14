@@ -19,7 +19,7 @@ defmodule Console.Schema.ScmConnection do
     from(scm in query, order_by: ^order)
   end
 
-  @valid ~w(name type base_url username token)a
+  @valid ~w(name type base_url api_url username token)a
 
   def changeset(model, attrs \\ %{}) do
     model

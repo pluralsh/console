@@ -1,10 +1,12 @@
 defmodule Console.GraphQl.Deployments.Git do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Deployments
-  alias Console.Schema.GitRepository
+  alias Console.Schema.{GitRepository, ScmConnection, PrAutomation}
 
   ecto_enum :auth_method, GitRepository.AuthMethod
   ecto_enum :git_health, GitRepository.Health
+  ecto_enum :scm_type, ScmConnection.Type
+  ecto_enum :match_strategy, PrAutomation.MatchStrategy
 
   input_object :git_attributes do
     field :url,         non_null(:string), description: "the url of this repository"
@@ -15,6 +17,39 @@ defmodule Console.GraphQl.Deployments.Git do
     field :https_path,  :string, description: "a manually supplied https path for non standard git setups.  This is auto-inferred in many cases"
     field :url_format,  :string, description: "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder}"
     field :decrypt,     :boolean, description: "whether to run plural crypto on this repo"
+  end
+
+  @desc "an object representing a means to authenticate to a source control provider like Github"
+  input_object :scm_connection_attributes do
+    field :name,     non_null(:string)
+    field :type,     non_null(:scm_type)
+    field :username, :string
+    field :token,    :string
+    field :base_url, :string
+    field :api_url,  :string
+  end
+
+  @desc "A way to create a self-service means of generating PRs against an IaC repo"
+  input_object :pr_automation_attributes do
+    field :name,          :string
+    field :identifier,    :string, description: "string id for a repository, eg for github, this is {organization}/{repository-name}"
+    field :documentation, :string
+    field :message,       :string
+    field :updates,       :pr_automation_update_spec_attributes
+
+    field :addon,         :string, description: "link to an add-on name if this can update it"
+    field :cluster_id,    :id, description: "link to a cluster if this is to perform an upgrade"
+    field :service_id,    :id, description: "link to a service if this can modify its configuration"
+    field :connection_id, :id, description: "the scm connection to use for pr generation"
+  end
+
+  @desc "The operations to be performed on the files w/in the pr"
+  input_object :pr_automation_update_spec_attributes do
+    field :regexes,          list_of(:string)
+    field :files,            list_of(:string)
+    field :replace_template, :string
+    field :yq,               :string
+    field :match_strategy,   :match_strategy
   end
 
   @desc "a git repository available for deployments"
@@ -80,7 +115,53 @@ defmodule Console.GraphQl.Deployments.Git do
     field :digest,      :string, description: "sha digest of this chart's contents"
   end
 
+  @desc "an object representing the means to connect to SCM apis"
+  object :scm_connection do
+    field :id,       non_null(:id)
+    field :name,     non_null(:string)
+    field :type,     non_null(:scm_type)
+    field :username, :string
+    field :base_url, :string, description: "base url for git clones for self-hosted versions"
+    field :api_url,  :string, description: "base url for HTTP apis for self-hosted versions if different from base url"
+
+    timestamps()
+  end
+
+  @desc "a description of how to generate a pr, which can either modify existing files or generate new ones w/in a repo"
+  object :pr_automation do
+    field :id,            non_null(:id)
+    field :identifier,    :string, description: "string id for a repository, eg for github, this is {organization}/{repository-name}"
+    field :name,          :string, description: "the name for this automation"
+    field :documentation, :string
+    field :message,       :string
+    field :updates,       :pr_update_spec
+
+    field :addon,      :string, description: "link to an add-on name if this can update it"
+    field :cluster,    :cluster,
+      description: "link to a cluster if this is to perform an upgrade",
+      resolve: dataloader(Deployments)
+    field :service,    :service_deployment,
+      description: "link to a service if this can update its configuration",
+      resolve: dataloader(Deployments)
+    field :connection, :scm_connection,
+      description: "the scm connection to use for pr generation",
+      resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  @desc "existing file updates that can be performed in a PR"
+  object :pr_update_spec do
+    field :regexes,          list_of(:string)
+    field :files,            list_of(:string)
+    field :replace_template, :string
+    field :yq,               :string
+    field :match_strategy,   :match_strategy
+  end
+
   connection node_type: :git_repository
+  connection node_type: :scm_connection
+  connection node_type: :pr_automation
 
   delta :git_repository
 
@@ -112,6 +193,32 @@ defmodule Console.GraphQl.Deployments.Git do
 
       resolve &Deployments.get_helm_repository/2
     end
+
+    connection field :scm_connections, node_type: :scm_connection do
+      middleware Authenticated
+
+      resolve &Deployments.list_scm_connections/2
+    end
+
+    field :scm_connection, :scm_connection do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_scm_connection/2
+    end
+
+    connection field :pr_automations, node_type: :pr_automation do
+      middleware Authenticated
+
+      resolve &Deployments.list_pr_automations/2
+    end
+
+    field :pr_automation, :pr_automation do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_pr_automation/2
+    end
   end
 
   object :git_mutations do
@@ -135,6 +242,50 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_git_repository/2
+    end
+
+    field :create_scm_connection, :scm_connection do
+      middleware Authenticated
+      arg :attributes, non_null(:scm_connection_attributes)
+
+      safe_resolve &Deployments.create_scm_connection/2
+    end
+
+    field :update_scm_connection, :scm_connection do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:scm_connection_attributes)
+
+      safe_resolve &Deployments.update_scm_connection/2
+    end
+
+    field :delete_scm_connection, :scm_connection do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_scm_connection/2
+    end
+
+    field :create_pr_automation, :pr_automation do
+      middleware Authenticated
+      arg :attributes, non_null(:pr_automation_attributes)
+
+      safe_resolve &Deployments.create_pr_automation/2
+    end
+
+    field :update_pr_automation, :pr_automation do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:pr_automation_attributes)
+
+      safe_resolve &Deployments.update_pr_automation/2
+    end
+
+    field :delete_pr_automation, :pr_automation do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_pr_automation/2
     end
   end
 end

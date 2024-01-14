@@ -89,4 +89,164 @@ defmodule Console.Deployments.GitTest do
       {:error, _} = Git.delete_repository(git.id, admin_user())
     end
   end
+
+  describe "#create_scm_connection/2" do
+    test "admins can create" do
+      admin = admin_user()
+
+      {:ok, conn} = Git.create_scm_connection(%{type: :github, name: "github", token: "pat-asdfa"}, admin)
+
+      assert conn.type == :github
+      assert conn.token == "pat-asdfa"
+    end
+
+    test "nonadmins cannot create" do
+      {:error, _} = Git.create_scm_connection(%{type: :github, name: "github", token: "pat-asdfa"}, insert(:user))
+    end
+  end
+
+  describe "#update_scm_connection/3" do
+    test "admins can update" do
+      admin = admin_user()
+      scm = insert(:scm_connection)
+
+      {:ok, conn} = Git.update_scm_connection(%{type: :github, token: "pat-asdfa"}, scm.id, admin)
+
+      assert conn.id == scm.id
+      assert conn.type == :github
+      assert conn.token == "pat-asdfa"
+    end
+
+    test "nonadmins cannot update" do
+      scm = insert(:scm_connection)
+      {:error, _} = Git.update_scm_connection(%{type: :github, token: "pat-asdfa"}, scm.id, insert(:user))
+    end
+  end
+
+  describe "#delete_scm_connection/3" do
+    test "admins can delete" do
+      admin = admin_user()
+      scm = insert(:scm_connection)
+
+      {:ok, conn} = Git.delete_scm_connection(scm.id, admin)
+
+      assert conn.id == scm.id
+      refute refetch(scm)
+    end
+
+    test "nonadmins cannot delete" do
+      scm = insert(:scm_connection)
+      {:error, _} = Git.delete_scm_connection(scm.id, insert(:user))
+    end
+  end
+
+  describe "#create_scm_webhook/2" do
+    test "admins can create" do
+      admin = admin_user()
+
+      {:ok, hook} = Git.create_scm_webhook(%{type: :github, hmac: "hmac"}, admin)
+
+      assert hook.type == :github
+      assert hook.hmac == "hmac"
+    end
+
+    test "nonadmins cannot create" do
+      {:error, _} = Git.create_scm_webhook(%{type: :github, hmac: "hmac"}, insert(:user))
+    end
+  end
+
+  describe "#update_scm_webhook/3" do
+    test "admins can update" do
+      admin = admin_user()
+      scm = insert(:scm_webhook)
+
+      {:ok, hook} = Git.update_scm_webhook(%{type: :github, hmac: "hmac"}, scm.id, admin)
+
+      assert hook.id == scm.id
+      assert hook.type == :github
+      assert hook.hmac == "hmac"
+    end
+
+    test "nonadmins cannot update" do
+      scm = insert(:scm_webhook)
+      {:error, _} = Git.update_scm_webhook(%{type: :github, hmac: "hmac"}, scm.id, insert(:user))
+    end
+  end
+
+  describe "#delete_scm_webhook/3" do
+    test "admins can delete" do
+      admin = admin_user()
+      scm = insert(:scm_webhook)
+
+      {:ok, hook} = Git.delete_scm_webhook(scm.id, admin)
+
+      assert hook.id == scm.id
+      refute refetch(scm)
+    end
+
+    test "nonadmins cannot delete" do
+      scm = insert(:scm_webhook)
+      {:error, _} = Git.delete_scm_webhook(scm.id, insert(:user))
+    end
+  end
+
+  describe "#create_pr_automation/2" do
+    test "admins can create" do
+      admin = admin_user()
+      conn = insert(:scm_connection)
+
+      {:ok, pr} = Git.create_pr_automation(%{
+        name: "cluster-upgrade",
+        message: "pr message",
+        connection_id: conn.id
+      }, admin)
+
+      assert pr.name == "cluster-upgrade"
+      assert pr.connection_id == conn.id
+      assert pr.message == "pr message"
+    end
+
+    test "nonadmins cannot create" do
+      conn = insert(:scm_connection)
+      {:error, _} = Git.create_pr_automation(%{
+        name: "cluster-upgrade",
+        message: "pr message",
+        connection_id: conn.id
+      }, insert(:user))
+    end
+  end
+
+  describe "#update_pr_automation/3" do
+    test "admins can update" do
+      admin = admin_user()
+      pr = insert(:pr_automation)
+
+      {:ok, up} = Git.update_pr_automation(%{name: "new name"}, pr.id, admin)
+
+      assert up.id == pr.id
+      assert up.name == "new name"
+    end
+
+    test "nonadmins cannot update" do
+      pr = insert(:pr_automation)
+      {:error, _} = Git.update_pr_automation(%{name: "new name"}, pr.id, insert(:user))
+    end
+  end
+
+  describe "#delete_pr_automation/3" do
+    test "admins can delete" do
+      admin = admin_user()
+      pr = insert(:pr_automation)
+
+      {:ok, del} = Git.delete_pr_automation(pr.id, admin)
+
+      assert del.id == pr.id
+      refute refetch(del)
+    end
+
+    test "nonadmins cannot delete" do
+      pr = insert(:pr_automation)
+      {:error, _} = Git.delete_pr_automation(pr.id, insert(:user))
+    end
+  end
 end

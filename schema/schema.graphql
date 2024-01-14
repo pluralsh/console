@@ -169,6 +169,14 @@ type RootQueryType {
 
   helmRepository(name: String!, namespace: String!): HelmRepository
 
+  scmConnections(after: String, first: Int, before: String, last: Int): ScmConnectionConnection
+
+  scmConnection(id: ID!): ScmConnection
+
+  prAutomations(after: String, first: Int, before: String, last: Int): PrAutomationConnection
+
+  prAutomation(id: ID!): PrAutomation
+
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
 
@@ -336,6 +344,18 @@ type RootMutationType {
   updateGitRepository(id: ID!, attributes: GitAttributes!): GitRepository
 
   deleteGitRepository(id: ID!): GitRepository
+
+  createScmConnection(attributes: ScmConnectionAttributes!): ScmConnection
+
+  updateScmConnection(id: ID!, attributes: ScmConnectionAttributes!): ScmConnection
+
+  deleteScmConnection(id: ID!): ScmConnection
+
+  createPrAutomation(attributes: PrAutomationAttributes!): PrAutomation
+
+  updatePrAutomation(id: ID!, attributes: PrAutomationAttributes!): PrAutomation
+
+  deletePrAutomation(id: ID!): PrAutomation
 
   createCluster(attributes: ClusterAttributes!): Cluster
 
@@ -1957,6 +1977,17 @@ enum GitHealth {
   FAILED
 }
 
+enum ScmType {
+  GITHUB
+  GITLAB
+}
+
+enum MatchStrategy {
+  ANY
+  ALL
+  RECURSIVE
+}
+
 input GitAttributes {
   "the url of this repository"
   url: String!
@@ -1981,6 +2012,51 @@ input GitAttributes {
 
   "whether to run plural crypto on this repo"
   decrypt: Boolean
+}
+
+"an object representing a means to authenticate to a source control provider like Github"
+input ScmConnectionAttributes {
+  name: String!
+  type: ScmType!
+  username: String
+  token: String
+  baseUrl: String
+  apiUrl: String
+}
+
+"A way to create a self-service means of generating PRs against an IaC repo"
+input PrAutomationAttributes {
+  name: String
+
+  "string id for a repository, eg for github, this is {organization}\/{repository-name}"
+  identifier: String
+
+  documentation: String
+
+  message: String
+
+  updates: PrAutomationUpdateSpecAttributes
+
+  "link to an add-on name if this can update it"
+  addon: String
+
+  "link to a cluster if this is to perform an upgrade"
+  clusterId: ID
+
+  "link to a service if this can modify its configuration"
+  serviceId: ID
+
+  "the scm connection to use for pr generation"
+  connectionId: ID
+}
+
+"The operations to be performed on the files w\/in the pr"
+input PrAutomationUpdateSpecAttributes {
+  regexes: [String]
+  files: [String]
+  replaceTemplate: String
+  yq: String
+  matchStrategy: MatchStrategy
 }
 
 "a git repository available for deployments"
@@ -2075,9 +2151,82 @@ type HelmChartVersion {
   digest: String
 }
 
+"an object representing the means to connect to SCM apis"
+type ScmConnection {
+  id: ID!
+
+  name: String!
+
+  type: ScmType!
+
+  username: String
+
+  "base url for git clones for self-hosted versions"
+  baseUrl: String
+
+  "base url for HTTP apis for self-hosted versions if different from base url"
+  apiUrl: String
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"a description of how to generate a pr, which can either modify existing files or generate new ones w\/in a repo"
+type PrAutomation {
+  id: ID!
+
+  "string id for a repository, eg for github, this is {organization}\/{repository-name}"
+  identifier: String
+
+  "the name for this automation"
+  name: String
+
+  documentation: String
+
+  message: String
+
+  updates: PrUpdateSpec
+
+  "link to an add-on name if this can update it"
+  addon: String
+
+  "link to a cluster if this is to perform an upgrade"
+  cluster: Cluster
+
+  "link to a service if this can update its configuration"
+  service: ServiceDeployment
+
+  "the scm connection to use for pr generation"
+  connection: ScmConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"existing file updates that can be performed in a PR"
+type PrUpdateSpec {
+  regexes: [String]
+  files: [String]
+  replaceTemplate: String
+  yq: String
+  matchStrategy: MatchStrategy
+}
+
 type GitRepositoryConnection {
   pageInfo: PageInfo!
   edges: [GitRepositoryEdge]
+}
+
+type ScmConnectionConnection {
+  pageInfo: PageInfo!
+  edges: [ScmConnectionEdge]
+}
+
+type PrAutomationConnection {
+  pageInfo: PageInfo!
+  edges: [PrAutomationEdge]
 }
 
 input CloneAttributes {
@@ -3721,6 +3870,16 @@ type RunbookExecutionEdge {
 
 type WebhookEdge {
   node: Webhook
+  cursor: String
+}
+
+type PrAutomationEdge {
+  node: PrAutomation
+  cursor: String
+}
+
+type ScmConnectionEdge {
+  node: ScmConnection
   cursor: String
 }
 

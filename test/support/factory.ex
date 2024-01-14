@@ -342,6 +342,31 @@ defmodule Console.Factory do
     %Schema.AccessToken.Scope{}
   end
 
+  def scm_connection_factory do
+    %Schema.ScmConnection{
+      type: :github,
+      name: sequence(:scm_conn, & "conn-#{&1}"),
+      token: sequence(:scm_conn, & "pat-#{&1}")
+    }
+  end
+
+  def scm_webhook_factory do
+    %Schema.ScmWebhook{
+      type: :github,
+      # name: sequence(:scm_conn, & "conn-#{&1}"),
+      external_id: sequence(:scm_webhook, & "webhook-#{&1}"),
+      hmac: sequence(:scm_webhook_hmac, & "hook-hmac-#{&1}")
+    }
+  end
+
+  def pr_automation_factory do
+    %Schema.PrAutomation{
+      name: sequence(:pr_automation, & "pr-#{&1}"),
+      message: "pr message",
+      connection: build(:scm_connection)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

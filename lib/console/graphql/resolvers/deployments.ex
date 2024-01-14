@@ -27,7 +27,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     PipelinePromotion,
     PromotionCriteria,
     PromotionService,
-    ComponentContent
+    ComponentContent,
+    ScmConnection,
+    PrAutomation
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -51,6 +53,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ServiceComponent, _), do: ServiceComponent
   def query(GitRepository, _), do: GitRepository
   def query(ComponentContent, _), do: ComponentContent
+  def query(ScmConnection, _), do: ScmConnection
+  def query(PrAutomation, _), do: PrAutomation
   def query(_, _), do: Cluster
 
   def list_clusters(args, %{context: %{current_user: user}}) do
@@ -187,6 +191,16 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> paginate(args)
   end
 
+  def list_scm_connections(args, _) do
+    ScmConnection.ordered()
+    |> paginate(args)
+  end
+
+  def list_pr_automations(args, _) do
+    PrAutomation.ordered()
+    |> paginate(args)
+  end
+
   def get_helm_repository(%{name: name, namespace: ns}, _), do: Kube.Client.get_helm_repository(ns, name)
 
   def list_helm_repositories(_, _), do: Git.list_helm_repositories()
@@ -247,6 +261,10 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     Global.get!(id)
     |> allow(user, :read)
   end
+
+  def resolve_scm_connection(%{id: id}, _), do: {:ok, Git.get_scm_connection(id)}
+
+  def resolve_pr_automation(%{id: id}, _), do: {:ok, Git.get_pr_automation(id)}
 
   defp actor(%{context: %{current_user: %User{} = user}}), do: user
   defp actor(%{context: %{cluster: %Cluster{} = cluster}}), do: cluster
@@ -373,6 +391,24 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def delete_git_repository(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_repository(id, user)
+
+  def create_scm_connection(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.create_scm_connection(attrs, user)
+
+  def update_scm_connection(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.update_scm_connection(attrs, id, user)
+
+  def delete_scm_connection(%{id: id}, %{context: %{current_user: user}}),
+    do: Git.delete_scm_connection(id, user)
+
+  def create_pr_automation(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.create_pr_automation(attrs, user)
+
+  def update_pr_automation(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.update_pr_automation(attrs, id, user)
+
+  def delete_pr_automation(%{id: id}, %{context: %{current_user: user}}),
+    do: Git.delete_pr_automation(id, user)
 
   def update_settings(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Settings.update(attrs, user)
