@@ -2,6 +2,58 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
   use Console.DataCase, async: true
   use Mimic
 
+  describe "createGitRepository" do
+    test "it will create a new git repo" do
+      {:ok, %{data: %{"createGitRepository" => git}}} = run_query("""
+        mutation Create($attrs: GitAttributes!) {
+          createGitRepository(attributes: $attrs) {
+            id
+            url
+          }
+        }
+      """, %{"attrs" => %{"url" => "https://github.com/pluralsh/console.git"}}, %{current_user: admin_user()})
+
+      assert git["url"] == "https://github.com/pluralsh/console.git"
+    end
+  end
+
+  describe "updateGitRepository" do
+    test "it will update a new git repo" do
+      git = insert(:git_repository)
+
+      {:ok, %{data: %{"updateGitRepository" => updated}}} = run_query("""
+        mutation Create($id: ID!, $attrs: GitAttributes!) {
+          updateGitRepository(id: $id, attributes: $attrs) {
+            id
+            url
+          }
+        }
+      """, %{
+        "id" => git.id,
+        "attrs" => %{"url" => "https://github.com/pluralsh/console.git"}
+      }, %{current_user: admin_user()})
+
+      assert updated["url"] == "https://github.com/pluralsh/console.git"
+    end
+  end
+
+  describe "deleteGitRepository" do
+    test "it will delete a new git repo" do
+      git = insert(:git_repository)
+
+      {:ok, %{data: %{"deleteGitRepository" => del}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteGitRepository(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => git.id}, %{current_user: admin_user()})
+
+      assert del["id"] == git.id
+      refute refetch(git)
+    end
+  end
+
   describe "createScmConnection" do
     test "it will create a new scm connection" do
       {:ok, %{data: %{"createScmConnection" => scm}}} = run_query("""
