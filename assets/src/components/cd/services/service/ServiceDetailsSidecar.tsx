@@ -12,6 +12,8 @@ import { Chip, ErrorIcon, Sidecar, SidecarItem } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
 
+import { wrap } from 'lodash'
+
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
 import { countDeprecations } from './deprecationUtils'
@@ -52,7 +54,19 @@ export function ServiceDetailsSidecar({
       <Sidecar>
         {name && <SidecarItem heading="Service name"> {name}</SidecarItem>}
         <SidecarItem heading="Status">
-          <ServiceStatusChip status={status} />
+          <div
+            css={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: theme.spacing.xxsmall,
+              alignItems: 'center',
+            }}
+          >
+            <ServiceStatusChip status={status} />
+            {!!serviceDeployment.dryRun && (
+              <Chip severity="warning">Dry run</Chip>
+            )}
+          </div>
         </SidecarItem>
         <SidecarItem heading="Warnings">
           {deprecationCount > 0 ? (
