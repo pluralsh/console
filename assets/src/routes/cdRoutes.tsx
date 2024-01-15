@@ -25,7 +25,7 @@ import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
 import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
 import ServiceSettings from 'components/cd/services/service/ServiceSettings'
 import ServiceHelm from 'components/cd/services/service/ServiceHelm'
-import ServiceDryRun from 'components/cd/services/service/ServiceDryRun'
+import ServiceDesiredState from 'components/cd/services/service/ServiceDesiredState'
 
 import ComponentInfo from 'components/component/ComponentInfo'
 import ComponentEvents from 'components/component/ComponentEvents'
@@ -391,8 +391,8 @@ const serviceDetailsRoutes = (
       path="helm"
     />
     <Route
-      element={<ServiceDryRun />}
-      path="dryrun"
+      element={<ServiceDesiredState />}
+      path="desiredstate"
     />
     <Route
       element={<ServiceSettings />}

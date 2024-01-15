@@ -10,7 +10,7 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { useServiceContext } from './ServiceDetails'
 
-export default function ServiceDryRun() {
+export default function ServiceDesiredState() {
   const navigate = useNavigate()
   const { service } = useServiceContext()
 
@@ -32,7 +32,7 @@ export default function ServiceDryRun() {
 
   return (
     <ScrollablePage
-      heading="Dry run"
+      heading="Desired state"
       scrollable={false}
     >
       ...
