@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Pr.Dispatcher do
   import Console.Deployments.Pr.Git
+  import Console.Deployments.Pr.Utils
   alias Console.Repo
   alias Console.Deployments.Pr.Config
   alias Console.Commands.Plural
@@ -8,20 +9,22 @@ defmodule Console.Deployments.Pr.Dispatcher do
 
   @type pr_resp :: {:ok, binary} | Console.error
 
-  @callback create(pr :: PrAutomation.t, identifier :: binary, branch :: binary, context :: map) :: pr_resp
+  @callback create(pr :: PrAutomation.t, branch :: binary, context :: map) :: pr_resp
 
   @doc """
   Fully creates a pr against the working dispatcher implementation
   """
-  @spec create(PrAutomation.t, binary, binary, map) :: pr_resp
-  def create(%PrAutomation{} = pr, identifier, branch, ctx) do
+  @spec create(PrAutomation.t, binary, map) :: pr_resp
+  def create(%PrAutomation{} = pr, branch, ctx) do
     %{scm_connection: conn} = pr = Repo.preload(pr, [:scm_connection])
     impl = dispatcher(conn)
-    with {:ok, conn} <- setup(conn, identifier, branch),
-         {:ok, f} <- Config.config(pr, ctx),
+    with {:ok, conn} <- setup(conn, pr.identifier, branch),
+         {:ok, f} <- Config.config(pr, branch, ctx),
          {:ok, _} <- Plural.template(f),
+         {:ok, msg} <- render_solid(pr.message, ctx),
+         {:ok, _} <- commit(conn, msg),
          {:ok, _} <- push(conn, branch),
-      do: impl.create(pr, identifier, branch, ctx)
+      do: impl.create(pr, branch, ctx)
   end
 
   defp dispatcher(%ScmConnection{type: :github}), do: Github

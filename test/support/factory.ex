@@ -362,6 +362,8 @@ defmodule Console.Factory do
   def pr_automation_factory do
     %Schema.PrAutomation{
       name: sequence(:pr_automation, & "pr-#{&1}"),
+      title: "pr title",
+      identifier: "some/repo",
       message: "pr message",
       connection: build(:scm_connection)
     }

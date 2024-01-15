@@ -197,6 +197,7 @@ defmodule Console.Deployments.GitTest do
 
       {:ok, pr} = Git.create_pr_automation(%{
         name: "cluster-upgrade",
+        title: "pr title",
         message: "pr message",
         connection_id: conn.id
       }, admin)

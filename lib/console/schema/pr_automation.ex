@@ -9,7 +9,9 @@ defmodule Console.Schema.PrAutomation do
     field :name,          :string
     field :documentation, :binary
     field :addon,         :string
+    field :title,         :string
     field :message,       :binary
+    field :branch,        :string
 
     embeds_one :updates, UpdateSpec, on_replace: :update do
       field :regexes,          {:array, :string}
@@ -30,13 +32,13 @@ defmodule Console.Schema.PrAutomation do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name identifier message documentation addon cluster_id service_id connection_id)a
+  @valid ~w(name identifier message title branch documentation addon cluster_id service_id connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:updates)
-    |> validate_required([:name, :message, :connection_id])
+    |> validate_required([:name, :title, :message, :connection_id])
     |> unique_constraint(:name)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)

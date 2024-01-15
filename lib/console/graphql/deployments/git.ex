@@ -34,7 +34,9 @@ defmodule Console.GraphQl.Deployments.Git do
     field :name,          :string
     field :identifier,    :string, description: "string id for a repository, eg for github, this is {organization}/{repository-name}"
     field :documentation, :string
+    field :title,         :string
     field :message,       :string
+    field :branch,        :string
     field :updates,       :pr_automation_update_spec_attributes
 
     field :addon,         :string, description: "link to an add-on name if this can update it"
@@ -130,10 +132,11 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "a description of how to generate a pr, which can either modify existing files or generate new ones w/in a repo"
   object :pr_automation do
     field :id,            non_null(:id)
-    field :identifier,    :string, description: "string id for a repository, eg for github, this is {organization}/{repository-name}"
-    field :name,          :string, description: "the name for this automation"
+    field :identifier,    non_null(:string), description: "string id for a repository, eg for github, this is {organization}/{repository-name}"
+    field :name,          non_null(:string), description: "the name for this automation"
     field :documentation, :string
-    field :message,       :string
+    field :title,         non_null(:string)
+    field :message,       non_null(:string)
     field :updates,       :pr_update_spec
 
     field :addon,      :string, description: "link to an add-on name if this can update it"

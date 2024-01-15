@@ -129,6 +129,7 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
           }
         }
       """, %{"attrs" => %{
+        "title" => "pr title",
         "name" => "test",
         "message" => "some pr message",
         "connectionId" => conn.id,

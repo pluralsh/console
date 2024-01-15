@@ -2026,14 +2026,18 @@ input ScmConnectionAttributes {
 
 "A way to create a self-service means of generating PRs against an IaC repo"
 input PrAutomationAttributes {
-  name: String
+  name: String!
 
   "string id for a repository, eg for github, this is {organization}\/{repository-name}"
-  identifier: String
+  identifier: String!
 
   documentation: String
 
-  message: String
+  title: String!
+
+  message: String!
+
+  branch: String
 
   updates: PrAutomationUpdateSpecAttributes
 
@@ -2177,14 +2181,16 @@ type PrAutomation {
   id: ID!
 
   "string id for a repository, eg for github, this is {organization}\/{repository-name}"
-  identifier: String
+  identifier: String!
 
   "the name for this automation"
-  name: String
+  name: String!
 
   documentation: String
 
-  message: String
+  title: String!
+
+  message: String!
 
   updates: PrUpdateSpec
 

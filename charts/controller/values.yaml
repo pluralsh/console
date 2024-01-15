@@ -1,4 +1,5 @@
 consoleUrl: ~
+fullnameOverride: console-operator
 tokenSecretRef:
   name: console-auth-token
   key: access-token

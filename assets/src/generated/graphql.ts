@@ -2379,13 +2379,14 @@ export type PrAutomation = {
   documentation?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
-  identifier?: Maybe<Scalars['String']['output']>;
+  identifier: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
-  message?: Maybe<Scalars['String']['output']>;
+  message: Scalars['String']['output'];
   /** the name for this automation */
-  name?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
   /** link to a service if this can update its configuration */
   service?: Maybe<ServiceDeployment>;
+  title: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   updates?: Maybe<PrUpdateSpec>;
 };
@@ -2394,17 +2395,19 @@ export type PrAutomation = {
 export type PrAutomationAttributes = {
   /** link to an add-on name if this can update it */
   addon?: InputMaybe<Scalars['String']['input']>;
+  branch?: InputMaybe<Scalars['String']['input']>;
   /** link to a cluster if this is to perform an upgrade */
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** the scm connection to use for pr generation */
   connectionId?: InputMaybe<Scalars['ID']['input']>;
   documentation?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
-  identifier?: InputMaybe<Scalars['String']['input']>;
-  message?: InputMaybe<Scalars['String']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
+  identifier: Scalars['String']['input'];
+  message: Scalars['String']['input'];
+  name: Scalars['String']['input'];
   /** link to a service if this can modify its configuration */
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+  title: Scalars['String']['input'];
   updates?: InputMaybe<PrAutomationUpdateSpecAttributes>;
 };
 
