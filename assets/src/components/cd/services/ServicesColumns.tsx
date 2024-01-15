@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import {
+  Chip,
   GearTrainIcon,
   GitHubLogoIcon,
   GlobeIcon,
@@ -181,14 +182,28 @@ export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
     row: {
       original: { node },
     },
-  }) => (
-    <div css={{ minWidth: 164 }}>
-      <ServiceStatusChip
-        status={node?.status}
-        componentStatus={node?.componentStatus}
-      />
-    </div>
-  ),
+  }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const theme = useTheme()
+
+    return (
+      <div
+        css={{
+          minWidth: 164,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: theme.spacing.xxsmall,
+          alignItems: 'center',
+        }}
+      >
+        <ServiceStatusChip
+          status={node?.status}
+          componentStatus={node?.componentStatus}
+        />
+        {!!node?.dryRun && <Chip severity="warning">Dry run</Chip>}
+      </div>
+    )
+  },
 })
 
 export const ColErrors = columnHelper.accessor(
