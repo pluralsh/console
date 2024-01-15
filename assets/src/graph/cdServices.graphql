@@ -73,6 +73,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
     id
     name
   }
+  dryRun
 }
 
 fragment ServiceDeploymentDetails on ServiceDeployment {

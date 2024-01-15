@@ -13,14 +13,13 @@ import { useServiceContext } from './ServiceDetails'
 export default function ServiceDryRun() {
   const navigate = useNavigate()
   const { service } = useServiceContext()
-  const dryRun = true // TODO: Get that from service deployment.
 
   if (!service) {
     navigate(`${CD_ABS_PATH}/${SERVICES_REL_PATH}`)
 
     return null
   }
-  if (!dryRun) {
+  if (!service.dryRun) {
     navigate(
       getServiceDetailsPath({
         serviceId: service.id,
