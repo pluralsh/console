@@ -50,6 +50,9 @@ import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
 import ClusterPods from '../components/cd/cluster/ClusterPods'
+import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
+import ClusterAddOnDetails from '../components/cd/cluster/addon/ClusterAddOnDetails'
+import ClusterAddOnCompatibility from '../components/cd/cluster/addon/ClusterAddOnCompatibility'
 
 import Node from '../components/cd/cluster/node/Node'
 import NodeInfo from '../components/cd/cluster/node/NodeInfo'
@@ -72,6 +75,8 @@ import {
   CD_DEFAULT_REL_PATH,
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
+  CLUSTER_ADDONS_PARAM_ID,
+  CLUSTER_ADDONS_REL_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
   CLUSTER_PODS_PATH,
@@ -248,7 +253,7 @@ const globalSettingsRoutes = (
   </Route>
 )
 
-const clusterDetailsRoutes = (
+const clusterDetailsRoutes = [
   <Route
     path={CLUSTER_REL_PATH}
     element={<Cluster />}
@@ -278,8 +283,30 @@ const clusterDetailsRoutes = (
       path={CLUSTER_METADATA_PATH}
       element={<ClusterMetadata />}
     />
-  </Route>
-)
+    <Route
+      path={CLUSTER_ADDONS_REL_PATH}
+      element={<ClusterAddOns />}
+    />
+  </Route>,
+  <Route
+    path={`${CLUSTER_REL_PATH}/${CLUSTER_ADDONS_REL_PATH}/:${CLUSTER_ADDONS_PARAM_ID}`}
+    element={<ClusterAddOnDetails />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="compatibility"
+        />
+      }
+    />
+    <Route
+      path="compatibility"
+      element={<ClusterAddOnCompatibility />}
+    />
+  </Route>,
+]
 
 const nodeDetailsRoutes = (
   <Route

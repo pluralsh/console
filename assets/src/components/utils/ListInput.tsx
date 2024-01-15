@@ -1,14 +1,16 @@
 import { ExtendTheme, Input, InputProps } from 'honorable'
-import { forwardRef, useContext } from 'react'
+import { forwardRef } from 'react'
 import { useTheme } from 'styled-components'
 
-import { ListContext, hueToBorderColor } from './List'
+import { useFillLevel } from '@pluralsh/design-system'
+
+import { fillLevelToBorderColor } from './List'
 
 const ListInput = forwardRef<HTMLDivElement, InputProps>(
   ({ ...props }, ref) => {
     const theme = useTheme()
-    const { hue } = useContext(ListContext)
     const bRad = theme.borderRadiuses.large - 2
+    const fillLevel = useFillLevel()
 
     const themeExtension: any = {
       Input: {
@@ -17,7 +19,8 @@ const ListInput = forwardRef<HTMLDivElement, InputProps>(
             position: 'relative',
             border: 'none',
             borderBottomStyle: 'solid',
-            borderColor: theme.colors[hueToBorderColor[hue]] || 'transparent',
+            borderColor:
+              theme.colors[fillLevelToBorderColor[fillLevel]] || 'transparent',
             borderWidth: '1px',
             borderRadius: 0,
             '&:focus-within': {

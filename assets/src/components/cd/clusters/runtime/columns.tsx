@@ -4,12 +4,17 @@ import { RuntimeServicesQuery } from 'generated/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { TableText } from 'components/cluster/TableElements'
 import {
-  CaretDownIcon,
-  CaretRightIcon,
-  ErrorIcon,
+  ArrowTopRightIcon,
+  BlockedIcon,
+  IconFrame,
+  Tooltip,
 } from '@pluralsh/design-system'
 
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
+
+import { Link } from 'react-router-dom'
+
+import { getClusterAddOnDetailsPath } from 'routes/cdRoutesConsts'
 
 import { GitPointer } from '../deprecationsColumns'
 
@@ -24,7 +29,7 @@ type AddOnVersion = NonNullable<
 const columnHelperRuntime = createColumnHelper<RuntimeService>()
 const columnHelperExpanded = createColumnHelper<AddOnVersion>()
 
-function AddOnName({ addon, row, expanded }) {
+function AddOnName({ addon, row }) {
   const theme = useTheme()
 
   return (
@@ -37,17 +42,6 @@ function AddOnName({ addon, row, expanded }) {
         }}
       >
         {row.original?.name}
-        {expanded ? (
-          <CaretDownIcon
-            size={12}
-            onClick={row.getToggleExpandedHandler()}
-          />
-        ) : (
-          <CaretRightIcon
-            size={12}
-            onClick={row.getToggleExpandedHandler()}
-          />
-        )}
       </div>
     </ColWithIcon>
   )
@@ -68,61 +62,151 @@ export const expandedColumns = [
   }),
 ]
 
-export const runtimeColumns = [
-  columnHelperRuntime.accessor((row) => row?.addon, {
-    id: 'name',
-    header: 'Name',
-    cell: ({ getValue, row }) => {
-      const addon = getValue()
-      const expanded = row.getIsExpanded()
+const colName = columnHelperRuntime.accessor((row) => row?.addon, {
+  id: 'name',
+  header: 'Name',
+  cell: ({ getValue, row }) => {
+    const addon = getValue()
 
-      if (!addon) return null
+    if (!addon) return null
 
+    return (
+      <AddOnName
+        addon={addon}
+        row={row}
+      />
+    )
+  },
+})
+const colChartVersion = columnHelperRuntime.accessor(
+  (row) => row?.service?.helm?.version,
+  {
+    id: 'chartVersion',
+    header: 'Chart version',
+    cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
+  }
+)
+
+const VersionSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  width: '100%',
+}))
+const VersionArrowLinkSC = styled(IconFrame)(({ theme }) => ({
+  ...theme.partials.text.inlineLink,
+}))
+
+function ChartVersion({
+  clusterId,
+  runtimeService,
+  showLinkOut = false,
+}: {
+  clusterId?: Nullable<string>
+  runtimeService: RuntimeService
+  showLinkOut?: boolean
+}) {
+  return (
+    <VersionSC>
+      <TableText>{runtimeService?.addonVersion?.version}</TableText>
+      {showLinkOut && clusterId && (
+        <VersionArrowLinkSC
+          clickable
+          forwardedAs={Link}
+          to={`${getClusterAddOnDetailsPath({
+            clusterId,
+            addOnId: runtimeService?.id,
+          })}/compatibility`}
+          icon={<ArrowTopRightIcon />}
+          tooltip="View compatibility matrix"
+          tooltipProps={{
+            placement: 'right',
+          }}
+        />
+      )}
+    </VersionSC>
+  )
+}
+const colVersion = columnHelperRuntime.accessor(
+  (row) => row?.addonVersion?.version,
+  {
+    id: 'version',
+    header: 'Version',
+    cell({ row: { original } }) {
+      return <ChartVersion runtimeService={original} />
+    },
+  }
+)
+const colVersionWithLink = columnHelperRuntime.accessor(
+  (row) => row?.addonVersion?.version,
+  {
+    id: 'version-with-link',
+    header: 'Version',
+    cell({
+      row: { original },
+      table: {
+        options: { meta },
+      },
+    }) {
       return (
-        <AddOnName
-          addon={addon}
-          expanded={expanded}
-          row={row}
+        <ChartVersion
+          runtimeService={original}
+          showLinkOut
+          clusterId={(meta as any)?.clusterId}
         />
       )
     },
-  }),
-  columnHelperRuntime.accessor((row) => row?.version, {
-    id: 'version',
-    header: 'Version',
-    cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
-  }),
-  columnHelperRuntime.accessor((row) => row?.addonVersion, {
-    id: 'kube-version',
-    header: 'Kubernetes Versions',
-    meta: { truncate: true },
-    cell: ({ getValue }) => {
-      const addonVersion = getValue()
+  }
+)
 
-      if (!addonVersion) return null
+const colKubVersion = columnHelperRuntime.accessor((row) => row?.addonVersion, {
+  id: 'kube-version',
+  header: 'Compatible k8s versions',
+  meta: { truncate: true },
+  cell: ({ getValue }) => {
+    const addonVersion = getValue()
 
-      return <TableText>{(addonVersion.kube || []).join(', ')}</TableText>
-    },
-  }),
-  columnHelperRuntime.accessor((row) => row?.addonVersion, {
-    id: 'blocking',
-    header: 'Blocks Upgrade',
-    cell: ({ getValue }) => {
-      const addonVersion = getValue()
+    return <TableText>{(addonVersion?.kube || []).join(', ')}</TableText>
+  },
+})
+const colBlocking = columnHelperRuntime.accessor((row) => row?.addonVersion, {
+  id: 'blocking',
+  header: 'Blocks k8s upgrade',
+  cell: ({ getValue }) => {
+    const addonVersion = getValue()
 
-      if (!addonVersion?.blocking) return null
+    if (!addonVersion?.blocking) return null
 
-      return (
-        <ErrorIcon
+    return (
+      <Tooltip label="Blocking">
+        <BlockedIcon
           color="icon-danger"
           size={16}
         />
-      )
-    },
-  }),
-  columnHelperRuntime.accessor((row) => row?.service, {
-    id: 'git',
-    header: 'Repository',
-    cell: ({ getValue }) => <GitPointer service={getValue()} />,
-  }),
+      </Tooltip>
+    )
+  },
+})
+const colGit = columnHelperRuntime.accessor((row) => row?.service, {
+  id: 'git',
+  header: 'Repository',
+  cell: ({ getValue }) => <GitPointer service={getValue()} />,
+})
+
+export const runtimeColumns = [
+  colName,
+  colVersionWithLink,
+  colChartVersion,
+  colKubVersion,
+  colBlocking,
+]
+
+export const clusterAddonsColumns = [
+  colName,
+  colVersion,
+  colChartVersion,
+  colKubVersion,
+  colBlocking,
+  colGit,
 ]

@@ -1,17 +1,10 @@
 import styled from 'styled-components'
-import { Card, CardProps } from '@pluralsh/design-system'
-import {
-  ReactNode,
-  createContext,
-  forwardRef,
-  useContext,
-  useMemo,
-} from 'react'
+import { Card, CardProps, useFillLevel } from '@pluralsh/design-system'
+import { ComponentProps, ReactNode, forwardRef } from 'react'
 import { Ul } from 'honorable'
+import { FillLevel } from '@pluralsh/design-system/dist/components/contexts/FillLevelContext'
 
 type Hue = Required<CardProps>['hue']
-
-const ListContext = createContext<{ hue: Hue }>({ hue: 'default' })
 
 const LiBare = styled.li(
   ({ $extendStyle }: { $extendStyle?: Record<string, any> }) => ({
@@ -23,20 +16,22 @@ const LiBare = styled.li(
   })
 )
 
-const hueToBorderColor: Record<Hue | 'none', string> = {
-  none: 'border',
-  default: 'border',
-  lighter: 'border-fill-two',
-  lightest: 'border-fill-three',
+const fillLevelToBorderColor: Record<FillLevel, string> = {
+  0: 'border',
+  1: 'border',
+  2: 'border-fill-two',
+  3: 'border-fill-three',
 }
 
-const ListItemInner = styled(LiBare)<{
+const ListItemSC = styled(LiBare)<{
   $last?: boolean
   $hue?: string
-}>(({ theme, $last = false, $hue = 'default' }) => ({
+  $fillLevel?: FillLevel
+}>(({ theme, $last = false, $fillLevel }) => ({
   padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
   borderBottomStyle: $last ? 'none' : 'solid',
-  borderColor: theme.colors[hueToBorderColor[$hue]] || 'transparent',
+  borderColor:
+    theme.colors[fillLevelToBorderColor[$fillLevel ?? 1]] || 'transparent',
   borderWidth: '1px',
 }))
 
@@ -45,15 +40,15 @@ type ListItemProps = any & {
   children: ReactNode
 }
 
-const ListItem = forwardRef<HTMLLIElement, ListItemProps>(
+const ListItem = forwardRef<ComponentProps<typeof ListItemSC>, ListItemProps>(
   ({ last, ...props }, ref) => {
-    const { hue } = useContext(ListContext)
+    const fillLevel = useFillLevel()
 
     return (
-      <ListItemInner
+      <ListItemSC
         ref={ref}
+        $fillLevel={fillLevel}
         $last={last}
-        $hue={hue}
         {...props}
       />
     )
@@ -66,36 +61,24 @@ type ListProps = any & {
 }
 
 const List = forwardRef<HTMLDivElement, ListProps>(
-  ({ hue = 'default', children, ...props }, ref) => {
-    const listContext = useMemo(
-      () => ({
-        hue,
-      }),
-      [hue]
-    )
-
-    return (
-      <ListContext.Provider value={listContext}>
-        <Card
-          ref={ref}
-          hue={hue}
-          display="flex"
-          alignItems="top"
-          flexDirection="column"
-          cornerSize="large"
-          padding={0}
-          margin={0}
-          flexGrow={1}
-          maxHeight="min-content"
-          {...props}
-          overflow="hidden"
-          as={Ul}
-        >
-          {children}
-        </Card>
-      </ListContext.Provider>
-    )
-  }
+  ({ children, ...props }, ref) => (
+    <Card
+      ref={ref}
+      display="flex"
+      alignItems="top"
+      flexDirection="column"
+      cornerSize="large"
+      padding={0}
+      margin={0}
+      flexGrow={1}
+      maxHeight="min-content"
+      {...props}
+      overflow="hidden"
+      as={Ul}
+    >
+      {children}
+    </Card>
+  )
 )
 
-export { List, ListItem, ListContext, hueToBorderColor }
+export { List, ListItem, fillLevelToBorderColor }

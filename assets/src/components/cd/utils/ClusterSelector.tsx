@@ -9,7 +9,7 @@ import {
 import { useCallback, useMemo, useState } from 'react'
 
 import { ClusterTinyFragment, useClusterSelectorQuery } from 'generated/graphql'
-import ProviderIcon from 'components/utils/Provider'
+import { ClusterProviderIcon } from 'components/utils/Provider'
 import { useTheme } from 'styled-components'
 import { useThrottle } from 'components/hooks/useThrottle'
 import isEmpty from 'lodash/isEmpty'
@@ -83,9 +83,9 @@ export default function ClusterSelector({
         clusterSelectIsOpen || !selectedCluster ? (
           <SearchIcon />
         ) : (
-          <ProviderIcon
-            provider={selectedCluster?.provider?.cloud || ''}
-            width={16}
+          <ClusterProviderIcon
+            cluster={selectedCluster}
+            size={16}
           />
         )
       }
@@ -151,9 +151,9 @@ export default function ClusterSelector({
           label={cluster?.name}
           textValue={cluster?.name}
           leftContent={
-            <ProviderIcon
-              provider={cluster?.provider?.cloud || ''}
-              width={16}
+            <ClusterProviderIcon
+              cluster={cluster}
+              size={16}
             />
           }
         />

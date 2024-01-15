@@ -19,7 +19,10 @@ import { shortenSha1 } from 'utils/sha'
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { getProviderIconUrl } from 'components/utils/Provider'
+import {
+  getClusterIconUrl,
+  getProviderIconUrl,
+} from 'components/utils/Provider'
 import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { ProtectBadge } from '../clusters/ProtectBadge'
@@ -70,11 +73,15 @@ export const ColCluster = columnHelper.accessor(
     cell: ({ getValue, row: { original } }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
-      const cloud = original?.node?.cluster?.provider?.cloud || ''
       const clusterName = getValue()
 
       return (
-        <ColWithIcon icon={getProviderIconUrl(cloud, theme.mode)}>
+        <ColWithIcon
+          icon={getClusterIconUrl({
+            cluster: original?.node?.cluster,
+            mode: theme.mode,
+          })}
+        >
           {clusterName}
         </ColWithIcon>
       )

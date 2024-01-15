@@ -165,7 +165,6 @@ export default function RunbookAlert({ alert }: { alert: RunbookAlertStatus }) {
               color="icon-warning"
             />
           }
-          hue="lighter"
           size="xxsmall"
         />
         <div className="info">

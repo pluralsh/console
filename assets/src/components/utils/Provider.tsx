@@ -1,7 +1,11 @@
+import { ComponentProps } from 'react'
+import { IconFrame, type styledTheme } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { type styledTheme } from '@pluralsh/design-system'
 
+import { ClusterDistro } from 'generated/graphql'
 import { Provider } from 'generated/graphql-plural'
+
+import { DistroProviderIcon, getDistroProviderIconUrl } from './ClusterDistro'
 
 export const CHART_ICON_DARK = '/providers/chart-icon.png'
 export const CHART_ICON_LIGHT = '/providers/chart-icon.png'
@@ -36,8 +40,43 @@ export function getProviderName(provider?: string | null) {
   return p && ProviderNames[p] ? ProviderNames[p] : 'BYOK'
 }
 
+export function getClusterIconUrl({
+  cluster,
+  mode,
+}: {
+  cluster: Nullable<{
+    distro?: Nullable<ClusterDistro>
+    provider?: Nullable<{ cloud?: Nullable<string> }>
+  }>
+  mode: typeof styledTheme.mode
+}) {
+  return getDistroProviderIconUrl({
+    distro: cluster?.distro,
+    provider: cluster?.provider?.cloud,
+    mode,
+  })
+}
+
+export function ClusterProviderIcon({
+  cluster,
+  ...props
+}: {
+  cluster: Nullable<{
+    distro?: Nullable<ClusterDistro>
+    provider?: Nullable<{ cloud?: Nullable<string> }>
+  }>
+} & Omit<ComponentProps<typeof DistroProviderIcon>, 'distro' | 'provider'>) {
+  return (
+    <DistroProviderIcon
+      distro={cluster?.distro}
+      provider={cluster?.provider?.cloud}
+      {...props}
+    />
+  )
+}
+
 export function getProviderIconUrl(
-  provider: string,
+  provider: Nullable<string>,
   mode: typeof styledTheme.mode
 ) {
   return (
@@ -53,7 +92,7 @@ export function getProviderIconUrl(
         KUBERNETES: mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK,
         LINODE: mode === 'light' ? LINODE_ICON_LIGHT : LINODE_ICON_DARK,
       } as const satisfies Record<Provider, string>
-    )[provider?.toUpperCase()] ??
+    )[provider?.toUpperCase() ?? ''] ??
     (mode === 'light' ? CHART_ICON_LIGHT : CHART_ICON_DARK)
   )
 }
@@ -61,11 +100,17 @@ export function getProviderIconUrl(
 export default function ProviderIcon({
   provider,
   width,
+  size,
 }: {
-  provider: string
-  width: number
+  provider: Nullable<string>
+  width?: number
+  size?: number
 }) {
   const theme = useTheme()
+
+  if (size) {
+    width = size
+  }
 
   return (
     <div css={{ display: 'flex', justifyContent: 'center', width }}>
@@ -75,5 +120,23 @@ export default function ProviderIcon({
         width={width}
       />
     </div>
+  )
+}
+
+export function ProviderIconFrame({
+  provider,
+  ...props
+}: {
+  provider: Nullable<string>
+} & Omit<ComponentProps<typeof IconFrame>, 'icon'>) {
+  const providerName = getProviderName(provider) || provider
+
+  return (
+    <IconFrame
+      textValue={providerName}
+      tooltip={providerName}
+      icon={<ProviderIcon provider={provider} />}
+      {...props}
+    />
   )
 }

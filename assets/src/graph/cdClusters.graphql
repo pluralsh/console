@@ -81,6 +81,23 @@ fragment RuntimeService on RuntimeService {
       ...AddonVersion
     }
   }
+  service {
+    git {
+      ref
+      folder
+    }
+    repository {
+      httpsPath
+      urlFormat
+    }
+    helm {
+      version
+    }
+  }
+  addonVersion {
+    ...AddonVersionBlocking @include(if: $hasKubeVersion)
+    ...AddonVersion
+  }
 }
 
 fragment AddonVersion on AddonVersion {
@@ -96,6 +113,10 @@ fragment AddonVersion on AddonVersion {
   }
 }
 
+fragment AddonVersionBlocking on AddonVersion {
+  blocking(kubeVersion: $kubeVersion)
+}
+
 fragment ClustersRow on Cluster {
   apiDeprecations {
     ...ApiDeprecation
@@ -106,6 +127,7 @@ fragment ClustersRow on Cluster {
   protect
   name
   handle
+  distro
   nodes {
     status {
       capacity
@@ -144,6 +166,7 @@ fragment ClustersRow on Cluster {
     name
     value
   }
+  distro
 }
 
 fragment Cluster on Cluster {
@@ -196,8 +219,13 @@ fragment Cluster on Cluster {
   }
 }
 
-query Clusters($first: Int = 100, $after: String, $q: String) {
-  clusters(first: $first, after: $after, q: $q) {
+query Clusters(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $healthy: Boolean
+) {
+  clusters(first: $first, after: $after, q: $q, healthy: $healthy) {
     pageInfo {
       ...PageInfo
     }
@@ -207,6 +235,10 @@ query Clusters($first: Int = 100, $after: String, $q: String) {
       }
     }
   }
+  clusterStatuses {
+    ...ClusterStatusInfo
+  }
+  tags
 }
 
 fragment ClusterTiny on Cluster {
@@ -215,6 +247,7 @@ fragment ClusterTiny on Cluster {
   provider {
     cloud
   }
+  distro
 }
 
 query ClustersTiny {
@@ -303,24 +336,18 @@ query ClusterBindings($id: ID!) {
   }
 }
 
-query RuntimeServices($id: ID!, $kubeVersion: String!) {
+query RuntimeServices(
+  $id: ID!
+  $kubeVersion: String!
+  $hasKubeVersion: Boolean!
+) {
   cluster(id: $id) {
+    id
+    name
+    currentVersion
+    version
     runtimeServices {
       ...RuntimeService
-      service {
-        git {
-          ref
-          folder
-        }
-        repository {
-          httpsPath
-          urlFormat
-        }
-      }
-      addonVersion {
-        blocking(kubeVersion: $kubeVersion)
-        ...AddonVersion
-      }
     }
   }
 }
@@ -345,5 +372,16 @@ mutation CreateCluster($attributes: ClusterAttributes!) {
 mutation DeleteCluster($id: ID!) {
   deleteCluster(id: $id) {
     ...Cluster
+  }
+}
+
+fragment ClusterStatusInfo on ClusterStatusInfo {
+  count
+  healthy
+}
+
+query ClusterStatuses($clusterId: ID) {
+  clusterStatuses {
+    ...ClusterStatusInfo
   }
 }

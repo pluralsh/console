@@ -78,7 +78,6 @@ export function userSuggestion({ name, email, avatar, id }: any) {
       leftContent={
         <AppIcon
           spacing={avatar ? 'none' : undefined}
-          hue="lightest"
           size="xsmall"
           name={name}
           url={avatar}

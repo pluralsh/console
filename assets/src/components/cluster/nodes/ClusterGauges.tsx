@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { LoopingLogo } from '@pluralsh/design-system'
 import { useQuery } from '@apollo/client'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { sumBy } from 'lodash'
@@ -10,7 +11,6 @@ import RadialBarChart from 'components/utils/RadialBarChart'
 
 import { ClusterMetrics as Metrics } from '../constants'
 import { NODE_METRICS_Q } from '../queries'
-
 import { GaugeWrap, ResourceGauge } from '../Gauges'
 
 import { ResourceUsage } from './Nodes'
@@ -106,7 +106,7 @@ export function ClusterGauges({
   }, [data, nodes, usage])
 
   if (!chartData) {
-    return null
+    return <LoopingLogo />
   }
 
   return (

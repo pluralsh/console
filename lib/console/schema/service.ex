@@ -44,6 +44,11 @@ defmodule Console.Schema.Service do
       field :version,      :string
       field :values_files, {:array, :string}
 
+      embeds_many :set, HelmValue, on_replace: :delete do
+        field :name, :string
+        field :value, Piazza.Ecto.EncryptedString
+      end
+
       embeds_one :repository, Console.Schema.NamespacedName
     end
 
@@ -51,12 +56,19 @@ defmodule Console.Schema.Service do
       model
       |> cast(attrs, ~w(values chart version values_files)a)
       |> cast_embed(:repository)
+      |> cast_embed(:set)
       |> validate_change(:values_files, fn :values_files, files ->
         case Enum.member?(files, "values.yaml") do
           true -> [values_files: "explicitly wiring in values.yaml can corrupt helm charts, try a different filename"]
           _ -> []
         end
       end)
+    end
+
+    def set_changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, ~w(name value)a)
+      |> validate_required(~w(name value)a)
     end
   end
 
@@ -75,6 +87,8 @@ defmodule Console.Schema.Service do
     field :read_policy_id,   :binary_id
     field :deleted_at,       :utc_datetime_usec
     field :protect,          :boolean
+    field :dry_run,          :boolean
+    field :interval,         :string
 
     embeds_one :git,  Git,  on_replace: :update
     embeds_one :helm, Helm, on_replace: :update
@@ -185,13 +199,14 @@ defmodule Console.Schema.Service do
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 
-  @valid ~w(name protect docs_path component_status status version sha cluster_id repository_id namespace owner_id message)a
+  @valid ~w(name protect interval docs_path component_status dry_run interval status version sha cluster_id repository_id namespace owner_id message)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> kubernetes_names([:name, :namespace])
     |> semver(:version)
+    |> validate_format(:interval, ~r/\d+[mhs]/, message: "interval must be a valid go interval string")
     |> cast_embed(:git)
     |> cast_embed(:helm)
     |> cast_embed(:sync_config, with: &sync_config_changeset/2)

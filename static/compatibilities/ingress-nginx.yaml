@@ -1,4 +1,6 @@
 icon: https://github.com/pluralsh/plural-artifacts/blob/main/ingress-nginx/plural/icons/nginx.png?raw=true
+git_url: https://github.com/kubernetes/ingress-nginx
+release_url: https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v{vsn}
 versions:
 - version: 1.9.5
   kube: ['1.28', '1.27', '1.26', '1.25']

@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Deployments.Cluster do
   use Console.GraphQl.Schema.Base
   alias Console.Schema.{ClusterProvider, Cluster}
-  alias Console.Deployments.Compatibilities
+  alias Console.Deployments.{Compatibilities, Clusters}
   alias Console.GraphQl.Resolvers.{Deployments}
 
   ecto_enum :cluster_distro, Cluster.Distro
@@ -383,7 +383,18 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   @desc "a full specification of a kubernetes runtime component's requirements"
   object :runtime_addon do
-    field :icon,     :string, description: "an icon to identify this runtime add-on"
+    field :icon,        :string, description: "an icon to identify this runtime add-on"
+    field :git_url,     :string, description: "the url to the add-ons git repository"
+    field :readme,      :string,
+      description: "the add-on's readme, this is a heavy operation that should not be performed w/in lists",
+      resolve: fn addon, _, _ -> Clusters.readme(addon) end
+
+    @desc "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
+    field :release_url, :string do
+      arg :version, non_null(:string)
+      resolve fn addon, %{version: version}, _ -> Clusters.release(addon, version) end
+    end
+
     field :versions, list_of(:addon_version)
   end
 
@@ -393,6 +404,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :kube,              list_of(:string), description: "kubernetes versions this add-on works with"
     field :requirements,      list_of(:version_reference), description: "any other add-ons this might require"
     field :incompatibilities, list_of(:version_reference), description: "any add-ons this might break"
+
+    @desc "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
+    field :release_url, :string do
+      arg :version, non_null(:string)
+      resolve fn
+        %{addon: addon}, %{version: version}, _ -> Clusters.release(addon, version)
+        _, _, _ -> {:ok, nil}
+      end
+    end
 
     @desc "checks if this is blocking a specific kubernetes upgrade"
     field :blocking, :boolean do
@@ -475,9 +495,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "a relay connection of all clusters visible to the current user"
     connection field :clusters, node_type: :cluster do
       middleware Authenticated
-      arg :q,      :string
-      arg :health, :boolean
-      arg :tag,    :tag_input
+      arg :q,       :string
+      arg :healthy, :boolean
+      arg :tag,     :tag_input
 
       resolve &Deployments.list_clusters/2
     end
@@ -530,6 +550,14 @@ defmodule Console.GraphQl.Deployments.Cluster do
       middleware Authenticated
 
       resolve &Deployments.list_addons/2
+    end
+
+    @desc "fetch an individual runtime service for more thorough detail views"
+    field :runtime_service, :runtime_service do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_runtime_service/2
     end
   end
 

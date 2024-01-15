@@ -91,6 +91,37 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert Enum.all?(found, & &1["name"])
     end
 
+    test "it can list clusters by health in the system" do
+      clusters = insert_list(3, :cluster, pinged_at: Timex.now())
+      others = insert_list(3, :cluster, pinged_at: Timex.now() |> Timex.shift(hours: -1))
+
+      {:ok, %{data: %{"clusters" => found}}} = run_query("""
+        query {
+          clusters(first: 5, healthy: true) {
+            edges { node { id name } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      found = from_connection(found)
+
+      assert ids_equal(found, clusters)
+      assert Enum.all?(found, & &1["name"])
+
+      {:ok, %{data: %{"clusters" => found}}} = run_query("""
+        query {
+          clusters(first: 5, healthy: false) {
+            edges { node { id name } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      found = from_connection(found)
+
+      assert ids_equal(found, others)
+      assert Enum.all?(found, & &1["name"])
+    end
+
     test "it will respect rbac" do
       user = insert(:user)
       %{group: group} = insert(:group_member, user: user)
@@ -391,6 +422,47 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
 
       assert ids_equal(svcs, services)
       assert Enum.all?(svcs, & &1["tarball"])
+    end
+  end
+
+  describe "runtimeService" do
+    test "it can fetch an individual runtime service by id" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}], current_version: "1.25")
+      runtime = insert(:runtime_service, cluster: cluster, name: "ingress-nginx", version: "1.5.1")
+
+      {:ok, %{data: %{"runtimeService" => rs}}} = run_query("""
+        query Runtime($id: ID!) {
+          runtimeService(id: $id) {
+            id
+            addon {
+              versions { version kube }
+              readme
+            }
+          }
+        }
+      """, %{"id" => runtime.id}, %{current_user: user})
+
+      assert rs["id"] == runtime.id
+      assert rs["addon"]["readme"]
+    end
+
+    test "users w/o cluster read cannot fetch a runtime service by id" do
+      user = insert(:user)
+      cluster = insert(:cluster, current_version: "1.25")
+      runtime = insert(:runtime_service, cluster: cluster, name: "ingress-nginx", version: "1.5.1")
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Runtime($id: ID!) {
+          runtimeService(id: $id) {
+            id
+            addon {
+              versions { version kube }
+              readme
+            }
+          }
+        }
+      """, %{"id" => runtime.id}, %{current_user: user})
     end
   end
 

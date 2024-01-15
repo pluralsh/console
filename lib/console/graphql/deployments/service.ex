@@ -15,6 +15,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :sync_config,    :sync_config_attributes
     field :protect,        :boolean
     field :repository_id,  :id
+    field :dry_run,        :boolean
     field :git,            :git_ref_attributes
     field :helm,           :helm_config_attributes
     field :kustomize,      :kustomize_attributes
@@ -32,12 +33,18 @@ defmodule Console.GraphQl.Deployments.Service do
     field :values_files, list_of(:string)
     field :chart,        :string
     field :version,      :string
+    field :set,          :helm_value_attributes
     field :repository,   :namespaced_name
   end
 
   input_object :metadata_attributes do
     field :labels,      :json
     field :annotations, :json
+  end
+
+  input_object :helm_value_attributes do
+    field :name,  :string, description: "helm value name, can be deeply nested via dot like `image.tag`"
+    field :value, :string, description: "value of the attribute"
   end
 
   input_object :service_update_attributes do
@@ -73,6 +80,13 @@ defmodule Console.GraphQl.Deployments.Service do
     field :kind,       non_null(:string)
     field :namespace,  non_null(:string)
     field :name,       non_null(:string)
+    field :content,    :component_content_attributes
+  end
+
+  @desc "the content of a component when visualized in dry run state"
+  input_object :component_content_attributes do
+    field :desired, :string, description: "the desired state of a service component as determined from the configured manifests"
+    field :live,    :string
   end
 
   input_object :service_error_attributes do
@@ -99,6 +113,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :namespace,        non_null(:string), description: "kubernetes namespace this service will be deployed to"
     field :status,           non_null(:service_deployment_status), description: "A summary status enum for the health of this service"
     field :version,          non_null(:string), description: "semver of this service"
+    field :interval,         :string, description: "the desired sync interval for this service"
     field :git,              :git_ref,   description: "description on where in git the service's manifests should be fetched"
     field :helm,             :helm_spec, description: "description of how helm charts should be applied", resolve: fn
       %{helm: %{} = helm} = svc, _, _ ->
@@ -114,6 +129,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :kustomize,        :kustomize, description: "kustomize related service metadata"
     field :message,          :string, description: "the commit message currently in use"
     field :deleted_at,       :datetime, description: "the time this service was scheduled for deletion"
+    field :dry_run,          :boolean, description: "whether this service should not actively reconcile state and instead simply report pending changes"
 
     @desc "fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries"
     field :docs, list_of(:git_file), resolve: &Deployments.docs/3
@@ -171,15 +187,23 @@ defmodule Console.GraphQl.Deployments.Service do
 
   object :helm_spec do
     field :chart,        :string, description: "the name of the chart this service is using"
-    field :values,       :string, description: "a helm values file to use with this service, requires auth and so is heavy to query",
+    field :values,       :string,
+      description: "a helm values file to use with this service, requires auth and so is heavy to query",
       resolve: &Deployments.helm_values/3
     field :repository,   :object_reference, description: "pointer to the flux helm repository resource used for this chart"
     field :version,      :string, description: "the chart version in use currently"
+    field :set,          list_of(:helm_value), description: "a list of helm name/value pairs to precisely set individual values"
     field :values_files, list_of(:string), description: "a list of relative paths to values files to use for helm applies"
   end
 
   @desc "a configuration item k/v pair"
   object :service_configuration do
+    field :name,  non_null(:string)
+    field :value, non_null(:string)
+  end
+
+  @desc "a (possibly nested) helm value pair"
+  object :helm_value do
     field :name,  non_null(:string)
     field :value, non_null(:string)
   end
@@ -200,8 +224,18 @@ defmodule Console.GraphQl.Deployments.Service do
     field :namespace,  :string, description: "kubernetes namespace of this resource"
     field :name,       non_null(:string), description: "kubernetes name of this resource"
 
+    field :content, :component_content, resolve: dataloader(Deployments), description: "the live and desired states of this service component"
     field :service, :service_deployment, resolve: dataloader(Deployments), description: "the service this component belongs to"
     field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments), description: "any api deprecations discovered from this component"
+  end
+
+  @desc "dry run content of a service component"
+  object :component_content do
+    field :id,      non_null(:id)
+    field :live,    :string
+    field :desired, :string, description: "the inferred desired state of this component"
+
+    timestamps()
   end
 
   @desc "a representation of a kubernetes api deprecation"

@@ -173,7 +173,7 @@ type RootQueryType {
   tokenExchange(token: String!): User
 
   "a relay connection of all clusters visible to the current user"
-  clusters(after: String, first: Int, before: String, last: Int, q: String, health: Boolean, tag: TagInput): ClusterConnection
+  clusters(after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput): ClusterConnection
 
   "gets summary information for all healthy\/unhealthy clusters in your fleet"
   clusterStatuses(q: String, tag: TagInput): [ClusterStatusInfo]
@@ -192,6 +192,9 @@ type RootQueryType {
 
   "list all addons currently resident in the artifacts repo"
   clusterAddOns: [ClusterAddOn]
+
+  "fetch an individual runtime service for more thorough detail views"
+  runtimeService(id: ID!): RuntimeService
 
   serviceDeployments(
     after: String
@@ -941,6 +944,7 @@ input ServiceDeploymentAttributes {
   syncConfig: SyncConfigAttributes
   protect: Boolean
   repositoryId: ID
+  dryRun: Boolean
   git: GitRefAttributes
   helm: HelmConfigAttributes
   kustomize: KustomizeAttributes
@@ -958,12 +962,21 @@ input HelmConfigAttributes {
   valuesFiles: [String]
   chart: String
   version: String
+  set: HelmValueAttributes
   repository: NamespacedName
 }
 
 input MetadataAttributes {
   labels: Json
   annotations: Json
+}
+
+input HelmValueAttributes {
+  "helm value name, can be deeply nested via dot like `image.tag`"
+  name: String
+
+  "value of the attribute"
+  value: String
 }
 
 input ServiceUpdateAttributes {
@@ -999,6 +1012,15 @@ input ComponentAttributes {
   kind: String!
   namespace: String!
   name: String!
+  content: ComponentContentAttributes
+}
+
+"the content of a component when visualized in dry run state"
+input ComponentContentAttributes {
+  "the desired state of a service component as determined from the configured manifests"
+  desired: String
+
+  live: String
 }
 
 input ServiceErrorAttributes {
@@ -1043,6 +1065,9 @@ type ServiceDeployment {
   "semver of this service"
   version: String!
 
+  "the desired sync interval for this service"
+  interval: String
+
   "description on where in git the service's manifests should be fetched"
   git: GitRef
 
@@ -1075,6 +1100,9 @@ type ServiceDeployment {
 
   "the time this service was scheduled for deletion"
   deletedAt: DateTime
+
+  "whether this service should not actively reconcile state and instead simply report pending changes"
+  dryRun: Boolean
 
   "fetches the \/docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries"
   docs: [GitFile]
@@ -1174,12 +1202,21 @@ type HelmSpec {
   "the chart version in use currently"
   version: String
 
+  "a list of helm name\/value pairs to precisely set individual values"
+  set: [HelmValue]
+
   "a list of relative paths to values files to use for helm applies"
   valuesFiles: [String]
 }
 
 "a configuration item k\/v pair"
 type ServiceConfiguration {
+  name: String!
+  value: String!
+}
+
+"a (possibly nested) helm value pair"
+type HelmValue {
   name: String!
   value: String!
 }
@@ -1215,11 +1252,28 @@ type ServiceComponent {
   "kubernetes name of this resource"
   name: String!
 
+  "the live and desired states of this service component"
+  content: ComponentContent
+
   "the service this component belongs to"
   service: ServiceDeployment
 
   "any api deprecations discovered from this component"
   apiDeprecations: [ApiDeprecation]
+}
+
+"dry run content of a service component"
+type ComponentContent {
+  id: ID!
+
+  live: String
+
+  "the inferred desired state of this component"
+  desired: String
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 "a representation of a kubernetes api deprecation"
@@ -1822,6 +1876,15 @@ type RuntimeAddon {
   "an icon to identify this runtime add-on"
   icon: String
 
+  "the url to the add-ons git repository"
+  gitUrl: String
+
+  "the add-on's readme, this is a heavy operation that should not be performed w\/in lists"
+  readme: String
+
+  "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
+  releaseUrl(version: String!): String
+
   versions: [AddonVersion]
 }
 
@@ -1838,6 +1901,9 @@ type AddonVersion {
 
   "any add-ons this might break"
   incompatibilities: [VersionReference]
+
+  "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
+  releaseUrl(version: String!): String
 
   "checks if this is blocking a specific kubernetes upgrade"
   blocking(kubeVersion: String!): Boolean

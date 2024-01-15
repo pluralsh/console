@@ -20,7 +20,6 @@ export default function GroupMember({ user, group, last, edit }: any) {
   return (
     <ListItem
       flex={false}
-      background="fill-two"
       last={last}
       title=""
     >
@@ -34,7 +33,6 @@ export default function GroupMember({ user, group, last, edit }: any) {
       >
         <UserInfo
           user={user}
-          hue="lightest"
           css={{ width: '100%' }}
         />
         {edit && (

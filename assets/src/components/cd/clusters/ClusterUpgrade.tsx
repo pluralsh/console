@@ -3,7 +3,6 @@ import {
   ClusterIcon,
   ErrorIcon,
   ListBoxItem,
-  Modal,
   Select,
   Table,
   Tooltip,
@@ -33,6 +32,8 @@ import { coerce } from 'semver'
 
 import { GqlError } from '../../utils/Alert'
 import { TabularNumbers } from '../../cluster/TableElements'
+
+import ModalAlt from '../ModalAlt'
 
 import { deprecationsColumns } from './deprecationsColumns'
 import RuntimeServices from './runtime/RuntimeServices'
@@ -226,8 +227,8 @@ function ClusterUpgradeModal({
   const theme = useTheme()
 
   return (
-    <Modal
-      header="Upgrade Kubernetes"
+    <ModalAlt
+      header="Upgrading Kubernetes"
       open={open}
       onClose={onClose}
       portal
@@ -254,28 +255,6 @@ function ClusterUpgradeModal({
           gap: theme.spacing.large,
         }}
       >
-        {hasDeprecations && (
-          <>
-            <div
-              css={{
-                ...theme.partials.text.body1,
-                color: theme.colors['text-light'],
-              }}
-            >
-              Before upgrading your Kubernetes version, fix all deprecated
-              resources listed below:
-            </div>
-            <Table
-              data={cluster?.apiDeprecations || []}
-              columns={deprecationsColumns}
-              css={{
-                maxHeight: 310,
-                height: '100%',
-              }}
-            />
-          </>
-        )}
-        <RuntimeServices cluster={cluster} />
         <Table
           data={[cluster]}
           columns={upgradeColumns}
@@ -285,6 +264,17 @@ function ClusterUpgradeModal({
           }}
           reactTableOptions={{ meta: { refetch, setError } }}
         />
+        <RuntimeServices cluster={cluster} />
+        {hasDeprecations && (
+          <Table
+            data={cluster?.apiDeprecations || []}
+            columns={deprecationsColumns}
+            css={{
+              maxHeight: 181,
+              height: '100%',
+            }}
+          />
+        )}
         {error && (
           <GqlError
             header="Problem upgrading cluster"
@@ -292,7 +282,7 @@ function ClusterUpgradeModal({
           />
         )}
       </div>
-    </Modal>
+    </ModalAlt>
   )
 }
 

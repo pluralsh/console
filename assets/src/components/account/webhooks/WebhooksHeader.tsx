@@ -1,36 +1,40 @@
 import { Card, IconFrame, SlackLogoIcon } from '@pluralsh/design-system'
-import { Flex, P } from 'honorable'
+import { useTheme } from 'styled-components'
+import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 
 import WebhookCreate from './WebhookCreate'
 
 export default function WebhooksHeader() {
+  const theme = useTheme()
+
   return (
     <Card
-      display="flex"
-      gap="medium"
-      padding="medium"
+      css={{
+        '&&': {
+          display: 'flex',
+          gap: theme.spacing.medium,
+          padding: theme.spacing.medium,
+          alignItems: 'center',
+        },
+      }}
     >
       <IconFrame
         icon={<SlackLogoIcon fullColor />}
         size="large"
         textValue="Slack"
-        type="floating"
+        type="secondary"
       />
       <div>
-        <P
-          body1
-          fontWeight={600}
-        >
-          Slack
-        </P>
-        <P
-          caption
-          color="text-xlight"
+        <Body1BoldP>Slack</Body1BoldP>
+        <CaptionP
+          css={{
+            color: theme.colors['text-light'],
+          }}
         >
           Previews alerts and other notifications from Slack.
-        </P>
+        </CaptionP>
       </div>
-      <Flex grow={1} />
+      <div css={{ flexGrow: 1 }} />
       <WebhookCreate />
     </Card>
   )

@@ -12,6 +12,9 @@ export const Body1BoldP = styled.p(({ theme }) => ({
 export const Body2BoldP = styled.p(({ theme }) => ({
   ...theme.partials.text.body2Bold,
 }))
+export const CaptionP = styled.p(({ theme }) => ({
+  ...theme.partials.text.caption,
+}))
 export const OverlineH1 = styled.h1(({ theme }) => ({
   ...theme.partials.text.overline,
 }))
@@ -28,3 +31,6 @@ export const Title2H1 = styled.h1(({ theme }) => ({
   ...theme.partials.text.title2,
 }))
 export const A = styled.a``
+export const TabularNums = styled.span({
+  fontVariantNumeric: 'tabular-nums',
+})

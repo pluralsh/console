@@ -27,6 +27,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     PipelinePromotion,
     PromotionCriteria,
     PromotionService,
+    ComponentContent
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -49,6 +50,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Revision, _), do: Revision
   def query(ServiceComponent, _), do: ServiceComponent
   def query(GitRepository, _), do: GitRepository
+  def query(ComponentContent, _), do: ComponentContent
   def query(_, _), do: Cluster
 
   def list_clusters(args, %{context: %{current_user: user}}) do
@@ -200,6 +202,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   end
   def resolve_cluster(%{id: id}, %{context: %{current_user: user}}) do
     Clusters.get_cluster(id)
+    |> allow(user, :read)
+  end
+
+  def resolve_runtime_service(%{id: id}, %{context: %{current_user: user}}) do
+    Clusters.get_runtime_service(id)
     |> allow(user, :read)
   end
 

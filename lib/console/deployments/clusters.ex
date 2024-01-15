@@ -6,7 +6,7 @@ defmodule Console.Deployments.Clusters do
   alias Console.Commands.{Tee, Command}
   alias Console.Deployments.{Services, Git, Providers.Configuration}
   alias Console.Deployments.Providers.Versions
-  alias Console.Deployments.Compatibilities.Table
+  alias Console.Deployments.Compatibilities.{Table, AddOn}
   alias Console.Deployments.Ecto.Validations
   alias Console.Services.Users
   alias Kazan.Apis.Core.V1, as: Core
@@ -27,6 +27,7 @@ defmodule Console.Deployments.Clusters do
   @cache_adapter Console.conf(:cache_adapter)
   @local_adapter Console.conf(:local_cache)
   @node_ttl :timer.minutes(30)
+  @readme_ttl :timer.hours(2)
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
@@ -53,6 +54,11 @@ defmodule Console.Deployments.Clusters do
   def get_cluster_by_handle(handle), do: Console.Repo.get_by(Cluster, handle: handle)
 
   def get_cluster_by_handle!(handle), do: Console.Repo.get_by!(Cluster, handle: handle)
+
+  def get_runtime_service(id) do
+    Console.Repo.get(RuntimeService, id)
+    |> with_addon()
+  end
 
   def has_cluster?(%ClusterProvider{id: id}), do: has_cluster?(id)
   def has_cluster?(provider_id) do
@@ -605,23 +611,58 @@ defmodule Console.Deployments.Clusters do
     |> Repo.update()
   end
 
+  @doc """
+  Grabs the readme for a runtime service registered in a cluster
+  """
+  @spec readme(AddOn.t) :: {:ok, binary} | Console.error
+  @decorate cacheable(cache: @cache_adapter, key: {:readme, url}, opts: [ttl: @readme_ttl])
+  def readme(%AddOn{readme_url: url}) when is_binary(url), do: readme_fetch(url)
+  def readme(%AddOn{git_url: "https://github.com" <> _ = url}),
+    do: readme_fetch("#{url}/raw/{branch}/README.md")
+  def readme(%AddOn{git_url: "https://gitlab.com" <> _ = url}),
+    do: readme_fetch("#{url}/-/raw/{branch}/README.md")
+  def readme(%AddOn{git_url: url}), do: {:ok, nil}
+
+  defp readme_fetch(url) do
+    Enum.find_value(~w(main master), fn branch ->
+      String.replace(url, "{branch}", branch)
+      |> HTTPoison.get([], follow_redirect: true)
+      |> case do
+        {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> {:ok, body}
+        _ -> {:ok, nil}
+      end
+    end)
+  end
+
+  @doc """
+  Fetches the changelog url for an add-on at a specific version
+  """
+  @spec release(AddOn.t, binary) :: {:ok, binary} | Console.error
+  def release(%AddOn{release_url: release}, vsn) when is_binary(release),
+    do: {:ok, String.replace(release, "{vsn}", vsn)}
+  def release(%AddOn{release_url: release}, vsn), do: {:ok, nil}
+
   @spec runtime_services(Cluster.t | binary) :: [RuntimeService.t]
   def runtime_services(%Cluster{id: id}), do: runtime_services(id)
   def runtime_services(id) when is_binary(id) do
     RuntimeService.for_cluster(id)
     |> RuntimeService.ordered()
     |> Repo.all()
-    |> Enum.map(fn svc ->
-      case Table.fetch(svc.name) do
-        %Compatibilities.AddOn{} = addon ->
-          Map.merge(svc, %{
-            addon: addon,
-            addon_version: Compatibilities.AddOn.find_version(addon, Validations.clean_version(svc.version))
-          })
-        _ -> svc
-      end
-    end)
+    |> Enum.map(&with_addon/1)
   end
+
+  defp with_addon(%RuntimeService{} = svc) do
+    case Table.fetch(svc.name) do
+      %Compatibilities.AddOn{} = addon ->
+        vsn = Compatibilities.AddOn.find_version(addon, Validations.clean_version(svc.version))
+        Map.merge(svc, %{
+          addon: addon,
+          addon_version: Map.put(vsn, :addon, addon)
+        })
+      _ -> svc
+    end
+  end
+  defp with_addon(pass), do: pass
 
   @doc """
   Upserts a list of runtime service entries for a cluster (and optionally labels their service id)
