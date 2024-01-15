@@ -77,6 +77,18 @@ spec:
         ports:
         - containerPort: 80"
         useDarkTheme={theme.mode === 'dark'}
+        styles={{
+          variables: {
+            dark: {
+              diffViewerBackground: theme.colors['fill-one'],
+              highlightBackground: theme.colors['fill-one-selected'],
+              gutterBackground: theme.colors['fill-two'],
+              codeFoldGutterBackground: theme.colors['fill-one-selected'],
+              codeFoldBackground: theme.colors['fill-one-selected'],
+              codeFoldContentColor: theme.colors.text,
+            },
+          },
+        }}
       />
     </ScrollablePage>
   )
