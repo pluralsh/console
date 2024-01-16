@@ -2376,6 +2376,8 @@ export type PrAutomation = {
   cluster?: Maybe<Cluster>;
   /** the scm connection to use for pr generation */
   connection?: Maybe<ScmConnection>;
+  /** users who can generate prs with this automation */
+  createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   documentation?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
@@ -2389,6 +2391,8 @@ export type PrAutomation = {
   title: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   updates?: Maybe<PrUpdateSpec>;
+  /** write policy for this pr automation, also propagates to the notifications list for any created PRs */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 /** A way to create a self-service means of generating PRs against an IaC repo */
@@ -2400,15 +2404,19 @@ export type PrAutomationAttributes = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** the scm connection to use for pr generation */
   connectionId?: InputMaybe<Scalars['ID']['input']>;
+  /** users who can create prs with this automation */
+  createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   documentation?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
-  identifier: Scalars['String']['input'];
-  message: Scalars['String']['input'];
-  name: Scalars['String']['input'];
+  identifier?: InputMaybe<Scalars['String']['input']>;
+  message?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   /** link to a service if this can modify its configuration */
   serviceId?: InputMaybe<Scalars['ID']['input']>;
-  title: Scalars['String']['input'];
+  title?: InputMaybe<Scalars['String']['input']>;
   updates?: InputMaybe<PrAutomationUpdateSpecAttributes>;
+  /** users who can update this automation */
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type PrAutomationConnection = {
@@ -2500,6 +2508,32 @@ export type ProviderCredentialAttributes = {
   kind?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** A reference to a pull request for your kubernetes related IaC */
+export type PullRequest = {
+  __typename?: 'PullRequest';
+  /** the cluster this pr is meant to modify */
+  cluster?: Maybe<Cluster>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the service this pr is meant to modify */
+  service?: Maybe<ServiceDeployment>;
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  url: Scalars['String']['output'];
+};
+
+export type PullRequestConnection = {
+  __typename?: 'PullRequestConnection';
+  edges?: Maybe<Array<Maybe<PullRequestEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PullRequestEdge = {
+  __typename?: 'PullRequestEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PullRequest>;
 };
 
 export type RbacAttributes = {
@@ -2694,6 +2728,7 @@ export type RootMutationType = {
   createPeer?: Maybe<WireguardPeer>;
   createPrAutomation?: Maybe<PrAutomation>;
   createProviderCredential?: Maybe<ProviderCredential>;
+  createPullRequest?: Maybe<PullRequest>;
   createRole?: Maybe<Role>;
   createScmConnection?: Maybe<ScmConnection>;
   createServiceAccount?: Maybe<User>;
@@ -2868,6 +2903,13 @@ export type RootMutationTypeCreatePrAutomationArgs = {
 export type RootMutationTypeCreateProviderCredentialArgs = {
   attributes: ProviderCredentialAttributes;
   name: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeCreatePullRequestArgs = {
+  branch?: InputMaybe<Scalars['String']['input']>;
+  context?: InputMaybe<Scalars['Json']['input']>;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3338,6 +3380,7 @@ export type RootQueryType = {
   postgresDatabases?: Maybe<Array<Maybe<Postgresql>>>;
   prAutomation?: Maybe<PrAutomation>;
   prAutomations?: Maybe<PrAutomationConnection>;
+  pullRequests?: Maybe<PullRequestConnection>;
   recipe?: Maybe<Recipe>;
   recipes?: Maybe<RecipeConnection>;
   repositories?: Maybe<RepositoryConnection>;
@@ -3362,6 +3405,8 @@ export type RootQueryType = {
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
   statefulSet?: Maybe<StatefulSet>;
+  /** adds the ability to search/filter through all tag name/value pairs */
+  tagPairs?: Maybe<TagConnection>;
   /** lists tags applied to any clusters in the fleet */
   tags?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   temporaryToken?: Maybe<Scalars['String']['output']>;
@@ -3737,6 +3782,16 @@ export type RootQueryTypePrAutomationsArgs = {
 };
 
 
+export type RootQueryTypePullRequestsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootQueryTypeRecipeArgs = {
   id: Scalars['ID']['input'];
 };
@@ -3874,6 +3929,16 @@ export type RootQueryTypeStatefulSetArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeTagPairsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  tag?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -4513,6 +4578,7 @@ export type SyncConfigAttributes = {
 
 export type Tag = {
   __typename?: 'Tag';
+  id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   value: Scalars['String']['output'];
 };
@@ -4520,6 +4586,18 @@ export type Tag = {
 export type TagAttributes = {
   name: Scalars['String']['input'];
   value: Scalars['String']['input'];
+};
+
+export type TagConnection = {
+  __typename?: 'TagConnection';
+  edges?: Maybe<Array<Maybe<TagEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type TagEdge = {
+  __typename?: 'TagEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Tag>;
 };
 
 export type TagInput = {

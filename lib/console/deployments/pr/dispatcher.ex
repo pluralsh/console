@@ -7,8 +7,12 @@ defmodule Console.Deployments.Pr.Dispatcher do
   alias Console.Deployments.Pr.Impl.{Github, Gitlab}
   alias Console.Schema.{PrAutomation, ScmConnection}
 
-  @type pr_resp :: {:ok, binary} | Console.error
 
+  @type pr_resp :: {:ok, binary, binary} | Console.error
+
+  @doc """
+  Create a pull request for the given SCM, and return the title + url of the pr if successful
+  """
   @callback create(pr :: PrAutomation.t, branch :: binary, context :: map) :: pr_resp
 
   @doc """
@@ -16,7 +20,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   """
   @spec create(PrAutomation.t, binary, map) :: pr_resp
   def create(%PrAutomation{} = pr, branch, ctx) do
-    %{scm_connection: conn} = pr = Repo.preload(pr, [:scm_connection])
+    %PrAutomation{connection: conn} = pr = Repo.preload(pr, [:connection])
     impl = dispatcher(conn)
     with {:ok, conn} <- setup(conn, pr.identifier, branch),
          {:ok, f} <- Config.config(pr, branch, ctx),

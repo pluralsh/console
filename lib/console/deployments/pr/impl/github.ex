@@ -14,7 +14,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
         base: pr.branch,
       })
       |> case do
-        {:ok, %{"html_url" => url}} -> {:ok, url}
+        {:ok, %{"html_url" => url}} -> {:ok, title, url}
         err -> err
       end
     end

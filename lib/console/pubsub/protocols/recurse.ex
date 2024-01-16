@@ -29,7 +29,6 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.BuildApproved do
   def process(_) do
     Logger.info "kicking any active runners"
     Swarm.members(:builds)
-    |> IO.inspect()
     Console.Runner.kick()
   end
 end

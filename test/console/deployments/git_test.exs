@@ -1,7 +1,9 @@
 defmodule Console.Deployments.GitTest do
   use Console.DataCase, async: true
+  use Mimic
   alias Console.PubSub
   alias Console.Deployments.Git
+  alias Console.Commands.Plural
 
   describe "#create_repository/2" do
     test "it can create a new git repository reference" do
@@ -248,6 +250,46 @@ defmodule Console.Deployments.GitTest do
     test "nonadmins cannot delete" do
       pr = insert(:pr_automation)
       {:error, _} = Git.delete_pr_automation(pr.id, insert(:user))
+    end
+  end
+
+  describe "#create_pull_request/4" do
+    test "it can create a pull request off of a pr automation instance" do
+      user = insert(:user)
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        write_bindings: [%{user_id: user.id}],
+        create_bindings: [%{user_id: user.id}]
+      )
+      expect(Plural, :template, fn f -> File.read(f) end)
+      expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
+        {:ok, %{"html_url" => "https://github.com/pr/url"}}
+      end)
+      expect(Console.Deployments.Pr.Git, :setup, fn conn, "pluralsh/console", "pr-test" -> {:ok, conn} end)
+      expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)
+      expect(Console.Deployments.Pr.Git, :push, fn _, "pr-test" -> {:ok, ""} end)
+
+      {:ok, pr} = Git.create_pull_request(%{}, pra.id, "pr-test", user)
+
+      assert pr.cluster_id == pra.cluster_id
+      assert pr.url == "https://github.com/pr/url"
+      assert pr.title == pra.title
+    end
+
+    test "users cannot create if they don't have permissions" do
+      user = insert(:user)
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        write_bindings: [%{user_id: user.id}],
+      )
+
+      {:error, _} = Git.create_pull_request(%{}, pra.id, "pr-test", user)
     end
   end
 end

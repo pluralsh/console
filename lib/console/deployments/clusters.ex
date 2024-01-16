@@ -657,7 +657,7 @@ defmodule Console.Deployments.Clusters do
         vsn = Compatibilities.AddOn.find_version(addon, Validations.clean_version(svc.version))
         Map.merge(svc, %{
           addon: addon,
-          addon_version: Map.put(vsn, :addon, addon)
+          addon_version: vsn && Map.put(vsn, :addon, addon)
         })
       _ -> svc
     end

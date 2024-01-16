@@ -631,7 +631,8 @@ defmodule Console.Deployments.ServicesTest do
             version: "v1",
             kind: "Ingress",
             namespace: "my-app",
-            name: "api"
+            name: "api",
+            content: %{desired: "some yaml"},
           },
           %{
             state: :running,

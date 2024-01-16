@@ -72,6 +72,21 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> ok()
   end
 
+  def search_tags(args, _) do
+    Tag.cluster()
+    |> tag_search_filters(args)
+    |> Tag.ordered([asc: :name, asc: :value])
+    |> paginate(args)
+  end
+
+  defp tag_search_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:tag, t}, q -> Tag.for_name(q, t)
+      {:q, s}, q -> Tag.search(q, s)
+      _, q -> q
+    end)
+  end
+
   defp tag_args(%{tag: _}), do: {[asc: :value], :value}
   defp tag_args(_), do: {[asc: :name], :name}
 

@@ -43,6 +43,9 @@ defmodule Console.GraphQl.Deployments.Git do
     field :cluster_id,    :id, description: "link to a cluster if this is to perform an upgrade"
     field :service_id,    :id, description: "link to a service if this can modify its configuration"
     field :connection_id, :id, description: "the scm connection to use for pr generation"
+
+    field :write_bindings, list_of(:policy_binding_attributes), description: "users who can update this automation"
+    field :create_bindings, list_of(:policy_binding_attributes), description: "users who can create prs with this automation"
   end
 
   @desc "The operations to be performed on the files w/in the pr"
@@ -139,6 +142,14 @@ defmodule Console.GraphQl.Deployments.Git do
     field :message,       non_null(:string)
     field :updates,       :pr_update_spec
 
+    field :write_bindings, list_of(:policy_binding),
+      description: "write policy for this pr automation, also propagates to the notifications list for any created PRs",
+      resolve: dataloader(Deployments)
+
+    field :create_bindings, list_of(:policy_binding),
+      description: "users who can generate prs with this automation",
+      resolve: dataloader(Deployments)
+
     field :addon,      :string, description: "link to an add-on name if this can update it"
     field :cluster,    :cluster,
       description: "link to a cluster if this is to perform an upgrade",
@@ -162,9 +173,24 @@ defmodule Console.GraphQl.Deployments.Git do
     field :match_strategy,   :match_strategy
   end
 
+  @desc "A reference to a pull request for your kubernetes related IaC"
+  object :pull_request do
+    field :id,    non_null(:id)
+    field :url,   non_null(:string)
+    field :title, :string
+
+    field :cluster, :cluster, description: "the cluster this pr is meant to modify",
+      resolve: dataloader(Deployments)
+    field :service, :service_deployment, description: "the service this pr is meant to modify",
+      resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
   connection node_type: :git_repository
   connection node_type: :scm_connection
   connection node_type: :pr_automation
+  connection node_type: :pull_request
 
   delta :git_repository
 
@@ -221,6 +247,14 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_pr_automation/2
+    end
+
+    connection field :pull_requests, node_type: :pull_request do
+      middleware Authenticated
+      arg :cluster_id, :id
+      arg :service_id, :id
+
+      resolve &Deployments.list_pull_requests/2
     end
   end
 
@@ -289,6 +323,15 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_pr_automation/2
+    end
+
+    field :create_pull_request, :pull_request do
+      middleware Authenticated
+      arg :id, non_null(:id), description: "the id of the PR automation instance to use"
+      arg :branch, :string
+      arg :context, :json
+
+      safe_resolve &Deployments.create_pull_request/2
     end
   end
 end

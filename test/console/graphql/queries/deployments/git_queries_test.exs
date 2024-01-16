@@ -85,4 +85,22 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
       assert chart["appVersion"]
     end
   end
+
+  describe "pullRequests" do
+    test "it can list pull requests" do
+      user = insert(:user)
+      prs = insert_list(3, :pull_request)
+
+      {:ok, %{data: %{"pullRequests" => found}}} = run_query("""
+        query {
+          pullRequests(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(prs)
+    end
+  end
 end

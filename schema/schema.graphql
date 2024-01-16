@@ -177,6 +177,8 @@ type RootQueryType {
 
   prAutomation(id: ID!): PrAutomation
 
+  pullRequests(after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID): PullRequestConnection
+
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
 
@@ -188,6 +190,23 @@ type RootQueryType {
 
   "lists tags applied to any clusters in the fleet"
   tags(tag: String): [String]
+
+  "adds the ability to search\/filter through all tag name\/value pairs"
+  tagPairs(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "only return tags with name==tag"
+    tag: String
+
+    "search for tags with q as a substring in name or value"
+    q: String
+  ): TagConnection
 
   "a relay connection of all providers visible to the current user"
   clusterProviders(after: String, first: Int, before: String, last: Int): ClusterProviderConnection
@@ -356,6 +375,15 @@ type RootMutationType {
   updatePrAutomation(id: ID!, attributes: PrAutomationAttributes!): PrAutomation
 
   deletePrAutomation(id: ID!): PrAutomation
+
+  createPullRequest(
+    "the id of the PR automation instance to use"
+    id: ID!
+
+    branch: String
+
+    context: Json
+  ): PullRequest
 
   createCluster(attributes: ClusterAttributes!): Cluster
 
@@ -1947,6 +1975,7 @@ type AgentMigration {
 }
 
 type Tag {
+  id: ID!
   name: String!
   value: String!
 }
@@ -1965,6 +1994,11 @@ type ClusterConnection {
 type ClusterProviderConnection {
   pageInfo: PageInfo!
   edges: [ClusterProviderEdge]
+}
+
+type TagConnection {
+  pageInfo: PageInfo!
+  edges: [TagEdge]
 }
 
 enum AuthMethod {
@@ -2026,16 +2060,16 @@ input ScmConnectionAttributes {
 
 "A way to create a self-service means of generating PRs against an IaC repo"
 input PrAutomationAttributes {
-  name: String!
+  name: String
 
   "string id for a repository, eg for github, this is {organization}\/{repository-name}"
-  identifier: String!
+  identifier: String
 
   documentation: String
 
-  title: String!
+  title: String
 
-  message: String!
+  message: String
 
   branch: String
 
@@ -2052,6 +2086,12 @@ input PrAutomationAttributes {
 
   "the scm connection to use for pr generation"
   connectionId: ID
+
+  "users who can update this automation"
+  writeBindings: [PolicyBindingAttributes]
+
+  "users who can create prs with this automation"
+  createBindings: [PolicyBindingAttributes]
 }
 
 "The operations to be performed on the files w\/in the pr"
@@ -2194,6 +2234,12 @@ type PrAutomation {
 
   updates: PrUpdateSpec
 
+  "write policy for this pr automation, also propagates to the notifications list for any created PRs"
+  writeBindings: [PolicyBinding]
+
+  "users who can generate prs with this automation"
+  createBindings: [PolicyBinding]
+
   "link to an add-on name if this can update it"
   addon: String
 
@@ -2220,6 +2266,25 @@ type PrUpdateSpec {
   matchStrategy: MatchStrategy
 }
 
+"A reference to a pull request for your kubernetes related IaC"
+type PullRequest {
+  id: ID!
+
+  url: String!
+
+  title: String
+
+  "the cluster this pr is meant to modify"
+  cluster: Cluster
+
+  "the service this pr is meant to modify"
+  service: ServiceDeployment
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type GitRepositoryConnection {
   pageInfo: PageInfo!
   edges: [GitRepositoryEdge]
@@ -2233,6 +2298,11 @@ type ScmConnectionConnection {
 type PrAutomationConnection {
   pageInfo: PageInfo!
   edges: [PrAutomationEdge]
+}
+
+type PullRequestConnection {
+  pageInfo: PageInfo!
+  edges: [PullRequestEdge]
 }
 
 input CloneAttributes {
@@ -3879,6 +3949,11 @@ type WebhookEdge {
   cursor: String
 }
 
+type PullRequestEdge {
+  node: PullRequest
+  cursor: String
+}
+
 type PrAutomationEdge {
   node: PrAutomation
   cursor: String
@@ -3891,6 +3966,11 @@ type ScmConnectionEdge {
 
 type GitRepositoryEdge {
   node: GitRepository
+  cursor: String
+}
+
+type TagEdge {
+  node: Tag
   cursor: String
 }
 

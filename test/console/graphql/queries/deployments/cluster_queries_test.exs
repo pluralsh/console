@@ -462,4 +462,36 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       """, %{}, %{current_user: user})
     end
   end
+
+  describe "tagPairs" do
+    test "it can list cluster tag names and values" do
+      user = insert(:user)
+      cluster = insert(:cluster)
+      t1 = insert(:tag, cluster: cluster, name: "first", value: "value")
+      t2 = insert(:tag, cluster: cluster, name: "second", value: "value")
+      t3 = insert(:tag, cluster: build(:cluster), name: "first", value: "value2")
+
+      {:ok, %{data: %{"tagPairs" => tags}}} = run_query("""
+        query {
+          tagPairs(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(tags)
+             |> ids_equal([t1, t2, t3])
+
+      {:ok, %{data: %{"tagPairs" => tags}}} = run_query("""
+        query Tags($q: String) {
+          tagPairs(q: $q, first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{"q" => "first"}, %{current_user: user})
+
+      assert from_connection(tags)
+             |> ids_equal([t1, t3])
+    end
+  end
 end

@@ -24,18 +24,18 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
         description: body,
         allow_collaboration: true,
       }), Connection.headers(conn))
-      |> handle_response()
+      |> handle_response(title)
     end
   end
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: 200, body: body}}) do
+  defp handle_response({:ok, %HTTPoison.Response{status_code: 200, body: body}}, title) do
     case Jason.decode(body) do
-      {:ok, %{"web_url" => url}} -> {:ok, url}
+      {:ok, %{"web_url" => url}} -> {:ok, title, url}
       _ -> {:error, "could not parse response body: #{body}"}
     end
   end
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "failed to create pr: #{body}"}
-  defp handle_response(_), do: {:error, "unknown gitlab error"}
+  defp handle_response({:ok, %HTTPoison.Response{body: body}}, _), do: {:error, "failed to create pr: #{body}"}
+  defp handle_response(_, _), do: {:error, "unknown gitlab error"}
 
   defp connection(%PrAutomation{} = pr) do
     with {:ok, url, token} <- url_and_token(pr, "https://gitlab.com"),

@@ -365,7 +365,17 @@ defmodule Console.Factory do
       title: "pr title",
       identifier: "some/repo",
       message: "pr message",
+      write_policy_id: Ecto.UUID.generate(),
+      create_policy_id: Ecto.UUID.generate(),
       connection: build(:scm_connection)
+    }
+  end
+
+  def pull_request_factory do
+    %Schema.PullRequest{
+      title: "pr title",
+      url: sequence(:pull_request, & "https://github.com/some/repo/#{&1}"),
+      notifications_policy_id: Ecto.UUID.generate(),
     }
   end
 

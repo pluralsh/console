@@ -64,8 +64,12 @@ defmodule Console.Deployments.Git.Agent do
     end
   end
 
-  def handle_call(:refs, _, %State{cache: %Cache{heads: %{} = heads}} = state),
-    do: {:reply, {:ok, Map.keys(heads)}, state}
+  def handle_call(:refs, _, %State{cache: %Cache{heads: %{} = heads}} = state) do
+    refs = Map.keys(heads)
+    important = MapSet.new(~w(main master dev))
+    {common, rest} = Enum.split_with(refs, &MapSet.member?(important, &1))
+    {:reply, {:ok, common ++ Enum.sort(rest)}, state}
+  end
   def handle_call(:refs, _, state), do: {:reply, {:ok, []}, state}
 
   def handle_call({:fetch, %Service{git: %{ref: ref, folder: path}} = svc}, _, %State{cache: cache} = state) do

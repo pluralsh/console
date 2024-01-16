@@ -5,7 +5,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   alias Console.Schema.{
     GitRepository,
     PrAutomation,
-    ScmConnection
+    ScmConnection,
+    PullRequest
   }
 
   def resolve_scm_connection(%{id: id}, _), do: {:ok, Git.get_scm_connection(id)}
@@ -34,6 +35,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def list_pr_automations(args, _) do
     PrAutomation.ordered()
+    |> paginate(args)
+  end
+
+  def list_pull_requests(args, _) do
+    PullRequest.ordered()
+    |> pr_filters(args)
     |> paginate(args)
   end
 
@@ -73,4 +80,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def delete_pr_automation(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_pr_automation(id, user)
+
+  def create_pull_request(%{id: id, branch: branch, context: ctx}, %{context: %{current_user: user}}),
+    do: Git.create_pull_request(ctx, id, branch, user)
+
+  defp pr_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:cluster_id, cid}, q -> PullRequest.for_cluster(q, cid)
+      {:service_id, sid}, q -> PullRequest.for_service(q, sid)
+      _, q -> q
+    end)
+  end
 end
