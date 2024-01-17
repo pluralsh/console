@@ -3,12 +3,22 @@ defmodule Console.Deployments.Git do
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Deployments.Settings
-  alias Console.Schema.{GitRepository, User, DeploymentSettings, ScmConnection, ScmWebhook, PrAutomation}
+  alias Console.Deployments.Pr.Dispatcher
+  alias Console.Schema.{
+    GitRepository,
+    User,
+    DeploymentSettings,
+    ScmConnection,
+    ScmWebhook,
+    PrAutomation,
+    PullRequest
+  }
 
   @type repository_resp :: {:ok, GitRepository.t} | Console.error
   @type connection_resp :: {:ok, ScmConnection.t} | Console.error
   @type webhook_resp :: {:ok, ScmWebhook.t} | Console.error
   @type automation_resp :: {:ok, PrAutomation.t} | Console.error
+  @type pull_request_resp :: {:ok, PullRequest.t} | Console.error
 
   def get_repository(id), do: Repo.get(GitRepository, id)
 
@@ -156,7 +166,7 @@ defmodule Console.Deployments.Git do
   def create_pr_automation(attrs, %User{} = user) do
     %PrAutomation{}
     |> PrAutomation.changeset(attrs)
-    |> allow(user, :edit)
+    |> allow(user, :create)
     |> when_ok(:insert)
   end
 
@@ -166,19 +176,38 @@ defmodule Console.Deployments.Git do
   @spec update_pr_automation(map, binary, User.t) :: automation_resp
   def update_pr_automation(attrs, id, %User{} = user) do
     get_pr_automation!(id)
+    |> Repo.preload([:write_bindings, :create_bindings])
     |> PrAutomation.changeset(attrs)
-    |> allow(user, :edit)
+    |> allow(user, :write)
     |> when_ok(:update)
   end
 
   @doc """
-
+  Deletes a PR automation record
   """
   @spec delete_pr_automation(binary, User.t) :: automation_resp
   def delete_pr_automation(id, %User{} = user) do
     get_pr_automation!(id)
-    |> allow(user, :edit)
+    |> allow(user, :write)
     |> when_ok(:delete)
+  end
+
+  @doc """
+  Creates a pull request given a pr automation instance
+  """
+  @spec create_pull_request(map, binary, binary, User.t) :: pull_request_resp
+  def create_pull_request(ctx, id, branch, %User{} = user) do
+    pr = get_pr_automation!(id)
+         |> Repo.preload([:write_bindings, :create_bindings])
+    with {:ok, pr} <- allow(pr, user, :create),
+         {:ok, title, url} <- Dispatcher.create(pr, branch, ctx) do
+      %PullRequest{}
+      |> PullRequest.changeset(
+        Map.merge(%{title: title, url: url}, Map.take(pr, ~w(cluster_id service_id)a))
+        |> Map.put(:notifications_bindings, Enum.map(pr.write_bindings, &Map.take(&1, [:user_id, :group_id])))
+      )
+      |> Repo.insert()
+    end
   end
 
   @doc """

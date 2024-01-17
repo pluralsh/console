@@ -126,6 +126,7 @@ defmodule Console.MixProject do
       {:briefly, "~> 0.4.0"},
       {:libring, "~> 1.0"},
       {:http_stream, "~> 1.0.0"},
+      {:solid, "~> 0.15"},
 
       # if using the Mint adapter:
       {:castore, "~> 0.1.7"},

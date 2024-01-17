@@ -439,6 +439,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   object :tag do
+    field :id,    non_null(:id)
     field :name,  non_null(:string)
     field :value, non_null(:string)
   end
@@ -452,6 +453,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
+  connection node_type: :tag
 
   delta :cluster
   delta :cluster_provider
@@ -517,6 +519,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :tag, :string
 
       resolve &Deployments.list_tags/2
+    end
+
+    @desc "adds the ability to search/filter through all tag name/value pairs"
+    connection field :tag_pairs, node_type: :tag do
+      middleware Authenticated
+      arg :tag, :string, description: "only return tags with name==tag"
+      arg :q,   :string, description: "search for tags with q as a substring in name or value"
+
+      resolve &Deployments.search_tags/2
     end
 
     @desc "a relay connection of all providers visible to the current user"
