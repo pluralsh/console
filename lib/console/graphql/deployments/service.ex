@@ -16,6 +16,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :protect,        :boolean
     field :repository_id,  :id
     field :dry_run,        :boolean
+    field :interval,       :string
     field :git,            :git_ref_attributes
     field :helm,           :helm_config_attributes
     field :kustomize,      :kustomize_attributes
@@ -50,6 +51,8 @@ defmodule Console.GraphQl.Deployments.Service do
   input_object :service_update_attributes do
     field :version,       :string
     field :protect,       :boolean
+    field :dry_run,       :boolean
+    field :interval,      :string
     field :git,           :git_ref_attributes
     field :helm,          :helm_config_attributes
     field :configuration, list_of(:config_attributes)

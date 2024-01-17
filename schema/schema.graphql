@@ -993,6 +993,7 @@ input ServiceDeploymentAttributes {
   protect: Boolean
   repositoryId: ID
   dryRun: Boolean
+  interval: String
   git: GitRefAttributes
   helm: HelmConfigAttributes
   kustomize: KustomizeAttributes
@@ -1030,6 +1031,8 @@ input HelmValueAttributes {
 input ServiceUpdateAttributes {
   version: String
   protect: Boolean
+  dryRun: Boolean
+  interval: String
   git: GitRefAttributes
   helm: HelmConfigAttributes
   configuration: [ConfigAttributes]
