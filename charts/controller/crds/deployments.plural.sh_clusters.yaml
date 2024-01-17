@@ -1,12 +1,9 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
-  labels:
-    app.kubernetes.io/managed-by: helm
-    app.kubernetes.io/part-of: plural-deployment-controller
-    app.kubernetes.io/version: dev
   name: clusters.deployments.plural.sh
 spec:
   group: deployments.plural.sh
