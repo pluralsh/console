@@ -39,9 +39,11 @@ export default function DiffViewer({
               diffViewerBackground: theme.colors['fill-one'],
               highlightBackground: theme.colors['fill-one-selected'],
               gutterBackground: theme.colors['fill-two'],
+              gutterColor: theme.colors['text-xlight'],
               codeFoldGutterBackground: theme.colors['fill-one-selected'],
               codeFoldBackground: theme.colors['fill-one-selected'],
               codeFoldContentColor: theme.colors.text,
+              emptyLineBackground: theme.colors['fill-one-hover'],
             },
           },
         }}

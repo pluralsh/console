@@ -13,6 +13,7 @@ import DiffViewer from '../../../utils/DiffViewer'
 import { useServiceContext } from './ServiceDetails'
 
 const SEPARATOR = '\n---\n'
+const NEW_LINE_REGEXP = /^\s+|\s+$/g
 
 export default function ServiceDesiredState() {
   const navigate = useNavigate()
@@ -21,10 +22,10 @@ export default function ServiceDesiredState() {
   const [live, desired] = useMemo(
     () => [
       service?.components
-        ?.map((c) => c?.content?.live ?? '')
+        ?.map((c) => c?.content?.live?.replace(NEW_LINE_REGEXP, '') ?? '')
         ?.join(SEPARATOR) ?? '',
       service?.components
-        ?.map((c) => c?.content?.desired ?? '')
+        ?.map((c) => c?.content?.desired?.replace(NEW_LINE_REGEXP, '') ?? '')
         ?.join(SEPARATOR) ?? '',
     ],
     [service]
