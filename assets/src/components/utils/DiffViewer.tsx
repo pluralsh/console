@@ -18,7 +18,14 @@ export default function DiffViewer({
   const theme = useTheme()
 
   return (
-    <Card overflow="hidden">
+    <Card
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        maxHeight: '100%',
+        overflow: 'auto',
+      }}
+    >
       <ReactDiffViewer
         oldValue={oldValue}
         newValue={newValue}

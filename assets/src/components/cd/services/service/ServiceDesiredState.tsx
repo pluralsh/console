@@ -49,7 +49,7 @@ export default function ServiceDesiredState() {
   return (
     <ScrollablePage
       heading="Desired state"
-      scrollable
+      scrollable={false}
     >
       <DiffViewer
         oldValue={live}
