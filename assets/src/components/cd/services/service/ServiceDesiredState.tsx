@@ -5,10 +5,10 @@ import {
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import DiffViewer from 'react-diff-viewer'
-import { useTheme } from 'styled-components'
 
 import { useMemo } from 'react'
+
+import DiffViewer from '../../../utils/DiffViewer'
 
 import { useServiceContext } from './ServiceDetails'
 
@@ -16,7 +16,6 @@ const SEPARATOR = '\n---\n'
 
 export default function ServiceDesiredState() {
   const navigate = useNavigate()
-  const theme = useTheme()
   const { service } = useServiceContext()
 
   const [live, desired] = useMemo(
@@ -55,19 +54,6 @@ export default function ServiceDesiredState() {
       <DiffViewer
         oldValue={live}
         newValue={desired}
-        useDarkTheme={theme.mode === 'dark'}
-        styles={{
-          variables: {
-            dark: {
-              diffViewerBackground: theme.colors['fill-one'],
-              highlightBackground: theme.colors['fill-one-selected'],
-              gutterBackground: theme.colors['fill-two'],
-              codeFoldGutterBackground: theme.colors['fill-one-selected'],
-              codeFoldBackground: theme.colors['fill-one-selected'],
-              codeFoldContentColor: theme.colors.text,
-            },
-          },
-        }}
       />
     </ScrollablePage>
   )
