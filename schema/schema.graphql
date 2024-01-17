@@ -637,6 +637,12 @@ enum GateType {
   JOB
 }
 
+enum RestartPolicy {
+  ALWAYS
+  NEVER
+  ONFAILURE
+}
+
 "the top level input object for creating\/deleting pipelines"
 input PipelineAttributes {
   stages: [PipelineStageAttributes]
@@ -876,14 +882,8 @@ type JobGateSpec {
   "the service account the pod will use"
   serviceAccount: String
 
-  "the restart policy of the job"
+  "what to do w\/ pod restarts in the job"
   restartPolicy: RestartPolicy
-}
-
-enum RestartPolicy {
-  ALWAYS
-  ONFAILURE
-  NEVER
 }
 
 "a shortform spec for job containers, designed for ease-of-use"

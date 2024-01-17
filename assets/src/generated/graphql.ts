@@ -1255,6 +1255,7 @@ export type GateJobAttributes = {
   namespace: Scalars['String']['input'];
   /** if you'd rather define the job spec via straight k8s yaml */
   raw?: InputMaybe<Scalars['String']['input']>;
+  restartPolicy?: InputMaybe<RestartPolicy>;
   serviceAccount?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -1688,6 +1689,8 @@ export type JobGateSpec = {
   namespace: Scalars['String']['output'];
   /** a raw kubernetes job resource, overrides any other configuration */
   raw?: Maybe<Scalars['String']['output']>;
+  /** what to do w/ pod restarts in the job */
+  restartPolicy?: Maybe<RestartPolicy>;
   /** the service account the pod will use */
   serviceAccount?: Maybe<Scalars['String']['output']>;
 };
@@ -2628,6 +2631,12 @@ export type Resources = {
   limits?: Maybe<ResourceSpec>;
   requests?: Maybe<ResourceSpec>;
 };
+
+export enum RestartPolicy {
+  Always = 'ALWAYS',
+  Never = 'NEVER',
+  Onfailure = 'ONFAILURE'
+}
 
 /** a representation of a past revision of a service */
 export type Revision = {

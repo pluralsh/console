@@ -1,10 +1,11 @@
 defmodule Console.GraphQl.Deployments.Pipeline do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.{Deployments, User}
-  alias Console.Schema.PipelineGate
+  alias Console.Schema.{PipelineGate, Gates}
 
   ecto_enum :gate_state, PipelineGate.State
   ecto_enum :gate_type, PipelineGate.Type
+  ecto_enum :restart_policy, Gates.JobSpec.RestartPolicy
 
   @desc "the top level input object for creating/deleting pipelines"
   input_object :pipeline_attributes do
@@ -64,6 +65,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :labels,          :json
     field :annotations,     :json
     field :service_account, :string
+    field :restart_policy,  :restart_policy
   end
 
   @desc "the attributes for a container"
@@ -162,6 +164,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :labels,          :map, description: "any pod labels to apply"
     field :annotations,     :map, description: "any pod annotations to apply"
     field :service_account, :string, description: "the service account the pod will use"
+    field :restart_policy,  :restart_policy, description: "what to do w/ pod restarts in the job"
   end
 
   @desc "a shortform spec for job containers, designed for ease-of-use"

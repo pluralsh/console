@@ -1,12 +1,15 @@
 defmodule Console.Schema.Gates.JobSpec do
   use Piazza.Ecto.Schema
 
+  defenum RestartPolicy, always: 0, never: 1, onfailure: 2
+
   embedded_schema do
     field :namespace,       :string
     field :raw,             :string
     field :service_account, :string
     field :labels,          :map
     field :annotations,     :map
+    field :restart_policy,  RestartPolicy
 
     embeds_many :containers, Container, on_replace: :delete do
       field       :image, :string
@@ -24,7 +27,7 @@ defmodule Console.Schema.Gates.JobSpec do
     end
   end
 
-  @valid ~w(namespace raw labels annotations service_account)a
+  @valid ~w(namespace raw labels annotations restart_policy service_account)a
 
   def changeset(model, attrs \\ %{}) do
     model
