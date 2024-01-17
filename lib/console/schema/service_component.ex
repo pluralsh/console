@@ -14,8 +14,8 @@ defmodule Console.Schema.ServiceComponent do
     field :name,       :string
 
     belongs_to :service, Service
-    has_many :api_deprecations, ApiDeprecation, foreign_key: :component_id
-    has_one :content, ComponentContent, foreign_key: :component_id
+    has_many :api_deprecations, ApiDeprecation, foreign_key: :component_id, on_replace: :delete
+    has_one :content, ComponentContent, foreign_key: :component_id, on_replace: :delete
 
     timestamps()
   end

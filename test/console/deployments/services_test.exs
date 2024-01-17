@@ -724,6 +724,44 @@ defmodule Console.Deployments.ServicesTest do
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
     end
 
+    test "it can persist dry run data" do
+      service = insert(:service)
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :running,
+          synced: true,
+          group: "networking.k8s.io",
+          version: "v1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api",
+          content: %{live: "some yaml", desired: "other yaml"}
+        }]
+      }, service)
+
+      %{components: [component]} = Console.Repo.preload(service, [components: :content])
+      assert component.content.live == "some yaml"
+      assert component.content.desired == "other yaml"
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :running,
+          synced: true,
+          group: "networking.k8s.io",
+          version: "v1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api",
+          content: %{live: "some yaml", desired: "new yaml"}
+        }]
+      }, service)
+
+      %{components: [component]} = Console.Repo.preload(service, [components: :content])
+      assert component.content.live == "some yaml"
+      assert component.content.desired == "new yaml"
+    end
+
     test "if a component is not synced it will remain stale" do
       service = insert(:service)
 
