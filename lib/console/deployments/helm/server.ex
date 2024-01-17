@@ -17,7 +17,10 @@ defmodule Console.Deployments.Helm.Server do
 
   def fetch(%HelmChart{} = chart), do: GenServer.call(__MODULE__, {:fetch, chart}, @timeout)
 
-  def handle_call({:fetch, chart}, _, cache), do: {:reply, Cache.fetch(cache, chart), cache}
+  def handle_call({:fetch, chart}, _, cache) do
+    with {:ok, f, cache} <- Cache.fetch(cache, chart),
+      do: {:reply, {:ok, f}, cache}
+  end
 
   def handle_info(:expire, cache), do: {:noreply, Cache.refresh(cache)}
   def handle_info(_, cache), do: {:noreply, cache}
