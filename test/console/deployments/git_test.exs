@@ -286,7 +286,6 @@ defmodule Console.Deployments.GitTest do
         identifier: "pluralsh/console",
         cluster: build(:cluster),
         connection: conn,
-        write_bindings: [%{user_id: user.id}],
       )
 
       {:error, _} = Git.create_pull_request(%{}, pra.id, "pr-test", user)
