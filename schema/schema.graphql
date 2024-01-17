@@ -719,6 +719,8 @@ input GateJobAttributes {
   annotations: Json
 
   serviceAccount: String
+
+  restartPolicy: RestartPolicy
 }
 
 "the attributes for a container"
@@ -873,6 +875,15 @@ type JobGateSpec {
 
   "the service account the pod will use"
   serviceAccount: String
+
+  "the restart policy of the job"
+  restartPolicy: RestartPolicy
+}
+
+enum RestartPolicy {
+  ALWAYS
+  ONFAILURE
+  NEVER
 }
 
 "a shortform spec for job containers, designed for ease-of-use"
