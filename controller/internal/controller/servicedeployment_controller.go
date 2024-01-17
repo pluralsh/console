@@ -162,14 +162,17 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 			return ctrl.Result{}, err
 		}
 	}
-	if err := controllerutil.SetOwnerReference(cluster, service, r.Scheme); err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-		return ctrl.Result{}, err
-	}
-	if err = controllerutil.SetOwnerReference(cluster, service, r.Scheme); err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-		return ctrl.Result{}, err
-	}
+
+	// we shouldn't set these as it'll hit cross-namespace ownership issues
+	// if err := controllerutil.SetOwnerReference(cluster, service, r.Scheme); err != nil {
+	// 	utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+	// 	return ctrl.Result{}, err
+	// }
+	// if err = controllerutil.SetOwnerReference(cluster, service, r.Scheme); err != nil {
+	// 	utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+	// 	return ctrl.Result{}, err
+	// }
+
 	updateStatus(service, existingService, sha)
 
 	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "The service components are not ready yet")

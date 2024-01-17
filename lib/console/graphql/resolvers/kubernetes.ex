@@ -3,7 +3,6 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   alias Kazan.Apis.Core.V1, as: Core
   alias Kazan.Apis.Apps.V1, as: Apps
   alias Kazan.Apis.Networking.V1, as: Networking
-  alias Kazan.Apis.Batch.V1beta1, as: Batch
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, LabelSelectorRequirement}
 
@@ -74,7 +73,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def resolve_cron_job(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
-    |> Batch.read_namespaced_cron_job!(name)
+    |> BatchV1.read_namespaced_cron_job!(name)
     |> Kube.Utils.run()
   end
 

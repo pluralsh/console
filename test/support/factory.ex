@@ -342,6 +342,43 @@ defmodule Console.Factory do
     %Schema.AccessToken.Scope{}
   end
 
+  def scm_connection_factory do
+    %Schema.ScmConnection{
+      type: :github,
+      name: sequence(:scm_conn, & "conn-#{&1}"),
+      token: sequence(:scm_conn, & "pat-#{&1}")
+    }
+  end
+
+  def scm_webhook_factory do
+    %Schema.ScmWebhook{
+      type: :github,
+      # name: sequence(:scm_conn, & "conn-#{&1}"),
+      external_id: sequence(:scm_webhook, & "webhook-#{&1}"),
+      hmac: sequence(:scm_webhook_hmac, & "hook-hmac-#{&1}")
+    }
+  end
+
+  def pr_automation_factory do
+    %Schema.PrAutomation{
+      name: sequence(:pr_automation, & "pr-#{&1}"),
+      title: "pr title",
+      identifier: "some/repo",
+      message: "pr message",
+      write_policy_id: Ecto.UUID.generate(),
+      create_policy_id: Ecto.UUID.generate(),
+      connection: build(:scm_connection)
+    }
+  end
+
+  def pull_request_factory do
+    %Schema.PullRequest{
+      title: "pr title",
+      url: sequence(:pull_request, & "https://github.com/some/repo/#{&1}"),
+      notifications_policy_id: Ecto.UUID.generate(),
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

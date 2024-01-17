@@ -21,8 +21,7 @@ defmodule ConsoleWeb.WebhookController do
     json(conn, %{ok: true})
   end
 
-  def alertmanager(conn, payload) do
-    IO.inspect(payload)
+  def alertmanager(conn, _payload) do
     json(conn, %{ok: true})
   end
 

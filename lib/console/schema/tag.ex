@@ -16,6 +16,11 @@ defmodule Console.Schema.Tag do
 
   def for_name(query \\ __MODULE__, name), do: from(t in query, where: t.name == ^name)
 
+  def search(query \\ __MODULE__, q) do
+    sq = "%#{q}%"
+    from(t in query, where: like(t.name, ^sq) or like(t.value, ^sq))
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]), do: from(t in query, order_by: ^order)
 
   def select(query \\ __MODULE__, field) do

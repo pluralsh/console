@@ -434,7 +434,7 @@ defmodule Console.Deployments.Services do
     Logger.info "updating components for #{service.id}"
     start_transaction()
     |> add_operation(:service, fn _ ->
-      svc = Console.Repo.preload(service, [:components, :errors])
+      svc = Console.Repo.preload(service, [:errors, components: :content])
 
       svc
       |> Service.changeset(stabilize(attrs, svc))

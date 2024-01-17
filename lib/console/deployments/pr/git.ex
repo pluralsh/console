@@ -13,12 +13,15 @@ defmodule Console.Deployments.Pr.Git do
   end
 
   @spec commit(ScmConnection.t, binary) :: git_resp
-  def commit(%ScmConnection{} = conn, msg), do: git(conn, "commit", ["-m", msg])
+  def commit(%ScmConnection{} = conn, msg) do
+    with {:ok, _} <- git(conn, "add", ["."]),
+      do: git(conn, "commit", ["-m", msg])
+  end
 
   @spec push(ScmConnection.t, binary) :: git_resp
   def push(%ScmConnection{} = conn, branch), do: git(conn, "push", ["--set-upstream", "origin", branch])
 
-  defp git(%ScmConnection{} = conn, cmd, args) when is_list(args) do
+  def git(%ScmConnection{} = conn, cmd, args) when is_list(args) do
     case System.cmd("git", [cmd | args], opts(conn)) do
       {out, 0} -> {:ok, out}
       {out, _} -> {:error, out}
@@ -33,8 +36,8 @@ defmodule Console.Deployments.Pr.Git do
   end
 
   defp url(%ScmConnection{base_url: base}) when is_binary(base), do: base
-  defp url(%ScmConnection{type: :github}), do: "https://github.com/"
-  defp url(%ScmConnection{type: :gitlab}), do: "https://gitlab.com/"
+  defp url(%ScmConnection{type: :github}), do: "https://github.com"
+  defp url(%ScmConnection{type: :gitlab}), do: "https://gitlab.com"
 
   defp opts(%ScmConnection{dir: dir} = conn), do: [env: env(conn), cd: dir, stderr_to_stdout: true]
 
