@@ -8,12 +8,28 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import DiffViewer from 'react-diff-viewer'
 import { useTheme } from 'styled-components'
 
+import { useMemo } from 'react'
+
 import { useServiceContext } from './ServiceDetails'
+
+const SEPARATOR = '\n---\n'
 
 export default function ServiceDesiredState() {
   const navigate = useNavigate()
   const theme = useTheme()
   const { service } = useServiceContext()
+
+  const [live, desired] = useMemo(
+    () => [
+      service?.components
+        ?.map((c) => c?.content?.live ?? '')
+        ?.join(SEPARATOR) ?? '',
+      service?.components
+        ?.map((c) => c?.content?.desired ?? '')
+        ?.join(SEPARATOR) ?? '',
+    ],
+    [service]
+  )
 
   if (!service) {
     navigate(`${CD_ABS_PATH}/${SERVICES_REL_PATH}`)
@@ -34,48 +50,11 @@ export default function ServiceDesiredState() {
   return (
     <ScrollablePage
       heading="Desired state"
-      scrollable={false}
+      scrollable
     >
-      {/* TODO */}
       <DiffViewer
-        oldValue="apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-spec:
-  selector:
-    matchLabels:
-      app: nginx
-  replicas: 2
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.14.2
-        ports:
-        - containerPort: 80"
-        newValue="apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-spec:
-  selector:
-    matchLabels:
-      app: test
-  replicas: 5
-  template:
-    metadata:
-      labels:
-        app: test
-    spec:
-      containers:
-      - name: test
-        image: test:1.14.8
-        ports:
-        - containerPort: 80"
+        oldValue={live}
+        newValue={desired}
         useDarkTheme={theme.mode === 'dark'}
         styles={{
           variables: {
