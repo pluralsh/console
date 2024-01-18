@@ -6,13 +6,15 @@ import {
 } from 'generated/graphql'
 import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-
 import { useMemo } from 'react'
-import { Chip, ErrorIcon, Sidecar, SidecarItem } from '@pluralsh/design-system'
-
+import {
+  Chip,
+  DryRunIcon,
+  ErrorIcon,
+  Sidecar,
+  SidecarItem,
+} from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-
-import { wrap } from 'lodash'
 
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
@@ -64,7 +66,10 @@ export function ServiceDetailsSidecar({
           >
             <ServiceStatusChip status={status} />
             {!!serviceDeployment.dryRun && (
-              <Chip severity="success">Dry run</Chip>
+              <Chip severity="success">
+                <DryRunIcon size={12} />
+                Dry run
+              </Chip>
             )}
           </div>
         </SidecarItem>
