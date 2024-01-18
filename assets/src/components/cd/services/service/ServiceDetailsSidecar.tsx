@@ -60,7 +60,7 @@ export function ServiceDetailsSidecar({
             css={{
               display: 'flex',
               flexWrap: 'wrap',
-              gap: theme.spacing.xxsmall,
+              gap: theme.spacing.xsmall,
               alignItems: 'center',
             }}
           >
