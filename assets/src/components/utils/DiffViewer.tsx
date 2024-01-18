@@ -7,6 +7,7 @@ type DiffViewerProps = {
   oldTitle?: string
   newValue: string
   newTitle?: string
+  splitView?: boolean
 }
 
 export default function DiffViewer({
@@ -14,6 +15,7 @@ export default function DiffViewer({
   oldTitle,
   newValue,
   newTitle,
+  splitView = true,
 }: DiffViewerProps) {
   const theme = useTheme()
 
@@ -31,6 +33,7 @@ export default function DiffViewer({
         newValue={newValue}
         leftTitle={oldTitle}
         rightTitle={newTitle}
+        splitView={splitView}
         useDarkTheme={theme.mode === 'dark'}
         styles={{
           line: { ...theme.partials.text.code },
