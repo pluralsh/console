@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
-
 import { useMemo } from 'react'
+import { isEmpty } from 'lodash'
 
 import DiffViewer from '../utils/DiffViewer'
 
@@ -12,7 +12,9 @@ export default function ComponentDesiredState() {
     [component]
   )
 
-  return (
+  return isEmpty(live) && isEmpty(desired) ? (
+    <div>There is no data available yet.</div>
+  ) : (
     <DiffViewer
       oldValue={live}
       newValue={desired}

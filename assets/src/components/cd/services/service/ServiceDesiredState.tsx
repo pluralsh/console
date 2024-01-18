@@ -7,11 +7,13 @@ import {
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useMemo, useState } from 'react'
 import {
-  HamburgerMenuCollapsedIcon,
-  HamburgerMenuIcon,
+  DiffColumnIcon,
+  DiffUnifiedIcon,
   IconFrame,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
+
+import { isEmpty } from 'lodash'
 
 import DiffViewer from '../../../utils/DiffViewer'
 
@@ -58,32 +60,38 @@ export default function ServiceDesiredState() {
     <ScrollablePage
       heading="Desired state"
       headingContent={
-        <div css={{ display: 'flex', gap: theme.spacing.small }}>
-          <IconFrame
-            clickable
-            onClick={() => setSplitView(true)}
-            selected={splitView}
-            type="secondary"
-            icon={<HamburgerMenuIcon />}
-            tooltip="Use split view"
-          />
-          <IconFrame
-            clickable
-            onClick={() => setSplitView(false)}
-            selected={!splitView}
-            type="secondary"
-            icon={<HamburgerMenuCollapsedIcon />}
-            tooltip="Use unified view"
-          />
-        </div>
+        !(isEmpty(live) && isEmpty(desired)) && (
+          <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+            <IconFrame
+              clickable
+              onClick={() => setSplitView(true)}
+              selected={splitView}
+              type="secondary"
+              icon={<DiffColumnIcon />}
+              tooltip="Use split view"
+            />
+            <IconFrame
+              clickable
+              onClick={() => setSplitView(false)}
+              selected={!splitView}
+              type="secondary"
+              icon={<DiffUnifiedIcon />}
+              tooltip="Use unified view"
+            />
+          </div>
+        )
       }
       scrollable={false}
     >
-      <DiffViewer
-        oldValue={live}
-        newValue={desired}
-        splitView={splitView}
-      />
+      {isEmpty(live) && isEmpty(desired) ? (
+        <div>There is no data available yet.</div>
+      ) : (
+        <DiffViewer
+          oldValue={live}
+          newValue={desired}
+          splitView={splitView}
+        />
+      )}
     </ScrollablePage>
   )
 }
