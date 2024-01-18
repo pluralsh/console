@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import {
   Chip,
+  DryRunIcon,
   GearTrainIcon,
   GitHubLogoIcon,
   GlobeIcon,
@@ -200,7 +201,6 @@ export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
           status={node?.status}
           componentStatus={node?.componentStatus}
         />
-        {!!node?.dryRun && <Chip severity="success">Dry run</Chip>}
       </div>
     )
   },
@@ -262,6 +262,14 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
             justifyContent: 'end',
           }}
         >
+          {node?.dryRun && (
+            <Tooltip
+              placement="top"
+              label="Dry run"
+            >
+              <DryRunIcon color={theme.colors['icon-light']} />
+            </Tooltip>
+          )}
           {globalService && (
             <Tooltip
               placement="top"
