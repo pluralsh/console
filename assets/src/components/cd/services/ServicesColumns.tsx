@@ -200,7 +200,7 @@ export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
           status={node?.status}
           componentStatus={node?.componentStatus}
         />
-        {!!node?.dryRun && <Chip severity="warning">Dry run</Chip>}
+        {!!node?.dryRun && <Chip severity="success">Dry run</Chip>}
       </div>
     )
   },

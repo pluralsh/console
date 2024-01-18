@@ -64,7 +64,7 @@ export function ServiceDetailsSidecar({
           >
             <ServiceStatusChip status={status} />
             {!!serviceDeployment.dryRun && (
-              <Chip severity="warning">Dry run</Chip>
+              <Chip severity="success">Dry run</Chip>
             )}
           </div>
         </SidecarItem>

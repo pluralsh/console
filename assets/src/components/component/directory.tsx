@@ -22,4 +22,8 @@ export const directory: {
     label: 'Raw',
     path: 'raw',
   },
+  {
+    label: 'Desired state',
+    path: 'desiredstate',
+  },
 ]

@@ -112,6 +112,10 @@ fragment ServiceDeploymentComponent on ServiceComponent {
   apiDeprecations {
     ...ApiDeprecation
   }
+  content {
+    desired
+    live
+  }
 }
 
 fragment ServiceDeploymentRevisions on ServiceDeployment {
