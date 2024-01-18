@@ -1003,6 +1003,7 @@ defmodule Console.Deployments.ServicesAsyncTest do
       content = Map.new(content)
       assert content["Chart.yaml"] =~ "console"
       assert content["values.yaml.liquid"] == "value: test"
+      assert content["values.yaml.static"] == "value: test"
     end
 
     test "it can support multiple sources" do

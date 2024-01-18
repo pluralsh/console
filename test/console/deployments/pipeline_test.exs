@@ -255,6 +255,37 @@ defmodule Console.Deployments.PipelinesTest do
       assert_receive {:event, %PubSub.PromotionCreated{item: ^promo}}
     end
 
+    test "it will revise a promotion if there is a sha change" do
+      admin = admin_user()
+      git = insert(:git_repository)
+      {:ok, svc} = create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        repository_id: git.id,
+        status: :healthy,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, insert(:cluster), admin)
+
+      svc = Console.Repo.preload(svc, [:revision])
+      stage = insert(:pipeline_stage)
+      insert(:pipeline_edge, from: stage)
+      insert(:stage_service, stage: stage, service: svc)
+      promotion = insert(:pipeline_promotion, stage: stage, revised_at: Timex.now()  |> Timex.shift(minutes: -1))
+      insert(:promotion_service, promotion: promotion, service: svc, revision: svc.revision, sha: "old")
+
+      {:ok, promo} = Pipelines.build_promotion(stage)
+
+      assert promo.id == promotion.id
+      assert promo.stage_id == stage.id
+      refute promo.revised_at == promotion.revised_at
+      assert promo.revised
+      service = Enum.find(promo.services, & &1.service_id == svc.id)
+      assert service.revision_id == svc.revision_id
+
+      assert_receive {:event, %PubSub.PromotionCreated{item: ^promo}}
+    end
+
     test "it will ignore if the stage has no successors" do
       admin = admin_user()
       git = insert(:git_repository)
@@ -279,7 +310,11 @@ defmodule Console.Deployments.PipelinesTest do
       svc = insert(:service, sha: "test-sha", status: :stale)
       insert(:revision, service: svc, sha: "test-sha")
       insert(:stage_service, stage: stage, service: svc)
-      promotion = insert(:pipeline_promotion, stage: stage, revised_at: Timex.now()  |> Timex.shift(minutes: -1))
+      promotion = insert(:pipeline_promotion,
+        stage: stage,
+        revised_at: Timex.now()  |> Timex.shift(minutes: -1),
+        promoted_at: Timex.now() |> Timex.shift(minutes: -2)
+      )
       insert(:promotion_service, promotion: promotion, service: svc, revision: build(:revision))
       insert(:promotion_service, promotion: promotion)
 
@@ -288,6 +323,7 @@ defmodule Console.Deployments.PipelinesTest do
       assert promo.id == promotion.id
       assert promo.stage_id == stage.id
       assert promo.revised_at == promotion.revised_at
+      refute promo.revised
     end
 
     test "it won't revise a promotion if there are no changes" do
@@ -308,6 +344,7 @@ defmodule Console.Deployments.PipelinesTest do
       assert promo.id == promotion.id
       assert promo.stage_id == stage.id
       assert promo.revised_at == promotion.revised_at
+      refute promo.revised
 
       assert refetch(gate).state == :open
     end

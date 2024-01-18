@@ -181,7 +181,7 @@ defmodule Console.Deployments.Pipelines do
             |> Map.drop(Enum.map(svcs, fn {%{id: id}, _} -> id end))
             |> Map.values()
             |> Console.mapify()
-      new = Enum.map(svcs, fn {%{id: id}, %{id: rid}} -> %{service_id: id, revision_id: rid} end)
+      new = Enum.map(svcs, fn {%{id: id, sha: sha}, %{id: rid}} -> %{service_id: id, revision_id: rid, sha: sha} end)
       case promo do
         nil -> %PipelinePromotion{stage_id: id}
         %PipelinePromotion{} = promo -> promo
@@ -190,12 +190,12 @@ defmodule Console.Deployments.Pipelines do
       |> Repo.insert_or_update()
     end)
     |> add_operation(:gates, fn %{stage: %{id: id}, build: promo} ->
-      case !promo.promoted_at || Timex.before?(promo.promoted_at, promo.revised_at) do
+      case promo.revised do
         true ->
           PipelineGate.for_stage(id)
           |> Repo.update_all(set: [state: :pending, approver_id: nil])
           |> ok()
-        false -> {:ok, 0}
+        _ -> {:ok, 0}
       end
     end)
     |> execute(extract: :build)
@@ -272,16 +272,16 @@ defmodule Console.Deployments.Pipelines do
     do: Map.new(promos, & {&1.service_id, &1})
   defp extant(_), do: %{}
 
-  defp add_revised(attrs, true), do: Map.put(attrs, :revised_at, Timex.now())
+  defp add_revised(attrs, true), do: Map.merge(attrs, %{revised_at: Timex.now(), revised: true})
   defp add_revised(attrs, _), do: attrs
 
   defp diff?([], _), do: false
   defp diff?(svcs, %PipelinePromotion{services: [_ | _]} = promo) do
     by_id = extant(promo)
-    Enum.any?(svcs, fn {svc, %{id: r}} ->
+    Enum.any?(svcs, fn {%{sha: sha} = svc, %{id: r}} ->
       case by_id[svc.id] do
         nil -> true
-        %PromotionService{revision_id: ^r} -> false
+        %PromotionService{revision_id: ^r, sha: ^sha} -> false
         _ -> true
       end
     end)
