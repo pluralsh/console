@@ -227,8 +227,9 @@ query Clusters(
   $after: String
   $q: String
   $healthy: Boolean
+  $tag: TagInput
 ) {
-  clusters(first: $first, after: $after, q: $q, healthy: $healthy) {
+  clusters(first: $first, after: $after, q: $q, healthy: $healthy, tag: $tag) {
     pageInfo {
       ...PageInfo
     }
@@ -386,5 +387,17 @@ fragment ClusterStatusInfo on ClusterStatusInfo {
 query ClusterStatuses($clusterId: ID) {
   clusterStatuses {
     ...ClusterStatusInfo
+  }
+}
+
+query TagPairs($first: Int = 30, $q: String, $tag: String) {
+  tagPairs(first: $first, q: $q, tag: $tag) {
+    edges {
+      node {
+        name
+        value
+        id
+      }
+    }
   }
 }

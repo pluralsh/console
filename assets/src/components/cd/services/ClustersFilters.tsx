@@ -1,3 +1,4 @@
+import { type ComponentProps } from 'react'
 import {
   Chip,
   Input,
@@ -10,6 +11,7 @@ import { Dispatch, MutableRefObject, SetStateAction, useEffect } from 'react'
 import isNil from 'lodash/isNil'
 
 import { serviceStatusToSeverity } from './ServiceStatusChip'
+import { ClusterTagsFilter } from './ClusterTagsFilter'
 
 export type ClusterStatusTabKey = 'HEALTHY' | 'UNHEALTHY' | 'ALL'
 export const statusTabs = Object.entries({
@@ -40,6 +42,8 @@ export function ClustersFilters({
   setSearchString,
   tabStateRef,
   statusCounts,
+  selectedTagKeys,
+  setSelectedTagKeys,
 }: {
   searchString
   setSearchString: (string) => void
@@ -47,6 +51,10 @@ export function ClustersFilters({
   setStatusFilter: Dispatch<SetStateAction<ClusterStatusTabKey>>
   tabStateRef: MutableRefObject<any>
   statusCounts: Record<ClusterStatusTabKey, number | undefined>
+  selectedTagKeys: ComponentProps<typeof ClusterTagsFilter>['selectedTagKeys']
+  setSelectedTagKeys: ComponentProps<
+    typeof ClusterTagsFilter
+  >['setSelectedTagKeys']
 }) {
   useEffect(() => {
     setStatusFilter(statusFilter)
@@ -54,15 +62,22 @@ export function ClustersFilters({
 
   return (
     <ClustersFiltersSC>
-      <Input
-        placeholder="Search"
-        startIcon={<SearchIcon />}
-        value={searchString}
-        onChange={(e) => {
-          setSearchString?.(e.currentTarget.value)
-        }}
-        css={{ flexGrow: 1 }}
-      />
+      <div css={{ flex: '1 1 50%' }}>
+        <ClusterTagsFilter
+          selectedTagKeys={selectedTagKeys}
+          setSelectedTagKeys={setSelectedTagKeys}
+        />
+      </div>
+      <div css={{ flex: '1 1 50%' }}>
+        <Input
+          placeholder="Search"
+          startIcon={<SearchIcon />}
+          value={searchString}
+          onChange={(e) => {
+            setSearchString?.(e.currentTarget.value)
+          }}
+        />
+      </div>
       <TabList
         stateRef={tabStateRef}
         stateProps={{

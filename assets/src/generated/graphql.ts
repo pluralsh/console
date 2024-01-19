@@ -5027,6 +5027,7 @@ export type ClustersQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   healthy?: InputMaybe<Scalars['Boolean']['input']>;
+  tag?: InputMaybe<TagInput>;
 }>;
 
 
@@ -5129,6 +5130,15 @@ export type ClusterStatusesQueryVariables = Exact<{
 
 
 export type ClusterStatusesQuery = { __typename?: 'RootQueryType', clusterStatuses?: Array<{ __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null } | null> | null };
+
+export type TagPairsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  tag?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type TagPairsQuery = { __typename?: 'RootQueryType', tagPairs?: { __typename?: 'TagConnection', edges?: Array<{ __typename?: 'TagEdge', node?: { __typename?: 'Tag', name: string, value: string, id: string } | null } | null> | null } | null };
 
 export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
 
@@ -7532,8 +7542,8 @@ export type InstallAddOnMutationHookResult = ReturnType<typeof useInstallAddOnMu
 export type InstallAddOnMutationResult = Apollo.MutationResult<InstallAddOnMutation>;
 export type InstallAddOnMutationOptions = Apollo.BaseMutationOptions<InstallAddOnMutation, InstallAddOnMutationVariables>;
 export const ClustersDocument = gql`
-    query Clusters($first: Int = 100, $after: String, $q: String, $healthy: Boolean) {
-  clusters(first: $first, after: $after, q: $q, healthy: $healthy) {
+    query Clusters($first: Int = 100, $after: String, $q: String, $healthy: Boolean, $tag: TagInput) {
+  clusters(first: $first, after: $after, q: $q, healthy: $healthy, tag: $tag) {
     pageInfo {
       ...PageInfo
     }
@@ -7568,6 +7578,7 @@ ${ClusterStatusInfoFragmentDoc}`;
  *      after: // value for 'after'
  *      q: // value for 'q'
  *      healthy: // value for 'healthy'
+ *      tag: // value for 'tag'
  *   },
  * });
  */
@@ -8076,6 +8087,54 @@ export type ClusterStatusesQueryHookResult = ReturnType<typeof useClusterStatuse
 export type ClusterStatusesLazyQueryHookResult = ReturnType<typeof useClusterStatusesLazyQuery>;
 export type ClusterStatusesSuspenseQueryHookResult = ReturnType<typeof useClusterStatusesSuspenseQuery>;
 export type ClusterStatusesQueryResult = Apollo.QueryResult<ClusterStatusesQuery, ClusterStatusesQueryVariables>;
+export const TagPairsDocument = gql`
+    query TagPairs($first: Int = 30, $q: String, $tag: String) {
+  tagPairs(first: $first, q: $q, tag: $tag) {
+    edges {
+      node {
+        name
+        value
+        id
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useTagPairsQuery__
+ *
+ * To run a query within a React component, call `useTagPairsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTagPairsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTagPairsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      q: // value for 'q'
+ *      tag: // value for 'tag'
+ *   },
+ * });
+ */
+export function useTagPairsQuery(baseOptions?: Apollo.QueryHookOptions<TagPairsQuery, TagPairsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<TagPairsQuery, TagPairsQueryVariables>(TagPairsDocument, options);
+      }
+export function useTagPairsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TagPairsQuery, TagPairsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<TagPairsQuery, TagPairsQueryVariables>(TagPairsDocument, options);
+        }
+export function useTagPairsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<TagPairsQuery, TagPairsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<TagPairsQuery, TagPairsQueryVariables>(TagPairsDocument, options);
+        }
+export type TagPairsQueryHookResult = ReturnType<typeof useTagPairsQuery>;
+export type TagPairsLazyQueryHookResult = ReturnType<typeof useTagPairsLazyQuery>;
+export type TagPairsSuspenseQueryHookResult = ReturnType<typeof useTagPairsSuspenseQuery>;
+export type TagPairsQueryResult = Apollo.QueryResult<TagPairsQuery, TagPairsQueryVariables>;
 export const UsageDocument = gql`
     query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!, $clusterId: ID) {
   cpu: metric(clusterId: $clusterId, query: $cpu, offset: $offset, step: $step) {
@@ -10974,6 +11033,7 @@ export const namedOperations = {
     ClusterBindings: 'ClusterBindings',
     RuntimeServices: 'RuntimeServices',
     ClusterStatuses: 'ClusterStatuses',
+    TagPairs: 'TagPairs',
     Usage: 'Usage',
     GitRepositories: 'GitRepositories',
     HelmRepositories: 'HelmRepositories',
