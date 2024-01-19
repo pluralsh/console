@@ -29,6 +29,7 @@ export function DeleteProvider({
     <Div onClick={(e) => e.stopPropagation()}>
       <DeleteIconButton
         onClick={() => setConfirm(true)}
+        disabled={!!provider.service}
         tooltip
       />
       <Confirm
