@@ -49,7 +49,7 @@ defmodule Console.Schema.PrAutomation do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
-    |> cast_embed(:updates)
+    |> cast_embed(:updates, with: &update_changeset/2)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:create_bindings)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
@@ -61,7 +61,7 @@ defmodule Console.Schema.PrAutomation do
     |> foreign_key_constraint(:connection_id)
   end
 
-  def spec_changeset(model, attrs \\ %{}) do
+  def update_changeset(model, attrs \\ %{}) do
     cast(model, attrs, ~w(regexes files yq replace_template match_strategy)a)
   end
 end
