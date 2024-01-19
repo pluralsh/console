@@ -47,7 +47,7 @@ defmodule Console.Deployments.Services do
   end
   def tarstream(%Service{helm: %Service.Helm{values: values}} = svc) when is_binary(values) do
     with {:ok, tar} <- tarfile(svc),
-      do: Tar.splice(tar, %{"values.yaml.liquid" => values})
+      do: Tar.splice(tar, %{"values.yaml.liquid" => values, "values.yaml.static" => values})
   end
   def tarstream(%Service{} = svc), do: tarfile(svc)
 

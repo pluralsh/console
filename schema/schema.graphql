@@ -385,6 +385,9 @@ type RootMutationType {
     context: Json
   ): PullRequest
 
+  "just registers a pointer record to a PR after it was created externally be some other automation"
+  createPullRequestPointer(attributes: PullRequestAttributes): PullRequest
+
   createCluster(attributes: ClusterAttributes!): Cluster
 
   updateCluster(id: ID!, attributes: ClusterUpdateAttributes!): Cluster
@@ -2104,6 +2107,14 @@ input PrAutomationUpdateSpecAttributes {
   replaceTemplate: String
   yq: String
   matchStrategy: MatchStrategy
+}
+
+"attributes for a pull request pointer record"
+input PullRequestAttributes {
+  url: String!
+  title: String!
+  creator: String
+  labels: Json
 }
 
 "a git repository available for deployments"

@@ -3,6 +3,8 @@ defmodule Console.Schema.PromotionService do
   alias Console.Schema.{PipelinePromotion, Service, Revision}
 
   schema "promotion_services" do
+    field :sha, :string
+
     belongs_to :promotion, PipelinePromotion
     belongs_to :service,   Service
     belongs_to :revision,  Revision
@@ -12,7 +14,7 @@ defmodule Console.Schema.PromotionService do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(service_id revision_id)a)
+    |> cast(attrs, ~w(service_id revision_id sha)a)
     |> foreign_key_constraint(:promotion_id)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:revision_id)

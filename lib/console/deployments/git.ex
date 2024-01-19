@@ -211,6 +211,17 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
+  Create a pull request record if a user has permissions
+  """
+  @spec create_pull_request(map, User.t) :: pull_request_resp
+  def create_pull_request(attrs, %User{} = user) do
+    %PullRequest{}
+    |> PullRequest.changeset(attrs)
+    |> allow(user, :create)
+    |> when_ok(:insert)
+  end
+
+  @doc """
   Fetches all helm repos registered in this cluster so far
   """
   @spec list_helm_repositories() :: {:ok, [Kube.HelmRepository.t]} | Console.error

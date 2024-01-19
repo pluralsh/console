@@ -291,4 +291,25 @@ defmodule Console.Deployments.GitTest do
       {:error, _} = Git.create_pull_request(%{}, pra.id, "pr-test", user)
     end
   end
+
+  describe "#create_pull_request/2" do
+    test "admins can create pr pointers" do
+      admin = admin_user()
+
+      {:ok, pr} = Git.create_pull_request(%{
+        title: "pr",
+        url: "https://github.com/org/name/pulls/2",
+      }, admin)
+
+      assert pr.title == "pr"
+      assert pr.url == "https://github.com/org/name/pulls/2"
+    end
+
+    test "nonadmins cannot create" do
+      {:error, _} = Git.create_pull_request(%{
+        title: "pr",
+        url: "https://github.com/org/name/pulls/2",
+      }, insert(:user))
+    end
+  end
 end
