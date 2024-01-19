@@ -77,7 +77,7 @@ export function ServiceDetailsSidecar({
           {deprecationCount > 0 ? (
             <Chip
               icon={<ErrorIcon />}
-              severity="error"
+              severity="danger"
             >
               Deprecations
             </Chip>

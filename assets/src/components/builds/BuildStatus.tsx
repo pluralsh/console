@@ -20,7 +20,7 @@ export default function BuildStatus({ status, ...props }) {
     case Status.FAILED:
       return (
         <Chip
-          severity="error"
+          severity="danger"
           {...props}
         >
           Error

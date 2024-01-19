@@ -24,7 +24,7 @@ export function ServiceDeprecationsChip({
   return (
     <Tooltip label="View deprecations">
       <Chip
-        severity="error"
+        severity="danger"
         icon={<ErrorIcon />}
         {...props}
       >

@@ -25,7 +25,7 @@ export default function AppStatus({ app }) {
         <Tooltip label={error.message}>
           <Chip
             size="small"
-            severity="error"
+            severity="danger"
           >
             Failed ({componentsReady})
           </Chip>
