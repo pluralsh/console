@@ -84,6 +84,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def create_pull_request(%{id: id, branch: branch, context: ctx}, %{context: %{current_user: user}}),
     do: Git.create_pull_request(ctx, id, branch, user)
 
+  def create_pr(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.create_pull_request(attrs, user)
+
   defp pr_filters(query, args) do
     Enum.reduce(args, query, fn
       {:cluster_id, cid}, q -> PullRequest.for_cluster(q, cid)

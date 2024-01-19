@@ -202,4 +202,18 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
       assert pr["title"] == pra.title
     end
   end
+
+  describe "createPullRequestPointer" do
+    test "creates a pointer to a pull request in an external scm" do
+      {:ok, %{data: %{"createPullRequestPointer" => pr}}} = run_query("""
+        mutation Create($attrs: PullRequestAttributes!) {
+          createPullRequestPointer(attributes: $attrs) {
+            url
+          }
+        }
+      """, %{"attrs" => %{"url" => "https://github.com/some/repo", "title" => "pr"}}, %{current_user: admin_user()})
+
+      assert pr["url"] == "https://github.com/some/repo"
+    end
+  end
 end

@@ -2524,6 +2524,14 @@ export type PullRequest = {
   url: Scalars['String']['output'];
 };
 
+/** attributes for a pull request pointer record */
+export type PullRequestAttributes = {
+  creator?: InputMaybe<Scalars['String']['input']>;
+  labels?: InputMaybe<Scalars['Json']['input']>;
+  title: Scalars['String']['input'];
+  url: Scalars['String']['input'];
+};
+
 export type PullRequestConnection = {
   __typename?: 'PullRequestConnection';
   edges?: Maybe<Array<Maybe<PullRequestEdge>>>;
@@ -2729,6 +2737,8 @@ export type RootMutationType = {
   createPrAutomation?: Maybe<PrAutomation>;
   createProviderCredential?: Maybe<ProviderCredential>;
   createPullRequest?: Maybe<PullRequest>;
+  /** just registers a pointer record to a PR after it was created externally be some other automation */
+  createPullRequestPointer?: Maybe<PullRequest>;
   createRole?: Maybe<Role>;
   createScmConnection?: Maybe<ScmConnection>;
   createServiceAccount?: Maybe<User>;
@@ -2910,6 +2920,11 @@ export type RootMutationTypeCreatePullRequestArgs = {
   branch?: InputMaybe<Scalars['String']['input']>;
   context?: InputMaybe<Scalars['Json']['input']>;
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreatePullRequestPointerArgs = {
+  attributes?: InputMaybe<PullRequestAttributes>;
 };
 
 

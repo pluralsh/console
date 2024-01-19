@@ -57,6 +57,14 @@ defmodule Console.GraphQl.Deployments.Git do
     field :match_strategy,   :match_strategy
   end
 
+  @desc "attributes for a pull request pointer record"
+  input_object :pull_request_attributes do
+    field :url,     non_null(:string)
+    field :title,   non_null(:string)
+    field :creator, :string
+    field :labels,  :json
+  end
+
   @desc "a git repository available for deployments"
   object :git_repository do
     field :id,           non_null(:id), description: "internal id of this repository"
@@ -332,6 +340,14 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :context, :json
 
       safe_resolve &Deployments.create_pull_request/2
+    end
+
+    @desc "just registers a pointer record to a PR after it was created externally be some other automation"
+    field :create_pull_request_pointer, :pull_request do
+      middleware Authenticated
+      arg :attributes, :pull_request_attributes
+
+      safe_resolve &Deployments.create_pr/2
     end
   end
 end

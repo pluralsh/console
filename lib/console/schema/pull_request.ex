@@ -3,8 +3,10 @@ defmodule Console.Schema.PullRequest do
   alias Console.Schema.{Cluster, Service, PolicyBinding}
 
   schema "pull_requests" do
-    field :url,   :string
-    field :title, :string
+    field :url,     :string
+    field :title,   :string
+    field :creator, :string
+    field :labels,  :map
 
     field :notifications_policy_id, :binary_id
 
@@ -31,7 +33,7 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, order_by: ^order)
   end
 
-  @valid ~w(url title cluster_id service_id)a
+  @valid ~w(url title cluster_id service_id creator labels)a
 
   def changeset(model, attrs \\ %{}) do
     model
