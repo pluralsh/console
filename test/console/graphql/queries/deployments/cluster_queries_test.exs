@@ -19,6 +19,41 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert Enum.all?(found, & &1["name"])
     end
 
+    test "it can filter by tags" do
+      admin = admin_user()
+      clusters = insert_list(2, :cluster, tags: [%{name: "t", value: "v"}, %{name: "t2", value: "v2"}])
+      clusters2 = insert_list(2, :cluster, tags: [%{name: "t", value: "v"}, %{name: "t2", value: "v3"}])
+      insert_list(2, :cluster)
+
+      {:ok, %{data: %{"clusters" => found}}} = run_query("""
+        query Clusters($tq: TagQuery!) {
+          clusters(first: 5, tagQuery: $tq) {
+            edges { node { id } }
+          }
+        }
+      """, %{"tq" => %{"op" => "AND", "tags" => [
+        %{"name" => "t", "value" => "v"},
+        %{"name" => "t2", "value" => "v2"},
+      ]}}, %{current_user: admin})
+
+      assert from_connection(found)
+             |> ids_equal(clusters)
+
+      {:ok, %{data: %{"clusters" => found}}} = run_query("""
+        query Clusters($tq: TagQuery!) {
+          clusters(first: 5, tagQuery: $tq) {
+            edges { node { id } }
+          }
+        }
+      """, %{"tq" => %{"op" => "OR", "tags" => [
+        %{"name" => "t", "value" => "v"},
+        %{"name" => "t2", "value" => "v2"},
+      ]}}, %{current_user: admin})
+
+      assert from_connection(found)
+             |> ids_equal(clusters ++ clusters2)
+    end
+
     test "it can list clusters by health in the system" do
       clusters = insert_list(3, :cluster, pinged_at: Timex.now())
       others = insert_list(3, :cluster, pinged_at: Timex.now() |> Timex.shift(hours: -1))
