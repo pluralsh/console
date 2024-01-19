@@ -1,6 +1,6 @@
 import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
-import { useContext, useMemo, useRef } from 'react'
-import { Outlet, useMatch } from 'react-router-dom'
+import { useContext, useEffect, useMemo, useRef } from 'react'
+import { Outlet, useMatch, useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import {
   POLL_INTERVAL,
@@ -22,6 +22,7 @@ import {
   DeploymentDocument,
   IngressDocument,
   JobDocument,
+  ServiceDeployment,
   ServiceDeploymentComponentFragment,
   ServiceDocument,
   StatefulSetDocument,
@@ -29,6 +30,7 @@ import {
 } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import { useTheme } from 'styled-components'
+import { isEmpty } from 'lodash'
 
 export const kindToQuery = {
   certificate: CertificateDocument,
@@ -43,6 +45,7 @@ export const kindToQuery = {
 } as const
 
 type DetailsComponent = {
+  id: string
   name: string
   namespace?: string | null | undefined
   kind: string
@@ -67,21 +70,20 @@ export type ComponentDetailsContext = {
 export function ComponentDetails({
   component,
   pathMatchString,
-  clusterId,
-  cluster,
-  serviceId,
+  service,
   serviceComponents,
   hasPrometheus,
+  cdView = false,
 }: {
   component: DetailsComponent
   pathMatchString: string
-  clusterId?: string
-  cluster?: any
-  serviceId?: string
-  hasPrometheus?: boolean
+  cdView?: boolean
+  service?: ServiceDeployment | null
   serviceComponents?: ComponentDetailsContext['serviceComponents']
+  hasPrometheus?: boolean
 }) {
   const theme = useTheme()
+  const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
   const componentKind = component.kind?.toLowerCase() || ''
@@ -92,7 +94,7 @@ export function ComponentDetails({
   const vars = {
     name: component.name,
     namespace: component.namespace,
-    ...(serviceId ? { serviceId } : {}),
+    ...(service?.id ? { serviceId: service?.id } : {}),
     ...(query === UnstructuredResourceDocument
       ? {
           kind: component.kind,
@@ -126,31 +128,42 @@ export function ComponentDetails({
       data,
       loading,
       refetch,
-      clusterId,
-      cluster,
-      serviceId,
+      clusterId: service?.cluster?.id,
+      cluster: service?.cluster,
+      serviceId: service?.id,
       serviceComponents,
     }),
-    [
-      clusterId,
-      cluster,
-      component,
-      data,
-      loading,
-      refetch,
-      serviceComponents,
-      serviceId,
-    ]
+    [component, data, loading, refetch, serviceComponents, service]
   )
 
-  if (!me || loading) return <LoadingIndicator />
+  const hasNotFoundError = useMemo(
+    () => !data && error && error?.message?.includes('not found'),
+    [data, error]
+  )
 
   const filteredDirectory = directory.filter(
-    ({ onlyFor, prometheus }) =>
+    ({ onlyFor, onlyIfNoError, onlyIfDryRun, prometheus }) =>
       (!onlyFor || (componentKind && onlyFor.includes(componentKind))) &&
-      (!prometheus || !clusterId || hasPrometheus)
+      (!prometheus || !service?.cluster?.id || hasPrometheus) &&
+      (!onlyIfNoError || !hasNotFoundError) &&
+      (!onlyIfDryRun || (cdView && !service?.dryRun))
   )
+
   const currentTab = filteredDirectory.find(({ path }) => path === subpath)
+
+  useEffect(() => {
+    if (!cdView || currentTab) return
+
+    if (isEmpty(filteredDirectory)) {
+      navigate(`/cd/clusters/${service?.cluster?.id}/services/${service?.id}`)
+    } else {
+      navigate(
+        `/cd/clusters/${service?.cluster?.id}/services/${service?.id}/components/${component.id}/${filteredDirectory[0].path}`
+      )
+    }
+  }, [navigate, currentTab, filteredDirectory, service, component, cdView])
+
+  if (!me || loading) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth
@@ -193,7 +206,7 @@ export function ComponentDetails({
             componentName={componentName}
             namespace={component.namespace || ''}
           />
-          {!serviceId && (
+          {!service?.id && (
             <ViewLogsButton
               metadata={value?.metadata}
               kind={componentKind}

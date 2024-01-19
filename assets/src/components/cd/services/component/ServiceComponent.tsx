@@ -115,11 +115,10 @@ export default function ServiceComponent() {
       <ComponentDetails
         component={component}
         serviceComponents={components}
-        clusterId={clusterId}
-        serviceId={serviceId}
-        cluster={data?.serviceDeployment?.cluster}
+        service={data?.serviceDeployment}
         hasPrometheus={!!settings?.prometheusConnection}
         pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
+        cdView
       />
     </BreadcrumbWrapper>
   )
