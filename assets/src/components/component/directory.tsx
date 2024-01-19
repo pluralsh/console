@@ -23,7 +23,7 @@ export const directory: {
     path: 'raw',
   },
   {
-    label: 'Desired state',
-    path: 'desiredstate',
+    label: 'Dry run',
+    path: 'dryrun',
   },
 ]

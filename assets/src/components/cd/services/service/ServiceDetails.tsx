@@ -94,7 +94,7 @@ export const getDirectory = ({
     { path: 'settings', label: 'Settings', enabled: true },
     { path: 'secrets', label: 'Secrets', enabled: true },
     { path: 'helm', label: 'Helm values', enabled: !!helm },
-    { path: 'desiredstate', label: 'Desired state', enabled: !!dryRun },
+    { path: 'dryrun', label: 'Dry run', enabled: !!dryRun },
     { path: 'revisions', label: 'Revisions', enabled: true },
     {
       path: 'docs',

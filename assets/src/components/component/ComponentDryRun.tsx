@@ -4,7 +4,7 @@ import { isEmpty } from 'lodash'
 
 import DiffViewer from '../utils/DiffViewer'
 
-export default function ComponentDesiredState() {
+export default function ComponentDryRun() {
   const { component } = useOutletContext<any>()
 
   const [live, desired] = useMemo(

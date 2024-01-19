@@ -22,7 +22,7 @@ import { useServiceContext } from './ServiceDetails'
 const SEPARATOR = '\n---\n'
 const NEW_LINE_REGEXP = /^\s+|\s+$/g
 
-export default function ServiceDesiredState() {
+export default function ServiceDryRun() {
   const navigate = useNavigate()
   const theme = useTheme()
   const [splitView, setSplitView] = useState(true)
@@ -58,7 +58,7 @@ export default function ServiceDesiredState() {
 
   return (
     <ScrollablePage
-      heading="Desired state"
+      heading="Dry run"
       headingContent={
         !(isEmpty(live) && isEmpty(desired)) && (
           <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
