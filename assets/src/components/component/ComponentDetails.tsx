@@ -143,10 +143,7 @@ export function ComponentDetails({
     ]
   )
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!me || !data) return <LoadingIndicator />
+  if (!me) return <LoadingIndicator />
 
   const filteredDirectory = directory.filter(
     ({ onlyFor, prometheus }) =>
@@ -205,6 +202,11 @@ export function ComponentDetails({
         </div>
       }
     >
+      {error && currentTab?.path !== 'dryrun' && (
+        <div css={{ marginBottom: theme.spacing.medium }}>
+          <GqlError error={error} />
+        </div>
+      )}
       <TabPanel
         as={<Outlet context={outletContext} />}
         stateRef={tabStateRef}
