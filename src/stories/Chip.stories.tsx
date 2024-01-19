@@ -5,6 +5,8 @@ import { StatusOkIcon, WrapWithIf } from '..'
 import Chip from '../components/Chip'
 import Card from '../components/Card'
 
+import { SEVERITIES } from '../types'
+
 import { Link } from './NavigationContextStub'
 
 export default {
@@ -38,14 +40,7 @@ const sizes: ComponentProps<typeof Chip>['size'][] = [
   'large',
 ]
 
-const severities: ComponentProps<typeof Chip>['severity'][] = [
-  'neutral',
-  'info',
-  'success',
-  'warning',
-  'error',
-  'critical',
-]
+const severities = SEVERITIES
 
 const versionsArgs = [{}, { loading: true }, { icon: <StatusOkIcon /> }]
 
@@ -240,8 +235,11 @@ function Template({ onFillLevel, asLink, ...args }: any) {
 
 export const Default = Template.bind({})
 Default.args = {
-  closeButton: false,
-  clickable: false,
+  closeButton: true,
+  clickable: true,
+  disabled: false,
   asLink: false,
   onFillLevel: 0,
+  tooltip: false,
+  condensed: false,
 }

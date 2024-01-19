@@ -1,9 +1,11 @@
-import { mergeTheme } from 'honorable'
 import { omitBy } from 'lodash'
-import { isUndefined, omit, pick } from 'lodash-es'
+import { isEmpty, isUndefined, omit, pick } from 'lodash-es'
 import {
+  type ComponentProps,
   type HTMLAttributes,
   type Key,
+  type KeyboardEvent,
+  type KeyboardEventHandler,
   type MouseEventHandler,
   type ReactElement,
   type ReactNode,
@@ -27,7 +29,7 @@ import { useFloatingDropdown } from '../hooks/useFloatingDropdown'
 
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import SearchIcon from './icons/SearchIcon'
-import Input, { type InputProps } from './Input'
+import { type InputProps } from './Input'
 import { Spinner } from './Spinner'
 
 import { type ListBoxItemBaseProps } from './ListBoxItem'
@@ -37,8 +39,11 @@ import {
   setNextFocusedKey,
   useSelectComboStateProps,
 } from './SelectComboShared'
+import Input2 from './Input2'
+import Chip, { CHIP_CLOSE_ATTR_KEY } from './Chip'
 
 type Placement = 'left' | 'right'
+const CHIP_ATTR_KEY = 'data-chip-key' as const
 
 type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
   children:
@@ -58,6 +63,10 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
   filter?: ComboBoxStateOptions<object>['defaultFilter']
   loading?: boolean
   titleContent?: ReactNode
+  chips?: ComponentProps<typeof Chip>[]
+  onDeleteChip?: (key: string) => void
+  inputContent?: ComponentProps<typeof Input2>['inputContent']
+  onDeleteInputContent?: ComponentProps<typeof Input2>['onDeleteInputContent']
 } & Pick<InputProps, 'suffix' | 'prefix' | 'titleContent' | 'showClearButton'> &
   Omit<
     ComboBoxStateOptions<object>,
@@ -89,50 +98,59 @@ type ComboBoxInputProps = {
   buttonRef?: RefObject<HTMLDivElement>
   buttonProps?: AriaButtonProps
   loading?: boolean
+  hasChips?: boolean
 }
 
-const OpenButton = styled(
-  ({
-    isOpen: _isOpen,
-    buttonRef,
-    buttonProps,
-    ...props
-  }: HTMLAttributes<HTMLDivElement> & {
-    isOpen?: boolean
-    buttonRef: RefObject<any>
-    buttonProps: AriaButtonProps
-  }) => {
-    const { buttonProps: useButtonProps } = useButton(
-      { ...buttonProps, elementType: 'div' },
-      buttonRef
-    )
-
-    return (
-      <div
-        ref={buttonRef}
-        {...props}
-        {...useButtonProps}
-      >
-        <DropdownArrowIcon />
-      </div>
-    )
-  }
-)(({ theme, isOpen }) => ({
+const OpenButtonSC = styled.div(({ theme }) => ({
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
+  alignSelf: 'stretch',
   paddingLeft: theme.spacing.medium,
   paddingRight: theme.spacing.medium,
-  height: '100%',
-  ...theme.partials.dropdown.arrowTransition({ isOpen }),
-  '&:focus': {
+  borderRadius: theme.borderRadiuses.medium - theme.borderWidths.default,
+  ...theme.partials.dropdown.arrowTransition({ isOpen: false }),
+  '&[aria-expanded=true]': {
+    ...theme.partials.dropdown.arrowTransition({ isOpen: true }),
+  },
+  '&:focus, &:focus-visible': {
     outline: 'none',
   },
-  borderRadius: theme.borderRadiuses.medium - theme.borderWidths.default,
-  '&:focus-visible': {
-    ...theme.partials.focus.outline,
-  },
 }))
+
+function OpenButton({
+  buttonRef,
+  buttonProps,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
+  isOpen?: boolean
+  buttonRef: RefObject<any>
+  buttonProps: AriaButtonProps
+}) {
+  const { buttonProps: useButtonProps } = useButton(
+    { ...buttonProps, elementType: 'div' },
+    buttonRef
+  )
+
+  return (
+    <OpenButtonSC
+      ref={buttonRef}
+      {...props}
+      {...useButtonProps}
+    >
+      <DropdownArrowIcon />
+    </OpenButtonSC>
+  )
+}
+
+const InputChipList = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xxsmall,
+}))
+const onChipClick = (e: Event) => {
+  e.stopPropagation()
+}
 
 const honorableInputPropNames = [
   'onChange',
@@ -151,6 +169,7 @@ function ComboBoxInput({
   buttonRef,
   buttonProps,
   showArrow = true,
+  hasChips = false,
   isOpen,
   onInputClick,
   loading,
@@ -163,6 +182,7 @@ function ComboBoxInput({
       'onChange' | 'onFocus' | 'onBlur' | 'onKeyDown' | 'onKeyUp'
     >),
   }
+
   const theme = useTheme()
   // Need to filter out undefined properties so they won't override
   // outerInputProps for honorable <Input> component
@@ -171,33 +191,12 @@ function ComboBoxInput({
     [inputProps]
   )
 
-  let themeExtension: any = {}
-
-  if (showArrow) {
-    themeExtension = mergeTheme(themeExtension, {
-      Input: {
-        Root: [{ paddingRight: 0 }],
-        InputBase: [{ paddingRight: 0 }],
-        EndIcon: [
-          {
-            alignSelf: 'stretch',
-            paddingLeft: 0,
-            paddingRight: 0,
-            marginLeft: 0,
-            marginRight: 0,
-          },
-        ],
-      },
-    })
-  }
-
   return (
-    <Input
-      themeExtension={themeExtension}
+    <Input2
       startIcon={
         loading ? <Spinner color={theme.colors['icon-xlight']} /> : startIcon
       }
-      endIcon={
+      dropdownButton={
         showArrow ? (
           <OpenButton
             isOpen={isOpen}
@@ -210,6 +209,10 @@ function ComboBoxInput({
         ref: inputRef,
         onClick: onInputClick,
         ...innerInputProps,
+        style: {
+          ...(hasChips ? { minWidth: 150 } : {}),
+          ...(innerInputProps?.style || {}),
+        },
       }}
       {...outerInputProps}
       {...props}
@@ -245,6 +248,8 @@ function ComboBox({
   prefix,
   titleContent,
   showClearButton,
+  chips,
+  onDeleteChip: onDeleteChipProp,
   ...props
 }: ComboBoxProps) {
   const nextFocusedKeyRef = useRef<Key>(null)
@@ -378,17 +383,142 @@ function ComboBox({
     placement,
   })
 
-  outerInputProps = {
-    ...outerInputProps,
-    ...(outerInputProps.ref
-      ? { ref: mergeRefs([outerInputProps.ref, triggerRef]) }
-      : { ref: triggerRef }),
-  }
+  const chipListRef = useRef<HTMLDivElement>(null)
+
+  const onDeleteChip = useCallback(
+    (key: string) => {
+      const elt = chipListRef?.current?.querySelector(
+        `[${CHIP_ATTR_KEY}="${CSS.escape(key)}"]`
+      )
+      const prevChipClose = elt?.previousElementSibling?.querySelector(
+        '[data-close-button]'
+      )
+
+      if (prevChipClose instanceof HTMLElement) {
+        prevChipClose.focus()
+      } else {
+        const nextChipClose = elt?.nextElementSibling?.querySelector(
+          '[data-close-button]'
+        )
+
+        if (nextChipClose instanceof HTMLElement) {
+          nextChipClose.focus?.()
+        } else {
+          inputRef.current?.querySelector('input')?.focus?.()
+        }
+      }
+
+      onDeleteChipProp?.(key)
+    },
+    [onDeleteChipProp]
+  )
+  const handleKeyDown = useCallback<KeyboardEventHandler>((e) => {
+    const elt = e.currentTarget
+
+    const dir: 0 | 1 | -1 =
+      e.code === 'ArrowLeft' ? -1 : e.code === 'ArrowRight' ? 1 : 0
+
+    if (dir === 0) return
+
+    if (elt instanceof HTMLInputElement) {
+      if (elt.selectionStart !== 0 || dir !== -1) {
+        return
+      }
+
+      const lastChipClose = chipListRef.current?.querySelector(
+        `:last-of-type[${CHIP_ATTR_KEY}] [${CHIP_CLOSE_ATTR_KEY}]`
+      )
+
+      if (lastChipClose instanceof HTMLElement) {
+        lastChipClose.focus()
+      }
+    } else if (
+      elt instanceof HTMLElement &&
+      elt.contains(document.activeElement)
+    ) {
+      const chip = document.activeElement?.closest(`[${CHIP_ATTR_KEY}]`)
+
+      if (dir === 1) {
+        if (!chip.nextElementSibling) {
+          inputRef.current?.querySelector('input')?.focus()
+        } else {
+          chip?.nextElementSibling
+            ?.querySelector(`[${CHIP_CLOSE_ATTR_KEY}]`)
+            // @ts-ignore
+            ?.focus?.()
+        }
+      } else if (dir === -1) {
+        chip.previousElementSibling
+          ?.querySelector(`[${CHIP_CLOSE_ATTR_KEY}]`)
+          // @ts-ignore
+          ?.focus?.()
+      }
+    }
+  }, [])
+
+  outerInputProps = useMemo(
+    () => ({
+      ...(!isEmpty(chips)
+        ? {
+            inputContent: (
+              <InputChipList
+                ref={chipListRef}
+                onKeyDown={handleKeyDown}
+              >
+                {chips.map((chipProps) => (
+                  <Chip
+                    size="small"
+                    condensed
+                    truncateWidth={100}
+                    truncateEdge="start"
+                    closeButton
+                    tooltip
+                    onClick={onChipClick}
+                    closeButtonProps={{
+                      onClick: () => {
+                        onDeleteChip?.(chipProps?.key)
+                      },
+                      'aria-label': `Remove ${chipProps.key}`,
+                    }}
+                    {...{ [CHIP_ATTR_KEY]: chipProps?.key }}
+                    {...chipProps}
+                  />
+                ))}
+              </InputChipList>
+            ),
+          }
+        : {}),
+      ...(onDeleteChipProp
+        ? {
+            onDeleteInputContent: () =>
+              onDeleteChipProp?.(chips?.[chips.length - 1]?.key),
+          }
+        : {}),
+      ...outerInputProps,
+      ...(outerInputProps.ref
+        ? { ref: mergeRefs([outerInputProps.ref, triggerRef]) }
+        : { ref: triggerRef }),
+    }),
+    [
+      chips,
+      handleKeyDown,
+      onDeleteChip,
+      onDeleteChipProp,
+      outerInputProps,
+      triggerRef,
+    ]
+  )
 
   return (
     <ComboBoxInner>
       <ComboBoxInput
-        inputProps={inputProps}
+        inputProps={{
+          ...inputProps,
+          onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
+            handleKeyDown(e)
+            inputProps?.onKeyDown?.(e)
+          },
+        }}
         buttonRef={buttonRef}
         buttonProps={buttonProps}
         showArrow={showArrow}
@@ -401,6 +531,7 @@ function ComboBox({
         startIcon={startIcon}
         outerInputProps={outerInputProps}
         loading={loading}
+        hasChips={!!chips}
         onInputClick={() => {
           setIsOpen(true)
           // Need to also manually open with state to override

@@ -15,6 +15,8 @@ import {
   WrapWithIf,
 } from '..'
 
+import { ClusterTagsTemplate } from './ClusterTagsTemplate'
+
 export default {
   title: 'Combo Box',
   component: 'ComboBox',
@@ -475,6 +477,12 @@ Default.args = {
 
 export const Tags = TagsTemplate.bind({})
 Tags.args = {
+  loading: false,
+  withTitleContent: false,
+}
+
+export const ClusterTags = ClusterTagsTemplate.bind({})
+ClusterTags.args = {
   loading: false,
   withTitleContent: false,
 }

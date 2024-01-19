@@ -1,10 +1,10 @@
 import chroma from 'chroma-js'
 import { Div, type DivProps } from 'honorable'
 import { forwardRef } from 'react'
-import { type DefaultTheme, useTheme } from 'styled-components'
+import styled, { type DefaultTheme } from 'styled-components'
 import { memoize } from 'lodash-es'
 
-import { type SeverityExt, sanitizeSeverity } from '../types'
+import { type Severity, type SeverityExt, sanitizeSeverity } from '../types'
 
 import {
   type FillLevel,
@@ -31,10 +31,13 @@ type CardHue = (typeof HUES)[number]
 type CardSeverity = Extract<SeverityExt, (typeof CARD_SEVERITIES)[number]>
 
 type BaseCardProps = {
-  hue?: CardHue // Deprecated, prefer fillLevel
+  /** @deprecated Colors set by `FillLevelContext`. If you need to override context, use `fillLevel` */
+  hue?: CardHue
+  /** Used to override a fill level set by `FillLevelContext`  */
   fillLevel?: FillLevel
   cornerSize?: CornerSize
   clickable?: boolean
+  disabled?: boolean
   selected?: boolean
   severity?: SeverityExt
 }
@@ -78,12 +81,7 @@ const fillToNeutralSelectedBgC: Record<
   3: 'fill-three-selected',
 }
 
-const cornerSizeToBorderRadius: Record<CornerSize, string> = {
-  medium: 'medium',
-  large: 'large',
-}
-
-function useDecideFillLevel({
+export function useDecideFillLevel({
   hue,
   fillLevel,
 }: {
@@ -101,7 +99,7 @@ function useDecideFillLevel({
     : (toFillLevel(parentFillLevel + 1) as CardFillLevel)
 }
 
-const getFillToLightBgC = memoize(
+export const getFillToLightBgC = memoize(
   (
     theme: DefaultTheme
   ): Record<CardSeverity, Record<CardFillLevel, string>> => ({
@@ -184,21 +182,70 @@ const getBgColor = ({
   return fillToLightBgC[severity][fillLevel]
 }
 
+const CardSC = styled(Div)<{
+  $fillLevel: CardFillLevel
+  $cornerSize: CornerSize
+  $severity: Severity
+  $selected: boolean
+  $clickable: boolean
+  disabled: boolean
+}>(
+  ({
+    theme,
+    $fillLevel: fillLevel,
+    $cornerSize: cornerSize,
+    $severity: severity,
+    $selected: selected,
+    $clickable: clickable,
+    disabled,
+  }) => ({
+    ...theme.partials.reset.button,
+    border: `1px solid ${getBorderColor({
+      theme,
+      fillLevel,
+      severity,
+    })}`,
+    borderRadius: theme.borderRadiuses[cornerSize],
+    backgroundColor: selected
+      ? fillToNeutralSelectedBgC[fillLevel]
+      : getBgColor({ theme, fillLevel, severity }),
+    '&:focus, &:focus-visible': {
+      outline: 'none',
+    },
+    '&:focus-visible': {
+      borderColor: theme.colors['border-outline-focused'],
+    },
+    ...(clickable &&
+      !disabled && {
+        cursor: 'pointer',
+      }),
+    ...(clickable &&
+      !disabled &&
+      !selected &&
+      severity === 'neutral' && {
+        ':hover': {
+          backgroundColor: theme.colors[fillToNeutralHoverBgC[fillLevel]],
+        },
+      }),
+    ...theme.partials.scrollBar({ fillLevel }),
+  })
+)
+
 const Card = forwardRef(
   (
     {
-      cornerSize: size = 'large',
+      cornerSize = 'large',
       hue, // Deprecated, prefer fillLevel
       severity = 'neutral',
       fillLevel,
       selected = false,
       clickable = false,
+      disabled = false,
       ...props
     }: CardProps,
     ref
   ) => {
     fillLevel = useDecideFillLevel({ hue, fillLevel })
-    const theme = useTheme()
     const cardSeverity = sanitizeSeverity(severity, {
       allowList: CARD_SEVERITIES,
       default: 'neutral',
@@ -206,40 +253,19 @@ const Card = forwardRef(
 
     return (
       <FillLevelProvider value={fillLevel}>
-        <Div
+        <CardSC
           ref={ref}
-          {...theme.partials.reset.button}
-          cursor="unset"
-          border={`1px solid ${getBorderColor({
-            theme,
-            fillLevel,
-            severity: cardSeverity,
-          })}`}
-          borderRadius={cornerSizeToBorderRadius[size]}
-          backgroundColor={
-            selected
-              ? fillToNeutralSelectedBgC[fillLevel]
-              : getBgColor({ theme, fillLevel, severity: cardSeverity })
-          }
-          {...{
-            '&:focus, &:focus-visible': {
-              outline: 'none',
-            },
-            '&:focus-visible': {
-              borderColor: theme.colors['border-outline-focused'],
-            },
-          }}
+          $cornerSize={cornerSize}
+          $fillLevel={fillLevel}
+          $severity={cardSeverity}
+          $selected={selected}
+          $clickable={clickable}
           {...(clickable && {
-            cursor: 'pointer',
-            as: 'button',
+            forwardedAs: 'button',
             type: 'button',
+            'data-clickable': 'true',
           })}
-          {...(clickable &&
-            !selected &&
-            severity === 'neutral' && {
-              _hover: { backgroundColor: fillToNeutralHoverBgC[fillLevel] },
-            })}
-          {...theme.partials.scrollBar({ fillLevel })}
+          disabled={clickable && disabled}
           {...props}
         />
       </FillLevelProvider>
@@ -248,4 +274,4 @@ const Card = forwardRef(
 )
 
 export default Card
-export type { BaseCardProps, CardProps, CornerSize as CardSize, CardHue }
+export type { BaseCardProps, CardProps, CornerSize, CardHue, CardFillLevel }

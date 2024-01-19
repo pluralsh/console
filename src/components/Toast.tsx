@@ -7,10 +7,7 @@ import { type Extends } from '../utils/ts-utils'
 import Banner from './Banner'
 import Layer, { type LayerPositionType } from './Layer'
 
-export type ToastSeverity = Extends<
-  Severity,
-  'info' | 'success' | 'danger' | 'error'
->
+export type ToastSeverity = Extends<Severity, 'info' | 'success' | 'danger'>
 
 type ToastProps = {
   position?: LayerPositionType

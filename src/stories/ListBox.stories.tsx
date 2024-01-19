@@ -24,6 +24,14 @@ const portrait = (
     url="photo.png"
   />
 )
+
+const initials = (
+  <AppIcon
+    spacing="none"
+    size="xsmall"
+    name="Javier Bardem"
+  />
+)
 const smallIcon = <PersonIcon size={16} />
 
 const chipProps = {
@@ -194,12 +202,12 @@ function Template() {
             </ListBoxFooter>
           }
         >
-          {items.map(({ key, label, description }) => (
+          {items.map(({ key, label, description }, i) => (
             <ListBoxItem
               key={key}
               label={label}
               description={description}
-              leftContent={portrait}
+              leftContent={i % 2 === 0 ? portrait : initials}
             />
           ))}
         </ListBox>

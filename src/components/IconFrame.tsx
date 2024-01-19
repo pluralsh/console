@@ -87,6 +87,7 @@ const sizeToFrameSize: Record<Size, number> = {
 
 type IconFrameProps = Omit<FlexProps, 'size'> & {
   clickable?: boolean
+  disabled?: boolean
   textValue?: string
   icon: ReactElement
   size?: Size
@@ -102,7 +103,9 @@ const IconFrameSC = styled(Flex)<{
   $selected: boolean
   $size: Size
 }>(({ theme, $type, $clickable, $selected, $size }) => ({
+  display: 'flex',
   alignItems: 'center',
+  alignContent: 'center',
   justifyContent: 'center',
   width: sizeToFrameSize[$size],
   height: sizeToFrameSize[$size],
@@ -111,7 +114,6 @@ const IconFrameSC = styled(Flex)<{
     : typeToBG(theme)[$type],
   border: typeToBorder(theme)[$type],
   borderRadius: theme.borderRadiuses.medium,
-
   '&:focus,&:focus-visible': { outline: 'none' },
   '&:focus-visible,&:hover:focus-visible': {
     ...theme.partials.focus.default,
@@ -127,7 +129,10 @@ const IconFrameSC = styled(Flex)<{
   ...($clickable
     ? {
         cursor: 'pointer',
-        '&:hover': {
+        '&[disabled]': {
+          cursor: 'default',
+        },
+        '&:hover:not(:disabled)': {
           backgroundColor: $selected
             ? typeToSelectedBG(theme)[$type]
             : $clickable && typeToHoverBG(theme)[$type],
@@ -154,6 +159,7 @@ const IconFrame = forwardRef<
       size = 'medium',
       textValue = '',
       clickable = false,
+      disabled = false,
       selected = false,
       tooltip,
       tooltipProps,
@@ -176,8 +182,8 @@ const IconFrame = forwardRef<
         $type={type}
         $size={size}
         ref={ref}
-        flex={false}
         aria-label={textValue}
+        disabled={(clickable && disabled) || undefined}
         {...(forwardedAs ? { forwardedAs } : {})}
         {...(clickable && {
           tabIndex: 0,

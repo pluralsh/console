@@ -4,6 +4,7 @@ import type Chip from '../components/Chip'
 import Card from '../components/Card'
 import ChipList from '../components/ChipList'
 import WrapWithIf from '../components/WrapWithIf'
+import { SEVERITIES } from '../types'
 
 const sizes: ComponentProps<typeof Chip>['size'][] = [
   'small',
@@ -11,14 +12,7 @@ const sizes: ComponentProps<typeof Chip>['size'][] = [
   'large',
 ]
 
-const severities: ComponentProps<typeof Chip>['severity'][] = [
-  'neutral',
-  'info',
-  'success',
-  'warning',
-  'error',
-  'critical',
-]
+const severities: ComponentProps<typeof Chip>['severity'][] = [...SEVERITIES]
 
 export default {
   title: 'ChipList',

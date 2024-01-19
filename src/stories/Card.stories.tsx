@@ -28,6 +28,7 @@ const cornerSizes: ComponentProps<typeof Card>['cornerSize'][] = [
 function Template({
   clickable,
   selected,
+  disabled,
   width,
   height,
   severity,
@@ -46,6 +47,7 @@ function Template({
             <Card
               clickable={clickable}
               selected={selected}
+              disabled={disabled}
               width={width}
               cornerSize={cornerSize}
               fillLevel={fillLevel}
@@ -73,6 +75,7 @@ function Template({
 function FillLevelTemplate({
   clickable,
   selected,
+  disabled,
   width,
   severity,
 }: { width: number } & CardProps) {
@@ -89,6 +92,7 @@ function FillLevelTemplate({
           <Card
             clickable={clickable}
             selected={selected}
+            disabled={disabled}
             width={width}
             padding="medium"
             fillLevel={fillLevel}
@@ -127,6 +131,7 @@ export const Default = Template.bind({})
 Default.args = {
   selected: false,
   clickable: false,
+  disabled: false,
   width: 150,
   height: 150,
   severity: 'neutral',
@@ -144,5 +149,6 @@ export const WithFillLevelContext = FillLevelTemplate.bind({})
 WithFillLevelContext.args = {
   selected: false,
   clickable: false,
+  disabled: false,
   width: 400,
 }

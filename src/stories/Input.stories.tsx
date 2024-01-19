@@ -7,6 +7,7 @@ import BrowseAppsIcon from '../components/icons/BrowseAppsIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
 import SearchIcon from '../components/icons/SearchIcon'
 import Input from '../components/Input'
+import Input2 from '../components/Input2'
 
 export default {
   title: 'Input',
@@ -17,7 +18,8 @@ function InputSet(props: any) {
   return (
     <Flex
       direction="column"
-      gap="small"
+      maxWidth="400px"
+      gap="large"
     >
       <Input {...props} />
       <Input
@@ -107,6 +109,48 @@ function CustomInputTemplate(args: any) {
   )
 }
 
+function CustomInputV2Template(args: any) {
+  const [inputVal, setInputVal] = useState('')
+
+  const props = {
+    value: inputVal,
+    onChange: (e: ChangeEvent<HTMLInputElement>) => {
+      setInputVal(e.target.value)
+    },
+    ...args,
+  }
+
+  return (
+    <Flex
+      direction="column"
+      maxWidth="400px"
+    >
+      <Div marginTop="medium">
+        <Input2
+          size="large"
+          width="100%"
+          {...props}
+        />
+      </Div>
+      <Div marginTop="medium">
+        <Input2
+          width="100%"
+          value={inputVal}
+          {...props}
+        />
+      </Div>
+      <Div marginTop="medium">
+        <Input2
+          size="small"
+          width="100%"
+          value={inputVal}
+          {...props}
+        />
+      </Div>
+    </Flex>
+  )
+}
+
 export const Default = Template.bind({})
 
 Default.args = {}
@@ -157,4 +201,23 @@ TitleContent.args = {
   placeholder: 'Search the marketplace',
   showClearButton: true,
   suffix: '',
+}
+
+export const Version2 = CustomInputV2Template.bind({})
+
+Version2.args = {
+  startIcon: <SearchIcon />,
+  // endIcon: <TagIcon />,
+  titleContent: (
+    <>
+      <BrowseAppsIcon marginRight="small" />
+      Marketplace
+    </>
+  ),
+  placeholder: 'Search the marketplace',
+  showClearButton: true,
+  suffix: '',
+  prefix: '',
+  disabled: false,
+  error: false,
 }

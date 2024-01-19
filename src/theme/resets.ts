@@ -8,10 +8,12 @@ export const resetPartials = {
     border: 'none',
     padding: 0,
     font: 'inherit',
-    cursor: 'pointer',
     outline: 'unset',
     alignItems: 'unset',
     appearance: 'none',
+    'button&:not(:disabled)': {
+      cursor: 'pointer',
+    },
   },
   list: {
     margin: 0,
@@ -21,5 +23,10 @@ export const resetPartials = {
   li: {
     margin: 0,
     padding: 0,
+  },
+  input: {
+    border: 'none',
+    outline: 'none',
+    background: 'none',
   },
 } as const satisfies Record<string, CSSObject>

@@ -1,58 +1,52 @@
 import { type FlexProps } from 'honorable'
-import PropTypes from 'prop-types'
 import {
   type ComponentProps,
   type ReactElement,
   type Ref,
   forwardRef,
 } from 'react'
-import styled, { type DefaultTheme, useTheme } from 'styled-components'
+import styled, {
+  type DefaultTheme,
+  type StyledComponent,
+  useTheme,
+} from 'styled-components'
 
-import { SEVERITIES } from '../types'
+import chroma from 'chroma-js'
+
+import { type SEVERITIES } from '../types'
 
 import { Spinner } from './Spinner'
-import Card, { type BaseCardProps } from './Card'
-import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
+import Card, {
+  type BaseCardProps,
+  type CardFillLevel,
+  getFillToLightBgC,
+  useDecideFillLevel,
+} from './Card'
 import CloseIcon from './icons/CloseIcon'
+import Tooltip from './Tooltip'
 
-const HUES = ['default', 'lighter', 'lightest'] as const
+export const CHIP_CLOSE_ATTR_KEY = 'data-close-button' as const
 const SIZES = ['small', 'medium', 'large'] as const
 
-type ChipHue = (typeof HUES)[number]
 type ChipSize = (typeof SIZES)[number]
 type ChipSeverity = (typeof SEVERITIES)[number]
 
 export type ChipProps = Omit<FlexProps, 'size'> &
   BaseCardProps & {
     size?: ChipSize
+    condensed?: boolean
     severity?: ChipSeverity
     icon?: ReactElement
     loading?: boolean
     closeButton?: boolean
+    closeButtonProps?: ComponentProps<StyledComponent<'button', DefaultTheme>>
     clickable?: boolean
+    truncateWidth?: number
+    truncateEdge?: 'start' | 'end'
+    tooltip?: boolean | ComponentProps<typeof Tooltip>['label']
+    tooltipProps?: ComponentProps<typeof Tooltip>
     [x: string]: unknown
-  }
-
-const propTypes = {
-  size: PropTypes.oneOf(SIZES),
-  severity: PropTypes.oneOf(SEVERITIES),
-  hue: PropTypes.oneOf(HUES),
-  icon: PropTypes.element,
-  loading: PropTypes.bool,
-} as const
-
-const parentFillLevelToHue = {
-  0: 'default',
-  1: 'lighter',
-  2: 'lightest',
-  3: 'lightest',
-} as const satisfies Record<FillLevel, ChipHue>
-
-const hueToFillLevel: Record<ChipHue, FillLevel> = {
-  default: 1,
-  lighter: 2,
-  lightest: 3,
-}
+  } & ({ severity?: ChipSeverity } | { severity: 'error' })
 
 const severityToColor = {
   neutral: 'text',
@@ -61,7 +55,7 @@ const severityToColor = {
   warning: 'text-warning-light',
   danger: 'text-danger-light',
   critical: 'text-danger',
-  // deprecated
+  // @ts-expect-error deprecated, should match 'danger'
   error: 'text-danger-light',
 } as const satisfies Record<ChipSeverity, string>
 
@@ -72,7 +66,7 @@ const severityToIconColor = {
   warning: 'icon-warning',
   danger: 'icon-danger',
   critical: 'icon-danger-critical',
-  // deprecated
+  // @ts-expect-error deprecated, should match 'danger'
   error: 'icon-danger',
 } as const satisfies Record<ChipSeverity, keyof DefaultTheme['colors']>
 
@@ -82,31 +76,35 @@ const sizeToCloseHeight = {
   large: 12,
 } as const satisfies Record<ChipSize, number>
 
-const ChipCardSC = styled(Card)<{ $size: ChipSize; $severity: ChipSeverity }>(({
-  $size,
-  $severity,
-  theme,
-}) => {
+const ChipCardSC = styled(Card)<{
+  $size: ChipSize
+  $severity: ChipSeverity
+  $truncateWidth?: number
+  $truncateEdge?: 'start' | 'end'
+  $condensed?: boolean
+}>(({ $size, $severity, $truncateWidth, $truncateEdge, $condensed, theme }) => {
   const textColor =
     theme.mode === 'light'
       ? theme.colors['text-light']
       : theme.colors[severityToColor[$severity]] || theme.colors.text
 
   return {
-    '.closeIcon': {
-      color: theme.colors['text-light'],
-      paddingLeft: theme.spacing.xsmall,
-    },
-    '&:hover': {
-      '.closeIcon': {
-        color: theme.colors.text,
-      },
-    },
-    '.spinner': {
-      marginRight: theme.spacing.xsmall,
-    },
-    '.icon': {
-      marginRight: theme.spacing.xsmall,
+    '&&': {
+      padding: `${$size === 'large' ? 6 : theme.spacing.xxxsmall}px ${
+        $size === 'large' && $condensed
+          ? 6
+          : $size === 'small'
+          ? $condensed
+            ? 6
+            : theme.spacing.xsmall
+          : $condensed
+          ? theme.spacing.xsmall
+          : theme.spacing.small
+      }px`,
+      alignItems: 'center',
+      display: 'inline-flex',
+      textDecoration: 'none',
+      gap: $condensed ? 6 : theme.spacing.xsmall,
     },
     '.children': {
       display: 'flex',
@@ -115,7 +113,63 @@ const ChipCardSC = styled(Card)<{ $size: ChipSize; $severity: ChipSeverity }>(({
       fontSize: $size === 'small' ? 12 : 14,
       fontWeight: $size === 'small' ? 400 : 600,
       lineHeight: $size === 'small' ? '16px' : '20px',
-      gap: 4,
+      gap: theme.spacing.xxsmall,
+      ...($condensed
+        ? {
+            letterSpacing: $condensed ? '-0.025em' : undefined,
+          }
+        : {}),
+      ...($truncateWidth
+        ? {
+            display: 'block',
+            maxWidth: $truncateWidth,
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+            ...($truncateEdge === 'start'
+              ? { direction: 'rtl', textAlign: 'left' }
+              : {}),
+          }
+        : {}),
+    },
+  }
+})
+
+const CloseButtonSC = styled.button<{
+  $severity: ChipSeverity
+  $fillLevel: CardFillLevel
+}>(({ theme, $fillLevel, $severity }) => {
+  const lightBg = chroma(getFillToLightBgC(theme)[$severity][$fillLevel])
+  const lightBgHover = `${lightBg.alpha(lightBg.alpha() + 0.15)}`
+
+  return {
+    ...theme.partials.reset.button,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: theme.borderRadiuses.medium,
+    padding: theme.spacing.xsmall - theme.spacing.xxsmall,
+    margin: -(theme.spacing.xsmall - theme.spacing.xxsmall),
+    '.closeIcon': {
+      color: theme.colors['text-light'],
+    },
+    '&:focus-visible': {
+      ...theme.partials.focus.outline,
+    },
+    '&:not(:disabled)': {
+      '&:focus-visible, &:hover, [data-clickable=true]:hover > &': {
+        backgroundColor:
+          theme.mode === 'light' && $severity !== 'neutral'
+            ? lightBgHover
+            : theme.colors[
+                `fill-${
+                  $fillLevel === 3 ? 'three' : $fillLevel === 2 ? 'two' : 'one'
+                }-hover`
+              ],
+        '.closeIcon': {
+          color: theme.colors.text,
+        },
+      },
     },
   }
 })
@@ -124,38 +178,43 @@ function ChipRef(
   {
     children,
     size = 'medium',
+    condensed = false,
     severity = 'neutral',
+    truncateWidth,
+    truncateEdge,
     hue,
+    fillLevel,
     loading = false,
     icon,
     closeButton,
+    closeButtonProps,
     clickable,
+    disabled,
+    tooltip,
+    tooltipProps,
     as,
     ...props
   }: ChipProps & { as?: ComponentProps<typeof ChipCardSC>['forwardedAs'] },
   ref: Ref<any>
 ) {
-  const parentFillLevel = useFillLevel()
+  fillLevel = useDecideFillLevel({ hue, fillLevel })
   const theme = useTheme()
-
-  hue = hue || parentFillLevelToHue[parentFillLevel]
 
   const iconCol = severityToIconColor[severity] || 'icon-default'
 
-  return (
+  let content = (
     <ChipCardSC
-      severity={severity}
       ref={ref}
+      severity={severity}
       cornerSize="medium"
-      fillLevel={hueToFillLevel[hue]}
+      fillLevel={fillLevel}
       clickable={clickable}
-      paddingVertical={size === 'large' ? '6px' : 'xxxsmall'}
-      paddingHorizontal={size === 'small' ? 'xsmall' : 'small'}
-      alignItems="center"
-      display="inline-flex"
-      textDecoration="none"
+      disabled={clickable && disabled}
       $size={size}
+      $condensed={condensed}
       $severity={severity}
+      $truncateWidth={truncateWidth}
+      $truncateEdge={truncateEdge}
       {...(as ? { forwardedAs: as } : {})}
       {...props}
     >
@@ -175,17 +234,42 @@ function ChipRef(
       )}
       <div className="children">{children}</div>
       {closeButton && (
-        <CloseIcon
-          className="closeIcon"
-          size={sizeToCloseHeight[size]}
-        />
+        <CloseButtonSC
+          disabled={disabled}
+          $fillLevel={fillLevel}
+          $severity={severity}
+          {...{
+            [CHIP_CLOSE_ATTR_KEY]: '',
+          }}
+          {...(clickable ? { as: 'div' } : {})}
+          {...(closeButtonProps || {})}
+        >
+          <CloseIcon
+            className="closeIcon"
+            size={sizeToCloseHeight[size]}
+          />
+        </CloseButtonSC>
       )}
     </ChipCardSC>
   )
+
+  if (tooltip) {
+    content = (
+      <Tooltip
+        displayOn="hover"
+        arrow
+        placement="top"
+        label={typeof tooltip === 'boolean' ? children : tooltip}
+        {...tooltipProps}
+      >
+        {content}
+      </Tooltip>
+    )
+  }
+
+  return content
 }
 
 const Chip = forwardRef(ChipRef)
-
-Chip.propTypes = propTypes
 
 export default Chip

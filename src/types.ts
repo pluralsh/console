@@ -13,8 +13,6 @@ export const SEVERITIES = [
   'danger',
   'critical',
   'neutral',
-  // deprecated
-  'error',
 ] as const
 
 export function isSeverity(sev: string): sev is Severity {
