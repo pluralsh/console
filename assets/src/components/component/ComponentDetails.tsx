@@ -143,7 +143,7 @@ export function ComponentDetails({
     ]
   )
 
-  if (!me) return <LoadingIndicator />
+  if (!me || loading) return <LoadingIndicator />
 
   const filteredDirectory = directory.filter(
     ({ onlyFor, prometheus }) =>
