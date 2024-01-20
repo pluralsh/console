@@ -5,6 +5,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
   alias Console.GraphQl.Resolvers.{Deployments}
 
   ecto_enum :cluster_distro, Cluster.Distro
+  enum :conjunction do
+    value :and
+    value :or
+  end
 
   input_object :cluster_attributes do
     field :name,           non_null(:string)
@@ -156,6 +160,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
   input_object :tag_input do
     field :name,  non_null(:string)
     field :value, non_null(:string)
+  end
+
+  input_object :tag_query do
+    field :op,   non_null(:conjunction)
+    field :tags, list_of(:tag_input)
   end
 
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -497,9 +506,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "a relay connection of all clusters visible to the current user"
     connection field :clusters, node_type: :cluster do
       middleware Authenticated
-      arg :q,       :string
-      arg :healthy, :boolean
-      arg :tag,     :tag_input
+      arg :q,         :string
+      arg :healthy,   :boolean
+      arg :tag,       :tag_input
+      arg :tag_query, :tag_query
 
       resolve &Deployments.list_clusters/2
     end

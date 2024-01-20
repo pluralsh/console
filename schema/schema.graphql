@@ -183,7 +183,9 @@ type RootQueryType {
   tokenExchange(token: String!): User
 
   "a relay connection of all clusters visible to the current user"
-  clusters(after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput): ClusterConnection
+  clusters(
+    after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput, tagQuery: TagQuery
+  ): ClusterConnection
 
   "gets summary information for all healthy\/unhealthy clusters in your fleet"
   clusterStatuses(q: String, tag: TagInput): [ClusterStatusInfo]
@@ -1424,6 +1426,11 @@ enum ClusterDistro {
   K3S
 }
 
+enum Conjunction {
+  AND
+  OR
+}
+
 input ClusterAttributes {
   name: String!
 
@@ -1602,6 +1609,11 @@ input AgentMigrationAttributes {
 input TagInput {
   name: String!
   value: String!
+}
+
+input TagQuery {
+  op: Conjunction!
+  tags: [TagInput]
 }
 
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"

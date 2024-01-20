@@ -944,6 +944,11 @@ export type ConfigurationValidation = {
   type?: Maybe<Scalars['String']['output']>;
 };
 
+export enum Conjunction {
+  And = 'AND',
+  Or = 'OR'
+}
+
 export type ConsoleConfiguration = {
   __typename?: 'ConsoleConfiguration';
   byok?: Maybe<Scalars['Boolean']['output']>;
@@ -3537,6 +3542,7 @@ export type RootQueryTypeClustersArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
+  tagQuery?: InputMaybe<TagQuery>;
 };
 
 
@@ -4621,6 +4627,11 @@ export type TagEdge = {
 export type TagInput = {
   name: Scalars['String']['input'];
   value: Scalars['String']['input'];
+};
+
+export type TagQuery = {
+  op: Conjunction;
+  tags?: InputMaybe<Array<InputMaybe<TagInput>>>;
 };
 
 /** a kubernetes node taint */

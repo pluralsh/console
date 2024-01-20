@@ -138,6 +138,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   defp cluster_filters(query, args) do
     Enum.reduce(args, query, fn
       {:tag, %{name: n, value: v}}, q -> Cluster.with_tag(q, n, v)
+      {:tag_query, tq}, q -> Cluster.with_tag_query(q, tq)
       {:healthy, h}, q -> Cluster.health(q, h)
       _, q -> q
     end)

@@ -218,6 +218,15 @@ defmodule Console.Schema.Cluster do
     )
   end
 
+  def with_tag_query(query \\ __MODULE__, tq) do
+    tags = Tag.for_query(tq)
+    from(c in query,
+      join: t in subquery(tags),
+        on: t.cluster_id == c.id,
+      distinct: true
+    )
+  end
+
   def for_tags(query \\ __MODULE__, tags) do
     Enum.reduce(tags, query, fn %{name: n, value: v}, q -> with_tag(q, n, v) end)
   end

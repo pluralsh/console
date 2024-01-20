@@ -16,6 +16,31 @@ defmodule Console.Schema.Tag do
 
   def for_name(query \\ __MODULE__, name), do: from(t in query, where: t.name == ^name)
 
+  def for_query(query \\ __MODULE__, tq, column \\ :cluster_id)
+
+  def for_query(query, %{op: :and, tags: [_ | _] = tags}, column) do
+    tags = Enum.map(tags, fn %{name: n, value: v} -> "#{n}:#{v}" end)
+    from(t in query,
+      group_by: field(t, ^column),
+      having: fragment("array_agg(? || ':' || ?) <@ ?", t.name, t.value, ^tags)
+    )
+    |> do_select(column)
+  end
+
+  def for_query(query, %{op: :or, tags: [_ | _] = tags}, _) do
+    Enum.reduce(tags, query, fn %{name: n, value: v}, query ->
+      from(t in query, or_where: t.name == ^n and t.value == ^v)
+    end)
+  end
+
+  defp do_select(q, :cluster_id) do
+    from(t in q, select: %{cluster_id: t.cluster_id, count: count(t.id)})
+  end
+
+  defp do_select(q, :service_id) do
+    from(t in q, select: %{service_id: t.service_id, count: count(t.id)})
+  end
+
   def search(query \\ __MODULE__, q) do
     sq = "%#{q}%"
     from(t in query, where: like(t.name, ^sq) or like(t.value, ^sq))
