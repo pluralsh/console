@@ -26,8 +26,9 @@ velero:
           region: minio-default
   snapshotsEnabled: true
   deployNodeAgent: true
-
-  credentials: { }
+  credentials:
+    secretContents:
+      cloud: "" # Templated.
 
 minio:
   resources:
@@ -38,8 +39,6 @@ minio:
     enabled: false
   provisioning:
     buckets:
-      - name: velero
-#        policy: public
-#        purge: true
-  rootUser: ""
-  rootPassword: ""
+      - name: velero # TODO: policy: public, purge: true?
+  rootUser: "" # Templated.
+  rootPassword: "" # Templated.
