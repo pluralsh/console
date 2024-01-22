@@ -2,7 +2,10 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ReactNode, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 
-import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
+import {
+  useServiceDeploymentComponentsQuery,
+  useServiceDeploymentQuery,
+} from 'generated/graphql'
 
 import {
   COMPONENT_PARAM_ID,
@@ -82,10 +85,8 @@ export default function ServiceComponent() {
   const serviceId = params[SERVICE_PARAM_ID]!
 
   const settings = useDeploymentSettings()
-  const { data, error } = useServiceDeploymentComponentsQuery({
-    variables: {
-      id: serviceId || '',
-    },
+  const { data, error } = useServiceDeploymentQuery({
+    variables: { id: serviceId || '' },
   })
 
   const serviceDeployment = data?.serviceDeployment

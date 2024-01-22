@@ -90,13 +90,7 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
     path
   }
   components {
-    apiDeprecations {
-      blocking
-    }
-    content {
-      desired
-      live
-    }
+    ...ServiceDeploymentComponent
   }
 }
 

@@ -22,8 +22,8 @@ import {
   DeploymentDocument,
   IngressDocument,
   JobDocument,
-  ServiceDeployment,
   ServiceDeploymentComponentFragment,
+  ServiceDeploymentDetailsFragment,
   ServiceDocument,
   StatefulSetDocument,
   UnstructuredResourceDocument,
@@ -78,7 +78,7 @@ export function ComponentDetails({
   component: DetailsComponent
   pathMatchString: string
   cdView?: boolean
-  service?: ServiceDeployment | null
+  service?: ServiceDeploymentDetailsFragment | null
   serviceComponents?: ComponentDetailsContext['serviceComponents']
   hasPrometheus?: boolean
 }) {
