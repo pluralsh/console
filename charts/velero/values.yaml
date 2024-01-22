@@ -14,7 +14,7 @@ velero:
         config:
           region: minio-default
           s3ForcePathStyle: true
-          s3Url: "velero-minio.velero.svc:9000"
+          s3Url: "http://velero-minio.velero.svc:9000"
           publicUrl: "http://localhost:9000"
     volumeSnapshotLocation:
       - name: default
