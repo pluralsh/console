@@ -1,21 +1,4 @@
 velero:
-  configuration:
-    backupStorageLocation:
-      - name: default
-        provider: aws
-        bucket: {{ configuration.bucket }}
-        config:
-          region: minio
-          s3ForcePathStyle: "true"
-          s3Url: "http://minio.velero.svc:9000"
-    volumeSnapshotLocation:
-      - name: default
-        provider: aws
-        credential:
-          name: velero
-          key: cloud
-        config:
-          region: minio
   credentials:
     secretContents:
       cloud: |
