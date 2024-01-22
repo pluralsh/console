@@ -1,0 +1,22 @@
+velero:
+  configuration:
+    backupStorageLocation:
+      - name: default
+        provider: aws # Always using AWS
+        bucket: {{ configuration.bucket }}
+        config:
+          region: minio
+          s3ForcePathStyle: "true"
+          s3Url: "http://minio.velero.svc:9000"
+  credentials:
+    secretContents:
+      cloud: |
+        [default]
+        aws_access_key_id={{ configuration.accessKey }}
+        aws_secret_access_key={{ configuration.secretAccessKey }}
+
+minio:
+  users:
+    - accessKey: {{ configuration.accessKey }}
+      secretKey: {{ configuration.secretAccessKey }}
+      policy: consoleAdmin

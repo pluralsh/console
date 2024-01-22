@@ -1,0 +1,13 @@
+apiVersion: v2
+name: velero
+description: Chart for Velero
+appVersion: 1.12.3
+version: 0.1.0
+type: application
+dependencies:
+  - name: velero
+    version: 5.2.2
+    repository: https://vmware-tanzu.github.io/helm-charts
+  - name: minio
+    version: 5.0.15
+    repository: https://charts.min.io/
