@@ -39,7 +39,7 @@ minio:
       memory: 1G
   persistence:
     enabled: false
-  defaultBuckets: ["velero"]
+  defaultBuckets: "velero"
   auth:
     rootUser: "" # Templated.
     rootPassword: "" # Templated.
