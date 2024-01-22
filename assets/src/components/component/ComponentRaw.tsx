@@ -1,19 +1,26 @@
-import { Code } from '@pluralsh/design-system'
+import { Code, EmptyState } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
 import { stringify } from 'yaml'
+import isEmpty from 'lodash/isEmpty'
 
 export default function ComponentRaw() {
   const { data } = useOutletContext<any>()
 
-  // To avoid mapping between component types and fields of data returned by API
-  // we are picking first available value from API object for now.
-  const value: any = useMemo(
-    () =>
-      data ? Object.values(data).find((value) => value !== undefined) : null,
-    [data]
-  )
+  const raw = useMemo(() => {
+    const v: any = data
+      ? Object.values(data).find((value) => value !== undefined)
+      : null
+
+    return v?.raw
+      ? stringify(typeof v.raw === 'string' ? JSON.parse(v.raw) : v.raw)
+      : ''
+  }, [data])
+
+  if (isEmpty(raw)) {
+    return <EmptyState message="No data available." />
+  }
 
   return (
     <Code
@@ -21,9 +28,7 @@ export default function ComponentRaw() {
       maxHeight="100%"
       overflowY="auto"
     >
-      {stringify(
-        typeof value.raw === 'string' ? JSON.parse(value?.raw) : value?.raw
-      )}
+      {raw}
     </Code>
   )
 }

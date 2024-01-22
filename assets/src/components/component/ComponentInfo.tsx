@@ -90,7 +90,7 @@ export default function ComponentInfo() {
     >
       {hasPods(componentKind) && <Pods pods={value?.pods} />}
       <div css={{ display: 'flex', gap: theme.spacing.large }}>
-        {info && <Section>{info}</Section>}
+        {info && value && <Section>{info}</Section>}
         <Section>
           <Metadata />
         </Section>

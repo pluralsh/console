@@ -25,6 +25,7 @@ import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
 import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
 import ServiceSettings from 'components/cd/services/service/ServiceSettings'
 import ServiceHelm from 'components/cd/services/service/ServiceHelm'
+import ServiceDryRun from 'components/cd/services/service/ServiceDryRun'
 
 import ComponentInfo from 'components/component/ComponentInfo'
 import ComponentEvents from 'components/component/ComponentEvents'
@@ -67,6 +68,8 @@ import PodRaw from '../components/cluster/pods/PodRaw'
 import PodEvents from '../components/cluster/pods/PodEvents'
 import Logs from '../components/cd/cluster/pod/logs/Logs'
 import PodShell from '../components/cd/cluster/pod/PodShell'
+
+import ComponentDryRun from '../components/component/ComponentDryRun'
 
 import {
   ADDONS_REL_PATH,
@@ -123,6 +126,10 @@ export const componentRoutes = (
     <Route
       path="raw"
       element={<ComponentRaw />}
+    />
+    <Route
+      path="dryrun"
+      element={<ComponentDryRun />}
     />
   </Route>
 )
@@ -388,6 +395,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceHelm />}
       path="helm"
+    />
+    <Route
+      element={<ServiceDryRun />}
+      path="dryrun"
     />
     <Route
       element={<ServiceSettings />}

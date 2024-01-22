@@ -73,6 +73,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
     id
     name
   }
+  dryRun
 }
 
 fragment ServiceDeploymentDetails on ServiceDeployment {
@@ -89,9 +90,7 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
     path
   }
   components {
-    apiDeprecations {
-      blocking
-    }
+    ...ServiceDeploymentComponent
   }
 }
 
@@ -106,6 +105,10 @@ fragment ServiceDeploymentComponent on ServiceComponent {
   version
   apiDeprecations {
     ...ApiDeprecation
+  }
+  content {
+    desired
+    live
   }
 }
 
