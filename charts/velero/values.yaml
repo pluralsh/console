@@ -24,8 +24,8 @@ velero:
           key: cloud
         config:
           region: minio-default
-  snapshotsEnabled: true
-  deployNodeAgent: true
+  snapshotsEnabled: false # TODO: true?
+  deployNodeAgent: false # TODO: true?
   credentials:
     secretContents:
       cloud: "" # Templated.
