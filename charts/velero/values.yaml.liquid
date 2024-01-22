@@ -7,7 +7,7 @@ velero:
         config:
           region: minio
           s3ForcePathStyle: "true"
-          s3Url: "http://minio.velero.svc:9000"
+          s3Url: "http://velero-minio.velero.svc:9000"
     volumeSnapshotLocation:
       - name: default
         provider: aws
