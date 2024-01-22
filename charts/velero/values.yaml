@@ -39,9 +39,7 @@ minio:
       memory: 1G
   persistence:
     enabled: false
-  provisioning:
-    buckets:
-      - name: velero # TODO: policy: public, purge: true?
+  defaultBuckets: ["velero"]
   auth:
     rootUser: "" # Templated.
     rootPassword: "" # Templated.
