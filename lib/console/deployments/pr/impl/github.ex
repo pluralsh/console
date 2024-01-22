@@ -11,11 +11,11 @@ defmodule Console.Deployments.Pr.Impl.Github do
         head: branch,
         title: title,
         body: body,
-        base: pr.branch,
+        base: pr.branch || "main",
       })
       |> case do
-        {:ok, %{"html_url" => url}} -> {:ok, title, url}
-        err -> err
+        {_, %{"html_url" => url}, _} -> {:ok, title, url}
+        {_, body, _} -> {:error, "failed to create pull request: #{inspect(body)}"}
       end
     end
   end

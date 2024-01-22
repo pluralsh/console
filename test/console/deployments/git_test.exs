@@ -261,12 +261,13 @@ defmodule Console.Deployments.GitTest do
         identifier: "pluralsh/console",
         cluster: build(:cluster),
         connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"},
         write_bindings: [%{user_id: user.id}],
         create_bindings: [%{user_id: user.id}]
       )
-      expect(Plural, :template, fn f -> File.read(f) end)
+      expect(Plural, :template, fn f, _ -> File.read(f) end)
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
-        {:ok, %{"html_url" => "https://github.com/pr/url"}}
+        {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
       end)
       expect(Console.Deployments.Pr.Git, :setup, fn conn, "pluralsh/console", "pr-test" -> {:ok, conn} end)
       expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)

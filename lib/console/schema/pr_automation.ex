@@ -21,6 +21,11 @@ defmodule Console.Schema.PrAutomation do
       field :replace_template, :string
       field :yq,               :string
       field :match_strategy,   MatchStrategy
+
+      embeds_many :regex_replacements, RegexReplacement, on_replace: :delete do
+        field :regex,       :string
+        field :replacement, :string
+      end
     end
 
     belongs_to :cluster,    Cluster
@@ -61,7 +66,13 @@ defmodule Console.Schema.PrAutomation do
     |> foreign_key_constraint(:connection_id)
   end
 
-  def update_changeset(model, attrs \\ %{}) do
-    cast(model, attrs, ~w(regexes files yq replace_template match_strategy)a)
+  defp update_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(regexes files yq replace_template match_strategy)a)
+    |> cast_embed(:regex_replacements, with: &regex_replacement_cs/2)
+  end
+
+  defp regex_replacement_cs(model, attrs) do
+    cast(model, attrs, ~w(regex replacement)a)
   end
 end

@@ -2115,10 +2115,23 @@ input PrAutomationAttributes {
 "The operations to be performed on the files w\/in the pr"
 input PrAutomationUpdateSpecAttributes {
   regexes: [String]
+
+  "list of regex scope replacement templates, useful for ANY strategies"
+  regexReplacements: [RegexReplacementAttributes]
+
   files: [String]
+
   replaceTemplate: String
+
   yq: String
+
   matchStrategy: MatchStrategy
+}
+
+"a fully specify regex\/replace flow"
+input RegexReplacementAttributes {
+  regex: String!
+  replacement: String!
 }
 
 "attributes for a pull request pointer record"
@@ -2286,10 +2299,19 @@ type PrAutomation {
 "existing file updates that can be performed in a PR"
 type PrUpdateSpec {
   regexes: [String]
+  regexReplacements: [RegexReplacement]
   files: [String]
   replaceTemplate: String
   yq: String
   matchStrategy: MatchStrategy
+}
+
+"a fully specified regex\/replace flow"
+type RegexReplacement {
+  regex: String!
+
+  "template string to replace any match with"
+  replacement: String!
 }
 
 "A reference to a pull request for your kubernetes related IaC"

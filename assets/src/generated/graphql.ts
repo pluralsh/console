@@ -2440,6 +2440,8 @@ export type PrAutomationEdge = {
 export type PrAutomationUpdateSpecAttributes = {
   files?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   matchStrategy?: InputMaybe<MatchStrategy>;
+  /** list of regex scope replacement templates, useful for ANY strategies */
+  regexReplacements?: InputMaybe<Array<InputMaybe<RegexReplacementAttributes>>>;
   regexes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   replaceTemplate?: InputMaybe<Scalars['String']['input']>;
   yq?: InputMaybe<Scalars['String']['input']>;
@@ -2450,6 +2452,7 @@ export type PrUpdateSpec = {
   __typename?: 'PrUpdateSpec';
   files?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   matchStrategy?: Maybe<MatchStrategy>;
+  regexReplacements?: Maybe<Array<Maybe<RegexReplacement>>>;
   regexes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   replaceTemplate?: Maybe<Scalars['String']['output']>;
   yq?: Maybe<Scalars['String']['output']>;
@@ -2599,6 +2602,20 @@ export type RecipeSection = {
 export type Recommendation = {
   __typename?: 'Recommendation';
   containerRecommendations?: Maybe<Array<Maybe<ContainerRecommendation>>>;
+};
+
+/** a fully specified regex/replace flow */
+export type RegexReplacement = {
+  __typename?: 'RegexReplacement';
+  regex: Scalars['String']['output'];
+  /** template string to replace any match with */
+  replacement: Scalars['String']['output'];
+};
+
+/** a fully specify regex/replace flow */
+export type RegexReplacementAttributes = {
+  regex: Scalars['String']['input'];
+  replacement: Scalars['String']['input'];
 };
 
 export type Repository = {

@@ -19,7 +19,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
       id = URI.encode(pr.identifier)
       HTTPoison.post("#{conn.host}/api/v4/projects/#{id}/merge_requests", Jason.encode!(%{
         source_branch: branch,
-        target_branch: pr.branch,
+        target_branch: pr.branch || "master",
         title: title,
         description: body,
         allow_collaboration: true,

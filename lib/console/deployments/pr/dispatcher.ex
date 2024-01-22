@@ -22,13 +22,13 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def create(%PrAutomation{} = pr, branch, ctx) do
     %PrAutomation{connection: conn} = pr = Repo.preload(pr, [:connection])
     impl = dispatcher(conn)
-    with {:ok, conn} <- setup(conn, pr.identifier, branch),
+    with {:ok, conn} <- setup(%{conn | branch: pr.branch}, pr.identifier, branch),
          {:ok, f} <- Config.config(pr, branch, ctx),
-         {:ok, _} <- Plural.template(f),
+         {:ok, _} <- Plural.template(f, conn.dir),
          {:ok, msg} <- render_solid(pr.message, ctx),
          {:ok, _} <- commit(conn, msg),
          {:ok, _} <- push(conn, branch),
-      do: impl.create(pr, branch, ctx)
+      do: impl.create(%{pr | branch: conn.branch}, branch, ctx)
   end
 
   defp dispatcher(%ScmConnection{type: :github}), do: Github
