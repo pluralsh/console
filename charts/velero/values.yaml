@@ -31,6 +31,8 @@ velero:
       cloud: "" # Templated.
 
 minio:
+  image:
+    debug: true # TODO: Remove.
   resources:
     requests:
       cpu: 1
@@ -40,5 +42,6 @@ minio:
   provisioning:
     buckets:
       - name: velero # TODO: policy: public, purge: true?
-  rootUser: "" # Templated.
-  rootPassword: "" # Templated.
+  auth:
+    rootUser: "" # Templated.
+    rootPassword: "" # Templated.

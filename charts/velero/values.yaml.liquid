@@ -7,5 +7,6 @@ velero:
         aws_secret_access_key={{ configuration.rootPassword }}
 
 minio:
-  rootUser: {{ configuration.rootUser }}
-  rootPassword: {{ configuration.rootPassword }}
+  auth:
+    rootUser: {{ configuration.rootUser }}
+    rootPassword: {{ configuration.rootPassword }}
