@@ -32,7 +32,15 @@ spec:
               name: tmp
           env:
             - name: S3PROXY_AUTHORIZATION
-              value: none
+              value: aws-v2-or-v4
+            - name: S3PROXY_IDENTITY
+              value: local-identity
+            - name: S3PROXY_CREDENTIAL
+              value: local-credential
+            - name: JCLOUDS_IDENTITY
+              value: abc
+            - name: JCLOUDS_CREDENTIAL
+              value: abc
             - name: JCLOUDS_PROVIDER
               value: filesystem
             - name: JCLOUDS_FILESYSTEM_BASEDIR
