@@ -1,0 +1,17 @@
+fragment PrAutomation on PrAutomation {
+  id
+  name
+  documentation
+}
+
+fragment PullRequest on PullRequest {
+  id
+  url
+  insertedAt
+}
+
+mutation CreatePullRequest($id: ID!, $branch: String!, $context: Json!) {
+  createPullRequest(id: $id, branch: $branch, context: $context) {
+    ...PullRequest
+  }
+}

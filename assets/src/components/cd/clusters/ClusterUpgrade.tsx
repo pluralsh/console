@@ -15,6 +15,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import {
   ClustersRowFragment,
+  useCreatePullRequestMutation,
   useUpdateClusterMutation,
 } from 'generated/graphql'
 import {
@@ -40,6 +41,32 @@ import RuntimeServices from './runtime/RuntimeServices'
 
 const supportedVersions = (cluster: ClustersRowFragment | null) =>
   cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
+
+function ClusterUpgradePr({ prs, setError }) {
+  const pr = prs[0]
+  const [mutation, { loading, error }] = useCreatePullRequestMutation({
+    variables: {
+      id: pr.id,
+      branch: 'mjg/upgrade',
+      context: JSON.stringify({ version: '1.28' }),
+    },
+  })
+
+  useEffect(() => {
+    setError(error)
+  }, [error, setError])
+
+  return (
+    <Button
+      type="button"
+      secondary
+      onClick={mutation}
+      loading={loading}
+    >
+      Upgrade Now
+    </Button>
+  )
+}
 
 function ClustersUpgradeNow({
   cluster,
@@ -165,6 +192,15 @@ const upgradeColumns = [
           setTargetVersion(undefined)
         }
       }, [targetVersion, upgrades])
+
+      if (!isEmpty(cluster.prAutomations)) {
+        return (
+          <ClusterUpgradePr
+            prs={cluster.prAutomations}
+            setError={setError}
+          />
+        )
+      }
 
       if (isEmpty(upgrades) || original.self) {
         return <div>Cluster must be upgraded externally</div>

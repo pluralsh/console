@@ -291,7 +291,8 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     @desc "forces a pipeline gate to be in open state"
     field :force_gate, :pipeline_gate do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,    non_null(:id)
+      arg :state, :gate_state
 
       resolve &Deployments.force_gate/2
     end

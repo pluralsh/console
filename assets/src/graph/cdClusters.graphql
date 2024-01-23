@@ -149,6 +149,9 @@ fragment ClustersRow on Cluster {
     namespace
     supportedVersions
   }
+  prAutomations {
+    ...PrAutomation
+  }
   self
   service {
     id

@@ -6,7 +6,7 @@ defmodule Console.Schema.PullRequest do
     field :url,     :string
     field :title,   :string
     field :creator, :string
-    field :labels,  :map
+    field :labels,  {:array, :string}
 
     field :notifications_policy_id, :binary_id
 

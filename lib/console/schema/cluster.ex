@@ -12,7 +12,8 @@ defmodule Console.Schema.Cluster do
     Tag,
     GlobalService,
     ProviderCredential,
-    ServiceError
+    ServiceError,
+    PrAutomation
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
@@ -112,6 +113,7 @@ defmodule Console.Schema.Cluster do
     has_many :tags, Tag, on_replace: :delete
     has_many :api_deprecations, through: [:services, :api_deprecations]
 
+    has_many :pr_automations, PrAutomation, on_replace: :delete
     has_many :read_bindings, PolicyBinding,
       on_replace: :delete,
       foreign_key: :policy_id,
