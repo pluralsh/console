@@ -1,18 +1,22 @@
-# Required configuration:
-# - provider  - Provider name. Supported values: aws, azure.
-# - bucket    - Amazon S3 bucket/Azure blob container name.
+# AWS configuration:
+# - provider        - Provider name, "aws".
+# - bucket          - Amazon S3 bucket name.
+# - reqion          - AWS reqion.
+# - accessKeyId     - AWS access key ID.
+# - secretAccessKey - AWS secret access key.
 #
-# Required Azure configuration:
-# - subscriptionId - Azure subscription ID.
-# - tenantId - Azure tenant ID.
-# - clientId - Azure client ID.
-# - clientSecret - Azure client secret.
-# - resourceGroup - Azure resource group name.
-# - storageAccount - Azure storage account name.
+# Azure configuration:
+# - provider        - Provider name, "azure".
+# - bucket          - Azure blob container name.
+# - subscriptionId  - Azure subscription ID.
+# - tenantId        - Azure tenant ID.
+# - clientId        - Azure client ID.
+# - clientSecret    - Azure client secret.
+# - resourceGroup   - Azure resource group name.
+# - storageAccount  - Azure storage account name.
 #
-# Required AWS configuration:
-# - accessKeyId - AWS access key ID. Required for AWS.
-# - secretAccessKey - AWS secret access key. Required for AWS.
+# TODO: Verify AWS setup.
+# TODO: Set provider-specific values only if given provider is used, i.e. region for AWS.
 
 velero:
   configuration:
@@ -21,23 +25,32 @@ velero:
         provider: {{ configuration.provider }}
         bucket: {{ configuration.bucket }}
         config:
+          {% if configuration.provider == "aws" -%}
+          region: {{ configuration.region }}
+          {% endif -%}
+          {% if configuration.provider == "azure" -%}
           resourceGroup: {{ configuration.resourceGroup }}
           storageAccount: {{ configuration.storageAccount }}
+          {% endif -%}
     volumeSnapshotLocation:
       - name: default
         provider: {{ configuration.provider }}
         credential:
           name: velero
           key: cloud
+        {% if configuration.provider == "aws" -%}
+        config:
+          region: {{ configuration.region }}
+        {% endif -%}
   credentials:
     secretContents:
       cloud: |
-        {%- if configuration.provider == "aws" -%}
+        {% if configuration.provider == "aws" -%}
         [default]
         aws_access_key_id={{ configuration.accessKeyId }}
         aws_secret_access_key={{ configuration.secretAccessKey }}
         {%- endif -%}
-        {%- if configuration.provider == "azure" -%}
+        {% if configuration.provider == "azure" -%}
         AZURE_SUBSCRIPTION_ID={{ configuration.subscriptionId }}
         AZURE_TENANT_ID={{ configuration.tenantId }}
         AZURE_CLIENT_ID={{ configuration.clientId }}
