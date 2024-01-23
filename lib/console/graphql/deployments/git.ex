@@ -67,10 +67,14 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "attributes for a pull request pointer record"
   input_object :pull_request_attributes do
-    field :url,     non_null(:string)
-    field :title,   non_null(:string)
-    field :creator, :string
-    field :labels,  :json
+    field :url,        non_null(:string)
+    field :title,      non_null(:string)
+    field :creator,    :string
+    field :labels,     list_of(:string)
+    field :service_id, :id
+    field :cluster_id, :id
+    field :service,    :namespaced_name
+    field :cluster,    :namespaced_name
   end
 
   @desc "a git repository available for deployments"
@@ -198,9 +202,10 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "A reference to a pull request for your kubernetes related IaC"
   object :pull_request do
-    field :id,    non_null(:id)
-    field :url,   non_null(:string)
-    field :title, :string
+    field :id,      non_null(:id)
+    field :url,     non_null(:string)
+    field :title,   :string
+    field :labels,  list_of(:string)
 
     field :cluster, :cluster, description: "the cluster this pr is meant to modify",
       resolve: dataloader(Deployments)

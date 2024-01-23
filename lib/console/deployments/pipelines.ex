@@ -123,11 +123,11 @@ defmodule Console.Deployments.Pipelines do
   @doc """
   If a user has pipeline write access, will force open a gate
   """
-  @spec force_gate(binary, User.t) :: gate_resp
-  def force_gate(id, %User{} = user) do
+  @spec force_gate(atom, binary, User.t) :: gate_resp
+  def force_gate(state \\ :open, id, %User{} = user) do
     get_gate!(id)
     |> Repo.preload([edge: :pipeline])
-    |> PipelineGate.changeset(%{state: :open})
+    |> PipelineGate.changeset(%{state: state})
     |> allow(user, :write)
     |> when_ok(:update)
     |> notify(:approve, user)

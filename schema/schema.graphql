@@ -502,7 +502,7 @@ type RootMutationType {
   approveGate(id: ID!): PipelineGate
 
   "forces a pipeline gate to be in open state"
-  forceGate(id: ID!): PipelineGate
+  forceGate(id: ID!, state: GateState): PipelineGate
 
   "a regular status ping to be sent by the deploy operator"
   pingCluster(attributes: ClusterPing!): Cluster
@@ -1744,6 +1744,9 @@ type Cluster {
   "a custom git repository if you want to define your own CAPI manifests"
   repository: GitRepository
 
+  "pr automations that are relevant to managing this cluster"
+  prAutomations: [PrAutomation]
+
   "list cached nodes for a cluster, this can be stale up to 5m"
   nodes: [Node]
 
@@ -2139,7 +2142,11 @@ input PullRequestAttributes {
   url: String!
   title: String!
   creator: String
-  labels: Json
+  labels: [String]
+  serviceId: ID
+  clusterId: ID
+  service: NamespacedName
+  cluster: NamespacedName
 }
 
 "a git repository available for deployments"
@@ -2321,6 +2328,8 @@ type PullRequest {
   url: String!
 
   title: String
+
+  labels: [String]
 
   "the cluster this pr is meant to modify"
   cluster: Cluster

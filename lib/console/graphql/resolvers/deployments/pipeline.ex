@@ -26,8 +26,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Pipeline do
   def approve_gate(%{id: id}, %{context: %{current_user: user}}),
     do: Pipelines.approve_gate(id, user)
 
-  def force_gate(%{id: id}, %{context: %{current_user: user}}),
-    do: Pipelines.force_gate(id, user)
+  def force_gate(%{id: id} = args, %{context: %{current_user: user}}),
+    do: Pipelines.force_gate(args[:state] || :open, id, user)
 
   def update_gate(%{id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Pipelines.update_gate(attrs, id, cluster)
