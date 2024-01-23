@@ -12,9 +12,9 @@ velero:
         provider: aws
         bucket: "velero"
         config:
-          region: minio-default
+          region: s3-proxy-default
           s3ForcePathStyle: true
-          s3Url: "http://s3proxy.velero.svc:80"
+          s3Url: "http://s3-proxy.velero.svc:80" # TODO: Check.
           publicUrl: "http://localhost:80"
     volumeSnapshotLocation:
       - name: default
@@ -23,49 +23,25 @@ velero:
           name: velero
           key: cloud
         config:
-          region: minio-default
-  snapshotsEnabled: false # TODO: true?
-  deployNodeAgent: false # TODO: true?
+          region: s3-proxy-default
+  snapshotsEnabled: false
+  deployNodeAgent: false
   credentials:
     secretContents:
-      cloud: "" # Templated.
+      cloud: ""
 
 s3-proxy:
   s3:
-    # -- Credentials used to access this proxy
-    identity: null
-    # -- Credentials used to access this proxy
+    identity: ""
     credential: ""
-
-  # -- Where requests should be proxied to
-  # @default -- Check below
   target:
-    # -- Target provider
-    provider: null
-    # -- Target endpoint
+    provider: ""
+    region: s3-proxy-default
+
     endpoint: null
-    # -- Target identity
     identity: null
-    # -- Target credential
     credential: ""
-    # -- Target Swift / Keystone API
-    api: null
-    # -- Singular region
-    region: null
-    # -- Multiple regions (keystone)
-    regions: null
     filesystem:
-      # -- Base directory for filesystem provider
       basedir: /data
     azureblob:
-      # -- Authentication method for Azure
       auth: azureKey
-    keystone:
-      # -- Keystone (Swift) version
-      version: null
-      # -- Keystone (Swift) credential type
-      credentialType: null
-      # -- Keystone (Swift) scope
-      scope: null
-      # -- Keystone (Swift) project domain name
-      projectDomainName: null

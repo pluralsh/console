@@ -8,40 +8,7 @@ velero:
 
 s3-proxy:
   s3:
-    # -- Credentials used to access this proxy
     identity: {{ configuration.identity }}
-    # -- Credentials used to access this proxy
     credential: {{ configuration.credential }}
-
-  # -- Where requests should be proxied to
-  # @default -- Check below
   target:
-    # -- Target provider
-    provider: null
-    # -- Target endpoint
-    endpoint: null
-    # -- Target identity
-    identity: null
-    # -- Target credential
-    credential: ""
-    # -- Target Swift / Keystone API
-    api: null
-    # -- Singular region
-    region: null
-    # -- Multiple regions (keystone)
-    regions: null
-    filesystem:
-      # -- Base directory for filesystem provider
-      basedir: /data
-    azureblob:
-      # -- Authentication method for Azure
-      auth: azureKey
-    keystone:
-      # -- Keystone (Swift) version
-      version: null
-      # -- Keystone (Swift) credential type
-      credentialType: null
-      # -- Keystone (Swift) scope
-      scope: null
-      # -- Keystone (Swift) project domain name
-      projectDomainName: null
+    provider: {{ configuration.provider }}
