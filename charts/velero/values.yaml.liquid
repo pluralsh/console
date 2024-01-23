@@ -3,15 +3,15 @@ velero:
     secretContents:
       cloud: |
         [default]
-        aws_access_key_id={{ configuration. }}
-        aws_secret_access_key=abc
+        aws_access_key_id={{ configuration.identity }}
+        aws_secret_access_key={{ configuration.credential }}
 
 s3-proxy:
   s3:
     # -- Credentials used to access this proxy
-    identity: null
+    identity: {{ configuration.identity }}
     # -- Credentials used to access this proxy
-    credential: ""
+    credential: {{ configuration.credential }}
 
   # -- Where requests should be proxied to
   # @default -- Check below
