@@ -36,11 +36,11 @@ velero:
         {% if configuration.provider == "aws" -%}
         aws_access_key_id={{ configuration.accessKeyId }}
         aws_secret_access_key={{ configuration.secretAccessKey }}
-        {% endif %}
+        {%- endif -%}
         {% if configuration.provider == "azure" -%}
         AZURE_SUBSCRIPTION_ID={{ configuration.subscriptionId }}
         AZURE_TENANT_ID={{ configuration.tenantId }}
         AZURE_CLIENT_ID={{ configuration.clientId }}
         AZURE_CLIENT_SECRET={{ configuration.clientSecret }}
         AZURE_RESOURCE_GROUP={{ configuration.resourceGroup }}
-        {% endif %}
+        {%- endif -%}
