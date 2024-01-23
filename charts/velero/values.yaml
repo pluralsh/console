@@ -14,7 +14,7 @@ velero:
         config:
           region: s3-proxy-default
           s3ForcePathStyle: true
-          s3Url: "http://s3-proxy.velero.svc:80" # TODO: Check.
+          s3Url: "http://velero-s3-proxy.velero.svc:80"
           publicUrl: "http://localhost:80"
     volumeSnapshotLocation:
       - name: default
