@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
 import { useDebounce } from '@react-hooks-library/core'
+import { isEmpty } from 'lodash'
 
 import {
   ClustersRowFragment,
@@ -37,11 +38,10 @@ import {
 
 import { Edge, extendConnection } from 'utils/graphql'
 import { keyToTag } from 'utils/clusterTags'
+import usePersistedState from 'components/hooks/usePersistedState'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { GqlError } from 'components/utils/Alert'
-
-import { isEmpty } from 'lodash'
 
 import {
   POLL_INTERVAL,
@@ -115,24 +115,16 @@ export default function Clusters() {
       }
     | undefined
   >()
-  const searchTags = useMemo(() => {
-    const tags: ReturnType<typeof keyToTag>[] = []
+  const searchTags = useMemo(
+    () =>
+      Array.from(selectedTagKeys.values(), (tagKey) => keyToTag(`${tagKey}`)),
+    [selectedTagKeys]
+  )
 
-    for (const tagKey of selectedTagKeys) {
-      console.log('tagKey', tagKey)
-      if (tagKey) {
-        tags.push(keyToTag(`${tagKey}`))
-      }
-    }
-
-    return tags
-  }, [selectedTagKeys])
-
-  console.log('searchTags', searchTags)
-
-  const [tagOp, setTagOp] = useState(Conjunction.Or)
-
-  console.log('tagOp', tagOp)
+  const [tagOp, setTagOp] = usePersistedState(
+    'tag-search-operator',
+    Conjunction.Or
+  )
 
   const queryResult = useClustersQuery({
     variables: {
