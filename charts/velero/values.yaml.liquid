@@ -20,9 +20,7 @@ velero:
         provider: {{ configuration.provider }}
         bucket: {{ configuration.bucket }}
         config:
-          region: {{ configuration.region }}
           resourceGroup: {{ configuration.resourceGroup }}
-          subscriptionId: {{ configuration.subscriptionId }}
           storageAccount: {{ configuration.storageAccount }}
     volumeSnapshotLocation:
       - name: default
@@ -30,10 +28,7 @@ velero:
         credential:
           name: velero
           key: cloud
-        config:
-          region: {{ configuration.region }}
-          resourceGroup: {{ configuration.resourceGroup }}
-          subscriptionId: {{ configuration.subscriptionId }}
+        config: {}
   credentials:
     secretContents:
       cloud: |
