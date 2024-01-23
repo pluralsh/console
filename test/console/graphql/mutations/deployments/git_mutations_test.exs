@@ -180,9 +180,9 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
       user = insert(:user)
       conn = insert(:scm_connection, token: "some-pat")
       pra = insert(:pr_automation, identifier: "pluralsh/console", cluster: build(:cluster), connection: conn, create_bindings: [%{user_id: user.id}])
-      expect(Console.Commands.Plural, :template, fn f -> File.read(f) end)
+      expect(Console.Commands.Plural, :template, fn f, _ -> File.read(f) end)
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
-        {:ok, %{"html_url" => "https://github.com/pr/url"}}
+        {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
       end)
       expect(Console.Deployments.Pr.Git, :setup, fn conn, "pluralsh/console", "pr-test" -> {:ok, conn} end)
       expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)

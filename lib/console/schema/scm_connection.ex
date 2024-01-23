@@ -11,6 +11,8 @@ defmodule Console.Schema.ScmConnection do
     field :username, :string
     field :token,    Piazza.Ecto.EncryptedString
     field :dir,      :string, virtual: true
+    field :author,   :map, virtual: true
+    field :branch,   :string, virtual: true
 
     timestamps()
   end

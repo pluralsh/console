@@ -198,9 +198,9 @@ defmodule Console.Deployments.Git do
   @spec create_pull_request(map, binary, binary, User.t) :: pull_request_resp
   def create_pull_request(ctx, id, branch, %User{} = user) do
     pr = get_pr_automation!(id)
-         |> Repo.preload([:write_bindings, :create_bindings])
+         |> Repo.preload([:write_bindings, :create_bindings, :connection])
     with {:ok, pr} <- allow(pr, user, :create),
-         {:ok, title, url} <- Dispatcher.create(pr, branch, ctx) do
+         {:ok, title, url} <- Dispatcher.create(put_in(pr.connection.author, user), branch, ctx) do
       %PullRequest{}
       |> PullRequest.changeset(
         Map.merge(%{title: title, url: url}, Map.take(pr, ~w(cluster_id service_id)a))

@@ -50,11 +50,19 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "The operations to be performed on the files w/in the pr"
   input_object :pr_automation_update_spec_attributes do
-    field :regexes,          list_of(:string)
-    field :files,            list_of(:string)
-    field :replace_template, :string
-    field :yq,               :string
-    field :match_strategy,   :match_strategy
+    field :regexes,            list_of(:string)
+    field :regex_replacements, list_of(:regex_replacement_attributes),
+      description: "list of regex scope replacement templates, useful for ANY strategies"
+    field :files,              list_of(:string)
+    field :replace_template,   :string
+    field :yq,                 :string
+    field :match_strategy,     :match_strategy
+  end
+
+  @desc "a fully specify regex/replace flow"
+  input_object :regex_replacement_attributes do
+    field :regex,       non_null(:string)
+    field :replacement, non_null(:string)
   end
 
   @desc "attributes for a pull request pointer record"
@@ -174,11 +182,18 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "existing file updates that can be performed in a PR"
   object :pr_update_spec do
-    field :regexes,          list_of(:string)
-    field :files,            list_of(:string)
-    field :replace_template, :string
-    field :yq,               :string
-    field :match_strategy,   :match_strategy
+    field :regexes,            list_of(:string)
+    field :regex_replacements, list_of(:regex_replacement)
+    field :files,              list_of(:string)
+    field :replace_template,   :string
+    field :yq,                 :string
+    field :match_strategy,     :match_strategy
+  end
+
+  @desc "a fully specified regex/replace flow"
+  object :regex_replacement do
+    field :regex,       non_null(:string)
+    field :replacement, non_null(:string), description: "template string to replace any match with"
   end
 
   @desc "A reference to a pull request for your kubernetes related IaC"

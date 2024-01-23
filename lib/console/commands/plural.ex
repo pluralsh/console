@@ -47,7 +47,7 @@ defmodule Console.Commands.Plural do
 
   def repair(), do: plural("repair", [])
 
-  def template(conf), do: plural("pr", ["template", "--file", conf])
+  def template(conf, dir), do: cmd("plural", ["pr", "template", "--file", conf], dir, [])
 
   def plural_home(command, args, env \\ []),
     do: cmd("plural", [command | args], System.user_home(), env)
