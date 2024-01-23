@@ -249,6 +249,7 @@ function ComboBox({
   titleContent,
   showClearButton,
   chips,
+  inputContent,
   onDeleteChip: onDeleteChipProp,
   ...props
 }: ComboBoxProps) {
@@ -358,6 +359,7 @@ function ComboBox({
 
   const buttonRef = useRef(null)
   const inputRef = useRef(null)
+  const inputInnerRef = useRef(null)
   const listBoxRef = useRef(null)
   const popoverRef = useRef(null)
 
@@ -420,7 +422,7 @@ function ComboBox({
 
     if (dir === 0) return
 
-    if (elt instanceof HTMLInputElement) {
+    if (elt === inputInnerRef.current && elt instanceof HTMLInputElement) {
       if (elt.selectionStart !== 0 || dir !== -1) {
         return
       }
@@ -440,7 +442,7 @@ function ComboBox({
 
       if (dir === 1) {
         if (!chip.nextElementSibling) {
-          inputRef.current?.querySelector('input')?.focus()
+          inputInnerRef.current?.focus()
         } else {
           chip?.nextElementSibling
             ?.querySelector(`[${CHIP_CLOSE_ATTR_KEY}]`)
@@ -458,36 +460,37 @@ function ComboBox({
 
   outerInputProps = useMemo(
     () => ({
-      ...(!isEmpty(chips)
-        ? {
-            inputContent: (
-              <InputChipList
-                ref={chipListRef}
-                onKeyDown={handleKeyDown}
-              >
-                {chips.map((chipProps) => (
-                  <Chip
-                    size="small"
-                    condensed
-                    truncateWidth={100}
-                    truncateEdge="start"
-                    closeButton
-                    tooltip
-                    onClick={onChipClick}
-                    closeButtonProps={{
-                      onClick: () => {
-                        onDeleteChip?.(chipProps?.key)
-                      },
-                      'aria-label': `Remove ${chipProps.key}`,
-                    }}
-                    {...{ [CHIP_ATTR_KEY]: chipProps?.key }}
-                    {...chipProps}
-                  />
-                ))}
-              </InputChipList>
-            ),
-          }
-        : {}),
+      inputContent: (
+        <>
+          {inputContent}
+          {!isEmpty(chips) && (
+            <InputChipList
+              ref={chipListRef}
+              onKeyDown={handleKeyDown}
+            >
+              {chips.map((chipProps) => (
+                <Chip
+                  size="small"
+                  condensed
+                  truncateWidth={100}
+                  truncateEdge="start"
+                  closeButton
+                  tooltip
+                  onClick={onChipClick}
+                  closeButtonProps={{
+                    onClick: () => {
+                      onDeleteChip?.(chipProps?.key)
+                    },
+                    'aria-label': `Remove ${chipProps.key}`,
+                  }}
+                  {...{ [CHIP_ATTR_KEY]: chipProps?.key }}
+                  {...chipProps}
+                />
+              ))}
+            </InputChipList>
+          )}
+        </>
+      ),
       ...(onDeleteChipProp
         ? {
             onDeleteInputContent: () =>
@@ -502,6 +505,7 @@ function ComboBox({
     [
       chips,
       handleKeyDown,
+      inputContent,
       onDeleteChip,
       onDeleteChipProp,
       outerInputProps,
@@ -512,6 +516,7 @@ function ComboBox({
   return (
     <ComboBoxInner>
       <ComboBoxInput
+        inputRef={inputInnerRef}
         inputProps={{
           ...inputProps,
           onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {

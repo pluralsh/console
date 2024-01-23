@@ -4,11 +4,12 @@ import Fuse from 'fuse.js'
 
 import { isEqual, uniqWith } from 'lodash-es'
 
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { Card, Chip, ComboBox, ListBoxItem, TagIcon, WrapWithIf } from '..'
 
 import { isNonNullable } from '../utils/isNonNullable'
+import TextSwitch from '../components/TextSwitch'
 
 const TagPicker = styled.div(({ theme }) => ({
   display: 'flex',
@@ -51,10 +52,12 @@ export function ClusterTagsTemplate({
   onFillLevel: any
   withTitleContent: boolean
 }) {
+  const theme = useTheme()
   const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
   const selectedTagArr = useMemo(() => [...selectedTagKeys], [selectedTagKeys])
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
+  const [searchLogic, setSearchLogic] = useState<string>('AND')
 
   const fuse = useMemo(
     () =>
@@ -117,6 +120,23 @@ export function ClusterTagsTemplate({
             inputValue={inputValue}
             onSelectionChange={onSelectionChange}
             onInputChange={onInputChange}
+            inputContent={
+              selectedTagArr.length > -1 && (
+                <TextSwitch
+                  onClick={(e: MouseEvent) => e.stopPropagation()}
+                  size="small"
+                  value={searchLogic}
+                  onChange={setSearchLogic}
+                  options={[
+                    { label: 'All', value: 'AND' },
+                    { label: 'Any', value: 'OR' },
+                  ]}
+                  css={{ marginRight: theme.spacing.xxsmall }}
+                  label="Match"
+                  labelPosition="start"
+                />
+              )
+            }
             chips={selectedTagArr.map((key) => ({
               key,
               children: key,
@@ -135,6 +155,7 @@ export function ClusterTagsTemplate({
             }}
             maxHeight={232}
             allowsEmptyCollection
+            startIcon={<TagIcon />}
             {...(withTitleContent
               ? {
                   startIcon: null,
