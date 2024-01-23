@@ -1,17 +1,18 @@
-# Configuration:
-# - provider - Provider name. Supported values: aws, azure. Required.
-# - bucket - Amazon S3 bucket/Azure blob container name. Required.
-# - region - Region. Required.
+# Required configuration:
+# - provider  - Provider name. Supported values: aws, azure.
+# - bucket    - Amazon S3 bucket/Azure blob container name.
 #
+# Required Azure configuration:
+# - subscriptionId - Azure subscription ID.
+# - tenantId - Azure tenant ID.
+# - clientId - Azure client ID.
+# - clientSecret - Azure client secret.
+# - resourceGroup - Azure resource group name.
+# - storageAccount - Azure storage account name.
+#
+# Required AWS configuration:
 # - accessKeyId - AWS access key ID. Required for AWS.
 # - secretAccessKey - AWS secret access key. Required for AWS.
-#
-# - subscriptionId - Azure subscription ID. Required for Azure.
-# - tenantId - Azure tenant ID. Required for Azure.
-# - clientId - Azure client ID. Required for Azure.
-# - clientSecret - Azure client secret. Required for Azure.
-# - resourceGroup - Azure resource group name. Required for Azure.
-# - storageAccount - Azure storage account name. Required for Azure.
 
 velero:
   configuration:
@@ -28,7 +29,6 @@ velero:
         credential:
           name: velero
           key: cloud
-        config: {}
   credentials:
     secretContents:
       cloud: |
