@@ -50,6 +50,12 @@ function ClusterUpgradePr({ prs, setError }) {
       branch: 'mjg/upgrade',
       context: JSON.stringify({ version: '1.28' }),
     },
+    onCompleted: (data) => {
+      const url = data.createPullRequest?.url
+      if (url) {
+        window?.open(url, '_blank').focus()
+      }
+    },
   })
 
   useEffect(() => {
