@@ -44,6 +44,8 @@ export function ClustersFilters({
   statusCounts,
   selectedTagKeys,
   setSelectedTagKeys,
+  tagOp,
+  setTagOp,
 }: {
   searchString
   setSearchString: (string) => void
@@ -55,6 +57,8 @@ export function ClustersFilters({
   setSelectedTagKeys: ComponentProps<
     typeof ClusterTagsFilter
   >['setSelectedTagKeys']
+  tagOp: ComponentProps<typeof ClusterTagsFilter>['searchOp']
+  setTagOp: ComponentProps<typeof ClusterTagsFilter>['setSearchOp']
 }) {
   useEffect(() => {
     setStatusFilter(statusFilter)
@@ -66,6 +70,8 @@ export function ClustersFilters({
         <ClusterTagsFilter
           selectedTagKeys={selectedTagKeys}
           setSelectedTagKeys={setSelectedTagKeys}
+          searchOp={tagOp}
+          setSearchOp={setTagOp}
         />
       </div>
       <div css={{ flex: '1 1 50%' }}>

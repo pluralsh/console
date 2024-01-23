@@ -227,9 +227,15 @@ query Clusters(
   $after: String
   $q: String
   $healthy: Boolean
-  $tag: TagInput
+  $tagQuery: TagQuery
 ) {
-  clusters(first: $first, after: $after, q: $q, healthy: $healthy, tag: $tag) {
+  clusters(
+    first: $first
+    after: $after
+    q: $q
+    healthy: $healthy
+    tagQuery: $tagQuery
+  ) {
     pageInfo {
       ...PageInfo
     }

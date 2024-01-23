@@ -22,7 +22,11 @@ import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
 import { useDebounce } from '@react-hooks-library/core'
 
-import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
+import {
+  ClustersRowFragment,
+  Conjunction,
+  useClustersQuery,
+} from 'generated/graphql'
 
 import {
   CD_REL_PATH,
@@ -36,6 +40,8 @@ import { keyToTag } from 'utils/clusterTags'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { GqlError } from 'components/utils/Alert'
+
+import { isEmpty } from 'lodash'
 
 import {
   POLL_INTERVAL,
@@ -109,16 +115,32 @@ export default function Clusters() {
       }
     | undefined
   >()
-  const searchTag =
-    selectedTagKeys.size > 0
-      ? keyToTag(`${selectedTagKeys.values().next().value || ''}`)
-      : undefined
+  const searchTags = useMemo(() => {
+    const tags: ReturnType<typeof keyToTag>[] = []
+
+    for (const tagKey of selectedTagKeys) {
+      console.log('tagKey', tagKey)
+      if (tagKey) {
+        tags.push(keyToTag(`${tagKey}`))
+      }
+    }
+
+    return tags
+  }, [selectedTagKeys])
+
+  console.log('searchTags', searchTags)
+
+  const [tagOp, setTagOp] = useState(Conjunction.Or)
+
+  console.log('tagOp', tagOp)
 
   const queryResult = useClustersQuery({
     variables: {
       q: debouncedSearchString,
       first: CLUSTERS_QUERY_PAGE_SIZE,
-      ...(selectedTagKeys.size > 0 ? { tag: searchTag } : {}),
+      ...(!isEmpty(searchTags)
+        ? { tagQuery: { op: tagOp, tags: searchTags } }
+        : {}),
       ...(statusFilter !== 'ALL'
         ? { healthy: statusFilter === 'HEALTHY' }
         : {}),
@@ -233,6 +255,8 @@ export default function Clusters() {
             statusCounts={statusCounts}
             selectedTagKeys={selectedTagKeys}
             setSelectedTagKeys={setSelectedTagKeys}
+            tagOp={tagOp}
+            setTagOp={setTagOp}
           />
           <TabPanel
             stateRef={tabStateRef}

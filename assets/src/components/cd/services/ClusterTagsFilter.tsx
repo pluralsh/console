@@ -7,21 +7,37 @@ import {
   TagIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
+import TextSwitch from '@pluralsh/design-system/dist/components/TextSwitch'
 import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 import uniqWith from 'lodash/uniqWith'
 import isEqual from 'lodash/isEqual'
-import { useTagPairsQuery } from 'generated/graphql'
+import { Conjunction, useTagPairsQuery } from 'generated/graphql'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { tagToKey } from 'utils/clusterTags'
+
+const tagOps: { value: Conjunction; label: string }[] = [
+  {
+    value: Conjunction.Or,
+    label: 'Any',
+  },
+  {
+    value: Conjunction.And,
+    label: 'All',
+  },
+]
 
 export function ClusterTagsFilter({
   selectedTagKeys,
   setSelectedTagKeys,
+  searchOp,
+  setSearchOp,
   ...props
 }: {
   selectedTagKeys: Set<Key>
   setSelectedTagKeys: (keys: Set<Key>) => void
+  searchOp: Conjunction
+  setSearchOp: (op: Conjunction) => void
 } & Omit<ComponentProps<typeof ComboBox>, 'children'>) {
   const theme = useTheme()
   const selectedTagArr = useMemo(() => [...selectedTagKeys], [selectedTagKeys])
@@ -58,8 +74,7 @@ export function ClusterTagsFilter({
     typeof ComboBox
   >['onSelectionChange'] = (key) => {
     if (key) {
-      // setSelectedTagKeys(new Set([...selectedTagArr, key]));
-      setSelectedTagKeys(new Set([key]))
+      setSelectedTagKeys(new Set([...selectedTagArr, key]))
       setInputValue('')
     }
   }
@@ -76,16 +91,30 @@ export function ClusterTagsFilter({
       inputValue={inputValue}
       onSelectionChange={onSelectionChange}
       onInputChange={onInputChange}
+      inputContent={
+        selectedTagArr.length > -1 && (
+          <TextSwitch
+            onClick={(e: MouseEvent) => e.stopPropagation()}
+            size="small"
+            value={searchOp}
+            onChange={setSearchOp as any}
+            options={tagOps}
+            css={{ marginRight: theme.spacing.xxsmall }}
+            label="Match"
+            labelPosition="start"
+          />
+        )
+      }
       chips={selectedTagArr.map((key) => ({
         key,
         children: key,
       }))}
-      onDeleteChip={(_chipKey) => {
-        // const newKeys = new Set(selectedTagKeys);
+      onDeleteChip={(chipKey) => {
+        const newKeys = new Set(selectedTagKeys)
 
-        // newKeys.delete(chipKey);
-        // setSelectedTagKeys(newKeys);
-        setSelectedTagKeys(new Set())
+        newKeys.delete(chipKey)
+        setSelectedTagKeys(newKeys)
+        // setSelectedTagKeys(new Set())
       }}
       inputProps={{
         placeholder: 'Filter by tag',
