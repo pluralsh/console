@@ -5,9 +5,9 @@ import {
   ListBoxFooter,
   ListBoxItem,
   TagIcon,
+  TextSwitch,
   WarningIcon,
 } from '@pluralsh/design-system'
-import TextSwitch from '@pluralsh/design-system/dist/components/TextSwitch'
 import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 import uniqWith from 'lodash/uniqWith'
