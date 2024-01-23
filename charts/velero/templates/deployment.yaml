@@ -1,0 +1,46 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: s3proxy
+  labels:
+    plural.sh/name: s3proxy
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      plural.sh/name: s3proxy
+  template:
+    metadata:
+      labels:
+        plural.sh/name: s3proxy
+    spec:
+      containers:
+        - name: s3proxy
+          image: andrewgaul/s3proxy:latest
+          args:
+            - --properties /etc/conf/s3proxy.conf
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /etc/conf
+              name: conf
+            - mountPath: /tmp
+              name: tmp
+          env:
+            - name: S3PROXY_AUTHORIZATION
+              value: none
+            - name: JCLOUDS_PROVIDER
+              value: filesystem
+            - name: JCLOUDS_FILESYSTEM_BASEDIR
+              value: /tmp/s3proxy
+      volumes:
+        - name: conf
+          secret:
+            secretName: s3proxy
+        - name: tmp
+          emptyDir: {}
+

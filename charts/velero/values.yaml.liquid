@@ -3,10 +3,6 @@ velero:
     secretContents:
       cloud: |
         [default]
-        aws_access_key_id={{ configuration.rootUser }}
-        aws_secret_access_key={{ configuration.rootPassword }}
+        aws_access_key_id=
+        aws_secret_access_key=
 
-minio:
-  auth:
-    rootUser: {{ configuration.rootUser }}
-    rootPassword: {{ configuration.rootPassword }}

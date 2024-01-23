@@ -14,8 +14,8 @@ velero:
         config:
           region: minio-default
           s3ForcePathStyle: true
-          s3Url: "http://velero-minio.velero.svc:9000"
-          publicUrl: "http://localhost:9000"
+          s3Url: "http://s3proxy.velero.svc:80"
+          publicUrl: "http://localhost:80"
     volumeSnapshotLocation:
       - name: default
         provider: aws
@@ -30,16 +30,3 @@ velero:
     secretContents:
       cloud: "" # Templated.
 
-minio:
-  image:
-    debug: true # TODO: Remove.
-  resources:
-    requests:
-      cpu: 1
-      memory: 1G
-  persistence:
-    enabled: false
-  defaultBuckets: "velero"
-  auth:
-    rootUser: "" # Templated.
-    rootPassword: "" # Templated.
