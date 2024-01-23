@@ -1,14 +1,51 @@
+# Configuration:
+# - provider - Provider name. Supported values: aws, azure. Required.
+# - bucket - Amazon S3 bucket/Azure blob container name. Required.
+# - region - Region. Required.
+#
+# - accessKeyId - AWS access key ID. Required for AWS.
+# - secretAccessKey - AWS secret access key. Required for AWS.
+#
+# - subscriptionId - Azure subscription ID. Required for Azure.
+# - tenantId - Azure tenant ID. Required for Azure.
+# - clientId - Azure client ID. Required for Azure.
+# - clientSecret - Azure client secret. Required for Azure.
+# - resourceGroup - Azure resource group name. Required for Azure.
+# - storageAccount - Azure storage account name. Required for Azure.
+
 velero:
+  configuration:
+    backupStorageLocation:
+      - name: default
+        provider: {{ configuration.provider }}
+        bucket: {{ configuration.bucket }}
+        config:
+          region: {{ configuration.region }}
+          resourceGroup: {{ configuration.resourceGroup }}
+          subscriptionId: {{ configuration.subscriptionId }}
+          storageAccount: {{ configuration.storageAccount }}
+    volumeSnapshotLocation:
+      - name: default
+        provider: {{ configuration.provider }}
+        credential:
+          name: velero
+          key: cloud
+        config:
+          region: {{ configuration.region }}
+          resourceGroup: {{ configuration.resourceGroup }}
+          subscriptionId: {{ configuration.subscriptionId }}
   credentials:
     secretContents:
       cloud: |
         [default]
-        aws_access_key_id={{ configuration.identity }}
-        aws_secret_access_key={{ configuration.credential }}
-
-s3-proxy:
-  s3:
-    identity: {{ configuration.identity }}
-    credential: {{ configuration.credential }}
-  target:
-    provider: {{ configuration.provider }}
+        {% if provider == "aws" -%}
+        aws_access_key_id={{ configuration.accessKeyId }}
+        aws_secret_access_key={{ configuration.secretAccessKey }}
+        {% endif %}
+        {% if provider == "azure" -%}
+        AZURE_SUBSCRIPTION_ID={{ configuration.subscriptionId }}
+        AZURE_TENANT_ID={{ configuration.tenantId }}
+        AZURE_CLIENT_ID={{ configuration.clientId }}
+        AZURE_CLIENT_SECRET={{ configuration.clientSecret }}
+        AZURE_RESOURCE_GROUP={{ configuration.resourceGroup }}
+        {% endif %}
