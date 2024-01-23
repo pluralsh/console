@@ -116,6 +116,7 @@ export { LightDarkSwitch } from './components/LightDarkSwitch'
 export { AnimatedDiv } from './components/AnimatedDiv'
 export { Spinner } from './components/Spinner'
 export { SetInert } from './components/SetInert'
+export { default as TextSwitch } from './components/TextSwitch'
 
 // Hooks
 export { useInert } from './hooks/useInert'
@@ -132,6 +133,7 @@ export {
   useFillLevel,
   toFillLevel,
   isFillLevel,
+  type FillLevel,
 } from './components/contexts/FillLevelContext'
 export * from './components/contexts/NavigationContext'
 export * from './components/TreeNavigation'
