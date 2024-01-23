@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import {
-  Chip,
   DryRunIcon,
   GearTrainIcon,
   GitHubLogoIcon,

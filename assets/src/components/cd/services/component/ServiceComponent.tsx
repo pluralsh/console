@@ -2,10 +2,7 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ReactNode, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 
-import {
-  useServiceDeploymentComponentsQuery,
-  useServiceDeploymentQuery,
-} from 'generated/graphql'
+import { useServiceDeploymentQuery } from 'generated/graphql'
 
 import {
   COMPONENT_PARAM_ID,
