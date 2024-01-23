@@ -33,11 +33,11 @@ velero:
     secretContents:
       cloud: |
         [default]
-        {% if provider == "aws" -%}
+        {% if configuration.provider == "aws" -%}
         aws_access_key_id={{ configuration.accessKeyId }}
         aws_secret_access_key={{ configuration.secretAccessKey }}
         {% endif %}
-        {% if provider == "azure" -%}
+        {% if configuration.provider == "azure" -%}
         AZURE_SUBSCRIPTION_ID={{ configuration.subscriptionId }}
         AZURE_TENANT_ID={{ configuration.tenantId }}
         AZURE_CLIENT_ID={{ configuration.clientId }}
