@@ -30,6 +30,8 @@ s3-proxy:
     credential: {{ configuration.internalCredential }}
   target:
     provider: {{ configuration.provider }}
-    endpoint: "https://{{ configuration.identity }}.blob.core.windows.net"
     identity: {{ configuration.identity }}
     credential: {{ configuration.credential }}
+    {% if configuration.provider == "azureblob" -%}
+    endpoint: "https://{{ configuration.identity }}.blob.core.windows.net"
+    {%- endif -%}
