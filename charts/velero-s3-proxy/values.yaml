@@ -34,4 +34,7 @@ s3-proxy:
     region: s3-proxy-default
     azureblob:
       auth: azureKey
+  extraEnvVars:
+    - name: LOG_LEVEL
+      value: debug
 
