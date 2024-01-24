@@ -1,12 +1,14 @@
 defmodule Console.GraphQl.Deployments.Git do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Deployments
-  alias Console.Schema.{GitRepository, ScmConnection, PrAutomation}
+  alias Console.Schema.{GitRepository, ScmConnection, PrAutomation, Configuration}
 
   ecto_enum :auth_method, GitRepository.AuthMethod
   ecto_enum :git_health, GitRepository.Health
   ecto_enum :scm_type, ScmConnection.Type
   ecto_enum :match_strategy, PrAutomation.MatchStrategy
+  ecto_enum :configuration_type, Configuration.Type
+  ecto_enum :operation, Configuration.Condition.Operation
 
   input_object :git_attributes do
     field :url,         non_null(:string), description: "the url of this repository"
@@ -44,8 +46,29 @@ defmodule Console.GraphQl.Deployments.Git do
     field :service_id,    :id, description: "link to a service if this can modify its configuration"
     field :connection_id, :id, description: "the scm connection to use for pr generation"
 
+    field :configuration, list_of(:pr_configuration_attributes)
+
     field :write_bindings, list_of(:policy_binding_attributes), description: "users who can update this automation"
     field :create_bindings, list_of(:policy_binding_attributes), description: "users who can create prs with this automation"
+  end
+
+  @desc "the a configuration item for creating a new pr"
+  input_object :pr_configuration_attributes do
+    field :type,          non_null(:configuration_type)
+    field :name,          non_null(:string)
+    field :default,       :string
+    field :documentation, :string
+    field :longform,      :string
+    field :placeholder,   :string
+    field :optional,      :boolean
+    field :condition,     :condition_attributes
+  end
+
+  @desc "attributes for declaratively specifying whether a config item is relevant given prior config"
+  input_object :condition_attributes do
+    field :operation, non_null(:operation)
+    field :field,     non_null(:string)
+    field :value,     :string
   end
 
   @desc "The operations to be performed on the files w/in the pr"
@@ -200,12 +223,31 @@ defmodule Console.GraphQl.Deployments.Git do
     field :replacement, non_null(:string), description: "template string to replace any match with"
   end
 
+  @desc "the a configuration item for creating a new pr, used for templating the ultimate code changes made"
+  object :pr_configuration do
+    field :type,          non_null(:configuration_type)
+    field :name,          non_null(:string)
+    field :default,       :string
+    field :documentation, :string
+    field :longform,      :string
+    field :placeholder,   :string
+    field :optional,      :boolean
+    field :condition,     :pr_configuration_condition
+  end
+
+  @desc "declaritive spec for whether a config item is relevant given prior config"
+  object :pr_configuration_condition do
+    field :operation, non_null(:operation), description: "a boolean operation to apply"
+    field :field,     non_null(:string), description: "the prior field to check"
+    field :value,     :string, description: "a fixed value to check against if its a binary operation"
+  end
+
   @desc "A reference to a pull request for your kubernetes related IaC"
   object :pull_request do
-    field :id,      non_null(:id)
-    field :url,     non_null(:string)
-    field :title,   :string
-    field :labels,  list_of(:string)
+    field :id,     non_null(:id)
+    field :url,    non_null(:string)
+    field :title,  :string
+    field :labels, list_of(:string)
 
     field :cluster, :cluster, description: "the cluster this pr is meant to modify",
       resolve: dataloader(Deployments)

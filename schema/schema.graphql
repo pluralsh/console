@@ -2043,6 +2043,28 @@ enum MatchStrategy {
   RECURSIVE
 }
 
+enum ConfigurationType {
+  STRING
+  INT
+  BOOL
+  DOMAIN
+  BUCKET
+  FILE
+  FUNCTION
+  PASSWORD
+}
+
+enum Operation {
+  NOT
+  GT
+  LT
+  EQ
+  GTE
+  LTE
+  PREFIX
+  SUFFIX
+}
+
 input GitAttributes {
   "the url of this repository"
   url: String!
@@ -2108,11 +2130,32 @@ input PrAutomationAttributes {
   "the scm connection to use for pr generation"
   connectionId: ID
 
+  configuration: [PrConfigurationAttributes]
+
   "users who can update this automation"
   writeBindings: [PolicyBindingAttributes]
 
   "users who can create prs with this automation"
   createBindings: [PolicyBindingAttributes]
+}
+
+"the a configuration item for creating a new pr"
+input PrConfigurationAttributes {
+  type: ConfigurationType!
+  name: String!
+  default: String
+  documentation: String
+  longform: String
+  placeholder: String
+  optional: Boolean
+  condition: ConditionAttributes
+}
+
+"attributes for declaratively specifying whether a config item is relevant given prior config"
+input ConditionAttributes {
+  operation: Operation!
+  field: String!
+  value: String
 }
 
 "The operations to be performed on the files w\/in the pr"
