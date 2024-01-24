@@ -4,7 +4,7 @@ import {
   Chip,
   InstallIcon,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import { BuildTypes } from 'components/types'
@@ -12,6 +12,8 @@ import { Flex, P } from 'honorable'
 import moment from 'moment'
 import { useContext, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import { TooltipTime } from 'components/utils/TooltipTime'
 
 import BuildStatus from './BuildStatus'
 
@@ -22,6 +24,11 @@ export const BUILD_TYPE_DISPLAY_NAMES = {
   [BuildTypes.APPROVAL]: 'New images',
   [BuildTypes.INSTALL]: 'Installation',
 }
+const TimeFromNow = styled(TooltipTime).attrs(() => ({ forwardedAs: 'p' }))(
+  (_) => ({
+    whiteSpace: 'nowrap',
+  })
+)
 
 export default function Build({ build }) {
   const theme = useTheme()
@@ -79,7 +86,9 @@ export default function Build({ build }) {
         align="center"
         justify="end"
       >
-        <P whiteSpace="nowrap">{moment(insertedAt).fromNow()}</P>
+        <TimeFromNow dateString={insertedAt}>
+          {moment(insertedAt).fromNow()}
+        </TimeFromNow>
         <BuildStatus status={status} />
         <CaretRightIcon />
       </Flex>

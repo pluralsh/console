@@ -2,6 +2,8 @@ import { Flex } from 'honorable'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 
+import { TooltipTime } from 'components/utils/TooltipTime'
+
 import BuildStatus from '../BuildStatus'
 
 export function Timer({ insertedAt, completedAt }) {
@@ -15,7 +17,13 @@ export function Timer({ insertedAt, completedAt }) {
   const fromBeginning = (dt) => moment.duration(dt.diff(moment(insertedAt)))
 
   return (
-    <>{moment.utc(fromBeginning(end).as('milliseconds')).format('HH:mm:ss')}</>
+    <TooltipTime
+      as="span"
+      date={completedAt}
+      prefix="Completed at: "
+    >
+      {moment.utc(fromBeginning(end).as('milliseconds')).format('HH:mm:ss')}
+    </TooltipTime>
   )
 }
 

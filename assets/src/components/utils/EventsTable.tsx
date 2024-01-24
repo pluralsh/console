@@ -1,9 +1,11 @@
-import { Date, EmptyState, Table } from '@pluralsh/design-system'
+import { EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { Event as EventT } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentProps } from 'react'
+
+import { DateTimeCol } from './table/DateTimeCol'
 
 const COLUMN_HELPER = createColumnHelper<EventT>()
 
@@ -30,7 +32,7 @@ const columns = [
   }),
   COLUMN_HELPER.accessor((event) => event.lastTimestamp, {
     id: 'lastTimestamp',
-    cell: (lastTimestamp) => <Date date={lastTimestamp.getValue()} />,
+    cell: (lastTimestamp) => <DateTimeCol date={lastTimestamp.getValue()} />,
     header: 'Last seen',
   }),
 ]

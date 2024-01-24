@@ -1,8 +1,10 @@
-import { Date, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { Maybe, PodCondition as PodConditionT } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
+
+import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
 import { TableText } from '../TableElements'
 
@@ -12,9 +14,7 @@ const columns = [
   COLUMN_HELPER.accessor((condition) => condition.lastTransitionTime, {
     id: 'timestamp',
     cell: (lastTransitionTime) => (
-      <TableText>
-        <Date date={lastTransitionTime.getValue()} />
-      </TableText>
+      <DateTimeCol date={lastTransitionTime.getValue()} />
     ),
     header: 'Timestamp',
   }),

@@ -10,20 +10,18 @@ import {
 import styled, { useTheme } from 'styled-components'
 import moment from 'moment/moment'
 import isEmpty from 'lodash/isEmpty'
+import { Link } from 'react-router-dom'
 
 import { ClusterFragment, ClusterStatus } from 'generated/graphql'
 import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
 
-import { Link } from 'react-router-dom'
+import { TooltipTime } from 'components/utils/TooltipTime'
 
 import { SubTitle } from '../../cluster/nodes/SubTitle'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { ClusterConditions } from '../clusters/ClusterConditions'
-
 import { getServiceDetailsPath } from '../../../routes/cdRoutesConsts'
-
 import { InlineLink } from '../../utils/typography/InlineLink'
-
 import { ClusterProviderIcon } from '../../utils/Provider'
 
 import { useClusterContext } from './Cluster'
@@ -128,12 +126,12 @@ function MetadataCard({
           )}
           <MetadataPropSC heading="Last pinged">
             {cluster?.pingedAt ? (
-              <Tooltip
-                label={moment(cluster?.pingedAt).format('lll')}
+              <TooltipTime
                 placement="top"
+                date={cluster?.pingedAt}
               >
                 <span>{moment(cluster?.pingedAt).fromNow()}</span>
-              </Tooltip>
+              </TooltipTime>
             ) : (
               '-'
             )}

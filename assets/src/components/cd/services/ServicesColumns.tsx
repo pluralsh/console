@@ -167,9 +167,7 @@ export const ColLastActivity = columnHelper.accessor(
     id: 'lastActivity',
     header: 'Activity ',
     sortingFn: 'datetime',
-    cell: ({ getValue }) => (
-      <DateTimeCol dateString={getValue()?.toISOString()} />
-    ),
+    cell: ({ getValue }) => <DateTimeCol date={getValue()?.toISOString()} />,
   }
 )
 

@@ -52,6 +52,7 @@ function ClusterUpgradePr({ prs, setError }) {
     },
     onCompleted: (data) => {
       const url = data.createPullRequest?.url
+
       if (url) {
         window.open(url, '_blank')?.focus()
       }

@@ -58,7 +58,7 @@ const ColCommitTime = columnHelper.accessor(
     header: 'Commit date',
     enableSorting: true,
     cell: ({ row: { original } }) => (
-      <DateTimeCol dateString={original?.insertedAt} />
+      <DateTimeCol date={original?.insertedAt} />
     ),
   }
 )

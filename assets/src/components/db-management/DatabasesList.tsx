@@ -21,6 +21,8 @@ import { isNil } from 'lodash'
 import moment from 'moment-timezone'
 import { fromNowMin } from 'utils/time'
 
+import { TooltipTime } from 'components/utils/TooltipTime'
+
 import { TableText, Usage, numishSort } from '../cluster/TableElements'
 
 import { DatabaseWithId } from './DatabaseManagement'
@@ -126,7 +128,16 @@ export const ColAge = columnHelper.accessor(
     cell: ({ row: { original } }) => {
       const age = fromNowMin(moment(original.metadata.creationTimestamp), true)
 
-      return <TableText>{age}</TableText>
+      return (
+        <TableText>
+          <TooltipTime
+            date={original.metadata.creationTimestamp}
+            prefix="Created: "
+          >
+            {age}
+          </TooltipTime>
+        </TableText>
+      )
     },
     header: 'Age',
   }

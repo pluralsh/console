@@ -1,31 +1,15 @@
-import moment from 'moment'
-import { useTheme } from 'styled-components'
+import { Date } from '@pluralsh/design-system'
 
-export function DateTimeCol({
-  dateString,
-}: {
-  dateString: string | null | undefined
-}) {
-  const theme = useTheme()
+import { TooltipTime } from '../TooltipTime'
 
-  if (!dateString) {
+export function DateTimeCol({ date }: { date: string | null | undefined }) {
+  if (!date) {
     return null
   }
-  const date = moment(dateString)
-  const formattedDate = date.format('MM/DD/YY')
-  const formattedTime = date.format('h:mma')
 
   return (
-    <div css={{ display: 'flex', flexDirection: 'column' }}>
-      <p css={{ ...theme.partials.text.body2 }}>{formattedDate}</p>
-      <p
-        css={{
-          ...theme.partials.text.caption,
-          color: theme.colors['text-xlight'],
-        }}
-      >
-        {formattedTime}
-      </p>
-    </div>
+    <TooltipTime date={date}>
+      <Date date={date} />
+    </TooltipTime>
   )
 }
