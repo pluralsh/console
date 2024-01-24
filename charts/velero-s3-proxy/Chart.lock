@@ -2,5 +2,8 @@ dependencies:
 - name: velero
   repository: https://vmware-tanzu.github.io/helm-charts
   version: 5.2.2
-digest: sha256:61578beb5f35def6912fc9e6c5b42cc0b630b1ff610bc8461a0fcddbeaa7cf4e
-generated: "2024-01-23T12:45:12.572664+01:00"
+- name: s3-proxy
+  repository: https://radar-base.github.io/radar-helm-charts
+  version: 0.3.1
+digest: sha256:129f21ba68693973b9dfd73c266a21a41275e8b7a50794aa649684c897c0f638
+generated: "2024-01-24T10:49:52.567595+01:00"

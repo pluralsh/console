@@ -6,17 +6,40 @@ velero:
       volumeMounts:
         - mountPath: /target
           name: plugins
-    - name: velero-plugin-for-microsoft-azure
-      image: velero/velero-plugin-for-microsoft-azure:v1.8.2
-      imagePullPolicy: IfNotPresent
-      volumeMounts:
-        - mountPath: /target
-          name: plugins
   configuration:
-    backupStorageLocation: {}
-    volumeSnapshotLocation: {}
+    backupStorageLocation:
+      - name: default
+        provider: aws
+        bucket: "velero"
+        config:
+          region: s3-proxy-default
+          s3ForcePathStyle: true
+          s3Url: "http://velero-s3-proxy.velero.svc:80"
+          publicUrl: "http://localhost:80"
+    volumeSnapshotLocation:
+      - name: default
+        provider: aws
+        credential:
+          name: velero
+          key: cloud
+        config:
+          region: s3-proxy-default
   snapshotsEnabled: false
   deployNodeAgent: false
   credentials:
     secretContents:
       cloud: ""
+
+s3-proxy:
+  s3:
+    identity: ""
+    credential: ""
+  target:
+    provider: ""
+    identity: ""
+    credential: ""
+    endpoint: ""
+    region: s3-proxy-default
+    azureblob:
+      auth: azureKey
+
