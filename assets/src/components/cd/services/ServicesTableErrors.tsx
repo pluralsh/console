@@ -1,9 +1,11 @@
-import { Chip, ErrorIcon, Modal, Table, Tooltip } from '@pluralsh/design-system'
-import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
+import { Chip, ErrorIcon, Modal, Tooltip } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentProps, useState } from 'react'
-import { createColumnHelper } from '@tanstack/react-table'
+
+import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { ServiceErrorsTable } from './service/ServiceErrors'
 
 export function ServiceErrorsChip({
   errors,
@@ -28,25 +30,7 @@ export function ServiceErrorsChip({
   )
 }
 
-const columnHelper = createColumnHelper<Nullable<ServiceError>>()
-
-export const ColSource = columnHelper.accessor((row) => row?.source, {
-  id: 'source',
-  header: 'Source',
-  enableSorting: true,
-  cell: ({ getValue }) => getValue(),
-})
-
-export const ColMessage = columnHelper.accessor((row) => row?.message, {
-  id: 'message',
-  header: 'Message',
-  enableSorting: true,
-  meta: { truncate: true },
-  cell: ({ getValue }) => getValue(),
-})
-const columns = [ColSource, ColMessage]
-
-export function ServiceErrors({
+export function ServicesTableErrors({
   service,
 }: {
   service: Nullable<
@@ -54,10 +38,7 @@ export function ServiceErrors({
   >
 }) {
   const [isOpen, setIsOpen] = useState(false)
-
   const serviceErrors = service?.errors
-
-  // const serviceErrors = [{message:'hi there', source:'Source'}]
 
   if (!serviceErrors || isEmpty(serviceErrors)) {
     return null
@@ -85,15 +66,7 @@ export function ServiceErrors({
           open={isOpen}
           onClose={() => setIsOpen(false)}
         >
-          <Table
-            data={serviceErrors}
-            columns={columns}
-            reactTableOptions={{
-              getRowId(original, index) {
-                return `${index}${original?.source}${original?.message}`
-              },
-            }}
-          />
+          <ServiceErrorsTable errors={serviceErrors} />
         </Modal>
       </ModalMountTransition>
     </div>

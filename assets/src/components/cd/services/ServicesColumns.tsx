@@ -33,7 +33,7 @@ import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 import DecoratedName from './DecoratedName'
 import { DeleteService } from './DeleteService'
-import { ServiceErrors } from './ServiceErrors'
+import { ServicesTableErrors } from './ServicesTableErrors'
 import { ServiceDeprecations } from './ServiceDeprecations'
 import { CreateGlobalService } from './CreateGlobalService'
 import { DeleteGlobalService } from './DeleteGlobalService'
@@ -216,7 +216,7 @@ export const ColErrors = columnHelper.accessor(
       },
     }) => (
       <div css={{ minWidth: 160 }}>
-        <ServiceErrors service={node} />
+        <ServicesTableErrors service={node} />
         <ServiceDeprecations service={node} />
       </div>
     ),

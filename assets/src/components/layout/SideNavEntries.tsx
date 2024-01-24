@@ -7,6 +7,20 @@ import {
 } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 import { useDocPageContext } from 'components/contexts/DocPageContext'
+import { ReactNode } from 'react'
+import { SetOptional } from 'type-fest'
+import { MarkdocHeading } from '@pluralsh/design-system/dist/markdoc/utils/collectHeadings'
+
+export type DirectoryEntry = {
+  enabled?: boolean
+  label: ReactNode
+  path: string
+  subpaths?: Nullable<Nullable<SetOptional<DirectoryEntry, 'enabled'>>[]>
+  type?: string
+  headings?: MarkdocHeading[]
+  id?: string
+}
+export type Directory = Nullable<DirectoryEntry>[]
 
 export function SideNavEntries({
   directory,
@@ -15,7 +29,7 @@ export function SideNavEntries({
   root = true,
   docPageContext,
 }: {
-  directory: any[]
+  directory: Directory
   pathname: string
   pathPrefix: string
   root?: boolean
@@ -26,20 +40,24 @@ export function SideNavEntries({
       condition={root}
       wrapper={<TreeNav />}
     >
-      {directory.map(({ label, path, subpaths, type, ...props }) => {
+      {directory.map((entry) => {
+        if (!entry || entry.enabled === false) {
+          return null
+        }
+        const { label, path, subpaths, type, id, headings } = entry
         const currentPath =
           removeTrailingSlashes(getBarePathFromPath(pathname)) || ''
         const fullPath = `${pathPrefix}/${removeTrailingSlashes(path) || ''}`
         const hashlessPath = fullPath.split('#')[0]
         const isInCurrentPath = currentPath.startsWith(hashlessPath)
-        const docPageRootHash = props?.headings?.[0]?.id || ''
+        const docPageRootHash = headings?.[0]?.id || ''
         const active =
           type === 'docPage'
             ? isInCurrentPath &&
               (docPageContext?.selectedHash === docPageRootHash ||
                 !docPageContext?.selectedHash)
             : type === 'docPageHash'
-            ? isInCurrentPath && docPageContext?.selectedHash === props.id
+            ? isInCurrentPath && docPageContext?.selectedHash === id
             : isInCurrentPath
 
         return (
@@ -48,10 +66,10 @@ export function SideNavEntries({
             href={path === 'docs' ? undefined : fullPath}
             label={label}
             active={active}
-            {...(type === 'docPageHash' && props.id
+            {...(type === 'docPageHash' && id
               ? {
                   onClick: () => {
-                    docPageContext?.scrollToHash?.(props.id)
+                    docPageContext?.scrollToHash?.(id)
                   },
                 }
               : type === 'docPage'
@@ -62,7 +80,7 @@ export function SideNavEntries({
                 }
               : {})}
           >
-            {!isEmpty(subpaths) ? (
+            {subpaths && !isEmpty(subpaths) ? (
               <SideNavEntries
                 directory={subpaths}
                 pathname={pathname}
