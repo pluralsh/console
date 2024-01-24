@@ -2,9 +2,8 @@
 # - provider            - s3-proxy provider name, "azureblob".
 # - internalIdentity    - internal s3-proxy AWS access key ID to use.
 # - internalCredential  - internal s3-proxy AWS secret access key to use.
-# - identity            - Azure service principal client ID.
-# - credential          - Azure service principal client secret.
-# - bucket              - Azure blob container name.
+# - identity            - Azure storage account name.
+# - credential          - Azure storage account access key.
 
 velero:
   credentials:
@@ -20,6 +19,6 @@ s3-proxy:
     credential: {{ configuration.internalCredential }}
   target:
     provider: {{ configuration.provider }}
-    endpoint: "https://{{ configuration.bucket }}.blob.core.windows.net"
+    endpoint: "https://{{ configuration.identity }}.blob.core.windows.net"
     identity: {{ configuration.identity }}
     credential: {{ configuration.credential }}
