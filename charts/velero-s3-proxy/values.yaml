@@ -7,15 +7,7 @@ velero:
         - mountPath: /target
           name: plugins
   configuration:
-    backupStorageLocation:
-      - name: default
-        provider: aws
-        bucket: "velero-s3" # TODO: Add to configuration.
-        config:
-          region: s3-proxy-default
-          s3ForcePathStyle: true
-          s3Url: "http://velero-s3-proxy.velero.svc:80"
-          publicUrl: "http://localhost:80"
+    backupStorageLocation: {}
     volumeSnapshotLocation:
       - name: default
         provider: aws

@@ -4,8 +4,19 @@
 # - internalCredential  - internal s3-proxy AWS secret access key to use.
 # - identity            - Azure storage account name.
 # - credential          - Azure storage account access key.
+# - bucket              - Azure blob container name.
 
 velero:
+  configuration:
+    backupStorageLocation:
+      - name: default
+        provider: aws
+        bucket: {{ configuration.bucket }}
+        config:
+          region: s3-proxy-default
+          s3ForcePathStyle: true
+          s3Url: "http://velero-s3-proxy.velero.svc:80"
+          publicUrl: "http://localhost:80"
   credentials:
     secretContents:
       cloud: |
