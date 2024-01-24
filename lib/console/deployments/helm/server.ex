@@ -41,7 +41,7 @@ defmodule Console.Deployments.Helm.Server do
       do: {:noreply, store_cache(table, cache)}
   end
 
-  def handle_call({:fetch, chart}, table) do
+  def handle_call({:fetch, chart}, _, table) do
     with {:ok, cache} <- get_cache(table),
          {:ok, f, cache} <- Cache.fetch(cache, chart),
       do: {:reply, {:ok, f}, store_cache(table, cache)}

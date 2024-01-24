@@ -1,6 +1,6 @@
 defmodule Console.Schema.PrAutomation do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, Service, ScmConnection, PolicyBinding}
+  alias Console.Schema.{Cluster, Service, ScmConnection, PolicyBinding, Configuration}
 
   defenum MatchStrategy, any: 0, all: 1, recursive: 2
 
@@ -27,6 +27,8 @@ defmodule Console.Schema.PrAutomation do
         field :replacement, :string
       end
     end
+
+    embeds_many :configuration, Configuration, on_replace: :delete
 
     belongs_to :cluster,    Cluster
     belongs_to :service,    Service
@@ -55,6 +57,7 @@ defmodule Console.Schema.PrAutomation do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:updates, with: &update_changeset/2)
+    |> cast_embed(:configuration)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:create_bindings)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)

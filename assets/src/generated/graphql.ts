@@ -879,6 +879,13 @@ export enum ComponentState {
   Running = 'RUNNING'
 }
 
+/** attributes for declaratively specifying whether a config item is relevant given prior config */
+export type ConditionAttributes = {
+  field: Scalars['String']['input'];
+  operation: Operation;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ConfigAttributes = {
   name: Scalars['String']['input'];
   value?: InputMaybe<Scalars['String']['input']>;
@@ -938,6 +945,17 @@ export type ConfigurationOverlaySpec = {
   subfolder?: Maybe<Scalars['String']['output']>;
   updates?: Maybe<Array<Maybe<OverlayUpdate>>>;
 };
+
+export enum ConfigurationType {
+  Bool = 'BOOL',
+  Bucket = 'BUCKET',
+  Domain = 'DOMAIN',
+  File = 'FILE',
+  Function = 'FUNCTION',
+  Int = 'INT',
+  Password = 'PASSWORD',
+  String = 'STRING'
+}
 
 export type ConfigurationValidation = {
   __typename?: 'ConfigurationValidation';
@@ -2038,6 +2056,17 @@ export type ObjectReference = {
   namespace?: Maybe<Scalars['String']['output']>;
 };
 
+export enum Operation {
+  Eq = 'EQ',
+  Gt = 'GT',
+  Gte = 'GTE',
+  Lt = 'LT',
+  Lte = 'LTE',
+  Not = 'NOT',
+  Prefix = 'PREFIX',
+  Suffix = 'SUFFIX'
+}
+
 export type OverlayUpdate = {
   __typename?: 'OverlayUpdate';
   path?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -2409,6 +2438,7 @@ export type PrAutomationAttributes = {
   branch?: InputMaybe<Scalars['String']['input']>;
   /** link to a cluster if this is to perform an upgrade */
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  configuration?: InputMaybe<Array<InputMaybe<PrConfigurationAttributes>>>;
   /** the scm connection to use for pr generation */
   connectionId?: InputMaybe<Scalars['ID']['input']>;
   /** users who can create prs with this automation */
@@ -2447,6 +2477,18 @@ export type PrAutomationUpdateSpecAttributes = {
   regexes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   replaceTemplate?: InputMaybe<Scalars['String']['input']>;
   yq?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** the a configuration item for creating a new pr */
+export type PrConfigurationAttributes = {
+  condition?: InputMaybe<ConditionAttributes>;
+  default?: InputMaybe<Scalars['String']['input']>;
+  documentation?: InputMaybe<Scalars['String']['input']>;
+  longform?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  optional?: InputMaybe<Scalars['Boolean']['input']>;
+  placeholder?: InputMaybe<Scalars['String']['input']>;
+  type: ConfigurationType;
 };
 
 /** existing file updates that can be performed in a PR */
