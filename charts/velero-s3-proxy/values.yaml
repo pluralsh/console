@@ -10,7 +10,7 @@ velero:
     backupStorageLocation:
       - name: default
         provider: aws
-        bucket: "velero"
+        bucket: "velero-s3" # TODO: Add to configuration.
         config:
           region: s3-proxy-default
           s3ForcePathStyle: true
