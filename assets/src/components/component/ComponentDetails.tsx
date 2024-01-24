@@ -146,7 +146,7 @@ export function ComponentDetails({
       (!onlyFor || (componentKind && onlyFor.includes(componentKind))) &&
       (!prometheus || !service?.cluster?.id || hasPrometheus) &&
       (!onlyIfNoError || !hasNotFoundError) &&
-      (!onlyIfDryRun || (cdView && !service?.dryRun))
+      (!onlyIfDryRun || (cdView && service?.dryRun))
   )
 
   const currentTab = filteredDirectory.find(({ path }) => path === subpath)
