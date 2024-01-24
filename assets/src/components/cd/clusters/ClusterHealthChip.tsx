@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import moment from 'moment'
 import { Chip, Tooltip } from '@pluralsh/design-system'
 import { ClustersRowFragment } from 'generated/graphql'
+import { TooltipTime } from 'components/utils/TooltipTime'
 
 export function ClusterHealth({
   cluster,
@@ -51,12 +52,18 @@ function ClusterHealthChip({
     pingedAt && now.clone().subtract(10, 'minutes').isBefore(pingedAt)
 
   return (
-    <Tooltip
-      label={
-        pinged
-          ? `Pinged at ${moment(pingedAt).format('MMM D, h:mm')}`
-          : `This cluster was not pinged yet`
+    <TooltipTime
+      prefix={
+        pinged ? (
+          <>
+            Pinged at {moment(pingedAt).format('MMM D, h:mm')}
+            <br />
+          </>
+        ) : (
+          `This cluster was not pinged yet`
+        )
       }
+      date={pingedAt}
     >
       <Chip
         severity={pinged ? (healthy ? 'success' : 'danger') : 'warning'}
@@ -65,6 +72,6 @@ function ClusterHealthChip({
       >
         {pinged ? (healthy ? 'Healthy' : 'Unhealthy') : 'Pending'}
       </Chip>
-    </Tooltip>
+    </TooltipTime>
   )
 }

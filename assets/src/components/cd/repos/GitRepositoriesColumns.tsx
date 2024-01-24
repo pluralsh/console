@@ -69,7 +69,7 @@ export const ColCreatedAt = columnHelper.accessor(
       row: {
         original: { node },
       },
-    }) => <DateTimeCol dateString={node?.insertedAt} />,
+    }) => <DateTimeCol date={node?.insertedAt} />,
   }
 )
 
@@ -84,7 +84,7 @@ export const ColUpdatedAt = columnHelper.accessor(
       row: {
         original: { node },
       },
-    }) => <DateTimeCol dateString={node?.updatedAt} />,
+    }) => <DateTimeCol date={node?.updatedAt} />,
   }
 )
 
@@ -99,7 +99,7 @@ export const ColPulledAt = columnHelper.accessor(
       row: {
         original: { node },
       },
-    }) => <DateTimeCol dateString={node?.pulledAt || ''} />,
+    }) => <DateTimeCol date={node?.pulledAt || ''} />,
   }
 )
 

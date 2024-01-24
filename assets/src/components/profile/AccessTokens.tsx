@@ -255,7 +255,7 @@ const tokenColumns = [
   tokenColumnHelper.accessor((row) => row.insertedAt, {
     id: 'createdOn',
     header: 'Created on',
-    cell: ({ getValue }) => <DateTimeCol dateString={getValue()} />,
+    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
   // columnHelper.accessor((row) => row.updatedAt, {
   //   id: 'updatedAt',

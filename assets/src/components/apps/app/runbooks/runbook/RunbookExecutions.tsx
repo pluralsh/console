@@ -1,5 +1,4 @@
-import { Avatar, Date, EmptyState, Table } from '@pluralsh/design-system'
-
+import { Avatar, EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Flex } from 'honorable'
 import { useCallback, useMemo } from 'react'
@@ -8,7 +7,9 @@ import { RUNBOOK_EXECUTIONS_Q } from 'components/runbooks/queries'
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 import { isEmpty } from 'lodash'
+
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
 import { FullHeightTableWrap } from '../../../../utils/layout/FullHeightTableWrap'
 
@@ -17,7 +18,7 @@ const columnHelper = createColumnHelper<any>()
 const columns = [
   columnHelper.accessor((row) => row.insertedAt, {
     id: 'insertedAt',
-    cell: (insertedAt: any) => <Date date={insertedAt.getValue()} />,
+    cell: (insertedAt: any) => <DateTimeCol date={insertedAt.getValue()} />,
     header: 'Date',
   }),
   columnHelper.accessor((row) => row.user, {

@@ -1,11 +1,13 @@
-import { AppIcon, Date, Table } from '@pluralsh/design-system'
+import { AppIcon, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Flex } from 'honorable'
 import { useCallback, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { extendConnection } from 'utils/graphql'
+
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
 import { AUDITS_Q } from '../queries'
 
@@ -51,7 +53,7 @@ const columns = [
   }),
   COLUMN_HELPER.accessor((audit) => audit.insertedAt, {
     id: 'insertedAt',
-    cell: (insertedAt: any) => <Date date={insertedAt.getValue()} />,
+    cell: (insertedAt: any) => <DateTimeCol date={insertedAt.getValue()} />,
     header: 'Timestamp',
   }),
   COLUMN_HELPER.accessor((audit) => audit, {
