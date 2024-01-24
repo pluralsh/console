@@ -1,3 +1,12 @@
+# AWS configuration:
+# - provider            - s3-proxy provider name, "aws-s3".
+# - internalIdentity    - internal s3-proxy AWS access key ID to use.
+# - internalCredential  - internal s3-proxy AWS secret access key to use.
+# - identity            - AWS access key ID.
+# - credential          - AWS secret access key.
+# - bucket              - Amazon S3 bucket name.
+# - region              - AWS region.
+#
 # Azure configuration:
 # - provider            - s3-proxy provider name, "azureblob".
 # - internalIdentity    - internal s3-proxy AWS access key ID to use.
@@ -32,6 +41,10 @@ s3-proxy:
     provider: {{ configuration.provider }}
     identity: {{ configuration.identity }}
     credential: {{ configuration.credential }}
+    {% if configuration.provider == "aws-s3" -%}
+    endpoint: "https://s3.{{ configuration.region }}.amazonaws.com"
+    region: {{ configuration.region }}
+    {%- endif -%}
     {% if configuration.provider == "azureblob" -%}
     endpoint: "https://{{ configuration.identity }}.blob.core.windows.net"
     {%- endif -%}
