@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Helm.Cache do
   require Logger
   alias Kube.HelmChart
+  alias Kube.HelmChart.Status
   alias Console.Deployments.Tar
 
   defstruct [:dir, :touched]
@@ -10,17 +11,38 @@ defmodule Console.Deployments.Helm.Cache do
     %__MODULE__{dir: dir, touched: %{}}
   end
 
-  def fetch(%__MODULE__{dir: dir} = cache, %HelmChart{
+  def present?(%__MODULE__{} = cache, chart) do
+    case path(cache, chart) do
+      {:ok, p} -> File.exists?(p)
+      _ -> false
+    end
+  end
+
+  def fetch(%__MODULE__{} = cache, %HelmChart{
     spec: %HelmChart.Spec{chart: chart},
-    status: %HelmChart.Status{artifact: %HelmChart.Status.Artifact{digest: sha, url: url}}
-  }) when is_binary(url) do
-    cache_path = Path.join(dir, sha)
+    status: %Status{artifact: %Status.Artifact{url: url}}
+  } = helm_chart) when is_binary(url) do
+    {:ok, cache_path} = path(cache, helm_chart)
     case File.exists?(cache_path) do
       true -> open(cache, cache_path)
       false -> build_tarball(url, cache, cache_path, chart)
     end
   end
   def fetch(_, _), do: {:error, "chart not yet loaded"}
+
+  def touch(%__MODULE__{touched: touched} = cache, %HelmChart{} = chart) do
+    case path(cache, chart) do
+      {:ok, cache_path} -> {:ok, put_in(cache.touched, Map.put(touched, cache_path, Timex.now()))}
+      _ -> {:ok, cache}
+    end
+  end
+
+  def path(%__MODULE__{dir: dir}, %HelmChart{
+    status: %Status{artifact: %Status.Artifact{digest: sha}}
+  }) when is_binary(sha) do
+    {:ok, Path.join(dir, sha)}
+  end
+  def path(_, _), do: {:error, "chart not yet loaded"}
 
   defp open(%__MODULE__{touched: touched} = cache, path) do
     with {:ok, f} <- File.open(path),
