@@ -1,8 +1,15 @@
 import { Tooltip } from '@pluralsh/design-system'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import isArray from 'lodash/isArray'
-import { ComponentProps, ReactNode, useCallback, useState } from 'react'
-import styled from 'styled-components'
+import {
+  ComponentProps,
+  ComponentPropsWithRef,
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useState,
+} from 'react'
+import styled, { DefaultTheme, StyledComponent } from 'styled-components'
 
 export const CopiedSC = styled.div(({ theme }) => ({
   fontSize: '.9em',
@@ -14,7 +21,28 @@ export const TimeSC = styled.div((_) => ({
 }))
 export const TooltipTimeSC = styled.div``
 
-export function TooltipTime({
+type BaseProps = {
+  startContent?: ReactNode
+  endContent?: ReactNode
+} & Pick<
+  ComponentProps<typeof Tooltip>,
+  'placement' | 'displayOn' | 'manualOpen'
+> &
+  ComponentPropsWithRef<StyledComponent<'div', DefaultTheme>>
+type SingleProps = {
+  date: ReactElement | string | undefined | null
+  prefix?: ReactElement | string | undefined | null
+  suffix?: ReactElement | string | undefined | null
+} & BaseProps
+type MultiProps = {
+  date: (ReactElement | string | undefined | null)[]
+  prefix?: (ReactElement | string | undefined | null)[]
+  suffix?: (ReactElement | string | undefined | null)[]
+} & BaseProps
+
+function TooltipTime(props: MultiProps)
+function TooltipTime(props: SingleProps)
+function TooltipTime({
   date,
   prefix,
   suffix,
@@ -27,24 +55,7 @@ export function TooltipTime({
   // element props
   onClick,
   ...props
-}: (
-  | {
-      date: string | null | undefined
-      prefix: string | null | undefined
-      suffix: string | null | undefined
-    }
-  | {
-      date: string[]
-      prefix: string[]
-      suffix: string[]
-    }
-) & { startContent?: ReactNode; endContent?: ReactNode } & ComponentProps<
-    typeof TooltipTimeSC
-  > &
-  Pick<
-    ComponentProps<typeof Tooltip>,
-    'placement' | 'displayOn' | 'manualOpen'
-  >) {
+}: MultiProps | SingleProps) {
   const [copied, setCopied] = useState(false)
   const clearCopied = useCallback(() => setCopied(false), [])
   const dateArr = isArray(date) ? date : [date]
@@ -94,3 +105,5 @@ export function TooltipTime({
     </Tooltip>
   )
 }
+
+export { TooltipTime }

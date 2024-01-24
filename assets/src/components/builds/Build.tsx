@@ -25,11 +25,11 @@ export const BUILD_TYPE_DISPLAY_NAMES = {
   [BuildTypes.APPROVAL]: 'New images',
   [BuildTypes.INSTALL]: 'Installation',
 }
-const TimeFromNow = styled(TooltipTime).attrs(() => ({ forwardedAs: 'p' }))(
-  (_) => ({
-    whiteSpace: 'nowrap',
-  })
-)
+const TimeFromNow: typeof TooltipTime = styled(TooltipTime).attrs(() => ({
+  forwardedAs: 'p',
+}))((_) => ({
+  whiteSpace: 'nowrap',
+}))
 
 export default function Build({ build }) {
   const theme = useTheme()
