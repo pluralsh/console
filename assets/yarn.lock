@@ -6565,6 +6565,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/humanize-duration@npm:3.27.4":
+  version: 3.27.4
+  resolution: "@types/humanize-duration@npm:3.27.4"
+  checksum: aa7fa41af839021c846a1728d2f097b7885f80acbc5050623a9804d23fd8fee19d2654eaae331f000a4e551b88d99cd0b5f6cc97aa99f869b9205f6248066827
+  languageName: node
+  linkType: hard
+
 "@types/is-hotkey@npm:^0.1.1":
   version: 0.1.7
   resolution: "@types/is-hotkey@npm:0.1.7"
@@ -9026,6 +9033,7 @@ __metadata:
     "@testing-library/jest-dom": 5.16.5
     "@testing-library/react": 14.0.0
     "@testing-library/user-event": 14.4.3
+    "@types/humanize-duration": 3.27.4
     "@types/jsdom": 21.1.5
     "@types/styled-components": 5.1.30
     "@types/uuid": 9.0.7
@@ -9064,6 +9072,7 @@ __metadata:
     highlight.js: 11.9.0
     honorable: 1.0.0-beta.17
     honorable-theme-default: 1.0.0-beta.5
+    humanize-duration: 3.31.0
     husky: 8.0.3
     immer: 10.0.3
     js-file-download: 0.4.12
@@ -12245,6 +12254,13 @@ __metadata:
   version: 5.0.0
   resolution: "human-signals@npm:5.0.0"
   checksum: 6504560d5ed91444f16bea3bd9dfc66110a339442084e56c3e7fa7bbdf3f406426d6563d662bdce67064b165eac31eeabfc0857ed170aaa612cf14ec9f9a464c
+  languageName: node
+  linkType: hard
+
+"humanize-duration@npm:3.31.0":
+  version: 3.31.0
+  resolution: "humanize-duration@npm:3.31.0"
+  checksum: a21b1c80d43580c28fef07213846f74703c467270d41b774faeb4df6041b1da65effc554346fe6f0a70c4096b011d75f2ba6c2fd254b5a3c93231d85910533fe
   languageName: node
   linkType: hard
 

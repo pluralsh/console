@@ -13,6 +13,7 @@ import moment from 'moment'
 import { useContext, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { humanizeDur } from 'utils/time'
 import { TooltipTime } from 'components/utils/TooltipTime'
 
 import BuildStatus from './BuildStatus'
@@ -32,7 +33,8 @@ const TimeFromNow = styled(TooltipTime).attrs(() => ({ forwardedAs: 'p' }))(
 
 export default function Build({ build }) {
   const theme = useTheme()
-  const { id, repository, status, insertedAt, message, type } = build
+  const { id, repository, status, insertedAt, completedAt, message, type } =
+    build
   const navigate = useNavigate()
   const { applications } = useContext<any>(InstallationContext)
   const app = useMemo(
@@ -86,9 +88,17 @@ export default function Build({ build }) {
         align="center"
         justify="end"
       >
-        <TimeFromNow dateString={insertedAt}>
-          {moment(insertedAt).fromNow()}
-        </TimeFromNow>
+        <div>
+          <TimeFromNow
+            date={[insertedAt, completedAt]}
+            prefix={[<>Started:&nbsp;</>, <>Completed:&nbsp;</>]}
+            endContent={humanizeDur(
+              new Date(completedAt).getTime() - new Date(insertedAt).getTime()
+            )}
+          >
+            {moment(insertedAt).fromNow()}
+          </TimeFromNow>
+        </div>
         <BuildStatus status={status} />
         <CaretRightIcon />
       </Flex>

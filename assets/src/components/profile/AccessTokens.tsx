@@ -260,7 +260,7 @@ const tokenColumns = [
   // columnHelper.accessor((row) => row.updatedAt, {
   //   id: 'updatedAt',
   //   header: 'Updated on',
-  //   cell: ({ getValue }) => <DateTimeCol dateString={getValue()} />,
+  //   cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   // }),
   tokenColumnHelper.accessor((row) => row.id, {
     id: 'actions',
