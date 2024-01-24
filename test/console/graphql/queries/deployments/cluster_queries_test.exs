@@ -45,6 +45,19 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
             edges { node { id } }
           }
         }
+      """, %{"tq" => %{"op" => "AND", "tags" => [
+        %{"name" => "t", "value" => "v"},
+      ]}}, %{current_user: admin})
+
+      assert from_connection(found)
+            |> ids_equal(clusters ++ clusters2)
+
+      {:ok, %{data: %{"clusters" => found}}} = run_query("""
+        query Clusters($tq: TagQuery!) {
+          clusters(first: 5, tagQuery: $tq) {
+            edges { node { id } }
+          }
+        }
       """, %{"tq" => %{"op" => "OR", "tags" => [
         %{"name" => "t", "value" => "v"},
         %{"name" => "t2", "value" => "v2"},

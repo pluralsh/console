@@ -39,9 +39,7 @@ defmodule Console.Deployments.Helm.Cache do
 
   def path(%__MODULE__{dir: dir}, %HelmChart{
     status: %Status{artifact: %Status.Artifact{digest: sha}}
-  }) when is_binary(sha) do
-    {:ok, Path.join(dir, sha)}
-  end
+  }) when is_binary(sha), do: {:ok, Path.join(dir, sha)}
   def path(_, _), do: {:error, "chart not yet loaded"}
 
   defp open(%__MODULE__{touched: touched} = cache, path) do
