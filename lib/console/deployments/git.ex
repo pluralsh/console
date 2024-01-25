@@ -31,11 +31,15 @@ defmodule Console.Deployments.Git do
   def get_scm_connection(id), do: Repo.get(ScmConnection, id)
   def get_scm_connection!(id), do: Repo.get!(ScmConnection, id)
 
+  def get_scm_connection_by_name(name), do: Repo.get_by(ScmConnection, name: name)
+
   def get_scm_webhook(id), do: Repo.get(ScmWebhook, id)
   def get_scm_webhook!(id), do: Repo.get!(ScmWebhook, id)
 
   def get_pr_automation(id), do: Repo.get(PrAutomation, id)
   def get_pr_automation!(id), do: Repo.get!(PrAutomation, id)
+
+  def get_pr_automation_by_name(name), do: Repo.get_by(PrAutomation, name: name)
 
   def deploy_url(), do: "https://github.com/pluralsh/deployment-operator.git"
 

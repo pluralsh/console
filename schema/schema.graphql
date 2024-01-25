@@ -171,11 +171,11 @@ type RootQueryType {
 
   scmConnections(after: String, first: Int, before: String, last: Int): ScmConnectionConnection
 
-  scmConnection(id: ID!): ScmConnection
+  scmConnection(id: ID, name: String): ScmConnection
 
   prAutomations(after: String, first: Int, before: String, last: Int): PrAutomationConnection
 
-  prAutomation(id: ID!): PrAutomation
+  prAutomation(id: ID, name: String): PrAutomation
 
   pullRequests(after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID): PullRequestConnection
 
