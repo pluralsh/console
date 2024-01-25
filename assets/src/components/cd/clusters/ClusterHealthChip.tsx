@@ -55,7 +55,7 @@ function ClusterHealthChip({
     <TooltipTime
       startContent={
         pinged
-          ? `Pinged at ${moment(pingedAt).format('MMM D, h:mm')}`
+          ? `Pinged: ${moment(pingedAt).format('MMM D, h:mm')}`
           : `This cluster was not pinged yet`
       }
       date={pingedAt}
