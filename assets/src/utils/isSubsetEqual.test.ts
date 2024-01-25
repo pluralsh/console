@@ -1,6 +1,6 @@
 import { isSubsetEqual } from './isSubsetEqual'
 
-const set:Record<string,any> = {
+const set: Record<string, any> = {
   a: 'a string',
   b: false,
   c: 123.3,
