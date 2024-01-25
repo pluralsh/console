@@ -49,6 +49,9 @@ type SyncConfigAttributes struct {
 }
 
 type ServiceSpec struct {
+	// the name of this service, if not provided ServiceDeployment's own name from ServiceDeployment.ObjectMeta will be used.
+	// +optional
+	Name *string `json:"name,omitempty"`
 	// the namespace this service will be deployed into, if not provided deploys to the ServiceDeployment's own namespace
 	// +optional
 	Namespace *string `json:"namespace,omitempty"`
@@ -137,6 +140,14 @@ type ServiceDeployment struct {
 	// +kubebuilder:validation:Required
 	Spec   ServiceSpec   `json:"spec,omitempty"`
 	Status ServiceStatus `json:"status,omitempty"`
+}
+
+func (s *ServiceDeployment) GetName() string {
+	if s.Spec.Name != nil && len(*s.Spec.Name) > 0 {
+		return *s.Spec.Name
+	}
+
+	return s.Name
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -264,6 +264,10 @@ spec:
                 required:
                 - path
                 type: object
+              name:
+                description: the name of this service, if not provided ServiceDeployment's
+                  own name from ServiceDeployment.ObjectMeta will be used.
+                type: string
               namespace:
                 description: the namespace this service will be deployed into, if
                   not provided deploys to the ServiceDeployment's own namespace
