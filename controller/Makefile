@@ -153,6 +153,10 @@ helm: manifests kustomize helmify
 	@$(KUSTOMIZE) build config/default | $(HELMIFY) -generate-defaults -image-pull-secrets -crd-dir ../charts/controller
 	@find ../charts/controller -type f -exec sed -i 's/app.kubernetes.io\/managed-by: kustomize/app.kubernetes.io\/managed-by: helm/g' {} \;
 
+.PHONY: chart-crds
+chart-crds:
+	@cp -a config/crd/bases/. ../charts/controller/crds
+
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | $(KUBECTL) apply -f -
