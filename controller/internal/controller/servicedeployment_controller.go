@@ -226,13 +226,9 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
-	namespace := service.Namespace
-	if service.Spec.Namespace != nil {
-		namespace = *service.Spec.Namespace
-	}
 	attr := &console.ServiceDeploymentAttributes{
-		Name:         service.Name,
-		Namespace:    namespace,
+		Name:         service.GetName(),
+		Namespace:    service.GetNamespace(),
 		Version:      service.Spec.Version,
 		DocsPath:     service.Spec.DocsPath,
 		Protect:      &service.Spec.Protect,

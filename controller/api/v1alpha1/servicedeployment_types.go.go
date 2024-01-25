@@ -150,6 +150,18 @@ func (s *ServiceDeployment) GetName() string {
 	return s.Name
 }
 
+func (s *ServiceDeployment) GetNamespace() string {
+	if s.Spec.Namespace != nil && len(*s.Spec.Namespace) > 0 {
+		return *s.Spec.Namespace
+	}
+
+	return s.Namespace
+}
+
+func (s *ServiceDeployment) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&s.Status.Conditions, condition)
+}
+
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type ServiceDeploymentList struct {
@@ -196,8 +208,4 @@ func (p *ServiceStatus) GetID() string {
 
 func (p *ServiceStatus) HasID() bool {
 	return p.ID != nil && len(*p.ID) > 0
-}
-
-func (p *ServiceDeployment) SetCondition(condition metav1.Condition) {
-	meta.SetStatusCondition(&p.Status.Conditions, condition)
 }
