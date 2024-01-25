@@ -59,7 +59,7 @@ const FILTERS = [
   {
     key: Readiness.Failed,
     label: readinessToLabel[Readiness.Failed],
-    color: 'error',
+    color: 'danger',
   },
 ] as const
 

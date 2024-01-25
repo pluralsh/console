@@ -7,15 +7,27 @@ import {
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
+import {
+  ComponentProps,
+  Key,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Row } from '@tanstack/react-table'
 import { VirtualItem } from '@tanstack/react-virtual'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
 import { useDebounce } from '@react-hooks-library/core'
+import { isEmpty } from 'lodash'
 
-import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
+import {
+  ClustersRowFragment,
+  Conjunction,
+  useClustersQuery,
+} from 'generated/graphql'
 
 import {
   CD_REL_PATH,
@@ -25,6 +37,8 @@ import {
 } from 'routes/cdRoutesConsts'
 
 import { Edge, extendConnection } from 'utils/graphql'
+import { keyToTag } from 'utils/clusterTags'
+import usePersistedState from 'components/hooks/usePersistedState'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { GqlError } from 'components/utils/Alert'
@@ -93,7 +107,7 @@ export default function Clusters() {
   const debouncedSearchString = useDebounce(searchString, 100)
   const tabStateRef = useRef<any>(null)
   const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
-
+  const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
   const [virtualSlice, setVirtualSlice] = useState<
     | {
         start: VirtualItem | undefined
@@ -101,11 +115,24 @@ export default function Clusters() {
       }
     | undefined
   >()
+  const searchTags = useMemo(
+    () =>
+      Array.from(selectedTagKeys.values(), (tagKey) => keyToTag(`${tagKey}`)),
+    [selectedTagKeys]
+  )
+
+  const [tagOp, setTagOp] = usePersistedState(
+    'tag-search-operator',
+    Conjunction.Or
+  )
 
   const queryResult = useClustersQuery({
     variables: {
       q: debouncedSearchString,
       first: CLUSTERS_QUERY_PAGE_SIZE,
+      ...(!isEmpty(searchTags)
+        ? { tagQuery: { op: tagOp, tags: searchTags } }
+        : {}),
       ...(statusFilter !== 'ALL'
         ? { healthy: statusFilter === 'HEALTHY' }
         : {}),
@@ -218,6 +245,10 @@ export default function Clusters() {
             setSearchString={setSearchString}
             tabStateRef={tabStateRef}
             statusCounts={statusCounts}
+            selectedTagKeys={selectedTagKeys}
+            setSelectedTagKeys={setSelectedTagKeys}
+            tagOp={tagOp}
+            setTagOp={setTagOp}
           />
           <TabPanel
             stateRef={tabStateRef}

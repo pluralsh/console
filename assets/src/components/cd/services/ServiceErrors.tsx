@@ -18,7 +18,7 @@ export function ServiceErrorsChip({
   return (
     <Tooltip label="View errors">
       <Chip
-        severity="error"
+        severity="danger"
         icon={<ErrorIcon />}
         {...props}
       >

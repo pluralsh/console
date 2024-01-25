@@ -1,8 +1,12 @@
 import styled from 'styled-components'
-import { Card, CardProps, useFillLevel } from '@pluralsh/design-system'
+import {
+  Card,
+  CardProps,
+  FillLevel,
+  useFillLevel,
+} from '@pluralsh/design-system'
 import { ComponentProps, ReactNode, forwardRef } from 'react'
 import { Ul } from 'honorable'
-import { FillLevel } from '@pluralsh/design-system/dist/components/contexts/FillLevelContext'
 
 type Hue = Required<CardProps>['hue']
 

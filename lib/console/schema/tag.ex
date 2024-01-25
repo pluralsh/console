@@ -22,7 +22,7 @@ defmodule Console.Schema.Tag do
     tags = Enum.map(tags, fn %{name: n, value: v} -> "#{n}:#{v}" end)
     from(t in query,
       group_by: field(t, ^column),
-      having: fragment("array_agg(? || ':' || ?) <@ ?", t.name, t.value, ^tags)
+      having: fragment("array_agg(? || ':' || ?) @> ?", t.name, t.value, ^tags)
     )
     |> do_select(column)
   end
