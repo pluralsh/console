@@ -10,8 +10,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   }
 
   def resolve_scm_connection(%{id: id}, _), do: {:ok, Git.get_scm_connection(id)}
+  def resolve_scm_connection(%{name: name}, _), do: {:ok, Git.get_scm_connection_by_name(name)}
 
   def resolve_pr_automation(%{id: id}, _), do: {:ok, Git.get_pr_automation(id)}
+  def resolve_pr_automation(%{name: name}, _), do: {:ok, Git.get_pr_automation_by_name(name)}
 
   def resolve_git(%{id: id}, %{context: %{current_user: user}}) when is_binary(id) do
     Git.get_repository(id)

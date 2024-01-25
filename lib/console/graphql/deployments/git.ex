@@ -301,7 +301,8 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :scm_connection, :scm_connection do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,   :id
+      arg :name, :string
 
       resolve &Deployments.resolve_scm_connection/2
     end
@@ -314,7 +315,8 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :pr_automation, :pr_automation do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,   :id
+      arg :name, :string
 
       resolve &Deployments.resolve_pr_automation/2
     end

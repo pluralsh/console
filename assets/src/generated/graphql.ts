@@ -3858,7 +3858,8 @@ export type RootQueryTypePostgresDatabaseArgs = {
 
 
 export type RootQueryTypePrAutomationArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3942,7 +3943,8 @@ export type RootQueryTypeScalingRecommendationArgs = {
 
 
 export type RootQueryTypeScmConnectionArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
