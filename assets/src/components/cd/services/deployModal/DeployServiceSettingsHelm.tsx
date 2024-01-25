@@ -102,15 +102,7 @@ export function ChartForm({ charts, chart, version, setChart, setVersion }) {
         setVersion('')
       }
     }
-  }, [
-    chart,
-    charts,
-    charts.length,
-    selectedChart?.versions,
-    setChart,
-    setVersion,
-    version,
-  ])
+  }, [chart, charts, selectedChart?.versions, setChart, setVersion, version])
 
   if (isEmpty(charts)) {
     return (
