@@ -66,7 +66,7 @@ type ServiceSpec struct {
 	Helm *ServiceHelm `json:"helm,omitempty"`
 	// +optional
 	SyncConfig *SyncConfigAttributes `json:"syncConfig,omitempty"`
-	// +kubebuilder:validation:Required
+	// +optional
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Repository is immutable"
 	RepositoryRef corev1.ObjectReference `json:"repositoryRef"`
 	// +kubebuilder:validation:Required

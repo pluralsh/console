@@ -348,7 +348,6 @@ spec:
                 type: string
             required:
             - clusterRef
-            - repositoryRef
             type: object
           status:
             properties:
