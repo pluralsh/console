@@ -7,6 +7,8 @@ import {
   ReactElement,
   ReactNode,
   useCallback,
+  useEffect,
+  useRef,
   useState,
 } from 'react'
 import styled, { DefaultTheme, StyledComponent } from 'styled-components'
@@ -57,10 +59,17 @@ function TooltipTime({
   ...props
 }: MultiProps | SingleProps) {
   const [copied, setCopied] = useState(false)
-  const clearCopied = useCallback(() => setCopied(false), [])
   const dateArr = isArray(date) ? date : [date]
   const prefixArr = isArray(prefix) ? prefix : [prefix]
   const suffixArr = isArray(suffix) ? suffix : [suffix]
+  const timeoutRef = useRef<number>()
+
+  useEffect(
+    () => () => {
+      clearTimeout(timeoutRef.current)
+    },
+    []
+  )
 
   return (
     <Tooltip
@@ -69,7 +78,7 @@ function TooltipTime({
           {startContent}
           <div>
             {dateArr.map((d, i) => (
-              <TimeSC>
+              <TimeSC key={`${d}/${i}`}>
                 <div>{prefixArr[i]}</div>
                 <div>
                   <TabularNumbers>
@@ -97,7 +106,11 @@ function TooltipTime({
           e.stopPropagation()
           window.navigator?.clipboard?.writeText?.(dateArr.join('\n'))
           setCopied(true)
-          setTimeout(clearCopied, 1500)
+          window.clearTimeout(timeoutRef.current)
+          timeoutRef.current = window.setTimeout(() => {
+            console.log('setCopied', setCopied)
+            setCopied?.(false)
+          }, 1500)
           onClick?.(e)
         }}
         {...props}
