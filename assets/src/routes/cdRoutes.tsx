@@ -21,6 +21,7 @@ import ServiceComponent from 'components/cd/services/component/ServiceComponent'
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
 import ServiceDocs from 'components/cd/services/service/ServiceDocs'
 import ServiceComponents from 'components/cd/services/service/ServiceComponents'
+import ServiceErrors from 'components/cd/services/service/ServiceErrors'
 import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
 import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
 import ServiceSettings from 'components/cd/services/service/ServiceSettings'
@@ -383,6 +384,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceComponents />}
       path={SERVICE_COMPONENTS_PATH}
+    />
+    <Route
+      element={<ServiceErrors />}
+      path="errors"
     />
     <Route
       element={<ServiceSecrets />}

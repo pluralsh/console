@@ -132,7 +132,7 @@ export const ColAge = columnHelper.accessor(
         <TableText>
           <TooltipTime
             date={original.metadata.creationTimestamp}
-            prefix="Created: "
+            prefix={<>Created:&nbsp;</>}
           >
             {age}
           </TooltipTime>

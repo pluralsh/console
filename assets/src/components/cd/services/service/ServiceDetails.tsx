@@ -1,28 +1,29 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import {
   Outlet,
   useLocation,
   useOutletContext,
   useParams,
 } from 'react-router-dom'
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import styled, { useTheme } from 'styled-components'
+import { Chip } from '@pluralsh/design-system'
+import capitalize from 'lodash/capitalize'
+import isEmpty from 'lodash/isEmpty'
+
 import {
   ServiceDeploymentDetailsFragment,
   useServiceDeploymentQuery,
   useServiceDeploymentsTinyQuery,
 } from 'generated/graphql'
-import { GqlError } from 'components/utils/Alert'
-import capitalize from 'lodash/capitalize'
-import { useTheme } from 'styled-components'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import isEmpty from 'lodash/isEmpty'
-
 import { mapExistingNodes } from 'utils/graphql'
 
+import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
+import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { GqlError } from 'components/utils/Alert'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   DocPageContextProvider,
   useDocPageContext,
@@ -35,10 +36,8 @@ import {
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import ComponentProgress from 'components/apps/app/components/ComponentProgress'
-import { SideNavEntries } from 'components/layout/SideNavEntries'
-
+import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
-
 import { POLL_INTERVAL } from 'components/cluster/constants'
 
 import ServiceSelector from '../ServiceSelector'
@@ -73,13 +72,30 @@ export const getServiceDetailsBreadcrumbs = ({
     : []),
 ]
 
+const ErrorsLabelSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  columnGap: theme.spacing.small,
+}))
+
+const ErrorsLabel = memo(({ count }: { count: Nullable<number> }) => (
+  <ErrorsLabelSC>
+    Errors
+    <Chip
+      size="small"
+      severity={(count || 0) > 0 ? 'danger' : 'success'}
+    >
+      {count || 0}
+    </Chip>
+  </ErrorsLabelSC>
+))
+
 export const getDirectory = ({
   serviceDeployment,
   docs = null,
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
   docs?: ReturnType<typeof getDocsData> | null
-}) => {
+}): Directory => {
   if (!serviceDeployment) {
     return []
   }
@@ -89,6 +105,11 @@ export const getDirectory = ({
     {
       path: 'components',
       label: <ComponentProgress componentsReady={componentStatus} />,
+      enabled: true,
+    },
+    {
+      path: 'errors',
+      label: <ErrorsLabel count={serviceDeployment.errors?.length} />,
       enabled: true,
     },
     { path: 'settings', label: 'Settings', enabled: true },
@@ -142,7 +163,7 @@ function ServiceDetailsBase() {
       getDirectory({
         serviceDeployment,
         docs,
-      }).filter((entry) => entry.enabled),
+      }),
     [docs, serviceDeployment]
   )
 
