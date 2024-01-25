@@ -7144,7 +7144,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/coverage-v8@npm:^1.2.1":
+"@vitest/coverage-v8@npm:1.2.1":
   version: 1.2.1
   resolution: "@vitest/coverage-v8@npm:1.2.1"
   dependencies:
@@ -9112,7 +9112,7 @@ __metadata:
     "@typescript-eslint/parser": 6.15.0
     "@vitejs/plugin-basic-ssl": 1.0.2
     "@vitejs/plugin-react": 4.2.1
-    "@vitest/coverage-v8": ^1.2.1
+    "@vitest/coverage-v8": 1.2.1
     "@vitest/ui": 1.1.0
     anser: 2.1.1
     apollo-absinthe-upload-link: 1.7.0
