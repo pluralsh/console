@@ -85,27 +85,29 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}
 
 	repository := &v1alpha1.GitRepository{}
-	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-		return ctrl.Result{}, err
-	}
-	if !repository.DeletionTimestamp.IsZero() {
-		logger.Info("deleting service after repository deletion")
-		if err := r.Delete(ctx, service); err != nil {
+	if service.Spec.RepositoryRef != nil {
+		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
-		return requeue, nil
-	}
+		if !repository.DeletionTimestamp.IsZero() {
+			logger.Info("deleting service after repository deletion")
+			if err := r.Delete(ctx, service); err != nil {
+				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+				return ctrl.Result{}, err
+			}
+			return requeue, nil
+		}
 
-	if repository.Status.ID == nil {
-		logger.Info("Repository is not ready")
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-		return requeue, nil
-	}
-	if repository.Status.Health == v1alpha1.GitHealthFailed {
-		logger.Info("Repository is not healthy")
-		return requeue, nil
+		if repository.Status.ID == nil {
+			logger.Info("Repository is not ready")
+			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
+			return requeue, nil
+		}
+		if repository.Status.Health == v1alpha1.GitHealthFailed {
+			logger.Info("Repository is not healthy")
+			return requeue, nil
+		}
 	}
 
 	attr, err := r.genServiceAttributes(ctx, service, repository.Status.ID)

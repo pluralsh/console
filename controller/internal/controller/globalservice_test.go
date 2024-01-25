@@ -7,9 +7,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/internal/test/mocks"
-	"github.com/pluralsh/console/controller/internal/test/utils"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
@@ -17,6 +14,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/test/mocks"
+	"github.com/pluralsh/console/controller/internal/test/utils"
 )
 
 func sanitizeGlobalServiceConditions(status v1alpha1.GlobalServiceStatus) v1alpha1.GlobalServiceStatus {
@@ -64,7 +65,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 					Spec: v1alpha1.ServiceSpec{
 						Version:       lo.ToPtr("1.24"),
 						ClusterRef:    corev1.ObjectReference{Name: clusterName, Namespace: namespace},
-						RepositoryRef: corev1.ObjectReference{Name: repoName, Namespace: namespace},
+						RepositoryRef: &corev1.ObjectReference{Name: repoName, Namespace: namespace},
 					},
 				}
 				Expect(utils.MaybeCreate(k8sClient, resource, func(p *v1alpha1.ServiceDeployment) {

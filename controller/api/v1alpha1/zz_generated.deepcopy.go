@@ -1435,7 +1435,11 @@ func (in *ServiceSpec) DeepCopyInto(out *ServiceSpec) {
 		*out = new(SyncConfigAttributes)
 		(*in).DeepCopyInto(*out)
 	}
-	out.RepositoryRef = in.RepositoryRef
+	if in.RepositoryRef != nil {
+		in, out := &in.RepositoryRef, &out.RepositoryRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
 	out.ClusterRef = in.ClusterRef
 	if in.ConfigurationRef != nil {
 		in, out := &in.ConfigurationRef, &out.ConfigurationRef
