@@ -140,6 +140,7 @@
     "@graphql-codegen/typescript-react-apollo": "4.1.0",
     "@pluralsh/eslint-config-typescript": "2.5.150",
     "@pluralsh/stylelint-config": "2.0.10",
+    "@testing-library/react-hooks": "8.0.1",
     "@types/humanize-duration": "3.27.4",
     "@types/jsdom": "21.1.5",
     "@types/styled-components": "5.1.30",
@@ -176,7 +177,7 @@
     "vite-plugin-pwa": "0.17.4",
     "vite-plugin-rewrite-all": "1.0.1",
     "vite-tsconfig-paths": "4.2.2",
-    "vitest": "1.1.0",
+    "vitest": "1.2.1",
     "wait-on": "7.0.1"
   },
   "lint-staged": {
