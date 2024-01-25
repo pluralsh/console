@@ -79,9 +79,6 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
-                x-kubernetes-validations:
-                - message: Provider is immutable
-                  rule: self == oldSelf
               serviceRef:
                 description: ServiceRef to replicate across clusters
                 properties:
