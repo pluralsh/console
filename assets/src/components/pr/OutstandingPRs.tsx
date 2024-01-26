@@ -1,9 +1,22 @@
-import { ComponentProps, useMemo } from 'react'
-import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { SearchIcon, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
+import Input2 from '@pluralsh/design-system/dist/components/Input2'
+import { VirtualItem } from '@tanstack/react-virtual'
+
+import { usePullRequestsQuery } from 'generated/graphql'
+import { extendConnection } from 'utils/graphql'
 
 import { PR_BASE_CRUMBS, PR_OUTSTANDING_ABS_PATH } from 'routes/prRoutesConsts'
 
-export const columns = []
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import { useThrottle } from 'components/hooks/useThrottle'
+import { useSlicePolling } from 'components/utils/tableFetchHelpers'
+
+import { GqlError } from 'components/utils/Alert'
+
+import { columns } from './PullRequestsColumns'
+import { POLL_INTERVAL } from './PullRequestsQueue'
 
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -11,10 +24,23 @@ export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-export const SERVICES_QUERY_PAGE_SIZE = 100
+export const PR_QUERY_PAGE_SIZE = 100
+const PR_STATUS_TAB_KEYS = ['ALL', 'OPEN', 'CLOSED'] as const
 
-export default function Services() {
-  // const theme = useTheme()
+type PrStatusTabKey = (typeof PR_STATUS_TAB_KEYS)[number]
+
+export default function OutstandingPrs() {
+  const theme = useTheme()
+  const [searchString, setSearchString] = useState('')
+  const _debouncedSearchString = useThrottle(searchString, 100)
+  const [_statusFilter, _setStatusFilter] = useState<PrStatusTabKey>('ALL')
+  const [virtualSlice, _setVirtualSlice] = useState<
+    | {
+        start: VirtualItem | undefined
+        end: VirtualItem | undefined
+      }
+    | undefined
+  >()
 
   useSetBreadcrumbs(
     useMemo(
@@ -29,11 +55,88 @@ export default function Services() {
     )
   )
 
+  const queryResult = usePullRequestsQuery({
+    variables: {
+      first: PR_QUERY_PAGE_SIZE,
+    },
+    fetchPolicy: 'cache-and-network',
+    // Important so loading will be updated on fetchMore to send to Table
+    notifyOnNetworkStatusChange: true,
+  })
+  const {
+    error,
+    fetchMore,
+    loading,
+    data: currentData,
+    previousData,
+  } = queryResult
+  const data = currentData || previousData
+  const pullRequests = data?.pullRequests
+  const pageInfo = pullRequests?.pageInfo
+  const { refetch: _ } = useSlicePolling(queryResult, {
+    virtualSlice,
+    pageSize: PR_QUERY_PAGE_SIZE,
+    key: 'pullRequests',
+    interval: POLL_INTERVAL,
+  })
+  const fetchNextPage = useCallback(() => {
+    if (!pageInfo?.endCursor) {
+      return
+    }
+    fetchMore({
+      variables: { after: pageInfo.endCursor },
+      updateQuery: (prev, { fetchMoreResult }) =>
+        extendConnection(prev, fetchMoreResult.pullRequests, 'pullRequests'),
+    })
+  }, [fetchMore, pageInfo?.endCursor])
+
+  if (error) {
+    return <GqlError error={error} />
+  }
+
   return (
-    <Table
-      columns={[]}
-      reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
-      data={[]}
-    />
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.small,
+        height: '100%',
+      }}
+    >
+      <div css={{ display: 'flex', minWidth: 0, gap: theme.spacing.medium }}>
+        <Input2
+          startIcon={<SearchIcon size={undefined} />}
+          showClearButton
+          value={searchString}
+          onChange={(e) => setSearchString(e.currentTarget.value)}
+          css={{ flexGrow: 1 }}
+        />
+        <div
+          css={{
+            display: 'flex',
+            minWidth: 0,
+            gap: theme.spacing.medium,
+            alignItems: 'center',
+          }}
+        >
+          tabs
+        </div>
+      </div>
+      <FullHeightTableWrap>
+        <Table
+          columns={columns}
+          reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+          data={data?.pullRequests?.edges || []}
+          virtualizeRows
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          css={{
+            maxHeight: 'unset',
+            height: '100%',
+          }}
+        />
+      </FullHeightTableWrap>
+    </div>
   )
 }

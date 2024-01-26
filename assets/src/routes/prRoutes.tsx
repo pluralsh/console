@@ -4,8 +4,9 @@ import { Navigate } from 'react-router-dom'
 
 import { DeploymentSettingsFragment } from 'generated/graphql'
 
-import PRQueue from 'components/pr/PRQueue'
-import OutstandingPRs from 'components/pr/OutstandingPRs'
+import PRQueue from 'components/pr/PullRequestsQueue'
+import OutstandingPrs from 'components/pr/OutstandingPrs'
+
 import DependencyDashboard from 'components/pr/DependencyDashboard'
 
 import {
@@ -40,7 +41,7 @@ export const prRoutes = [
         children: [
           {
             path: PR_OUTSTANDING_REL_PATH,
-            Component: OutstandingPRs,
+            Component: OutstandingPrs,
           },
           {
             path: PR_DEPENDENCIES_REL_PATH,

@@ -5679,7 +5679,7 @@ export type DeleteClusterProviderMutation = { __typename?: 'RootMutationType', d
 
 export type PrAutomationFragment = { __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null };
 
-export type PullRequestFragment = { __typename?: 'PullRequest', id: string, url: string, insertedAt?: string | null };
+export type PullRequestFragment = { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null };
 
 export type CreatePullRequestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5688,7 +5688,17 @@ export type CreatePullRequestMutationVariables = Exact<{
 }>;
 
 
-export type CreatePullRequestMutation = { __typename?: 'RootMutationType', createPullRequest?: { __typename?: 'PullRequest', id: string, url: string, insertedAt?: string | null } | null };
+export type CreatePullRequestMutation = { __typename?: 'RootMutationType', createPullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null };
+
+export type PullRequestsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type PullRequestsQuery = { __typename?: 'RootQueryType', pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null };
 
 export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null } | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null };
 
@@ -6942,8 +6952,19 @@ export const ClusterProviderFragmentDoc = gql`
 export const PullRequestFragmentDoc = gql`
     fragment PullRequest on PullRequest {
   id
+  service {
+    id
+    name
+  }
+  cluster {
+    id
+    name
+  }
+  title
   url
+  labels
   insertedAt
+  updatedAt
 }
     `;
 export const ServiceDeploymentsRowFragmentDoc = gql`
@@ -9374,6 +9395,62 @@ export function useCreatePullRequestMutation(baseOptions?: Apollo.MutationHookOp
 export type CreatePullRequestMutationHookResult = ReturnType<typeof useCreatePullRequestMutation>;
 export type CreatePullRequestMutationResult = Apollo.MutationResult<CreatePullRequestMutation>;
 export type CreatePullRequestMutationOptions = Apollo.BaseMutationOptions<CreatePullRequestMutation, CreatePullRequestMutationVariables>;
+export const PullRequestsDocument = gql`
+    query PullRequests($first: Int = 100, $after: String, $clusterId: ID, $serviceId: ID) {
+  pullRequests(
+    first: $first
+    after: $after
+    clusterId: $clusterId
+    serviceId: $serviceId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...PullRequest
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${PullRequestFragmentDoc}`;
+
+/**
+ * __usePullRequestsQuery__
+ *
+ * To run a query within a React component, call `usePullRequestsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePullRequestsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePullRequestsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      clusterId: // value for 'clusterId'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function usePullRequestsQuery(baseOptions?: Apollo.QueryHookOptions<PullRequestsQuery, PullRequestsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PullRequestsQuery, PullRequestsQueryVariables>(PullRequestsDocument, options);
+      }
+export function usePullRequestsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PullRequestsQuery, PullRequestsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PullRequestsQuery, PullRequestsQueryVariables>(PullRequestsDocument, options);
+        }
+export function usePullRequestsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PullRequestsQuery, PullRequestsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PullRequestsQuery, PullRequestsQueryVariables>(PullRequestsDocument, options);
+        }
+export type PullRequestsQueryHookResult = ReturnType<typeof usePullRequestsQuery>;
+export type PullRequestsLazyQueryHookResult = ReturnType<typeof usePullRequestsLazyQuery>;
+export type PullRequestsSuspenseQueryHookResult = ReturnType<typeof usePullRequestsSuspenseQuery>;
+export type PullRequestsQueryResult = Apollo.QueryResult<PullRequestsQuery, PullRequestsQueryVariables>;
 export const ServiceDeploymentsDocument = gql`
     query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID, $status: ServiceDeploymentStatus) {
   serviceDeployments(
@@ -11530,6 +11607,7 @@ export const namedOperations = {
     Pipelines: 'Pipelines',
     Pipeline: 'Pipeline',
     ClusterProviders: 'ClusterProviders',
+    PullRequests: 'PullRequests',
     ServiceDeployments: 'ServiceDeployments',
     ServiceDeploymentsTiny: 'ServiceDeploymentsTiny',
     ServiceDeployment: 'ServiceDeployment',

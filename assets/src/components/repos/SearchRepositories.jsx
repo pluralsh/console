@@ -75,10 +75,7 @@ export function SearchRepos({ setOpen, setRepo }) {
         >
           <TextInput
             icon={
-              <SearchIcon
-                size={16}
-                border="tone-medium"
-              />
+<div>hi</div>
             }
             reverse
             value={query}
