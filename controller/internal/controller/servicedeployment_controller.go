@@ -116,7 +116,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return ctrl.Result{}, err
 	}
 
-	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
+	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.GetName())
 	if err != nil && !errors.IsNotFound(err) {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
@@ -128,7 +128,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
-		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
+		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.GetName())
 		if err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
@@ -284,7 +284,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			}
 		}
 		if service.Spec.Helm.ValuesRef != nil {
-			val, err := utils.GetConfigMapData(ctx, r.Client, service.Namespace, service.Spec.Helm.ValuesRef)
+			val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesRef)
 			if err != nil {
 				return nil, err
 			}
@@ -338,7 +338,7 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 
 	if service.Spec.Helm != nil && service.Spec.Helm.ValuesRef != nil {
 		configMap := &corev1.ConfigMap{}
-		name := types.NamespacedName{Name: service.Spec.Helm.ValuesRef.Name, Namespace: service.Namespace}
+		name := types.NamespacedName{Name: service.Spec.Helm.ValuesRef.Name, Namespace: service.GetNamespace()}
 		err := r.Get(ctx, name, configMap)
 		if err != nil {
 			return err
@@ -356,7 +356,7 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 	log := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 		log.Info("try to delete service")
-		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
+		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.GetName())
 		if err != nil && !errors.IsNotFound(err) {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
