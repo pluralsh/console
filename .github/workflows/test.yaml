@@ -8,7 +8,6 @@ jobs:
   bump:
     name: Bump Chart Version
     runs-on: ubuntu-20.04
-    needs: [release]
     permissions:
       contents: write
       discussions: write
