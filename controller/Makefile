@@ -155,7 +155,7 @@ helm: manifests kustomize helmify
 
 .PHONY: chart-crds
 chart-crds:
-	@cp -a config/crd/bases/. ../charts/controller/crds
+	cp -a config/crd/bases/. ../charts/controller/crds
 
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
