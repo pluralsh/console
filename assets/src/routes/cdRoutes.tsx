@@ -78,8 +78,7 @@ import ComponentDryRun from '../components/component/ComponentDryRun'
 
 import {
   ADDONS_REL_PATH,
-  CD_ABS_PATH,
-  CD_DEFAULT_REL_PATH,
+  CD_DEFAULT_ABS_PATH,
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
   CLUSTER_ADDONS_PARAM_ID,
@@ -139,8 +138,6 @@ export const componentRoutes = (
   </Route>
 )
 
-const defaultLocation = `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}` as const
-
 const CDContext = createContext<{
   deploymentSettings?: DeploymentSettingsFragment | undefined | null
 }>({})
@@ -151,7 +148,7 @@ export function useDeploymentSettings() {
   return ctx?.deploymentSettings
 }
 
-function CdRoot() {
+export function CdRoot() {
   const { data } = useDeploymentSettingsQuery({
     pollInterval: POLL_INTERVAL,
   })
@@ -160,8 +157,8 @@ function CdRoot() {
   const location = useLocation()
 
   useLayoutEffect(() => {
-    if (!cdIsEnabled && location.pathname !== defaultLocation) {
-      navigate(defaultLocation)
+    if (!cdIsEnabled && location.pathname !== CD_DEFAULT_ABS_PATH) {
+      navigate(CD_DEFAULT_ABS_PATH)
     }
   }, [cdIsEnabled, location.pathname, navigate])
   const providerValue = useMemo(

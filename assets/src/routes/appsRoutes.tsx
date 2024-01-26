@@ -10,7 +10,7 @@ import Uninstall from 'components/apps/app/uninstall/Uninstall'
 
 import AppComponents from 'components/apps/app/components/AppComponents'
 
-import AddOns from '../components/apps/Apps'
+import Apps from '../components/apps/Apps'
 import App from '../components/apps/app/App'
 import Dashboards from '../components/apps/app/dashboards/Dashboards'
 import Runbooks from '../components/apps/app/runbooks/Runbooks'
@@ -26,10 +26,6 @@ import ComponentEvents from '../components/component/ComponentEvents'
 import ComponentRaw from '../components/component/ComponentRaw'
 
 export const appsRoutes = [
-  <Route
-    index
-    element={<AddOns />}
-  />,
   <Route
     path="apps/:appName"
     element={<App />}
