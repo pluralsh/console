@@ -3,6 +3,9 @@ export { Avatar, Menu, MenuItem } from 'honorable'
 // Icons
 export * from './icons'
 
+// PluralLogos
+export * from './plural-logos'
+
 // Components
 export { default as Accordion } from './components/Accordion'
 export { default as Banner } from './components/Banner'

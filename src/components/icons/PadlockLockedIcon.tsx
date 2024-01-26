@@ -1,6 +1,6 @@
 import createIcon from './createIcon'
 
-export default createIcon(({ size, color }) => (
+export default createIcon(({ size, color, secondaryColor = 'transparent' }) => (
   <svg
     width={size}
     height={size}
@@ -8,6 +8,15 @@ export default createIcon(({ size, color }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
+    <rect
+      x="3"
+      y="7.5"
+      width="10"
+      height="7"
+      rx={1}
+      ry={1}
+      fill={secondaryColor}
+    />
     <g clipPath="url(#clip0_1441_510)">
       <path
         d="M4.6001 10.0998V2.1998C4.6001 1.3998 5.2001 0.799805 6.0001 0.799805H10.0001C10.8001 0.799805 11.4001 1.3998 11.4001 2.1998V9.9998"

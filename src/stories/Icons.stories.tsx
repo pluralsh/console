@@ -2,6 +2,7 @@ import styled, { useTheme } from 'styled-components'
 import { createElement } from 'react'
 
 import * as icons from '../icons'
+import * as logos from '../plural-logos'
 
 export default {
   title: 'Icons',
@@ -110,6 +111,62 @@ function Template({ backgroundColor, color, secondaryColor, ...args }: any) {
   )
 }
 
+function LogosTemplate({
+  backgroundColor,
+  color,
+  secondaryColor,
+  ...args
+}: any) {
+  const theme = useTheme()
+  const bgColor =
+    (typeof (theme.colors as any)[backgroundColor] === 'string' &&
+      (theme.colors as any)[backgroundColor]) ||
+    backgroundColor
+
+  // @ts-ignore
+  color = theme.colors[color] ?? (color || undefined)
+  secondaryColor =
+    // @ts-ignore
+    theme.colors[secondaryColor as string] ?? (secondaryColor || undefined)
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.medium,
+        flexWrap: 'wrap',
+        maxWidth: '100%',
+      }}
+    >
+      {Object.entries(logos).map(([name, icon]) => (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.small,
+            padding: theme.spacing.small,
+            backgroundColor: bgColor,
+            border: theme.borders.default,
+            borderRadius: theme.borderRadiuses.medium,
+          }}
+        >
+          <div style={{ justifySelf: 'flex-end' }}>
+            {createElement(icon as any, { color, secondaryColor, ...args })}
+          </div>
+          <span
+            dangerouslySetInnerHTML={{
+              __html: name
+                .replace('Icon', '')
+                .replaceAll(/([a-z])([A-Z])/g, '$1&shy;$2'),
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export const Default = Template.bind({})
 Default.args = {
   color: 'icon-default',
@@ -152,6 +209,14 @@ Color.args = {
 
 export const FullColor = Template.bind({})
 FullColor.args = {
+  color: 'icon-default',
+  fullColor: true,
+  size: 32,
+  backgroundColor: 'transparent',
+}
+
+export const PluralLogos = LogosTemplate.bind({})
+PluralLogos.args = {
   color: 'icon-default',
   fullColor: true,
   size: 32,

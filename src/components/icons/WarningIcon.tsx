@@ -2,7 +2,7 @@ import { useId } from 'react'
 
 import createIcon from './createIcon'
 
-export default createIcon(({ size, color }) => {
+export default createIcon(({ size, color, secondaryColor = 'transparent' }) => {
   const id1 = useId()
 
   return (
@@ -12,6 +12,15 @@ export default createIcon(({ size, color }) => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
+      <rect
+        x="7"
+        y="3"
+        width="2"
+        height="11"
+        rx={0.5}
+        ry={0.5}
+        fill={secondaryColor}
+      />
       <clipPath id={id1}>
         <path d="m.95459.306h16v16h-16z" />
       </clipPath>
