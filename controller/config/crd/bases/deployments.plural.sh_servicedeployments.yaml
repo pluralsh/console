@@ -73,6 +73,9 @@ spec:
                       type: object
                     type: array
                 type: object
+                x-kubernetes-validations:
+                - message: Bindings are immutable
+                  rule: self == oldSelf
               clusterRef:
                 description: "ObjectReference contains enough information to let you
                   inspect or modify the referred object. --- New uses of this type
