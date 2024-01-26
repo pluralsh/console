@@ -443,6 +443,25 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
     end
   end
 
+  describe "detachServiceDeployment" do
+    test "it can mark a cluster for deletion" do
+      user = insert(:user)
+      service = insert(:service, write_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"detachServiceDeployment" => deleted}}} = run_query("""
+        mutation Delete($id: ID!) {
+          detachServiceDeployment(id: $id) {
+            id
+            deletedAt
+          }
+        }
+      """, %{"id" => service.id}, %{current_user: user})
+
+      assert deleted["id"] == service.id
+      refute refetch(service)
+    end
+  end
+
   describe "updateServiceComponents" do
     test "it will post updates to the components of the service in a cluster" do
       cluster = insert(:cluster)

@@ -388,6 +388,14 @@ defmodule Console.GraphQl.Deployments.Service do
       safe_resolve &Deployments.delete_service/2
     end
 
+    @desc "removes a service from storage, but bypasses waiting for the agent to fully drain it from its hosting cluster"
+    field :detach_service_deployment, :service_deployment do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.detach_service/2
+    end
+
     @desc "merges configuration for a service"
     field :merge_service, :service_deployment do
       middleware Authenticated
