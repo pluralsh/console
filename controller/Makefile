@@ -32,7 +32,7 @@ SHELL = /usr/bin/env bash -o pipefail
 
 # Validate required env variables
 ifndef GOPATH
-$(error $$GOPATH environment variable not set)
+$(warning $$GOPATH environment variable not set)
 endif
 
 ifndef PLURAL_CONSOLE_TOKEN
@@ -40,7 +40,7 @@ $(warning $$PLURAL_CONSOLE_TOKEN environment variable not set. Deploy will not w
 endif
 
 ifeq (,$(findstring $(GOPATH)/bin,$(PATH)))
-$(error $$GOPATH/bin directory is not in your $$PATH)
+$(warning $$GOPATH/bin directory is not in your $$PATH)
 endif
 
 .PHONY: all
