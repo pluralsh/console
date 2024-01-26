@@ -1,0 +1,120 @@
+name: CI / Console
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ '*' ]
+jobs:
+  build:
+    name: Test Build Docker image
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            ghcr.io/pluralsh/console
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=sha
+            type=ref,event=pr
+            type=ref,event=branch
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test Build console image
+        uses: docker/build-push-action@v3
+        with:
+          context: "."
+          file: "./Dockerfile"
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: GIT_COMMIT=${{ github.sha }}
+  test:
+    name: Test
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+          version-type: strict
+      - uses: azure/setup-helm@v3
+        with:
+          version: latest
+      - run: make testup
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-2-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-2
+      - name: Restore _build
+        uses: actions/cache@v3
+        with:
+          path: _build
+          key: ${{ runner.os }}-mix-2-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-2
+      - run: mix deps.get
+      - run: mix test
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: workflow,job,repo,message,commit,author
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }} # required
+        if: always()
+  updateSchema:
+    name: Check that Schema is up to date
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+          version-type: strict
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-2-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-2
+      - name: Restore _build
+        uses: actions/cache@v3
+        with:
+          path: _build
+          key: ${{ runner.os }}-mix-2-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-2
+      - name: get dependencies
+        run: mix deps.get
+      - name: update schema
+        run: MIX_ENV=test mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
+      - name: Verify Changed files
+        uses: tj-actions/verify-changed-files@v17
+        id: verify-changed-files
+        with:
+          files: |
+            schema/schema.graphql
+      - name: Schema changed
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: |
+          echo "::error Schema has changed changed. Please run 'make update-schema' and commit the changes."
+          exit 1
