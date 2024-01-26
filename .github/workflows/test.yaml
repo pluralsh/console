@@ -19,4 +19,5 @@ jobs:
         persist-credentials: false
         fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
     - name: update controller crds
+      working-directory: controller
       run: make chart-crds
