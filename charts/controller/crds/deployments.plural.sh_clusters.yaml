@@ -52,7 +52,11 @@ spec:
                           type: string
                         groupID:
                           type: string
+                        groupName:
+                          type: string
                         id:
+                          type: string
+                        userEmail:
                           type: string
                       type: object
                     type: array
@@ -64,14 +68,15 @@ spec:
                           type: string
                         groupID:
                           type: string
+                        groupName:
+                          type: string
                         id:
+                          type: string
+                        userEmail:
                           type: string
                       type: object
                     type: array
                 type: object
-                x-kubernetes-validations:
-                - message: Bindings are immutable
-                  rule: self == oldSelf
               cloud:
                 description: Cloud provider to use for this cluster.
                 enum:

@@ -62,6 +62,8 @@ type ConsoleClient interface {
 	GetPipeline(id string) (*console.PipelineFragment, error)
 	ListPipelines() (*console.GetPipelines, error)
 	IsPipelineExisting(id string) bool
+	GetUser(email string) (*console.UserFragment, error)
+	GetGroup(name string) (*console.GroupFragment, error)
 }
 
 func New(url, token string) ConsoleClient {

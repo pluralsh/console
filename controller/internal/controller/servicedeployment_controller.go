@@ -36,8 +36,8 @@ type ServiceReconciler struct {
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=servicedeployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=servicedeployments/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=servicedeployments/finalizers,verbs=update
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;patch
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;patch
 
 func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
@@ -85,27 +85,35 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}
 
 	repository := &v1alpha1.GitRepository{}
-	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-		return ctrl.Result{}, err
-	}
-	if !repository.DeletionTimestamp.IsZero() {
-		logger.Info("deleting service after repository deletion")
-		if err := r.Delete(ctx, service); err != nil {
+	if service.Spec.RepositoryRef != nil {
+		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
-		return requeue, nil
+		if !repository.DeletionTimestamp.IsZero() {
+			logger.Info("deleting service after repository deletion")
+			if err := r.Delete(ctx, service); err != nil {
+				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+				return ctrl.Result{}, err
+			}
+			return requeue, nil
+		}
+
+		if repository.Status.ID == nil {
+			logger.Info("Repository is not ready")
+			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
+			return requeue, nil
+		}
+		if repository.Status.Health == v1alpha1.GitHealthFailed {
+			logger.Info("Repository is not healthy")
+			return requeue, nil
+		}
 	}
 
-	if repository.Status.ID == nil {
-		logger.Info("Repository is not ready")
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-		return requeue, nil
-	}
-	if repository.Status.Health == v1alpha1.GitHealthFailed {
-		logger.Info("Repository is not healthy")
-		return requeue, nil
+	err = r.ensureService(service)
+	if err != nil {
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		return ctrl.Result{}, err
 	}
 
 	attr, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
@@ -114,7 +122,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return ctrl.Result{}, err
 	}
 
-	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
+	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.GetName())
 	if err != nil && !errors.IsNotFound(err) {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
@@ -126,7 +134,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
-		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
+		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.GetName())
 		if err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
@@ -226,13 +234,9 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
-	namespace := service.Namespace
-	if service.Spec.Namespace != nil {
-		namespace = *service.Spec.Namespace
-	}
 	attr := &console.ServiceDeploymentAttributes{
-		Name:         service.Name,
-		Namespace:    namespace,
+		Name:         service.GetName(),
+		Namespace:    service.GetNamespace(),
 		Version:      service.Spec.Version,
 		DocsPath:     service.Spec.DocsPath,
 		Protect:      &service.Spec.Protect,
@@ -286,7 +290,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			}
 		}
 		if service.Spec.Helm.ValuesRef != nil {
-			val, err := utils.GetConfigMapData(ctx, r.Client, service.Namespace, service.Spec.Helm.ValuesRef)
+			val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesRef)
 			if err != nil {
 				return nil, err
 			}
@@ -340,7 +344,7 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 
 	if service.Spec.Helm != nil && service.Spec.Helm.ValuesRef != nil {
 		configMap := &corev1.ConfigMap{}
-		name := types.NamespacedName{Name: service.Spec.Helm.ValuesRef.Name, Namespace: service.Namespace}
+		name := types.NamespacedName{Name: service.Spec.Helm.ValuesRef.Name, Namespace: service.GetNamespace()}
 		err := r.Get(ctx, name, configMap)
 		if err != nil {
 			return err
@@ -358,7 +362,7 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 	log := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 		log.Info("try to delete service")
-		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
+		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.GetName())
 		if err != nil && !errors.IsNotFound(err) {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
@@ -378,6 +382,28 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 		controllerutil.RemoveFinalizer(service, ServiceFinalizer)
 	}
 	return ctrl.Result{}, nil
+}
+
+// ensureService makes sure that user-friendly input such as userEmail/groupName in
+// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
+func (r *ServiceReconciler) ensureService(service *v1alpha1.ServiceDeployment) error {
+	if service.Spec.Bindings == nil {
+		return nil
+	}
+
+	bindings, err := ensureBindings(service.Spec.Bindings.Read, r.ConsoleClient)
+	if err != nil {
+		return err
+	}
+	service.Spec.Bindings.Read = bindings
+
+	bindings, err = ensureBindings(service.Spec.Bindings.Write, r.ConsoleClient)
+	if err != nil {
+		return err
+	}
+	service.Spec.Bindings.Write = bindings
+
+	return nil
 }
 
 func isServiceReady(components []v1alpha1.ServiceComponent) bool {

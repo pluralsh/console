@@ -261,5 +261,31 @@ func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster,
 	}
 
 	logger.Info(fmt.Sprintf("%s cluster does not exist, creating it", cluster.Name))
+	if err := r.ensureCluster(cluster); err != nil {
+		return nil, err
+	}
+
 	return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
+}
+
+// ensureCluster makes sure that user-friendly input such as userEmail/groupName in
+// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
+func (r *ClusterReconciler) ensureCluster(cluster *v1alpha1.Cluster) error {
+	if cluster.Spec.Bindings == nil {
+		return nil
+	}
+
+	bindings, err := ensureBindings(cluster.Spec.Bindings.Read, r.ConsoleClient)
+	if err != nil {
+		return err
+	}
+	cluster.Spec.Bindings.Read = bindings
+
+	bindings, err = ensureBindings(cluster.Spec.Bindings.Write, r.ConsoleClient)
+	if err != nil {
+		return err
+	}
+	cluster.Spec.Bindings.Write = bindings
+
+	return nil
 }
