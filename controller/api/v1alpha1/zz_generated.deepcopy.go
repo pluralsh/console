@@ -40,8 +40,18 @@ func (in *Binding) DeepCopyInto(out *Binding) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.UserEmail != nil {
+		in, out := &in.UserEmail, &out.UserEmail
+		*out = new(string)
+		**out = **in
+	}
 	if in.GroupID != nil {
 		in, out := &in.GroupID, &out.GroupID
+		*out = new(string)
+		**out = **in
+	}
+	if in.GroupName != nil {
+		in, out := &in.GroupName, &out.GroupName
 		*out = new(string)
 		**out = **in
 	}

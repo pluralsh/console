@@ -52,7 +52,11 @@ spec:
                           type: string
                         groupID:
                           type: string
+                        groupName:
+                          type: string
                         id:
+                          type: string
+                        userEmail:
                           type: string
                       type: object
                     type: array
@@ -64,7 +68,11 @@ spec:
                           type: string
                         groupID:
                           type: string
+                        groupName:
+                          type: string
                         id:
+                          type: string
+                        userEmail:
                           type: string
                       type: object
                     type: array

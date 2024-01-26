@@ -110,6 +110,12 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		}
 	}
 
+	err = r.ensureService(service)
+	if err != nil {
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		return ctrl.Result{}, err
+	}
+
 	attr, err := r.genServiceAttributes(ctx, service, repository.Status.ID)
 	if err != nil {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
@@ -376,6 +382,28 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 		controllerutil.RemoveFinalizer(service, ServiceFinalizer)
 	}
 	return ctrl.Result{}, nil
+}
+
+// ensureService makes sure that user-friendly input such as userEmail/groupName in
+// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
+func (r *ServiceReconciler) ensureService(service *v1alpha1.ServiceDeployment) error {
+	if service.Spec.Bindings == nil {
+		return nil
+	}
+
+	bindings, err := ensureBindings(service.Spec.Bindings.Read, r.ConsoleClient)
+	if err != nil {
+		return err
+	}
+	service.Spec.Bindings.Read = bindings
+
+	bindings, err = ensureBindings(service.Spec.Bindings.Write, r.ConsoleClient)
+	if err != nil {
+		return err
+	}
+	service.Spec.Bindings.Write = bindings
+
+	return nil
 }
 
 func isServiceReady(components []v1alpha1.ServiceComponent) bool {

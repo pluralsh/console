@@ -828,6 +828,64 @@ func (_c *ConsoleClientMock_GetGlobalService_Call) RunAndReturn(run func(string)
 	return _c
 }
 
+// GetGroup provides a mock function with given fields: name
+func (_m *ConsoleClientMock) GetGroup(name string) (*gqlclient.GroupFragment, error) {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetGroup")
+	}
+
+	var r0 *gqlclient.GroupFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*gqlclient.GroupFragment, error)); ok {
+		return rf(name)
+	}
+	if rf, ok := ret.Get(0).(func(string) *gqlclient.GroupFragment); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.GroupFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetGroup_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetGroup'
+type ConsoleClientMock_GetGroup_Call struct {
+	*mock.Call
+}
+
+// GetGroup is a helper method to define mock.On call
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetGroup(name interface{}) *ConsoleClientMock_GetGroup_Call {
+	return &ConsoleClientMock_GetGroup_Call{Call: _e.mock.On("GetGroup", name)}
+}
+
+func (_c *ConsoleClientMock_GetGroup_Call) Run(run func(name string)) *ConsoleClientMock_GetGroup_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGroup_Call) Return(_a0 *gqlclient.GroupFragment, _a1 error) *ConsoleClientMock_GetGroup_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGroup_Call) RunAndReturn(run func(string) (*gqlclient.GroupFragment, error)) *ConsoleClientMock_GetGroup_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetPipeline provides a mock function with given fields: id
 func (_m *ConsoleClientMock) GetPipeline(id string) (*gqlclient.PipelineFragment, error) {
 	ret := _m.Called(id)
@@ -1204,6 +1262,64 @@ func (_c *ConsoleClientMock_GetServices_Call) Return(_a0 []*gqlclient.ServiceDep
 }
 
 func (_c *ConsoleClientMock_GetServices_Call) RunAndReturn(run func() ([]*gqlclient.ServiceDeploymentBaseFragment, error)) *ConsoleClientMock_GetServices_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetUser provides a mock function with given fields: email
+func (_m *ConsoleClientMock) GetUser(email string) (*gqlclient.UserFragment, error) {
+	ret := _m.Called(email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUser")
+	}
+
+	var r0 *gqlclient.UserFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*gqlclient.UserFragment, error)); ok {
+		return rf(email)
+	}
+	if rf, ok := ret.Get(0).(func(string) *gqlclient.UserFragment); ok {
+		r0 = rf(email)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.UserFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUser'
+type ConsoleClientMock_GetUser_Call struct {
+	*mock.Call
+}
+
+// GetUser is a helper method to define mock.On call
+//   - email string
+func (_e *ConsoleClientMock_Expecter) GetUser(email interface{}) *ConsoleClientMock_GetUser_Call {
+	return &ConsoleClientMock_GetUser_Call{Call: _e.mock.On("GetUser", email)}
+}
+
+func (_c *ConsoleClientMock_GetUser_Call) Run(run func(email string)) *ConsoleClientMock_GetUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetUser_Call) Return(_a0 *gqlclient.UserFragment, _a1 error) *ConsoleClientMock_GetUser_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetUser_Call) RunAndReturn(run func(string) (*gqlclient.UserFragment, error)) *ConsoleClientMock_GetUser_Call {
 	_c.Call.Return(run)
 	return _c
 }
