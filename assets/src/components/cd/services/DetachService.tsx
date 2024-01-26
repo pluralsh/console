@@ -3,10 +3,10 @@ import { useTheme } from 'styled-components'
 import { Confirm } from '../../utils/Confirm'
 import {
   ServiceDeploymentsRowFragment,
-  useDeleteServiceDeploymentMutation,
+  useDetachServiceDeploymentMutation,
 } from '../../../generated/graphql'
 
-export function DeleteService({
+export function DetachService({
   serviceDeployment,
   refetch,
   open,
@@ -18,7 +18,7 @@ export function DeleteService({
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const [mutation, { loading, error }] = useDeleteServiceDeploymentMutation({
+  const [mutation, { loading, error }] = useDetachServiceDeploymentMutation({
     variables: { id: serviceDeployment.id },
     onCompleted: () => {
       onClose?.()
@@ -31,18 +31,19 @@ export function DeleteService({
       open={open}
       close={onClose}
       destructive
-      label="Delete"
+      label="Detach"
       loading={loading}
       error={error}
       submit={() => mutation()}
-      title="Delete service deployment"
+      title="Detach service deployment"
       text={
         <>
-          Are you sure you want to delete the{' '}
+          Are you sure you want to detach the {' '}
           <span css={{ color: theme.colors['text-danger'] }}>
             “{serviceDeployment.name}”{' '}
           </span>
-          deployment?
+          deployment? The service will be removed from storage without waiting
+          for the agent to fully drain it from its hosting cluster
         </>
       }
     />

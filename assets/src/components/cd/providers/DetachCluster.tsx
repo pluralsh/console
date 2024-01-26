@@ -2,24 +2,24 @@ import { useTheme } from 'styled-components'
 
 import { Confirm } from '../../utils/Confirm'
 import {
-  ServiceDeploymentsRowFragment,
-  useDeleteServiceDeploymentMutation,
+  ClustersRowFragment,
+  useDetachClusterMutation,
 } from '../../../generated/graphql'
 
-export function DeleteService({
-  serviceDeployment,
+export function DetachClusterModal({
+  cluster,
   refetch,
   open,
   onClose,
 }: {
-  serviceDeployment: ServiceDeploymentsRowFragment
+  cluster: ClustersRowFragment
   refetch: Nullable<() => void>
   open: boolean
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const [mutation, { loading, error }] = useDeleteServiceDeploymentMutation({
-    variables: { id: serviceDeployment.id },
+  const [mutation, { loading, error }] = useDetachClusterMutation({
+    variables: { id: cluster.id },
     onCompleted: () => {
       onClose?.()
       refetch?.()
@@ -28,21 +28,22 @@ export function DeleteService({
 
   return (
     <Confirm
-      open={open}
-      close={onClose}
+      close={() => onClose?.()}
       destructive
-      label="Delete"
+      label="Detach"
       loading={loading}
       error={error}
+      open={open}
       submit={() => mutation()}
-      title="Delete service deployment"
+      title="Detach cluster"
       text={
         <>
-          Are you sure you want to delete the{' '}
+          Are you sure you want to detach the{' '}
           <span css={{ color: theme.colors['text-danger'] }}>
-            “{serviceDeployment.name}”{' '}
-          </span>
-          deployment?
+            “{cluster.name}”
+          </span>{' '}
+          cluster? The cluster will be deregistered from our system, but will
+          not disturb any kubernetes objects.
         </>
       }
     />

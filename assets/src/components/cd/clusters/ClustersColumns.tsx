@@ -3,6 +3,7 @@ import {
   GearTrainIcon,
   ListBoxItem,
   PeopleIcon,
+  ReturnIcon,
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
@@ -42,6 +43,8 @@ import { roundToTwoPlaces } from 'components/cluster/utils'
 import { DeleteClusterModal } from '../providers/DeleteCluster'
 import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
 import { ClusterSettingsModal } from '../cluster/ClusterSettings'
+
+import { DetachClusterModal } from '../providers/DetachCluster'
 
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
@@ -276,6 +279,7 @@ const ColStatus = columnHelper.accessor(({ node }) => node, {
 enum MenuItemKey {
   Permissions = 'permissions',
   Delete = 'delete',
+  Detach = 'detach',
   Settings = 'Settings',
 }
 
@@ -329,8 +333,20 @@ const ColActions = columnHelper.accessor(({ node }) => node, {
           />
           {!protect && (
             <ListBoxItem
+              key={MenuItemKey.Detach}
+              leftContent={
+                <ReturnIcon color={theme.colors['icon-danger-critical']} />
+              }
+              label="Detach cluster"
+              textValue="Detach cluster"
+            />
+          )}
+          {!protect && (
+            <ListBoxItem
               key={MenuItemKey.Delete}
-              leftContent={<TrashCanIcon color={theme.colors['icon-danger']} />}
+              leftContent={
+                <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+              }
               label="Delete cluster"
               textValue="Delete cluster"
             />
@@ -341,6 +357,12 @@ const ColActions = columnHelper.accessor(({ node }) => node, {
           cluster={cluster}
           refetch={refetch}
           open={menuKey === MenuItemKey.Delete}
+          onClose={() => setMenuKey('')}
+        />
+        <DetachClusterModal
+          cluster={cluster}
+          refetch={refetch}
+          open={menuKey === MenuItemKey.Detach}
           onClose={() => setMenuKey('')}
         />
         <ClusterPermissionsModal
