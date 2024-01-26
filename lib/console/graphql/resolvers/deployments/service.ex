@@ -79,6 +79,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
   def delete_service(%{id: id}, %{context: %{current_user: user}}),
     do: Services.delete_service(id, user)
 
+  def detach_service(%{cluster: _, name: _} = args, %{context: %{current_user: user}}) do
+    svc = fetch_service(args)
+    Services.detach_service(svc.id, user)
+  end
+  def detach_service(%{id: id}, %{context: %{current_user: user}}),
+    do: Services.detach_service(id, user)
+
   def proceed(args, %{context: %{current_user: user}}) do
     svc = fetch_service(args)
     Services.proceed(args[:promotion] || :proceed, svc, user)

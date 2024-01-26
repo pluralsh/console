@@ -537,6 +537,17 @@ defmodule Console.Deployments.Services do
     |> notify(:delete, user)
   end
 
+  @doc """
+  Removes a service immediately from the database and don't bother with attempting a drain from its cluster
+  """
+  @spec detach_service(binary, User.t) :: service_resp
+  def detach_service(service_id, %User{} = user) do
+    get_service!(service_id)
+    |> allow(user, :delete)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
   def force_delete_service(service_id, %User{} = user) do
     get_service!(service_id)
     |> Ecto.Changeset.change(%{deleted_at: Timex.now()})
