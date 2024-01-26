@@ -35,7 +35,7 @@ export function DeleteClusterModal({
       error={error}
       open={open}
       submit={() => mutation()}
-      title="Delete cluster provider"
+      title="Delete cluster"
       text={
         <>
           Are you sure you want to delete the{' '}

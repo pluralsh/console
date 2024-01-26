@@ -250,6 +250,12 @@ mutation DeleteServiceDeployment($id: ID!) {
   }
 }
 
+mutation DetachServiceDeployment($id: ID!) {
+  detachServiceDeployment(id: $id) {
+    id
+  }
+}
+
 mutation RollbackService($id: ID, $revisionId: ID!) {
   rollbackService(id: $id, revisionId: $revisionId) {
     ...ServiceDeploymentsRow

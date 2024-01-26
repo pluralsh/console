@@ -385,6 +385,12 @@ mutation DeleteCluster($id: ID!) {
   }
 }
 
+mutation DetachCluster($id: ID!) {
+  detachCluster(id: $id) {
+    ...Cluster
+  }
+}
+
 fragment ClusterStatusInfo on ClusterStatusInfo {
   count
   healthy

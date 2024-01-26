@@ -8,6 +8,7 @@ import {
   ListBoxItem,
   ListIcon,
   PeopleIcon,
+  ReturnIcon,
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
@@ -39,6 +40,7 @@ import { CreateGlobalService } from './CreateGlobalService'
 import { DeleteGlobalService } from './DeleteGlobalService'
 import { ServiceSettings } from './ServiceSettings'
 import { ServiceUpdateHelmValues } from './ServiceUpdateHelmValues'
+import { DetachService } from './DetachService'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -230,6 +232,7 @@ enum MenuItemKey {
   Settings = 'settings',
   HelmValues = 'helmValues',
   Delete = 'delete',
+  Detach = 'detach',
 }
 
 export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
@@ -318,9 +321,19 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
             )}
             {!node.protect && (
               <ListBoxItem
+                key={MenuItemKey.Detach}
+                leftContent={
+                  <ReturnIcon color={theme.colors['icon-danger-critical']} />
+                }
+                label="Detach service"
+                textValue="Detach service"
+              />
+            )}
+            {!node.protect && (
+              <ListBoxItem
                 key={MenuItemKey.Delete}
                 leftContent={
-                  <TrashCanIcon color={theme.colors['icon-danger']} />
+                  <TrashCanIcon color={theme.colors['icon-danger-critical']} />
                 }
                 label="Delete service"
                 textValue="Delete service"
@@ -331,6 +344,14 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
           <DeleteService
             serviceDeployment={serviceDeployment}
             open={menuKey === MenuItemKey.Delete}
+            onClose={() => {
+              setMenuKey('')
+            }}
+            refetch={refetch}
+          />
+          <DetachService
+            serviceDeployment={serviceDeployment}
+            open={menuKey === MenuItemKey.Detach}
             onClose={() => {
               setMenuKey('')
             }}
