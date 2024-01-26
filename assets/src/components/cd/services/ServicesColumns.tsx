@@ -322,7 +322,9 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
             {!node.protect && (
               <ListBoxItem
                 key={MenuItemKey.Detach}
-                leftContent={<ReturnIcon color={theme.colors['icon-danger-critical']} />}
+                leftContent={
+                  <ReturnIcon color={theme.colors['icon-danger-critical']} />
+                }
                 label="Detach service"
                 textValue="Detach service"
               />

@@ -38,7 +38,7 @@ export function DetachService({
       title="Detach service deployment"
       text={
         <>
-          Are you sure you want to detach the {' '}
+          Are you sure you want to detach the{' '}
           <span css={{ color: theme.colors['text-danger'] }}>
             “{serviceDeployment.name}”{' '}
           </span>
