@@ -80,7 +80,6 @@ type ServiceSpec struct {
 	ConfigurationRef *corev1.SecretReference `json:"configurationRef,omitempty"`
 	// Bindings contain read and write policies of this cluster
 	// +optional
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Bindings are immutable"
 	Bindings *Bindings `json:"bindings,omitempty"`
 	// Dependencies contain dependent services
 	// +optional
