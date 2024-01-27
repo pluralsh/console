@@ -372,7 +372,7 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 			updateStatus(service, existingService, "")
 			return requeue, nil
 		}
-		if existingService != nil {
+		if existingService != nil && service.Status.ID != nil {
 			if err := r.ConsoleClient.DeleteService(*service.Status.ID); err != nil {
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 				return ctrl.Result{}, err
