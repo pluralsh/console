@@ -542,4 +542,38 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
       assert refetch(svc).promotion == :proceed
     end
   end
+
+  describe "saveServiceContext" do
+    test "admins can save contexts" do
+      {:ok, %{data: %{"saveServiceContext" => ctx}}} = run_query("""
+        mutation Save($name: String!, $attributes: ServiceContextAttributes!) {
+          saveServiceContext(name: $name, attributes: $attributes) {
+            name
+            configuration
+          }
+        }
+      """, %{"name" => "my-context", "attributes" => %{
+        "configuration" => Jason.encode!(%{"some" => "config"})
+      }}, %{current_user: admin_user()})
+
+      assert ctx["name"] == "my-context"
+      assert ctx["configuration"]["some"] == "config"
+    end
+  end
+
+  describe "deleteServiceContext" do
+    test "admins can delete service contexts" do
+      ctx = insert(:service_context)
+
+      {:ok, %{data: %{"deleteServiceContext" => del}}} = run_query("""
+        mutation Del($id: ID!) {
+          deleteServiceContext(id: $id) { id }
+        }
+      """, %{"id" => ctx.id}, %{current_user: admin_user()})
+
+      assert del["id"] == ctx.id
+
+      refute refetch(ctx)
+    end
+  end
 end

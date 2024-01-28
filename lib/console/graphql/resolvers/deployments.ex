@@ -27,7 +27,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     PromotionService,
     ComponentContent,
     ScmConnection,
-    PrAutomation
+    PrAutomation,
+    ServiceContext
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -52,6 +53,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(GitRepository, _), do: GitRepository
   def query(ComponentContent, _), do: ComponentContent
   def query(ScmConnection, _), do: ScmConnection
+  def query(ServiceContext, _), do: ServiceContext
   def query(PrAutomation, _), do: PrAutomation
   def query(_, _), do: Cluster
 

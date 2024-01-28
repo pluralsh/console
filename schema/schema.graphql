@@ -248,6 +248,8 @@ type RootQueryType {
 
   globalService(id: ID!): GlobalService
 
+  serviceContext(name: String!): ServiceContext
+
   pipelines(after: String, first: Int, before: String, last: Int): PipelineConnection
 
   pipeline(id: ID!): Pipeline
@@ -495,6 +497,10 @@ type RootMutationType {
   updateGlobalService(id: ID!, attributes: GlobalServiceAttributes!): GlobalService
 
   deleteGlobalService(id: ID!): GlobalService
+
+  saveServiceContext(name: String!, attributes: ServiceContextAttributes!): ServiceContext
+
+  deleteServiceContext(id: ID!): ServiceContext
 
   "upserts a pipeline with a given name"
   savePipeline(name: String!, attributes: PipelineAttributes!): Pipeline
@@ -1008,6 +1014,7 @@ input ServiceDeploymentAttributes {
   configuration: [ConfigAttributes]
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+  contextBindings: [ContextBindingAttributes]
 }
 
 input SyncConfigAttributes {
@@ -1045,6 +1052,9 @@ input ServiceUpdateAttributes {
   helm: HelmConfigAttributes
   configuration: [ConfigAttributes]
   kustomize: KustomizeAttributes
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
+  contextBindings: [ContextBindingAttributes]
 }
 
 input ServiceCloneAttributes {
@@ -1085,6 +1095,17 @@ input ComponentContentAttributes {
 input ServiceErrorAttributes {
   source: String!
   message: String!
+}
+
+"A reusable configuration context, useful for plumbing data from external tools like terraform\/pulumi\/etc"
+input ServiceContextAttributes {
+  configuration: Json
+  secrets: [ConfigAttributes]
+}
+
+"a binding from a service to a service context"
+input ContextBindingAttributes {
+  contextId: String!
 }
 
 "A reference for a globalized service, which targets clusters based on the configured criteria"
@@ -1197,6 +1218,9 @@ type ServiceDeployment {
 
   "whether this service is controlled by a global service"
   owner: GlobalService
+
+  "bound contexts for this service"
+  contexts: [ServiceContext]
 
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
@@ -1408,6 +1432,16 @@ type SyncConfig {
 type NamespaceMetadata {
   labels: Map
   annotations: Map
+}
+
+"A reusable bundle of configuration designed to make it easy to communicate between tools like tf\/pulumi and k8s"
+type ServiceContext {
+  id: ID!
+  name: String!
+  configuration: Map
+  secrets: [ServiceConfiguration]
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 type ServiceDeploymentConnection {

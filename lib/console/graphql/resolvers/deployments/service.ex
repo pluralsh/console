@@ -15,6 +15,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
     |> allow(actor(ctx), :read)
   end
 
+  def resolve_service_context(%{name: name}, %{context: %{current_user: user}}) do
+    Services.get_context_by_name(name)
+    |> allow(user, :read)
+  end
+
   def service_statuses(args, %{context: %{current_user: user}}) do
     Service.for_user(user)
     |> service_filters(args)
@@ -110,6 +115,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
 
   def merge_service(%{id: id, configuration: config}, %{context: %{current_user: user}}),
     do: Services.merge_service(config, id, user)
+
+  def save_service_context(%{attributes: attrs, name: name}, %{context: %{current_user: user}}),
+    do: Services.save_context(attrs, name, user)
+
+  def delete_service_context(%{id: id}, %{context: %{current_user: user}}),
+    do: Services.delete_context(id, user)
 
   def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
   def docs(svc, _, _), do: Services.docs(svc)

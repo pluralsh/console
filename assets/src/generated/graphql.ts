@@ -1060,6 +1060,11 @@ export type ContextAttributes = {
   protect?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
+/** a binding from a service to a service context */
+export type ContextBindingAttributes = {
+  contextId: Scalars['String']['input'];
+};
+
 export type CostAnalysis = {
   __typename?: 'CostAnalysis';
   cpuCost?: Maybe<Scalars['Float']['output']>;
@@ -2834,6 +2839,7 @@ export type RootMutationType = {
   deleteProviderCredential?: Maybe<ProviderCredential>;
   deleteRole?: Maybe<Role>;
   deleteScmConnection?: Maybe<ScmConnection>;
+  deleteServiceContext?: Maybe<ServiceContext>;
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
@@ -2868,6 +2874,7 @@ export type RootMutationType = {
   rollbackService?: Maybe<ServiceDeployment>;
   /** upserts a pipeline with a given name */
   savePipeline?: Maybe<Pipeline>;
+  saveServiceContext?: Maybe<ServiceContext>;
   selfManage?: Maybe<ServiceDeployment>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
@@ -3130,6 +3137,11 @@ export type RootMutationTypeDeleteScmConnectionArgs = {
 };
 
 
+export type RootMutationTypeDeleteServiceContextArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteServiceDeploymentArgs = {
   id: Scalars['ID']['input'];
 };
@@ -3265,6 +3277,12 @@ export type RootMutationTypeRollbackServiceArgs = {
 
 export type RootMutationTypeSavePipelineArgs = {
   attributes: PipelineAttributes;
+  name: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeSaveServiceContextArgs = {
+  attributes: ServiceContextAttributes;
   name: Scalars['String']['input'];
 };
 
@@ -3492,6 +3510,7 @@ export type RootQueryType = {
   secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
   serviceAccounts?: Maybe<UserConnection>;
+  serviceContext?: Maybe<ServiceContext>;
   /** fetches details of this service deployment, and can be called by the deploy operator */
   serviceDeployment?: Maybe<ServiceDeployment>;
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
@@ -3991,6 +4010,11 @@ export type RootQueryTypeServiceAccountsArgs = {
 };
 
 
+export type RootQueryTypeServiceContextArgs = {
+  name: Scalars['String']['input'];
+};
+
+
 export type RootQueryTypeServiceDeploymentArgs = {
   cluster?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -4385,6 +4409,23 @@ export type ServiceConfiguration = {
   value: Scalars['String']['output'];
 };
 
+/** A reusable bundle of configuration designed to make it easy to communicate between tools like tf/pulumi and k8s */
+export type ServiceContext = {
+  __typename?: 'ServiceContext';
+  configuration?: Maybe<Scalars['Map']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  secrets?: Maybe<Array<Maybe<ServiceConfiguration>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** A reusable configuration context, useful for plumbing data from external tools like terraform/pulumi/etc */
+export type ServiceContextAttributes = {
+  configuration?: InputMaybe<Scalars['Json']['input']>;
+  secrets?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+};
+
 /** a reference to a service deployed from a git repo into a cluster */
 export type ServiceDeployment = {
   __typename?: 'ServiceDeployment';
@@ -4396,6 +4437,8 @@ export type ServiceDeployment = {
   components?: Maybe<Array<Maybe<ServiceComponent>>>;
   /** possibly secret configuration used to template the manifests of this service */
   configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
+  /** bound contexts for this service */
+  contexts?: Maybe<Array<Maybe<ServiceContext>>>;
   /** the time this service was scheduled for deletion */
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries */
@@ -4466,6 +4509,7 @@ export type ServiceDeploymentRevisionsArgs = {
 
 export type ServiceDeploymentAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  contextBindings?: InputMaybe<Array<InputMaybe<ContextBindingAttributes>>>;
   docsPath?: InputMaybe<Scalars['String']['input']>;
   dryRun?: InputMaybe<Scalars['Boolean']['input']>;
   git?: InputMaybe<GitRefAttributes>;
@@ -4550,13 +4594,16 @@ export type ServiceStatusCount = {
 
 export type ServiceUpdateAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  contextBindings?: InputMaybe<Array<InputMaybe<ContextBindingAttributes>>>;
   dryRun?: InputMaybe<Scalars['Boolean']['input']>;
   git?: InputMaybe<GitRefAttributes>;
   helm?: InputMaybe<HelmConfigAttributes>;
   interval?: InputMaybe<Scalars['String']['input']>;
   kustomize?: InputMaybe<KustomizeAttributes>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   version?: InputMaybe<Scalars['String']['input']>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export enum Severity {
