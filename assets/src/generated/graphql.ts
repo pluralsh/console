@@ -3561,6 +3561,7 @@ export type RootQueryType = {
   cluster?: Maybe<Cluster>;
   /** list all addons currently resident in the artifacts repo */
   clusterAddOns?: Maybe<Array<Maybe<ClusterAddOn>>>;
+  clusterGate?: Maybe<PipelineGate>;
   clusterGates?: Maybe<Array<Maybe<PipelineGate>>>;
   clusterInfo?: Maybe<ClusterInfo>;
   /** fetches an individual cluster provider */
@@ -3736,6 +3737,11 @@ export type RootQueryTypeCertificateArgs = {
 export type RootQueryTypeClusterArgs = {
   handle?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeClusterGateArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

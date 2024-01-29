@@ -27,9 +27,14 @@ defmodule Console.Deployments.Policies do
     end
   end
 
+  def can?(%Cluster{id: id}, %PipelineGate{cluster_id: id}, :read),
+    do: :pass
+
   def can?(%Cluster{id: id}, %PipelineGate{cluster_id: id}, :update),
     do: :pass
   def can?(_, %PipelineGate{}, :update), do: {:error, "forbidden"}
+
+  def can?(%Cluster{}, %PipelineGate{}, _), do: {:error, "forbidden"}
 
   def can?(%User{} = user, %PipelineGate{type: :approval} = g, :approve),
     do: can?(user, g, :write)
