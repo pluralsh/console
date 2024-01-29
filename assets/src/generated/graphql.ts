@@ -2840,6 +2840,8 @@ export type RootMutationType = {
   deleteWebhook?: Maybe<Webhook>;
   /** soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects */
   detachCluster?: Maybe<Cluster>;
+  /** removes a service from storage, but bypasses waiting for the agent to fully drain it from its hosting cluster */
+  detachServiceDeployment?: Maybe<ServiceDeployment>;
   enableDeployments?: Maybe<DeploymentSettings>;
   executeRunbook?: Maybe<RunbookActionResponse>;
   /** forces a pipeline gate to be in open state */
@@ -3149,6 +3151,11 @@ export type RootMutationTypeDeleteWebhookArgs = {
 
 
 export type RootMutationTypeDetachClusterArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDetachServiceDeploymentArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -3858,7 +3865,8 @@ export type RootQueryTypePostgresDatabaseArgs = {
 
 
 export type RootQueryTypePrAutomationArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3942,7 +3950,8 @@ export type RootQueryTypeScalingRecommendationArgs = {
 
 
 export type RootQueryTypeScmConnectionArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -5122,6 +5131,13 @@ export type DeleteClusterMutationVariables = Exact<{
 
 export type DeleteClusterMutation = { __typename?: 'RootMutationType', deleteCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null } | null> | null } | null };
 
+export type DetachClusterMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DetachClusterMutation = { __typename?: 'RootMutationType', detachCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null } | null> | null } | null };
+
 export type ClusterStatusInfoFragment = { __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null };
 
 export type ClusterStatusesQueryVariables = Exact<{
@@ -5415,6 +5431,13 @@ export type DeleteServiceDeploymentMutationVariables = Exact<{
 
 
 export type DeleteServiceDeploymentMutation = { __typename?: 'RootMutationType', deleteServiceDeployment?: { __typename?: 'ServiceDeployment', id: string } | null };
+
+export type DetachServiceDeploymentMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DetachServiceDeploymentMutation = { __typename?: 'RootMutationType', detachServiceDeployment?: { __typename?: 'ServiceDeployment', id: string } | null };
 
 export type RollbackServiceMutationVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -8053,6 +8076,39 @@ export function useDeleteClusterMutation(baseOptions?: Apollo.MutationHookOption
 export type DeleteClusterMutationHookResult = ReturnType<typeof useDeleteClusterMutation>;
 export type DeleteClusterMutationResult = Apollo.MutationResult<DeleteClusterMutation>;
 export type DeleteClusterMutationOptions = Apollo.BaseMutationOptions<DeleteClusterMutation, DeleteClusterMutationVariables>;
+export const DetachClusterDocument = gql`
+    mutation DetachCluster($id: ID!) {
+  detachCluster(id: $id) {
+    ...Cluster
+  }
+}
+    ${ClusterFragmentDoc}`;
+export type DetachClusterMutationFn = Apollo.MutationFunction<DetachClusterMutation, DetachClusterMutationVariables>;
+
+/**
+ * __useDetachClusterMutation__
+ *
+ * To run a mutation, you first call `useDetachClusterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetachClusterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detachClusterMutation, { data, loading, error }] = useDetachClusterMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDetachClusterMutation(baseOptions?: Apollo.MutationHookOptions<DetachClusterMutation, DetachClusterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetachClusterMutation, DetachClusterMutationVariables>(DetachClusterDocument, options);
+      }
+export type DetachClusterMutationHookResult = ReturnType<typeof useDetachClusterMutation>;
+export type DetachClusterMutationResult = Apollo.MutationResult<DetachClusterMutation>;
+export type DetachClusterMutationOptions = Apollo.BaseMutationOptions<DetachClusterMutation, DetachClusterMutationVariables>;
 export const ClusterStatusesDocument = gql`
     query ClusterStatuses($clusterId: ID) {
   clusterStatuses {
@@ -9360,6 +9416,39 @@ export function useDeleteServiceDeploymentMutation(baseOptions?: Apollo.Mutation
 export type DeleteServiceDeploymentMutationHookResult = ReturnType<typeof useDeleteServiceDeploymentMutation>;
 export type DeleteServiceDeploymentMutationResult = Apollo.MutationResult<DeleteServiceDeploymentMutation>;
 export type DeleteServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<DeleteServiceDeploymentMutation, DeleteServiceDeploymentMutationVariables>;
+export const DetachServiceDeploymentDocument = gql`
+    mutation DetachServiceDeployment($id: ID!) {
+  detachServiceDeployment(id: $id) {
+    id
+  }
+}
+    `;
+export type DetachServiceDeploymentMutationFn = Apollo.MutationFunction<DetachServiceDeploymentMutation, DetachServiceDeploymentMutationVariables>;
+
+/**
+ * __useDetachServiceDeploymentMutation__
+ *
+ * To run a mutation, you first call `useDetachServiceDeploymentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetachServiceDeploymentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detachServiceDeploymentMutation, { data, loading, error }] = useDetachServiceDeploymentMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDetachServiceDeploymentMutation(baseOptions?: Apollo.MutationHookOptions<DetachServiceDeploymentMutation, DetachServiceDeploymentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetachServiceDeploymentMutation, DetachServiceDeploymentMutationVariables>(DetachServiceDeploymentDocument, options);
+      }
+export type DetachServiceDeploymentMutationHookResult = ReturnType<typeof useDetachServiceDeploymentMutation>;
+export type DetachServiceDeploymentMutationResult = Apollo.MutationResult<DetachServiceDeploymentMutation>;
+export type DetachServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<DetachServiceDeploymentMutation, DetachServiceDeploymentMutationVariables>;
 export const RollbackServiceDocument = gql`
     mutation RollbackService($id: ID, $revisionId: ID!) {
   rollbackService(id: $id, revisionId: $revisionId) {
@@ -11089,6 +11178,7 @@ export const namedOperations = {
     UpdateCluster: 'UpdateCluster',
     CreateCluster: 'CreateCluster',
     DeleteCluster: 'DeleteCluster',
+    DetachCluster: 'DetachCluster',
     CreateGitRepository: 'CreateGitRepository',
     DeleteGitRepository: 'DeleteGitRepository',
     UpdateGitRepository: 'UpdateGitRepository',
@@ -11104,6 +11194,7 @@ export const namedOperations = {
     UpdateServiceDeployment: 'UpdateServiceDeployment',
     MergeService: 'MergeService',
     DeleteServiceDeployment: 'DeleteServiceDeployment',
+    DetachServiceDeployment: 'DetachServiceDeployment',
     RollbackService: 'RollbackService',
     ProceedService: 'ProceedService',
     UpdateRbac: 'UpdateRbac',

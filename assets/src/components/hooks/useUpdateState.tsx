@@ -1,10 +1,12 @@
 import isEqual from 'lodash/isEqual'
 import { useCallback, useMemo, useState } from 'react'
 
+import { isSubsetEqual } from 'utils/isSubsetEqual'
+
 type IsEqualFn<T = any> = (a: T, b: T) => boolean
 type IsEqualFns<T> = Partial<Record<keyof T, IsEqualFn<T[keyof T]>>>
 
-export function useUpdateState<T extends { [key: string]: unknown }>(
+export function useUpdateState<T extends Record<string, unknown>>(
   initialState: T,
   isEqualFns?: IsEqualFns<T>
 ) {
@@ -13,6 +15,9 @@ export function useUpdateState<T extends { [key: string]: unknown }>(
 
   const update = useCallback(
     (update: Partial<T>) => {
+      if (isSubsetEqual(state, update)) {
+        return
+      }
       setState({ ...state, ...update })
     },
     [state]

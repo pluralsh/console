@@ -8,7 +8,7 @@ import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPa
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import { SideNavEntries } from 'components/layout/SideNavEntries'
+import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
 
 import {
   DeploymentSettingsFragment,
@@ -27,7 +27,11 @@ export const getGlobalSettingsBreadcrumbs = ({ page }: { page: string }) => [
   { label: page, url: `${CD_REL_PATH}/clusters/${page}` },
 ]
 
-const directory = [
+const getDirectory = ({
+  autoUpdateEnabled,
+}: {
+  autoUpdateEnabled: boolean
+}): Directory => [
   {
     path: 'permissions/read',
     label: 'Read permissions',
@@ -44,7 +48,6 @@ const directory = [
     path: 'permissions/git',
     label: 'Git write permissions',
   },
-
   {
     path: 'repositories',
     label: 'Repositories',
@@ -56,6 +59,7 @@ const directory = [
   {
     path: 'auto-update',
     label: 'Auto Update',
+    enabled: autoUpdateEnabled,
   },
 ]
 
@@ -83,11 +87,10 @@ export function GlobalSettings() {
 
   const prunedDirectory = useMemo(
     () =>
-      directory.filter(
-        ({ path }) =>
-          path !== 'auto-update' ||
-          (configuration?.byok && !data?.deploymentSettings?.selfManaged)
-      ),
+      getDirectory({
+        autoUpdateEnabled:
+          configuration?.byok && !data?.deploymentSettings?.selfManaged,
+      }),
     [configuration, data]
   )
 

@@ -27,7 +27,13 @@ type Binding struct {
 	UserID *string `json:"UserID,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	UserEmail *string `json:"userEmail,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	GroupID *string `json:"groupID,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	GroupName *string `json:"groupName,omitempty"`
 }
 
 func (b *Binding) Attributes() *console.PolicyBindingAttributes {

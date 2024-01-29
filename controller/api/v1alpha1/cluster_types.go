@@ -123,7 +123,6 @@ type ClusterSpec struct {
 
 	// Bindings contain read and write policies of this cluster
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Bindings are immutable"
 	Bindings *Bindings `json:"bindings,omitempty"`
 
 	// CloudSettings contains cloud-specific settings for this cluster.

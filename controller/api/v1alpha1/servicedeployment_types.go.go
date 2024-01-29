@@ -49,6 +49,9 @@ type SyncConfigAttributes struct {
 }
 
 type ServiceSpec struct {
+	// the name of this service, if not provided ServiceDeployment's own name from ServiceDeployment.ObjectMeta will be used.
+	// +optional
+	Name *string `json:"name,omitempty"`
 	// the namespace this service will be deployed into, if not provided deploys to the ServiceDeployment's own namespace
 	// +optional
 	Namespace *string `json:"namespace,omitempty"`
@@ -66,9 +69,9 @@ type ServiceSpec struct {
 	Helm *ServiceHelm `json:"helm,omitempty"`
 	// +optional
 	SyncConfig *SyncConfigAttributes `json:"syncConfig,omitempty"`
-	// +kubebuilder:validation:Required
+	// +optional
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Repository is immutable"
-	RepositoryRef corev1.ObjectReference `json:"repositoryRef"`
+	RepositoryRef *corev1.ObjectReference `json:"repositoryRef"`
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cluster is immutable"
 	ClusterRef corev1.ObjectReference `json:"clusterRef"`
@@ -205,8 +208,4 @@ func (p *ServiceStatus) GetID() string {
 
 func (p *ServiceStatus) HasID() bool {
 	return p.ID != nil && len(*p.ID) > 0
-}
-
-func (p *ServiceDeployment) SetCondition(condition metav1.Condition) {
-	meta.SetStatusCondition(&p.Status.Conditions, condition)
 }

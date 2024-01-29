@@ -171,11 +171,11 @@ type RootQueryType {
 
   scmConnections(after: String, first: Int, before: String, last: Int): ScmConnectionConnection
 
-  scmConnection(id: ID!): ScmConnection
+  scmConnection(id: ID, name: String): ScmConnection
 
   prAutomations(after: String, first: Int, before: String, last: Int): PrAutomationConnection
 
-  prAutomation(id: ID!): PrAutomation
+  prAutomation(id: ID, name: String): PrAutomation
 
   pullRequests(after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID): PullRequestConnection
 
@@ -434,6 +434,9 @@ type RootMutationType {
   ): ServiceDeployment
 
   deleteServiceDeployment(id: ID!): ServiceDeployment
+
+  "removes a service from storage, but bypasses waiting for the agent to fully drain it from its hosting cluster"
+  detachServiceDeployment(id: ID!): ServiceDeployment
 
   "merges configuration for a service"
   mergeService(id: ID!, configuration: [ConfigAttributes]): ServiceDeployment

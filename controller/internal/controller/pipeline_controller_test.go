@@ -132,7 +132,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 				Spec: v1alpha1.ServiceSpec{
 					Version:       lo.ToPtr("1.24"),
 					ClusterRef:    corev1.ObjectReference{Name: devClusterName, Namespace: namespace},
-					RepositoryRef: corev1.ObjectReference{Name: repositoryName, Namespace: namespace},
+					RepositoryRef: &corev1.ObjectReference{Name: repositoryName, Namespace: namespace},
 				},
 			}, func(p *v1alpha1.ServiceDeployment) {
 				p.Status.ID = lo.ToPtr(devServiceConsoleID)
@@ -147,7 +147,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 				Spec: v1alpha1.ServiceSpec{
 					Version:       lo.ToPtr("1.24"),
 					ClusterRef:    corev1.ObjectReference{Name: prodClusterName, Namespace: namespace},
-					RepositoryRef: corev1.ObjectReference{Name: repositoryName, Namespace: namespace},
+					RepositoryRef: &corev1.ObjectReference{Name: repositoryName, Namespace: namespace},
 				},
 			}, func(p *v1alpha1.ServiceDeployment) {
 				p.Status.ID = lo.ToPtr(prodServiceConsoleID)

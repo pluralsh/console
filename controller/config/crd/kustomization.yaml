@@ -10,7 +10,9 @@ labels:
       app.kubernetes.io/managed-by: kustomize
 
 resources:
-  - bases/deployments.plural.sh_providers.yaml
-  - bases/deployments.plural.sh_gitrepositories.yaml
   - bases/deployments.plural.sh_clusters.yaml
+  - bases/deployments.plural.sh_gitrepositories.yaml
+  - bases/deployments.plural.sh_globalservices.yaml
+  - bases/deployments.plural.sh_pipelines.yaml
+  - bases/deployments.plural.sh_providers.yaml
   - bases/deployments.plural.sh_servicedeployments.yaml

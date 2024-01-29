@@ -42,8 +42,7 @@ type GlobalServiceSpec struct {
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Service is immutable"
 	ServiceRef corev1.ObjectReference `json:"serviceRef"`
 	// ProviderRef apply to clusters with this provider
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Provider is immutable"
+	// +optional
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 }
 

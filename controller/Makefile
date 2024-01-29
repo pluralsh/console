@@ -32,7 +32,7 @@ SHELL = /usr/bin/env bash -o pipefail
 
 # Validate required env variables
 ifndef GOPATH
-$(error $$GOPATH environment variable not set)
+$(warning $$GOPATH environment variable not set)
 endif
 
 ifndef PLURAL_CONSOLE_TOKEN
@@ -40,7 +40,7 @@ $(warning $$PLURAL_CONSOLE_TOKEN environment variable not set. Deploy will not w
 endif
 
 ifeq (,$(findstring $(GOPATH)/bin,$(PATH)))
-$(error $$GOPATH/bin directory is not in your $$PATH)
+$(warning $$GOPATH/bin directory is not in your $$PATH)
 endif
 
 .PHONY: all
@@ -69,7 +69,8 @@ build: manifests generate fmt vet ## build manager binary
 
 .PHONY: run
 run: manifests generate fmt vet ## run a controller from your host
-	go run ./cmd/main.go
+	go run ./cmd/main.go \
+		--console-url=${PLURAL_CONSOLE_URL}/gql
 
 .PHONY: release
 release: manifests generate fmt vet ## builds release version of the app. Requires GoReleaser to work.
@@ -106,6 +107,7 @@ docker-buildx: ## Build and push docker image for the manager for cross-platform
 .PHONY: manifests
 manifests: controller-gen ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	@$(MAKE) -s chart-crds
 
 .PHONY: generate
 generate: controller-gen ## generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations
@@ -151,6 +153,10 @@ endif
 helm: manifests kustomize helmify
 	@$(KUSTOMIZE) build config/default | $(HELMIFY) -generate-defaults -image-pull-secrets -crd-dir ../charts/controller
 	@find ../charts/controller -type f -exec sed -i 's/app.kubernetes.io\/managed-by: kustomize/app.kubernetes.io\/managed-by: helm/g' {} \;
+
+.PHONY: chart-crds
+chart-crds:
+	@cp -a config/crd/bases/. ../charts/controller/crds
 
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
