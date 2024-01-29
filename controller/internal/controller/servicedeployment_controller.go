@@ -114,7 +114,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return ctrl.Result{}, err
 	}
 
-	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
+	existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
 	if err != nil && !errors.IsNotFound(err) {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
@@ -126,7 +126,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
-		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
+		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
 		if err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
@@ -156,6 +156,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}
 
 	if service.Status.HasSHA() && !service.Status.IsSHAEqual(sha) {
+		logger.Info("updating ServiceDeployment")
 		// update service
 		if err := r.ConsoleClient.UpdateService(existingService.ID, updater); err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
@@ -226,13 +227,9 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
-	namespace := service.Namespace
-	if service.Spec.Namespace != nil {
-		namespace = *service.Spec.Namespace
-	}
 	attr := &console.ServiceDeploymentAttributes{
-		Name:         service.Name,
-		Namespace:    namespace,
+		Name:         service.ConsoleName(),
+		Namespace:    service.ConsoleNamespace(),
 		Version:      service.Spec.Version,
 		DocsPath:     service.Spec.DocsPath,
 		Protect:      &service.Spec.Protect,
@@ -358,7 +355,7 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 	log := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 		log.Info("try to delete service")
-		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.Name)
+		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
 		if err != nil && !errors.IsNotFound(err) {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err

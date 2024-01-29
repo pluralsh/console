@@ -139,6 +139,26 @@ type ServiceDeployment struct {
 	Status ServiceStatus `json:"status,omitempty"`
 }
 
+func (s *ServiceDeployment) ConsoleName() string {
+	if s.Spec.Name != nil && len(*s.Spec.Name) > 0 {
+		return *s.Spec.Name
+	}
+
+	return s.Name
+}
+
+func (s *ServiceDeployment) ConsoleNamespace() string {
+	if s.Spec.Namespace != nil && len(*s.Spec.Namespace) > 0 {
+		return *s.Spec.Namespace
+	}
+
+	return s.Namespace
+}
+
+func (s *ServiceDeployment) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&s.Status.Conditions, condition)
+}
+
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type ServiceDeploymentList struct {
