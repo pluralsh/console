@@ -983,6 +983,33 @@ defmodule Console.Deployments.ServicesTest do
       assert component.api_deprecations == []
     end
   end
+
+  describe "#save_context/3" do
+    test "admins can save contexts" do
+      {:ok, ctx} = Services.save_context(%{configuration: %{"some" => "config"}}, "my-context", admin_user())
+
+      assert ctx.name == "my-context"
+      assert ctx.configuration["some"] == "config"
+    end
+
+    test "nonadmins cannot save contexts" do
+      {:error, _} = Services.save_context(%{configuration: %{"some" => "config"}}, "my-context", insert(:user))
+    end
+  end
+
+  describe "#delete_context/3" do
+    test "admins can save contexts" do
+      ctx = insert(:service_context)
+      {:ok, ctx} = Services.delete_context(ctx.id, admin_user())
+
+      refute refetch(ctx)
+    end
+
+    test "nonadmins cannot save contexts" do
+      ctx = insert(:service_context)
+      {:error, _} = Services.delete_context(ctx.id, insert(:user))
+    end
+  end
 end
 
 defmodule Console.Deployments.ServicesAsyncTest do

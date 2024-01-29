@@ -71,12 +71,14 @@ defmodule Console.ExternalGraphQl do
     import_fields :public_service_queries
     import_fields :public_cluster_queries
     import_fields :public_pipeline_queries
+    import_fields :public_backup_queries
   end
 
   mutation do
     import_fields :public_cluster_mutations
     import_fields :public_service_mutations
     import_fields :public_pipeline_mutations
+    import_fields :public_backup_mutations
   end
 
 

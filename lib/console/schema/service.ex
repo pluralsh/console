@@ -14,7 +14,8 @@ defmodule Console.Schema.Service do
     ServiceError,
     DiffNormalizer,
     Metadata,
-    StageService
+    StageService,
+    ServiceContextBinding
   }
 
   defenum Promotion, ignore: 0, proceed: 1, rollback: 2
@@ -113,7 +114,9 @@ defmodule Console.Schema.Service do
 
     has_many :errors, ServiceError, on_replace: :delete
     has_many :components, ServiceComponent, on_replace: :delete
+    has_many :context_bindings, ServiceContextBinding, on_replace: :delete
     has_many :api_deprecations, through: [:components, :api_deprecations]
+    has_many :contexts, through: [:context_bindings, :context]
     has_many :stage_services, StageService
     has_many :read_bindings, PolicyBinding,
       on_replace: :delete,
@@ -215,6 +218,7 @@ defmodule Console.Schema.Service do
     |> cast_assoc(:errors)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+    |> cast_assoc(:context_bindings)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:owner_id)
     |> foreign_key_constraint(:repository_id)

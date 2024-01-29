@@ -22,6 +22,8 @@ We are currently trying to aggregate compatibility and dependency information fo
 
 To be eligible for the upgrade bounty you'll need to submit a PR to this repo with the changes and a link to whatever documentation confirms the correctness of the information.  We'll then review and if it's correct and useful for the broader community, you'll be eligible for the reward once merged.
 
+It would also be great to ensure the compatibility is tested before submitting a review, that can be done by modifying the file at `lib/console/deployments/compatibilities/table.ex#11` to have the url var point to your fork/branch.  You should then be able to run `mix test` to confirm everything is correct (this does require setting up elixir on your laptop).
+
 To claim the reward, you should get in touch with us on our discord at https://discord.gg/pluralsh and we'll simply need to confirm that you did the work (easy way to do that is linking your discord handle on the relevant PRs) and will give you the bounty you've earned.
 
 ## Development
@@ -66,9 +68,9 @@ autoconf -V
 For Mac Machines, if unable to download Erlang via `asdf` (this is very common, and it might be worthwhile to just get erlang from homebrew) then run:
 
 ```sh
-brew install erlang@23
-cp -r /opt/homebrew/opt/erlang@23/lib/erlang ~/.asdf/installs/erlang/23.3
-asdf reshim erlang 23.3
+brew install erlang@24
+cp -r /opt/homebrew/opt/erlang@24/lib/erlang ~/.asdf/installs/erlang/24.3.4.14 # this exact version will drift a lot, as long as its erlang 24 it's good
+asdf reshim erlang 24.3.4.14
 ```
 
 You can also use the make target in our root Makefile to automate this, eg:

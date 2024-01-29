@@ -248,9 +248,13 @@ type RootQueryType {
 
   globalService(id: ID!): GlobalService
 
+  serviceContext(name: String!): ServiceContext
+
   pipelines(after: String, first: Int, before: String, last: Int): PipelineConnection
 
   pipeline(id: ID!): Pipeline
+
+  objectStores(after: String, first: Int, before: String, last: Int): ObjectStoreConnection
 
   "the services deployed in the current cluster, to be polled by the deploy operator"
   clusterServices: [ServiceDeployment]
@@ -269,6 +273,10 @@ type RootQueryType {
   myCluster: Cluster
 
   clusterGates: [PipelineGate]
+
+  clusterGate(id: ID!): PipelineGate
+
+  clusterRestore(id: ID!): ClusterRestore
 
   deploymentSettings: DeploymentSettings
 }
@@ -496,6 +504,10 @@ type RootMutationType {
 
   deleteGlobalService(id: ID!): GlobalService
 
+  saveServiceContext(name: String!, attributes: ServiceContextAttributes!): ServiceContext
+
+  deleteServiceContext(id: ID!): ServiceContext
+
   "upserts a pipeline with a given name"
   savePipeline(name: String!, attributes: PipelineAttributes!): Pipeline
 
@@ -507,6 +519,14 @@ type RootMutationType {
   "forces a pipeline gate to be in open state"
   forceGate(id: ID!, state: GateState): PipelineGate
 
+  createObjectStore(attributes: ObjectStoreAttributes!): ObjectStore
+
+  updateObjectStore(id: ID!, attributes: ObjectStoreAttributes!): ObjectStore
+
+  deleteObjectStore(id: ID!): ObjectStore
+
+  createClusterRestore(backupId: ID!): ClusterRestore
+
   "a regular status ping to be sent by the deploy operator"
   pingCluster(attributes: ClusterPing!): Cluster
 
@@ -517,6 +537,10 @@ type RootMutationType {
   updateServiceComponents(id: ID!, components: [ComponentAttributes], errors: [ServiceErrorAttributes]): ServiceDeployment
 
   updateGate(id: ID!, attributes: GateUpdateAttributes!): PipelineGate
+
+  createClusterBackup(attributes: BackupAttributes!): ClusterBackup
+
+  updateClusterRestore(id: ID!, attributes: RestoreAttributes!): ClusterRestore
 
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
@@ -631,6 +655,102 @@ input HttpConnectionAttributes {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+enum RestoreStatus {
+  CREATED
+  PENDING
+  SUCCESSFUL
+  FAILED
+}
+
+input ObjectStoreAttributes {
+  name: String!
+  s3: S3StoreAttributes
+  gcs: GcsStoreAttributes
+  azure: AzureStoreAttributes
+}
+
+input BackupAttributes {
+  name: String!
+}
+
+input RestoreAttributes {
+  status: RestoreStatus!
+}
+
+input S3StoreAttributes {
+  bucket: String!
+  region: String
+  endpoint: String
+  accessKeyId: String!
+  secretAccessKey: String!
+}
+
+input GcsStoreAttributes {
+  bucket: String!
+  region: String!
+  applicationCredentials: String!
+}
+
+input AzureStoreAttributes {
+  storageAccount: String!
+  container: String!
+  subscriptionId: String!
+  tenantId: String!
+  clientId: String!
+  clientSecret: String!
+}
+
+type ObjectStore {
+  id: ID!
+  name: String!
+  s3: S3Store
+  gcs: GcsStore
+  azure: AzureStore
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type ClusterBackup {
+  id: ID!
+  name: String!
+  cluster: Cluster
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type ClusterRestore {
+  id: ID!
+  status: RestoreStatus!
+  backup: ClusterBackup
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type S3Store {
+  bucket: String!
+  region: String
+  endpoint: String
+  accessKeyId: String!
+}
+
+type GcsStore {
+  bucket: String!
+  region: String!
+}
+
+type AzureStore {
+  storageAccount: String!
+  container: String!
+  subscriptionId: String!
+  tenantId: String!
+  clientId: String!
+}
+
+type ObjectStoreConnection {
+  pageInfo: PageInfo!
+  edges: [ObjectStoreEdge]
 }
 
 enum GateState {
@@ -1008,6 +1128,7 @@ input ServiceDeploymentAttributes {
   configuration: [ConfigAttributes]
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+  contextBindings: [ContextBindingAttributes]
 }
 
 input SyncConfigAttributes {
@@ -1045,6 +1166,9 @@ input ServiceUpdateAttributes {
   helm: HelmConfigAttributes
   configuration: [ConfigAttributes]
   kustomize: KustomizeAttributes
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
+  contextBindings: [ContextBindingAttributes]
 }
 
 input ServiceCloneAttributes {
@@ -1085,6 +1209,17 @@ input ComponentContentAttributes {
 input ServiceErrorAttributes {
   source: String!
   message: String!
+}
+
+"A reusable configuration context, useful for plumbing data from external tools like terraform\/pulumi\/etc"
+input ServiceContextAttributes {
+  configuration: Json
+  secrets: [ConfigAttributes]
+}
+
+"a binding from a service to a service context"
+input ContextBindingAttributes {
+  contextId: String!
 }
 
 "A reference for a globalized service, which targets clusters based on the configured criteria"
@@ -1197,6 +1332,9 @@ type ServiceDeployment {
 
   "whether this service is controlled by a global service"
   owner: GlobalService
+
+  "bound contexts for this service"
+  contexts: [ServiceContext]
 
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
@@ -1408,6 +1546,16 @@ type SyncConfig {
 type NamespaceMetadata {
   labels: Map
   annotations: Map
+}
+
+"A reusable bundle of configuration designed to make it easy to communicate between tools like tf\/pulumi and k8s"
+type ServiceContext {
+  id: ID!
+  name: String!
+  configuration: Map
+  secrets: [ServiceConfiguration]
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 type ServiceDeploymentConnection {
@@ -4099,5 +4247,10 @@ type ServiceDeploymentEdge {
 
 type PipelineEdge {
   node: Pipeline
+  cursor: String
+}
+
+type ObjectStoreEdge {
+  node: ObjectStore
   cursor: String
 }
