@@ -373,6 +373,28 @@ export type AzureSettingsAttributes = {
   tenantId: Scalars['String']['input'];
 };
 
+export type AzureStore = {
+  __typename?: 'AzureStore';
+  clientId: Scalars['String']['output'];
+  container: Scalars['String']['output'];
+  storageAccount: Scalars['String']['output'];
+  subscriptionId: Scalars['String']['output'];
+  tenantId: Scalars['String']['output'];
+};
+
+export type AzureStoreAttributes = {
+  clientId: Scalars['String']['input'];
+  clientSecret: Scalars['String']['input'];
+  container: Scalars['String']['input'];
+  storageAccount: Scalars['String']['input'];
+  subscriptionId: Scalars['String']['input'];
+  tenantId: Scalars['String']['input'];
+};
+
+export type BackupAttributes = {
+  name: Scalars['String']['input'];
+};
+
 export type BindingAttributes = {
   groupId?: InputMaybe<Scalars['ID']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -659,6 +681,15 @@ export type ClusterAttributes = {
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
+export type ClusterBackup = {
+  __typename?: 'ClusterBackup';
+  cluster?: Maybe<Cluster>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 /** a single condition struct for various phases of the cluster provisionining process */
 export type ClusterCondition = {
   __typename?: 'ClusterCondition';
@@ -767,6 +798,15 @@ export type ClusterProviderUpdateAttributes = {
   cloudSettings?: InputMaybe<CloudProviderSettingsAttributes>;
   /** if you optionally want to reconfigure the git repository for the cluster provider */
   service?: InputMaybe<ClusterServiceAttributes>;
+};
+
+export type ClusterRestore = {
+  __typename?: 'ClusterRestore';
+  backup?: Maybe<ClusterBackup>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  status: RestoreStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type ClusterServiceAttributes = {
@@ -1337,6 +1377,18 @@ export type GcpCloudSettings = {
 
 export type GcpSettingsAttributes = {
   applicationCredentials: Scalars['String']['input'];
+};
+
+export type GcsStore = {
+  __typename?: 'GcsStore';
+  bucket: Scalars['String']['output'];
+  region: Scalars['String']['output'];
+};
+
+export type GcsStoreAttributes = {
+  applicationCredentials: Scalars['String']['input'];
+  bucket: Scalars['String']['input'];
+  region: Scalars['String']['input'];
 };
 
 export type GitAttributes = {
@@ -2061,6 +2113,36 @@ export type ObjectReference = {
   namespace?: Maybe<Scalars['String']['output']>;
 };
 
+export type ObjectStore = {
+  __typename?: 'ObjectStore';
+  azure?: Maybe<AzureStore>;
+  gcs?: Maybe<GcsStore>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  s3?: Maybe<S3Store>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ObjectStoreAttributes = {
+  azure?: InputMaybe<AzureStoreAttributes>;
+  gcs?: InputMaybe<GcsStoreAttributes>;
+  name: Scalars['String']['input'];
+  s3?: InputMaybe<S3StoreAttributes>;
+};
+
+export type ObjectStoreConnection = {
+  __typename?: 'ObjectStoreConnection';
+  edges?: Maybe<Array<Maybe<ObjectStoreEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ObjectStoreEdge = {
+  __typename?: 'ObjectStoreEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ObjectStore>;
+};
+
 export enum Operation {
   Eq = 'EQ',
   Gt = 'GT',
@@ -2713,6 +2795,17 @@ export type Resources = {
   requests?: Maybe<ResourceSpec>;
 };
 
+export type RestoreAttributes = {
+  status: RestoreStatus;
+};
+
+export enum RestoreStatus {
+  Created = 'CREATED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Successful = 'SUCCESSFUL'
+}
+
 /** a representation of a past revision of a service */
 export type Revision = {
   __typename?: 'Revision';
@@ -2803,12 +2896,15 @@ export type RootMutationType = {
   createAgentMigration?: Maybe<AgentMigration>;
   createBuild?: Maybe<Build>;
   createCluster?: Maybe<Cluster>;
+  createClusterBackup?: Maybe<ClusterBackup>;
   createClusterProvider?: Maybe<ClusterProvider>;
+  createClusterRestore?: Maybe<ClusterRestore>;
   createGitRepository?: Maybe<GitRepository>;
   createGlobalService?: Maybe<GlobalService>;
   createGroup?: Maybe<Group>;
   createGroupMember?: Maybe<GroupMember>;
   createInvite?: Maybe<Invite>;
+  createObjectStore?: Maybe<ObjectStore>;
   createPeer?: Maybe<WireguardPeer>;
   createPrAutomation?: Maybe<PrAutomation>;
   createProviderCredential?: Maybe<ProviderCredential>;
@@ -2832,6 +2928,7 @@ export type RootMutationType = {
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
   deleteNode?: Maybe<Node>;
+  deleteObjectStore?: Maybe<ObjectStore>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
@@ -2880,12 +2977,14 @@ export type RootMutationType = {
   signup?: Maybe<User>;
   updateCluster?: Maybe<Cluster>;
   updateClusterProvider?: Maybe<ClusterProvider>;
+  updateClusterRestore?: Maybe<ClusterRestore>;
   updateConfiguration?: Maybe<Configuration>;
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
   updateGate?: Maybe<PipelineGate>;
   updateGitRepository?: Maybe<GitRepository>;
   updateGlobalService?: Maybe<GlobalService>;
   updateGroup?: Maybe<Group>;
+  updateObjectStore?: Maybe<ObjectStore>;
   updatePrAutomation?: Maybe<PrAutomation>;
   /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
@@ -2944,8 +3043,18 @@ export type RootMutationTypeCreateClusterArgs = {
 };
 
 
+export type RootMutationTypeCreateClusterBackupArgs = {
+  attributes: BackupAttributes;
+};
+
+
 export type RootMutationTypeCreateClusterProviderArgs = {
   attributes: ClusterProviderAttributes;
+};
+
+
+export type RootMutationTypeCreateClusterRestoreArgs = {
+  backupId: Scalars['ID']['input'];
 };
 
 
@@ -2975,6 +3084,11 @@ export type RootMutationTypeCreateGroupMemberArgs = {
 
 export type RootMutationTypeCreateInviteArgs = {
   attributes: InviteAttributes;
+};
+
+
+export type RootMutationTypeCreateObjectStoreArgs = {
+  attributes: ObjectStoreAttributes;
 };
 
 
@@ -3097,6 +3211,11 @@ export type RootMutationTypeDeleteJobArgs = {
 
 export type RootMutationTypeDeleteNodeArgs = {
   name: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeDeleteObjectStoreArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3316,6 +3435,12 @@ export type RootMutationTypeUpdateClusterProviderArgs = {
 };
 
 
+export type RootMutationTypeUpdateClusterRestoreArgs = {
+  attributes: RestoreAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateConfigurationArgs = {
   content: Scalars['String']['input'];
   message?: InputMaybe<Scalars['String']['input']>;
@@ -3350,6 +3475,12 @@ export type RootMutationTypeUpdateGlobalServiceArgs = {
 export type RootMutationTypeUpdateGroupArgs = {
   attributes: GroupAttributes;
   groupId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateObjectStoreArgs = {
+  attributes: ObjectStoreAttributes;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3480,6 +3611,7 @@ export type RootQueryType = {
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   nodes?: Maybe<Array<Maybe<Node>>>;
   notifications?: Maybe<NotificationConnection>;
+  objectStores?: Maybe<ObjectStoreConnection>;
   pipeline?: Maybe<Pipeline>;
   pipelines?: Maybe<PipelineConnection>;
   pluralCluster?: Maybe<PluralCluster>;
@@ -3818,6 +3950,14 @@ export type RootQueryTypeNodeMetricsArgs = {
 export type RootQueryTypeNotificationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   all?: InputMaybe<Scalars['Boolean']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeObjectStoresArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
@@ -4288,6 +4428,22 @@ export type RuntimeService = {
 export type RuntimeServiceAttributes = {
   name: Scalars['String']['input'];
   version: Scalars['String']['input'];
+};
+
+export type S3Store = {
+  __typename?: 'S3Store';
+  accessKeyId: Scalars['String']['output'];
+  bucket: Scalars['String']['output'];
+  endpoint?: Maybe<Scalars['String']['output']>;
+  region?: Maybe<Scalars['String']['output']>;
+};
+
+export type S3StoreAttributes = {
+  accessKeyId: Scalars['String']['input'];
+  bucket: Scalars['String']['input'];
+  endpoint?: InputMaybe<Scalars['String']['input']>;
+  region?: InputMaybe<Scalars['String']['input']>;
+  secretAccessKey: Scalars['String']['input'];
 };
 
 /** an object representing the means to connect to SCM apis */

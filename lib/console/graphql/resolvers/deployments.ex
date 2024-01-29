@@ -28,7 +28,10 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ComponentContent,
     ScmConnection,
     PrAutomation,
-    ServiceContext
+    ServiceContext,
+    ClusterRestore,
+    ClusterBackup,
+    ObjectStore
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -55,12 +58,16 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ScmConnection, _), do: ScmConnection
   def query(ServiceContext, _), do: ServiceContext
   def query(PrAutomation, _), do: PrAutomation
+  def query(ClusterRestore, _), do: ClusterRestore
+  def query(ClusterBackup, _), do: ClusterBackup
+  def query(ObjectStore, _), do: ObjectStore
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
   delegates Console.GraphQl.Resolvers.Deployments.Cluster
   delegates Console.GraphQl.Resolvers.Deployments.Service
   delegates Console.GraphQl.Resolvers.Deployments.Pipeline
+  delegates Console.GraphQl.Resolvers.Deployments.Backup
 
   def list_addons(_, _), do: AddOns.addons()
 

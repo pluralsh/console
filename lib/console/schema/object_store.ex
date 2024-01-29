@@ -6,10 +6,11 @@ defmodule Console.Schema.ObjectStore do
     field :name, :string
 
     embeds_one :s3, S3, on_replace: :update do
-      field :bucket,        :string
-      field :region,        :string
-      field :endpoint,      :string
-      field :access_key_id, EncryptedString
+      field :bucket,            :string
+      field :region,            :string
+      field :endpoint,          :string
+      field :access_key_id,     :string
+      field :secret_access_key, EncryptedString
     end
 
     embeds_one :gcs, GCS, on_replace: :update do
@@ -28,6 +29,10 @@ defmodule Console.Schema.ObjectStore do
     end
 
     timestamps()
+  end
+
+  def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
+    from(os in query, order_by: ^order)
   end
 
   @valid ~w(name)a

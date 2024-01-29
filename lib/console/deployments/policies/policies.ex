@@ -2,7 +2,7 @@ defmodule Console.Deployments.Policies do
   use Piazza.Policy
   import Console.Deployments.Policies.Rbac, only: [rbac: 3]
   alias Console.Deployments.Services
-  alias Console.Schema.{User, Cluster, Service, PipelineGate}
+  alias Console.Schema.{User, Cluster, Service, PipelineGate, ClusterBackup}
 
   def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
     res = resource(res)
@@ -31,6 +31,9 @@ defmodule Console.Deployments.Policies do
     do: can?(user, %{svc | deleted_at: nil}, :write)
   def can?(%Cluster{id: id}, %Service{cluster_id: id}, :secrets), do: :pass
   def can?(%Cluster{id: id}, %Service{cluster_id: id}, :read), do: :pass
+
+  def can?(%User{} = user, %ClusterBackup{cluster: %Cluster{} = cluster}, action),
+    do: can?(user, cluster, action)
 
   def can?(_, %Cluster{self: true}, :delete), do: {:error, "cannot delete the management cluster"}
   def can?(_, %Cluster{protect: true}, :delete), do: {:error, "this cluster has deletion protection enabled"}

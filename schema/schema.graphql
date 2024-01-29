@@ -254,6 +254,8 @@ type RootQueryType {
 
   pipeline(id: ID!): Pipeline
 
+  objectStores(after: String, first: Int, before: String, last: Int): ObjectStoreConnection
+
   "the services deployed in the current cluster, to be polled by the deploy operator"
   clusterServices: [ServiceDeployment]
 
@@ -513,6 +515,14 @@ type RootMutationType {
   "forces a pipeline gate to be in open state"
   forceGate(id: ID!, state: GateState): PipelineGate
 
+  createObjectStore(attributes: ObjectStoreAttributes!): ObjectStore
+
+  updateObjectStore(id: ID!, attributes: ObjectStoreAttributes!): ObjectStore
+
+  deleteObjectStore(id: ID!): ObjectStore
+
+  createClusterRestore(backupId: ID!): ClusterRestore
+
   "a regular status ping to be sent by the deploy operator"
   pingCluster(attributes: ClusterPing!): Cluster
 
@@ -523,6 +533,10 @@ type RootMutationType {
   updateServiceComponents(id: ID!, components: [ComponentAttributes], errors: [ServiceErrorAttributes]): ServiceDeployment
 
   updateGate(id: ID!, attributes: GateUpdateAttributes!): PipelineGate
+
+  createClusterBackup(attributes: BackupAttributes!): ClusterBackup
+
+  updateClusterRestore(id: ID!, attributes: RestoreAttributes!): ClusterRestore
 
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
@@ -637,6 +651,102 @@ input HttpConnectionAttributes {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+enum RestoreStatus {
+  CREATED
+  PENDING
+  SUCCESSFUL
+  FAILED
+}
+
+input ObjectStoreAttributes {
+  name: String!
+  s3: S3StoreAttributes
+  gcs: GcsStoreAttributes
+  azure: AzureStoreAttributes
+}
+
+input BackupAttributes {
+  name: String!
+}
+
+input RestoreAttributes {
+  status: RestoreStatus!
+}
+
+input S3StoreAttributes {
+  bucket: String!
+  region: String
+  endpoint: String
+  accessKeyId: String!
+  secretAccessKey: String!
+}
+
+input GcsStoreAttributes {
+  bucket: String!
+  region: String!
+  applicationCredentials: String!
+}
+
+input AzureStoreAttributes {
+  storageAccount: String!
+  container: String!
+  subscriptionId: String!
+  tenantId: String!
+  clientId: String!
+  clientSecret: String!
+}
+
+type ObjectStore {
+  id: ID!
+  name: String!
+  s3: S3Store
+  gcs: GcsStore
+  azure: AzureStore
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type ClusterBackup {
+  id: ID!
+  name: String!
+  cluster: Cluster
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type ClusterRestore {
+  id: ID!
+  status: RestoreStatus!
+  backup: ClusterBackup
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type S3Store {
+  bucket: String!
+  region: String
+  endpoint: String
+  accessKeyId: String!
+}
+
+type GcsStore {
+  bucket: String!
+  region: String!
+}
+
+type AzureStore {
+  storageAccount: String!
+  container: String!
+  subscriptionId: String!
+  tenantId: String!
+  clientId: String!
+}
+
+type ObjectStoreConnection {
+  pageInfo: PageInfo!
+  edges: [ObjectStoreEdge]
 }
 
 enum GateState {
@@ -4133,5 +4243,10 @@ type ServiceDeploymentEdge {
 
 type PipelineEdge {
   node: Pipeline
+  cursor: String
+}
+
+type ObjectStoreEdge {
+  node: ObjectStore
   cursor: String
 }

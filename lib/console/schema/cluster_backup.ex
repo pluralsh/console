@@ -10,6 +10,14 @@ defmodule Console.Schema.ClusterBackup do
     timestamps()
   end
 
+  def for_cluster(query \\ __MODULE__, cluster_id) do
+    from(cb in query, where: cb.cluster_id == ^cluster_id)
+  end
+
+  def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
+    from(cb in query, order_by: ^order)
+  end
+
   @valid ~w(name)a
 
   def changeset(model, attrs \\ %{}) do

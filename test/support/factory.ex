@@ -385,6 +385,25 @@ defmodule Console.Factory do
     }
   end
 
+  def object_store_factory do
+    %Schema.ObjectStore{
+      name: sequence(:object_store, & "os-#{&1}")
+    }
+  end
+
+  def cluster_backup_factory do
+    %Schema.ClusterBackup{
+      name: sequence(:cb, & "cb-#{&1}"),
+      cluster: build(:cluster)
+    }
+  end
+
+  def cluster_restore_factory do
+    %Schema.ClusterRestore{
+      backup: build(:cluster_backup)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

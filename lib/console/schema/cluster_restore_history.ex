@@ -1,10 +1,10 @@
 defmodule Console.Schema.ClusterRestoreHistory do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, ClusterBackup}
+  alias Console.Schema.{Cluster, ClusterRestore}
 
   schema "cluster_restore_history" do
     belongs_to :cluster, Cluster
-    belongs_to :backup, ClusterBackup
+    belongs_to :restore, ClusterRestore
 
     timestamps()
   end
@@ -17,13 +17,13 @@ defmodule Console.Schema.ClusterRestoreHistory do
     from(cr in query, order_by: ^order)
   end
 
-  @valid ~w(cluster_id backup_id)a
+  @valid ~w(cluster_id restore_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:cluster_id)
-    |> foreign_key_constraint(:backup_id)
+    |> foreign_key_constraint(:restore_id)
     |> validate_required(@valid)
   end
 end
