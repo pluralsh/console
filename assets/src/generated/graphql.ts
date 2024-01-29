@@ -3567,6 +3567,7 @@ export type RootQueryType = {
   clusterProvider?: Maybe<ClusterProvider>;
   /** a relay connection of all providers visible to the current user */
   clusterProviders?: Maybe<ClusterProviderConnection>;
+  clusterRestore?: Maybe<ClusterRestore>;
   /** the services deployed in the current cluster, to be polled by the deploy operator */
   clusterServices?: Maybe<Array<Maybe<ServiceDeployment>>>;
   /** gets summary information for all healthy/unhealthy clusters in your fleet */
@@ -3750,6 +3751,11 @@ export type RootQueryTypeClusterProvidersArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeClusterRestoreArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

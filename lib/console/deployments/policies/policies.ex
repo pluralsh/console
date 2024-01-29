@@ -1,8 +1,9 @@
 defmodule Console.Deployments.Policies do
   use Piazza.Policy
   import Console.Deployments.Policies.Rbac, only: [rbac: 3]
+  alias Console.Repo
   alias Console.Deployments.Services
-  alias Console.Schema.{User, Cluster, Service, PipelineGate, ClusterBackup}
+  alias Console.Schema.{User, Cluster, Service, PipelineGate, ClusterBackup, ClusterRestore}
 
   def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
     res = resource(res)
@@ -18,6 +19,13 @@ defmodule Console.Deployments.Policies do
   def can?(user, %{read_bindings: r, write_bindings: w} = resource, :create)
         when (is_list(r) and length(r) > 0) or (is_list(w) and length(w) > 0),
     do: can?(user, Map.merge(resource, %{read_bindings: [], write_bindings: []}), :create)
+
+  def can?(%Cluster{id: id}, %ClusterRestore{} = restore, :read) do
+    case Repo.preload(restore, [:backup]) do
+      %ClusterRestore{backup: %ClusterBackup{cluster_id: ^id}} -> :pass
+      _ -> {:error,  "forbidden"}
+    end
+  end
 
   def can?(%Cluster{id: id}, %PipelineGate{cluster_id: id}, :update),
     do: :pass

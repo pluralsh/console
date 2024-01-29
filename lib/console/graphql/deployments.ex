@@ -78,6 +78,7 @@
     import_fields :public_service_queries
     import_fields :public_cluster_queries
     import_fields :public_pipeline_queries
+    import_fields :public_backup_queries
 
     field :deployment_settings, :deployment_settings do
       middleware Authenticated

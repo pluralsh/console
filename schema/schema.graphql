@@ -274,6 +274,8 @@ type RootQueryType {
 
   clusterGates: [PipelineGate]
 
+  clusterRestore(id: ID!): ClusterRestore
+
   deploymentSettings: DeploymentSettings
 }
 

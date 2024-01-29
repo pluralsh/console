@@ -100,6 +100,15 @@ defmodule Console.GraphQl.Deployments.Backup do
 
   connection node_type: :object_store
 
+  object :public_backup_queries do
+    field :cluster_restore, :cluster_restore do
+      middleware ClusterAuthenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_cluster_restore/2
+    end
+  end
+
   object :public_backup_mutations do
     field :create_cluster_backup, :cluster_backup do
       middleware ClusterAuthenticated
