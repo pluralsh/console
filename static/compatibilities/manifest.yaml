@@ -5,3 +5,4 @@ names:
 - argo-rollouts
 - kube-prometheus-stack
 - istio
+- linkerd
