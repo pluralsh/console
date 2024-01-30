@@ -5,7 +5,6 @@ import (
 
 	console "github.com/pluralsh/console-client-go"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -66,6 +65,12 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 		}
 	}()
 
+	// Handle proper resource deletion via finalizer
+	result, err := r.addOrRemoveFinalizer(ctx, scm)
+	if result != nil {
+		return *result, err
+	}
+
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, scm)
 	if err != nil {
@@ -80,12 +85,6 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
-
-	// Handle proper resource deletion via finalizer
-	result, err := r.addOrRemoveFinalizer(ctx, scm)
-	if result != nil {
-		return *result, err
-	}
 
 	// Get ScmConnection SHA that can be saved back in the status to check for changes
 	changed, sha, err := scm.Diff(utils.HashObject)
@@ -113,7 +112,13 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 }
 
 func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Context, scm *v1alpha1.ScmConnection) (reconcile.Result, error) {
-	apiScmConnection, err := r.ConsoleClient.GetScmConnection(ctx, scm.ConsoleName())
+	if !r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName()) {
+		scm.Status.ID = nil
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, "Could not find ScmConnection in Console API")
+		return ctrl.Result{}, nil
+	}
+
+	apiScmConnection, err := r.ConsoleClient.GetScmConnectionByName(ctx, scm.ConsoleName())
 	if err != nil {
 		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
@@ -132,13 +137,9 @@ func (r *ScmConnectionReconciler) isAlreadyExists(ctx context.Context, scm *v1al
 		return scm.Status.IsReadonly(), nil
 	}
 
-	_, err := r.ConsoleClient.GetScmConnection(ctx, scm.ConsoleName())
-	if errors.IsNotFound(err) {
+	exists := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
+	if !exists {
 		return false, nil
-	}
-
-	if err != nil {
-		return false, err
 	}
 
 	if !scm.Status.HasID() {
@@ -161,7 +162,7 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !scm.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Remove ScmConnection from Console API if it exists
-		if r.ConsoleClient.IsScmConnectionExists(ctx, scm.Status.GetID()) {
+		if r.ConsoleClient.IsScmConnectionExists(ctx, scm.Status.GetID()) && !scm.Status.IsReadonly() {
 			logger.Info("Deleting ScmConnection")
 			if err := r.ConsoleClient.DeleteScmConnection(ctx, scm.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
@@ -195,7 +196,7 @@ func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmCon
 
 	// Read the ScmConnection from Console API if it already exists
 	if exists {
-		return r.ConsoleClient.GetScmConnection(ctx, scm.Spec.Name)
+		return r.ConsoleClient.GetScmConnectionByName(ctx, scm.ConsoleName())
 	}
 
 	// Create the ScmConnection in Console API if it doesn't exist

@@ -67,7 +67,8 @@ type ConsoleClient interface {
 	CreateScmConnection(ctx context.Context, attributes console.ScmConnectionAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
 	UpdateScmConnection(ctx context.Context, id string, attributes console.ScmConnectionAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
 	DeleteScmConnection(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error
-	GetScmConnection(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
+	GetScmConnection(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
+	GetScmConnectionByName(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
 	IsScmConnectionExists(ctx context.Context, name string) bool
 }
 

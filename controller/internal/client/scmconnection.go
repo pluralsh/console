@@ -33,8 +33,21 @@ func (c *client) DeleteScmConnection(ctx context.Context, id string, options ...
 	return err
 }
 
-func (c *client) GetScmConnection(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
-	response, err := c.consoleClient.GetScmConnection(ctx, nil, &name, options...)
+func (c *client) GetScmConnection(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
+	response, err := c.consoleClient.GetScmConnection(ctx, id, options...)
+	if err == nil && (response == nil || response.ScmConnection == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+
+	if response == nil {
+		return nil, err
+	}
+
+	return response.ScmConnection, err
+}
+
+func (c *client) GetScmConnectionByName(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
+	response, err := c.consoleClient.GetScmConnectionByName(ctx, name, options...)
 	if err == nil && (response == nil || response.ScmConnection == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, name)
 	}

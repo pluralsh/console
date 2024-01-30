@@ -279,6 +279,80 @@ func (_c *ConsoleClientMock_CreateRepository_Call) RunAndReturn(run func(string,
 	return _c
 }
 
+// CreateScmConnection provides a mock function with given fields: ctx, attributes, options
+func (_m *ConsoleClientMock) CreateScmConnection(ctx context.Context, attributes gqlclient.ScmConnectionAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
+	_va := make([]interface{}, len(options))
+	for _i := range options {
+		_va[_i] = options[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, attributes)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateScmConnection")
+	}
+
+	var r0 *gqlclient.ScmConnectionFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)); ok {
+		return rf(ctx, attributes, options...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) *gqlclient.ScmConnectionFragment); ok {
+		r0 = rf(ctx, attributes, options...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.ScmConnectionFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) error); ok {
+		r1 = rf(ctx, attributes, options...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateScmConnection_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateScmConnection'
+type ConsoleClientMock_CreateScmConnection_Call struct {
+	*mock.Call
+}
+
+// CreateScmConnection is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes gqlclient.ScmConnectionAttributes
+//   - options ...gqlgencclient.HTTPRequestOption
+func (_e *ConsoleClientMock_Expecter) CreateScmConnection(ctx interface{}, attributes interface{}, options ...interface{}) *ConsoleClientMock_CreateScmConnection_Call {
+	return &ConsoleClientMock_CreateScmConnection_Call{Call: _e.mock.On("CreateScmConnection",
+		append([]interface{}{ctx, attributes}, options...)...)}
+}
+
+func (_c *ConsoleClientMock_CreateScmConnection_Call) Run(run func(ctx context.Context, attributes gqlclient.ScmConnectionAttributes, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_CreateScmConnection_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
+			}
+		}
+		run(args[0].(context.Context), args[1].(gqlclient.ScmConnectionAttributes), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateScmConnection_Call) Return(_a0 *gqlclient.ScmConnectionFragment, _a1 error) *ConsoleClientMock_CreateScmConnection_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateScmConnection_Call) RunAndReturn(run func(context.Context, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_CreateScmConnection_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateService provides a mock function with given fields: clusterId, attributes
 func (_m *ConsoleClientMock) CreateService(clusterId *string, attributes gqlclient.ServiceDeploymentAttributes) (*gqlclient.ServiceDeploymentExtended, error) {
 	ret := _m.Called(clusterId, attributes)
@@ -604,6 +678,68 @@ func (_c *ConsoleClientMock_DeleteRepository_Call) Return(_a0 error) *ConsoleCli
 }
 
 func (_c *ConsoleClientMock_DeleteRepository_Call) RunAndReturn(run func(string) error) *ConsoleClientMock_DeleteRepository_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteScmConnection provides a mock function with given fields: ctx, id, options
+func (_m *ConsoleClientMock) DeleteScmConnection(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption) error {
+	_va := make([]interface{}, len(options))
+	for _i := range options {
+		_va[_i] = options[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteScmConnection")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
+		r0 = rf(ctx, id, options...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteScmConnection_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteScmConnection'
+type ConsoleClientMock_DeleteScmConnection_Call struct {
+	*mock.Call
+}
+
+// DeleteScmConnection is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - options ...gqlgencclient.HTTPRequestOption
+func (_e *ConsoleClientMock_Expecter) DeleteScmConnection(ctx interface{}, id interface{}, options ...interface{}) *ConsoleClientMock_DeleteScmConnection_Call {
+	return &ConsoleClientMock_DeleteScmConnection_Call{Call: _e.mock.On("DeleteScmConnection",
+		append([]interface{}{ctx, id}, options...)...)}
+}
+
+func (_c *ConsoleClientMock_DeleteScmConnection_Call) Run(run func(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_DeleteScmConnection_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteScmConnection_Call) Return(_a0 error) *ConsoleClientMock_DeleteScmConnection_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteScmConnection_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error) *ConsoleClientMock_DeleteScmConnection_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1150,6 +1286,154 @@ func (_c *ConsoleClientMock_GetRepository_Call) RunAndReturn(run func(*string) (
 	return _c
 }
 
+// GetScmConnection provides a mock function with given fields: ctx, id, options
+func (_m *ConsoleClientMock) GetScmConnection(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
+	_va := make([]interface{}, len(options))
+	for _i := range options {
+		_va[_i] = options[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetScmConnection")
+	}
+
+	var r0 *gqlclient.ScmConnectionFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)); ok {
+		return rf(ctx, id, options...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) *gqlclient.ScmConnectionFragment); ok {
+		r0 = rf(ctx, id, options...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.ScmConnectionFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
+		r1 = rf(ctx, id, options...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetScmConnection_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetScmConnection'
+type ConsoleClientMock_GetScmConnection_Call struct {
+	*mock.Call
+}
+
+// GetScmConnection is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - options ...gqlgencclient.HTTPRequestOption
+func (_e *ConsoleClientMock_Expecter) GetScmConnection(ctx interface{}, id interface{}, options ...interface{}) *ConsoleClientMock_GetScmConnection_Call {
+	return &ConsoleClientMock_GetScmConnection_Call{Call: _e.mock.On("GetScmConnection",
+		append([]interface{}{ctx, id}, options...)...)}
+}
+
+func (_c *ConsoleClientMock_GetScmConnection_Call) Run(run func(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_GetScmConnection_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetScmConnection_Call) Return(_a0 *gqlclient.ScmConnectionFragment, _a1 error) *ConsoleClientMock_GetScmConnection_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetScmConnection_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_GetScmConnection_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetScmConnectionByName provides a mock function with given fields: ctx, name, options
+func (_m *ConsoleClientMock) GetScmConnectionByName(ctx context.Context, name string, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
+	_va := make([]interface{}, len(options))
+	for _i := range options {
+		_va[_i] = options[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetScmConnectionByName")
+	}
+
+	var r0 *gqlclient.ScmConnectionFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)); ok {
+		return rf(ctx, name, options...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) *gqlclient.ScmConnectionFragment); ok {
+		r0 = rf(ctx, name, options...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.ScmConnectionFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
+		r1 = rf(ctx, name, options...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetScmConnectionByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetScmConnectionByName'
+type ConsoleClientMock_GetScmConnectionByName_Call struct {
+	*mock.Call
+}
+
+// GetScmConnectionByName is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+//   - options ...gqlgencclient.HTTPRequestOption
+func (_e *ConsoleClientMock_Expecter) GetScmConnectionByName(ctx interface{}, name interface{}, options ...interface{}) *ConsoleClientMock_GetScmConnectionByName_Call {
+	return &ConsoleClientMock_GetScmConnectionByName_Call{Call: _e.mock.On("GetScmConnectionByName",
+		append([]interface{}{ctx, name}, options...)...)}
+}
+
+func (_c *ConsoleClientMock_GetScmConnectionByName_Call) Run(run func(ctx context.Context, name string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_GetScmConnectionByName_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetScmConnectionByName_Call) Return(_a0 *gqlclient.ScmConnectionFragment, _a1 error) *ConsoleClientMock_GetScmConnectionByName_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetScmConnectionByName_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_GetScmConnectionByName_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetService provides a mock function with given fields: clusterID, serviceName
 func (_m *ConsoleClientMock) GetService(clusterID string, serviceName string) (*gqlclient.ServiceDeploymentExtended, error) {
 	ret := _m.Called(clusterID, serviceName)
@@ -1552,6 +1836,53 @@ func (_c *ConsoleClientMock_IsProviderExists_Call) Return(_a0 bool) *ConsoleClie
 }
 
 func (_c *ConsoleClientMock_IsProviderExists_Call) RunAndReturn(run func(context.Context, string) bool) *ConsoleClientMock_IsProviderExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsScmConnectionExists provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) IsScmConnectionExists(ctx context.Context, name string) bool {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsScmConnectionExists")
+	}
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, name)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_IsScmConnectionExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsScmConnectionExists'
+type ConsoleClientMock_IsScmConnectionExists_Call struct {
+	*mock.Call
+}
+
+// IsScmConnectionExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ConsoleClientMock_Expecter) IsScmConnectionExists(ctx interface{}, name interface{}) *ConsoleClientMock_IsScmConnectionExists_Call {
+	return &ConsoleClientMock_IsScmConnectionExists_Call{Call: _e.mock.On("IsScmConnectionExists", ctx, name)}
+}
+
+func (_c *ConsoleClientMock_IsScmConnectionExists_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_IsScmConnectionExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsScmConnectionExists_Call) Return(_a0 bool) *ConsoleClientMock_IsScmConnectionExists_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsScmConnectionExists_Call) RunAndReturn(run func(context.Context, string) bool) *ConsoleClientMock_IsScmConnectionExists_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2082,6 +2413,81 @@ func (_c *ConsoleClientMock_UpdateRepository_Call) Return(_a0 *gqlclient.UpdateG
 }
 
 func (_c *ConsoleClientMock_UpdateRepository_Call) RunAndReturn(run func(string, gqlclient.GitAttributes) (*gqlclient.UpdateGitRepository, error)) *ConsoleClientMock_UpdateRepository_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateScmConnection provides a mock function with given fields: ctx, id, attributes, options
+func (_m *ConsoleClientMock) UpdateScmConnection(ctx context.Context, id string, attributes gqlclient.ScmConnectionAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
+	_va := make([]interface{}, len(options))
+	for _i := range options {
+		_va[_i] = options[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id, attributes)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateScmConnection")
+	}
+
+	var r0 *gqlclient.ScmConnectionFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)); ok {
+		return rf(ctx, id, attributes, options...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) *gqlclient.ScmConnectionFragment); ok {
+		r0 = rf(ctx, id, attributes, options...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.ScmConnectionFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) error); ok {
+		r1 = rf(ctx, id, attributes, options...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateScmConnection_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateScmConnection'
+type ConsoleClientMock_UpdateScmConnection_Call struct {
+	*mock.Call
+}
+
+// UpdateScmConnection is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes gqlclient.ScmConnectionAttributes
+//   - options ...gqlgencclient.HTTPRequestOption
+func (_e *ConsoleClientMock_Expecter) UpdateScmConnection(ctx interface{}, id interface{}, attributes interface{}, options ...interface{}) *ConsoleClientMock_UpdateScmConnection_Call {
+	return &ConsoleClientMock_UpdateScmConnection_Call{Call: _e.mock.On("UpdateScmConnection",
+		append([]interface{}{ctx, id, attributes}, options...)...)}
+}
+
+func (_c *ConsoleClientMock_UpdateScmConnection_Call) Run(run func(ctx context.Context, id string, attributes gqlclient.ScmConnectionAttributes, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_UpdateScmConnection_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-3)
+		for i, a := range args[3:] {
+			if a != nil {
+				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.ScmConnectionAttributes), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateScmConnection_Call) Return(_a0 *gqlclient.ScmConnectionFragment, _a1 error) *ConsoleClientMock_UpdateScmConnection_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateScmConnection_Call) RunAndReturn(run func(context.Context, string, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_UpdateScmConnection_Call {
 	_c.Call.Return(run)
 	return _c
 }

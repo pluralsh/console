@@ -91,9 +91,10 @@ func (c ConditionReason) String() string {
 }
 
 const (
-	ReadonlyConditionReason     ConditionReason = "Readonly"
-	ReadyConditionReason        ConditionReason = "Ready"
-	SynchronizedConditionReason ConditionReason = "Synchronized"
+	ReadonlyConditionReason             ConditionReason = "Readonly"
+	ReadyConditionReason                ConditionReason = "Ready"
+	SynchronizedConditionReason         ConditionReason = "Synchronized"
+	SynchronizedConditionReasonNotFound ConditionReason = "NotFound"
 )
 
 type ConditionMessage string
@@ -103,5 +104,5 @@ func (c ConditionMessage) String() string {
 }
 
 const (
-	ReadonlyTrueConditionMessage ConditionMessage = "Running in read-only mode. Resource already exists upstream and will not be synced."
+	ReadonlyTrueConditionMessage ConditionMessage = "Running in read-only mode"
 )

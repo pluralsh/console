@@ -1,0 +1,11 @@
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ScmConnection
+metadata:
+  name: github
+spec:
+  name: scm-test-github
+  type: GITHUB
+  token: "api-token"
+  username: "johndoe"
+

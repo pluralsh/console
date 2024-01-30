@@ -19,13 +19,9 @@ spec:
       jsonPath: .status.id
       name: ID
       type: string
-    - description: Human-readable name of the Provider.
-      jsonPath: .spec.name
-      name: Name
-      type: string
-    - description: Name of the Provider cloud service.
-      jsonPath: .spec.cloud
-      name: Cloud
+    - description: Name of the scm provider service.
+      jsonPath: .spec.type
+      name: Provider
       type: string
     name: v1alpha1
     schema:
@@ -73,6 +69,7 @@ spec:
                 type: string
             required:
             - name
+            - token
             - type
             type: object
           status:

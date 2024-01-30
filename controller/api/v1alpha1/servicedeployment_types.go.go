@@ -4,6 +4,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func init() {
@@ -30,6 +31,8 @@ type ServiceGit struct {
 type ServiceHelm struct {
 	// +optional
 	ValuesRef *corev1.ConfigMapKeySelector `json:"values,omitempty"`
+	// +optional
+	ValuesRaw *runtime.RawExtension `json:"valuesRaw,omitempty"`
 	// +optional
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// +optional

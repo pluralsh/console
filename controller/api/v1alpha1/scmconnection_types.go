@@ -24,8 +24,7 @@ type ScmConnectionList struct {
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the provider in the Console API."
-// +kubebuilder:printcolumn:name="Name",type="string",JSONPath=".spec.name",description="Human-readable name of the Provider."
-// +kubebuilder:printcolumn:name="Cloud",type="string",JSONPath=".spec.cloud",description="Name of the Provider cloud service."
+// +kubebuilder:printcolumn:name="Provider",type="string",JSONPath=".spec.type",description="Name of the scm provider service."
 type ScmConnection struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -47,7 +46,7 @@ func (p *ScmConnection) Attributes() console.ScmConnectionAttributes {
 		Username: p.Spec.Username,
 		BaseURL:  p.Spec.BaseUrl,
 		APIURL:   p.Spec.APIUrl,
-		Token:    p.Spec.Token,
+		Token:    &p.Spec.Token,
 	}
 }
 
@@ -75,6 +74,9 @@ type ScmConnectionSpec struct {
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:Enum:=GITHUB;GITLAB
 	Type console.ScmType `json:"type"`
+	// Token ...
+	// +kubebuilder:validation:Required
+	Token string `json:"token"`
 	// Username ...
 	// +kubebuilder:validation:Optional
 	Username *string `json:"username,omitempty"`
@@ -84,9 +86,6 @@ type ScmConnectionSpec struct {
 	// APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl.
 	// +kubebuilder:validation:Optional
 	APIUrl *string `json:"apiUrl,omitempty"`
-	// Token ...
-	// +kubebuilder:validation:Optional
-	Token *string `json:"token,omitempty"`
 }
 
 type ScmConnectionStatus struct {

@@ -65,6 +65,11 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 		}
 	}()
 
+	// Handle resource deletion both in Kubernetes cluster and in Console API.
+	if result := r.addOrRemoveFinalizer(cluster); result != nil {
+		return *result, nil
+	}
+
 	// Handle existing resource.
 	exists, err := r.isExisting(cluster)
 	if err != nil {
@@ -79,11 +84,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
-
-	// Handle resource deletion both in Kubernetes cluster and in Console API.
-	if result := r.addOrRemoveFinalizer(cluster); result != nil {
-		return *result, nil
-	}
 
 	// Get Provider ID from the reference if it is set and ensure that controller reference is set properly.
 	providerId, result, err := r.getProviderIdAndSetControllerRef(ctx, cluster)
@@ -125,10 +125,6 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) {
 	if cluster.Status.HasReadonlyCondition() {
 		return cluster.Status.IsReadonly(), nil
-	}
-
-	if controllerutil.ContainsFinalizer(cluster, ClusterFinalizer) {
-		return false, nil
 	}
 
 	if !cluster.Spec.HasHandle() {
@@ -181,8 +177,8 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 			return &requeue
 		}
 
-		// Remove Cluster from Console API if it exists.
-		if r.ConsoleClient.IsClusterExisting(cluster.Status.ID) {
+		// Remove Cluster from Console API if it exists and is not read-only.
+		if r.ConsoleClient.IsClusterExisting(cluster.Status.ID) && !cluster.Status.IsReadonly() {
 			if _, err := r.ConsoleClient.DeleteCluster(*cluster.Status.ID); err != nil {
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.

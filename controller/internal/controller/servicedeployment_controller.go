@@ -7,6 +7,7 @@ import (
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -296,6 +297,9 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 				return nil, err
 			}
 			attr.Helm.Values = &val
+		}
+		if service.Spec.Helm.ValuesRaw != nil {
+			attr.Helm.Values = lo.ToPtr(string(service.Spec.Helm.ValuesRaw.Raw))
 		}
 		if service.Spec.Helm.Chart != nil {
 			attr.Helm.Chart = service.Spec.Helm.Chart

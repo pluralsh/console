@@ -73,6 +73,10 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		}
 	}()
 
+	if !repo.GetDeletionTimestamp().IsZero() {
+		return r.handleDelete(ctx, repo)
+	}
+
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(repo)
 	if err != nil {
@@ -83,9 +87,9 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		logger.Info("repository already exists in the API, running in read-only mode")
 		return r.handleExistingRepo(ctx, repo)
 	}
-	if !repo.GetDeletionTimestamp().IsZero() {
-		return r.handleDelete(ctx, repo)
-	}
+
+	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
+
 	cred, err := r.getRepositoryCredentials(ctx, repo)
 	if err != nil {
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
@@ -138,7 +142,6 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	if apiRepo.Health != nil && *apiRepo.Health == console.GitHealthPullable {
 		utils.MarkCondition(repo.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	}
-	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 	utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
@@ -166,7 +169,7 @@ func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alph
 			return ctrl.Result{}, err
 		}
 
-		if existingRepo != nil {
+		if existingRepo != nil && !repo.Status.IsReadonly() {
 			if err := r.ConsoleClient.DeleteRepository(*repo.Status.ID); err != nil {
 				if !errors.IsDeleteRepository(err) {
 					utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
