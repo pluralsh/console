@@ -47,7 +47,14 @@ type ClusterBackupReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *ClusterBackupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
+
+	// Read resource from Kubernetes cluster.
+	backup := &deploymentsv1alpha1.ClusterBackup{}
+	if err := r.Get(ctx, req.NamespacedName, backup); err != nil {
+		logger.Error(err, "Unable to fetch backup")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
 	// TODO(user): your logic here
 
