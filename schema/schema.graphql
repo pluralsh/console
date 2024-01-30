@@ -1898,6 +1898,12 @@ type Cluster {
   "pr automations that are relevant to managing this cluster"
   prAutomations: [PrAutomation]
 
+  "the active restore for this cluster"
+  restore: ClusterRestore
+
+  "the object store connection bound to this cluster for backup\/restore"
+  objectStore: ObjectStore
+
   "list cached nodes for a cluster, this can be stale up to 5m"
   nodes: [Node]
 
@@ -2247,7 +2253,7 @@ input ScmConnectionAttributes {
   name: String!
   type: ScmType!
   username: String
-  token: String
+  token: String!
   baseUrl: String
   apiUrl: String
 }
