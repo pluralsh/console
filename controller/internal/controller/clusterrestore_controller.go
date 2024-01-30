@@ -19,12 +19,14 @@ package controller
 import (
 	"context"
 
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/utils"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	deploymentsv1alpha1 "github.com/pluralsh/console/controller/api/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 // ClusterRestoreReconciler reconciles a ClusterRestore object
@@ -46,15 +48,28 @@ type ClusterRestoreReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	// Read resource from Kubernetes cluster.
-	restore := &deploymentsv1alpha1.ClusterRestore{}
+	restore := &v1alpha1.ClusterRestore{}
 	if err := r.Get(ctx, req.NamespacedName, restore); err != nil {
 		logger.Error(err, "Unable to fetch restore")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
+	// Ensure that status updates will always be persisted when exiting this function.
+	scope, err := NewClusterRestoreScope(ctx, r.Client, restore)
+	if err != nil {
+		logger.Error(err, "Failed to create restore scope")
+		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		return ctrl.Result{}, err
+	}
+	defer func() {
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
+		}
+	}()
 
 	// TODO(user): your logic here
 
@@ -64,6 +79,6 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 // SetupWithManager sets up the controller with the Manager.
 func (r *ClusterRestoreReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&deploymentsv1alpha1.ClusterRestore{}).
+		For(&v1alpha1.ClusterRestore{}).
 		Complete(r)
 }
