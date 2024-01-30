@@ -19,12 +19,14 @@ package controller
 import (
 	"context"
 
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/utils"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	deploymentsv1alpha1 "github.com/pluralsh/console/controller/api/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 // ClusterBackupReconciler reconciles a ClusterBackup object
@@ -46,15 +48,28 @@ type ClusterBackupReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *ClusterBackupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *ClusterBackupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	// Read resource from Kubernetes cluster.
-	backup := &deploymentsv1alpha1.ClusterBackup{}
+	backup := &v1alpha1.ClusterBackup{}
 	if err := r.Get(ctx, req.NamespacedName, backup); err != nil {
 		logger.Error(err, "Unable to fetch backup")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
+	// Ensure that status updates will always be persisted when exiting this function.
+	scope, err := NewClusterBackupScope(ctx, r.Client, backup)
+	if err != nil {
+		logger.Error(err, "Failed to create backup scope")
+		utils.MarkCondition(backup.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		return ctrl.Result{}, err
+	}
+	defer func() {
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
+		}
+	}()
 
 	// TODO(user): your logic here
 
@@ -64,6 +79,6 @@ func (r *ClusterBackupReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 // SetupWithManager sets up the controller with the Manager.
 func (r *ClusterBackupReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&deploymentsv1alpha1.ClusterBackup{}).
+		For(&v1alpha1.ClusterBackup{}).
 		Complete(r)
 }
