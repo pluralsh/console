@@ -26,7 +26,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :name,     non_null(:string)
     field :type,     non_null(:scm_type)
     field :username, :string
-    field :token,    :string
+    field :token,    non_null(:string)
     field :base_url, :string
     field :api_url,  :string
   end
@@ -48,7 +48,7 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :configuration, list_of(:pr_configuration_attributes)
 
-    field :write_bindings, list_of(:policy_binding_attributes), description: "users who can update this automation"
+    field :write_bindings,  list_of(:policy_binding_attributes), description: "users who can update this automation"
     field :create_bindings, list_of(:policy_binding_attributes), description: "users who can create prs with this automation"
   end
 

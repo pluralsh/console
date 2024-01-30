@@ -232,6 +232,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :service_errors,   list_of(:service_error), resolve: dataloader(Deployments), description: "any errors which might have occurred during the bootstrap process"
     field :repository,       :git_repository, resolve: dataloader(Deployments), description: "a custom git repository if you want to define your own CAPI manifests"
     field :pr_automations,   list_of(:pr_automation), resolve: dataloader(Deployments), description: "pr automations that are relevant to managing this cluster"
+    field :restore,          :cluster_restore, resolve: dataloader(Deployments), description: "the active restore for this cluster"
+    field :object_store,     :object_store, resolve: dataloader(Deployments), description: "the object store connection bound to this cluster for backup/restore"
 
     field :nodes, list_of(:node), description: "list cached nodes for a cluster, this can be stale up to 5m",
       resolve: &Deployments.list_nodes/3
