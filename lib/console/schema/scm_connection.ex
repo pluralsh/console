@@ -1,5 +1,6 @@
 defmodule Console.Schema.ScmConnection do
   use Piazza.Ecto.Schema
+  alias Piazza.Ecto.EncryptedString
 
   defenum Type, github: 0, gitlab: 1
 
@@ -9,10 +10,12 @@ defmodule Console.Schema.ScmConnection do
     field :base_url, :string
     field :api_url,  :string
     field :username, :string
-    field :token,    Piazza.Ecto.EncryptedString
+    field :token,    EncryptedString
     field :dir,      :string, virtual: true
     field :author,   :map, virtual: true
     field :branch,   :string, virtual: true
+
+    field :signing_private_key, EncryptedString
 
     timestamps()
   end
@@ -21,7 +24,7 @@ defmodule Console.Schema.ScmConnection do
     from(scm in query, order_by: ^order)
   end
 
-  @valid ~w(name type base_url api_url username token)a
+  @valid ~w(name type base_url api_url username token signing_private_key)a
 
   def changeset(model, attrs \\ %{}) do
     model

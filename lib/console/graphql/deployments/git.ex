@@ -23,12 +23,13 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "an object representing a means to authenticate to a source control provider like Github"
   input_object :scm_connection_attributes do
-    field :name,     non_null(:string)
-    field :type,     non_null(:scm_type)
-    field :username, :string
-    field :token,    non_null(:string)
-    field :base_url, :string
-    field :api_url,  :string
+    field :name,                non_null(:string)
+    field :type,                non_null(:scm_type)
+    field :username,            :string
+    field :token,               non_null(:string)
+    field :base_url,            :string
+    field :api_url,             :string
+    field :signing_private_key, :string, description: "a ssh private key to be used for commit signing"
   end
 
   @desc "A way to create a self-service means of generating PRs against an IaC repo"
