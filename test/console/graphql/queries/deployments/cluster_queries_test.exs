@@ -195,7 +195,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
               addonVersion {
                 version
                 kube
-                blocking(kubeVersion: "1.26")
+                blocking(kubeVersion: "1.25")
               }
             }
           }
@@ -221,7 +221,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
               addonVersion {
                 version
                 kube
-                blocking(kubeVersion: "1.25")
+                blocking(kubeVersion: "1.24")
               }
             }
           }
