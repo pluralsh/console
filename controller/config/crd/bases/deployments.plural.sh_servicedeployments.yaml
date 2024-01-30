@@ -342,9 +342,6 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
-                x-kubernetes-validations:
-                - message: Repository is immutable
-                  rule: self == oldSelf
               syncConfig:
                 properties:
                   annotations:

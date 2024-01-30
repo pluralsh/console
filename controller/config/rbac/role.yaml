@@ -155,6 +155,32 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - scmconnections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - scmconnections/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - scmconnections/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - servicedeployments
   verbs:
   - create

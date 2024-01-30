@@ -70,7 +70,6 @@ type ServiceSpec struct {
 	// +optional
 	SyncConfig *SyncConfigAttributes `json:"syncConfig,omitempty"`
 	// +optional
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Repository is immutable"
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef"`
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cluster is immutable"
