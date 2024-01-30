@@ -1,0 +1,50 @@
+# AWS configuration:
+# - provider            - s3-proxy provider name, "aws-s3".
+# - internalIdentity    - internal s3-proxy AWS access key ID to use.
+# - internalCredential  - internal s3-proxy AWS secret access key to use.
+# - identity            - AWS access key ID.
+# - credential          - AWS secret access key.
+# - bucket              - Amazon S3 bucket name.
+# - region              - AWS region.
+#
+# Azure configuration:
+# - provider            - s3-proxy provider name, "azureblob".
+# - internalIdentity    - internal s3-proxy AWS access key ID to use.
+# - internalCredential  - internal s3-proxy AWS secret access key to use.
+# - identity            - Azure storage account name.
+# - credential          - Azure storage account access key.
+# - bucket              - Azure blob container name.
+
+velero:
+  configuration:
+    backupStorageLocation:
+      - name: default
+        provider: aws
+        bucket: {{ configuration.bucket }}
+        config:
+          region: s3-proxy-default
+          s3ForcePathStyle: true
+          s3Url: "http://velero-s3-proxy.velero.svc:80"
+          publicUrl: "http://localhost:80"
+  credentials:
+    secretContents:
+      cloud: |
+        [default]
+        aws_access_key_id={{ configuration.internalIdentity }}
+        aws_secret_access_key={{ configuration.internalCredential }}
+
+s3-proxy:
+  s3:
+    identity: {{ configuration.internalIdentity }}
+    credential: {{ configuration.internalCredential }}
+  target:
+    provider: {{ configuration.provider }}
+    identity: {{ configuration.identity }}
+    credential: {{ configuration.credential }}
+    {% if configuration.provider == "aws-s3" -%}
+    endpoint: "https://s3.{{ configuration.region }}.amazonaws.com"
+    region: {{ configuration.region }}
+    {%- endif -%}
+    {% if configuration.provider == "azureblob" -%}
+    endpoint: "https://{{ configuration.identity }}.blob.core.windows.net"
+    {%- endif -%}

@@ -2,13 +2,14 @@ defmodule Console.Deployments.Services do
   use Console.Services.Base
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository}
+  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository, ServiceContext}
   alias Console.Deployments.{Secrets.Store, Settings, Git, Clusters, Deprecations.Checker, AddOns, Tar}
   alias Console.Deployments.Helm
   require Logger
 
   @type service_resp :: {:ok, Service.t} | Console.error
   @type revision_resp :: {:ok, Revision.t} | Console.error
+  @type context_resp :: {:ok, ServiceContext.t} | Console.error
 
   def get_service!(id), do: Console.Repo.get!(Service, id)
 
@@ -28,6 +29,9 @@ defmodule Console.Deployments.Services do
   end
 
   def get_revision!(id), do: Repo.get!(Revision, id)
+
+  def get_context_by_name!(name), do: Console.Repo.get_by!(ServiceContext, name: name)
+  def get_context_by_name(name), do: Console.Repo.get_by(ServiceContext, name: name)
 
   def tarball(%Service{id: id}), do: api_url("v1/git/tarballs?id=#{id}")
 
@@ -332,7 +336,8 @@ defmodule Console.Deployments.Services do
   def update_service(attrs, %Service{} = svc) do
     start_transaction()
     |> add_operation(:base, fn _ ->
-      Service.changeset(svc, Map.put(attrs, :status, :stale))
+      Repo.preload(svc, [:context_bindings, :read_bindings, :write_bindings])
+      |> Service.changeset(Map.put(attrs, :status, :stale))
       |> Console.Repo.update()
     end)
     |> add_operation(:revision, fn %{base: base} ->
@@ -611,6 +616,30 @@ defmodule Console.Deployments.Services do
     |> Repo.delete_all()
     |> elem(0)
     |> ok()
+  end
+
+  @doc """
+  Saves a service context for the given name, will update if its already present
+  """
+  @spec save_context(map, binary, User.t) :: context_resp
+  def save_context(attrs, name, %User{} = user) do
+    case get_context_by_name(name) do
+      %ServiceContext{} = ctx -> ctx
+      nil -> %ServiceContext{name: name}
+    end
+    |> ServiceContext.changeset(attrs)
+    |> allow(user, :create)
+    |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @doc """
+  Deletes a service context
+  """
+  @spec delete_context(binary, User.t) :: context_resp
+  def delete_context(id, %User{} = user) do
+    Repo.get(ServiceContext, id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   defp create_revision(attrs, %Service{id: id}) do

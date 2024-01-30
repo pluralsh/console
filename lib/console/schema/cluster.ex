@@ -13,7 +13,9 @@ defmodule Console.Schema.Cluster do
     GlobalService,
     ProviderCredential,
     ServiceError,
-    PrAutomation
+    PrAutomation,
+    ClusterRestore,
+    ObjectStore
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
@@ -103,9 +105,11 @@ defmodule Console.Schema.Cluster do
     embeds_one :kubeconfig,     Kubeconfig, on_replace: :update
     embeds_one :cloud_settings, CloudSettings, on_replace: :update
 
-    belongs_to :provider,   ClusterProvider
-    belongs_to :service,    Service
-    belongs_to :credential, ProviderCredential
+    belongs_to :provider,     ClusterProvider
+    belongs_to :service,      Service
+    belongs_to :credential,   ProviderCredential
+    belongs_to :object_store, ObjectStore
+    belongs_to :restore,      ClusterRestore
 
     has_many :node_pools, ClusterNodePool, on_replace: :delete
     has_many :service_errors, ServiceError, on_replace: :delete

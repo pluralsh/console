@@ -1,8 +1,9 @@
 defmodule Console.Deployments.Policies do
   use Piazza.Policy
   import Console.Deployments.Policies.Rbac, only: [rbac: 3]
+  alias Console.Repo
   alias Console.Deployments.Services
-  alias Console.Schema.{User, Cluster, Service, PipelineGate}
+  alias Console.Schema.{User, Cluster, Service, PipelineGate, ClusterBackup, ClusterRestore}
 
   def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
     res = resource(res)
@@ -19,9 +20,21 @@ defmodule Console.Deployments.Policies do
         when (is_list(r) and length(r) > 0) or (is_list(w) and length(w) > 0),
     do: can?(user, Map.merge(resource, %{read_bindings: [], write_bindings: []}), :create)
 
+  def can?(%Cluster{id: id}, %ClusterRestore{} = restore, :read) do
+    case Repo.preload(restore, [:backup]) do
+      %ClusterRestore{backup: %ClusterBackup{cluster_id: ^id}} -> :pass
+      _ -> {:error,  "forbidden"}
+    end
+  end
+
+  def can?(%Cluster{id: id}, %PipelineGate{cluster_id: id}, :read),
+    do: :pass
+
   def can?(%Cluster{id: id}, %PipelineGate{cluster_id: id}, :update),
     do: :pass
   def can?(_, %PipelineGate{}, :update), do: {:error, "forbidden"}
+
+  def can?(%Cluster{}, %PipelineGate{}, _), do: {:error, "forbidden"}
 
   def can?(%User{} = user, %PipelineGate{type: :approval} = g, :approve),
     do: can?(user, g, :write)
@@ -31,6 +44,9 @@ defmodule Console.Deployments.Policies do
     do: can?(user, %{svc | deleted_at: nil}, :write)
   def can?(%Cluster{id: id}, %Service{cluster_id: id}, :secrets), do: :pass
   def can?(%Cluster{id: id}, %Service{cluster_id: id}, :read), do: :pass
+
+  def can?(%User{} = user, %ClusterBackup{cluster: %Cluster{} = cluster}, action),
+    do: can?(user, cluster, action)
 
   def can?(_, %Cluster{self: true}, :delete), do: {:error, "cannot delete the management cluster"}
   def can?(_, %Cluster{protect: true}, :delete), do: {:error, "this cluster has deletion protection enabled"}

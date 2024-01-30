@@ -236,6 +236,13 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
       resolve &Deployments.cluster_gates/2
     end
+
+    field :cluster_gate, :pipeline_gate do
+      middleware ClusterAuthenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.cluster_gate/2
+    end
   end
 
   object :public_pipeline_mutations do

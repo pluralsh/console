@@ -141,7 +141,7 @@ type ServiceDeployment struct {
 	Status ServiceStatus `json:"status,omitempty"`
 }
 
-func (s *ServiceDeployment) GetName() string {
+func (s *ServiceDeployment) ConsoleName() string {
 	if s.Spec.Name != nil && len(*s.Spec.Name) > 0 {
 		return *s.Spec.Name
 	}
@@ -149,7 +149,7 @@ func (s *ServiceDeployment) GetName() string {
 	return s.Name
 }
 
-func (s *ServiceDeployment) GetNamespace() string {
+func (s *ServiceDeployment) ConsoleNamespace() string {
 	if s.Spec.Namespace != nil && len(*s.Spec.Namespace) > 0 {
 		return *s.Spec.Namespace
 	}

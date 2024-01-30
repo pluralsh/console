@@ -28,7 +28,7 @@ defmodule Console.Deployments.Helm.Cache do
       false -> build_tarball(url, cache, cache_path, chart)
     end
   end
-  def fetch(_, _), do: {:error, "chart not yet loaded"}
+  def fetch(_, chart), do: {:error, "chart not yet loaded: #{reason(chart)}"}
 
   def touch(%__MODULE__{touched: touched} = cache, %HelmChart{} = chart) do
     case path(cache, chart) do
@@ -73,6 +73,14 @@ defmodule Console.Deployments.Helm.Cache do
       _ -> true
     end
   end
+
+  defp reason(%HelmChart{status: %Status{conditions: [_ | _] = conditions}}) do
+    case Enum.find(conditions, & &1.type == "Ready") do
+      %Status.Conditions{message: msg} -> msg
+      _ -> "downloading"
+    end
+  end
+  defp reason(_), do: "downloading"
 
   defp remove_prefix(contents, chart) do
     Enum.map(contents, fn {path, content} -> {String.trim_leading(path, "#{chart}/"), content} end)

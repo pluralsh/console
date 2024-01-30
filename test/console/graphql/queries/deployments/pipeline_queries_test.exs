@@ -64,4 +64,26 @@ defmodule Console.GraphQl.Deployments.PipelineQueriesTest do
       assert found["id"] == job.id
     end
   end
+
+  describe "clusterGate" do
+    test "it can fetch a gate for a cluster" do
+      cluster = insert(:cluster)
+      other   = insert(:cluster)
+      job = insert(:pipeline_gate, type: :job, state: :pending, cluster: cluster)
+
+      {:ok, %{data: %{"clusterGate" => found}}} = run_query("""
+        query Gate($id: ID!) {
+          clusterGate(id: $id) { id }
+        }
+      """, %{"id" => job.id}, %{cluster: cluster})
+
+      assert found["id"] == job.id
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Gate($id: ID!) {
+          clusterGate(id: $id) { id }
+        }
+      """, %{"id" => job.id}, %{cluster: other})
+    end
+  end
 end

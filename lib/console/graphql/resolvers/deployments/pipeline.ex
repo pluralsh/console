@@ -12,6 +12,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Pipeline do
 
   def cluster_gates(_, %{context: %{cluster: cluster}}), do: {:ok, Pipelines.for_cluster(cluster)}
 
+  def cluster_gate(%{id: id}, ctx) do
+    Pipelines.get_gate!(id)
+    |> allow(actor(ctx), :read)
+  end
+
   def resolve_pipeline(%{id: id}, %{context: %{current_user: user}}) do
     Pipelines.get_pipeline!(id)
     |> allow(user, :read)
