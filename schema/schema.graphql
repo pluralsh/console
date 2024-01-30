@@ -2251,11 +2251,19 @@ input GitAttributes {
 "an object representing a means to authenticate to a source control provider like Github"
 input ScmConnectionAttributes {
   name: String!
+
   type: ScmType!
+
   username: String
+
   token: String!
+
   baseUrl: String
+
   apiUrl: String
+
+  "a ssh private key to be used for commit signing"
+  signingPrivateKey: String
 }
 
 "A way to create a self-service means of generating PRs against an IaC repo"
@@ -3756,6 +3764,7 @@ input UserAttributes {
   email: String
   password: String
   roles: UserRoleAttributes
+  signingPrivateKey: String
 }
 
 input ServiceAccountAttributes {

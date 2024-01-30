@@ -4482,6 +4482,8 @@ export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  /** a ssh private key to be used for commit signing */
+  signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
   token: Scalars['String']['input'];
   type: ScmType;
   username?: InputMaybe<Scalars['String']['input']>;
@@ -5040,6 +5042,7 @@ export type UserAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   password?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<UserRoleAttributes>;
+  signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UserConnection = {
