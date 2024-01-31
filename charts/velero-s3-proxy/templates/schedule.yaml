@@ -1,0 +1,10 @@
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: {{ include "velero-s3-proxy.fullname" . }}-default
+  labels:
+    {{- include "velero-s3-proxy.labels" . | nindent 4 }}
+spec:
+  schedule: 0 7 * * *
+  template:
+    ttl: 24h0m0s
