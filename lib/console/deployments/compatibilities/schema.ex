@@ -12,12 +12,13 @@ defmodule Console.Deployments.Compatibilities.Version do
 
   defstruct [:version, :kube, :requirements, :incompatibilities]
 
-  def blocking?(%__MODULE__{kube: kube_vsns}, kube_version) do
+  def blocking?(%__MODULE__{kube: kube_vsns}, kube_version, inc \\ 1) do
     with {:ok, %{major: maj, minor: min}} <- Version.parse(clean_version(kube_version)) do
-      kube_vsns = Enum.map(kube_vsns, &clean_version/1)
-      Enum.all?(kube_vsns, fn kube ->
+      minor = min + inc
+      Enum.map(kube_vsns, &clean_version/1)
+      |> Enum.all?(fn kube ->
         case Version.parse(kube) do
-          {:ok, %{major: ^maj, minor: ^min}} -> false
+          {:ok, %{major: ^maj, minor: ^minor}} -> false
           _ -> true
         end
       end)

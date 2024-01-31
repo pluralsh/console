@@ -1,5 +1,5 @@
 defmodule Console.Deployments.Pr.Git do
-  alias Console.Schema.{ScmConnection}
+  alias Console.Schema.{ScmConnection, User}
 
   @type git_resp :: {:ok, binary} | Console.error
 
@@ -11,6 +11,7 @@ defmodule Console.Deployments.Pr.Git do
          {:ok, b} <- branch(conn),
          {:ok, _} <- git(conn, "config", ["user.email", conn.author.email]),
          {:ok, _} <- git(conn, "config", ["user.name", conn.author.name]),
+         :ok <- configure_signing(conn),
          {:ok, _} <- git(conn, "checkout", ["-b", branch]),
       do: {:ok, %{conn | branch: b}}
   end
@@ -53,6 +54,19 @@ defmodule Console.Deployments.Pr.Git do
 
   defp branch_args(%ScmConnection{branch: b}) when is_binary(b), do: ["-b", b]
   defp branch_args(_), do: []
+
+  defp configure_signing(%ScmConnection{author: %User{signing_private_key: pk}} = conn) when is_binary(pk),
+    do: configure_signing(%{conn | signing_private_key: pk, author: nil})
+  defp configure_signing(%ScmConnection{signing_private_key: pk} = conn) when is_binary(pk) do
+    with {:ok, f} <- Briefly.create(),
+         :ok <- File.write(f, pk),
+         :ok <- File.chmod(f, 0o400),
+         {:ok, _} <- git(conn, "config", ["user.signingKey", f]),
+         {:ok, _} <- git(conn, "config", ["commit.gpgsign", "true"]),
+         {:ok, _} <- git(conn, "config", ["gpg.format", "ssh"]),
+      do: :ok
+  end
+  defp configure_signing(_), do: :ok
 
   defp git_askpass(), do: Console.conf(:git_askpass)
 end

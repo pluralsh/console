@@ -608,6 +608,8 @@ export type Cluster = {
   nodePools?: Maybe<Array<Maybe<NodePool>>>;
   /** list cached nodes for a cluster, this can be stale up to 5m */
   nodes?: Maybe<Array<Maybe<Node>>>;
+  /** the object store connection bound to this cluster for backup/restore */
+  objectStore?: Maybe<ObjectStore>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
   /** pr automations that are relevant to managing this cluster */
@@ -620,6 +622,8 @@ export type Cluster = {
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** a custom git repository if you want to define your own CAPI manifests */
   repository?: Maybe<GitRepository>;
+  /** the active restore for this cluster */
+  restore?: Maybe<ClusterRestore>;
   /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
   revisions?: Maybe<RevisionConnection>;
   /** fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries */
@@ -4478,7 +4482,9 @@ export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
-  token?: InputMaybe<Scalars['String']['input']>;
+  /** a ssh private key to be used for commit signing */
+  signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
+  token: Scalars['String']['input'];
   type: ScmType;
   username?: InputMaybe<Scalars['String']['input']>;
 };
@@ -5036,6 +5042,7 @@ export type UserAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   password?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<UserRoleAttributes>;
+  signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UserConnection = {
