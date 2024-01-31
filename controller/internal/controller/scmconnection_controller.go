@@ -6,6 +6,7 @@ import (
 
 	console "github.com/pluralsh/console-client-go"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -148,9 +149,12 @@ func (r *ScmConnectionReconciler) isAlreadyExists(ctx context.Context, scm *v1al
 		return scm.Status.IsReadonly(), nil
 	}
 
-	exists := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
-	if !exists {
+	_, err := r.ConsoleClient.GetScmConnectionByName(ctx, scm.ConsoleName())
+	if errors.IsNotFound(err) {
 		return false, nil
+	}
+	if err != nil {
+		return false, err
 	}
 
 	if !scm.Status.HasID() {
