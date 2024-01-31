@@ -18,7 +18,9 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
+	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
 	"github.com/pluralsh/console/controller/internal/utils"
@@ -26,8 +28,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+)
+
+const (
+	ClusterRestoreFinalizer = "deployments.plural.sh/cluster-restore-protection"
 )
 
 // ClusterRestoreReconciler reconciles a ClusterRestore object
@@ -60,11 +67,13 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	// Ensure that status updates will always be persisted when exiting this function.
 	scope, err := NewClusterRestoreScope(ctx, r.Client, restore)
 	if err != nil {
 		logger.Error(err, "Failed to create restore scope")
-		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	defer func() {
@@ -73,9 +82,80 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		}
 	}()
 
-	// TODO(user): your logic here
+	// Handle resource deletion both in Kubernetes cluster and in Console API.
+	if result := r.addOrRemoveFinalizer(restore); result != nil {
+		return *result, nil
+	}
+
+	// Sync resource with Console API.
+	apiRestore, err := r.sync(ctx, restore)
+	if err != nil {
+		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	// Update resource status.
+	restore.Status.ID = &apiRestore.ID
+	restore.Status.Status = apiRestore.Status
+	if apiRestore.Status == console.RestoreStatusSuccessful {
+		utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	} else {
+		utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, fmt.Sprintf("Restore has %s status", apiRestore.Status))
+	}
+	utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{}, nil
+}
+
+func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.ClusterRestore) (*console.ClusterRestoreFragment, error) {
+	exists := r.ConsoleClient.IsClusterRestoreExisting(restore.Status.GetID())
+	logger := log.FromContext(ctx)
+
+	if exists {
+		logger.V(9).Info(fmt.Sprintf("No changes detected for %s cluster", restore.Name))
+		return r.ConsoleClient.GetClusterRestore(restore.Status.GetID())
+	}
+
+	logger.Info(fmt.Sprintf("%s cluster does not exist, creating it", restore.Name))
+	return r.ConsoleClient.CreateClusterRestore(restore.Spec.BackupID)
+}
+
+func (r *ClusterRestoreReconciler) addOrRemoveFinalizer(restore *v1alpha1.ClusterRestore) *ctrl.Result {
+	/// If object is not being deleted and if it does not have our finalizer,
+	// then lets add the finalizer. This is equivalent to registering our finalizer.
+	if restore.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(restore, ClusterRestoreFinalizer) {
+		controllerutil.AddFinalizer(restore, ClusterRestoreFinalizer)
+	}
+
+	// If object is being deleted cleanup and remove the finalizer.
+	if !restore.ObjectMeta.DeletionTimestamp.IsZero() {
+		// If object is already being deleted from Console API requeue.
+		if r.ConsoleClient.IsClusterRestoreDeleting(restore.Status.GetID()) {
+			return &requeue
+		}
+
+		// Remove Cluster from Console API if it exists.
+		if r.ConsoleClient.IsClusterRestoreExisting(restore.Status.GetID()) {
+			if _, err := r.ConsoleClient.DeleteClusterRestore(restore.Status.GetID()); err != nil {
+				// If it fails to delete the external dependency here, return with error
+				// so that it can be retried.
+				utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+				return &ctrl.Result{}
+			}
+
+			// If deletion process started requeue so that we can make sure provider
+			// has been deleted from Console API before removing the finalizer.
+			return &requeue
+		}
+
+		// If our finalizer is present, remove it.
+		controllerutil.RemoveFinalizer(restore, ClusterRestoreFinalizer)
+
+		// Stop reconciliation as the item is being deleted.
+		return &ctrl.Result{}
+	}
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
