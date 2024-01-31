@@ -146,6 +146,11 @@ func (r *ClusterReconciler) isExisting(cluster *v1alpha1.Cluster) (bool, error) 
 
 func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Result, error) {
 	apiCluster, err := r.ConsoleClient.GetClusterByHandle(cluster.Spec.Handle)
+	if errors.IsNotFound(err) {
+		cluster.Status.ID = nil
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, "Could not find Cluster in Console API")
+		return ctrl.Result{}, nil
+	}
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err

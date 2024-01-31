@@ -251,7 +251,7 @@ func (r *GitRepositoryReconciler) handleExistingRepo(ctx context.Context, repo *
 		return ctrl.Result{}, err
 	}
 	if existingRepo == nil {
-		msg := "existing Git repository was deleted from the console"
+		msg := "Could not find Git repository in Console API"
 		logger.Info(msg)
 		repo.Status.Message = &msg
 		repo.Status.Health = v1alpha1.GitHealthFailed
