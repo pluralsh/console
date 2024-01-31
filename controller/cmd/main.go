@@ -41,7 +41,7 @@ import (
 )
 
 const reconcilersUsage = "Comma delimited list of reconciler names. Available reconcilers: gitrepository,cluster," +
-	"provider,servicedeployment"
+	"provider,servicedeployment,clusterrestore"
 
 var (
 	scheme   = runtime.NewScheme()

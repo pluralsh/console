@@ -1,0 +1,6 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ClusterRestore
+metadata:
+  name: test
+spec:
+  backupID: "667c598f-a142-4dde-84a5-b50b5de55137"
