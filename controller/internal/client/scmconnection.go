@@ -60,7 +60,7 @@ func (c *client) GetScmConnectionByName(ctx context.Context, name string, option
 }
 
 func (c *client) IsScmConnectionExists(ctx context.Context, name string) bool {
-	_, err := c.GetScmConnection(ctx, name)
+	_, err := c.GetScmConnectionByName(ctx, name)
 	if errors.IsNotFound(err) {
 		return false
 	}

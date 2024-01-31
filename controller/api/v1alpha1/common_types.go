@@ -94,6 +94,7 @@ const (
 	ReadonlyConditionReason             ConditionReason = "Readonly"
 	ReadyConditionReason                ConditionReason = "Ready"
 	SynchronizedConditionReason         ConditionReason = "Synchronized"
+	SynchronizedConditionReasonError    ConditionReason = "Error"
 	SynchronizedConditionReasonNotFound ConditionReason = "NotFound"
 )
 

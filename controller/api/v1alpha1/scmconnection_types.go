@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	console "github.com/pluralsh/console-client-go"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -39,24 +40,24 @@ func (s *ScmConnection) ConsoleName() string {
 	return s.Spec.Name
 }
 
-func (p *ScmConnection) Attributes() console.ScmConnectionAttributes {
+func (s *ScmConnection) Attributes(token string) console.ScmConnectionAttributes {
 	return console.ScmConnectionAttributes{
-		Name:     p.Spec.Name,
-		Type:     p.Spec.Type,
-		Username: p.Spec.Username,
-		BaseURL:  p.Spec.BaseUrl,
-		APIURL:   p.Spec.APIUrl,
-		Token:    &p.Spec.Token,
+		Name:     s.Spec.Name,
+		Type:     s.Spec.Type,
+		Username: s.Spec.Username,
+		BaseURL:  s.Spec.BaseUrl,
+		APIURL:   s.Spec.APIUrl,
+		Token:    &token,
 	}
 }
 
-func (p *ScmConnection) Diff(hasher Hasher) (changed bool, sha string, err error) {
-	currentSha, err := hasher(p.Spec)
+func (s *ScmConnection) Diff(hasher Hasher) (changed bool, sha string, err error) {
+	currentSha, err := hasher(s.Spec)
 	if err != nil {
 		return false, "", err
 	}
 
-	return !p.Status.IsSHAEqual(currentSha), currentSha, nil
+	return !s.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
 func (p *ScmConnection) SetCondition(condition metav1.Condition) {
@@ -76,7 +77,7 @@ type ScmConnectionSpec struct {
 	Type console.ScmType `json:"type"`
 	// Token ...
 	// +kubebuilder:validation:Required
-	Token string `json:"token"`
+	TokenSecretRef *corev1.SecretReference `json:"tokenSecretRef"`
 	// Username ...
 	// +kubebuilder:validation:Optional
 	Username *string `json:"username,omitempty"`

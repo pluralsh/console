@@ -53,9 +53,19 @@ spec:
               name:
                 description: Name is a human-readable name of the ScmConnection.
                 type: string
-              token:
+              tokenSecretRef:
                 description: Token ...
-                type: string
+                properties:
+                  name:
+                    description: name is unique within a namespace to reference a
+                      secret resource.
+                    type: string
+                  namespace:
+                    description: namespace defines the space within which the secret
+                      name must be unique.
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
               type:
                 description: 'Type is the name of the scm service for the ScmConnection.
                   One of (ScmType): [github, gitlab]'
@@ -69,7 +79,7 @@ spec:
                 type: string
             required:
             - name
-            - token
+            - tokenSecretRef
             - type
             type: object
           status:

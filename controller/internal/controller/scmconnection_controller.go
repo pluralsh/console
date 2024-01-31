@@ -2,15 +2,18 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
@@ -43,7 +46,6 @@ const (
 // and syncs it with the Console API state.
 func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
-	logger.Info("Reconciling")
 
 	// Read ScmConnection CRD from the K8S API
 	scm := new(v1alpha1.ScmConnection)
@@ -54,7 +56,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	scope, err := NewScmConnectionScope(ctx, r.Client, scm)
 	if err != nil {
 		logger.Error(err, "failed to create scope")
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -65,6 +67,9 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 		}
 	}()
 
+	// Mark resource as not ready. This will be overridden in the end.
+	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	// Handle proper resource deletion via finalizer
 	result, err := r.addOrRemoveFinalizer(ctx, scm)
 	if result != nil {
@@ -74,7 +79,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, scm)
 	if err != nil {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if exists {
@@ -86,11 +91,17 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
+	err = r.tryAddControllerRef(ctx, scm)
+	if err != nil {
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
 	// Get ScmConnection SHA that can be saved back in the status to check for changes
 	changed, sha, err := scm.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate scm SHA")
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -98,7 +109,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	apiScmConnection, err := r.sync(ctx, scm, changed)
 	if err != nil {
 		logger.Error(err, "unable to create or update scm")
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -120,7 +131,7 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 
 	apiScmConnection, err := r.ConsoleClient.GetScmConnectionByName(ctx, scm.ConsoleName())
 	if err != nil {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -162,12 +173,12 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !scm.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Remove ScmConnection from Console API if it exists
-		if r.ConsoleClient.IsScmConnectionExists(ctx, scm.Status.GetID()) && !scm.Status.IsReadonly() {
+		if r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName()) && !scm.Status.IsReadonly() {
 			logger.Info("Deleting ScmConnection")
 			if err := r.ConsoleClient.DeleteScmConnection(ctx, scm.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
-				utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+				utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return &ctrl.Result{}, err
 			}
 
@@ -186,12 +197,16 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 
 func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmConnection, changed bool) (*console.ScmConnectionFragment, error) {
 	logger := log.FromContext(ctx)
-	exists := r.ConsoleClient.IsScmConnectionExists(ctx, scm.Status.GetID())
+	exists := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
+	token, err := r.getTokenFromSecret(ctx, scm)
+	if err != nil {
+		return nil, err
+	}
 
 	// Update only if ScmConnection has changed
 	if changed && exists {
 		logger.Info("Updating ScmConnection")
-		return r.ConsoleClient.UpdateScmConnection(ctx, scm.Status.GetID(), scm.Attributes())
+		return r.ConsoleClient.UpdateScmConnection(ctx, scm.Status.GetID(), scm.Attributes(token))
 	}
 
 	// Read the ScmConnection from Console API if it already exists
@@ -201,14 +216,39 @@ func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmCon
 
 	// Create the ScmConnection in Console API if it doesn't exist
 	logger.Info("Creating ScmConnection")
-	return r.ConsoleClient.CreateScmConnection(ctx, scm.Attributes())
+	return r.ConsoleClient.CreateScmConnection(ctx, scm.Attributes(token))
+}
+
+func (r *ScmConnectionReconciler) getTokenFromSecret(ctx context.Context, scm *v1alpha1.ScmConnection) (string, error) {
+	const tokenKeyName = "token"
+
+	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
+	if err != nil {
+		return "", err
+	}
+
+	token, exists := secret.Data[tokenKeyName]
+	if !exists {
+		return "", fmt.Errorf("%q key does not exist in referenced credential secret", tokenKeyName)
+	}
+
+	return string(token), nil
+}
+
+func (r *ScmConnectionReconciler) tryAddControllerRef(ctx context.Context, scm *v1alpha1.ScmConnection) error {
+	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
+	if err != nil {
+		return err
+	}
+
+	return utils.TryAddControllerRef(ctx, r.Client, scm, secret, r.Scheme)
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
 func (r *ScmConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "scmconnection_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.ScmConnection{}).
-		Owns(&corev1.Secret{}).
+		For(&v1alpha1.ScmConnection{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }

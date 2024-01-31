@@ -10,9 +10,11 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
@@ -45,7 +47,6 @@ const (
 // and syncs it with the Console API state.
 func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
-	logger.Info("Reconciling")
 
 	// Read Provider CRD from the K8S API
 	provider := new(v1alpha1.Provider)
@@ -56,7 +57,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	scope, err := NewProviderScope(ctx, r.Client, provider)
 	if err != nil {
 		logger.Error(err, "failed to create scope")
-		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -67,10 +68,16 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 		}
 	}()
 
+	// Handle proper resource deletion via finalizer
+	result, err := r.addOrRemoveFinalizer(ctx, provider)
+	if result != nil {
+		return *result, err
+	}
+
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, provider)
 	if err != nil {
-		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if exists {
@@ -82,15 +89,9 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	// Handle proper resource deletion via finalizer
-	result, err := r.addOrRemoveFinalizer(ctx, provider)
-	if result != nil {
-		return *result, err
-	}
-
 	err = r.tryAddControllerRef(ctx, provider)
 	if err != nil {
-		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -98,7 +99,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	changed, sha, err := provider.Diff(ctx, r.toCloudProviderSettingsAttributes, utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate provider SHA")
-		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -106,7 +107,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	apiProvider, err := r.sync(ctx, provider, changed)
 	if err != nil {
 		logger.Error(err, "unable to create or update provider")
-		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -126,7 +127,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 func (r *ProviderReconciler) handleExistingProvider(ctx context.Context, provider *v1alpha1.Provider) (reconcile.Result, error) {
 	apiProvider, err := r.ConsoleClient.GetProviderByCloud(ctx, provider.Spec.Cloud)
 	if err != nil {
-		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -181,12 +182,12 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 		}
 
 		// Remove Provider from Console API if it exists
-		if r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID()) {
+		if r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID()) && !provider.Status.IsReadonly() {
 			logger.Info("Deleting provider")
 			if err := r.ConsoleClient.DeleteProvider(ctx, provider.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
-				utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+				utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return &ctrl.Result{}, err
 			}
 
@@ -247,15 +248,6 @@ func (r *ProviderReconciler) tryAddControllerRef(ctx context.Context, provider *
 	return utils.TryAddControllerRef(ctx, r.Client, provider, secret, r.Scheme)
 }
 
-// SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
-func (r *ProviderReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	mgr.GetLogger().Info("Starting reconciler", "reconciler", "provider_reconciler")
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.Provider{}).
-		Owns(&corev1.Secret{}).
-		Complete(r)
-}
-
 func isProviderReady(provider *console.ClusterProviderFragment) bool {
 	if provider.Service == nil {
 		return true // Retuning true as management cluster will not have any service, and it should be considered as ready.
@@ -268,4 +260,13 @@ func isProviderReady(provider *console.ClusterProviderFragment) bool {
 	}
 
 	return true
+}
+
+// SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
+func (r *ProviderReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	mgr.GetLogger().Info("Starting reconciler", "reconciler", "provider_reconciler")
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.Provider{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		Complete(r)
 }
