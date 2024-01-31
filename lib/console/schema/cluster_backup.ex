@@ -3,7 +3,9 @@ defmodule Console.Schema.ClusterBackup do
   alias Console.Schema.Cluster
 
   schema "cluster_backups" do
-    field :name, :string
+    field :name,              :string
+    field :namespace,         :string
+    field :garbage_collected, :boolean
 
     belongs_to :cluster, Cluster
 
@@ -18,11 +20,13 @@ defmodule Console.Schema.ClusterBackup do
     from(cb in query, order_by: ^order)
   end
 
-  @valid ~w(name)a
+  @valid ~w(name namespace cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> unique_constraint(~w(cluster_id namespace name)a)
+    |> foreign_key_constraint(:cluster_id)
     |> validate_required(@valid)
   end
 end

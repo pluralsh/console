@@ -20,6 +20,12 @@ defmodule Console.Deployments.Backups do
 
   def get_cluster_restore(id), do: Repo.get(ClusterRestore, id)
 
+  def get_cluster_backup(cluster_id, ns, name) do
+    Repo.get_by(ClusterBackup, cluster_id: cluster_id, namespace: ns, name: name)
+  end
+
+  def get_cluster_backup(id), do: Repo.get(ClusterBackup, id)
+
   @doc """
   Creates a new object store credential to be used in backup/restores
   """
@@ -56,10 +62,13 @@ defmodule Console.Deployments.Backups do
   Creates a cluster backup reference, to be sent by a running deploy agent
   """
   @spec create_cluster_backup(map, Cluster.t) :: backup_resp
-  def create_cluster_backup(attrs, %Cluster{id: id}) do
-    %ClusterBackup{cluster_id: id}
+  def create_cluster_backup(%{namespace: ns, name: n} = attrs, %Cluster{id: id}) do
+    case get_cluster_backup(id, ns, n) do
+      %ClusterBackup{} = backup -> backup
+      nil -> %ClusterBackup{cluster_id: id}
+    end
     |> ClusterBackup.changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert_or_update()
   end
 
   @doc """

@@ -394,6 +394,7 @@ defmodule Console.Factory do
   def cluster_backup_factory do
     %Schema.ClusterBackup{
       name: sequence(:cb, & "cb-#{&1}"),
+      namespace: "velero",
       cluster: build(:cluster)
     }
   end

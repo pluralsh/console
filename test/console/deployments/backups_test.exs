@@ -65,9 +65,10 @@ defmodule Console.Deployments.BackupsTest do
     test "it can create a backup reference for a cluster" do
       cluster = insert(:cluster)
 
-      {:ok, backup} = Backups.create_cluster_backup(%{name: "backup"}, cluster)
+      {:ok, backup} = Backups.create_cluster_backup(%{name: "backup", namespace: "velero"}, cluster)
 
       assert backup.name == "backup"
+      assert backup.namespace == "velero"
     end
   end
 

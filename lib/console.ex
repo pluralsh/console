@@ -72,6 +72,18 @@ defmodule Console do
     end
   end
 
+  def dump_folder(path, contents) do
+    Enum.reduce_while(contents, :ok, fn {p, data}, _ ->
+      fullpath = Path.join(path, p)
+      with :ok <- File.mkdir_p(Path.dirname(fullpath)),
+           :ok <- File.write(fullpath, data) do
+        {:cont, :ok}
+      else
+        err -> {:halt, err}
+      end
+    end)
+  end
+
   def put_new(attrs, key, val) when is_function(val), do: Map.put_new_lazy(attrs, key, val)
   def put_new(attrs, key, val), do: Map.put_new(attrs, key, val)
 
