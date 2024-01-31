@@ -17,25 +17,17 @@ limitations under the License.
 package v1alpha1
 
 import (
-	corev1 "k8s.io/api/core/v1"
+	console "github.com/pluralsh/console-client-go"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-type RestoreStatus string
-
-const (
-	RestoreStatusCreated    RestoreStatus = "CREATED"
-	RestoreStatusPending    RestoreStatus = "PENDING"
-	RestoreStatusSuccessful RestoreStatus = "SUCCESSFUL"
-	RestoreStatusFailed     RestoreStatus = "FAILED"
 )
 
 // ClusterRestoreSpec defines the desired state of ClusterRestore
 type ClusterRestoreSpec struct {
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="ClusterBackup is immutable"
-	ClusterBackupRef corev1.ObjectReference `json:"clusterBackupRef"`
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupID is immutable"
+	BackupID string `json:"backupID"`
 }
 
 // ClusterRestoreStatus defines the observed state of ClusterRestore
@@ -46,7 +38,7 @@ type ClusterRestoreStatus struct {
 	ID *string `json:"id,omitempty"`
 
 	// +kubebuilder:validation:Enum=CREATED;PENDING;SUCCESSFUL;FAILED
-	Status RestoreStatus `json:"status,omitempty"`
+	Status console.RestoreStatus `json:"status,omitempty"`
 
 	// Represents the observations of ClusterRestore current state.
 	// +patchMergeKey=type
@@ -54,6 +46,18 @@ type ClusterRestoreStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+}
+
+func (p *ClusterRestoreStatus) GetID() string {
+	if !p.HasID() {
+		return ""
+	}
+
+	return *p.ID
+}
+
+func (p *ClusterRestoreStatus) HasID() bool {
+	return p.ID != nil && len(*p.ID) > 0
 }
 
 //+kubebuilder:object:root=true
@@ -68,6 +72,10 @@ type ClusterRestore struct {
 	Status ClusterRestoreStatus `json:"status,omitempty"`
 }
 
+func (s *ClusterRestore) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&s.Status.Conditions, condition)
+}
+
 //+kubebuilder:object:root=true
 
 // ClusterRestoreList contains a list of ClusterRestore
@@ -79,20 +87,4 @@ type ClusterRestoreList struct {
 
 func init() {
 	SchemeBuilder.Register(&ClusterRestore{}, &ClusterRestoreList{})
-}
-
-func (s *ClusterRestore) SetCondition(condition metav1.Condition) {
-	meta.SetStatusCondition(&s.Status.Conditions, condition)
-}
-
-func (p *ClusterRestoreStatus) GetID() string {
-	if !p.HasID() {
-		return ""
-	}
-
-	return *p.ID
-}
-
-func (p *ClusterRestoreStatus) HasID() bool {
-	return p.ID != nil && len(*p.ID) > 0
 }
