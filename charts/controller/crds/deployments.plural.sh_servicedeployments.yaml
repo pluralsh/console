@@ -241,6 +241,9 @@ spec:
                     - namespace
                     type: object
                   values:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  valuesConfigMapRef:
                     description: Selects a key from a ConfigMap.
                     properties:
                       key:
@@ -342,9 +345,6 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
-                x-kubernetes-validations:
-                - message: Repository is immutable
-                  rule: self == oldSelf
               syncConfig:
                 properties:
                   annotations:

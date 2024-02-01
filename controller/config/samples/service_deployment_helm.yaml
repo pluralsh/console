@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: podinfo
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: podinfo
+  namespace: podinfo
+spec:
+  interval: 5m0s
+  provider: generic
+  timeout: 60s
+  url: https://stefanprodan.github.io/podinfo
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ServiceDeployment
+metadata:
+  name: podinfo
+  namespace: podinfo
+spec:
+  version: 0.0.1
+  helm:
+    values:
+      image:
+        tag: 6.5.3
+    chart: podinfo
+    version: 6.5.2
+    repository:
+      name: podinfo
+      namespace: podinfo
+  clusterRef:
+    kind: Cluster
+    name: lukaszz
+    namespace: default
