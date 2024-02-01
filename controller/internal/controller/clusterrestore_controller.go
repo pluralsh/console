@@ -28,7 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -50,13 +49,6 @@ type ClusterRestoreReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the ClusterRestore object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
@@ -83,8 +75,10 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	}()
 
 	// Handle resource deletion both in Kubernetes cluster and in Console API.
-	if result := r.addOrRemoveFinalizer(restore); result != nil {
-		return *result, nil
+	if restore.GetDeletionTimestamp() != nil {
+		// TODO
+		// utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+		return ctrl.Result{}, nil
 	}
 
 	// Sync resource with Console API.
@@ -126,7 +120,7 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 			return nil, err
 		}
 		if !cluster.Status.HasID() {
-			return nil, fmt.Errorf("cluster has no ID set")
+			return nil, fmt.Errorf("cluster has no ID set yet")
 		}
 
 		backup, err := r.ConsoleClient.GetClusterBackup(cluster.Status.ID, restore.Spec.BackupNamespace, restore.Spec.BackupName)
@@ -138,44 +132,6 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 
 	logger.Info(fmt.Sprintf("%s cluster does not exist, creating it", restore.Name))
 	return r.ConsoleClient.CreateClusterRestore(backupID)
-}
-
-func (r *ClusterRestoreReconciler) addOrRemoveFinalizer(restore *v1alpha1.ClusterRestore) *ctrl.Result {
-	/// If object is not being deleted and if it does not have our finalizer,
-	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if restore.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(restore, ClusterRestoreFinalizer) {
-		controllerutil.AddFinalizer(restore, ClusterRestoreFinalizer)
-	}
-
-	// If object is being deleted cleanup and remove the finalizer.
-	if !restore.ObjectMeta.DeletionTimestamp.IsZero() {
-		// If object is already being deleted from Console API requeue.
-		if r.ConsoleClient.IsClusterRestoreDeleting(restore.Status.GetID()) {
-			return &requeue
-		}
-
-		// Remove Cluster from Console API if it exists.
-		if r.ConsoleClient.IsClusterRestoreExisting(restore.Status.GetID()) {
-			if _, err := r.ConsoleClient.DeleteClusterRestore(restore.Status.GetID()); err != nil {
-				// If it fails to delete the external dependency here, return with error
-				// so that it can be retried.
-				utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-				return &ctrl.Result{}
-			}
-
-			// If deletion process started requeue so that we can make sure provider
-			// has been deleted from Console API before removing the finalizer.
-			return &requeue
-		}
-
-		// If our finalizer is present, remove it.
-		controllerutil.RemoveFinalizer(restore, ClusterRestoreFinalizer)
-
-		// Stop reconciliation as the item is being deleted.
-		return &ctrl.Result{}
-	}
-
-	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

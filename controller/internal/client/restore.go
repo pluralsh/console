@@ -51,25 +51,3 @@ func (c *client) IsClusterRestoreExisting(id string) bool {
 
 	return err == nil
 }
-
-func (c *client) IsClusterRestoreDeleting(id string) bool {
-	_, err := c.GetClusterRestore(id)
-	if err != nil {
-		return false
-	}
-
-	return false // TODO: Will it use async deletion? restore != nil && restore.DeletedAt != nil
-}
-
-func (c *client) DeleteClusterRestore(id string) (*console.ClusterRestoreFragment, error) {
-	// TODO: response, err := c.consoleClient.DeleteCluster(c.ctx, id)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if response == nil {
-	//	return nil, err
-	//}
-	//
-	//return response.DeleteCluster, nil
-	return nil, nil
-}

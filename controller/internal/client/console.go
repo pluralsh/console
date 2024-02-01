@@ -68,9 +68,7 @@ type ConsoleClient interface {
 	GetClusterRestore(id string) (*console.ClusterRestoreFragment, error)
 	UpdateClusterRestore(id string, attrs console.RestoreAttributes) (*console.ClusterRestoreFragment, error)
 	CreateClusterRestore(backupId string) (*console.ClusterRestoreFragment, error)
-	DeleteClusterRestore(id string) (*console.ClusterRestoreFragment, error)
 	IsClusterRestoreExisting(id string) bool
-	IsClusterRestoreDeleting(id string) bool
 }
 
 func New(url, token string) ConsoleClient {
