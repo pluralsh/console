@@ -64,6 +64,7 @@ type ConsoleClient interface {
 	IsPipelineExisting(id string) bool
 	GetUser(email string) (*console.UserFragment, error)
 	GetGroup(name string) (*console.GroupFragment, error)
+	GetClusterBackup(clusterId, namespace, name *string) (*console.ClusterBackupFragment, error)
 	GetClusterRestore(id string) (*console.ClusterRestoreFragment, error)
 	UpdateClusterRestore(id string, attrs console.RestoreAttributes) (*console.ClusterRestoreFragment, error)
 	CreateClusterRestore(backupId string) (*console.ClusterRestoreFragment, error)

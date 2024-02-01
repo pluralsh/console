@@ -34,13 +34,41 @@ spec:
           spec:
             description: ClusterRestoreSpec defines the desired state of ClusterRestore
             properties:
+              backupClusterID:
+                description: BackupClusterID is an ID of a cluster where the backup
+                  to restore is located. BackupNamespace and BackupClusterID have
+                  to be specified as well with it. If BackupName, BackupNamespace
+                  and BackupClusterID are specified then BackupID is not needed.
+                type: string
+                x-kubernetes-validations:
+                - message: BackupClusterID is immutable
+                  rule: self == oldSelf
               backupID:
+                description: BackupID is an ID of the backup to restore. If BackupID
+                  is specified then BackupName, BackupNamespace and BackupClusterID
+                  are not needed.
                 type: string
                 x-kubernetes-validations:
                 - message: BackupID is immutable
                   rule: self == oldSelf
-            required:
-            - backupID
+              backupName:
+                description: BackupName is a name of the backup to restore. BackupNamespace
+                  and BackupClusterID have to be specified as well with it. If BackupName,
+                  BackupNamespace and BackupClusterID are specified then BackupID
+                  is not needed.
+                type: string
+                x-kubernetes-validations:
+                - message: BackupName is immutable
+                  rule: self == oldSelf
+              backupNamespace:
+                description: BackupNamespace is a namespace of the backup to restore.
+                  BackupName and BackupClusterID have to be specified as well with
+                  it. If BackupName, BackupNamespace and BackupClusterID are specified
+                  then BackupID is not needed.
+                type: string
+                x-kubernetes-validations:
+                - message: BackupNamespace is immutable
+                  rule: self == oldSelf
             type: object
           status:
             description: ClusterRestoreStatus defines the observed state of ClusterRestore

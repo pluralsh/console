@@ -116,8 +116,19 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 		return r.ConsoleClient.GetClusterRestore(restore.Status.GetID())
 	}
 
+	var backupID string
+	if restore.Spec.HasBackupID() {
+		backupID = restore.Spec.GetBackupID()
+	} else {
+		backup, err := r.ConsoleClient.GetClusterBackup(restore.Spec.BackupClusterID, restore.Spec.BackupNamespace, restore.Spec.BackupName)
+		if err != nil {
+			return nil, err
+		}
+		backupID = backup.ID
+	}
+
 	logger.Info(fmt.Sprintf("%s cluster does not exist, creating it", restore.Name))
-	return r.ConsoleClient.CreateClusterRestore(restore.Spec.BackupID)
+	return r.ConsoleClient.CreateClusterRestore(backupID)
 }
 
 func (r *ClusterRestoreReconciler) addOrRemoveFinalizer(restore *v1alpha1.ClusterRestore) *ctrl.Result {

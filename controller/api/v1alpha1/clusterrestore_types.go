@@ -24,10 +24,48 @@ import (
 
 // ClusterRestoreSpec defines the desired state of ClusterRestore
 type ClusterRestoreSpec struct {
-	// +kubebuilder:validation:Required
+	// BackupID is an ID of the backup to restore.
+	// If BackupID is specified then BackupName, BackupNamespace and BackupClusterID are not needed.
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupID is immutable"
-	BackupID string `json:"backupID"`
+	BackupID *string `json:"backupID"`
+
+	// BackupName is a name of the backup to restore.
+	// BackupNamespace and BackupClusterID have to be specified as well with it.
+	// If BackupName, BackupNamespace and BackupClusterID are specified then BackupID is not needed.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupName is immutable"
+	BackupName *string `json:"backupName"`
+
+	// BackupNamespace is a namespace of the backup to restore.
+	// BackupName and BackupClusterID have to be specified as well with it.
+	// If BackupName, BackupNamespace and BackupClusterID are specified then BackupID is not needed.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupNamespace is immutable"
+	BackupNamespace *string `json:"backupNamespace"`
+
+	// BackupClusterID is an ID of a cluster where the backup to restore is located.
+	// BackupNamespace and BackupClusterID have to be specified as well with it.
+	// If BackupName, BackupNamespace and BackupClusterID are specified then BackupID is not needed.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupClusterID is immutable"
+	BackupClusterID *string `json:"backupClusterID"`
+}
+
+func (p *ClusterRestoreSpec) HasBackupID() bool {
+	return p.BackupID != nil && len(*p.BackupID) > 0
+}
+
+func (p *ClusterRestoreSpec) GetBackupID() string {
+	if !p.HasBackupID() {
+		return ""
+	}
+
+	return *p.BackupID
 }
 
 // ClusterRestoreStatus defines the observed state of ClusterRestore
