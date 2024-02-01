@@ -1,4 +1,5 @@
 import { DocSearchModal } from '@docsearch/react'
+import { useKeyDown } from '@react-hooks-library/core'
 import { createPortal } from 'react-dom'
 
 export function DocSearch({
@@ -8,6 +9,13 @@ export function DocSearch({
   isOpen: boolean
   onClose: any
 }) {
+  useKeyDown(['Escape'], (e) => {
+    if (!isOpen) return
+
+    e.stopPropagation()
+    onClose()
+  })
+
   if (!isOpen) {
     return null
   }
@@ -32,7 +40,9 @@ export function DocSearch({
       }
       initialScrollY={window.scrollY}
       initialQuery=""
-      onClose={onClose}
+      onClose={() => {
+        onClose()
+      }}
     />,
     document.body
   )
