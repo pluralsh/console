@@ -1,4 +1,10 @@
-import { type ComponentProps, type Key, forwardRef, useState } from 'react'
+import {
+  type ComponentProps,
+  type Key,
+  forwardRef,
+  useEffect,
+  useState,
+} from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import {
@@ -202,8 +208,24 @@ const IconFrameTrigger = forwardRef((props: any, ref) => (
   />
 ))
 
+function useTestKeyCapture() {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target === document.body) return
+      alert(`Select box isn’t properly stopping keypress propagation`)
+    }
+
+    window.addEventListener('keydown', handler)
+
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+}
+
 function Template({ onFillLevel }: { onFillLevel: any }) {
   const theme = useTheme()
+
+  useTestKeyCapture()
+
   const [selectedKey, setSelectedKey] = useState<Key>()
   const shownStep = 4
   const [shownLimit, setShownLimit] = useState<number>(shownStep)

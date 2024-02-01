@@ -345,7 +345,12 @@ function Select({
   })
 
   return (
-    <SelectInner className="selectInner">
+    <SelectInner
+      className="selectInner"
+      onKeyDown={(e) => {
+        e.stopPropagation()
+      }}
+    >
       <HiddenSelect
         state={state}
         triggerRef={ref}
