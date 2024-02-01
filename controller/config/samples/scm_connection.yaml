@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-token
+  namespace: default
+stringData:
+  token: "test-token"
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ScmConnection
+metadata:
+  name: github
+spec:
+  name: scm-test-github
+  type: GITHUB
+  tokenSecretRef:
+    name: github-token
+    namespace: default
+  username: "johndoe"
+

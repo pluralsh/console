@@ -13,6 +13,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Backup do
     |> allow(actor(ctx), :read)
   end
 
+  def resolve_cluster_backup(%{id: id}, ctx) do
+    Backups.get_cluster_backup(id)
+    |> allow(actor(ctx), :read)
+  end
+  def resolve_cluster_backup(%{cluster_id: id, namespace: ns, name: n}, ctx) do
+    Backups.get_cluster_backup(id, ns, n)
+    |> allow(actor(ctx), :read)
+  end
+
   def create_object_store(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Backups.create_object_store(attrs, user)
 

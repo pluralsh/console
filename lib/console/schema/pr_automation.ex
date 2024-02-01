@@ -1,6 +1,6 @@
 defmodule Console.Schema.PrAutomation do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, Service, ScmConnection, PolicyBinding, Configuration}
+  alias Console.Schema.{Cluster, Service, ScmConnection, PolicyBinding, Configuration, GitRepository}
 
   defenum MatchStrategy, any: 0, all: 1, recursive: 2
 
@@ -14,6 +14,16 @@ defmodule Console.Schema.PrAutomation do
     field :branch,           :string
     field :write_policy_id,  :binary_id
     field :create_policy_id, :binary_id
+
+    embeds_one :creates, CreateSpec, on_replace: :update do
+      embeds_one :git, Service.Git
+
+      embeds_many :templates, TemplateSpec, on_replace: :delete do
+        field :source,      :string
+        field :destination, :string
+        field :external,    :boolean
+      end
+    end
 
     embeds_one :updates, UpdateSpec, on_replace: :update do
       field :regexes,          {:array, :string}
@@ -33,6 +43,7 @@ defmodule Console.Schema.PrAutomation do
     belongs_to :cluster,    Cluster
     belongs_to :service,    Service
     belongs_to :connection, ScmConnection
+    belongs_to :repository, GitRepository
 
     has_many :write_bindings, PolicyBinding,
       on_replace: :delete,
@@ -57,6 +68,7 @@ defmodule Console.Schema.PrAutomation do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:updates, with: &update_changeset/2)
+    |> cast_embed(:creates, with: &create_changeset/2)
     |> cast_embed(:configuration)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:create_bindings)
@@ -73,6 +85,19 @@ defmodule Console.Schema.PrAutomation do
     model
     |> cast(attrs, ~w(regexes files yq replace_template match_strategy)a)
     |> cast_embed(:regex_replacements, with: &regex_replacement_cs/2)
+  end
+
+  defp create_changeset(model, attrs) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:git)
+    |> cast_embed(:creates, with: &template_changeset/2)
+  end
+
+  defp template_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(source destination external)a)
+    |> validate_required(~w(source destination)a)
   end
 
   defp regex_replacement_cs(model, attrs) do

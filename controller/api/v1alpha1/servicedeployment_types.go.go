@@ -4,6 +4,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func init() {
@@ -29,7 +30,9 @@ type ServiceGit struct {
 
 type ServiceHelm struct {
 	// +optional
-	ValuesRef *corev1.ConfigMapKeySelector `json:"values,omitempty"`
+	ValuesConfigMapRef *corev1.ConfigMapKeySelector `json:"valuesConfigMapRef,omitempty"`
+	// +optional
+	Values *runtime.RawExtension `json:"values,omitempty"`
 	// +optional
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// +optional
@@ -70,7 +73,6 @@ type ServiceSpec struct {
 	// +optional
 	SyncConfig *SyncConfigAttributes `json:"syncConfig,omitempty"`
 	// +optional
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Repository is immutable"
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef"`
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cluster is immutable"

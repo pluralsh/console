@@ -392,7 +392,9 @@ export type AzureStoreAttributes = {
 };
 
 export type BackupAttributes = {
+  garbageCollected?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
 };
 
 export type BindingAttributes = {
@@ -688,9 +690,11 @@ export type ClusterAttributes = {
 export type ClusterBackup = {
   __typename?: 'ClusterBackup';
   cluster?: Maybe<Cluster>;
+  garbageCollected?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -2505,6 +2509,7 @@ export type PrAutomation = {
   connection?: Maybe<ScmConnection>;
   /** users who can generate prs with this automation */
   createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  creates?: Maybe<PrCreateSpec>;
   documentation?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
@@ -2513,6 +2518,8 @@ export type PrAutomation = {
   message: Scalars['String']['output'];
   /** the name for this automation */
   name: Scalars['String']['output'];
+  /** the git repository to use for sourcing external templates */
+  repository?: Maybe<GitRepository>;
   /** link to a service if this can update its configuration */
   service?: Maybe<ServiceDeployment>;
   title: Scalars['String']['output'];
@@ -2534,11 +2541,14 @@ export type PrAutomationAttributes = {
   connectionId?: InputMaybe<Scalars['ID']['input']>;
   /** users who can create prs with this automation */
   createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  creates?: InputMaybe<PrAutomationCreateSpecAttributes>;
   documentation?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: InputMaybe<Scalars['String']['input']>;
   message?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  /** a git repository to use for create mode prs */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
   /** link to a service if this can modify its configuration */
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
@@ -2553,10 +2563,24 @@ export type PrAutomationConnection = {
   pageInfo: PageInfo;
 };
 
+/** Operations to create new templated files within this pr */
+export type PrAutomationCreateSpecAttributes = {
+  git?: InputMaybe<GitRefAttributes>;
+  templates?: InputMaybe<Array<InputMaybe<PrAutomationTemplateAttributes>>>;
+};
+
 export type PrAutomationEdge = {
   __typename?: 'PrAutomationEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<PrAutomation>;
+};
+
+/** templates to apply in this pr */
+export type PrAutomationTemplateAttributes = {
+  destination: Scalars['String']['input'];
+  /** whether the source template is sourced from an external git repo bound to this automation */
+  external: Scalars['Boolean']['input'];
+  source: Scalars['String']['input'];
 };
 
 /** The operations to be performed on the files w/in the pr */
@@ -2580,6 +2604,22 @@ export type PrConfigurationAttributes = {
   optional?: InputMaybe<Scalars['Boolean']['input']>;
   placeholder?: InputMaybe<Scalars['String']['input']>;
   type: ConfigurationType;
+};
+
+/** templated files used to add new files to a given pr */
+export type PrCreateSpec = {
+  __typename?: 'PrCreateSpec';
+  /** pointer within an external git repository to source templates from */
+  git?: Maybe<GitRef>;
+  templates?: Maybe<Array<Maybe<PrTemplateSpec>>>;
+};
+
+/** the details of where to find and place a templated file */
+export type PrTemplateSpec = {
+  __typename?: 'PrTemplateSpec';
+  destination: Scalars['String']['output'];
+  external: Scalars['Boolean']['output'];
+  source: Scalars['String']['output'];
 };
 
 /** existing file updates that can be performed in a PR */
@@ -2900,6 +2940,7 @@ export type RootMutationType = {
   createAgentMigration?: Maybe<AgentMigration>;
   createBuild?: Maybe<Build>;
   createCluster?: Maybe<Cluster>;
+  /** upserts a cluster backup resource */
   createClusterBackup?: Maybe<ClusterBackup>;
   createClusterProvider?: Maybe<ClusterProvider>;
   createClusterRestore?: Maybe<ClusterRestore>;
@@ -3565,6 +3606,7 @@ export type RootQueryType = {
   cluster?: Maybe<Cluster>;
   /** list all addons currently resident in the artifacts repo */
   clusterAddOns?: Maybe<Array<Maybe<ClusterAddOn>>>;
+  clusterBackup?: Maybe<ClusterBackup>;
   clusterGate?: Maybe<PipelineGate>;
   clusterGates?: Maybe<Array<Maybe<PipelineGate>>>;
   clusterInfo?: Maybe<ClusterInfo>;
@@ -3741,6 +3783,14 @@ export type RootQueryTypeCertificateArgs = {
 export type RootQueryTypeClusterArgs = {
   handle?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeClusterBackupArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
 };
 
 

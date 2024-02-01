@@ -40,8 +40,8 @@ import (
 	"github.com/pluralsh/console/controller/internal/types"
 )
 
-const reconcilersUsage = "Comma delimited list of reconciler names. Available reconcilers: gitrepository,cluster," +
-	"provider,servicedeployment,clusterrestore"
+const reconcilersUsage = "Comma delimited list of reconciler names. Available reconcilers: gitrepository, cluster, " +
+	"provider, servicedeployment, globalservice, pipeline, scmconnection"
 
 var (
 	scheme   = runtime.NewScheme()

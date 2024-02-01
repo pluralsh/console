@@ -13,6 +13,12 @@ defmodule Console.Deployments.Git.Discovery do
       do: Agent.fetch(pid, svc)
   end
 
+  @spec fetch(GitRepository.t, Service.Git.t) :: {:ok, File.t} | Console.error
+  def fetch(%GitRepository{} = repo, ref) do
+    with {:ok, pid} <- find(repo),
+      do: Agent.fetch(pid, ref)
+  end
+
   @spec docs(Service.t) :: {:ok, File.t} | Console.error
   def docs(%Service{} = svc) do
     %{repository: repo} = Console.Repo.preload(svc, [:repository])
