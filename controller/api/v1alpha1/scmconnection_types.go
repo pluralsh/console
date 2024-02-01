@@ -24,7 +24,7 @@ type ScmConnectionList struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the provider in the Console API."
+// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the scm connection in the Console API."
 // +kubebuilder:printcolumn:name="Provider",type="string",JSONPath=".spec.type",description="Name of the scm provider service."
 type ScmConnection struct {
 	metav1.TypeMeta   `json:",inline"`

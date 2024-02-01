@@ -219,8 +219,10 @@ spec:
               git:
                 properties:
                   folder:
+                    description: Folder ...
                     type: string
                   ref:
+                    description: Ref ...
                     type: string
                 required:
                 - folder

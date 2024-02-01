@@ -23,11 +23,6 @@ type ServiceKustomize struct {
 	Path string `json:"path"`
 }
 
-type ServiceGit struct {
-	Folder string `json:"folder"`
-	Ref    string `json:"ref"`
-}
-
 type ServiceHelm struct {
 	// +optional
 	ValuesConfigMapRef *corev1.ConfigMapKeySelector `json:"valuesConfigMapRef,omitempty"`
@@ -67,7 +62,7 @@ type ServiceSpec struct {
 	// +optional
 	Kustomize *ServiceKustomize `json:"kustomize,omitempty"`
 	// +optional
-	Git *ServiceGit `json:"git,omitempty"`
+	Git *GitRef `json:"git,omitempty"`
 	// +optional
 	Helm *ServiceHelm `json:"helm,omitempty"`
 	// +optional

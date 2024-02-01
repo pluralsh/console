@@ -107,3 +107,14 @@ func (c ConditionMessage) String() string {
 const (
 	ReadonlyTrueConditionMessage ConditionMessage = "Running in read-only mode"
 )
+
+// GitRef ...
+type GitRef struct {
+	// Folder ...
+	// +kubebuilder:validation:Required
+	Folder string `json:"folder"`
+
+	// Ref ...
+	// +kubebuilder:validation:Required
+	Ref string `json:"ref"`
+}
