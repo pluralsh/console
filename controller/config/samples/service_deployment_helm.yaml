@@ -23,7 +23,7 @@ metadata:
 spec:
   version: 0.0.1
   helm:
-    valuesRaw:
+    values:
       image:
         tag: 6.5.3
     chart: podinfo

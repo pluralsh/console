@@ -284,15 +284,15 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 				Namespace: service.Spec.Helm.Repository.Namespace,
 			}
 		}
-		if service.Spec.Helm.ValuesRef != nil {
-			val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesRef)
+		if service.Spec.Helm.ValuesConfigMapRef != nil {
+			val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesConfigMapRef)
 			if err != nil {
 				return nil, err
 			}
 			attr.Helm.Values = &val
 		}
-		if service.Spec.Helm.ValuesRaw != nil {
-			attr.Helm.Values = lo.ToPtr(string(service.Spec.Helm.ValuesRaw.Raw))
+		if service.Spec.Helm.Values != nil {
+			attr.Helm.Values = lo.ToPtr(string(service.Spec.Helm.Values.Raw))
 		}
 		if service.Spec.Helm.Chart != nil {
 			attr.Helm.Chart = service.Spec.Helm.Chart
@@ -337,12 +337,11 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 		if err := utils.TryAddControllerRef(ctx, r.Client, service, configurationSecret, r.Scheme); err != nil {
 			return err
 		}
-
 	}
 
-	if service.Spec.Helm != nil && service.Spec.Helm.ValuesRef != nil {
+	if service.Spec.Helm != nil && service.Spec.Helm.ValuesConfigMapRef != nil {
 		configMap := &corev1.ConfigMap{}
-		name := types.NamespacedName{Name: service.Spec.Helm.ValuesRef.Name, Namespace: service.GetNamespace()}
+		name := types.NamespacedName{Name: service.Spec.Helm.ValuesConfigMapRef.Name, Namespace: service.GetNamespace()}
 		err := r.Get(ctx, name, configMap)
 		if err != nil {
 			return err

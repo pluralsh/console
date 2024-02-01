@@ -241,6 +241,9 @@ spec:
                     - namespace
                     type: object
                   values:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  valuesConfigMapRef:
                     description: Selects a key from a ConfigMap.
                     properties:
                       key:
@@ -262,9 +265,6 @@ spec:
                     items:
                       type: string
                     type: array
-                  valuesRaw:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
                   version:
                     type: string
                 type: object
