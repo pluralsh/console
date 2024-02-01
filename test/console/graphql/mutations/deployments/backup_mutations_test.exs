@@ -56,12 +56,14 @@ defmodule Console.GraphQl.Deployments.BackupMutationsTest do
           createClusterBackup(attributes: $attributes) {
             id
             name
+            namespace
             cluster { id }
           }
         }
-      """, %{"attributes" => %{"name" => "backup"}}, %{cluster: cluster})
+      """, %{"attributes" => %{"name" => "backup", "namespace" => "velero"}}, %{cluster: cluster})
 
       assert cb["name"] == "backup"
+      assert cb["namespace"] == "velero"
       assert cb["cluster"]["id"] == cluster.id
     end
   end

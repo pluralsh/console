@@ -21,6 +21,7 @@ defmodule Console.Deployments.Git.Agent do
   def registry(), do: __MODULE__
 
   def fetch(pid, %Service{} = svc), do: GenServer.call(pid, {:fetch, svc}, 30_000)
+  def fetch(pid, %Service.Git{} = ref), do: GenServer.call(pid, {:fetch, ref}, 30_000)
 
   def docs(pid, %Service{} = svc), do: GenServer.call(pid, {:docs, svc}, 30_000)
 
@@ -71,6 +72,13 @@ defmodule Console.Deployments.Git.Agent do
     {:reply, {:ok, common ++ Enum.sort(rest)}, state}
   end
   def handle_call(:refs, _, state), do: {:reply, {:ok, []}, state}
+
+  def handle_call({:fetch, %Service.Git{ref: ref, folder: path}}, _, %State{cache: cache} = state) do
+    case Cache.fetch(cache, ref, path) do
+      {:ok, %Cache.Line{file: f, sha: sha, message: msg}, cache} -> {:reply, File.open(f), %{state | cache: cache}}
+      err -> {:reply, err, state}
+    end
+  end
 
   def handle_call({:fetch, %Service{git: %{ref: ref, folder: path}} = svc}, _, %State{cache: cache} = state) do
     svc = Console.Repo.preload(svc, [:revision])

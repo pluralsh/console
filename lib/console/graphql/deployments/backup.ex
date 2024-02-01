@@ -13,7 +13,9 @@ defmodule Console.GraphQl.Deployments.Backup do
   end
 
   input_object :backup_attributes do
-    field :name, non_null(:string)
+    field :name,              non_null(:string)
+    field :namespace,         non_null(:string)
+    field :garbage_collected, :boolean
   end
 
   input_object :restore_attributes do
@@ -54,8 +56,10 @@ defmodule Console.GraphQl.Deployments.Backup do
   end
 
   object :cluster_backup do
-    field :id,   non_null(:id)
-    field :name, non_null(:string)
+    field :id,                non_null(:id)
+    field :name,              non_null(:string)
+    field :namespace,         non_null(:string)
+    field :garbage_collected, :boolean
 
     field :cluster, :cluster, resolve: dataloader(Deployments)
 
@@ -102,7 +106,7 @@ defmodule Console.GraphQl.Deployments.Backup do
 
   object :public_backup_queries do
     field :cluster_restore, :cluster_restore do
-      middleware ClusterAuthenticated
+      middleware Authenticated, :cluster
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_cluster_restore/2
@@ -110,6 +114,7 @@ defmodule Console.GraphQl.Deployments.Backup do
   end
 
   object :public_backup_mutations do
+    @desc "upserts a cluster backup resource"
     field :create_cluster_backup, :cluster_backup do
       middleware ClusterAuthenticated
       arg :attributes, non_null(:backup_attributes)
@@ -127,6 +132,16 @@ defmodule Console.GraphQl.Deployments.Backup do
   end
 
   object :backup_queries do
+    field :cluster_backup, :cluster_backup do
+      middleware Authenticated
+      arg :id,         :id
+      arg :cluster_id, :id
+      arg :namespace,  :string
+      arg :name,       :string
+
+      resolve &Deployments.resolve_cluster_backup/2
+    end
+
     connection field :object_stores, node_type: :object_store do
       middleware Authenticated
 

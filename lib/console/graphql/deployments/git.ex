@@ -41,11 +41,14 @@ defmodule Console.GraphQl.Deployments.Git do
     field :message,       :string
     field :branch,        :string
     field :updates,       :pr_automation_update_spec_attributes
+    field :creates,       :pr_automation_create_spec_attributes
 
     field :addon,         :string, description: "link to an add-on name if this can update it"
     field :cluster_id,    :id, description: "link to a cluster if this is to perform an upgrade"
     field :service_id,    :id, description: "link to a service if this can modify its configuration"
     field :connection_id, :id, description: "the scm connection to use for pr generation"
+
+    field :repository_id, :id, description: "a git repository to use for create mode prs"
 
     field :configuration, list_of(:pr_configuration_attributes)
 
@@ -83,10 +86,24 @@ defmodule Console.GraphQl.Deployments.Git do
     field :match_strategy,     :match_strategy
   end
 
+  @desc "Operations to create new templated files within this pr"
+  input_object :pr_automation_create_spec_attributes do
+    field :git,       :git_ref_attributes
+    field :templates, list_of(:pr_automation_template_attributes)
+  end
+
   @desc "a fully specify regex/replace flow"
   input_object :regex_replacement_attributes do
     field :regex,       non_null(:string)
     field :replacement, non_null(:string)
+  end
+
+  @desc "templates to apply in this pr"
+  input_object :pr_automation_template_attributes do
+    field :source,      non_null(:string)
+    field :destination, non_null(:string)
+    field :external,    non_null(:boolean),
+      description: "whether the source template is sourced from an external git repo bound to this automation"
   end
 
   @desc "attributes for a pull request pointer record"
@@ -185,6 +202,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :title,         non_null(:string)
     field :message,       non_null(:string)
     field :updates,       :pr_update_spec
+    field :creates,       :pr_create_spec
 
     field :write_bindings, list_of(:policy_binding),
       description: "write policy for this pr automation, also propagates to the notifications list for any created PRs",
@@ -195,6 +213,9 @@ defmodule Console.GraphQl.Deployments.Git do
       resolve: dataloader(Deployments)
 
     field :addon,      :string, description: "link to an add-on name if this can update it"
+    field :repository, :git_repository,
+      description: "the git repository to use for sourcing external templates",
+      resolve: dataloader(Deployments)
     field :cluster,    :cluster,
       description: "link to a cluster if this is to perform an upgrade",
       resolve: dataloader(Deployments)
@@ -216,6 +237,19 @@ defmodule Console.GraphQl.Deployments.Git do
     field :replace_template,   :string
     field :yq,                 :string
     field :match_strategy,     :match_strategy
+  end
+
+  @desc "templated files used to add new files to a given pr"
+  object :pr_create_spec do
+    field :git, :git_ref, description: "pointer within an external git repository to source templates from"
+    field :templates, list_of(:pr_template_spec)
+  end
+
+  @desc "the details of where to find and place a templated file"
+  object :pr_template_spec do
+    field :source,      non_null(:string)
+    field :destination, non_null(:string)
+    field :external,    non_null(:boolean)
   end
 
   @desc "a fully specified regex/replace flow"

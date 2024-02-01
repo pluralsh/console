@@ -254,6 +254,8 @@ type RootQueryType {
 
   pipeline(id: ID!): Pipeline
 
+  clusterBackup(id: ID, clusterId: ID, namespace: String, name: String): ClusterBackup
+
   objectStores(after: String, first: Int, before: String, last: Int): ObjectStoreConnection
 
   "the services deployed in the current cluster, to be polled by the deploy operator"
@@ -538,6 +540,7 @@ type RootMutationType {
 
   updateGate(id: ID!, attributes: GateUpdateAttributes!): PipelineGate
 
+  "upserts a cluster backup resource"
   createClusterBackup(attributes: BackupAttributes!): ClusterBackup
 
   updateClusterRestore(id: ID!, attributes: RestoreAttributes!): ClusterRestore
@@ -673,6 +676,8 @@ input ObjectStoreAttributes {
 
 input BackupAttributes {
   name: String!
+  namespace: String!
+  garbageCollected: Boolean
 }
 
 input RestoreAttributes {
@@ -715,6 +720,8 @@ type ObjectStore {
 type ClusterBackup {
   id: ID!
   name: String!
+  namespace: String!
+  garbageCollected: Boolean
   cluster: Cluster
   insertedAt: DateTime
   updatedAt: DateTime
@@ -2283,6 +2290,8 @@ input PrAutomationAttributes {
 
   updates: PrAutomationUpdateSpecAttributes
 
+  creates: PrAutomationCreateSpecAttributes
+
   "link to an add-on name if this can update it"
   addon: String
 
@@ -2294,6 +2303,9 @@ input PrAutomationAttributes {
 
   "the scm connection to use for pr generation"
   connectionId: ID
+
+  "a git repository to use for create mode prs"
+  repositoryId: ID
 
   configuration: [PrConfigurationAttributes]
 
@@ -2339,10 +2351,26 @@ input PrAutomationUpdateSpecAttributes {
   matchStrategy: MatchStrategy
 }
 
+"Operations to create new templated files within this pr"
+input PrAutomationCreateSpecAttributes {
+  git: GitRefAttributes
+  templates: [PrAutomationTemplateAttributes]
+}
+
 "a fully specify regex\/replace flow"
 input RegexReplacementAttributes {
   regex: String!
   replacement: String!
+}
+
+"templates to apply in this pr"
+input PrAutomationTemplateAttributes {
+  source: String!
+
+  destination: String!
+
+  "whether the source template is sourced from an external git repo bound to this automation"
+  external: Boolean!
 }
 
 "attributes for a pull request pointer record"
@@ -2488,6 +2516,8 @@ type PrAutomation {
 
   updates: PrUpdateSpec
 
+  creates: PrCreateSpec
+
   "write policy for this pr automation, also propagates to the notifications list for any created PRs"
   writeBindings: [PolicyBinding]
 
@@ -2496,6 +2526,9 @@ type PrAutomation {
 
   "link to an add-on name if this can update it"
   addon: String
+
+  "the git repository to use for sourcing external templates"
+  repository: GitRepository
 
   "link to a cluster if this is to perform an upgrade"
   cluster: Cluster
@@ -2519,6 +2552,21 @@ type PrUpdateSpec {
   replaceTemplate: String
   yq: String
   matchStrategy: MatchStrategy
+}
+
+"templated files used to add new files to a given pr"
+type PrCreateSpec {
+  "pointer within an external git repository to source templates from"
+  git: GitRef
+
+  templates: [PrTemplateSpec]
+}
+
+"the details of where to find and place a templated file"
+type PrTemplateSpec {
+  source: String!
+  destination: String!
+  external: Boolean!
 }
 
 "a fully specified regex\/replace flow"
