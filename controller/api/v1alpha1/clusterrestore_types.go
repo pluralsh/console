@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	console "github.com/pluralsh/console-client-go"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -25,35 +26,34 @@ import (
 // ClusterRestoreSpec defines the desired state of ClusterRestore
 type ClusterRestoreSpec struct {
 	// BackupID is an ID of the backup to restore.
-	// If BackupID is specified then BackupName, BackupNamespace and BackupClusterID are not needed.
+	// If BackupID is specified then BackupName, BackupNamespace and BackupClusterRef are not needed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupID is immutable"
 	BackupID *string `json:"backupID"`
 
 	// BackupName is a name of the backup to restore.
-	// BackupNamespace and BackupClusterID have to be specified as well with it.
-	// If BackupName, BackupNamespace and BackupClusterID are specified then BackupID is not needed.
+	// BackupNamespace and BackupClusterRef have to be specified as well with it.
+	// If BackupName, BackupNamespace and BackupCluster are specified then BackupID is not needed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupName is immutable"
 	BackupName *string `json:"backupName"`
 
 	// BackupNamespace is a namespace of the backup to restore.
-	// BackupName and BackupClusterID have to be specified as well with it.
-	// If BackupName, BackupNamespace and BackupClusterID are specified then BackupID is not needed.
+	// BackupName and BackupClusterRef have to be specified as well with it.
+	// If BackupName, BackupNamespace and BackupCluster are specified then BackupID is not needed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupNamespace is immutable"
 	BackupNamespace *string `json:"backupNamespace"`
 
 	// BackupClusterID is an ID of a cluster where the backup to restore is located.
-	// BackupNamespace and BackupClusterID have to be specified as well with it.
-	// If BackupName, BackupNamespace and BackupClusterID are specified then BackupID is not needed.
+	// BackupName and BackupNamespace have to be specified as well with it.
+	// If BackupName, BackupNamespace and BackupClusterRef are specified then BackupID is not needed.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupClusterID is immutable"
-	BackupClusterID *string `json:"backupClusterID"`
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupCluster is immutable"
+	BackupClusterRef *corev1.ObjectReference `json:"backupCluster"`
 }
 
 func (p *ClusterRestoreSpec) HasBackupID() bool {

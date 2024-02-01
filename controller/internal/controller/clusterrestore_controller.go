@@ -120,7 +120,16 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 	if restore.Spec.HasBackupID() {
 		backupID = restore.Spec.GetBackupID()
 	} else {
-		backup, err := r.ConsoleClient.GetClusterBackup(restore.Spec.BackupClusterID, restore.Spec.BackupNamespace, restore.Spec.BackupName)
+		cluster := &v1alpha1.Cluster{}
+		key := client.ObjectKey{Name: restore.Spec.BackupClusterRef.Name, Namespace: restore.Spec.BackupClusterRef.Namespace}
+		if err := r.Get(ctx, key, cluster); err != nil {
+			return nil, err
+		}
+		if !cluster.Status.HasID() {
+			return nil, fmt.Errorf("cluster has no ID set")
+		}
+
+		backup, err := r.ConsoleClient.GetClusterBackup(cluster.Status.ID, restore.Spec.BackupNamespace, restore.Spec.BackupName)
 		if err != nil {
 			return nil, err
 		}
