@@ -53,7 +53,7 @@ type ClusterRestoreSpec struct {
 	// If BackupName, BackupNamespace and BackupClusterRef are specified then BackupID is not needed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupCluster is immutable"
-	BackupClusterRef *corev1.ObjectReference `json:"backupCluster"`
+	BackupClusterRef *corev1.ObjectReference `json:"backupClusterRef"`
 }
 
 func (p *ClusterRestoreSpec) HasBackupID() bool {

@@ -34,7 +34,7 @@ spec:
           spec:
             description: ClusterRestoreSpec defines the desired state of ClusterRestore
             properties:
-              backupCluster:
+              backupClusterRef:
                 description: BackupClusterID is an ID of a cluster where the backup
                   to restore is located. BackupName and BackupNamespace have to be
                   specified as well with it. If BackupName, BackupNamespace and BackupClusterRef
