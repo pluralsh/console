@@ -32,10 +32,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-const (
-	ClusterRestoreFinalizer = "deployments.plural.sh/cluster-restore-protection"
-)
-
 // ClusterRestoreReconciler reconciles a ClusterRestore object
 type ClusterRestoreReconciler struct {
 	client.Client
