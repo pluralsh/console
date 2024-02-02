@@ -13,7 +13,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Backup do
     |> allow(actor(ctx), :read)
   end
 
-  def resolve_cluster_backup(%{id: id}, ctx) do
+  def resolve_cluster_backup(%{id: id}, ctx) when is_binary(id) do
     Backups.get_cluster_backup(id)
     |> allow(actor(ctx), :read)
   end
