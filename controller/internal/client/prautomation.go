@@ -58,3 +58,13 @@ func (c *client) GetPrAutomationByName(ctx context.Context, name string, options
 
 	return response.PrAutomation, err
 }
+
+func (c *client) IsPrAutomationExists(ctx context.Context, id string) bool {
+	_, err := c.GetScmConnection(ctx, id)
+	if errors.IsNotFound(err) {
+		return false
+	}
+
+	// We are assuming that if there is an error, and it is not ErrorNotFound then resource does not exist.
+	return err == nil
+}

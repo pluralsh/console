@@ -3,7 +3,9 @@ package v1alpha1
 import (
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -42,12 +44,12 @@ type PrAutomation struct {
 
 	// Status ...
 	// +kubebuilder:validation:Optional
-	Status PrAutomationStatus `json:"status,omitempty"`
+	Status Status `json:"status,omitempty"`
 }
 
-func (in *PrAutomation) Attributes(clusterID string, serviceID string, connectionID string) console.PrAutomationAttributes {
+func (in *PrAutomation) Attributes(clusterID *string, serviceID *string, connectionID *string) *console.PrAutomationAttributes {
 	attrs := console.PrAutomationAttributes{
-		Name:          in.Spec.Name,
+		Name:          lo.ToPtr(in.ConsoleName()),
 		Identifier:    in.Spec.Identifier,
 		Documentation: in.Spec.Documentation,
 		Title:         in.Spec.Title,
@@ -55,9 +57,9 @@ func (in *PrAutomation) Attributes(clusterID string, serviceID string, connectio
 		Branch:        in.Spec.Branch,
 		Updates:       in.Spec.Updates.Attributes(),
 		Addon:         in.Spec.Addon,
-		ClusterID:     &clusterID,
-		ServiceID:     &serviceID,
-		ConnectionID:  &connectionID,
+		ClusterID:     clusterID,
+		ServiceID:     serviceID,
+		ConnectionID:  connectionID,
 		Configuration: algorithms.Map(in.Spec.Configuration, func(c PrAutomationConfiguration) *console.PrConfigurationAttributes {
 			return c.Attributes()
 		}),
@@ -70,7 +72,28 @@ func (in *PrAutomation) Attributes(clusterID string, serviceID string, connectio
 			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
 	}
 
-	return attrs
+	return &attrs
+}
+
+func (s *PrAutomation) Diff(hasher Hasher) (changed bool, sha string, err error) {
+	currentSha, err := hasher(s.Spec)
+	if err != nil {
+		return false, "", err
+	}
+
+	return !s.Status.IsSHAEqual(currentSha), currentSha, nil
+}
+
+func (in *PrAutomation) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&in.Status.Conditions, condition)
+}
+
+func (in *PrAutomation) ConsoleName() string {
+	if in.Spec.Name != nil && len(*in.Spec.Name) > 0 {
+		return *in.Spec.Name
+	}
+
+	return in.Name
 }
 
 // PrAutomationSpec ...
@@ -282,22 +305,4 @@ func (in *Condition) Attributes() *console.ConditionAttributes {
 		Field:     in.Field,
 		Value:     in.Value,
 	}
-}
-
-// PrAutomationStatus ...
-type PrAutomationStatus struct {
-	// ID of the pr automation in the Console API.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	ID *string `json:"id,omitempty"`
-	// SHA of last applied configuration.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	SHA *string `json:"sha,omitempty"`
-	// Represents the observations of a PrAutomation's current state.
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	// +listType=map
-	// +listMapKey=type
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }

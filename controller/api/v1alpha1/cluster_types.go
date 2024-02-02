@@ -39,6 +39,11 @@ type Cluster struct {
 	Status ClusterStatus `json:"status,omitempty"`
 }
 
+// ConsoleID implements Getter interface
+func (c *Cluster) ConsoleID() *string {
+	return c.Status.ID
+}
+
 func (c *Cluster) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&c.Status.Conditions, condition)
 }
@@ -353,22 +358,7 @@ func (cs *ClusterNodePoolAWSCloudSettings) Attributes() *console.AwsNodeCloudAtt
 }
 
 type ClusterStatus struct {
-	// ID from Console.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	ID *string `json:"id,omitempty"`
-
-	// SHA of last applied configuration.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	SHA *string `json:"sha,omitempty"`
-
-	// Represents the observations of a Cluster current state.
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	// +listType=map
-	// +listMapKey=type
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+	Status `json:",inline"`
 
 	// CurrentVersion contains current Kubernetes version this cluster is using.
 	// +kubebuilder:validation:Optional
@@ -384,24 +374,4 @@ type ClusterStatus struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	PingedAt *string `json:"pingedAt,omitempty"`
-}
-
-func (cs *ClusterStatus) HasID() bool {
-	return cs.ID != nil && len(*cs.ID) > 0
-}
-
-func (cs *ClusterStatus) HasSHA() bool {
-	return cs.SHA != nil && len(*cs.SHA) > 0
-}
-
-func (cs *ClusterStatus) IsSHAChanged(sha string) bool {
-	return cs.HasSHA() && *cs.SHA != sha
-}
-
-func (cs *ClusterStatus) HasReadonlyCondition() bool {
-	return meta.FindStatusCondition(cs.Conditions, ReadonlyConditionType.String()) != nil
-}
-
-func (cs *ClusterStatus) IsReadonly() bool {
-	return meta.IsStatusConditionTrue(cs.Conditions, ReadonlyConditionType.String())
 }

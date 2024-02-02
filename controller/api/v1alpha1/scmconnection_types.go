@@ -33,7 +33,12 @@ type ScmConnection struct {
 	// +kubebuilder:validation:Required
 	Spec ScmConnectionSpec `json:"spec"`
 	// +kubebuilder:validation:Optional
-	Status ScmConnectionStatus `json:"status,omitempty"`
+	Status Status `json:"status,omitempty"`
+}
+
+// ConsoleID implements Getter interface
+func (s *ScmConnection) ConsoleID() *string {
+	return s.Status.ID
 }
 
 func (s *ScmConnection) ConsoleName() string {
@@ -60,8 +65,8 @@ func (s *ScmConnection) Diff(hasher Hasher) (changed bool, sha string, err error
 	return !s.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
-func (p *ScmConnection) SetCondition(condition metav1.Condition) {
-	meta.SetStatusCondition(&p.Status.Conditions, condition)
+func (s *ScmConnection) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&s.Status.Conditions, condition)
 }
 
 type ScmConnectionSpec struct {
@@ -87,61 +92,4 @@ type ScmConnectionSpec struct {
 	// APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl.
 	// +kubebuilder:validation:Optional
 	APIUrl *string `json:"apiUrl,omitempty"`
-}
-
-type ScmConnectionStatus struct {
-	// ID of the Scm connection in the Console API.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	ID *string `json:"id,omitempty"`
-	// SHA of last applied configuration.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	SHA *string `json:"sha,omitempty"`
-	// Represents the observations of a ScmConnection's current state.
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	// +listType=map
-	// +listMapKey=type
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
-}
-
-func (p *ScmConnectionStatus) GetID() string {
-	if !p.HasID() {
-		return ""
-	}
-
-	return *p.ID
-}
-
-func (p *ScmConnectionStatus) HasID() bool {
-	return p.ID != nil && len(*p.ID) > 0
-}
-
-func (p *ScmConnectionStatus) GetSHA() string {
-	if !p.HasSHA() {
-		return ""
-	}
-
-	return *p.SHA
-}
-
-func (p *ScmConnectionStatus) HasSHA() bool {
-	return p.SHA != nil && len(*p.SHA) > 0
-}
-
-func (p *ScmConnectionStatus) IsSHAEqual(sha string) bool {
-	if !p.HasSHA() {
-		return false
-	}
-
-	return p.GetSHA() == sha
-}
-
-func (p *ScmConnectionStatus) HasReadonlyCondition() bool {
-	return meta.FindStatusCondition(p.Conditions, ReadonlyConditionType.String()) != nil
-}
-
-func (p *ScmConnectionStatus) IsReadonly() bool {
-	return meta.IsStatusConditionTrue(p.Conditions, ReadonlyConditionType.String())
 }

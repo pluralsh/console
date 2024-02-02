@@ -27,6 +27,8 @@ const (
 )
 
 type GitRepositoryStatus struct {
+	Status `json:",inline"`
+
 	// Health status.
 	// +optional
 	// +kubebuilder:validation:Enum:=PULLABLE;FAILED
@@ -34,20 +36,6 @@ type GitRepositoryStatus struct {
 	// Message indicating details about last transition.
 	// +optional
 	Message *string `json:"message,omitempty"`
-	// ID of the provider in the Console API.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	ID *string `json:"id,omitempty"`
-	// SHA of last applied configuration.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	SHA *string `json:"sha,omitempty"`
-	// Represents the observations of Repository current state.
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	// +listType=map
-	// +listMapKey=type
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 // +kubebuilder:object:root=true
@@ -69,46 +57,6 @@ type GitRepositoryList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []GitRepository `json:"items"`
-}
-
-func (p *GitRepositoryStatus) HasReadonlyCondition() bool {
-	return meta.FindStatusCondition(p.Conditions, ReadonlyConditionType.String()) != nil
-}
-
-func (p *GitRepositoryStatus) IsReadonly() bool {
-	return meta.IsStatusConditionTrue(p.Conditions, ReadonlyConditionType.String())
-}
-
-func (p *GitRepositoryStatus) IsSHAEqual(sha string) bool {
-	if !p.HasSHA() {
-		return false
-	}
-
-	return p.GetSHA() == sha
-}
-
-func (p *GitRepositoryStatus) GetSHA() string {
-	if !p.HasSHA() {
-		return ""
-	}
-
-	return *p.SHA
-}
-
-func (p *GitRepositoryStatus) HasSHA() bool {
-	return p.SHA != nil && len(*p.SHA) > 0
-}
-
-func (p *GitRepositoryStatus) GetID() string {
-	if !p.HasID() {
-		return ""
-	}
-
-	return *p.ID
-}
-
-func (p *GitRepositoryStatus) HasID() bool {
-	return p.ID != nil && len(*p.ID) > 0
 }
 
 func (p *GitRepository) SetCondition(condition metav1.Condition) {

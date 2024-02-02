@@ -139,6 +139,11 @@ type ServiceDeployment struct {
 	Status ServiceStatus `json:"status,omitempty"`
 }
 
+// ConsoleID implements Getter interface
+func (s *ServiceDeployment) ConsoleID() *string {
+	return s.Status.ID
+}
+
 func (s *ServiceDeployment) ConsoleName() string {
 	if s.Spec.Name != nil && len(*s.Spec.Name) > 0 {
 		return *s.Spec.Name

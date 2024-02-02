@@ -1,7 +1,13 @@
 package v1alpha1
 
 import (
+	"context"
+
 	console "github.com/pluralsh/console-client-go"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type NamespacedName struct {
@@ -117,4 +123,80 @@ type GitRef struct {
 	// Ref ...
 	// +kubebuilder:validation:Required
 	Ref string `json:"ref"`
+}
+
+type Getter interface {
+	client.Object
+
+	ConsoleID() *string
+}
+
+func GetConsoleID[T Getter](ctx context.Context, ref *v1.ObjectReference, resource T, reader client.Reader) (*string, error) {
+	if resource == nil {
+		return nil, nil
+	}
+
+	err := reader.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, resource)
+	return resource.ConsoleID(), err
+}
+
+type Status struct {
+	// ID of the resource in the Console API.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	ID *string `json:"id,omitempty"`
+	// SHA of last applied configuration.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	SHA *string `json:"sha,omitempty"`
+	// Represents the observations of a PrAutomation's current state.
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=type
+	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+}
+
+func (p *Status) GetID() string {
+	if !p.HasID() {
+		return ""
+	}
+
+	return *p.ID
+}
+
+func (p *Status) HasID() bool {
+	return p.ID != nil && len(*p.ID) > 0
+}
+
+func (p *Status) GetSHA() string {
+	if !p.HasSHA() {
+		return ""
+	}
+
+	return *p.SHA
+}
+
+func (p *Status) HasSHA() bool {
+	return p.SHA != nil && len(*p.SHA) > 0
+}
+
+func (p *Status) IsSHAEqual(sha string) bool {
+	if !p.HasSHA() {
+		return false
+	}
+
+	return p.GetSHA() == sha
+}
+
+func (p *Status) HasReadonlyCondition() bool {
+	return meta.FindStatusCondition(p.Conditions, ReadonlyConditionType.String()) != nil
+}
+
+func (p *Status) IsReadonly() bool {
+	return meta.IsStatusConditionTrue(p.Conditions, ReadonlyConditionType.String())
+}
+
+func (p *Status) IsStatusConditionTrue(condition ConditionType) bool {
+	return meta.IsStatusConditionTrue(p.Conditions, condition.String())
 }

@@ -253,7 +253,7 @@ func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster,
 	exists := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
 	logger := log.FromContext(ctx)
 
-	if cluster.Status.IsSHAChanged(sha) && exists {
+	if !cluster.Status.IsSHAEqual(sha) && exists {
 		logger.Info(fmt.Sprintf("Detected changes, updating %s cluster", cluster.Name))
 		return r.ConsoleClient.UpdateCluster(*cluster.Status.ID, cluster.UpdateAttributes())
 	}
