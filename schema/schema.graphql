@@ -527,6 +527,8 @@ type RootMutationType {
 
   deleteObjectStore(id: ID!): ObjectStore
 
+  configureBackups(clusterId: ID!, storeId: ID!): Cluster
+
   createClusterRestore(backupId: ID!): ClusterRestore
 
   "a regular status ping to be sent by the deploy operator"
@@ -2975,6 +2977,8 @@ enum AuditType {
   PROVIDER_CREDENTIAL
   PIPELINE
   GLOBAL
+  OBJECT_STORE
+  CLUSTER_RESTORE
 }
 
 enum AuditAction {

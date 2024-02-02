@@ -41,4 +41,22 @@ defmodule Console.GraphQl.Deployments.BackupQueriesTest do
       """, %{"id" => restore.id}, %{cluster: insert(:cluster)})
     end
   end
+
+  describe "clusterBackup" do
+    test "it can fetch a cluster backup by cluster/name/namespace" do
+      backup = insert(:cluster_backup)
+
+      {:ok, %{data: %{"clusterBackup" => found}}} = run_query("""
+        query Backup($clusterId: ID!, $name: String!, $namespace: String!) {
+          clusterBackup(clusterId: $clusterId, name: $name, namespace: $namespace) { id }
+        }
+      """, %{
+        "clusterId" => backup.cluster_id,
+        "name" => backup.name,
+        "namespace" => backup.namespace
+      }, %{current_user: admin_user()})
+
+      assert found["id"] == backup.id
+    end
+  end
 end

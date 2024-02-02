@@ -39,4 +39,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Backup do
 
   def update_cluster_restore(%{id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Backups.update_cluster_restore(attrs, id, cluster)
+
+  def configure_backups(%{store_id: store_id, cluster_id: cluster_id}, %{context: %{current_user: user}}),
+    do: Backups.configure_backups(store_id, cluster_id, user)
 end

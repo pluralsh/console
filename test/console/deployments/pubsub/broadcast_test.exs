@@ -39,4 +39,14 @@ defmodule Console.Deployments.PubSub.BroadcastTest do
       Broadcast.handle_event(event)
     end
   end
+
+  describe "ClusterRestoreCreated" do
+    test "it will push a restore.event event" do
+      %{id: id, backup: %{cluster_id: cluster_id}} = restore = insert(:cluster_restore)
+      expect(Phoenix.Channel.Server, :broadcast, fn Console.PubSub, "cluster:" <> ^cluster_id, "restore.event", %{"id" => ^id} -> :ok end)
+
+      event = %PubSub.ClusterRestoreCreated{item: restore}
+      Broadcast.handle_event(event)
+    end
+  end
 end

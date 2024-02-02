@@ -1,6 +1,7 @@
 defmodule Console.Deployments.BackupsTest do
   use Console.DataCase, async: true
-  alias Console.Deployments.Backups
+  alias Console.PubSub
+  alias Console.Deployments.{Backups, Services}
 
   describe "#create_object_store/2" do
     test "admins can create object stores" do
@@ -13,6 +14,8 @@ defmodule Console.Deployments.BackupsTest do
       assert os.gcs.bucket == "my-bucket"
       assert os.gcs.region == "us-east1"
       assert os.gcs.application_credentials == "blah"
+
+      assert_receive {:event, %PubSub.ObjectStoreCreated{item: ^os}}
     end
 
     test "non-admins cannot create object stores" do
@@ -35,6 +38,8 @@ defmodule Console.Deployments.BackupsTest do
       assert os.gcs.bucket == "my-bucket"
       assert os.gcs.region == "us-east1"
       assert os.gcs.application_credentials == "blah"
+
+      assert_receive {:event, %PubSub.ObjectStoreUpdated{item: ^os}}
     end
 
     test "non-admins cannot update object stores" do
@@ -53,6 +58,8 @@ defmodule Console.Deployments.BackupsTest do
 
       assert os.id == store.id
       refute refetch(store)
+
+      assert_receive {:event, %PubSub.ObjectStoreDeleted{item: ^os}}
     end
 
     test "nonadmins cannot delete" do
@@ -87,6 +94,8 @@ defmodule Console.Deployments.BackupsTest do
       [_] = Console.Schema.ClusterRestoreHistory.for_cluster(backup.cluster_id)
             |> Console.Repo.all()
 
+      assert_receive {:event, %PubSub.ClusterRestoreCreated{item: ^restore}}
+
       # cannot create restores when one is in-progress
       {:error, _} = Backups.create_cluster_restore(backup.id, admin_user())
     end
@@ -105,6 +114,24 @@ defmodule Console.Deployments.BackupsTest do
       {:ok, updated} = Backups.update_cluster_restore(%{status: :successful}, restore.id, restore.backup.cluster)
 
       assert updated.status == :successful
+    end
+  end
+
+  describe "#configure_backups/3" do
+    test "it can set an object store for cluster backups" do
+      store = insert(:object_store, s3: %{bucket: "bucket"})
+      cluster = insert(:cluster)
+
+      {:ok, updated} = Backups.configure_backups(store.id, cluster.id, admin_user())
+
+      assert updated.id == cluster.id
+      assert updated.object_store_id == store.id
+
+      svc = Services.get_service_by_name(cluster.id, "velero")
+      {:ok, config} = Services.configuration(svc)
+
+      assert config["provider"] == "aws"
+      assert config["bucket"] == "bucket"
     end
   end
 end

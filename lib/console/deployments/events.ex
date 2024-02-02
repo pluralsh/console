@@ -34,3 +34,8 @@ defmodule Console.PubSub.PipelineDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PipelineGateApproved, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.PromotionCreated, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.ClusterRestoreCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.ObjectStoreCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.ObjectStoreUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.ObjectStoreDeleted, do: use Piazza.PubSub.Event
