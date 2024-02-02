@@ -68,7 +68,7 @@ build: manifests generate fmt vet ## build manager binary
 	go build -o bin/manager cmd/main.go
 
 .PHONY: run
-run: manifests generate fmt vet ## run a controller from your host
+run: manifests generate chart-rbac fmt vet ## run a controller from your host
 	go run ./cmd/main.go \
 		--console-url=${PLURAL_CONSOLE_URL}/gql
 
@@ -151,12 +151,17 @@ endif
 
 .PHONY: helm
 helm: manifests kustomize helmify
-	@$(KUSTOMIZE) build config/default | $(HELMIFY) -generate-defaults -image-pull-secrets -crd-dir ../charts/controller
-	@find ../charts/controller -type f -exec sed -i 's/app.kubernetes.io\/managed-by: kustomize/app.kubernetes.io\/managed-by: helm/g' {} \;
+	@rm -rf tmp/
+	@$(KUSTOMIZE) build config/default | $(HELMIFY) -generate-defaults -image-pull-secrets -crd-dir tmp/charts/controller
+	@find tmp/charts/controller -type f -exec sed -i 's/app.kubernetes.io\/managed-by: kustomize/app.kubernetes.io\/managed-by: helm/g' {} \;
 
 .PHONY: chart-crds
 chart-crds:
 	@cp -a config/crd/bases/. ../charts/controller/crds
+
+.PHONY: chart-rbac
+chart-rbac: helm
+	@cp -a tmp/charts/controller/templates/manager-rbac.yaml ../charts/controller/templates
 
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
