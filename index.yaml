@@ -2,6 +2,24 @@ apiVersion: v1
 entries:
   console:
   - apiVersion: v2
+    appVersion: 0.8.7
+    created: "2024-02-02T01:28:47.488528761Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.0.4
+    - name: controller
+      repository: file://../controller
+      version: 0.0.11
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: fc25599020d71937da104a7bdc143286fab274b861fef6cbb4976a6ccd63544d
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.1.27/console-0.1.27.tgz
+    version: 0.1.27
+  - apiVersion: v2
     appVersion: 0.8.6
     created: "2024-01-26T20:33:14.551458499Z"
     dependencies:
@@ -395,6 +413,16 @@ entries:
     version: 0.1.1
   controller:
   - apiVersion: v2
+    appVersion: 0.8.7
+    created: "2024-02-02T01:28:47.638125937Z"
+    description: deploys the deployment operator for plural cd
+    digest: 504b1f9ee43344e0acefc9fa5bb68c4d7cff7b6f70f80f8d153774f23810cca4
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.11/controller-0.0.11.tgz
+    version: 0.0.11
+  - apiVersion: v2
     appVersion: 0.8.6
     created: "2024-01-26T20:33:14.662246627Z"
     description: deploys the deployment operator for plural cd
@@ -505,4 +533,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/console-chart-v0.1.0/system-upgrade-controller-0.1.0.tgz
     version: 0.1.0
-generated: "2024-01-26T20:33:14.662439605Z"
+generated: "2024-02-02T01:28:47.63842231Z"
