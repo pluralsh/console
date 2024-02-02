@@ -31,6 +31,18 @@ defmodule Console.Schema.ObjectStore do
     timestamps()
   end
 
+  def configuration(%__MODULE__{s3: %__MODULE__.S3{} = s3}), do: with_provider(s3, "aws")
+  def configuration(%__MODULE__{gcs: %__MODULE__.GCS{} = gcs}), do: with_provider(gcs, "gcs")
+  def configuration(%__MODULE__{azure: %__MODULE__.Azure{} = azure}), do: with_provider(azure, "azure")
+
+  defp with_provider(struct, provider) do
+    Console.mapify(struct)
+    |> Enum.filter(&elem(&1, 1))
+    |> Map.new(fn {k, v} -> {Inflex.camelize(k, :lower), v} end)
+    |> Map.put("provider", provider)
+    |> Map.drop(~w(id))
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(os in query, order_by: ^order)
   end

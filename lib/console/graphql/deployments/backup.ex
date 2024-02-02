@@ -172,6 +172,14 @@ defmodule Console.GraphQl.Deployments.Backup do
       resolve &Deployments.delete_object_store/2
     end
 
+    field :configure_backups, :cluster do
+      middleware Authenticated
+      arg :cluster_id, non_null(:id)
+      arg :store_id,   non_null(:id)
+
+      resolve &Deployments.configure_backups/2
+    end
+
     field :create_cluster_restore, :cluster_restore do
       middleware Authenticated
       arg :backup_id, non_null(:id)

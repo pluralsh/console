@@ -253,16 +253,8 @@ defmodule Console.Deployments.Services do
   def self_manage(values, %User{} = user) do
     start_transaction()
     |> add_operation(:values, fn _ -> YamlElixir.read_from_string(values) end)
-    |> add_operation(:git, fn _ ->
-      url = "https://github.com/pluralsh/console.git"
-      case Git.get_by_url(url) do
-        %GitRepository{} = git -> {:ok, git}
-        _ -> Git.create_repository(%{url: url}, user)
-      end
-    end)
-    |> add_operation(:settings, fn _ ->
-      Settings.update(%{self_managed: true}, user)
-    end)
+    |> add_operation(:git, fn _ -> ensure_console_repo(user) end)
+    |> add_operation(:settings, fn _ -> Settings.update(%{self_managed: true}, user) end)
     |> add_operation(:service, fn %{git: git} ->
       cluster = Clusters.local_cluster()
       create_service(%{
@@ -640,6 +632,18 @@ defmodule Console.Deployments.Services do
     Repo.get(ServiceContext, id)
     |> allow(user, :write)
     |> when_ok(:delete)
+  end
+
+  @doc """
+  Upserts a git repository pointing to the main console repo
+  """
+  @spec ensure_console_repo(User.t) :: service_resp
+  def ensure_console_repo(user) do
+    url = "https://github.com/pluralsh/console.git"
+    case Git.get_by_url(url) do
+      %GitRepository{} = git -> {:ok, git}
+      _ -> Git.create_repository(%{url: url}, user)
+    end
   end
 
   defp create_revision(attrs, %Service{id: id}) do

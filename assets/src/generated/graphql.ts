@@ -2936,6 +2936,7 @@ export type RootMutationType = {
   cancelBuild?: Maybe<Build>;
   /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
   cloneService?: Maybe<ServiceDeployment>;
+  configureBackups?: Maybe<Cluster>;
   createAccessToken?: Maybe<AccessToken>;
   createAgentMigration?: Maybe<AgentMigration>;
   createBuild?: Maybe<Build>;
@@ -3065,6 +3066,12 @@ export type RootMutationTypeCloneServiceArgs = {
   clusterId: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeConfigureBackupsArgs = {
+  clusterId: Scalars['ID']['input'];
+  storeId: Scalars['ID']['input'];
 };
 
 
