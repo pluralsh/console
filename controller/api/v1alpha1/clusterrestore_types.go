@@ -34,7 +34,7 @@ type ClusterRestoreSpec struct {
 
 	// BackupName is a name of the backup to restore.
 	// BackupNamespace and BackupClusterRef have to be specified as well with it.
-	// If BackupName, BackupNamespace and BackupCluster are specified then BackupID is not needed.
+	// If BackupName, BackupNamespace and BackupCluster are specified, then BackupID is not needed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupName is immutable"
@@ -42,7 +42,7 @@ type ClusterRestoreSpec struct {
 
 	// BackupNamespace is a namespace of the backup to restore.
 	// BackupName and BackupClusterRef have to be specified as well with it.
-	// If BackupName, BackupNamespace and BackupCluster are specified then BackupID is not needed.
+	// If BackupName, BackupNamespace and BackupCluster are specified, then BackupID is not needed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupNamespace is immutable"
@@ -50,9 +50,9 @@ type ClusterRestoreSpec struct {
 
 	// BackupClusterID is an ID of a cluster where the backup to restore is located.
 	// BackupName and BackupNamespace have to be specified as well with it.
-	// If BackupName, BackupNamespace and BackupClusterRef are specified then BackupID is not needed.
+	// If BackupName, BackupNamespace and BackupClusterRef are specified, then BackupID is not needed.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupCluster is immutable"
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupClusterRef is immutable"
 	BackupClusterRef *corev1.ObjectReference `json:"backupClusterRef"`
 }
 
