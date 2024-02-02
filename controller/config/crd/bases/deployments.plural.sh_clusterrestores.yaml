@@ -79,7 +79,7 @@ spec:
                   rule: self == oldSelf
               backupID:
                 description: BackupID is an ID of the backup to restore. If BackupID
-                  is specified then BackupName, BackupNamespace and BackupClusterRef
+                  is specified, then BackupName, BackupNamespace and BackupClusterRef
                   are not needed.
                 type: string
                 x-kubernetes-validations:

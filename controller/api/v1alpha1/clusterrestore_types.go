@@ -26,7 +26,7 @@ import (
 // ClusterRestoreSpec defines the desired state of ClusterRestore
 type ClusterRestoreSpec struct {
 	// BackupID is an ID of the backup to restore.
-	// If BackupID is specified then BackupName, BackupNamespace and BackupClusterRef are not needed.
+	// If BackupID is specified, then BackupName, BackupNamespace and BackupClusterRef are not needed.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="BackupID is immutable"
