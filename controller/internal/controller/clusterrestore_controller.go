@@ -75,9 +75,9 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	}()
 
 	// Handle resource deletion both in Kubernetes cluster and in Console API.
-	if restore.GetDeletionTimestamp() != nil {
-		// TODO
-		// utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	if !restore.GetDeletionTimestamp().IsZero() {
+		utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReasonDeleting, "")
+		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonDeleting, "")
 		return ctrl.Result{}, nil
 	}
 
