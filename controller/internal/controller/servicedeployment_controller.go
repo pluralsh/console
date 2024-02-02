@@ -158,6 +158,8 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		Helm:          attr.Helm,
 		Configuration: attr.Configuration,
 		Kustomize:     attr.Kustomize,
+		ReadBindings:  attr.ReadBindings,
+		WriteBindings: attr.WriteBindings,
 	}
 
 	sha, err := utils.HashObject(updater)
