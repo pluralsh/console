@@ -4,9 +4,11 @@ defmodule Console.Deployments.Settings do
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Commands.Plural
+  alias Console.Services.Users
   alias Console.Deployments.{Clusters, Services}
   alias Console.Schema.{DeploymentSettings, User}
 
+  @agent_vsn File.read!("AGENT_VERSION")
   @cache_adapter Console.conf(:cache_adapter)
   @ttl :timer.minutes(45)
 
@@ -20,6 +22,12 @@ defmodule Console.Deployments.Settings do
   @spec fetch() :: DeploymentSettings.t | nil
   @decorate cacheable(cache: @cache_adapter, key: :deployment_settings, opts: [ttl: @ttl])
   def fetch(), do: fetch_consistent()
+
+  @doc """
+  The git ref to use for new agents on clusters
+  """
+  @spec agent_ref() :: binary
+  def agent_ref(), do: "refs/tags/agent-#{@agent_vsn}"
 
   @doc "same as fetch/0 but always reads from db"
   def fetch_consistent() do
@@ -58,6 +66,29 @@ defmodule Console.Deployments.Settings do
       %DeploymentSettings{enabled: true} = enabled -> {:ok, enabled}
       settings -> do_enable(settings, user)
     end
+  end
+
+  def migrate_agents() do
+    vsn = agent_ref()
+    case fetch_consistent() do
+      %DeploymentSettings{manage_agents: true, agent_version: ^vsn} = settings -> {:ok, settings}
+      %DeploymentSettings{manage_agents: true} = settings -> migrate_agents(settings, vsn)
+      _ -> {:error, "ignoring agent updates"}
+    end
+  end
+
+  defp migrate_agents(%DeploymentSettings{} = settings, vsn) do
+    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+
+    start_transaction()
+    |> add_operation(:settings, fn _ ->
+      DeploymentSettings.changeset(settings, %{agent_version: vsn})
+      |> Repo.update()
+    end)
+    |> add_operation(:migration, fn _ ->
+      Clusters.create_agent_migration(%{name: vsn, ref: vsn}, bot)
+    end)
+    |> execute(extract: :settings)
   end
 
   defp do_enable(settings, user) do

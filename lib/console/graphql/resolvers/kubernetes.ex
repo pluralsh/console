@@ -185,7 +185,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def list_jobs(%{namespace: ns}) do
     Console.namespace(ns)
-    |> BatchV1.list_namespaced_job!()
+    |> BatchV1.list_namespaced_job!(limit: 300)
     |> Kube.Utils.run()
     |> items_response()
   end

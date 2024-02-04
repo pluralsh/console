@@ -7,6 +7,7 @@ defmodule Console.GraphQl.Deployments.Git do
   ecto_enum :git_health, GitRepository.Health
   ecto_enum :scm_type, ScmConnection.Type
   ecto_enum :match_strategy, PrAutomation.MatchStrategy
+  ecto_enum :pr_role, PrAutomation.Role
   ecto_enum :configuration_type, Configuration.Type
   ecto_enum :operation, Configuration.Condition.Operation
 
@@ -35,6 +36,7 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "A way to create a self-service means of generating PRs against an IaC repo"
   input_object :pr_automation_attributes do
     field :name,          :string
+    field :role,          :pr_role
     field :identifier,    :string, description: "string id for a repository, eg for github, this is {organization}/{repository-name}"
     field :documentation, :string
     field :title,         :string
@@ -198,6 +200,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :id,            non_null(:id)
     field :identifier,    non_null(:string), description: "string id for a repository, eg for github, this is {organization}/{repository-name}"
     field :name,          non_null(:string), description: "the name for this automation"
+    field :role,          :pr_role, description: "An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster"
     field :documentation, :string
     field :title,         non_null(:string)
     field :message,       non_null(:string)
