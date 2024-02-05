@@ -26,11 +26,12 @@ export default function Command({ command, follow }) {
         <Flex
           gap="small"
           align="center"
+          grow={1}
         >
           <ArrowRightIcon size={12} />
           <span> {command.command}</span>
-          <CommandExitStatus exitCode={command.exitCode} />
         </Flex>
+        <CommandExitStatus exitCode={command.exitCode} />
         <Timer
           insertedAt={command.insertedAt}
           completedAt={command.completedAt}
