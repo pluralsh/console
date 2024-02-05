@@ -1,6 +1,8 @@
 defmodule Console.Deployments.Backups do
   use Console.Services.Base
   import Console.Deployments.Policies
+  alias Console.Deployments.{Clusters, Services}
+  alias Console.PubSub
   alias Console.Schema.{
     ClusterBackup,
     ClusterRestore,
@@ -8,6 +10,7 @@ defmodule Console.Deployments.Backups do
     ObjectStore,
     Cluster,
     User,
+    Service
   }
 
   @type object_store_resp :: {:ok, ObjectStore.t} | Console.error
@@ -35,6 +38,7 @@ defmodule Console.Deployments.Backups do
     |> ObjectStore.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:insert)
+    |> notify(:create, user)
   end
 
   @doc """
@@ -46,6 +50,7 @@ defmodule Console.Deployments.Backups do
     |> ObjectStore.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
+    |> notify(:update, user)
   end
 
   @doc """
@@ -56,6 +61,7 @@ defmodule Console.Deployments.Backups do
     get_object_store(id)
     |> allow(user, :write)
     |> when_ok(:delete)
+    |> notify(:delete, user)
   end
 
   @doc """
@@ -100,6 +106,7 @@ defmodule Console.Deployments.Backups do
         |> Repo.insert()
     end)
     |> execute(extract: :restore)
+    |> notify(:create, user)
   end
 
   @doc """
@@ -111,4 +118,60 @@ defmodule Console.Deployments.Backups do
     |> ClusterRestore.changeset(attrs)
     |> Repo.update()
   end
+
+  @doc """
+  Binds an object store to a cluster, and sets up the velero service to initiate backup/restore
+  """
+  @spec configure_backups(binary, binary, User.t) :: Clusters.cluster_resp
+  def configure_backups(store_id, cluster_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:cluster, fn _ ->
+      Clusters.get_cluster(cluster_id)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:store, fn _ ->
+      get_object_store(store_id)
+      |> allow(user, :read)
+    end)
+    |> add_operation(:update, fn %{cluster: cluster, store: %{id: id}} ->
+      cluster
+      |> Ecto.Changeset.change(%{object_store_id: id})
+      |> Repo.update()
+    end)
+    |> add_operation(:repo, fn _ -> Services.ensure_console_repo(user) end)
+    |> add_operation(:svc, fn %{cluster: %{id: cluster_id}, repo: repo, store: store} ->
+      upsert_service(cluster_id, repo, store, user)
+    end)
+    |> execute(extract: :update)
+  end
+
+  defp upsert_service(cluster_id, repo, store, user) do
+    config = ObjectStore.configuration(store)
+             |> Enum.map(fn {k, v} -> %{name: k, value: v} end)
+    case Services.get_service_by_name(cluster_id, "velero") do
+      %Service{id: id} -> Services.merge_service(config, id, tmp_admin(user))
+      nil -> Services.create_service(%{
+        repository_id: repo.id,
+        name: "velero",
+        protect: true,
+        namespace: "velero",
+        configuration: config,
+        git: %{ref: "main", folder: "charts/velero"},
+      }, cluster_id, tmp_admin(user))
+    end
+  end
+
+  defp tmp_admin(%User{} = user), do: %{user | roles: %{admin: true}}
+
+  defp notify({:ok, %ObjectStore{} = store}, :create, user),
+    do: handle_notify(PubSub.ObjectStoreCreated, store, actor: user)
+  defp notify({:ok, %ObjectStore{} = store}, :update, user),
+    do: handle_notify(PubSub.ObjectStoreUpdated, store, actor: user)
+  defp notify({:ok, %ObjectStore{} = store}, :delete, user),
+    do: handle_notify(PubSub.ObjectStoreDeleted, store, actor: user)
+
+  defp notify({:ok, %ClusterRestore{} = restore}, :create, user),
+    do: handle_notify(PubSub.ClusterRestoreCreated, restore, actor: user)
+
+  defp notify(pass, _, _), do: pass
 end

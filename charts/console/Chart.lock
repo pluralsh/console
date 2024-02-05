@@ -4,6 +4,6 @@ dependencies:
   version: 0.0.4
 - name: controller
   repository: file://../controller
-  version: 0.0.10
-digest: sha256:7e81bf9c7bc0f73dfb5ff350f2e35f8e4191c2efaaa00cd9356824ab7c63933b
-generated: "2024-01-26T17:11:00.347804555Z"
+  version: 0.0.12
+digest: sha256:bdb641f28f3b4539965dea7ca15ed7844336e1818e457ea890595c193c255f5c
+generated: "2024-02-02T00:15:18.704136-05:00"

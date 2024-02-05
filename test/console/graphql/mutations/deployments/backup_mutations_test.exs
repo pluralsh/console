@@ -102,4 +102,23 @@ defmodule Console.GraphQl.Deployments.BackupMutationsTest do
       assert res["status"] == "PENDING"
     end
   end
+
+  describe "configureBackups" do
+    test "it can configure a backup/restore service for the relevant cluster" do
+      store = insert(:object_store, s3: %{bucket: "bucket"})
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"configureBackups" => updated}}} = run_query("""
+        mutation Configure($storeId: ID!, $clusterId: ID!) {
+          configureBackups(storeId: $storeId, clusterId: $clusterId) {
+            id
+            objectStore { id }
+          }
+        }
+      """, %{"clusterId" => cluster.id, "storeId" => store.id}, %{current_user: admin_user()})
+
+      assert updated["id"] == cluster.id
+      assert updated["objectStore"]["id"] == store.id
+    end
+  end
 end
