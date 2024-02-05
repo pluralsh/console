@@ -9,6 +9,8 @@ import isEmpty from 'lodash/isEmpty'
 import { isNonNullable } from 'utils/isNonNullable'
 import { groupBy } from 'lodash'
 
+import { Entries } from 'type-fest'
+
 import { StageStatus, getStageStatus } from '../nodes/StageNode'
 
 import { CUSTOM_EDGE_NAME } from '../EdgeLine'
@@ -35,6 +37,30 @@ const TYPE_SORT_VALS = Object.fromEntries(
   )
 )
 
+function pushToEdges(
+  edges: Edge<any>[],
+  nodeId: string,
+  toId: string,
+  fromId: string
+) {
+  if (toId) {
+    edges.push({
+      ...baseEdgeProps,
+      id: `${nodeId}->${toId}`,
+      source: nodeId,
+      target: toId,
+    })
+  }
+  if (fromId) {
+    edges.push({
+      ...baseEdgeProps,
+      id: `${fromId}->${nodeId}`,
+      source: fromId,
+      target: nodeId,
+    })
+  }
+}
+
 export function getNodesAndEdges(pipeline: PipelineFragment) {
   const edges: Edge<any>[] = []
   const pipeStages = pipeline.stages?.filter(isNonNullable) ?? []
@@ -57,57 +83,70 @@ export function getNodesAndEdges(pipeline: PipelineFragment) {
     }
 
     const groupedGates = groupBy(edge?.gates, (gate) => {
-      console.log('gate', gate?.type)
       switch (gate?.type) {
         case GateType.Approval:
           return NodeType.Approval
         case GateType.Job:
           return NodeType.Job
+        case GateType.Window:
         default:
           return NodeType.Tests
       }
     }) as Record<NodeType, PipelineGateFragment[]>
 
     return (
-      Object.entries(groupedGates)
+      (Object.entries(groupedGates) as Entries<typeof groupedGates>)
         // Order of edges matters to Dagre layout, so sort by type ahead of time
         .sort(
           ([aType], [bType]) => TYPE_SORT_VALS[bType] - TYPE_SORT_VALS[aType]
         )
         .flatMap(([type, gates]) => {
-          const nodeId =
-            type === NodeType.Approval
-              ? `${edge.id}-${gates?.[0]?.id}`
-              : edge.id
+          // Don't add unsupported gate types
+          if (type !== NodeType.Job && type !== NodeType.Approval) {
+            return []
+          }
+          // Gate types that get their own node
+          if (type === NodeType.Job) {
+            return gates?.flatMap((gate) => {
+              const nodeId = gate.id
+
+              if (!nodeId) {
+                return []
+              }
+              pushToEdges(edges, nodeId, edge.to.id, edge.from.id)
+
+              return {
+                id: nodeId,
+                type: type as NodeType,
+                position: { x: 0, y: 0 },
+                data: {
+                  ...edge,
+                  gates: [gate],
+                  meta: {
+                    state: (gate.state || undefined) as GateState | undefined,
+                  },
+                },
+              }
+            })
+          }
+
+          // Gate types that get are grouped into a single node
+          const nodeId = `${edge.id}-${type}`
 
           if (!gates || !nodeId) {
             return []
           }
-
-          if (edge?.to?.id) {
-            edges.push({
-              ...baseEdgeProps,
-              id: `${nodeId}->${edge.to.id}`,
-              source: nodeId,
-              target: edge.to.id,
-            })
-          }
-          if (edge?.from?.id) {
-            edges.push({
-              ...baseEdgeProps,
-              id: `${edge.from.id}->${nodeId}`,
-              source: edge.from.id,
-              target: nodeId,
-            })
-          }
+          pushToEdges(edges, nodeId, edge.to.id, edge.from.id)
           const state = reduceGateStates(gates)
 
-          return {
+          const y = {
             id: nodeId,
             type,
             position: { x: 0, y: 0 },
             data: { ...edge, gates, meta: { state } },
           }
+
+          return y
         })
     )
   })
