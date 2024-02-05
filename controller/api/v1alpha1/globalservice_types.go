@@ -30,11 +30,11 @@ func init() {
 // GlobalServiceSpec defines the desired state of GlobalService
 type GlobalServiceSpec struct {
 	// Tags a set of tags to select clusters for this global service
-	// +optional
+	// +kubebuilder:validation:Optional
 	Tags map[string]string `json:"tags,omitempty"`
 
 	// Distro of kubernetes this cluster is running
-	// +optional
+	// +kubebuilder:validation:Optional
 	Distro *console.ClusterDistro `json:"distro,omitempty"`
 
 	// ServiceRef to replicate across clusters
@@ -42,82 +42,30 @@ type GlobalServiceSpec struct {
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Service is immutable"
 	ServiceRef corev1.ObjectReference `json:"serviceRef"`
 	// ProviderRef apply to clusters with this provider
-	// +optional
+	// +kubebuilder:validation:Optional
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 }
 
-// GlobalServiceStatus defines the observed state of GlobalService
-type GlobalServiceStatus struct {
-	// ID of the global service in the Console API.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	ID *string `json:"id,omitempty"`
-	// SHA of last applied configuration.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	SHA *string `json:"sha,omitempty"`
-	// Represents the observations of GlobalService current state.
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	// +listType=map
-	// +listMapKey=type
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
-}
-
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Global service Id"
-
 // GlobalService is the Schema for the globalservices API
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="Global service Id"
 type GlobalService struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   GlobalServiceSpec   `json:"spec,omitempty"`
-	Status GlobalServiceStatus `json:"status,omitempty"`
-}
-
-//+kubebuilder:object:root=true
-
-// GlobalServiceList contains a list of GlobalService
-type GlobalServiceList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []GlobalService `json:"items"`
-}
-
-func (p *GlobalServiceStatus) IsSHAEqual(sha string) bool {
-	if !p.HasSHA() {
-		return false
-	}
-
-	return p.GetSHA() == sha
-}
-
-func (p *GlobalServiceStatus) GetSHA() string {
-	if !p.HasSHA() {
-		return ""
-	}
-
-	return *p.SHA
-}
-
-func (p *GlobalServiceStatus) HasSHA() bool {
-	return p.SHA != nil && len(*p.SHA) > 0
-}
-
-func (p *GlobalServiceStatus) GetID() string {
-	if !p.HasID() {
-		return ""
-	}
-
-	return *p.ID
-}
-
-func (p *GlobalServiceStatus) HasID() bool {
-	return p.ID != nil && len(*p.ID) > 0
+	Spec   GlobalServiceSpec `json:"spec,omitempty"`
+	Status Status            `json:"status,omitempty"`
 }
 
 func (p *GlobalService) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&p.Status.Conditions, condition)
+}
+
+// GlobalServiceList contains a list of GlobalService
+// +kubebuilder:object:root=true
+type GlobalServiceList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []GlobalService `json:"items"`
 }

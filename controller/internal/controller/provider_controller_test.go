@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"sort"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -21,19 +20,6 @@ import (
 	"github.com/pluralsh/console/controller/internal/test/mocks"
 	"github.com/pluralsh/console/controller/internal/test/utils"
 )
-
-func sanitizeProviderStatus(status v1alpha1.ProviderStatus) v1alpha1.ProviderStatus {
-	for i := range status.Conditions {
-		status.Conditions[i].LastTransitionTime = metav1.Time{}
-		status.Conditions[i].ObservedGeneration = 0
-	}
-
-	sort.Slice(status.Conditions, func(i, j int) bool {
-		return status.Conditions[i].Type < status.Conditions[j].Type
-	})
-
-	return status
-}
 
 var _ = Describe("Provider Controller", Ordered, func() {
 	Context("when reconciling resource", func() {
@@ -131,7 +117,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 			provider := &v1alpha1.Provider{}
 			err = k8sClient.Get(ctx, namespacedName, provider)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizeProviderStatus(provider.Status)).To(Equal(sanitizeProviderStatus(v1alpha1.ProviderStatus{
+			Expect(sanitizeStatusConditions(provider.Status)).To(Equal(sanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(providerConsoleID),
 				SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
 				Conditions: []metav1.Condition{
@@ -182,7 +168,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 			provider := &v1alpha1.Provider{}
 			err = k8sClient.Get(ctx, namespacedName, provider)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizeProviderStatus(provider.Status)).To(Equal(sanitizeProviderStatus(v1alpha1.ProviderStatus{
+			Expect(sanitizeStatusConditions(provider.Status)).To(Equal(sanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(providerConsoleID),
 				SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
 				Conditions: []metav1.Condition{
@@ -226,7 +212,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 			provider := &v1alpha1.Provider{}
 			err = k8sClient.Get(ctx, readonlyNamespacedName, provider)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizeProviderStatus(provider.Status)).To(Equal(sanitizeProviderStatus(v1alpha1.ProviderStatus{
+			Expect(sanitizeStatusConditions(provider.Status)).To(Equal(sanitizeStatusConditions(v1alpha1.Status{
 				ID: lo.ToPtr(readonlyProviderConsoleID),
 				Conditions: []metav1.Condition{
 					{

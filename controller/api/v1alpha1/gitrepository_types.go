@@ -15,7 +15,7 @@ type GitRepositorySpec struct {
 	Url string `json:"url"`
 
 	// CredentialsRef is a secret reference which should contain privateKey, passphrase, username and password.
-	// +optional
+	// +kubebuilder:validation:Optional
 	CredentialsRef *corev1.SecretReference `json:"credentialsRef,omitempty"`
 }
 
@@ -30,11 +30,11 @@ type GitRepositoryStatus struct {
 	Status `json:",inline"`
 
 	// Health status.
-	// +optional
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum:=PULLABLE;FAILED
 	Health GitHealth `json:"health,omitempty"`
 	// Message indicating details about last transition.
-	// +optional
+	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty"`
 }
 

@@ -59,7 +59,7 @@ type Provider struct {
 	// +kubebuilder:validation:Required
 	Spec ProviderSpec `json:"spec"`
 	// +kubebuilder:validation:Optional
-	Status ProviderStatus `json:"status,omitempty"`
+	Status Status `json:"status,omitempty"`
 }
 
 func (p *Provider) Attributes(ctx context.Context, cloudSettingsGetter CloudSettingsGetter) (console.ClusterProviderAttributes, error) {
@@ -132,62 +132,4 @@ type ProviderSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Namespace is immutable"
 	Namespace string `json:"namespace,omitempty"`
-}
-
-// ProviderStatus ...
-type ProviderStatus struct {
-	// ID of the provider in the Console API.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	ID *string `json:"id,omitempty"`
-	// SHA of last applied configuration.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	SHA *string `json:"sha,omitempty"`
-	// Represents the observations of a Provider's current state.
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	// +listType=map
-	// +listMapKey=type
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
-}
-
-func (p *ProviderStatus) GetID() string {
-	if !p.HasID() {
-		return ""
-	}
-
-	return *p.ID
-}
-
-func (p *ProviderStatus) HasID() bool {
-	return p.ID != nil && len(*p.ID) > 0
-}
-
-func (p *ProviderStatus) GetSHA() string {
-	if !p.HasSHA() {
-		return ""
-	}
-
-	return *p.SHA
-}
-
-func (p *ProviderStatus) HasSHA() bool {
-	return p.SHA != nil && len(*p.SHA) > 0
-}
-
-func (p *ProviderStatus) IsSHAEqual(sha string) bool {
-	if !p.HasSHA() {
-		return false
-	}
-
-	return p.GetSHA() == sha
-}
-
-func (p *ProviderStatus) HasReadonlyCondition() bool {
-	return meta.FindStatusCondition(p.Conditions, ReadonlyConditionType.String()) != nil
-}
-
-func (p *ProviderStatus) IsReadonly() bool {
-	return meta.IsStatusConditionTrue(p.Conditions, ReadonlyConditionType.String())
 }

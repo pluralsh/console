@@ -36,18 +36,19 @@ type ScmConnection struct {
 	Status Status `json:"status,omitempty"`
 }
 
-// ConsoleID implements Getter interface
+// ConsoleID implements PluralResource interface
 func (s *ScmConnection) ConsoleID() *string {
 	return s.Status.ID
 }
 
+// ConsoleName implements PluralResource interface
 func (s *ScmConnection) ConsoleName() string {
 	return s.Spec.Name
 }
 
 func (s *ScmConnection) Attributes(token string) console.ScmConnectionAttributes {
 	return console.ScmConnectionAttributes{
-		Name:     s.Spec.Name,
+		Name:     s.ConsoleName(),
 		Type:     s.Spec.Type,
 		Username: s.Spec.Username,
 		BaseURL:  s.Spec.BaseUrl,

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"sort"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -19,19 +18,6 @@ import (
 	"github.com/pluralsh/console/controller/internal/test/mocks"
 	"github.com/pluralsh/console/controller/internal/test/utils"
 )
-
-func sanitizePipelineStatus(status v1alpha1.PipelineStatus) v1alpha1.PipelineStatus {
-	for i := range status.Conditions {
-		status.Conditions[i].LastTransitionTime = metav1.Time{}
-		status.Conditions[i].ObservedGeneration = 0
-	}
-
-	sort.Slice(status.Conditions, func(i, j int) bool {
-		return status.Conditions[i].Type < status.Conditions[j].Type
-	})
-
-	return status
-}
 
 var _ = Describe("Pipeline Controller", Ordered, func() {
 	Context("when reconciling resource", func() {
@@ -253,7 +239,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			pipeline := &v1alpha1.Pipeline{}
 			err = k8sClient.Get(ctx, pipelineNamespacedName, pipeline)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizePipelineStatus(pipeline.Status)).To(Equal(sanitizePipelineStatus(v1alpha1.PipelineStatus{
+			Expect(sanitizeStatusConditions(pipeline.Status)).To(Equal(sanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(pipelineConsoleID),
 				SHA: lo.ToPtr("CD336FRXMBI6RSIWXEOVKHEFYYX7YQCCUDT52PXCBMQZCGMQYSNA===="),
 				Conditions: []metav1.Condition{
@@ -289,7 +275,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			pipeline := &v1alpha1.Pipeline{}
 			err = k8sClient.Get(ctx, pipelineNamespacedName, pipeline)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizePipelineStatus(pipeline.Status)).To(Equal(sanitizePipelineStatus(v1alpha1.PipelineStatus{
+			Expect(sanitizeStatusConditions(pipeline.Status)).To(Equal(sanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(pipelineConsoleID),
 				SHA: lo.ToPtr("CD336FRXMBI6RSIWXEOVKHEFYYX7YQCCUDT52PXCBMQZCGMQYSNA===="),
 				Conditions: []metav1.Condition{

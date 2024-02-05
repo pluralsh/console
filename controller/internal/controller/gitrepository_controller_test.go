@@ -92,24 +92,26 @@ var _ = Describe("Repository Controller", Ordered, func() {
 				expectedStatus              v1alpha1.GitRepositoryStatus
 			}{
 				expectedStatus: v1alpha1.GitRepositoryStatus{
-					ID: lo.ToPtr("123"),
-					Conditions: []metav1.Condition{
-						{
-							Type:    v1alpha1.ReadyConditionType.String(),
-							Status:  metav1.ConditionFalse,
-							Reason:  v1alpha1.ReadyConditionReason.String(),
-							Message: "The repository is not pullable yet",
-						},
-						{
-							Type:    v1alpha1.ReadonlyConditionType.String(),
-							Status:  metav1.ConditionTrue,
-							Reason:  v1alpha1.ReadonlyConditionReason.String(),
-							Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
-						},
-						{
-							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.SynchronizedConditionReason.String(),
+					Status: v1alpha1.Status{
+						ID: lo.ToPtr("123"),
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.ReadyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.ReadyConditionReason.String(),
+								Message: "The repository is not pullable yet",
+							},
+							{
+								Type:    v1alpha1.ReadonlyConditionType.String(),
+								Status:  metav1.ConditionTrue,
+								Reason:  v1alpha1.ReadonlyConditionReason.String(),
+								Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
+							},
+							{
+								Type:   v1alpha1.SynchronizedConditionType.String(),
+								Status: metav1.ConditionTrue,
+								Reason: v1alpha1.SynchronizedConditionReason.String(),
+							},
 						},
 					},
 				},
@@ -218,24 +220,26 @@ var _ = Describe("Repository Controller", Ordered, func() {
 				expectedStatus              v1alpha1.GitRepositoryStatus
 			}{
 				expectedStatus: v1alpha1.GitRepositoryStatus{
-					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA===="),
-					Conditions: []metav1.Condition{
-						{
-							Type:    v1alpha1.ReadyConditionType.String(),
-							Status:  metav1.ConditionFalse,
-							Reason:  v1alpha1.ReadyConditionReason.String(),
-							Message: "The repository is not pullable yet",
-						},
-						{
-							Type:   v1alpha1.ReadonlyConditionType.String(),
-							Status: metav1.ConditionFalse,
-							Reason: v1alpha1.ReadonlyConditionReason.String(),
-						},
-						{
-							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.SynchronizedConditionReason.String(),
+					Status: v1alpha1.Status{
+						ID:  lo.ToPtr("123"),
+						SHA: lo.ToPtr("TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA===="),
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.ReadyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.ReadyConditionReason.String(),
+								Message: "The repository is not pullable yet",
+							},
+							{
+								Type:   v1alpha1.ReadonlyConditionType.String(),
+								Status: metav1.ConditionFalse,
+								Reason: v1alpha1.ReadonlyConditionReason.String(),
+							},
+							{
+								Type:   v1alpha1.SynchronizedConditionType.String(),
+								Status: metav1.ConditionTrue,
+								Reason: v1alpha1.SynchronizedConditionReason.String(),
+							},
 						},
 					},
 				},
@@ -281,24 +285,26 @@ var _ = Describe("Repository Controller", Ordered, func() {
 				expectedStatus           v1alpha1.GitRepositoryStatus
 			}{
 				expectedStatus: v1alpha1.GitRepositoryStatus{
-					ID:  lo.ToPtr(repoID),
-					SHA: lo.ToPtr("TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA===="),
-					Conditions: []metav1.Condition{
-						{
-							Type:    v1alpha1.ReadyConditionType.String(),
-							Status:  metav1.ConditionFalse,
-							Reason:  v1alpha1.ReadyConditionReason.String(),
-							Message: "The repository is not pullable yet",
-						},
-						{
-							Type:   v1alpha1.ReadonlyConditionType.String(),
-							Status: metav1.ConditionFalse,
-							Reason: v1alpha1.ReadonlyConditionReason.String(),
-						},
-						{
-							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.SynchronizedConditionReason.String(),
+					Status: v1alpha1.Status{
+						ID:  lo.ToPtr(repoID),
+						SHA: lo.ToPtr("TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA===="),
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.ReadyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.ReadyConditionReason.String(),
+								Message: "The repository is not pullable yet",
+							},
+							{
+								Type:   v1alpha1.ReadonlyConditionType.String(),
+								Status: metav1.ConditionFalse,
+								Reason: v1alpha1.ReadonlyConditionReason.String(),
+							},
+							{
+								Type:   v1alpha1.SynchronizedConditionType.String(),
+								Status: metav1.ConditionTrue,
+								Reason: v1alpha1.SynchronizedConditionReason.String(),
+							},
 						},
 					},
 				},

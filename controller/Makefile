@@ -64,16 +64,16 @@ update-dependencies: ## update dependencies
 ##@ Build
 
 .PHONY: build
-build: manifests generate fmt vet ## build manager binary
+build: generate manifests fmt vet ## build manager binary
 	go build -o bin/manager cmd/main.go
 
 .PHONY: run
-run: manifests generate fmt vet ## run a controller from your host
+run: generate manifests fmt vet ## run a controller from your host
 	go run ./cmd/main.go \
 		--console-url=${PLURAL_CONSOLE_URL}/gql
 
 .PHONY: release
-release: manifests generate fmt vet ## builds release version of the app. Requires GoReleaser to work.
+release: generate manifests fmt vet ## builds release version of the app. Requires GoReleaser to work.
 	goreleaser build --clean --single-target --snapshot
 
 # If you wish to build the manager image targeting other platforms you can use the --platform flag.
@@ -136,7 +136,7 @@ fix: golangci-lint ## fix issues found by linters
 	@$(GOLANGCI_LINT) run --fix ./...
 
 .PHONY: test
-test: manifests generate genmock fmt vet envtest ## run tests
+test: generate manifests genmock fmt vet envtest ## run tests
 	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(GOPATH)/bin -p path)" go test $$(go list ./... | grep -v /e2e) -v
 
 .PHONY: e2e

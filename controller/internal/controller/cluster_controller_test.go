@@ -164,18 +164,20 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, awsNamespacedName, cluster)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
-				ID:  lo.ToPtr(awsClusterConsoleID),
-				SHA: lo.ToPtr("J7CMSICIXLWV7MCWNPBZUA6FEOI3HGTQMNVLYD6VZXX6Y66S6ETQ===="),
-				Conditions: []metav1.Condition{
-					{
-						Type:   v1alpha1.ReadonlyConditionType.String(),
-						Status: metav1.ConditionFalse,
-						Reason: v1alpha1.ReadonlyConditionReason.String(),
-					},
-					{
-						Type:   v1alpha1.SynchronizedConditionType.String(),
-						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.SynchronizedConditionReason.String(),
+				Status: v1alpha1.Status{
+					ID:  lo.ToPtr(awsClusterConsoleID),
+					SHA: lo.ToPtr("J7CMSICIXLWV7MCWNPBZUA6FEOI3HGTQMNVLYD6VZXX6Y66S6ETQ===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:   v1alpha1.ReadonlyConditionType.String(),
+							Status: metav1.ConditionFalse,
+							Reason: v1alpha1.ReadonlyConditionReason.String(),
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
 					},
 				},
 			})))
@@ -206,19 +208,21 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, awsNamespacedName, cluster)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
-				ID:             lo.ToPtr(awsClusterConsoleID),
-				SHA:            lo.ToPtr("J7CMSICIXLWV7MCWNPBZUA6FEOI3HGTQMNVLYD6VZXX6Y66S6ETQ===="),
 				CurrentVersion: lo.ToPtr("1.25.6"),
-				Conditions: []metav1.Condition{
-					{
-						Type:   v1alpha1.ReadonlyConditionType.String(),
-						Status: metav1.ConditionFalse,
-						Reason: v1alpha1.ReadonlyConditionReason.String(),
-					},
-					{
-						Type:   v1alpha1.SynchronizedConditionType.String(),
-						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.SynchronizedConditionReason.String(),
+				Status: v1alpha1.Status{
+					ID:  lo.ToPtr(awsClusterConsoleID),
+					SHA: lo.ToPtr("J7CMSICIXLWV7MCWNPBZUA6FEOI3HGTQMNVLYD6VZXX6Y66S6ETQ===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:   v1alpha1.ReadonlyConditionType.String(),
+							Status: metav1.ConditionFalse,
+							Reason: v1alpha1.ReadonlyConditionReason.String(),
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
 					},
 				},
 			})))
@@ -243,18 +247,20 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, byokNamespacedName, cluster)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
-				ID:  lo.ToPtr(byokClusterConsoleID),
-				SHA: lo.ToPtr("CPYLCGRGF2JWFBF3OGRHQQUSBDXW6Y4VMUDQDCQQDEA6G6CAZORQ===="),
-				Conditions: []metav1.Condition{
-					{
-						Type:   v1alpha1.ReadonlyConditionType.String(),
-						Status: metav1.ConditionFalse,
-						Reason: v1alpha1.ReadonlyConditionReason.String(),
-					},
-					{
-						Type:   v1alpha1.SynchronizedConditionType.String(),
-						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.SynchronizedConditionReason.String(),
+				Status: v1alpha1.Status{
+					ID:  lo.ToPtr(byokClusterConsoleID),
+					SHA: lo.ToPtr("CPYLCGRGF2JWFBF3OGRHQQUSBDXW6Y4VMUDQDCQQDEA6G6CAZORQ===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:   v1alpha1.ReadonlyConditionType.String(),
+							Status: metav1.ConditionFalse,
+							Reason: v1alpha1.ReadonlyConditionReason.String(),
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
 					},
 				},
 			})))
@@ -286,19 +292,21 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
-				ID:             lo.ToPtr(byokClusterConsoleID),
-				SHA:            lo.ToPtr("CPYLCGRGF2JWFBF3OGRHQQUSBDXW6Y4VMUDQDCQQDEA6G6CAZORQ===="),
 				CurrentVersion: lo.ToPtr("1.25.6"),
-				Conditions: []metav1.Condition{
-					{
-						Type:   v1alpha1.ReadonlyConditionType.String(),
-						Status: metav1.ConditionFalse,
-						Reason: v1alpha1.ReadonlyConditionReason.String(),
-					},
-					{
-						Type:   v1alpha1.SynchronizedConditionType.String(),
-						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.SynchronizedConditionReason.String(),
+				Status: v1alpha1.Status{
+					ID:  lo.ToPtr(byokClusterConsoleID),
+					SHA: lo.ToPtr("CPYLCGRGF2JWFBF3OGRHQQUSBDXW6Y4VMUDQDCQQDEA6G6CAZORQ===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:   v1alpha1.ReadonlyConditionType.String(),
+							Status: metav1.ConditionFalse,
+							Reason: v1alpha1.ReadonlyConditionReason.String(),
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
 					},
 				},
 			})))
@@ -324,18 +332,20 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, awsReadonlyNamespacedName, cluster)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
-				ID: lo.ToPtr(awsReadonlyClusterConsoleID),
-				Conditions: []metav1.Condition{
-					{
-						Type:    v1alpha1.ReadonlyConditionType.String(),
-						Status:  metav1.ConditionTrue,
-						Reason:  v1alpha1.ReadonlyConditionReason.String(),
-						Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
-					},
-					{
-						Type:   v1alpha1.SynchronizedConditionType.String(),
-						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.SynchronizedConditionReason.String(),
+				Status: v1alpha1.Status{
+					ID: lo.ToPtr(awsReadonlyClusterConsoleID),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionTrue,
+							Reason:  v1alpha1.ReadonlyConditionReason.String(),
+							Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
 					},
 				},
 				CurrentVersion: lo.ToPtr("1.24.11"),
@@ -362,18 +372,20 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, byokReadonlyNamespacedName, cluster)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
-				ID: lo.ToPtr(byokReadonlyClusterConsoleID),
-				Conditions: []metav1.Condition{
-					{
-						Type:    v1alpha1.ReadonlyConditionType.String(),
-						Status:  metav1.ConditionTrue,
-						Reason:  v1alpha1.ReadonlyConditionReason.String(),
-						Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
-					},
-					{
-						Type:   v1alpha1.SynchronizedConditionType.String(),
-						Status: metav1.ConditionTrue,
-						Reason: v1alpha1.SynchronizedConditionReason.String(),
+				Status: v1alpha1.Status{
+					ID: lo.ToPtr(byokReadonlyClusterConsoleID),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionTrue,
+							Reason:  v1alpha1.ReadonlyConditionReason.String(),
+							Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
 					},
 				},
 				CurrentVersion: lo.ToPtr("1.24.11"),

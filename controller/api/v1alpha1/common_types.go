@@ -1,20 +1,25 @@
 package v1alpha1
 
 import (
-	"context"
-
 	console "github.com/pluralsh/console-client-go"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// NamespacedName is the same as types.NamespacedName
+// with the addition of kubebuilder/json annotations for better schema support.
 type NamespacedName struct {
-	Name      string `json:"name"`
+	// Name is a resource name.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+
+	// Namespace is a resource namespace.
+	// +kubebuilder:validation:Required
 	Namespace string `json:"namespace"`
 }
 
+// Bindings ...
 type Bindings struct {
 	// Read bindings.
 	// +kubebuilder:validation:Optional
@@ -25,6 +30,7 @@ type Bindings struct {
 	Write []Binding `json:"write,omitempty"`
 }
 
+// Binding ...
 type Binding struct {
 	// +kubebuilder:validation:Optional
 	ID *string `json:"id,omitempty"`
@@ -125,21 +131,6 @@ type GitRef struct {
 	Ref string `json:"ref"`
 }
 
-type Getter interface {
-	client.Object
-
-	ConsoleID() *string
-}
-
-func GetConsoleID[T Getter](ctx context.Context, ref *v1.ObjectReference, resource T, reader client.Reader) (*string, error) {
-	if resource == nil {
-		return nil, nil
-	}
-
-	err := reader.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, resource)
-	return resource.ConsoleID(), err
-}
-
 type Status struct {
 	// ID of the resource in the Console API.
 	// +kubebuilder:validation:Optional
@@ -199,4 +190,24 @@ func (p *Status) IsReadonly() bool {
 
 func (p *Status) IsStatusConditionTrue(condition ConditionType) bool {
 	return meta.IsStatusConditionTrue(p.Conditions, condition.String())
+}
+
+// PluralResource ...
+// +k8s:deepcopy-gen=false
+type PluralResource interface {
+	client.Object
+
+	// ConsoleID returns a resource id read from the Console API
+	ConsoleID() *string
+	// ConsoleName returns a resource name read from the Console API
+	ConsoleName() string
+}
+
+// NamespacedPluralResource ...
+// +k8s:deepcopy-gen=false
+type NamespacedPluralResource interface {
+	PluralResource
+
+	// ConsoleNamespace returns a resource namespace read from the Console API
+	ConsoleNamespace() string
 }

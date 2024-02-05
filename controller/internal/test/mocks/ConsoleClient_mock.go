@@ -143,6 +143,80 @@ func (_c *ConsoleClientMock_CreateGlobalService_Call) RunAndReturn(run func(stri
 	return _c
 }
 
+// CreatePrAutomation provides a mock function with given fields: ctx, attributes, options
+func (_m *ConsoleClientMock) CreatePrAutomation(ctx context.Context, attributes gqlclient.PrAutomationAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error) {
+	_va := make([]interface{}, len(options))
+	for _i := range options {
+		_va[_i] = options[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, attributes)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreatePrAutomation")
+	}
+
+	var r0 *gqlclient.PrAutomationFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)); ok {
+		return rf(ctx, attributes, options...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) *gqlclient.PrAutomationFragment); ok {
+		r0 = rf(ctx, attributes, options...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.PrAutomationFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) error); ok {
+		r1 = rf(ctx, attributes, options...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreatePrAutomation_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreatePrAutomation'
+type ConsoleClientMock_CreatePrAutomation_Call struct {
+	*mock.Call
+}
+
+// CreatePrAutomation is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes gqlclient.PrAutomationAttributes
+//   - options ...gqlgencclient.HTTPRequestOption
+func (_e *ConsoleClientMock_Expecter) CreatePrAutomation(ctx interface{}, attributes interface{}, options ...interface{}) *ConsoleClientMock_CreatePrAutomation_Call {
+	return &ConsoleClientMock_CreatePrAutomation_Call{Call: _e.mock.On("CreatePrAutomation",
+		append([]interface{}{ctx, attributes}, options...)...)}
+}
+
+func (_c *ConsoleClientMock_CreatePrAutomation_Call) Run(run func(ctx context.Context, attributes gqlclient.PrAutomationAttributes, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_CreatePrAutomation_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
+			}
+		}
+		run(args[0].(context.Context), args[1].(gqlclient.PrAutomationAttributes), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreatePrAutomation_Call) Return(_a0 *gqlclient.PrAutomationFragment, _a1 error) *ConsoleClientMock_CreatePrAutomation_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreatePrAutomation_Call) RunAndReturn(run func(context.Context, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_CreatePrAutomation_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateProvider provides a mock function with given fields: ctx, attributes, options
 func (_m *ConsoleClientMock) CreateProvider(ctx context.Context, attributes gqlclient.ClusterProviderAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
 	_va := make([]interface{}, len(options))
@@ -570,6 +644,68 @@ func (_c *ConsoleClientMock_DeletePipeline_Call) Return(_a0 *gqlclient.PipelineF
 }
 
 func (_c *ConsoleClientMock_DeletePipeline_Call) RunAndReturn(run func(string) (*gqlclient.PipelineFragment, error)) *ConsoleClientMock_DeletePipeline_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeletePrAutomation provides a mock function with given fields: ctx, id, options
+func (_m *ConsoleClientMock) DeletePrAutomation(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption) error {
+	_va := make([]interface{}, len(options))
+	for _i := range options {
+		_va[_i] = options[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeletePrAutomation")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
+		r0 = rf(ctx, id, options...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeletePrAutomation_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeletePrAutomation'
+type ConsoleClientMock_DeletePrAutomation_Call struct {
+	*mock.Call
+}
+
+// DeletePrAutomation is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - options ...gqlgencclient.HTTPRequestOption
+func (_e *ConsoleClientMock_Expecter) DeletePrAutomation(ctx interface{}, id interface{}, options ...interface{}) *ConsoleClientMock_DeletePrAutomation_Call {
+	return &ConsoleClientMock_DeletePrAutomation_Call{Call: _e.mock.On("DeletePrAutomation",
+		append([]interface{}{ctx, id}, options...)...)}
+}
+
+func (_c *ConsoleClientMock_DeletePrAutomation_Call) Run(run func(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_DeletePrAutomation_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePrAutomation_Call) Return(_a0 error) *ConsoleClientMock_DeletePrAutomation_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePrAutomation_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error) *ConsoleClientMock_DeletePrAutomation_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1076,6 +1212,154 @@ func (_c *ConsoleClientMock_GetPipeline_Call) Return(_a0 *gqlclient.PipelineFrag
 }
 
 func (_c *ConsoleClientMock_GetPipeline_Call) RunAndReturn(run func(string) (*gqlclient.PipelineFragment, error)) *ConsoleClientMock_GetPipeline_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetPrAutomation provides a mock function with given fields: ctx, id, options
+func (_m *ConsoleClientMock) GetPrAutomation(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error) {
+	_va := make([]interface{}, len(options))
+	for _i := range options {
+		_va[_i] = options[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPrAutomation")
+	}
+
+	var r0 *gqlclient.PrAutomationFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)); ok {
+		return rf(ctx, id, options...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) *gqlclient.PrAutomationFragment); ok {
+		r0 = rf(ctx, id, options...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.PrAutomationFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
+		r1 = rf(ctx, id, options...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetPrAutomation_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPrAutomation'
+type ConsoleClientMock_GetPrAutomation_Call struct {
+	*mock.Call
+}
+
+// GetPrAutomation is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - options ...gqlgencclient.HTTPRequestOption
+func (_e *ConsoleClientMock_Expecter) GetPrAutomation(ctx interface{}, id interface{}, options ...interface{}) *ConsoleClientMock_GetPrAutomation_Call {
+	return &ConsoleClientMock_GetPrAutomation_Call{Call: _e.mock.On("GetPrAutomation",
+		append([]interface{}{ctx, id}, options...)...)}
+}
+
+func (_c *ConsoleClientMock_GetPrAutomation_Call) Run(run func(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_GetPrAutomation_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPrAutomation_Call) Return(_a0 *gqlclient.PrAutomationFragment, _a1 error) *ConsoleClientMock_GetPrAutomation_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPrAutomation_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_GetPrAutomation_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetPrAutomationByName provides a mock function with given fields: ctx, name, options
+func (_m *ConsoleClientMock) GetPrAutomationByName(ctx context.Context, name string, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error) {
+	_va := make([]interface{}, len(options))
+	for _i := range options {
+		_va[_i] = options[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPrAutomationByName")
+	}
+
+	var r0 *gqlclient.PrAutomationFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)); ok {
+		return rf(ctx, name, options...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) *gqlclient.PrAutomationFragment); ok {
+		r0 = rf(ctx, name, options...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.PrAutomationFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
+		r1 = rf(ctx, name, options...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetPrAutomationByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPrAutomationByName'
+type ConsoleClientMock_GetPrAutomationByName_Call struct {
+	*mock.Call
+}
+
+// GetPrAutomationByName is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+//   - options ...gqlgencclient.HTTPRequestOption
+func (_e *ConsoleClientMock_Expecter) GetPrAutomationByName(ctx interface{}, name interface{}, options ...interface{}) *ConsoleClientMock_GetPrAutomationByName_Call {
+	return &ConsoleClientMock_GetPrAutomationByName_Call{Call: _e.mock.On("GetPrAutomationByName",
+		append([]interface{}{ctx, name}, options...)...)}
+}
+
+func (_c *ConsoleClientMock_GetPrAutomationByName_Call) Run(run func(ctx context.Context, name string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_GetPrAutomationByName_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPrAutomationByName_Call) Return(_a0 *gqlclient.PrAutomationFragment, _a1 error) *ConsoleClientMock_GetPrAutomationByName_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPrAutomationByName_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_GetPrAutomationByName_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1746,6 +2030,53 @@ func (_c *ConsoleClientMock_IsPipelineExisting_Call) RunAndReturn(run func(strin
 	return _c
 }
 
+// IsPrAutomationExists provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) IsPrAutomationExists(ctx context.Context, id string) bool {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsPrAutomationExists")
+	}
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_IsPrAutomationExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsPrAutomationExists'
+type ConsoleClientMock_IsPrAutomationExists_Call struct {
+	*mock.Call
+}
+
+// IsPrAutomationExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsPrAutomationExists(ctx interface{}, id interface{}) *ConsoleClientMock_IsPrAutomationExists_Call {
+	return &ConsoleClientMock_IsPrAutomationExists_Call{Call: _e.mock.On("IsPrAutomationExists", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_IsPrAutomationExists_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_IsPrAutomationExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPrAutomationExists_Call) Return(_a0 bool) *ConsoleClientMock_IsPrAutomationExists_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPrAutomationExists_Call) RunAndReturn(run func(context.Context, string) bool) *ConsoleClientMock_IsPrAutomationExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsProviderDeleting provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) IsProviderDeleting(ctx context.Context, id string) bool {
 	ret := _m.Called(ctx, id)
@@ -2279,6 +2610,81 @@ func (_c *ConsoleClientMock_UpdateGlobalService_Call) Return(_a0 *gqlclient.Glob
 }
 
 func (_c *ConsoleClientMock_UpdateGlobalService_Call) RunAndReturn(run func(string, gqlclient.GlobalServiceAttributes) (*gqlclient.GlobalServiceFragment, error)) *ConsoleClientMock_UpdateGlobalService_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdatePrAutomation provides a mock function with given fields: ctx, id, attributes, options
+func (_m *ConsoleClientMock) UpdatePrAutomation(ctx context.Context, id string, attributes gqlclient.PrAutomationAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error) {
+	_va := make([]interface{}, len(options))
+	for _i := range options {
+		_va[_i] = options[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id, attributes)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdatePrAutomation")
+	}
+
+	var r0 *gqlclient.PrAutomationFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)); ok {
+		return rf(ctx, id, attributes, options...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) *gqlclient.PrAutomationFragment); ok {
+		r0 = rf(ctx, id, attributes, options...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.PrAutomationFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) error); ok {
+		r1 = rf(ctx, id, attributes, options...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdatePrAutomation_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdatePrAutomation'
+type ConsoleClientMock_UpdatePrAutomation_Call struct {
+	*mock.Call
+}
+
+// UpdatePrAutomation is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes gqlclient.PrAutomationAttributes
+//   - options ...gqlgencclient.HTTPRequestOption
+func (_e *ConsoleClientMock_Expecter) UpdatePrAutomation(ctx interface{}, id interface{}, attributes interface{}, options ...interface{}) *ConsoleClientMock_UpdatePrAutomation_Call {
+	return &ConsoleClientMock_UpdatePrAutomation_Call{Call: _e.mock.On("UpdatePrAutomation",
+		append([]interface{}{ctx, id, attributes}, options...)...)}
+}
+
+func (_c *ConsoleClientMock_UpdatePrAutomation_Call) Run(run func(ctx context.Context, id string, attributes gqlclient.PrAutomationAttributes, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_UpdatePrAutomation_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-3)
+		for i, a := range args[3:] {
+			if a != nil {
+				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.PrAutomationAttributes), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdatePrAutomation_Call) Return(_a0 *gqlclient.PrAutomationFragment, _a1 error) *ConsoleClientMock_UpdatePrAutomation_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdatePrAutomation_Call) RunAndReturn(run func(context.Context, string, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_UpdatePrAutomation_Call {
 	_c.Call.Return(run)
 	return _c
 }

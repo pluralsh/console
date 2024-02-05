@@ -20,7 +20,7 @@ import (
 	"github.com/pluralsh/console/controller/internal/test/utils"
 )
 
-func sanitizeGlobalServiceConditions(status v1alpha1.GlobalServiceStatus) v1alpha1.GlobalServiceStatus {
+func sanitizeStatusConditions(status v1alpha1.Status) v1alpha1.Status {
 	for i := range status.Conditions {
 		status.Conditions[i].LastTransitionTime = metav1.Time{}
 		status.Conditions[i].ObservedGeneration = 0
@@ -142,9 +142,9 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			By("Create resource")
 			test := struct {
 				returnCreateService *gqlclient.GlobalServiceFragment
-				expectedStatus      v1alpha1.GlobalServiceStatus
+				expectedStatus      v1alpha1.Status
 			}{
-				expectedStatus: v1alpha1.GlobalServiceStatus{
+				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
 					SHA: lo.ToPtr("WAXTBLTM6PFWW6BBRLCPV2ILX2J4EOHQKDISWH4QAM5IODNRMBJQ===="),
 					Conditions: []metav1.Condition{
@@ -178,7 +178,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, service)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizeGlobalServiceConditions(service.Status)).To(Equal(sanitizeGlobalServiceConditions(test.expectedStatus)))
+			Expect(sanitizeStatusConditions(service.Status)).To(Equal(sanitizeStatusConditions(test.expectedStatus)))
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Delete resource")

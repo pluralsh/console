@@ -17,6 +17,7 @@ func init() {
 	SchemeBuilder.Register(&Cluster{}, &ClusterList{})
 }
 
+// ClusterList ...
 // +kubebuilder:object:root=true
 type ClusterList struct {
 	metav1.TypeMeta `json:",inline"`
@@ -24,6 +25,7 @@ type ClusterList struct {
 	Items           []Cluster `json:"items"`
 }
 
+// Cluster ...
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
@@ -39,9 +41,14 @@ type Cluster struct {
 	Status ClusterStatus `json:"status,omitempty"`
 }
 
-// ConsoleID implements Getter interface
+// ConsoleID implements PluralResource interface
 func (c *Cluster) ConsoleID() *string {
 	return c.Status.ID
+}
+
+// ConsoleName implements PluralResource interface
+func (c *Cluster) ConsoleName() string {
+	return c.Name
 }
 
 func (c *Cluster) SetCondition(condition metav1.Condition) {
@@ -50,7 +57,7 @@ func (c *Cluster) SetCondition(condition metav1.Condition) {
 
 func (c *Cluster) Attributes(providerId *string) console.ClusterAttributes {
 	attrs := console.ClusterAttributes{
-		Name:          c.Name,
+		Name:          c.ConsoleName(),
 		Handle:        c.Spec.Handle,
 		ProviderID:    providerId,
 		Version:       c.Spec.Version,
