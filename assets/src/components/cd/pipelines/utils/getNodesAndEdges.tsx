@@ -21,6 +21,7 @@ export enum NodeType {
   Stage = 'stage',
   Tests = 'tests',
   Approval = 'approval',
+  Job = 'job',
 }
 
 const baseEdgeProps = {
@@ -29,7 +30,9 @@ const baseEdgeProps = {
 }
 
 const TYPE_SORT_VALS = Object.fromEntries(
-  [NodeType.Stage, NodeType.Approval, NodeType.Tests].map((val, i) => [val, i])
+  [NodeType.Stage, NodeType.Job, NodeType.Approval, NodeType.Tests].map(
+    (val, i) => [val, i]
+  )
 )
 
 export function getNodesAndEdges(pipeline: PipelineFragment) {
@@ -54,9 +57,12 @@ export function getNodesAndEdges(pipeline: PipelineFragment) {
     }
 
     const groupedGates = groupBy(edge?.gates, (gate) => {
+      console.log('gate', gate?.type)
       switch (gate?.type) {
         case GateType.Approval:
           return NodeType.Approval
+        case GateType.Job:
+          return NodeType.Job
         default:
           return NodeType.Tests
       }
