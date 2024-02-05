@@ -10,6 +10,30 @@ fragment PipelineServiceDeployment on ServiceDeployment {
   componentStatus
 }
 
+fragment ContainerSpec on ContainerSpec {
+  args
+  env {
+    name
+    value
+  }
+  envFrom {
+    configMap
+    secret
+  }
+  image
+}
+
+fragment JobGateSpec on JobGateSpec {
+  annotations
+  containers {
+    ...ContainerSpec
+  }
+  labels
+  namespace
+  raw
+  serviceAccount
+}
+
 fragment PipelineGate on PipelineGate {
   id
   name
@@ -132,6 +156,17 @@ query Pipelines($first: Int = 50, $after: String) {
     }
     pageInfo {
       ...PageInfo
+    }
+  }
+}
+
+query JobGate($id: ID!) {
+  clusterGate(id: $id) {
+    ...PipelineGate
+    spec {
+      job {
+        ...JobGateSpec
+      }
     }
   }
 }
