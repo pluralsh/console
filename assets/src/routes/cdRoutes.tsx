@@ -33,6 +33,7 @@ import { GlobalSettingsRepositories } from 'components/cd/globalSettings/GlobalS
 import SelfManage from 'components/cd/globalSettings/SelfManage'
 
 import Pipelines from 'components/cd/pipelines/Pipelines'
+import PipelineJob from 'components/cd/pipelines/job/PipelineJob'
 
 import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
 
@@ -42,6 +43,7 @@ import {
 } from 'generated/graphql'
 
 import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
+import PipelineJobLogs from 'components/cd/pipelines/job/PipelineJobLogs'
 
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
@@ -199,6 +201,39 @@ const mainRoutes = (
     <Route
       path={ADDONS_REL_PATH}
       element={<AddOns />}
+    />
+  </Route>
+)
+
+const pipelineJobRoutes = (
+  <Route
+    path={`${PIPELINES_REL_PATH}/jobs/:jobId`}
+    element={<PipelineJob />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="logs"
+        />
+      }
+    />
+    <Route
+      path="logs"
+      element={<PipelineJobLogs />}
+    />
+    <Route
+      path="pods"
+      element={<PipelineJobLogs />}
+    />
+    <Route
+      path="status"
+      element={<PipelineJobLogs />}
+    />
+    <Route
+      path="specs"
+      element={<PipelineJobLogs />}
     />
   </Route>
 )
@@ -442,5 +477,6 @@ export const cdRoutes = [
     {podDetailsRoutes}
     {serviceDetailsRoutes}
     {componentRoutes}
+    {pipelineJobRoutes}
   </Route>,
 ]
