@@ -22,13 +22,18 @@ export default function Command({ command, follow }) {
         paddingHorizontal="medium"
         paddingVertical="xsmall"
         justify="space-between"
+        backgroundColor="fill-two"
+        _hover={{ backgroundColor: 'fill-two-hover' }}
       >
         <Flex
           gap="small"
           align="center"
           grow={1}
         >
-          <ArrowRightIcon size={12} />
+          <ArrowRightIcon
+            size={12}
+            paddingRight="small"
+          />
           <span> {command.command}</span>
         </Flex>
         <CommandExitStatus exitCode={command.exitCode} />
