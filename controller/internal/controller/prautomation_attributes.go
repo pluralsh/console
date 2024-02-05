@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
 
@@ -22,9 +23,12 @@ func (in *PrAutomationReconciler) attributes(ctx context.Context, pra *v1alpha1.
 		return nil, err
 	}
 
-	connectionID, err := helper.IDFromRef(pra.Spec.ScmConnectionRef, &v1alpha1.ScmConnection{})
+	connectionID, err := helper.IDFromRef(&pra.Spec.ScmConnectionRef, &v1alpha1.ScmConnection{})
 	if err != nil {
 		return nil, err
+	}
+	if connectionID == nil {
+		return nil, fmt.Errorf("could not find ScmConnection: %s", pra.Spec.ScmConnectionRef.Name)
 	}
 
 	return pra.Attributes(clusterID, serviceID, connectionID), nil

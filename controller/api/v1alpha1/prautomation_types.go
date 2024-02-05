@@ -9,6 +9,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func init() {
+	SchemeBuilder.Register(&PrAutomation{}, &PrAutomationList{})
+}
+
 // PrAutomationBindings ...
 type PrAutomationBindings struct {
 	// Create bindings.
@@ -45,6 +49,20 @@ type PrAutomation struct {
 	// Status ...
 	// +kubebuilder:validation:Optional
 	Status Status `json:"status,omitempty"`
+}
+
+// ConsoleID implements PluralResource interface
+func (in *PrAutomation) ConsoleID() *string {
+	return in.Status.ID
+}
+
+// ConsoleName implements PluralResource interface
+func (in *PrAutomation) ConsoleName() string {
+	if in.Spec.Name != nil && len(*in.Spec.Name) > 0 {
+		return *in.Spec.Name
+	}
+
+	return in.Name
 }
 
 func (in *PrAutomation) Attributes(clusterID *string, serviceID *string, connectionID *string) *console.PrAutomationAttributes {
@@ -88,14 +106,6 @@ func (in *PrAutomation) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
-func (in *PrAutomation) ConsoleName() string {
-	if in.Spec.Name != nil && len(*in.Spec.Name) > 0 {
-		return *in.Spec.Name
-	}
-
-	return in.Name
-}
-
 // PrAutomationSpec ...
 type PrAutomationSpec struct {
 	// Addon is a link to an addon name
@@ -131,8 +141,8 @@ type PrAutomationSpec struct {
 	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`
 
 	// ScmConnectionRef ...
-	// +kubebuilder:validation:Optional
-	ScmConnectionRef *corev1.ObjectReference `json:"scmConnectionRef,omitempty"`
+	// +kubebuilder:validation:Required
+	ScmConnectionRef corev1.ObjectReference `json:"scmConnectionRef,omitempty"`
 
 	// RepositoryRef ...
 	// +kubebuilder:validation:Optional

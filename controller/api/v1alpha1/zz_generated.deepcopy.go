@@ -1246,11 +1246,7 @@ func (in *PrAutomationSpec) DeepCopyInto(out *PrAutomationSpec) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
-	if in.ScmConnectionRef != nil {
-		in, out := &in.ScmConnectionRef, &out.ScmConnectionRef
-		*out = new(v1.ObjectReference)
-		**out = **in
-	}
+	out.ScmConnectionRef = in.ScmConnectionRef
 	if in.RepositoryRef != nil {
 		in, out := &in.RepositoryRef, &out.RepositoryRef
 		*out = new(v1.ObjectReference)

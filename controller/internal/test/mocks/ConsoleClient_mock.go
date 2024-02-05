@@ -2077,6 +2077,53 @@ func (_c *ConsoleClientMock_IsPrAutomationExists_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// IsPrAutomationExistsByName provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) IsPrAutomationExistsByName(ctx context.Context, name string) bool {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsPrAutomationExistsByName")
+	}
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, name)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_IsPrAutomationExistsByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsPrAutomationExistsByName'
+type ConsoleClientMock_IsPrAutomationExistsByName_Call struct {
+	*mock.Call
+}
+
+// IsPrAutomationExistsByName is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ConsoleClientMock_Expecter) IsPrAutomationExistsByName(ctx interface{}, name interface{}) *ConsoleClientMock_IsPrAutomationExistsByName_Call {
+	return &ConsoleClientMock_IsPrAutomationExistsByName_Call{Call: _e.mock.On("IsPrAutomationExistsByName", ctx, name)}
+}
+
+func (_c *ConsoleClientMock_IsPrAutomationExistsByName_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_IsPrAutomationExistsByName_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPrAutomationExistsByName_Call) Return(_a0 bool) *ConsoleClientMock_IsPrAutomationExistsByName_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPrAutomationExistsByName_Call) RunAndReturn(run func(context.Context, string) bool) *ConsoleClientMock_IsPrAutomationExistsByName_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsProviderDeleting provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) IsProviderDeleting(ctx context.Context, id string) bool {
 	ret := _m.Called(ctx, id)

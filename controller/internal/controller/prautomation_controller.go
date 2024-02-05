@@ -4,7 +4,6 @@ import (
 	"context"
 
 	console "github.com/pluralsh/console-client-go"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -37,7 +36,6 @@ const (
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=prautomations,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=prautomations/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=prautomations/finalizers,verbs=update
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the v1alpha1.PrAutomation closer to the desired state
@@ -88,6 +86,10 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
+	if apiPrAutomation == nil {
+		logger.Info("PR automation already exists in the Console API. Won't reconcile again.")
+		return ctrl.Result{}, err
+	}
 
 	prAutomation.Status.ID = &apiPrAutomation.ID
 	prAutomation.Status.SHA = &sha
@@ -134,7 +136,11 @@ func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAu
 
 func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alpha1.PrAutomation, changed bool) (*console.PrAutomationFragment, error) {
 	logger := log.FromContext(ctx)
-	exists := in.ConsoleClient.IsPrAutomationExists(ctx, prAutomation.Status.GetID())
+	exists := in.ConsoleClient.IsPrAutomationExistsByName(ctx, prAutomation.ConsoleName())
+	if exists && !prAutomation.Status.HasID() {
+		return nil, nil
+	}
+
 	attributes, err := in.attributes(ctx, prAutomation)
 	if err != nil {
 		return nil, err
@@ -164,6 +170,5 @@ func (in *PrAutomationReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "prautomation_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.PrAutomation{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(in)
 }

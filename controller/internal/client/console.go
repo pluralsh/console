@@ -76,6 +76,7 @@ type ConsoleClient interface {
 	GetPrAutomation(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
 	GetPrAutomationByName(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
 	IsPrAutomationExists(ctx context.Context, id string) bool
+	IsPrAutomationExistsByName(ctx context.Context, name string) bool
 }
 
 func New(url, token string) ConsoleClient {

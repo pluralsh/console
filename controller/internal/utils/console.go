@@ -17,7 +17,7 @@ type ConsoleHelper struct {
 }
 
 func (in *ConsoleHelper) IDFromRef(ref *v1.ObjectReference, resource v1alpha1.PluralResource) (*string, error) {
-	if resource == nil {
+	if ref == nil {
 		return nil, nil
 	}
 
