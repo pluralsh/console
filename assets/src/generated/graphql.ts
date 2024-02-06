@@ -5679,7 +5679,7 @@ export type DeleteClusterProviderMutation = { __typename?: 'RootMutationType', d
 
 export type PrAutomationFragment = { __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null };
 
-export type PullRequestFragment = { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null };
+export type PullRequestFragment = { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null } | null };
 
 export type CreatePullRequestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5688,7 +5688,7 @@ export type CreatePullRequestMutationVariables = Exact<{
 }>;
 
 
-export type CreatePullRequestMutation = { __typename?: 'RootMutationType', createPullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null };
+export type CreatePullRequestMutation = { __typename?: 'RootMutationType', createPullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null } | null } | null };
 
 export type PullRequestsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -5698,7 +5698,7 @@ export type PullRequestsQueryVariables = Exact<{
 }>;
 
 
-export type PullRequestsQuery = { __typename?: 'RootQueryType', pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null };
+export type PullRequestsQuery = { __typename?: 'RootQueryType', pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null } | null } | null } | null> | null } | null };
 
 export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null } | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null };
 
@@ -6959,6 +6959,12 @@ export const PullRequestFragmentDoc = gql`
   cluster {
     id
     name
+    handle
+    self
+    protect
+    deletedAt
+    version
+    currentVersion
   }
   title
   url

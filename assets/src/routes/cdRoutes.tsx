@@ -152,15 +152,9 @@ export function CdRoot() {
   const { data } = useDeploymentSettingsQuery({
     pollInterval: POLL_INTERVAL,
   })
-  const cdIsEnabled = useCDEnabled()
-  const navigate = useNavigate()
-  const location = useLocation()
 
-  useLayoutEffect(() => {
-    if (!cdIsEnabled && location.pathname !== CD_DEFAULT_ABS_PATH) {
-      navigate(CD_DEFAULT_ABS_PATH)
-    }
-  }, [cdIsEnabled, location.pathname, navigate])
+  useCDEnabled({ redirect: true })
+
   const providerValue = useMemo(
     () => ({ deploymentSettings: data?.deploymentSettings }),
     [data?.deploymentSettings]

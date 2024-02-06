@@ -13,6 +13,12 @@ fragment PullRequest on PullRequest {
   cluster {
     id
     name
+    handle
+    self
+    protect
+    deletedAt
+    version
+    currentVersion
   }
   title
   url

@@ -15,8 +15,9 @@ import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 
 import { GqlError } from 'components/utils/Alert'
 
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+
 import { columns } from './PullRequestsColumns'
-import { POLL_INTERVAL } from './PullRequestsQueue'
 
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -105,22 +106,12 @@ export default function OutstandingPrs() {
     >
       <div css={{ display: 'flex', minWidth: 0, gap: theme.spacing.medium }}>
         <Input2
-          startIcon={<SearchIcon size={undefined} />}
+          startIcon={<SearchIcon />}
           showClearButton
           value={searchString}
           onChange={(e) => setSearchString(e.currentTarget.value)}
           css={{ flexGrow: 1 }}
         />
-        <div
-          css={{
-            display: 'flex',
-            minWidth: 0,
-            gap: theme.spacing.medium,
-            alignItems: 'center',
-          }}
-        >
-          tabs
-        </div>
       </div>
       <FullHeightTableWrap>
         <Table

@@ -81,12 +81,6 @@ function getMenuItems({
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
     },
-    {
-      text: 'Deployment Settings',
-      icon: <GearTrainIcon />,
-      path: `${CD_ABS_PATH}/settings`,
-      pathRegexp: /^\/cd\/settings.*$/,
-    },
     ...(!isCDEnabled
       ? []
       : [
@@ -95,6 +89,12 @@ function getMenuItems({
             icon: <PrOpenIcon />,
             path: PR_DEFAULT_ABS_PATH,
             pathRegexp: /^(\/pr)|(\/pr\/.*)$/,
+          },
+          {
+            text: 'Deployment Settings',
+            icon: <GearTrainIcon />,
+            path: `${CD_ABS_PATH}/settings`,
+            pathRegexp: /^\/cd\/settings.*$/,
           },
         ]),
     {

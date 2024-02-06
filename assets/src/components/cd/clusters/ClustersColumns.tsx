@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { ClustersRowFragment } from 'generated/graphql'
+import { Cluster, ClustersRowFragment } from 'generated/graphql'
 
 import {
   canUpgrade,
@@ -53,42 +53,64 @@ import { DynamicClusterIcon } from './DynamicClusterIcon'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
-const ColClusterSC = styled.div(({ theme }) => ({
+const ColClusterContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.xsmall,
 }))
 
-const ColCluster = columnHelper.accessor(({ node }) => node, {
+export function ColClusterContent({
+  cluster,
+}: {
+  cluster: Nullable<
+    Pick<
+      Cluster,
+      | 'id'
+      | 'name'
+      | 'version'
+      | 'currentVersion'
+      | 'protect'
+      | 'self'
+      | 'deletedAt'
+      | 'handle'
+    >
+  >
+}) {
+  if (!cluster) {
+    return null
+  }
+  const upgrading =
+    !cluster?.self && isUpgrading(cluster?.version, cluster?.currentVersion)
+
+  return (
+    <ColClusterContentSC>
+      <DynamicClusterIcon
+        deleting={!!cluster?.deletedAt}
+        upgrading={upgrading}
+        protect={!!cluster?.protect}
+        self={!!cluster?.self}
+      />
+      <StackedText
+        first={
+          <BasicLink
+            as={Link}
+            to={`/cd/clusters/${cluster?.id}`}
+            css={{ whiteSpace: 'nowrap' }}
+          >
+            {cluster?.name}
+          </BasicLink>
+        }
+        second={`handle: ${cluster?.handle}`}
+      />
+    </ColClusterContentSC>
+  )
+}
+
+const ColCluster = columnHelper.accessor(({ node }) => node?.name, {
   id: 'cluster',
   header: 'Cluster',
-  cell: function Cell({ getValue }) {
-    const cluster = getValue()
-    const upgrading =
-      !cluster?.self && isUpgrading(cluster?.version, cluster?.currentVersion)
-
-    return (
-      <ColClusterSC>
-        <DynamicClusterIcon
-          deleting={!!cluster?.deletedAt}
-          upgrading={upgrading}
-          protect={!!cluster?.protect}
-          self={!!cluster?.self}
-        />
-        <StackedText
-          first={
-            <BasicLink
-              as={Link}
-              to={`/cd/clusters/${cluster?.id}`}
-              css={{ whiteSpace: 'nowrap' }}
-            >
-              {cluster?.name}
-            </BasicLink>
-          }
-          second={`handle: ${cluster?.handle}`}
-        />
-      </ColClusterSC>
-    )
+  cell: function Cell({ row: { original } }) {
+    return <ColClusterContent cluster={original.node} />
   },
 })
 
@@ -106,7 +128,7 @@ const ColProvider = columnHelper.accessor(
       },
     }) {
       return (
-        <ColClusterSC>
+        <ColClusterContentSC>
           <DistroProviderIconFrame
             distro={node?.distro}
             provider={node?.provider?.cloud}
@@ -117,7 +139,7 @@ const ColProvider = columnHelper.accessor(
             first={getClusterDistroName(node?.distro, 'short')}
             second={getProviderName(node?.provider?.cloud)}
           />
-        </ColClusterSC>
+        </ColClusterContentSC>
       )
     },
   }
