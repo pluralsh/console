@@ -47,7 +47,7 @@ func (s *ScmConnection) Attributes(token string) console.ScmConnectionAttributes
 		Username: s.Spec.Username,
 		BaseURL:  s.Spec.BaseUrl,
 		APIURL:   s.Spec.APIUrl,
-		Token:    &token,
+		Token:    token,
 	}
 }
 

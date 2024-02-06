@@ -6,5 +6,5 @@ version: 0.1.0
 type: application
 dependencies:
   - name: velero
-    version: 5.2.2
+    version: 5.2.2 # It should be kept in sync with Velero chart version in deployment-operator/Makefile
     repository: https://vmware-tanzu.github.io/helm-charts

@@ -93,9 +93,11 @@ func (c ConditionReason) String() string {
 const (
 	ReadonlyConditionReason             ConditionReason = "Readonly"
 	ReadyConditionReason                ConditionReason = "Ready"
+	ReadyConditionReasonDeleting        ConditionReason = "Deleting"
 	SynchronizedConditionReason         ConditionReason = "Synchronized"
 	SynchronizedConditionReasonError    ConditionReason = "Error"
 	SynchronizedConditionReasonNotFound ConditionReason = "NotFound"
+	SynchronizedConditionReasonDeleting ConditionReason = "Deleting"
 )
 
 type ConditionMessage string
