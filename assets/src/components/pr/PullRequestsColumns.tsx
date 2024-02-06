@@ -88,11 +88,6 @@ const ColInsertedAt = columnHelper.accessor(({ node }) => node?.insertedAt, {
   },
 })
 
-const ColClusterSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.xsmall,
-}))
 const ColCluster = columnHelper.accessor(({ node }) => node?.cluster?.name, {
   id: 'cluster',
   header: 'Cluster',
