@@ -1,17 +1,23 @@
-import { AppIcon, BriefcaseIcon, Button, Chip } from '@pluralsh/design-system'
 import {
+  ArrowTopRightIcon,
+  BriefcaseIcon,
+  Card,
+  Chip,
+  IconFrame,
+} from '@pluralsh/design-system'
+import {
+  ContainerSpecFragment,
   GateState,
   PipelineGateFragment,
-  useApproveGateMutation,
 } from 'generated/graphql'
 
-import { ComponentPropsWithoutRef, useState } from 'react'
+import { ComponentPropsWithoutRef } from 'react'
 
 import styled from 'styled-components'
 
-import { Confirm } from 'components/utils/Confirm'
+import { Link } from 'react-router-dom'
 
-import { ApolloError } from '@apollo/client'
+import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import {
   BaseNode,
@@ -29,64 +35,101 @@ export const gateStateToJobText = {
   [GateState.Closed]: 'Blocked',
 } as const satisfies Record<GateState, string>
 
-const ApproverCardSC = styled(StatusCard)(({ theme }) => ({
+const JobInfoCardSC = styled(StatusCard)(({ theme }) => ({
   '.contentArea': {
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.small,
   },
-  '.name': {
+  '.primary': {
     ...theme.partials.text.body2,
     color: theme.colors['text-light'],
   },
-  '.email': {
+  '.secondary': {
     ...theme.partials.text.caption,
     color: theme.colors['text-xlight'],
     marginTop: -theme.spacing.xxxsmall,
   },
 }))
 
-export function ApproverCard({
+export function JobInfoCard({
   gate,
+  container: _c,
   ...props
-}: { gate: PipelineGateFragment } & ComponentPropsWithoutRef<
-  typeof ApproverCardSC
->) {
-  const { approver } = gate
-
-  if (!approver) {
-    return null
-  }
-
+}: {
+  gate: PipelineGateFragment
+  container?: Nullable<ContainerSpecFragment>
+} & ComponentPropsWithoutRef<typeof JobInfoCardSC>) {
   return (
-    <ApproverCardSC
+    <JobInfoCardSC
       status={gate.state ? gateStateToCardStatus[gate.state] : undefined}
       statusLabel={gate.state ? gateStateToJobText[gate.state] : undefined}
       {...props}
     >
-      <AppIcon
-        size="xxsmall"
-        name={approver.name}
-        url={approver.profile ?? undefined}
-        spacing="none"
-      />
       <div>
-        <p className="name">{approver.name}</p>
-        <p className="email">{approver.email}</p>
+        {gate.name && <p className="primary">{gate.name}</p>}
+        {gate.spec?.job?.namespace && (
+          <p className="secondary">{gate.spec?.job?.namespace}</p>
+        )}
       </div>
-    </ApproverCardSC>
+    </JobInfoCardSC>
   )
 }
+
+const ContainerCardSC = styled(Card)(({ theme }) => ({
+  '&&': { padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px ` },
+  '.contentArea': {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.small,
+  },
+
+  '.primary': {
+    ...theme.partials.text.body2,
+    color: theme.colors['text-light'],
+  },
+  '.secondary': {
+    ...theme.partials.text.caption,
+    color: theme.colors['text-xlight'],
+    marginTop: -theme.spacing.xxxsmall,
+  },
+}))
+
+export function ContainerCard({
+  container,
+  ...props
+}: {
+  container?: Nullable<ContainerSpecFragment>
+} & ComponentPropsWithoutRef<typeof JobInfoCardSC>) {
+  if (!container?.image) {
+    return null
+  }
+
+  return (
+    <ContainerCardSC {...props}>
+      <div>
+        {container.image && <p className="primary">{container.image}</p>}
+      </div>
+    </ContainerCardSC>
+  )
+}
+
+const JobNodeSC = styled(BaseNode)(({ theme }) => ({
+  '.headerArea2': { display: 'flex', columnGap: theme.spacing.medium },
+}))
 
 export function JobNode(props: EdgeNode) {
   const {
     data: { meta, ...edge },
   } = props
 
-  const gates = edge?.gates
+  const gate = edge?.gates?.[0]
+  const containers = gate?.spec?.job?.containers
+
+  if (!gate) return null
 
   return (
-    <BaseNode {...props}>
+    <JobNodeSC {...props}>
       <div className="headerArea">
         <h2 className="heading">Action</h2>
         {meta.state && (
@@ -98,68 +141,31 @@ export function JobNode(props: EdgeNode) {
           </Chip>
         )}
       </div>
-      <IconHeading icon={<BriefcaseIcon />}>Job</IconHeading>
+      <div className="headerArea2">
+        <IconHeading icon={<BriefcaseIcon />}>Job – {gate.name}</IconHeading>
+        <IconFrame
+          type="secondary"
+          icon={<ArrowTopRightIcon />}
+          as={Link}
+          to={`${PIPELINES_ABS_PATH}/jobs/${gate.id}`}
+        />
+      </div>
+      {/* <NodeCardList>
+        <li>
+          <JobInfoCard
+            container={containers?.[0]}
+            gate={gate}
+          />
+        </li>
+      </NodeCardList> */}
       <NodeCardList>
-        {gates?.map((gate) =>
-          gate?.approver ? (
-            <li>
-              <ApproverCard gate={gate} />
-            </li>
-          ) : (
-            gate && (
-              <li>
-                <ApproveButton id={gate.id} />
-              </li>
-            )
-          )
-        )}
+        <li>
+          <ContainerCard
+            container={containers?.[0]}
+            gate={gate}
+          />
+        </li>
       </NodeCardList>
-    </BaseNode>
-  )
-}
-
-function ApproveButton({
-  id,
-  onCompleted,
-  onError,
-}: {
-  id: string
-  onCompleted?: () => void
-  onError?: (e: ApolloError) => void
-}) {
-  const [confirmIsOpen, setConfirmIsOpen] = useState(false)
-
-  const [approveGateMutation, { loading, error }] = useApproveGateMutation({
-    variables: { id },
-    onCompleted: () => {
-      onCompleted?.()
-    },
-    onError: (e) => onError?.(e),
-  })
-
-  return (
-    <>
-      <Button
-        small
-        secondary
-        onClick={() => {
-          setConfirmIsOpen(true)
-        }}
-      >
-        Approve
-      </Button>
-      <Confirm
-        open={confirmIsOpen}
-        loading={loading}
-        error={error}
-        title={null}
-        text="Are you sure you want to approve this?"
-        label="Approve"
-        submit={() => {
-          approveGateMutation()
-        }}
-        close={() => setConfirmIsOpen(false)}
-      />
-    </>
+    </JobNodeSC>
   )
 }

@@ -58,17 +58,38 @@ export const DEMO_GATES: Partial<PipelineGateFragment>[] = [
     name: 'Code scan job',
     type: GateType.Job,
     state: GateState.Open,
+    spec: {
+      job: {
+        namespace: 'some-namespace',
+        serviceAccount: 'some-service-account',
+        containers: [{ image: 'container-image' }],
+      },
+    },
   },
   {
-    id: '20',
+    id: '21',
     name: 'Datadog Monitors',
     type: GateType.Job,
     state: GateState.Pending,
+    spec: {
+      job: {
+        namespace: 'some-namespace',
+        serviceAccount: 'some-service-account',
+        containers: [{ image: 'container-image' }],
+      },
+    },
   },
   {
-    id: '20',
+    id: '22',
     name: 'Integration tests',
     type: GateType.Job,
-    state: GateState.Open,
+    state: GateState.Closed,
+    spec: {
+      job: {
+        namespace: 'some-namespace',
+        serviceAccount: 'some-service-account',
+        containers: [{ image: 'container-image' }],
+      },
+    },
   },
 ]

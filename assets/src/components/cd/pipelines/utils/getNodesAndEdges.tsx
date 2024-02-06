@@ -12,11 +12,9 @@ import { groupBy } from 'lodash'
 import { Entries } from 'type-fest'
 
 import { StageStatus, getStageStatus } from '../nodes/StageNode'
-
 import { CUSTOM_EDGE_NAME } from '../EdgeLine'
 
 import { reduceGateStates } from './reduceGateStatuses'
-
 import { DEMO_GATES, PIPELINE_DEBUG_MODE } from './_demo_data'
 
 export enum NodeType {
@@ -32,7 +30,7 @@ const baseEdgeProps = {
 }
 
 const TYPE_SORT_VALS = Object.fromEntries(
-  [NodeType.Stage, NodeType.Job, NodeType.Approval, NodeType.Tests].map(
+  [NodeType.Stage, NodeType.Approval, NodeType.Job, NodeType.Tests].map(
     (val, i) => [val, i]
   )
 )

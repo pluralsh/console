@@ -27,7 +27,10 @@ import { Pipeline } from './Pipeline'
 
 const POLL_INTERVAL = 10 * 1000
 
-export const PIPELINES_CRUMBS = [...CD_BASE_CRUMBS, { label: 'pipelines',url: PIPELINES_ABS_PATH }]
+export const PIPELINES_CRUMBS = [
+  ...CD_BASE_CRUMBS,
+  { label: 'pipelines', url: PIPELINES_ABS_PATH },
+]
 
 const PipelineList = styled(VirtualList)(({ theme }) => ({
   ...theme.partials.reset.list,
