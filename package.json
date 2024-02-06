@@ -23,7 +23,10 @@
     "fix:format": "prettier --write --no-error-on-unmatched-pattern ./src",
     "fix:js": "eslint --fix . --ext ts,tsx,js,jsx",
     "prepublishOnly": "npm run build",
-    "firebase:start": "yarn build:storybook && npx firebase emulators:start"
+    "firebase:start": "yarn build:storybook && npx firebase emulators:start",
+    "postinstall": "husky",
+    "prepack": "pinst --disable",
+    "postpack": "pinst --enable"
   },
   "engines": {
     "node": "18.16.0"
@@ -107,7 +110,7 @@
     "honorable": "1.0.0-beta.17",
     "honorable-theme-default": "1.0.0-beta.5",
     "http-server": "14.1.1",
-    "husky": "8.0.3",
+    "husky": "9.0.10",
     "jest-mock": "29.5.0",
     "jsdom": "23.0.1",
     "lint-staged": "15.2.0",
