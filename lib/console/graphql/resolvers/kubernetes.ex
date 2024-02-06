@@ -232,6 +232,13 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> maybe_filter_pods(args)
   end
 
+  def read_job_logs(pass, args, %{source: %BatchV1.Job{metadata: metadata, spec: %{selector: selector}}}) do
+    case list_pods(metadata, selector) do
+      {:ok, %{items: [pod | _]}} -> read_pod_logs(pass, args, %{source: pod})
+      err -> err
+    end
+  end
+
   def read_pod_logs(_, args, %{source: %Core.Pod{metadata: %{namespace: ns, name: n}}}) do
     Core.read_namespaced_pod_log!(ns, n, Map.to_list(args))
     |> Kube.Utils.run()

@@ -1760,11 +1760,18 @@ export type IssuerRef = {
 export type Job = {
   __typename?: 'Job';
   events?: Maybe<Array<Maybe<Event>>>;
+  logs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   metadata: Metadata;
   pods?: Maybe<Array<Maybe<Pod>>>;
   raw: Scalars['String']['output'];
   spec: JobSpec;
   status: JobStatus;
+};
+
+
+export type JobLogsArgs = {
+  container: Scalars['String']['input'];
+  sinceSeconds: Scalars['Int']['input'];
 };
 
 /** the full specification of a job gate */
@@ -2249,6 +2256,8 @@ export type PipelineGate = {
   cluster?: Maybe<Cluster>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation) */
+  job?: Maybe<Job>;
   /** the name of this gate as seen in the UI */
   name: Scalars['String']['output'];
   /** more detailed specification for complex gates */
@@ -2522,6 +2531,8 @@ export type PrAutomation = {
   name: Scalars['String']['output'];
   /** the git repository to use for sourcing external templates */
   repository?: Maybe<GitRepository>;
+  /** An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster */
+  role?: Maybe<PrRole>;
   /** link to a service if this can update its configuration */
   service?: Maybe<ServiceDeployment>;
   title: Scalars['String']['output'];
@@ -2551,6 +2562,7 @@ export type PrAutomationAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   /** a git repository to use for create mode prs */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  role?: InputMaybe<PrRole>;
   /** link to a service if this can modify its configuration */
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
@@ -2615,6 +2627,14 @@ export type PrCreateSpec = {
   git?: Maybe<GitRef>;
   templates?: Maybe<Array<Maybe<PrTemplateSpec>>>;
 };
+
+export enum PrRole {
+  Cluster = 'CLUSTER',
+  Pipeline = 'PIPELINE',
+  Service = 'SERVICE',
+  Update = 'UPDATE',
+  Upgrade = 'UPGRADE'
+}
 
 /** the details of where to find and place a templated file */
 export type PrTemplateSpec = {
@@ -3670,6 +3690,7 @@ export type RootQueryType = {
   notifications?: Maybe<NotificationConnection>;
   objectStores?: Maybe<ObjectStoreConnection>;
   pipeline?: Maybe<Pipeline>;
+  pipelineGate?: Maybe<PipelineGate>;
   pipelines?: Maybe<PipelineConnection>;
   pluralCluster?: Maybe<PluralCluster>;
   pluralContext?: Maybe<PluralContext>;
@@ -4044,6 +4065,11 @@ export type RootQueryTypePipelineArgs = {
 };
 
 
+export type RootQueryTypePipelineGateArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootQueryTypePipelinesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -4118,6 +4144,7 @@ export type RootQueryTypePullRequestsArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 

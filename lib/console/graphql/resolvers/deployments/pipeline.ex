@@ -22,6 +22,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Pipeline do
     |> allow(user, :read)
   end
 
+  def resolve_gate(%{id: id}, %{context: %{current_user: user}}) do
+    Pipelines.get_gate!(id)
+    |> allow(user, :read)
+  end
+
   def upsert_pipeline(%{name: name, attributes: attrs}, %{context: %{current_user: user}}),
     do: Pipelines.upsert(attrs, name, user)
 

@@ -44,6 +44,7 @@ defmodule Console.ExternalGraphQl do
   import_types Console.GraphQl.Kubernetes.Pod
   import_types Console.GraphQl.Kubernetes.Node
   import_types Console.GraphQl.Kubernetes.Event
+  import_types Console.GraphQl.Kubernetes.Job
 
   @sources [Deployments]
 

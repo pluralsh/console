@@ -14,6 +14,13 @@ defmodule Console.GraphQl.Kubernetes.Job do
       %{metadata: metadata, spec: %{selector: selector}}, _, _ ->
         Kubernetes.list_pods(metadata, selector)
     end
+
+    field :logs, list_of(:string) do
+      arg :container,     non_null(:string)
+      arg :since_seconds, non_null(:integer)
+
+      resolve &Kubernetes.read_job_logs/3
+    end
   end
 
   object :job_status do

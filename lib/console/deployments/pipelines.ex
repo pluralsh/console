@@ -3,7 +3,8 @@ defmodule Console.Deployments.Pipelines do
   import Console.Deployments.Policies
   import Console.Deployments.Pipelines.Stability
   alias Console.PubSub
-  alias Console.Deployments.{Services}
+  alias Console.Deployments.{Services, Clusters}
+  alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Schema.{
     Pipeline,
     PipelineStage,
@@ -32,6 +33,13 @@ defmodule Console.Deployments.Pipelines do
   def get_gate!(id), do: Repo.get!(PipelineGate, id)
 
   def get_pipeline_by_name(name), do: Repo.get_by(Pipeline, name: name)
+
+  def gate_job(%PipelineGate{status: %{job_ref: %{namespace: ns, name: name}}} = gate) do
+    %{cluster: cluster} = Repo.preload(gate, [:cluster])
+    BatchV1.read_namespaced_job!(ns, name)
+    |> Kazan.run(server: Clusters.control_plane(cluster))
+  end
+  def gate_job(_), do: {:ok, nil}
 
   @doc """
   Will either create or recreate a pipeline with the given attributes. Requires write permissions to the pipeline
