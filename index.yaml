@@ -561,4 +561,37 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/console-chart-v0.1.0/system-upgrade-controller-0.1.0.tgz
     version: 0.1.0
-generated: "2024-02-02T11:18:12.394665842Z"
+  velero:
+  - apiVersion: v2
+    appVersion: 1.12.3
+    created: "2024-02-06T15:43:40.943413349Z"
+    dependencies:
+    - name: velero
+      repository: https://vmware-tanzu.github.io/helm-charts
+      version: 5.2.2
+    description: Chart for Velero
+    digest: e72043c2626f259e2479d80790fe311f36f3da7064581504c7f96a7240cc75a0
+    name: velero
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/velero-chart-v0.1.0/velero-0.1.0.tgz
+    version: 0.1.0
+  velero-s3-proxy:
+  - apiVersion: v2
+    appVersion: 1.12.3
+    created: "2024-02-06T15:43:41.057877011Z"
+    dependencies:
+    - name: velero
+      repository: https://vmware-tanzu.github.io/helm-charts
+      version: 5.2.2
+    - name: s3-proxy
+      repository: https://radar-base.github.io/radar-helm-charts
+      version: 0.3.1
+    description: Chart for Velero
+    digest: 420d8ebdd4226b3b470f32851cee7a5c60b2f0e165aa60ad0ce4c57ec79527ba
+    name: velero-s3-proxy
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/velero-s3-proxy-chart-v0.1.0/velero-s3-proxy-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-02-06T15:43:41.057973009Z"
