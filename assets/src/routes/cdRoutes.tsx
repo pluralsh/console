@@ -1,4 +1,4 @@
-import { createContext, useContext, useLayoutEffect, useMemo } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 
 import ContinuousDeployment, {
   POLL_INTERVAL,
@@ -11,8 +11,6 @@ import {
   Navigate,
   Outlet,
   Route,
-  useLocation,
-  useNavigate,
 } from 'react-router-dom'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -78,7 +76,6 @@ import ComponentDryRun from '../components/component/ComponentDryRun'
 
 import {
   ADDONS_REL_PATH,
-  CD_DEFAULT_ABS_PATH,
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
   CLUSTER_ADDONS_PARAM_ID,

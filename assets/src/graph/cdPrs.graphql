@@ -1,24 +1,3 @@
-fragment PrAutomation on PrAutomation {
-  id
-  name
-  documentation
-  addon
-  cluster {
-    ...ClusterBasic
-  }
-  service {
-    id
-    name
-  }
-  repository {
-    url
-    # Probably don't need, but let's see what's inside
-    httpsPath
-  }
-  role
-  documentation
-}
-
 fragment PullRequest on PullRequest {
   id
   service {
@@ -63,36 +42,5 @@ query PullRequests(
         ...PullRequest
       }
     }
-  }
-}
-
-query PrAutomations($first: Int = 100, $after: String) {
-  prAutomations(first: $first, after: $after) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...PrAutomation
-      }
-    }
-  }
-}
-
-mutation CreatePrAutomation($attributes: PrAutomationAttributes!) {
-  createPrAutomation(attributes: $attributes) {
-    ...PrAutomation
-  }
-}
-
-mutation UpdatePrAutomation($id: ID!, $attributes: PrAutomationAttributes!) {
-  updatePrAutomation(id: $id, attributes: $attributes) {
-    ...PrAutomation
-  }
-}
-
-mutation DeletePrAutomation($id: ID!) {
-  deletePrAutomation(id: $id) {
-    ...PrAutomation
   }
 }

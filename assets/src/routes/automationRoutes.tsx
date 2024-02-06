@@ -4,8 +4,9 @@ import { Navigate } from 'react-router-dom'
 
 import { DeploymentSettingsFragment } from 'generated/graphql'
 
-import AutomationPr from 'components/automation/AutomationPr'
 import Automation from 'components/automation/Automation'
+import AutomationPr from 'components/automation/AutomationPr'
+import ScmConnections from 'components/automation/ScmConnections'
 
 import {
   AUTOMATION_DEFAULT_REL_PATH,
@@ -39,7 +40,7 @@ export const automationRoutes = [
         children: [
           {
             path: AUTOMATION_PR_REL_PATH,
-            element: <AutomationPr />,
+            element: <ScmConnections />,
           },
           {
             path: AUTOMATION_SCM_REL_PATH,
