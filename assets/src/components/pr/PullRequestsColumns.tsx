@@ -7,19 +7,14 @@ import {
   PeopleIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
+import styled, { useTheme } from 'styled-components'
 
 import { PullRequestFragment } from 'generated/graphql'
 
 import { Edge } from 'utils/graphql'
-
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import styled, { useTheme } from 'styled-components'
-import { DynamicClusterIcon } from 'components/cd/clusters/DynamicClusterIcon'
-import { StackedText } from 'components/utils/table/StackedText'
-import { BasicLink } from 'components/utils/typography/BasicLink'
-import { Link } from 'react-router-dom'
-import { isUpgrading } from 'utils/semver'
+
 import { ColClusterContent } from 'components/cd/clusters/ClustersColumns'
 
 enum MenuItemKey {
