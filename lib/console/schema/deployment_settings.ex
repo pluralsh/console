@@ -29,6 +29,11 @@ defmodule Console.Schema.DeploymentSettings do
     field :create_policy_id, :binary_id
     field :git_policy_id,    :binary_id
 
+    field :agent_helm_values, Piazza.Ecto.EncryptedString
+
+    field :helm_changed, :boolean, virtual: true
+    field :version_changed, :boolean, virtual: true
+
     embeds_one :prometheus_connection, Connection, on_replace: :update
     embeds_one :loki_connection, Connection, on_replace: :update
 
@@ -55,7 +60,7 @@ defmodule Console.Schema.DeploymentSettings do
     timestamps()
   end
 
-  @valid ~w(name enabled agent_version manage_agents self_managed artifact_repository_id deployer_repository_id)a
+  @valid ~w(name enabled agent_version agent_helm_values manage_agents self_managed artifact_repository_id deployer_repository_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -66,6 +71,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_assoc(:create_bindings)
     |> cast_embed(:prometheus_connection)
     |> cast_embed(:loki_connection)
+    |> change_markers(agent_helm_values: :helm_changed, agent_version: :version_changed)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:git_policy_id, &Ecto.UUID.generate/0)

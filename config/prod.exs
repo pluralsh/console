@@ -38,6 +38,7 @@ config :console, Console.Cron,
     {"30 * * * *", {Console.Deployments.Cron, :migrate_agents, []}},
     {"@daily", {Console.Deployments.Cron, :rotate_deploy_tokens, []}},
     {"@daily", {Console.Deployments.Cron, :prune_revisions, []}},
+    {"@daily", {Console.Deployments.Cron, :prune_migrations, []}},
     {"@daily", {Console.Cron.Jobs, :prune_notifications, []}},
     {"@daily", {Console.Cron.Jobs, :prune_audits, []}},
   ]

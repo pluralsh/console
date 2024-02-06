@@ -595,6 +595,9 @@ type DeploymentSettings {
   "the way we can connect to your prometheus instance"
   prometheusConnection: HttpConnection
 
+  "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
+  agentHelmValues: String
+
   "the repo to fetch CAPI manifests from, for both providers and clusters"
   artifactRepository: GitRepository
 
@@ -633,6 +636,9 @@ input DeploymentSettingsAttributes {
   artifactRepositoryId: ID
 
   deployerRepositoryId: ID
+
+  "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
+  agentHelmValues: String
 
   "connection details for a prometheus instance to use"
   prometheusConnection: HttpConnectionAttributes

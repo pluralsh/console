@@ -596,20 +596,20 @@ defmodule Console.Deployments.Clusters do
     |> Repo.insert()
   end
 
-  def apply_migration(%AgentMigration{id: id, ref: ref} = migration) when is_binary(ref) do
+  def apply_migration(%AgentMigration{id: id} = migration) do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
     Service.agent()
     |> Service.stream()
     |> Repo.stream(method: :keyset)
     |> Stream.each(fn svc ->
       Logger.info "applying agent migration #{id} for #{svc.id}"
-      Services.update_service(%{git: %{ref: ref, folder: svc.git.folder}}, svc.id, bot)
+      AgentMigration.updates(migration, svc)
+      |> Services.update_service(svc.id, bot)
     end)
     |> Stream.run()
 
     complete_migration(migration)
   end
-  def apply_migration(%AgentMigration{} = migration), do: complete_migration(migration)
   def apply_migration(_), do: :ok
 
   defp complete_migration(%AgentMigration{} = migration) do
