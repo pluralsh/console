@@ -29,6 +29,8 @@ defmodule Console.Schema.GlobalService do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:tags, with: &tag_changeset/2)
+    |> unique_constraint(:service_id)
+    |> unique_constraint(:name)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:provider_id)
     |> validate_required(~w(name service_id)a)

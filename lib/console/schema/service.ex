@@ -50,7 +50,7 @@ defmodule Console.Schema.Service do
         field :value, Piazza.Ecto.EncryptedString
       end
 
-      embeds_one :repository, Console.Schema.NamespacedName
+      embeds_one :repository, Console.Schema.NamespacedName, on_replace: :update
     end
 
     def changeset(model, attrs \\ %{}) do
