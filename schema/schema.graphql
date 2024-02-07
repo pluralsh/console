@@ -2209,6 +2209,14 @@ enum MatchStrategy {
   RECURSIVE
 }
 
+enum PrRole {
+  CLUSTER
+  SERVICE
+  PIPELINE
+  UPDATE
+  UPGRADE
+}
+
 enum ConfigurationType {
   STRING
   INT
@@ -2278,6 +2286,8 @@ input ScmConnectionAttributes {
 "A way to create a self-service means of generating PRs against an IaC repo"
 input PrAutomationAttributes {
   name: String
+
+  role: PrRole
 
   "string id for a repository, eg for github, this is {organization}\/{repository-name}"
   identifier: String
@@ -2509,6 +2519,9 @@ type PrAutomation {
 
   "the name for this automation"
   name: String!
+
+  "An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster"
+  role: PrRole
 
   documentation: String
 

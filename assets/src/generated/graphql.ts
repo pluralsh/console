@@ -2522,6 +2522,8 @@ export type PrAutomation = {
   name: Scalars['String']['output'];
   /** the git repository to use for sourcing external templates */
   repository?: Maybe<GitRepository>;
+  /** An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster */
+  role?: Maybe<PrRole>;
   /** link to a service if this can update its configuration */
   service?: Maybe<ServiceDeployment>;
   title: Scalars['String']['output'];
@@ -2551,6 +2553,7 @@ export type PrAutomationAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   /** a git repository to use for create mode prs */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  role?: InputMaybe<PrRole>;
   /** link to a service if this can modify its configuration */
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
@@ -2615,6 +2618,14 @@ export type PrCreateSpec = {
   git?: Maybe<GitRef>;
   templates?: Maybe<Array<Maybe<PrTemplateSpec>>>;
 };
+
+export enum PrRole {
+  Cluster = 'CLUSTER',
+  Pipeline = 'PIPELINE',
+  Service = 'SERVICE',
+  Update = 'UPDATE',
+  Upgrade = 'UPGRADE'
+}
 
 /** the details of where to find and place a templated file */
 export type PrTemplateSpec = {
