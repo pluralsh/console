@@ -54,7 +54,7 @@ defmodule Console.Deployments.Git.Cmd do
         [_, _] -> true
         _ -> false
       end)
-      |> Map.new(fn [sha, head] -> {head, sha} end)
+      |> Map.new(fn [sha, head] -> {String.trim(head), sha} end)
     else
       _ -> %{}
     end

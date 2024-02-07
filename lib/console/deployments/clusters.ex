@@ -590,6 +590,12 @@ defmodule Console.Deployments.Clusters do
     |> notify(:create, user)
   end
 
+  def create_agent_migration(attrs) do
+    %AgentMigration{}
+    |> AgentMigration.changeset(attrs)
+    |> Repo.insert()
+  end
+
   def apply_migration(%AgentMigration{id: id, ref: ref} = migration) when is_binary(ref) do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
     Service.agent()

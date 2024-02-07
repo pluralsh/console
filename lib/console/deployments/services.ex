@@ -128,7 +128,7 @@ defmodule Console.Deployments.Services do
       protect: true,
       name: "deploy-operator",
       namespace: "plrl-deploy-operator",
-      git: %{ref: "main", folder: "charts/deployment-operator"},
+      git: %{ref: Settings.agent_ref(), folder: "charts/deployment-operator"},
       configuration: operator_configuration(cluster)
     }, cluster_id, user)
   end

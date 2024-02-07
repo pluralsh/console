@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.Schema.Base do
   use Absinthe.Schema.Notation
   import Console.GraphQl.Helpers
+  require Logger
 
   enum :delta do
     value :create
@@ -122,8 +123,12 @@ defmodule Console.GraphQl.Schema.Base do
         end
       rescue
         error ->
-          {_, msg} = Console.GraphQl.Exception.error(error)
-          {:error, msg}
+          case Console.GraphQl.Exception.error(error) do
+            {code, msg} when code >= 500 ->
+              Exception.format(:error, error, __STACKTRACE__) |> Logger.error()
+              {:error, msg}
+            {_, msg} -> {:error, msg}
+          end
       end
     end
   end
