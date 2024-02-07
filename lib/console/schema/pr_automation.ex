@@ -3,10 +3,12 @@ defmodule Console.Schema.PrAutomation do
   alias Console.Schema.{Cluster, Service, ScmConnection, PolicyBinding, Configuration, GitRepository}
 
   defenum MatchStrategy, any: 0, all: 1, recursive: 2
+  defenum Role, cluster: 0, service: 1, pipeline: 2, update: 3, upgrade: 4
 
   schema "pr_automations" do
     field :identifier,       :string
     field :name,             :string
+    field :role,             Role
     field :documentation,    :binary
     field :addon,            :string
     field :title,            :string
@@ -62,7 +64,7 @@ defmodule Console.Schema.PrAutomation do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name identifier message title branch documentation addon cluster_id service_id connection_id)a
+  @valid ~w(name role identifier message title branch documentation addon cluster_id service_id connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

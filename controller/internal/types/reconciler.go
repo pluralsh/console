@@ -16,6 +16,7 @@ const (
 	GitRepositoryReconciler     Reconciler = "gitrepository"
 	ServiceDeploymentReconciler Reconciler = "servicedeployment"
 	ClusterReconciler           Reconciler = "cluster"
+	ClusterRestoreReconciler    Reconciler = "clusterrestore"
 	ProviderReconciler          Reconciler = "provider"
 	GlobalServiceReconciler     Reconciler = "globalservice"
 	PipelineReconciler          Reconciler = "pipeline"
@@ -31,6 +32,8 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 	case ServiceDeploymentReconciler:
 		fallthrough
 	case ClusterReconciler:
+		fallthrough
+	case ClusterRestoreReconciler:
 		fallthrough
 	case GlobalServiceReconciler:
 		fallthrough
@@ -64,6 +67,12 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case ClusterReconciler:
 		return &controller.ClusterReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}, nil
+	case ClusterRestoreReconciler:
+		return &controller.ClusterRestoreReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),

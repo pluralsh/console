@@ -4,12 +4,13 @@ import { Flex } from 'honorable'
 import { useCallback, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { extendConnection } from 'utils/graphql'
-
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+import { Link } from 'react-router-dom'
 
 import { AUDITS_Q } from '../queries'
+import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { AuditLocation } from './AuditLocation'
 import { AuditAction } from './AuditAction'
@@ -26,7 +27,14 @@ const columns = [
   }),
   COLUMN_HELPER.accessor((audit) => audit.repository, {
     id: 'repository',
-    cell: (repository: any) => repository.getValue(),
+    cell: (repository: any) => (
+      <InlineLink
+        as={Link}
+        to={`/apps/${repository.getValue()}`}
+      >
+        {repository.getValue()}
+      </InlineLink>
+    ),
     header: 'Application',
   }),
   COLUMN_HELPER.accessor((audit) => audit.actor, {

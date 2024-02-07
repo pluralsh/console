@@ -28,11 +28,16 @@ function CommandLogLine({ line, number, follow }) {
       align="center"
       color="text-light"
       gap="medium"
-      paddingLeft={50}
+      paddingLeft="medium"
       ref={lineRef}
       _hover={{ backgroundColor: 'fill-one-hover' }}
     >
-      <Span color="text-xlight">{number}</Span>
+      <Span
+        color="text-xlight"
+        width={20}
+      >
+        {number}
+      </Span>
       {blocks.map((json, i) => (
         <Span
           key={i}
@@ -54,6 +59,7 @@ export default function CommandLog({ text, follow }) {
   return (
     <Flex
       direction="column"
+      paddingVertical="small"
       overflowY="auto"
     >
       {lines.map((line, i) => (

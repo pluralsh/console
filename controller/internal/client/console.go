@@ -70,6 +70,11 @@ type ConsoleClient interface {
 	GetScmConnection(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
 	GetScmConnectionByName(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
 	IsScmConnectionExists(ctx context.Context, name string) bool
+	GetClusterBackup(clusterId, namespace, name *string) (*console.ClusterBackupFragment, error)
+	GetClusterRestore(id string) (*console.ClusterRestoreFragment, error)
+	UpdateClusterRestore(id string, attrs console.RestoreAttributes) (*console.ClusterRestoreFragment, error)
+	CreateClusterRestore(backupId string) (*console.ClusterRestoreFragment, error)
+	IsClusterRestoreExisting(id string) bool
 	CreatePrAutomation(ctx context.Context, attributes console.PrAutomationAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
 	UpdatePrAutomation(ctx context.Context, id string, attributes console.PrAutomationAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
 	DeletePrAutomation(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error

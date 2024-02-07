@@ -14,6 +14,10 @@ defmodule Console.Bootstrapper do
 
   def init(_) do
     Process.flag(:trap_exit, true)
+    if Console.conf(:initialize) do
+      send self(), :migrate
+    end
+
     if Console.conf(:initialize) && !Console.byok?() do
       send self(), :init
     end
@@ -43,6 +47,12 @@ defmodule Console.Bootstrapper do
 
   def handle_call(:status, _, %State{cloned: cloned, output: output} = state),
     do: {:reply, %{cloned: cloned, output: output}, state}
+
+  def handle_info(:migrate, state) do
+    with {:error, err} <- Console.Deployments.Settings.migrate_agents(),
+      do: Logger.info("didn't migrate agents due to: #{inspect(err)}")
+    {:noreply, state}
+  end
 
   def handle_info(:init, %State{storage: storage, table: table} = state) do
     tee = Tee.new()
