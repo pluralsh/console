@@ -5,11 +5,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { coerce, compare } from 'semver'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
 import { AddonVersion } from 'generated/graphql'
-
 import { TabularNumbers } from 'components/cluster/TableElements'
-
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
 import { useClusterAddOnContext } from './ClusterAddOnDetails'

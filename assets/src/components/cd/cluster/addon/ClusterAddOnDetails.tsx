@@ -17,7 +17,6 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { useTheme } from 'styled-components'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-
 import {
   CLUSTER_ADDONS_PARAM_ID,
   CLUSTER_ADDONS_REL_PATH,
@@ -26,19 +25,16 @@ import {
   getClusterDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { SideNavEntries } from 'components/layout/SideNavEntries'
-
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
-
 import { POLL_INTERVAL } from 'components/cluster/constants'
-
 import {
   ListBoxItem,
   LoopingLogo,
   Select,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-
 import { useEffect, useMemo, useState } from 'react'
+import { isEmpty } from 'lodash'
 
 import ClusterAddOnDetailsSidecar from './ClusterAddOnDetailsSidecar'
 
@@ -76,13 +72,23 @@ export const getAddOnDetailsBreadcrumbs = ({
     : []),
 ]
 
-const DIRECTORY = [
-  {
-    path: 'compatibility',
-    label: 'Compatibility',
-    enabled: true,
-  },
-]
+const useGetDirectory = (readme: string | null | undefined) =>
+  useMemo(() => {
+    const hasReadme = !isEmpty(readme)
+
+    return [
+      {
+        path: 'compatibility',
+        label: 'Compatibility',
+        enabled: true,
+      },
+      {
+        path: 'readme',
+        label: 'Readme',
+        enabled: hasReadme,
+      },
+    ]
+  }, [readme])
 
 export default function ClusterAddOnDetails() {
   const theme = useTheme()
@@ -113,6 +119,7 @@ export default function ClusterAddOnDetails() {
 
   useEffect(() => setKubeVersionVar(kubeVersion), [kubeVersion])
   const rts = runtimeServices?.find((rts) => rts?.id === addOnId)
+  const directory = useGetDirectory(rts?.addon?.readme)
 
   useSetBreadcrumbs(
     useMemo(
@@ -184,7 +191,7 @@ export default function ClusterAddOnDetails() {
             }}
           >
             <SideNavEntries
-              directory={DIRECTORY}
+              directory={directory}
               pathname={pathname}
               pathPrefix={pathPrefix}
             />

@@ -80,6 +80,7 @@ fragment RuntimeService on RuntimeService {
     versions {
       ...AddonVersion
     }
+    readme
   }
   service {
     git {
