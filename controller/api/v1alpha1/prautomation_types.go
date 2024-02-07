@@ -65,7 +65,7 @@ func (in *PrAutomation) ConsoleName() string {
 	return in.Name
 }
 
-func (in *PrAutomation) Attributes(clusterID *string, serviceID *string, connectionID *string) *console.PrAutomationAttributes {
+func (in *PrAutomation) Attributes(clusterID *string, serviceID *string, connectionID *string, repositoryID *string) *console.PrAutomationAttributes {
 	attrs := console.PrAutomationAttributes{
 		Name:          lo.ToPtr(in.ConsoleName()),
 		Identifier:    in.Spec.Identifier,
@@ -74,10 +74,12 @@ func (in *PrAutomation) Attributes(clusterID *string, serviceID *string, connect
 		Message:       in.Spec.Message,
 		Branch:        in.Spec.Branch,
 		Updates:       in.Spec.Updates.Attributes(),
+		Creates:       in.Spec.Creates.Attributes(),
 		Addon:         in.Spec.Addon,
 		ClusterID:     clusterID,
 		ServiceID:     serviceID,
 		ConnectionID:  connectionID,
+		RepositoryID:  repositoryID,
 		Configuration: algorithms.Map(in.Spec.Configuration, func(c PrAutomationConfiguration) *console.PrConfigurationAttributes {
 			return c.Attributes()
 		}),
@@ -93,13 +95,13 @@ func (in *PrAutomation) Attributes(clusterID *string, serviceID *string, connect
 	return &attrs
 }
 
-func (s *PrAutomation) Diff(hasher Hasher) (changed bool, sha string, err error) {
-	currentSha, err := hasher(s.Spec)
+func (in *PrAutomation) Diff(hasher Hasher) (changed bool, sha string, err error) {
+	currentSha, err := hasher(in.Spec)
 	if err != nil {
 		return false, "", err
 	}
 
-	return !s.Status.IsSHAEqual(currentSha), currentSha, nil
+	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
 }
 
 func (in *PrAutomation) SetCondition(condition metav1.Condition) {
@@ -180,6 +182,19 @@ type PrAutomationCreateConfiguration struct {
 	Templates []PrAutomationTemplate `json:"templates,omitempty"`
 }
 
+func (in *PrAutomationCreateConfiguration) Attributes() *console.PrAutomationCreateSpecAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PrAutomationCreateSpecAttributes{
+		Git: in.Git.Attributes(),
+		Templates: algorithms.Map(in.Templates, func(c PrAutomationTemplate) *console.PrAutomationTemplateAttributes {
+			return c.Attributes()
+		}),
+	}
+}
+
 // PrAutomationTemplate ...
 type PrAutomationTemplate struct {
 	// Destination ...
@@ -193,6 +208,18 @@ type PrAutomationTemplate struct {
 	// Source ...
 	// +kubebuilder:validation:Optional
 	Source string `json:"source"`
+}
+
+func (in *PrAutomationTemplate) Attributes() *console.PrAutomationTemplateAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PrAutomationTemplateAttributes{
+		Source:      in.Source,
+		Destination: in.Destination,
+		External:    in.External,
+	}
 }
 
 // PrAutomationUpdateConfiguration ...

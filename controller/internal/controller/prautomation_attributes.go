@@ -23,6 +23,11 @@ func (in *PrAutomationReconciler) attributes(ctx context.Context, pra *v1alpha1.
 		return nil, err
 	}
 
+	repositoryID, err := helper.IDFromRef(pra.Spec.RepositoryRef, &v1alpha1.GitRepository{})
+	if err != nil {
+		return nil, err
+	}
+
 	connectionID, err := helper.IDFromRef(&pra.Spec.ScmConnectionRef, &v1alpha1.ScmConnection{})
 	if err != nil {
 		return nil, err
@@ -31,5 +36,5 @@ func (in *PrAutomationReconciler) attributes(ctx context.Context, pra *v1alpha1.
 		return nil, fmt.Errorf("could not find ScmConnection: %s", pra.Spec.ScmConnectionRef.Name)
 	}
 
-	return pra.Attributes(clusterID, serviceID, connectionID), nil
+	return pra.Attributes(clusterID, serviceID, connectionID, repositoryID), nil
 }

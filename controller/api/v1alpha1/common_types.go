@@ -133,6 +133,17 @@ type GitRef struct {
 	Ref string `json:"ref"`
 }
 
+func (in *GitRef) Attributes() *console.GitRefAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.GitRefAttributes{
+		Ref:    in.Ref,
+		Folder: in.Folder,
+	}
+}
+
 type Status struct {
 	// ID of the resource in the Console API.
 	// +kubebuilder:validation:Optional

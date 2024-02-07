@@ -51,6 +51,16 @@ type GitRepository struct {
 	Status GitRepositoryStatus `json:"status,omitempty"`
 }
 
+// ConsoleID implements PluralResource interface
+func (in *GitRepository) ConsoleID() *string {
+	return in.Status.ID
+}
+
+// ConsoleName implements PluralResource interface
+func (in *GitRepository) ConsoleName() string {
+	return in.Name
+}
+
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type GitRepositoryList struct {
@@ -59,6 +69,6 @@ type GitRepositoryList struct {
 	Items           []GitRepository `json:"items"`
 }
 
-func (p *GitRepository) SetCondition(condition metav1.Condition) {
-	meta.SetStatusCondition(&p.Status.Conditions, condition)
+func (in *GitRepository) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
