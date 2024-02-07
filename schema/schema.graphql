@@ -2284,7 +2284,7 @@ input ScmConnectionAttributes {
 
   username: String
 
-  token: String!
+  token: String
 
   baseUrl: String
 

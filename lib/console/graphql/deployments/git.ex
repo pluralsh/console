@@ -27,7 +27,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :name,                non_null(:string)
     field :type,                non_null(:scm_type)
     field :username,            :string
-    field :token,               non_null(:string)
+    field :token,               :string
     field :base_url,            :string
     field :api_url,             :string
     field :signing_private_key, :string, description: "a ssh private key to be used for commit signing"

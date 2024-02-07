@@ -630,12 +630,12 @@ defmodule Console.Deployments.Clusters do
   def readme(%AddOn{git_url: url}), do: {:ok, nil}
 
   defp readme_fetch(url) do
-    Enum.find_value(~w(main master), fn branch ->
+    Enum.find_value(~w(main master), {:ok, nil}, fn branch ->
       String.replace(url, "{branch}", branch)
       |> HTTPoison.get([], follow_redirect: true)
       |> case do
         {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> {:ok, body}
-        _ -> {:ok, nil}
+        _ -> nil
       end
     end)
   end

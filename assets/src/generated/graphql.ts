@@ -4599,7 +4599,7 @@ export type ScmConnectionAttributes = {
   name: Scalars['String']['input'];
   /** a ssh private key to be used for commit signing */
   signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
-  token: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
   type: ScmType;
   username?: InputMaybe<Scalars['String']['input']>;
 };
@@ -5444,7 +5444,7 @@ export type AddonReleaseUrlQueryVariables = Exact<{
 }>;
 
 
-export type AddonReleaseUrlQuery = { __typename?: 'RootQueryType', runtimeService?: { __typename?: 'RuntimeService', addon?: { __typename?: 'RuntimeAddon', releaseUrl?: string | null } | null } | null };
+export type AddonReleaseUrlQuery = { __typename?: 'RootQueryType', runtimeService?: { __typename?: 'RuntimeService', id: string, addon?: { __typename?: 'RuntimeAddon', releaseUrl?: string | null } | null } | null };
 
 export type UpdateClusterBindingsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8293,6 +8293,7 @@ export type RuntimeServicesQueryResult = Apollo.QueryResult<RuntimeServicesQuery
 export const AddonReleaseUrlDocument = gql`
     query AddonReleaseURL($id: ID!, $version: String!) {
   runtimeService(id: $id) {
+    id
     addon {
       releaseUrl(version: $version)
     }
