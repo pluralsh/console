@@ -1,23 +1,21 @@
 import { ComponentProps, useCallback, useMemo, useState } from 'react'
-import { SearchIcon, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import Input2 from '@pluralsh/design-system/dist/components/Input2'
 import { VirtualItem } from '@tanstack/react-virtual'
 
 import { usePrAutomationsQuery } from 'generated/graphql'
 import { extendConnection } from 'utils/graphql'
 
-import { PR_BASE_CRUMBS, PR_OUTSTANDING_ABS_PATH } from 'routes/prRoutesConsts'
-
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { useThrottle } from 'components/hooks/useThrottle'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 
 import { GqlError } from 'components/utils/Alert'
 
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
-import { columns } from './AutomationPrColumns'
+import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
+
+import { columns } from './PrAutomationsColumns'
 
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -26,15 +24,9 @@ export const REACT_VIRTUAL_OPTIONS: ComponentProps<
 }
 
 export const QUERY_PAGE_SIZE = 100
-const PR_STATUS_TAB_KEYS = ['ALL', 'OPEN', 'CLOSED'] as const
 
-type PrStatusTabKey = (typeof PR_STATUS_TAB_KEYS)[number]
-
-export default function OutstandingPrs() {
+export default function AutomationPr() {
   const theme = useTheme()
-  const [searchString, setSearchString] = useState('')
-  const _debouncedSearchString = useThrottle(searchString, 100)
-  const [_statusFilter, _setStatusFilter] = useState<PrStatusTabKey>('ALL')
   const [virtualSlice, _setVirtualSlice] = useState<
     | {
         start: VirtualItem | undefined
@@ -49,7 +41,7 @@ export default function OutstandingPrs() {
         ...PR_BASE_CRUMBS,
         {
           label: 'outstanding PRs',
-          url: PR_OUTSTANDING_ABS_PATH,
+          url: PR_QUEUE_ABS_PATH,
         },
       ],
       []
@@ -94,8 +86,6 @@ export default function OutstandingPrs() {
   if (error) {
     return <GqlError error={error} />
   }
-
-  console.log('prAutomations', prAutomations)
 
   return (
     <div

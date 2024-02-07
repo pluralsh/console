@@ -7,11 +7,7 @@ import Clusters from 'components/cd/clusters/Clusters'
 import Repositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
 import Providers from 'components/cd/providers/Providers'
-import {
-  Navigate,
-  Outlet,
-  Route,
-} from 'react-router-dom'
+import { Navigate, Outlet, Route } from 'react-router-dom'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 

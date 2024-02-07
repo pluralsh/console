@@ -12,7 +12,6 @@ import {
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
-  HelpIcon,
   ListIcon,
   LogoutIcon,
   PeopleIcon,
@@ -47,8 +46,6 @@ import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
-import { AUTOMATION_DEFAULT_ABS_PATH } from 'routes/automationRoutesConsts'
-
 import { LoginContext } from '../contexts'
 
 import { MARK_READ } from './queries'
@@ -61,13 +58,16 @@ type MenuItem = {
   pathRegexp?: RegExp
   ignoreRegexp?: RegExp
   plural?: boolean
+  enabled?: boolean
 }
 
 function getMenuItems({
   isCDEnabled,
+  isByok,
 }: {
   isSandbox: boolean
   isCDEnabled: boolean
+  isByok: boolean
 }): MenuItem[] {
   return [
     {
@@ -108,17 +108,10 @@ function getMenuItems({
       path: '/pods',
     },
     {
-      text: 'PR Queue',
+      text: 'PR',
       icon: <PrOpenIcon />,
       path: PR_DEFAULT_ABS_PATH,
-      pathRegexp: /^(\/pr-queue)|(\/pr-queue\/.*)$/,
-      enabled: isCDEnabled,
-    },
-    {
-      text: 'Automation',
-      icon: <HelpIcon />,
-      path: AUTOMATION_DEFAULT_ABS_PATH,
-      pathRegexp: /^(\/automation)|(\/automation\/.*)$/,
+      pathRegexp: /^(\/pr)|(\/pr\/.*)$/,
       enabled: isCDEnabled,
     },
     {
@@ -147,7 +140,7 @@ function getMenuItems({
       icon: <PeopleIcon />,
       path: '/account',
     },
-  ].filter(({ enabled }) => enabled !== false)
+  ].filter((item) => item.enabled !== false && (!item.plural || !isByok))
 }
 
 function isActiveMenuItem(
@@ -212,8 +205,9 @@ export default function Sidebar() {
       getMenuItems({
         isSandbox: configuration.isSandbox,
         isCDEnabled,
+        isByok: configuration.byok,
       }),
-    [configuration.isSandbox, isCDEnabled]
+    [configuration.byok, configuration.isSandbox, isCDEnabled]
   )
 
   const [mutation] = useMutation(MARK_READ, {
@@ -261,22 +255,19 @@ export default function Sidebar() {
           grow={1}
           shrink={1}
         >
-          {menuItems.map(
-            (item, i) =>
-              (!item.plural || !configuration.byok) && (
-                <SidebarItem
-                  key={i}
-                  clickable
-                  tooltip={item.text}
-                  className={`sidebar-${item.text}`}
-                  active={isActive(item)}
-                  as={Link}
-                  to={item.path}
-                >
-                  {item.icon}
-                </SidebarItem>
-              )
-          )}
+          {menuItems.map((item, i) => (
+            <SidebarItem
+              key={i}
+              clickable
+              tooltip={item.text}
+              className={`sidebar-${item.text}`}
+              active={isActive(item)}
+              as={Link}
+              to={item.path}
+            >
+              {item.icon}
+            </SidebarItem>
+          ))}
           <Flex grow={1} />
           <SidebarItem
             tooltip="Discord"

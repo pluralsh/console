@@ -7,7 +7,7 @@ import { VirtualItem } from '@tanstack/react-virtual'
 import { usePullRequestsQuery } from 'generated/graphql'
 import { extendConnection } from 'utils/graphql'
 
-import { PR_BASE_CRUMBS, PR_OUTSTANDING_ABS_PATH } from 'routes/prRoutesConsts'
+import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { useThrottle } from 'components/hooks/useThrottle'
@@ -17,7 +17,7 @@ import { GqlError } from 'components/utils/Alert'
 
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
-import { columns } from '../pr/PullRequestsColumns'
+import { columns } from './PrQueueColumns'
 
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -30,7 +30,7 @@ const PR_STATUS_TAB_KEYS = ['ALL', 'OPEN', 'CLOSED'] as const
 
 type PrStatusTabKey = (typeof PR_STATUS_TAB_KEYS)[number]
 
-export default function ScmConnections() {
+export default function OutstandingPrs() {
   const theme = useTheme()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 100)
@@ -49,7 +49,7 @@ export default function ScmConnections() {
         ...PR_BASE_CRUMBS,
         {
           label: 'outstanding PRs',
-          url: PR_OUTSTANDING_ABS_PATH,
+          url: PR_QUEUE_ABS_PATH,
         },
       ],
       []

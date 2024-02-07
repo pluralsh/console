@@ -1,31 +1,21 @@
-import { createContext, useContext } from 'react'
 import { type RouteObject } from 'react-router'
 import { Navigate } from 'react-router-dom'
 
-import { DeploymentSettingsFragment } from 'generated/graphql'
+import Pr from 'components/pr/Pr'
+import PrQueue from 'components/pr/PrQueue'
+import PrDependencyDashboard from 'components/pr/PrDependencyDashboard'
+import PrScmConnections from 'components/pr/PrScmConnections'
+import PrAutomations from 'components/pr/PrAutomations'
 
-import PRQueue from 'components/pr/PullRequestsQueue'
-import OutstandingPrs from 'components/pr/OutstandingPrs'
-
-import DependencyDashboard from 'components/pr/DependencyDashboard'
-
+import { CdRoot } from './cdRoutes'
 import {
+  PR_AUTOMATIONS_REL_PATH,
   PR_DEFAULT_REL_PATH,
   PR_DEPENDENCIES_REL_PATH,
-  PR_OUTSTANDING_REL_PATH,
+  PR_QUEUE_REL_PATH,
   PR_REL_PATH,
+  PR_SCM_REL_PATH,
 } from './prRoutesConsts'
-import { CdRoot } from './cdRoutes'
-
-const CDContext = createContext<{
-  deploymentSettings?: DeploymentSettingsFragment | undefined | null
-}>({})
-
-export function useDeploymentSettings() {
-  const ctx = useContext(CDContext)
-
-  return ctx?.deploymentSettings
-}
 
 export const prRoutes = [
   {
@@ -37,15 +27,23 @@ export const prRoutes = [
         element: <Navigate to={PR_DEFAULT_REL_PATH} />,
       },
       {
-        element: <PRQueue />,
+        element: <Pr />,
         children: [
           {
-            path: PR_OUTSTANDING_REL_PATH,
-            element: <OutstandingPrs />,
+            path: PR_QUEUE_REL_PATH,
+            element: <PrQueue />,
           },
           {
             path: PR_DEPENDENCIES_REL_PATH,
-            element: <DependencyDashboard />,
+            element: <PrDependencyDashboard />,
+          },
+          {
+            path: PR_SCM_REL_PATH,
+            element: <PrScmConnections />,
+          },
+          {
+            path: PR_AUTOMATIONS_REL_PATH,
+            element: <PrAutomations />,
           },
         ],
       },

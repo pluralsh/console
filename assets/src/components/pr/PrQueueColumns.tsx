@@ -149,7 +149,7 @@ export const columns = [
   // ColStatus,
   ColInsertedAt,
   ColCluster,
-  ColAuthor,
+  // ColAuthor, 
   ColLabels,
   ColLink,
 ]

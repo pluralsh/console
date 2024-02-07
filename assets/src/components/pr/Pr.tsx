@@ -1,39 +1,47 @@
-import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { Suspense, useRef } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
+import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
+import {
+  PR_ABS_PATH,
+  PR_AUTOMATIONS_REL_PATH,
+  PR_QUEUE_REL_PATH,
+  PR_SCM_REL_PATH,
+} from 'routes/prRoutesConsts'
+import { PluralErrorBoundary } from 'components/cd/PluralErrorBoundary'
+import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
+import { Directory } from 'components/layout/SideNavEntries'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
-import { PluralErrorBoundary } from 'components/cd/PluralErrorBoundary'
-import {
-  AUTOMATION_ABS_PATH,
-  AUTOMATION_PR_REL_PATH,
-  AUTOMATION_SCM_REL_PATH,
-} from 'routes/automationRoutesConsts'
-import { Directory } from 'components/layout/SideNavEntries'
 import { LinkTabWrap } from 'components/utils/Tabs'
 
 const directory = [
   {
-    path: AUTOMATION_SCM_REL_PATH,
-    label: 'SCM Connection',
+    path: PR_QUEUE_REL_PATH,
+    label: 'Outstanding PRs',
+  },
+  // {
+  //   path: PR_DEPENDENCIES_REL_PATH,
+  //   label: 'Dependency dashboard',
+  // },
+  {
+    path: PR_SCM_REL_PATH,
+    label: 'SCM Connections',
   },
   {
-    path: AUTOMATION_PR_REL_PATH,
-    label: 'PR Automation',
+    path: PR_AUTOMATIONS_REL_PATH,
+    label: 'PR Automations',
   },
 ] as const satisfies Directory
 
 export default function PullRequests() {
   const theme = useTheme()
-
   const cdEnabled = useCDEnabled({ redirect: true })
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${AUTOMATION_ABS_PATH}/:tab*`)
-  // @ts-expect-error
+  const pathMatch = useMatch(`${PR_ABS_PATH}/:tab*`)
+  // @ts-ignore
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 
@@ -65,7 +73,7 @@ export default function PullRequests() {
                 subTab
                 key={path}
                 textValue={label}
-                to={`${AUTOMATION_ABS_PATH}/${path}`}
+                to={`${PR_ABS_PATH}/${path}`}
               >
                 <SubTab
                   key={path}

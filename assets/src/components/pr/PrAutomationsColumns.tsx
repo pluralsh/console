@@ -63,10 +63,7 @@ const ColRepoUrl = columnHelper.accessor(({ node }) => node?.repository?.url, {
   cell: function Cell({ getValue }) {
     return (
       <TruncateStart>
-        <span>
-          {getValue() ||
-            'https://qwerlkjqhwrelkasjdhflkasjdhflasdkfjhalsdkfjhasdlfkjasdhflkasjdhf.git'}
-        </span>
+        <span>{getValue()}</span>
       </TruncateStart>
     )
   },
@@ -203,7 +200,7 @@ export function DeletePrAutomationModal({
           <span css={{ color: theme.colors['text-danger'] }}>
             “{prAutomation.name}”
           </span>{' '}
-          PR automation?
+          automation?
         </>
       }
     />
@@ -240,8 +237,8 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
             leftContent={
               <TrashCanIcon color={theme.colors['icon-danger-critical']} />
             }
-            label="Delete cluster"
-            textValue="Delete cluster"
+            label="Delete automation"
+            textValue="Delete automation"
           />
         </MoreMenu>
         {/* Modals */}
@@ -251,8 +248,8 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
           open={menuKey === MenuItemKey.Delete}
           onClose={() => setMenuKey('')}
         />
-        {/* <ClusterPermissionsModal
-          cluster={cluster}
+        {/* <AutomationPermissionsModal
+          automation={automation}
           open={menuKey === MenuItemKey.Permissions}
           onClose={() => setMenuKey('')}
         /> */}

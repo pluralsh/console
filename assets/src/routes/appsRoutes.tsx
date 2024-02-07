@@ -1,17 +1,10 @@
 import { Navigate, Route } from 'react-router-dom'
 
-import ComponentMetrics from 'components/component/ComponentMetrics'
-
-import AppDocs from 'components/apps/app/docs/AppDocs'
-
-import Credentials from 'components/apps/app/credentials/Credentials'
-
-import Uninstall from 'components/apps/app/uninstall/Uninstall'
-
-import AppComponents from 'components/apps/app/components/AppComponents'
-
-import Apps from '../components/apps/Apps'
 import App from '../components/apps/app/App'
+import AppDocs from '../components/apps/app/docs/AppDocs'
+import Credentials from '../components/apps/app/credentials/Credentials'
+import Uninstall from '../components/apps/app/uninstall/Uninstall'
+import AppComponents from '../components/apps/app/components/AppComponents'
 import Dashboards from '../components/apps/app/dashboards/Dashboards'
 import Runbooks from '../components/apps/app/runbooks/Runbooks'
 import CostAnalysis from '../components/apps/app/cost/CostAnalysis'
@@ -21,6 +14,8 @@ import Logs from '../components/apps/app/logs/Logs'
 import UserManagement from '../components/apps/app/oidc/UserManagement'
 import Configuration from '../components/apps/app/config/Configuration'
 import AppComponent from '../components/apps/app/components/component/AppComponent'
+
+import ComponentMetrics from '../components/component/ComponentMetrics'
 import ComponentInfo from '../components/component/ComponentInfo'
 import ComponentEvents from '../components/component/ComponentEvents'
 import ComponentRaw from '../components/component/ComponentRaw'
