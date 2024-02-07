@@ -2209,6 +2209,14 @@ enum MatchStrategy {
   RECURSIVE
 }
 
+enum PrRole {
+  CLUSTER
+  SERVICE
+  PIPELINE
+  UPDATE
+  UPGRADE
+}
+
 enum ConfigurationType {
   STRING
   INT
@@ -2278,6 +2286,8 @@ input ScmConnectionAttributes {
 "A way to create a self-service means of generating PRs against an IaC repo"
 input PrAutomationAttributes {
   name: String
+
+  role: PrRole
 
   "string id for a repository, eg for github, this is {organization}\/{repository-name}"
   identifier: String
@@ -2510,6 +2520,9 @@ type PrAutomation {
   "the name for this automation"
   name: String!
 
+  "An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster"
+  role: PrRole
+
   documentation: String
 
   title: String!
@@ -2519,6 +2532,8 @@ type PrAutomation {
   updates: PrUpdateSpec
 
   creates: PrCreateSpec
+
+  configuration: [PrConfiguration]
 
   "write policy for this pr automation, also propagates to the notifications list for any created PRs"
   writeBindings: [PolicyBinding]
@@ -2577,6 +2592,30 @@ type RegexReplacement {
 
   "template string to replace any match with"
   replacement: String!
+}
+
+"the a configuration item for creating a new pr, used for templating the ultimate code changes made"
+type PrConfiguration {
+  type: ConfigurationType!
+  name: String!
+  default: String
+  documentation: String
+  longform: String
+  placeholder: String
+  optional: Boolean
+  condition: PrConfigurationCondition
+}
+
+"declaritive spec for whether a config item is relevant given prior config"
+type PrConfigurationCondition {
+  "a boolean operation to apply"
+  operation: Operation!
+
+  "the prior field to check"
+  field: String!
+
+  "a fixed value to check against if its a binary operation"
+  value: String
 }
 
 "A reference to a pull request for your kubernetes related IaC"

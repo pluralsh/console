@@ -2507,6 +2507,7 @@ export type PrAutomation = {
   addon?: Maybe<Scalars['String']['output']>;
   /** link to a cluster if this is to perform an upgrade */
   cluster?: Maybe<Cluster>;
+  configuration?: Maybe<Array<Maybe<PrConfiguration>>>;
   /** the scm connection to use for pr generation */
   connection?: Maybe<ScmConnection>;
   /** users who can generate prs with this automation */
@@ -2522,6 +2523,8 @@ export type PrAutomation = {
   name: Scalars['String']['output'];
   /** the git repository to use for sourcing external templates */
   repository?: Maybe<GitRepository>;
+  /** An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster */
+  role?: Maybe<PrRole>;
   /** link to a service if this can update its configuration */
   service?: Maybe<ServiceDeployment>;
   title: Scalars['String']['output'];
@@ -2551,6 +2554,7 @@ export type PrAutomationAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   /** a git repository to use for create mode prs */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  role?: InputMaybe<PrRole>;
   /** link to a service if this can modify its configuration */
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
@@ -2596,6 +2600,19 @@ export type PrAutomationUpdateSpecAttributes = {
   yq?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** the a configuration item for creating a new pr, used for templating the ultimate code changes made */
+export type PrConfiguration = {
+  __typename?: 'PrConfiguration';
+  condition?: Maybe<PrConfigurationCondition>;
+  default?: Maybe<Scalars['String']['output']>;
+  documentation?: Maybe<Scalars['String']['output']>;
+  longform?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  optional?: Maybe<Scalars['Boolean']['output']>;
+  placeholder?: Maybe<Scalars['String']['output']>;
+  type: ConfigurationType;
+};
+
 /** the a configuration item for creating a new pr */
 export type PrConfigurationAttributes = {
   condition?: InputMaybe<ConditionAttributes>;
@@ -2608,6 +2625,17 @@ export type PrConfigurationAttributes = {
   type: ConfigurationType;
 };
 
+/** declaritive spec for whether a config item is relevant given prior config */
+export type PrConfigurationCondition = {
+  __typename?: 'PrConfigurationCondition';
+  /** the prior field to check */
+  field: Scalars['String']['output'];
+  /** a boolean operation to apply */
+  operation: Operation;
+  /** a fixed value to check against if its a binary operation */
+  value?: Maybe<Scalars['String']['output']>;
+};
+
 /** templated files used to add new files to a given pr */
 export type PrCreateSpec = {
   __typename?: 'PrCreateSpec';
@@ -2615,6 +2643,14 @@ export type PrCreateSpec = {
   git?: Maybe<GitRef>;
   templates?: Maybe<Array<Maybe<PrTemplateSpec>>>;
 };
+
+export enum PrRole {
+  Cluster = 'CLUSTER',
+  Pipeline = 'PIPELINE',
+  Service = 'SERVICE',
+  Update = 'UPDATE',
+  Upgrade = 'UPGRADE'
+}
 
 /** the details of where to find and place a templated file */
 export type PrTemplateSpec = {
