@@ -1,4 +1,4 @@
-import { Suspense, useRef } from 'react'
+import { ReactNode, Suspense, useMemo, useRef, useState } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
 import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
@@ -15,6 +15,7 @@ import { Directory } from 'components/layout/SideNavEntries'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { LinkTabWrap } from 'components/utils/Tabs'
+import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 
 const directory = [
   {
@@ -35,8 +36,17 @@ const directory = [
   },
 ] as const satisfies Directory
 
-export default function PullRequests() {
+export default function Pr() {
   const theme = useTheme()
+  const [headerContent, setHeaderContent] = useState<ReactNode>()
+
+  const pageHeaderContext = useMemo(
+    () => ({
+      setHeaderContent,
+    }),
+    []
+  )
+
   const cdEnabled = useCDEnabled({ redirect: true })
 
   const tabStateRef = useRef<any>(null)
@@ -84,6 +94,7 @@ export default function PullRequests() {
               </LinkTabWrap>
             ))}
           </TabList>
+          {headerContent}
         </div>
       }
     >
@@ -92,9 +103,11 @@ export default function PullRequests() {
           css={{ height: '100%' }}
           stateRef={tabStateRef}
         >
-          <Suspense fallback={<LoadingIndicator />}>
-            <Outlet />
-          </Suspense>
+          <PageHeaderContext.Provider value={pageHeaderContext}>
+            <Suspense fallback={<LoadingIndicator />}>
+              <Outlet />
+            </Suspense>
+          </PageHeaderContext.Provider>
         </TabPanel>
       </PluralErrorBoundary>
     </ResponsivePageFullWidth>

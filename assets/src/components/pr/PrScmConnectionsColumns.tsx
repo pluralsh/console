@@ -13,11 +13,12 @@ import styled, { useTheme } from 'styled-components'
 
 import {
   ScmConnectionFragment,
+  ScmConnectionsDocument,
   ScmType,
   useDeleteScmConnectionMutation,
 } from 'generated/graphql'
 
-import { Edge } from 'utils/graphql'
+import { Edge, removeConnection, updateCache } from 'utils/graphql'
 import { Confirm } from 'components/utils/Confirm'
 import { TruncateStart } from 'components/utils/table/TruncateStart'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -68,13 +69,13 @@ const DynamicScmTypeIconSC = styled.div((_) => ({
   position: 'relative',
 }))
 
-const scmTypeToLabel = {
+export const scmTypeToLabel = {
   [ScmType.Github]: 'GitHub',
   [ScmType.Gitlab]: 'GitLab',
   '': 'Unknown',
 } as const satisfies Record<ScmType | '', string>
 
-const scmTypeToIcon = {
+export const scmTypeToIcon = {
   [ScmType.Github]: <GitHubLogoIcon fullColor />,
   [ScmType.Gitlab]: <GitLabLogoIcon fullColor />,
   '': <HelpIcon />,
@@ -117,21 +118,26 @@ const ColType = columnHelper.accessor(({ node }) => node?.type, {
 
 export function DeleteScmConnectionModal({
   scmConnection,
-  refetch,
   open,
   onClose,
 }: {
   scmConnection: ScmConnectionFragment
-  refetch: Nullable<() => void>
   open: boolean
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
   const [mutation, { loading, error }] = useDeleteScmConnectionMutation({
     variables: { id: scmConnection.id },
+    update: (cache, { data }) =>
+      updateCache(cache, {
+        variables: {},
+        query: ScmConnectionsDocument,
+        update: (prev) => {
+          removeConnection(prev, data?.deleteScmConnection, 'scmConnections')
+        },
+      }),
     onCompleted: () => {
       onClose?.()
-      refetch?.()
     },
   })
 
@@ -161,11 +167,10 @@ export function DeleteScmConnectionModal({
 export const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',
   header: '',
-  cell: function Cell({ table, getValue }) {
+  cell: function Cell({ getValue }) {
     const theme = useTheme()
     const scmConnection = getValue()
     const [menuKey, setMenuKey] = useState<MenuItemKey | ''>()
-    const { refetch } = table.options.meta as { refetch?: () => void }
 
     if (!scmConnection) {
       return null
@@ -195,7 +200,6 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
         {/* Modals */}
         <DeleteScmConnectionModal
           scmConnection={scmConnection}
-          refetch={refetch}
           open={menuKey === MenuItemKey.Delete}
           onClose={() => setMenuKey('')}
         />

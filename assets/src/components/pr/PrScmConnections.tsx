@@ -9,11 +9,15 @@ import { extendConnection } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { GqlError } from 'components/utils/Alert'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import {
+  POLL_INTERVAL,
+  useSetPageHeaderContent,
+} from 'components/cd/ContinuousDeployment'
 
 import { PR_BASE_CRUMBS, PR_SCM_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { columns } from './PrScmConnectionsColumns'
+import { CreateScmConnection } from './scm/CreateScmConnection'
 
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -84,6 +88,8 @@ export default function ScmConnections() {
         ),
     })
   }, [fetchMore, pageInfo?.endCursor])
+
+  useSetPageHeaderContent(<CreateScmConnection refetch={refetch} />)
 
   if (error) {
     return <GqlError error={error} />

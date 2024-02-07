@@ -4,10 +4,11 @@ import {
   ClusterIcon,
   DeploymentIcon,
   IconFrame,
-  LinkoutIcon,
   ListBoxItem,
+  Modal,
   PeopleIcon,
   PipelineIcon,
+  PrOpenIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -26,12 +27,12 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 import { StackedText } from 'components/utils/table/StackedText'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import { Link } from 'react-router-dom'
-
-const DOCS_URL = 'https://docs.plural.sh/'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 enum MenuItemKey {
   Permissions = 'permissions',
   Delete = 'delete',
+  CreatePr = 'create-pr',
 }
 
 export const columnHelper = createColumnHelper<Edge<PrAutomationFragment>>()
@@ -138,30 +139,6 @@ const ColRole = columnHelper.accessor(({ node }) => node?.cluster?.name, {
   },
 })
 
-const ColCreatePr = columnHelper.accessor(() => DOCS_URL, {
-  id: 'createPr',
-  header: '',
-  cell: function Cell() {
-    const theme = useTheme()
-
-    return (
-      <div css={{ '&&': { color: theme.colors['action-link-inline'] } }}>
-        <Button
-          secondary
-          // startIcon={<PrOpenIcon />}
-          endIcon={<LinkoutIcon />}
-          as="a"
-          href={DOCS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          How to create a PR
-        </Button>
-      </div>
-    )
-  },
-})
-
 export function DeletePrAutomationModal({
   prAutomation,
   refetch,
@@ -205,6 +182,41 @@ export function DeletePrAutomationModal({
   )
 }
 
+export function CreatePrModal({
+  prAutomation,
+  // refetch,
+  open,
+  onClose,
+}: {
+  prAutomation: PrAutomationFragment
+  // eslint-disable-next-line react/no-unused-prop-types
+  refetch: Nullable<() => void>
+  open: boolean
+  onClose: Nullable<() => void>
+}) {
+  // const theme = useTheme()
+  // const [mutation, { loading, error }] = useCreatePullRequestMutation({
+  //   variables: { id: prAutomation.id },
+  //   onCompleted: () => {
+  //     onClose?.()
+  //     refetch?.()
+  //   },
+  // })
+
+  return (
+    <ModalMountTransition open={open}>
+      <Modal
+        portal
+        open={open}
+        onClose={onClose}
+        header={`Pull request configuration for ${prAutomation?.name}`}
+      >
+        TODO
+      </Modal>
+    </ModalMountTransition>
+  )
+}
+
 export const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',
   header: '',
@@ -221,8 +233,22 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
     return (
       <div
         onClick={(e) => e.stopPropagation()}
-        css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}
+        css={{
+          alignItems: 'center',
+          alignSelf: 'end',
+          display: 'flex',
+          columnGap: theme.spacing.medium,
+        }}
       >
+        <Button
+          secondary
+          startIcon={<PrOpenIcon />}
+          onClick={() => {
+            setMenuKey(MenuItemKey.CreatePr)
+          }}
+        >
+          Create a PR
+        </Button>
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Permissions}
@@ -251,6 +277,12 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
           open={menuKey === MenuItemKey.Permissions}
           onClose={() => setMenuKey('')}
         /> */}
+        <CreatePrModal
+          prAutomation={prAutomation}
+          refetch={refetch}
+          open={menuKey === MenuItemKey.CreatePr}
+          onClose={() => setMenuKey('')}
+        />
       </div>
     )
   },
@@ -261,6 +293,5 @@ export const columns = [
   ColRole,
   ColDocumentation,
   ColRepoUrl,
-  ColCreatePr,
   ColActions,
 ]

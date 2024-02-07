@@ -1,5 +1,5 @@
 import { ComponentProps, useCallback, useMemo, useState } from 'react'
-import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Button, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { VirtualItem } from '@tanstack/react-virtual'
 
@@ -11,19 +11,24 @@ import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 
 import { GqlError } from 'components/utils/Alert'
 
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import {
+  POLL_INTERVAL,
+  useSetPageHeaderContent,
+} from 'components/cd/ContinuousDeployment'
 
 import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { columns } from './PrAutomationsColumns'
 
-export const REACT_VIRTUAL_OPTIONS: ComponentProps<
+const DOCS_URL = 'https://docs.plural.sh/'
+
+const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
 >['reactVirtualOptions'] = {
   overscan: 10,
 }
 
-export const QUERY_PAGE_SIZE = 100
+const QUERY_PAGE_SIZE = 100
 
 export default function AutomationPr() {
   const theme = useTheme()
@@ -82,6 +87,23 @@ export default function AutomationPr() {
         extendConnection(prev, fetchMoreResult.prAutomations, 'prAutomations'),
     })
   }, [fetchMore, pageInfo?.endCursor])
+
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <Button
+          primary
+          as="a"
+          href={DOCS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Documentation
+        </Button>
+      ),
+      []
+    )
+  )
 
   if (error) {
     return <GqlError error={error} />

@@ -3,7 +3,7 @@ import { Breadcrumb } from '@pluralsh/design-system'
 export const PR_REL_PATH = 'pr' as const
 export const PR_ABS_PATH = `/${PR_REL_PATH}` as const
 
-export const PR_QUEUE_REL_PATH = 'prs' as const
+export const PR_QUEUE_REL_PATH = 'queue' as const
 export const PR_QUEUE_ABS_PATH = `${PR_ABS_PATH}/${PR_QUEUE_REL_PATH}` as const
 
 export const PR_DEPENDENCIES_REL_PATH = 'dependencies' as const

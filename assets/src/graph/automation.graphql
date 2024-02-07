@@ -12,9 +12,24 @@ fragment PrAutomation on PrAutomation {
   }
   repository {
     url
+    refs
   }
   role
   documentation
+  connection {
+    ...ScmConnection
+  }
+  updates {
+    files
+    matchStrategy
+    regexReplacements {
+      regex
+      replacement
+    }
+    regexes
+    replaceTemplate
+    yq
+  }
 }
 
 query PrAutomations($first: Int = 100, $after: String) {
