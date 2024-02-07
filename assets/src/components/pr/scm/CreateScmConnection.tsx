@@ -1,29 +1,18 @@
 import { useCallback, useState } from 'react'
-import {
-  Accordion,
-  Button,
-  FormField,
-  ListBoxItem,
-  Modal,
-  Select,
-} from '@pluralsh/design-system'
-import Input2 from '@pluralsh/design-system/dist/components/Input2'
+import { Button, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import {
   ScmConnectionAttributes,
   ScmConnectionsDocument,
-  ScmType,
   useCreateScmConnectionMutation,
 } from 'generated/graphql'
 import { appendConnection, updateCache } from 'utils/graphql'
 
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { InputRevealer } from 'components/cd/providers/InputRevealer'
-import { GqlError } from 'components/utils/Alert'
 
-import { scmTypeToIcon, scmTypeToLabel } from '../PrScmConnectionsColumns'
+import { ScmConnectionForm } from './EditScmConnection'
 
 const DEFAULT_ATTRIBUTES: Partial<ScmConnectionAttributes> = {
   apiUrl: '',
@@ -95,15 +84,21 @@ export function CreateScmConnectionModal({
   )
 
   return (
-    <ModalMountTransition open={open}>
-      <Modal
-        portal
-        open={open}
-        onClose={onClose}
-        asForm
-        onSubmit={onSubmit}
-        header="Create a new connection"
-        actions={
+    <Modal
+      portal
+      open={open}
+      onClose={onClose}
+      asForm
+      onSubmit={onSubmit}
+      header="Create a new connection"
+      actions={
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'row-reverse',
+            gap: theme.spacing.small,
+          }}
+        >
           <Button
             loading={loading}
             primary
@@ -112,100 +107,19 @@ export function CreateScmConnectionModal({
           >
             Create
           </Button>
-        }
-      >
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.medium,
-          }}
-        >
-          <FormField
-            label="Provider type"
-            required
+          <Button
+            secondary
+            onClick={() => onClose?.()}
           >
-            <Select
-              leftContent={
-                !formState.type
-                  ? undefined
-                  : scmTypeToIcon[formState.type || '']
-              }
-              label="Select provider type"
-              onSelectionChange={(key) =>
-                updateFormState({ type: key as ScmType })
-              }
-            >
-              {[ScmType.Github, ScmType.Gitlab].map((type) => (
-                <ListBoxItem
-                  key={type}
-                  leftContent={scmTypeToIcon[type]}
-                  label={scmTypeToLabel[type]}
-                />
-              ))}
-            </Select>
-          </FormField>
-          <FormField
-            label="Name"
-            required
-          >
-            <Input2
-              value={formState.name}
-              onChange={(e) => updateFormState({ name: e.target.value })}
-            />
-          </FormField>
-          <FormField
-            label="Token"
-            required
-          >
-            <Input2
-              value={formState.token}
-              onChange={(e) => updateFormState({ token: e.target.value })}
-            />
-          </FormField>
-          <Accordion label="Advanced configuration">
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.medium,
-              }}
-            >
-              <FormField label="Base url">
-                <Input2
-                  value={formState.baseUrl ?? ''}
-                  onChange={(e) => updateFormState({ baseUrl: e.target.value })}
-                />
-              </FormField>
-              <FormField label="API url">
-                <Input2
-                  value={formState.apiUrl ?? ''}
-                  onChange={(e) => updateFormState({ apiUrl: e.target.value })}
-                />
-              </FormField>
-              <FormField label="User name">
-                <Input2
-                  value={formState.username ?? ''}
-                  onChange={(e) =>
-                    updateFormState({ username: e.target.value })
-                  }
-                />
-              </FormField>
-              <FormField label="Signing private key">
-                <InputRevealer
-                  defaultRevealed={false}
-                  value={formState.signingPrivateKey ?? ''}
-                  onChange={(e) =>
-                    updateFormState({ signingPrivateKey: e.target.value })
-                  }
-                />
-              </FormField>
-            </div>
-          </Accordion>
-          {error && <GqlError error={error} />}
+            Cancel
+          </Button>
         </div>
-      </Modal>
-    </ModalMountTransition>
+      }
+    >
+      <ScmConnectionForm
+        {...{ type: 'create', formState, updateFormState, error }}
+      />
+    </Modal>
   )
 }
 
@@ -224,11 +138,13 @@ export function CreateScmConnection({
       >
         Create connection
       </Button>
-      <CreateScmConnectionModal
-        open={open}
-        refetch={refetch}
-        onClose={() => setOpen(false)}
-      />
+      <ModalMountTransition open={open}>
+        <CreateScmConnectionModal
+          open={open}
+          refetch={refetch}
+          onClose={() => setOpen(false)}
+        />
+      </ModalMountTransition>
     </>
   )
 }

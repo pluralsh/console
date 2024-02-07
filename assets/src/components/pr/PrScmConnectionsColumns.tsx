@@ -4,9 +4,7 @@ import {
   GitLabLogoIcon,
   HelpIcon,
   IconFrame,
-  ListBoxItem,
-  PeopleIcon,
-  TrashCanIcon,
+  PencilIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import styled, { useTheme } from 'styled-components'
@@ -21,11 +19,13 @@ import {
 import { Edge, removeConnection, updateCache } from 'utils/graphql'
 import { Confirm } from 'components/utils/Confirm'
 import { TruncateStart } from 'components/utils/table/TruncateStart'
-import { MoreMenu } from 'components/utils/MoreMenu'
 import { StackedText } from 'components/utils/table/StackedText'
+import { DeleteIconButton } from 'components/utils/IconButtons'
+
+import { EditScmConnectionModal } from './scm/EditScmConnection'
 
 enum MenuItemKey {
-  Permissions = 'permissions',
+  Edit = 'edit',
   Delete = 'delete',
 }
 
@@ -132,9 +132,8 @@ export function DeleteScmConnectionModal({
       updateCache(cache, {
         variables: {},
         query: ScmConnectionsDocument,
-        update: (prev) => {
-          removeConnection(prev, data?.deleteScmConnection, 'scmConnections')
-        },
+        update: (prev) =>
+          removeConnection(prev, data?.deleteScmConnection, 'scmConnections'),
       }),
     onCompleted: () => {
       onClose?.()
@@ -179,35 +178,33 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
     return (
       <div
         onClick={(e) => e.stopPropagation()}
-        css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}
+        css={{
+          alignItems: 'center',
+          alignSelf: 'end',
+          display: 'flex',
+          gap: theme.spacing.small,
+        }}
       >
-        <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
-          <ListBoxItem
-            key={MenuItemKey.Permissions}
-            leftContent={<PeopleIcon />}
-            label="Permissions"
-            textValue="Permissions"
-          />
-          <ListBoxItem
-            key={MenuItemKey.Delete}
-            leftContent={
-              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
-            }
-            label="Delete connection"
-            textValue="Delete connection"
-          />
-        </MoreMenu>
+        <IconFrame
+          size="medium"
+          clickable
+          icon={<PencilIcon />}
+          textValue="Edit"
+          onClick={() => setMenuKey(MenuItemKey.Edit)}
+        />
+        <DeleteIconButton onClick={() => setMenuKey(MenuItemKey.Delete)} />
         {/* Modals */}
         <DeleteScmConnectionModal
           scmConnection={scmConnection}
           open={menuKey === MenuItemKey.Delete}
           onClose={() => setMenuKey('')}
         />
-        {/* <ClusterPermissionsModal
-          cluster={cluster}
-          open={menuKey === MenuItemKey.Permissions}
+        <EditScmConnectionModal
+          // refetch={refetch}
+          scmConnection={scmConnection}
+          open={menuKey === MenuItemKey.Edit}
           onClose={() => setMenuKey('')}
-        /> */}
+        />
       </div>
     )
   },
