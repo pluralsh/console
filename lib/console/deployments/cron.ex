@@ -134,6 +134,11 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
+  def prune_migrations() do
+    AgentMigration.expired()
+    |> Repo.delete_all()
+  end
+
   def scan_pipeline_stages() do
     PipelineStage.stream()
     |> Repo.stream(method: :keyset)

@@ -51,7 +51,7 @@ defmodule Console.Deployments.Services do
   end
   def tarstream(%Service{helm: %Service.Helm{values: values}} = svc) when is_binary(values) do
     with {:ok, tar} <- tarfile(svc),
-      do: Tar.splice(tar, %{"values.yaml.liquid" => values, "values.yaml.static" => values})
+      do: Tar.splice(tar, %{"values.yaml.static" => values})
   end
   def tarstream(%Service{} = svc), do: tarfile(svc)
 
@@ -129,6 +129,10 @@ defmodule Console.Deployments.Services do
       name: "deploy-operator",
       namespace: "plrl-deploy-operator",
       git: %{ref: Settings.agent_ref(), folder: "charts/deployment-operator"},
+      helm: (case Settings.agent_helm_values() do
+        nil -> nil
+        vals when is_binary(vals) -> %{values: vals}
+      end),
       configuration: operator_configuration(cluster)
     }, cluster_id, user)
   end

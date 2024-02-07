@@ -11,6 +11,7 @@ fragment DeploymentSettings on DeploymentSettings {
   selfManaged
   insertedAt
   updatedAt
+  agentHelmValues
   lokiConnection {
     ...HttpConnection
   }

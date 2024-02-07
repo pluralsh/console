@@ -47,6 +47,8 @@ import {
   useDeploymentSettingsQuery,
 } from 'generated/graphql'
 
+import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -250,6 +252,10 @@ const globalSettingsRoutes = (
     <Route
       path="repositories"
       element={<GlobalSettingsRepositories />}
+    />
+    <Route
+      path="agents"
+      element={<GlobalSettingsAgents />}
     />
     <Route
       path="auto-update"

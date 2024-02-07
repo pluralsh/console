@@ -75,7 +75,7 @@ defmodule Console.Deployments.Git.Agent do
 
   def handle_call({:fetch, %Service.Git{ref: ref, folder: path}}, _, %State{cache: cache} = state) do
     case Cache.fetch(cache, ref, path) do
-      {:ok, %Cache.Line{file: f, sha: sha, message: msg}, cache} -> {:reply, File.open(f), %{state | cache: cache}}
+      {:ok, %Cache.Line{file: f}, cache} -> {:reply, File.open(f), %{state | cache: cache}}
       err -> {:reply, err, state}
     end
   end

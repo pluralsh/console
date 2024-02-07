@@ -21,6 +21,10 @@ defmodule Console.Schema.PullRequest do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, q) do
+    from(pr in query, where: ilike(pr.title, ^"%#{q}%"))
+  end
+
   def for_cluster(query \\ __MODULE__, cid) do
     from(pr in query, where: pr.cluster_id == ^cid)
   end

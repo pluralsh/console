@@ -36,8 +36,8 @@ defmodule Console.Deployments.Policies.Rbac do
     end
   end
 
-  def evaluate(%PipelineGate{edge: %{pipeline: %Pipeline{} = pipe}}, %User{} = user, action),
-    do: evaluate(pipe, user, action)
+  def evaluate(%PipelineGate{} = gate, %User{} = user, action),
+    do: recurse(gate, user, action, & &1.edge.pipeline)
   def evaluate(%Pipeline{} = pipe, %User{} = user, action),
     do: recurse(pipe, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%Service{} = svc, %User{} = user, action),

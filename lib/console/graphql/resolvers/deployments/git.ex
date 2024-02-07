@@ -42,6 +42,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def list_pull_requests(args, _) do
     PullRequest.ordered()
+    |> maybe_search(PullRequest, args)
     |> pr_filters(args)
     |> paginate(args)
   end

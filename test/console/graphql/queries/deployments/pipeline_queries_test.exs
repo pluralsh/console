@@ -17,7 +17,7 @@ defmodule Console.GraphQl.Deployments.PipelineQueriesTest do
             }
           }
         }
-      """, %{}, %{current_user: user})
+      """, %{}, %{current_user: Console.Services.Rbac.preload(user)})
 
       assert from_connection(found)
              |> ids_equal([other | pipes])
@@ -42,6 +42,36 @@ defmodule Console.GraphQl.Deployments.PipelineQueriesTest do
           pipeline(id: $id) { id }
         }
       """, %{"id" => pipe.id}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "pipelineGate" do
+    test "it can fetch a pipeline gate by id" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+      pipe = insert(:pipeline, read_bindings: [%{group_id: group.id}])
+      edge = insert(:pipeline_edge, pipeline: pipe)
+      job = insert(:pipeline_gate, edge: edge, type: :job, state: :pending)
+
+      {:ok, %{data: %{"pipelineGate" => gate}}} = run_query("""
+        query Gate($id: ID!) {
+          pipelineGate(id: $id) { id }
+        }
+      """, %{"id" => job.id}, %{current_user: Console.Services.Rbac.preload(user)})
+
+      assert gate["id"] == job.id
+    end
+
+    test "users w/o permission cannot fetch" do
+      pipe = insert(:pipeline)
+      edge = insert(:pipeline_edge, pipeline: pipe)
+      job = insert(:pipeline_gate, edge: edge, type: :job, state: :pending)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Gate($id: ID!) {
+          pipelineGate(id: $id) { id }
+        }
+      """, %{"id" => job.id}, %{current_user: insert(:user)})
     end
   end
 

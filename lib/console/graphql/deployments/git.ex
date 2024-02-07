@@ -363,6 +363,7 @@ defmodule Console.GraphQl.Deployments.Git do
       middleware Authenticated
       arg :cluster_id, :id
       arg :service_id, :id
+      arg :q,          :string
 
       resolve &Deployments.list_pull_requests/2
     end

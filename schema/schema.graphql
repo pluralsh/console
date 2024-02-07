@@ -177,7 +177,7 @@ type RootQueryType {
 
   prAutomation(id: ID, name: String): PrAutomation
 
-  pullRequests(after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID): PullRequestConnection
+  pullRequests(after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID, q: String): PullRequestConnection
 
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
@@ -253,6 +253,8 @@ type RootQueryType {
   pipelines(after: String, first: Int, before: String, last: Int): PipelineConnection
 
   pipeline(id: ID!): Pipeline
+
+  pipelineGate(id: ID!): PipelineGate
 
   clusterBackup(id: ID, clusterId: ID, namespace: String, name: String): ClusterBackup
 
@@ -593,6 +595,9 @@ type DeploymentSettings {
   "the way we can connect to your prometheus instance"
   prometheusConnection: HttpConnection
 
+  "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
+  agentHelmValues: String
+
   "the repo to fetch CAPI manifests from, for both providers and clusters"
   artifactRepository: GitRepository
 
@@ -631,6 +636,9 @@ input DeploymentSettingsAttributes {
   artifactRepositoryId: ID
 
   deployerRepositoryId: ID
+
+  "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
+  agentHelmValues: String
 
   "connection details for a prometheus instance to use"
   prometheusConnection: HttpConnectionAttributes
@@ -974,6 +982,9 @@ type PipelineGate {
 
   "more detailed specification for complex gates"
   spec: GateSpec
+
+  "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
+  job: Job
 
   "the cluster this gate can run on"
   cluster: Cluster
@@ -3377,6 +3388,7 @@ type Job {
   raw: String!
   events: [Event]
   pods: [Pod]
+  logs(container: String!, sinceSeconds: Int!): [String]
 }
 
 type JobStatus {

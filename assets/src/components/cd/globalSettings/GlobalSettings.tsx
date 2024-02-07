@@ -46,11 +46,15 @@ const getDirectory = ({
   },
   {
     path: 'permissions/git',
-    label: 'Git write permissions',
+    label: 'Repository permissions',
   },
   {
     path: 'repositories',
     label: 'Repositories',
+  },
+  {
+    path: "agents",
+    label: "Agent Configuration"
   },
   {
     path: 'observability',

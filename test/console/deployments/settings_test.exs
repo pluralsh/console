@@ -1,6 +1,7 @@
 defmodule Console.Deployments.SettingsTest do
   use Console.DataCase, async: true
   use Mimic
+  alias Console.PubSub
   alias Console.Deployments.Settings
 
   describe "#enable/1" do
@@ -26,6 +27,20 @@ defmodule Console.Deployments.SettingsTest do
 
       %{write_bindings: [binding]} = Repo.preload(updated, [:write_bindings])
       assert binding.user_id == user.id
+    end
+
+    test "it can create a migration if helm values were modified" do
+      admin = admin_user()
+      insert(:deployment_settings)
+
+      {:ok, updated} = Settings.update(%{agent_helm_values: "bogus: values"}, admin)
+
+      assert updated.agent_helm_values == "bogus: values"
+      [%{id: id} = migration] = Console.Repo.all(Console.Schema.AgentMigration)
+      assert migration.helm_values == "bogus: values"
+
+      assert_receive {:event, %PubSub.DeploymentSettingsUpdated{item: ^updated}}
+      assert_receive {:event, %PubSub.AgentMigrationCreated{item: %{id: ^id}}}
     end
 
     test "non admins cannot update" do
