@@ -363,6 +363,15 @@ query RuntimeServices(
   }
 }
 
+query AddonReleaseURL($id: ID!, $version: String!) {
+  runtimeService(id: $id) {
+    id
+    addon {
+      releaseUrl(version: $version)
+    }
+  }
+}
+
 mutation UpdateClusterBindings($id: ID!, $rbac: RbacAttributes!) {
   updateRbac(clusterId: $id, rbac: $rbac)
 }

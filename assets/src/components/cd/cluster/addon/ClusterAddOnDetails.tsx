@@ -34,7 +34,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useEffect, useMemo, useState } from 'react'
-import { isEmpty } from 'lodash'
+import isEmpty from 'lodash/isEmpty'
 
 import ClusterAddOnDetailsSidecar from './ClusterAddOnDetailsSidecar'
 
