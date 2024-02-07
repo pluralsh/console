@@ -4,7 +4,7 @@ import { useTheme } from 'styled-components'
 import Input2 from '@pluralsh/design-system/dist/components/Input2'
 import { VirtualItem } from '@tanstack/react-virtual'
 
-import { usePullRequestsQuery } from 'generated/graphql'
+import { usePrAutomationsQuery } from 'generated/graphql'
 import { extendConnection } from 'utils/graphql'
 
 import { PR_BASE_CRUMBS, PR_OUTSTANDING_ABS_PATH } from 'routes/prRoutesConsts'
@@ -17,7 +17,7 @@ import { GqlError } from 'components/utils/Alert'
 
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
-import { columns } from './PullRequestsColumns'
+import { columns } from './AutomationPrColumns'
 
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -25,7 +25,7 @@ export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-export const PR_QUERY_PAGE_SIZE = 100
+export const QUERY_PAGE_SIZE = 100
 const PR_STATUS_TAB_KEYS = ['ALL', 'OPEN', 'CLOSED'] as const
 
 type PrStatusTabKey = (typeof PR_STATUS_TAB_KEYS)[number]
@@ -33,7 +33,7 @@ type PrStatusTabKey = (typeof PR_STATUS_TAB_KEYS)[number]
 export default function OutstandingPrs() {
   const theme = useTheme()
   const [searchString, setSearchString] = useState('')
-  const debouncedSearchString = useThrottle(searchString, 100)
+  const _debouncedSearchString = useThrottle(searchString, 100)
   const [_statusFilter, _setStatusFilter] = useState<PrStatusTabKey>('ALL')
   const [virtualSlice, _setVirtualSlice] = useState<
     | {
@@ -56,10 +56,9 @@ export default function OutstandingPrs() {
     )
   )
 
-  const queryResult = usePullRequestsQuery({
+  const queryResult = usePrAutomationsQuery({
     variables: {
-      first: PR_QUERY_PAGE_SIZE,
-      q: debouncedSearchString,
+      first: QUERY_PAGE_SIZE,
     },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
@@ -73,12 +72,12 @@ export default function OutstandingPrs() {
     previousData,
   } = queryResult
   const data = currentData || previousData
-  const pullRequests = data?.pullRequests
-  const pageInfo = pullRequests?.pageInfo
-  const { refetch: _ } = useSlicePolling(queryResult, {
+  const prAutomations = data?.prAutomations
+  const pageInfo = prAutomations?.pageInfo
+  const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
-    pageSize: PR_QUERY_PAGE_SIZE,
-    key: 'pullRequests',
+    pageSize: QUERY_PAGE_SIZE,
+    key: 'prAutomations',
     interval: POLL_INTERVAL,
   })
   const fetchNextPage = useCallback(() => {
@@ -88,13 +87,15 @@ export default function OutstandingPrs() {
     fetchMore({
       variables: { after: pageInfo.endCursor },
       updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(prev, fetchMoreResult.pullRequests, 'pullRequests'),
+        extendConnection(prev, fetchMoreResult.prAutomations, 'prAutomations'),
     })
   }, [fetchMore, pageInfo?.endCursor])
 
   if (error) {
     return <GqlError error={error} />
   }
+
+  console.log('prAutomations', prAutomations)
 
   return (
     <div
@@ -105,20 +106,12 @@ export default function OutstandingPrs() {
         height: '100%',
       }}
     >
-      <div css={{ display: 'flex', minWidth: 0, gap: theme.spacing.medium }}>
-        <Input2
-          startIcon={<SearchIcon />}
-          showClearButton
-          value={searchString}
-          onChange={(e) => setSearchString(e.currentTarget.value)}
-          css={{ flexGrow: 1 }}
-        />
-      </div>
       <FullHeightTableWrap>
         <Table
           columns={columns}
+          reactTableOptions={{ meta: { refetch } }}
           reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
-          data={data?.pullRequests?.edges || []}
+          data={data?.prAutomations?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}

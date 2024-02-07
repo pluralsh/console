@@ -261,6 +261,16 @@ fragment ClusterTiny on Cluster {
   distro
 }
 
+fragment ClusterBasic on Cluster {
+  ...ClusterTiny
+  handle
+  self
+  protect
+  deletedAt
+  version
+  currentVersion
+}
+
 query ClustersTiny {
   clusters(first: 200) {
     edges {

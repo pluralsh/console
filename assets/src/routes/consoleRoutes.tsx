@@ -32,6 +32,7 @@ import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
 import { cdRoutes } from './cdRoutes'
 import { prRoutes } from './prRoutes'
+import { automationRoutes } from './automationRoutes'
 
 const buildsRoutes = [
   <Route
@@ -230,6 +231,9 @@ export const consoleRoutes: RouteObject[] = [
   // Index
   { index: true, Component: Apps },
 
-  // PULL REQUESTS
+  // PR QUEUE
   ...prRoutes,
+
+  // AUTOMATION
+  ...automationRoutes,
 ]

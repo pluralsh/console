@@ -4,17 +4,15 @@ import { Navigate } from 'react-router-dom'
 
 import { DeploymentSettingsFragment } from 'generated/graphql'
 
-import PRQueue from 'components/pr/PullRequestsQueue'
-import OutstandingPrs from 'components/pr/OutstandingPrs'
-
-import DependencyDashboard from 'components/pr/DependencyDashboard'
+import AutomationPr from 'components/automation/AutomationPr'
+import Automation from 'components/automation/Automation'
 
 import {
-  PR_DEFAULT_REL_PATH,
-  PR_DEPENDENCIES_REL_PATH,
-  PR_OUTSTANDING_REL_PATH,
-  PR_REL_PATH,
-} from './prRoutesConsts'
+  AUTOMATION_DEFAULT_REL_PATH,
+  AUTOMATION_PR_REL_PATH,
+  AUTOMATION_REL_PATH,
+  AUTOMATION_SCM_REL_PATH,
+} from './automationRoutesConsts'
 import { CdRoot } from './cdRoutes'
 
 const CDContext = createContext<{
@@ -27,25 +25,25 @@ export function useDeploymentSettings() {
   return ctx?.deploymentSettings
 }
 
-export const prRoutes = [
+export const automationRoutes = [
   {
-    path: PR_REL_PATH,
+    path: AUTOMATION_REL_PATH,
     element: <CdRoot />,
     children: [
       {
         index: true,
-        element: <Navigate to={PR_DEFAULT_REL_PATH} />,
+        element: <Navigate to={AUTOMATION_DEFAULT_REL_PATH} />,
       },
       {
-        element: <PRQueue />,
+        element: <Automation />,
         children: [
           {
-            path: PR_OUTSTANDING_REL_PATH,
-            element: <OutstandingPrs />,
+            path: AUTOMATION_PR_REL_PATH,
+            element: <AutomationPr />,
           },
           {
-            path: PR_DEPENDENCIES_REL_PATH,
-            element: <DependencyDashboard />,
+            path: AUTOMATION_SCM_REL_PATH,
+            element: <AutomationPr />,
           },
         ],
       },

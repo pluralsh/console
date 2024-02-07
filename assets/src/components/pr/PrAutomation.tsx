@@ -33,7 +33,7 @@ type PrStatusTabKey = (typeof PR_STATUS_TAB_KEYS)[number]
 export default function OutstandingPrs() {
   const theme = useTheme()
   const [searchString, setSearchString] = useState('')
-  const debouncedSearchString = useThrottle(searchString, 100)
+  const _debouncedSearchString = useThrottle(searchString, 100)
   const [_statusFilter, _setStatusFilter] = useState<PrStatusTabKey>('ALL')
   const [virtualSlice, _setVirtualSlice] = useState<
     | {
@@ -59,7 +59,6 @@ export default function OutstandingPrs() {
   const queryResult = usePullRequestsQuery({
     variables: {
       first: PR_QUERY_PAGE_SIZE,
-      q: debouncedSearchString,
     },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table

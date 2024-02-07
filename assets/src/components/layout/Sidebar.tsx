@@ -12,6 +12,7 @@ import {
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
+  HelpIcon,
   ListIcon,
   LogoutIcon,
   PeopleIcon,
@@ -45,6 +46,8 @@ import { CD_ABS_PATH, CD_DEFAULT_REL_PATH } from 'routes/cdRoutesConsts'
 import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
+
+import { AUTOMATION_DEFAULT_ABS_PATH } from 'routes/automationRoutesConsts'
 
 import { LoginContext } from '../contexts'
 
@@ -81,22 +84,13 @@ function getMenuItems({
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
     },
-    ...(!isCDEnabled
-      ? []
-      : [
-          {
-            text: 'PR Queue',
-            icon: <PrOpenIcon />,
-            path: PR_DEFAULT_ABS_PATH,
-            pathRegexp: /^(\/pr)|(\/pr\/.*)$/,
-          },
-          {
-            text: 'Deployment Settings',
-            icon: <GearTrainIcon />,
-            path: `${CD_ABS_PATH}/settings`,
-            pathRegexp: /^\/cd\/settings.*$/,
-          },
-        ]),
+    {
+      text: 'Deployment Settings',
+      icon: <GearTrainIcon />,
+      path: `${CD_ABS_PATH}/settings`,
+      pathRegexp: /^\/cd\/settings.*$/,
+      enabled: isCDEnabled,
+    },
     {
       text: 'Builds',
       icon: <BuildIcon />,
@@ -112,6 +106,20 @@ function getMenuItems({
       text: 'Pods',
       icon: <ApiIcon />,
       path: '/pods',
+    },
+    {
+      text: 'PR Queue',
+      icon: <PrOpenIcon />,
+      path: PR_DEFAULT_ABS_PATH,
+      pathRegexp: /^(\/pr-queue)|(\/pr-queue\/.*)$/,
+      enabled: isCDEnabled,
+    },
+    {
+      text: 'Automation',
+      icon: <HelpIcon />,
+      path: AUTOMATION_DEFAULT_ABS_PATH,
+      pathRegexp: /^(\/automation)|(\/automation\/.*)$/,
+      enabled: isCDEnabled,
     },
     {
       text: 'Database management',
@@ -139,7 +147,7 @@ function getMenuItems({
       icon: <PeopleIcon />,
       path: '/account',
     },
-  ]
+  ].filter(({ enabled }) => enabled !== false)
 }
 
 function isActiveMenuItem(

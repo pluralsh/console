@@ -2,6 +2,21 @@ fragment PrAutomation on PrAutomation {
   id
   name
   documentation
+  addon
+  cluster {
+    ...ClusterBasic
+  }
+  service {
+    id
+    name
+  }
+  repository {
+    url
+    # Probably don't need, but let's see what's inside
+    httpsPath
+  }
+  role
+  documentation
 }
 
 fragment PullRequest on PullRequest {
@@ -11,14 +26,7 @@ fragment PullRequest on PullRequest {
     name
   }
   cluster {
-    id
-    name
-    handle
-    self
-    protect
-    deletedAt
-    version
-    currentVersion
+    ...ClusterBasic
   }
   title
   url
@@ -34,12 +42,14 @@ mutation CreatePullRequest($id: ID!, $branch: String!, $context: Json!) {
 }
 
 query PullRequests(
+  $q: String
   $first: Int = 100
   $after: String
   $clusterId: ID
   $serviceId: ID
 ) {
   pullRequests(
+    q: $q
     first: $first
     after: $after
     clusterId: $clusterId
@@ -53,5 +63,36 @@ query PullRequests(
         ...PullRequest
       }
     }
+  }
+}
+
+query PrAutomations($first: Int = 100, $after: String) {
+  prAutomations(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...PrAutomation
+      }
+    }
+  }
+}
+
+mutation CreatePrAutomation($attributes: PrAutomationAttributes!) {
+  createPrAutomation(attributes: $attributes) {
+    ...PrAutomation
+  }
+}
+
+mutation UpdatePrAutomation($id: ID!, $attributes: PrAutomationAttributes!) {
+  updatePrAutomation(id: $id, attributes: $attributes) {
+    ...PrAutomation
+  }
+}
+
+mutation DeletePrAutomation($id: ID!) {
+  deletePrAutomation(id: $id) {
+    ...PrAutomation
   }
 }
