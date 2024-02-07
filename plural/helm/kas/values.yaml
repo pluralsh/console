@@ -13,6 +13,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 podAnnotations: {}
+podLabels: {}
 
 podSecurityContext:
   runAsUser: 65532

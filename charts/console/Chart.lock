@@ -1,9 +1,9 @@
 dependencies:
 - name: kas
   repository: file://../../plural/helm/kas
-  version: 0.0.4
+  version: 0.0.5
 - name: controller
   repository: file://../controller
-  version: 0.0.12
-digest: sha256:bdb641f28f3b4539965dea7ca15ed7844336e1818e457ea890595c193c255f5c
-generated: "2024-02-02T00:15:18.704136-05:00"
+  version: 0.0.13
+digest: sha256:760c8d504fe5486bed121c184c0fb97aa75e6ee41c6d2dc34378583d77088c61
+generated: "2024-02-07T15:00:11.558411-05:00"

@@ -207,6 +207,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_update_spec
     field :creates,       :pr_create_spec
 
+    field :configuration, list_of(:pr_configuration)
+
     field :write_bindings, list_of(:policy_binding),
       description: "write policy for this pr automation, also propagates to the notifications list for any created PRs",
       resolve: dataloader(Deployments)

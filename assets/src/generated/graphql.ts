@@ -2520,6 +2520,7 @@ export type PrAutomation = {
   addon?: Maybe<Scalars['String']['output']>;
   /** link to a cluster if this is to perform an upgrade */
   cluster?: Maybe<Cluster>;
+  configuration?: Maybe<Array<Maybe<PrConfiguration>>>;
   /** the scm connection to use for pr generation */
   connection?: Maybe<ScmConnection>;
   /** users who can generate prs with this automation */
@@ -2612,6 +2613,19 @@ export type PrAutomationUpdateSpecAttributes = {
   yq?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** the a configuration item for creating a new pr, used for templating the ultimate code changes made */
+export type PrConfiguration = {
+  __typename?: 'PrConfiguration';
+  condition?: Maybe<PrConfigurationCondition>;
+  default?: Maybe<Scalars['String']['output']>;
+  documentation?: Maybe<Scalars['String']['output']>;
+  longform?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  optional?: Maybe<Scalars['Boolean']['output']>;
+  placeholder?: Maybe<Scalars['String']['output']>;
+  type: ConfigurationType;
+};
+
 /** the a configuration item for creating a new pr */
 export type PrConfigurationAttributes = {
   condition?: InputMaybe<ConditionAttributes>;
@@ -2622,6 +2636,17 @@ export type PrConfigurationAttributes = {
   optional?: InputMaybe<Scalars['Boolean']['input']>;
   placeholder?: InputMaybe<Scalars['String']['input']>;
   type: ConfigurationType;
+};
+
+/** declaritive spec for whether a config item is relevant given prior config */
+export type PrConfigurationCondition = {
+  __typename?: 'PrConfigurationCondition';
+  /** the prior field to check */
+  field: Scalars['String']['output'];
+  /** a boolean operation to apply */
+  operation: Operation;
+  /** a fixed value to check against if its a binary operation */
+  value?: Maybe<Scalars['String']['output']>;
 };
 
 /** templated files used to add new files to a given pr */
