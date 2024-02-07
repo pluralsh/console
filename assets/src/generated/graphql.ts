@@ -5302,7 +5302,7 @@ export type NodePoolFragment = { __typename?: 'NodePool', id: string, name: stri
 
 export type ApiDeprecationFragment = { __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null };
 
-export type RuntimeServiceFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null };
+export type RuntimeServiceFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, readme?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null };
 
 export type AddonVersionFragment = { __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null };
 
@@ -5380,7 +5380,15 @@ export type RuntimeServicesQueryVariables = Exact<{
 }>;
 
 
-export type RuntimeServicesQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null } | null };
+export type RuntimeServicesQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, readme?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null } | null };
+
+export type AddonReleaseUrlQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  version: Scalars['String']['input'];
+}>;
+
+
+export type AddonReleaseUrlQuery = { __typename?: 'RootQueryType', runtimeService?: { __typename?: 'RuntimeService', addon?: { __typename?: 'RuntimeAddon', releaseUrl?: string | null } | null } | null };
 
 export type UpdateClusterBindingsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6294,6 +6302,7 @@ export const RuntimeServiceFragmentDoc = gql`
     versions {
       ...AddonVersion
     }
+    readme
   }
   service {
     git {
@@ -8224,6 +8233,49 @@ export type RuntimeServicesQueryHookResult = ReturnType<typeof useRuntimeService
 export type RuntimeServicesLazyQueryHookResult = ReturnType<typeof useRuntimeServicesLazyQuery>;
 export type RuntimeServicesSuspenseQueryHookResult = ReturnType<typeof useRuntimeServicesSuspenseQuery>;
 export type RuntimeServicesQueryResult = Apollo.QueryResult<RuntimeServicesQuery, RuntimeServicesQueryVariables>;
+export const AddonReleaseUrlDocument = gql`
+    query AddonReleaseURL($id: ID!, $version: String!) {
+  runtimeService(id: $id) {
+    addon {
+      releaseUrl(version: $version)
+    }
+  }
+}
+    `;
+
+/**
+ * __useAddonReleaseUrlQuery__
+ *
+ * To run a query within a React component, call `useAddonReleaseUrlQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAddonReleaseUrlQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAddonReleaseUrlQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      version: // value for 'version'
+ *   },
+ * });
+ */
+export function useAddonReleaseUrlQuery(baseOptions: Apollo.QueryHookOptions<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>(AddonReleaseUrlDocument, options);
+      }
+export function useAddonReleaseUrlLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>(AddonReleaseUrlDocument, options);
+        }
+export function useAddonReleaseUrlSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>(AddonReleaseUrlDocument, options);
+        }
+export type AddonReleaseUrlQueryHookResult = ReturnType<typeof useAddonReleaseUrlQuery>;
+export type AddonReleaseUrlLazyQueryHookResult = ReturnType<typeof useAddonReleaseUrlLazyQuery>;
+export type AddonReleaseUrlSuspenseQueryHookResult = ReturnType<typeof useAddonReleaseUrlSuspenseQuery>;
+export type AddonReleaseUrlQueryResult = Apollo.QueryResult<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>;
 export const UpdateClusterBindingsDocument = gql`
     mutation UpdateClusterBindings($id: ID!, $rbac: RbacAttributes!) {
   updateRbac(clusterId: $id, rbac: $rbac)
@@ -11408,6 +11460,7 @@ export const namedOperations = {
     ClusterNamespaces: 'ClusterNamespaces',
     ClusterBindings: 'ClusterBindings',
     RuntimeServices: 'RuntimeServices',
+    AddonReleaseURL: 'AddonReleaseURL',
     ClusterStatuses: 'ClusterStatuses',
     TagPairs: 'TagPairs',
     Usage: 'Usage',
