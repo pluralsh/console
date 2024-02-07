@@ -1,10 +1,11 @@
-package controller
+package controller_test
 
 import (
 	"context"
 	"sort"
 
-	"github.com/pluralsh/console/controller/internal/test/utils"
+	"github.com/pluralsh/console/controller/internal/controller"
+	common "github.com/pluralsh/console/controller/internal/test/common"
 
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -125,7 +126,7 @@ var _ = Describe("Repository Controller", Ordered, func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetRepository", mock.AnythingOfType("*string")).Return(test.returnGetRepository, test.returnErrorGetRepository)
 
-			controllerReconciler := &GitRepositoryReconciler{
+			controllerReconciler := &controller.GitRepositoryReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -257,7 +258,7 @@ var _ = Describe("Repository Controller", Ordered, func() {
 			fakeConsoleClient.On("GetRepository", mock.AnythingOfType("*string")).Return(test.returnGetRepository, test.returnErrorGetRepository)
 			fakeConsoleClient.On("CreateRepository", mock.AnythingOfType("string"), mock.AnythingOfType("*string"), mock.AnythingOfType("*string"), mock.AnythingOfType("*string"), mock.AnythingOfType("*string")).Return(test.returnCreateRepository, test.returnErrorCreateRepository)
 
-			controllerReconciler := &GitRepositoryReconciler{
+			controllerReconciler := &controller.GitRepositoryReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -315,7 +316,7 @@ var _ = Describe("Repository Controller", Ordered, func() {
 				},
 			}
 
-			Expect(utils.MaybePatch(k8sClient, &v1alpha1.GitRepository{
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.GitRepository{
 				ObjectMeta: metav1.ObjectMeta{Name: repoName, Namespace: namespace},
 			}, func(p *v1alpha1.GitRepository) {
 				p.Status.ID = lo.ToPtr(repoID)
@@ -330,7 +331,7 @@ var _ = Describe("Repository Controller", Ordered, func() {
 			fakeConsoleClient.On("GetRepository", mock.AnythingOfType("*string")).Return(test.returnGetRepository, test.returnErrorGetRepository)
 			fakeConsoleClient.On("UpdateRepository", mock.Anything, mock.Anything).Return(&gqlclient.UpdateGitRepository{}, nil)
 
-			controllerReconciler := &GitRepositoryReconciler{
+			controllerReconciler := &controller.GitRepositoryReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,

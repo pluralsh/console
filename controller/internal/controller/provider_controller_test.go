@@ -1,4 +1,4 @@
-package controller
+package controller_test
 
 import (
 	"context"
@@ -17,8 +17,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/controller"
+	common "github.com/pluralsh/console/controller/internal/test/common"
 	"github.com/pluralsh/console/controller/internal/test/mocks"
-	"github.com/pluralsh/console/controller/internal/test/utils"
 )
 
 var _ = Describe("Provider Controller", Ordered, func() {
@@ -38,7 +39,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 
 		BeforeAll(func() {
 			By("Creating provider secret")
-			Expect(utils.MaybeCreate(k8sClient, &corev1.Secret{
+			Expect(common.MaybeCreate(k8sClient, &corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      providerSecretName,
 					Namespace: providerSecretNamespace,
@@ -49,7 +50,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 			}, nil)).To(Succeed())
 
 			By("Creating provider")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Provider{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Provider{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: providerName,
 				},
@@ -69,7 +70,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 			})).To(Succeed())
 
 			By("Creating readonly provider")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Provider{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Provider{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: readonlyProviderName,
 				},
@@ -105,7 +106,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 				Cloud:     "gcp",
 			}, nil)
 
-			controllerReconciler := &ProviderReconciler{
+			controllerReconciler := &controller.ProviderReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -117,7 +118,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 			provider := &v1alpha1.Provider{}
 			err = k8sClient.Get(ctx, namespacedName, provider)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizeStatusConditions(provider.Status)).To(Equal(sanitizeStatusConditions(v1alpha1.Status{
+			Expect(common.SanitizeStatusConditions(provider.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(providerConsoleID),
 				SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
 				Conditions: []metav1.Condition{
@@ -141,7 +142,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 		})
 
 		It("should successfully reconcile and update previously created provider", func() {
-			Expect(utils.MaybePatch(k8sClient, &v1alpha1.Provider{
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.Provider{
 				ObjectMeta: metav1.ObjectMeta{Name: providerName, Namespace: "default"},
 			}, func(p *v1alpha1.Provider) {
 				p.Status.SHA = lo.ToPtr("diff-sha")
@@ -156,7 +157,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 				Cloud:     "gcp",
 			}, nil)
 
-			controllerReconciler := &ProviderReconciler{
+			controllerReconciler := &controller.ProviderReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -168,7 +169,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 			provider := &v1alpha1.Provider{}
 			err = k8sClient.Get(ctx, namespacedName, provider)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizeStatusConditions(provider.Status)).To(Equal(sanitizeStatusConditions(v1alpha1.Status{
+			Expect(common.SanitizeStatusConditions(provider.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(providerConsoleID),
 				SHA: lo.ToPtr("QL7PGU67IFKWWO4A7AU33D2HCTSGG4GGXR32DZXNPE6GDBHLXUSQ===="),
 				Conditions: []metav1.Condition{
@@ -200,7 +201,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 				Cloud:     "aws",
 			}, nil)
 
-			controllerReconciler := &ProviderReconciler{
+			controllerReconciler := &controller.ProviderReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -212,7 +213,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 			provider := &v1alpha1.Provider{}
 			err = k8sClient.Get(ctx, readonlyNamespacedName, provider)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizeStatusConditions(provider.Status)).To(Equal(sanitizeStatusConditions(v1alpha1.Status{
+			Expect(common.SanitizeStatusConditions(provider.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 				ID: lo.ToPtr(readonlyProviderConsoleID),
 				Conditions: []metav1.Condition{
 					{

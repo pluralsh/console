@@ -1,4 +1,4 @@
-package controller
+package controller_test
 
 import (
 	"context"
@@ -18,8 +18,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/controller"
+	common "github.com/pluralsh/console/controller/internal/test/common"
 	"github.com/pluralsh/console/controller/internal/test/mocks"
-	"github.com/pluralsh/console/controller/internal/test/utils"
 )
 
 func sanitizeClusterStatus(status v1alpha1.ClusterStatus) v1alpha1.ClusterStatus {
@@ -58,7 +59,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 
 		BeforeAll(func() {
 			By("Creating AWS provider")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Provider{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Provider{
 				ObjectMeta: metav1.ObjectMeta{Name: awsProviderName},
 				Spec: v1alpha1.ProviderSpec{
 					Cloud: "aws",
@@ -69,7 +70,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			})).To(Succeed())
 
 			By("Creating AWS cluster")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      awsClusterName,
 					Namespace: "default",
@@ -83,7 +84,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			}, nil)).To(Succeed())
 
 			By("Creating BYOK cluster")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      byokClusterName,
 					Namespace: "default",
@@ -95,7 +96,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			}, nil)).To(Succeed())
 
 			By("Creating AWS cluster that will adopt existing Console resource")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      awsReadonlyClusterName,
 					Namespace: "default",
@@ -107,7 +108,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			}, nil)).To(Succeed())
 
 			By("Creating BYOK cluster that will adopt existing Console resource")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      byokReadonlyClusterName,
 					Namespace: "default",
@@ -151,7 +152,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(false)
 			fakeConsoleClient.On("CreateCluster", mock.Anything).Return(&gqlclient.ClusterFragment{ID: awsClusterConsoleID}, nil)
 
-			controllerReconciler := &ClusterReconciler{
+			controllerReconciler := &controller.ClusterReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -184,7 +185,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 		})
 
 		It("should successfully reconcile and update previously created AWS cluster", func() {
-			Expect(utils.MaybePatch(k8sClient, &v1alpha1.Cluster{
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{Name: awsClusterName, Namespace: "default"},
 			}, func(p *v1alpha1.Cluster) {
 				p.Status.SHA = lo.ToPtr("diff-sha")
@@ -195,7 +196,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			fakeConsoleClient.On("UpdateCluster", mock.AnythingOfType("string"), mock.Anything).Return(
 				&gqlclient.ClusterFragment{ID: awsClusterConsoleID, CurrentVersion: lo.ToPtr("1.25.6")}, nil)
 
-			controllerReconciler := &ClusterReconciler{
+			controllerReconciler := &controller.ClusterReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -234,7 +235,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(false)
 			fakeConsoleClient.On("CreateCluster", mock.Anything).Return(&gqlclient.ClusterFragment{ID: byokClusterConsoleID}, nil)
 
-			controllerReconciler := &ClusterReconciler{
+			controllerReconciler := &controller.ClusterReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -267,7 +268,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 		})
 
 		It("should successfully reconcile and update previously created BYOK cluster", func() {
-			Expect(utils.MaybePatch(k8sClient, &v1alpha1.Cluster{
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{Name: byokClusterName, Namespace: "default"},
 			}, func(p *v1alpha1.Cluster) {
 				p.Status.SHA = lo.ToPtr("diff-sha")
@@ -278,7 +279,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			fakeConsoleClient.On("UpdateCluster", mock.AnythingOfType("string"), mock.Anything).Return(
 				&gqlclient.ClusterFragment{ID: byokClusterConsoleID, CurrentVersion: lo.ToPtr("1.25.6")}, nil)
 
-			controllerReconciler := &ClusterReconciler{
+			controllerReconciler := &controller.ClusterReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -319,7 +320,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				CurrentVersion: lo.ToPtr("1.24.11"),
 			}, nil)
 
-			controllerReconciler := &ClusterReconciler{
+			controllerReconciler := &controller.ClusterReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -359,7 +360,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				CurrentVersion: lo.ToPtr("1.24.11"),
 			}, nil)
 
-			controllerReconciler := &ClusterReconciler{
+			controllerReconciler := &controller.ClusterReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,

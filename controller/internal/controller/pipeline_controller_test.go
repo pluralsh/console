@@ -1,4 +1,4 @@
-package controller
+package controller_test
 
 import (
 	"context"
@@ -15,8 +15,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/controller"
+	common "github.com/pluralsh/console/controller/internal/test/common"
 	"github.com/pluralsh/console/controller/internal/test/mocks"
-	"github.com/pluralsh/console/controller/internal/test/utils"
 )
 
 var _ = Describe("Pipeline Controller", Ordered, func() {
@@ -54,7 +55,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 
 		BeforeAll(func() {
 			By("Creating provider")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Provider{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Provider{
 				ObjectMeta: metav1.ObjectMeta{Name: providerName},
 				Spec: v1alpha1.ProviderSpec{
 					Cloud: cloud,
@@ -65,7 +66,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			})).To(Succeed())
 
 			By("Creating dev cluster")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      devClusterName,
 					Namespace: namespace,
@@ -81,7 +82,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			})).To(Succeed())
 
 			By("Creating prod cluster")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      prodClusterName,
 					Namespace: namespace,
@@ -97,7 +98,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			})).To(Succeed())
 
 			By("Creating repository")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.GitRepository{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.GitRepository{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      repositoryName,
 					Namespace: namespace,
@@ -110,7 +111,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			})).To(Succeed())
 
 			By("Creating dev service deployment")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.ServiceDeployment{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.ServiceDeployment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      devServiceName,
 					Namespace: namespace,
@@ -125,7 +126,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			})).To(Succeed())
 
 			By("Creating prod service deployment")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.ServiceDeployment{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.ServiceDeployment{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      prodServiceName,
 					Namespace: namespace,
@@ -140,7 +141,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			})).To(Succeed())
 
 			By("Creating pipeline")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Pipeline{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Pipeline{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      pipelineName,
 					Namespace: namespace,
@@ -227,7 +228,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			fakeConsoleClient.On("IsPipelineExisting", mock.AnythingOfType("string")).Return(false)
 			fakeConsoleClient.On("SavePipeline", mock.AnythingOfType("string"), mock.Anything).Return(&gqlclient.PipelineFragment{ID: pipelineConsoleID}, nil)
 
-			controllerReconciler := &PipelineReconciler{
+			controllerReconciler := &controller.PipelineReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -239,7 +240,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			pipeline := &v1alpha1.Pipeline{}
 			err = k8sClient.Get(ctx, pipelineNamespacedName, pipeline)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizeStatusConditions(pipeline.Status)).To(Equal(sanitizeStatusConditions(v1alpha1.Status{
+			Expect(common.SanitizeStatusConditions(pipeline.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(pipelineConsoleID),
 				SHA: lo.ToPtr("CD336FRXMBI6RSIWXEOVKHEFYYX7YQCCUDT52PXCBMQZCGMQYSNA===="),
 				Conditions: []metav1.Condition{
@@ -253,7 +254,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 		})
 
 		It("should successfully reconcile and update previously created pipeline", func() {
-			Expect(utils.MaybePatch(k8sClient, &v1alpha1.Pipeline{
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.Pipeline{
 				ObjectMeta: metav1.ObjectMeta{Name: pipelineName, Namespace: namespace},
 			}, func(p *v1alpha1.Pipeline) {
 				p.Status.SHA = lo.ToPtr("diff-sha")
@@ -263,7 +264,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			fakeConsoleClient.On("IsPipelineExisting", mock.AnythingOfType("string")).Return(false)
 			fakeConsoleClient.On("SavePipeline", mock.AnythingOfType("string"), mock.Anything).Return(&gqlclient.PipelineFragment{ID: pipelineConsoleID}, nil)
 
-			controllerReconciler := &PipelineReconciler{
+			controllerReconciler := &controller.PipelineReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -275,7 +276,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			pipeline := &v1alpha1.Pipeline{}
 			err = k8sClient.Get(ctx, pipelineNamespacedName, pipeline)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizeStatusConditions(pipeline.Status)).To(Equal(sanitizeStatusConditions(v1alpha1.Status{
+			Expect(common.SanitizeStatusConditions(pipeline.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(pipelineConsoleID),
 				SHA: lo.ToPtr("CD336FRXMBI6RSIWXEOVKHEFYYX7YQCCUDT52PXCBMQZCGMQYSNA===="),
 				Conditions: []metav1.Condition{
