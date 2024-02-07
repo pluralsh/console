@@ -64,16 +64,16 @@ update-dependencies: ## update dependencies
 ##@ Build
 
 .PHONY: build
-build: generate manifests fmt vet ## build manager binary
+build: manifests generate fmt vet ## build manager binary
 	go build -o bin/manager cmd/main.go
 
 .PHONY: run
-run: generate manifests fmt vet ## run a controller from your host
+run: manifests generate chart-rbac fmt vet ## run a controller from your host
 	go run ./cmd/main.go \
 		--console-url=${PLURAL_CONSOLE_URL}/gql
 
 .PHONY: release
-release: generate manifests fmt vet ## builds release version of the app. Requires GoReleaser to work.
+release: manifests generate fmt vet ## builds release version of the app. Requires GoReleaser to work.
 	goreleaser build --clean --single-target --snapshot
 
 # If you wish to build the manager image targeting other platforms you can use the --platform flag.
@@ -136,7 +136,7 @@ fix: golangci-lint ## fix issues found by linters
 	@$(GOLANGCI_LINT) run --fix ./...
 
 .PHONY: test
-test: generate manifests genmock fmt vet envtest ## run tests
+test: manifests generate genmock fmt vet envtest ## run tests
 	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(GOPATH)/bin -p path)" go test $$(go list ./... | grep -v /e2e) -v
 
 .PHONY: e2e
@@ -151,12 +151,17 @@ endif
 
 .PHONY: helm
 helm: manifests kustomize helmify
-	@$(KUSTOMIZE) build config/default | $(HELMIFY) -generate-defaults -image-pull-secrets -crd-dir ../charts/controller
-	@find ../charts/controller -type f -exec sed -i 's/app.kubernetes.io\/managed-by: kustomize/app.kubernetes.io\/managed-by: helm/g' {} \;
+	@rm -rf tmp/
+	@$(KUSTOMIZE) build config/default | $(HELMIFY) -generate-defaults -image-pull-secrets -crd-dir tmp/charts/controller
+	@find tmp/charts/controller -type f -exec sed -i 's/app.kubernetes.io\/managed-by: kustomize/app.kubernetes.io\/managed-by: helm/g' {} \;
 
 .PHONY: chart-crds
 chart-crds:
 	@cp -a config/crd/bases/. ../charts/controller/crds
+
+.PHONY: chart-rbac
+chart-rbac: helm
+	@cp -a tmp/charts/controller/templates/manager-rbac.yaml ../charts/controller/templates
 
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.

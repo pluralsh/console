@@ -80,6 +80,7 @@ fragment RuntimeService on RuntimeService {
     versions {
       ...AddonVersion
     }
+    readme
   }
   service {
     git {
@@ -358,6 +359,15 @@ query RuntimeServices(
     version
     runtimeServices {
       ...RuntimeService
+    }
+  }
+}
+
+query AddonReleaseURL($id: ID!, $version: String!) {
+  runtimeService(id: $id) {
+    id
+    addon {
+      releaseUrl(version: $version)
     }
   }
 }
