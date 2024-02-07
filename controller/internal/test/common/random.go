@@ -5,9 +5,9 @@ import (
 	"math/rand"
 )
 
-type Generator[T string] interface {
-	WithPrefix(prefix string, length int) T
-	Random(length int) T
+type Generator interface {
+	WithPrefix(prefix string, length int) string
+	Random(length int) string
 }
 
 type generator struct {
@@ -27,7 +27,7 @@ func (in *generator) Random(length int) string {
 	return string(b)
 }
 
-func StringGenerator() Generator[string] {
+func StringGenerator() Generator {
 	return &generator{
 		characters: "abcdefghijklmnopqrstuvwxyz0123456789",
 	}
