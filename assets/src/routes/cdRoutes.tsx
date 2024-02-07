@@ -55,6 +55,7 @@ import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
 import ClusterAddOnDetails from '../components/cd/cluster/addon/ClusterAddOnDetails'
 import ClusterAddOnCompatibility from '../components/cd/cluster/addon/ClusterAddOnCompatibility'
 import ClusterAddOnReadme from '../components/cd/cluster/addon/ClusterAddOnReadme'
+import ClusterAddOnReleases from '../components/cd/cluster/addon/ClusterAddOnReleases'
 
 import Node from '../components/cd/cluster/node/Node'
 import NodeInfo from '../components/cd/cluster/node/NodeInfo'
@@ -316,6 +317,10 @@ const clusterDetailsRoutes = [
     <Route
       path="readme"
       element={<ClusterAddOnReadme />}
+    />
+    <Route
+      path="releases"
+      element={<ClusterAddOnReleases />}
     />
   </Route>,
 ]

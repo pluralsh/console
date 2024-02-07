@@ -83,6 +83,11 @@ const useGetDirectory = (readme: string | null | undefined) =>
         enabled: true,
       },
       {
+        path: 'releases',
+        label: 'Releases',
+        enabled: true,
+      },
+      {
         path: 'readme',
         label: 'Readme',
         enabled: hasReadme,
