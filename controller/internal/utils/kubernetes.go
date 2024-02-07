@@ -233,6 +233,14 @@ func MarkCondition(set func(condition metav1.Condition), conditionType v1alpha1.
 	})
 }
 
+func MarkTrue(set func(metav1.Condition), conditionType v1alpha1.ConditionType, conditionReason v1alpha1.ConditionReason, message string, messageArgs ...interface{}) {
+	MarkCondition(set, conditionType, metav1.ConditionTrue, conditionReason, message, messageArgs...)
+}
+
+func MarkFalse(set func(metav1.Condition), conditionType v1alpha1.ConditionType, conditionReason v1alpha1.ConditionReason, message string, messageArgs ...interface{}) {
+	MarkCondition(set, conditionType, metav1.ConditionFalse, conditionReason, message, messageArgs...)
+}
+
 func SyncCondition(set func(condition metav1.Condition), conditionType, status, reason, message *string) {
 	condition := metav1.Condition{}
 

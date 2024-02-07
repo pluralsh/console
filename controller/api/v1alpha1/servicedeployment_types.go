@@ -23,90 +23,73 @@ type ServiceKustomize struct {
 	Path string `json:"path"`
 }
 
-type ServiceGit struct {
-	Folder string `json:"folder"`
-	Ref    string `json:"ref"`
-}
-
 type ServiceHelm struct {
-	// +optional
+	// +kubebuilder:validation:Optional
 	ValuesConfigMapRef *corev1.ConfigMapKeySelector `json:"valuesConfigMapRef,omitempty"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	Values *runtime.RawExtension `json:"values,omitempty"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	Chart *string `json:"chart,omitempty"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	Version *string `json:"version,omitempty"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	Repository *NamespacedName `json:"repository,omitempty"`
 }
 
 type SyncConfigAttributes struct {
-	// +optional
+	// +kubebuilder:validation:Optional
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// +optional
+	// +kubebuilder:validation:Optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 type ServiceSpec struct {
 	// the name of this service, if not provided ServiceDeployment's own name from ServiceDeployment.ObjectMeta will be used.
-	// +optional
+	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 	// the namespace this service will be deployed into, if not provided deploys to the ServiceDeployment's own namespace
-	// +optional
+	// +kubebuilder:validation:Optional
 	Namespace *string `json:"namespace,omitempty"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	DocsPath *string `json:"docsPath,omitempty"`
 	// +kubebuilder:validation:Optional
 	Version *string `json:"version"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	Protect bool `json:"protect,omitempty"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	Kustomize *ServiceKustomize `json:"kustomize,omitempty"`
-	// +optional
-	Git *ServiceGit `json:"git,omitempty"`
-	// +optional
+	// +kubebuilder:validation:Optional
+	Git *GitRef `json:"git,omitempty"`
+	// +kubebuilder:validation:Optional
 	Helm *ServiceHelm `json:"helm,omitempty"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	SyncConfig *SyncConfigAttributes `json:"syncConfig,omitempty"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef"`
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cluster is immutable"
 	ClusterRef corev1.ObjectReference `json:"clusterRef"`
 	// ConfigurationRef is a secret reference which should contain service configuration.
-	// +optional
+	// +kubebuilder:validation:Optional
 	ConfigurationRef *corev1.SecretReference `json:"configurationRef,omitempty"`
 	// Bindings contain read and write policies of this cluster
-	// +optional
+	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
 	// Dependencies contain dependent services
-	// +optional
+	// +kubebuilder:validation:Optional
 	Dependencies []corev1.ObjectReference `json:"dependencies,omitempty"`
 }
 
 type ServiceStatus struct {
-	// +optional
+	Status `json:",inline"`
+
+	// +kubebuilder:validation:Optional
 	Errors []ServiceError `json:"errors,omitempty"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	Components []ServiceComponent `json:"components,omitempty"`
-	// ID of the service in the Console API.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	ID *string `json:"id,omitempty"`
-	// SHA of last applied configuration.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	SHA *string `json:"sha,omitempty"`
-	// Represents the observations of Repository current state.
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	// +listType=map
-	// +listMapKey=type
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 type ServiceError struct {
@@ -117,17 +100,17 @@ type ServiceError struct {
 type ServiceComponent struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	Group *string `json:"group,omitempty"`
 	Kind  string  `json:"kind"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	Namespace *string `json:"namespace,omitempty"`
 	// State specifies the component state
 	// +kubebuilder:validation:Enum:=RUNNING;PENDING;FAILED
-	// +optional
+	// +kubebuilder:validation:Optional
 	State  *ComponentState `json:"state,omitempty"`
 	Synced bool            `json:"synced"`
-	// +optional
+	// +kubebuilder:validation:Optional
 	Version *string `json:"version,omitempty"`
 }
 
@@ -144,6 +127,12 @@ type ServiceDeployment struct {
 	Status ServiceStatus `json:"status,omitempty"`
 }
 
+// ConsoleID implements NamespacedPluralResource interface
+func (s *ServiceDeployment) ConsoleID() *string {
+	return s.Status.ID
+}
+
+// ConsoleName implements NamespacedPluralResource interface
 func (s *ServiceDeployment) ConsoleName() string {
 	if s.Spec.Name != nil && len(*s.Spec.Name) > 0 {
 		return *s.Spec.Name
@@ -152,6 +141,7 @@ func (s *ServiceDeployment) ConsoleName() string {
 	return s.Name
 }
 
+// ConsoleNamespace implements NamespacedPluralResource interface
 func (s *ServiceDeployment) ConsoleNamespace() string {
 	if s.Spec.Namespace != nil && len(*s.Spec.Namespace) > 0 {
 		return *s.Spec.Namespace
@@ -170,44 +160,4 @@ type ServiceDeploymentList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []ServiceDeployment `json:"items"`
-}
-
-func (p *ServiceStatus) HasReadonlyCondition() bool {
-	return meta.FindStatusCondition(p.Conditions, ReadonlyConditionType.String()) != nil
-}
-
-func (p *ServiceStatus) IsReadonly() bool {
-	return meta.IsStatusConditionTrue(p.Conditions, ReadonlyConditionType.String())
-}
-
-func (p *ServiceStatus) IsSHAEqual(sha string) bool {
-	if !p.HasSHA() {
-		return false
-	}
-
-	return p.GetSHA() == sha
-}
-
-func (p *ServiceStatus) GetSHA() string {
-	if !p.HasSHA() {
-		return ""
-	}
-
-	return *p.SHA
-}
-
-func (p *ServiceStatus) HasSHA() bool {
-	return p.SHA != nil && len(*p.SHA) > 0
-}
-
-func (p *ServiceStatus) GetID() string {
-	if !p.HasID() {
-		return ""
-	}
-
-	return *p.ID
-}
-
-func (p *ServiceStatus) HasID() bool {
-	return p.ID != nil && len(*p.ID) > 0
 }

@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-prautomation
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-token
+  namespace: test-prautomation
+stringData:
+  token: "test-token"
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ScmConnection
+metadata:
+  name: github
+spec:
+  name: scm-test-github
+  type: GITHUB
+  tokenSecretRef:
+    name: github-token
+    namespace: test-prautomation
+  username: "johndoe"
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: PrAutomation
+metadata:
+  name: github-automation
+spec:
+  name: pr-test
+  scmConnectionRef:
+    name: github
+  clusterRef:
+    name: lukaszz
+    namespace: default
+  title: "Updating cluster to {{ context.version }}"
+  message: "Updating cluster to {{ context.version }}, please run terraform plan to confirm all changes look good before merging"
+  identifier: "floreks/cd-renovate"

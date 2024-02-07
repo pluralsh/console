@@ -148,7 +148,7 @@ func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeli
 	exists := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
 	logger := log.FromContext(ctx)
 
-	if exists && !pipeline.Status.IsSHAChanged(sha) {
+	if exists && pipeline.Status.IsSHAEqual(sha) {
 		logger.V(9).Info(fmt.Sprintf("No changes detected for %s pipeline", pipeline.Name))
 		return r.ConsoleClient.GetPipeline(pipeline.Status.GetID())
 	}

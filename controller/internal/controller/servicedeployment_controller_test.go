@@ -1,10 +1,11 @@
-package controller
+package controller_test
 
 import (
 	"context"
 	"sort"
 
-	"github.com/pluralsh/console/controller/internal/test/utils"
+	"github.com/pluralsh/console/controller/internal/controller"
+	common "github.com/pluralsh/console/controller/internal/test/common"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -72,7 +73,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}
 			By("creating the custom resource for the Kind Cluster")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{Name: clusterName, Namespace: namespace},
 				Spec: v1alpha1.ClusterSpec{
 					Cloud: "aws",
@@ -81,7 +82,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 				p.Status.ID = lo.ToPtr(id)
 			})).To(Succeed())
 			By("creating the custom resource for the Kind Repository")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.GitRepository{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.GitRepository{
 				ObjectMeta: metav1.ObjectMeta{Name: repoName, Namespace: namespace},
 				Spec: v1alpha1.GitRepositorySpec{
 					Url: repoUrl,
@@ -114,19 +115,21 @@ var _ = Describe("Service Controller", Ordered, func() {
 				expectedStatus   v1alpha1.ServiceStatus
 			}{
 				expectedStatus: v1alpha1.ServiceStatus{
-					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("E2KK4GJDZD4C62CW2OXWRDOWPOQ6XQJ4XHGZYFTANUMGIN7SGTPQ===="),
-					Conditions: []metav1.Condition{
-						{
-							Type:    v1alpha1.ReadyConditionType.String(),
-							Status:  metav1.ConditionFalse,
-							Reason:  v1alpha1.ReadyConditionReason.String(),
-							Message: "The service components are not ready yet",
-						},
-						{
-							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.SynchronizedConditionReason.String(),
+					Status: v1alpha1.Status{
+						ID:  lo.ToPtr("123"),
+						SHA: lo.ToPtr("E2KK4GJDZD4C62CW2OXWRDOWPOQ6XQJ4XHGZYFTANUMGIN7SGTPQ===="),
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.ReadyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.ReadyConditionReason.String(),
+								Message: "The service components are not ready yet",
+							},
+							{
+								Type:   v1alpha1.SynchronizedConditionType.String(),
+								Status: metav1.ConditionTrue,
+								Reason: v1alpha1.SynchronizedConditionReason.String(),
+							},
 						},
 					},
 				},
@@ -139,7 +142,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(nil, nil).Once()
 			fakeConsoleClient.On("CreateService", mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(test.returnGetService, nil)
-			serviceReconciler := &ServiceReconciler{
+			serviceReconciler := &controller.ServiceReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -164,19 +167,21 @@ var _ = Describe("Service Controller", Ordered, func() {
 				expectedStatus   v1alpha1.ServiceStatus
 			}{
 				expectedStatus: v1alpha1.ServiceStatus{
-					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("E2KK4GJDZD4C62CW2OXWRDOWPOQ6XQJ4XHGZYFTANUMGIN7SGTPQ===="),
-					Conditions: []metav1.Condition{
-						{
-							Type:    v1alpha1.ReadyConditionType.String(),
-							Status:  metav1.ConditionFalse,
-							Reason:  v1alpha1.ReadyConditionReason.String(),
-							Message: "The service components are not ready yet",
-						},
-						{
-							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.SynchronizedConditionReason.String(),
+					Status: v1alpha1.Status{
+						ID:  lo.ToPtr("123"),
+						SHA: lo.ToPtr("E2KK4GJDZD4C62CW2OXWRDOWPOQ6XQJ4XHGZYFTANUMGIN7SGTPQ===="),
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.ReadyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.ReadyConditionReason.String(),
+								Message: "The service components are not ready yet",
+							},
+							{
+								Type:   v1alpha1.SynchronizedConditionType.String(),
+								Status: metav1.ConditionTrue,
+								Reason: v1alpha1.SynchronizedConditionReason.String(),
+							},
 						},
 					},
 				},
@@ -185,7 +190,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 				},
 			}
 
-			Expect(utils.MaybePatch(k8sClient, &v1alpha1.ServiceDeployment{
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.ServiceDeployment{
 				ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: namespace},
 			}, func(p *v1alpha1.ServiceDeployment) {
 				p.Status.ID = lo.ToPtr(id)
@@ -195,7 +200,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(test.returnGetService, nil)
 			fakeConsoleClient.On("UpdateService", mock.Anything, mock.Anything).Return(nil)
-			serviceReconciler := &ServiceReconciler{
+			serviceReconciler := &controller.ServiceReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -223,7 +228,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(nil, nil).Once()
-			serviceReconciler := &ServiceReconciler{
+			serviceReconciler := &controller.ServiceReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,

@@ -1,4 +1,4 @@
-package controller
+package controller_test
 
 import (
 	"context"
@@ -17,8 +17,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/controller"
+	common "github.com/pluralsh/console/controller/internal/test/common"
 	"github.com/pluralsh/console/controller/internal/test/mocks"
-	"github.com/pluralsh/console/controller/internal/test/utils"
 )
 
 func sanitizeClusterRestoreStatus(status v1alpha1.ClusterRestoreStatus) v1alpha1.ClusterRestoreStatus {
@@ -47,7 +48,7 @@ var _ = Describe("Cluster Restore Controller", Ordered, func() {
 
 		BeforeAll(func() {
 			By("Creating restore")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.ClusterRestore{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.ClusterRestore{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      restoreName,
 					Namespace: "default",
@@ -72,7 +73,7 @@ var _ = Describe("Cluster Restore Controller", Ordered, func() {
 			fakeConsoleClient.On("IsClusterRestoreExisting", mock.AnythingOfType("string")).Return(false)
 			fakeConsoleClient.On("CreateClusterRestore", restoreBackupID).Return(&gqlclient.ClusterRestoreFragment{ID: restoreConsoleID, Status: gqlclient.RestoreStatusSuccessful}, nil)
 
-			controllerReconciler := &ClusterRestoreReconciler{
+			controllerReconciler := &controller.ClusterRestoreReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,

@@ -1,8 +1,7 @@
-package controller
+package controller_test
 
 import (
 	"context"
-	"sort"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -16,22 +15,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/controller"
+	common "github.com/pluralsh/console/controller/internal/test/common"
 	"github.com/pluralsh/console/controller/internal/test/mocks"
-	"github.com/pluralsh/console/controller/internal/test/utils"
 )
-
-func sanitizeGlobalServiceConditions(status v1alpha1.GlobalServiceStatus) v1alpha1.GlobalServiceStatus {
-	for i := range status.Conditions {
-		status.Conditions[i].LastTransitionTime = metav1.Time{}
-		status.Conditions[i].ObservedGeneration = 0
-	}
-
-	sort.Slice(status.Conditions, func(i, j int) bool {
-		return status.Conditions[i].Type < status.Conditions[j].Type
-	})
-
-	return status
-}
 
 var _ = Describe("Global Service Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
@@ -68,13 +55,13 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 						RepositoryRef: &corev1.ObjectReference{Name: repoName, Namespace: namespace},
 					},
 				}
-				Expect(utils.MaybeCreate(k8sClient, resource, func(p *v1alpha1.ServiceDeployment) {
+				Expect(common.MaybeCreate(k8sClient, resource, func(p *v1alpha1.ServiceDeployment) {
 					p.Status.ID = lo.ToPtr(id)
 				})).To(Succeed())
 
 			}
 			By("creating the custom resource for the Kind Cluster")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{Name: clusterName, Namespace: namespace},
 				Spec: v1alpha1.ClusterSpec{
 					Cloud: "aws",
@@ -83,7 +70,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 				p.Status.ID = lo.ToPtr(id)
 			})).To(Succeed())
 			By("creating the custom resource for the Kind Repository")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.GitRepository{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.GitRepository{
 				ObjectMeta: metav1.ObjectMeta{Name: repoName, Namespace: namespace},
 				Spec: v1alpha1.GitRepositorySpec{
 					Url: repoUrl,
@@ -94,7 +81,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			})).To(Succeed())
 
 			By("creating the custom resource for the Kind Provider")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.Provider{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Provider{
 				ObjectMeta: metav1.ObjectMeta{Name: providerName, Namespace: namespace},
 				Spec: v1alpha1.ProviderSpec{
 					Cloud:     "aws",
@@ -106,7 +93,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			})).To(Succeed())
 
 			By("creating the custom resource for the Kind GlobalService")
-			Expect(utils.MaybeCreate(k8sClient, &v1alpha1.GlobalService{
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.GlobalService{
 				ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: namespace},
 				Spec: v1alpha1.GlobalServiceSpec{
 					Distro: lo.ToPtr(gqlclient.ClusterDistroGeneric),
@@ -142,9 +129,9 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			By("Create resource")
 			test := struct {
 				returnCreateService *gqlclient.GlobalServiceFragment
-				expectedStatus      v1alpha1.GlobalServiceStatus
+				expectedStatus      v1alpha1.Status
 			}{
-				expectedStatus: v1alpha1.GlobalServiceStatus{
+				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
 					SHA: lo.ToPtr("WAXTBLTM6PFWW6BBRLCPV2ILX2J4EOHQKDISWH4QAM5IODNRMBJQ===="),
 					Conditions: []metav1.Condition{
@@ -162,7 +149,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("CreateGlobalService", mock.Anything, mock.Anything).Return(test.returnCreateService, nil)
-			serviceReconciler := &GlobalServiceReconciler{
+			serviceReconciler := &controller.GlobalServiceReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,
@@ -178,7 +165,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, service)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(sanitizeGlobalServiceConditions(service.Status)).To(Equal(sanitizeGlobalServiceConditions(test.expectedStatus)))
+			Expect(common.SanitizeStatusConditions(service.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Delete resource")
@@ -190,7 +177,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 				},
 			}
 
-			Expect(utils.MaybePatch(k8sClient, &v1alpha1.GlobalService{
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.GlobalService{
 				ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: namespace},
 			}, func(p *v1alpha1.GlobalService) {
 				p.Status.ID = lo.ToPtr(id)
@@ -205,7 +192,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetGlobalService", mock.Anything, mock.Anything).Return(test.returnCreateService, nil)
 			fakeConsoleClient.On("DeleteGlobalService", mock.Anything, mock.Anything).Return(nil)
-			serviceReconciler := &GlobalServiceReconciler{
+			serviceReconciler := &controller.GlobalServiceReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
 				ConsoleClient: fakeConsoleClient,

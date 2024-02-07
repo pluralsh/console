@@ -75,6 +75,13 @@ type ConsoleClient interface {
 	UpdateClusterRestore(id string, attrs console.RestoreAttributes) (*console.ClusterRestoreFragment, error)
 	CreateClusterRestore(backupId string) (*console.ClusterRestoreFragment, error)
 	IsClusterRestoreExisting(id string) bool
+	CreatePrAutomation(ctx context.Context, attributes console.PrAutomationAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
+	UpdatePrAutomation(ctx context.Context, id string, attributes console.PrAutomationAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
+	DeletePrAutomation(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error
+	GetPrAutomation(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
+	GetPrAutomationByName(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
+	IsPrAutomationExists(ctx context.Context, id string) bool
+	IsPrAutomationExistsByName(ctx context.Context, name string) bool
 }
 
 func New(url, token string) ConsoleClient {
