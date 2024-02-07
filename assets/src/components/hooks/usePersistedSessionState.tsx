@@ -20,7 +20,7 @@ function usePersistedSessionState<T>(
 
       if (item) return parser(JSON.parse(item))
     } catch (error) {
-      console.log('Error on sessionStorage.getItem of', key)
+      console.error('Error on sessionStorage.getItem of', key)
     }
 
     return defaultValue

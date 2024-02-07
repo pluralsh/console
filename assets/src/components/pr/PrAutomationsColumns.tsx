@@ -116,8 +116,6 @@ const ColRole = columnHelper.accessor(({ node }) => node?.cluster?.name, {
   header: 'Role',
   cell: function Cell({ row }) {
     const { role, cluster } = row.original.node || {}
-
-    console.log('role', role, 'cluster', cluster?.name)
     const label = roleToLabel[role || ''] || roleToLabel['']
 
     return (

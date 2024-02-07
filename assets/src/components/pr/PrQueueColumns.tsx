@@ -40,22 +40,22 @@ const ColTitle = columnHelper.accessor(({ node }) => node?.title, {
 //   },
 // })
 
-const ColAuthor = columnHelper.accessor(({ node }) => node?.id, {
-  id: 'author',
-  header: 'Author',
-  cell: function Cell({ getValue }) {
-    const theme = useTheme()
+// const ColAuthor = columnHelper.accessor(({ node }) => node?.id, {
+//   id: 'author',
+//   header: 'Author',
+//   cell: function Cell({ getValue }) {
+//     const theme = useTheme()
 
-    return (
-      <>
-        <div css={{ color: theme.colors['text-danger'] }}>
-          !!Author missing for:{' '}
-        </div>
-        {getValue()}
-      </>
-    )
-  },
-})
+//     return (
+//       <>
+//         <div css={{ color: theme.colors['text-danger'] }}>
+//           !!Author missing for:{' '}
+//         </div>
+//         {getValue()}
+//       </>
+//     )
+//   },
+// })
 
 const ColLabelsSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -149,7 +149,7 @@ export const columns = [
   // ColStatus,
   ColInsertedAt,
   ColCluster,
-  // ColAuthor, 
+  // ColAuthor,
   ColLabels,
   ColLink,
 ]
