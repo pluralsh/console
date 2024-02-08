@@ -69,7 +69,18 @@ export function AccessTokensCreateScope({
                 setApi(e.currentTarget.value)
               }}
             />
-            <Button secondary>Add</Button>
+            <Button
+              secondary
+              onClick={() => {
+                const nextScope = scope
+
+                nextScope.apis = [...nextScope.apis, api]
+                setScope(nextScope)
+                setApi('')
+              }}
+            >
+              Add
+            </Button>
           </div>
         </FormField>
         {!isEmpty(scope.apis) && (
@@ -101,7 +112,18 @@ export function AccessTokensCreateScope({
                 setId(e.currentTarget.value)
               }}
             />
-            <Button secondary>Add</Button>
+            <Button
+              secondary
+              onClick={() => {
+                const nextScope = scope
+
+                nextScope.ids = [...nextScope.ids, id]
+                setScope(nextScope)
+                setId('')
+              }}
+            >
+              Add
+            </Button>
           </div>
         </FormField>
         {!isEmpty(scope.ids) && (

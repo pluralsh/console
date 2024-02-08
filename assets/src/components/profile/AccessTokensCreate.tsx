@@ -41,6 +41,16 @@ export function AccessTokensCreate() {
   const addScope = useCallback(() => {
     setScopes([...scopes, { apis: [], ids: [] }])
   }, [scopes, setScopes])
+  const setScope = useCallback(
+    (s: Scope, i: number) => {
+      const nextScopes = [...scopes]
+
+      nextScopes[i] = s
+
+      setScopes(nextScopes)
+    },
+    [scopes, setScopes]
+  )
   const canRemoveScope = scopes.length > 1
   const removeScope = useCallback(
     (idx: number) => {
@@ -137,13 +147,7 @@ export function AccessTokensCreate() {
                 <AccessTokensCreateScope
                   index={index}
                   scope={scope}
-                  setScope={(s) => {
-                    const nextScopes = scopes
-
-                    nextScopes[index] = s
-
-                    setScopes(nextScopes)
-                  }}
+                  setScope={(s) => setScope(s, index)}
                   canRemove={canRemoveScope}
                   remove={() => removeScope(index)}
                 />
