@@ -19,6 +19,12 @@ fragment PrAutomation on PrAutomation {
   connection {
     ...ScmConnection
   }
+  createBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
   configuration {
     condition {
       field
