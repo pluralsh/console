@@ -22,7 +22,7 @@ export type Scope = {
 export function AccessTokensCreate() {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
-  const [hasScopes, setHasScopes] = useState(false)
+  const [addScopes, setAddScopes] = useState(false)
   const [scopes, setScopes] = useState<Scope[]>([
     {
       apis: ['updateServiceDeployment', 'updateCluster'],
@@ -33,7 +33,11 @@ export function AccessTokensCreate() {
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
 
   const [mutation, { loading, error }] = useCreateAccessTokenMutation({
-    variables: { scopes: scopes.map(({ apis, ids }) => ({ apis, ids })) },
+    variables: {
+      scopes: addScopes
+        ? scopes.map(({ apis, ids }) => ({ apis, ids }))
+        : undefined,
+    },
     update: (cache, { data }) =>
       updateCache(cache, {
         query: AccessTokensDocument,
@@ -98,8 +102,8 @@ export function AccessTokensCreate() {
           <div css={{ display: 'flex', gap: theme.spacing.small, flexGrow: 1 }}>
             <div css={{ display: 'flex', flexGrow: 1 }}>
               <Switch
-                checked={hasScopes}
-                onChange={(val) => setHasScopes(val)}
+                checked={addScopes}
+                onChange={(val) => setAddScopes(val)}
               >
                 <div
                   css={{
@@ -112,7 +116,7 @@ export function AccessTokensCreate() {
                 </div>
               </Switch>
             </div>
-            {hasScopes && (
+            {addScopes && (
               <Button
                 secondary
                 onClick={addScope}
@@ -140,7 +144,7 @@ export function AccessTokensCreate() {
       >
         <>
           <p>Do you want to create new access token?</p>
-          {hasScopes && (
+          {addScopes && (
             <>
               <div
                 css={{
