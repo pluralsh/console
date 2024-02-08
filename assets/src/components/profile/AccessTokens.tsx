@@ -13,44 +13,33 @@ import {
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import CopyToClipboard from 'react-copy-to-clipboard'
-
 import {
   AccessTokenAudit,
   AccessTokenFragment,
   AccessTokensDocument,
   useAccessTokensQuery,
-  useCreateAccessTokenMutation,
   useDeleteAccessTokenMutation,
   useTokenAuditsQuery,
 } from 'generated/graphql'
-
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
 import isEmpty from 'lodash/isEmpty'
-
-import { Box } from 'grommet'
-
 import { useTheme } from 'styled-components'
-
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
 import {
   Edge,
-  appendConnection,
   mapExistingNodes,
   removeConnection,
   updateCache,
 } from '../../utils/graphql'
-
 import { formatLocation } from '../../utils/geo'
 import { Confirm } from '../utils/Confirm'
 import { DeleteIconButton } from '../utils/IconButtons'
-
 import LoadingIndicator from '../utils/LoadingIndicator'
-
 import { DateTimeCol } from '../utils/table/DateTimeCol'
 
 import { ObscuredToken } from './ObscuredToken'
+import { AccessTokensCreate } from './AccessTokensCreate'
 
 const TOOLTIP =
   'Access tokens allow you to access the Plural API for automation and active Plural clusters.'
@@ -286,22 +275,14 @@ const tokenColumns = [
 ]
 
 export function AccessTokens() {
-  const [displayNewBanner, setDisplayNewBanner] = useState(false)
-  const { data } = useAccessTokensQuery()
-  const [mutation, { loading }] = useCreateAccessTokenMutation({
-    update: (cache, { data }) =>
-      updateCache(cache, {
-        query: AccessTokensDocument,
-        update: (prev) =>
-          appendConnection(prev, data?.createAccessToken, 'accessTokens'),
-      }),
-  })
+  const { data, loading } = useAccessTokensQuery()
+
   const tokensList = useMemo(
     () => mapExistingNodes(data?.accessTokens),
     [data?.accessTokens]
   )
 
-  if (!data) return <LoadingIndicator />
+  if (loading) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth
@@ -313,54 +294,21 @@ export function AccessTokens() {
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'space-between',
+            flexGrow: 1,
           }}
         >
           <Tooltip
-            width="315px"
+            width={315}
             label={TOOLTIP}
           >
-            <div
-              css={{
-                display: 'flex',
-                padding: 6,
-                alignItems: 'center',
-                // borderRadius: '50%',
-              }}
-            >
-              <InfoIcon />
-            </div>
+            <InfoIcon />
           </Tooltip>
-          <Box
-            flex
-            align="end"
-          >
-            {displayNewBanner && (
-              <Toast
-                severity="success"
-                marginBottom="medium"
-                marginRight="xxxxlarge"
-                onClose={() => {
-                  setDisplayNewBanner(false)
-                }}
-              >
-                New access token created.
-              </Toast>
-            )}
-            <Button
-              secondary
-              onClick={() => {
-                setDisplayNewBanner(true)
-                mutation()
-              }}
-              loading={loading}
-            >
-              Create access token
-            </Button>
-          </Box>
+          {!isEmpty(tokensList) && <AccessTokensCreate />}
         </div>
       }
     >
-      {tokensList ? (
+      {!isEmpty(tokensList) ? (
         <FullHeightTableWrap>
           <Table
             data={tokensList}
@@ -373,16 +321,7 @@ export function AccessTokens() {
         </FullHeightTableWrap>
       ) : (
         <EmptyState message="Looks like you don't have any access tokens yet.">
-          <Button
-            onClick={() => {
-              setDisplayNewBanner(true)
-              setTimeout(() => setDisplayNewBanner(false), 1000)
-              mutation()
-            }}
-            loading={loading}
-          >
-            Create access token
-          </Button>
+          <AccessTokensCreate />
         </EmptyState>
       )}
     </ResponsivePageFullWidth>
