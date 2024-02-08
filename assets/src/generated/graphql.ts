@@ -6110,14 +6110,14 @@ export type UnstructuredResourceQueryVariables = Exact<{
 
 export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
 
-export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null };
+export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api: string, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
 export type AccessTokenAuditFragment = { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null };
 
 export type AccessTokensQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AccessTokensQuery = { __typename?: 'RootQueryType', accessTokens?: { __typename?: 'AccessTokenConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenEdge', node?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
+export type AccessTokensQuery = { __typename?: 'RootQueryType', accessTokens?: { __typename?: 'AccessTokenConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenEdge', node?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api: string, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null } | null> | null } | null };
 
 export type TokenAuditsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6127,17 +6127,19 @@ export type TokenAuditsQueryVariables = Exact<{
 
 export type TokenAuditsQuery = { __typename?: 'RootQueryType', accessToken?: { __typename?: 'AccessToken', id?: string | null, audits?: { __typename?: 'AccessTokenAuditConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenAuditEdge', node?: { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
 
-export type CreateAccessTokenMutationVariables = Exact<{ [key: string]: never; }>;
+export type CreateAccessTokenMutationVariables = Exact<{
+  scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>> | InputMaybe<ScopeAttributes>>;
+}>;
 
 
-export type CreateAccessTokenMutation = { __typename?: 'RootMutationType', createAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null };
+export type CreateAccessTokenMutation = { __typename?: 'RootMutationType', createAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api: string, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
 
 export type DeleteAccessTokenMutationVariables = Exact<{
   token: Scalars['String']['input'];
 }>;
 
 
-export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null };
+export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api: string, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
 
 export type UserFragment = { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
 
@@ -7562,8 +7564,14 @@ export const AccessTokenFragmentDoc = gql`
     fragment AccessToken on AccessToken {
   id
   insertedAt
-  token
   updatedAt
+  token
+  scopes {
+    api
+    apis
+    identifier
+    ids
+  }
 }
     `;
 export const AccessTokenAuditFragmentDoc = gql`
@@ -11271,8 +11279,8 @@ export type TokenAuditsLazyQueryHookResult = ReturnType<typeof useTokenAuditsLaz
 export type TokenAuditsSuspenseQueryHookResult = ReturnType<typeof useTokenAuditsSuspenseQuery>;
 export type TokenAuditsQueryResult = Apollo.QueryResult<TokenAuditsQuery, TokenAuditsQueryVariables>;
 export const CreateAccessTokenDocument = gql`
-    mutation CreateAccessToken {
-  createAccessToken {
+    mutation CreateAccessToken($scopes: [ScopeAttributes]) {
+  createAccessToken(scopes: $scopes) {
     ...AccessToken
   }
 }
@@ -11292,6 +11300,7 @@ export type CreateAccessTokenMutationFn = Apollo.MutationFunction<CreateAccessTo
  * @example
  * const [createAccessTokenMutation, { data, loading, error }] = useCreateAccessTokenMutation({
  *   variables: {
+ *      scopes: // value for 'scopes'
  *   },
  * });
  */
