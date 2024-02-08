@@ -25,7 +25,7 @@ import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { columns } from './PrAutomationsColumns'
 
-const DOCS_URL = 'https://docs.plural.sh/'
+const DOCS_URL = 'https://docs.plural.sh/deployments/operator/pr-automations'
 
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
