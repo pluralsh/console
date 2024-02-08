@@ -1,5 +1,5 @@
 import { useTheme } from 'styled-components'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Button, Card, Chip, FormField, Input } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 
@@ -22,8 +22,42 @@ export function AccessTokensCreateScope({
   canRemove: boolean
 }) {
   const theme = useTheme()
+
   const [api, setApi] = useState('')
   const [id, setId] = useState('')
+
+  const addApi = useCallback(() => {
+    const next = scope
+
+    next.apis = [...next.apis, api]
+    setScope(next)
+    setApi('')
+  }, [scope, setScope, api, setApi])
+  const removeApi = useCallback(
+    (i: number) => {
+      const next = scope
+
+      next.apis.splice(i, 1)
+      setScope(next)
+    },
+    [scope, setScope]
+  )
+  const addId = useCallback(() => {
+    const next = scope
+
+    next.ids = [...next.ids, id]
+    setScope(next)
+    setId('')
+  }, [scope, setScope, id, setId])
+  const removeId = useCallback(
+    (i: number) => {
+      const next = scope
+
+      next.ids.splice(i, 1)
+      setScope(next)
+    },
+    [scope, setScope]
+  )
 
   return (
     <Card
@@ -67,20 +101,12 @@ export function AccessTokensCreateScope({
               flexGrow={1}
               value={api}
               error={isEmpty(scope.apis)}
-              onChange={(e) => {
-                setApi(e.currentTarget.value)
-              }}
+              onChange={(e) => setApi(e.currentTarget.value)}
             />
             <Button
               secondary
               disabled={isEmpty(api)}
-              onClick={() => {
-                const nextScope = scope
-
-                nextScope.apis = [...nextScope.apis, api]
-                setScope(nextScope)
-                setApi('')
-              }}
+              onClick={addApi}
             >
               Add
             </Button>
@@ -89,17 +115,11 @@ export function AccessTokensCreateScope({
         {!isEmpty(scope.apis) && (
           <ChipList
             maxVisible={Infinity}
-            chips={scope.apis.map((a, i) => (
+            chips={scope.apis.map((a, idx) => (
               <Chip
                 size="small"
                 clickable
-                onClick={() => {
-                  const nextScope = scope
-
-                  nextScope.apis.splice(i, 1)
-
-                  setScope(nextScope)
-                }}
+                onClick={() => removeApi(idx)}
                 closeButton
               >
                 {a}
@@ -124,13 +144,7 @@ export function AccessTokensCreateScope({
             <Button
               secondary
               disabled={isEmpty(id)}
-              onClick={() => {
-                const nextScope = scope
-
-                nextScope.ids = [...nextScope.ids, id]
-                setScope(nextScope)
-                setId('')
-              }}
+              onClick={addId}
             >
               Add
             </Button>
@@ -139,20 +153,14 @@ export function AccessTokensCreateScope({
         {!isEmpty(scope.ids) && (
           <ChipList
             maxVisible={Infinity}
-            chips={scope.ids.map((identifier, i) => (
+            chips={scope.ids.map((i, idx) => (
               <Chip
                 size="small"
                 clickable
-                onClick={() => {
-                  const nextScope = scope
-
-                  nextScope.ids.splice(i, 1)
-
-                  setScope(nextScope)
-                }}
+                onClick={() => removeId(idx)}
                 closeButton
               >
-                {identifier}
+                {i}
               </Chip>
             ))}
           />

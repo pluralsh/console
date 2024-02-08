@@ -33,7 +33,7 @@ export function AccessTokensCreate() {
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
 
   const [mutation, { loading, error }] = useCreateAccessTokenMutation({
-    variables: { scopes },
+    variables: { scopes: scopes.map(({ apis, ids }) => ({ apis, ids })) },
     update: (cache, { data }) =>
       updateCache(cache, {
         query: AccessTokensDocument,
@@ -161,10 +161,12 @@ export function AccessTokensCreate() {
             </>
           )}
           {error && (
-            <GqlError
-              header="Problem creating token."
-              error={error}
-            />
+            <div css={{ marginTop: theme.spacing.medium }}>
+              <GqlError
+                header="Problem creating token"
+                error={error}
+              />
+            </div>
           )}
         </>
       </Modal>
