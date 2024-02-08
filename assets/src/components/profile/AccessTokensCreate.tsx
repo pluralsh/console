@@ -1,6 +1,8 @@
 import { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 import { Button, Modal, Switch, Toast } from '@pluralsh/design-system'
+
+import { isEmpty } from 'lodash'
 
 import {
   AccessTokensDocument,
@@ -14,6 +16,7 @@ import { AccessTokensCreateScope } from './AccessTokensCreateScope'
 export type Scope = {
   apis: string[]
   ids: string[]
+  valid?: boolean
 }
 
 export function AccessTokensCreate() {
@@ -24,11 +27,13 @@ export function AccessTokensCreate() {
     {
       apis: ['updateServiceDeployment', 'updateCluster'],
       ids: ['*'],
+      valid: true,
     },
   ])
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
 
   const [mutation, { loading, error }] = useCreateAccessTokenMutation({
+    variables: { scopes },
     update: (cache, { data }) =>
       updateCache(cache, {
         query: AccessTokensDocument,
@@ -46,6 +51,7 @@ export function AccessTokensCreate() {
       const nextScopes = [...scopes]
 
       nextScopes[i] = s
+      nextScopes[i].valid = !isEmpty(nextScopes[i].apis)
 
       setScopes(nextScopes)
     },
@@ -61,15 +67,15 @@ export function AccessTokensCreate() {
     [scopes, setScopes]
   )
 
-  const disabled = false
+  const valid = useMemo(() => scopes.every((s) => !!s.valid), [scopes])
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
-      if (!disabled && !loading) {
+      if (valid && !loading) {
         mutation()
       }
     },
-    [disabled, loading, mutation]
+    [valid, loading, mutation]
   )
 
   return (
@@ -116,7 +122,7 @@ export function AccessTokensCreate() {
             )}
             <Button
               type="submit"
-              disabled={disabled}
+              disabled={!valid}
               loading={loading}
               primary
             >
@@ -147,7 +153,7 @@ export function AccessTokensCreate() {
                 <AccessTokensCreateScope
                   index={index}
                   scope={scope}
-                  setScope={(s) => setScope(s, index)}
+                  setScope={(s: Scope) => setScope(s, index)}
                   canRemove={canRemoveScope}
                   remove={() => removeScope(index)}
                 />
@@ -167,9 +173,7 @@ export function AccessTokensCreate() {
           severity="success"
           marginBottom="medium"
           marginRight="xxxxlarge"
-          onClose={() => {
-            setDisplayNewBanner(false)
-          }}
+          onClose={() => setDisplayNewBanner(false)}
         >
           New access token created.
         </Toast>

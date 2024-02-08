@@ -58,13 +58,15 @@ export function AccessTokensCreateScope({
       <div>
         <FormField
           label="API"
-          hint="Choose at least one API, i.e. updateServiceDeployment."
+          hint="Add at least one API, i.e. updateServiceDeployment."
+          error={isEmpty(scope.apis)}
           required
         >
           <div css={{ display: 'flex', flexGrow: 1, gap: theme.spacing.small }}>
             <Input
               flexGrow={1}
               value={api}
+              error={isEmpty(scope.apis)}
               onChange={(e) => {
                 setApi(e.currentTarget.value)
               }}
@@ -109,7 +111,7 @@ export function AccessTokensCreateScope({
       <div>
         <FormField
           label="ID"
-          hint="Choose at least one ID. Leave it blank or use * to match all resources."
+          hint="Add resource identifiers. Leave it blank or use * to match all resources."
         >
           <div css={{ display: 'flex', flexGrow: 1, gap: theme.spacing.small }}>
             <Input
