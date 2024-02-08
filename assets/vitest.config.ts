@@ -11,6 +11,9 @@ export default defineConfig({
     cache: {
       dir: '../node_modules',
     },
+    coverage: {
+      reportsDirectory: '../coverage',
+    },
   },
   plugins: [tsconfigPaths() as any],
   optimizeDeps: {

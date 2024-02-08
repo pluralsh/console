@@ -1,4 +1,4 @@
-import { createContext, useContext, useLayoutEffect, useMemo } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 
 import ContinuousDeployment, {
   POLL_INTERVAL,
@@ -7,13 +7,7 @@ import Clusters from 'components/cd/clusters/Clusters'
 import Repositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
 import Providers from 'components/cd/providers/Providers'
-import {
-  Navigate,
-  Outlet,
-  Route,
-  useLocation,
-  useNavigate,
-} from 'react-router-dom'
+import { Navigate, Outlet, Route } from 'react-router-dom'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
@@ -78,8 +72,6 @@ import ComponentDryRun from '../components/component/ComponentDryRun'
 
 import {
   ADDONS_REL_PATH,
-  CD_ABS_PATH,
-  CD_DEFAULT_REL_PATH,
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
   CLUSTER_ADDONS_PARAM_ID,
@@ -139,8 +131,6 @@ export const componentRoutes = (
   </Route>
 )
 
-const defaultLocation = `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}` as const
-
 const CDContext = createContext<{
   deploymentSettings?: DeploymentSettingsFragment | undefined | null
 }>({})
@@ -151,19 +141,13 @@ export function useDeploymentSettings() {
   return ctx?.deploymentSettings
 }
 
-function CdRoot() {
+export function CdRoot() {
   const { data } = useDeploymentSettingsQuery({
     pollInterval: POLL_INTERVAL,
   })
-  const cdIsEnabled = useCDEnabled()
-  const navigate = useNavigate()
-  const location = useLocation()
 
-  useLayoutEffect(() => {
-    if (!cdIsEnabled && location.pathname !== defaultLocation) {
-      navigate(defaultLocation)
-    }
-  }, [cdIsEnabled, location.pathname, navigate])
+  useCDEnabled({ redirect: true })
+
   const providerValue = useMemo(
     () => ({ deploymentSettings: data?.deploymentSettings }),
     [data?.deploymentSettings]

@@ -1,125 +1,76 @@
 import { Button, Modal } from '@pluralsh/design-system'
-import styled, { useTheme } from 'styled-components'
-import {
-  FormEvent,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { useTheme } from 'styled-components'
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import isEqual from 'lodash/isEqual'
 import uniqWith from 'lodash/uniqWith'
-import upperFirst from 'lodash/upperFirst'
-import { PolicyBindingFragment, useUpdateRbacMutation } from 'generated/graphql'
+import {
+  PrAutomationFragment,
+  useUpdatePrAutomationMutation,
+} from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import RoleFormBindings from 'components/account/roles/RoleFormBindings'
 import { bindingToBindingAttributes } from 'components/account/roles/misc'
 import { GqlError } from 'components/utils/Alert'
 
-import { StepBody } from '../ModalAlt'
+import { StepBody } from '../../cd/ModalAlt'
 
-export const Overline = styled.h3(({ theme }) => ({
-  ...theme.partials.text.overline,
-  color: theme.colors['text-xlight'],
-}))
-export const PermissionsColumnSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  rowGap: theme.spacing.medium,
-}))
+import { Overline, PermissionsColumnSC } from '../../cd/utils/PermissionsModal'
 
-export function Permissions({
-  bindings,
-  setBindings,
-  permissionType,
-  forLabel,
-}: {
-  bindings?: (PolicyBindingFragment | null | undefined)[] | null | undefined
-  setBindings: any
-  permissionType: 'read' | 'write'
-  forLabel: string | undefined
-}) {
-  return (
-    <PermissionsColumnSC>
-      <Overline>{upperFirst(permissionType)} permissions</Overline>
-      <RoleFormBindings
-        bindings={bindings}
-        setBindings={setBindings}
-        hints={{
-          user: `Users with ${permissionType} permissions${
-            !forLabel ? '' : ` for this ${forLabel}`
-          }`,
-          group: `Groups with ${permissionType} permissions${
-            !forLabel ? '' : ` for this ${forLabel}`
-          }`,
-        }}
-      />
-    </PermissionsColumnSC>
-  )
-}
-
-export function PermissionsModal({
-  clusterId,
-  serviceId,
-  bindings,
-  header,
-  name,
+export function PrAutomationPermissionsModal({
+  prAutomation,
   open,
   onClose,
   refetch,
 }: {
-  clusterId?: string
-  serviceId?: string
-  bindings: {
-    readBindings?: Nullable<Nullable<PolicyBindingFragment>[]>
-    writeBindings?: Nullable<Nullable<PolicyBindingFragment>[]>
-  }
-  header: ReactNode
-  name?: string
+  prAutomation: PrAutomationFragment
   open: boolean
   onClose: () => void
   refetch?: () => void
 }) {
   const theme = useTheme()
+  const { name, id } = prAutomation
+  const forLabel = 'PR automation'
+  const header = `${forLabel} permissions – ${name}`
 
-  const [readBindings, setReadBindings] = useState(bindings.readBindings)
-  const [writeBindings, setWriteBindings] = useState(bindings.writeBindings)
+  const [createBindings, setCreateBindings] = useState(
+    prAutomation.createBindings
+  )
+  const [writeBindings, setWriteBindings] = useState(prAutomation.writeBindings)
 
   useEffect(() => {
-    setReadBindings(bindings.readBindings)
-  }, [bindings.readBindings])
+    setCreateBindings(prAutomation.createBindings)
+  }, [prAutomation.createBindings])
   useEffect(() => {
-    setWriteBindings(bindings.writeBindings)
-  }, [bindings.writeBindings])
+    setWriteBindings(prAutomation.writeBindings)
+  }, [prAutomation.writeBindings])
 
-  const uniqueReadBindings = useMemo(
-    () => uniqWith(readBindings, isEqual),
-    [readBindings]
+  const uniqueCreateBindings = useMemo(
+    () => uniqWith(createBindings, isEqual),
+    [createBindings]
   )
   const uniqueWriteBindings = useMemo(
     () => uniqWith(writeBindings, isEqual),
     [writeBindings]
   )
   const [mutation, { loading: mutationLoading, error: mutationError }] =
-    useUpdateRbacMutation({
+    useUpdatePrAutomationMutation({
       onCompleted: () => {
         refetch?.()
         onClose()
       },
     })
-  const allowSubmit = readBindings && writeBindings
+  const allowSubmit = createBindings && writeBindings
 
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
-      if ((serviceId || clusterId) && readBindings && writeBindings) {
-        mutation({
+      if (id && createBindings && writeBindings) {
+        const vars = {
           variables: {
-            ...(clusterId ? { clusterId } : serviceId ? { serviceId } : {}),
-            rbac: {
-              readBindings: readBindings
+            id,
+            attributes: {
+              createBindings: createBindings
                 ?.filter(isNonNullable)
                 .map(bindingToBindingAttributes),
               writeBindings: writeBindings
@@ -127,12 +78,13 @@ export function PermissionsModal({
                 .map(bindingToBindingAttributes),
             },
           },
-        })
+        }
+
+        mutation(vars)
       }
     },
-    [clusterId, mutation, readBindings, serviceId, writeBindings]
+    [id, createBindings, writeBindings, mutation]
   )
-  const forLabel = clusterId ? 'cluster' : serviceId ? 'service' : undefined
 
   return (
     <Modal
@@ -189,7 +141,7 @@ export function PermissionsModal({
           }}
         >
           <StepBody>
-            Bind users and groups to read or write permissions for
+            Bind users to read or write permissions for
             {name && (
               <>
                 {' '}
@@ -198,7 +150,7 @@ export function PermissionsModal({
             )}
           </StepBody>
         </div>
-        {!bindings ? (
+        {!(writeBindings && createBindings) ? (
           <LoadingIndicator />
         ) : (
           <div css={{ display: 'flex' }}>
@@ -209,20 +161,30 @@ export function PermissionsModal({
                 borderRight: theme.borders['fill-two'],
               }}
             >
-              <Permissions
-                permissionType="read"
-                forLabel={forLabel}
-                bindings={uniqueReadBindings}
-                setBindings={setReadBindings}
-              />
+              <PermissionsColumnSC>
+                <Overline>Create PR permissions</Overline>
+                <RoleFormBindings
+                  bindings={uniqueCreateBindings}
+                  setBindings={setCreateBindings}
+                  hints={{
+                    user: 'Users who can create PRs with this automation',
+                    group: 'Groups who can create PRs with this automation',
+                  }}
+                />
+              </PermissionsColumnSC>
             </div>
             <div css={{ width: '50%', paddingLeft: theme.spacing.large }}>
-              <Permissions
-                permissionType="write"
-                forLabel={forLabel}
-                bindings={uniqueWriteBindings}
-                setBindings={setWriteBindings}
-              />
+              <PermissionsColumnSC>
+                <Overline>Update Automation permissions</Overline>
+                <RoleFormBindings
+                  bindings={uniqueWriteBindings}
+                  setBindings={setWriteBindings}
+                  hints={{
+                    user: 'Users who can update this automation',
+                    group: 'Groups who can update this automation',
+                  }}
+                />
+              </PermissionsColumnSC>
             </div>
           </div>
         )}

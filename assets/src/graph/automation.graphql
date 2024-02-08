@@ -1,0 +1,115 @@
+fragment PrAutomation on PrAutomation {
+  id
+  name
+  documentation
+  addon
+  cluster {
+    ...ClusterBasic
+  }
+  service {
+    id
+    name
+  }
+  repository {
+    url
+    refs
+  }
+  role
+  documentation
+  connection {
+    ...ScmConnection
+  }
+  createBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+  configuration {
+    condition {
+      field
+      operation
+      value
+    }
+    default
+    documentation
+    longform
+    name
+    optional
+    placeholder
+    type
+  }
+}
+
+query PrAutomations($first: Int = 100, $after: String) {
+  prAutomations(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...PrAutomation
+      }
+    }
+  }
+}
+
+mutation CreatePrAutomation($attributes: PrAutomationAttributes!) {
+  createPrAutomation(attributes: $attributes) {
+    ...PrAutomation
+  }
+}
+
+mutation UpdatePrAutomation($id: ID!, $attributes: PrAutomationAttributes!) {
+  updatePrAutomation(id: $id, attributes: $attributes) {
+    ...PrAutomation
+  }
+}
+
+mutation DeletePrAutomation($id: ID!) {
+  deletePrAutomation(id: $id) {
+    ...PrAutomation
+  }
+}
+
+fragment ScmConnection on ScmConnection {
+  id
+  name
+  insertedAt
+  updatedAt
+  type
+  username
+  baseUrl
+  apiUrl
+}
+
+query ScmConnections($first: Int = 100, $after: String) {
+  scmConnections(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ScmConnection
+      }
+    }
+  }
+}
+
+mutation CreateScmConnection($attributes: ScmConnectionAttributes!) {
+  createScmConnection(attributes: $attributes) {
+    ...ScmConnection
+  }
+}
+
+mutation UpdateScmConnection($id: ID!, $attributes: ScmConnectionAttributes!) {
+  updateScmConnection(id: $id, attributes: $attributes) {
+    ...ScmConnection
+  }
+}
+
+mutation DeleteScmConnection($id: ID!) {
+  deleteScmConnection(id: $id) {
+    ...ScmConnection
+  }
+}

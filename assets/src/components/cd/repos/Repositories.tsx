@@ -29,7 +29,7 @@ import { CD_REL_PATH, REPOS_REL_PATH } from 'routes/cdRoutesConsts'
 import {
   CD_BASE_CRUMBS,
   POLL_INTERVAL,
-  useSetCDHeaderContent,
+  useSetPageHeaderContent,
 } from '../ContinuousDeployment'
 
 import {
@@ -165,7 +165,7 @@ export default function Repositories() {
 
   useSetBreadcrumbs(crumbs)
 
-  useSetCDHeaderContent(
+  useSetPageHeaderContent(
     useMemo(() => <ImportGit refetch={refetch} />, [refetch])
   )
 

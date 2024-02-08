@@ -11,7 +11,7 @@
 !.yarn/versions
 
 # testing
-/src/coverage
+/coverage
 
 # production
 /build
