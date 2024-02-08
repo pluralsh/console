@@ -1,9 +1,5 @@
 // TODO: Move into design system
-import {
-  EyeClosedIcon,
-  EyeIcon,
-  IconFrame,
-} from '@pluralsh/design-system'
+import { EyeClosedIcon, EyeIcon, IconFrame } from '@pluralsh/design-system'
 import Input2 from '@pluralsh/design-system/dist/components/Input2'
 
 import styled from 'styled-components'

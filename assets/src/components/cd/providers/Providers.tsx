@@ -14,7 +14,10 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { mapExistingNodes } from 'utils/graphql'
 
-import { CD_BASE_CRUMBS, useSetPageHeaderContent } from '../ContinuousDeployment'
+import {
+  CD_BASE_CRUMBS,
+  useSetPageHeaderContent,
+} from '../ContinuousDeployment'
 
 import { ColActions, ColName, ColProvider } from './ProvidersColumns'
 import { CreateProvider } from './CreateProvider'

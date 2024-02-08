@@ -53,8 +53,8 @@ const getDirectory = ({
     label: 'Repositories',
   },
   {
-    path: "agents",
-    label: "Agent Configuration"
+    path: 'agents',
+    label: 'Agent Configuration',
   },
   {
     path: 'observability',
