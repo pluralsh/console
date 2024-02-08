@@ -71,6 +71,7 @@ export function AccessTokensCreateScope({
             />
             <Button
               secondary
+              disabled={isEmpty(api)}
               onClick={() => {
                 const nextScope = scope
 
@@ -86,11 +87,17 @@ export function AccessTokensCreateScope({
         {!isEmpty(scope.apis) && (
           <ChipList
             maxVisible={Infinity}
-            chips={scope.apis.map((a) => (
+            chips={scope.apis.map((a, i) => (
               <Chip
                 size="small"
                 clickable
-                // onClick={() => onRemove(key)}
+                onClick={() => {
+                  const nextScope = scope
+
+                  nextScope.apis.splice(i, 1)
+
+                  setScope(nextScope)
+                }}
                 closeButton
               >
                 {a}
@@ -114,6 +121,7 @@ export function AccessTokensCreateScope({
             />
             <Button
               secondary
+              disabled={isEmpty(id)}
               onClick={() => {
                 const nextScope = scope
 
