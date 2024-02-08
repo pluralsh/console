@@ -55,7 +55,7 @@ defmodule Console.Schema.PrAutomation do
     has_many :create_bindings, PolicyBinding,
       on_replace: :delete,
       foreign_key: :policy_id,
-      references: :write_policy_id
+      references: :create_policy_id
 
     timestamps()
   end
