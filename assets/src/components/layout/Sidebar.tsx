@@ -38,12 +38,10 @@ import { ME_Q } from 'components/graphql/users'
 import { useMutation } from '@apollo/client'
 import { updateCache } from 'utils/graphql'
 import styled from 'styled-components'
-import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 
 import { CD_ABS_PATH, CD_DEFAULT_REL_PATH } from 'routes/cdRoutesConsts'
-
 import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
-
+import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
 import { LoginContext } from '../contexts'

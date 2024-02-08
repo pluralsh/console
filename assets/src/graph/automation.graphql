@@ -39,17 +39,6 @@ fragment PrAutomation on PrAutomation {
     placeholder
     type
   }
-  # updates {
-  #   files
-  #   matchStrategy
-  #   regexReplacements {
-  #     regex
-  #     replacement
-  #   }
-  #   regexes
-  #   replaceTemplate
-  #   yq
-  # }
 }
 
 query PrAutomations($first: Int = 100, $after: String) {
