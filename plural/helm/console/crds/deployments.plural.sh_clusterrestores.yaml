@@ -4,33 +4,20 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: providers.deployments.plural.sh
+  name: clusterrestores.deployments.plural.sh
 spec:
   group: deployments.plural.sh
   names:
-    kind: Provider
-    listKind: ProviderList
-    plural: providers
-    singular: provider
-  scope: Cluster
+    kind: ClusterRestore
+    listKind: ClusterRestoreList
+    plural: clusterrestores
+    singular: clusterrestore
+  scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - description: ID of the provider in the Console API.
-      jsonPath: .status.id
-      name: ID
-      type: string
-    - description: Human-readable name of the Provider.
-      jsonPath: .spec.name
-      name: Name
-      type: string
-    - description: Name of the Provider cloud service.
-      jsonPath: .spec.cloud
-      name: Cloud
-      type: string
-    name: v1alpha1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Provider ...
+        description: ClusterRestore is the Schema for the clusterrestores API
         properties:
           apiVersion:
             description: |-
@@ -50,95 +37,90 @@ spec:
           metadata:
             type: object
           spec:
-            description: ProviderSpec ...
+            description: ClusterRestoreSpec defines the desired state of ClusterRestore
             properties:
-              cloud:
+              backupClusterRef:
                 description: |-
-                  Cloud is the name of the cloud service for the Provider.
-                  One of (CloudProvider): [gcp, aws, azure]
-                enum:
-                - gcp
-                - aws
-                - azure
-                example: aws
-                type: string
-                x-kubernetes-validations:
-                - message: Cloud is immutable
-                  rule: self == oldSelf
-              cloudSettings:
-                description: |-
-                  CloudSettings reference cloud provider credentials secrets used for provisioning the Cluster.
-                  Not required when Cloud is set to CloudProvider(BYOK).
+                  BackupClusterID is an ID of a cluster where the backup to restore is located.
+                  BackupName and BackupNamespace have to be specified as well with it.
+                  If BackupName, BackupNamespace and BackupClusterRef are specified, then BackupID is not needed.
                 properties:
-                  aws:
+                  apiVersion:
+                    description: API version of the referent.
+                    type: string
+                  fieldPath:
                     description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
-                    properties:
-                      name:
-                        description: name is unique within a namespace to reference
-                          a secret resource.
-                        type: string
-                      namespace:
-                        description: namespace defines the space within which the
-                          secret name must be unique.
-                        type: string
-                    type: object
-                    x-kubernetes-map-type: atomic
-                  azure:
+                      If referring to a piece of an object instead of an entire object, this string
+                      should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                      For example, if the object reference is to a container within a pod, this would take on a value like:
+                      "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                      the event) or if no container name is specified "spec.containers[2]" (container with
+                      index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                      referencing a part of an object.
+                      TODO: this design is not final and this field is subject to change in the future.
+                    type: string
+                  kind:
                     description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
-                    properties:
-                      name:
-                        description: name is unique within a namespace to reference
-                          a secret resource.
-                        type: string
-                      namespace:
-                        description: namespace defines the space within which the
-                          secret name must be unique.
-                        type: string
-                    type: object
-                    x-kubernetes-map-type: atomic
-                  gcp:
+                      Kind of the referent.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                    type: string
+                  name:
                     description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
-                    properties:
-                      name:
-                        description: name is unique within a namespace to reference
-                          a secret resource.
-                        type: string
-                      namespace:
-                        description: namespace defines the space within which the
-                          secret name must be unique.
-                        type: string
-                    type: object
-                    x-kubernetes-map-type: atomic
+                      Name of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                    type: string
+                  resourceVersion:
+                    description: |-
+                      Specific resourceVersion to which this reference is made, if any.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                    type: string
+                  uid:
+                    description: |-
+                      UID of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                    type: string
                 type: object
                 x-kubernetes-map-type: atomic
-              name:
-                description: Name is a human-readable name of the Provider.
-                example: gcp-provider
+                x-kubernetes-validations:
+                - message: BackupClusterRef is immutable
+                  rule: self == oldSelf
+              backupID:
+                description: |-
+                  BackupID is an ID of the backup to restore.
+                  If BackupID is specified, then BackupName, BackupNamespace and BackupClusterRef are not needed.
                 type: string
                 x-kubernetes-validations:
-                - message: Name is immutable
+                - message: BackupID is immutable
                   rule: self == oldSelf
-              namespace:
-                description: Namespace is the namespace ClusterAPI resources are deployed
-                  into.
-                example: capi-gcp
+              backupName:
+                description: |-
+                  BackupName is a name of the backup to restore.
+                  BackupNamespace and BackupClusterRef have to be specified as well with it.
+                  If BackupName, BackupNamespace and BackupCluster are specified, then BackupID is not needed.
                 type: string
                 x-kubernetes-validations:
-                - message: Namespace is immutable
+                - message: BackupName is immutable
                   rule: self == oldSelf
-            required:
-            - cloud
+              backupNamespace:
+                description: |-
+                  BackupNamespace is a namespace of the backup to restore.
+                  BackupName and BackupClusterRef have to be specified as well with it.
+                  If BackupName, BackupNamespace and BackupCluster are specified, then BackupID is not needed.
+                type: string
+                x-kubernetes-validations:
+                - message: BackupNamespace is immutable
+                  rule: self == oldSelf
             type: object
           status:
+            description: ClusterRestoreStatus defines the observed state of ClusterRestore
             properties:
               conditions:
-                description: Represents the observations of a PrAutomation's current
+                description: Represents the observations of ClusterRestore current
                   state.
                 items:
                   description: "Condition contains details for one aspect of the current
@@ -212,14 +194,16 @@ spec:
                 - type
                 x-kubernetes-list-type: map
               id:
-                description: ID of the resource in the Console API.
+                description: ID of the cluster restore in the Console API.
                 type: string
-              sha:
-                description: SHA of last applied configuration.
+              status:
+                enum:
+                - CREATED
+                - PENDING
+                - SUCCESSFUL
+                - FAILED
                 type: string
             type: object
-        required:
-        - spec
         type: object
     served: true
     storage: true

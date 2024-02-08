@@ -145,12 +145,12 @@ jobs:
     - uses: actions/setup-go@v5
       with:
         go-version: '^1.21.3'
-    - name: update controller crds
-      working-directory: controller
-      run: make chart-crds
-    - name: update controller rbac
-      working-directory: controller
-      run: make chart-rbac
+    # - name: update controller crds
+    #   working-directory: controller
+    #   run: make chart-crds
+    # - name: update controller rbac
+    #   working-directory: controller
+    #   run: make chart-rbac
     - name: push chart
       uses: pluralsh/chart-releaser@v0.1.3
       with:

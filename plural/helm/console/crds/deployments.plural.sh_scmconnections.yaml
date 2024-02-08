@@ -4,33 +4,29 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: providers.deployments.plural.sh
+  name: scmconnections.deployments.plural.sh
 spec:
   group: deployments.plural.sh
   names:
-    kind: Provider
-    listKind: ProviderList
-    plural: providers
-    singular: provider
+    kind: ScmConnection
+    listKind: ScmConnectionList
+    plural: scmconnections
+    singular: scmconnection
   scope: Cluster
   versions:
   - additionalPrinterColumns:
-    - description: ID of the provider in the Console API.
+    - description: ID of the scm connection in the Console API.
       jsonPath: .status.id
       name: ID
       type: string
-    - description: Human-readable name of the Provider.
-      jsonPath: .spec.name
-      name: Name
-      type: string
-    - description: Name of the Provider cloud service.
-      jsonPath: .spec.cloud
-      name: Cloud
+    - description: Name of the scm provider service.
+      jsonPath: .spec.type
+      name: Provider
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Provider ...
+        description: ScmConnection ...
         properties:
           apiVersion:
             description: |-
@@ -50,90 +46,47 @@ spec:
           metadata:
             type: object
           spec:
-            description: ProviderSpec ...
             properties:
-              cloud:
-                description: |-
-                  Cloud is the name of the cloud service for the Provider.
-                  One of (CloudProvider): [gcp, aws, azure]
-                enum:
-                - gcp
-                - aws
-                - azure
-                example: aws
+              apiUrl:
+                description: APIUrl is a base URL for HTTP apis for shel-hosted versions
+                  if different from BaseUrl.
                 type: string
-                x-kubernetes-validations:
-                - message: Cloud is immutable
-                  rule: self == oldSelf
-              cloudSettings:
-                description: |-
-                  CloudSettings reference cloud provider credentials secrets used for provisioning the Cluster.
-                  Not required when Cloud is set to CloudProvider(BYOK).
+              baseUrl:
+                description: BaseUrl is a base URL for Git clones for self-hosted
+                  versions.
+                type: string
+              name:
+                description: Name is a human-readable name of the ScmConnection.
+                type: string
+              tokenSecretRef:
+                description: Token ...
                 properties:
-                  aws:
-                    description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
-                    properties:
-                      name:
-                        description: name is unique within a namespace to reference
-                          a secret resource.
-                        type: string
-                      namespace:
-                        description: namespace defines the space within which the
-                          secret name must be unique.
-                        type: string
-                    type: object
-                    x-kubernetes-map-type: atomic
-                  azure:
-                    description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
-                    properties:
-                      name:
-                        description: name is unique within a namespace to reference
-                          a secret resource.
-                        type: string
-                      namespace:
-                        description: namespace defines the space within which the
-                          secret name must be unique.
-                        type: string
-                    type: object
-                    x-kubernetes-map-type: atomic
-                  gcp:
-                    description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
-                    properties:
-                      name:
-                        description: name is unique within a namespace to reference
-                          a secret resource.
-                        type: string
-                      namespace:
-                        description: namespace defines the space within which the
-                          secret name must be unique.
-                        type: string
-                    type: object
-                    x-kubernetes-map-type: atomic
+                  name:
+                    description: name is unique within a namespace to reference a
+                      secret resource.
+                    type: string
+                  namespace:
+                    description: namespace defines the space within which the secret
+                      name must be unique.
+                    type: string
                 type: object
                 x-kubernetes-map-type: atomic
-              name:
-                description: Name is a human-readable name of the Provider.
-                example: gcp-provider
+              type:
+                description: |-
+                  Type is the name of the scm service for the ScmConnection.
+                  One of (ScmType): [github, gitlab]
+                enum:
+                - GITHUB
+                - GITLAB
+                example: GITHUB
                 type: string
-                x-kubernetes-validations:
-                - message: Name is immutable
-                  rule: self == oldSelf
-              namespace:
-                description: Namespace is the namespace ClusterAPI resources are deployed
-                  into.
-                example: capi-gcp
+              username:
+                description: Username ...
                 type: string
-                x-kubernetes-validations:
-                - message: Namespace is immutable
-                  rule: self == oldSelf
             required:
-            - cloud
+            - name
+            - tokenSecretRef
+            - type
             type: object
           status:
             properties:
