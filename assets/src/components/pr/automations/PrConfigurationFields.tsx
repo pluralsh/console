@@ -32,8 +32,6 @@ export function PrConfigurationFields({
           setConfigVals({ ...configVals, [name]: value })
         }
 
-        console.log('config', cfg)
-
         return (
           <FormField
             required={!optional}

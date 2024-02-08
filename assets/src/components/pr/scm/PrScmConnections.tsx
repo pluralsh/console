@@ -1,5 +1,5 @@
 import { ComponentProps, useCallback, useMemo, useState } from 'react'
-import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { LoopingLogo, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { VirtualItem } from '@tanstack/react-virtual'
 
@@ -17,7 +17,7 @@ import {
 import { PR_BASE_CRUMBS, PR_SCM_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { columns } from './PrScmConnectionsColumns'
-import { CreateScmConnection } from './scm/CreateScmConnection'
+import { CreateScmConnection } from './CreateScmConnection'
 
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -93,6 +93,9 @@ export default function ScmConnections() {
 
   if (error) {
     return <GqlError error={error} />
+  }
+  if (!data) {
+    return <LoopingLogo />
   }
 
   return (

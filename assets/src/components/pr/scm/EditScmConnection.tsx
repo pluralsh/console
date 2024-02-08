@@ -25,7 +25,7 @@ import { GqlError } from 'components/utils/Alert'
 
 import { ApolloError } from '@apollo/client'
 
-import { scmTypeToIcon, scmTypeToLabel } from '../PrScmConnectionsColumns'
+import { scmTypeToIcon, scmTypeToLabel } from './PrScmConnectionsColumns'
 
 function EditScmConnectionModalBase({
   open,

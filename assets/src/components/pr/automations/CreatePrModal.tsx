@@ -42,8 +42,6 @@ function CreatePrModalBase({
     validateAndFilterConfig(configuration, configVals)
   const allowSubmit = branch && configIsValid
 
-  console.log('validationRes', configIsValid, filteredConfig)
-
   return (
     <ModalMountTransition open={open}>
       <Modal

@@ -57,7 +57,6 @@ export function validateAndFilterConfig(
       if (value) {
         filteredValues.push({ name, value })
       }
-      console.log('optional', configItem.optional)
 
       return (!!configItem.optional || !!value) && acc
     }

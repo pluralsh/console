@@ -22,7 +22,7 @@ import { TruncateStart } from 'components/utils/table/TruncateStart'
 import { StackedText } from 'components/utils/table/StackedText'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 
-import { EditScmConnectionModal } from './scm/EditScmConnection'
+import { EditScmConnectionModal } from './EditScmConnection'
 
 enum MenuItemKey {
   Edit = 'edit',

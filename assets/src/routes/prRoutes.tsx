@@ -2,16 +2,14 @@ import { type RouteObject } from 'react-router'
 import { Navigate } from 'react-router-dom'
 
 import Pr from 'components/pr/Pr'
-import PrQueue from 'components/pr/PrQueue'
-import PrDependencyDashboard from 'components/pr/PrDependencyDashboard'
-import PrScmConnections from 'components/pr/PrScmConnections'
-import PrAutomations from 'components/pr/PrAutomations'
+import PrQueue from 'components/pr/queue/PrQueue'
+import PrScmConnections from 'components/pr/scm/PrScmConnections'
+import PrAutomations from 'components/pr/automations/PrAutomations'
 
 import { CdRoot } from './cdRoutes'
 import {
   PR_AUTOMATIONS_REL_PATH,
   PR_DEFAULT_REL_PATH,
-  PR_DEPENDENCIES_REL_PATH,
   PR_QUEUE_REL_PATH,
   PR_REL_PATH,
   PR_SCM_REL_PATH,
@@ -32,10 +30,6 @@ export const prRoutes = [
           {
             path: PR_QUEUE_REL_PATH,
             element: <PrQueue />,
-          },
-          {
-            path: PR_DEPENDENCIES_REL_PATH,
-            element: <PrDependencyDashboard />,
           },
           {
             path: PR_SCM_REL_PATH,

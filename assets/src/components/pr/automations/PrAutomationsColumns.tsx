@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react'
+import { ComponentProps, ReactElement, useState } from 'react'
 import {
   Button,
   ClusterIcon,
@@ -26,6 +26,9 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 import { StackedText } from 'components/utils/table/StackedText'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import { Link } from 'react-router-dom'
+
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { PrAutomationPermissionsModal } from 'components/pr/automations/PrAutomationPermissionsModal'
 
 import { CreatePrModal } from './CreatePrModal'
 
@@ -237,11 +240,11 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
           open={menuKey === MenuItemKey.Delete}
           onClose={() => setMenuKey('')}
         />
-        {/* <AutomationPermissionsModal
-          automation={automation}
+        <AutomationPermissionsModal
+          prAutomation={prAutomation}
           open={menuKey === MenuItemKey.Permissions}
           onClose={() => setMenuKey('')}
-        /> */}
+        />
         <CreatePrModal
           prAutomation={prAutomation}
           refetch={refetch}
@@ -252,6 +255,16 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
     )
   },
 })
+
+function AutomationPermissionsModal(
+  props: ComponentProps<typeof PrAutomationPermissionsModal>
+) {
+  return (
+    <ModalMountTransition open={props.open}>
+      <PrAutomationPermissionsModal {...props} />
+    </ModalMountTransition>
+  )
+}
 
 export const columns = [
   ColName,
