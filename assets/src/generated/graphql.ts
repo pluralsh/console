@@ -87,7 +87,7 @@ export type AccessTokenEdge = {
 
 export type AccessTokenScope = {
   __typename?: 'AccessTokenScope';
-  api: Scalars['String']['output'];
+  api?: Maybe<Scalars['String']['output']>;
   apis?: Maybe<Array<Scalars['String']['output']>>;
   identifier?: Maybe<Scalars['String']['output']>;
   ids?: Maybe<Array<Scalars['String']['output']>>;

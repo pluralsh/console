@@ -4004,7 +4004,7 @@ type AccessToken {
 }
 
 type AccessTokenScope {
-  api: String!
+  api: String
   apis: [String!]
   identifier: String
   ids: [String!]

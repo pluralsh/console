@@ -175,7 +175,7 @@ defmodule Console.GraphQl.Users do
   end
 
   object :access_token_scope do
-    field :api,        non_null(:string)
+    field :api,        :string
     field :apis,       list_of(non_null(:string))
     field :identifier, :string
     field :ids,        list_of(non_null(:string))
