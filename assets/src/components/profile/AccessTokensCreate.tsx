@@ -1,15 +1,6 @@
 import { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
-
-import {
-  Button,
-  Card,
-  FormField,
-  Input,
-  Modal,
-  Switch,
-  Toast,
-} from '@pluralsh/design-system'
+import { FormEvent, useCallback, useState } from 'react'
+import { Button, Modal, Switch, Toast } from '@pluralsh/design-system'
 
 import {
   AccessTokensDocument,
@@ -18,12 +9,24 @@ import {
 import { GqlError } from '../utils/Alert'
 import { appendConnection, updateCache } from '../../utils/graphql'
 
+import { AccessTokensCreateScope } from './AccessTokensCreateScope'
+
+export type Scope = {
+  apis: string[]
+  ids: string[]
+}
+
 export function AccessTokensCreate() {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
-  const [scopes, setScopes] = useState(false)
+  const [hasScopes, setHasScopes] = useState(false)
+  const [scopes, setScopes] = useState<Scope[]>([
+    {
+      apis: ['updateServiceDeployment', 'updateCluster'],
+      ids: ['*'],
+    },
+  ])
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
-  const [api, setApi] = useState('api')
 
   const [mutation, { loading, error }] = useCreateAccessTokenMutation({
     update: (cache, { data }) =>
@@ -35,6 +38,19 @@ export function AccessTokensCreate() {
     onCompleted: () => setOpen(false),
   })
 
+  const addScope = useCallback(() => {
+    setScopes([...scopes, { apis: [], ids: [] }])
+  }, [scopes, setScopes])
+  const canRemoveScope = scopes.length > 1
+  const removeScope = useCallback(
+    (idx: number) => {
+      if (scopes.length < 2) return
+
+      setScopes(scopes.filter((_, i) => i !== idx))
+    },
+    [scopes, setScopes]
+  )
+
   const disabled = false
   const onSubmit = useCallback(
     (e: FormEvent) => {
@@ -45,12 +61,6 @@ export function AccessTokensCreate() {
     },
     [disabled, loading, mutation]
   )
-
-  const initialFocusRef = useRef<HTMLInputElement>()
-
-  useEffect(() => {
-    if (open) initialFocusRef.current?.focus?.()
-  }, [open])
 
   return (
     <>
@@ -72,12 +82,28 @@ export function AccessTokensCreate() {
           <div css={{ display: 'flex', gap: theme.spacing.small, flexGrow: 1 }}>
             <div css={{ display: 'flex', flexGrow: 1 }}>
               <Switch
-                checked={scopes}
-                onChange={(val) => setScopes(val)}
+                checked={hasScopes}
+                onChange={(val) => setHasScopes(val)}
               >
-                Configure scopes
+                <div
+                  css={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: theme.spacing.xsmall,
+                  }}
+                >
+                  Configure access scopes
+                </div>
               </Switch>
             </div>
+            {hasScopes && (
+              <Button
+                secondary
+                onClick={addScope}
+              >
+                Add scope
+              </Button>
+            )}
             <Button
               type="submit"
               disabled={disabled}
@@ -98,41 +124,35 @@ export function AccessTokensCreate() {
       >
         <>
           <p>Do you want to create new access token?</p>
-          {scopes && (
-            <Card
-              css={{
-                '&&': {
-                  marginTop: theme.spacing.medium,
-                  padding: theme.spacing.medium,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: theme.spacing.medium,
-                },
-              }}
-            >
-              <FormField label="APIs">
-                <Input
-                  inputProps={{ ref: initialFocusRef }}
-                  value={api}
-                  onChange={(e) => {
-                    setApi(e.currentTarget.value)
+          {hasScopes && (
+            <>
+              <div
+                css={{
+                  ...theme.partials.text.body2,
+                  color: theme.colors['text-light'],
+                  marginTop: theme.spacing.small,
+                }}
+              />
+              {scopes.map((scope, index) => (
+                <AccessTokensCreateScope
+                  index={index}
+                  scope={scope}
+                  setScope={(s) => {
+                    const nextScopes = scopes
+
+                    nextScopes[index] = s
+
+                    setScopes(nextScopes)
                   }}
+                  canRemove={canRemoveScope}
+                  remove={() => removeScope(index)}
                 />
-              </FormField>
-              <FormField label="IDs">
-                <Input
-                  inputProps={{ ref: initialFocusRef }}
-                  value={api}
-                  onChange={(e) => {
-                    setApi(e.currentTarget.value)
-                  }}
-                />
-              </FormField>
-            </Card>
+              ))}
+            </>
           )}
           {error && (
             <GqlError
-              header="Problem importing repository"
+              header="Problem creating token."
               error={error}
             />
           )}
@@ -153,75 +173,3 @@ export function AccessTokensCreate() {
     </>
   )
 }
-
-//
-// object :access_token_scope do
-//   field :api,        non_null(:string)
-// field :apis,       list_of(non_null(:string))
-// field :identifier, :string
-// field :ids,        list_of(non_null(:string))
-// end
-//    test "a user can create an access token with scopes" do
-//       user = insert(:user)
-//
-//       {:ok, token} = Users.create_access_token(%{
-//         scopes: [%{api: "updateServiceDeployment", identifier: Ecto.UUID.generate()}]
-//       }, user)
-//
-//       assert token.token
-//       assert token.user_id == user.id
-//       [scope] = token.scopes
-//       assert scope.api == "updateServiceDeployment"
-//    test "it will match by wildcard" do
-//       scope = build(:scope, ids: ["*"], apis: ["updateService"])
-//       assert AccessTokens.scopes_match?([scope], "updateService", "id")
-//       refute AccessTokens.scopes_match?([scope], "updateCluster", "id")
-//       assert AccessTokens.scopes_match?([scope], "updateService", "id2")
-//
-//       scope = build(:scope, identifier: "*", apis: ["updateService"])
-//       assert AccessTokens.scopes_match?([scope], "updateService", "id")
-//       refute AccessTokens.scopes_match?([scope], "updateCluster", "id")
-//       assert AccessTokens.scopes_match?([scope], "updateService", "id2")
-//     end
-//
-//     test "it will ignore nils" do
-//       scope = build(:scope)
-//       assert AccessTokens.scopes_match?([scope], "updateService", "id")
-//       assert AccessTokens.scopes_match?([scope], "updateCluster", "id")
-//       assert AccessTokens.scopes_match?([scope], "updateService", "id2")
-
-//    test "it will match if api and id matches" do
-//       scope = build(:scope, identifier: "id", api: "updateService")
-//       assert AccessTokens.scopes_match?([scope], "updateService", "id")
-//       refute AccessTokens.scopes_match?([scope], "updateCluster", "id")
-//       refute AccessTokens.scopes_match?([scope], "updateService", "id2")
-//     end
-//
-//     test "it will match if api and id in list" do
-//       scope = build(:scope, ids: ["id"], apis: ["updateService"])
-//       assert AccessTokens.scopes_match?([scope], "updateService", "id")
-//       refute AccessTokens.scopes_match?([scope], "updateCluster", "id")
-//       refute AccessTokens.scopes_match?([scope], "updateService", "id2")
-//     end
-
-/// defmodule Console.Users.AccessTokens do
-//   alias Console.Schema.AccessToken.Scope
-//
-//   @spec scopes_match?([Scope.t], binary, binary | nil) :: boolean
-//   def scopes_match?(scopes, api, id) do
-//     Enum.all?(scopes, &matches_api?(&1, api) && matches_id?(&1, id))
-//   end
-//
-//   defp matches_api?(%Scope{api: api}, api2) when is_binary(api), do: api == api2
-//   defp matches_api?(%Scope{apis: [_ | _] = apis}, api), do: Enum.member?(apis, api)
-//   defp matches_api?(%Scope{api: nil, apis: nil}, _), do: true
-//   defp matches_api?(_, _), do: false
-//
-//   defp matches_id?(_, nil), do: true
-//   defp matches_id?(%Scope{identifier: "*"}, _), do: true
-//   defp matches_id?(%Scope{ids: ["*"]}, _), do: true
-//   defp matches_id?(%Scope{ids: [_ | _] = ids}, id), do: Enum.member?(ids, id)
-//   defp matches_id?(%Scope{identifier: id}, id2) when is_binary(id), do: id == id2
-//   defp matches_id?(%Scope{identifier: nil, ids: nil}, _), do: true
-//   defp matches_id?(_, _), do: false
-// end
