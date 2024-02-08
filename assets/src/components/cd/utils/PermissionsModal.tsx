@@ -29,12 +29,14 @@ const PermissionsColumnSC = styled.div(({ theme }) => ({
   rowGap: theme.spacing.medium,
 }))
 
-function ReadPermissions({
+export function ReadPermissions({
   bindings,
   setBindings,
+  forLabel,
 }: {
   bindings?: (PolicyBindingFragment | null | undefined)[] | null | undefined
   setBindings: any
+  forLabel: 'cluster' | 'service' | undefined
 }) {
   return (
     <PermissionsColumnSC>
@@ -43,19 +45,26 @@ function ReadPermissions({
         bindings={bindings}
         setBindings={setBindings}
         hints={{
-          user: 'Users with read permissions for this cluster',
-          group: 'Groups with read permissions for this cluster',
+          user: `Users with read permissions${
+            !forLabel ? '' : ` for this ${forLabel}`
+          }`,
+          group: `Groups with read permissions${
+            !forLabel ? '' : ` for this ${forLabel}`
+          }`,
         }}
       />
     </PermissionsColumnSC>
   )
 }
-function WritePermissions({
+
+export function WritePermissions({
   bindings,
   setBindings,
+  forLabel,
 }: {
   bindings?: (PolicyBindingFragment | null | undefined)[] | null | undefined
   setBindings: any
+  forLabel: 'cluster' | 'service' | undefined
 }) {
   return (
     <PermissionsColumnSC>
@@ -64,8 +73,12 @@ function WritePermissions({
         bindings={bindings}
         setBindings={setBindings}
         hints={{
-          user: 'Users with write permissions for this cluster',
-          group: 'Groups with write permissions for this cluster',
+          user: `Users with write permissions${
+            !forLabel ? '' : ` for this ${forLabel}`
+          }`,
+          group: `Groups with write permissions${
+            !forLabel ? '' : ` for this ${forLabel}`
+          }`,
         }}
       />
     </PermissionsColumnSC>
@@ -144,6 +157,7 @@ export function PermissionsModal({
     },
     [clusterId, mutation, readBindings, serviceId, writeBindings]
   )
+  const forLabel = clusterId ? 'cluster' : serviceId ? 'service' : undefined
 
   return (
     <Modal
@@ -200,7 +214,12 @@ export function PermissionsModal({
           }}
         >
           <StepBody>
-            Bind users to read or write permissions for <b>{name}</b> cluster
+            Bind users to read or write permissions for
+            {name && (
+              <>
+                <b>{name}</b> {forLabel}
+              </>
+            )}
           </StepBody>
         </div>
         {!bindings ? (
@@ -215,12 +234,14 @@ export function PermissionsModal({
               }}
             >
               <ReadPermissions
+                forLabel={forLabel}
                 bindings={uniqueReadBindings}
                 setBindings={setReadBindings}
               />
             </div>
             <div css={{ width: '50%', paddingLeft: theme.spacing.large }}>
               <WritePermissions
+                forLabel={forLabel}
                 bindings={uniqueWriteBindings}
                 setBindings={setWriteBindings}
               />
