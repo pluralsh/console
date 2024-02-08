@@ -234,12 +234,19 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   end
 
   connection node_type: :pipeline
+  connection node_type: :pipeline_gate
 
   object :public_pipeline_queries do
     field :cluster_gates, list_of(:pipeline_gate) do
       middleware ClusterAuthenticated
 
       resolve &Deployments.cluster_gates/2
+    end
+
+    connection field :paged_cluster_gates, node_type: :pipeline_gate do
+      middleware ClusterAuthenticated
+
+      resolve &Deployments.paged_cluster_gates/2
     end
 
     field :cluster_gate, :pipeline_gate do

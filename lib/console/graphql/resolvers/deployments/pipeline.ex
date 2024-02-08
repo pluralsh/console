@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Pipeline do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.{Pipelines}
-  alias Console.Schema.{Pipeline}
+  alias Console.Schema.{Pipeline, PipelineGate}
 
   def list_pipelines(args, %{context: %{current_user: user}}) do
     Pipeline.for_user(user)
@@ -11,6 +11,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Pipeline do
   end
 
   def cluster_gates(_, %{context: %{cluster: cluster}}), do: {:ok, Pipelines.for_cluster(cluster)}
+
+  def paged_cluster_gates(args, %{context: %{cluster: %{id: id}}}) do
+    PipelineGate.for_cluster(id)
+    |> PipelineGate.for_agent()
+    |> PipelineGate.pending()
+    |> paginate(args)
+  end
 
   def cluster_gate(%{id: id}, ctx) do
     Pipelines.get_gate!(id)
