@@ -103,7 +103,7 @@ export default function AutomationPr() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Documentation
+          Create automation
         </Button>
       ),
       []
