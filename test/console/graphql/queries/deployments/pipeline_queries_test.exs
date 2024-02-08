@@ -95,6 +95,29 @@ defmodule Console.GraphQl.Deployments.PipelineQueriesTest do
     end
   end
 
+  describe "pagedClusterGates" do
+    test "it will fetch the gates configured for a cluster" do
+      cluster = insert(:cluster)
+      other   = insert(:cluster)
+      job = insert(:pipeline_gate, type: :job, state: :pending, cluster: cluster)
+      insert(:pipeline_gate, type: :job, state: :pending, cluster: other)
+      insert(:pipeline_gate, type: :job, state: :open, cluster: cluster)
+      insert(:pipeline_gate, type: :job, state: :closed, cluster: cluster)
+      insert(:pipeline_gate, type: :approval)
+
+      {:ok, %{data: %{"pagedClusterGates" => found}}} = run_query("""
+        query {
+          pagedClusterGates(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{cluster: cluster})
+
+      [node] = from_connection(found)
+      assert node["id"] == job.id
+    end
+  end
+
   describe "clusterGate" do
     test "it can fetch a gate for a cluster" do
       cluster = insert(:cluster)

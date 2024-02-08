@@ -2287,6 +2287,18 @@ export type PipelineGateAttributes = {
   type: GateType;
 };
 
+export type PipelineGateConnection = {
+  __typename?: 'PipelineGateConnection';
+  edges?: Maybe<Array<Maybe<PipelineGateEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PipelineGateEdge = {
+  __typename?: 'PipelineGateEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PipelineGate>;
+};
+
 /** a representation of an individual pipeline promotion, which is a list of services/revisions and timestamps to determine promotion status */
 export type PipelinePromotion = {
   __typename?: 'PipelinePromotion';
@@ -3718,6 +3730,8 @@ export type RootQueryType = {
   nodes?: Maybe<Array<Maybe<Node>>>;
   notifications?: Maybe<NotificationConnection>;
   objectStores?: Maybe<ObjectStoreConnection>;
+  pagedClusterGates?: Maybe<PipelineGateConnection>;
+  pagedClusterServices?: Maybe<ServiceDeploymentConnection>;
   pipeline?: Maybe<Pipeline>;
   pipelineGate?: Maybe<PipelineGate>;
   pipelines?: Maybe<PipelineConnection>;
@@ -4082,6 +4096,22 @@ export type RootQueryTypeNotificationsArgs = {
 
 
 export type RootQueryTypeObjectStoresArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypePagedClusterGatesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypePagedClusterServicesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;

@@ -333,6 +333,12 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.cluster_services/2
     end
 
+    connection field :paged_cluster_services, node_type: :service_deployment do
+      middleware ClusterAuthenticated
+
+      resolve &Deployments.paged_cluster_services/2
+    end
+
     @desc "fetches details of this service deployment, and can be called by the deploy operator"
     field :service_deployment, :service_deployment do
       middleware Authenticated, :cluster

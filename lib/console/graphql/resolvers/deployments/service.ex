@@ -49,6 +49,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
     |> all()
   end
 
+  def paged_cluster_services(args, %{context: %{cluster: %{id: id}}}) do
+    Service.for_cluster(id)
+    |> Service.ordered()
+    |> paginate(args)
+  end
+
   def service_configuration(service, _, ctx) do
     with {:ok, _} <- allow(service, actor(ctx), :secrets),
          {:ok, secrets} <- Services.configuration(service) do
