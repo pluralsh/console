@@ -68,28 +68,19 @@ function EditScmConnectionModalBase({
         const attributes = {
           name,
           type,
-          token: formState.token || null,
-          apiUrl: formState.apiUrl || null,
-          baseUrl: formState.baseUrl || null,
-          username: formState.username || null,
-          signingPrivateKey: formState.signingPrivateKey || null,
+          apiUrl: formState.apiUrl || '',
+          baseUrl: formState.baseUrl || '',
+          username: formState.username || '',
+          ...(!formState.token ? {} : { token: formState.token }),
+          ...(!formState.signingPrivateKey
+            ? {}
+            : { signingPrivateKey: formState.signingPrivateKey }),
         }
 
         mutation({ variables: { id: scmConnection.id, attributes } })
       }
     },
-    [
-      allowSubmit,
-      formState.apiUrl,
-      formState.baseUrl,
-      formState.signingPrivateKey,
-      formState.token,
-      formState.username,
-      mutation,
-      name,
-      scmConnection.id,
-      type,
-    ]
+    [allowSubmit, formState, mutation, name, scmConnection.id, type]
   )
 
   return (
