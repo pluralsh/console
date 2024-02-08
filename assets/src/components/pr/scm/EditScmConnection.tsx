@@ -75,7 +75,6 @@ function EditScmConnectionModalBase({
           signingPrivateKey: formState.signingPrivateKey || null,
         }
 
-        // @ts-expect-error
         mutation({ variables: { id: scmConnection.id, attributes } })
       }
     },
@@ -190,7 +189,7 @@ export function ScmConnectionForm({
       >
         <InputRevealer
           defaultRevealed={false}
-          value={formState.token}
+          value={formState.token || ''}
           onChange={(e) => updateFormState({ token: e.target.value })}
         />
       </FormField>

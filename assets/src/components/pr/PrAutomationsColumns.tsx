@@ -5,7 +5,6 @@ import {
   DeploymentIcon,
   IconFrame,
   ListBoxItem,
-  Modal,
   PeopleIcon,
   PipelineIcon,
   PrOpenIcon,
@@ -27,7 +26,8 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 import { StackedText } from 'components/utils/table/StackedText'
 import { BasicLink } from 'components/utils/typography/BasicLink'
 import { Link } from 'react-router-dom'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { CreatePrModal } from './CreatePrModal'
 
 enum MenuItemKey {
   Permissions = 'permissions',
@@ -179,41 +179,6 @@ export function DeletePrAutomationModal({
         </>
       }
     />
-  )
-}
-
-export function CreatePrModal({
-  prAutomation,
-  // refetch,
-  open,
-  onClose,
-}: {
-  prAutomation: PrAutomationFragment
-  // eslint-disable-next-line react/no-unused-prop-types
-  refetch: Nullable<() => void>
-  open: boolean
-  onClose: Nullable<() => void>
-}) {
-  // const theme = useTheme()
-  // const [mutation, { loading, error }] = useCreatePullRequestMutation({
-  //   variables: { id: prAutomation.id },
-  //   onCompleted: () => {
-  //     onClose?.()
-  //     refetch?.()
-  //   },
-  // })
-
-  return (
-    <ModalMountTransition open={open}>
-      <Modal
-        portal
-        open={open}
-        onClose={onClose}
-        header={`Pull request configuration for ${prAutomation?.name}`}
-      >
-        TODO
-      </Modal>
-    </ModalMountTransition>
   )
 }
 

@@ -19,17 +19,31 @@ fragment PrAutomation on PrAutomation {
   connection {
     ...ScmConnection
   }
-  updates {
-    files
-    matchStrategy
-    regexReplacements {
-      regex
-      replacement
+  configuration {
+    condition {
+      field
+      operation
+      value
     }
-    regexes
-    replaceTemplate
-    yq
+    default
+    documentation
+    longform
+    name
+    optional
+    placeholder
+    type
   }
+  # updates {
+  #   files
+  #   matchStrategy
+  #   regexReplacements {
+  #     regex
+  #     replacement
+  #   }
+  #   regexes
+  #   replaceTemplate
+  #   yq
+  # }
 }
 
 query PrAutomations($first: Int = 100, $after: String) {
