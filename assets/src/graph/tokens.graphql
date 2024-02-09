@@ -1,8 +1,14 @@
 fragment AccessToken on AccessToken {
   id
   insertedAt
-  token
   updatedAt
+  token
+  scopes {
+    api
+    apis
+    identifier
+    ids
+  }
 }
 
 fragment AccessTokenAudit on AccessTokenAudit {
@@ -47,8 +53,8 @@ query TokenAudits($id: ID!, $cursor: String) {
   }
 }
 
-mutation CreateAccessToken {
-  createAccessToken {
+mutation CreateAccessToken($scopes: [ScopeAttributes]) {
+  createAccessToken(scopes: $scopes) {
     ...AccessToken
   }
 }
