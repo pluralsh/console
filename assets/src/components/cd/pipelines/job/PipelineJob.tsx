@@ -1,7 +1,13 @@
 import {
+  AppIcon,
   type Breadcrumb,
+  BriefcaseIcon,
+  Chip,
   LoopingLogo,
+  Sidecar,
+  SidecarItem,
   TabPanel,
+  Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createContext, useContext, useMemo, useRef } from 'react'
@@ -12,8 +18,13 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom'
+import capitalize from 'lodash/capitalize'
 
-import { PipelineGateJobFragment, useJobGateQuery } from 'generated/graphql'
+import {
+  JobFragment,
+  PipelineGateJobFragment,
+  useJobGateQuery,
+} from 'generated/graphql'
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import { GqlError } from 'components/utils/Alert'
@@ -23,6 +34,12 @@ import { ResponsiveLayoutContentContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { SideNavEntries } from 'components/layout/SideNavEntries'
+
+import { useTheme } from 'styled-components'
+
+import { Body2P, Subtitle2H1 } from 'components/utils/typography/Text'
+
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
 import { PIPELINES_CRUMBS } from '../Pipelines'
 
@@ -59,10 +76,17 @@ export const useJobPods = () => {
   return useContext(PodsContext)
 }
 
-type OutletContextT = { refetch: () => void }
+type OutletContextT = {
+  refetch: () => void
+  status: Nullable<JobFragment['status']>
+  metadata: Nullable<JobFragment['metadata']>
+  raw: Nullable<JobFragment['raw']>
+  spec: Nullable<JobFragment['spec']>
+}
 export const usePipelineJob = () => useOutletContext<OutletContextT>()
 
 export default function PipelineJob() {
+  const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const jobId = useParams().jobId!
   const { pathname } = useLocation()
@@ -79,10 +103,37 @@ export default function PipelineJob() {
     )
   )
 
-  const { data, error, refetch } = useJobGateQuery({ variables: { id: jobId } })
+  const { data, error, refetch } = useJobGateQuery({
+    variables: { id: jobId },
+    pollInterval: POLL_INTERVAL,
+  })
 
-  const outletContext: OutletContextT = useMemo(() => ({ refetch }), [refetch])
+  const outletContext: OutletContextT = useMemo(
+    () => ({
+      refetch,
+      status: data?.pipelineGate?.job?.status,
+      metadata: data?.pipelineGate?.job?.metadata,
+      raw: data?.pipelineGate?.job?.raw,
+      spec: data?.pipelineGate?.job?.spec,
+    }),
+    [
+      data?.pipelineGate?.job?.metadata,
+      data?.pipelineGate?.job?.raw,
+      data?.pipelineGate?.job?.spec,
+      data?.pipelineGate?.job?.status,
+      refetch,
+    ]
+  )
+  const podsContext = useMemo(
+    () => data?.pipelineGate?.job?.pods || [],
+    [data?.pipelineGate?.job?.pods]
+  )
   let content = <Outlet context={outletContext} />
+  const gate = data?.pipelineGate
+  const job = gate?.job
+  const name = gate?.name
+
+  console.log('gate', gate)
 
   if (error) {
     content = <GqlError error={error} />
@@ -93,6 +144,51 @@ export default function PipelineJob() {
   return (
     <ResponsiveLayoutPage>
       <ResponsiveLayoutSidenavContainer>
+        <div
+          css={{
+            display: 'flex',
+            alignItem: 'center',
+            gap: theme.spacing.small,
+            marginBottom: theme.spacing.xsmall,
+          }}
+        >
+          <AppIcon
+            size="xsmall"
+            icon={<BriefcaseIcon size={theme.spacing.large} />}
+          />
+          <div
+            css={{
+              minWidth: 0,
+              '&>*': {
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              },
+            }}
+          >
+            <Tooltip label={name}>
+              <Subtitle2H1
+                css={{
+                  margin: 0,
+                }}
+              >
+                {name}
+              </Subtitle2H1>
+            </Tooltip>
+            {name && (
+              <Tooltip label={name}>
+                <Body2P
+                  css={{
+                    color: theme.colors['text-light'],
+                  }}
+                >
+                  Job gate
+                </Body2P>
+              </Tooltip>
+            )}
+          </div>
+        </div>
+
         <SideNavEntries
           directory={directory}
           pathname={pathname}
@@ -104,11 +200,29 @@ export default function PipelineJob() {
         as={<ResponsiveLayoutContentContainer />}
         stateRef={tabStateRef}
       >
-        <PodsContext.Provider value={data?.pipelineGate?.job?.pods || null}>
+        <PodsContext.Provider value={podsContext}>
           {content}
         </PodsContext.Provider>
       </TabPanel>
-      <ResponsiveLayoutSidecarContainer />
+      <ResponsiveLayoutSidecarContainer>
+        {gate && (
+          <Sidecar>
+            {job?.metadata.name && (
+              <SidecarItem heading="Job name">{job?.metadata.name}</SidecarItem>
+            )}
+            {job?.metadata.namespace && (
+              <SidecarItem heading="Job namespace">
+                {gate?.job?.metadata.namespace}
+              </SidecarItem>
+            )}
+            <SidecarItem heading="Status">
+              <Chip>{capitalize(gate?.state)}</Chip>
+            </SidecarItem>
+            <SidecarItem heading="Build type">Job</SidecarItem>
+            <SidecarItem heading="ID">{gate.id}</SidecarItem>
+          </Sidecar>
+        )}
+      </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
     </ResponsiveLayoutPage>
   )

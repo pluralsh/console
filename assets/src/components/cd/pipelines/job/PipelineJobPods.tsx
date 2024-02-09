@@ -16,6 +16,8 @@ import {
 } from 'components/cluster/pods/PodsList'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
 import { useJobPods, usePipelineJob } from './PipelineJob'
 
 const columns = [
@@ -54,10 +56,12 @@ export default function PipelineJobLogs() {
   if (!podsWithId) {
     return <LoopingLogo />
   }
-  console.log('podsWithId', podsWithId)
 
   return (
-    <div>
+    <ScrollablePage
+      scrollable={false}
+      heading="Pods"
+    >
       <FullHeightTableWrap>
         <PodsList
           pods={podsWithId}
@@ -70,6 +74,6 @@ export default function PipelineJobLogs() {
           }}
         />
       </FullHeightTableWrap>
-    </div>
+    </ScrollablePage>
   )
 }

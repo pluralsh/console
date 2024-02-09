@@ -5771,6 +5771,15 @@ export type JobGateQueryVariables = Exact<{
 
 export type JobGateQuery = { __typename?: 'RootQueryType', pipelineGate?: { __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, job?: { __typename?: 'Job', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, count?: number | null, eventTime?: string | null, lastTimestamp?: string | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, spec: { __typename?: 'JobSpec', activeDeadlineSeconds?: number | null, backoffLimit?: number | null, parallelism?: number | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, failed?: number | null, startTime?: string | null, succeeded?: number | null } } | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, spec?: { __typename?: 'GateSpec', job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null };
 
+export type JobGateLogsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  container: Scalars['String']['input'];
+  sinceSeconds: Scalars['Int']['input'];
+}>;
+
+
+export type JobGateLogsQuery = { __typename?: 'RootQueryType', pipelineGate?: { __typename?: 'PipelineGate', job?: { __typename?: 'Job', logs?: Array<string | null> | null } | null } | null };
+
 export type PipelineQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -9758,6 +9767,50 @@ export type JobGateQueryHookResult = ReturnType<typeof useJobGateQuery>;
 export type JobGateLazyQueryHookResult = ReturnType<typeof useJobGateLazyQuery>;
 export type JobGateSuspenseQueryHookResult = ReturnType<typeof useJobGateSuspenseQuery>;
 export type JobGateQueryResult = Apollo.QueryResult<JobGateQuery, JobGateQueryVariables>;
+export const JobGateLogsDocument = gql`
+    query JobGateLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
+  pipelineGate(id: $id) {
+    job {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
+    }
+  }
+}
+    `;
+
+/**
+ * __useJobGateLogsQuery__
+ *
+ * To run a query within a React component, call `useJobGateLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useJobGateLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useJobGateLogsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      container: // value for 'container'
+ *      sinceSeconds: // value for 'sinceSeconds'
+ *   },
+ * });
+ */
+export function useJobGateLogsQuery(baseOptions: Apollo.QueryHookOptions<JobGateLogsQuery, JobGateLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<JobGateLogsQuery, JobGateLogsQueryVariables>(JobGateLogsDocument, options);
+      }
+export function useJobGateLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<JobGateLogsQuery, JobGateLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<JobGateLogsQuery, JobGateLogsQueryVariables>(JobGateLogsDocument, options);
+        }
+export function useJobGateLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<JobGateLogsQuery, JobGateLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<JobGateLogsQuery, JobGateLogsQueryVariables>(JobGateLogsDocument, options);
+        }
+export type JobGateLogsQueryHookResult = ReturnType<typeof useJobGateLogsQuery>;
+export type JobGateLogsLazyQueryHookResult = ReturnType<typeof useJobGateLogsLazyQuery>;
+export type JobGateLogsSuspenseQueryHookResult = ReturnType<typeof useJobGateLogsSuspenseQuery>;
+export type JobGateLogsQueryResult = Apollo.QueryResult<JobGateLogsQuery, JobGateLogsQueryVariables>;
 export const PipelineDocument = gql`
     query Pipeline($id: ID!) {
   pipeline(id: $id) {
@@ -12225,6 +12278,7 @@ export const namedOperations = {
     DeploymentSettings: 'DeploymentSettings',
     Pipelines: 'Pipelines',
     JobGate: 'JobGate',
+    JobGateLogs: 'JobGateLogs',
     Pipeline: 'Pipeline',
     ClusterProviders: 'ClusterProviders',
     PullRequests: 'PullRequests',

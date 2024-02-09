@@ -205,6 +205,14 @@ query JobGate($id: ID!) {
   }
 }
 
+query JobGateLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
+  pipelineGate(id: $id) {
+    job {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
+    }
+  }
+}
+
 query Pipeline($id: ID!) {
   pipeline(id: $id) {
     ...Pipeline
