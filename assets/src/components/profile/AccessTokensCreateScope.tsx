@@ -92,7 +92,7 @@ export function AccessTokensCreateScope({
       />
       <FormField
         label="API"
-        hint="Add at least one API, i.e. updateServiceDeployment."
+        hint="Add at least one API (e.g. updateServiceDeployment)."
         marginTop="small"
         error={isEmpty(scope.apis)}
         required
