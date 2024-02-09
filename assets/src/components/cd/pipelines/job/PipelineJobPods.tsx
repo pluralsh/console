@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { LoopingLogo } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 
 import {
@@ -52,10 +51,6 @@ export default function PipelineJobLogs() {
 
     return podsWithId || []
   }, [pods])
-
-  if (!podsWithId) {
-    return <LoopingLogo />
-  }
 
   return (
     <ScrollablePage

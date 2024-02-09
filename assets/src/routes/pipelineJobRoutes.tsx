@@ -34,7 +34,7 @@ export const pipelineJobRoutes = (
       element={<PipelineJobStatus />}
     />
     <Route
-      path="specs"
+      path="specs/:tab?"
       element={<PipelineJobSpecs />}
     />
   </Route>

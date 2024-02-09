@@ -1,25 +1,85 @@
-import { Card, Code } from '@pluralsh/design-system'
+import { Card, Code, SubTab, TabList } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { PropWideBold } from 'components/component/info/common'
 
+import { useNavigate, useParams } from 'react-router-dom'
+
+import { useLayoutEffect, useRef } from 'react'
+
+import { LinkTabWrap } from 'components/utils/Tabs'
+
+import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
+
 import { usePipelineJob } from './PipelineJob'
+
+const TABS = [
+  { path: '', label: 'Info', enabled: true },
+  { path: 'raw', label: 'Raw', enabled: true },
+]
 
 export default function PipelineJobStatus() {
   const theme = useTheme()
-  const { status, raw, spec } = usePipelineJob()
+  const navigate = useNavigate()
+  const { raw, spec } = usePipelineJob()
+  const { tab: tabName, jobId } = useParams()
+  const tabStateRef = useRef<any>(null)
+  const currentTab = TABS.find((tab) => tab.path === (tabName ?? ''))
+
+  console.log('tabName')
+  useLayoutEffect(() => {
+    if (!currentTab) {
+      navigate(`${PIPELINES_ABS_PATH}/jobs/${jobId}/specs`)
+    }
+  }, [currentTab, jobId, navigate])
+  if (!currentTab) return null
+  console.log('currentTab', currentTab)
 
   return (
-    <ScrollablePage heading="Specs">
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.xlarge,
-        }}
-      >
-        {status?.active}
+    <ScrollablePage
+      heading="Specs"
+      scrollable={currentTab?.path === ''}
+      headingContent={
+        <TabList
+          stateRef={tabStateRef}
+          stateProps={{
+            orientation: 'horizontal',
+            selectedKey: currentTab?.path,
+          }}
+        >
+          {TABS.map(({ label, path }) => (
+            <LinkTabWrap
+              subTab
+              key={path}
+              textValue={label}
+              to={`${PIPELINES_ABS_PATH}/jobs/${jobId}/specs/${path}`}
+            >
+              <SubTab
+                key={path}
+                textValue={label}
+              >
+                {label}
+              </SubTab>
+            </LinkTabWrap>
+          ))}
+        </TabList>
+      }
+    >
+      {currentTab?.path === 'raw' && (
+        /* @ts-ignore */
+        <Code
+          showLineNumbers
+          lang="yaml"
+          css={{
+            overflowY: 'auto',
+            maxHeight: '100%',
+          }}
+        >
+          {raw || ''}
+        </Code>
+      )}
+      {currentTab?.path === '' && (
         <Card
           css={{
             display: 'flex',
@@ -28,16 +88,17 @@ export default function PipelineJobStatus() {
             flexDirection: 'column',
           }}
         >
-          <PropWideBold title="Active">{status?.active || 0}</PropWideBold>
-          <PropWideBold title="Succeeded">{status?.succeeded}</PropWideBold>
-          <PropWideBold title="Failed">{status?.failed || 0}</PropWideBold>
-          <PropWideBold title="Start time">{status?.startTime}</PropWideBold>
-          <PropWideBold title="Completion time">
-            {status?.completionTime}
+          <PropWideBold title="Active deadline seconds">
+            {spec?.activeDeadlineSeconds || 0}
+          </PropWideBold>
+          <PropWideBold title="Backoff limit">
+            {spec?.backoffLimit || 0}
+          </PropWideBold>
+          <PropWideBold title="Parallelism">
+            {spec?.parallelism || 0}
           </PropWideBold>
         </Card>
-        <Code>{raw || ''}</Code>
-      </div>
+      )}
     </ScrollablePage>
   )
 }

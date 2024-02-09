@@ -1,4 +1,11 @@
-import { ReactElement, createRef, useEffect, useMemo, useState } from 'react'
+import {
+  ComponentProps,
+  ReactElement,
+  createRef,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { IconFrame, ReloadIcon, Spinner, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -10,10 +17,7 @@ import LoadingIndicator from '../../../../utils/LoadingIndicator'
 import { determineLevel } from '../../../../apps/app/logs/LogContent'
 import { useBorderColor } from '../../../../apps/app/logs/LogLine'
 
-type ContainerLogsProps = {
-  container: string
-  sinceSeconds?: number
-}
+import { SinceSecondsOptions } from './Logs'
 
 const columnHelper = createColumnHelper<string>()
 
@@ -82,7 +86,13 @@ function LogLine({ getValue }): ReactElement {
   )
 }
 
-function ContainerLogs({ container, sinceSeconds = 180 }: ContainerLogsProps) {
+function ContainerLogs({
+  container,
+  sinceSeconds = SinceSecondsOptions.HalfHour,
+}: {
+  sinceSeconds?: number
+  container: string
+}) {
   const { clusterId } = useParams()
   const { pod } = useOutletContext() as { pod: Pod }
   const {
@@ -121,7 +131,7 @@ function ContainerLogs({ container, sinceSeconds = 180 }: ContainerLogsProps) {
   )
 }
 
-interface ContainerLogsTableProps extends ContainerLogsProps {
+type ContainerLogsTableProps = ComponentProps<typeof ContainerLogs> & {
   refetch: () => void
   loading: boolean
   logs: string[]
@@ -139,7 +149,7 @@ const columns = [
   }),
 ]
 
-function ContainerLogsTable({
+export function ContainerLogsTable({
   container,
   refetch,
   loading,
@@ -159,6 +169,7 @@ function ContainerLogsTable({
     <div
       ref={containerRef}
       css={{
+        minHeight: 0,
         height: '100%',
         ' td': { padding: '1px 0', minHeight: '30px' },
         ' .thSortIndicatorWrap > div': { width: '100%' },
@@ -172,6 +183,10 @@ function ContainerLogsTable({
         columns={columns}
         data={logs}
         emptyStateProps={{ message: 'No logs found to display' }}
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
       />
     </div>
   )

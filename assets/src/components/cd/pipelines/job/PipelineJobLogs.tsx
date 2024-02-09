@@ -1,17 +1,28 @@
-import { ListBoxItem, Select } from '@pluralsh/design-system'
+import { useMemo, useState } from 'react'
+import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
 import { useJobGateLogsQuery } from 'generated/graphql'
 import { useParams } from 'react-router-dom'
-
-import { Key, useMemo, useState } from 'react'
+import { useTheme } from 'styled-components'
 
 import { GqlError } from 'components/utils/Alert'
+
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import { ContainerLogsTable } from 'components/cd/cluster/pod/logs/ContainerLogs'
+
+import {
+  SinceSecondsOptions,
+  SinceSecondsSelectOptions,
+} from 'components/cd/cluster/pod/logs/Logs'
+
+import { isNonNullable } from 'utils/isNonNullable'
 
 import { useJobPods } from './PipelineJob'
 
 export default function PipelineJobLogs() {
+  const theme = useTheme()
   const id = useParams().jobId!
   const pods = useJobPods()
-
   const containers =
     useMemo(
       () =>
@@ -24,34 +35,94 @@ export default function PipelineJobLogs() {
         ),
       [pods]
     ) || []
-  const { data, error } = useJobGateLogsQuery({
-    variables: { id, container: containers?.[0]?.name || '', sinceSeconds: 60 },
-    pollInterval: 500,
+
+  const [sinceSeconds, setSinceSeconds] = useState(SinceSecondsOptions.HalfHour)
+  const [selectedContainer, setSelectedContainer] = useState<string>(
+    containers?.[0]?.name || ''
+  )
+
+  const {
+    data: currentData,
+    previousData,
+    error,
+    loading,
+    refetch,
+  } = useJobGateLogsQuery({
+    variables: { id, container: containers?.[0]?.name || '', sinceSeconds },
+    notifyOnNetworkStatusChange: true,
   })
-  const [selectedKey, setSelectedKey] = useState<Key>(containers?.[0]?.id || '')
-  const logs = data?.pipelineGate?.job?.logs
+  const data = currentData || previousData
+
+  const logs = useMemo(
+    () => (data?.pipelineGate?.job?.logs || []).filter(isNonNullable),
+    [data?.pipelineGate?.job?.logs]
+  )
 
   if (error) {
     return <GqlError error={error} />
   }
 
+  console.log('sinceSeconds', sinceSeconds)
+
   return (
-    <div>
-      {containers.length > 1 && (
-        <Select
-          selectedKey={selectedKey}
-          onSelectionChange={(key) => setSelectedKey(key)}
+    <ScrollablePage
+      heading="Logs"
+      scrollable={false}
+    >
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.medium,
+          height: '100%',
+        }}
+      >
+        <div
+          css={{
+            display: 'flex',
+            gap: theme.spacing.large,
+            '> *': { width: '100%' },
+          }}
         >
-          {containers?.map((c) => (
-            <ListBoxItem
-              key={c.id || ''}
-              label={c.name || ''}
-              textValue={c.name || ''}
-            />
-          ))}
-        </Select>
-      )}
-      {logs && <div>{logs}</div>}
-    </div>
+          <FormField label="Container">
+            <Select
+              selectedKey={selectedContainer}
+              onSelectionChange={(key) => setSelectedContainer(key as string)}
+            >
+              {containers?.map((c) => (
+                <ListBoxItem
+                  key={c.name || ''}
+                  label={c.name || ''}
+                  textValue={c.name || ''}
+                />
+              ))}
+            </Select>
+          </FormField>
+
+          <FormField label="Logs since">
+            <Select
+              selectedKey={`${sinceSeconds}`}
+              onSelectionChange={(key) =>
+                setSinceSeconds(Number(key) as SinceSecondsOptions)
+              }
+            >
+              {SinceSecondsSelectOptions.map((opts) => (
+                <ListBoxItem
+                  key={`${opts.key}`}
+                  label={opts.label}
+                  selected={opts.key === sinceSeconds}
+                />
+              ))}
+            </Select>
+          </FormField>
+        </div>
+        <ContainerLogsTable
+          logs={logs || []}
+          loading={loading}
+          refetch={refetch}
+          container={selectedContainer}
+        />
+      </div>
+    </ScrollablePage>
   )
 }
