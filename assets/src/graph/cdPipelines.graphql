@@ -165,9 +165,43 @@ query Pipelines($first: Int = 50, $after: String) {
   }
 }
 
+fragment PipelineGateJob on Job {
+  events {
+    action
+    count
+    eventTime
+    lastTimestamp
+    message
+    reason
+    type
+  }
+  metadata {
+    ...Metadata
+  }
+  pods {
+    ...Pod
+  }
+  raw
+  spec {
+    activeDeadlineSeconds
+    backoffLimit
+    parallelism
+  }
+  status {
+    active
+    completionTime
+    failed
+    startTime
+    succeeded
+  }
+}
+
 query JobGate($id: ID!) {
-  clusterGate(id: $id) {
+  pipelineGate(id: $id) {
     ...PipelineGate
+    job {
+      ...PipelineGateJob
+    }
   }
 }
 

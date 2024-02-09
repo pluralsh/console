@@ -1,6 +1,5 @@
 import { ComponentProps, forwardRef, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@apollo/client'
-import { Div, Flex, useDebounce } from 'honorable'
 import {
   AppsIcon,
   ComboBox,
@@ -14,6 +13,7 @@ import {
 import Fuse from 'fuse.js'
 import { useNavigate, useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
+import { useDebounce } from '@react-hooks-library/core'
 import type { RootQueryType } from 'generated/graphql'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
@@ -77,6 +77,17 @@ const searchOptions = {
 
 const breadcrumbs = [{ label: 'pods', url: '/pods' }]
 
+const columns = [
+  ColNamespace,
+  ColName,
+  ColMemoryReservation,
+  ColCpuReservation,
+  ColRestarts,
+  ColContainers,
+  ColImages,
+  ColActions,
+]
+
 export default function AllPods() {
   useSetBreadcrumbs(breadcrumbs)
 
@@ -125,19 +136,6 @@ export default function AllPods() {
     [subscribeToMore]
   )
 
-  const columns = useMemo(
-    () => [
-      ColNamespace,
-      ColName,
-      ColMemoryReservation,
-      ColCpuReservation,
-      ColRestarts,
-      ColContainers,
-      ColImages,
-      ColActions(refetch),
-    ],
-    [refetch]
-  )
   const theme = useTheme()
   const namespace = useParams().namespace || null
   const navigate = useNavigate()
@@ -211,7 +209,11 @@ export default function AllPods() {
       scrollable={false}
       headingContent={
         isEmpty(namespaces) ? null : (
-          <Div width={320}>
+          <div
+            css={{
+              width: 320,
+            }}
+          >
             <ComboBox
               inputProps={{ placeholder: 'Filter by namespace' }}
               inputValue={inputValue}
@@ -244,16 +246,19 @@ export default function AllPods() {
                 />
               )) || []}
             </ComboBox>
-          </Div>
+          </div>
         )
       }
     >
       {!data ? (
         <LoadingIndicator />
       ) : (
-        <Flex
-          direction="column"
-          height="100%"
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+          }}
         >
           <Input
             startIcon={<SearchIcon />}
@@ -271,12 +276,15 @@ export default function AllPods() {
                 applications={data?.applications}
                 columns={columns}
                 reactTableOptions={reactTableOptions}
-                maxHeight="unset"
-                height="100%"
+                refetch={refetch}
+                css={{
+                  maxHeight: 'unset',
+                  height: '100%',
+                }}
               />
             </FullHeightTableWrap>
           )}
-        </Flex>
+        </div>
       )}
     </ResponsivePageFullWidth>
   )

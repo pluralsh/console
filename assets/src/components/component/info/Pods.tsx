@@ -8,7 +8,6 @@ import {
   ColRestarts,
   PodsList,
 } from 'components/cluster/pods/PodsList'
-import { useMemo } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -19,27 +18,25 @@ import {
 
 import { InfoSectionH2 } from './common'
 
+const columns = [
+  ColName,
+  {
+    ...ColMemoryReservation,
+    meta: {
+      truncate: true,
+    },
+  },
+  ColCpuReservation,
+  ColRestarts,
+  ColContainers,
+  ColImages,
+  ColDelete,
+]
+
 export default function Pods({ pods }) {
   const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
   const { refetch, ...rest } = useOutletContext<any>()
   const theme = useTheme()
-  const columns = useMemo(
-    () => [
-      ColName,
-      {
-        ...ColMemoryReservation,
-        meta: {
-          truncate: true,
-        },
-      },
-      ColCpuReservation,
-      ColRestarts,
-      ColContainers,
-      ColImages,
-      ColDelete(refetch),
-    ],
-    [refetch]
-  )
 
   return (
     <div
@@ -56,6 +53,7 @@ export default function Pods({ pods }) {
         pods={pods}
         columns={columns}
         serviceId={rest?.serviceId}
+        refetch={refetch}
         {...(clusterId
           ? {
               linkBasePath: getPodDetailsPath({ clusterId }),

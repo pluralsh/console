@@ -4,10 +4,16 @@ import {
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useMemo, useRef } from 'react'
-import { Outlet, useLocation, useMatch, useParams } from 'react-router-dom'
+import { createContext, useContext, useMemo, useRef } from 'react'
+import {
+  Outlet,
+  useLocation,
+  useMatch,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
 
-import { useJobGateQuery } from 'generated/graphql'
+import { PipelineGateJobFragment, useJobGateQuery } from 'generated/graphql'
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import { GqlError } from 'components/utils/Alert'
@@ -40,7 +46,23 @@ const getPipelineJobBreadcrumbs = ({
   { label: tab, url: `${PIPELINES_ABS_PATH}/jobs/${job.id}/${tab}` },
 ]
 
-export default function Account() {
+const PodsContext =
+  createContext<Nullable<PipelineGateJobFragment['pods']>>(undefined)
+
+export const useJobPods = () => {
+  const ctx = useContext(PodsContext)
+
+  if (!ctx) {
+    throw new Error('useJobPods must be used within a PodsContext.Provider')
+  }
+
+  return useContext(PodsContext)
+}
+
+type OutletContextT = { refetch: () => void }
+export const usePipelineJob = () => useOutletContext<OutletContextT>()
+
+export default function PipelineJob() {
   const tabStateRef = useRef<any>(null)
   const jobId = useParams().jobId!
   const { pathname } = useLocation()
@@ -57,9 +79,10 @@ export default function Account() {
     )
   )
 
-  const { data, error } = useJobGateQuery({ variables: { id: jobId } })
+  const { data, error, refetch } = useJobGateQuery({ variables: { id: jobId } })
 
-  let content = <Outlet />
+  const outletContext: OutletContextT = useMemo(() => ({ refetch }), [refetch])
+  let content = <Outlet context={outletContext} />
 
   if (error) {
     content = <GqlError error={error} />
@@ -81,7 +104,9 @@ export default function Account() {
         as={<ResponsiveLayoutContentContainer />}
         stateRef={tabStateRef}
       >
-        {content}
+        <PodsContext.Provider value={data?.pipelineGate?.job?.pods || null}>
+          {content}
+        </PodsContext.Provider>
       </TabPanel>
       <ResponsiveLayoutSidecarContainer />
       <ResponsiveLayoutSpacer />
