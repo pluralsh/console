@@ -27,14 +27,12 @@ export default function PipelineJobStatus() {
   const tabStateRef = useRef<any>(null)
   const currentTab = TABS.find((tab) => tab.path === (tabName ?? ''))
 
-  console.log('tabName')
   useLayoutEffect(() => {
     if (!currentTab) {
       navigate(`${PIPELINES_ABS_PATH}/jobs/${jobId}/specs`)
     }
   }, [currentTab, jobId, navigate])
   if (!currentTab) return null
-  console.log('currentTab', currentTab)
 
   return (
     <ScrollablePage

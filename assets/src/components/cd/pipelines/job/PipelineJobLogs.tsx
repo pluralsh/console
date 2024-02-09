@@ -62,8 +62,6 @@ export default function PipelineJobLogs() {
     return <GqlError error={error} />
   }
 
-  console.log('sinceSeconds', sinceSeconds)
-
   return (
     <ScrollablePage
       heading="Logs"

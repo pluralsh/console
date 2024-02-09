@@ -133,8 +133,6 @@ export default function PipelineJob() {
   const job = gate?.job
   const name = gate?.name
 
-  console.log('gate', gate)
-
   if (error) {
     content = <GqlError error={error} />
   } else if (!data) {
