@@ -276,6 +276,7 @@ const tokenColumns = [
 
 export function AccessTokens() {
   const [open, setOpen] = useState(false)
+  const [displayNewBanner, setDisplayNewBanner] = useState(false)
   const { data, loading } = useAccessTokensQuery()
 
   const tokensList = useMemo(
@@ -342,9 +343,20 @@ export function AccessTokens() {
           <AccessTokensCreateModal
             open={open}
             setOpen={setOpen}
+            setDisplayNewBanner={setDisplayNewBanner}
           />
         </ModalMountTransition>
       </Suspense>
+      {displayNewBanner && (
+        <Toast
+          severity="success"
+          marginBottom="medium"
+          marginRight="xxxxlarge"
+          onClose={() => setDisplayNewBanner(false)}
+        >
+          New access token created.
+        </Toast>
+      )}
     </ResponsivePageFullWidth>
   )
 }
