@@ -576,4 +576,23 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
       refute refetch(ctx)
     end
   end
+
+  describe "setupRenovate" do
+    test "it can initialize a renovate cron" do
+      insert(:git_repository, url: "https://github.com/pluralsh/scaffolds.git")
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      insert(:cluster, self: true)
+      scm = insert(:scm_connection)
+
+      {:ok, %{data: %{"setupRenovate" => svc}}} = run_query("""
+        mutation Setup($id: ID!, $repos: [String]) {
+          setupRenovate(connectionId: $id, repos: $repos) {
+            id
+          }
+        }
+      """, %{"id" => scm.id, "repos" => ["some/repo"]}, %{current_user: admin_user()})
+
+      assert svc["id"]
+    end
+  end
 end

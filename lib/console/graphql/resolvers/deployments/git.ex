@@ -90,6 +90,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def create_pr(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.create_pull_request(attrs, user)
 
+  def setup_renovate(%{connection_id: id, repos: repos}, %{context: %{current_user: user}}),
+    do: Git.setup_renovate(id, repos, user)
+
   defp pr_filters(query, args) do
     Enum.reduce(args, query, fn
       {:cluster_id, cid}, q -> PullRequest.for_cluster(q, cid)
