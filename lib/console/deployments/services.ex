@@ -30,6 +30,8 @@ defmodule Console.Deployments.Services do
 
   def get_revision!(id), do: Repo.get!(Revision, id)
 
+  def get_service_component!(id), do: Repo.get!(ServiceComponent, id)
+
   def get_context_by_name!(name), do: Console.Repo.get_by!(ServiceContext, name: name)
   def get_context_by_name(name), do: Console.Repo.get_by(ServiceContext, name: name)
 

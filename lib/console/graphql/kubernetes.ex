@@ -10,6 +10,7 @@ defmodule Console.GraphQl.Kubernetes do
     field :name,               non_null(:string)
     field :namespace,          :string
     field :creation_timestamp, :string
+    field :uid,                :string
   end
 
   object :result_status do

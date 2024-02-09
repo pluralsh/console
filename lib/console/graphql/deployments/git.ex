@@ -450,6 +450,7 @@ defmodule Console.GraphQl.Deployments.Git do
     @desc "just registers a pointer record to a PR after it was created externally be some other automation"
     field :create_pull_request_pointer, :pull_request do
       middleware Authenticated
+      middleware Scope, api: "createPullRequestPointer"
       arg :attributes, :pull_request_attributes
 
       safe_resolve &Deployments.create_pr/2

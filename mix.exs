@@ -84,6 +84,7 @@ defmodule Console.MixProject do
       {:flow, "~> 0.15.0"},
       {:bourne, "~> 1.1"},
       {:phoenix_html, "~> 2.11"},
+      {:parallel_task, "~> 0.1.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},

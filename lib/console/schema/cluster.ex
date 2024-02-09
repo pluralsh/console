@@ -176,10 +176,13 @@ defmodule Console.Schema.Cluster do
 
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
+      sub = Service.for_user(user)
       from(c in query,
+        left_join: s in subquery(sub),
+          on: s.cluster_id == c.id,
         left_join: b in PolicyBinding,
           on: b.policy_id == c.read_policy_id or b.policy_id == c.write_policy_id,
-        where: b.user_id == ^id or b.group_id in ^groups,
+        where: b.user_id == ^id or b.group_id in ^groups or not is_nil(s.id),
         distinct: true
       )
     end)

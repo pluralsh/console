@@ -66,6 +66,12 @@ defmodule Console.Deployments.Clusters do
     |> Repo.exists?()
   end
 
+  def accessible_service?(%Cluster{id: id}, %User{} = user) do
+    Service.for_cluster(id)
+    |> Service.for_user(user)
+    |> Repo.exists?()
+  end
+
   @spec control_plane(Cluster.t) :: Kazan.Server.t | {:error, term}
   def control_plane(%Cluster{self: true}), do: Kazan.Server.in_cluster()
   def control_plane(%Cluster{kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)

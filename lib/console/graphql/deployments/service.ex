@@ -320,6 +320,27 @@ defmodule Console.GraphQl.Deployments.Service do
     timestamps()
   end
 
+  @desc "A tree view of the kubernetes object hierarchy beneath a component"
+  object :component_tree do
+    field :deployments,  list_of(:deployment)
+    field :statefulsets, list_of(:stateful_set)
+    field :daemonsets,   list_of(:daemon_set)
+    field :services,     list_of(:service)
+    field :ingresses,    list_of(:ingress)
+    field :cronjobs,     list_of(:cron_job)
+    field :configmaps,   list_of(:config_map)
+    field :secrets,      list_of(:secret)
+    field :certificates, list_of(:certificate)
+
+    field :edges, list_of(:resource_edge)
+  end
+
+  @desc "an edge representing mapping from kubernetes object metadata.uid -> metadata.uid"
+  object :resource_edge do
+    field :from, non_null(:string)
+    field :to,   non_null(:string)
+  end
+
   connection node_type: :service_deployment
   connection node_type: :revision
 
@@ -394,6 +415,14 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :name, non_null(:string)
 
       safe_resolve &Deployments.resolve_service_context/2
+    end
+
+    @desc "renders a full hierarchy of resources recursively owned by this component (useful for CRD views)"
+    field :component_tree, :component_tree do
+      middleware Authenticated
+      arg :id, non_null(:id), description: "the id of the service component for the tree view"
+
+      resolve &Deployments.tree/2
     end
   end
 
