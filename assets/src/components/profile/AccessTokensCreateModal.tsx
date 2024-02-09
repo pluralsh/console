@@ -19,8 +19,6 @@ export type Scope = {
   valid?: boolean
 }
 
-const initialScopesState: Scope[] = [{ apis: [], ids: [] }]
-
 export function AccessTokensCreateModal({
   open,
   setOpen,
@@ -32,12 +30,12 @@ export function AccessTokensCreateModal({
 }) {
   const theme = useTheme()
   const [addScopes, setAddScopes] = useState(false)
-  const [scopes, setScopes] = useState<Scope[]>(initialScopesState)
+  const [scopes, setScopes] = useState<Scope[]>([{ apis: [], ids: [] }])
 
   const close = useCallback(() => {
     setOpen(false)
     setAddScopes(false)
-    setScopes(initialScopesState)
+    setScopes([{ apis: [], ids: [] }])
   }, [setOpen, setAddScopes, setScopes])
 
   const [mutation, { loading, error }] = useCreateAccessTokenMutation({
