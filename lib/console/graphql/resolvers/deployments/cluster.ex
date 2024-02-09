@@ -11,11 +11,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
   def resolve_cluster(%{handle: handle}, %{context: %{current_user: user}}) do
     Clusters.find!(handle)
-    |> allow(user, :read)
+    |> allow(user, :view)
   end
   def resolve_cluster(%{id: id}, %{context: %{current_user: user}}) do
     Clusters.get_cluster(id)
-    |> allow(user, :read)
+    |> allow(user, :view)
   end
 
   def resolve_runtime_service(%{id: id}, %{context: %{current_user: user}}) do

@@ -16,6 +16,7 @@ defmodule Console.ExternalGraphQl do
     field :name,               non_null(:string)
     field :namespace,          :string
     field :creation_timestamp, :string
+    field :uid,                :string
   end
 
   object :label_pair do
@@ -23,6 +24,12 @@ defmodule Console.ExternalGraphQl do
     field :value, :string
   end
 
+  object :status_condition do
+    field :message, non_null(:string)
+    field :reason,  non_null(:string)
+    field :status,  non_null(:string)
+    field :type,    non_null(:string)
+  end
 
   object :resource_spec do
     field :cpu,    :string, resolve: fn
@@ -45,6 +52,14 @@ defmodule Console.ExternalGraphQl do
   import_types Console.GraphQl.Kubernetes.Node
   import_types Console.GraphQl.Kubernetes.Event
   import_types Console.GraphQl.Kubernetes.Job
+  import_types Console.GraphQl.Kubernetes.CronJob
+  import_types Console.GraphQl.Kubernetes.Certificate
+  import_types Console.GraphQl.Kubernetes.Config
+  import_types Console.GraphQl.Kubernetes.Ingress
+  import_types Console.GraphQl.Kubernetes.Service
+  import_types Console.GraphQl.Kubernetes.StatefulSet
+  import_types Console.GraphQl.Kubernetes.Deployment
+  import_types Console.GraphQl.Kubernetes.DaemonSet
 
   @sources [Deployments]
 

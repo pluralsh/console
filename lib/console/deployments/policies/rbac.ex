@@ -115,4 +115,5 @@ defmodule Console.Deployments.Policies.Rbac do
   defp binding_key(:write), do: :write_bindings
   defp binding_key(:git), do: :git_bindings
   defp binding_key(:create), do: [:create_bindings, :write_bindings]
+  defp binding_key(_), do: []
 end

@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Service do
   use Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Deployments.{Services, Clusters}
+  alias Console.Deployments.{Services, Clusters, Tree}
   alias Console.Schema.{
     Service,
     Revision
@@ -53,6 +53,22 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
     Service.for_cluster(id)
     |> Service.ordered()
     |> paginate(args)
+  end
+
+  def tree(%{id: id}, %{context: %{current_user: user}}) do
+    component = Services.get_service_component!(id) |> Console.Repo.preload([service: :cluster])
+    with {:ok, _} <- allow(component.service, user, :read),
+         %Kazan.Server{} = server <- Clusters.control_plane(component.service.cluster),
+         _ <- Kube.Utils.save_kubeconfig(server),
+         {:ok, {results, edges}} <- Tree.tree(component),
+      do: {:ok, Map.put(results, :edges, edges) |> filter_secrets(component.service, user)}
+  end
+
+  defp filter_secrets(results, svc, user) do
+    case allow(svc, user, :write) do
+      {:ok, _} -> results
+      _ -> Map.put(results, :secrets, [])
+    end
   end
 
   def service_configuration(service, _, ctx) do

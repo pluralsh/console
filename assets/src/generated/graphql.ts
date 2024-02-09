@@ -929,6 +929,21 @@ export enum ComponentState {
   Running = 'RUNNING'
 }
 
+/** A tree view of the kubernetes object hierarchy beneath a component */
+export type ComponentTree = {
+  __typename?: 'ComponentTree';
+  certificates?: Maybe<Array<Maybe<Certificate>>>;
+  configmaps?: Maybe<Array<Maybe<ConfigMap>>>;
+  cronjobs?: Maybe<Array<Maybe<CronJob>>>;
+  daemonsets?: Maybe<Array<Maybe<DaemonSet>>>;
+  deployments?: Maybe<Array<Maybe<Deployment>>>;
+  edges?: Maybe<Array<Maybe<ResourceEdge>>>;
+  ingresses?: Maybe<Array<Maybe<Ingress>>>;
+  secrets?: Maybe<Array<Maybe<Secret>>>;
+  services?: Maybe<Array<Maybe<Service>>>;
+  statefulsets?: Maybe<Array<Maybe<StatefulSet>>>;
+};
+
 /** attributes for declaratively specifying whether a config item is relevant given prior config */
 export type ConditionAttributes = {
   field: Scalars['String']['input'];
@@ -1947,6 +1962,7 @@ export type Metadata = {
   labels?: Maybe<Array<Maybe<LabelPair>>>;
   name: Scalars['String']['output'];
   namespace?: Maybe<Scalars['String']['output']>;
+  uid?: Maybe<Scalars['String']['output']>;
 };
 
 export type MetadataAttributes = {
@@ -2890,6 +2906,13 @@ export type RepositoryEdge = {
   node?: Maybe<Repository>;
 };
 
+/** an edge representing mapping from kubernetes object metadata.uid -> metadata.uid */
+export type ResourceEdge = {
+  __typename?: 'ResourceEdge';
+  from: Scalars['String']['output'];
+  to: Scalars['String']['output'];
+};
+
 export type ResourceSpec = {
   __typename?: 'ResourceSpec';
   cpu?: Maybe<Scalars['String']['output']>;
@@ -3691,6 +3714,8 @@ export type RootQueryType = {
   clusterStatuses?: Maybe<Array<Maybe<ClusterStatusInfo>>>;
   /** a relay connection of all clusters visible to the current user */
   clusters?: Maybe<ClusterConnection>;
+  /** renders a full hierarchy of resources recursively owned by this component (useful for CRD views) */
+  componentTree?: Maybe<ComponentTree>;
   configMap?: Maybe<ConfigMap>;
   configMaps?: Maybe<Array<Maybe<ConfigMap>>>;
   configuration?: Maybe<ConsoleConfiguration>;
@@ -3907,6 +3932,11 @@ export type RootQueryTypeClustersArgs = {
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
   tagQuery?: InputMaybe<TagQuery>;
+};
+
+
+export type RootQueryTypeComponentTreeArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

@@ -250,6 +250,12 @@ type RootQueryType {
 
   serviceContext(name: String!): ServiceContext
 
+  "renders a full hierarchy of resources recursively owned by this component (useful for CRD views)"
+  componentTree(
+    "the id of the service component for the tree view"
+    id: ID!
+  ): ComponentTree
+
   pipelines(after: String, first: Int, before: String, last: Int): PipelineConnection
 
   pipeline(id: ID!): Pipeline
@@ -1585,6 +1591,26 @@ type ServiceContext {
   secrets: [ServiceConfiguration]
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+"A tree view of the kubernetes object hierarchy beneath a component"
+type ComponentTree {
+  deployments: [Deployment]
+  statefulsets: [StatefulSet]
+  daemonsets: [DaemonSet]
+  services: [Service]
+  ingresses: [Ingress]
+  cronjobs: [CronJob]
+  configmaps: [ConfigMap]
+  secrets: [Secret]
+  certificates: [Certificate]
+  edges: [ResourceEdge]
+}
+
+"an edge representing mapping from kubernetes object metadata.uid -> metadata.uid"
+type ResourceEdge {
+  from: String!
+  to: String!
 }
 
 type ServiceDeploymentConnection {
@@ -3134,6 +3160,7 @@ type Metadata {
   name: String!
   namespace: String
   creationTimestamp: String
+  uid: String
 }
 
 type SecretKeySelector {
