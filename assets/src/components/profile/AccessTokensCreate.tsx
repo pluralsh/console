@@ -71,7 +71,10 @@ export function AccessTokensCreate() {
     [scopes, setScopes]
   )
 
-  const valid = useMemo(() => scopes.every((s) => !!s.valid), [scopes])
+  const valid = useMemo(
+    () => !addScopes || scopes.every((s) => !!s.valid),
+    [addScopes, scopes]
+  )
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
@@ -155,7 +158,6 @@ export function AccessTokensCreate() {
               />
               {scopes.map((scope, index) => (
                 <AccessTokensCreateScope
-                  index={index}
                   scope={scope}
                   setScope={(s: Scope) => setScope(s, index)}
                   canRemove={canRemoveScope}
