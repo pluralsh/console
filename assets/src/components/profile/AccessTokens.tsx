@@ -40,6 +40,7 @@ import { DateTimeCol } from '../utils/table/DateTimeCol'
 
 import { ObscuredToken } from './ObscuredToken'
 import { AccessTokensCreate } from './AccessTokensCreate'
+import { AccessTokensScopes } from './AccessTokensScopes'
 
 const TOOLTIP =
   'Access tokens allow you to access the Plural API for automation and active Plural clusters.'
@@ -217,6 +218,7 @@ function CopyButton({ token }: { token: AccessTokenFragment }) {
         }}
       >
         <Button
+          small
           secondary
           startIcon={<CopyIcon size={15} />}
         >
@@ -246,11 +248,6 @@ const tokenColumns = [
     header: 'Created on',
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
-  // columnHelper.accessor((row) => row.updatedAt, {
-  //   id: 'updatedAt',
-  //   header: 'Updated on',
-  //   cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
-  // }),
   tokenColumnHelper.accessor((row) => row.id, {
     id: 'actions',
     header: '',
@@ -266,6 +263,7 @@ const tokenColumns = [
           }}
         >
           <CopyButton token={original} />
+          <AccessTokensScopes token={original} />
           <AuditsButton token={original} />
           <DeleteAccessToken token={original} />
         </div>
