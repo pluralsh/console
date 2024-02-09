@@ -2,6 +2,24 @@ apiVersion: v1
 entries:
   console:
   - apiVersion: v2
+    appVersion: 0.8.8
+    created: "2024-02-09T13:20:47.785891992Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.0.5
+    - name: controller
+      repository: file://../controller
+      version: 0.0.14
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: d441088d851c23f242f4405346924008adbef2dcd2123ed9a0152154da3c388c
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.1.30/console-0.1.30.tgz
+    version: 0.1.30
+  - apiVersion: v2
     appVersion: 0.8.7
     created: "2024-02-07T21:55:21.02110681Z"
     dependencies:
@@ -449,6 +467,16 @@ entries:
     version: 0.1.1
   controller:
   - apiVersion: v2
+    appVersion: 0.8.8
+    created: "2024-02-09T13:20:47.907132048Z"
+    description: deploys the deployment operator for plural cd
+    digest: 79235ec4dbdddf669518d8af782e7af48e707aa5541e9e4920172b8cd749b641
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.14/controller-0.0.14.tgz
+    version: 0.0.14
+  - apiVersion: v2
     appVersion: 0.8.7
     created: "2024-02-07T21:55:21.125239787Z"
     description: deploys the deployment operator for plural cd
@@ -622,4 +650,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/velero-s3-proxy-chart-v0.1.0/velero-s3-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2024-02-07T21:55:21.125464646Z"
+generated: "2024-02-09T13:20:47.907393096Z"
