@@ -23,13 +23,7 @@ export function AccessTokensCreate() {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
   const [addScopes, setAddScopes] = useState(false)
-  const [scopes, setScopes] = useState<Scope[]>([
-    {
-      apis: ['updateServiceDeployment', 'updateCluster'],
-      ids: ['*'],
-      valid: true,
-    },
-  ])
+  const [scopes, setScopes] = useState<Scope[]>([{ apis: [], ids: [] }])
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
 
   const [mutation, { loading, error }] = useCreateAccessTokenMutation({
@@ -78,9 +72,7 @@ export function AccessTokensCreate() {
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
-      if (valid && !loading) {
-        mutation()
-      }
+      if (valid && !loading) mutation()
     },
     [valid, loading, mutation]
   )
