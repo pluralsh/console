@@ -19,12 +19,20 @@ export type Scope = {
   valid?: boolean
 }
 
+const initialScopesState: Scope[] = [{ apis: [], ids: [] }]
+
 export function AccessTokensCreate() {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
   const [addScopes, setAddScopes] = useState(false)
-  const [scopes, setScopes] = useState<Scope[]>([{ apis: [], ids: [] }])
+  const [scopes, setScopes] = useState<Scope[]>(initialScopesState)
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
+
+  const close = useCallback(() => {
+    setOpen(false)
+    setAddScopes(false)
+    setScopes(initialScopesState)
+  }, [setOpen, setScopes])
 
   const [mutation, { loading, error }] = useCreateAccessTokenMutation({
     variables: {
@@ -38,7 +46,7 @@ export function AccessTokensCreate() {
         update: (prev) =>
           appendConnection(prev, data?.createAccessToken, 'accessTokens'),
       }),
-    onCompleted: () => setOpen(false),
+    onCompleted: () => close(),
   })
 
   const addScope = useCallback(() => {
@@ -89,7 +97,7 @@ export function AccessTokensCreate() {
         header="Create access token"
         open={open}
         portal
-        onClose={() => setOpen(false)}
+        onClose={close}
         size="large"
         asForm
         formProps={{ onSubmit }}
@@ -130,7 +138,7 @@ export function AccessTokensCreate() {
             <Button
               type="button"
               secondary
-              onClick={() => setOpen(false)}
+              onClick={close}
             >
               Cancel
             </Button>
