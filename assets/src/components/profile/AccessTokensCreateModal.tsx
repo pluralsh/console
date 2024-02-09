@@ -21,9 +21,14 @@ export type Scope = {
 
 const initialScopesState: Scope[] = [{ apis: [], ids: [] }]
 
-export function AccessTokensCreate() {
+export function AccessTokensCreateModal({
+  open,
+  setOpen,
+}: {
+  open: boolean
+  setOpen: (open: boolean) => void
+}) {
   const theme = useTheme()
-  const [open, setOpen] = useState(false)
   const [addScopes, setAddScopes] = useState(false)
   const [scopes, setScopes] = useState<Scope[]>(initialScopesState)
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
@@ -87,12 +92,6 @@ export function AccessTokensCreate() {
 
   return (
     <>
-      <Button
-        secondary
-        onClick={() => setOpen(true)}
-      >
-        Create access token
-      </Button>
       <Modal
         header="Create access token"
         open={open}

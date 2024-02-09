@@ -1,6 +1,6 @@
 import { Button, Modal } from 'honorable'
 import moment from 'moment'
-import { useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import {
   CopyIcon,
   EmptyState,
@@ -38,8 +38,10 @@ import { DeleteIconButton } from '../utils/IconButtons'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { DateTimeCol } from '../utils/table/DateTimeCol'
 
+import { ModalMountTransition } from '../utils/ModalMountTransition'
+
 import { ObscuredToken } from './ObscuredToken'
-import { AccessTokensCreate } from './AccessTokensCreate'
+import { AccessTokensCreateModal } from './AccessTokensCreateModal'
 import { AccessTokensScopes } from './AccessTokensScopes'
 
 const TOOLTIP =
@@ -273,6 +275,7 @@ const tokenColumns = [
 ]
 
 export function AccessTokens() {
+  const [open, setOpen] = useState(false)
   const { data, loading } = useAccessTokensQuery()
 
   const tokensList = useMemo(
@@ -302,7 +305,14 @@ export function AccessTokens() {
           >
             <InfoIcon />
           </Tooltip>
-          {!isEmpty(tokensList) && <AccessTokensCreate />}
+          {!isEmpty(tokensList) && (
+            <Button
+              secondary
+              onClick={() => setOpen(true)}
+            >
+              Create access token
+            </Button>
+          )}
         </div>
       }
     >
@@ -319,9 +329,22 @@ export function AccessTokens() {
         </FullHeightTableWrap>
       ) : (
         <EmptyState message="Looks like you don't have any access tokens yet.">
-          <AccessTokensCreate />
+          <Button
+            secondary
+            onClick={() => setOpen(true)}
+          >
+            Create access token
+          </Button>
         </EmptyState>
       )}
+      <Suspense fallback={null}>
+        <ModalMountTransition open={open}>
+          <AccessTokensCreateModal
+            open={open}
+            setOpen={setOpen}
+          />
+        </ModalMountTransition>
+      </Suspense>
     </ResponsivePageFullWidth>
   )
 }

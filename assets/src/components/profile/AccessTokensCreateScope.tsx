@@ -13,7 +13,7 @@ import { isEmpty } from 'lodash'
 
 import { ChipList } from '../cd/services/CreateGlobalService'
 
-import { Scope } from './AccessTokensCreate'
+import { Scope } from './AccessTokensCreateModal'
 
 export function AccessTokensCreateScope({
   scope,
