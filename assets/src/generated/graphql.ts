@@ -3784,6 +3784,7 @@ export type RootQueryType = {
   scalingRecommendation?: Maybe<VerticalPodAutoscaler>;
   scmConnection?: Maybe<ScmConnection>;
   scmConnections?: Maybe<ScmConnectionConnection>;
+  scmWebhooks?: Maybe<ScmWebhookConnection>;
   secret?: Maybe<Secret>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
@@ -4313,6 +4314,14 @@ export type RootQueryTypeScmConnectionsArgs = {
 };
 
 
+export type RootQueryTypeScmWebhooksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypeSecretArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -4657,6 +4666,8 @@ export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  /** the owning entity in this scm provider, eg a github organization */
+  owner?: InputMaybe<Scalars['String']['input']>;
   /** a ssh private key to be used for commit signing */
   signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
@@ -4680,6 +4691,31 @@ export enum ScmType {
   Github = 'GITHUB',
   Gitlab = 'GITLAB'
 }
+
+export type ScmWebhook = {
+  __typename?: 'ScmWebhook';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name in your SCM provider for this webhook */
+  name: Scalars['String']['output'];
+  owner: Scalars['String']['output'];
+  type: ScmType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the url for this specific webhook */
+  url: Scalars['String']['output'];
+};
+
+export type ScmWebhookConnection = {
+  __typename?: 'ScmWebhookConnection';
+  edges?: Maybe<Array<Maybe<ScmWebhookEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ScmWebhookEdge = {
+  __typename?: 'ScmWebhookEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ScmWebhook>;
+};
 
 export type ScopeAttributes = {
   api?: InputMaybe<Scalars['String']['input']>;
@@ -6245,14 +6281,14 @@ export type UnstructuredResourceQueryVariables = Exact<{
 
 export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
 
-export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api: string, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
+export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
 export type AccessTokenAuditFragment = { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null };
 
 export type AccessTokensQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AccessTokensQuery = { __typename?: 'RootQueryType', accessTokens?: { __typename?: 'AccessTokenConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenEdge', node?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api: string, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null } | null> | null } | null };
+export type AccessTokensQuery = { __typename?: 'RootQueryType', accessTokens?: { __typename?: 'AccessTokenConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenEdge', node?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null } | null> | null } | null };
 
 export type TokenAuditsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6267,14 +6303,14 @@ export type CreateAccessTokenMutationVariables = Exact<{
 }>;
 
 
-export type CreateAccessTokenMutation = { __typename?: 'RootMutationType', createAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api: string, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
+export type CreateAccessTokenMutation = { __typename?: 'RootMutationType', createAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
 
 export type DeleteAccessTokenMutationVariables = Exact<{
   token: Scalars['String']['input'];
 }>;
 
 
-export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api: string, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
+export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
 
 export type UserFragment = { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
 

@@ -6,7 +6,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     GitRepository,
     PrAutomation,
     ScmConnection,
-    PullRequest
+    PullRequest,
+    ScmWebhook
   }
 
   def resolve_scm_connection(%{id: id}, _), do: {:ok, Git.get_scm_connection(id)}
@@ -44,6 +45,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     PullRequest.ordered()
     |> maybe_search(PullRequest, args)
     |> pr_filters(args)
+    |> paginate(args)
+  end
+
+  def list_scm_webhooks(args, _) do
+    ScmWebhook.ordered()
     |> paginate(args)
   end
 

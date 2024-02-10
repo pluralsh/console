@@ -5,7 +5,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   alias Console.Deployments.{Pr.Config, Git.Discovery, Tar}
   alias Console.Commands.Plural
   alias Console.Deployments.Pr.Impl.{Github, Gitlab}
-  alias Console.Schema.{PrAutomation, ScmConnection, GitRepository}
+  alias Console.Schema.{PrAutomation, ScmConnection, ScmWebhook, GitRepository}
 
 
   @type pr_resp :: {:ok, binary, binary} | Console.error
@@ -14,6 +14,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
   Create a pull request for the given SCM, and return the title + url of the pr if successful
   """
   @callback create(pr :: PrAutomation.t, branch :: binary, context :: map) :: pr_resp
+
+  @doc """
+  Creates a webhook using the credentials in this connection
+  """
+  @callback webhook(conn :: ScmConnection.t, hook :: ScmWebhook.t) :: :ok | Console.error
 
   @doc """
   Fully creates a pr against the working dispatcher implementation
@@ -30,6 +35,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
          {:ok, _} <- commit(conn, msg),
          {:ok, _} <- push(conn, branch),
       do: impl.create(%{pr | branch: conn.branch}, branch, ctx)
+  end
+
+  def webhook(%ScmConnection{} = conn, %ScmWebhook{} = hook) do
+    impl = dispatcher(conn)
+    impl.webhook(conn, hook)
   end
 
   defp external_git(%PrAutomation{repository: %GitRepository{} = git, creates: %{git: %{ref: _, folder: _} = ref}}) do
