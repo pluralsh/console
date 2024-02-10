@@ -9,9 +9,8 @@ import {
 import { useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
-import { Div, Flex, useDebounce } from 'honorable'
-
 import Fuse from 'fuse.js'
+import { useDebounce } from '@react-hooks-library/core'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -44,13 +43,23 @@ const searchOptions = {
   threshold: 0.25,
 }
 
-export const ColActions = (clusterId: string) =>
-  columnHelper.display({
-    id: 'actions',
-    cell: ({ row: { original } }: any) => (
-      <Flex
-        flexDirection="row"
-        gap="xxsmall"
+export const ColActions = columnHelper.display({
+  id: 'actions',
+  cell: ({ row: { original }, table }: any) => {
+    const { linkBasePath } =
+      (table.options?.meta as {
+        refetch?: () => void
+        linkBasePath?: string
+      }) || {}
+
+    return (
+      <div
+        css={{
+          display: 'flex',
+          gap: 'xxsmall',
+          justifyContent: 'flex-end',
+          width: '100%',
+        }}
       >
         {/* TODO */}
         {/* <DeletePod */}
@@ -58,23 +67,35 @@ export const ColActions = (clusterId: string) =>
         {/*  namespace={original.namespace} */}
         {/*  refetch={refetch} */}
         {/* /> */}
-        <TableCaretLink
-          to={getPodDetailsPath({
-            clusterId,
-            name: original?.name,
-            namespace: original?.namespace,
-          })}
-          textValue={`View pod ${original?.name}`}
-        />
-      </Flex>
-    ),
-    header: '',
-  })
+        <div onClick={(e) => e.stopPropagation()}>
+          <TableCaretLink
+            to={`${linkBasePath || '/pods'}/${original.namespace}/${
+              original.name
+            }`}
+            textValue={`View pod ${original?.name}`}
+          />
+        </div>
+      </div>
+    )
+  },
+  header: '',
+})
+
+const columns = [
+  ColNamespace,
+  ColName,
+  ColMemoryReservation,
+  ColCpuReservation,
+  ColRestarts,
+  ColContainers,
+  ColImages,
+  ColActions,
+]
 
 export default function ClusterPods() {
   const { clusterId = '' } = useParams()
   const [namespace, setNamespace] = useState<string>('')
-  const { data: namespacesData } = useClusterNamespacesQuery({
+  const { data: namespacesData, refetch } = useClusterNamespacesQuery({
     variables: { clusterId },
     pollInterval: POLL_INTERVAL,
   })
@@ -82,19 +103,6 @@ export default function ClusterPods() {
     variables: { clusterId, namespace },
     pollInterval: POLL_INTERVAL,
   })
-  const columns = useMemo(
-    () => [
-      ColNamespace,
-      ColName,
-      ColMemoryReservation,
-      ColCpuReservation,
-      ColRestarts,
-      ColContainers,
-      ColImages,
-      ColActions(clusterId),
-    ],
-    [clusterId]
-  )
   const theme = useTheme()
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 300)
@@ -161,9 +169,12 @@ export default function ClusterPods() {
   return !data ? (
     <LoadingIndicator />
   ) : (
-    <Flex
-      direction="column"
-      height="100%"
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }}
     >
       <div css={{ display: 'flex', gap: theme.spacing.large }}>
         <Input
@@ -175,7 +186,11 @@ export default function ClusterPods() {
           flexGrow={1}
         />
         {isEmpty(namespaces) ? null : (
-          <Div width={320}>
+          <div
+            css={{
+              width: 320,
+            }}
+          >
             <ComboBox
               inputProps={{ placeholder: 'Filter by namespace' }}
               inputValue={namespace}
@@ -206,7 +221,7 @@ export default function ClusterPods() {
                 />
               )) || []}
             </ComboBox>
-          </Div>
+          </div>
         )}
       </div>
       {!pods || pods.length === 0 ? (
@@ -215,18 +230,20 @@ export default function ClusterPods() {
         <FullHeightTableWrap>
           <PodsList
             pods={pods}
-            // applications={data?.applications}
             columns={columns}
             reactTableOptions={reactTableOptions}
-            maxHeight="unset"
-            height="100%"
+            refetch={refetch}
             linkBasePath={getPodDetailsPath({
               clusterId,
               isRelative: false,
             })}
+            css={{
+              maxHeight: 'unset',
+              height: '100%',
+            }}
           />
         </FullHeightTableWrap>
       )}
-    </Flex>
+    </div>
   )
 }

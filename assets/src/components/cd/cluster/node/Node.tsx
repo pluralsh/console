@@ -61,7 +61,7 @@ export default function Node() {
   const tab = useMatch(`${NODE_ABS_PATH}/:tab`)?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
 
-  const { data: clusterData } = useClusterQuery({
+  const { data: clusterData, refetch } = useClusterQuery({
     variables: { id: clusterId },
     fetchPolicy: 'cache-and-network',
   })
@@ -126,6 +126,7 @@ export default function Node() {
               context={{
                 node: data?.node,
                 nodeMetric: nodeMetricData?.nodeMetric,
+                refetch,
               }}
             />
           }

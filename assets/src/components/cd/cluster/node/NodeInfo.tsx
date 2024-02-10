@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { Card } from '@pluralsh/design-system'
-import { Flex } from 'honorable'
+import { useTheme } from 'styled-components'
 import { Node, NodeMetric } from 'generated/graphql'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
@@ -25,26 +25,25 @@ import {
 } from '../../../../routes/cdRoutesConsts'
 import { ColActions } from '../ClusterPods'
 
+const columns = [
+  ColName,
+  ColMemoryReservation,
+  ColCpuReservation,
+  ColRestarts,
+  ColContainers,
+  ColActions,
+]
+
 export default function NodeInfo() {
+  const theme = useTheme()
   const params = useParams()
   const nodeName = params[NODE_PARAM_NAME] as string
   const clusterId = params[NODE_PARAM_CLUSTER] as string
-  const { node, nodeMetric } = useOutletContext() as {
+  const { node, nodeMetric, refetch } = useOutletContext() as {
     node: Node
     nodeMetric: NodeMetric
+    refetch?: Nullable<() => void>
   }
-
-  const columns = useMemo(
-    () => [
-      ColName,
-      ColMemoryReservation,
-      ColCpuReservation,
-      ColRestarts,
-      ColContainers,
-      ColActions(clusterId),
-    ],
-    [clusterId]
-  )
 
   const pods = useMemo(() => {
     if (isEmpty(node?.pods)) {
@@ -60,9 +59,12 @@ export default function NodeInfo() {
   if (!node || !nodeMetric) return <LoadingIndicator />
 
   return (
-    <Flex
-      direction="column"
-      gap="xlarge"
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.xlarge,
+      }}
     >
       <section>
         <SubTitle>Overview</SubTitle>
@@ -80,12 +82,13 @@ export default function NodeInfo() {
         <PodsList
           columns={columns}
           pods={pods}
+          refetch={refetch}
           linkBasePath={getPodDetailsPath({
             clusterId,
             isRelative: false,
           })}
         />
       </section>
-    </Flex>
+    </div>
   )
 }

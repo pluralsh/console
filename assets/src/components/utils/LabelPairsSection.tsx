@@ -1,6 +1,18 @@
 import { Chip } from '@pluralsh/design-system'
-import { Flex, H3 } from 'honorable'
 import { LabelPair, Maybe } from 'generated/graphql'
+import styled from 'styled-components'
+
+const Heading = styled.h3(({ theme }) => ({
+  ...theme.partials.text.body1Bold,
+  marginBottom: theme.spacing.medium,
+}))
+
+const List = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: theme.spacing.xsmall,
+  color: theme.colors['text-xlight'],
+}))
 
 export function LabelPairsSection({
   vals,
@@ -11,17 +23,8 @@ export function LabelPairsSection({
 }) {
   return (
     <div>
-      <H3
-        body1
-        fontWeight={600}
-        marginBottom="medium"
-      >
-        {title}
-      </H3>
-      <Flex
-        gap="xsmall"
-        wrap="wrap"
-      >
+      <Heading>{title}</Heading>
+      <List>
         {!vals || vals.length === 0
           ? `There are no ${title.toLowerCase()}.`
           : vals.map(
@@ -32,7 +35,7 @@ export function LabelPairsSection({
                   </Chip>
                 )
             )}
-      </Flex>
+      </List>
     </div>
   )
 }

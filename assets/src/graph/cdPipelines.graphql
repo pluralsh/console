@@ -10,6 +10,30 @@ fragment PipelineServiceDeployment on ServiceDeployment {
   componentStatus
 }
 
+fragment ContainerSpec on ContainerSpec {
+  args
+  env {
+    name
+    value
+  }
+  envFrom {
+    configMap
+    secret
+  }
+  image
+}
+
+fragment JobGateSpec on JobGateSpec {
+  annotations
+  containers {
+    ...ContainerSpec
+  }
+  labels
+  namespace
+  raw
+  serviceAccount
+}
+
 fragment PipelineGate on PipelineGate {
   id
   name
@@ -17,6 +41,11 @@ fragment PipelineGate on PipelineGate {
   type
   approver {
     ...User
+  }
+  spec {
+    job {
+      ...JobGateSpec
+    }
   }
   insertedAt
   updatedAt
@@ -132,6 +161,54 @@ query Pipelines($first: Int = 50, $after: String) {
     }
     pageInfo {
       ...PageInfo
+    }
+  }
+}
+
+fragment PipelineGateJob on Job {
+  events {
+    action
+    count
+    eventTime
+    lastTimestamp
+    message
+    reason
+    type
+  }
+  metadata {
+    ...Metadata
+  }
+  pods {
+    ...Pod
+  }
+  raw
+  spec {
+    activeDeadlineSeconds
+    backoffLimit
+    parallelism
+  }
+  status {
+    active
+    completionTime
+    failed
+    startTime
+    succeeded
+  }
+}
+
+query JobGate($id: ID!) {
+  pipelineGate(id: $id) {
+    ...PipelineGate
+    job {
+      ...PipelineGateJob
+    }
+  }
+}
+
+query JobGateLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
+  pipelineGate(id: $id) {
+    job {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
     }
   }
 }

@@ -93,6 +93,7 @@ import {
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
+import { pipelineJobRoutes } from './pipelineJobRoutes'
 
 export const componentRoutes = (
   <Route
@@ -442,5 +443,6 @@ export const cdRoutes = [
     {podDetailsRoutes}
     {serviceDetailsRoutes}
     {componentRoutes}
+    {pipelineJobRoutes}
   </Route>,
 ]

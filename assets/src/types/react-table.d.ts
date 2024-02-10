@@ -7,4 +7,9 @@ declare module '@tanstack/table-core' {
     gridTemplate?: string
     center?: boolean
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface TableMeta<TData extends RowData> {
+    refetch?: Nullable<() => void>
+    [k: string]: any
+  }
 }
