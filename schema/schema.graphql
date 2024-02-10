@@ -256,7 +256,7 @@ type RootQueryType {
     id: ID!
   ): ComponentTree
 
-  pipelines(after: String, first: Int, before: String, last: Int): PipelineConnection
+  pipelines(after: String, first: Int, before: String, last: Int, q: String): PipelineConnection
 
   pipeline(id: ID!): Pipeline
 
@@ -399,6 +399,9 @@ type RootMutationType {
   updatePrAutomation(id: ID!, attributes: PrAutomationAttributes!): PrAutomation
 
   deletePrAutomation(id: ID!): PrAutomation
+
+  "creates the service to enable self-hosted renovate in one pass"
+  setupRenovate(connectionId: ID!, repos: [String]): ServiceDeployment
 
   createPullRequest(
     "the id of the PR automation instance to use"

@@ -2,7 +2,8 @@ defmodule Console.Deployments.Git do
   use Console.Services.Base
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Deployments.Settings
+  alias Console.Deployments.{Settings, Services, Clusters}
+  alias Console.Services.Users
   alias Console.Deployments.Pr.Dispatcher
   alias Console.Schema.{
     GitRepository,
@@ -235,6 +236,41 @@ defmodule Console.Deployments.Git do
       _ -> {:ok, []}
     end
   end
+
+  @doc """
+  Sets up a service to run the renovate cron given an scm connection and target repositories
+  """
+  @spec setup_renovate(binary, [binary], User.t) :: Services.service_resp
+  def setup_renovate(args \\ %{}, id, repos, %User{} = user) do
+    cluster = Clusters.local_cluster()
+    start_transaction()
+    |> add_operation(:scm, fn _ -> {:ok, get_scm_connection!(id)} end)
+    |> add_operation(:console, fn _ -> {:ok, Users.get_bot!("console") } end)
+    |> add_operation(:token, fn %{console: console} ->
+      Users.create_access_token(%{scopes: [%{apis: ["createPullRequestPointer"]}]}, console)
+    end)
+    |> add_operation(:svc, fn %{token: token, scm: scm} ->
+      Services.create_service(%{
+        repository_id: artifacts_repo!().id,
+        name: Map.get(args, :name, "plural-renovate"),
+        namespace: Map.get(args, :namespace, "plural-renovate"),
+        git: %{ref: "main", folder: "addons/plural-renovate"},
+        helm: %{values: "# you can add your values here\n{}"},
+        configuration: [
+          %{name: "consoleToken", value: token.token},
+          %{name: "consoleUrl", value: Console.url("/gql")},
+          %{name: "repositories", value: Enum.join(repos, ",")},
+          %{name: "renovateToken", value: scm.token},
+          %{name: "platform", value: "#{scm.type}"},
+        ] ++ hosted_url(scm),
+      }, cluster.id, user)
+    end)
+    |> execute(extract: :svc)
+  end
+
+  defp hosted_url(%ScmConnection{base_url: url}) when is_binary(url),
+    do: [%{name: "endpoint", value: url}]
+  defp hosted_url(_), do: []
 
   def status(%GitRepository{} = repo, status) do
     GitRepository.status_changeset(repo, status)

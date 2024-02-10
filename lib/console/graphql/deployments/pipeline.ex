@@ -270,6 +270,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   object :pipeline_queries do
     connection field :pipelines, node_type: :pipeline do
       middleware Authenticated
+      arg :q, :string
 
       resolve &Deployments.list_pipelines/2
     end

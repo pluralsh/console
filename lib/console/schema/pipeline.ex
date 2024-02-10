@@ -23,6 +23,10 @@ defmodule Console.Schema.Pipeline do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, q) do
+    from(p in query, where: ilike(p.name, ^"%#{q}%"))
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(p in query,

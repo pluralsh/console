@@ -438,6 +438,15 @@ defmodule Console.GraphQl.Deployments.Git do
       safe_resolve &Deployments.delete_pr_automation/2
     end
 
+    @desc "creates the service to enable self-hosted renovate in one pass"
+    field :setup_renovate, :service_deployment do
+      middleware Authenticated
+      arg :connection_id, non_null(:id)
+      arg :repos, list_of(:string)
+
+      safe_resolve &Deployments.setup_renovate/2
+    end
+
     field :create_pull_request, :pull_request do
       middleware Authenticated
       arg :id,      non_null(:id), description: "the id of the PR automation instance to use"
