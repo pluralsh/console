@@ -7,7 +7,6 @@ defmodule Console.Deployments.Pr.Dispatcher do
   alias Console.Deployments.Pr.Impl.{Github, Gitlab}
   alias Console.Schema.{PrAutomation, ScmConnection, ScmWebhook, GitRepository}
 
-
   @type pr_resp :: {:ok, binary, binary} | Console.error
 
   @doc """
@@ -21,7 +20,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   @callback webhook(conn :: ScmConnection.t, hook :: ScmWebhook.t) :: :ok | Console.error
 
   @doc """
-  Gets updates to perform in response to a pr
+  Gets updates to perform in response to a pr webhook event
   """
   @callback pr(msg :: map) :: {:ok, binary, map} | :ignore
 
