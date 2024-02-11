@@ -179,6 +179,8 @@ type RootQueryType {
 
   pullRequests(after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID, q: String): PullRequestConnection
 
+  scmWebhooks(after: String, first: Int, before: String, last: Int): ScmWebhookConnection
+
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
 
@@ -2320,6 +2322,9 @@ input ScmConnectionAttributes {
 
   type: ScmType!
 
+  "the owning entity in this scm provider, eg a github organization"
+  owner: String
+
   username: String
 
   token: String
@@ -2688,6 +2693,24 @@ type PullRequest {
   updatedAt: DateTime
 }
 
+type ScmWebhook {
+  id: ID!
+
+  type: ScmType!
+
+  owner: String!
+
+  "the url for this specific webhook"
+  url: String!
+
+  "the name in your SCM provider for this webhook"
+  name: String!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type GitRepositoryConnection {
   pageInfo: PageInfo!
   edges: [GitRepositoryEdge]
@@ -2706,6 +2729,11 @@ type PrAutomationConnection {
 type PullRequestConnection {
   pageInfo: PageInfo!
   edges: [PullRequestEdge]
+}
+
+type ScmWebhookConnection {
+  pageInfo: PageInfo!
+  edges: [ScmWebhookEdge]
 }
 
 input CloneAttributes {
@@ -4354,6 +4382,11 @@ type RunbookExecutionEdge {
 
 type WebhookEdge {
   node: Webhook
+  cursor: String
+}
+
+type ScmWebhookEdge {
+  node: ScmWebhook
   cursor: String
 }
 

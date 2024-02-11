@@ -101,18 +101,45 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  Creates an scm connection and attempts to register a webhook simultaneously for the connection
   """
   @spec create_scm_connection(map, User.t) :: connection_resp
   def create_scm_connection(attrs, %User{} = user) do
-    %ScmConnection{}
-    |> ScmConnection.changeset(attrs)
-    |> allow(user, :edit)
-    |> when_ok(:insert)
+    start_transaction()
+    |> add_operation(:conn, fn _ ->
+      %ScmConnection{}
+      |> ScmConnection.changeset(attrs)
+      |> allow(user, :edit)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:hook, fn %{conn: conn} ->
+      create_webhook_for_connection(attrs[:owner], conn)
+    end)
+    |> execute(extract: :conn)
   end
 
   @doc """
+  Uses the creds in an scm connection to create a properly configured webhook for us to use
+  """
+  @spec create_webhook_for_connection(binary, ScmConnection.t) :: webhook_resp
+  def create_webhook_for_connection(owner, %ScmConnection{} = conn) do
+    start_transaction()
+    |> add_operation(:hook, fn _ ->
+      %ScmWebhook{type: conn.type}
+      |> ScmWebhook.changeset(%{owner: owner})
+      |> Repo.insert_or_update()
+    end)
+    |> add_operation(:remote, fn %{hook: hook} ->
+      case Dispatcher.webhook(conn, hook) do
+        :ok -> {:ok, conn}
+        err -> err
+      end
+    end)
+    |> execute(extract: :hook)
+  end
 
+  @doc """
+  Updates the attributes of a scm connection
   """
   @spec update_scm_connection(map, binary, User.t) :: connection_resp
   def update_scm_connection(attrs, id, %User{} = user) do
@@ -123,7 +150,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  Deletes an scm connection
   """
   @spec delete_scm_connection(binary, User.t) :: connection_resp
   def delete_scm_connection(id, %User{} = user) do
@@ -133,7 +160,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  creates an scm webhook
   """
   @spec create_scm_webhook(map, User.t) :: webhook_resp
   def create_scm_webhook(attrs, %User{} = user) do
@@ -144,7 +171,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  updates an scm webhook
   """
   @spec update_scm_webhook(map, binary, User.t) :: webhook_resp
   def update_scm_webhook(attrs, id, %User{} = user) do
@@ -155,7 +182,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  deletes a scm webhook
   """
   @spec delete_scm_webhook(binary, User.t) :: webhook_resp
   def delete_scm_webhook(id, %User{} = user) do
@@ -165,7 +192,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  creates a new pr automation reference
   """
   @spec create_pr_automation(map, User.t) :: automation_resp
   def create_pr_automation(attrs, %User{} = user) do
@@ -176,7 +203,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  updates an existing pr automation
   """
   @spec update_pr_automation(map, binary, User.t) :: automation_resp
   def update_pr_automation(attrs, id, %User{} = user) do

@@ -95,6 +95,7 @@ defmodule Console.Deployments.GitTest do
   describe "#create_scm_connection/2" do
     test "admins can create" do
       admin = admin_user()
+      expect(Tentacat.Organizations.Hooks, :create, fn _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)
 
       {:ok, conn} = Git.create_scm_connection(%{type: :github, name: "github", token: "pat-asdfa"}, admin)
 

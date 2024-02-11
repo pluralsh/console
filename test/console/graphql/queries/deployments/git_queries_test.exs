@@ -86,6 +86,23 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
     end
   end
 
+  describe "scmWebhooks" do
+    test "it can list scm webhooks" do
+      hooks = insert_list(3, :scm_webhook)
+
+      {:ok, %{data: %{"scmWebhooks" => found}}} = run_query("""
+        query {
+          scmWebhooks(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(hooks)
+    end
+  end
+
   describe "pullRequests" do
     test "it can list pull requests" do
       user = insert(:user)

@@ -21,7 +21,7 @@ defmodule Console.GraphQl.Schema.Base do
       import Absinthe.Resolution.Helpers
       import Console.GraphQl.Schema.Helpers
       import Console.GraphQl.Schema.Base
-      alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature, ClusterAuthenticated, Scope}
+      alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature, ClusterAuthenticated, Scope, ErrorHandler}
     end
   end
 

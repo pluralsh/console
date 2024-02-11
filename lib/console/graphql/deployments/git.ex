@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Deployments.Git do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Deployments
-  alias Console.Schema.{GitRepository, ScmConnection, PrAutomation, Configuration}
+  alias Console.Schema.{GitRepository, ScmConnection, ScmWebhook, PrAutomation, Configuration}
 
   ecto_enum :auth_method, GitRepository.AuthMethod
   ecto_enum :git_health, GitRepository.Health
@@ -26,6 +26,7 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :scm_connection_attributes do
     field :name,                non_null(:string)
     field :type,                non_null(:scm_type)
+    field :owner,               :string, description: "the owning entity in this scm provider, eg a github organization"
     field :username,            :string
     field :token,               :string
     field :base_url,            :string
@@ -297,10 +298,27 @@ defmodule Console.GraphQl.Deployments.Git do
     timestamps()
   end
 
+  object :scm_webhook do
+    field :id,    non_null(:id)
+    field :type,  non_null(:scm_type)
+    field :owner, non_null(:string)
+
+    field :url, non_null(:string),
+      description: "the url for this specific webhook",
+      resolve: fn hook, _, _ -> {:ok, ScmWebhook.url(hook)} end
+
+    field :name,  non_null(:string),
+      description: "the name in your SCM provider for this webhook",
+      resolve: fn hook, _, _ -> {:ok, ScmWebhook.name(hook)} end
+
+    timestamps()
+  end
+
   connection node_type: :git_repository
   connection node_type: :scm_connection
   connection node_type: :pr_automation
   connection node_type: :pull_request
+  connection node_type: :scm_webhook
 
   delta :git_repository
 
@@ -368,6 +386,12 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :q,          :string
 
       resolve &Deployments.list_pull_requests/2
+    end
+
+    connection field :scm_webhooks, node_type: :scm_webhook do
+      middleware Authenticated
+
+      resolve &Deployments.list_scm_webhooks/2
     end
   end
 

@@ -31,6 +31,8 @@ defmodule ConsoleWeb.Router do
     scope "/v1", ConsoleWeb do
       get "/git/tarballs", GitController, :tarball
 
+      post "/webhooks/:type/:id", WebhookController, :scm
+
       get "/gate/:cluster/:name", GitController, :proceed
       get "/gate/:id", GitController, :proceed
       post "/gate/:cluster/:name", GitController, :proceed

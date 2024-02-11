@@ -56,6 +56,7 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
 
   describe "createScmConnection" do
     test "it will create a new scm connection" do
+      expect(Tentacat.Organizations.Hooks, :create, fn _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)
       {:ok, %{data: %{"createScmConnection" => scm}}} = run_query("""
         mutation Create($attrs: ScmConnectionAttributes!) {
           createScmConnection(attributes: $attrs) {
@@ -67,6 +68,7 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
       """, %{"attrs" => %{
         "type" => "GITHUB",
         "name" => "test",
+        "owner" => "pluralsh",
         "token" => "my-pat"
       }}, %{current_user: admin_user()})
 

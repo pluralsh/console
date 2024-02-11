@@ -3792,6 +3792,7 @@ export type RootQueryType = {
   scalingRecommendation?: Maybe<VerticalPodAutoscaler>;
   scmConnection?: Maybe<ScmConnection>;
   scmConnections?: Maybe<ScmConnectionConnection>;
+  scmWebhooks?: Maybe<ScmWebhookConnection>;
   secret?: Maybe<Secret>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
@@ -4322,6 +4323,14 @@ export type RootQueryTypeScmConnectionsArgs = {
 };
 
 
+export type RootQueryTypeScmWebhooksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypeSecretArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -4666,6 +4675,8 @@ export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  /** the owning entity in this scm provider, eg a github organization */
+  owner?: InputMaybe<Scalars['String']['input']>;
   /** a ssh private key to be used for commit signing */
   signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
@@ -4689,6 +4700,31 @@ export enum ScmType {
   Github = 'GITHUB',
   Gitlab = 'GITLAB'
 }
+
+export type ScmWebhook = {
+  __typename?: 'ScmWebhook';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name in your SCM provider for this webhook */
+  name: Scalars['String']['output'];
+  owner: Scalars['String']['output'];
+  type: ScmType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the url for this specific webhook */
+  url: Scalars['String']['output'];
+};
+
+export type ScmWebhookConnection = {
+  __typename?: 'ScmWebhookConnection';
+  edges?: Maybe<Array<Maybe<ScmWebhookEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ScmWebhookEdge = {
+  __typename?: 'ScmWebhookEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ScmWebhook>;
+};
 
 export type ScopeAttributes = {
   api?: InputMaybe<Scalars['String']['input']>;

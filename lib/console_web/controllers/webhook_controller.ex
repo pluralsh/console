@@ -6,6 +6,10 @@ defmodule ConsoleWeb.WebhookController do
   plug ConsoleWeb.Verifier when action == :webhook
   plug ConsoleWeb.PiazzaVerifier when action == :piazza
 
+  def scm(conn, _) do
+    json(conn, %{ok: true})
+  end
+
   def webhook(conn, params) do
     bot = Users.get_bot!("console")
     with {:ok, _} <- Builds.create(params, bot),

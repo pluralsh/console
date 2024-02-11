@@ -144,9 +144,11 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :state, non_null(:gate_state), description: "the current state of this gate"
     field :spec,  :gate_spec, description: "more detailed specification for complex gates"
 
-    field :job, :job,
-      description: "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)",
-      resolve: fn gate, _, _ -> Pipelines.gate_job(gate) end
+    @desc "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
+    field :job, :job do
+      resolve fn gate, _, _ -> Pipelines.gate_job(gate) end
+      middleware ErrorHandler
+    end
 
     field :cluster,  :cluster, description: "the cluster this gate can run on", resolve: dataloader(Deployments)
     field :approver, :user, description: "the last user to approve this gate", resolve: dataloader(User)
