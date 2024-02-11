@@ -2,7 +2,8 @@ defmodule Console.Deployments.Git do
   use Console.Services.Base
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Deployments.Settings
+  alias Console.Deployments.{Settings, Services, Clusters}
+  alias Console.Services.Users
   alias Console.Deployments.Pr.Dispatcher
   alias Console.Schema.{
     GitRepository,
@@ -100,18 +101,45 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  Creates an scm connection and attempts to register a webhook simultaneously for the connection
   """
   @spec create_scm_connection(map, User.t) :: connection_resp
   def create_scm_connection(attrs, %User{} = user) do
-    %ScmConnection{}
-    |> ScmConnection.changeset(attrs)
-    |> allow(user, :edit)
-    |> when_ok(:insert)
+    start_transaction()
+    |> add_operation(:conn, fn _ ->
+      %ScmConnection{}
+      |> ScmConnection.changeset(attrs)
+      |> allow(user, :edit)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:hook, fn %{conn: conn} ->
+      create_webhook_for_connection(attrs[:owner], conn)
+    end)
+    |> execute(extract: :conn)
   end
 
   @doc """
+  Uses the creds in an scm connection to create a properly configured webhook for us to use
+  """
+  @spec create_webhook_for_connection(binary, ScmConnection.t) :: webhook_resp
+  def create_webhook_for_connection(owner, %ScmConnection{} = conn) do
+    start_transaction()
+    |> add_operation(:hook, fn _ ->
+      %ScmWebhook{type: conn.type}
+      |> ScmWebhook.changeset(%{owner: owner})
+      |> Repo.insert_or_update()
+    end)
+    |> add_operation(:remote, fn %{hook: hook} ->
+      case Dispatcher.webhook(conn, hook) do
+        :ok -> {:ok, conn}
+        err -> err
+      end
+    end)
+    |> execute(extract: :hook)
+  end
 
+  @doc """
+  Updates the attributes of a scm connection
   """
   @spec update_scm_connection(map, binary, User.t) :: connection_resp
   def update_scm_connection(attrs, id, %User{} = user) do
@@ -122,7 +150,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  Deletes an scm connection
   """
   @spec delete_scm_connection(binary, User.t) :: connection_resp
   def delete_scm_connection(id, %User{} = user) do
@@ -132,7 +160,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  creates an scm webhook
   """
   @spec create_scm_webhook(map, User.t) :: webhook_resp
   def create_scm_webhook(attrs, %User{} = user) do
@@ -143,7 +171,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  updates an scm webhook
   """
   @spec update_scm_webhook(map, binary, User.t) :: webhook_resp
   def update_scm_webhook(attrs, id, %User{} = user) do
@@ -154,7 +182,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  deletes a scm webhook
   """
   @spec delete_scm_webhook(binary, User.t) :: webhook_resp
   def delete_scm_webhook(id, %User{} = user) do
@@ -164,7 +192,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  creates a new pr automation reference
   """
   @spec create_pr_automation(map, User.t) :: automation_resp
   def create_pr_automation(attrs, %User{} = user) do
@@ -175,7 +203,7 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
-
+  updates an existing pr automation
   """
   @spec update_pr_automation(map, binary, User.t) :: automation_resp
   def update_pr_automation(attrs, id, %User{} = user) do
@@ -235,6 +263,41 @@ defmodule Console.Deployments.Git do
       _ -> {:ok, []}
     end
   end
+
+  @doc """
+  Sets up a service to run the renovate cron given an scm connection and target repositories
+  """
+  @spec setup_renovate(binary, [binary], User.t) :: Services.service_resp
+  def setup_renovate(args \\ %{}, id, repos, %User{} = user) do
+    cluster = Clusters.local_cluster()
+    start_transaction()
+    |> add_operation(:scm, fn _ -> {:ok, get_scm_connection!(id)} end)
+    |> add_operation(:console, fn _ -> {:ok, Users.get_bot!("console") } end)
+    |> add_operation(:token, fn %{console: console} ->
+      Users.create_access_token(%{scopes: [%{apis: ["createPullRequestPointer"]}]}, console)
+    end)
+    |> add_operation(:svc, fn %{token: token, scm: scm} ->
+      Services.create_service(%{
+        repository_id: artifacts_repo!().id,
+        name: Map.get(args, :name, "plural-renovate"),
+        namespace: Map.get(args, :namespace, "plural-renovate"),
+        git: %{ref: "main", folder: "addons/plural-renovate"},
+        helm: %{values: "# you can add your values here\n{}"},
+        configuration: [
+          %{name: "consoleToken", value: token.token},
+          %{name: "consoleUrl", value: Console.url("/gql")},
+          %{name: "repositories", value: Enum.join(repos, ",")},
+          %{name: "renovateToken", value: scm.token},
+          %{name: "platform", value: "#{scm.type}"},
+        ] ++ hosted_url(scm),
+      }, cluster.id, user)
+    end)
+    |> execute(extract: :svc)
+  end
+
+  defp hosted_url(%ScmConnection{base_url: url}) when is_binary(url),
+    do: [%{name: "endpoint", value: url}]
+  defp hosted_url(_), do: []
 
   def status(%GitRepository{} = repo, status) do
     GitRepository.status_changeset(repo, status)

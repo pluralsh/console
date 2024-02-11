@@ -38,7 +38,7 @@ export function DeleteService({
       title="Delete service deployment"
       text={
         <>
-          Are you sure you want to delete{' '}
+          Are you sure you want to delete the{' '}
           <span css={{ color: theme.colors['text-danger'] }}>
             “{serviceDeployment.name}”{' '}
           </span>

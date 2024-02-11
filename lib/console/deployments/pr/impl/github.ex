@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Pr.Impl.Github do
   import Console.Deployments.Pr.Utils
-  alias Console.Schema.{PrAutomation}
+  alias Console.Schema.{PrAutomation, ScmWebhook, ScmConnection}
   @behaviour Console.Deployments.Pr.Dispatcher
 
   def create(pr, branch, ctx) do
@@ -16,6 +16,25 @@ defmodule Console.Deployments.Pr.Impl.Github do
       |> case do
         {_, %{"html_url" => url}, _} -> {:ok, title, url}
         {_, body, _} -> {:error, "failed to create pull request: #{inspect(body)}"}
+      end
+    end
+  end
+
+  def webhook(%ScmConnection{} = conn, %ScmWebhook{id: id, owner: owner, hmac: hmac} = hook) do
+    with {:ok, client} <- client(conn) do
+      Tentacat.Organizations.Hooks.create(client, owner, %{
+        "name" => ScmWebhook.name(hook),
+        "active" => true,
+        "events" => ["pull_request"],
+        "config" => %{
+          "url" => ScmWebhook.url(hook),
+          "content_type" => "json",
+          "secret" => hmac,
+        },
+      })
+      |> case do
+        {_, %{"id" => _}, _} -> :ok
+        {_, body, _} -> {:error, "failed to create webhook: #{inspect(body)}"}
       end
     end
   end

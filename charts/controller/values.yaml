@@ -4,6 +4,9 @@ tokenSecretRef:
   name: console-auth-token
   key: access-token
 controllerManager:
+  podLabels: {}
+  podAnnotations: {}
+
   kubeRbacProxy:
     args:
     - --secure-listen-address=0.0.0.0:8443
@@ -42,7 +45,7 @@ controllerManager:
     resources:
       limits:
         cpu: 500m
-        memory: 128Mi
+        memory: 500Mi
       requests:
         cpu: 10m
         memory: 64Mi

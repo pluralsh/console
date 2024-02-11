@@ -2,13 +2,14 @@ defmodule Console.Deployments.Services do
   use Console.Services.Base
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository}
+  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository, ServiceContext}
   alias Console.Deployments.{Secrets.Store, Settings, Git, Clusters, Deprecations.Checker, AddOns, Tar}
   alias Console.Deployments.Helm
   require Logger
 
   @type service_resp :: {:ok, Service.t} | Console.error
   @type revision_resp :: {:ok, Revision.t} | Console.error
+  @type context_resp :: {:ok, ServiceContext.t} | Console.error
 
   def get_service!(id), do: Console.Repo.get!(Service, id)
 
@@ -29,6 +30,11 @@ defmodule Console.Deployments.Services do
 
   def get_revision!(id), do: Repo.get!(Revision, id)
 
+  def get_service_component!(id), do: Repo.get!(ServiceComponent, id)
+
+  def get_context_by_name!(name), do: Console.Repo.get_by!(ServiceContext, name: name)
+  def get_context_by_name(name), do: Console.Repo.get_by(ServiceContext, name: name)
+
   def tarball(%Service{id: id}), do: api_url("v1/git/tarballs?id=#{id}")
 
   @doc """
@@ -47,7 +53,7 @@ defmodule Console.Deployments.Services do
   end
   def tarstream(%Service{helm: %Service.Helm{values: values}} = svc) when is_binary(values) do
     with {:ok, tar} <- tarfile(svc),
-      do: Tar.splice(tar, %{"values.yaml.liquid" => values, "values.yaml.static" => values})
+      do: Tar.splice(tar, %{"values.yaml.static" => values})
   end
   def tarstream(%Service{} = svc), do: tarfile(svc)
 
@@ -124,7 +130,11 @@ defmodule Console.Deployments.Services do
       protect: true,
       name: "deploy-operator",
       namespace: "plrl-deploy-operator",
-      git: %{ref: "main", folder: "charts/deployment-operator"},
+      git: %{ref: Settings.agent_ref(), folder: "charts/deployment-operator"},
+      helm: (case Settings.agent_helm_values() do
+        nil -> nil
+        vals when is_binary(vals) -> %{values: vals}
+      end),
       configuration: operator_configuration(cluster)
     }, cluster_id, user)
   end
@@ -249,16 +259,8 @@ defmodule Console.Deployments.Services do
   def self_manage(values, %User{} = user) do
     start_transaction()
     |> add_operation(:values, fn _ -> YamlElixir.read_from_string(values) end)
-    |> add_operation(:git, fn _ ->
-      url = "https://github.com/pluralsh/console.git"
-      case Git.get_by_url(url) do
-        %GitRepository{} = git -> {:ok, git}
-        _ -> Git.create_repository(%{url: url}, user)
-      end
-    end)
-    |> add_operation(:settings, fn _ ->
-      Settings.update(%{self_managed: true}, user)
-    end)
+    |> add_operation(:git, fn _ -> ensure_console_repo(user) end)
+    |> add_operation(:settings, fn _ -> Settings.update(%{self_managed: true}, user) end)
     |> add_operation(:service, fn %{git: git} ->
       cluster = Clusters.local_cluster()
       create_service(%{
@@ -332,7 +334,8 @@ defmodule Console.Deployments.Services do
   def update_service(attrs, %Service{} = svc) do
     start_transaction()
     |> add_operation(:base, fn _ ->
-      Service.changeset(svc, Map.put(attrs, :status, :stale))
+      Repo.preload(svc, [:context_bindings, :read_bindings, :write_bindings])
+      |> Service.changeset(Map.put(attrs, :status, :stale))
       |> Console.Repo.update()
     end)
     |> add_operation(:revision, fn %{base: base} ->
@@ -537,6 +540,17 @@ defmodule Console.Deployments.Services do
     |> notify(:delete, user)
   end
 
+  @doc """
+  Removes a service immediately from the database and don't bother with attempting a drain from its cluster
+  """
+  @spec detach_service(binary, User.t) :: service_resp
+  def detach_service(service_id, %User{} = user) do
+    get_service!(service_id)
+    |> allow(user, :delete)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
   def force_delete_service(service_id, %User{} = user) do
     get_service!(service_id)
     |> Ecto.Changeset.change(%{deleted_at: Timex.now()})
@@ -600,6 +614,42 @@ defmodule Console.Deployments.Services do
     |> Repo.delete_all()
     |> elem(0)
     |> ok()
+  end
+
+  @doc """
+  Saves a service context for the given name, will update if its already present
+  """
+  @spec save_context(map, binary, User.t) :: context_resp
+  def save_context(attrs, name, %User{} = user) do
+    case get_context_by_name(name) do
+      %ServiceContext{} = ctx -> ctx
+      nil -> %ServiceContext{name: name}
+    end
+    |> ServiceContext.changeset(attrs)
+    |> allow(user, :create)
+    |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @doc """
+  Deletes a service context
+  """
+  @spec delete_context(binary, User.t) :: context_resp
+  def delete_context(id, %User{} = user) do
+    Repo.get(ServiceContext, id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
+  @doc """
+  Upserts a git repository pointing to the main console repo
+  """
+  @spec ensure_console_repo(User.t) :: service_resp
+  def ensure_console_repo(user) do
+    url = "https://github.com/pluralsh/console.git"
+    case Git.get_by_url(url) do
+      %GitRepository{} = git -> {:ok, git}
+      _ -> Git.create_repository(%{url: url}, user)
+    end
   end
 
   defp create_revision(attrs, %Service{id: id}) do

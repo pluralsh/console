@@ -1,4 +1,11 @@
-import { ReactElement, createRef, useEffect, useMemo, useState } from 'react'
+import {
+  ComponentProps,
+  ReactElement,
+  createRef,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { IconFrame, ReloadIcon, Spinner, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -10,49 +17,52 @@ import LoadingIndicator from '../../../../utils/LoadingIndicator'
 import { determineLevel } from '../../../../apps/app/logs/LogContent'
 import { useBorderColor } from '../../../../apps/app/logs/LogLine'
 
-interface ContainerLogsProps {
-  container: string
-  sinceSeconds?: number
-}
+import { SinceSecondsOptions } from './Logs'
 
 const columnHelper = createColumnHelper<string>()
 
-function createLogHeader(container: string, refetch) {
-  return function Header(): ReactElement {
-    const theme = useTheme()
-    const [loading, setLoading] = useState(false)
+function LogHeader({
+  container,
+  refetch,
+  loading,
+}: {
+  container: string
+  refetch: Nullable<() => void>
+  loading: boolean
+}): ReactElement {
+  const theme = useTheme()
 
-    return (
-      <div
-        css={{
-          display: 'flex',
-          gap: theme.spacing.medium,
-          alignItems: 'center',
-          justifyContent: 'space-between',
+  console.log('LogHeader', loading)
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        gap: theme.spacing.medium,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      <span>Logs from {container}</span>
+      <IconFrame
+        size="small"
+        clickable
+        onClick={() => {
+          refetch?.()
         }}
-      >
-        <span>Logs from {container}</span>
-        <IconFrame
-          size="small"
-          clickable
-          onClick={() => {
-            setLoading(true)
-            refetch().finally(() => setLoading(false))
-          }}
-          icon={
-            loading ? (
-              <Spinner color={theme.colors['icon-info']} />
-            ) : (
-              <ReloadIcon width={12} />
-            )
-          }
-          textValue="refresh"
-          tooltip="Refresh logs"
-          type="floating"
-        />
-      </div>
-    )
-  }
+        icon={
+          loading ? (
+            <Spinner color={theme.colors['icon-info']} />
+          ) : (
+            <ReloadIcon width={12} />
+          )
+        }
+        textValue="refresh"
+        tooltip="Refresh logs"
+        type="floating"
+      />
+    </div>
+  )
 }
 
 function LogLine({ getValue }): ReactElement {
@@ -78,15 +88,19 @@ function LogLine({ getValue }): ReactElement {
 
 function ContainerLogs({
   container,
-  sinceSeconds = 180,
-}: ContainerLogsProps): ReactElement {
-  const { pod } = useOutletContext() as { pod: Pod }
-  const size = useWindowSize()
+  sinceSeconds = SinceSecondsOptions.HalfHour,
+}: {
+  sinceSeconds?: number
+  container: string
+}) {
   const { clusterId } = useParams()
-  const containerRef = createRef<HTMLDivElement>()
-  const [containerHeight, setContainerHeight] = useState(0)
-
-  const { data, refetch } = usePodLogsQuery({
+  const { pod } = useOutletContext() as { pod: Pod }
+  const {
+    data: currentData,
+    loading,
+    refetch,
+    previousData,
+  } = usePodLogsQuery({
     variables: {
       name: pod.metadata.name!,
       namespace: pod.metadata.namespace!,
@@ -95,13 +109,55 @@ function ContainerLogs({
       sinceSeconds,
     },
     fetchPolicy: 'no-cache',
+    notifyOnNetworkStatusChange: true,
   })
-
+  const data = currentData || previousData
   const logs = useMemo(
     () =>
       (data?.pod?.logs as Array<string>)?.filter((l) => !!l).reverse() ?? [],
     [data]
   )
+
+  if (!data) return <LoadingIndicator />
+
+  return (
+    <ContainerLogsTable
+      container={container}
+      sinceSeconds={sinceSeconds}
+      loading={loading}
+      refetch={refetch}
+      logs={logs}
+    />
+  )
+}
+
+type ContainerLogsTableProps = ComponentProps<typeof ContainerLogs> & {
+  refetch: () => void
+  loading: boolean
+  logs: string[]
+}
+
+const columns = [
+  columnHelper.accessor((row) => row, {
+    id: 'header',
+    header: ({ table }) => {
+      const { refetch, container, loading } = table.options.meta || {}
+
+      return <LogHeader {...{ container, refetch, loading }} />
+    },
+    cell: LogLine,
+  }),
+]
+
+export function ContainerLogsTable({
+  container,
+  refetch,
+  loading,
+  logs,
+}: ContainerLogsTableProps): ReactElement {
+  const size = useWindowSize()
+  const containerRef = createRef<HTMLDivElement>()
+  const [containerHeight, setContainerHeight] = useState(0)
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -109,10 +165,11 @@ function ContainerLogs({
     setContainerHeight(containerRef.current.clientHeight)
   }, [containerRef, size])
 
-  return data ? (
+  return (
     <div
       ref={containerRef}
       css={{
+        minHeight: 0,
         height: '100%',
         ' td': { padding: '1px 0', minHeight: '30px' },
         ' .thSortIndicatorWrap > div': { width: '100%' },
@@ -120,21 +177,18 @@ function ContainerLogs({
     >
       <Table
         height={containerHeight}
+        reactTableOptions={{ meta: { refetch, container, loading } }}
         virtualizeRows
         onRowClick={() => {}}
-        columns={[
-          columnHelper.accessor((row) => row, {
-            id: 'header',
-            header: createLogHeader(container, refetch),
-            cell: LogLine,
-          }),
-        ]}
+        columns={columns}
         data={logs}
         emptyStateProps={{ message: 'No logs found to display' }}
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
       />
     </div>
-  ) : (
-    <LoadingIndicator />
   )
 }
 

@@ -1,9 +1,5 @@
 import { ReactNode } from 'react'
-import {
-  RouterProvider,
-  createBrowserRouter,
-  createRoutesFromElements,
-} from 'react-router-dom'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { Grommet } from 'grommet'
 import { IntercomProvider } from 'react-use-intercom'
 import { ApolloProvider } from '@apollo/client'
@@ -35,7 +31,7 @@ import { PluralErrorBoundary } from './components/cd/PluralErrorBoundary'
 
 const INTERCOM_APP_ID = 'p127zb9y'
 
-const router = createBrowserRouter(createRoutesFromElements(rootRoutes))
+const router = createBrowserRouter(rootRoutes)
 
 export default function App() {
   return (

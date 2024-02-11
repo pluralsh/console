@@ -87,7 +87,7 @@ export type AccessTokenEdge = {
 
 export type AccessTokenScope = {
   __typename?: 'AccessTokenScope';
-  api: Scalars['String']['output'];
+  api?: Maybe<Scalars['String']['output']>;
   apis?: Maybe<Array<Scalars['String']['output']>>;
   identifier?: Maybe<Scalars['String']['output']>;
   ids?: Maybe<Array<Scalars['String']['output']>>;
@@ -289,12 +289,14 @@ export enum AuditType {
   Build = 'BUILD',
   Cluster = 'CLUSTER',
   ClusterProvider = 'CLUSTER_PROVIDER',
+  ClusterRestore = 'CLUSTER_RESTORE',
   Configuration = 'CONFIGURATION',
   DeploymentSettings = 'DEPLOYMENT_SETTINGS',
   GitRepository = 'GIT_REPOSITORY',
   Global = 'GLOBAL',
   Group = 'GROUP',
   GroupMember = 'GROUP_MEMBER',
+  ObjectStore = 'OBJECT_STORE',
   Pipeline = 'PIPELINE',
   Pod = 'POD',
   Policy = 'POLICY',
@@ -371,6 +373,30 @@ export type AzureSettingsAttributes = {
   clientSecret: Scalars['String']['input'];
   subscriptionId: Scalars['String']['input'];
   tenantId: Scalars['String']['input'];
+};
+
+export type AzureStore = {
+  __typename?: 'AzureStore';
+  clientId: Scalars['String']['output'];
+  container: Scalars['String']['output'];
+  storageAccount: Scalars['String']['output'];
+  subscriptionId: Scalars['String']['output'];
+  tenantId: Scalars['String']['output'];
+};
+
+export type AzureStoreAttributes = {
+  clientId: Scalars['String']['input'];
+  clientSecret: Scalars['String']['input'];
+  container: Scalars['String']['input'];
+  storageAccount: Scalars['String']['input'];
+  subscriptionId: Scalars['String']['input'];
+  tenantId: Scalars['String']['input'];
+};
+
+export type BackupAttributes = {
+  garbageCollected?: InputMaybe<Scalars['Boolean']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
 };
 
 export type BindingAttributes = {
@@ -586,6 +612,8 @@ export type Cluster = {
   nodePools?: Maybe<Array<Maybe<NodePool>>>;
   /** list cached nodes for a cluster, this can be stale up to 5m */
   nodes?: Maybe<Array<Maybe<Node>>>;
+  /** the object store connection bound to this cluster for backup/restore */
+  objectStore?: Maybe<ObjectStore>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
   /** pr automations that are relevant to managing this cluster */
@@ -598,6 +626,8 @@ export type Cluster = {
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** a custom git repository if you want to define your own CAPI manifests */
   repository?: Maybe<GitRepository>;
+  /** the active restore for this cluster */
+  restore?: Maybe<ClusterRestore>;
   /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
   revisions?: Maybe<RevisionConnection>;
   /** fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries */
@@ -657,6 +687,17 @@ export type ClusterAttributes = {
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
   version?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type ClusterBackup = {
+  __typename?: 'ClusterBackup';
+  cluster?: Maybe<Cluster>;
+  garbageCollected?: Maybe<Scalars['Boolean']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 /** a single condition struct for various phases of the cluster provisionining process */
@@ -769,6 +810,15 @@ export type ClusterProviderUpdateAttributes = {
   service?: InputMaybe<ClusterServiceAttributes>;
 };
 
+export type ClusterRestore = {
+  __typename?: 'ClusterRestore';
+  backup?: Maybe<ClusterBackup>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  status: RestoreStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type ClusterServiceAttributes = {
   git: GitRefAttributes;
   id: Scalars['ID']['input'];
@@ -878,6 +928,21 @@ export enum ComponentState {
   Pending = 'PENDING',
   Running = 'RUNNING'
 }
+
+/** A tree view of the kubernetes object hierarchy beneath a component */
+export type ComponentTree = {
+  __typename?: 'ComponentTree';
+  certificates?: Maybe<Array<Maybe<Certificate>>>;
+  configmaps?: Maybe<Array<Maybe<ConfigMap>>>;
+  cronjobs?: Maybe<Array<Maybe<CronJob>>>;
+  daemonsets?: Maybe<Array<Maybe<DaemonSet>>>;
+  deployments?: Maybe<Array<Maybe<Deployment>>>;
+  edges?: Maybe<Array<Maybe<ResourceEdge>>>;
+  ingresses?: Maybe<Array<Maybe<Ingress>>>;
+  secrets?: Maybe<Array<Maybe<Secret>>>;
+  services?: Maybe<Array<Maybe<Service>>>;
+  statefulsets?: Maybe<Array<Maybe<StatefulSet>>>;
+};
 
 /** attributes for declaratively specifying whether a config item is relevant given prior config */
 export type ConditionAttributes = {
@@ -1060,6 +1125,11 @@ export type ContextAttributes = {
   protect?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
+/** a binding from a service to a service context */
+export type ContextBindingAttributes = {
+  contextId: Scalars['String']['input'];
+};
+
 export type CostAnalysis = {
   __typename?: 'CostAnalysis';
   cpuCost?: Maybe<Scalars['Float']['output']>;
@@ -1186,6 +1256,8 @@ export type Deployment = {
 /** global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator */
 export type DeploymentSettings = {
   __typename?: 'DeploymentSettings';
+  /** custom helm values to apply to all agents (useful for things like adding customary annotations/labels) */
+  agentHelmValues?: Maybe<Scalars['String']['output']>;
   /** the repo to fetch CAPI manifests from, for both providers and clusters */
   artifactRepository?: Maybe<GitRepository>;
   /** policy for creation of new clusters */
@@ -1213,6 +1285,8 @@ export type DeploymentSettings = {
 };
 
 export type DeploymentSettingsAttributes = {
+  /** custom helm values to apply to all agents (useful for things like adding customary annotations/labels) */
+  agentHelmValues?: InputMaybe<Scalars['String']['input']>;
   artifactRepositoryId?: InputMaybe<Scalars['ID']['input']>;
   createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   deployerRepositoryId?: InputMaybe<Scalars['ID']['input']>;
@@ -1332,6 +1406,18 @@ export type GcpCloudSettings = {
 
 export type GcpSettingsAttributes = {
   applicationCredentials: Scalars['String']['input'];
+};
+
+export type GcsStore = {
+  __typename?: 'GcsStore';
+  bucket: Scalars['String']['output'];
+  region: Scalars['String']['output'];
+};
+
+export type GcsStoreAttributes = {
+  applicationCredentials: Scalars['String']['input'];
+  bucket: Scalars['String']['input'];
+  region: Scalars['String']['input'];
 };
 
 export type GitAttributes = {
@@ -1693,11 +1779,18 @@ export type IssuerRef = {
 export type Job = {
   __typename?: 'Job';
   events?: Maybe<Array<Maybe<Event>>>;
+  logs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   metadata: Metadata;
   pods?: Maybe<Array<Maybe<Pod>>>;
   raw: Scalars['String']['output'];
   spec: JobSpec;
   status: JobStatus;
+};
+
+
+export type JobLogsArgs = {
+  container: Scalars['String']['input'];
+  sinceSeconds: Scalars['Int']['input'];
 };
 
 /** the full specification of a job gate */
@@ -1869,6 +1962,7 @@ export type Metadata = {
   labels?: Maybe<Array<Maybe<LabelPair>>>;
   name: Scalars['String']['output'];
   namespace?: Maybe<Scalars['String']['output']>;
+  uid?: Maybe<Scalars['String']['output']>;
 };
 
 export type MetadataAttributes = {
@@ -2056,6 +2150,36 @@ export type ObjectReference = {
   namespace?: Maybe<Scalars['String']['output']>;
 };
 
+export type ObjectStore = {
+  __typename?: 'ObjectStore';
+  azure?: Maybe<AzureStore>;
+  gcs?: Maybe<GcsStore>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  s3?: Maybe<S3Store>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ObjectStoreAttributes = {
+  azure?: InputMaybe<AzureStoreAttributes>;
+  gcs?: InputMaybe<GcsStoreAttributes>;
+  name: Scalars['String']['input'];
+  s3?: InputMaybe<S3StoreAttributes>;
+};
+
+export type ObjectStoreConnection = {
+  __typename?: 'ObjectStoreConnection';
+  edges?: Maybe<Array<Maybe<ObjectStoreEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ObjectStoreEdge = {
+  __typename?: 'ObjectStoreEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ObjectStore>;
+};
+
 export enum Operation {
   Eq = 'EQ',
   Gt = 'GT',
@@ -2152,6 +2276,8 @@ export type PipelineGate = {
   cluster?: Maybe<Cluster>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation) */
+  job?: Maybe<Job>;
   /** the name of this gate as seen in the UI */
   name: Scalars['String']['output'];
   /** more detailed specification for complex gates */
@@ -2175,6 +2301,18 @@ export type PipelineGateAttributes = {
   spec?: InputMaybe<GateSpecAttributes>;
   /** the type of gate this is */
   type: GateType;
+};
+
+export type PipelineGateConnection = {
+  __typename?: 'PipelineGateConnection';
+  edges?: Maybe<Array<Maybe<PipelineGateEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PipelineGateEdge = {
+  __typename?: 'PipelineGateEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PipelineGate>;
 };
 
 /** a representation of an individual pipeline promotion, which is a list of services/revisions and timestamps to determine promotion status */
@@ -2410,10 +2548,12 @@ export type PrAutomation = {
   addon?: Maybe<Scalars['String']['output']>;
   /** link to a cluster if this is to perform an upgrade */
   cluster?: Maybe<Cluster>;
+  configuration?: Maybe<Array<Maybe<PrConfiguration>>>;
   /** the scm connection to use for pr generation */
   connection?: Maybe<ScmConnection>;
   /** users who can generate prs with this automation */
   createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  creates?: Maybe<PrCreateSpec>;
   documentation?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
@@ -2422,6 +2562,10 @@ export type PrAutomation = {
   message: Scalars['String']['output'];
   /** the name for this automation */
   name: Scalars['String']['output'];
+  /** the git repository to use for sourcing external templates */
+  repository?: Maybe<GitRepository>;
+  /** An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster */
+  role?: Maybe<PrRole>;
   /** link to a service if this can update its configuration */
   service?: Maybe<ServiceDeployment>;
   title: Scalars['String']['output'];
@@ -2443,11 +2587,15 @@ export type PrAutomationAttributes = {
   connectionId?: InputMaybe<Scalars['ID']['input']>;
   /** users who can create prs with this automation */
   createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  creates?: InputMaybe<PrAutomationCreateSpecAttributes>;
   documentation?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: InputMaybe<Scalars['String']['input']>;
   message?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  /** a git repository to use for create mode prs */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  role?: InputMaybe<PrRole>;
   /** link to a service if this can modify its configuration */
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
@@ -2462,10 +2610,24 @@ export type PrAutomationConnection = {
   pageInfo: PageInfo;
 };
 
+/** Operations to create new templated files within this pr */
+export type PrAutomationCreateSpecAttributes = {
+  git?: InputMaybe<GitRefAttributes>;
+  templates?: InputMaybe<Array<InputMaybe<PrAutomationTemplateAttributes>>>;
+};
+
 export type PrAutomationEdge = {
   __typename?: 'PrAutomationEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<PrAutomation>;
+};
+
+/** templates to apply in this pr */
+export type PrAutomationTemplateAttributes = {
+  destination: Scalars['String']['input'];
+  /** whether the source template is sourced from an external git repo bound to this automation */
+  external: Scalars['Boolean']['input'];
+  source: Scalars['String']['input'];
 };
 
 /** The operations to be performed on the files w/in the pr */
@@ -2479,6 +2641,19 @@ export type PrAutomationUpdateSpecAttributes = {
   yq?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** the a configuration item for creating a new pr, used for templating the ultimate code changes made */
+export type PrConfiguration = {
+  __typename?: 'PrConfiguration';
+  condition?: Maybe<PrConfigurationCondition>;
+  default?: Maybe<Scalars['String']['output']>;
+  documentation?: Maybe<Scalars['String']['output']>;
+  longform?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  optional?: Maybe<Scalars['Boolean']['output']>;
+  placeholder?: Maybe<Scalars['String']['output']>;
+  type: ConfigurationType;
+};
+
 /** the a configuration item for creating a new pr */
 export type PrConfigurationAttributes = {
   condition?: InputMaybe<ConditionAttributes>;
@@ -2489,6 +2664,41 @@ export type PrConfigurationAttributes = {
   optional?: InputMaybe<Scalars['Boolean']['input']>;
   placeholder?: InputMaybe<Scalars['String']['input']>;
   type: ConfigurationType;
+};
+
+/** declaritive spec for whether a config item is relevant given prior config */
+export type PrConfigurationCondition = {
+  __typename?: 'PrConfigurationCondition';
+  /** the prior field to check */
+  field: Scalars['String']['output'];
+  /** a boolean operation to apply */
+  operation: Operation;
+  /** a fixed value to check against if its a binary operation */
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+/** templated files used to add new files to a given pr */
+export type PrCreateSpec = {
+  __typename?: 'PrCreateSpec';
+  /** pointer within an external git repository to source templates from */
+  git?: Maybe<GitRef>;
+  templates?: Maybe<Array<Maybe<PrTemplateSpec>>>;
+};
+
+export enum PrRole {
+  Cluster = 'CLUSTER',
+  Pipeline = 'PIPELINE',
+  Service = 'SERVICE',
+  Update = 'UPDATE',
+  Upgrade = 'UPGRADE'
+}
+
+/** the details of where to find and place a templated file */
+export type PrTemplateSpec = {
+  __typename?: 'PrTemplateSpec';
+  destination: Scalars['String']['output'];
+  external: Scalars['Boolean']['output'];
+  source: Scalars['String']['output'];
 };
 
 /** existing file updates that can be performed in a PR */
@@ -2696,6 +2906,13 @@ export type RepositoryEdge = {
   node?: Maybe<Repository>;
 };
 
+/** an edge representing mapping from kubernetes object metadata.uid -> metadata.uid */
+export type ResourceEdge = {
+  __typename?: 'ResourceEdge';
+  from: Scalars['String']['output'];
+  to: Scalars['String']['output'];
+};
+
 export type ResourceSpec = {
   __typename?: 'ResourceSpec';
   cpu?: Maybe<Scalars['String']['output']>;
@@ -2707,6 +2924,17 @@ export type Resources = {
   limits?: Maybe<ResourceSpec>;
   requests?: Maybe<ResourceSpec>;
 };
+
+export type RestoreAttributes = {
+  status: RestoreStatus;
+};
+
+export enum RestoreStatus {
+  Created = 'CREATED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Successful = 'SUCCESSFUL'
+}
 
 /** a representation of a past revision of a service */
 export type Revision = {
@@ -2794,16 +3022,21 @@ export type RootMutationType = {
   cancelBuild?: Maybe<Build>;
   /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
   cloneService?: Maybe<ServiceDeployment>;
+  configureBackups?: Maybe<Cluster>;
   createAccessToken?: Maybe<AccessToken>;
   createAgentMigration?: Maybe<AgentMigration>;
   createBuild?: Maybe<Build>;
   createCluster?: Maybe<Cluster>;
+  /** upserts a cluster backup resource */
+  createClusterBackup?: Maybe<ClusterBackup>;
   createClusterProvider?: Maybe<ClusterProvider>;
+  createClusterRestore?: Maybe<ClusterRestore>;
   createGitRepository?: Maybe<GitRepository>;
   createGlobalService?: Maybe<GlobalService>;
   createGroup?: Maybe<Group>;
   createGroupMember?: Maybe<GroupMember>;
   createInvite?: Maybe<Invite>;
+  createObjectStore?: Maybe<ObjectStore>;
   createPeer?: Maybe<WireguardPeer>;
   createPrAutomation?: Maybe<PrAutomation>;
   createProviderCredential?: Maybe<ProviderCredential>;
@@ -2827,6 +3060,7 @@ export type RootMutationType = {
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
   deleteNode?: Maybe<Node>;
+  deleteObjectStore?: Maybe<ObjectStore>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
@@ -2834,12 +3068,15 @@ export type RootMutationType = {
   deleteProviderCredential?: Maybe<ProviderCredential>;
   deleteRole?: Maybe<Role>;
   deleteScmConnection?: Maybe<ScmConnection>;
+  deleteServiceContext?: Maybe<ServiceContext>;
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteWebhook?: Maybe<Webhook>;
   /** soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects */
   detachCluster?: Maybe<Cluster>;
+  /** removes a service from storage, but bypasses waiting for the agent to fully drain it from its hosting cluster */
+  detachServiceDeployment?: Maybe<ServiceDeployment>;
   enableDeployments?: Maybe<DeploymentSettings>;
   executeRunbook?: Maybe<RunbookActionResponse>;
   /** forces a pipeline gate to be in open state */
@@ -2866,17 +3103,22 @@ export type RootMutationType = {
   rollbackService?: Maybe<ServiceDeployment>;
   /** upserts a pipeline with a given name */
   savePipeline?: Maybe<Pipeline>;
+  saveServiceContext?: Maybe<ServiceContext>;
   selfManage?: Maybe<ServiceDeployment>;
+  /** creates the service to enable self-hosted renovate in one pass */
+  setupRenovate?: Maybe<ServiceDeployment>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
   updateCluster?: Maybe<Cluster>;
   updateClusterProvider?: Maybe<ClusterProvider>;
+  updateClusterRestore?: Maybe<ClusterRestore>;
   updateConfiguration?: Maybe<Configuration>;
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
   updateGate?: Maybe<PipelineGate>;
   updateGitRepository?: Maybe<GitRepository>;
   updateGlobalService?: Maybe<GlobalService>;
   updateGroup?: Maybe<Group>;
+  updateObjectStore?: Maybe<ObjectStore>;
   updatePrAutomation?: Maybe<PrAutomation>;
   /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
@@ -2915,6 +3157,12 @@ export type RootMutationTypeCloneServiceArgs = {
 };
 
 
+export type RootMutationTypeConfigureBackupsArgs = {
+  clusterId: Scalars['ID']['input'];
+  storeId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateAccessTokenArgs = {
   scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
 };
@@ -2935,8 +3183,18 @@ export type RootMutationTypeCreateClusterArgs = {
 };
 
 
+export type RootMutationTypeCreateClusterBackupArgs = {
+  attributes: BackupAttributes;
+};
+
+
 export type RootMutationTypeCreateClusterProviderArgs = {
   attributes: ClusterProviderAttributes;
+};
+
+
+export type RootMutationTypeCreateClusterRestoreArgs = {
+  backupId: Scalars['ID']['input'];
 };
 
 
@@ -2966,6 +3224,11 @@ export type RootMutationTypeCreateGroupMemberArgs = {
 
 export type RootMutationTypeCreateInviteArgs = {
   attributes: InviteAttributes;
+};
+
+
+export type RootMutationTypeCreateObjectStoreArgs = {
+  attributes: ObjectStoreAttributes;
 };
 
 
@@ -3091,6 +3354,11 @@ export type RootMutationTypeDeleteNodeArgs = {
 };
 
 
+export type RootMutationTypeDeleteObjectStoreArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeletePeerArgs = {
   name: Scalars['String']['input'];
 };
@@ -3128,6 +3396,11 @@ export type RootMutationTypeDeleteScmConnectionArgs = {
 };
 
 
+export type RootMutationTypeDeleteServiceContextArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteServiceDeploymentArgs = {
   id: Scalars['ID']['input'];
 };
@@ -3149,6 +3422,11 @@ export type RootMutationTypeDeleteWebhookArgs = {
 
 
 export type RootMutationTypeDetachClusterArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDetachServiceDeploymentArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -3262,8 +3540,20 @@ export type RootMutationTypeSavePipelineArgs = {
 };
 
 
+export type RootMutationTypeSaveServiceContextArgs = {
+  attributes: ServiceContextAttributes;
+  name: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeSelfManageArgs = {
   values: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeSetupRenovateArgs = {
+  connectionId: Scalars['ID']['input'];
+  repos?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 
@@ -3287,6 +3577,12 @@ export type RootMutationTypeUpdateClusterArgs = {
 
 export type RootMutationTypeUpdateClusterProviderArgs = {
   attributes: ClusterProviderUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateClusterRestoreArgs = {
+  attributes: RestoreAttributes;
   id: Scalars['ID']['input'];
 };
 
@@ -3325,6 +3621,12 @@ export type RootMutationTypeUpdateGlobalServiceArgs = {
 export type RootMutationTypeUpdateGroupArgs = {
   attributes: GroupAttributes;
   groupId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateObjectStoreArgs = {
+  attributes: ObjectStoreAttributes;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3405,18 +3707,23 @@ export type RootQueryType = {
   cluster?: Maybe<Cluster>;
   /** list all addons currently resident in the artifacts repo */
   clusterAddOns?: Maybe<Array<Maybe<ClusterAddOn>>>;
+  clusterBackup?: Maybe<ClusterBackup>;
+  clusterGate?: Maybe<PipelineGate>;
   clusterGates?: Maybe<Array<Maybe<PipelineGate>>>;
   clusterInfo?: Maybe<ClusterInfo>;
   /** fetches an individual cluster provider */
   clusterProvider?: Maybe<ClusterProvider>;
   /** a relay connection of all providers visible to the current user */
   clusterProviders?: Maybe<ClusterProviderConnection>;
+  clusterRestore?: Maybe<ClusterRestore>;
   /** the services deployed in the current cluster, to be polled by the deploy operator */
   clusterServices?: Maybe<Array<Maybe<ServiceDeployment>>>;
   /** gets summary information for all healthy/unhealthy clusters in your fleet */
   clusterStatuses?: Maybe<Array<Maybe<ClusterStatusInfo>>>;
   /** a relay connection of all clusters visible to the current user */
   clusters?: Maybe<ClusterConnection>;
+  /** renders a full hierarchy of resources recursively owned by this component (useful for CRD views) */
+  componentTree?: Maybe<ComponentTree>;
   configMap?: Maybe<ConfigMap>;
   configMaps?: Maybe<Array<Maybe<ConfigMap>>>;
   configuration?: Maybe<ConsoleConfiguration>;
@@ -3455,7 +3762,11 @@ export type RootQueryType = {
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   nodes?: Maybe<Array<Maybe<Node>>>;
   notifications?: Maybe<NotificationConnection>;
+  objectStores?: Maybe<ObjectStoreConnection>;
+  pagedClusterGates?: Maybe<PipelineGateConnection>;
+  pagedClusterServices?: Maybe<ServiceDeploymentConnection>;
   pipeline?: Maybe<Pipeline>;
+  pipelineGate?: Maybe<PipelineGate>;
   pipelines?: Maybe<PipelineConnection>;
   pluralCluster?: Maybe<PluralCluster>;
   pluralContext?: Maybe<PluralContext>;
@@ -3481,10 +3792,12 @@ export type RootQueryType = {
   scalingRecommendation?: Maybe<VerticalPodAutoscaler>;
   scmConnection?: Maybe<ScmConnection>;
   scmConnections?: Maybe<ScmConnectionConnection>;
+  scmWebhooks?: Maybe<ScmWebhookConnection>;
   secret?: Maybe<Secret>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
   serviceAccounts?: Maybe<UserConnection>;
+  serviceContext?: Maybe<ServiceContext>;
   /** fetches details of this service deployment, and can be called by the deploy operator */
   serviceDeployment?: Maybe<ServiceDeployment>;
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
@@ -3580,6 +3893,19 @@ export type RootQueryTypeClusterArgs = {
 };
 
 
+export type RootQueryTypeClusterBackupArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeClusterGateArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootQueryTypeClusterProviderArgs = {
   cloud?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -3592,6 +3918,11 @@ export type RootQueryTypeClusterProvidersArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeClusterRestoreArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3610,6 +3941,11 @@ export type RootQueryTypeClustersArgs = {
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
   tagQuery?: InputMaybe<TagQuery>;
+};
+
+
+export type RootQueryTypeComponentTreeArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3798,7 +4134,36 @@ export type RootQueryTypeNotificationsArgs = {
 };
 
 
+export type RootQueryTypeObjectStoresArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypePagedClusterGatesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypePagedClusterServicesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypePipelineArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypePipelineGateArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -3808,6 +4173,7 @@ export type RootQueryTypePipelinesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3877,6 +4243,7 @@ export type RootQueryTypePullRequestsArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -3956,6 +4323,14 @@ export type RootQueryTypeScmConnectionsArgs = {
 };
 
 
+export type RootQueryTypeScmWebhooksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypeSecretArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -3981,6 +4356,11 @@ export type RootQueryTypeServiceAccountsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeServiceContextArgs = {
+  name: Scalars['String']['input'];
 };
 
 
@@ -4259,6 +4639,22 @@ export type RuntimeServiceAttributes = {
   version: Scalars['String']['input'];
 };
 
+export type S3Store = {
+  __typename?: 'S3Store';
+  accessKeyId: Scalars['String']['output'];
+  bucket: Scalars['String']['output'];
+  endpoint?: Maybe<Scalars['String']['output']>;
+  region?: Maybe<Scalars['String']['output']>;
+};
+
+export type S3StoreAttributes = {
+  accessKeyId: Scalars['String']['input'];
+  bucket: Scalars['String']['input'];
+  endpoint?: InputMaybe<Scalars['String']['input']>;
+  region?: InputMaybe<Scalars['String']['input']>;
+  secretAccessKey: Scalars['String']['input'];
+};
+
 /** an object representing the means to connect to SCM apis */
 export type ScmConnection = {
   __typename?: 'ScmConnection';
@@ -4279,6 +4675,10 @@ export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
+  /** the owning entity in this scm provider, eg a github organization */
+  owner?: InputMaybe<Scalars['String']['input']>;
+  /** a ssh private key to be used for commit signing */
+  signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
   type: ScmType;
   username?: InputMaybe<Scalars['String']['input']>;
@@ -4300,6 +4700,31 @@ export enum ScmType {
   Github = 'GITHUB',
   Gitlab = 'GITLAB'
 }
+
+export type ScmWebhook = {
+  __typename?: 'ScmWebhook';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name in your SCM provider for this webhook */
+  name: Scalars['String']['output'];
+  owner: Scalars['String']['output'];
+  type: ScmType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the url for this specific webhook */
+  url: Scalars['String']['output'];
+};
+
+export type ScmWebhookConnection = {
+  __typename?: 'ScmWebhookConnection';
+  edges?: Maybe<Array<Maybe<ScmWebhookEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ScmWebhookEdge = {
+  __typename?: 'ScmWebhookEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ScmWebhook>;
+};
 
 export type ScopeAttributes = {
   api?: InputMaybe<Scalars['String']['input']>;
@@ -4378,6 +4803,23 @@ export type ServiceConfiguration = {
   value: Scalars['String']['output'];
 };
 
+/** A reusable bundle of configuration designed to make it easy to communicate between tools like tf/pulumi and k8s */
+export type ServiceContext = {
+  __typename?: 'ServiceContext';
+  configuration?: Maybe<Scalars['Map']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  secrets?: Maybe<Array<Maybe<ServiceConfiguration>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** A reusable configuration context, useful for plumbing data from external tools like terraform/pulumi/etc */
+export type ServiceContextAttributes = {
+  configuration?: InputMaybe<Scalars['Json']['input']>;
+  secrets?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+};
+
 /** a reference to a service deployed from a git repo into a cluster */
 export type ServiceDeployment = {
   __typename?: 'ServiceDeployment';
@@ -4389,6 +4831,8 @@ export type ServiceDeployment = {
   components?: Maybe<Array<Maybe<ServiceComponent>>>;
   /** possibly secret configuration used to template the manifests of this service */
   configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
+  /** bound contexts for this service */
+  contexts?: Maybe<Array<Maybe<ServiceContext>>>;
   /** the time this service was scheduled for deletion */
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries */
@@ -4459,6 +4903,7 @@ export type ServiceDeploymentRevisionsArgs = {
 
 export type ServiceDeploymentAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  contextBindings?: InputMaybe<Array<InputMaybe<ContextBindingAttributes>>>;
   docsPath?: InputMaybe<Scalars['String']['input']>;
   dryRun?: InputMaybe<Scalars['Boolean']['input']>;
   git?: InputMaybe<GitRefAttributes>;
@@ -4543,13 +4988,16 @@ export type ServiceStatusCount = {
 
 export type ServiceUpdateAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  contextBindings?: InputMaybe<Array<InputMaybe<ContextBindingAttributes>>>;
   dryRun?: InputMaybe<Scalars['Boolean']['input']>;
   git?: InputMaybe<GitRefAttributes>;
   helm?: InputMaybe<HelmConfigAttributes>;
   interval?: InputMaybe<Scalars['String']['input']>;
   kustomize?: InputMaybe<KustomizeAttributes>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   version?: InputMaybe<Scalars['String']['input']>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export enum Severity {
@@ -4814,6 +5262,7 @@ export type UserAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   password?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<UserRoleAttributes>;
+  signingPrivateKey?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UserConnection = {
@@ -4969,6 +5418,70 @@ export type RepositoryQueryVariables = Exact<{
 
 export type RepositoryQuery = { __typename?: 'RootQueryType', repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null };
 
+export type PrAutomationFragment = { __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null };
+
+export type PrAutomationsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PrAutomationsQuery = { __typename?: 'RootQueryType', prAutomations?: { __typename?: 'PrAutomationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PrAutomationEdge', node?: { __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null } | null> | null } | null };
+
+export type CreatePrAutomationMutationVariables = Exact<{
+  attributes: PrAutomationAttributes;
+}>;
+
+
+export type CreatePrAutomationMutation = { __typename?: 'RootMutationType', createPrAutomation?: { __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null };
+
+export type UpdatePrAutomationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: PrAutomationAttributes;
+}>;
+
+
+export type UpdatePrAutomationMutation = { __typename?: 'RootMutationType', updatePrAutomation?: { __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null };
+
+export type DeletePrAutomationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeletePrAutomationMutation = { __typename?: 'RootMutationType', deletePrAutomation?: { __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null };
+
+export type ScmConnectionFragment = { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null };
+
+export type ScmConnectionsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ScmConnectionsQuery = { __typename?: 'RootQueryType', scmConnections?: { __typename?: 'ScmConnectionConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ScmConnectionEdge', node?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null } | null> | null } | null };
+
+export type CreateScmConnectionMutationVariables = Exact<{
+  attributes: ScmConnectionAttributes;
+}>;
+
+
+export type CreateScmConnectionMutation = { __typename?: 'RootMutationType', createScmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null };
+
+export type UpdateScmConnectionMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ScmConnectionAttributes;
+}>;
+
+
+export type UpdateScmConnectionMutation = { __typename?: 'RootMutationType', updateScmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null };
+
+export type DeleteScmConnectionMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteScmConnectionMutation = { __typename?: 'RootMutationType', deleteScmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null };
+
 export type PageInfoFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null };
 
 export type PluralContextQueryVariables = Exact<{ [key: string]: never; }>;
@@ -5014,15 +5527,15 @@ export type NodePoolFragment = { __typename?: 'NodePool', id: string, name: stri
 
 export type ApiDeprecationFragment = { __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null };
 
-export type RuntimeServiceFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null };
+export type RuntimeServiceFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, readme?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null };
 
 export type AddonVersionFragment = { __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null };
 
 export type AddonVersionBlockingFragment = { __typename?: 'AddonVersion', blocking?: boolean | null };
 
-export type ClustersRowFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null } | null> | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
+export type ClustersRowFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
 
-export type ClusterFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null } | null> | null };
+export type ClusterFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null };
 
 export type ClustersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -5033,9 +5546,11 @@ export type ClustersQueryVariables = Exact<{
 }>;
 
 
-export type ClustersQuery = { __typename?: 'RootQueryType', tags?: Array<string | null> | null, clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null } | null> | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null } | null> | null } | null, clusterStatuses?: Array<{ __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null } | null> | null };
+export type ClustersQuery = { __typename?: 'RootQueryType', tags?: Array<string | null> | null, clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null } | null> | null } | null, clusterStatuses?: Array<{ __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null } | null> | null };
 
 export type ClusterTinyFragment = { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
+
+export type ClusterBasicFragment = { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
 
 export type ClustersTinyQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5057,7 +5572,7 @@ export type ClusterQueryVariables = Exact<{
 }>;
 
 
-export type ClusterQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null } | null> | null } | null };
+export type ClusterQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null } | null };
 
 export type ClusterPodsQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
@@ -5092,7 +5607,15 @@ export type RuntimeServicesQueryVariables = Exact<{
 }>;
 
 
-export type RuntimeServicesQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null } | null };
+export type RuntimeServicesQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, runtimeServices?: Array<{ __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, readme?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null> | null } | null };
+
+export type AddonReleaseUrlQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  version: Scalars['String']['input'];
+}>;
+
+
+export type AddonReleaseUrlQuery = { __typename?: 'RootQueryType', runtimeService?: { __typename?: 'RuntimeService', id: string, addon?: { __typename?: 'RuntimeAddon', releaseUrl?: string | null } | null } | null };
 
 export type UpdateClusterBindingsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5108,21 +5631,28 @@ export type UpdateClusterMutationVariables = Exact<{
 }>;
 
 
-export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null } | null> | null } | null };
+export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null } | null };
 
 export type CreateClusterMutationVariables = Exact<{
   attributes: ClusterAttributes;
 }>;
 
 
-export type CreateClusterMutation = { __typename?: 'RootMutationType', createCluster?: { __typename?: 'Cluster', deployToken?: string | null, currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null } | null> | null } | null };
+export type CreateClusterMutation = { __typename?: 'RootMutationType', createCluster?: { __typename?: 'Cluster', deployToken?: string | null, currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null } | null };
 
 export type DeleteClusterMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteClusterMutation = { __typename?: 'RootMutationType', deleteCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null } | null> | null } | null };
+export type DeleteClusterMutation = { __typename?: 'RootMutationType', deleteCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null } | null };
+
+export type DetachClusterMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DetachClusterMutation = { __typename?: 'RootMutationType', detachCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null } | null };
 
 export type ClusterStatusInfoFragment = { __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null };
 
@@ -5231,23 +5761,27 @@ export type DeleteGlobalServiceMutation = { __typename?: 'RootMutationType', del
 
 export type HttpConnectionFragment = { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null };
 
-export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
 export type UpdateDeploymentSettingsMutationVariables = Exact<{
   attributes: DeploymentSettingsAttributes;
 }>;
 
 
-export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type PipelineServiceDeploymentFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null };
 
-export type PipelineGateFragment = { __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null };
+export type ContainerSpecFragment = { __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null };
+
+export type JobGateSpecFragment = { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null };
+
+export type PipelineGateFragment = { __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, spec?: { __typename?: 'GateSpec', job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null };
 
 export type RevisionFragment = { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null };
 
@@ -5261,9 +5795,9 @@ export type StageServiceFragment = { __typename?: 'StageService', id: string, in
 
 export type PipelineStageFragment = { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null };
 
-export type PipelineStageEdgeFragment = { __typename?: 'PipelineStageEdge', id: string, insertedAt?: string | null, promotedAt?: string | null, updatedAt?: string | null, gates?: Array<{ __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null> | null, from: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null }, to: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } };
+export type PipelineStageEdgeFragment = { __typename?: 'PipelineStageEdge', id: string, insertedAt?: string | null, promotedAt?: string | null, updatedAt?: string | null, gates?: Array<{ __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, spec?: { __typename?: 'GateSpec', job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null> | null, from: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null }, to: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } };
 
-export type PipelineFragment = { __typename?: 'Pipeline', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, edges?: Array<{ __typename?: 'PipelineStageEdge', id: string, insertedAt?: string | null, promotedAt?: string | null, updatedAt?: string | null, gates?: Array<{ __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null> | null, from: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null }, to: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } } | null> | null, stages?: Array<{ __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null> | null };
+export type PipelineFragment = { __typename?: 'Pipeline', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, edges?: Array<{ __typename?: 'PipelineStageEdge', id: string, insertedAt?: string | null, promotedAt?: string | null, updatedAt?: string | null, gates?: Array<{ __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, spec?: { __typename?: 'GateSpec', job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null> | null, from: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null }, to: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } } | null> | null, stages?: Array<{ __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null> | null };
 
 export type PipelinesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -5271,21 +5805,39 @@ export type PipelinesQueryVariables = Exact<{
 }>;
 
 
-export type PipelinesQuery = { __typename?: 'RootQueryType', pipelines?: { __typename?: 'PipelineConnection', edges?: Array<{ __typename?: 'PipelineEdge', cursor?: string | null, node?: { __typename?: 'Pipeline', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, edges?: Array<{ __typename?: 'PipelineStageEdge', id: string, insertedAt?: string | null, promotedAt?: string | null, updatedAt?: string | null, gates?: Array<{ __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null> | null, from: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null }, to: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } } | null> | null, stages?: Array<{ __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type PipelinesQuery = { __typename?: 'RootQueryType', pipelines?: { __typename?: 'PipelineConnection', edges?: Array<{ __typename?: 'PipelineEdge', cursor?: string | null, node?: { __typename?: 'Pipeline', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, edges?: Array<{ __typename?: 'PipelineStageEdge', id: string, insertedAt?: string | null, promotedAt?: string | null, updatedAt?: string | null, gates?: Array<{ __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, spec?: { __typename?: 'GateSpec', job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null> | null, from: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null }, to: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } } | null> | null, stages?: Array<{ __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type PipelineGateJobFragment = { __typename?: 'Job', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, count?: number | null, eventTime?: string | null, lastTimestamp?: string | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, spec: { __typename?: 'JobSpec', activeDeadlineSeconds?: number | null, backoffLimit?: number | null, parallelism?: number | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, failed?: number | null, startTime?: string | null, succeeded?: number | null } };
+
+export type JobGateQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type JobGateQuery = { __typename?: 'RootQueryType', pipelineGate?: { __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, job?: { __typename?: 'Job', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, count?: number | null, eventTime?: string | null, lastTimestamp?: string | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, spec: { __typename?: 'JobSpec', activeDeadlineSeconds?: number | null, backoffLimit?: number | null, parallelism?: number | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, failed?: number | null, startTime?: string | null, succeeded?: number | null } } | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, spec?: { __typename?: 'GateSpec', job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null };
+
+export type JobGateLogsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  container: Scalars['String']['input'];
+  sinceSeconds: Scalars['Int']['input'];
+}>;
+
+
+export type JobGateLogsQuery = { __typename?: 'RootQueryType', pipelineGate?: { __typename?: 'PipelineGate', job?: { __typename?: 'Job', logs?: Array<string | null> | null } | null } | null };
 
 export type PipelineQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type PipelineQuery = { __typename?: 'RootQueryType', pipeline?: { __typename?: 'Pipeline', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, edges?: Array<{ __typename?: 'PipelineStageEdge', id: string, insertedAt?: string | null, promotedAt?: string | null, updatedAt?: string | null, gates?: Array<{ __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null> | null, from: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null }, to: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } } | null> | null, stages?: Array<{ __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null> | null } | null };
+export type PipelineQuery = { __typename?: 'RootQueryType', pipeline?: { __typename?: 'Pipeline', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, edges?: Array<{ __typename?: 'PipelineStageEdge', id: string, insertedAt?: string | null, promotedAt?: string | null, updatedAt?: string | null, gates?: Array<{ __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, spec?: { __typename?: 'GateSpec', job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null> | null, from: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null }, to: { __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } } | null> | null, stages?: Array<{ __typename?: 'PipelineStage', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, promotion?: { __typename?: 'PipelinePromotion', id: string, insertedAt?: string | null, updatedAt?: string | null, promotedAt?: string | null, revisedAt?: string | null, services?: Array<{ __typename?: 'PromotionService', id: string, insertedAt?: string | null, updatedAt?: string | null, revision?: { __typename?: 'Revision', id: string, insertedAt?: string | null, updatedAt?: string | null, message?: string | null, sha?: string | null, version: string, git?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null, services?: Array<{ __typename?: 'StageService', id: string, insertedAt?: string | null, updatedAt?: string | null, criteria?: { __typename?: 'PromotionCriteria', id: string, secrets?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, source?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null> | null } | null };
 
 export type ApproveGateMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ApproveGateMutation = { __typename?: 'RootMutationType', approveGate?: { __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null };
+export type ApproveGateMutation = { __typename?: 'RootMutationType', approveGate?: { __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, spec?: { __typename?: 'GateSpec', job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null };
 
 export type ProviderCredentialFragment = { __typename?: 'ProviderCredential', id: string, insertedAt?: string | null, kind: string, name: string, namespace: string, updatedAt?: string | null };
 
@@ -5318,9 +5870,7 @@ export type DeleteClusterProviderMutationVariables = Exact<{
 
 export type DeleteClusterProviderMutation = { __typename?: 'RootMutationType', deleteClusterProvider?: { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, supportedVersions?: Array<string | null> | null, deletedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null, credentials?: Array<{ __typename?: 'ProviderCredential', id: string, insertedAt?: string | null, kind: string, name: string, namespace: string, updatedAt?: string | null } | null> | null } | null };
 
-export type PrAutomationFragment = { __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null };
-
-export type PullRequestFragment = { __typename?: 'PullRequest', id: string, url: string, insertedAt?: string | null };
+export type PullRequestFragment = { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
 export type CreatePullRequestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5329,7 +5879,18 @@ export type CreatePullRequestMutationVariables = Exact<{
 }>;
 
 
-export type CreatePullRequestMutation = { __typename?: 'RootMutationType', createPullRequest?: { __typename?: 'PullRequest', id: string, url: string, insertedAt?: string | null } | null };
+export type CreatePullRequestMutation = { __typename?: 'RootMutationType', createPullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+
+export type PullRequestsQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type PullRequestsQuery = { __typename?: 'RootQueryType', pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
 
 export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null } | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null };
 
@@ -5417,6 +5978,13 @@ export type DeleteServiceDeploymentMutationVariables = Exact<{
 
 
 export type DeleteServiceDeploymentMutation = { __typename?: 'RootMutationType', deleteServiceDeployment?: { __typename?: 'ServiceDeployment', id: string } | null };
+
+export type DetachServiceDeploymentMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DetachServiceDeploymentMutation = { __typename?: 'RootMutationType', detachServiceDeployment?: { __typename?: 'ServiceDeployment', id: string } | null };
 
 export type RollbackServiceMutationVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -5744,14 +6312,14 @@ export type UnstructuredResourceQueryVariables = Exact<{
 
 export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
 
-export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null };
+export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
 export type AccessTokenAuditFragment = { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null };
 
 export type AccessTokensQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AccessTokensQuery = { __typename?: 'RootQueryType', accessTokens?: { __typename?: 'AccessTokenConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenEdge', node?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
+export type AccessTokensQuery = { __typename?: 'RootQueryType', accessTokens?: { __typename?: 'AccessTokenConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenEdge', node?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null } | null> | null } | null };
 
 export type TokenAuditsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5761,17 +6329,19 @@ export type TokenAuditsQueryVariables = Exact<{
 
 export type TokenAuditsQuery = { __typename?: 'RootQueryType', accessToken?: { __typename?: 'AccessToken', id?: string | null, audits?: { __typename?: 'AccessTokenAuditConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenAuditEdge', node?: { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
 
-export type CreateAccessTokenMutationVariables = Exact<{ [key: string]: never; }>;
+export type CreateAccessTokenMutationVariables = Exact<{
+  scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>> | InputMaybe<ScopeAttributes>>;
+}>;
 
 
-export type CreateAccessTokenMutation = { __typename?: 'RootMutationType', createAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null };
+export type CreateAccessTokenMutation = { __typename?: 'RootMutationType', createAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
 
 export type DeleteAccessTokenMutationVariables = Exact<{
   token: Scalars['String']['input'];
 }>;
 
 
-export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null };
+export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
 
 export type UserFragment = { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
 
@@ -5992,6 +6562,7 @@ export const RuntimeServiceFragmentDoc = gql`
     versions {
       ...AddonVersion
     }
+    readme
   }
   service {
     git {
@@ -6039,13 +6610,99 @@ export const ApiDeprecationFragmentDoc = gql`
   replacement
 }
     `;
+export const ClusterTinyFragmentDoc = gql`
+    fragment ClusterTiny on Cluster {
+  id
+  name
+  provider {
+    cloud
+  }
+  distro
+}
+    `;
+export const ClusterBasicFragmentDoc = gql`
+    fragment ClusterBasic on Cluster {
+  ...ClusterTiny
+  handle
+  self
+  protect
+  deletedAt
+  version
+  currentVersion
+}
+    ${ClusterTinyFragmentDoc}`;
+export const ScmConnectionFragmentDoc = gql`
+    fragment ScmConnection on ScmConnection {
+  id
+  name
+  insertedAt
+  updatedAt
+  type
+  username
+  baseUrl
+  apiUrl
+}
+    `;
+export const PolicyBindingFragmentDoc = gql`
+    fragment PolicyBinding on PolicyBinding {
+  id
+  user {
+    id
+    name
+    email
+  }
+  group {
+    id
+    name
+  }
+}
+    `;
 export const PrAutomationFragmentDoc = gql`
     fragment PrAutomation on PrAutomation {
   id
   name
   documentation
+  addon
+  cluster {
+    ...ClusterBasic
+  }
+  service {
+    id
+    name
+  }
+  repository {
+    url
+    refs
+  }
+  role
+  documentation
+  connection {
+    ...ScmConnection
+  }
+  createBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+  configuration {
+    condition {
+      field
+      operation
+      value
+    }
+    default
+    documentation
+    longform
+    name
+    optional
+    placeholder
+    type
+  }
 }
-    `;
+    ${ClusterBasicFragmentDoc}
+${ScmConnectionFragmentDoc}
+${PolicyBindingFragmentDoc}`;
 export const ClusterConditionFragmentDoc = gql`
     fragment ClusterCondition on ClusterCondition {
   lastTransitionTime
@@ -6225,30 +6882,6 @@ ${NodePoolFragmentDoc}
 ${ClusterNodeFragmentDoc}
 ${NodeMetricFragmentDoc}
 ${ClusterConditionFragmentDoc}`;
-export const ClusterTinyFragmentDoc = gql`
-    fragment ClusterTiny on Cluster {
-  id
-  name
-  provider {
-    cloud
-  }
-  distro
-}
-    `;
-export const PolicyBindingFragmentDoc = gql`
-    fragment PolicyBinding on PolicyBinding {
-  id
-  user {
-    id
-    name
-    email
-  }
-  group {
-    id
-    name
-  }
-}
-    `;
 export const ClusterBindingsFragmentDoc = gql`
     fragment ClusterBindings on Cluster {
   readBindings {
@@ -6351,6 +6984,7 @@ export const DeploymentSettingsFragmentDoc = gql`
   selfManaged
   insertedAt
   updatedAt
+  agentHelmValues
   lokiConnection {
     ...HttpConnection
   }
@@ -6393,6 +7027,32 @@ export const UserFragmentDoc = gql`
   }
 }
     `;
+export const ContainerSpecFragmentDoc = gql`
+    fragment ContainerSpec on ContainerSpec {
+  args
+  env {
+    name
+    value
+  }
+  envFrom {
+    configMap
+    secret
+  }
+  image
+}
+    `;
+export const JobGateSpecFragmentDoc = gql`
+    fragment JobGateSpec on JobGateSpec {
+  annotations
+  containers {
+    ...ContainerSpec
+  }
+  labels
+  namespace
+  raw
+  serviceAccount
+}
+    ${ContainerSpecFragmentDoc}`;
 export const PipelineGateFragmentDoc = gql`
     fragment PipelineGate on PipelineGate {
   id
@@ -6402,10 +7062,16 @@ export const PipelineGateFragmentDoc = gql`
   approver {
     ...User
   }
+  spec {
+    job {
+      ...JobGateSpec
+    }
+  }
   insertedAt
   updatedAt
 }
-    ${UserFragmentDoc}`;
+    ${UserFragmentDoc}
+${JobGateSpecFragmentDoc}`;
 export const RevisionFragmentDoc = gql`
     fragment Revision on Revision {
   id
@@ -6532,6 +7198,128 @@ export const PipelineFragmentDoc = gql`
 }
     ${PipelineStageEdgeFragmentDoc}
 ${PipelineStageFragmentDoc}`;
+export const ContainerStatusFragmentDoc = gql`
+    fragment ContainerStatus on ContainerStatus {
+  restartCount
+  ready
+  name
+  state {
+    running {
+      startedAt
+    }
+    terminated {
+      exitCode
+      message
+      reason
+    }
+    waiting {
+      message
+      reason
+    }
+  }
+}
+    `;
+export const ResourceSpecFragmentDoc = gql`
+    fragment ResourceSpec on ResourceSpec {
+  cpu
+  memory
+}
+    `;
+export const ResourcesFragmentDoc = gql`
+    fragment Resources on Resources {
+  limits {
+    ...ResourceSpec
+  }
+  requests {
+    ...ResourceSpec
+  }
+}
+    ${ResourceSpecFragmentDoc}`;
+export const ContainerFragmentDoc = gql`
+    fragment Container on Container {
+  name
+  image
+  ports {
+    containerPort
+    protocol
+  }
+  resources {
+    ...Resources
+  }
+}
+    ${ResourcesFragmentDoc}`;
+export const PodFragmentDoc = gql`
+    fragment Pod on Pod {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    podIp
+    reason
+    containerStatuses {
+      ...ContainerStatus
+    }
+    initContainerStatuses {
+      ...ContainerStatus
+    }
+    conditions {
+      lastProbeTime
+      lastTransitionTime
+      message
+      reason
+      status
+      type
+    }
+  }
+  spec {
+    nodeName
+    serviceAccountName
+    containers {
+      ...Container
+    }
+    initContainers {
+      ...Container
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${ContainerStatusFragmentDoc}
+${ContainerFragmentDoc}`;
+export const PipelineGateJobFragmentDoc = gql`
+    fragment PipelineGateJob on Job {
+  events {
+    action
+    count
+    eventTime
+    lastTimestamp
+    message
+    reason
+    type
+  }
+  metadata {
+    ...Metadata
+  }
+  pods {
+    ...Pod
+  }
+  raw
+  spec {
+    activeDeadlineSeconds
+    backoffLimit
+    parallelism
+  }
+  status {
+    active
+    completionTime
+    failed
+    startTime
+    succeeded
+  }
+}
+    ${MetadataFragmentDoc}
+${PodFragmentDoc}`;
 export const ProviderCredentialFragmentDoc = gql`
     fragment ProviderCredential on ProviderCredential {
   id
@@ -6574,10 +7362,20 @@ export const ClusterProviderFragmentDoc = gql`
 export const PullRequestFragmentDoc = gql`
     fragment PullRequest on PullRequest {
   id
+  service {
+    id
+    name
+  }
+  cluster {
+    ...ClusterBasic
+  }
+  title
   url
+  labels
   insertedAt
+  updatedAt
 }
-    `;
+    ${ClusterBasicFragmentDoc}`;
 export const ServiceDeploymentsRowFragmentDoc = gql`
     fragment ServiceDeploymentsRow on ServiceDeployment {
   id
@@ -6727,22 +7525,6 @@ export const ServiceStatusCountFragmentDoc = gql`
   status
 }
     `;
-export const ResourceSpecFragmentDoc = gql`
-    fragment ResourceSpec on ResourceSpec {
-  cpu
-  memory
-}
-    `;
-export const ResourcesFragmentDoc = gql`
-    fragment Resources on Resources {
-  limits {
-    ...ResourceSpec
-  }
-  requests {
-    ...ResourceSpec
-  }
-}
-    ${ResourceSpecFragmentDoc}`;
 export const DatabaseTableRowFragmentDoc = gql`
     fragment DatabaseTableRow on Postgresql {
   instances {
@@ -6869,79 +7651,6 @@ export const DaemonSetSpecFragmentDoc = gql`
   }
 }
     `;
-export const ContainerStatusFragmentDoc = gql`
-    fragment ContainerStatus on ContainerStatus {
-  restartCount
-  ready
-  name
-  state {
-    running {
-      startedAt
-    }
-    terminated {
-      exitCode
-      message
-      reason
-    }
-    waiting {
-      message
-      reason
-    }
-  }
-}
-    `;
-export const ContainerFragmentDoc = gql`
-    fragment Container on Container {
-  name
-  image
-  ports {
-    containerPort
-    protocol
-  }
-  resources {
-    ...Resources
-  }
-}
-    ${ResourcesFragmentDoc}`;
-export const PodFragmentDoc = gql`
-    fragment Pod on Pod {
-  metadata {
-    ...Metadata
-  }
-  status {
-    phase
-    podIp
-    reason
-    containerStatuses {
-      ...ContainerStatus
-    }
-    initContainerStatuses {
-      ...ContainerStatus
-    }
-    conditions {
-      lastProbeTime
-      lastTransitionTime
-      message
-      reason
-      status
-      type
-    }
-  }
-  spec {
-    nodeName
-    serviceAccountName
-    containers {
-      ...Container
-    }
-    initContainers {
-      ...Container
-    }
-  }
-  raw
-}
-    ${MetadataFragmentDoc}
-${ContainerStatusFragmentDoc}
-${ContainerFragmentDoc}`;
 export const DaemonSetFragmentDoc = gql`
     fragment DaemonSet on DaemonSet {
   metadata {
@@ -7194,8 +7903,14 @@ export const AccessTokenFragmentDoc = gql`
     fragment AccessToken on AccessToken {
   id
   insertedAt
-  token
   updatedAt
+  token
+  scopes {
+    api
+    apis
+    identifier
+    ids
+  }
 }
     `;
 export const AccessTokenAuditFragmentDoc = gql`
@@ -7389,6 +8104,304 @@ export type RepositoryQueryHookResult = ReturnType<typeof useRepositoryQuery>;
 export type RepositoryLazyQueryHookResult = ReturnType<typeof useRepositoryLazyQuery>;
 export type RepositorySuspenseQueryHookResult = ReturnType<typeof useRepositorySuspenseQuery>;
 export type RepositoryQueryResult = Apollo.QueryResult<RepositoryQuery, RepositoryQueryVariables>;
+export const PrAutomationsDocument = gql`
+    query PrAutomations($first: Int = 100, $after: String) {
+  prAutomations(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...PrAutomation
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${PrAutomationFragmentDoc}`;
+
+/**
+ * __usePrAutomationsQuery__
+ *
+ * To run a query within a React component, call `usePrAutomationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePrAutomationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePrAutomationsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function usePrAutomationsQuery(baseOptions?: Apollo.QueryHookOptions<PrAutomationsQuery, PrAutomationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PrAutomationsQuery, PrAutomationsQueryVariables>(PrAutomationsDocument, options);
+      }
+export function usePrAutomationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PrAutomationsQuery, PrAutomationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PrAutomationsQuery, PrAutomationsQueryVariables>(PrAutomationsDocument, options);
+        }
+export function usePrAutomationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PrAutomationsQuery, PrAutomationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PrAutomationsQuery, PrAutomationsQueryVariables>(PrAutomationsDocument, options);
+        }
+export type PrAutomationsQueryHookResult = ReturnType<typeof usePrAutomationsQuery>;
+export type PrAutomationsLazyQueryHookResult = ReturnType<typeof usePrAutomationsLazyQuery>;
+export type PrAutomationsSuspenseQueryHookResult = ReturnType<typeof usePrAutomationsSuspenseQuery>;
+export type PrAutomationsQueryResult = Apollo.QueryResult<PrAutomationsQuery, PrAutomationsQueryVariables>;
+export const CreatePrAutomationDocument = gql`
+    mutation CreatePrAutomation($attributes: PrAutomationAttributes!) {
+  createPrAutomation(attributes: $attributes) {
+    ...PrAutomation
+  }
+}
+    ${PrAutomationFragmentDoc}`;
+export type CreatePrAutomationMutationFn = Apollo.MutationFunction<CreatePrAutomationMutation, CreatePrAutomationMutationVariables>;
+
+/**
+ * __useCreatePrAutomationMutation__
+ *
+ * To run a mutation, you first call `useCreatePrAutomationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePrAutomationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPrAutomationMutation, { data, loading, error }] = useCreatePrAutomationMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreatePrAutomationMutation(baseOptions?: Apollo.MutationHookOptions<CreatePrAutomationMutation, CreatePrAutomationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePrAutomationMutation, CreatePrAutomationMutationVariables>(CreatePrAutomationDocument, options);
+      }
+export type CreatePrAutomationMutationHookResult = ReturnType<typeof useCreatePrAutomationMutation>;
+export type CreatePrAutomationMutationResult = Apollo.MutationResult<CreatePrAutomationMutation>;
+export type CreatePrAutomationMutationOptions = Apollo.BaseMutationOptions<CreatePrAutomationMutation, CreatePrAutomationMutationVariables>;
+export const UpdatePrAutomationDocument = gql`
+    mutation UpdatePrAutomation($id: ID!, $attributes: PrAutomationAttributes!) {
+  updatePrAutomation(id: $id, attributes: $attributes) {
+    ...PrAutomation
+  }
+}
+    ${PrAutomationFragmentDoc}`;
+export type UpdatePrAutomationMutationFn = Apollo.MutationFunction<UpdatePrAutomationMutation, UpdatePrAutomationMutationVariables>;
+
+/**
+ * __useUpdatePrAutomationMutation__
+ *
+ * To run a mutation, you first call `useUpdatePrAutomationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePrAutomationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePrAutomationMutation, { data, loading, error }] = useUpdatePrAutomationMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdatePrAutomationMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePrAutomationMutation, UpdatePrAutomationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdatePrAutomationMutation, UpdatePrAutomationMutationVariables>(UpdatePrAutomationDocument, options);
+      }
+export type UpdatePrAutomationMutationHookResult = ReturnType<typeof useUpdatePrAutomationMutation>;
+export type UpdatePrAutomationMutationResult = Apollo.MutationResult<UpdatePrAutomationMutation>;
+export type UpdatePrAutomationMutationOptions = Apollo.BaseMutationOptions<UpdatePrAutomationMutation, UpdatePrAutomationMutationVariables>;
+export const DeletePrAutomationDocument = gql`
+    mutation DeletePrAutomation($id: ID!) {
+  deletePrAutomation(id: $id) {
+    ...PrAutomation
+  }
+}
+    ${PrAutomationFragmentDoc}`;
+export type DeletePrAutomationMutationFn = Apollo.MutationFunction<DeletePrAutomationMutation, DeletePrAutomationMutationVariables>;
+
+/**
+ * __useDeletePrAutomationMutation__
+ *
+ * To run a mutation, you first call `useDeletePrAutomationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePrAutomationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePrAutomationMutation, { data, loading, error }] = useDeletePrAutomationMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeletePrAutomationMutation(baseOptions?: Apollo.MutationHookOptions<DeletePrAutomationMutation, DeletePrAutomationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePrAutomationMutation, DeletePrAutomationMutationVariables>(DeletePrAutomationDocument, options);
+      }
+export type DeletePrAutomationMutationHookResult = ReturnType<typeof useDeletePrAutomationMutation>;
+export type DeletePrAutomationMutationResult = Apollo.MutationResult<DeletePrAutomationMutation>;
+export type DeletePrAutomationMutationOptions = Apollo.BaseMutationOptions<DeletePrAutomationMutation, DeletePrAutomationMutationVariables>;
+export const ScmConnectionsDocument = gql`
+    query ScmConnections($first: Int = 100, $after: String) {
+  scmConnections(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ScmConnection
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ScmConnectionFragmentDoc}`;
+
+/**
+ * __useScmConnectionsQuery__
+ *
+ * To run a query within a React component, call `useScmConnectionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useScmConnectionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useScmConnectionsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useScmConnectionsQuery(baseOptions?: Apollo.QueryHookOptions<ScmConnectionsQuery, ScmConnectionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ScmConnectionsQuery, ScmConnectionsQueryVariables>(ScmConnectionsDocument, options);
+      }
+export function useScmConnectionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ScmConnectionsQuery, ScmConnectionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ScmConnectionsQuery, ScmConnectionsQueryVariables>(ScmConnectionsDocument, options);
+        }
+export function useScmConnectionsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ScmConnectionsQuery, ScmConnectionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ScmConnectionsQuery, ScmConnectionsQueryVariables>(ScmConnectionsDocument, options);
+        }
+export type ScmConnectionsQueryHookResult = ReturnType<typeof useScmConnectionsQuery>;
+export type ScmConnectionsLazyQueryHookResult = ReturnType<typeof useScmConnectionsLazyQuery>;
+export type ScmConnectionsSuspenseQueryHookResult = ReturnType<typeof useScmConnectionsSuspenseQuery>;
+export type ScmConnectionsQueryResult = Apollo.QueryResult<ScmConnectionsQuery, ScmConnectionsQueryVariables>;
+export const CreateScmConnectionDocument = gql`
+    mutation CreateScmConnection($attributes: ScmConnectionAttributes!) {
+  createScmConnection(attributes: $attributes) {
+    ...ScmConnection
+  }
+}
+    ${ScmConnectionFragmentDoc}`;
+export type CreateScmConnectionMutationFn = Apollo.MutationFunction<CreateScmConnectionMutation, CreateScmConnectionMutationVariables>;
+
+/**
+ * __useCreateScmConnectionMutation__
+ *
+ * To run a mutation, you first call `useCreateScmConnectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateScmConnectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createScmConnectionMutation, { data, loading, error }] = useCreateScmConnectionMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateScmConnectionMutation(baseOptions?: Apollo.MutationHookOptions<CreateScmConnectionMutation, CreateScmConnectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateScmConnectionMutation, CreateScmConnectionMutationVariables>(CreateScmConnectionDocument, options);
+      }
+export type CreateScmConnectionMutationHookResult = ReturnType<typeof useCreateScmConnectionMutation>;
+export type CreateScmConnectionMutationResult = Apollo.MutationResult<CreateScmConnectionMutation>;
+export type CreateScmConnectionMutationOptions = Apollo.BaseMutationOptions<CreateScmConnectionMutation, CreateScmConnectionMutationVariables>;
+export const UpdateScmConnectionDocument = gql`
+    mutation UpdateScmConnection($id: ID!, $attributes: ScmConnectionAttributes!) {
+  updateScmConnection(id: $id, attributes: $attributes) {
+    ...ScmConnection
+  }
+}
+    ${ScmConnectionFragmentDoc}`;
+export type UpdateScmConnectionMutationFn = Apollo.MutationFunction<UpdateScmConnectionMutation, UpdateScmConnectionMutationVariables>;
+
+/**
+ * __useUpdateScmConnectionMutation__
+ *
+ * To run a mutation, you first call `useUpdateScmConnectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateScmConnectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateScmConnectionMutation, { data, loading, error }] = useUpdateScmConnectionMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateScmConnectionMutation(baseOptions?: Apollo.MutationHookOptions<UpdateScmConnectionMutation, UpdateScmConnectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateScmConnectionMutation, UpdateScmConnectionMutationVariables>(UpdateScmConnectionDocument, options);
+      }
+export type UpdateScmConnectionMutationHookResult = ReturnType<typeof useUpdateScmConnectionMutation>;
+export type UpdateScmConnectionMutationResult = Apollo.MutationResult<UpdateScmConnectionMutation>;
+export type UpdateScmConnectionMutationOptions = Apollo.BaseMutationOptions<UpdateScmConnectionMutation, UpdateScmConnectionMutationVariables>;
+export const DeleteScmConnectionDocument = gql`
+    mutation DeleteScmConnection($id: ID!) {
+  deleteScmConnection(id: $id) {
+    ...ScmConnection
+  }
+}
+    ${ScmConnectionFragmentDoc}`;
+export type DeleteScmConnectionMutationFn = Apollo.MutationFunction<DeleteScmConnectionMutation, DeleteScmConnectionMutationVariables>;
+
+/**
+ * __useDeleteScmConnectionMutation__
+ *
+ * To run a mutation, you first call `useDeleteScmConnectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteScmConnectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteScmConnectionMutation, { data, loading, error }] = useDeleteScmConnectionMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteScmConnectionMutation(baseOptions?: Apollo.MutationHookOptions<DeleteScmConnectionMutation, DeleteScmConnectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteScmConnectionMutation, DeleteScmConnectionMutationVariables>(DeleteScmConnectionDocument, options);
+      }
+export type DeleteScmConnectionMutationHookResult = ReturnType<typeof useDeleteScmConnectionMutation>;
+export type DeleteScmConnectionMutationResult = Apollo.MutationResult<DeleteScmConnectionMutation>;
+export type DeleteScmConnectionMutationOptions = Apollo.BaseMutationOptions<DeleteScmConnectionMutation, DeleteScmConnectionMutationVariables>;
 export const PluralContextDocument = gql`
     query PluralContext {
   pluralContext {
@@ -7922,6 +8935,50 @@ export type RuntimeServicesQueryHookResult = ReturnType<typeof useRuntimeService
 export type RuntimeServicesLazyQueryHookResult = ReturnType<typeof useRuntimeServicesLazyQuery>;
 export type RuntimeServicesSuspenseQueryHookResult = ReturnType<typeof useRuntimeServicesSuspenseQuery>;
 export type RuntimeServicesQueryResult = Apollo.QueryResult<RuntimeServicesQuery, RuntimeServicesQueryVariables>;
+export const AddonReleaseUrlDocument = gql`
+    query AddonReleaseURL($id: ID!, $version: String!) {
+  runtimeService(id: $id) {
+    id
+    addon {
+      releaseUrl(version: $version)
+    }
+  }
+}
+    `;
+
+/**
+ * __useAddonReleaseUrlQuery__
+ *
+ * To run a query within a React component, call `useAddonReleaseUrlQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAddonReleaseUrlQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAddonReleaseUrlQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      version: // value for 'version'
+ *   },
+ * });
+ */
+export function useAddonReleaseUrlQuery(baseOptions: Apollo.QueryHookOptions<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>(AddonReleaseUrlDocument, options);
+      }
+export function useAddonReleaseUrlLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>(AddonReleaseUrlDocument, options);
+        }
+export function useAddonReleaseUrlSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>(AddonReleaseUrlDocument, options);
+        }
+export type AddonReleaseUrlQueryHookResult = ReturnType<typeof useAddonReleaseUrlQuery>;
+export type AddonReleaseUrlLazyQueryHookResult = ReturnType<typeof useAddonReleaseUrlLazyQuery>;
+export type AddonReleaseUrlSuspenseQueryHookResult = ReturnType<typeof useAddonReleaseUrlSuspenseQuery>;
+export type AddonReleaseUrlQueryResult = Apollo.QueryResult<AddonReleaseUrlQuery, AddonReleaseUrlQueryVariables>;
 export const UpdateClusterBindingsDocument = gql`
     mutation UpdateClusterBindings($id: ID!, $rbac: RbacAttributes!) {
   updateRbac(clusterId: $id, rbac: $rbac)
@@ -8055,6 +9112,39 @@ export function useDeleteClusterMutation(baseOptions?: Apollo.MutationHookOption
 export type DeleteClusterMutationHookResult = ReturnType<typeof useDeleteClusterMutation>;
 export type DeleteClusterMutationResult = Apollo.MutationResult<DeleteClusterMutation>;
 export type DeleteClusterMutationOptions = Apollo.BaseMutationOptions<DeleteClusterMutation, DeleteClusterMutationVariables>;
+export const DetachClusterDocument = gql`
+    mutation DetachCluster($id: ID!) {
+  detachCluster(id: $id) {
+    ...Cluster
+  }
+}
+    ${ClusterFragmentDoc}`;
+export type DetachClusterMutationFn = Apollo.MutationFunction<DetachClusterMutation, DetachClusterMutationVariables>;
+
+/**
+ * __useDetachClusterMutation__
+ *
+ * To run a mutation, you first call `useDetachClusterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetachClusterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detachClusterMutation, { data, loading, error }] = useDetachClusterMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDetachClusterMutation(baseOptions?: Apollo.MutationHookOptions<DetachClusterMutation, DetachClusterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetachClusterMutation, DetachClusterMutationVariables>(DetachClusterDocument, options);
+      }
+export type DetachClusterMutationHookResult = ReturnType<typeof useDetachClusterMutation>;
+export type DetachClusterMutationResult = Apollo.MutationResult<DetachClusterMutation>;
+export type DetachClusterMutationOptions = Apollo.BaseMutationOptions<DetachClusterMutation, DetachClusterMutationVariables>;
 export const ClusterStatusesDocument = gql`
     query ClusterStatuses($clusterId: ID) {
   clusterStatuses {
@@ -8678,6 +9768,94 @@ export type PipelinesQueryHookResult = ReturnType<typeof usePipelinesQuery>;
 export type PipelinesLazyQueryHookResult = ReturnType<typeof usePipelinesLazyQuery>;
 export type PipelinesSuspenseQueryHookResult = ReturnType<typeof usePipelinesSuspenseQuery>;
 export type PipelinesQueryResult = Apollo.QueryResult<PipelinesQuery, PipelinesQueryVariables>;
+export const JobGateDocument = gql`
+    query JobGate($id: ID!) {
+  pipelineGate(id: $id) {
+    ...PipelineGate
+    job {
+      ...PipelineGateJob
+    }
+  }
+}
+    ${PipelineGateFragmentDoc}
+${PipelineGateJobFragmentDoc}`;
+
+/**
+ * __useJobGateQuery__
+ *
+ * To run a query within a React component, call `useJobGateQuery` and pass it any options that fit your needs.
+ * When your component renders, `useJobGateQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useJobGateQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useJobGateQuery(baseOptions: Apollo.QueryHookOptions<JobGateQuery, JobGateQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<JobGateQuery, JobGateQueryVariables>(JobGateDocument, options);
+      }
+export function useJobGateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<JobGateQuery, JobGateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<JobGateQuery, JobGateQueryVariables>(JobGateDocument, options);
+        }
+export function useJobGateSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<JobGateQuery, JobGateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<JobGateQuery, JobGateQueryVariables>(JobGateDocument, options);
+        }
+export type JobGateQueryHookResult = ReturnType<typeof useJobGateQuery>;
+export type JobGateLazyQueryHookResult = ReturnType<typeof useJobGateLazyQuery>;
+export type JobGateSuspenseQueryHookResult = ReturnType<typeof useJobGateSuspenseQuery>;
+export type JobGateQueryResult = Apollo.QueryResult<JobGateQuery, JobGateQueryVariables>;
+export const JobGateLogsDocument = gql`
+    query JobGateLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
+  pipelineGate(id: $id) {
+    job {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
+    }
+  }
+}
+    `;
+
+/**
+ * __useJobGateLogsQuery__
+ *
+ * To run a query within a React component, call `useJobGateLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useJobGateLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useJobGateLogsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      container: // value for 'container'
+ *      sinceSeconds: // value for 'sinceSeconds'
+ *   },
+ * });
+ */
+export function useJobGateLogsQuery(baseOptions: Apollo.QueryHookOptions<JobGateLogsQuery, JobGateLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<JobGateLogsQuery, JobGateLogsQueryVariables>(JobGateLogsDocument, options);
+      }
+export function useJobGateLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<JobGateLogsQuery, JobGateLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<JobGateLogsQuery, JobGateLogsQueryVariables>(JobGateLogsDocument, options);
+        }
+export function useJobGateLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<JobGateLogsQuery, JobGateLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<JobGateLogsQuery, JobGateLogsQueryVariables>(JobGateLogsDocument, options);
+        }
+export type JobGateLogsQueryHookResult = ReturnType<typeof useJobGateLogsQuery>;
+export type JobGateLogsLazyQueryHookResult = ReturnType<typeof useJobGateLogsLazyQuery>;
+export type JobGateLogsSuspenseQueryHookResult = ReturnType<typeof useJobGateLogsSuspenseQuery>;
+export type JobGateLogsQueryResult = Apollo.QueryResult<JobGateLogsQuery, JobGateLogsQueryVariables>;
 export const PipelineDocument = gql`
     query Pipeline($id: ID!) {
   pipeline(id: $id) {
@@ -8929,6 +10107,64 @@ export function useCreatePullRequestMutation(baseOptions?: Apollo.MutationHookOp
 export type CreatePullRequestMutationHookResult = ReturnType<typeof useCreatePullRequestMutation>;
 export type CreatePullRequestMutationResult = Apollo.MutationResult<CreatePullRequestMutation>;
 export type CreatePullRequestMutationOptions = Apollo.BaseMutationOptions<CreatePullRequestMutation, CreatePullRequestMutationVariables>;
+export const PullRequestsDocument = gql`
+    query PullRequests($q: String, $first: Int = 100, $after: String, $clusterId: ID, $serviceId: ID) {
+  pullRequests(
+    q: $q
+    first: $first
+    after: $after
+    clusterId: $clusterId
+    serviceId: $serviceId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...PullRequest
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${PullRequestFragmentDoc}`;
+
+/**
+ * __usePullRequestsQuery__
+ *
+ * To run a query within a React component, call `usePullRequestsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePullRequestsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePullRequestsQuery({
+ *   variables: {
+ *      q: // value for 'q'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      clusterId: // value for 'clusterId'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function usePullRequestsQuery(baseOptions?: Apollo.QueryHookOptions<PullRequestsQuery, PullRequestsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PullRequestsQuery, PullRequestsQueryVariables>(PullRequestsDocument, options);
+      }
+export function usePullRequestsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PullRequestsQuery, PullRequestsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PullRequestsQuery, PullRequestsQueryVariables>(PullRequestsDocument, options);
+        }
+export function usePullRequestsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PullRequestsQuery, PullRequestsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PullRequestsQuery, PullRequestsQueryVariables>(PullRequestsDocument, options);
+        }
+export type PullRequestsQueryHookResult = ReturnType<typeof usePullRequestsQuery>;
+export type PullRequestsLazyQueryHookResult = ReturnType<typeof usePullRequestsLazyQuery>;
+export type PullRequestsSuspenseQueryHookResult = ReturnType<typeof usePullRequestsSuspenseQuery>;
+export type PullRequestsQueryResult = Apollo.QueryResult<PullRequestsQuery, PullRequestsQueryVariables>;
 export const ServiceDeploymentsDocument = gql`
     query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID, $status: ServiceDeploymentStatus) {
   serviceDeployments(
@@ -9362,6 +10598,39 @@ export function useDeleteServiceDeploymentMutation(baseOptions?: Apollo.Mutation
 export type DeleteServiceDeploymentMutationHookResult = ReturnType<typeof useDeleteServiceDeploymentMutation>;
 export type DeleteServiceDeploymentMutationResult = Apollo.MutationResult<DeleteServiceDeploymentMutation>;
 export type DeleteServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<DeleteServiceDeploymentMutation, DeleteServiceDeploymentMutationVariables>;
+export const DetachServiceDeploymentDocument = gql`
+    mutation DetachServiceDeployment($id: ID!) {
+  detachServiceDeployment(id: $id) {
+    id
+  }
+}
+    `;
+export type DetachServiceDeploymentMutationFn = Apollo.MutationFunction<DetachServiceDeploymentMutation, DetachServiceDeploymentMutationVariables>;
+
+/**
+ * __useDetachServiceDeploymentMutation__
+ *
+ * To run a mutation, you first call `useDetachServiceDeploymentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetachServiceDeploymentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detachServiceDeploymentMutation, { data, loading, error }] = useDetachServiceDeploymentMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDetachServiceDeploymentMutation(baseOptions?: Apollo.MutationHookOptions<DetachServiceDeploymentMutation, DetachServiceDeploymentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetachServiceDeploymentMutation, DetachServiceDeploymentMutationVariables>(DetachServiceDeploymentDocument, options);
+      }
+export type DetachServiceDeploymentMutationHookResult = ReturnType<typeof useDetachServiceDeploymentMutation>;
+export type DetachServiceDeploymentMutationResult = Apollo.MutationResult<DetachServiceDeploymentMutation>;
+export type DetachServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<DetachServiceDeploymentMutation, DetachServiceDeploymentMutationVariables>;
 export const RollbackServiceDocument = gql`
     mutation RollbackService($id: ID, $revisionId: ID!) {
   rollbackService(id: $id, revisionId: $revisionId) {
@@ -10793,8 +12062,8 @@ export type TokenAuditsLazyQueryHookResult = ReturnType<typeof useTokenAuditsLaz
 export type TokenAuditsSuspenseQueryHookResult = ReturnType<typeof useTokenAuditsSuspenseQuery>;
 export type TokenAuditsQueryResult = Apollo.QueryResult<TokenAuditsQuery, TokenAuditsQueryVariables>;
 export const CreateAccessTokenDocument = gql`
-    mutation CreateAccessToken {
-  createAccessToken {
+    mutation CreateAccessToken($scopes: [ScopeAttributes]) {
+  createAccessToken(scopes: $scopes) {
     ...AccessToken
   }
 }
@@ -10814,6 +12083,7 @@ export type CreateAccessTokenMutationFn = Apollo.MutationFunction<CreateAccessTo
  * @example
  * const [createAccessTokenMutation, { data, loading, error }] = useCreateAccessTokenMutation({
  *   variables: {
+ *      scopes: // value for 'scopes'
  *   },
  * });
  */
@@ -11030,6 +12300,8 @@ export const namedOperations = {
     App: 'App',
     AppInfo: 'AppInfo',
     Repository: 'Repository',
+    PrAutomations: 'PrAutomations',
+    ScmConnections: 'ScmConnections',
     PluralContext: 'PluralContext',
     ClusterAddOns: 'ClusterAddOns',
     Clusters: 'Clusters',
@@ -11040,6 +12312,7 @@ export const namedOperations = {
     ClusterNamespaces: 'ClusterNamespaces',
     ClusterBindings: 'ClusterBindings',
     RuntimeServices: 'RuntimeServices',
+    AddonReleaseURL: 'AddonReleaseURL',
     ClusterStatuses: 'ClusterStatuses',
     TagPairs: 'TagPairs',
     Usage: 'Usage',
@@ -11049,8 +12322,11 @@ export const namedOperations = {
     GitRepository: 'GitRepository',
     DeploymentSettings: 'DeploymentSettings',
     Pipelines: 'Pipelines',
+    JobGate: 'JobGate',
+    JobGateLogs: 'JobGateLogs',
     Pipeline: 'Pipeline',
     ClusterProviders: 'ClusterProviders',
+    PullRequests: 'PullRequests',
     ServiceDeployments: 'ServiceDeployments',
     ServiceDeploymentsTiny: 'ServiceDeploymentsTiny',
     ServiceDeployment: 'ServiceDeployment',
@@ -11085,12 +12361,19 @@ export const namedOperations = {
     SearchUsers: 'SearchUsers'
   },
   Mutation: {
+    CreatePrAutomation: 'CreatePrAutomation',
+    UpdatePrAutomation: 'UpdatePrAutomation',
+    DeletePrAutomation: 'DeletePrAutomation',
+    CreateScmConnection: 'CreateScmConnection',
+    UpdateScmConnection: 'UpdateScmConnection',
+    DeleteScmConnection: 'DeleteScmConnection',
     CreateBuild: 'CreateBuild',
     InstallAddOn: 'InstallAddOn',
     UpdateClusterBindings: 'UpdateClusterBindings',
     UpdateCluster: 'UpdateCluster',
     CreateCluster: 'CreateCluster',
     DeleteCluster: 'DeleteCluster',
+    DetachCluster: 'DetachCluster',
     CreateGitRepository: 'CreateGitRepository',
     DeleteGitRepository: 'DeleteGitRepository',
     UpdateGitRepository: 'UpdateGitRepository',
@@ -11106,6 +12389,7 @@ export const namedOperations = {
     UpdateServiceDeployment: 'UpdateServiceDeployment',
     MergeService: 'MergeService',
     DeleteServiceDeployment: 'DeleteServiceDeployment',
+    DetachServiceDeployment: 'DetachServiceDeployment',
     RollbackService: 'RollbackService',
     ProceedService: 'ProceedService',
     UpdateRbac: 'UpdateRbac',
@@ -11128,6 +12412,8 @@ export const namedOperations = {
     Application: 'Application',
     ConfigurationOverlay: 'ConfigurationOverlay',
     Repository: 'Repository',
+    PrAutomation: 'PrAutomation',
+    ScmConnection: 'ScmConnection',
     PageInfo: 'PageInfo',
     AddOnConfigCondition: 'AddOnConfigCondition',
     AddOnConfiguration: 'AddOnConfiguration',
@@ -11143,6 +12429,7 @@ export const namedOperations = {
     ClustersRow: 'ClustersRow',
     Cluster: 'Cluster',
     ClusterTiny: 'ClusterTiny',
+    ClusterBasic: 'ClusterBasic',
     PolicyBinding: 'PolicyBinding',
     ClusterBindings: 'ClusterBindings',
     ClusterStatusInfo: 'ClusterStatusInfo',
@@ -11154,6 +12441,8 @@ export const namedOperations = {
     HttpConnection: 'HttpConnection',
     DeploymentSettings: 'DeploymentSettings',
     PipelineServiceDeployment: 'PipelineServiceDeployment',
+    ContainerSpec: 'ContainerSpec',
+    JobGateSpec: 'JobGateSpec',
     PipelineGate: 'PipelineGate',
     Revision: 'Revision',
     PromotionService: 'PromotionService',
@@ -11163,9 +12452,9 @@ export const namedOperations = {
     PipelineStage: 'PipelineStage',
     PipelineStageEdge: 'PipelineStageEdge',
     Pipeline: 'Pipeline',
+    PipelineGateJob: 'PipelineGateJob',
     ProviderCredential: 'ProviderCredential',
     ClusterProvider: 'ClusterProvider',
-    PrAutomation: 'PrAutomation',
     PullRequest: 'PullRequest',
     ServiceDeploymentRevision: 'ServiceDeploymentRevision',
     ServiceDeploymentsRow: 'ServiceDeploymentsRow',

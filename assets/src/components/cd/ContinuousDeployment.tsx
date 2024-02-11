@@ -33,19 +33,20 @@ import { PluralErrorBoundary } from './PluralErrorBoundary'
 
 export const POLL_INTERVAL = 10_000
 
-const CDContext = createContext<
+export const PageScrollableContext = createContext<
   | {
       setScrollable: (content: boolean) => void
-      setHeaderContent: (content: ReactNode) => void
     }
   | undefined
 >(undefined)
 
-export const useSetCDScrollable = (scrollable: boolean) => {
-  const ctx = useContext(CDContext)
+export const useSetPageScrollable = (scrollable: boolean) => {
+  const ctx = useContext(PageScrollableContext)
 
   if (!ctx) {
-    console.warn('useSetCDScrollable() must be used within a CDContext')
+    console.warn(
+      'useSetPageScrollable() must be used within a PageScrollContext'
+    )
   }
   const { setScrollable } = ctx || {}
 
@@ -58,11 +59,22 @@ export const useSetCDScrollable = (scrollable: boolean) => {
   }, [scrollable, setScrollable])
 }
 
-export const useSetCDHeaderContent = (headerContent?: ReactNode) => {
-  const ctx = useContext(CDContext)
+export const PageHeaderContext = createContext<
+  | {
+      setHeaderContent: (content: ReactNode) => void
+    }
+  | undefined
+>(undefined)
+
+export function PageHeaderProvider(props) {
+  return <PageHeaderContext.Provider {...props} />
+}
+
+export const useSetPageHeaderContent = (headerContent?: ReactNode) => {
+  const ctx = useContext(PageHeaderContext)
 
   if (!ctx) {
-    console.warn('useSetCDHeaderContent() must be used within a CDContext')
+    console.warn('useSetPageHeaderContent() must be used within a CDContext')
   }
   const { setHeaderContent } = ctx || {}
 
@@ -93,10 +105,15 @@ export default function ContinuousDeployment() {
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [scrollable, setScrollable] = useState(false)
 
-  const cdContext = useMemo(
+  const pageScrollableContext = useMemo(
+    () => ({
+      setScrollable,
+    }),
+    []
+  )
+  const pageHeaderContext = useMemo(
     () => ({
       setHeaderContent,
-      setScrollable,
     }),
     []
   )
@@ -158,11 +175,13 @@ export default function ContinuousDeployment() {
           css={{ height: '100%' }}
           stateRef={tabStateRef}
         >
-          <CDContext.Provider value={cdContext}>
-            <Suspense fallback={<LoadingIndicator />}>
-              <Outlet />
-            </Suspense>
-          </CDContext.Provider>
+          <PageHeaderContext.Provider value={pageHeaderContext}>
+            <PageScrollableContext.Provider value={pageScrollableContext}>
+              <Suspense fallback={<LoadingIndicator />}>
+                <Outlet />
+              </Suspense>
+            </PageScrollableContext.Provider>
+          </PageHeaderContext.Provider>
         </TabPanel>
       </PluralErrorBoundary>
     </ResponsivePageFullWidth>

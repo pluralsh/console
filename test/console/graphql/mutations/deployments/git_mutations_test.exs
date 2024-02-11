@@ -56,6 +56,7 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
 
   describe "createScmConnection" do
     test "it will create a new scm connection" do
+      expect(Tentacat.Organizations.Hooks, :create, fn _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)
       {:ok, %{data: %{"createScmConnection" => scm}}} = run_query("""
         mutation Create($attrs: ScmConnectionAttributes!) {
           createScmConnection(attributes: $attrs) {
@@ -67,6 +68,7 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
       """, %{"attrs" => %{
         "type" => "GITHUB",
         "name" => "test",
+        "owner" => "pluralsh",
         "token" => "my-pat"
       }}, %{current_user: admin_user()})
 
@@ -180,7 +182,7 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
       user = insert(:user)
       conn = insert(:scm_connection, token: "some-pat")
       pra = insert(:pr_automation, identifier: "pluralsh/console", cluster: build(:cluster), connection: conn, create_bindings: [%{user_id: user.id}])
-      expect(Console.Commands.Plural, :template, fn f, _ -> File.read(f) end)
+      expect(Console.Commands.Plural, :template, fn f, _, _ -> File.read(f) end)
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
         {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
       end)

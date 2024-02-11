@@ -15,7 +15,7 @@ type GitRepositorySpec struct {
 	Url string `json:"url"`
 
 	// CredentialsRef is a secret reference which should contain privateKey, passphrase, username and password.
-	// +optional
+	// +kubebuilder:validation:Optional
 	CredentialsRef *corev1.SecretReference `json:"credentialsRef,omitempty"`
 }
 
@@ -27,27 +27,15 @@ const (
 )
 
 type GitRepositoryStatus struct {
+	Status `json:",inline"`
+
 	// Health status.
-	// +optional
+	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum:=PULLABLE;FAILED
 	Health GitHealth `json:"health,omitempty"`
 	// Message indicating details about last transition.
-	// +optional
+	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty"`
-	// ID of the provider in the Console API.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	ID *string `json:"id,omitempty"`
-	// SHA of last applied configuration.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	SHA *string `json:"sha,omitempty"`
-	// Represents the observations of Repository current state.
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	// +listType=map
-	// +listMapKey=type
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 // +kubebuilder:object:root=true
@@ -63,6 +51,16 @@ type GitRepository struct {
 	Status GitRepositoryStatus `json:"status,omitempty"`
 }
 
+// ConsoleID implements PluralResource interface
+func (in *GitRepository) ConsoleID() *string {
+	return in.Status.ID
+}
+
+// ConsoleName implements PluralResource interface
+func (in *GitRepository) ConsoleName() string {
+	return in.Name
+}
+
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type GitRepositoryList struct {
@@ -71,46 +69,6 @@ type GitRepositoryList struct {
 	Items           []GitRepository `json:"items"`
 }
 
-func (p *GitRepositoryStatus) HasReadonlyCondition() bool {
-	return meta.FindStatusCondition(p.Conditions, ReadonlyConditionType.String()) != nil
-}
-
-func (p *GitRepositoryStatus) IsReadonly() bool {
-	return meta.IsStatusConditionTrue(p.Conditions, ReadonlyConditionType.String())
-}
-
-func (p *GitRepositoryStatus) IsSHAEqual(sha string) bool {
-	if !p.HasSHA() {
-		return false
-	}
-
-	return p.GetSHA() == sha
-}
-
-func (p *GitRepositoryStatus) GetSHA() string {
-	if !p.HasSHA() {
-		return ""
-	}
-
-	return *p.SHA
-}
-
-func (p *GitRepositoryStatus) HasSHA() bool {
-	return p.SHA != nil && len(*p.SHA) > 0
-}
-
-func (p *GitRepositoryStatus) GetID() string {
-	if !p.HasID() {
-		return ""
-	}
-
-	return *p.ID
-}
-
-func (p *GitRepositoryStatus) HasID() bool {
-	return p.ID != nil && len(*p.ID) > 0
-}
-
-func (p *GitRepository) SetCondition(condition metav1.Condition) {
-	meta.SetStatusCondition(&p.Status.Conditions, condition)
+func (in *GitRepository) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }

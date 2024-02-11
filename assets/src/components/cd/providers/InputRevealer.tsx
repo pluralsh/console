@@ -1,10 +1,7 @@
 // TODO: Move into design system
-import {
-  EyeClosedIcon,
-  EyeIcon,
-  IconFrame,
-  Input,
-} from '@pluralsh/design-system'
+import { EyeClosedIcon, EyeIcon, IconFrame } from '@pluralsh/design-system'
+import Input2 from '@pluralsh/design-system/dist/components/Input2'
+
 import styled from 'styled-components'
 import { ComponentProps, useState } from 'react'
 
@@ -17,11 +14,11 @@ export function InputRevealer({
   inputProps,
   defaultRevealed = false,
   ...props
-}: { defaultRevealed?: boolean } & ComponentProps<typeof Input>) {
+}: { defaultRevealed?: boolean } & ComponentProps<typeof Input2>) {
   const [showInput, setShowInput] = useState(defaultRevealed)
 
   return (
-    <Input
+    <Input2
       inputProps={{
         ...inputProps,
         type: showInput ? 'text' : 'password',

@@ -62,6 +62,26 @@ type ConsoleClient interface {
 	GetPipeline(id string) (*console.PipelineFragment, error)
 	ListPipelines() (*console.GetPipelines, error)
 	IsPipelineExisting(id string) bool
+	GetUser(email string) (*console.UserFragment, error)
+	GetGroup(name string) (*console.GroupFragment, error)
+	CreateScmConnection(ctx context.Context, attributes console.ScmConnectionAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
+	UpdateScmConnection(ctx context.Context, id string, attributes console.ScmConnectionAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
+	DeleteScmConnection(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error
+	GetScmConnection(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
+	GetScmConnectionByName(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
+	IsScmConnectionExists(ctx context.Context, name string) bool
+	GetClusterBackup(clusterId, namespace, name *string) (*console.ClusterBackupFragment, error)
+	GetClusterRestore(id string) (*console.ClusterRestoreFragment, error)
+	UpdateClusterRestore(id string, attrs console.RestoreAttributes) (*console.ClusterRestoreFragment, error)
+	CreateClusterRestore(backupId string) (*console.ClusterRestoreFragment, error)
+	IsClusterRestoreExisting(id string) bool
+	CreatePrAutomation(ctx context.Context, attributes console.PrAutomationAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
+	UpdatePrAutomation(ctx context.Context, id string, attributes console.PrAutomationAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
+	DeletePrAutomation(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error
+	GetPrAutomation(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
+	GetPrAutomationByName(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
+	IsPrAutomationExists(ctx context.Context, id string) bool
+	IsPrAutomationExistsByName(ctx context.Context, name string) bool
 }
 
 func New(url, token string) ConsoleClient {

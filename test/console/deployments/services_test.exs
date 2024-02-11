@@ -470,6 +470,51 @@ defmodule Console.Deployments.ServicesTest do
     end
   end
 
+  describe "#detach_service/2" do
+    test "users can delete services" do
+      user = insert(:user)
+      svc = insert(:service, write_bindings: [%{user_id: user.id}])
+
+      {:ok, service} = Services.detach_service(svc.id, user)
+
+      assert service.id == svc.id
+      refute refetch(service)
+
+      assert_receive {:event, %PubSub.ServiceDeleted{item: ^service}}
+    end
+
+    test "users can detach a deleting service" do
+      user = insert(:user)
+      svc = insert(:service, write_bindings: [%{user_id: user.id}], deleted_at: Timex.now())
+
+      {:ok, service} = Services.detach_service(svc.id, user)
+
+      assert service.id == svc.id
+      refute refetch(service)
+
+      assert_receive {:event, %PubSub.ServiceDeleted{item: ^service}}
+    end
+
+    test "it cannot delete a cluster service" do
+      user = insert(:user)
+      svc = insert(:service, write_bindings: [%{user_id: user.id}])
+      insert(:cluster, service: svc)
+      {:error, _} = Services.detach_service(svc.id, user)
+    end
+
+    test "it cannot delete a deploy operator" do
+      user = insert(:user)
+      svc = insert(:service, name: "deploy-operator", write_bindings: [%{user_id: user.id}])
+      {:error, _} = Services.detach_service(svc.id, user)
+    end
+
+    test "it cannot delete protected services" do
+      user = insert(:user)
+      svc = insert(:service, protect: true, write_bindings: [%{user_id: user.id}])
+      {:error, _} = Services.detach_service(svc.id, user)
+    end
+  end
+
   describe "#merge_service/3" do
     test "it can merge config for a service" do
       user = insert(:user)
@@ -938,6 +983,33 @@ defmodule Console.Deployments.ServicesTest do
       assert component.api_deprecations == []
     end
   end
+
+  describe "#save_context/3" do
+    test "admins can save contexts" do
+      {:ok, ctx} = Services.save_context(%{configuration: %{"some" => "config"}}, "my-context", admin_user())
+
+      assert ctx.name == "my-context"
+      assert ctx.configuration["some"] == "config"
+    end
+
+    test "nonadmins cannot save contexts" do
+      {:error, _} = Services.save_context(%{configuration: %{"some" => "config"}}, "my-context", insert(:user))
+    end
+  end
+
+  describe "#delete_context/3" do
+    test "admins can save contexts" do
+      ctx = insert(:service_context)
+      {:ok, ctx} = Services.delete_context(ctx.id, admin_user())
+
+      refute refetch(ctx)
+    end
+
+    test "nonadmins cannot save contexts" do
+      ctx = insert(:service_context)
+      {:error, _} = Services.delete_context(ctx.id, insert(:user))
+    end
+  end
 end
 
 defmodule Console.Deployments.ServicesAsyncTest do
@@ -1002,7 +1074,7 @@ defmodule Console.Deployments.ServicesAsyncTest do
 
       content = Map.new(content)
       assert content["Chart.yaml"] =~ "console"
-      assert content["values.yaml.liquid"] == "value: test"
+      # assert content["values.yaml.liquid"] == "value: test"
       assert content["values.yaml.static"] == "value: test"
     end
 

@@ -12,6 +12,8 @@ export const PIPELINES_ABS_PATH =
 export const PROVIDERS_REL_PATH = 'providers' as const
 export const REPOS_REL_PATH = 'repos' as const
 export const CD_DEFAULT_REL_PATH = CLUSTERS_REL_PATH
+export const CD_DEFAULT_ABS_PATH =
+  `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}` as const
 
 export const CLUSTER_PARAM_ID = `clusterId` as const
 export const CLUSTER_REL_PATH =

@@ -50,7 +50,9 @@ export default function Node() {
 
   return (
     <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer paddingTop={40 + theme.spacing.medium}>
+      <ResponsiveLayoutSidenavContainer
+        css={{ paddingTop: 40 + theme.spacing.medium }}
+      >
         <SideNav tabStateRef={tabStateRef} />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />

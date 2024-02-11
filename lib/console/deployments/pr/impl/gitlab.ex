@@ -17,28 +17,34 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     with {:ok, conn} <- connection(pr),
          {:ok, title, body} <- description(pr, ctx) do
       id = URI.encode(pr.identifier)
-      HTTPoison.post("#{conn.host}/api/v4/projects/#{id}/merge_requests", Jason.encode!(%{
+      post(conn, "/api/v4/projects/#{id}/merge_requests", %{
         source_branch: branch,
         target_branch: pr.branch || "master",
         title: title,
         description: body,
         allow_collaboration: true,
-      }), Connection.headers(conn))
-      |> handle_response(title)
+      })
+      |> case do
+        {:ok, %{"web_url" => url}} -> {:ok, title, url}
+        err -> err
+      end
     end
   end
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: 200, body: body}}, title) do
-    case Jason.decode(body) do
-      {:ok, %{"web_url" => url}} -> {:ok, title, url}
-      _ -> {:error, "could not parse response body: #{body}"}
-    end
-  end
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}, _), do: {:error, "failed to create pr: #{body}"}
-  defp handle_response(_, _), do: {:error, "unknown gitlab error"}
+  def webhook(_, _), do: :ok
 
-  defp connection(%PrAutomation{} = pr) do
-    with {:ok, url, token} <- url_and_token(pr, "https://gitlab.com"),
+  defp post(conn, url, body) do
+    HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
+    |> handle_response()
+  end
+
+  defp handle_response({:ok, %HTTPoison.Response{status_code: 200, body: body}}),
+    do: Jason.decode(body)
+  defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "failed to create pr: #{body}"}
+  defp handle_response(_), do: {:error, "unknown gitlab error"}
+
+  defp connection(conn) do
+    with {:ok, url, token} <- url_and_token(conn, "https://gitlab.com"),
       do: Connection.new(url, token)
   end
 end

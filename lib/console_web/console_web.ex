@@ -55,7 +55,7 @@ defmodule ConsoleWeb do
 
   def channel do
     quote do
-      use Phoenix.Channel
+      use Phoenix.Channel, log_join: :debug, log_handle_in: false
       import ConsoleWeb.Gettext
     end
   end

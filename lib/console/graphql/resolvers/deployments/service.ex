@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Service do
   use Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Deployments.{Services, Clusters}
+  alias Console.Deployments.{Services, Clusters, Tree}
   alias Console.Schema.{
     Service,
     Revision
@@ -13,6 +13,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
   def resolve_service(%{id: id}, ctx) do
     Services.get_service!(id)
     |> allow(actor(ctx), :read)
+  end
+
+  def resolve_service_context(%{name: name}, %{context: %{current_user: user}}) do
+    Services.get_context_by_name(name)
+    |> allow(user, :read)
   end
 
   def service_statuses(args, %{context: %{current_user: user}}) do
@@ -42,6 +47,28 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
     Service.for_cluster(id)
     |> Service.ordered()
     |> all()
+  end
+
+  def paged_cluster_services(args, %{context: %{cluster: %{id: id}}}) do
+    Service.for_cluster(id)
+    |> Service.ordered()
+    |> paginate(args)
+  end
+
+  def tree(%{id: id}, %{context: %{current_user: user}}) do
+    component = Services.get_service_component!(id) |> Console.Repo.preload([service: :cluster])
+    with {:ok, _} <- allow(component.service, user, :read),
+         %Kazan.Server{} = server <- Clusters.control_plane(component.service.cluster),
+         _ <- Kube.Utils.save_kubeconfig(server),
+         {:ok, {results, edges}} <- Tree.tree(component),
+      do: {:ok, Map.put(results, :edges, edges) |> filter_secrets(component.service, user)}
+  end
+
+  defp filter_secrets(results, svc, user) do
+    case allow(svc, user, :write) do
+      {:ok, _} -> results
+      _ -> Map.put(results, :secrets, [])
+    end
   end
 
   def service_configuration(service, _, ctx) do
@@ -79,6 +106,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
   def delete_service(%{id: id}, %{context: %{current_user: user}}),
     do: Services.delete_service(id, user)
 
+  def detach_service(%{cluster: _, name: _} = args, %{context: %{current_user: user}}) do
+    svc = fetch_service(args)
+    Services.detach_service(svc.id, user)
+  end
+  def detach_service(%{id: id}, %{context: %{current_user: user}}),
+    do: Services.detach_service(id, user)
+
   def proceed(args, %{context: %{current_user: user}}) do
     svc = fetch_service(args)
     Services.proceed(args[:promotion] || :proceed, svc, user)
@@ -103,6 +137,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
 
   def merge_service(%{id: id, configuration: config}, %{context: %{current_user: user}}),
     do: Services.merge_service(config, id, user)
+
+  def save_service_context(%{attributes: attrs, name: name}, %{context: %{current_user: user}}),
+    do: Services.save_context(attrs, name, user)
+
+  def delete_service_context(%{id: id}, %{context: %{current_user: user}}),
+    do: Services.delete_context(id, user)
 
   def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
   def docs(svc, _, _), do: Services.docs(svc)

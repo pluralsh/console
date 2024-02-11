@@ -21,6 +21,8 @@ defmodule Console.Schema.User do
     field :scopes,           :map, virtual: true
     field :api,              :string, virtual: true
 
+    field :signing_private_key, Piazza.Ecto.EncryptedString
+
     has_many :assume_bindings, PolicyBinding,
       on_replace: :delete,
       foreign_key: :policy_id,
@@ -60,7 +62,7 @@ defmodule Console.Schema.User do
     from(u in query, order_by: ^order)
   end
 
-  @valid ~w(name email password deleted_at profile plural_id service_account)a
+  @valid ~w(name email password deleted_at profile plural_id service_account signing_private_key)a
 
   def changeset(model, attrs \\ %{}) do
     model

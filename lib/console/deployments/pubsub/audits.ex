@@ -20,6 +20,10 @@ defimpl Console.PubSub.Auditable, for: [
   Console.PubSub.PipelineUpdated,
   Console.PubSub.PipelineCreated,
   Console.PubSub.PipelineDeleted,
+  Console.PubSub.ClusterRestoreCreated,
+  Console.PubSub.ObjectStoreCreated,
+  Console.PubSub.ObjectStoreDeleted,
+  Console.PubSub.ObjectStoreUpdated
 ] do
   alias Console.Schema.{Audit, User, PipelineGate}
 
@@ -42,6 +46,7 @@ defimpl Console.PubSub.Auditable, for: [
   def embeddable?(Console.PubSub.ClusterUpdated), do: true
   def embeddable?(Console.PubSub.ClusterDeleted), do: true
   def embeddable?(Console.PubSub.DeploymentSettingsUpdated), do: false
+  def embeddable?(Console.PubSub.ClusterRestoreCreated), do: true
   def embeddable?(_), do: false
 
   def details(Console.PubSub.ServiceCreated), do: {:service, :create}
@@ -64,6 +69,10 @@ defimpl Console.PubSub.Auditable, for: [
   def details(Console.PubSub.PipelineDeleted), do: {:pipeline, :delete}
   def details(Console.PubSub.GlobalServiceCreated), do: {:global, :create}
   def details(Console.PubSub.GlobalServiceDeleted), do: {:global, :delete}
+  def details(Console.PubSub.ClusterRestoreCreated), do: {:cluster_restore, :create}
+  def details(Console.PubSub.ObjectStoreCreated), do: {:object_store, :create}
+  def details(Console.PubSub.ObjectStoreDeleted), do: {:object_store, :delete}
+  def details(Console.PubSub.ObjectStoreUpdated), do: {:object_store, :update}
 
   def details(Console.PubSub.PipelineApproved), do: {:pipeline, :approve}
 

@@ -10,6 +10,7 @@ import {
 } from 'react'
 import isEqual from 'lodash/isEqual'
 import uniqWith from 'lodash/uniqWith'
+import upperFirst from 'lodash/upperFirst'
 import { PolicyBindingFragment, useUpdateRbacMutation } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -19,53 +20,40 @@ import { GqlError } from 'components/utils/Alert'
 
 import { StepBody } from '../ModalAlt'
 
-const Overline = styled.h3(({ theme }) => ({
+export const Overline = styled.h3(({ theme }) => ({
   ...theme.partials.text.overline,
   color: theme.colors['text-xlight'],
 }))
-const PermissionsColumnSC = styled.div(({ theme }) => ({
+export const PermissionsColumnSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   rowGap: theme.spacing.medium,
 }))
 
-function ReadPermissions({
+export function Permissions({
   bindings,
   setBindings,
+  permissionType,
+  forLabel,
 }: {
   bindings?: (PolicyBindingFragment | null | undefined)[] | null | undefined
   setBindings: any
+  permissionType: 'read' | 'write'
+  forLabel: string | undefined
 }) {
   return (
     <PermissionsColumnSC>
-      <Overline>Read Permissions</Overline>
+      <Overline>{upperFirst(permissionType)} permissions</Overline>
       <RoleFormBindings
         bindings={bindings}
         setBindings={setBindings}
         hints={{
-          user: 'Users with read permissions for this cluster',
-          group: 'Groups with read permissions for this cluster',
-        }}
-      />
-    </PermissionsColumnSC>
-  )
-}
-function WritePermissions({
-  bindings,
-  setBindings,
-}: {
-  bindings?: (PolicyBindingFragment | null | undefined)[] | null | undefined
-  setBindings: any
-}) {
-  return (
-    <PermissionsColumnSC>
-      <Overline>Write Permissions</Overline>
-      <RoleFormBindings
-        bindings={bindings}
-        setBindings={setBindings}
-        hints={{
-          user: 'Users with write permissions for this cluster',
-          group: 'Groups with write permissions for this cluster',
+          user: `Users with ${permissionType} permissions${
+            !forLabel ? '' : ` for this ${forLabel}`
+          }`,
+          group: `Groups with ${permissionType} permissions${
+            !forLabel ? '' : ` for this ${forLabel}`
+          }`,
         }}
       />
     </PermissionsColumnSC>
@@ -144,6 +132,7 @@ export function PermissionsModal({
     },
     [clusterId, mutation, readBindings, serviceId, writeBindings]
   )
+  const forLabel = clusterId ? 'cluster' : serviceId ? 'service' : undefined
 
   return (
     <Modal
@@ -200,7 +189,13 @@ export function PermissionsModal({
           }}
         >
           <StepBody>
-            Bind users to read or write permissions for <b>{name}</b> cluster
+            Bind users and groups to read or write permissions for
+            {name && (
+              <>
+                {' '}
+                <b>{name}</b> {forLabel}
+              </>
+            )}
           </StepBody>
         </div>
         {!bindings ? (
@@ -214,13 +209,17 @@ export function PermissionsModal({
                 borderRight: theme.borders['fill-two'],
               }}
             >
-              <ReadPermissions
+              <Permissions
+                permissionType="read"
+                forLabel={forLabel}
                 bindings={uniqueReadBindings}
                 setBindings={setReadBindings}
               />
             </div>
             <div css={{ width: '50%', paddingLeft: theme.spacing.large }}>
-              <WritePermissions
+              <Permissions
+                permissionType="write"
+                forLabel={forLabel}
                 bindings={uniqueWriteBindings}
                 setBindings={setWriteBindings}
               />

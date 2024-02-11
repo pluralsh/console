@@ -8,7 +8,7 @@ import { Pod } from '../../../../../generated/graphql'
 
 import ContainerLogs from './ContainerLogs'
 
-enum SinceSecondsOptions {
+export enum SinceSecondsOptions {
   Minute = 60,
   QuarterHour = SinceSecondsOptions.Minute * 15,
   HalfHour = SinceSecondsOptions.Minute * 30,
@@ -16,7 +16,7 @@ enum SinceSecondsOptions {
   Day = SinceSecondsOptions.Hour * 24,
 }
 
-const SinceSecondsSelectOptions: Array<{ key: Key; label: string }> = [
+export const SinceSecondsSelectOptions: Array<{ key: Key; label: string }> = [
   {
     key: SinceSecondsOptions.Minute,
     label: '1 minute',
@@ -68,7 +68,7 @@ function Logs(): ReactElement {
         css={{
           display: 'flex',
           flexDirection: 'column',
-          gap: theme.spacing.large,
+          gap: theme.spacing.medium,
           height: '100%',
         }}
       >

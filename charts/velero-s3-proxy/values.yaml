@@ -1,0 +1,43 @@
+nameOverride: ""
+fullnameOverride: ""
+
+velero:
+  initContainers:
+    - name: velero-plugin-for-aws
+      image: velero/velero-plugin-for-aws:v1.8.0
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /target
+          name: plugins
+  configuration:
+    backupStorageLocation: {}
+    volumeSnapshotLocation:
+      - name: default
+        provider: aws
+        credential:
+          name: velero
+          key: cloud
+        config:
+          region: s3-proxy-default
+  snapshotsEnabled: false
+  deployNodeAgent: false
+  credentials:
+    secretContents:
+      cloud: ""
+
+s3-proxy:
+  s3:
+    identity: ""
+    credential: ""
+  target:
+    provider: ""
+    identity: ""
+    credential: ""
+    endpoint: ""
+    region: s3-proxy-default
+    azureblob:
+      auth: azureKey
+  extraEnvVars:
+    - name: LOG_LEVEL
+      value: debug
+

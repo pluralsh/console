@@ -18,6 +18,7 @@
   import_types Console.GraphQl.Deployments.Cluster
   import_types Console.GraphQl.Deployments.Service
   import_types Console.GraphQl.Deployments.Pipeline
+  import_types Console.GraphQl.Deployments.Backup
 
   @desc "global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator"
   object :deployment_settings do
@@ -27,6 +28,7 @@
     field :self_managed,          :boolean, description: "whether the byok cluster has been brought under self-management"
     field :loki_connection,       :http_connection, description: "the way we can connect to your loki instance"
     field :prometheus_connection, :http_connection, description: "the way we can connect to your prometheus instance"
+    field :agent_helm_values,     :string, description: "custom helm values to apply to all agents (useful for things like adding customary annotations/labels)"
 
     field :artifact_repository, :git_repository, resolve: dataloader(Deployments), description: "the repo to fetch CAPI manifests from, for both providers and clusters"
     field :deployer_repository, :git_repository, resolve: dataloader(Deployments), description: "the repo to fetch the deploy operators manifests from"
@@ -49,6 +51,7 @@
   input_object :deployment_settings_attributes do
     field :artifact_repository_id, :id
     field :deployer_repository_id, :id
+    field :agent_helm_values,      :string, description: "custom helm values to apply to all agents (useful for things like adding customary annotations/labels)"
     field :prometheus_connection,  :http_connection_attributes, description: "connection details for a prometheus instance to use"
     field :loki_connection,        :http_connection_attributes, description: "connection details for a loki instance to use"
     field :read_bindings,          list_of(:policy_binding_attributes)
@@ -73,9 +76,11 @@
     import_fields :cluster_queries
     import_fields :service_queries
     import_fields :pipeline_queries
+    import_fields :backup_queries
     import_fields :public_service_queries
     import_fields :public_cluster_queries
     import_fields :public_pipeline_queries
+    import_fields :public_backup_queries
 
     field :deployment_settings, :deployment_settings do
       middleware Authenticated
@@ -89,9 +94,11 @@
     import_fields :cluster_mutations
     import_fields :service_mutations
     import_fields :pipeline_mutations
+    import_fields :backup_mutations
     import_fields :public_cluster_mutations
     import_fields :public_service_mutations
     import_fields :public_pipeline_mutations
+    import_fields :public_backup_mutations
 
     @desc "a reusable mutation for updating rbac settings on core services"
     field :update_rbac, :boolean do

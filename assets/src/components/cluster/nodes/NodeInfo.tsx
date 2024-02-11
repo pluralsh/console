@@ -1,9 +1,7 @@
-import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
-
 import { Card } from '@pluralsh/design-system'
-import { Flex } from 'honorable'
+import { useTheme } from 'styled-components'
 
 import { Event, NodeMetric, Node as NodeT, Pod } from 'generated/graphql'
 
@@ -24,7 +22,17 @@ import { NODE_Q } from '../queries'
 import { NodeGraphs } from './NodeGraphs'
 import { SubTitle } from './SubTitle'
 
+const columns = [
+  ColName,
+  ColMemoryReservation,
+  ColCpuReservation,
+  ColRestarts,
+  ColContainers,
+  ColActions,
+]
+
 export default function NodeInfo() {
+  const theme = useTheme()
   const { name } = useParams()
 
   const { data, refetch } = useQuery<{
@@ -40,26 +48,17 @@ export default function NodeInfo() {
     fetchPolicy: 'cache-and-network',
   })
 
-  const columns = useMemo(
-    () => [
-      ColName,
-      ColMemoryReservation,
-      ColCpuReservation,
-      ColRestarts,
-      ColContainers,
-      ColActions(refetch),
-    ],
-    [refetch]
-  )
-
   if (!data) return <LoadingIndicator />
 
   const { node, nodeMetric } = data
 
   return (
-    <Flex
-      direction="column"
-      gap="xlarge"
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.xlarge,
+      }}
     >
       <section>
         <SubTitle>Overview</SubTitle>
@@ -75,10 +74,11 @@ export default function NodeInfo() {
       <section>
         <SubTitle>Pods</SubTitle>
         <PodsList
+          refetch={refetch}
           columns={columns}
           pods={node.pods}
         />
       </section>
-    </Flex>
+    </div>
   )
 }

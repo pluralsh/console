@@ -45,8 +45,8 @@ import { GqlError } from 'components/utils/Alert'
 
 import {
   POLL_INTERVAL,
-  useSetCDHeaderContent,
-  useSetCDScrollable,
+  useSetPageHeaderContent,
+  useSetPageScrollable,
 } from '../ContinuousDeployment'
 import { useCDEnabled } from '../utils/useCDEnabled'
 import { DEMO_CLUSTERS } from '../utils/demoData'
@@ -210,7 +210,7 @@ export default function Clusters() {
     [cdIsEnabled, navigate, theme.spacing.medium]
   )
 
-  useSetCDHeaderContent(headerActions)
+  useSetPageHeaderContent(headerActions)
   useSetBreadcrumbs(CD_CLUSTERS_BASE_CRUMBS)
 
   const clusterEdges = data?.clusters?.edges
@@ -218,7 +218,7 @@ export default function Clusters() {
   const tableData = isDemo ? DEMO_CLUSTERS : clusterEdges
   const showGettingStarted = isDemo || (statusCounts.ALL ?? 0) < 2
 
-  useSetCDScrollable(showGettingStarted || isDemo)
+  useSetPageScrollable(showGettingStarted || isDemo)
 
   if (error) {
     return <GqlError error={error} />

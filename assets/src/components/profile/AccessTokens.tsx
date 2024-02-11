@@ -1,6 +1,6 @@
 import { Button, Modal } from 'honorable'
 import moment from 'moment'
-import { useMemo, useState } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import {
   CopyIcon,
   EmptyState,
@@ -13,44 +13,36 @@ import {
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import CopyToClipboard from 'react-copy-to-clipboard'
-
 import {
   AccessTokenAudit,
   AccessTokenFragment,
   AccessTokensDocument,
   useAccessTokensQuery,
-  useCreateAccessTokenMutation,
   useDeleteAccessTokenMutation,
   useTokenAuditsQuery,
 } from 'generated/graphql'
-
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
 import isEmpty from 'lodash/isEmpty'
-
-import { Box } from 'grommet'
-
 import { useTheme } from 'styled-components'
-
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
 import {
   Edge,
-  appendConnection,
   mapExistingNodes,
   removeConnection,
   updateCache,
 } from '../../utils/graphql'
-
 import { formatLocation } from '../../utils/geo'
 import { Confirm } from '../utils/Confirm'
 import { DeleteIconButton } from '../utils/IconButtons'
-
 import LoadingIndicator from '../utils/LoadingIndicator'
-
 import { DateTimeCol } from '../utils/table/DateTimeCol'
 
+import { ModalMountTransition } from '../utils/ModalMountTransition'
+
 import { ObscuredToken } from './ObscuredToken'
+import { AccessTokensCreateModal } from './AccessTokensCreateModal'
+import { AccessTokensScopes } from './AccessTokensScopes'
 
 const TOOLTIP =
   'Access tokens allow you to access the Plural API for automation and active Plural clusters.'
@@ -228,6 +220,7 @@ function CopyButton({ token }: { token: AccessTokenFragment }) {
         }}
       >
         <Button
+          small
           secondary
           startIcon={<CopyIcon size={15} />}
         >
@@ -257,11 +250,6 @@ const tokenColumns = [
     header: 'Created on',
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
-  // columnHelper.accessor((row) => row.updatedAt, {
-  //   id: 'updatedAt',
-  //   header: 'Updated on',
-  //   cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
-  // }),
   tokenColumnHelper.accessor((row) => row.id, {
     id: 'actions',
     header: '',
@@ -277,6 +265,7 @@ const tokenColumns = [
           }}
         >
           <CopyButton token={original} />
+          <AccessTokensScopes token={original} />
           <AuditsButton token={original} />
           <DeleteAccessToken token={original} />
         </div>
@@ -286,22 +275,16 @@ const tokenColumns = [
 ]
 
 export function AccessTokens() {
+  const [open, setOpen] = useState(false)
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
-  const { data } = useAccessTokensQuery()
-  const [mutation, { loading }] = useCreateAccessTokenMutation({
-    update: (cache, { data }) =>
-      updateCache(cache, {
-        query: AccessTokensDocument,
-        update: (prev) =>
-          appendConnection(prev, data?.createAccessToken, 'accessTokens'),
-      }),
-  })
+  const { data, loading } = useAccessTokensQuery()
+
   const tokensList = useMemo(
     () => mapExistingNodes(data?.accessTokens),
     [data?.accessTokens]
   )
 
-  if (!data) return <LoadingIndicator />
+  if (loading) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth
@@ -313,54 +296,28 @@ export function AccessTokens() {
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'space-between',
+            flexGrow: 1,
           }}
         >
           <Tooltip
-            width="315px"
+            width={315}
             label={TOOLTIP}
           >
-            <div
-              css={{
-                display: 'flex',
-                padding: 6,
-                alignItems: 'center',
-                // borderRadius: '50%',
-              }}
-            >
-              <InfoIcon />
-            </div>
+            <InfoIcon />
           </Tooltip>
-          <Box
-            flex
-            align="end"
-          >
-            {displayNewBanner && (
-              <Toast
-                severity="success"
-                marginBottom="medium"
-                marginRight="xxxxlarge"
-                onClose={() => {
-                  setDisplayNewBanner(false)
-                }}
-              >
-                New access token created.
-              </Toast>
-            )}
+          {!isEmpty(tokensList) && (
             <Button
               secondary
-              onClick={() => {
-                setDisplayNewBanner(true)
-                mutation()
-              }}
-              loading={loading}
+              onClick={() => setOpen(true)}
             >
               Create access token
             </Button>
-          </Box>
+          )}
         </div>
       }
     >
-      {tokensList ? (
+      {!isEmpty(tokensList) ? (
         <FullHeightTableWrap>
           <Table
             data={tokensList}
@@ -374,16 +331,31 @@ export function AccessTokens() {
       ) : (
         <EmptyState message="Looks like you don't have any access tokens yet.">
           <Button
-            onClick={() => {
-              setDisplayNewBanner(true)
-              setTimeout(() => setDisplayNewBanner(false), 1000)
-              mutation()
-            }}
-            loading={loading}
+            secondary
+            onClick={() => setOpen(true)}
           >
             Create access token
           </Button>
         </EmptyState>
+      )}
+      <Suspense fallback={null}>
+        <ModalMountTransition open={open}>
+          <AccessTokensCreateModal
+            open={open}
+            setOpen={setOpen}
+            setDisplayNewBanner={setDisplayNewBanner}
+          />
+        </ModalMountTransition>
+      </Suspense>
+      {displayNewBanner && (
+        <Toast
+          severity="success"
+          marginBottom="medium"
+          marginRight="xxxxlarge"
+          onClose={() => setDisplayNewBanner(false)}
+        >
+          New access token created.
+        </Toast>
       )}
     </ResponsivePageFullWidth>
   )

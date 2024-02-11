@@ -13,6 +13,7 @@ rules:
   verbs:
   - get
   - list
+  - patch
   - watch
 - apiGroups:
   - ""
@@ -21,7 +22,34 @@ rules:
   verbs:
   - get
   - list
+  - patch
   - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - clusterrestores
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - clusterrestores/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - clusterrestores/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - deployments.plural.sh
   resources:
@@ -129,6 +157,32 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - prautomations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - prautomations/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - prautomations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - providers
   verbs:
   - create
@@ -148,6 +202,32 @@ rules:
   - deployments.plural.sh
   resources:
   - providers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - scmconnections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - scmconnections/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - scmconnections/status
   verbs:
   - get
   - patch

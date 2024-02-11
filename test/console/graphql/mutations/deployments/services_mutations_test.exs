@@ -443,6 +443,25 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
     end
   end
 
+  describe "detachServiceDeployment" do
+    test "it can mark a cluster for deletion" do
+      user = insert(:user)
+      service = insert(:service, write_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"detachServiceDeployment" => deleted}}} = run_query("""
+        mutation Delete($id: ID!) {
+          detachServiceDeployment(id: $id) {
+            id
+            deletedAt
+          }
+        }
+      """, %{"id" => service.id}, %{current_user: user})
+
+      assert deleted["id"] == service.id
+      refute refetch(service)
+    end
+  end
+
   describe "updateServiceComponents" do
     test "it will post updates to the components of the service in a cluster" do
       cluster = insert(:cluster)
@@ -521,6 +540,59 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
 
       assert res["id"] == svc.id
       assert refetch(svc).promotion == :proceed
+    end
+  end
+
+  describe "saveServiceContext" do
+    test "admins can save contexts" do
+      {:ok, %{data: %{"saveServiceContext" => ctx}}} = run_query("""
+        mutation Save($name: String!, $attributes: ServiceContextAttributes!) {
+          saveServiceContext(name: $name, attributes: $attributes) {
+            name
+            configuration
+          }
+        }
+      """, %{"name" => "my-context", "attributes" => %{
+        "configuration" => Jason.encode!(%{"some" => "config"})
+      }}, %{current_user: admin_user()})
+
+      assert ctx["name"] == "my-context"
+      assert ctx["configuration"]["some"] == "config"
+    end
+  end
+
+  describe "deleteServiceContext" do
+    test "admins can delete service contexts" do
+      ctx = insert(:service_context)
+
+      {:ok, %{data: %{"deleteServiceContext" => del}}} = run_query("""
+        mutation Del($id: ID!) {
+          deleteServiceContext(id: $id) { id }
+        }
+      """, %{"id" => ctx.id}, %{current_user: admin_user()})
+
+      assert del["id"] == ctx.id
+
+      refute refetch(ctx)
+    end
+  end
+
+  describe "setupRenovate" do
+    test "it can initialize a renovate cron" do
+      insert(:git_repository, url: "https://github.com/pluralsh/scaffolds.git")
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      insert(:cluster, self: true)
+      scm = insert(:scm_connection)
+
+      {:ok, %{data: %{"setupRenovate" => svc}}} = run_query("""
+        mutation Setup($id: ID!, $repos: [String]) {
+          setupRenovate(connectionId: $id, repos: $repos) {
+            id
+          }
+        }
+      """, %{"id" => scm.id, "repos" => ["some/repo"]}, %{current_user: admin_user()})
+
+      assert svc["id"]
     end
   end
 end

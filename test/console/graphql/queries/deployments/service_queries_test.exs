@@ -297,6 +297,28 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
     end
   end
 
+  describe "pagedClusterServices" do
+    test "it can fetch the services for a cluster" do
+      cluster = insert(:cluster)
+      services = insert_list(3, :service, cluster: cluster)
+      insert_list(3, :service)
+
+      {:ok, %{data: %{"pagedClusterServices" => found}}} = run_query("""
+        query {
+          pagedClusterServices(first: 5) {
+            edges {
+              node { id tarball }
+            }
+          }
+        }
+      """, %{}, %{cluster: cluster})
+
+      svcs = from_connection(found)
+      assert ids_equal(svcs, services)
+      assert Enum.all?(svcs, & &1["tarball"])
+    end
+  end
+
   describe "serviceStatuses" do
     test "it can list the statuses counts for a service query" do
       cluster = insert(:cluster)

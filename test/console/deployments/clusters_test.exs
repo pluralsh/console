@@ -2,7 +2,7 @@ defmodule Console.Deployments.ClustersTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.PubSub
-  alias Console.Deployments.{Clusters, Services}
+  alias Console.Deployments.{Clusters, Services, Settings}
   alias Kazan.Apis.Core.V1, as: CoreV1
   import KubernetesScaffolds
 
@@ -57,7 +57,7 @@ defmodule Console.Deployments.ClustersTest do
       [svc] = Clusters.services(cluster)
 
       assert svc.repository_id == git.id
-      assert svc.git.ref == "main"
+      assert svc.git.ref == Console.Deployments.Settings.agent_ref()
       assert svc.git.folder == "charts/deployment-operator"
 
       {:ok, %{"deployToken" => token, "url" => url} = secrets} = Services.configuration(svc)
@@ -215,6 +215,21 @@ defmodule Console.Deployments.ClustersTest do
       assert node_pool["min_size"] == pool.min_size
       assert node_pool["max_size"] == pool.max_size
       assert node_pool["instance_type"] == "t5.large"
+    end
+
+    test "it can overwrite agent helm values if specified" do
+      user = admin_user()
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      insert(:deployment_settings, agent_helm_values: "bogus: values", deployer_repository: git)
+
+      {:ok, cluster} = Clusters.create_cluster(%{name: "test"}, user)
+
+      [svc] = Clusters.services(cluster)
+
+      assert svc.repository_id == git.id
+      assert svc.git.ref == Console.Deployments.Settings.agent_ref()
+      assert svc.git.folder == "charts/deployment-operator"
+      assert svc.helm.values == "bogus: values"
     end
 
     test "it will respect rbac" do
@@ -918,6 +933,52 @@ defmodule Console.Deployments.ClustersTest do
 
       assert first.git.ref == migration.ref
       assert second.git.ref == migration.ref
+    end
+
+    test "it can apply helm vals migrations" do
+      user = admin_user()
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, _} = Clusters.create_cluster(%{name: "test"}, user)
+      {:ok, _} = Clusters.create_cluster(%{name: "test2"}, user)
+
+      migration = insert(:agent_migration, ref: nil, helm_values: "bogus: val")
+      {:ok, completed} = Clusters.apply_migration(migration)
+
+      assert completed.id == migration.id
+      assert completed.completed
+
+      [first, second] = Console.Schema.Service.agent()
+                        |> Console.Repo.all()
+
+      assert first.git.ref == Settings.agent_ref()
+      assert first.helm.values == "bogus: val"
+      assert second.git.ref == Settings.agent_ref()
+      assert second.helm.values == "bogus: val"
+    end
+
+    test "it can migrate helm vals and ref" do
+      user = admin_user()
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, _} = Clusters.create_cluster(%{name: "test"}, user)
+      {:ok, _} = Clusters.create_cluster(%{name: "test2"}, user)
+
+      migration = insert(:agent_migration, ref: "some/ref", helm_values: "bogus: val")
+      {:ok, completed} = Clusters.apply_migration(migration)
+
+      assert completed.id == migration.id
+      assert completed.completed
+
+      [first, second] = Console.Schema.Service.agent()
+                        |> Console.Repo.all()
+
+      assert first.git.ref == "some/ref"
+      assert first.helm.values == "bogus: val"
+      assert second.git.ref == "some/ref"
+      assert second.helm.values == "bogus: val"
     end
   end
 

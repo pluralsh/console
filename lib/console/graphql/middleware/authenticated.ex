@@ -4,7 +4,5 @@ defmodule Console.Middleware.Authenticated do
 
   def call(%{context: %{cluster: %Cluster{}}} = res, :cluster), do: res
   def call(%{context: %{current_user: %User{}}} = res, _config), do: res
-  def call(resolution, _) do
-    Absinthe.Resolution.put_result(resolution, {:error, "unauthenticated"})
-  end
+  def call(res, _), do: Absinthe.Resolution.put_result(res, {:error, "unauthenticated"})
 end

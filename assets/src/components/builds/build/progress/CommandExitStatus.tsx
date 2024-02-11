@@ -1,5 +1,4 @@
-import { Spinner } from '@pluralsh/design-system'
-import { P } from 'honorable'
+import { CheckIcon, ErrorIcon, Spinner, Tooltip } from '@pluralsh/design-system'
 
 export default function CommandExitStatus({ exitCode }) {
   if (!exitCode && exitCode !== 0) {
@@ -7,18 +6,20 @@ export default function CommandExitStatus({ exitCode }) {
   }
 
   return exitCode === 0 ? (
-    <P
-      color="text-success"
-      whiteSpace="pre"
-    >
-      ✓ OK
-    </P>
+    <CheckIcon
+      color="icon-success"
+      size={12}
+    />
   ) : (
-    <P
-      color="text-error"
-      whiteSpace="pre"
+    <Tooltip
+      label={`Exit code: ${exitCode}`}
+      placement="bottom"
     >
-      ✗ Exit code: {exitCode}
-    </P>
+      <ErrorIcon
+        color="icon-error"
+        cursor="help"
+        size={12}
+      />
+    </Tooltip>
   )
 }

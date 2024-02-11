@@ -14,10 +14,11 @@ defmodule Console.GraphQl.Users do
   end
 
   input_object :user_attributes do
-    field :name,     :string
-    field :email,    :string
-    field :password, :string
-    field :roles,    :user_role_attributes
+    field :name,                :string
+    field :email,               :string
+    field :password,            :string
+    field :roles,               :user_role_attributes
+    field :signing_private_key, :string
   end
 
   input_object :service_account_attributes do
@@ -174,7 +175,7 @@ defmodule Console.GraphQl.Users do
   end
 
   object :access_token_scope do
-    field :api,        non_null(:string)
+    field :api,        :string
     field :apis,       list_of(non_null(:string))
     field :identifier, :string
     field :ids,        list_of(non_null(:string))

@@ -1,4 +1,9 @@
-import { A, Div, Flex, Span } from 'honorable'
+import {
+  IconFrame,
+  Table,
+  Tooltip,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { Link, useNavigate } from 'react-router-dom'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 import {
@@ -10,21 +15,17 @@ import {
   useState,
 } from 'react'
 import { filesize } from 'filesize'
+import { isEmpty } from 'lodash'
 
 import type { Application, Maybe, Pod } from 'generated/graphql'
 import { ReadinessT } from 'utils/status'
 
-import {
-  IconFrame,
-  Table,
-  Tooltip,
-  TrashCanIcon,
-} from '@pluralsh/design-system'
-
 import { Confirm } from 'components/utils/Confirm'
 import { useMutation } from '@apollo/client'
 
-import { isEmpty } from 'lodash'
+import { TruncateStart } from 'components/utils/table/TruncateStart'
+
+import { InlineLink } from 'components/utils/typography/InlineLink'
 
 import {
   LabelWithIcon,
@@ -49,7 +50,7 @@ function DeletePod({
 }: {
   name: string
   namespace: string
-  refetch: any
+  refetch: Nullable<() => void>
   serviceId?: string | null
 }) {
   const [confirm, setConfirm] = useState(false)
@@ -58,12 +59,12 @@ function DeletePod({
     variables: { name, namespace, serviceId },
     onCompleted: () => {
       setConfirm(false)
-      refetch()
+      refetch?.()
     },
   })
 
   return (
-    <Div onClick={(e) => e.stopPropagation()}>
+    <div onClick={(e) => e.stopPropagation()}>
       <IconFrame
         clickable
         icon={<TrashCanIcon color="icon-danger" />}
@@ -83,7 +84,7 @@ function DeletePod({
           namespace ? ` in namespace "${namespace}"` : ''
         } will be replaced by it's managing controller.`}
       />
-    </Div>
+    </div>
   )
 }
 
@@ -149,14 +150,12 @@ export const ColNodeName = columnHelper.accessor((pod) => pod.nodeName, {
         label={original.nodeName}
         placement="top-start"
       >
-        <A
-          inline
+        <InlineLink
           as={Link}
           to={`/nodes/${original.nodeName}`}
-          display="inline"
         >
           {props.getValue()}
-        </A>
+        </InlineLink>
       </Tooltip>
     </TableText>
   ),
@@ -235,14 +234,9 @@ export const ColImages = columnHelper.accessor((row) => row?.images || [], {
         label={image}
         placement="left-start"
       >
-        <Span
-          color="text-light"
-          direction="rtl"
-          textAlign="left"
-          whiteSpace="nowrap"
-        >
-          {image}
-        </Span>
+        <TruncateStart>
+          <span>{image}</span>
+        </TruncateStart>
       </Tooltip>
     ))
   },
@@ -252,51 +246,69 @@ export const ColImages = columnHelper.accessor((row) => row?.images || [], {
   },
 })
 
-export const ColActions = (refetch) =>
-  columnHelper.display({
-    id: 'actions',
-    cell: ({ row: { original } }: any) => (
-      <Flex
-        flexDirection="row"
-        gap="xxsmall"
+export const ColActions = columnHelper.display({
+  id: 'actions',
+  cell: ({ row: { original }, table }) => {
+    const { refetch, linkBasePath } =
+      (table.options?.meta as {
+        refetch?: () => void
+        linkBasePath?: string
+      }) || {}
+
+    return (
+      <div
+        css={{
+          display: 'flex',
+          gap: 'xxsmall',
+          justifyContent: 'flex-end',
+          width: '100%',
+        }}
       >
-        <DeletePod
-          name={original.name}
-          namespace={original.namespace}
-          refetch={refetch}
-        />
-        <TableCaretLink
-          to={`/pods/${original.namespace}/${original.name}`}
-          textValue={`View pod ${original?.name}`}
-        />
-      </Flex>
-    ),
-    header: '',
-  })
+        {original.name && original.namespace && (
+          <DeletePod
+            name={original.name}
+            namespace={original.namespace}
+            refetch={refetch}
+          />
+        )}
+        <div onClick={(e) => e.stopPropagation()}>
+          <TableCaretLink
+            to={`${linkBasePath || '/pods'}/${original.namespace}/${
+              original.name
+            }`}
+            textValue={`View pod ${original?.name}`}
+          />
+        </div>
+      </div>
+    )
+  },
+  header: '',
+})
 
-export const ColDelete = (refetch) =>
-  columnHelper.accessor((row) => row.name, {
-    id: 'delete',
-    cell: function Cell({ row: { original } }) {
-      const ctx = useContext(PodsListContext)
+export const ColDelete = columnHelper.display({
+  id: 'delete',
+  cell: function Cell({ row: { original }, table }) {
+    const ctx = useContext(PodsListContext)
+    const refetch = table.options.meta?.refetch
 
-      return (
-        <DeletePod
-          name={original.name || ''}
-          namespace={original.namespace || ''}
-          refetch={refetch}
-          serviceId={ctx?.serviceId}
-        />
-      )
-    },
-    header: '',
-  })
+    return (
+      <DeletePod
+        name={original.name || ''}
+        namespace={original.namespace || ''}
+        refetch={refetch}
+        serviceId={ctx?.serviceId}
+      />
+    )
+  },
+  header: '',
+})
 
 export type PodWithId = Pod & {
   id?: Maybe<string>
 }
 type PodListProps = Omit<ComponentProps<typeof Table>, 'data'> & {
   pods?: Maybe<PodWithId>[] & PodWithId[]
+  refetch: Nullable<() => void>
   applications?: Maybe<Maybe<Application>[]>
   columns: any[]
   linkBasePath?: string
@@ -336,6 +348,8 @@ export const PodsList = memo(
     columns,
     serviceId,
     linkBasePath = `/pods`,
+    refetch,
+    reactTableOptions: reactTableOptionsProp,
     ...props
   }: PodListProps) => {
     const navigate = useNavigate()
@@ -383,6 +397,19 @@ export const PodsList = memo(
       [serviceId]
     )
 
+    const reactTableOptions = useMemo(
+      () => ({
+        ...reactTableOptionsProp,
+        meta: {
+          ...(reactTableOptionsProp?.meta || {}),
+          refetch,
+          linkBasePath,
+        },
+      }),
+      [linkBasePath, reactTableOptionsProp, refetch]
+    )
+
+    console.log('reactTableOptions', reactTableOptions)
     if (!pods || pods.length === 0) {
       return <>No pods available.</>
     }
@@ -393,6 +420,7 @@ export const PodsList = memo(
           data={tableData}
           columns={columns}
           virtualizeRows
+          reactTableOptions={reactTableOptions}
           {...props}
           onRowClick={(_e, { original }: Row<PodTableRow>) =>
             navigate(`${linkBasePath}/${original.namespace}/${original.name}`)

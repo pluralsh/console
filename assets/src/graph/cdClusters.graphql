@@ -80,6 +80,7 @@ fragment RuntimeService on RuntimeService {
     versions {
       ...AddonVersion
     }
+    readme
   }
   service {
     git {
@@ -260,6 +261,16 @@ fragment ClusterTiny on Cluster {
   distro
 }
 
+fragment ClusterBasic on Cluster {
+  ...ClusterTiny
+  handle
+  self
+  protect
+  deletedAt
+  version
+  currentVersion
+}
+
 query ClustersTiny {
   clusters(first: 200) {
     edges {
@@ -362,6 +373,15 @@ query RuntimeServices(
   }
 }
 
+query AddonReleaseURL($id: ID!, $version: String!) {
+  runtimeService(id: $id) {
+    id
+    addon {
+      releaseUrl(version: $version)
+    }
+  }
+}
+
 mutation UpdateClusterBindings($id: ID!, $rbac: RbacAttributes!) {
   updateRbac(clusterId: $id, rbac: $rbac)
 }
@@ -381,6 +401,12 @@ mutation CreateCluster($attributes: ClusterAttributes!) {
 
 mutation DeleteCluster($id: ID!) {
   deleteCluster(id: $id) {
+    ...Cluster
+  }
+}
+
+mutation DetachCluster($id: ID!) {
+  detachCluster(id: $id) {
     ...Cluster
   }
 }

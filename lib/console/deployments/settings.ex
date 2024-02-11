@@ -4,9 +4,11 @@ defmodule Console.Deployments.Settings do
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Commands.Plural
+  alias Console.Services.Users
   alias Console.Deployments.{Clusters, Services}
   alias Console.Schema.{DeploymentSettings, User}
 
+  @agent_vsn File.read!("AGENT_VERSION")
   @cache_adapter Console.conf(:cache_adapter)
   @ttl :timer.minutes(45)
 
@@ -21,10 +23,27 @@ defmodule Console.Deployments.Settings do
   @decorate cacheable(cache: @cache_adapter, key: :deployment_settings, opts: [ttl: @ttl])
   def fetch(), do: fetch_consistent()
 
+  @doc """
+  The git ref to use for new agents on clusters
+  """
+  @spec agent_ref() :: binary
+  def agent_ref(), do: "refs/tags/agent-#{@agent_vsn}"
+
   @doc "same as fetch/0 but always reads from db"
   def fetch_consistent() do
     Console.Repo.get_by(DeploymentSettings, name: "global")
     |> Console.Repo.preload(@preloads)
+  end
+
+  @doc """
+  Fetches the configured global helm values for deployment agents (useful for things like unified pod labeling)
+  """
+  @spec agent_helm_values() :: binary | nil
+  def agent_helm_values() do
+    case fetch() do
+      %DeploymentSettings{agent_helm_values: vs} when is_binary(vs) and byte_size(vs) > 0 -> vs
+      _ -> nil
+    end
   end
 
   @doc """
@@ -43,11 +62,21 @@ defmodule Console.Deployments.Settings do
   @spec update(map, User.t) :: settings_resp
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def update(attrs, %User{} = user) do
-    fetch_consistent()
-    |> Repo.preload(@preloads)
-    |> DeploymentSettings.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:update)
+    start_transaction()
+    |> add_operation(:update, fn _ ->
+      fetch_consistent()
+      |> Repo.preload(@preloads)
+      |> DeploymentSettings.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:migrations, fn
+      %{update: %{helm_changed: h, version_changed: v} = settings} when h == true or v == true ->
+        migration_attrs(%{}, settings)
+        |> Clusters.create_agent_migration(user)
+      %{update: up} -> {:ok, up}
+    end)
+    |> execute(extract: :update)
     |> notify(:update, user)
   end
 
@@ -59,6 +88,39 @@ defmodule Console.Deployments.Settings do
       settings -> do_enable(settings, user)
     end
   end
+
+  def migrate_agents() do
+    vsn = agent_ref()
+    case fetch_consistent() do
+      %DeploymentSettings{manage_agents: true, agent_version: ^vsn} = settings -> {:ok, settings}
+      %DeploymentSettings{manage_agents: true} = settings -> migrate_agents(settings, vsn)
+      _ -> {:error, "ignoring agent updates"}
+    end
+  end
+
+  defp migrate_agents(%DeploymentSettings{} = settings, vsn) do
+    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+
+    start_transaction()
+    |> add_operation(:settings, fn _ ->
+      DeploymentSettings.changeset(settings, %{agent_version: vsn})
+      |> Repo.update()
+    end)
+    |> add_operation(:migration, fn _ ->
+      Clusters.create_agent_migration(%{name: vsn, ref: vsn}, bot)
+    end)
+    |> execute(extract: :settings)
+  end
+
+  defp migration_attrs(attrs, %DeploymentSettings{helm_changed: true, agent_helm_values: vals} = settings) when is_binary(vals) and byte_size(vals) > 0 do
+    Map.merge(attrs, %{helm_values: vals})
+    |> migration_attrs(%{settings | helm_changed: false})
+  end
+  defp migration_attrs(attrs, %DeploymentSettings{version_changed: true, agent_version: vsn} = settings) do
+    Map.merge(attrs, %{ref: vsn})
+    |> migration_attrs(%{settings | version_changed: false})
+  end
+  defp migration_attrs(attrs, _), do: Map.merge(attrs, %{name: "settings-#{Console.rand_alphanum(10)}"})
 
   defp do_enable(settings, user) do
     start_transaction()

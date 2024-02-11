@@ -1,4 +1,4 @@
-import { createContext, useContext, useLayoutEffect, useMemo } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 
 import ContinuousDeployment, {
   POLL_INTERVAL,
@@ -7,13 +7,7 @@ import Clusters from 'components/cd/clusters/Clusters'
 import Repositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
 import Providers from 'components/cd/providers/Providers'
-import {
-  Navigate,
-  Outlet,
-  Route,
-  useLocation,
-  useNavigate,
-} from 'react-router-dom'
+import { Navigate, Outlet, Route } from 'react-router-dom'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
@@ -47,6 +41,8 @@ import {
   useDeploymentSettingsQuery,
 } from 'generated/graphql'
 
+import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -54,6 +50,8 @@ import ClusterPods from '../components/cd/cluster/ClusterPods'
 import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
 import ClusterAddOnDetails from '../components/cd/cluster/addon/ClusterAddOnDetails'
 import ClusterAddOnCompatibility from '../components/cd/cluster/addon/ClusterAddOnCompatibility'
+import ClusterAddOnReadme from '../components/cd/cluster/addon/ClusterAddOnReadme'
+import ClusterAddOnReleases from '../components/cd/cluster/addon/ClusterAddOnReleases'
 
 import Node from '../components/cd/cluster/node/Node'
 import NodeInfo from '../components/cd/cluster/node/NodeInfo'
@@ -74,8 +72,6 @@ import ComponentDryRun from '../components/component/ComponentDryRun'
 
 import {
   ADDONS_REL_PATH,
-  CD_ABS_PATH,
-  CD_DEFAULT_REL_PATH,
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
   CLUSTER_ADDONS_PARAM_ID,
@@ -97,6 +93,7 @@ import {
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
+import { pipelineJobRoutes } from './pipelineJobRoutes'
 
 export const componentRoutes = (
   <Route
@@ -135,8 +132,6 @@ export const componentRoutes = (
   </Route>
 )
 
-const defaultLocation = `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}` as const
-
 const CDContext = createContext<{
   deploymentSettings?: DeploymentSettingsFragment | undefined | null
 }>({})
@@ -147,19 +142,13 @@ export function useDeploymentSettings() {
   return ctx?.deploymentSettings
 }
 
-function CdRoot() {
+export function CdRoot() {
   const { data } = useDeploymentSettingsQuery({
     pollInterval: POLL_INTERVAL,
   })
-  const cdIsEnabled = useCDEnabled()
-  const navigate = useNavigate()
-  const location = useLocation()
 
-  useLayoutEffect(() => {
-    if (!cdIsEnabled && location.pathname !== defaultLocation) {
-      navigate(defaultLocation)
-    }
-  }, [cdIsEnabled, location.pathname, navigate])
+  useCDEnabled({ redirect: true })
+
   const providerValue = useMemo(
     () => ({ deploymentSettings: data?.deploymentSettings }),
     [data?.deploymentSettings]
@@ -250,6 +239,10 @@ const globalSettingsRoutes = (
       element={<GlobalSettingsRepositories />}
     />
     <Route
+      path="agents"
+      element={<GlobalSettingsAgents />}
+    />
+    <Route
       path="auto-update"
       element={<SelfManage />}
     />
@@ -311,6 +304,14 @@ const clusterDetailsRoutes = [
     <Route
       path="compatibility"
       element={<ClusterAddOnCompatibility />}
+    />
+    <Route
+      path="readme"
+      element={<ClusterAddOnReadme />}
+    />
+    <Route
+      path="releases"
+      element={<ClusterAddOnReleases />}
     />
   </Route>,
 ]
@@ -442,5 +443,6 @@ export const cdRoutes = [
     {podDetailsRoutes}
     {serviceDetailsRoutes}
     {componentRoutes}
+    {pipelineJobRoutes}
   </Route>,
 ]

@@ -13,7 +13,9 @@ defmodule Console.Schema.Cluster do
     GlobalService,
     ProviderCredential,
     ServiceError,
-    PrAutomation
+    PrAutomation,
+    ClusterRestore,
+    ObjectStore
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
@@ -103,9 +105,11 @@ defmodule Console.Schema.Cluster do
     embeds_one :kubeconfig,     Kubeconfig, on_replace: :update
     embeds_one :cloud_settings, CloudSettings, on_replace: :update
 
-    belongs_to :provider,   ClusterProvider
-    belongs_to :service,    Service
-    belongs_to :credential, ProviderCredential
+    belongs_to :provider,     ClusterProvider
+    belongs_to :service,      Service
+    belongs_to :credential,   ProviderCredential
+    belongs_to :object_store, ObjectStore
+    belongs_to :restore,      ClusterRestore
 
     has_many :node_pools, ClusterNodePool, on_replace: :delete
     has_many :service_errors, ServiceError, on_replace: :delete
@@ -172,10 +176,13 @@ defmodule Console.Schema.Cluster do
 
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
+      sub = Service.for_user(user)
       from(c in query,
+        left_join: s in subquery(sub),
+          on: s.cluster_id == c.id,
         left_join: b in PolicyBinding,
           on: b.policy_id == c.read_policy_id or b.policy_id == c.write_policy_id,
-        where: b.user_id == ^id or b.group_id in ^groups,
+        where: b.user_id == ^id or b.group_id in ^groups or not is_nil(s.id),
         distinct: true
       )
     end)

@@ -1,46 +1,37 @@
-import { Navigate, Route } from 'react-router-dom'
+import { Navigate, Route, RouteObject, Routes } from 'react-router-dom'
 
 import Builds from 'components/builds/Builds'
 import Build from 'components/builds/build/Build'
 import Changelog from 'components/builds/build/changelog/Changelog'
 import Progress from 'components/builds/build/progress/Progress'
+
+import Audits from 'components/audits/Audits'
 import AuditsTable from 'components/audits/table/AuditTable'
 import AuditsGraph from 'components/audits/graph/AuditsGraph'
 
 import MyProfile from 'components/profile/MyProfile'
-
 import { Profile } from 'components/profile/Profile'
-
 import { Security } from 'components/profile/Security'
-
 import { Permissions } from 'components/profile/Permissions'
+import { AccessTokens } from 'components/profile/AccessTokens'
+import { ProfileVPN } from 'components/profile/VPN'
 
 import Account from 'components/account/Account'
-
 import { Groups } from 'components/account/groups/Groups'
-
-import Audits from 'components/audits/Audits'
-
 import Roles from 'components/account/roles/Roles'
-
 import { Webhooks } from 'components/account/webhooks/Webhooks'
-
 import Users from 'components/account/users/Users'
-
 import EmailSettings from 'components/account/email/EmailSettings'
-
 import AccountSettings from 'components/account/settings/AccountSettings'
 import CookieSettings from 'components/account/settings/CookieSettings'
+import { AccountVPN } from 'components/account/vpn/VPN'
 
-import { AccessTokens } from 'components/profile/AccessTokens'
-
-import { ProfileVPN } from '../components/profile/VPN'
-
-import { AccountVPN } from '../components/account/vpn/VPN'
+import Apps from 'components/apps/Apps'
 
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
 import { cdRoutes } from './cdRoutes'
+import { prRoutes } from './prRoutes'
 
 const buildsRoutes = [
   <Route
@@ -202,7 +193,7 @@ const incidentsRoutes = [
   />,
 ] */
 
-export const consoleRoutes = [
+export const consoleComponentRoutes = [
   /* APPS */
   ...appsRoutes,
 
@@ -226,4 +217,19 @@ export const consoleRoutes = [
 
   /* CONTINUOUS DEPLOYMENT */
   ...cdRoutes,
+]
+
+export const consoleRoutes: RouteObject[] = [
+  // ----- Old-style component-based routes -----
+  {
+    path: '*',
+    Component: () => <Routes>{consoleComponentRoutes}</Routes>,
+  },
+
+  // ----- New object-based routes -----
+  // Index
+  { index: true, Component: Apps },
+
+  // PR QUEUE
+  ...prRoutes,
 ]

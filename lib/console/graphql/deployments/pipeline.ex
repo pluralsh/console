@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Deployments.Pipeline do
   use Console.GraphQl.Schema.Base
+  alias Console.Deployments.Pipelines
   alias Console.GraphQl.Resolvers.{Deployments, User}
   alias Console.Schema.PipelineGate
 
@@ -143,6 +144,12 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :state, non_null(:gate_state), description: "the current state of this gate"
     field :spec,  :gate_spec, description: "more detailed specification for complex gates"
 
+    @desc "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
+    field :job, :job do
+      resolve fn gate, _, _ -> Pipelines.gate_job(gate) end
+      middleware ErrorHandler
+    end
+
     field :cluster,  :cluster, description: "the cluster this gate can run on", resolve: dataloader(Deployments)
     field :approver, :user, description: "the last user to approve this gate", resolve: dataloader(User)
 
@@ -229,12 +236,26 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   end
 
   connection node_type: :pipeline
+  connection node_type: :pipeline_gate
 
   object :public_pipeline_queries do
     field :cluster_gates, list_of(:pipeline_gate) do
       middleware ClusterAuthenticated
 
       resolve &Deployments.cluster_gates/2
+    end
+
+    connection field :paged_cluster_gates, node_type: :pipeline_gate do
+      middleware ClusterAuthenticated
+
+      resolve &Deployments.paged_cluster_gates/2
+    end
+
+    field :cluster_gate, :pipeline_gate do
+      middleware ClusterAuthenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.cluster_gate/2
     end
   end
 
@@ -251,6 +272,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   object :pipeline_queries do
     connection field :pipelines, node_type: :pipeline do
       middleware Authenticated
+      arg :q, :string
 
       resolve &Deployments.list_pipelines/2
     end
@@ -260,6 +282,13 @@ defmodule Console.GraphQl.Deployments.Pipeline do
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_pipeline/2
+    end
+
+    field :pipeline_gate, :pipeline_gate do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_gate/2
     end
   end
 

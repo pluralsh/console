@@ -2,7 +2,7 @@ defmodule Console.Deployments.GitTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.PubSub
-  alias Console.Deployments.Git
+  alias Console.Deployments.{Git, Services}
   alias Console.Commands.Plural
 
   describe "#create_repository/2" do
@@ -95,6 +95,7 @@ defmodule Console.Deployments.GitTest do
   describe "#create_scm_connection/2" do
     test "admins can create" do
       admin = admin_user()
+      expect(Tentacat.Organizations.Hooks, :create, fn _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)
 
       {:ok, conn} = Git.create_scm_connection(%{type: :github, name: "github", token: "pat-asdfa"}, admin)
 
@@ -265,7 +266,7 @@ defmodule Console.Deployments.GitTest do
         write_bindings: [%{user_id: user.id}],
         create_bindings: [%{user_id: user.id}]
       )
-      expect(Plural, :template, fn f, _ -> File.read(f) end)
+      expect(Plural, :template, fn f, _, _ -> File.read(f) end)
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
         {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
       end)
@@ -311,6 +312,77 @@ defmodule Console.Deployments.GitTest do
         title: "pr",
         url: "https://github.com/org/name/pulls/2",
       }, insert(:user))
+    end
+  end
+
+  describe "setupRenovate" do
+    test "it can create a service for renovate" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/scaffolds.git")
+      bot = insert(:user, bot_name: "console", roles: %{admin: true})
+      scm = insert(:scm_connection)
+      cluster = insert(:cluster, self: true)
+
+      {:ok, svc} = Git.setup_renovate(scm.id, ["some/repo", "other/repo"], admin_user())
+
+      assert svc.name == "plural-renovate"
+      assert svc.namespace == "plural-renovate"
+      assert svc.repository_id == git.id
+      assert svc.cluster_id == cluster.id
+      assert svc.git.ref == "main"
+      assert svc.git.folder == "addons/plural-renovate"
+
+      {:ok, conf} = Services.configuration(svc)
+      [access] = Console.Repo.all(Console.Schema.AccessToken)
+
+      assert access.user_id == bot.id
+
+      assert conf["renovateToken"] == scm.token
+      assert conf["consoleToken"] == access.token
+      assert conf["platform"] == "#{scm.type}"
+      assert conf["repositories"] == "some/repo,other/repo"
+      assert conf["consoleUrl"] == Console.url("/gql")
+    end
+  end
+end
+
+defmodule Console.Deployments.GitSyncTest do
+  use Console.DataCase, async: false
+  alias Console.Deployments.Git
+  use Mimic
+
+  setup :set_mimic_global
+
+  describe "#create_pull_request/4" do
+    test "it can create a pull request referencing an external git repo" do
+      user = insert(:user)
+      conn = insert(:scm_connection, token: "some-pat")
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        repository: git,
+        creates: %{templates: [%{source: "agent.yaml", destination: "some/folder/agent.yaml"}], git: %{ref: "master", folder: "test-apps/k3s"}},
+        write_bindings: [%{user_id: user.id}],
+        create_bindings: [%{user_id: user.id}]
+      )
+
+      expect(Console.Commands.Plural, :template, fn f, _, ext ->
+        with true <- File.dir?(ext),
+          do: File.read(f)
+      end)
+      expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
+        {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
+      end)
+      expect(Console.Deployments.Pr.Git, :setup, fn conn, "pluralsh/console", "pr-test" -> {:ok, conn} end)
+      expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)
+      expect(Console.Deployments.Pr.Git, :push, fn _, "pr-test" -> {:ok, ""} end)
+
+      {:ok, pr} = Git.create_pull_request(%{}, pra.id, "pr-test", user)
+
+      assert pr.cluster_id == pra.cluster_id
+      assert pr.url == "https://github.com/pr/url"
+      assert pr.title == pra.title
     end
   end
 end

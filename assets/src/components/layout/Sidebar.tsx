@@ -16,13 +16,21 @@ import {
   LogoutIcon,
   PeopleIcon,
   PersonIcon,
+  PrOpenIcon,
   ScrollIcon,
   ServersIcon,
   SidebarItem,
   SidebarSection,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
-import { ReactElement, useCallback, useContext, useRef, useState } from 'react'
+import {
+  ReactElement,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Avatar, Flex, Menu, MenuItem, useOutsideClick } from 'honorable'
 import { wipeToken } from 'helpers/auth'
 import posthog from 'posthog-js'
@@ -30,9 +38,11 @@ import { ME_Q } from 'components/graphql/users'
 import { useMutation } from '@apollo/client'
 import { updateCache } from 'utils/graphql'
 import styled from 'styled-components'
-import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 
 import { CD_ABS_PATH, CD_DEFAULT_REL_PATH } from 'routes/cdRoutesConsts'
+import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
+import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
+import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
 import { LoginContext } from '../contexts'
 
@@ -44,66 +54,92 @@ type MenuItem = {
   icon: ReactElement
   path: string
   pathRegexp?: RegExp
-  sandboxed?: boolean
   ignoreRegexp?: RegExp
   plural?: boolean
+  enabled?: boolean
 }
 
-const MENU_ITEMS: MenuItem[] = [
-  {
-    text: 'Apps',
-    icon: <AppsIcon />,
-    path: '/',
-    plural: true,
-    pathRegexp: /^\/(apps)/,
-  },
-  {
-    text: 'Continuous deployment',
-    icon: <GitPullIcon />,
-    path: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}`,
-    pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
-    ignoreRegexp: /^\/cd\/settings.*$/,
-  },
-  {
-    text: 'Deployment Settings',
-    icon: <GearTrainIcon />,
-    path: `${CD_ABS_PATH}/settings`,
-    pathRegexp: /^\/cd\/settings.*$/,
-  },
-  {
-    text: 'Builds',
-    icon: <BuildIcon />,
-    plural: true,
-    path: '/builds',
-  },
-  {
-    text: 'Nodes',
-    icon: <ServersIcon />,
-    path: '/nodes',
-  },
-  {
-    text: 'Pods',
-    icon: <ApiIcon />,
-    path: '/pods',
-  },
-  {
-    text: 'Database management',
-    icon: <DatabaseIcon />,
-    plural: true,
-    path: `/${DB_MANAGEMENT_PATH}`,
-  },
-  // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true },
-  {
-    text: 'Audits',
-    icon: <ListIcon />,
-    path: '/audits',
-  },
-  {
-    text: 'Account',
-    icon: <PeopleIcon />,
-    path: '/account',
-  },
-]
+function getMenuItems({
+  isCDEnabled,
+  isByok,
+}: {
+  isSandbox: boolean
+  isCDEnabled: boolean
+  isByok: boolean
+}): MenuItem[] {
+  return [
+    {
+      text: 'Apps',
+      icon: <AppsIcon />,
+      path: '/',
+      plural: true,
+      pathRegexp: /^\/(apps)/,
+    },
+    {
+      text: 'Continuous deployment',
+      icon: <GitPullIcon />,
+      path: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}`,
+      pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
+      ignoreRegexp: /^\/cd\/settings.*$/,
+    },
+    {
+      text: 'Deployment Settings',
+      icon: <GearTrainIcon />,
+      path: `${CD_ABS_PATH}/settings`,
+      pathRegexp: /^\/cd\/settings.*$/,
+      enabled: isCDEnabled,
+    },
+    {
+      text: 'Builds',
+      icon: <BuildIcon />,
+      plural: true,
+      path: '/builds',
+    },
+    {
+      text: 'Nodes',
+      icon: <ServersIcon />,
+      path: '/nodes',
+    },
+    {
+      text: 'Pods',
+      icon: <ApiIcon />,
+      path: '/pods',
+    },
+    {
+      text: 'PR',
+      icon: <PrOpenIcon />,
+      path: PR_DEFAULT_ABS_PATH,
+      pathRegexp: /^(\/pr)|(\/pr\/.*)$/,
+      enabled: isCDEnabled,
+    },
+    {
+      text: 'Database management',
+      icon: <DatabaseIcon />,
+      plural: true,
+      path: `/${DB_MANAGEMENT_PATH}`,
+    },
+    // ...(isSandbox
+    //   ? []
+    //   : [
+    //       {
+    //         text: 'Incidents',
+    //         icon: <SirenIcon />,
+    //         path: '/incidents',
+    //         sandboxed: true,
+    //       },
+    //     ]),
+    {
+      text: 'Audits',
+      icon: <ListIcon />,
+      path: '/audits',
+    },
+    {
+      text: 'Account',
+      icon: <PeopleIcon />,
+      path: '/account',
+    },
+  ].filter((item) => item.enabled !== false && (!item.plural || !isByok))
+}
 
 function isActiveMenuItem(
   {
@@ -160,9 +196,17 @@ export default function Sidebar() {
       isActiveMenuItem(menuItem, pathname),
     [pathname]
   )
-  const menuItems = configuration.isSandbox
-    ? MENU_ITEMS.filter(({ sandboxed }) => !sandboxed)
-    : MENU_ITEMS
+  const isCDEnabled = useCDEnabled()
+
+  const menuItems = useMemo(
+    () =>
+      getMenuItems({
+        isSandbox: configuration.isSandbox,
+        isCDEnabled,
+        isByok: configuration.byok,
+      }),
+    [configuration.byok, configuration.isSandbox, isCDEnabled]
+  )
 
   const [mutation] = useMutation(MARK_READ, {
     update: (cache) =>
@@ -209,22 +253,19 @@ export default function Sidebar() {
           grow={1}
           shrink={1}
         >
-          {menuItems.map(
-            (item, i) =>
-              (!item.plural || !configuration.byok) && (
-                <SidebarItem
-                  key={i}
-                  clickable
-                  tooltip={item.text}
-                  className={`sidebar-${item.text}`}
-                  active={isActive(item)}
-                  as={Link}
-                  to={item.path}
-                >
-                  {item.icon}
-                </SidebarItem>
-              )
-          )}
+          {menuItems.map((item, i) => (
+            <SidebarItem
+              key={i}
+              clickable
+              tooltip={item.text}
+              className={`sidebar-${item.text}`}
+              active={isActive(item)}
+              as={Link}
+              to={item.path}
+            >
+              {item.icon}
+            </SidebarItem>
+          ))}
           <Flex grow={1} />
           <SidebarItem
             tooltip="Discord"

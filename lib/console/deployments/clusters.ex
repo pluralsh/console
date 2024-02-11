@@ -66,6 +66,12 @@ defmodule Console.Deployments.Clusters do
     |> Repo.exists?()
   end
 
+  def accessible_service?(%Cluster{id: id}, %User{} = user) do
+    Service.for_cluster(id)
+    |> Service.for_user(user)
+    |> Repo.exists?()
+  end
+
   @spec control_plane(Cluster.t) :: Kazan.Server.t | {:error, term}
   def control_plane(%Cluster{self: true}), do: Kazan.Server.in_cluster()
   def control_plane(%Cluster{kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
@@ -590,20 +596,26 @@ defmodule Console.Deployments.Clusters do
     |> notify(:create, user)
   end
 
-  def apply_migration(%AgentMigration{id: id, ref: ref} = migration) when is_binary(ref) do
+  def create_agent_migration(attrs) do
+    %AgentMigration{}
+    |> AgentMigration.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def apply_migration(%AgentMigration{id: id} = migration) do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
     Service.agent()
     |> Service.stream()
     |> Repo.stream(method: :keyset)
     |> Stream.each(fn svc ->
       Logger.info "applying agent migration #{id} for #{svc.id}"
-      Services.update_service(%{git: %{ref: ref, folder: svc.git.folder}}, svc.id, bot)
+      AgentMigration.updates(migration, svc)
+      |> Services.update_service(svc.id, bot)
     end)
     |> Stream.run()
 
     complete_migration(migration)
   end
-  def apply_migration(%AgentMigration{} = migration), do: complete_migration(migration)
   def apply_migration(_), do: :ok
 
   defp complete_migration(%AgentMigration{} = migration) do
@@ -624,12 +636,12 @@ defmodule Console.Deployments.Clusters do
   def readme(%AddOn{git_url: url}), do: {:ok, nil}
 
   defp readme_fetch(url) do
-    Enum.find_value(~w(main master), fn branch ->
+    Enum.find_value(~w(main master), {:ok, nil}, fn branch ->
       String.replace(url, "{branch}", branch)
       |> HTTPoison.get([], follow_redirect: true)
       |> case do
         {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> {:ok, body}
-        _ -> {:ok, nil}
+        _ -> nil
       end
     end)
   end

@@ -107,7 +107,6 @@ function TooltipTime({
           setCopied(true)
           window.clearTimeout(timeoutRef.current)
           timeoutRef.current = window.setTimeout(() => {
-            console.log('setCopied', setCopied)
             setCopied?.(false)
           }, 1500)
           onClick?.(e)

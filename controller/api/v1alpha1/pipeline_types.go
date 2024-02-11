@@ -174,46 +174,6 @@ type EnvFrom struct {
 	ConfigMap string `json:"configMap"`
 }
 
-// PipelineStatus defines the observed state of Pipeline
-type PipelineStatus struct {
-	// ID from Console.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	ID *string `json:"id,omitempty"`
-
-	// SHA of last applied configuration.
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	SHA *string `json:"sha,omitempty"`
-
-	// Represents the observations of a Pipeline current state.
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	// +listType=map
-	// +listMapKey=type
-	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
-}
-
-func (ps *PipelineStatus) HasID() bool {
-	return ps.ID != nil && len(*ps.ID) > 0
-}
-
-func (ps *PipelineStatus) GetID() string {
-	if !ps.HasID() {
-		return ""
-	}
-
-	return *ps.ID
-}
-
-func (ps *PipelineStatus) HasSHA() bool {
-	return ps.SHA != nil && len(*ps.SHA) > 0
-}
-
-func (ps *PipelineStatus) IsSHAChanged(sha string) bool {
-	return ps.HasSHA() && *ps.SHA != sha
-}
-
 // Pipeline is the Schema for the pipelines API
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Namespaced
@@ -223,8 +183,8 @@ type Pipeline struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   PipelineSpec   `json:"spec,omitempty"`
-	Status PipelineStatus `json:"status,omitempty"`
+	Spec   PipelineSpec `json:"spec,omitempty"`
+	Status Status       `json:"status,omitempty"`
 }
 
 func (p *Pipeline) SetCondition(condition metav1.Condition) {

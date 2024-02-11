@@ -1,0 +1,25 @@
+nameOverride: ""
+fullnameOverride: ""
+
+velero:
+  initContainers:
+    - name: velero-plugin-for-aws
+      image: velero/velero-plugin-for-aws:v1.8.0
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /target
+          name: plugins
+    - name: velero-plugin-for-microsoft-azure
+      image: velero/velero-plugin-for-microsoft-azure:v1.8.2
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /target
+          name: plugins
+  configuration:
+    backupStorageLocation: {}
+    volumeSnapshotLocation: {}
+  snapshotsEnabled: false
+  deployNodeAgent: false
+  credentials:
+    secretContents:
+      cloud: ""

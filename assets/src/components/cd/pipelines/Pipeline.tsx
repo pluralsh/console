@@ -27,6 +27,7 @@ import styled, { useTheme } from 'styled-components'
 import { TestsNode } from './nodes/TestsNode'
 import { StageNode } from './nodes/StageNode'
 import { ApprovalNode } from './nodes/ApprovalNode'
+import { JobNode } from './nodes/JobNode'
 import { type DagreDirection, getLayoutedElements } from './utils/nodeLayouter'
 import { EdgeLineMarkerDefs, edgeTypes } from './EdgeLine'
 import { NodeType, getNodesAndEdges } from './utils/getNodesAndEdges'
@@ -34,6 +35,7 @@ import { NodeType, getNodesAndEdges } from './utils/getNodesAndEdges'
 const nodeTypes = {
   [NodeType.Stage]: StageNode,
   [NodeType.Approval]: ApprovalNode,
+  [NodeType.Job]: JobNode,
   [NodeType.Tests]: TestsNode,
 }
 

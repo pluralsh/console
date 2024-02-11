@@ -36,8 +36,8 @@ defmodule Console.Deployments.Policies.Rbac do
     end
   end
 
-  def evaluate(%PipelineGate{edge: %{pipeline: %Pipeline{} = pipe}}, %User{} = user, action),
-    do: evaluate(pipe, user, action)
+  def evaluate(%PipelineGate{} = gate, %User{} = user, action),
+    do: recurse(gate, user, action, & &1.edge.pipeline)
   def evaluate(%Pipeline{} = pipe, %User{} = user, action),
     do: recurse(pipe, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%Service{} = svc, %User{} = user, action),
@@ -115,4 +115,5 @@ defmodule Console.Deployments.Policies.Rbac do
   defp binding_key(:write), do: :write_bindings
   defp binding_key(:git), do: :git_bindings
   defp binding_key(:create), do: [:create_bindings, :write_bindings]
+  defp binding_key(_), do: []
 end

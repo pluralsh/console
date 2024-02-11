@@ -14,6 +14,7 @@ defmodule Console.Middleware.ErrorHandler do
   defp format({:http_error, _, %{"message" => msg}}), do: msg
   defp format({:http_error, _, err}) when is_binary(err), do: err
   defp format(err) when is_binary(err), do: err
+  defp format(err) when is_atom(err), do: err
   defp format(err) do
     Logger.error "found unknown error: #{inspect(err)}"
     "unknown error"

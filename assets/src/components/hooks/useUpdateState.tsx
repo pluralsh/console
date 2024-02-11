@@ -1,5 +1,5 @@
 import isEqual from 'lodash/isEqual'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { isSubsetEqual } from 'utils/isSubsetEqual'
 
@@ -10,29 +10,29 @@ export function useUpdateState<T extends Record<string, unknown>>(
   initialState: T,
   isEqualFns?: IsEqualFns<T>
 ) {
-  const [state, setState] = useState({ ...initialState })
-  const [errors, setErrors] = useState({})
+  const initialStateRef = useRef(initialState)
 
-  const update = useCallback(
-    (update: Partial<T>) => {
-      if (isSubsetEqual(state, update)) {
-        return
+  initialStateRef.current = initialState
+  const [state, setState] = useState({ ...initialStateRef.current })
+  const [errors, setErrors] = useState<Partial<Record<keyof T, boolean>>>({})
+
+  const update = useCallback((update: Partial<T>) => {
+    setState((s) => {
+      if (isSubsetEqual(s, update)) {
+        return s
       }
-      setState({ ...state, ...update })
-    },
-    [state]
-  )
+
+      return { ...s, ...update }
+    })
+  }, [])
 
   const reset = useCallback(() => {
-    setState({ ...initialState })
-  }, [initialState])
+    setState({ ...initialStateRef.current })
+  }, [])
 
-  const updateErrors = useCallback(
-    (update: Partial<T>) => {
-      setErrors({ ...errors, ...update })
-    },
-    [errors]
-  )
+  const updateErrors = useCallback((update: typeof errors) => {
+    setErrors((e) => ({ ...e, ...update }))
+  }, [])
 
   const clearErrors = useCallback(() => setErrors({}), [])
 

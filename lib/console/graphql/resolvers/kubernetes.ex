@@ -185,7 +185,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def list_jobs(%{namespace: ns}) do
     Console.namespace(ns)
-    |> BatchV1.list_namespaced_job!()
+    |> BatchV1.list_namespaced_job!(limit: 300)
     |> Kube.Utils.run()
     |> items_response()
   end
@@ -230,6 +230,13 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   def list_cached_pods(args, _) do
     Console.Cached.Pod.fetch()
     |> maybe_filter_pods(args)
+  end
+
+  def read_job_logs(pass, args, %{source: %BatchV1.Job{metadata: metadata, spec: %{selector: selector}}}) do
+    case list_pods(metadata, selector) do
+      {:ok, %{items: [pod | _]}} -> read_pod_logs(pass, args, %{source: pod})
+      err -> err
+    end
   end
 
   def read_pod_logs(_, args, %{source: %Core.Pod{metadata: %{namespace: ns, name: n}}}) do

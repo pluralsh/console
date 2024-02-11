@@ -21,15 +21,18 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
-	consoleclient "github.com/pluralsh/console/controller/internal/client"
-	"github.com/pluralsh/console/controller/internal/utils"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/utils"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 )
@@ -65,7 +68,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	scope, err := NewPipelineScope(ctx, r.Client, pipeline)
 	if err != nil {
 		logger.Error(err, "Failed to create pipeline scope")
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	defer func() {
@@ -82,21 +85,21 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	// Prepare attributes object that is used to calculate SHA and save changes.
 	attrs, err := r.pipelineAttributes(ctx, pipeline)
 	if err != nil {
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
 	sha, err := utils.HashObject(*attrs)
 	if err != nil {
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	// Sync resource with Console API.
 	apiPipeline, err := r.sync(ctx, pipeline, *attrs, sha)
 	if err != nil {
-		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -122,7 +125,7 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 			if _, err := r.ConsoleClient.DeletePipeline(*pipeline.Status.ID); err != nil {
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
-				utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+				utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return &ctrl.Result{}
 			}
 
@@ -145,7 +148,7 @@ func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeli
 	exists := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
 	logger := log.FromContext(ctx)
 
-	if exists && !pipeline.Status.IsSHAChanged(sha) {
+	if exists && pipeline.Status.IsSHAEqual(sha) {
 		logger.V(9).Info(fmt.Sprintf("No changes detected for %s pipeline", pipeline.Name))
 		return r.ConsoleClient.GetPipeline(pipeline.Status.GetID())
 	}
@@ -161,6 +164,6 @@ func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeli
 // SetupWithManager sets up the controller with the Manager.
 func (r *PipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.Pipeline{}).
+		For(&v1alpha1.Pipeline{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
