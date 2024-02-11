@@ -2232,6 +2232,7 @@ export type Pipeline = {
   name: Scalars['String']['output'];
   /** the stages of this pipeline */
   stages?: Maybe<Array<Maybe<PipelineStage>>>;
+  status?: Maybe<PipelineStatus>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -2360,6 +2361,15 @@ export type PipelineStageEdge = {
   promotedAt?: Maybe<Scalars['DateTime']['output']>;
   to: PipelineStage;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** a report of gate statuses within a pipeline to gauge its health */
+export type PipelineStatus = {
+  __typename?: 'PipelineStatus';
+  /** if > 0, consider the pipeline stopped */
+  closed?: Maybe<Scalars['Int']['output']>;
+  /** if > 0, consider the pipeline running */
+  pending?: Maybe<Scalars['Int']['output']>;
 };
 
 export type Plan = {

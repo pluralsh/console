@@ -106,6 +106,12 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :id,     non_null(:id)
     field :name,   non_null(:string), description: "the name of the pipeline"
     field :stages, list_of(:pipeline_stage), description: "the stages of this pipeline", resolve: dataloader(Deployments)
+
+    field :status, :pipeline_status, resolve: fn
+      %{id: id}, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.Resolvers.PipelineGateLoader, :pipeline, id)
+    end
+
     field :edges,  list_of(:pipeline_stage_edge),
       description: "edges linking two stages w/in the pipeline in a full DAG",
       resolve: dataloader(Deployments)
@@ -233,6 +239,12 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :revision, :revision, description: "the revision of the service to promote", resolve: dataloader(Deployments)
 
     timestamps()
+  end
+
+  @desc "a report of gate statuses within a pipeline to gauge its health"
+  object :pipeline_status do
+    field :pending, :integer, description: "if > 0, consider the pipeline running"
+    field :closed,  :integer, description: "if > 0, consider the pipeline stopped"
   end
 
   connection node_type: :pipeline

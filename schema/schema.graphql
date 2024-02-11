@@ -938,6 +938,8 @@ type Pipeline {
   "the stages of this pipeline"
   stages: [PipelineStage]
 
+  status: PipelineStatus
+
   "edges linking two stages w\/in the pipeline in a full DAG"
   edges: [PipelineStageEdge]
 
@@ -1119,6 +1121,15 @@ type PromotionService {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"a report of gate statuses within a pipeline to gauge its health"
+type PipelineStatus {
+  "if > 0, consider the pipeline running"
+  pending: Int
+
+  "if > 0, consider the pipeline stopped"
+  closed: Int
 }
 
 type PipelineConnection {
