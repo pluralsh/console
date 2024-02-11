@@ -14,8 +14,14 @@ defmodule ConsoleWeb.WebhookControllerTest do
       hook = insert(:scm_webhook)
       pr = insert(:pull_request)
 
+      payload = Jason.encode!(%{"pull_request" => %{"html_url" => pr.url, "merged" => true}})
+      hmac = :crypto.mac(:hmac, :sha256, hook.hmac, payload)
+             |> Base.encode16(case: :lower)
+
       conn
-      |> post("/ext/v1/webhooks/github/#{hook.id}", %{"pull_request" => %{"html_url" => pr.url, "merged" => true}})
+      |> put_req_header("x-hub-signature-256", "sha256=#{hmac}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/github/#{hook.id}", payload)
       |> response(200)
 
       assert refetch(pr).status == :merged

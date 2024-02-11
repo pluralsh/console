@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Git do
   use Console.Services.Base
+  use Nebulex.Caching
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Deployments.{Settings, Services, Clusters}
@@ -14,6 +15,9 @@ defmodule Console.Deployments.Git do
     PrAutomation,
     PullRequest
   }
+
+  @cache Console.conf(:cache_adapter)
+  @ttl :timer.minutes(30)
 
   @type repository_resp :: {:ok, GitRepository.t} | Console.error
   @type connection_resp :: {:ok, ScmConnection.t} | Console.error
@@ -34,7 +38,9 @@ defmodule Console.Deployments.Git do
 
   def get_scm_connection_by_name(name), do: Repo.get_by(ScmConnection, name: name)
 
+  @decorate cacheable(cache: @cache, key: {:scm_webhook, id}, opts: [ttl: @ttl])
   def get_scm_webhook(id), do: Repo.get(ScmWebhook, id)
+
   def get_scm_webhook!(id), do: Repo.get!(ScmWebhook, id)
 
   def get_pr_automation(id), do: Repo.get(PrAutomation, id)

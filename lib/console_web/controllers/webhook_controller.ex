@@ -12,10 +12,12 @@ defmodule ConsoleWeb.WebhookController do
 
   def scm(conn, %{"id" => id}) do
     with %ScmWebhook{} = hook <- Git.get_scm_webhook(id),
+         :ok <- verify(conn, hook),
          {:ok, url, params} <- Dispatcher.pr(hook, conn.body_params),
          {:ok, _} <- Git.update_pull_request(params, url) do
       json(conn, %{ignored: false, message: "updated pull request"})
     else
+      :reject -> send_resp(conn, 403, "Forbidden")
       err ->
         Logger.info "Did not process scm webhook, result: #{inspect(err)}"
         json(conn, %{ignored: true})
@@ -40,4 +42,25 @@ defmodule ConsoleWeb.WebhookController do
   def alertmanager(conn, _payload) do
     json(conn, %{ok: true})
   end
+
+  defp verify(conn, %ScmWebhook{type: :github, hmac: hmac}) do
+    with [signature] <- get_req_header(conn, "x-hub-signature-256"),
+         computed = :crypto.mac(:hmac, :sha256, hmac, conn.assigns.raw_body),
+         true <- Plug.Crypto.secure_compare(signature, "sha256=#{Base.encode16(computed, case: :lower)}") do
+      :ok
+    else
+      _ -> :reject
+    end
+  end
+
+  defp verify(conn, %ScmWebhook{type: :gitlab, hmac: hmac}) do
+    with [token] <- get_req_header(conn, "x-gitlab-token"),
+         true <- Plug.Crypto.secure_compare(hmac, token) do
+      :ok
+    else
+      _ -> :reject
+    end
+  end
+
+  defp verify(_, _), do: :reject
 end
