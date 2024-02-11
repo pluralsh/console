@@ -2,12 +2,24 @@ defmodule ConsoleWeb.WebhookController do
   use ConsoleWeb, :controller
   alias Alertmanager.Alert
   alias Console.Services.{Builds, Users, Alertmanager}
+  alias Console.Schema.{ScmWebhook}
+  alias Console.Deployments.Pr.Dispatcher
+  alias Console.Deployments.Git
+
+  require Logger
 
   plug ConsoleWeb.Verifier when action == :webhook
-  plug ConsoleWeb.PiazzaVerifier when action == :piazza
 
-  def scm(conn, _) do
-    json(conn, %{ok: true})
+  def scm(conn, %{"id" => id}) do
+    with %ScmWebhook{} = hook <- Git.get_scm_webhook(id),
+         {:ok, url, params} <- Dispatcher.pr(hook, conn.body_params),
+         {:ok, _} <- Git.update_pull_request(params, url) do
+      json(conn, %{ignored: false, message: "updated pull request"})
+    else
+      err ->
+        Logger.info "Did not process scm webhook, result: #{inspect(err)}"
+        json(conn, %{ignored: true})
+    end
   end
 
   def webhook(conn, params) do
@@ -28,13 +40,4 @@ defmodule ConsoleWeb.WebhookController do
   def alertmanager(conn, _payload) do
     json(conn, %{ok: true})
   end
-
-  def piazza(conn, %{"text" => "/console deploy " <> application}) do
-    bot = Users.get_bot!("console")
-    case Builds.create(%{type: :deploy, repository: application, message: "Deployed from piazza"}, bot) do
-      {:ok, _} -> json(conn, %{"text" => "deploying #{application}"})
-      _ -> json(conn, %{"text" => "hmm, something went wrong"})
-    end
-  end
-  def piazza(conn, _), do: json(conn, %{"text" => "I don't understand what you're asking"})
 end

@@ -119,6 +119,16 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
+  Creates another webhook (besides the default) for a given scm connection
+  """
+  @spec create_webhook_for_connection(binary, binary, User.t) :: webhook_resp
+  def create_webhook_for_connection(owner, conn_id, %User{} = user) do
+    conn = get_scm_connection!(conn_id)
+    with {:ok, conn} <- allow(conn, user, :edit),
+      do: create_webhook_for_connection(owner, conn)
+  end
+
+  @doc """
   Uses the creds in an scm connection to create a properly configured webhook for us to use
   """
   @spec create_webhook_for_connection(binary, ScmConnection.t) :: webhook_resp
@@ -251,6 +261,17 @@ defmodule Console.Deployments.Git do
     |> PullRequest.changeset(attrs)
     |> allow(user, :create)
     |> when_ok(:insert)
+  end
+
+  @doc """
+  Updates attributes for a pr in response to a scm webhook invocation
+  """
+  @spec update_pull_request(map, binary) :: pull_request_resp
+  def update_pull_request(attrs, url) do
+    case Repo.get_by(PullRequest, url: url) do
+      %PullRequest{} = pr -> PullRequest.changeset(pr, attrs) |> Repo.update()
+      _ -> {:error, :not_found}
+    end
   end
 
   @doc """

@@ -1,13 +1,14 @@
 defmodule Console.GraphQl.Deployments.Git do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Deployments
-  alias Console.Schema.{GitRepository, ScmConnection, ScmWebhook, PrAutomation, Configuration}
+  alias Console.Schema.{GitRepository, PullRequest, ScmConnection, ScmWebhook, PrAutomation, Configuration}
 
   ecto_enum :auth_method, GitRepository.AuthMethod
   ecto_enum :git_health, GitRepository.Health
   ecto_enum :scm_type, ScmConnection.Type
   ecto_enum :match_strategy, PrAutomation.MatchStrategy
   ecto_enum :pr_role, PrAutomation.Role
+  ecto_enum :pr_status, PullRequest.Status
   ecto_enum :configuration_type, Configuration.Type
   ecto_enum :operation, Configuration.Condition.Operation
 
@@ -286,6 +287,7 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "A reference to a pull request for your kubernetes related IaC"
   object :pull_request do
     field :id,     non_null(:id)
+    field :status, non_null(:pr_status)
     field :url,    non_null(:string)
     field :title,  :string
     field :labels, list_of(:string)
@@ -438,6 +440,14 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_scm_connection/2
+    end
+
+    field :create_scm_webhook, :scm_webhook do
+      middleware Authenticated
+      arg :connection_id, non_null(:id)
+      arg :owner,         non_null(:string)
+
+      safe_resolve &Deployments.create_webhook_for_connection/2
     end
 
     field :create_pr_automation, :pr_automation do
