@@ -71,12 +71,19 @@ export default function PipelineJobLogs() {
     [data?.pipelineGate?.job?.logs]
   )
 
-  if (error) {
-    return <GqlError error={error} />
-  }
   if (isEmpty(containers)) {
     return <EmptyState message="No containers to view logs from" />
   }
+  const content = error ? (
+    <GqlError error={error} />
+  ) : (
+    <ContainerLogsTable
+      logs={logs || []}
+      loading={loading}
+      refetch={refetch}
+      container={containerName}
+    />
+  )
 
   return (
     <ScrollablePage
@@ -134,12 +141,7 @@ export default function PipelineJobLogs() {
             </Select>
           </FormField>
         </div>
-        <ContainerLogsTable
-          logs={logs || []}
-          loading={loading}
-          refetch={refetch}
-          container={containerName}
-        />
+        {content}
       </div>
     </ScrollablePage>
   )
