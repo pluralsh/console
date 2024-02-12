@@ -7,7 +7,11 @@ import { useBackupsEnabled } from '../../cd/utils/useBackupsEnabled'
 
 import CreateObjectStoreModal from './CreateObjectStoreModal'
 
-export default function CreateObjectStore() {
+export default function CreateObjectStore({
+  refetch,
+}: {
+  refetch: () => void
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const { buttonProps } = useOpenTransition(isOpen, setIsOpen)
   const backupsEnabled = useBackupsEnabled()
@@ -25,6 +29,7 @@ export default function CreateObjectStore() {
         <CreateObjectStoreModal
           open={isOpen}
           onClose={() => setIsOpen(false)}
+          refetch={refetch}
         />
       </ModalMountTransition>
     </>

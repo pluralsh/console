@@ -25,10 +25,6 @@ import { CreateProvider } from './CreateProvider'
 const POLL_INTERVAL = 10 * 1000
 const PROVIDERS_CRUMBS = [...CD_BASE_CRUMBS, { label: 'providers' }]
 
-export type ServicesCluster = Exclude<
-  ServiceDeploymentsRowFragment['cluster'],
-  undefined | null
->
 const columns = [ColProvider, ColName, ColActions]
 
 export default function Providers() {

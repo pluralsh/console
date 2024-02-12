@@ -3,9 +3,11 @@ import ModalAlt from '../../cd/ModalAlt'
 export default function CreateObjectStoreModal({
   open,
   onClose,
+  refetch,
 }: {
   open: boolean
   onClose: Nullable<() => void>
+  refetch: () => void
 }) {
   return (
     <ModalAlt
