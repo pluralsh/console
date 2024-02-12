@@ -103,6 +103,8 @@ defmodule Console.GraphQl.Deployments.Backup do
   end
 
   connection node_type: :object_store
+  connection node_type: :cluster_backup
+  connection node_type: :cluster_restore
 
   object :public_backup_queries do
     field :cluster_restore, :cluster_restore do
@@ -140,6 +142,20 @@ defmodule Console.GraphQl.Deployments.Backup do
       arg :name,       :string
 
       resolve &Deployments.resolve_cluster_backup/2
+    end
+
+    connection field :cluster_backups, node_type: :cluster_backup do
+      middleware Authenticated
+      arg :cluster_id, non_null(:id)
+
+      resolve &Deployments.list_cluster_backups/2
+    end
+
+    connection field :cluster_restores, node_type: :cluster_restore do
+      middleware Authenticated
+      arg :cluster_id, non_null(:id)
+
+      resolve &Deployments.list_cluster_restores/2
     end
 
     connection field :object_stores, node_type: :object_store do
