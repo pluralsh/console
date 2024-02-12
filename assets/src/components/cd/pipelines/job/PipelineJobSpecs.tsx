@@ -27,6 +27,16 @@ export default function PipelineJobStatus() {
   const tabStateRef = useRef<any>(null)
   const currentTab = TABS.find((tab) => tab.path === (tabName ?? ''))
 
+  let jsonRaw: string | undefined
+
+  try {
+    if (raw) {
+      jsonRaw = JSON.stringify(JSON.parse(raw || '{}'), null, 2)
+    }
+  } catch (e) {
+    jsonRaw = undefined
+  }
+
   useLayoutEffect(() => {
     if (!currentTab) {
       navigate(`${PIPELINES_ABS_PATH}/jobs/${jobId}/specs`)
@@ -68,13 +78,13 @@ export default function PipelineJobStatus() {
         /* @ts-ignore */
         <Code
           showLineNumbers
-          lang="yaml"
+          language={jsonRaw ? 'json' : undefined}
           css={{
             overflowY: 'auto',
             maxHeight: '100%',
           }}
         >
-          {raw || ''}
+          {jsonRaw || raw ||''}
         </Code>
       )}
       {currentTab?.path === '' && (
