@@ -12,6 +12,7 @@ import {
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
+  HistoryIcon,
   ListIcon,
   LogoutIcon,
   PeopleIcon,
@@ -128,6 +129,11 @@ function getMenuItems({
     //         sandboxed: true,
     //       },
     //     ]),
+    {
+      text: 'Backups',
+      icon: <HistoryIcon />,
+      path: '/backups',
+    },
     {
       text: 'Audits',
       icon: <ListIcon />,
