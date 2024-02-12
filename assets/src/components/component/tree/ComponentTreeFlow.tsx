@@ -19,10 +19,12 @@ import styled, { useTheme } from 'styled-components'
 
 import isEmpty from 'lodash/isEmpty'
 
-import { type DagreDirection, getLayoutedElements } from './utils/nodeLayouter'
-import { EdgeLineMarkerDefs, edgeTypes } from './EdgeLine'
-import { ComponentTreeNode } from './nodes/ComponentTreeNode'
-import { PipelineEditAreaSC } from './Pipelines'
+import { type DagreDirection, getLayoutedElements } from '../../cd/pipelines/utils/nodeLayouter'
+import { EdgeLineMarkerDefs, edgeTypes } from '../../cd/pipelines/EdgeLine'
+
+import { PipelineEditAreaSC } from '../../cd/pipelines/Pipelines'
+
+import { ComponentTreeNode } from './ComponentTreeNode'
 
 export const COMPONENTTREE_GRID_GAP = styledTheme.spacing.large
 

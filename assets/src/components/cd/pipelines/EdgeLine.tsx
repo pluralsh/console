@@ -3,7 +3,7 @@ import { ComponentProps } from 'react'
 import { StepEdge } from 'reactflow'
 import { useTheme } from 'styled-components'
 
-import { useEdgeNodes } from './utils/hooks'
+import { useEdgeNodes } from 'components/hooks/reactFlowHooks'
 
 export const CUSTOM_EDGE_NAME = 'plural-edge' as const
 const MARKER_ACTIVE_ID = 'pipeline-markerArrowActive'

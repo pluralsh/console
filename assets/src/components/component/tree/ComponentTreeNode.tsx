@@ -5,11 +5,9 @@ import { Handle, type NodeProps, Position } from 'reactflow'
 import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
-import { TreeNodeMeta } from 'components/component/ComponentTree'
-
+import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import ComponentCard from 'components/apps/app/components/ComponentCard'
-
-import { useNodeEdges } from '../utils/hooks'
+import { TreeNodeMeta } from 'components/component/tree/getTreeNodesAndEdges'
 
 export type CardStatus = 'ok' | 'closed' | 'pending'
 
@@ -98,7 +96,7 @@ export function ComponentTreeNode({
         position={Position.Left}
       />
       <ComponentCard
-        component={{ name: metadata?.name || '', kind: data.type }}
+        component={{ name: metadata?.name || '', kind: data.kind }}
       />
       <HandleSC
         type="source"

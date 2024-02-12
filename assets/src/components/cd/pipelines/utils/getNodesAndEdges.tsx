@@ -24,7 +24,7 @@ export enum NodeType {
   Job = 'job',
 }
 
-const baseEdgeProps = {
+export const baseEdgeProps = {
   type: CUSTOM_EDGE_NAME,
   updatable: false,
 }
