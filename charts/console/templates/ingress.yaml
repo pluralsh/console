@@ -18,6 +18,15 @@ spec:
   - host: {{ .Values.ingress.console_dns | quote }}
     http:
       paths:
+      {{ if .Values.dashboard.enabled }}
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: console-dashboard
+            port:
+              name: {{ .Values.dashboardapi.role }}
+      {{ end }}
       - path: /
         pathType: Prefix
         backend:
