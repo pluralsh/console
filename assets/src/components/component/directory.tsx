@@ -29,6 +29,11 @@ export const directory: {
     onlyIfNoError: true,
   },
   {
+    label: 'Tree view',
+    path: 'tree',
+    onlyIfNoError: true,
+  },
+  {
     label: 'Dry run',
     path: 'dryrun',
     onlyIfDryRun: true,
