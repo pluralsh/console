@@ -4,9 +4,16 @@ import Root from '../components/backups/Backups'
 import Backups from '../components/backups/backups/Backups'
 import ObjectStores from '../components/backups/objectstores/ObjectStores'
 
+import {
+  BACKUPS_ABS_PATH,
+  BACKUPS_DEFAULT_REL_PATH,
+  BACKUPS_REL_PATH,
+  OBJECT_STORES_REL_PATH,
+} from './backupRoutesConsts'
+
 export const backupsRoutes = [
   <Route
-    path="backups"
+    path={BACKUPS_ABS_PATH}
     element={<Root />}
   >
     <Route
@@ -14,16 +21,16 @@ export const backupsRoutes = [
       element={
         <Navigate
           replace
-          to="objectstores"
+          to={BACKUPS_DEFAULT_REL_PATH}
         />
       }
     />
     <Route
-      path="objectstores"
+      path={OBJECT_STORES_REL_PATH}
       element={<ObjectStores />}
     />
     <Route
-      path="backups"
+      path={BACKUPS_REL_PATH}
       element={<Backups />}
     />
   </Route>,
