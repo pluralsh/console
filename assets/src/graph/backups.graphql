@@ -1,0 +1,92 @@
+fragment ObjectStore on ObjectStore {
+  id
+  name
+  s3 {
+    bucket
+    region
+    endpoint
+    accessKeyId
+  }
+  azure {
+    container
+    storageAccount
+    subscriptionId
+    clientId
+  }
+  gcs {
+    bucket
+    region
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment ClusterBackup on ClusterBackup {
+  id
+  cluster {
+    ...ClusterBasic
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment ClusterRestore on ClusterRestore {
+  id
+  status
+  backup {
+    ...ClusterBackup
+  }
+  insertedAt
+  updatedAt
+}
+
+query ObjectStores($after: String, $first: Int, $before: String, $last: Int) {
+  objectStores(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ObjectStore
+      }
+    }
+  }
+}
+
+query ClusterBackup($id: ID, $clusterId: ID, $namespace: String, $name: String) {
+  clusterBackup(id: $id, clusterId: $clusterId, namespace: $namespace, name: $name) {
+    ...ClusterBackup
+  }
+}
+
+mutation CreateObjectStore($attributes: ObjectStoreAttributes!) {
+  createObjectStore(attributes: $attributes) {
+    ...ObjectStore
+  }
+}
+
+mutation UpdateObjectStore($id: ID!, $attributes: ObjectStoreAttributes!) {
+  updateObjectStore(id: $id, attributes: $attributes) {
+    ...ObjectStore
+  }
+}
+
+mutation DeleteObjectStore($id: ID!) {
+  deleteObjectStore(id: $id) {
+    ...ObjectStore
+  }
+}
+
+mutation CreateClusterRestore($backupId: ID!) {
+  createClusterRestore(backupId: $backupId) {
+    ...ClusterRestore
+  }
+}
+
+
+
+
+
+
+
+
