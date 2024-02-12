@@ -4,7 +4,8 @@ import { ListBoxItem, Select } from '@pluralsh/design-system'
 
 import ModalAlt from '../../cd/ModalAlt'
 import { ProviderCloud } from '../../cd/clusters/create/types'
-import { SUPPORTED_CLOUDS } from '../../cd/providers/ProviderSettings'
+
+import { SUPPORTED_CLOUDS } from './ObjectStoreCloudSettings'
 
 export default function CreateObjectStoreModal({
   open,
