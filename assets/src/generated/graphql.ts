@@ -5823,7 +5823,7 @@ export type JobGateLogsQueryVariables = Exact<{
 }>;
 
 
-export type JobGateLogsQuery = { __typename?: 'RootQueryType', pipelineGate?: { __typename?: 'PipelineGate', job?: { __typename?: 'Job', logs?: Array<string | null> | null } | null } | null };
+export type JobGateLogsQuery = { __typename?: 'RootQueryType', pipelineGate?: { __typename?: 'PipelineGate', id: string, job?: { __typename?: 'Job', logs?: Array<string | null> | null } | null } | null };
 
 export type PipelineQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9815,6 +9815,7 @@ export type JobGateQueryResult = Apollo.QueryResult<JobGateQuery, JobGateQueryVa
 export const JobGateLogsDocument = gql`
     query JobGateLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
   pipelineGate(id: $id) {
+    id
     job {
       logs(container: $container, sinceSeconds: $sinceSeconds)
     }

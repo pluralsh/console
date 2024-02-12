@@ -409,7 +409,6 @@ export const PodsList = memo(
       [linkBasePath, reactTableOptionsProp, refetch]
     )
 
-    console.log('reactTableOptions', reactTableOptions)
     if (!pods || pods.length === 0) {
       return <>No pods available.</>
     }

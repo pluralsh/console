@@ -32,8 +32,6 @@ function LogHeader({
 }): ReactElement {
   const theme = useTheme()
 
-  console.log('LogHeader', loading)
-
   return (
     <div
       css={{
@@ -182,7 +180,9 @@ export function ContainerLogsTable({
         onRowClick={() => {}}
         columns={columns}
         data={logs}
-        emptyStateProps={{ message: 'No logs found to display' }}
+        emptyStateProps={{
+          message: loading ? 'Loading logs...' : 'No logs found to display',
+        }}
         css={{
           maxHeight: 'unset',
           height: '100%',

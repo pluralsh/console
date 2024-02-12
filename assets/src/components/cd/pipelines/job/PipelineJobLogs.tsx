@@ -1,8 +1,14 @@
-import { useMemo, useState } from 'react'
-import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  EmptyState,
+  FormField,
+  ListBoxItem,
+  Select,
+} from '@pluralsh/design-system'
 import { useJobGateLogsQuery } from 'generated/graphql'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import isEmpty from 'lodash/isEmpty'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -23,23 +29,26 @@ export default function PipelineJobLogs() {
   const theme = useTheme()
   const id = useParams().jobId!
   const pods = useJobPods()
-  const containers =
-    useMemo(
-      () =>
-        pods?.flatMap(
-          (p) =>
-            p?.spec?.containers?.flatMap?.((c) => ({
-              id: `${p.metadata.name}++${p.metadata.namespace}++${c?.name}`,
-              ...c,
-            })) ?? []
-        ),
-      [pods]
-    ) || []
+  const containers = useMemo(
+    () =>
+      pods?.flatMap(
+        (p) =>
+          p?.spec?.containers?.map?.((c) => c?.name)?.filter(isNonNullable) ??
+          []
+      ) ?? [],
+    [pods]
+  )
 
   const [sinceSeconds, setSinceSeconds] = useState(SinceSecondsOptions.HalfHour)
-  const [selectedContainer, setSelectedContainer] = useState<string>(
-    containers?.[0]?.name || ''
+  const [containerName, setContainerName] = useState<string>(
+    containers?.[0] || ''
   )
+
+  useEffect(() => {
+    if (!containers?.includes(containerName)) {
+      setContainerName(containers?.[0] || '')
+    }
+  }, [containerName, containers])
 
   const {
     data: currentData,
@@ -48,7 +57,11 @@ export default function PipelineJobLogs() {
     loading,
     refetch,
   } = useJobGateLogsQuery({
-    variables: { id, container: containers?.[0]?.name || '', sinceSeconds },
+    variables: {
+      id,
+      container: containerName || containers?.[0] || '',
+      sinceSeconds,
+    },
     notifyOnNetworkStatusChange: true,
   })
   const data = currentData || previousData
@@ -60,6 +73,9 @@ export default function PipelineJobLogs() {
 
   if (error) {
     return <GqlError error={error} />
+  }
+  if (isEmpty(containers)) {
+    return <EmptyState message="No containers to view logs from" />
   }
 
   return (
@@ -84,14 +100,18 @@ export default function PipelineJobLogs() {
         >
           <FormField label="Container">
             <Select
-              selectedKey={selectedContainer}
-              onSelectionChange={(key) => setSelectedContainer(key as string)}
+              label={
+                isEmpty(containers) ? 'No containers' : 'Select a container'
+              }
+              isDisabled={isEmpty(containers)}
+              selectedKey={containerName}
+              onSelectionChange={(key) => setContainerName(key as string)}
             >
               {containers?.map((c) => (
                 <ListBoxItem
-                  key={c.name || ''}
-                  label={c.name || ''}
-                  textValue={c.name || ''}
+                  key={c}
+                  label={c}
+                  textValue={c}
                 />
               ))}
             </Select>
@@ -118,7 +138,7 @@ export default function PipelineJobLogs() {
           logs={logs || []}
           loading={loading}
           refetch={refetch}
-          container={selectedContainer}
+          container={containerName}
         />
       </div>
     </ScrollablePage>
