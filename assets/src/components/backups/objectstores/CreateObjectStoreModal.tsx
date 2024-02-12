@@ -1,4 +1,10 @@
+import { useState } from 'react'
+
+import { ListBoxItem, Select } from '@pluralsh/design-system'
+
 import ModalAlt from '../../cd/ModalAlt'
+import { ProviderCloud } from '../../cd/clusters/create/types'
+import { SUPPORTED_CLOUDS } from '../../cd/providers/ProviderSettings'
 
 export default function CreateObjectStoreModal({
   open,
@@ -9,6 +15,10 @@ export default function CreateObjectStoreModal({
   onClose: Nullable<() => void>
   refetch: () => void
 }) {
+  const [selectedCloud, setSelectedCloud] = useState<ProviderCloud>(
+    ProviderCloud.AWS
+  )
+
   return (
     <ModalAlt
       header="Add object store"
@@ -19,6 +29,21 @@ export default function CreateObjectStoreModal({
       onClose={() => {
         onClose?.()
       }}
-    />
+    >
+      <Select
+        selectedKey={selectedCloud}
+        // TODO
+        // @ts-ignore
+        onSelectionChange={setSelectedCloud}
+      >
+        {SUPPORTED_CLOUDS.map((t) => (
+          <ListBoxItem
+            key={t}
+            label={t}
+            textValue={t}
+          />
+        ))}
+      </Select>
+    </ModalAlt>
   )
 }
