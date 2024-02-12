@@ -101,7 +101,17 @@ export function ComponentIcon({
   kind,
   size,
 }: {
-  kind: string | undefined
+  kind:
+    | 'service'
+    | 'deployment'
+    | 'statefulset'
+    | 'ingress'
+    | 'cronjob'
+    | 'job'
+    | 'certificate'
+    // `& {}` is hack to still show autocomplete for above options
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    | (string & {})
   size?: number | undefined
 }) {
   switch (kind?.toLowerCase()) {

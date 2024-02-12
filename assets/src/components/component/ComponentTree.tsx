@@ -2,63 +2,42 @@ import { EmptyState } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
-import {
-  ComponentTreeFragment,
-  MetadataFragment,
-  useComponentTreeQuery,
-} from 'generated/graphql'
+import { ComponentTreeFragment, useComponentTreeQuery } from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 
-import { ConditionalKeys } from 'type-fest'
-
 import { isNonNullable } from 'utils/isNonNullable'
 
+import { ComponentTreeFlow } from 'components/cd/pipelines/ComponentTreeFlow'
+
+import { ReactFlowProvider } from 'reactflow'
+
 import { ComponentDetailsContext } from './ComponentDetails'
-
-type HasMetadata = { metadata?: MetadataFragment }
-type ComponentTypeKey = ConditionalKeys<
-  ComponentTreeFragment,
-  Nullable<Nullable<HasMetadata>[]>
->
-
-const cTypes = [
-  'certificates',
-  'configmaps',
-  'cronjobs',
-  'daemonsets',
-  'deployments',
-  'ingresses',
-  'secrets',
-  'services',
-  'statefulsets',
-] as const satisfies ComponentTypeKey[]
+import {
+  C_TYPES,
+  HasMetadata,
+  getTreeNodesAndEdges,
+} from './tree/getTreeNodesAndEdges'
 
 export default function ComponentTree() {
   const ctx = useOutletContext<ComponentDetailsContext>()
   const componentId = ctx?.component.id
 
-  console.log('ctx', ctx)
   const queryRes = useComponentTreeQuery({ variables: { id: componentId } })
   const tree = queryRes.data?.componentTree
 
   console.log('queryRes', queryRes)
 
-  const edges = tree?.edges || []
-  const metadatas = useMemo(
-    () =>
-      cTypes.map(
-        (cType) =>
-          tree?.[cType]?.filter(isNonNullable).map((c: HasMetadata) => ({
-            type: cType,
-            ...c,
-          }))
-      ),
-    [tree]
-  )
+  const flowData = useMemo(() => {
+    const metadatas = flattenMetadata(tree)
 
-  console.log('metadatas', metadatas)
-  console.log('edges', edges)
+    return getTreeNodesAndEdges({
+      edges: tree?.edges?.filter?.(isNonNullable) || [],
+      metadatas: metadatas || [],
+    })
+  }, [tree])
+
+  console.log('flow', flowData)
 
   if (queryRes.error) {
     return <GqlError error={queryRes.error} />
@@ -67,5 +46,37 @@ export default function ComponentTree() {
     return <EmptyState message="No data available." />
   }
 
-  return <div>hi</div>
+  // return (
+  //   <div>
+  //     edges:
+  //     {queryRes.data.componentTree.edges?.map((e) => (
+  //       <div>
+  //         {e?.from}--{e?.to}
+  //       </div>
+  //     ))}
+  //   </div>
+  // )
+
+  return (
+    <ReactFlowProvider>
+      <ComponentTreeFlow
+        nodes={flowData.nodes}
+        edges={flowData.edges}
+      />
+    </ReactFlowProvider>
+  )
 }
+
+function flattenMetadata(tree: Nullable<ComponentTreeFragment>) {
+  if (!tree) return []
+
+  return C_TYPES.flatMap(
+    (cType) =>
+      tree?.[cType]?.filter(isNonNullable).map((c: HasMetadata) => ({
+        kind: cType.slice(0, -1),
+        ...c,
+      })) || []
+  )
+}
+
+export type TreeNodeMeta = ReturnType<typeof flattenMetadata>[number]
