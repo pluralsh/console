@@ -26,13 +26,13 @@ Kube.Parser.parse(path: "crds/plural-service.yaml", module: Kube.ServiceDeployme
 
 Kube.Parser.parse(path: "crds/wireguardserver.yaml", module: Kube.WireguardServer)
 Kube.Parser.parse(path: "crds/wireguardpeer.yaml", module: Kube.WireguardPeer, ovveride: [
-  {"configRef", Kazan.Apis.Core.V1.SecretKeySelector}
+  # {"configRef", Kazan.Apis.Core.V1.SecretKeySelector}
 ])
 
 # overridden crds
 
 Kube.Parser.parse(path: "crds/vpa.yaml", module: Kube.VerticalPodAutoscaler, override: [
-  {"targetRef", Kazan.Apis.Autoscaling.V1.CrossVersionObjectReference}
+  # {"targetRef", Kazan.Apis.Autoscaling.V1.CrossVersionObjectReference}
 ])
 
 ## this cannot be read from a CRD as its actually piped through a dedicated API service

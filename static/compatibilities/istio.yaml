@@ -34,3 +34,45 @@ versions:
   kube: ['1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
+- version: 1.12
+  kube: ['1.22', '1.21', '1.20', '1.19']
+  incompatibilities:
+    - name: kubernetes
+      version: '1.18'
+    - name: kubernetes
+      version: '1.17'
+    - name: kubernetes
+      version: '1.16'
+- version: 1.11
+  kube: ['1.22', '1.21', '1.20', '1.19', '1.18']
+  incompatibilities:
+    - name: kubernetes
+      version: '1.17'
+    - name: kubernetes
+      version: '1.16'
+- version: 1.10
+  kube: ['1.21', '1.20', '1.19', '1.18']
+  incompatibilities:
+    - name: kubernetes
+      version: '1.22'
+    - name: kubernetes
+      version: '1.17'
+    - name: kubernetes
+      version: '1.16'
+- version: 1.9
+  kube: ['1.20', '1.19', '1.18', '1.17']
+  incompatibilities:
+    - name: kubernetes
+      version: '1.16'
+    - name: kubernetes
+      version: '1.15'
+- version: 1.8
+  kube: ['1.19', '1.18', '1.17', '1.16']
+  incompatibilities:
+    - name: kubernetes
+      version: '1.15'
+- version: 1.7
+  kube: ['1.18', '1.17', '1.16']
+  incompatibilities:
+    - name: kubernetes
+      version: '1.15'

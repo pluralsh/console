@@ -700,6 +700,18 @@ export type ClusterBackup = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+export type ClusterBackupConnection = {
+  __typename?: 'ClusterBackupConnection';
+  edges?: Maybe<Array<Maybe<ClusterBackupEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterBackupEdge = {
+  __typename?: 'ClusterBackupEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterBackup>;
+};
+
 /** a single condition struct for various phases of the cluster provisionining process */
 export type ClusterCondition = {
   __typename?: 'ClusterCondition';
@@ -817,6 +829,18 @@ export type ClusterRestore = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   status: RestoreStatus;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ClusterRestoreConnection = {
+  __typename?: 'ClusterRestoreConnection';
+  edges?: Maybe<Array<Maybe<ClusterRestoreEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterRestoreEdge = {
+  __typename?: 'ClusterRestoreEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterRestore>;
 };
 
 export type ClusterServiceAttributes = {
@@ -939,6 +963,7 @@ export type ComponentTree = {
   deployments?: Maybe<Array<Maybe<Deployment>>>;
   edges?: Maybe<Array<Maybe<ResourceEdge>>>;
   ingresses?: Maybe<Array<Maybe<Ingress>>>;
+  replicasets?: Maybe<Array<Maybe<ReplicaSet>>>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
   services?: Maybe<Array<Maybe<Service>>>;
   statefulsets?: Maybe<Array<Maybe<StatefulSet>>>;
@@ -2877,6 +2902,29 @@ export type RegexReplacementAttributes = {
   replacement: Scalars['String']['input'];
 };
 
+export type ReplicaSet = {
+  __typename?: 'ReplicaSet';
+  metadata: Metadata;
+  pods?: Maybe<Array<Maybe<Pod>>>;
+  raw: Scalars['String']['output'];
+  spec: ReplicaSetSpec;
+  status: ReplicaSetStatus;
+};
+
+export type ReplicaSetSpec = {
+  __typename?: 'ReplicaSetSpec';
+  replicas?: Maybe<Scalars['Int']['output']>;
+};
+
+export type ReplicaSetStatus = {
+  __typename?: 'ReplicaSetStatus';
+  availableReplicas?: Maybe<Scalars['Int']['output']>;
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
+  fullyLabeledReplicas?: Maybe<Scalars['Int']['output']>;
+  readyReplicas?: Maybe<Scalars['Int']['output']>;
+  replicas?: Maybe<Scalars['Int']['output']>;
+};
+
 export type Repository = {
   __typename?: 'Repository';
   configuration?: Maybe<Configuration>;
@@ -3708,6 +3756,7 @@ export type RootQueryType = {
   /** list all addons currently resident in the artifacts repo */
   clusterAddOns?: Maybe<Array<Maybe<ClusterAddOn>>>;
   clusterBackup?: Maybe<ClusterBackup>;
+  clusterBackups?: Maybe<ClusterBackupConnection>;
   clusterGate?: Maybe<PipelineGate>;
   clusterGates?: Maybe<Array<Maybe<PipelineGate>>>;
   clusterInfo?: Maybe<ClusterInfo>;
@@ -3716,6 +3765,7 @@ export type RootQueryType = {
   /** a relay connection of all providers visible to the current user */
   clusterProviders?: Maybe<ClusterProviderConnection>;
   clusterRestore?: Maybe<ClusterRestore>;
+  clusterRestores?: Maybe<ClusterRestoreConnection>;
   /** the services deployed in the current cluster, to be polled by the deploy operator */
   clusterServices?: Maybe<Array<Maybe<ServiceDeployment>>>;
   /** gets summary information for all healthy/unhealthy clusters in your fleet */
@@ -3901,6 +3951,15 @@ export type RootQueryTypeClusterBackupArgs = {
 };
 
 
+export type RootQueryTypeClusterBackupsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  clusterId: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypeClusterGateArgs = {
   id: Scalars['ID']['input'];
 };
@@ -3923,6 +3982,15 @@ export type RootQueryTypeClusterProvidersArgs = {
 
 export type RootQueryTypeClusterRestoreArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeClusterRestoresArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  clusterId: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
