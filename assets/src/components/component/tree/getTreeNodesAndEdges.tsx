@@ -33,7 +33,7 @@ function flattenMetadata(
 ): {
   kind: string
   metadata?: MetadataFragment
-  raw?: string
+  raw?: string | object
 }[] {
   if (!tree) return []
 
@@ -65,24 +65,27 @@ export function getTreeNodesAndEdges(
       }
     }) || []
 
-  const nodes = flattenMetadata(tree, rootKind).map(({ kind, metadata }) => {
-    // Gate types that get their own node
-    const nodeId = metadata?.uid
+  const nodes = flattenMetadata(tree, rootKind).map(
+    ({ kind, metadata, raw }) => {
+      // Gate types that get their own node
+      const nodeId = metadata?.uid
 
-    if (!nodeId) {
-      return []
-    }
+      if (!nodeId) {
+        return []
+      }
 
-    return {
-      id: nodeId,
-      type: 'component',
-      position: { x: 0, y: 0 },
-      data: {
-        kind,
-        metadata,
-      },
+      return {
+        id: nodeId,
+        type: 'component',
+        position: { x: 0, y: 0 },
+        data: {
+          kind,
+          metadata,
+          raw,
+        },
+      }
     }
-  })
+  )
 
   return {
     nodes,

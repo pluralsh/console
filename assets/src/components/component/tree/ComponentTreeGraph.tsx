@@ -53,10 +53,6 @@ export function ComponentTreeGraph({
   const prevNodesProp = usePrevious(nodesProp)
   const prevEdgesProp = usePrevious(edgesProp)
 
-  console.log('nodes', nodes)
-  console.log('edges', edges)
-  console.log('needsLayout', needsLayout)
-
   const layoutNodes = useCallback(
     (direction: DagreDirection = 'LR') => {
       // if (isEmpty(nodes)) return
@@ -95,7 +91,6 @@ export function ComponentTreeGraph({
   useEffect(() => {
     // Don't run for initial values of nodes and edges, only for changes
     if (prevNodesProp !== nodesProp || prevEdgesProp !== edgesProp) {
-      console.log('setting nodes and edges')
       setNodes(nodesProp)
       setEdges(edgesProp)
       setNeedsLayout(true)

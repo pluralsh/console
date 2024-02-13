@@ -1,4 +1,4 @@
-import { Card, Code, Modal, Tooltip } from '@pluralsh/design-system'
+import { Card, Modal, Tooltip } from '@pluralsh/design-system'
 import { PipelineStageEdgeFragment } from 'generated/graphql'
 import {
   ComponentProps,
@@ -17,6 +17,8 @@ import { ComponentIcon } from 'components/apps/app/components/misc'
 import { TRUNCATE } from 'components/utils/truncate'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
+import { ComponentRawCode } from '../ComponentRaw'
+
 export type CardStatus = 'ok' | 'closed' | 'pending'
 
 const HANDLE_SIZE = 10
@@ -32,7 +34,7 @@ const ComponentTreeNodeSC = styled(Card)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     overflow: 'hidden',
-    padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
+    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
     gap: theme.spacing.medium,
     width: 240,
   },
@@ -164,27 +166,18 @@ function DetailsModal({
   data,
   ...props
 }: ComponentProps<typeof Modal> & { data: TreeNodeMeta }) {
-  let raw: string
-
-  try {
-    raw = JSON.stringify(JSON.parse(data?.raw || ''), null, 2)
-  } catch {
-    raw = data.raw || ''
-  }
+  const theme = useTheme()
 
   return (
     <Modal
-      header={data?.metadata?.name || 'Details'}
-      size="large"
+      header={`${data?.metadata?.name} - Raw`}
       portal
+      scrollable={false}
+      width="auto"
+      maxWidth={`min(1000px, 100vw - ${theme.spacing.xlarge * 2}px)`}
       {...props}
     >
-      <Code
-        title="Config"
-        language="json"
-      >
-        {raw}
-      </Code>
+      <ComponentRawCode raw={data.raw} />
     </Modal>
   )
 }
