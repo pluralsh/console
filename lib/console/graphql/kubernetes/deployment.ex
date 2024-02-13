@@ -17,6 +17,19 @@ defmodule Console.GraphQl.Kubernetes.Deployment do
     field :events, list_of(:event), resolve: fn model, _, _ -> Kubernetes.list_events(model) end
   end
 
+  object :replica_set do
+    field :metadata, non_null(:metadata)
+    field :spec, non_null(:replica_set_spec)
+    field :status, non_null(:replica_set_status)
+
+    field :pods, list_of(:pod), resolve: fn
+      %{metadata: metadata, spec: %{selector: selector}}, _, _ ->
+        Kubernetes.list_pods(metadata, selector)
+    end
+
+    field :raw, non_null(:string), resolve: fn model, _, _ -> encode(model) end
+  end
+
   object :deployment_status do
     field :available_replicas,   :integer
     field :replicas,             :integer
@@ -29,6 +42,10 @@ defmodule Console.GraphQl.Kubernetes.Deployment do
     field :strategy, :deployment_strategy
   end
 
+  object :replica_set_spec do
+    field :replicas, :integer
+  end
+
   object :deployment_strategy do
     field :type,           :string
     field :rolling_update, :rolling_update
@@ -37,5 +54,13 @@ defmodule Console.GraphQl.Kubernetes.Deployment do
   object :rolling_update do
     field :max_surge,       :integer
     field :max_unavailable, :integer
+  end
+
+  object :replica_set_status do
+    field :available_replicas,     :integer
+    field :conditions,             list_of(:status_condition)
+    field :replicas,               :integer
+    field :ready_replicas,         :integer
+    field :fully_labeled_replicas, :integer
   end
 end

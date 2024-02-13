@@ -12,6 +12,17 @@ defmodule Console.Schema.ClusterRestore do
     timestamps()
   end
 
+  def for_cluster(query \\ __MODULE__, cid) do
+    from(r in query,
+      join: b in assoc(r, :backup),
+      where: b.cluster_id == ^cid
+    )
+  end
+
+  def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
+    from(r in query, order_by: ^order)
+  end
+
   @valid ~w(status backup_id)a
 
   def changeset(model, attrs \\ %{}) do
