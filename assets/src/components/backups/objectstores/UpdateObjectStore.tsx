@@ -3,7 +3,6 @@ import { IconFrame, PencilIcon } from '@pluralsh/design-system'
 
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
 import { useBackupsEnabled } from '../../cd/utils/useBackupsEnabled'
-
 import { ObjectStore } from '../../../generated/graphql'
 
 import CreateObjectStoreModal from './CreateObjectStoreModal'
@@ -34,6 +33,7 @@ export default function UpdateObjectStore({
           open={isOpen}
           onClose={() => setIsOpen(false)}
           refetch={refetch}
+          objectStore={objectStore}
         />
       </ModalMountTransition>
     </>

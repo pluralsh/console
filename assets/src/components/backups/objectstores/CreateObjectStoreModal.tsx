@@ -1,4 +1,11 @@
-import { FormEvent, ReactNode, useCallback, useReducer, useState } from 'react'
+import {
+  FormEvent,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useReducer,
+  useState,
+} from 'react'
 import {
   Button,
   FormField,
@@ -13,6 +20,7 @@ import { useTheme } from 'styled-components'
 
 import ModalAlt from '../../cd/ModalAlt'
 import {
+  ObjectStore,
   ObjectStoreAttributes,
   useCreateObjectStoreMutation,
 } from '../../../generated/graphql'
@@ -27,6 +35,8 @@ import {
   ObjectStoreCloud,
   ObjectStoreCloudIcon,
   SUPPORTED_CLOUDS,
+  getObjectStoreCloud,
+  getObjectStoreCloudAttributes,
   objectStoreCloudToDisplayName,
 } from './utils'
 
@@ -45,16 +55,32 @@ export default function CreateObjectStoreModal({
   open,
   onClose,
   refetch,
+  objectStore, // Set to use edit mode.
 }: {
   open: boolean
   onClose: () => void
   refetch: Nullable<() => void>
+  objectStore?: ObjectStore
 }) {
   const theme = useTheme()
-  const [name, setName] = useState('')
-  const [cloud, setCloud] = useState<ObjectStoreCloud>(ObjectStoreCloud.S3)
-  const [cloudSettings, updateCloudSettings] = useReducer(updateSettings, {})
+
+  const { initialName, initialCloud, initialCloudSettings } = useMemo(() => {
+    const initialName = objectStore?.name ?? ''
+    const initialCloud = getObjectStoreCloud(objectStore) ?? ObjectStoreCloud.S3
+    const initialCloudSettings = getObjectStoreCloudAttributes(objectStore)
+
+    return { initialName, initialCloud, initialCloudSettings }
+  }, [objectStore])
+
+  const [name, setName] = useState<string>(initialName)
+  const [cloud, setCloud] = useState<ObjectStoreCloud>(initialCloud)
+  const [cloudSettings, updateCloudSettings] = useReducer(
+    updateSettings,
+    initialCloudSettings
+  )
+
   const closeModal = useCallback(() => onClose(), [onClose])
+
   const [mutation, { loading, error }] = useCreateObjectStoreMutation({
     variables: { attributes: { name, [cloud]: cloudSettings[cloud] } },
     onCompleted: () => {

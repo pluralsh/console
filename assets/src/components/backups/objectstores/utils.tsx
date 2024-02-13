@@ -3,7 +3,7 @@ import { styledTheme } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { getProviderIconUrl } from '../../utils/Provider'
-import { ObjectStore } from '../../../generated/graphql'
+import { ObjectStore, ObjectStoreAttributes } from '../../../generated/graphql'
 
 export enum ObjectStoreCloud {
   S3 = 's3',
@@ -43,6 +43,45 @@ export function getObjectStoreCloud(
   }
 
   return null
+}
+
+export function getObjectStoreCloudAttributes(
+  os: ObjectStore | null | undefined
+): Omit<ObjectStoreAttributes, 'name'> {
+  if (os?.azure) {
+    return {
+      azure: {
+        clientId: os.azure.clientId,
+        clientSecret: '',
+        subscriptionId: os.azure.subscriptionId,
+        tenantId: os.azure.tenantId,
+        storageAccount: os.azure.storageAccount,
+        container: os.azure.container,
+      },
+    }
+  }
+  if (os?.s3) {
+    return {
+      s3: {
+        accessKeyId: os.s3.accessKeyId,
+        secretAccessKey: '',
+        endpoint: os.s3.endpoint,
+        region: os.s3.region,
+        bucket: os.s3.bucket,
+      },
+    }
+  }
+  if (os?.gcs) {
+    return {
+      gcs: {
+        applicationCredentials: '',
+        region: os.gcs.region,
+        bucket: os.gcs.bucket,
+      },
+    }
+  }
+
+  return {}
 }
 
 export function getObjectStoreIconUrl(
