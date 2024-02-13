@@ -964,6 +964,7 @@ export type ComponentTree = {
   edges?: Maybe<Array<Maybe<ResourceEdge>>>;
   ingresses?: Maybe<Array<Maybe<Ingress>>>;
   replicasets?: Maybe<Array<Maybe<ReplicaSet>>>;
+  root?: Maybe<KubernetesUnstructured>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
   services?: Maybe<Array<Maybe<Service>>>;
   statefulsets?: Maybe<Array<Maybe<StatefulSet>>>;
@@ -1267,6 +1268,28 @@ export enum Delta {
   Delete = 'DELETE',
   Update = 'UPDATE'
 }
+
+/** A representation to a service which configures renovate for a scm connection */
+export type DependencyManagementService = {
+  __typename?: 'DependencyManagementService';
+  connection?: Maybe<ScmConnection>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  service?: Maybe<ServiceDeployment>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type DependencyManagementServiceConnection = {
+  __typename?: 'DependencyManagementServiceConnection';
+  edges?: Maybe<Array<Maybe<DependencyManagementServiceEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type DependencyManagementServiceEdge = {
+  __typename?: 'DependencyManagementServiceEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<DependencyManagementService>;
+};
 
 export type Deployment = {
   __typename?: 'Deployment';
@@ -3161,6 +3184,7 @@ export type RootMutationType = {
   /** marks a service as being able to proceed to the next stage of a canary rollout */
   proceed?: Maybe<ServiceDeployment>;
   readNotifications?: Maybe<User>;
+  reconfigureRenovate?: Maybe<ServiceDeployment>;
   /** registers a list of runtime services discovered for the current cluster */
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
   restartBuild?: Maybe<Build>;
@@ -3579,6 +3603,12 @@ export type RootMutationTypeProceedArgs = {
 };
 
 
+export type RootMutationTypeReconfigureRenovateArgs = {
+  repos?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  serviceId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeRegisterRuntimeServicesArgs = {
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   services?: InputMaybe<Array<InputMaybe<RuntimeServiceAttributes>>>;
@@ -3809,6 +3839,7 @@ export type RootQueryType = {
   daemonSet?: Maybe<DaemonSet>;
   dashboard?: Maybe<Dashboard>;
   dashboards?: Maybe<Array<Maybe<Dashboard>>>;
+  dependencyManagementServices?: Maybe<DependencyManagementServiceConnection>;
   deployment?: Maybe<Deployment>;
   deploymentSettings?: Maybe<DeploymentSettings>;
   externalToken?: Maybe<Scalars['String']['output']>;
@@ -4085,6 +4116,14 @@ export type RootQueryTypeDashboardArgs = {
 
 export type RootQueryTypeDashboardsArgs = {
   repo: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeDependencyManagementServicesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

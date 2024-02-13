@@ -13,7 +13,8 @@ defmodule Console.Deployments.Git do
     ScmConnection,
     ScmWebhook,
     PrAutomation,
-    PullRequest
+    PullRequest,
+    DependencyManagementService
   }
 
   @cache Console.conf(:cache_adapter)
@@ -322,8 +323,16 @@ defmodule Console.Deployments.Git do
         ] ++ hosted_url(scm),
       }, cluster.id, user)
     end)
+    |> add_operation(:dep_mgmt, fn %{scm: scm, svc: svc} ->
+      %DependencyManagementService{connection_id: scm.id, service_id: svc.id}
+      |> DependencyManagementService.changeset()
+      |> Repo.insert()
+    end)
     |> execute(extract: :svc)
   end
+
+  def reconfigure_renovate(%{repositories: repos}, svc_id, %User{} = user),
+    do: Services.merge_service([%{name: "repositories", value: Enum.join(repos, ",")}], svc_id, user)
 
   defp hosted_url(%ScmConnection{base_url: url}) when is_binary(url),
     do: [%{name: "endpoint", value: url}]
