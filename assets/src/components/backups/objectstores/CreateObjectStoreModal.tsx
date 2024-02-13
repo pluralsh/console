@@ -1,28 +1,36 @@
-import { ReactNode, useReducer, useState } from 'react'
-import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
+import { FormEvent, ReactNode, useCallback, useReducer, useState } from 'react'
+import {
+  Button,
+  FormField,
+  Input,
+  ListBoxItem,
+  Select,
+} from '@pluralsh/design-system'
 import { produce } from 'immer'
 import { PartialDeep } from 'type-fest'
 import merge from 'lodash/merge'
-
 import { useTheme } from 'styled-components'
 
 import ModalAlt from '../../cd/ModalAlt'
-import { ProviderCloud } from '../../cd/clusters/create/types'
-import { ObjectStoreAttributes } from '../../../generated/graphql'
+import {
+  ObjectStoreAttributes,
+  useCreateObjectStoreMutation,
+} from '../../../generated/graphql'
 
 import { GqlError } from '../../utils/Alert'
 
 import {
   AzureSettings,
   GcsSettings,
+  ObjectStoreCloud,
   S3Settings,
   SUPPORTED_CLOUDS,
 } from './ObjectStoreCloudSettings'
 
 const updateSettings = produce(
   (
-    original: ObjectStoreAttributes,
-    update: PartialDeep<ObjectStoreAttributes>
+    original: Omit<ObjectStoreAttributes, 'name'>,
+    update: PartialDeep<Omit<ObjectStoreAttributes, 'name'>>
   ) => {
     merge(original, update)
 
@@ -36,54 +44,100 @@ export default function CreateObjectStoreModal({
   refetch,
 }: {
   open: boolean
-  onClose: Nullable<() => void>
+  onClose: () => void
   refetch: () => void
 }) {
   const theme = useTheme()
-  const error = null
-
-  const [selectedCloud, setSelectedCloud] = useState<ProviderCloud>(
-    ProviderCloud.AWS
-  )
-  const [providerSettings, updateProviderSettings] = useReducer(
-    updateSettings,
-    { name: '' }
-  )
+  const [name, setName] = useState('')
+  const [cloud, setCloud] = useState<ObjectStoreCloud>(ObjectStoreCloud.S3)
+  const [cloudSettings, updateCloudSettings] = useReducer(updateSettings, {})
+  const closeModal = useCallback(() => onClose(), [onClose])
+  const [mutation, { loading, error }] = useCreateObjectStoreMutation({
+    variables: { attributes: { name, [cloud]: cloudSettings[cloud] } },
+    onCompleted: () => {
+      refetch?.()
+      closeModal()
+    },
+  })
 
   let settings: ReactNode
 
-  switch (selectedCloud) {
-    case 'aws':
+  switch (cloud) {
+    case 's3':
       settings = (
         <S3Settings
-          settings={providerSettings.s3}
-          updateSettings={(settings) =>
-            updateProviderSettings({ s3: settings })
-          }
-        />
-      )
-      break
-    case 'gcp':
-      settings = (
-        <GcsSettings
-          settings={providerSettings.gcs}
-          updateSettings={(settings) =>
-            updateProviderSettings({ gcs: settings })
-          }
+          settings={cloudSettings.s3}
+          updateSettings={(settings) => updateCloudSettings({ s3: settings })}
         />
       )
       break
     case 'azure':
       settings = (
         <AzureSettings
-          settings={providerSettings.azure}
+          settings={cloudSettings.azure}
           updateSettings={(settings) =>
-            updateProviderSettings({ azure: settings })
+            updateCloudSettings({ azure: settings })
           }
         />
       )
       break
+    case 'gcs':
+      settings = (
+        <GcsSettings
+          settings={cloudSettings.gcs}
+          updateSettings={(settings) => updateCloudSettings({ gcs: settings })}
+        />
+      )
+      break
   }
+
+  let disabled = !name || !cloud
+
+  // TODO: Finish.
+  switch (cloud) {
+    case ObjectStoreCloud.S3:
+      disabled =
+        disabled ||
+        !(
+          cloudSettings.s3?.accessKeyId &&
+          cloudSettings.s3?.secretAccessKey &&
+          cloudSettings.s3?.region &&
+          cloudSettings.s3?.endpoint &&
+          cloudSettings.s3?.bucket
+        )
+      break
+    case ObjectStoreCloud.GCS:
+      disabled =
+        disabled ||
+        !(
+          cloudSettings.gcs?.applicationCredentials &&
+          cloudSettings.gcs?.region &&
+          cloudSettings.gcs?.bucket
+        )
+      break
+    case ObjectStoreCloud.Azure:
+      disabled =
+        disabled ||
+        !(
+          cloudSettings.azure?.clientId &&
+          cloudSettings.azure?.clientSecret &&
+          cloudSettings.azure?.tenantId &&
+          cloudSettings.azure?.subscriptionId &&
+          cloudSettings.azure?.storageAccount &&
+          cloudSettings.azure?.container
+        )
+      break
+  }
+
+  const onSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault()
+      if (!disabled && !loading) {
+        mutation()
+      }
+    },
+    [disabled, loading, mutation, onClose]
+  )
 
   return (
     <ModalAlt
@@ -92,9 +146,28 @@ export default function CreateObjectStoreModal({
       style={{ padding: 0, position: 'absolute' }}
       open={open}
       portal
-      onClose={() => {
-        onClose?.()
-      }}
+      onClose={closeModal}
+      asForm
+      formProps={{ onSubmit }}
+      actions={
+        <>
+          <Button
+            type="submit"
+            disabled={disabled}
+            loading={loading}
+            primary
+          >
+            Create
+          </Button>
+          <Button
+            type="button"
+            secondary
+            onClick={closeModal}
+          >
+            Cancel
+          </Button>
+        </>
+      }
     >
       <p
         css={{
@@ -106,10 +179,10 @@ export default function CreateObjectStoreModal({
       </p>
       <FormField label="Cloud provider">
         <Select
-          selectedKey={selectedCloud}
+          selectedKey={cloud}
           // TODO
           // @ts-ignore
-          onSelectionChange={setSelectedCloud}
+          onSelectionChange={setCloud}
         >
           {SUPPORTED_CLOUDS.map((t) => (
             <ListBoxItem
@@ -130,10 +203,8 @@ export default function CreateObjectStoreModal({
       >
         <FormField label="Name">
           <Input
-            value={providerSettings.name}
-            onChange={(e) => {
-              updateProviderSettings({ name: e.currentTarget.value })
-            }}
+            value={name}
+            onChange={(e) => setName(e.currentTarget.value)}
           />
         </FormField>
         {settings}

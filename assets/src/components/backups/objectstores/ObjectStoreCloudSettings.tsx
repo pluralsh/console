@@ -2,14 +2,19 @@ import { FormField, Input } from '@pluralsh/design-system'
 
 import { ObjectStoreAttributes } from '../../../generated/graphql'
 import { InputRevealer } from '../../cd/providers/InputRevealer'
-import { ProviderCloud } from '../../cd/clusters/create/types'
 import GcpCredentials from '../../cd/providers/GcpCredentials'
 
+export enum ObjectStoreCloud {
+  S3 = 's3',
+  GCS = 'gcs',
+  Azure = 'azure',
+}
+
 export const SUPPORTED_CLOUDS = [
-  ProviderCloud.AWS,
-  ProviderCloud.Azure,
-  ProviderCloud.GCP,
-] as const satisfies readonly ProviderCloud[]
+  ObjectStoreCloud.S3,
+  ObjectStoreCloud.Azure,
+  ObjectStoreCloud.GCS,
+] as const satisfies readonly ObjectStoreCloud[]
 
 export function S3Settings({
   settings,
