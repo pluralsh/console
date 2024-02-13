@@ -5,7 +5,7 @@ import { ModalMountTransition } from '../../utils/ModalMountTransition'
 import { useBackupsEnabled } from '../../cd/utils/useBackupsEnabled'
 import { ObjectStore } from '../../../generated/graphql'
 
-import CreateObjectStoreModal from './CreateObjectStoreModal'
+import UpsertObjectStoreModal from './UpsertObjectStoreModal'
 
 export default function UpdateObjectStore({
   objectStore,
@@ -29,7 +29,7 @@ export default function UpdateObjectStore({
         onClick={() => setIsOpen(true)}
       />
       <ModalMountTransition open={isOpen}>
-        <CreateObjectStoreModal
+        <UpsertObjectStoreModal
           open={isOpen}
           onClose={() => setIsOpen(false)}
           refetch={refetch}

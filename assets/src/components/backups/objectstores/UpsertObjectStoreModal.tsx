@@ -51,7 +51,7 @@ const updateSettings = produce(
   }
 )
 
-export default function CreateObjectStoreModal({
+export default function UpsertObjectStoreModal({
   open,
   onClose,
   refetch,
