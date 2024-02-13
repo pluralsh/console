@@ -49,8 +49,7 @@ export const columns = [
   columnHelper.accessor(({ node }) => node, {
     id: 'provider',
     header: 'Provider',
-    enableSorting: true,
-    enableGlobalFilter: true,
+    meta: { gridTemplate: `240px` },
     cell: ({ getValue }) => {
       const cloud = getObjectStoreCloud(getValue())
 
@@ -66,16 +65,12 @@ export const columns = [
       )
     },
   }),
-  columnHelper.accessor(({ node }) => node, {
+  columnHelper.accessor(({ node }) => node.name, {
     id: 'name',
     header: 'Storage name',
     enableSorting: true,
     enableGlobalFilter: true,
-    cell: ({ getValue }) => {
-      const objectStorage = getValue()
-
-      return objectStorage?.name
-    },
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor(({ node }) => node?.id, {
     id: 'actions',
