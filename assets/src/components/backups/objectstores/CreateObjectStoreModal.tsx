@@ -16,18 +16,19 @@ import {
   ObjectStoreAttributes,
   useCreateObjectStoreMutation,
 } from '../../../generated/graphql'
-
 import { GqlError } from '../../utils/Alert'
 
 import {
   AzureSettings,
   GcsSettings,
+  S3Settings,
+} from './ObjectStoreCloudSettings'
+import {
   ObjectStoreCloud,
   ObjectStoreCloudIcon,
-  S3Settings,
   SUPPORTED_CLOUDS,
   objectStoreCloudToDisplayName,
-} from './ObjectStoreCloudSettings'
+} from './utils'
 
 const updateSettings = produce(
   (
@@ -181,12 +182,7 @@ export default function CreateObjectStoreModal({
       <FormField label="Cloud provider">
         <Select
           selectedKey={cloud}
-          leftContent={
-            <ObjectStoreCloudIcon
-              cloud={cloud}
-              size={16}
-            />
-          }
+          leftContent={<ObjectStoreCloudIcon cloud={cloud} />}
           onSelectionChange={(key) => {
             setCloud(key as ObjectStoreCloud)
           }}

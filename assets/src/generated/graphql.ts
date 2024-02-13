@@ -8571,7 +8571,7 @@ export type DeleteScmConnectionMutationHookResult = ReturnType<typeof useDeleteS
 export type DeleteScmConnectionMutationResult = Apollo.MutationResult<DeleteScmConnectionMutation>;
 export type DeleteScmConnectionMutationOptions = Apollo.BaseMutationOptions<DeleteScmConnectionMutation, DeleteScmConnectionMutationVariables>;
 export const ObjectStoresDocument = gql`
-    query ObjectStores($after: String, $first: Int, $before: String, $last: Int) {
+    query ObjectStores($after: String, $first: Int = 100, $before: String, $last: Int) {
   objectStores(after: $after, first: $first, before: $before, last: $last) {
     pageInfo {
       ...PageInfo

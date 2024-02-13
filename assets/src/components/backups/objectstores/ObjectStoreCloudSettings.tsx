@@ -6,57 +6,6 @@ import { InputRevealer } from '../../cd/providers/InputRevealer'
 import GcpCredentials from '../../cd/providers/GcpCredentials'
 import { getProviderIconUrl } from '../../utils/Provider'
 
-export enum ObjectStoreCloud {
-  S3 = 's3',
-  GCS = 'gcs',
-  Azure = 'azure',
-}
-
-export const SUPPORTED_CLOUDS = [
-  ObjectStoreCloud.S3,
-  ObjectStoreCloud.Azure,
-  ObjectStoreCloud.GCS,
-] as const satisfies readonly ObjectStoreCloud[]
-
-export const objectStoreCloudToDisplayName = {
-  [ObjectStoreCloud.S3]: 'AWS',
-  [ObjectStoreCloud.Azure]: 'Azure',
-  [ObjectStoreCloud.GCS]: 'GCP',
-}
-
-const objectStoreCloudToProviderCloud = {
-  [ObjectStoreCloud.S3]: 'aws',
-  [ObjectStoreCloud.Azure]: 'azure',
-  [ObjectStoreCloud.GCS]: 'gcp',
-}
-
-export function getObjectStoreIconUrl(
-  cloud: ObjectStoreCloud,
-  mode: typeof styledTheme.mode
-) {
-  return getProviderIconUrl(objectStoreCloudToProviderCloud[cloud], mode)
-}
-
-export function ObjectStoreCloudIcon({
-  cloud,
-  size,
-}: {
-  cloud: ObjectStoreCloud
-  size?: number
-}) {
-  const theme = useTheme()
-
-  return (
-    <div css={{ display: 'flex', justifyContent: 'center', width: size }}>
-      <img
-        alt={cloud}
-        src={getObjectStoreIconUrl(cloud, theme.mode)}
-        width={size}
-      />
-    </div>
-  )
-}
-
 export function S3Settings({
   settings,
   updateSettings,

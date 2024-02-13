@@ -2,7 +2,6 @@ import { ComponentProps, useMemo, useState } from 'react'
 import {
   Breadcrumb,
   EmptyState,
-  GitHubLogoIcon,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -24,7 +23,14 @@ import { ObjectStore, useObjectStoresQuery } from '../../../generated/graphql'
 import { Edge } from '../../../utils/graphql'
 import { ColWithIcon } from '../../utils/table/ColWithIcon'
 
+import { GqlError } from '../../utils/Alert'
+
 import CreateObjectStore from './CreateObjectStore'
+import {
+  ObjectStoreCloudIcon,
+  getObjectStoreCloud,
+  objectStoreCloudToDisplayName,
+} from './utils'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -45,15 +51,16 @@ export const columns = [
     enableSorting: true,
     enableGlobalFilter: true,
     cell: ({ getValue }) => {
-      const objectStorage = getValue()
-      const provider = objectStorage?.id // TODO
+      const cloud = getObjectStoreCloud(getValue())
+
+      if (!cloud) return null
 
       return (
         <ColWithIcon
           truncateLeft
-          icon={<GitHubLogoIcon />}
+          icon={<ObjectStoreCloudIcon cloud={cloud} />}
         >
-          {provider}
+          {objectStoreCloudToDisplayName[cloud]}
         </ColWithIcon>
       )
     },
@@ -106,7 +113,10 @@ export default function ObjectStores() {
 
   if (error) {
     return (
-      <EmptyState message="Looks like you don't have any object storage connections yet." />
+      <GqlError
+        header="Something went wrong"
+        error={error}
+      />
     )
   }
 
@@ -136,7 +146,7 @@ export default function ObjectStores() {
           />
         </FullHeightTableWrap>
       ) : (
-        <EmptyState message="Looks like you don't have any providers yet." />
+        <EmptyState message="Looks like you don't have any object storage connections yet." />
       )}
     </div>
   )

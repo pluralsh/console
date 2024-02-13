@@ -40,7 +40,7 @@ fragment ClusterRestore on ClusterRestore {
   updatedAt
 }
 
-query ObjectStores($after: String, $first: Int, $before: String, $last: Int) {
+query ObjectStores($after: String, $first: Int = 100, $before: String, $last: Int) {
   objectStores(after: $after, first: $first, before: $before, last: $last) {
     pageInfo {
       ...PageInfo
