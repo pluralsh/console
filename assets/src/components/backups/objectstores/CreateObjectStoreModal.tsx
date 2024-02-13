@@ -145,7 +145,6 @@ export default function CreateObjectStoreModal({
     <ModalAlt
       header="Add object store"
       size="large"
-      style={{ padding: 0, position: 'absolute' }}
       open={open}
       portal
       onClose={closeModal}
