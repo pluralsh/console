@@ -266,6 +266,10 @@ type RootQueryType {
 
   clusterBackup(id: ID, clusterId: ID, namespace: String, name: String): ClusterBackup
 
+  clusterBackups(after: String, first: Int, before: String, last: Int, clusterId: ID!): ClusterBackupConnection
+
+  clusterRestores(after: String, first: Int, before: String, last: Int, clusterId: ID!): ClusterRestoreConnection
+
   objectStores(after: String, first: Int, before: String, last: Int): ObjectStoreConnection
 
   "the services deployed in the current cluster, to be polled by the deploy operator"
@@ -783,6 +787,16 @@ type AzureStore {
 type ObjectStoreConnection {
   pageInfo: PageInfo!
   edges: [ObjectStoreEdge]
+}
+
+type ClusterBackupConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterBackupEdge]
+}
+
+type ClusterRestoreConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterRestoreEdge]
 }
 
 enum GateState {
@@ -1602,6 +1616,7 @@ type ServiceContext {
 type ComponentTree {
   deployments: [Deployment]
   statefulsets: [StatefulSet]
+  replicasets: [ReplicaSet]
   daemonsets: [DaemonSet]
   services: [Service]
   ingresses: [Ingress]
@@ -3680,6 +3695,14 @@ type Deployment {
   events: [Event]
 }
 
+type ReplicaSet {
+  metadata: Metadata!
+  spec: ReplicaSetSpec!
+  status: ReplicaSetStatus!
+  pods: [Pod]
+  raw: String!
+}
+
 type DeploymentStatus {
   availableReplicas: Int
   replicas: Int
@@ -3692,6 +3715,10 @@ type DeploymentSpec {
   strategy: DeploymentStrategy
 }
 
+type ReplicaSetSpec {
+  replicas: Int
+}
+
 type DeploymentStrategy {
   type: String
   rollingUpdate: RollingUpdate
@@ -3700,6 +3727,14 @@ type DeploymentStrategy {
 type RollingUpdate {
   maxSurge: Int
   maxUnavailable: Int
+}
+
+type ReplicaSetStatus {
+  availableReplicas: Int
+  conditions: [StatusCondition]
+  replicas: Int
+  readyReplicas: Int
+  fullyLabeledReplicas: Int
 }
 
 type Pod {
@@ -4442,6 +4477,16 @@ type PipelineGateEdge {
 
 type PipelineEdge {
   node: Pipeline
+  cursor: String
+}
+
+type ClusterRestoreEdge {
+  node: ClusterRestore
+  cursor: String
+}
+
+type ClusterBackupEdge {
+  node: ClusterBackup
   cursor: String
 }
 

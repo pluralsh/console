@@ -1,10 +1,22 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Backup do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.Backups
-  alias Console.Schema.ObjectStore
+  alias Console.Schema.{ObjectStore, ClusterBackup, ClusterRestore}
 
   def list_object_stores(args, _) do
     ObjectStore.ordered()
+    |> paginate(args)
+  end
+
+  def list_cluster_backups(%{cluster_id: cid} = args, _) do
+    ClusterBackup.for_cluster(cid)
+    |> ClusterBackup.ordered()
+    |> paginate(args)
+  end
+
+  def list_cluster_restores(%{cluster_id: cid} = args, _) do
+    ClusterRestore.for_cluster(cid)
+    |> ClusterRestore.ordered()
     |> paginate(args)
   end
 

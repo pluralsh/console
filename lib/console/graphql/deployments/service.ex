@@ -324,6 +324,7 @@ defmodule Console.GraphQl.Deployments.Service do
   object :component_tree do
     field :deployments,  list_of(:deployment)
     field :statefulsets, list_of(:stateful_set)
+    field :replicasets,  list_of(:replica_set)
     field :daemonsets,   list_of(:daemon_set)
     field :services,     list_of(:service)
     field :ingresses,    list_of(:ingress)

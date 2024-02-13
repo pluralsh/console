@@ -14,12 +14,13 @@ defmodule Console.Deployments.Tree do
     @fields ~w(deployments statefulsets daemonsets services ingresses jobs cronjobs configmaps secrets certificates)a
     defstruct Enum.map(@fields, & {&1, []})
 
-    def kinds(), do: @fields
+    def fields(), do: @fields
 
     def queries() do
       %{
         deployments: &AppsV1.list_namespaced_deployment!/1,
         statefulsets: &AppsV1.list_namespaced_stateful_set!/1,
+        replicasets: &AppsV1.list_namespaced_replica_set!/1,
         daemonsets: &AppsV1.list_namespaced_daemon_set!/1,
         services: &CoreV1.list_namespaced_service!/1,
         ingresss: &NetworkingV1.list_namespaced_ingress!/1,
@@ -58,8 +59,8 @@ defmodule Console.Deployments.Tree do
   def tree(_), do: {:error, "cannot generate trees for cluster-scoped resources"}
 
   defp recurse(resources, uid) do
-    level = Results.fields() |> Enum.into(%{}, fn name ->
-      subset = Enum.filter(resources[name], fn
+    level = Enum.into(Results.fields(), %{}, fn name ->
+      subset = Enum.filter(resources[name] || [], fn
         %{metadata: %MetaV1.ObjectMeta{owner_references: [_ | _] = refs}} ->
           Enum.any?(refs, & &1.uid == uid)
         _ -> false
