@@ -99,8 +99,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def create_webhook_for_connection(%{owner: owner, connection_id: conn_id}, %{context: %{current_user: user}}),
     do: Git.create_webhook_for_connection(owner, conn_id, user)
 
-  def setup_renovate(%{connection_id: id, repos: repos}, %{context: %{current_user: user}}),
-    do: Git.setup_renovate(id, repos, user)
+  def setup_renovate(%{connection_id: id, repos: repos} = args, %{context: %{current_user: user}}),
+    do: Git.setup_renovate(args, id, repos, user)
 
   defp pr_filters(query, args) do
     Enum.reduce(args, query, fn

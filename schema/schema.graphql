@@ -409,7 +409,17 @@ type RootMutationType {
   deletePrAutomation(id: ID!): PrAutomation
 
   "creates the service to enable self-hosted renovate in one pass"
-  setupRenovate(connectionId: ID!, repos: [String]): ServiceDeployment
+  setupRenovate(
+    connectionId: ID!
+
+    repos: [String]
+
+    "the name of the owning service"
+    name: String
+
+    "the namespace of the owning service"
+    namespace: String
+  ): ServiceDeployment
 
   createPullRequest(
     "the id of the PR automation instance to use"
