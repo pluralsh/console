@@ -65,7 +65,7 @@ export const columns = [
       )
     },
   }),
-  columnHelper.accessor(({ node }) => node.name, {
+  columnHelper.accessor(({ node }) => node?.name, {
     id: 'name',
     header: 'Storage name',
     enableSorting: true,
