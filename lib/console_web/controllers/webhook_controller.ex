@@ -2,12 +2,26 @@ defmodule ConsoleWeb.WebhookController do
   use ConsoleWeb, :controller
   alias Alertmanager.Alert
   alias Console.Services.{Builds, Users, Alertmanager}
+  alias Console.Schema.{ScmWebhook}
+  alias Console.Deployments.Pr.Dispatcher
+  alias Console.Deployments.Git
+
+  require Logger
 
   plug ConsoleWeb.Verifier when action == :webhook
-  plug ConsoleWeb.PiazzaVerifier when action == :piazza
 
-  def scm(conn, _) do
-    json(conn, %{ok: true})
+  def scm(conn, %{"id" => id}) do
+    with %ScmWebhook{} = hook <- Git.get_scm_webhook(id),
+         :ok <- verify(conn, hook),
+         {:ok, url, params} <- Dispatcher.pr(hook, conn.body_params),
+         {:ok, _} <- Git.update_pull_request(params, url) do
+      json(conn, %{ignored: false, message: "updated pull request"})
+    else
+      :reject -> send_resp(conn, 403, "Forbidden")
+      err ->
+        Logger.info "Did not process scm webhook, result: #{inspect(err)}"
+        json(conn, %{ignored: true})
+    end
   end
 
   def webhook(conn, params) do
@@ -29,12 +43,24 @@ defmodule ConsoleWeb.WebhookController do
     json(conn, %{ok: true})
   end
 
-  def piazza(conn, %{"text" => "/console deploy " <> application}) do
-    bot = Users.get_bot!("console")
-    case Builds.create(%{type: :deploy, repository: application, message: "Deployed from piazza"}, bot) do
-      {:ok, _} -> json(conn, %{"text" => "deploying #{application}"})
-      _ -> json(conn, %{"text" => "hmm, something went wrong"})
+  defp verify(conn, %ScmWebhook{type: :github, hmac: hmac}) do
+    with [signature] <- get_req_header(conn, "x-hub-signature-256"),
+         computed = :crypto.mac(:hmac, :sha256, hmac, conn.assigns.raw_body),
+         true <- Plug.Crypto.secure_compare(signature, "sha256=#{Base.encode16(computed, case: :lower)}") do
+      :ok
+    else
+      _ -> :reject
     end
   end
-  def piazza(conn, _), do: json(conn, %{"text" => "I don't understand what you're asking"})
+
+  defp verify(conn, %ScmWebhook{type: :gitlab, hmac: hmac}) do
+    with [token] <- get_req_header(conn, "x-gitlab-token"),
+         true <- Plug.Crypto.secure_compare(hmac, token) do
+      :ok
+    else
+      _ -> :reject
+    end
+  end
+
+  defp verify(_, _), do: :reject
 end

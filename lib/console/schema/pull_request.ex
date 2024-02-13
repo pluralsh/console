@@ -2,8 +2,11 @@ defmodule Console.Schema.PullRequest do
   use Piazza.Ecto.Schema
   alias Console.Schema.{Cluster, Service, PolicyBinding}
 
+  defenum Status, open: 0, merged: 1, closed: 2
+
   schema "pull_requests" do
     field :url,     :string
+    field :status,  Status, default: :open
     field :title,   :string
     field :creator, :string
     field :labels,  {:array, :string}
@@ -37,7 +40,7 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, order_by: ^order)
   end
 
-  @valid ~w(url title cluster_id service_id creator labels)a
+  @valid ~w(url status title cluster_id service_id creator labels)a
 
   def changeset(model, attrs \\ %{}) do
     model

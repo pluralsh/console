@@ -2728,6 +2728,12 @@ export enum PrRole {
   Upgrade = 'UPGRADE'
 }
 
+export enum PrStatus {
+  Closed = 'CLOSED',
+  Merged = 'MERGED',
+  Open = 'OPEN'
+}
+
 /** the details of where to find and place a templated file */
 export type PrTemplateSpec = {
   __typename?: 'PrTemplateSpec';
@@ -2817,6 +2823,7 @@ export type PullRequest = {
   labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the service this pr is meant to modify */
   service?: Maybe<ServiceDeployment>;
+  status: PrStatus;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   url: Scalars['String']['output'];
@@ -3103,6 +3110,7 @@ export type RootMutationType = {
   createPullRequestPointer?: Maybe<PullRequest>;
   createRole?: Maybe<Role>;
   createScmConnection?: Maybe<ScmConnection>;
+  createScmWebhook?: Maybe<ScmWebhook>;
   createServiceAccount?: Maybe<User>;
   createServiceAccountToken?: Maybe<AccessToken>;
   createServiceDeployment?: Maybe<ServiceDeployment>;
@@ -3327,6 +3335,12 @@ export type RootMutationTypeCreateRoleArgs = {
 
 export type RootMutationTypeCreateScmConnectionArgs = {
   attributes: ScmConnectionAttributes;
+};
+
+
+export type RootMutationTypeCreateScmWebhookArgs = {
+  connectionId: Scalars['ID']['input'];
+  owner: Scalars['String']['input'];
 };
 
 

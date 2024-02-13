@@ -400,6 +400,8 @@ type RootMutationType {
 
   deleteScmConnection(id: ID!): ScmConnection
 
+  createScmWebhook(connectionId: ID!, owner: String!): ScmWebhook
+
   createPrAutomation(attributes: PrAutomationAttributes!): PrAutomation
 
   updatePrAutomation(id: ID!, attributes: PrAutomationAttributes!): PrAutomation
@@ -2294,6 +2296,12 @@ enum PrRole {
   UPGRADE
 }
 
+enum PrStatus {
+  OPEN
+  MERGED
+  CLOSED
+}
+
 enum ConfigurationType {
   STRING
   INT
@@ -2701,6 +2709,8 @@ type PrConfigurationCondition {
 "A reference to a pull request for your kubernetes related IaC"
 type PullRequest {
   id: ID!
+
+  status: PrStatus!
 
   url: String!
 

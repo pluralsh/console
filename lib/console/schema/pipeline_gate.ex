@@ -66,7 +66,7 @@ defmodule Console.Schema.PipelineGate do
     |> cast_embed(:spec, with: &spec_changeset/2)
     |> foreign_key_constraint(:edge_id)
     |> foreign_key_constraint(:approver_id)
-    |> validate_format(:name, ~r/[a-z0-9][ -a-z0-9]*[a-z0-9]/)
+    |> validate_format(:name, ~r/[a-z0-9][ -a-z0-9]*[a-z0-9]/, message: "Gate names must be lowercase alphanumeric, or separated by spaces or hyphens")
     |> validate_required([:name, :state, :type])
   end
 
