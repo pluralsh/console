@@ -19,12 +19,14 @@ import {
 
 import { GqlError } from '../../utils/Alert'
 
-import ObjectStoreCloudIcon, {
+import {
   AzureSettings,
   GcsSettings,
   ObjectStoreCloud,
+  ObjectStoreCloudIcon,
   S3Settings,
   SUPPORTED_CLOUDS,
+  objectStoreCloudToDisplayName,
 } from './ObjectStoreCloudSettings'
 
 const updateSettings = produce(
@@ -185,14 +187,14 @@ export default function CreateObjectStoreModal({
               size={16}
             />
           }
-          // TODO
-          // @ts-ignore
-          onSelectionChange={setCloud}
+          onSelectionChange={(key) => {
+            setCloud(key as ObjectStoreCloud)
+          }}
         >
           {SUPPORTED_CLOUDS.map((t) => (
             <ListBoxItem
               key={t}
-              label={t}
+              label={objectStoreCloudToDisplayName[t]}
               textValue={t}
             />
           ))}

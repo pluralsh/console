@@ -18,6 +18,12 @@ export const SUPPORTED_CLOUDS = [
   ObjectStoreCloud.GCS,
 ] as const satisfies readonly ObjectStoreCloud[]
 
+export const objectStoreCloudToDisplayName = {
+  [ObjectStoreCloud.S3]: 'AWS',
+  [ObjectStoreCloud.Azure]: 'Azure',
+  [ObjectStoreCloud.GCS]: 'GCP',
+}
+
 const objectStoreCloudToProviderCloud = {
   [ObjectStoreCloud.S3]: 'aws',
   [ObjectStoreCloud.Azure]: 'azure',
@@ -31,7 +37,7 @@ export function getObjectStoreIconUrl(
   return getProviderIconUrl(objectStoreCloudToProviderCloud[cloud], mode)
 }
 
-export default function ObjectStoreCloudIcon({
+export function ObjectStoreCloudIcon({
   cloud,
   size,
 }: {
