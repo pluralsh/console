@@ -96,20 +96,30 @@ export default function CreateObjectStoreModal({
         onClose?.()
       }}
     >
-      <Select
-        selectedKey={selectedCloud}
-        // TODO
-        // @ts-ignore
-        onSelectionChange={setSelectedCloud}
+      <p
+        css={{
+          ...theme.partials.text.overline,
+          color: theme.colors['text-xlight'],
+        }}
       >
-        {SUPPORTED_CLOUDS.map((t) => (
-          <ListBoxItem
-            key={t}
-            label={t}
-            textValue={t}
-          />
-        ))}
-      </Select>
+        Configure object store
+      </p>
+      <FormField label="Cloud provider">
+        <Select
+          selectedKey={selectedCloud}
+          // TODO
+          // @ts-ignore
+          onSelectionChange={setSelectedCloud}
+        >
+          {SUPPORTED_CLOUDS.map((t) => (
+            <ListBoxItem
+              key={t}
+              label={t}
+              textValue={t}
+            />
+          ))}
+        </Select>
+      </FormField>
       <div
         css={{
           display: 'flex',
