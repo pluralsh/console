@@ -1,7 +1,7 @@
 overwrite: true
 generates:
   src/generated/graphql.ts:
-    schema: '../schema/schema.graphql'
+    schema: 'https://console.boot-aws.onplural.sh/gql'
     documents: './src/graph/**/*.graphql'
     plugins:
       - 'typescript'

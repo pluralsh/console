@@ -1,4 +1,10 @@
 fragment ComponentTree on ComponentTree {
+  root {
+    metadata {
+      ...Metadata
+    }
+    raw
+  }
   edges {
     from
     to

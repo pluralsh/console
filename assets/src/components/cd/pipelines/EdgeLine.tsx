@@ -5,11 +5,12 @@ import { useTheme } from 'styled-components'
 
 import { useEdgeNodes } from 'components/hooks/reactFlowHooks'
 
-export const CUSTOM_EDGE_NAME = 'plural-edge' as const
+export const PIPELINE_EDGE_NAME = 'plural-pipeline-edge' as const
+export const BASIC_EDGE_NAME = 'plural-basic-edge' as const
 const MARKER_ACTIVE_ID = 'pipeline-markerArrowActive'
 const MARKER_ID = 'pipeline-markerArrow'
 
-export default function EdgeLine({
+export default function GateEdgeLine({
   style,
   ...props
 }: ComponentProps<typeof StepEdge>) {
@@ -18,7 +19,7 @@ export default function EdgeLine({
     source: props.source,
     target: props.target,
   })
-  const active = (source?.data as any)?.meta.state === GateState.Open
+  const active = (source?.data as any)?.meta?.state === GateState.Open
   const color = active ? theme.colors['border-secondary'] : theme.colors.border
 
   return (
@@ -34,7 +35,30 @@ export default function EdgeLine({
   )
 }
 
-export const edgeTypes = { [CUSTOM_EDGE_NAME]: EdgeLine } as const
+export function BasicEdgeLine({
+  style,
+  ...props
+}: ComponentProps<typeof StepEdge>) {
+  const theme = useTheme()
+
+  return (
+    <StepEdge
+      data-something="data-something"
+      {...props}
+      style={{
+        ...style,
+        stroke: theme.colors['border-secondary'],
+      }}
+      markerEnd={`url(#${MARKER_ACTIVE_ID})`}
+    />
+  )
+}
+
+export const edgeTypes = {
+  [PIPELINE_EDGE_NAME]: GateEdgeLine,
+  [BASIC_EDGE_NAME]: BasicEdgeLine,
+} as const
+
 function EdgeLineMarker({ id, color }: { id: string; color: string }) {
   return (
     <marker

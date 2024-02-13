@@ -1,4 +1,4 @@
-import { Card, Code, IconFrame, Modal, Tooltip } from '@pluralsh/design-system'
+import { Card, Code, Modal, Tooltip } from '@pluralsh/design-system'
 import { PipelineStageEdgeFragment } from 'generated/graphql'
 import {
   ComponentProps,
@@ -94,7 +94,6 @@ export function ComponentTreeNode({
   const metadata = data?.metadata
   const kind = data?.kind?.toLowerCase()
 
-  console.log('dataz', data)
   const clickable = !!data?.raw
 
   return (

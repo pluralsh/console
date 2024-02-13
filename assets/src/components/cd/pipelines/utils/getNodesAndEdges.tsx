@@ -12,7 +12,7 @@ import { groupBy } from 'lodash'
 import { Entries } from 'type-fest'
 
 import { StageStatus, getStageStatus } from '../nodes/StageNode'
-import { CUSTOM_EDGE_NAME } from '../EdgeLine'
+import { PIPELINE_EDGE_NAME } from '../EdgeLine'
 
 import { reduceGateStates } from './reduceGateStatuses'
 import { DEMO_GATES, PIPELINE_DEBUG_MODE } from './_demo_data'
@@ -24,8 +24,8 @@ export enum NodeType {
   Job = 'job',
 }
 
-export const baseEdgeProps = {
-  type: CUSTOM_EDGE_NAME,
+const baseEdgeProps = {
+  type: PIPELINE_EDGE_NAME,
   updatable: false,
 }
 
