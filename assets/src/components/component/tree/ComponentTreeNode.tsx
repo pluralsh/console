@@ -1,13 +1,21 @@
-import { Card } from '@pluralsh/design-system'
+import { Card, Code, IconFrame, Modal, Tooltip } from '@pluralsh/design-system'
 import { PipelineStageEdgeFragment } from 'generated/graphql'
-import { ComponentProps, ReactElement, ReactNode, cloneElement } from 'react'
+import {
+  ComponentProps,
+  ReactElement,
+  ReactNode,
+  cloneElement,
+  useState,
+} from 'react'
 import { Handle, type NodeProps, Position } from 'reactflow'
 import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
-import ComponentCard from 'components/apps/app/components/ComponentCard'
 import { TreeNodeMeta } from 'components/component/tree/getTreeNodesAndEdges'
+import { ComponentIcon } from 'components/apps/app/components/misc'
+import { TRUNCATE } from 'components/utils/truncate'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 export type CardStatus = 'ok' | 'closed' | 'pending'
 
@@ -19,41 +27,39 @@ export const NodeCardList = styled.ul(({ theme }) => ({
   gap: theme.spacing.xsmall,
 }))
 
-const BaseNodeSC = styled(Card)(({ theme }) => ({
+const ComponentTreeNodeSC = styled(Card)(({ theme }) => ({
   '&&': {
-    position: 'relative',
-    padding: theme.spacing.small,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.small,
-    ul: {
-      ...theme.partials.reset.list,
-    },
-    li: {
-      ...theme.partials.reset.li,
-    },
-  },
-  '.section': {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.xsmall,
-  },
-  '.headerArea': {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-
-    gap: theme.spacing.small,
-    minHeight: 22,
-    marginTop: -4,
+    overflow: 'hidden',
+    padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
+    gap: theme.spacing.medium,
+    width: 240,
   },
-  '.heading': {
-    ...theme.partials.text.overline,
-    color: theme.colors['text-light'],
-  },
-  '.subhead': {
-    ...theme.partials.text.caption,
-    color: theme.colors['text-light'],
+  '.content': {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'baseline',
+    columnGap: theme.spacing.small,
+    rowGap: theme.spacing.xxxsmall,
+    flexShrink: 1,
+    flexGrow: 1,
+    overflow: 'hidden',
+    '.name': {
+      ...theme.partials.text.body2Bold,
+      maxWidth: '100%',
+      ...TRUNCATE,
+      flexShrink: 1,
+    },
+    '.kind': {
+      ...theme.partials.text.caption,
+      maxWidth: '100%',
+      ...TRUNCATE,
+      color: theme.colors['text-xlight'],
+      marginRight: theme.spacing.xsmall,
+      flexShrink: 1,
+      flexGrow: 1,
+    },
   },
 }))
 
@@ -82,12 +88,28 @@ export function ComponentTreeNode({
   id,
   data,
   ...props
-}: NodeProps<TreeNodeMeta> & ComponentProps<typeof BaseNodeSC>) {
+}: NodeProps<TreeNodeMeta> & ComponentProps<typeof ComponentTreeNodeSC>) {
+  const [open, setOpen] = useState(false)
   const { incomers, outgoers } = useNodeEdges(id)
-  const { metadata } = data
+  const metadata = data?.metadata
+  const kind = data?.kind?.toLowerCase()
+
+  console.log('dataz', data)
+  const clickable = !!data?.raw
 
   return (
-    <BaseNodeSC {...props}>
+    <ComponentTreeNodeSC
+      {...props}
+      clickable={clickable}
+      onClick={
+        !clickable
+          ? undefined
+          : (e) => {
+              e.preventDefault()
+              setOpen(true)
+            }
+      }
+    >
       <HandleSC
         type="target"
         isConnectable={false}
@@ -95,9 +117,29 @@ export function ComponentTreeNode({
         $isOpen
         position={Position.Left}
       />
-      <ComponentCard
-        component={{ name: metadata?.name || '', kind: data.kind }}
+      <ComponentIcon
+        kind={data.kind}
+        size={16}
       />
+      <div className="content">
+        {metadata?.name && (
+          <p className="name">
+            <Tooltip
+              label={metadata.name}
+              placement="bottom"
+            >
+              <span>{metadata.name}</span>
+            </Tooltip>
+          </p>
+        )}
+        {kind && (
+          <p className="kind">
+            <Tooltip label={kind}>
+              <span>{kind}</span>
+            </Tooltip>
+          </p>
+        )}
+      </div>
       <HandleSC
         type="source"
         isConnectable={false}
@@ -105,7 +147,10 @@ export function ComponentTreeNode({
         $isOpen
         position={Position.Right}
       />
-    </BaseNodeSC>
+      <ModalMountTransition open={open}>
+        <DetailsModal {...{ open, data, onClose: () => setOpen(false) }} />
+      </ModalMountTransition>
+    </ComponentTreeNodeSC>
   )
 }
 
@@ -115,6 +160,35 @@ const IconHeadingSC = styled.div(({ theme }) => ({
   gap: theme.spacing.xsmall,
   ...theme.partials.text.body2Bold,
 }))
+
+function DetailsModal({
+  data,
+  ...props
+}: ComponentProps<typeof Modal> & { data: TreeNodeMeta }) {
+  let raw: string
+
+  try {
+    raw = JSON.stringify(JSON.parse(data?.raw || ''), null, 2)
+  } catch {
+    raw = data.raw || ''
+  }
+
+  return (
+    <Modal
+      header={data?.metadata?.name || 'Details'}
+      size="large"
+      portal
+      {...props}
+    >
+      <Code
+        title="Config"
+        language="json"
+      >
+        {raw}
+      </Code>
+    </Modal>
+  )
+}
 
 export function IconHeading({
   icon,

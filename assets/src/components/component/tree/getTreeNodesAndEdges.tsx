@@ -5,10 +5,10 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { baseEdgeProps } from 'components/cd/pipelines/utils/getNodesAndEdges'
 
 export type TreeNodeMeta = ReturnType<typeof flattenMetadata>[number]
-export type HasMetadata = { metadata?: MetadataFragment }
+export type ComponentCommonData = { metadata?: MetadataFragment; raw?: string }
 export type ComponentKindsKey = ConditionalKeys<
   ComponentTreeFragment,
-  Nullable<Nullable<HasMetadata>[]>
+  Nullable<Nullable<ComponentCommonData>[]>
 >
 
 export const C_TYPES = [
@@ -32,7 +32,7 @@ function flattenMetadata(tree: Nullable<ComponentTreeFragment>) {
 
   return C_TYPES.flatMap(
     (cType) =>
-      tree?.[cType]?.filter(isNonNullable).map((c: HasMetadata) => ({
+      tree?.[cType]?.filter(isNonNullable).map((c: ComponentCommonData) => ({
         kind: cType.slice(0, -1),
         ...c,
       })) || []
@@ -52,10 +52,11 @@ export function getTreeNodesAndEdges(tree: Nullable<ComponentTreeFragment>) {
       }
     }) || []
 
+  console.log('edges', edges)
   const nodes = flattenMetadata(tree)
     // Order of edges matters to Dagre layout, so sort by type ahead of time
     .sort((a, b) => TYPE_SORT_VALS[b.kind] - TYPE_SORT_VALS[a.kind])
-    .map(({ kind, metadata }) => {
+    .map(({ kind, metadata, raw }) => {
       // Gate types that get their own node
       const nodeId = metadata?.uid
 
@@ -68,8 +69,9 @@ export function getTreeNodesAndEdges(tree: Nullable<ComponentTreeFragment>) {
         type: 'component',
         position: { x: 0, y: 0 },
         data: {
-          type: kind,
-          meta: metadata,
+          kind,
+          metadata,
+          raw,
         },
       }
     })

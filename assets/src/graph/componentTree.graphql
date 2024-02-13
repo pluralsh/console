@@ -7,31 +7,37 @@ fragment ComponentTree on ComponentTree {
     metadata {
       ...Metadata
     }
+    raw
   }
   configmaps {
     metadata {
       ...Metadata
     }
+    raw
   }
   cronjobs {
     metadata {
       ...Metadata
     }
+    raw
   }
   daemonsets {
     metadata {
       ...Metadata
     }
+    raw
   }
   deployments {
     metadata {
       ...Metadata
     }
+    raw
   }
   ingresses {
     metadata {
       ...Metadata
     }
+    raw
   }
   secrets {
     metadata {
@@ -42,11 +48,13 @@ fragment ComponentTree on ComponentTree {
     metadata {
       ...Metadata
     }
+    raw
   }
   statefulsets {
     metadata {
       ...Metadata
     }
+    raw
   }
 }
 

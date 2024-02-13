@@ -17,9 +17,10 @@ import chroma from 'chroma-js'
 import 'reactflow/dist/style.css'
 import styled, { useTheme } from 'styled-components'
 
-import isEmpty from 'lodash/isEmpty'
-
-import { type DagreDirection, getLayoutedElements } from '../../cd/pipelines/utils/nodeLayouter'
+import {
+  type DagreDirection,
+  getLayoutedElements,
+} from '../../cd/pipelines/utils/nodeLayouter'
 import { EdgeLineMarkerDefs, edgeTypes } from '../../cd/pipelines/EdgeLine'
 
 import { PipelineEditAreaSC } from '../../cd/pipelines/Pipelines'
@@ -32,9 +33,9 @@ const nodeTypes = {
   component: ComponentTreeNode,
 }
 
-export function ComponentTreeFlow({
-  nodes: initialNodes,
-  edges: initialEdges,
+export function ComponentTreeGraph({
+  nodes: nodesProp,
+  edges: edgesProp,
 }: {
   nodes: any[]
   edges: any[]
@@ -43,18 +44,22 @@ export function ComponentTreeFlow({
   const margin = COMPONENTTREE_GRID_GAP * 1
 
   const { setViewport, getViewport, viewportInitialized } = useReactFlow()
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+  const [nodes, setNodes, onNodesChange] = useNodesState(nodesProp)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(edgesProp)
   const [needsLayout, setNeedsLayout] = useState(true)
   const prevNodes = usePrevious(nodes)
   const prevEdges = usePrevious(edges)
 
+  const prevNodesProp = usePrevious(nodesProp)
+  const prevEdgesProp = usePrevious(edgesProp)
+
   console.log('nodes', nodes)
   console.log('edges', edges)
+  console.log('needsLayout', needsLayout)
 
   const layoutNodes = useCallback(
     (direction: DagreDirection = 'LR') => {
-      if (isEmpty(nodes) || isEmpty(edges)) return
+      // if (isEmpty(nodes)) return
 
       const layouted = getLayoutedElements(nodes, edges, {
         direction,
@@ -89,12 +94,13 @@ export function ComponentTreeFlow({
 
   useEffect(() => {
     // Don't run for initial values of nodes and edges, only for changes
-    if (prevNodes !== nodes || prevEdges !== edges) {
-      setNodes(nodes)
-      setEdges(edges)
+    if (prevNodesProp !== nodesProp || prevEdgesProp !== edgesProp) {
+      console.log('setting nodes and edges')
+      setNodes(nodesProp)
+      setEdges(edgesProp)
       setNeedsLayout(true)
     }
-  }, [edges, nodes, prevEdges, prevNodes, setEdges, setNodes])
+  }, [nodesProp, prevNodesProp, edgesProp, prevEdgesProp, setEdges, setNodes])
 
   return (
     <PipelineEditAreaSC>

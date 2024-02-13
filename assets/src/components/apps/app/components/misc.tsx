@@ -8,6 +8,7 @@ import {
   HistoryIcon,
   NetworkInIcon,
   NetworkInterfaceIcon,
+  PadlockLockedIcon,
   VolumesIcon,
 } from '@pluralsh/design-system'
 import { ComponentState } from 'generated/graphql'
@@ -109,6 +110,7 @@ export function ComponentIcon({
     | 'cronjob'
     | 'job'
     | 'certificate'
+    | 'secret'
     // `& {}` is hack to still show autocomplete for above options
     // eslint-disable-next-line @typescript-eslint/ban-types
     | (string & {})
@@ -129,6 +131,8 @@ export function ComponentIcon({
       return <BriefcaseIcon size={size} />
     case 'certificate':
       return <CertificateIcon size={size} />
+    case 'secret':
+      return <PadlockLockedIcon size={size} />
     default:
       return <ComponentsIcon size={size} />
   }

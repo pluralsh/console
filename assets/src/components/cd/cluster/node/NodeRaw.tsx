@@ -11,7 +11,13 @@ export default function NodeRaw() {
 
   if (!node) return <LoadingIndicator />
 
-  const content = stringify(JSON.parse(node.raw))
+  let content
+
+  try {
+    content = stringify(JSON.parse(node.raw), { indent: 2 })
+  } catch {
+    content = node.raw
+  }
 
   return (
     <Flex
