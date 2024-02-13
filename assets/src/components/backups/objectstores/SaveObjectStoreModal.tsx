@@ -23,6 +23,7 @@ import {
   ObjectStore,
   ObjectStoreAttributes,
   useCreateObjectStoreMutation,
+  useUpdateObjectStoreMutation,
 } from '../../../generated/graphql'
 import { GqlError } from '../../utils/Alert'
 
@@ -51,7 +52,7 @@ const updateSettings = produce(
   }
 )
 
-export default function UpsertObjectStoreModal({
+export default function SaveObjectStoreModal({
   open,
   onClose,
   refetch,
@@ -64,13 +65,15 @@ export default function UpsertObjectStoreModal({
 }) {
   const theme = useTheme()
 
-  const { initialName, initialCloud, initialCloudSettings } = useMemo(() => {
-    const initialName = objectStore?.name ?? ''
-    const initialCloud = getObjectStoreCloud(objectStore) ?? ObjectStoreCloud.S3
-    const initialCloudSettings = getObjectStoreCloudAttributes(objectStore)
-
-    return { initialName, initialCloud, initialCloudSettings }
-  }, [objectStore])
+  const { editMode, initialName, initialCloud, initialCloudSettings } = useMemo(
+    () => ({
+      editMode: !!objectStore,
+      initialName: objectStore?.name ?? '',
+      initialCloud: getObjectStoreCloud(objectStore) ?? ObjectStoreCloud.S3,
+      initialCloudSettings: getObjectStoreCloudAttributes(objectStore),
+    }),
+    [objectStore]
+  )
 
   const [name, setName] = useState<string>(initialName)
   const [cloud, setCloud] = useState<ObjectStoreCloud>(initialCloud)
@@ -80,14 +83,28 @@ export default function UpsertObjectStoreModal({
   )
 
   const closeModal = useCallback(() => onClose(), [onClose])
+  const onCompleted = useCallback(() => {
+    refetch?.()
+    closeModal()
+  }, [refetch, closeModal])
 
-  const [mutation, { loading, error }] = useCreateObjectStoreMutation({
-    variables: { attributes: { name, [cloud]: cloudSettings[cloud] } },
-    onCompleted: () => {
-      refetch?.()
-      closeModal()
-    },
-  })
+  const [createMutation, { loading: creating, error: createError }] =
+    useCreateObjectStoreMutation({
+      variables: { attributes: { name, [cloud]: cloudSettings[cloud] } },
+      onCompleted,
+    })
+
+  const [updateMutation, { loading: updating, error: updateError }] =
+    useUpdateObjectStoreMutation({
+      variables: {
+        id: objectStore?.id ?? '',
+        attributes: { name, [cloud]: cloudSettings[cloud] },
+      },
+      onCompleted,
+    })
+
+  const loading = creating || updating
+  const error = createError ?? updateError
 
   let settings: ReactNode
 
@@ -161,15 +178,16 @@ export default function UpsertObjectStoreModal({
     (e: FormEvent) => {
       e.preventDefault()
       if (!disabled && !loading) {
-        mutation()
+        if (objectStore) updateMutation()
+        else createMutation()
       }
     },
-    [disabled, loading, mutation]
+    [disabled, loading, createMutation, updateMutation]
   )
 
   return (
     <ModalAlt
-      header="Add object store"
+      header={editMode ? 'Update object store' : 'Add object store'}
       size="large"
       open={open}
       portal
@@ -184,7 +202,7 @@ export default function UpsertObjectStoreModal({
             loading={loading}
             primary
           >
-            Create
+            {editMode ? 'Update' : 'Create'}
           </Button>
           <Button
             type="button"
@@ -240,7 +258,7 @@ export default function UpsertObjectStoreModal({
       {error && (
         <div css={{ marginTop: theme.spacing.large }}>
           <GqlError
-            header="Problem creating provider"
+            header="Problem saving object store credentials"
             error={error}
           />
         </div>

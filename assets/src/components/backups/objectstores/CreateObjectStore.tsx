@@ -5,7 +5,7 @@ import { useOpenTransition } from '../../hooks/suspense/useOpenTransition'
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
 import { useBackupsEnabled } from '../../cd/utils/useBackupsEnabled'
 
-import UpsertObjectStoreModal from './UpsertObjectStoreModal'
+import SaveObjectStoreModal from './SaveObjectStoreModal'
 
 export default function CreateObjectStore({
   refetch,
@@ -26,7 +26,7 @@ export default function CreateObjectStore({
         Create connection
       </Button>
       <ModalMountTransition open={isOpen}>
-        <UpsertObjectStoreModal
+        <SaveObjectStoreModal
           open={isOpen}
           onClose={() => setIsOpen(false)}
           refetch={refetch}
