@@ -182,7 +182,7 @@ export default function SaveObjectStoreModal({
         else createMutation()
       }
     },
-    [disabled, loading, createMutation, updateMutation]
+    [disabled, loading, objectStore, updateMutation, createMutation]
   )
 
   return (
