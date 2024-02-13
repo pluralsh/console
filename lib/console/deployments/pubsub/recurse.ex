@@ -95,3 +95,9 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentMigrationCreated do
 
   def process(%{item: migration}), do: Clusters.apply_migration(migration)
 end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.PipelineStageUpdated do
+  alias Console.Deployments.Pipelines
+
+  def process(%{item: stage}), do: Pipelines.apply_pipeline_context(stage)
+end

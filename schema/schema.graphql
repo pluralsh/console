@@ -546,6 +546,9 @@ type RootMutationType {
   "upserts a pipeline with a given name"
   savePipeline(name: String!, attributes: PipelineAttributes!): Pipeline
 
+  "creates a new pipeline context and binds it to the beginning stage"
+  createPipelineContext(pipelineId: ID!, attributes: PipelineContextAttributes!): PipelineContext
+
   deletePipeline(id: ID!): Pipeline
 
   "approves an approval pipeline gate"
@@ -871,6 +874,11 @@ input PipelineGateAttributes {
   spec: GateSpecAttributes
 }
 
+"attributes needed to create a new pipeline context"
+input PipelineContextAttributes {
+  context: Json!
+}
+
 "the allowed inputs for a deployment agent gate update"
 input GateUpdateAttributes {
   state: GateState
@@ -969,6 +977,26 @@ type Pipeline {
   "edges linking two stages w\/in the pipeline in a full DAG"
   edges: [PipelineStageEdge]
 
+  "lists the contexts applied to a pipeline"
+  contexts(after: String, first: Int, before: String, last: Int): PipelineContextConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"A variable context that can be used to generate pull requests as a pipeline progresses"
+type PipelineContext {
+  id: ID!
+
+  "the context map that will be passed to the pipeline"
+  context: Map!
+
+  pipeline: Pipeline
+
+  "a history of pull requests created by this context thus far"
+  pullRequests: [PullRequest]
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -983,6 +1011,9 @@ type PipelineStage {
 
   "the services within this stage"
   services: [StageService]
+
+  "the context that is to be applied to this stage for PR promotions"
+  context: PipelineContext
 
   "a promotion which might be outstanding for this stage"
   promotion: PipelinePromotion
@@ -1166,6 +1197,11 @@ type PipelineConnection {
 type PipelineGateConnection {
   pageInfo: PageInfo!
   edges: [PipelineGateEdge]
+}
+
+type PipelineContextConnection {
+  pageInfo: PageInfo!
+  edges: [PipelineContextEdge]
 }
 
 enum ComponentState {
@@ -4498,6 +4534,11 @@ type RevisionEdge {
 
 type ServiceDeploymentEdge {
   node: ServiceDeployment
+  cursor: String
+}
+
+type PipelineContextEdge {
+  node: PipelineContext
   cursor: String
 }
 

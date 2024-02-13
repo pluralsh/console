@@ -2249,6 +2249,8 @@ export enum Permission {
 /** a release pipeline, composed of multiple stages each with potentially multiple services */
 export type Pipeline = {
   __typename?: 'Pipeline';
+  /** lists the contexts applied to a pipeline */
+  contexts?: Maybe<PipelineContextConnection>;
   /** edges linking two stages w/in the pipeline in a full DAG */
   edges?: Maybe<Array<Maybe<PipelineStageEdge>>>;
   id: Scalars['ID']['output'];
@@ -2261,6 +2263,15 @@ export type Pipeline = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+
+/** a release pipeline, composed of multiple stages each with potentially multiple services */
+export type PipelineContextsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /** the top level input object for creating/deleting pipelines */
 export type PipelineAttributes = {
   edges?: InputMaybe<Array<InputMaybe<PipelineEdgeAttributes>>>;
@@ -2271,6 +2282,36 @@ export type PipelineConnection = {
   __typename?: 'PipelineConnection';
   edges?: Maybe<Array<Maybe<PipelineEdge>>>;
   pageInfo: PageInfo;
+};
+
+/** A variable context that can be used to generate pull requests as a pipeline progresses */
+export type PipelineContext = {
+  __typename?: 'PipelineContext';
+  /** the context map that will be passed to the pipeline */
+  context: Scalars['Map']['output'];
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  pipeline?: Maybe<Pipeline>;
+  /** a history of pull requests created by this context thus far */
+  pullRequests?: Maybe<Array<Maybe<PullRequest>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** attributes needed to create a new pipeline context */
+export type PipelineContextAttributes = {
+  context: Scalars['Json']['input'];
+};
+
+export type PipelineContextConnection = {
+  __typename?: 'PipelineContextConnection';
+  edges?: Maybe<Array<Maybe<PipelineContextEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PipelineContextEdge = {
+  __typename?: 'PipelineContextEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PipelineContext>;
 };
 
 export type PipelineEdge = {
@@ -2358,6 +2399,8 @@ export type PipelinePromotion = {
 /** a pipeline stage, has a list of services and potentially a promotion which might be pending */
 export type PipelineStage = {
   __typename?: 'PipelineStage';
+  /** the context that is to be applied to this stage for PR promotions */
+  context?: Maybe<PipelineContext>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of this stage (eg dev, prod, staging) */
@@ -3103,6 +3146,8 @@ export type RootMutationType = {
   createInvite?: Maybe<Invite>;
   createObjectStore?: Maybe<ObjectStore>;
   createPeer?: Maybe<WireguardPeer>;
+  /** creates a new pipeline context and binds it to the beginning stage */
+  createPipelineContext?: Maybe<PipelineContext>;
   createPrAutomation?: Maybe<PrAutomation>;
   createProviderCredential?: Maybe<ProviderCredential>;
   createPullRequest?: Maybe<PullRequest>;
@@ -3302,6 +3347,12 @@ export type RootMutationTypeCreatePeerArgs = {
   email?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeCreatePipelineContextArgs = {
+  attributes: PipelineContextAttributes;
+  pipelineId: Scalars['ID']['input'];
 };
 
 
