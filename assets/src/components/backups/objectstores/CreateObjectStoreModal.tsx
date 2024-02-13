@@ -19,7 +19,7 @@ import {
 
 import { GqlError } from '../../utils/Alert'
 
-import {
+import ObjectStoreCloudIcon, {
   AzureSettings,
   GcsSettings,
   ObjectStoreCloud,
@@ -93,7 +93,6 @@ export default function CreateObjectStoreModal({
 
   let disabled = !name || !cloud
 
-  // TODO: Finish.
   switch (cloud) {
     case ObjectStoreCloud.S3:
       disabled =
@@ -136,7 +135,7 @@ export default function CreateObjectStoreModal({
         mutation()
       }
     },
-    [disabled, loading, mutation, onClose]
+    [disabled, loading, mutation]
   )
 
   return (
@@ -180,6 +179,12 @@ export default function CreateObjectStoreModal({
       <FormField label="Cloud provider">
         <Select
           selectedKey={cloud}
+          leftContent={
+            <ObjectStoreCloudIcon
+              cloud={cloud}
+              size={16}
+            />
+          }
           // TODO
           // @ts-ignore
           onSelectionChange={setCloud}

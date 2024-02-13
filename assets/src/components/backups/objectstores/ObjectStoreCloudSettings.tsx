@@ -1,8 +1,10 @@
-import { FormField, Input } from '@pluralsh/design-system'
+import { FormField, Input, styledTheme } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
 
 import { ObjectStoreAttributes } from '../../../generated/graphql'
 import { InputRevealer } from '../../cd/providers/InputRevealer'
 import GcpCredentials from '../../cd/providers/GcpCredentials'
+import { getProviderIconUrl } from '../../utils/Provider'
 
 export enum ObjectStoreCloud {
   S3 = 's3',
@@ -15,6 +17,39 @@ export const SUPPORTED_CLOUDS = [
   ObjectStoreCloud.Azure,
   ObjectStoreCloud.GCS,
 ] as const satisfies readonly ObjectStoreCloud[]
+
+const objectStoreCloudToProviderCloud = {
+  [ObjectStoreCloud.S3]: 'aws',
+  [ObjectStoreCloud.Azure]: 'azure',
+  [ObjectStoreCloud.GCS]: 'gcp',
+}
+
+export function getObjectStoreIconUrl(
+  cloud: ObjectStoreCloud,
+  mode: typeof styledTheme.mode
+) {
+  return getProviderIconUrl(objectStoreCloudToProviderCloud[cloud], mode)
+}
+
+export default function ObjectStoreCloudIcon({
+  cloud,
+  size,
+}: {
+  cloud: ObjectStoreCloud
+  size?: number
+}) {
+  const theme = useTheme()
+
+  return (
+    <div css={{ display: 'flex', justifyContent: 'center', width: size }}>
+      <img
+        alt={cloud}
+        src={getObjectStoreIconUrl(cloud, theme.mode)}
+        width={size}
+      />
+    </div>
+  )
+}
 
 export function S3Settings({
   settings,
