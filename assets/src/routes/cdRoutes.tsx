@@ -26,7 +26,7 @@ import ComponentInfo from 'components/component/ComponentInfo'
 import ComponentEvents from 'components/component/ComponentEvents'
 import ComponentRaw from 'components/component/ComponentRaw'
 import ComponentMetrics from 'components/component/ComponentMetrics'
-import  ComponentTree  from 'components/component/ComponentTree'
+import ComponentTree from 'components/component/ComponentTree'
 
 import { GlobalSettings } from 'components/cd/globalSettings/GlobalSettings'
 import { GlobalSettingsPermissions } from 'components/cd/globalSettings/GlobalSettingsPermissions'
@@ -43,7 +43,6 @@ import {
 } from 'generated/graphql'
 
 import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
-
 
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
@@ -131,7 +130,6 @@ export const componentRoutes = (
       path="tree"
       element={<ComponentTree />}
     />
-
     <Route
       path="dryrun"
       element={<ComponentDryRun />}
