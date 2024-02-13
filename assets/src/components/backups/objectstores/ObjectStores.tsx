@@ -183,6 +183,7 @@ export default function ObjectStores() {
               height: '100%',
             }}
             reactTableOptions={reactTableOptions}
+            loose
           />
         </FullHeightTableWrap>
       ) : (
