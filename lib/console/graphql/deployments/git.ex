@@ -476,7 +476,9 @@ defmodule Console.GraphQl.Deployments.Git do
     field :setup_renovate, :service_deployment do
       middleware Authenticated
       arg :connection_id, non_null(:id)
-      arg :repos, list_of(:string)
+      arg :repos,         list_of(:string)
+      arg :name,          :string, description: "the name of the owning service"
+      arg :namespace,     :string, description: "the namespace of the owning service"
 
       safe_resolve &Deployments.setup_renovate/2
     end

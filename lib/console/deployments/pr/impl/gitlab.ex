@@ -33,7 +33,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
 
   def webhook(%ScmConnection{} = conn, %ScmWebhook{owner: owner, hmac: hmac} = hook) do
     with {:ok, conn} <- connection(conn) do
-      post(conn, "/api/v4/projects/#{URI.encode(owner)}/hooks", %{
+      post(conn, "/api/v4/groups/#{URI.encode(owner)}/hooks", %{
         url: ScmWebhook.url(hook),
         merge_requests_events: true,
         token: hmac,

@@ -3625,6 +3625,8 @@ export type RootMutationTypeSelfManageArgs = {
 
 export type RootMutationTypeSetupRenovateArgs = {
   connectionId: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
   repos?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 

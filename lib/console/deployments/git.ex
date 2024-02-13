@@ -119,7 +119,10 @@ defmodule Console.Deployments.Git do
       |> when_ok(:insert)
     end)
     |> add_operation(:hook, fn %{conn: conn} ->
-      create_webhook_for_connection(attrs[:owner], conn)
+      case attrs do
+        %{owner: owner} when is_binary(owner) -> create_webhook_for_connection(owner, conn)
+        _ -> {:ok, conn} # don't attempt webhook creation here
+      end
     end)
     |> execute(extract: :conn)
   end
