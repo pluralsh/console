@@ -10,6 +10,7 @@ defmodule Console.Schema.Pipeline do
 
     has_many :stages, PipelineStage, on_replace: :delete
     has_many :edges,  PipelineEdge, on_replace: :delete
+    has_many :gates, through: [:edges, :gates]
 
     has_many :read_bindings, PolicyBinding,
       on_replace: :delete,
@@ -25,6 +26,18 @@ defmodule Console.Schema.Pipeline do
 
   def search(query \\ __MODULE__, q) do
     from(p in query, where: ilike(p.name, ^"%#{q}%"))
+  end
+
+  def gate_statuses(query \\ __MODULE__) do
+    from(p in query,
+      left_join: g in assoc(p, :gates),
+      group_by: p.id,
+      select: %{
+        id: p.id,
+        pending: sum(fragment("case when ? = 0 then 1 else 0 end", g.state)),
+        closed: sum(fragment("case when ? = 2 then 1 else 0 end", g.state))
+      }
+    )
   end
 
   def for_user(query \\ __MODULE__, %User{} = user) do

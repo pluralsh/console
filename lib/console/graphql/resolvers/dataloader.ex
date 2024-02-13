@@ -23,6 +23,22 @@ defmodule Console.GraphQl.Resolvers.HelmRepositoryLoader do
   defp key(_), do: nil
 end
 
+defmodule Console.GraphQl.Resolvers.PipelineGateLoader do
+  alias Console.Schema.Pipeline
+
+  def data(_) do
+    Dataloader.KV.new(&query/2, max_concurrency: 1)
+  end
+
+  def query(_, ids) do
+    MapSet.to_list(ids)
+    |> Pipeline.for_ids()
+    |> Pipeline.gate_statuses()
+    |> Console.Repo.all()
+    |> Map.new(& {&1.id, &1})
+  end
+end
+
 defmodule Console.GraphQl.Resolvers.UserLoader do
   alias Console.Schema.User
 
