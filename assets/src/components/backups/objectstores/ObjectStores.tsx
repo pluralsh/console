@@ -32,6 +32,7 @@ import {
   objectStoreCloudToDisplayName,
 } from './utils'
 import { DeleteObjectStore } from './DeleteObjectStore'
+import UpdateObjectStore from './UpdateObjectStore'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -92,16 +93,15 @@ export const columns = [
             css={{
               display: 'flex',
               flexGrow: 0,
-              gap: theme.spacing.large,
+              gap: theme.spacing.medium,
               alignItems: 'center',
               alignSelf: 'end',
             }}
           >
-            {/* TODO */}
-            {/* <UpdateProvider */}
-            {/*  provider={node} */}
-            {/*  refetch={refetch} */}
-            {/* /> */}
+            <UpdateObjectStore
+              objectStore={node}
+              refetch={refetch}
+            />
             <DeleteObjectStore
               objectStore={node}
               refetch={refetch}

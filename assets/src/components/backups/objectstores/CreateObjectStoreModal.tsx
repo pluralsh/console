@@ -48,7 +48,7 @@ export default function CreateObjectStoreModal({
 }: {
   open: boolean
   onClose: () => void
-  refetch: () => void
+  refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
   const [name, setName] = useState('')
