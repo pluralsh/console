@@ -59,6 +59,19 @@ query ClusterBackup($id: ID, $clusterId: ID, $namespace: String, $name: String) 
   }
 }
 
+query ClusterBackups($after: String, $first: Int = 100, $before: String, $last: Int, $clusterId: ID! ) {
+  clusterBackups(last: $last, first: $first, before: $before, after: $after, clusterId: $clusterId) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterBackup
+      }
+    }
+  }
+}
+
 mutation CreateObjectStore($attributes: ObjectStoreAttributes!) {
   createObjectStore(attributes: $attributes) {
     ...ObjectStore

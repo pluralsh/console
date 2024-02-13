@@ -5576,6 +5576,17 @@ export type ClusterBackupQueryVariables = Exact<{
 
 export type ClusterBackupQuery = { __typename?: 'RootQueryType', clusterBackup?: { __typename?: 'ClusterBackup', id: string, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
 
+export type ClusterBackupsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  clusterId: Scalars['ID']['input'];
+}>;
+
+
+export type ClusterBackupsQuery = { __typename?: 'RootQueryType', clusterBackups?: { __typename?: 'ClusterBackupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterBackupEdge', node?: { __typename?: 'ClusterBackup', id: string, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
+
 export type CreateObjectStoreMutationVariables = Exact<{
   attributes: ObjectStoreAttributes;
 }>;
@@ -8669,6 +8680,64 @@ export type ClusterBackupQueryHookResult = ReturnType<typeof useClusterBackupQue
 export type ClusterBackupLazyQueryHookResult = ReturnType<typeof useClusterBackupLazyQuery>;
 export type ClusterBackupSuspenseQueryHookResult = ReturnType<typeof useClusterBackupSuspenseQuery>;
 export type ClusterBackupQueryResult = Apollo.QueryResult<ClusterBackupQuery, ClusterBackupQueryVariables>;
+export const ClusterBackupsDocument = gql`
+    query ClusterBackups($after: String, $first: Int = 100, $before: String, $last: Int, $clusterId: ID!) {
+  clusterBackups(
+    last: $last
+    first: $first
+    before: $before
+    after: $after
+    clusterId: $clusterId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterBackup
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClusterBackupFragmentDoc}`;
+
+/**
+ * __useClusterBackupsQuery__
+ *
+ * To run a query within a React component, call `useClusterBackupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterBackupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterBackupsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useClusterBackupsQuery(baseOptions: Apollo.QueryHookOptions<ClusterBackupsQuery, ClusterBackupsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterBackupsQuery, ClusterBackupsQueryVariables>(ClusterBackupsDocument, options);
+      }
+export function useClusterBackupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterBackupsQuery, ClusterBackupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterBackupsQuery, ClusterBackupsQueryVariables>(ClusterBackupsDocument, options);
+        }
+export function useClusterBackupsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterBackupsQuery, ClusterBackupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterBackupsQuery, ClusterBackupsQueryVariables>(ClusterBackupsDocument, options);
+        }
+export type ClusterBackupsQueryHookResult = ReturnType<typeof useClusterBackupsQuery>;
+export type ClusterBackupsLazyQueryHookResult = ReturnType<typeof useClusterBackupsLazyQuery>;
+export type ClusterBackupsSuspenseQueryHookResult = ReturnType<typeof useClusterBackupsSuspenseQuery>;
+export type ClusterBackupsQueryResult = Apollo.QueryResult<ClusterBackupsQuery, ClusterBackupsQueryVariables>;
 export const CreateObjectStoreDocument = gql`
     mutation CreateObjectStore($attributes: ObjectStoreAttributes!) {
   createObjectStore(attributes: $attributes) {
@@ -12704,6 +12773,7 @@ export const namedOperations = {
     ScmConnections: 'ScmConnections',
     ObjectStores: 'ObjectStores',
     ClusterBackup: 'ClusterBackup',
+    ClusterBackups: 'ClusterBackups',
     PluralContext: 'PluralContext',
     ClusterAddOns: 'ClusterAddOns',
     Clusters: 'Clusters',
