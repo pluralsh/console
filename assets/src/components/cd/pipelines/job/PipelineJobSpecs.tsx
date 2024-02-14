@@ -1,4 +1,4 @@
-import { Card, Code, SubTab, TabList } from '@pluralsh/design-system'
+import { Card, SubTab, TabList } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'

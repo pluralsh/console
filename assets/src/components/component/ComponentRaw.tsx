@@ -18,11 +18,7 @@ export default function ComponentRaw() {
   return <RawYaml raw={raw} />
 }
 
-export function RawYaml({
-  raw,
-}: {
-  raw?: object | string | null | undefined
-}) {
+export function RawYaml({ raw }: { raw?: object | string | null | undefined }) {
   const rawStr = useMemo(
     () =>
       raw ? stringify(typeof raw === 'string' ? JSON.parse(raw) : raw) : '',
