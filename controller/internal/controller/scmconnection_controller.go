@@ -203,13 +203,10 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmConnection, changed bool) (*console.ScmConnectionFragment, error) {
 	logger := log.FromContext(ctx)
 	exists := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
-	var token *string
-	if scm.Spec.TokenSecretRef != nil {
-		var err error
-		token, err = r.getTokenFromSecret(ctx, scm)
-		if err != nil {
-			return nil, err
-		}
+
+	token, err := r.getTokenFromSecret(ctx, scm)
+	if err != nil {
+		return nil, err
 	}
 
 	// Update only if ScmConnection has changed
@@ -229,6 +226,9 @@ func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmCon
 }
 
 func (r *ScmConnectionReconciler) getTokenFromSecret(ctx context.Context, scm *v1alpha1.ScmConnection) (*string, error) {
+	if scm.Spec.TokenSecretRef == nil {
+		return nil, nil
+	}
 	const tokenKeyName = "token"
 
 	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
