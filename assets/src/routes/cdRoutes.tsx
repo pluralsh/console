@@ -33,7 +33,7 @@ import { GlobalSettingsPermissions } from 'components/cd/globalSettings/GlobalSe
 import { GlobalSettingsRepositories } from 'components/cd/globalSettings/GlobalSettingsRepositories'
 import SelfManage from 'components/cd/globalSettings/SelfManage'
 
-import Pipelines from 'components/cd/pipelines/PipelineDetails'
+import Pipelines from 'components/cd/pipelines/PipelinesList'
 
 import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
 
@@ -94,7 +94,7 @@ import {
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
-import { pipelineJobRoutes } from './pipelineJobRoutes'
+import { pipelineRoutes } from './pipelineRoutes'
 
 export const componentRoutes = (
   <Route
@@ -179,12 +179,7 @@ const mainRoutes = (
     <Route
       path={PIPELINES_REL_PATH}
       element={<Pipelines />}
-    >
-      <Route
-        path=":pipelineId"
-        element={<Pipelines />}
-      />
-    </Route>
+    />
     <Route
       path="git"
       element={
@@ -448,6 +443,6 @@ export const cdRoutes = [
     {podDetailsRoutes}
     {serviceDetailsRoutes}
     {componentRoutes}
-    {pipelineJobRoutes}
+    {pipelineRoutes}
   </Route>,
 ]

@@ -5,9 +5,15 @@ import PipelineJobPods from 'components/cd/pipelines/job/PipelineJobPods'
 import PipelineJobStatus from 'components/cd/pipelines/job/PipelineJobStatus'
 import PipelineJobSpecs from 'components/cd/pipelines/job/PipelineJobSpecs'
 
+import PipelineDetails from 'components/cd/pipelines/PipelineDetails'
+
 import { PIPELINES_REL_PATH } from './cdRoutesConsts'
 
-export const pipelineJobRoutes = (
+export const pipelineRoutes = [
+  <Route
+    path={`${PIPELINES_REL_PATH}/:pipelineId`}
+    element={<PipelineDetails />}
+  />,
   <Route
     path={`${PIPELINES_REL_PATH}/jobs/:jobId`}
     element={<PipelineJob />}
@@ -37,5 +43,5 @@ export const pipelineJobRoutes = (
       path="specs/:tab?"
       element={<PipelineJobSpecs />}
     />
-  </Route>
-)
+  </Route>,
+]

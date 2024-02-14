@@ -1,44 +1,82 @@
-import { useCallback, useMemo } from 'react'
-import {
-  AppIcon,
-  Card,
-  EmptyState,
-  PipelineIcon,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { useMemo } from 'react'
+import { EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
-import isEmpty from 'lodash/isEmpty'
 import { ReactFlowProvider } from 'reactflow'
-import { NetworkStatus } from '@apollo/client'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
-import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
-import { Edge, extendConnection } from 'utils/graphql'
+import { usePipelineQuery } from 'generated/graphql'
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import {
-  VirtualList,
-  type VirtualListRenderer,
-} from 'components/utils/VirtualList'
-import { CD_BASE_CRUMBS } from 'components/cd/ContinuousDeployment'
+
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
 import { Pipeline } from './Pipeline'
+import { PIPELINES_CRUMBS } from './PipelinesList'
 
 const POLL_INTERVAL = 10 * 1000
 
-export const PIPELINES_CRUMBS = [
-  ...CD_BASE_CRUMBS,
-  { label: 'pipelines', url: PIPELINES_ABS_PATH },
-]
+// const PipelineList = styled(VirtualList)(({ theme }) => ({
+//   ...theme.partials.reset.list,
+//   display: 'flex',
+//   height: '100%',
+//   width: 200,
+//   flexShrink: 0,
+// }))
 
-const PipelineList = styled(VirtualList)(({ theme }) => ({
-  ...theme.partials.reset.list,
-  display: 'flex',
-  height: '100%',
-  width: 200,
-  flexShrink: 0,
-}))
+// type ListMeta = {
+//   selectedId: string
+//   setSelectedId: (string) => void
+// }
+
+// const PipelineListItemSC = styled(Card)(({ theme, selected }) => ({
+//   '&&': {
+//     width: '100%',
+//     padding: theme.spacing.medium,
+//     display: 'flex',
+//     alignItems: 'center',
+//     gap: theme.spacing.medium,
+//     borderColor: selected ? theme.colors['border-secondary'] : undefined,
+//   },
+// }))
+
+// const PipelineListItem: VirtualListRenderer<Edge<PipelineFragment>, ListMeta> =
+//   // eslint-disable-next-line func-names
+//   function ({ row, meta }) {
+//     const theme = useTheme()
+//     const { node } = row
+
+//     if (!node) {
+//       return null
+//     }
+//     const isSelected = node.id === meta.selectedId
+
+//     return (
+//       <PipelineListItemSC
+//         clickable
+//         selected={isSelected}
+//         onClick={(e) => {
+//           e.preventDefault()
+//           meta?.setSelectedId?.(node.id)
+//         }}
+//       >
+//         <AppIcon
+//           type="secondary"
+//           size="xxsmall"
+//           icon={
+//             <PipelineIcon
+//               color={
+//                 isSelected
+//                   ? theme.colors['icon-info']
+//                   : theme.colors['icon-light']
+//               }
+//             />
+//           }
+//         />
+//         <div>{row.node?.name}</div>
+//       </PipelineListItemSC>
+//     )
+//   }
 
 export const PipelineEditAreaSC = styled.div(({ theme }) => ({
   border: theme.borders.default,
@@ -49,111 +87,36 @@ export const PipelineEditAreaSC = styled.div(({ theme }) => ({
   overflow: 'hidden',
 }))
 
-type ListMeta = {
-  selectedId: string
-  setSelectedId: (string) => void
-}
-
-const PipelineListItemSC = styled(Card)(({ theme, selected }) => ({
-  '&&': {
-    width: '100%',
-    padding: theme.spacing.medium,
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing.medium,
-    borderColor: selected ? theme.colors['border-secondary'] : undefined,
-  },
-}))
-const PipelineListItem: VirtualListRenderer<Edge<PipelineFragment>, ListMeta> =
-  // eslint-disable-next-line func-names
-  function ({ row, meta }) {
-    const theme = useTheme()
-    const { node } = row
-
-    if (!node) {
-      return null
-    }
-    const isSelected = node.id === meta.selectedId
-
-    return (
-      <PipelineListItemSC
-        clickable
-        selected={isSelected}
-        onClick={(e) => {
-          e.preventDefault()
-          meta?.setSelectedId?.(node.id)
-        }}
-      >
-        <AppIcon
-          type="secondary"
-          size="xxsmall"
-          icon={
-            <PipelineIcon
-              color={
-                isSelected
-                  ? theme.colors['icon-info']
-                  : theme.colors['icon-light']
-              }
-            />
-          }
-        />
-        <div>{row.node?.name}</div>
-      </PipelineListItemSC>
-    )
-  }
-
-function Pipelines() {
+function PipelineDetailsBase() {
   const theme = useTheme()
-  const { data, error, fetchMore, networkStatus } = usePipelinesQuery({
+  const pipelineId = useParams().pipelineId!
+
+  const { data, error } = usePipelineQuery({
+    variables: { id: pipelineId },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
     notifyOnNetworkStatusChange: true,
   })
-  const pageInfo = data?.pipelines?.pageInfo
-  const pipeEdges = data?.pipelines?.edges
-  const selectedPipeline = useParams().pipelineId
-  const navigate = useNavigate()
-  const setSelectedPipeline = useCallback(
-    (pipelineId: string) => {
-      navigate(`${PIPELINES_ABS_PATH}/${pipelineId}`)
-    },
-    [navigate]
+
+  const pipeline = data?.pipeline
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...PIPELINES_CRUMBS,
+        ...(!pipeline
+          ? []
+          : [
+              {
+                label: pipeline?.name,
+                url: `${PIPELINES_ABS_PATH}/${pipelineId}`,
+              },
+            ]),
+      ],
+      [pipeline, pipelineId]
+    )
   )
-  const pipeline = useMemo(
-    () => pipeEdges?.find((p) => p?.node?.id === selectedPipeline)?.node,
-    [pipeEdges, selectedPipeline]
-  )
 
-  if (data && !pipeline) {
-    const firstId = pipeEdges?.[0]?.node?.id
-
-    if (firstId) {
-      setSelectedPipeline(firstId)
-    } else if (selectedPipeline) {
-      setSelectedPipeline('')
-    }
-  }
-
-  useSetBreadcrumbs(PIPELINES_CRUMBS)
-
-  const loadNextPage = useCallback(() => {
-    if (!pageInfo?.hasNextPage) {
-      return
-    }
-    fetchMore({
-      variables: { cursor: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult: { pipelines } }) =>
-        extendConnection(prev, pipelines, 'pipelines'),
-    })
-  }, [fetchMore, pageInfo?.endCursor, pageInfo?.hasNextPage])
-
-  const meta = useMemo(
-    () => ({
-      selectedId: selectedPipeline,
-      setSelectedId: setSelectedPipeline,
-    }),
-    [selectedPipeline, setSelectedPipeline]
-  )
   const emptyState = (
     <EmptyState message="Looks like you don't have any pipelines yet." />
   )
@@ -166,28 +129,18 @@ function Pipelines() {
   }
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        height: '100%',
-      }}
+    <ResponsivePageFullWidth
+      scrollable={false}
+      heading={`Pipeline — ${pipeline?.name}`}
     >
-      {/* <PipelinesFilters setFilterString={setFilterString} /> */}
-      {data?.pipelines?.edges && !isEmpty(data?.pipelines?.edges) ? (
+      {pipeline && (
         <div
-          css={{ display: 'flex', gap: theme.spacing.medium, height: '100%' }}
+          css={{
+            display: 'flex',
+            gap: theme.spacing.medium,
+            height: '100%',
+          }}
         >
-          <PipelineList
-            data={data.pipelines.edges}
-            loadNextPage={loadNextPage}
-            hasNextPage={pageInfo?.hasNextPage}
-            isLoadingNextPage={networkStatus === NetworkStatus.fetchMore}
-            renderer={PipelineListItem}
-            gap={theme.spacing.xsmall}
-            meta={meta}
-          />
           <PipelineEditAreaSC>
             {pipeline && (
               <Pipeline
@@ -197,17 +150,15 @@ function Pipelines() {
             )}
           </PipelineEditAreaSC>
         </div>
-      ) : (
-        emptyState
       )}
-    </div>
+    </ResponsivePageFullWidth>
   )
 }
 
-export default function PipelinesWrapper() {
+export default function PipelineDetails() {
   return (
     <ReactFlowProvider>
-      <Pipelines />
+      <PipelineDetailsBase />
     </ReactFlowProvider>
   )
 }

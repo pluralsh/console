@@ -87,7 +87,7 @@ function EditScmConnectionModalBase({
     <Modal
       portal
       open={open}
-      onClose={onClose}
+      onClose={onClose || undefined}
       asForm
       onSubmit={onSubmit}
       header={`Update connection - ${scmConnection.name}`}

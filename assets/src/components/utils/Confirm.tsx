@@ -38,7 +38,7 @@ export function Confirm({
       <Modal
         header={title}
         open={open}
-        onClose={close}
+        onClose={close || undefined}
         width="512px"
         portal
         actions={
