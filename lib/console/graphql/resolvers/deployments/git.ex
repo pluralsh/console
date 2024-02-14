@@ -7,7 +7,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     PrAutomation,
     ScmConnection,
     PullRequest,
-    ScmWebhook
+    ScmWebhook,
+    DependencyManagementService
   }
 
   def resolve_scm_connection(%{id: id}, _), do: {:ok, Git.get_scm_connection(id)}
@@ -50,6 +51,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def list_scm_webhooks(args, _) do
     ScmWebhook.ordered()
+    |> paginate(args)
+  end
+
+  def list_dependency_management_services(args, _) do
+    DependencyManagementService.ordered()
     |> paginate(args)
   end
 
@@ -101,6 +107,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def setup_renovate(%{connection_id: id, repos: repos} = args, %{context: %{current_user: user}}),
     do: Git.setup_renovate(args, id, repos, user)
+
+  def reconfigure_renovate(%{repos: repos, service_id: svc_id}, %{context: %{current_user: user}}),
+    do: Git.reconfigure_renovate(%{repositories: repos}, svc_id, user)
 
   defp pr_filters(query, args) do
     Enum.reduce(args, query, fn

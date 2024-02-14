@@ -42,6 +42,16 @@ defmodule Console.ExternalGraphQl do
     end
   end
 
+  object :kubernetes_unstructured do
+    field :raw, :map, resolve: fn
+      %{raw: %{"metadata" => %{"managedFields" => _}} = raw}, _, _ ->
+        {:ok, put_in(raw["metadata"]["managedFields"], [])}
+      %{raw: raw}, _, _ -> {:ok, raw}
+    end
+
+    field :metadata, non_null(:metadata)
+  end
+
   import_types Absinthe.Type.Custom
   import_types Absinthe.Plug.Types
   import_types Console.GraphQl.CustomTypes

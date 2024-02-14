@@ -50,10 +50,11 @@ defmodule Console.Deployments.Tree do
   def tree(%ServiceComponent{kind: k, version: v, name: n, group: g, namespace: ns}) when is_binary(ns) do
     kind = String.downcase(k) |> Inflex.pluralize()
     path = Kube.Client.Base.path(g, v, kind, ns, n)
-    with {:ok, %{"metadata" => %{"uid" => uid}}} <- Kube.Client.raw(path) do
-      gather(ns)
-      |> recurse(uid)
-      |> ok()
+    with {:ok, %{"metadata" => %{"uid" => uid}} = root} <- Kube.Client.raw(path) do
+      resources = gather(ns)
+      {results, edges} = recurse(resources, uid)
+      results = Map.put(results, :root, %{raw: root, metadata: Kube.Utils.raw_meta(root)})
+      {:ok, {results, edges}}
     end
   end
   def tree(_), do: {:error, "cannot generate trees for cluster-scoped resources"}

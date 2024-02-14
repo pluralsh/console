@@ -12,6 +12,7 @@ defmodule Kube.Utils do
   def raw_meta(%{"metadata" => meta}) do
     %MetaV1.ObjectMeta{
       name: meta["name"],
+      uid: meta["uid"],
       namespace: meta["namespace"],
       labels: meta["labels"] || %{},
       annotations: meta["annotations"] || %{},

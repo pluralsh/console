@@ -322,6 +322,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "A tree view of the kubernetes object hierarchy beneath a component"
   object :component_tree do
+    field :root,         :kubernetes_unstructured
     field :deployments,  list_of(:deployment)
     field :statefulsets, list_of(:stateful_set)
     field :replicasets,  list_of(:replica_set)

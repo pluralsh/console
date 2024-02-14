@@ -341,6 +341,11 @@ defmodule Console.Deployments.GitTest do
       assert conf["platform"] == "#{scm.type}"
       assert conf["repositories"] == "some/repo,other/repo"
       assert conf["consoleUrl"] == Console.url("/gql")
+
+      [mgmt] = Console.Repo.all(Console.Schema.DependencyManagementService)
+
+      assert mgmt.service_id == svc.id
+      assert mgmt.connection_id == scm.id
     end
   end
 end
