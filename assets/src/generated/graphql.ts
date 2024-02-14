@@ -5552,6 +5552,8 @@ export type DeleteScmConnectionMutation = { __typename?: 'RootMutationType', del
 
 export type ObjectStoreFragment = { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, subscriptionId: string, clientId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string, region: string } | null };
 
+export type ClustersObjectStoresFragment = { __typename?: 'Cluster', id: string, name: string, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, subscriptionId: string, clientId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string, region: string } | null } | null };
+
 export type ClusterBackupFragment = { __typename?: 'ClusterBackup', id: string, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
 export type ClusterRestoreFragment = { __typename?: 'ClusterRestore', id: string, status: RestoreStatus, insertedAt?: string | null, updatedAt?: string | null, backup?: { __typename?: 'ClusterBackup', id: string, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
@@ -5565,6 +5567,14 @@ export type ObjectStoresQueryVariables = Exact<{
 
 
 export type ObjectStoresQuery = { __typename?: 'RootQueryType', objectStores?: { __typename?: 'ObjectStoreConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ObjectStoreEdge', node?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, subscriptionId: string, clientId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string, region: string } | null } | null } | null> | null } | null };
+
+export type ClustersObjectStoresQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ClustersObjectStoresQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, subscriptionId: string, clientId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string, region: string } | null } | null } | null } | null> | null } | null };
 
 export type ClusterBackupQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -6654,6 +6664,15 @@ export const ObjectStoreFragmentDoc = gql`
   updatedAt
 }
     `;
+export const ClustersObjectStoresFragmentDoc = gql`
+    fragment ClustersObjectStores on Cluster {
+  id
+  name
+  objectStore {
+    ...ObjectStore
+  }
+}
+    ${ObjectStoreFragmentDoc}`;
 export const ClusterTinyFragmentDoc = gql`
     fragment ClusterTiny on Cluster {
   id
@@ -8632,6 +8651,55 @@ export type ObjectStoresQueryHookResult = ReturnType<typeof useObjectStoresQuery
 export type ObjectStoresLazyQueryHookResult = ReturnType<typeof useObjectStoresLazyQuery>;
 export type ObjectStoresSuspenseQueryHookResult = ReturnType<typeof useObjectStoresSuspenseQuery>;
 export type ObjectStoresQueryResult = Apollo.QueryResult<ObjectStoresQuery, ObjectStoresQueryVariables>;
+export const ClustersObjectStoresDocument = gql`
+    query ClustersObjectStores($first: Int = 100, $after: String) {
+  clusters(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClustersObjectStores
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClustersObjectStoresFragmentDoc}`;
+
+/**
+ * __useClustersObjectStoresQuery__
+ *
+ * To run a query within a React component, call `useClustersObjectStoresQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClustersObjectStoresQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClustersObjectStoresQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useClustersObjectStoresQuery(baseOptions?: Apollo.QueryHookOptions<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>(ClustersObjectStoresDocument, options);
+      }
+export function useClustersObjectStoresLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>(ClustersObjectStoresDocument, options);
+        }
+export function useClustersObjectStoresSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>(ClustersObjectStoresDocument, options);
+        }
+export type ClustersObjectStoresQueryHookResult = ReturnType<typeof useClustersObjectStoresQuery>;
+export type ClustersObjectStoresLazyQueryHookResult = ReturnType<typeof useClustersObjectStoresLazyQuery>;
+export type ClustersObjectStoresSuspenseQueryHookResult = ReturnType<typeof useClustersObjectStoresSuspenseQuery>;
+export type ClustersObjectStoresQueryResult = Apollo.QueryResult<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>;
 export const ClusterBackupDocument = gql`
     query ClusterBackup($id: ID, $clusterId: ID, $namespace: String, $name: String) {
   clusterBackup(
@@ -12772,6 +12840,7 @@ export const namedOperations = {
     PrAutomations: 'PrAutomations',
     ScmConnections: 'ScmConnections',
     ObjectStores: 'ObjectStores',
+    ClustersObjectStores: 'ClustersObjectStores',
     ClusterBackup: 'ClusterBackup',
     ClusterBackups: 'ClusterBackups',
     PluralContext: 'PluralContext',
@@ -12891,6 +12960,7 @@ export const namedOperations = {
     PrAutomation: 'PrAutomation',
     ScmConnection: 'ScmConnection',
     ObjectStore: 'ObjectStore',
+    ClustersObjectStores: 'ClustersObjectStores',
     ClusterBackup: 'ClusterBackup',
     ClusterRestore: 'ClusterRestore',
     PageInfo: 'PageInfo',

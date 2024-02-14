@@ -21,6 +21,14 @@ fragment ObjectStore on ObjectStore {
   updatedAt
 }
 
+fragment ClustersObjectStores on Cluster {
+  id
+  name
+  objectStore {
+    ...ObjectStore
+  }
+}
+
 fragment ClusterBackup on ClusterBackup {
   id
   cluster {
@@ -48,6 +56,19 @@ query ObjectStores($after: String, $first: Int = 100, $before: String, $last: In
     edges {
       node {
         ...ObjectStore
+      }
+    }
+  }
+}
+
+query ClustersObjectStores($first: Int = 100, $after: String) {
+  clusters(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClustersObjectStores
       }
     }
   }
