@@ -23,7 +23,7 @@ import {
 } from '../../cd/pipelines/utils/nodeLayouter'
 import { EdgeLineMarkerDefs, edgeTypes } from '../../cd/pipelines/EdgeLine'
 
-import { PipelineEditAreaSC } from '../../cd/pipelines/Pipelines'
+import { PipelineEditAreaSC } from '../../cd/pipelines/PipelineDetails'
 
 import { ComponentTreeNode } from './ComponentTreeNode'
 

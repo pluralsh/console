@@ -33,7 +33,7 @@ import { GlobalSettingsPermissions } from 'components/cd/globalSettings/GlobalSe
 import { GlobalSettingsRepositories } from 'components/cd/globalSettings/GlobalSettingsRepositories'
 import SelfManage from 'components/cd/globalSettings/SelfManage'
 
-import Pipelines from 'components/cd/pipelines/Pipelines'
+import Pipelines from 'components/cd/pipelines/PipelineDetails'
 
 import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
 
