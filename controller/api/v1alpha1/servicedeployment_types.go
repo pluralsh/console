@@ -81,6 +81,9 @@ type ServiceSpec struct {
 	// Dependencies contain dependent services
 	// +kubebuilder:validation:Optional
 	Dependencies []corev1.ObjectReference `json:"dependencies,omitempty"`
+	// Contexts contain dependent service context names
+	// +kubebuilder:validation:Optional
+	Contexts []string `json:"contexts,omitempty"`
 }
 
 type ServiceStatus struct {

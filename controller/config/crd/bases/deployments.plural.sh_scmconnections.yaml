@@ -85,7 +85,6 @@ spec:
                 type: string
             required:
             - name
-            - tokenSecretRef
             - type
             type: object
           status:

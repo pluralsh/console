@@ -3,16 +3,14 @@ package client
 import (
 	"context"
 
-	gqlgenclient "github.com/Yamashou/gqlgenc/client"
 	gqlclient "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	"github.com/pluralsh/console/controller/api/v1alpha1"
 )
 
-func (c *client) CreateProvider(ctx context.Context, attributes gqlclient.ClusterProviderAttributes, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
-	response, err := c.consoleClient.CreateClusterProvider(ctx, attributes, options...)
+func (c *client) CreateProvider(ctx context.Context, attributes gqlclient.ClusterProviderAttributes) (*gqlclient.ClusterProviderFragment, error) {
+	response, err := c.consoleClient.CreateClusterProvider(ctx, attributes)
 	if err != nil {
 		return nil, err
 	}
@@ -20,8 +18,8 @@ func (c *client) CreateProvider(ctx context.Context, attributes gqlclient.Cluste
 	return response.CreateClusterProvider, err
 }
 
-func (c *client) GetProvider(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
-	response, err := c.consoleClient.GetClusterProvider(ctx, id, options...)
+func (c *client) GetProvider(ctx context.Context, id string) (*gqlclient.ClusterProviderFragment, error) {
+	response, err := c.consoleClient.GetClusterProvider(ctx, id)
 	if err == nil && (response == nil || response.ClusterProvider == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
@@ -33,8 +31,8 @@ func (c *client) GetProvider(ctx context.Context, id string, options ...gqlgencl
 	return response.ClusterProvider, err
 }
 
-func (c *client) GetProviderByCloud(ctx context.Context, cloud v1alpha1.CloudProvider, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
-	response, err := c.consoleClient.GetClusterProviderByCloud(ctx, string(cloud), options...)
+func (c *client) GetProviderByCloud(ctx context.Context, cloud v1alpha1.CloudProvider) (*gqlclient.ClusterProviderFragment, error) {
+	response, err := c.consoleClient.GetClusterProviderByCloud(ctx, string(cloud))
 	if err == nil && (response == nil || response.ClusterProvider == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, string(cloud))
 	}
@@ -46,8 +44,8 @@ func (c *client) GetProviderByCloud(ctx context.Context, cloud v1alpha1.CloudPro
 	return response.ClusterProvider, err
 }
 
-func (c *client) UpdateProvider(ctx context.Context, id string, attributes gqlclient.ClusterProviderUpdateAttributes, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
-	response, err := c.consoleClient.UpdateClusterProvider(ctx, id, attributes, options...)
+func (c *client) UpdateProvider(ctx context.Context, id string, attributes gqlclient.ClusterProviderUpdateAttributes) (*gqlclient.ClusterProviderFragment, error) {
+	response, err := c.consoleClient.UpdateClusterProvider(ctx, id, attributes)
 	if err == nil && (response == nil || response.UpdateClusterProvider == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
@@ -59,8 +57,8 @@ func (c *client) UpdateProvider(ctx context.Context, id string, attributes gqlcl
 	return response.UpdateClusterProvider, err
 }
 
-func (c *client) DeleteProvider(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error {
-	_, err := c.consoleClient.DeleteClusterProvider(ctx, id, options...)
+func (c *client) DeleteProvider(ctx context.Context, id string) error {
+	_, err := c.consoleClient.DeleteClusterProvider(ctx, id)
 	return err
 }
 
