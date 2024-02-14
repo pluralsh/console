@@ -11,8 +11,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
-import { Pipeline } from './Pipeline'
-import { PIPELINES_CRUMBS } from './PipelinesList'
+import { Pipeline } from './PipelineGraph'
+import { PIPELINES_CRUMBS } from './Pipelines'
 
 const POLL_INTERVAL = 10 * 1000
 

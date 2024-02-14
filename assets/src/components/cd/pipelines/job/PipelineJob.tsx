@@ -42,7 +42,7 @@ import { Body2P, Subtitle2H1 } from 'components/utils/typography/Text'
 
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
-import { PIPELINES_CRUMBS } from '../PipelinesList'
+import { PIPELINES_CRUMBS } from '../Pipelines'
 
 const getDirectory = () => [
   { path: 'logs', label: 'Logs', enabled: true },
