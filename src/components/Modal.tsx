@@ -1,5 +1,4 @@
 import { type ReactNode, type Ref, forwardRef, useEffect } from 'react'
-import { Flex, H1, type ModalProps } from 'honorable'
 import PropTypes from 'prop-types'
 
 import styled, { type StyledComponentPropsWithRef } from 'styled-components'
@@ -8,7 +7,7 @@ import { type ColorKey, type SeverityExt } from '../types'
 
 import useLockedBody from '../hooks/useLockedBody'
 
-import { HonorableModal } from './HonorableModal'
+import { HonorableModal, type ModalProps } from './HonorableModal'
 
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import type createIcon from './icons/createIcon'
@@ -37,6 +36,7 @@ type ModalPropsType = Omit<ModalProps, 'size'> & {
   lockBody?: boolean
   asForm?: boolean
   formProps?: StyledComponentPropsWithRef<'form'>
+  scrollable?: boolean
   [x: string]: unknown
 }
 
@@ -73,23 +73,66 @@ const sizeToWidth = {
   large: 608,
 } as const satisfies Record<ModalSize, number>
 
-const ModalSC = styled.div((_) => ({
+const ModalSC = styled.div<{ $scrollable: boolean }>(({ $scrollable }) => ({
   position: 'relative',
+  ...($scrollable
+    ? {}
+    : {
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }),
 }))
 
-const ModalContentSC = styled.div<{ $hasActions: boolean }>(
-  ({ theme, $hasActions }) => ({
-    margin: theme.spacing.large,
-    marginBottom: $hasActions ? 0 : theme.spacing.large,
-    ...theme.partials.text.body1,
-  })
-)
+const ModalContentSC = styled.div<{
+  $scrollable: boolean
+  $hasActions: boolean
+}>(({ theme, $scrollable, $hasActions }) => ({
+  margin: theme.spacing.large,
+  marginBottom: $hasActions ? 0 : theme.spacing.large,
+  ...theme.partials.text.body1,
+  ...($scrollable
+    ? {}
+    : {
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }),
+}))
 
 const ModalActionsSC = styled.div((_) => ({
   display: 'flex',
   position: 'sticky',
   flexDirection: 'column',
   bottom: '0',
+}))
+
+const gradientHeight = 12
+const ModalActionsGradientSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  background: `linear-gradient(180deg, transparent 0%, ${theme.colors['fill-one']} 100%);`,
+  height: gradientHeight,
+}))
+const ModalActionsContentSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  padding: theme.spacing.large,
+  paddingTop: theme.spacing.large - gradientHeight,
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  backgroundColor: theme.colors['fill-one'],
+}))
+
+const ModalHeaderWrapSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  justifyContent: 'start',
+  marginBottom: theme.spacing.large,
+  gap: theme.spacing.xsmall,
+}))
+
+const ModalHeaderSC = styled.h1(({ theme }) => ({
+  margin: 0,
+  ...theme.partials.text.overline,
+  color: theme.colors['text-xlight'],
 }))
 
 function ModalRef(
@@ -105,6 +148,7 @@ function ModalRef(
     lockBody = true,
     asForm = false,
     formProps = {},
+    scrollable = true,
     ...props
   }: ModalPropsType,
   ref: Ref<any>
@@ -123,55 +167,37 @@ function ModalRef(
       open={open}
       onClose={onClose}
       ref={ref}
-      fontSize={16}
-      color="text"
       width={sizeToWidth[size]}
       maxWidth={sizeToWidth[size]}
+      scrollable={scrollable}
       {...props}
     >
       <ModalSC
         as={asForm ? 'form' : undefined}
+        $scrollable={scrollable}
         {...(asForm ? formProps : {})}
       >
-        <ModalContentSC $hasActions={!!actions}>
+        <ModalContentSC
+          $scrollable={scrollable}
+          $hasActions={!!actions}
+        >
           {!!header && (
-            <Flex
-              ref={ref}
-              align="center"
-              justify="start"
-              marginBottom="large"
-              gap="xsmall"
-            >
+            <ModalHeaderWrapSC ref={ref}>
               {HeaderIcon && (
                 <HeaderIcon
                   marginTop={-2} // optically center icon
                   color={iconColorKey}
                 />
               )}
-              <H1
-                overline
-                color="text-xlight"
-              >
-                {header}
-              </H1>
-            </Flex>
+              <ModalHeaderSC>{header}</ModalHeaderSC>
+            </ModalHeaderWrapSC>
           )}
           {children}
         </ModalContentSC>
         {!!actions && (
           <ModalActionsSC>
-            <Flex
-              background="linear-gradient(180deg, transparent 0%, fill-one 100%);"
-              height={16}
-            />
-            <Flex
-              padding="large"
-              align="center"
-              justify="flex-end"
-              backgroundColor="fill-one"
-            >
-              {actions}
-            </Flex>
+            <ModalActionsGradientSC />
+            <ModalActionsContentSC>{actions}</ModalActionsContentSC>
           </ModalActionsSC>
         )}
       </ModalSC>

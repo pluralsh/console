@@ -71,15 +71,12 @@ const hueToFill = {
   lightest: 3,
 } as const satisfies Record<CardHue, CardFillLevel>
 
-const fillToNeutralSelectedBgC: Record<
-  FillLevel,
-  keyof DefaultTheme['colors']
-> = {
+const fillToNeutralSelectedBgC = {
   0: 'fill-one-selected',
   1: 'fill-one-selected',
   2: 'fill-two-selected',
   3: 'fill-three-selected',
-}
+} as const satisfies Record<FillLevel, keyof DefaultTheme['colors']>
 
 export function useDecideFillLevel({
   hue,
@@ -207,7 +204,7 @@ const CardSC = styled(Div)<{
     })}`,
     borderRadius: theme.borderRadiuses[cornerSize],
     backgroundColor: selected
-      ? fillToNeutralSelectedBgC[fillLevel]
+      ? theme.colors[fillToNeutralSelectedBgC[fillLevel]]
       : getBgColor({ theme, fillLevel, severity }),
     '&:focus, &:focus-visible': {
       outline: 'none',

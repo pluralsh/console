@@ -1,5 +1,7 @@
-import { Button, Flex, Modal as HonorableModal, P } from 'honorable'
+import { Button, Flex, P } from 'honorable'
 import { type ReactElement, useEffect, useMemo, useState } from 'react'
+
+import { useTheme } from 'styled-components'
 
 import { type LayerPositionType } from '../components/Layer'
 import { Wizard } from '../components/wizard/Wizard'
@@ -16,6 +18,7 @@ import { Toast } from '../components/Toast'
 import FormField from '../components/FormField'
 import Modal from '../components/Modal'
 import GlobeIcon from '../components/icons/GlobeIcon'
+import { HonorableModal } from '../components/HonorableModal'
 
 export default {
   title: 'Wizard',
@@ -130,6 +133,7 @@ const DEFAULT_STEPS: Array<StepConfig> = [
 ]
 
 function ModalTemplate() {
+  const theme = useTheme()
   const [open, setOpen] = useState(true)
   const [confirmClose, setConfirmClose] = useState(false)
   const [visible, setVisible] = useState(false)
@@ -140,12 +144,16 @@ function ModalTemplate() {
       <Button onClick={() => setOpen(true)}>Open</Button>
 
       <HonorableModal
+        portal
         open={open}
         fontSize={16}
         width={768}
         maxWidth={768}
         height={768}
-        padding={24}
+        paddingTop={theme.spacing.large}
+        paddingLeft={theme.spacing.large}
+        paddingRight={theme.spacing.large}
+        paddingBottom={theme.spacing.large}
       >
         <Wizard
           onClose={() => (inProgress ? setConfirmClose(true) : setOpen(false))}

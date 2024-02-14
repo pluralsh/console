@@ -30,6 +30,7 @@ export { default as Highlight } from './components/Highlight'
 export type { IconFrameProps } from './components/IconFrame'
 export { default as IconFrame } from './components/IconFrame'
 export { default as Input } from './components/Input'
+export { default as Input2 } from './components/Input2'
 export { default as Markdown } from './components/Markdown'
 export type { PageCardProps } from './components/PageCard'
 export { default as PageCard } from './components/PageCard'
@@ -71,6 +72,7 @@ export { default as Sidebar } from './components/Sidebar'
 export { default as SidebarSection } from './components/SidebarSection'
 export { default as SidebarItem } from './components/SidebarItem'
 export { default as Modal } from './components/Modal'
+export { HonorableModal } from './components/HonorableModal'
 export type {
   ChecklistProps,
   ChecklistStateProps,

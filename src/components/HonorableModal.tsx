@@ -18,7 +18,6 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { Transition } from 'react-transition-group'
-import PropTypes from 'prop-types'
 
 import { Div, useTheme } from 'honorable'
 import useRootStyles from 'honorable/dist/hooks/useRootStyles.js'
@@ -29,29 +28,17 @@ import filterUndefinedValues from 'honorable/dist/utils/filterUndefinedValues.js
 
 export const modalParts = ['Backdrop'] as const
 
-export const modalPropTypes = {
-  open: PropTypes.bool,
-  onClose: PropTypes.func,
-  fade: PropTypes.bool,
-  transitionDuration: PropTypes.number,
-  disableEscapeKey: PropTypes.bool,
-  portal: PropTypes.bool,
-}
-
 export type ModalBaseProps = {
   open?: boolean
-  onClose?: (event: MouseEvent | KeyboardEvent) => void
+  onClose?: (event?: MouseEvent | KeyboardEvent) => void
   fade?: boolean
   transitionDuration?: number
   disableEscapeKey?: boolean
   portal?: boolean
 }
 
-export type ModalProps = ComponentProps<
-  ModalBaseProps,
-  'div',
-  (typeof modalParts)[number]
->
+export type ModalProps = ModalBaseProps &
+  ComponentProps<ModalBaseProps, 'div', (typeof modalParts)[number]>
 
 function ModalRef(props: ModalProps, ref: Ref<any>) {
   const {
@@ -225,7 +212,7 @@ function ModalRef(props: ModalProps, ref: Ref<any>) {
             ref={ref}
             backgroundColor="background"
             overflowY="auto"
-            margin={32}
+            margin="xlarge"
             {...rootStyles}
             {...filterUndefinedValues(otherProps)}
           />
@@ -238,6 +225,5 @@ function ModalRef(props: ModalProps, ref: Ref<any>) {
 const BaseModal = forwardRef(ModalRef)
 
 BaseModal.displayName = 'Modal'
-BaseModal.propTypes = modalPropTypes
 
 export const HonorableModal = memo(BaseModal)
