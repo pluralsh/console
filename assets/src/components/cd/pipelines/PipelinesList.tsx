@@ -123,7 +123,6 @@ export default function PipelineList() {
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
           onRowClick={(_e, { original }: Row<Edge<PipelineFragment>>) => {
-            console.log('row', original)
             navigate(`${PIPELINES_ABS_PATH}/${original.node?.id}`)
           }}
           css={{
