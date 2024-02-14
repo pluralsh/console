@@ -2762,6 +2762,8 @@ type PullRequest {
 
   title: String
 
+  creator: String
+
   labels: [String]
 
   "the cluster this pr is meant to modify"

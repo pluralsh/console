@@ -2861,6 +2861,7 @@ export type PullRequest = {
   __typename?: 'PullRequest';
   /** the cluster this pr is meant to modify */
   cluster?: Maybe<Cluster>;
+  creator?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
