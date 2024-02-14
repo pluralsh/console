@@ -3,14 +3,13 @@ package client
 import (
 	"context"
 
-	gqlgenclient "github.com/Yamashou/gqlgenc/client"
 	gqlclient "github.com/pluralsh/console-client-go"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-func (c *client) CreateScmConnection(ctx context.Context, attributes gqlclient.ScmConnectionAttributes, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
-	response, err := c.consoleClient.CreateScmConnection(ctx, attributes, options...)
+func (c *client) CreateScmConnection(ctx context.Context, attributes gqlclient.ScmConnectionAttributes) (*gqlclient.ScmConnectionFragment, error) {
+	response, err := c.consoleClient.CreateScmConnection(ctx, attributes)
 	if err != nil {
 		return nil, err
 	}
@@ -18,8 +17,8 @@ func (c *client) CreateScmConnection(ctx context.Context, attributes gqlclient.S
 	return response.CreateScmConnection, err
 }
 
-func (c *client) UpdateScmConnection(ctx context.Context, id string, attributes gqlclient.ScmConnectionAttributes, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
-	response, err := c.consoleClient.UpdateScmConnection(ctx, id, attributes, options...)
+func (c *client) UpdateScmConnection(ctx context.Context, id string, attributes gqlclient.ScmConnectionAttributes) (*gqlclient.ScmConnectionFragment, error) {
+	response, err := c.consoleClient.UpdateScmConnection(ctx, id, attributes)
 	if err != nil {
 		return nil, err
 	}
@@ -27,14 +26,14 @@ func (c *client) UpdateScmConnection(ctx context.Context, id string, attributes 
 	return response.UpdateScmConnection, err
 }
 
-func (c *client) DeleteScmConnection(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error {
-	_, err := c.consoleClient.DeleteScmConnection(ctx, id, options...)
+func (c *client) DeleteScmConnection(ctx context.Context, id string) error {
+	_, err := c.consoleClient.DeleteScmConnection(ctx, id)
 
 	return err
 }
 
-func (c *client) GetScmConnection(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
-	response, err := c.consoleClient.GetScmConnection(ctx, id, options...)
+func (c *client) GetScmConnection(ctx context.Context, id string) (*gqlclient.ScmConnectionFragment, error) {
+	response, err := c.consoleClient.GetScmConnection(ctx, id)
 	if err == nil && (response == nil || response.ScmConnection == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
@@ -46,8 +45,8 @@ func (c *client) GetScmConnection(ctx context.Context, id string, options ...gql
 	return response.ScmConnection, err
 }
 
-func (c *client) GetScmConnectionByName(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
-	response, err := c.consoleClient.GetScmConnectionByName(ctx, name, options...)
+func (c *client) GetScmConnectionByName(ctx context.Context, name string) (*gqlclient.ScmConnectionFragment, error) {
+	response, err := c.consoleClient.GetScmConnectionByName(ctx, name)
 	if err == nil && (response == nil || response.ScmConnection == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, name)
 	}
