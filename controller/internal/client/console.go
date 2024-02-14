@@ -4,8 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	gqlgenclient "github.com/Yamashou/gqlgenc/client"
-
 	console "github.com/pluralsh/console-client-go"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
@@ -23,7 +21,7 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 type client struct {
 	ctx           context.Context
-	consoleClient *console.Client
+	consoleClient console.ConsoleClient
 }
 
 type ConsoleClient interface {
@@ -44,11 +42,11 @@ type ConsoleClient interface {
 	DeleteCluster(id string) (*console.ClusterFragment, error)
 	IsClusterExisting(id *string) bool
 	IsClusterDeleting(id *string) bool
-	CreateProvider(ctx context.Context, attributes console.ClusterProviderAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
-	GetProvider(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
-	GetProviderByCloud(ctx context.Context, cloud v1alpha1.CloudProvider, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
-	UpdateProvider(ctx context.Context, id string, attributes console.ClusterProviderUpdateAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ClusterProviderFragment, error)
-	DeleteProvider(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error
+	CreateProvider(ctx context.Context, attributes console.ClusterProviderAttributes) (*console.ClusterProviderFragment, error)
+	GetProvider(ctx context.Context, id string) (*console.ClusterProviderFragment, error)
+	GetProviderByCloud(ctx context.Context, cloud v1alpha1.CloudProvider) (*console.ClusterProviderFragment, error)
+	UpdateProvider(ctx context.Context, id string, attributes console.ClusterProviderUpdateAttributes) (*console.ClusterProviderFragment, error)
+	DeleteProvider(ctx context.Context, id string) error
 	IsProviderExists(ctx context.Context, id string) bool
 	IsProviderDeleting(ctx context.Context, id string) bool
 	UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error
@@ -64,24 +62,25 @@ type ConsoleClient interface {
 	IsPipelineExisting(id string) bool
 	GetUser(email string) (*console.UserFragment, error)
 	GetGroup(name string) (*console.GroupFragment, error)
-	CreateScmConnection(ctx context.Context, attributes console.ScmConnectionAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
-	UpdateScmConnection(ctx context.Context, id string, attributes console.ScmConnectionAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
-	DeleteScmConnection(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error
-	GetScmConnection(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
-	GetScmConnectionByName(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*console.ScmConnectionFragment, error)
+	CreateScmConnection(ctx context.Context, attributes console.ScmConnectionAttributes) (*console.ScmConnectionFragment, error)
+	UpdateScmConnection(ctx context.Context, id string, attributes console.ScmConnectionAttributes) (*console.ScmConnectionFragment, error)
+	DeleteScmConnection(ctx context.Context, id string) error
+	GetScmConnection(ctx context.Context, id string) (*console.ScmConnectionFragment, error)
+	GetScmConnectionByName(ctx context.Context, name string) (*console.ScmConnectionFragment, error)
 	IsScmConnectionExists(ctx context.Context, name string) bool
 	GetClusterBackup(clusterId, namespace, name *string) (*console.ClusterBackupFragment, error)
 	GetClusterRestore(id string) (*console.ClusterRestoreFragment, error)
 	UpdateClusterRestore(id string, attrs console.RestoreAttributes) (*console.ClusterRestoreFragment, error)
 	CreateClusterRestore(backupId string) (*console.ClusterRestoreFragment, error)
 	IsClusterRestoreExisting(id string) bool
-	CreatePrAutomation(ctx context.Context, attributes console.PrAutomationAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
-	UpdatePrAutomation(ctx context.Context, id string, attributes console.PrAutomationAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
-	DeletePrAutomation(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error
-	GetPrAutomation(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
-	GetPrAutomationByName(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error)
+	CreatePrAutomation(ctx context.Context, attributes console.PrAutomationAttributes) (*console.PrAutomationFragment, error)
+	UpdatePrAutomation(ctx context.Context, id string, attributes console.PrAutomationAttributes) (*console.PrAutomationFragment, error)
+	DeletePrAutomation(ctx context.Context, id string) error
+	GetPrAutomation(ctx context.Context, id string) (*console.PrAutomationFragment, error)
+	GetPrAutomationByName(ctx context.Context, name string) (*console.PrAutomationFragment, error)
 	IsPrAutomationExists(ctx context.Context, id string) bool
 	IsPrAutomationExistsByName(ctx context.Context, name string) bool
+	GetServiceContext(name string) (*console.ServiceContextFragment, error)
 }
 
 func New(url, token string) ConsoleClient {
@@ -93,7 +92,7 @@ func New(url, token string) ConsoleClient {
 	}
 
 	return &client{
-		consoleClient: console.NewClient(&httpClient, url),
+		consoleClient: console.NewClient(&httpClient, url, nil),
 		ctx:           context.Background(),
 	}
 }
