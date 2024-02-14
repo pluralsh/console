@@ -65,14 +65,32 @@ const columns = [
 export default function Backups() {
   const theme = useTheme()
 
-  const { data, error, refetch } = useClustersObjectStoresQuery({
+  const { data, error, loading, refetch } = useClustersObjectStoresQuery({
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   }) // TODO: Pagination.
 
+  const { clustersWithBackups, clustersWithoutBackups } = useMemo(() => {
+    const clusters: ClustersObjectStoresFragment[] = (
+      data?.clusters?.edges || []
+    )
+      .map((e) => e?.node)
+      .filter((c): c is ClustersObjectStoresFragment => !!c)
+
+    return {
+      clustersWithBackups: clusters.filter((c) => c.objectStore) || [],
+      clustersWithoutBackups: clusters.filter((c) => !c.objectStore) || [],
+    }
+  }, [data])
+
   const headerActions = useMemo(
-    () => <ConfigureClusterBackups refetch={refetch} />,
-    [refetch]
+    () => (
+      <ConfigureClusterBackups
+        clusters={clustersWithoutBackups}
+        refetch={refetch}
+      />
+    ),
+    [clustersWithoutBackups, refetch]
   )
 
   useSetPageHeaderContent(headerActions)
@@ -104,7 +122,7 @@ export default function Backups() {
     )
   }
 
-  if (!data) {
+  if (loading) {
     return <LoadingIndicator />
   }
 
@@ -117,10 +135,10 @@ export default function Backups() {
         height: '100%',
       }}
     >
-      {!isEmpty(data?.clusters?.edges) ? (
+      {!isEmpty(clustersWithBackups) ? (
         <FullHeightTableWrap>
           <Table
-            data={data?.clusters?.edges || []}
+            data={clustersWithBackups}
             columns={columns}
             css={{
               maxHeight: 'unset',

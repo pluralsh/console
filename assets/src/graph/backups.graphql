@@ -22,8 +22,7 @@ fragment ObjectStore on ObjectStore {
 }
 
 fragment ClustersObjectStores on Cluster {
-  id
-  name
+  ...ClusterTiny
   objectStore {
     ...ObjectStore
   }
@@ -108,6 +107,12 @@ mutation UpdateObjectStore($id: ID!, $attributes: ObjectStoreAttributes!) {
 mutation DeleteObjectStore($id: ID!) {
   deleteObjectStore(id: $id) {
     ...ObjectStore
+  }
+}
+
+mutation ConfigureBackups($clusterId: ID!, $storeId: ID!) {
+  configureBackups(clusterId: $clusterId, storeId: $storeId) {
+    id
   }
 }
 

@@ -1,24 +1,32 @@
 import { FormEvent, useCallback, useState } from 'react'
-import { Button, FormField, Input } from '@pluralsh/design-system'
+import { Button, FormField, ListBoxItem, Select } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
 
 import ModalAlt from '../../cd/ModalAlt'
-import { useCreateObjectStoreMutation } from '../../../generated/graphql'
+import {
+  ClustersObjectStoresFragment,
+  useConfigureBackupsMutation,
+  useObjectStoresQuery,
+} from '../../../generated/graphql'
 import { GqlError } from '../../utils/Alert'
+import { ClusterSelect } from '../../cd/addOns/ClusterSelect'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 
 export default function ConfigureClusterBackupsModal({
   open,
   onClose,
   refetch,
+  clusters,
 }: {
   open: boolean
   onClose: () => void
   refetch: Nullable<() => void>
+  clusters: ClustersObjectStoresFragment[]
 }) {
   const theme = useTheme()
-
-  const [name, setName] = useState<string>('')
+  const [clusterId, setClusterId] = useState<string>(clusters[0].id)
+  const [storeId, setStoreId] = useState<string>('')
 
   const closeModal = useCallback(() => onClose(), [onClose])
   const onCompleted = useCallback(() => {
@@ -26,12 +34,20 @@ export default function ConfigureClusterBackupsModal({
     closeModal()
   }, [refetch, closeModal])
 
-  const [mutation, { loading, error }] = useCreateObjectStoreMutation({
-    variables: { attributes: { name } },
+  const {
+    data,
+    error: loadError,
+    loading: loadingData,
+  } = useObjectStoresQuery({
+    fetchPolicy: 'cache-and-network',
+  }) // TODO: Pagination.
+
+  const [mutation, { loading, error }] = useConfigureBackupsMutation({
+    variables: { clusterId, storeId },
     onCompleted,
   })
 
-  const disabled = !name
+  const disabled = false
 
   const onSubmit = useCallback(
     (e: FormEvent) => {
@@ -43,9 +59,22 @@ export default function ConfigureClusterBackupsModal({
     [disabled, loading, mutation]
   )
 
+  if (loadError) {
+    return (
+      <GqlError
+        header="Something went wrong"
+        error={error}
+      />
+    )
+  }
+
+  if (loadingData) {
+    return <LoadingIndicator />
+  }
+
   return (
     <ModalAlt
-      header=""
+      header="Configure cluster backup"
       size="large"
       open={open}
       portal
@@ -78,7 +107,7 @@ export default function ConfigureClusterBackupsModal({
           color: theme.colors['text-xlight'],
         }}
       >
-        Configure object store
+        Configure backup
       </p>
       <div
         css={{
@@ -88,11 +117,27 @@ export default function ConfigureClusterBackupsModal({
           marginBottom: error ? theme.spacing.large : 0,
         }}
       >
-        <FormField label="Name">
-          <Input
-            value={name}
-            onChange={(e) => setName(e.currentTarget.value)}
+        <FormField label="Cluster">
+          <ClusterSelect
+            clusters={clusters}
+            selectedKey={clusterId}
+            onSelectionChange={(key) => setClusterId(key as string)}
+            withoutLabel
           />
+        </FormField>
+        <FormField label="Object store">
+          <Select
+            selectedKey={storeId}
+            onSelectionChange={(key) => setStoreId(key as string)}
+          >
+            {data?.objectStores?.edges?.map((edge) => (
+              <ListBoxItem
+                key={edge?.node?.id}
+                label={edge?.node?.name}
+                textValue={edge?.node?.name}
+              />
+            ))}
+          </Select>
         </FormField>
       </div>
       {error && (

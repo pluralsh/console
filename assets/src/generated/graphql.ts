@@ -5552,7 +5552,7 @@ export type DeleteScmConnectionMutation = { __typename?: 'RootMutationType', del
 
 export type ObjectStoreFragment = { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, subscriptionId: string, clientId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string, region: string } | null };
 
-export type ClustersObjectStoresFragment = { __typename?: 'Cluster', id: string, name: string, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, subscriptionId: string, clientId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string, region: string } | null } | null };
+export type ClustersObjectStoresFragment = { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, subscriptionId: string, clientId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string, region: string } | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
 
 export type ClusterBackupFragment = { __typename?: 'ClusterBackup', id: string, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
@@ -5574,7 +5574,7 @@ export type ClustersObjectStoresQueryVariables = Exact<{
 }>;
 
 
-export type ClustersObjectStoresQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, subscriptionId: string, clientId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string, region: string } | null } | null } | null } | null> | null } | null };
+export type ClustersObjectStoresQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, subscriptionId: string, clientId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string, region: string } | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
 
 export type ClusterBackupQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -5618,6 +5618,14 @@ export type DeleteObjectStoreMutationVariables = Exact<{
 
 
 export type DeleteObjectStoreMutation = { __typename?: 'RootMutationType', deleteObjectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, subscriptionId: string, clientId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string, region: string } | null } | null };
+
+export type ConfigureBackupsMutationVariables = Exact<{
+  clusterId: Scalars['ID']['input'];
+  storeId: Scalars['ID']['input'];
+}>;
+
+
+export type ConfigureBackupsMutation = { __typename?: 'RootMutationType', configureBackups?: { __typename?: 'Cluster', id: string } | null };
 
 export type CreateClusterRestoreMutationVariables = Exact<{
   backupId: Scalars['ID']['input'];
@@ -6640,6 +6648,16 @@ export const RepositoryFragmentDoc = gql`
 }
     ${ConfigurationFragmentDoc}
 ${FileContentFragmentDoc}`;
+export const ClusterTinyFragmentDoc = gql`
+    fragment ClusterTiny on Cluster {
+  id
+  name
+  provider {
+    cloud
+  }
+  distro
+}
+    `;
 export const ObjectStoreFragmentDoc = gql`
     fragment ObjectStore on ObjectStore {
   id
@@ -6666,23 +6684,13 @@ export const ObjectStoreFragmentDoc = gql`
     `;
 export const ClustersObjectStoresFragmentDoc = gql`
     fragment ClustersObjectStores on Cluster {
-  id
-  name
+  ...ClusterTiny
   objectStore {
     ...ObjectStore
   }
 }
-    ${ObjectStoreFragmentDoc}`;
-export const ClusterTinyFragmentDoc = gql`
-    fragment ClusterTiny on Cluster {
-  id
-  name
-  provider {
-    cloud
-  }
-  distro
-}
-    `;
+    ${ClusterTinyFragmentDoc}
+${ObjectStoreFragmentDoc}`;
 export const ClusterBasicFragmentDoc = gql`
     fragment ClusterBasic on Cluster {
   ...ClusterTiny
@@ -8906,6 +8914,40 @@ export function useDeleteObjectStoreMutation(baseOptions?: Apollo.MutationHookOp
 export type DeleteObjectStoreMutationHookResult = ReturnType<typeof useDeleteObjectStoreMutation>;
 export type DeleteObjectStoreMutationResult = Apollo.MutationResult<DeleteObjectStoreMutation>;
 export type DeleteObjectStoreMutationOptions = Apollo.BaseMutationOptions<DeleteObjectStoreMutation, DeleteObjectStoreMutationVariables>;
+export const ConfigureBackupsDocument = gql`
+    mutation ConfigureBackups($clusterId: ID!, $storeId: ID!) {
+  configureBackups(clusterId: $clusterId, storeId: $storeId) {
+    id
+  }
+}
+    `;
+export type ConfigureBackupsMutationFn = Apollo.MutationFunction<ConfigureBackupsMutation, ConfigureBackupsMutationVariables>;
+
+/**
+ * __useConfigureBackupsMutation__
+ *
+ * To run a mutation, you first call `useConfigureBackupsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConfigureBackupsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [configureBackupsMutation, { data, loading, error }] = useConfigureBackupsMutation({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *      storeId: // value for 'storeId'
+ *   },
+ * });
+ */
+export function useConfigureBackupsMutation(baseOptions?: Apollo.MutationHookOptions<ConfigureBackupsMutation, ConfigureBackupsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ConfigureBackupsMutation, ConfigureBackupsMutationVariables>(ConfigureBackupsDocument, options);
+      }
+export type ConfigureBackupsMutationHookResult = ReturnType<typeof useConfigureBackupsMutation>;
+export type ConfigureBackupsMutationResult = Apollo.MutationResult<ConfigureBackupsMutation>;
+export type ConfigureBackupsMutationOptions = Apollo.BaseMutationOptions<ConfigureBackupsMutation, ConfigureBackupsMutationVariables>;
 export const CreateClusterRestoreDocument = gql`
     mutation CreateClusterRestore($backupId: ID!) {
   createClusterRestore(backupId: $backupId) {
@@ -12911,6 +12953,7 @@ export const namedOperations = {
     CreateObjectStore: 'CreateObjectStore',
     UpdateObjectStore: 'UpdateObjectStore',
     DeleteObjectStore: 'DeleteObjectStore',
+    ConfigureBackups: 'ConfigureBackups',
     CreateClusterRestore: 'CreateClusterRestore',
     CreateBuild: 'CreateBuild',
     InstallAddOn: 'InstallAddOn',
