@@ -15,10 +15,10 @@ export default function ComponentRaw() {
     return v?.raw
   }, [data])
 
-  return <ComponentRawCode raw={raw} />
+  return <RawYaml raw={raw} />
 }
 
-export function ComponentRawCode({
+export function RawYaml({
   raw,
 }: {
   raw?: object | string | null | undefined

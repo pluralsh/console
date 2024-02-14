@@ -22,6 +22,7 @@ import capitalize from 'lodash/capitalize'
 
 import {
   JobFragment,
+  PipelineGateFragment,
   PipelineGateJobFragment,
   useJobGateQuery,
 } from 'generated/graphql'
@@ -51,16 +52,23 @@ const getDirectory = () => [
 ]
 
 const getPipelineJobBreadcrumbs = ({
-  job,
+  gate,
   tab,
 }: {
-  job: { id }
+  gate?: Nullable<PipelineGateFragment>
   tab: string
 }): Breadcrumb[] => [
   ...PIPELINES_CRUMBS,
   { label: 'jobs' },
-  { label: job.id, url: `${PIPELINES_ABS_PATH}/jobs/${job.id}/logs` },
-  { label: tab, url: `${PIPELINES_ABS_PATH}/jobs/${job.id}/${tab}` },
+  ...(!gate
+    ? []
+    : [
+        {
+          label: gate.name,
+          url: `${PIPELINES_ABS_PATH}/jobs/${gate.id}/logs`,
+        },
+        { label: tab, url: `${PIPELINES_ABS_PATH}/jobs/${gate.id}/${tab}` },
+      ]),
 ]
 
 const PodsContext =
@@ -96,18 +104,17 @@ export default function PipelineJob() {
 
   const directory = getDirectory().filter(({ enabled }) => enabled)
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => getPipelineJobBreadcrumbs({ job: { id: jobId }, tab }),
-      [jobId, tab]
-    )
-  )
-
   const { data, error, refetch } = useJobGateQuery({
     variables: { id: jobId },
     pollInterval: POLL_INTERVAL,
   })
 
+  useSetBreadcrumbs(
+    useMemo(
+      () => getPipelineJobBreadcrumbs({ gate: data?.pipelineGate, tab }),
+      [data?.pipelineGate, tab]
+    )
+  )
   const outletContext: OutletContextT = useMemo(
     () => ({
       refetch,
