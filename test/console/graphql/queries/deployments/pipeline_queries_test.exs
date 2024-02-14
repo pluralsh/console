@@ -22,6 +22,33 @@ defmodule Console.GraphQl.Deployments.PipelineQueriesTest do
       assert from_connection(found)
              |> ids_equal([other | pipes])
     end
+
+    test "it can sideload gate statuses" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+      pipe = insert(:pipeline, read_bindings: [%{group_id: group.id}])
+      edge = insert(:pipeline_edge, pipeline: pipe)
+      insert_list(2, :pipeline_gate, edge: edge, state: :pending)
+      insert_list(3, :pipeline_gate, edge: edge, state: :closed)
+      insert_list(1, :pipeline_gate, edge: edge, state: :open)
+
+      {:ok, %{data: %{"pipelines" => found}}} = run_query("""
+        query {
+          pipelines(first: 5) {
+            edges {
+              node {
+                status { pending closed }
+              }
+            }
+          }
+        }
+      """, %{}, %{current_user: Console.Services.Rbac.preload(user)})
+
+      [pipeline] = from_connection(found)
+
+      assert pipeline["status"]["pending"] == 2
+      assert pipeline["status"]["closed"] == 3
+    end
   end
 
   describe "pipeline" do

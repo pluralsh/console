@@ -20,7 +20,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
     end
   end
 
-  def webhook(%ScmConnection{} = conn, %ScmWebhook{id: id, owner: owner, hmac: hmac} = hook) do
+  def webhook(%ScmConnection{} = conn, %ScmWebhook{owner: owner, hmac: hmac} = hook) do
     with {:ok, client} <- client(conn) do
       Tentacat.Organizations.Hooks.create(client, owner, %{
         "name" => ScmWebhook.name(hook),
@@ -39,6 +39,9 @@ defmodule Console.Deployments.Pr.Impl.Github do
     end
   end
 
+  def pr(%{"pull_request" => %{"html_url" => url} = pr}), do: {:ok, url, %{status: state(pr)}}
+  def pr(_), do: :ignore
+
   defp identifier(%PrAutomation{identifier: id}) when is_binary(id) do
     case String.split(id, "/") do
       [owner, repo] -> {:ok, owner, repo}
@@ -53,4 +56,9 @@ defmodule Console.Deployments.Pr.Impl.Github do
       err -> err
     end
   end
+
+  defp state(%{"merged" => true}), do: :merged
+  defp state(%{"state" => "closed", "merged_at" => merged}) when not is_nil(merged), do: :merged
+  defp state(%{"state" => "closed"}), do: :closed
+  defp state(_), do: :open
 end

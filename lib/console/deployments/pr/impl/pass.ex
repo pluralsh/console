@@ -4,4 +4,6 @@ defmodule Console.Deployments.Pr.Impl.Pass do
   def create(_pr, _branch, _ctx), do: {:ok, ""}
 
   def webhook(_, _), do: :ok
+
+  def pr(_), do: :ignore
 end

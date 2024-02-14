@@ -97,7 +97,7 @@ defmodule Console.Deployments.GitTest do
       admin = admin_user()
       expect(Tentacat.Organizations.Hooks, :create, fn _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)
 
-      {:ok, conn} = Git.create_scm_connection(%{type: :github, name: "github", token: "pat-asdfa"}, admin)
+      {:ok, conn} = Git.create_scm_connection(%{type: :github, owner: "pluralsh", name: "github", token: "pat-asdfa"}, admin)
 
       assert conn.type == :github
       assert conn.token == "pat-asdfa"
@@ -341,6 +341,11 @@ defmodule Console.Deployments.GitTest do
       assert conf["platform"] == "#{scm.type}"
       assert conf["repositories"] == "some/repo,other/repo"
       assert conf["consoleUrl"] == Console.url("/gql")
+
+      [mgmt] = Console.Repo.all(Console.Schema.DependencyManagementService)
+
+      assert mgmt.service_id == svc.id
+      assert mgmt.connection_id == scm.id
     end
   end
 end

@@ -1,0 +1,71 @@
+fragment ComponentTree on ComponentTree {
+  root {
+    metadata {
+      ...Metadata
+    }
+    raw
+  }
+  edges {
+    from
+    to
+  }
+  certificates {
+    metadata {
+      ...Metadata
+    }
+    raw
+  }
+  configmaps {
+    metadata {
+      ...Metadata
+    }
+    raw
+  }
+  cronjobs {
+    metadata {
+      ...Metadata
+    }
+    raw
+  }
+  daemonsets {
+    metadata {
+      ...Metadata
+    }
+    raw
+  }
+  deployments {
+    metadata {
+      ...Metadata
+    }
+    raw
+  }
+  ingresses {
+    metadata {
+      ...Metadata
+    }
+    raw
+  }
+  secrets {
+    metadata {
+      ...Metadata
+    }
+  }
+  services {
+    metadata {
+      ...Metadata
+    }
+    raw
+  }
+  statefulsets {
+    metadata {
+      ...Metadata
+    }
+    raw
+  }
+}
+
+query ComponentTree($id: ID!) {
+  componentTree(id: $id) {
+    ...ComponentTree
+  }
+}

@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Git do
   use Console.Services.Base
+  use Nebulex.Caching
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Deployments.{Settings, Services, Clusters}
@@ -12,8 +13,12 @@ defmodule Console.Deployments.Git do
     ScmConnection,
     ScmWebhook,
     PrAutomation,
-    PullRequest
+    PullRequest,
+    DependencyManagementService
   }
+
+  @cache Console.conf(:cache_adapter)
+  @ttl :timer.minutes(30)
 
   @type repository_resp :: {:ok, GitRepository.t} | Console.error
   @type connection_resp :: {:ok, ScmConnection.t} | Console.error
@@ -34,7 +39,9 @@ defmodule Console.Deployments.Git do
 
   def get_scm_connection_by_name(name), do: Repo.get_by(ScmConnection, name: name)
 
+  @decorate cacheable(cache: @cache, key: {:scm_webhook, id}, opts: [ttl: @ttl])
   def get_scm_webhook(id), do: Repo.get(ScmWebhook, id)
+
   def get_scm_webhook!(id), do: Repo.get!(ScmWebhook, id)
 
   def get_pr_automation(id), do: Repo.get(PrAutomation, id)
@@ -113,9 +120,22 @@ defmodule Console.Deployments.Git do
       |> when_ok(:insert)
     end)
     |> add_operation(:hook, fn %{conn: conn} ->
-      create_webhook_for_connection(attrs[:owner], conn)
+      case attrs do
+        %{owner: owner} when is_binary(owner) -> create_webhook_for_connection(owner, conn)
+        _ -> {:ok, conn} # don't attempt webhook creation here
+      end
     end)
     |> execute(extract: :conn)
+  end
+
+  @doc """
+  Creates another webhook (besides the default) for a given scm connection
+  """
+  @spec create_webhook_for_connection(binary, binary, User.t) :: webhook_resp
+  def create_webhook_for_connection(owner, conn_id, %User{} = user) do
+    conn = get_scm_connection!(conn_id)
+    with {:ok, conn} <- allow(conn, user, :edit),
+      do: create_webhook_for_connection(owner, conn)
   end
 
   @doc """
@@ -254,6 +274,17 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
+  Updates attributes for a pr in response to a scm webhook invocation
+  """
+  @spec update_pull_request(map, binary) :: pull_request_resp
+  def update_pull_request(attrs, url) do
+    case Repo.get_by(PullRequest, url: url) do
+      %PullRequest{} = pr -> PullRequest.changeset(pr, attrs) |> Repo.update()
+      _ -> {:error, :not_found}
+    end
+  end
+
+  @doc """
   Fetches all helm repos registered in this cluster so far
   """
   @spec list_helm_repositories() :: {:ok, [Kube.HelmRepository.t]} | Console.error
@@ -292,8 +323,16 @@ defmodule Console.Deployments.Git do
         ] ++ hosted_url(scm),
       }, cluster.id, user)
     end)
+    |> add_operation(:dep_mgmt, fn %{scm: scm, svc: svc} ->
+      %DependencyManagementService{connection_id: scm.id, service_id: svc.id}
+      |> DependencyManagementService.changeset()
+      |> Repo.insert()
+    end)
     |> execute(extract: :svc)
   end
+
+  def reconfigure_renovate(%{repositories: repos}, svc_id, %User{} = user),
+    do: Services.merge_service([%{name: "repositories", value: Enum.join(repos, ",")}], svc_id, user)
 
   defp hosted_url(%ScmConnection{base_url: url}) when is_binary(url),
     do: [%{name: "endpoint", value: url}]
