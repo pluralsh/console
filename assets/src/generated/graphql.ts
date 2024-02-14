@@ -5550,6 +5550,14 @@ export type DeleteScmConnectionMutationVariables = Exact<{
 
 export type DeleteScmConnectionMutation = { __typename?: 'RootMutationType', deleteScmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null };
 
+export type SetupRenovateMutationVariables = Exact<{
+  connectionId: Scalars['ID']['input'];
+  repos: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SetupRenovateMutation = { __typename?: 'RootMutationType', setupRenovate?: { __typename?: 'ServiceDeployment', id: string } | null };
+
 export type PageInfoFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null };
 
 export type PluralContextQueryVariables = Exact<{ [key: string]: never; }>;
@@ -8470,6 +8478,40 @@ export function useDeleteScmConnectionMutation(baseOptions?: Apollo.MutationHook
 export type DeleteScmConnectionMutationHookResult = ReturnType<typeof useDeleteScmConnectionMutation>;
 export type DeleteScmConnectionMutationResult = Apollo.MutationResult<DeleteScmConnectionMutation>;
 export type DeleteScmConnectionMutationOptions = Apollo.BaseMutationOptions<DeleteScmConnectionMutation, DeleteScmConnectionMutationVariables>;
+export const SetupRenovateDocument = gql`
+    mutation SetupRenovate($connectionId: ID!, $repos: [String]!) {
+  setupRenovate(connectionId: $connectionId, repos: $repos) {
+    id
+  }
+}
+    `;
+export type SetupRenovateMutationFn = Apollo.MutationFunction<SetupRenovateMutation, SetupRenovateMutationVariables>;
+
+/**
+ * __useSetupRenovateMutation__
+ *
+ * To run a mutation, you first call `useSetupRenovateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetupRenovateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setupRenovateMutation, { data, loading, error }] = useSetupRenovateMutation({
+ *   variables: {
+ *      connectionId: // value for 'connectionId'
+ *      repos: // value for 'repos'
+ *   },
+ * });
+ */
+export function useSetupRenovateMutation(baseOptions?: Apollo.MutationHookOptions<SetupRenovateMutation, SetupRenovateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetupRenovateMutation, SetupRenovateMutationVariables>(SetupRenovateDocument, options);
+      }
+export type SetupRenovateMutationHookResult = ReturnType<typeof useSetupRenovateMutation>;
+export type SetupRenovateMutationResult = Apollo.MutationResult<SetupRenovateMutation>;
+export type SetupRenovateMutationOptions = Apollo.BaseMutationOptions<SetupRenovateMutation, SetupRenovateMutationVariables>;
 export const PluralContextDocument = gql`
     query PluralContext {
   pluralContext {
@@ -12435,6 +12477,7 @@ export const namedOperations = {
     CreateScmConnection: 'CreateScmConnection',
     UpdateScmConnection: 'UpdateScmConnection',
     DeleteScmConnection: 'DeleteScmConnection',
+    SetupRenovate: 'SetupRenovate',
     CreateBuild: 'CreateBuild',
     InstallAddOn: 'InstallAddOn',
     UpdateClusterBindings: 'UpdateClusterBindings',

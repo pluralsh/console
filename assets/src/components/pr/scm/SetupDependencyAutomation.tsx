@@ -2,26 +2,39 @@ import { ReactElement, useCallback, useState } from 'react'
 import {
   Button,
   Chip,
+  ComboBox,
   FormField,
-  Input,
   ListBoxFooterPlus,
   ListBoxItem,
+  ListBoxItemChipList,
   Modal,
   Select,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
+import { randomId } from 'kbar/lib/utils'
+
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
-import { useScmConnectionsQuery } from '../../../generated/graphql'
+import {
+  SetupRenovateMutationVariables,
+  useGitRepositoriesQuery,
+  useScmConnectionsQuery,
+  useSetupRenovateMutation,
+} from '../../../generated/graphql'
 import { extendConnection } from '../../../utils/graphql'
 import { GqlError } from '../../utils/Alert'
 import { useUpdateState } from '../../hooks/useUpdateState'
 
+import { RegExpGroups } from '../../../types/regex'
+
 import { PR_QUERY_PAGE_SIZE } from './PrScmConnections'
 import { scmTypeToIcon } from './PrScmConnectionsColumns'
 
+const REPOSITORY_EXTRACT_REGEX =
+  /(?<userOrOrg>[^/:]+)\/(?<repository>[^/]+)?\.git$/
+
 interface SetupDependencyAutomationFormProps {
-  formState: SetupRenovateAttributes
+  formState: Partial<SetupRenovateAttributes>
   updateFormState: (update: Partial<SetupRenovateAttributes>) => void
 }
 
@@ -32,38 +45,27 @@ function SetupDependencyAutomationForm({
   const theme = useTheme()
   const [repository, setRepository] = useState('')
 
-  const addRepository = useCallback(
-    (repository) => {
-      if (!repository || formState.repos?.find((repo) => repo === repository)) {
-        setRepository('')
-
-        return
-      }
-
-      updateFormState({ repos: [...(formState.repos ?? []), repository] })
-      setRepository('')
-    },
-    [formState.repos, updateFormState]
-  )
-
-  const removeRepository = useCallback(
-    (repository) => {
+  const onRepositorySelection = useCallback(
+    (repository: string) => {
       if (!repository) {
         return
       }
 
       updateFormState({
-        repos: formState.repos?.filter((repo) => repo !== repository) ?? [],
+        repos: Array.from(
+          new Set([...(formState.repos ?? []), repository]).values()
+        ),
       })
+      setRepository('')
     },
     [formState.repos, updateFormState]
   )
 
   const {
-    error,
-    fetchMore,
-    data: currentData,
-    previousData,
+    error: scmConnectionsError,
+    fetchMore: fetchMoreSCMConnections,
+    data: scmData,
+    previousData: previousSCMData,
   } = useScmConnectionsQuery({
     variables: {
       first: PR_QUERY_PAGE_SIZE,
@@ -73,15 +75,16 @@ function SetupDependencyAutomationForm({
     notifyOnNetworkStatusChange: true,
   })
 
-  const data = currentData || previousData
-  const scmConnections = data?.scmConnections
-  const pageInfo = scmConnections?.pageInfo
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
+  const scmConnections =
+    scmData?.scmConnections ?? previousSCMData?.scmConnections
+  const scmConnectionsPageInfo = scmConnections?.pageInfo
+  const fetchNextSCMConnections = useCallback(() => {
+    if (!scmConnectionsPageInfo?.endCursor) {
       return
     }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
+
+    fetchMoreSCMConnections({
+      variables: { after: scmConnectionsPageInfo.endCursor },
       updateQuery: (prev, { fetchMoreResult }) =>
         extendConnection(
           prev,
@@ -89,7 +92,56 @@ function SetupDependencyAutomationForm({
           'scmConnections'
         ),
     })
-  }, [fetchMore, pageInfo?.endCursor])
+  }, [fetchMoreSCMConnections, scmConnectionsPageInfo?.endCursor])
+
+  const {
+    error: repositoriesError,
+    fetchMore: fetchMoreRepositories,
+    data: repositoriesData,
+    previousData: previousRepositoriesData,
+  } = useGitRepositoriesQuery()
+
+  const repositories =
+    repositoriesData?.gitRepositories ??
+    previousRepositoriesData?.gitRepositories
+  const repositoriesPageInfo = repositories?.pageInfo
+  const fetchNextRepositories = useCallback(() => {
+    if (!repositoriesPageInfo?.endCursor) {
+      return
+    }
+
+    fetchMoreRepositories({
+      variables: { after: repositoriesPageInfo.endCursor },
+      updateQuery: (prev, { fetchMoreResult }) =>
+        extendConnection(
+          prev,
+          fetchMoreResult.gitRepositories,
+          'gitRepositories'
+        ),
+    })
+  }, [fetchMoreRepositories, repositoriesPageInfo?.endCursor])
+
+  const toRepositoryName = useCallback((url: string) => {
+    const { userOrOrg, repository } =
+      (
+        REPOSITORY_EXTRACT_REGEX.exec(url) as RegExpGroups<
+          'userOrOrg' | 'repository'
+        >
+      )?.groups ?? {}
+
+    return `${userOrOrg}/${repository}`
+  }, [])
+
+  const toServiceName = useCallback(
+    (scmConnectionID: string): string => {
+      const scm = scmConnections?.edges?.find(
+        (scm) => scm!.node!.id === scmConnectionID
+      )
+
+      return `dependency-automation-${scm?.node?.name ?? randomId()}`
+    },
+    [scmConnections?.edges]
+  )
 
   return (
     <div
@@ -99,7 +151,8 @@ function SetupDependencyAutomationForm({
         gap: theme.spacing.small,
       }}
     >
-      {error && <GqlError error={error} />}
+      {scmConnectionsError && <GqlError error={scmConnectionsError} />}
+      {repositoriesError && <GqlError error={repositoriesError} />}
       <FormField
         label="SCM connection"
         required
@@ -114,10 +167,15 @@ function SetupDependencyAutomationForm({
               )?.node?.type || ''
             ]
           }
-          onSelectionChange={(key) => updateFormState({ connectionId: key })}
+          onSelectionChange={(key) =>
+            updateFormState({
+              connectionId: key as string,
+              name: toServiceName(key as string),
+            })
+          }
           dropdownFooterFixed={
-            pageInfo?.hasNextPage && (
-              <ListBoxFooterPlus onClick={fetchNextPage}>
+            scmConnectionsPageInfo?.hasNextPage && (
+              <ListBoxFooterPlus onClick={fetchNextSCMConnections}>
                 Load more
               </ListBoxFooterPlus>
             )
@@ -125,11 +183,11 @@ function SetupDependencyAutomationForm({
         >
           {scmConnections?.edges?.map((scm) => (
             <ListBoxItem
-              key={scm?.node?.id}
-              leftContent={scmTypeToIcon[scm?.node?.type]}
-              label={scm?.node?.name}
+              key={scm!.node!.id}
+              leftContent={scmTypeToIcon[scm!.node!.type]}
+              label={scm!.node!.name}
             />
-          ))}
+          )) ?? []}
         </Select>
       </FormField>
 
@@ -137,44 +195,55 @@ function SetupDependencyAutomationForm({
         label="Repositories"
         required
       >
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.small,
-            marginBottom: theme.spacing.xsmall,
+        <ComboBox
+          inputValue={repository}
+          onInputChange={(key) => setRepository(key as string)}
+          onSelectionChange={(key) => onRepositorySelection(key as string)}
+          inputProps={{
+            placeholder: 'Select repositories',
           }}
+          dropdownFooterFixed={
+            repositoriesPageInfo?.hasNextPage && (
+              <ListBoxFooterPlus onClick={fetchNextRepositories}>
+                Load more
+              </ListBoxFooterPlus>
+            )
+          }
         >
-          <Input
-            placeholder="pluralsh/cd-demo"
-            onChange={(event) => setRepository(event.target.value)}
-            value={repository}
-            width="100%"
+          {repositories?.edges?.map((repo) => (
+            <ListBoxItem
+              key={toRepositoryName(repo!.node!.url!)}
+              label={toRepositoryName(repo!.node!.url!)}
+            />
+          )) ?? []}
+        </ComboBox>
+        {!(formState?.repos?.length === 0) && (
+          <ListBoxItemChipList
+            css={{
+              justifyContent: 'start',
+              marginTop: theme.spacing.xsmall,
+            }}
+            maxVisible={Infinity}
+            chips={
+              formState?.repos?.map((key) => (
+                <Chip
+                  fillLevel={2}
+                  size="small"
+                  clickable
+                  onClick={() => {
+                    const newKeys = new Set(formState.repos)
+
+                    newKeys.delete(key)
+                    updateFormState({ repos: Array.from(newKeys.values()) })
+                  }}
+                  closeButton
+                >
+                  {key}
+                </Chip>
+              )) ?? []
+            }
           />
-          <Button
-            secondary
-            onClick={() => addRepository(repository)}
-          >
-            Add
-          </Button>
-        </div>
-        <div
-          css={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: theme.spacing.xsmall,
-          }}
-        >
-          {formState.repos?.map((repository) => (
-            <Chip
-              fillLevel={2}
-              clickable
-              closeButton
-              onClick={() => removeRepository(repository)}
-            >
-              {repository}
-            </Chip>
-          ))}
-        </div>
+        )}
       </FormField>
     </div>
   )
@@ -189,6 +258,7 @@ interface SetupDependencyAutomationModalProps {
 interface SetupRenovateAttributes {
   connectionId: string
   repos: Array<string>
+  name?: string
 }
 
 function SetupDependencyAutomationModal({
@@ -197,15 +267,30 @@ function SetupDependencyAutomationModal({
   onClose,
 }: SetupDependencyAutomationModalProps): ReactElement {
   const theme = useTheme()
-  const { state: formState, update: updateFormState } =
-    useUpdateState<SetupRenovateAttributes>({
-      connectionId: '',
-      repos: [],
-    } as SetupRenovateAttributes)
+  const { state: formState, update: updateFormState } = useUpdateState<
+    Partial<SetupRenovateAttributes>
+  >({
+    connectionId: '',
+    repos: [],
+  } as SetupRenovateAttributes)
 
-  const onSubmit = useCallback((e) => {
-    e.preventDefault()
-  }, [])
+  const [mutation, { loading, error }] = useSetupRenovateMutation({
+    onCompleted: () => {
+      onClose?.()
+      refetch?.()
+    },
+  })
+
+  const onSubmit = useCallback(
+    (e) => {
+      e.preventDefault()
+
+      mutation({
+        variables: formState as SetupRenovateMutationVariables,
+      })
+    },
+    [formState, mutation]
+  )
 
   return (
     <Modal
@@ -213,7 +298,6 @@ function SetupDependencyAutomationModal({
       open={open}
       onClose={onClose}
       asForm
-      onSubmit={onSubmit}
       header="Setup Dependency Automation"
       actions={
         <div
@@ -224,10 +308,10 @@ function SetupDependencyAutomationModal({
           }}
         >
           <Button
-            // loading={loading}
+            loading={loading}
             primary
-            disabled={formState.repos?.length < 1 || !formState.connectionId}
-            type="submit"
+            disabled={!formState?.repos?.length || !formState.connectionId}
+            onClick={onSubmit}
           >
             Create
           </Button>
@@ -240,13 +324,19 @@ function SetupDependencyAutomationModal({
         </div>
       }
     >
+      {error && (
+        <div
+          css={{
+            marginBottom: theme.spacing.small,
+          }}
+        >
+          <GqlError error={error} />
+        </div>
+      )}
       <SetupDependencyAutomationForm
         formState={formState}
         updateFormState={updateFormState}
       />
-      {/* <ScmConnectionForm */}
-      {/*  {...{ type: 'create', formState, updateFormState, error }} */}
-      {/* /> */}
     </Modal>
   )
 }

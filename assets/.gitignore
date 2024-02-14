@@ -28,6 +28,7 @@ cypress/videos
 .env.production.local
 .graphqlconfig
 schema.graphql
+graphql.config.yml
 
 npm-debug.log*
 yarn-debug.log*

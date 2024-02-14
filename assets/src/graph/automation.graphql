@@ -113,3 +113,9 @@ mutation DeleteScmConnection($id: ID!) {
     ...ScmConnection
   }
 }
+
+mutation SetupRenovate($connectionId: ID!, $repos: [String]!) {
+  setupRenovate(connectionId: $connectionId, repos: $repos) {
+    id
+  }
+}
