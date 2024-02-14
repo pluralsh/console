@@ -17,6 +17,12 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /**
+   * The `DateTime` scalar type represents a date and time in the UTC
+   * timezone. The DateTime appears in a JSON response as an ISO8601 formatted
+   * string, including UTC timezone ("Z"). The parsed date and time string will
+   * be converted to UTC if there is an offset.
+   */
   DateTime: { input: string; output: string; }
   Json: { input: any; output: any; }
   Long: { input: any; output: any; }
@@ -3919,6 +3925,7 @@ export type RootQueryType = {
   pagedClusterGates?: Maybe<PipelineGateConnection>;
   pagedClusterServices?: Maybe<ServiceDeploymentConnection>;
   pipeline?: Maybe<Pipeline>;
+  pipelineContext?: Maybe<PipelineContext>;
   pipelineGate?: Maybe<PipelineGate>;
   pipelines?: Maybe<PipelineConnection>;
   pluralCluster?: Maybe<PluralCluster>;
@@ -4338,6 +4345,11 @@ export type RootQueryTypePagedClusterServicesArgs = {
 
 
 export type RootQueryTypePipelineArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypePipelineContextArgs = {
   id: Scalars['ID']['input'];
 };
 

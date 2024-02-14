@@ -37,6 +37,8 @@ defmodule Console.Deployments.Pipelines do
 
   def get_gate!(id), do: Repo.get!(PipelineGate, id)
 
+  def get_context!(id), do: Repo.get!(PipelineContext, id)
+
   def get_pipeline_by_name(name), do: Repo.get_by(Pipeline, name: name)
 
   def gate_job(%PipelineGate{status: %{job_ref: %{namespace: ns, name: name}}} = gate) do
@@ -161,6 +163,14 @@ defmodule Console.Deployments.Pipelines do
   def promoted?(%PipelineEdge{promoted_at: at}, dt) when not is_nil(at),
     do: Timex.after?(at, dt)
   def promoted?(_, _), do: false
+
+  @doc """
+  Validate if we've already done the promotion for this stage for pr pipelines
+  """
+  @spec pr_promoted?(PipelineEdge.t, PipelinePromotion.t) :: boolean
+  def pr_promoted?(%PipelineEdge{to: %PipelineStage{context_id: id}}, %PipelinePromotion{context_id: id})
+    when is_binary(id), do: true
+  def pr_promoted?(_, _), do: false
 
   @doc """
   Fetches all eligible gates for a cluster
@@ -292,6 +302,7 @@ defmodule Console.Deployments.Pipelines do
     |> add_operation(:resolve, fn %{promo: promotion, edges: edges} ->
       Enum.filter(edges, &open?/1)
       |> Enum.filter(& !promoted?(&1, promotion.revised_at))
+      |> Enum.filter(& !pr_promoted?(&1, promotion))
       |> Enum.reduce(start_transaction(), &promote_edge(&2, promotion, &1))
       |> execute()
     end)

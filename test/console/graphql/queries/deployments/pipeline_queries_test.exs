@@ -123,6 +123,35 @@ defmodule Console.GraphQl.Deployments.PipelineQueriesTest do
     end
   end
 
+  describe "pipelineContext" do
+    test "it can fetch a pipeline gate by id" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+      pipe = insert(:pipeline, read_bindings: [%{group_id: group.id}])
+      ctx = insert(:pipeline_context, pipeline: pipe)
+
+      {:ok, %{data: %{"pipelineContext" => found}}} = run_query("""
+        query Context($id: ID!) {
+          pipelineContext(id: $id) { id }
+        }
+      """, %{"id" => ctx.id}, %{current_user: Console.Services.Rbac.preload(user)})
+
+      assert found["id"] == ctx.id
+    end
+
+    test "users w/o permission cannot fetch" do
+      user = insert(:user)
+      pipe = insert(:pipeline)
+      ctx = insert(:pipeline_context, pipeline: pipe)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Context($id: ID!) {
+          pipelineContext(id: $id) { id }
+        }
+      """, %{"id" => ctx.id}, %{current_user: Console.Services.Rbac.preload(user)})
+    end
+  end
+
   describe "clusterGates" do
     test "it will fetch the gates configured for a cluster" do
       cluster = insert(:cluster)
