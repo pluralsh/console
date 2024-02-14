@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Button } from '@pluralsh/design-system'
+import { Button, Tooltip, WrapWithIf } from '@pluralsh/design-system'
+import isEmpty from 'lodash/isEmpty'
 
 import { useOpenTransition } from '../../hooks/suspense/useOpenTransition'
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
 import { useBackupsEnabled } from '../../cd/utils/useBackupsEnabled'
-
 import { ClustersObjectStoresFragment } from '../../../generated/graphql'
 
 import ConfigureClusterBackupsModal from './ConfigureClusterBackupsModal'
@@ -19,16 +19,28 @@ export default function ConfigureClusterBackups({
   const [isOpen, setIsOpen] = useState(false)
   const { buttonProps } = useOpenTransition(isOpen, setIsOpen)
   const backupsEnabled = useBackupsEnabled()
+  const noClustersAvailable = isEmpty(clusters)
 
   return (
     <>
-      <Button
-        primary
-        {...buttonProps}
-        {...(!backupsEnabled ? { disabled: true } : {})}
+      <WrapWithIf
+        condition={noClustersAvailable}
+        wrapper={
+          <Tooltip label="All clusters already have backups configured." />
+        }
       >
-        Add cluster
-      </Button>
+        <div>
+          <Button
+            primary
+            {...buttonProps}
+            {...(!backupsEnabled || noClustersAvailable
+              ? { disabled: true }
+              : {})}
+          >
+            Add cluster
+          </Button>
+        </div>
+      </WrapWithIf>
       <ModalMountTransition open={isOpen}>
         <ConfigureClusterBackupsModal
           open={isOpen}
