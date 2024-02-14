@@ -17,6 +17,12 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /**
+   * The `DateTime` scalar type represents a date and time in the UTC
+   * timezone. The DateTime appears in a JSON response as an ISO8601 formatted
+   * string, including UTC timezone ("Z"). The parsed date and time string will
+   * be converted to UTC if there is an offset.
+   */
   DateTime: { input: string; output: string; }
   Json: { input: any; output: any; }
   Long: { input: any; output: any; }
@@ -5612,6 +5618,8 @@ export type DeleteScmConnectionMutation = { __typename?: 'RootMutationType', del
 export type SetupRenovateMutationVariables = Exact<{
   connectionId: Scalars['ID']['input'];
   repos: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -8615,8 +8623,13 @@ export type DeleteScmConnectionMutationHookResult = ReturnType<typeof useDeleteS
 export type DeleteScmConnectionMutationResult = Apollo.MutationResult<DeleteScmConnectionMutation>;
 export type DeleteScmConnectionMutationOptions = Apollo.BaseMutationOptions<DeleteScmConnectionMutation, DeleteScmConnectionMutationVariables>;
 export const SetupRenovateDocument = gql`
-    mutation SetupRenovate($connectionId: ID!, $repos: [String]!) {
-  setupRenovate(connectionId: $connectionId, repos: $repos) {
+    mutation SetupRenovate($connectionId: ID!, $repos: [String]!, $name: String, $namespace: String) {
+  setupRenovate(
+    connectionId: $connectionId
+    repos: $repos
+    name: $name
+    namespace: $namespace
+  ) {
     id
   }
 }
@@ -8638,6 +8651,8 @@ export type SetupRenovateMutationFn = Apollo.MutationFunction<SetupRenovateMutat
  *   variables: {
  *      connectionId: // value for 'connectionId'
  *      repos: // value for 'repos'
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
  *   },
  * });
  */
