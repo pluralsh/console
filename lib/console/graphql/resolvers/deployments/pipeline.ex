@@ -40,6 +40,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Pipeline do
     |> allow(user, :read)
   end
 
+  def resolve_pipeline_context(%{id: id}, %{context: %{current_user: user}}) do
+    Pipelines.get_context!(id)
+    |> allow(user, :read)
+  end
+
   def upsert_pipeline(%{name: name, attributes: attrs}, %{context: %{current_user: user}}),
     do: Pipelines.upsert(attrs, name, user)
 

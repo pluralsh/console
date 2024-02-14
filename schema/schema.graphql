@@ -266,6 +266,8 @@ type RootQueryType {
 
   pipelineGate(id: ID!): PipelineGate
 
+  pipelineContext(id: ID!): PipelineContext
+
   clusterBackup(id: ID, clusterId: ID, namespace: String, name: String): ClusterBackup
 
   clusterBackups(after: String, first: Int, before: String, last: Int, clusterId: ID!): ClusterBackupConnection

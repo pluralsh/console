@@ -327,6 +327,13 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
       resolve &Deployments.resolve_gate/2
     end
+
+    field :pipeline_context, :pipeline_context do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_pipeline_context/2
+    end
   end
 
   object :pipeline_mutations do

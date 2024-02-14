@@ -12,6 +12,7 @@ defmodule Console.Deployments.Policies.Rbac do
     ProviderCredential,
     Pipeline,
     PipelineGate,
+    PipelineContext,
     AgentMigration,
     RuntimeService,
     PrAutomation
@@ -36,6 +37,8 @@ defmodule Console.Deployments.Policies.Rbac do
     end
   end
 
+  def evaluate(%PipelineContext{} = ctx, %User{} = user, action),
+    do: recurse(ctx, user, action, & &1.pipeline)
   def evaluate(%PipelineGate{} = gate, %User{} = user, action),
     do: recurse(gate, user, action, & &1.edge.pipeline)
   def evaluate(%Pipeline{} = pipe, %User{} = user, action),
@@ -62,6 +65,7 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(settings, user, action)
   def evaluate(_, _, _), do: false
 
+  def preload(%PipelineContext{} = ctx), do: Repo.preload(ctx, [pipeline: [:read_bindings, :write_bindings]])
   def preload(%PipelineGate{} = gate), do: Repo.preload(gate, [edge: [pipeline: [:read_bindings, :write_bindings]]])
   def preload(%Pipeline{} = pipe), do: Repo.preload(pipe, [:read_bindings, :write_bindings])
   def preload(%Service{} = service),
