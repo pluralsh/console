@@ -1,4 +1,5 @@
 fragment Metadata on Metadata {
+  uid
   name
   namespace
   labels {

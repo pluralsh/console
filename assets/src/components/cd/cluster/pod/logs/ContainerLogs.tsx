@@ -32,8 +32,6 @@ function LogHeader({
 }): ReactElement {
   const theme = useTheme()
 
-  console.log('LogHeader', loading)
-
   return (
     <div
       css={{

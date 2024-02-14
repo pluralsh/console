@@ -7,16 +7,27 @@ import isEmpty from 'lodash/isEmpty'
 
 export default function ComponentRaw() {
   const { data } = useOutletContext<any>()
-
   const raw = useMemo(() => {
     const v: any = data
       ? Object.values(data).find((value) => value !== undefined)
       : null
 
     return v?.raw
-      ? stringify(typeof v.raw === 'string' ? JSON.parse(v.raw) : v.raw)
-      : ''
   }, [data])
+
+  return <ComponentRawCode raw={raw} />
+}
+
+export function ComponentRawCode({
+  raw,
+}: {
+  raw?: object | string | null | undefined
+}) {
+  const rawStr = useMemo(
+    () =>
+      raw ? stringify(typeof raw === 'string' ? JSON.parse(raw) : raw) : '',
+    [raw]
+  )
 
   if (isEmpty(raw)) {
     return <EmptyState message="No data available." />
@@ -28,7 +39,7 @@ export default function ComponentRaw() {
       maxHeight="100%"
       overflowY="auto"
     >
-      {raw}
+      {rawStr}
     </Code>
   )
 }

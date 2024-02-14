@@ -25,7 +25,8 @@ import {
 import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
-import { useNodeEdges } from '../utils/hooks'
+import { useNodeEdges } from 'components/hooks/reactFlowHooks'
+
 import { reduceGateStates } from '../utils/reduceGateStatuses'
 
 export type CardStatus = 'ok' | 'closed' | 'pending'
