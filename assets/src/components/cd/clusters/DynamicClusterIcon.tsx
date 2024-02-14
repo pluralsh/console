@@ -1,4 +1,4 @@
-import { ReactElement, useMemo } from 'react'
+import { ComponentProps, ReactElement, useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import {
   ClusterIcon,
@@ -15,6 +15,7 @@ interface DynamicClusterIconProps {
   upgrading?: boolean
   protect?: boolean
   self?: boolean
+  type?: ComponentProps<typeof IconFrame>['type']
 }
 
 const DynamicClusterIconSC = styled.div((_) => ({
@@ -34,6 +35,7 @@ export function DynamicClusterIcon({
   upgrading = false,
   protect = false,
   self = false,
+  type = 'secondary',
 }: DynamicClusterIconProps): ReactElement {
   const theme = useTheme()
 
@@ -51,7 +53,7 @@ export function DynamicClusterIcon({
     <DynamicClusterIconSC>
       <IconFrame
         size="medium"
-        type="secondary"
+        type={type}
         tooltip={tooltip}
         icon={
           pending ? (

@@ -29,6 +29,10 @@ import {
 } from '../objectstores/utils'
 import { ColWithIcon } from '../../utils/table/ColWithIcon'
 
+import { DynamicClusterIcon } from '../../cd/clusters/DynamicClusterIcon'
+
+import { ColClusterContentSC } from '../../cd/clusters/ClustersColumns'
+
 import ConfigureClusterBackups from './ConfigureClusterBackups'
 
 const POLL_INTERVAL = 10 * 1000
@@ -49,7 +53,15 @@ const columns = [
     header: 'Cluster',
     enableSorting: true,
     enableGlobalFilter: true,
-    cell: ({ getValue }) => getValue(),
+    cell: ({ row: { original: cluster } }) => (
+      <ColClusterContentSC>
+        <DynamicClusterIcon
+          self={!!cluster?.self}
+          type="tertiary"
+        />
+        {cluster.name}
+      </ColClusterContentSC>
+    ),
   }),
   columnHelper.accessor((node) => node?.objectStore, {
     id: 'provider',

@@ -24,6 +24,7 @@ fragment ObjectStore on ObjectStore {
 
 fragment ClustersObjectStores on Cluster {
   ...ClusterTiny
+  self
   objectStore {
     ...ObjectStore
   }
