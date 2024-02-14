@@ -14,7 +14,18 @@ defmodule Console.Deployments.Pipelines.StageWorker do
   def dispatch(shard, %PipelineStage{} = stage),
     do: GenServer.cast(name(shard), stage)
 
+  def context(shard, %PipelineStage{} = stage),
+    do: GenServer.cast(name(shard), {:context, stage})
+
   def name(shard), do: {:via, Registry, {Supervisor.registry(), {:stage, :shard, shard}}}
+
+  def handle_cast({:context, stage}, state) do
+    case Pipelines.apply_pipeline_context(stage) do
+      {:ok, _} -> Logger.info "stage #{stage.id} context applied successfully"
+      {:error, err} -> Logger.info "failed to apply stage context #{stage.id} reason: #{inspect(err)}"
+    end
+    {:noreply, state}
+  end
 
   def handle_cast(%PipelineStage{} = stage, state) do
     case Pipelines.build_promotion(stage) do

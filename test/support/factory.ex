@@ -405,6 +405,13 @@ defmodule Console.Factory do
     }
   end
 
+  def pipeline_context_factory do
+    %Schema.PipelineContext{
+      context: %{some: "context"},
+      pipeline: build(:pipeline)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

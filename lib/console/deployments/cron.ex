@@ -158,4 +158,15 @@ defmodule Console.Deployments.Cron do
     end)
     |> Stream.run()
   end
+
+  def scan_pending_contexts() do
+    PipelineStage.pending_context()
+    |> PipelineStage.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn stage ->
+      Logger.info "attempt to apply context for a stage"
+      Discovery.context(stage)
+    end)
+    |> Stream.run()
+  end
 end
