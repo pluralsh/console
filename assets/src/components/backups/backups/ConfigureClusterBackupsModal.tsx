@@ -1,6 +1,5 @@
 import { FormEvent, useCallback, useState } from 'react'
 import { Button, FormField, ListBoxItem, Select } from '@pluralsh/design-system'
-
 import { useTheme } from 'styled-components'
 
 import ModalAlt from '../../cd/ModalAlt'
@@ -25,7 +24,7 @@ export default function ConfigureClusterBackupsModal({
   clusters: ClustersObjectStoresFragment[]
 }) {
   const theme = useTheme()
-  const [clusterId, setClusterId] = useState<string>(clusters[0].id)
+  const [clusterId, setClusterId] = useState<string>('')
   const [storeId, setStoreId] = useState<string>('')
 
   const closeModal = useCallback(() => onClose(), [onClose])
@@ -47,7 +46,7 @@ export default function ConfigureClusterBackupsModal({
     onCompleted,
   })
 
-  const disabled = false
+  const disabled = !clusterId || !storeId
 
   const onSubmit = useCallback(
     (e: FormEvent) => {
@@ -122,15 +121,18 @@ export default function ConfigureClusterBackupsModal({
             clusters={clusters}
             selectedKey={clusterId}
             onSelectionChange={(key) => setClusterId(key as string)}
-            withoutLabel
+            label="Select cluster"
+            withoutTitleContent
+            withoutLeftContent={!clusterId}
           />
         </FormField>
         <FormField label="Object store">
           <Select
             selectedKey={storeId}
             onSelectionChange={(key) => setStoreId(key as string)}
+            label="Select object store"
           >
-            {data?.objectStores?.edges?.map((edge) => (
+            {(data?.objectStores?.edges || [])?.map((edge) => (
               <ListBoxItem
                 key={edge?.node?.id}
                 label={edge?.node?.name}

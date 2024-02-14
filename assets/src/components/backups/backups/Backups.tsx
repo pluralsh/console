@@ -4,13 +4,9 @@ import {
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-
 import { useTheme } from 'styled-components'
-
 import { ComponentProps, useMemo, useState } from 'react'
-
 import { TableState, createColumnHelper } from '@tanstack/react-table'
-
 import isEmpty from 'lodash/isEmpty'
 
 import {
@@ -21,15 +17,17 @@ import {
   ClustersObjectStoresFragment,
   useClustersObjectStoresQuery,
 } from '../../../generated/graphql'
-
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
-
 import { GqlError } from '../../utils/Alert'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
-import { Edge } from '../../../utils/graphql'
+import {
+  ObjectStoreCloudIcon,
+  getObjectStoreCloud,
+  objectStoreCloudToDisplayName,
+} from '../objectstores/utils'
+import { ColWithIcon } from '../../utils/table/ColWithIcon'
 
 import ConfigureClusterBackups from './ConfigureClusterBackups'
 
@@ -43,17 +41,35 @@ const BACKUPS_BACKUPS_BASE_CRUMBS: Breadcrumb[] = [
   },
 ]
 
-const columnHelper = createColumnHelper<Edge<ClustersObjectStoresFragment>>()
+const columnHelper = createColumnHelper<ClustersObjectStoresFragment>()
 
 const columns = [
-  columnHelper.accessor(({ node }) => node?.name, {
+  columnHelper.accessor((node) => node?.name, {
     id: 'cluster',
     header: 'Cluster',
     enableSorting: true,
     enableGlobalFilter: true,
     cell: ({ getValue }) => getValue(),
   }),
-  columnHelper.accessor(({ node }) => node?.objectStore?.name, {
+  columnHelper.accessor((node) => node?.objectStore, {
+    id: 'provider',
+    header: 'Storage provider',
+    cell: ({ getValue }) => {
+      const cloud = getObjectStoreCloud(getValue())
+
+      if (!cloud) return null
+
+      return (
+        <ColWithIcon
+          truncateLeft
+          icon={<ObjectStoreCloudIcon cloud={cloud} />}
+        >
+          {objectStoreCloudToDisplayName[cloud]}
+        </ColWithIcon>
+      )
+    },
+  }),
+  columnHelper.accessor((node) => node?.objectStore?.name, {
     id: 'name',
     header: 'Storage name',
     enableSorting: true,

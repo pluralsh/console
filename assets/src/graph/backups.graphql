@@ -12,6 +12,7 @@ fragment ObjectStore on ObjectStore {
     storageAccount
     subscriptionId
     clientId
+    tenantId
   }
   gcs {
     bucket
