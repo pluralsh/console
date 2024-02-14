@@ -314,6 +314,7 @@ defmodule Console.Factory do
 
   def pipeline_gate_factory do
     %Schema.PipelineGate{
+      state: :pending,
       name: sequence(:gate, & "gate-#{&1}"),
       edge: build(:pipeline_edge),
       type: :approval

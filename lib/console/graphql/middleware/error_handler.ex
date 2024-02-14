@@ -5,7 +5,7 @@ defmodule Console.Middleware.ErrorHandler do
 
   @impl true
   def call(%{errors: [_ | _] = errors} = resolution, _config) do
-    %{ resolution | errors: Enum.map(errors, &format/1) }
+    %{ resolution | errors: Enum.map(errors, &format/1) |> flatten() }
   end
   def call(res, _), do: res
 
@@ -19,4 +19,10 @@ defmodule Console.Middleware.ErrorHandler do
     Logger.error "found unknown error: #{inspect(err)}"
     "unknown error"
   end
+
+  defp flatten(vals, res \\ [])
+  defp flatten([], res), do: res
+  defp flatten([l | tail], res) when is_list(l), do: flatten(tail, res ++ l)
+  defp flatten([h | tail], res), do: flatten(tail, [h | res])
+  defp flatten(v, res), do: [v | res]
 end

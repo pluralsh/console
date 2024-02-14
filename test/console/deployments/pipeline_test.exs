@@ -406,7 +406,7 @@ defmodule Console.Deployments.PipelinesTest do
     test "approvals respect rbac" do
       user = insert(:user)
       pipeline = insert(:pipeline, write_bindings: [%{user_id: user.id}])
-      gate = insert(:pipeline_gate, edge: build(:pipeline_edge, pipeline: pipeline))
+      gate = insert(:pipeline_gate, state: :pending, edge: build(:pipeline_edge, pipeline: pipeline))
 
       {:ok, approved} = Pipelines.approve_gate(gate.id, user)
 
@@ -417,6 +417,14 @@ defmodule Console.Deployments.PipelinesTest do
       assert_receive {:event, %PubSub.PipelineGateApproved{item: ^approved}}
 
       {:error, _} = Pipelines.approve_gate(gate.id, insert(:user))
+    end
+
+    test "you cannot approve closed gates" do
+      user = insert(:user)
+      pipeline = insert(:pipeline, write_bindings: [%{user_id: user.id}])
+      gate = insert(:pipeline_gate, state: :closed, edge: build(:pipeline_edge, pipeline: pipeline))
+
+      {:error, _} = Pipelines.approve_gate(gate.id, user)
     end
 
     test "you cannot approve non-approval gates" do
