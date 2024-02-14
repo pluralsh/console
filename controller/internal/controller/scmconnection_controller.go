@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/samber/lo"
+
 	console "github.com/pluralsh/console-client-go"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -202,9 +204,13 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmConnection, changed bool) (*console.ScmConnectionFragment, error) {
 	logger := log.FromContext(ctx)
 	exists := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
-	token, err := r.getTokenFromSecret(ctx, scm)
-	if err != nil {
-		return nil, err
+	var token *string
+	if scm.Spec.TokenSecretRef != nil {
+		var err error
+		token, err = r.getTokenFromSecret(ctx, scm)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Update only if ScmConnection has changed
@@ -223,20 +229,19 @@ func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmCon
 	return r.ConsoleClient.CreateScmConnection(ctx, scm.Attributes(token))
 }
 
-func (r *ScmConnectionReconciler) getTokenFromSecret(ctx context.Context, scm *v1alpha1.ScmConnection) (string, error) {
+func (r *ScmConnectionReconciler) getTokenFromSecret(ctx context.Context, scm *v1alpha1.ScmConnection) (*string, error) {
 	const tokenKeyName = "token"
 
 	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	token, exists := secret.Data[tokenKeyName]
 	if !exists {
-		return "", fmt.Errorf("%q key does not exist in referenced credential secret", tokenKeyName)
+		return nil, fmt.Errorf("%q key does not exist in referenced credential secret", tokenKeyName)
 	}
-
-	return string(token), nil
+	return lo.ToPtr(string(token)), nil
 }
 
 func (r *ScmConnectionReconciler) tryAddControllerRef(ctx context.Context, scm *v1alpha1.ScmConnection) error {

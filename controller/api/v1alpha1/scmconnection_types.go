@@ -46,14 +46,14 @@ func (s *ScmConnection) ConsoleName() string {
 	return s.Spec.Name
 }
 
-func (s *ScmConnection) Attributes(token string) console.ScmConnectionAttributes {
+func (s *ScmConnection) Attributes(token *string) console.ScmConnectionAttributes {
 	return console.ScmConnectionAttributes{
 		Name:     s.ConsoleName(),
 		Type:     s.Spec.Type,
 		Username: s.Spec.Username,
 		BaseURL:  s.Spec.BaseUrl,
 		APIURL:   s.Spec.APIUrl,
-		Token:    &token,
+		Token:    token,
 	}
 }
 
@@ -82,8 +82,8 @@ type ScmConnectionSpec struct {
 	// +kubebuilder:validation:Enum:=GITHUB;GITLAB
 	Type console.ScmType `json:"type"`
 	// Token ...
-	// +kubebuilder:validation:Required
-	TokenSecretRef *corev1.SecretReference `json:"tokenSecretRef"`
+	// +kubebuilder:validation:Optional
+	TokenSecretRef *corev1.SecretReference `json:"tokenSecretRef,omitempty"`
 	// Username ...
 	// +kubebuilder:validation:Optional
 	Username *string `json:"username,omitempty"`
