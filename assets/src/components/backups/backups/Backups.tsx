@@ -1,6 +1,8 @@
 import {
+  ArrowTopRightIcon,
   Breadcrumb,
   EmptyState,
+  IconFrame,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -8,6 +10,8 @@ import { useTheme } from 'styled-components'
 import { ComponentProps, useMemo, useState } from 'react'
 import { TableState, createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
+
+import { Link } from 'react-router-dom'
 
 import {
   BACKUPS_ABS_PATH,
@@ -28,9 +32,7 @@ import {
   objectStoreCloudToDisplayName,
 } from '../objectstores/utils'
 import { ColWithIcon } from '../../utils/table/ColWithIcon'
-
 import { DynamicClusterIcon } from '../../cd/clusters/DynamicClusterIcon'
-
 import { ColClusterContentSC } from '../../cd/clusters/ClustersColumns'
 
 import ConfigureClusterBackups from './ConfigureClusterBackups'
@@ -87,6 +89,19 @@ const columns = [
     enableSorting: true,
     enableGlobalFilter: true,
     cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor((node) => node?.id, {
+    id: 'actions',
+    header: '',
+    meta: { gridTemplate: `fit-content(100px)` },
+    cell: ({ getValue }) => (
+      <IconFrame
+        type="tertiary"
+        icon={<ArrowTopRightIcon />}
+        as={Link}
+        to={`${BACKUPS_ABS_PATH}/backups/${getValue()}`}
+      />
+    ),
   }),
 ]
 

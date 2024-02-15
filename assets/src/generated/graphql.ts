@@ -5677,9 +5677,9 @@ export type ObjectStoreFragment = { __typename?: 'ObjectStore', id: string, name
 
 export type ClustersObjectStoresFragment = { __typename?: 'Cluster', self?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string, region: string } | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
 
-export type ClusterBackupFragment = { __typename?: 'ClusterBackup', id: string, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+export type ClusterBackupFragment = { __typename?: 'ClusterBackup', id: string, garbageCollected?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
-export type ClusterRestoreFragment = { __typename?: 'ClusterRestore', id: string, status: RestoreStatus, insertedAt?: string | null, updatedAt?: string | null, backup?: { __typename?: 'ClusterBackup', id: string, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+export type ClusterRestoreFragment = { __typename?: 'ClusterRestore', id: string, status: RestoreStatus, insertedAt?: string | null, updatedAt?: string | null, backup?: { __typename?: 'ClusterBackup', id: string, garbageCollected?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
 
 export type ObjectStoresQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5707,7 +5707,7 @@ export type ClusterBackupQueryVariables = Exact<{
 }>;
 
 
-export type ClusterBackupQuery = { __typename?: 'RootQueryType', clusterBackup?: { __typename?: 'ClusterBackup', id: string, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+export type ClusterBackupQuery = { __typename?: 'RootQueryType', clusterBackup?: { __typename?: 'ClusterBackup', id: string, garbageCollected?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
 
 export type ClusterBackupsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5718,7 +5718,7 @@ export type ClusterBackupsQueryVariables = Exact<{
 }>;
 
 
-export type ClusterBackupsQuery = { __typename?: 'RootQueryType', clusterBackups?: { __typename?: 'ClusterBackupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterBackupEdge', node?: { __typename?: 'ClusterBackup', id: string, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
+export type ClusterBackupsQuery = { __typename?: 'RootQueryType', clusterBackups?: { __typename?: 'ClusterBackupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterBackupEdge', node?: { __typename?: 'ClusterBackup', id: string, garbageCollected?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
 
 export type CreateObjectStoreMutationVariables = Exact<{
   attributes: ObjectStoreAttributes;
@@ -5755,7 +5755,7 @@ export type CreateClusterRestoreMutationVariables = Exact<{
 }>;
 
 
-export type CreateClusterRestoreMutation = { __typename?: 'RootMutationType', createClusterRestore?: { __typename?: 'ClusterRestore', id: string, status: RestoreStatus, insertedAt?: string | null, updatedAt?: string | null, backup?: { __typename?: 'ClusterBackup', id: string, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null };
+export type CreateClusterRestoreMutation = { __typename?: 'RootMutationType', createClusterRestore?: { __typename?: 'ClusterRestore', id: string, status: RestoreStatus, insertedAt?: string | null, updatedAt?: string | null, backup?: { __typename?: 'ClusterBackup', id: string, garbageCollected?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null };
 
 export type PageInfoFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null };
 
@@ -6843,6 +6843,7 @@ export const ClusterBackupFragmentDoc = gql`
   cluster {
     ...ClusterBasic
   }
+  garbageCollected
   insertedAt
   updatedAt
 }
