@@ -87,7 +87,7 @@ export function CreateScmConnectionModal({
     <Modal
       portal
       open={open}
-      onClose={onClose}
+      onClose={onClose || undefined}
       asForm
       onSubmit={onSubmit}
       header="Create a new connection"

@@ -88,7 +88,7 @@ function CreatePrModalBase({
           })
         }}
         open={open}
-        onClose={onClose}
+        onClose={onClose || undefined}
         header={
           successPr
             ? `Successfully created PR`

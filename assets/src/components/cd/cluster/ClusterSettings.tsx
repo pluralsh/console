@@ -152,7 +152,7 @@ export function ClusterSettingsModal(
   props: ComponentProps<typeof ClusterSettingsModalInner>
 ) {
   return (
-    <ModalMountTransition open={props.open}>
+    <ModalMountTransition open={!!props.open}>
       <ClusterSettingsModalInner {...props} />
     </ModalMountTransition>
   )

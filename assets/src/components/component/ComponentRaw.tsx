@@ -15,14 +15,10 @@ export default function ComponentRaw() {
     return v?.raw
   }, [data])
 
-  return <ComponentRawCode raw={raw} />
+  return <RawYaml raw={raw} />
 }
 
-export function ComponentRawCode({
-  raw,
-}: {
-  raw?: object | string | null | undefined
-}) {
+export function RawYaml({ raw }: { raw?: object | string | null | undefined }) {
   const rawStr = useMemo(
     () =>
       raw ? stringify(typeof raw === 'string' ? JSON.parse(raw) : raw) : '',

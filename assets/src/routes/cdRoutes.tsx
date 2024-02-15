@@ -94,7 +94,7 @@ import {
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
-import { pipelineJobRoutes } from './pipelineJobRoutes'
+import { pipelineRoutes } from './pipelineRoutes'
 
 export const componentRoutes = (
   <Route
@@ -179,12 +179,7 @@ const mainRoutes = (
     <Route
       path={PIPELINES_REL_PATH}
       element={<Pipelines />}
-    >
-      <Route
-        path=":pipelineId"
-        element={<Pipelines />}
-      />
-    </Route>
+    />
     <Route
       path="git"
       element={
@@ -448,6 +443,6 @@ export const cdRoutes = [
     {podDetailsRoutes}
     {serviceDetailsRoutes}
     {componentRoutes}
-    {pipelineJobRoutes}
+    {pipelineRoutes}
   </Route>,
 ]
