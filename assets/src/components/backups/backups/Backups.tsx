@@ -39,7 +39,7 @@ import ConfigureClusterBackups from './ConfigureClusterBackups'
 
 const POLL_INTERVAL = 10 * 1000
 
-const BACKUPS_BACKUPS_BASE_CRUMBS: Breadcrumb[] = [
+export const BACKUPS_BACKUPS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'backups', url: BACKUPS_ABS_PATH },
   {
     label: 'backups',
@@ -99,7 +99,7 @@ const columns = [
         type="tertiary"
         icon={<ArrowTopRightIcon />}
         as={Link}
-        to={`${BACKUPS_ABS_PATH}/backups/${getValue()}`}
+        to={`/backups/backups/${getValue()}`}
       />
     ),
   }),

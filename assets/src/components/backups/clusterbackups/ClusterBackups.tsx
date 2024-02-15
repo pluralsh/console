@@ -1,20 +1,10 @@
-import {
-  Breadcrumb,
-  EmptyState,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { EmptyState, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { ComponentProps, useMemo, useState } from 'react'
 import { TableState, createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
-
 import { useParams } from 'react-router-dom'
 
-import {
-  BACKUPS_ABS_PATH,
-  BACKUPS_REL_PATH,
-} from '../../../routes/backupRoutesConsts'
 import {
   ClusterBackup,
   useClusterBackupsQuery,
@@ -24,16 +14,10 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
 import { Edge } from '../../../utils/graphql'
+import { BACKUPS_BACKUPS_BASE_CRUMBS } from '../backups/Backups'
+import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
 const POLL_INTERVAL = 10 * 1000
-
-const BACKUPS_BACKUPS_BASE_CRUMBS: Breadcrumb[] = [
-  { label: 'backups', url: BACKUPS_ABS_PATH },
-  {
-    label: 'backups',
-    url: `${BACKUPS_ABS_PATH}/${BACKUPS_REL_PATH}`,
-  },
-]
 
 const columnHelper = createColumnHelper<Edge<ClusterBackup>>()
 
@@ -44,6 +28,13 @@ const columns = [
     enableSorting: true,
     enableGlobalFilter: true,
     cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor(({ node }) => node?.insertedAt, {
+    id: 'date',
+    header: 'Backup date',
+    enableSorting: true,
+    enableGlobalFilter: true,
+    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
 ]
 
@@ -57,8 +48,18 @@ export default function ClusterBackups() {
     pollInterval: POLL_INTERVAL,
   })
 
-  useSetBreadcrumbs(BACKUPS_BACKUPS_BASE_CRUMBS)
-
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...BACKUPS_BACKUPS_BASE_CRUMBS,
+        {
+          label: clusterId,
+          url: `/backups/backups/${clusterId}`,
+        },
+      ],
+      [clusterId]
+    )
+  )
   const [tableFilters, _] = useState<
     Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   >({
