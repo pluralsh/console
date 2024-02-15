@@ -54,4 +54,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Backup do
 
   def configure_backups(%{store_id: store_id, cluster_id: cluster_id}, %{context: %{current_user: user}}),
     do: Backups.configure_backups(store_id, cluster_id, user)
+
+  def delink_backups(%{cluster_id: cluster_id}, %{context: %{current_user: user}}),
+    do: Backups.delink_backups(cluster_id, user)
 end
