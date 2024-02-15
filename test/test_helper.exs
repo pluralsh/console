@@ -31,6 +31,7 @@ Mimic.copy(Phoenix.Channel.Server)
 Mimic.copy(Tentacat.Pulls)
 Mimic.copy(Tentacat.Organizations.Hooks)
 Mimic.copy(Console.Deployments.Pr.Git)
+Mimic.copy(Console.Deployments.Pr.Dispatcher)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)

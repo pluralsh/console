@@ -286,11 +286,12 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "A reference to a pull request for your kubernetes related IaC"
   object :pull_request do
-    field :id,     non_null(:id)
-    field :status, non_null(:pr_status)
-    field :url,    non_null(:string)
-    field :title,  :string
-    field :labels, list_of(:string)
+    field :id,      non_null(:id)
+    field :status,  non_null(:pr_status)
+    field :url,     non_null(:string)
+    field :title,   :string
+    field :creator, :string
+    field :labels,  list_of(:string)
 
     field :cluster, :cluster, description: "the cluster this pr is meant to modify",
       resolve: dataloader(Deployments)

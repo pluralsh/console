@@ -31,7 +31,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ServiceContext,
     ClusterRestore,
     ClusterBackup,
-    ObjectStore
+    ObjectStore,
+    PullRequest,
+    PipelineContext
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -61,6 +63,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ClusterRestore, _), do: ClusterRestore
   def query(ClusterBackup, _), do: ClusterBackup
   def query(ObjectStore, _), do: ObjectStore
+  def query(PullRequest, _), do: PullRequest
+  def query(PipelineContext, _), do: PipelineContext
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

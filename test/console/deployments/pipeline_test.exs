@@ -1,5 +1,6 @@
 defmodule Console.Deployments.PipelinesTest do
   use Console.DataCase, async: true
+  use Mimic
   alias Console.PubSub
   alias Console.Deployments.{Pipelines, Services}
 
@@ -192,6 +193,57 @@ defmodule Console.Deployments.PipelinesTest do
     end
   end
 
+  describe "#create_pipeline_context/3" do
+    test "it can create a context blob for a pipeline and bind it to the first stage" do
+      user = admin_user()
+      [svc, svc2] = insert_list(2, :service)
+      pipe = insert(:pipeline, name: "my-pipeline")
+      %{id: id} = dev = insert(:pipeline_stage, pipeline: pipe, name: "dev")
+      insert(:stage_service, service: svc, stage: dev)
+      prod = insert(:pipeline_stage, pipeline: pipe, name: "prod")
+      ss2 = insert(:stage_service, service: svc2, stage: prod)
+      insert(:promotion_criteria, stage_service: ss2, source: svc, secrets: ["some-secret"])
+      edge = insert(:pipeline_edge, from: dev, to: prod, pipeline: pipe)
+      insert(:pipeline_gate, edge: edge, type: :approval, name: "approve")
+
+      {:ok, ctx} = Pipelines.create_pipeline_context(%{context: %{some: "context"}}, pipe.id, user)
+
+      assert ctx.pipeline_id == pipe.id
+      assert refetch(dev).context_id == ctx.id
+      refute refetch(prod).context_id == ctx.id
+
+      assert_receive {:event, %PubSub.PipelineStageUpdated{item: %{id: ^id}}}
+    end
+  end
+
+  describe "#apply_pipeline_context/1" do
+    test "it can spawn the pull requests needed for a given pipeline stage" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
+      )
+
+      svc = insert(:service)
+      pipe = insert(:pipeline, name: "my-pipeline")
+      ctx = insert(:pipeline_context, context: %{some: "context"})
+      dev = insert(:pipeline_stage, pipeline: pipe, name: "dev", context: ctx)
+      ss = insert(:stage_service, service: svc, stage: dev)
+      insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
+
+      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{some: "context"} -> {:ok, "some", "url"} end)
+
+      {:ok, %{stg: stage}} = Pipelines.apply_pipeline_context(dev)
+
+      assert stage.applied_context_id == ctx.id
+      assert Console.Repo.get_by(Console.Schema.PipelinePullRequest, context_id: ctx.id, service_id: svc.id)
+    end
+  end
+
   describe "#build_promotion/1" do
     test "it will create a new promotion for a pipeline stage and mark all gates pending" do
       admin = admin_user()
@@ -354,7 +406,7 @@ defmodule Console.Deployments.PipelinesTest do
     test "approvals respect rbac" do
       user = insert(:user)
       pipeline = insert(:pipeline, write_bindings: [%{user_id: user.id}])
-      gate = insert(:pipeline_gate, edge: build(:pipeline_edge, pipeline: pipeline))
+      gate = insert(:pipeline_gate, state: :pending, edge: build(:pipeline_edge, pipeline: pipeline))
 
       {:ok, approved} = Pipelines.approve_gate(gate.id, user)
 
@@ -365,6 +417,14 @@ defmodule Console.Deployments.PipelinesTest do
       assert_receive {:event, %PubSub.PipelineGateApproved{item: ^approved}}
 
       {:error, _} = Pipelines.approve_gate(gate.id, insert(:user))
+    end
+
+    test "you cannot approve closed gates" do
+      user = insert(:user)
+      pipeline = insert(:pipeline, write_bindings: [%{user_id: user.id}])
+      gate = insert(:pipeline_gate, state: :closed, edge: build(:pipeline_edge, pipeline: pipeline))
+
+      {:error, _} = Pipelines.approve_gate(gate.id, user)
     end
 
     test "you cannot approve non-approval gates" do

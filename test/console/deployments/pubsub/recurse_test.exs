@@ -216,4 +216,33 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       refute Global.diff?(source, synced)
     end
   end
+
+  describe "PipelineStageUpdated" do
+    test "it will attempt to apply pr automations" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
+      )
+
+      svc = insert(:service)
+      pipe = insert(:pipeline, name: "my-pipeline")
+      ctx = insert(:pipeline_context, context: %{some: "context"})
+      dev = insert(:pipeline_stage, pipeline: pipe, name: "dev", context: ctx)
+      ss = insert(:stage_service, service: svc, stage: dev)
+      insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
+
+      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{some: "context"} -> {:ok, "some", "url"} end)
+
+      event = %PubSub.PipelineStageUpdated{item: dev}
+      {:ok, %{stg: stage}} = Recurse.handle_event(event)
+
+      assert stage.applied_context_id == ctx.id
+      assert Console.Repo.get_by(Console.Schema.PipelinePullRequest, context_id: ctx.id, service_id: svc.id)
+    end
+  end
 end
