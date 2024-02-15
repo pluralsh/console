@@ -3,14 +3,13 @@ package client
 import (
 	"context"
 
-	gqlgenclient "github.com/Yamashou/gqlgenc/client"
 	console "github.com/pluralsh/console-client-go"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-func (c *client) CreatePrAutomation(ctx context.Context, attributes console.PrAutomationAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error) {
-	response, err := c.consoleClient.CreatePrAutomation(ctx, attributes, options...)
+func (c *client) CreatePrAutomation(ctx context.Context, attributes console.PrAutomationAttributes) (*console.PrAutomationFragment, error) {
+	response, err := c.consoleClient.CreatePrAutomation(ctx, attributes)
 	if err != nil {
 		return nil, err
 	}
@@ -18,8 +17,8 @@ func (c *client) CreatePrAutomation(ctx context.Context, attributes console.PrAu
 	return response.CreatePrAutomation, err
 }
 
-func (c *client) UpdatePrAutomation(ctx context.Context, id string, attributes console.PrAutomationAttributes, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error) {
-	response, err := c.consoleClient.UpdatePrAutomation(ctx, id, attributes, options...)
+func (c *client) UpdatePrAutomation(ctx context.Context, id string, attributes console.PrAutomationAttributes) (*console.PrAutomationFragment, error) {
+	response, err := c.consoleClient.UpdatePrAutomation(ctx, id, attributes)
 	if err != nil {
 		return nil, err
 	}
@@ -27,14 +26,14 @@ func (c *client) UpdatePrAutomation(ctx context.Context, id string, attributes c
 	return response.UpdatePrAutomation, err
 }
 
-func (c *client) DeletePrAutomation(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) error {
-	_, err := c.consoleClient.DeletePrAutomation(ctx, id, options...)
+func (c *client) DeletePrAutomation(ctx context.Context, id string) error {
+	_, err := c.consoleClient.DeletePrAutomation(ctx, id)
 
 	return err
 }
 
-func (c *client) GetPrAutomation(ctx context.Context, id string, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error) {
-	response, err := c.consoleClient.GetPrAutomation(ctx, id, options...)
+func (c *client) GetPrAutomation(ctx context.Context, id string) (*console.PrAutomationFragment, error) {
+	response, err := c.consoleClient.GetPrAutomation(ctx, id)
 	if err == nil && (response == nil || response.PrAutomation == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
@@ -46,8 +45,8 @@ func (c *client) GetPrAutomation(ctx context.Context, id string, options ...gqlg
 	return response.PrAutomation, err
 }
 
-func (c *client) GetPrAutomationByName(ctx context.Context, name string, options ...gqlgenclient.HTTPRequestOption) (*console.PrAutomationFragment, error) {
-	response, err := c.consoleClient.GetPrAutomationByName(ctx, name, options...)
+func (c *client) GetPrAutomationByName(ctx context.Context, name string) (*console.PrAutomationFragment, error) {
+	response, err := c.consoleClient.GetPrAutomationByName(ctx, name)
 	if err == nil && (response == nil || response.PrAutomation == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, name)
 	}

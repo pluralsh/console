@@ -58,15 +58,24 @@ defmodule Console.Schema.PipelineGate do
     from(g in query, order_by: ^order)
   end
 
+  @terminal ~w(open closed)a
+
+  def valid_transition?(state, :pending) when state in @terminal, do: false
+  def valid_transition?(:pending, state) when state in @terminal, do: true
+  def valid_transition?(state, state), do: true
+  def valid_transition?(nil, _), do: true
+  def valid_transition?(_, _), do: false
+
   @valid ~w(name state type edge_id cluster_id approver_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:spec, with: &spec_changeset/2)
+    |> validate_state()
     |> foreign_key_constraint(:edge_id)
     |> foreign_key_constraint(:approver_id)
-    |> validate_format(:name, ~r/[a-z0-9][ -a-z0-9]*[a-z0-9]/)
+    |> validate_format(:name, ~r/[a-z0-9][ -a-z0-9]*[a-z0-9]/, message: "Gate names must be lowercase alphanumeric, or separated by spaces or hyphens")
     |> validate_required([:name, :state, :type])
   end
 
@@ -92,5 +101,15 @@ defmodule Console.Schema.PipelineGate do
     model
     |> cast(attrs, ~w(name namespace)a)
     |> validate_required(~w(name namespace)a)
+  end
+
+  defp validate_state(cs) do
+    current = cs.data.state
+    validate_change(cs, :state, fn _, val ->
+      case valid_transition?(current, val) do
+        true -> []
+        false -> [state: "cannot transition gate state from #{current} to #{val}"]
+      end
+    end)
   end
 end

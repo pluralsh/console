@@ -7,7 +7,6 @@ defmodule Console.Deployments.Pr.Dispatcher do
   alias Console.Deployments.Pr.Impl.{Github, Gitlab}
   alias Console.Schema.{PrAutomation, ScmConnection, ScmWebhook, GitRepository}
 
-
   @type pr_resp :: {:ok, binary, binary} | Console.error
 
   @doc """
@@ -19,6 +18,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
   Creates a webhook using the credentials in this connection
   """
   @callback webhook(conn :: ScmConnection.t, hook :: ScmWebhook.t) :: :ok | Console.error
+
+  @doc """
+  Gets updates to perform in response to a pr webhook event
+  """
+  @callback pr(msg :: map) :: {:ok, binary, map} | :ignore
 
   @doc """
   Fully creates a pr against the working dispatcher implementation
@@ -42,6 +46,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
     impl.webhook(conn, hook)
   end
 
+  def pr(%ScmWebhook{} = hook, body) do
+    impl = dispatcher(hook)
+    impl.pr(body)
+  end
+
   defp external_git(%PrAutomation{repository: %GitRepository{} = git, creates: %{git: %{ref: _, folder: _} = ref}}) do
     with {:ok, dir} <- Briefly.create(directory: true),
          {:ok, f} <- Discovery.fetch(git, ref),
@@ -51,6 +60,6 @@ defmodule Console.Deployments.Pr.Dispatcher do
   end
   defp external_git(_), do: {:ok, nil}
 
-  defp dispatcher(%ScmConnection{type: :github}), do: Github
-  defp dispatcher(%ScmConnection{type: :gitlab}), do: Gitlab
+  defp dispatcher(%{type: :github}), do: Github
+  defp dispatcher(%{type: :gitlab}), do: Gitlab
 end

@@ -40,7 +40,7 @@ const PipelineList = styled(VirtualList)(({ theme }) => ({
   flexShrink: 0,
 }))
 
-const PipelineEditAreaSC = styled.div(({ theme }) => ({
+export const PipelineEditAreaSC = styled.div(({ theme }) => ({
   border: theme.borders.default,
   width: '100%',
   height: '100%',

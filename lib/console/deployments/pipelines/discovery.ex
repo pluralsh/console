@@ -14,8 +14,13 @@ defmodule Console.Deployments.Pipelines.Discovery do
   def stage(%PipelineStage{id: id} = stage),
     do: maybe_rpc(id, __MODULE__, :dispatch, [stage])
 
+  def context(%PipelineStage{id: id} = stage),
+    do: maybe_rpc(id, __MODULE__, :stage_context, [stage])
+
   def dispatch(%PipelinePromotion{id: id} = promo), do: PromotionWorker.dispatch(worker_shard(id), promo)
   def dispatch(%PipelineStage{id: id} = stage), do: StageWorker.dispatch(worker_shard(id), stage)
+
+  def stage_context(%PipelineStage{id: id} = stage), do: StageWorker.context(worker_shard(id), stage)
 
   def shards(), do: @shards
 

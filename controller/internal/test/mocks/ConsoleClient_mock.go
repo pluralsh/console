@@ -5,9 +5,7 @@ package mocks
 import (
 	context "context"
 
-	gqlgencclient "github.com/Yamashou/gqlgenc/client"
 	gqlclient "github.com/pluralsh/console-client-go"
-
 	mock "github.com/stretchr/testify/mock"
 
 	v1alpha1 "github.com/pluralsh/console/controller/api/v1alpha1"
@@ -201,16 +199,9 @@ func (_c *ConsoleClientMock_CreateGlobalService_Call) RunAndReturn(run func(stri
 	return _c
 }
 
-// CreatePrAutomation provides a mock function with given fields: ctx, attributes, options
-func (_m *ConsoleClientMock) CreatePrAutomation(ctx context.Context, attributes gqlclient.PrAutomationAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, attributes)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// CreatePrAutomation provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreatePrAutomation(ctx context.Context, attributes gqlclient.PrAutomationAttributes) (*gqlclient.PrAutomationFragment, error) {
+	ret := _m.Called(ctx, attributes)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreatePrAutomation")
@@ -218,19 +209,19 @@ func (_m *ConsoleClientMock) CreatePrAutomation(ctx context.Context, attributes 
 
 	var r0 *gqlclient.PrAutomationFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)); ok {
-		return rf(ctx, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.PrAutomationAttributes) (*gqlclient.PrAutomationFragment, error)); ok {
+		return rf(ctx, attributes)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) *gqlclient.PrAutomationFragment); ok {
-		r0 = rf(ctx, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.PrAutomationAttributes) *gqlclient.PrAutomationFragment); ok {
+		r0 = rf(ctx, attributes)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.PrAutomationFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, attributes, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.PrAutomationAttributes) error); ok {
+		r1 = rf(ctx, attributes)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -246,21 +237,13 @@ type ConsoleClientMock_CreatePrAutomation_Call struct {
 // CreatePrAutomation is a helper method to define mock.On call
 //   - ctx context.Context
 //   - attributes gqlclient.PrAutomationAttributes
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) CreatePrAutomation(ctx interface{}, attributes interface{}, options ...interface{}) *ConsoleClientMock_CreatePrAutomation_Call {
-	return &ConsoleClientMock_CreatePrAutomation_Call{Call: _e.mock.On("CreatePrAutomation",
-		append([]interface{}{ctx, attributes}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) CreatePrAutomation(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreatePrAutomation_Call {
+	return &ConsoleClientMock_CreatePrAutomation_Call{Call: _e.mock.On("CreatePrAutomation", ctx, attributes)}
 }
 
-func (_c *ConsoleClientMock_CreatePrAutomation_Call) Run(run func(ctx context.Context, attributes gqlclient.PrAutomationAttributes, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_CreatePrAutomation_Call {
+func (_c *ConsoleClientMock_CreatePrAutomation_Call) Run(run func(ctx context.Context, attributes gqlclient.PrAutomationAttributes)) *ConsoleClientMock_CreatePrAutomation_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(gqlclient.PrAutomationAttributes), variadicArgs...)
+		run(args[0].(context.Context), args[1].(gqlclient.PrAutomationAttributes))
 	})
 	return _c
 }
@@ -270,21 +253,14 @@ func (_c *ConsoleClientMock_CreatePrAutomation_Call) Return(_a0 *gqlclient.PrAut
 	return _c
 }
 
-func (_c *ConsoleClientMock_CreatePrAutomation_Call) RunAndReturn(run func(context.Context, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_CreatePrAutomation_Call {
+func (_c *ConsoleClientMock_CreatePrAutomation_Call) RunAndReturn(run func(context.Context, gqlclient.PrAutomationAttributes) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_CreatePrAutomation_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// CreateProvider provides a mock function with given fields: ctx, attributes, options
-func (_m *ConsoleClientMock) CreateProvider(ctx context.Context, attributes gqlclient.ClusterProviderAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, attributes)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// CreateProvider provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreateProvider(ctx context.Context, attributes gqlclient.ClusterProviderAttributes) (*gqlclient.ClusterProviderFragment, error) {
+	ret := _m.Called(ctx, attributes)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateProvider")
@@ -292,19 +268,19 @@ func (_m *ConsoleClientMock) CreateProvider(ctx context.Context, attributes gqlc
 
 	var r0 *gqlclient.ClusterProviderFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ClusterProviderAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error)); ok {
-		return rf(ctx, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ClusterProviderAttributes) (*gqlclient.ClusterProviderFragment, error)); ok {
+		return rf(ctx, attributes)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ClusterProviderAttributes, ...gqlgencclient.HTTPRequestOption) *gqlclient.ClusterProviderFragment); ok {
-		r0 = rf(ctx, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ClusterProviderAttributes) *gqlclient.ClusterProviderFragment); ok {
+		r0 = rf(ctx, attributes)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.ClusterProviderFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.ClusterProviderAttributes, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, attributes, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.ClusterProviderAttributes) error); ok {
+		r1 = rf(ctx, attributes)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -320,21 +296,13 @@ type ConsoleClientMock_CreateProvider_Call struct {
 // CreateProvider is a helper method to define mock.On call
 //   - ctx context.Context
 //   - attributes gqlclient.ClusterProviderAttributes
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) CreateProvider(ctx interface{}, attributes interface{}, options ...interface{}) *ConsoleClientMock_CreateProvider_Call {
-	return &ConsoleClientMock_CreateProvider_Call{Call: _e.mock.On("CreateProvider",
-		append([]interface{}{ctx, attributes}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) CreateProvider(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreateProvider_Call {
+	return &ConsoleClientMock_CreateProvider_Call{Call: _e.mock.On("CreateProvider", ctx, attributes)}
 }
 
-func (_c *ConsoleClientMock_CreateProvider_Call) Run(run func(ctx context.Context, attributes gqlclient.ClusterProviderAttributes, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_CreateProvider_Call {
+func (_c *ConsoleClientMock_CreateProvider_Call) Run(run func(ctx context.Context, attributes gqlclient.ClusterProviderAttributes)) *ConsoleClientMock_CreateProvider_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(gqlclient.ClusterProviderAttributes), variadicArgs...)
+		run(args[0].(context.Context), args[1].(gqlclient.ClusterProviderAttributes))
 	})
 	return _c
 }
@@ -344,7 +312,7 @@ func (_c *ConsoleClientMock_CreateProvider_Call) Return(_a0 *gqlclient.ClusterPr
 	return _c
 }
 
-func (_c *ConsoleClientMock_CreateProvider_Call) RunAndReturn(run func(context.Context, gqlclient.ClusterProviderAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error)) *ConsoleClientMock_CreateProvider_Call {
+func (_c *ConsoleClientMock_CreateProvider_Call) RunAndReturn(run func(context.Context, gqlclient.ClusterProviderAttributes) (*gqlclient.ClusterProviderFragment, error)) *ConsoleClientMock_CreateProvider_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -411,16 +379,9 @@ func (_c *ConsoleClientMock_CreateRepository_Call) RunAndReturn(run func(string,
 	return _c
 }
 
-// CreateScmConnection provides a mock function with given fields: ctx, attributes, options
-func (_m *ConsoleClientMock) CreateScmConnection(ctx context.Context, attributes gqlclient.ScmConnectionAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, attributes)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// CreateScmConnection provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreateScmConnection(ctx context.Context, attributes gqlclient.ScmConnectionAttributes) (*gqlclient.ScmConnectionFragment, error) {
+	ret := _m.Called(ctx, attributes)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateScmConnection")
@@ -428,19 +389,19 @@ func (_m *ConsoleClientMock) CreateScmConnection(ctx context.Context, attributes
 
 	var r0 *gqlclient.ScmConnectionFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)); ok {
-		return rf(ctx, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ScmConnectionAttributes) (*gqlclient.ScmConnectionFragment, error)); ok {
+		return rf(ctx, attributes)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) *gqlclient.ScmConnectionFragment); ok {
-		r0 = rf(ctx, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ScmConnectionAttributes) *gqlclient.ScmConnectionFragment); ok {
+		r0 = rf(ctx, attributes)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.ScmConnectionFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, attributes, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.ScmConnectionAttributes) error); ok {
+		r1 = rf(ctx, attributes)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -456,21 +417,13 @@ type ConsoleClientMock_CreateScmConnection_Call struct {
 // CreateScmConnection is a helper method to define mock.On call
 //   - ctx context.Context
 //   - attributes gqlclient.ScmConnectionAttributes
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) CreateScmConnection(ctx interface{}, attributes interface{}, options ...interface{}) *ConsoleClientMock_CreateScmConnection_Call {
-	return &ConsoleClientMock_CreateScmConnection_Call{Call: _e.mock.On("CreateScmConnection",
-		append([]interface{}{ctx, attributes}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) CreateScmConnection(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreateScmConnection_Call {
+	return &ConsoleClientMock_CreateScmConnection_Call{Call: _e.mock.On("CreateScmConnection", ctx, attributes)}
 }
 
-func (_c *ConsoleClientMock_CreateScmConnection_Call) Run(run func(ctx context.Context, attributes gqlclient.ScmConnectionAttributes, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_CreateScmConnection_Call {
+func (_c *ConsoleClientMock_CreateScmConnection_Call) Run(run func(ctx context.Context, attributes gqlclient.ScmConnectionAttributes)) *ConsoleClientMock_CreateScmConnection_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(gqlclient.ScmConnectionAttributes), variadicArgs...)
+		run(args[0].(context.Context), args[1].(gqlclient.ScmConnectionAttributes))
 	})
 	return _c
 }
@@ -480,7 +433,7 @@ func (_c *ConsoleClientMock_CreateScmConnection_Call) Return(_a0 *gqlclient.ScmC
 	return _c
 }
 
-func (_c *ConsoleClientMock_CreateScmConnection_Call) RunAndReturn(run func(context.Context, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_CreateScmConnection_Call {
+func (_c *ConsoleClientMock_CreateScmConnection_Call) RunAndReturn(run func(context.Context, gqlclient.ScmConnectionAttributes) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_CreateScmConnection_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -706,24 +659,17 @@ func (_c *ConsoleClientMock_DeletePipeline_Call) RunAndReturn(run func(string) (
 	return _c
 }
 
-// DeletePrAutomation provides a mock function with given fields: ctx, id, options
-func (_m *ConsoleClientMock) DeletePrAutomation(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption) error {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, id)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// DeletePrAutomation provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeletePrAutomation(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeletePrAutomation")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r0 = rf(ctx, id, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -739,21 +685,13 @@ type ConsoleClientMock_DeletePrAutomation_Call struct {
 // DeletePrAutomation is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id string
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) DeletePrAutomation(ctx interface{}, id interface{}, options ...interface{}) *ConsoleClientMock_DeletePrAutomation_Call {
-	return &ConsoleClientMock_DeletePrAutomation_Call{Call: _e.mock.On("DeletePrAutomation",
-		append([]interface{}{ctx, id}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) DeletePrAutomation(ctx interface{}, id interface{}) *ConsoleClientMock_DeletePrAutomation_Call {
+	return &ConsoleClientMock_DeletePrAutomation_Call{Call: _e.mock.On("DeletePrAutomation", ctx, id)}
 }
 
-func (_c *ConsoleClientMock_DeletePrAutomation_Call) Run(run func(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_DeletePrAutomation_Call {
+func (_c *ConsoleClientMock_DeletePrAutomation_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeletePrAutomation_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -763,29 +701,22 @@ func (_c *ConsoleClientMock_DeletePrAutomation_Call) Return(_a0 error) *ConsoleC
 	return _c
 }
 
-func (_c *ConsoleClientMock_DeletePrAutomation_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error) *ConsoleClientMock_DeletePrAutomation_Call {
+func (_c *ConsoleClientMock_DeletePrAutomation_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeletePrAutomation_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// DeleteProvider provides a mock function with given fields: ctx, id, options
-func (_m *ConsoleClientMock) DeleteProvider(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption) error {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, id)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// DeleteProvider provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteProvider(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteProvider")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r0 = rf(ctx, id, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -801,21 +732,13 @@ type ConsoleClientMock_DeleteProvider_Call struct {
 // DeleteProvider is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id string
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) DeleteProvider(ctx interface{}, id interface{}, options ...interface{}) *ConsoleClientMock_DeleteProvider_Call {
-	return &ConsoleClientMock_DeleteProvider_Call{Call: _e.mock.On("DeleteProvider",
-		append([]interface{}{ctx, id}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) DeleteProvider(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteProvider_Call {
+	return &ConsoleClientMock_DeleteProvider_Call{Call: _e.mock.On("DeleteProvider", ctx, id)}
 }
 
-func (_c *ConsoleClientMock_DeleteProvider_Call) Run(run func(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_DeleteProvider_Call {
+func (_c *ConsoleClientMock_DeleteProvider_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteProvider_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -825,7 +748,7 @@ func (_c *ConsoleClientMock_DeleteProvider_Call) Return(_a0 error) *ConsoleClien
 	return _c
 }
 
-func (_c *ConsoleClientMock_DeleteProvider_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error) *ConsoleClientMock_DeleteProvider_Call {
+func (_c *ConsoleClientMock_DeleteProvider_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteProvider_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -876,24 +799,17 @@ func (_c *ConsoleClientMock_DeleteRepository_Call) RunAndReturn(run func(string)
 	return _c
 }
 
-// DeleteScmConnection provides a mock function with given fields: ctx, id, options
-func (_m *ConsoleClientMock) DeleteScmConnection(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption) error {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, id)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// DeleteScmConnection provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteScmConnection(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteScmConnection")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r0 = rf(ctx, id, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -909,21 +825,13 @@ type ConsoleClientMock_DeleteScmConnection_Call struct {
 // DeleteScmConnection is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id string
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) DeleteScmConnection(ctx interface{}, id interface{}, options ...interface{}) *ConsoleClientMock_DeleteScmConnection_Call {
-	return &ConsoleClientMock_DeleteScmConnection_Call{Call: _e.mock.On("DeleteScmConnection",
-		append([]interface{}{ctx, id}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) DeleteScmConnection(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteScmConnection_Call {
+	return &ConsoleClientMock_DeleteScmConnection_Call{Call: _e.mock.On("DeleteScmConnection", ctx, id)}
 }
 
-func (_c *ConsoleClientMock_DeleteScmConnection_Call) Run(run func(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_DeleteScmConnection_Call {
+func (_c *ConsoleClientMock_DeleteScmConnection_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteScmConnection_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -933,7 +841,7 @@ func (_c *ConsoleClientMock_DeleteScmConnection_Call) Return(_a0 error) *Console
 	return _c
 }
 
-func (_c *ConsoleClientMock_DeleteScmConnection_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error) *ConsoleClientMock_DeleteScmConnection_Call {
+func (_c *ConsoleClientMock_DeleteScmConnection_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteScmConnection_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1392,16 +1300,9 @@ func (_c *ConsoleClientMock_GetPipeline_Call) RunAndReturn(run func(string) (*gq
 	return _c
 }
 
-// GetPrAutomation provides a mock function with given fields: ctx, id, options
-func (_m *ConsoleClientMock) GetPrAutomation(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, id)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// GetPrAutomation provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetPrAutomation(ctx context.Context, id string) (*gqlclient.PrAutomationFragment, error) {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetPrAutomation")
@@ -1409,19 +1310,19 @@ func (_m *ConsoleClientMock) GetPrAutomation(ctx context.Context, id string, opt
 
 	var r0 *gqlclient.PrAutomationFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)); ok {
-		return rf(ctx, id, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.PrAutomationFragment, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) *gqlclient.PrAutomationFragment); ok {
-		r0 = rf(ctx, id, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.PrAutomationFragment); ok {
+		r0 = rf(ctx, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.PrAutomationFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, id, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1437,21 +1338,13 @@ type ConsoleClientMock_GetPrAutomation_Call struct {
 // GetPrAutomation is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id string
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) GetPrAutomation(ctx interface{}, id interface{}, options ...interface{}) *ConsoleClientMock_GetPrAutomation_Call {
-	return &ConsoleClientMock_GetPrAutomation_Call{Call: _e.mock.On("GetPrAutomation",
-		append([]interface{}{ctx, id}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) GetPrAutomation(ctx interface{}, id interface{}) *ConsoleClientMock_GetPrAutomation_Call {
+	return &ConsoleClientMock_GetPrAutomation_Call{Call: _e.mock.On("GetPrAutomation", ctx, id)}
 }
 
-func (_c *ConsoleClientMock_GetPrAutomation_Call) Run(run func(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_GetPrAutomation_Call {
+func (_c *ConsoleClientMock_GetPrAutomation_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetPrAutomation_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -1461,21 +1354,14 @@ func (_c *ConsoleClientMock_GetPrAutomation_Call) Return(_a0 *gqlclient.PrAutoma
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetPrAutomation_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_GetPrAutomation_Call {
+func (_c *ConsoleClientMock_GetPrAutomation_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_GetPrAutomation_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetPrAutomationByName provides a mock function with given fields: ctx, name, options
-func (_m *ConsoleClientMock) GetPrAutomationByName(ctx context.Context, name string, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, name)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// GetPrAutomationByName provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) GetPrAutomationByName(ctx context.Context, name string) (*gqlclient.PrAutomationFragment, error) {
+	ret := _m.Called(ctx, name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetPrAutomationByName")
@@ -1483,19 +1369,19 @@ func (_m *ConsoleClientMock) GetPrAutomationByName(ctx context.Context, name str
 
 	var r0 *gqlclient.PrAutomationFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)); ok {
-		return rf(ctx, name, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.PrAutomationFragment, error)); ok {
+		return rf(ctx, name)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) *gqlclient.PrAutomationFragment); ok {
-		r0 = rf(ctx, name, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.PrAutomationFragment); ok {
+		r0 = rf(ctx, name)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.PrAutomationFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, name, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1511,21 +1397,13 @@ type ConsoleClientMock_GetPrAutomationByName_Call struct {
 // GetPrAutomationByName is a helper method to define mock.On call
 //   - ctx context.Context
 //   - name string
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) GetPrAutomationByName(ctx interface{}, name interface{}, options ...interface{}) *ConsoleClientMock_GetPrAutomationByName_Call {
-	return &ConsoleClientMock_GetPrAutomationByName_Call{Call: _e.mock.On("GetPrAutomationByName",
-		append([]interface{}{ctx, name}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) GetPrAutomationByName(ctx interface{}, name interface{}) *ConsoleClientMock_GetPrAutomationByName_Call {
+	return &ConsoleClientMock_GetPrAutomationByName_Call{Call: _e.mock.On("GetPrAutomationByName", ctx, name)}
 }
 
-func (_c *ConsoleClientMock_GetPrAutomationByName_Call) Run(run func(ctx context.Context, name string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_GetPrAutomationByName_Call {
+func (_c *ConsoleClientMock_GetPrAutomationByName_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_GetPrAutomationByName_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -1535,21 +1413,14 @@ func (_c *ConsoleClientMock_GetPrAutomationByName_Call) Return(_a0 *gqlclient.Pr
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetPrAutomationByName_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_GetPrAutomationByName_Call {
+func (_c *ConsoleClientMock_GetPrAutomationByName_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_GetPrAutomationByName_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetProvider provides a mock function with given fields: ctx, id, options
-func (_m *ConsoleClientMock) GetProvider(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, id)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// GetProvider provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetProvider(ctx context.Context, id string) (*gqlclient.ClusterProviderFragment, error) {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetProvider")
@@ -1557,19 +1428,19 @@ func (_m *ConsoleClientMock) GetProvider(ctx context.Context, id string, options
 
 	var r0 *gqlclient.ClusterProviderFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error)); ok {
-		return rf(ctx, id, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.ClusterProviderFragment, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) *gqlclient.ClusterProviderFragment); ok {
-		r0 = rf(ctx, id, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.ClusterProviderFragment); ok {
+		r0 = rf(ctx, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.ClusterProviderFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, id, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1585,21 +1456,13 @@ type ConsoleClientMock_GetProvider_Call struct {
 // GetProvider is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id string
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) GetProvider(ctx interface{}, id interface{}, options ...interface{}) *ConsoleClientMock_GetProvider_Call {
-	return &ConsoleClientMock_GetProvider_Call{Call: _e.mock.On("GetProvider",
-		append([]interface{}{ctx, id}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) GetProvider(ctx interface{}, id interface{}) *ConsoleClientMock_GetProvider_Call {
+	return &ConsoleClientMock_GetProvider_Call{Call: _e.mock.On("GetProvider", ctx, id)}
 }
 
-func (_c *ConsoleClientMock_GetProvider_Call) Run(run func(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_GetProvider_Call {
+func (_c *ConsoleClientMock_GetProvider_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetProvider_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -1609,21 +1472,14 @@ func (_c *ConsoleClientMock_GetProvider_Call) Return(_a0 *gqlclient.ClusterProvi
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetProvider_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error)) *ConsoleClientMock_GetProvider_Call {
+func (_c *ConsoleClientMock_GetProvider_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.ClusterProviderFragment, error)) *ConsoleClientMock_GetProvider_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetProviderByCloud provides a mock function with given fields: ctx, cloud, options
-func (_m *ConsoleClientMock) GetProviderByCloud(ctx context.Context, cloud v1alpha1.CloudProvider, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, cloud)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// GetProviderByCloud provides a mock function with given fields: ctx, cloud
+func (_m *ConsoleClientMock) GetProviderByCloud(ctx context.Context, cloud v1alpha1.CloudProvider) (*gqlclient.ClusterProviderFragment, error) {
+	ret := _m.Called(ctx, cloud)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetProviderByCloud")
@@ -1631,19 +1487,19 @@ func (_m *ConsoleClientMock) GetProviderByCloud(ctx context.Context, cloud v1alp
 
 	var r0 *gqlclient.ClusterProviderFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, v1alpha1.CloudProvider, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error)); ok {
-		return rf(ctx, cloud, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, v1alpha1.CloudProvider) (*gqlclient.ClusterProviderFragment, error)); ok {
+		return rf(ctx, cloud)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, v1alpha1.CloudProvider, ...gqlgencclient.HTTPRequestOption) *gqlclient.ClusterProviderFragment); ok {
-		r0 = rf(ctx, cloud, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, v1alpha1.CloudProvider) *gqlclient.ClusterProviderFragment); ok {
+		r0 = rf(ctx, cloud)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.ClusterProviderFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, v1alpha1.CloudProvider, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, cloud, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, v1alpha1.CloudProvider) error); ok {
+		r1 = rf(ctx, cloud)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1659,21 +1515,13 @@ type ConsoleClientMock_GetProviderByCloud_Call struct {
 // GetProviderByCloud is a helper method to define mock.On call
 //   - ctx context.Context
 //   - cloud v1alpha1.CloudProvider
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) GetProviderByCloud(ctx interface{}, cloud interface{}, options ...interface{}) *ConsoleClientMock_GetProviderByCloud_Call {
-	return &ConsoleClientMock_GetProviderByCloud_Call{Call: _e.mock.On("GetProviderByCloud",
-		append([]interface{}{ctx, cloud}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) GetProviderByCloud(ctx interface{}, cloud interface{}) *ConsoleClientMock_GetProviderByCloud_Call {
+	return &ConsoleClientMock_GetProviderByCloud_Call{Call: _e.mock.On("GetProviderByCloud", ctx, cloud)}
 }
 
-func (_c *ConsoleClientMock_GetProviderByCloud_Call) Run(run func(ctx context.Context, cloud v1alpha1.CloudProvider, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_GetProviderByCloud_Call {
+func (_c *ConsoleClientMock_GetProviderByCloud_Call) Run(run func(ctx context.Context, cloud v1alpha1.CloudProvider)) *ConsoleClientMock_GetProviderByCloud_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(v1alpha1.CloudProvider), variadicArgs...)
+		run(args[0].(context.Context), args[1].(v1alpha1.CloudProvider))
 	})
 	return _c
 }
@@ -1683,7 +1531,7 @@ func (_c *ConsoleClientMock_GetProviderByCloud_Call) Return(_a0 *gqlclient.Clust
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetProviderByCloud_Call) RunAndReturn(run func(context.Context, v1alpha1.CloudProvider, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error)) *ConsoleClientMock_GetProviderByCloud_Call {
+func (_c *ConsoleClientMock_GetProviderByCloud_Call) RunAndReturn(run func(context.Context, v1alpha1.CloudProvider) (*gqlclient.ClusterProviderFragment, error)) *ConsoleClientMock_GetProviderByCloud_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1746,16 +1594,9 @@ func (_c *ConsoleClientMock_GetRepository_Call) RunAndReturn(run func(*string) (
 	return _c
 }
 
-// GetScmConnection provides a mock function with given fields: ctx, id, options
-func (_m *ConsoleClientMock) GetScmConnection(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, id)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// GetScmConnection provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetScmConnection(ctx context.Context, id string) (*gqlclient.ScmConnectionFragment, error) {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetScmConnection")
@@ -1763,19 +1604,19 @@ func (_m *ConsoleClientMock) GetScmConnection(ctx context.Context, id string, op
 
 	var r0 *gqlclient.ScmConnectionFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)); ok {
-		return rf(ctx, id, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.ScmConnectionFragment, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) *gqlclient.ScmConnectionFragment); ok {
-		r0 = rf(ctx, id, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.ScmConnectionFragment); ok {
+		r0 = rf(ctx, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.ScmConnectionFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, id, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1791,21 +1632,13 @@ type ConsoleClientMock_GetScmConnection_Call struct {
 // GetScmConnection is a helper method to define mock.On call
 //   - ctx context.Context
 //   - id string
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) GetScmConnection(ctx interface{}, id interface{}, options ...interface{}) *ConsoleClientMock_GetScmConnection_Call {
-	return &ConsoleClientMock_GetScmConnection_Call{Call: _e.mock.On("GetScmConnection",
-		append([]interface{}{ctx, id}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) GetScmConnection(ctx interface{}, id interface{}) *ConsoleClientMock_GetScmConnection_Call {
+	return &ConsoleClientMock_GetScmConnection_Call{Call: _e.mock.On("GetScmConnection", ctx, id)}
 }
 
-func (_c *ConsoleClientMock_GetScmConnection_Call) Run(run func(ctx context.Context, id string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_GetScmConnection_Call {
+func (_c *ConsoleClientMock_GetScmConnection_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetScmConnection_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -1815,21 +1648,14 @@ func (_c *ConsoleClientMock_GetScmConnection_Call) Return(_a0 *gqlclient.ScmConn
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetScmConnection_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_GetScmConnection_Call {
+func (_c *ConsoleClientMock_GetScmConnection_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_GetScmConnection_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetScmConnectionByName provides a mock function with given fields: ctx, name, options
-func (_m *ConsoleClientMock) GetScmConnectionByName(ctx context.Context, name string, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, name)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// GetScmConnectionByName provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) GetScmConnectionByName(ctx context.Context, name string) (*gqlclient.ScmConnectionFragment, error) {
+	ret := _m.Called(ctx, name)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetScmConnectionByName")
@@ -1837,19 +1663,19 @@ func (_m *ConsoleClientMock) GetScmConnectionByName(ctx context.Context, name st
 
 	var r0 *gqlclient.ScmConnectionFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)); ok {
-		return rf(ctx, name, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.ScmConnectionFragment, error)); ok {
+		return rf(ctx, name)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) *gqlclient.ScmConnectionFragment); ok {
-		r0 = rf(ctx, name, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.ScmConnectionFragment); ok {
+		r0 = rf(ctx, name)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.ScmConnectionFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, name, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1865,21 +1691,13 @@ type ConsoleClientMock_GetScmConnectionByName_Call struct {
 // GetScmConnectionByName is a helper method to define mock.On call
 //   - ctx context.Context
 //   - name string
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) GetScmConnectionByName(ctx interface{}, name interface{}, options ...interface{}) *ConsoleClientMock_GetScmConnectionByName_Call {
-	return &ConsoleClientMock_GetScmConnectionByName_Call{Call: _e.mock.On("GetScmConnectionByName",
-		append([]interface{}{ctx, name}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) GetScmConnectionByName(ctx interface{}, name interface{}) *ConsoleClientMock_GetScmConnectionByName_Call {
+	return &ConsoleClientMock_GetScmConnectionByName_Call{Call: _e.mock.On("GetScmConnectionByName", ctx, name)}
 }
 
-func (_c *ConsoleClientMock_GetScmConnectionByName_Call) Run(run func(ctx context.Context, name string, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_GetScmConnectionByName_Call {
+func (_c *ConsoleClientMock_GetScmConnectionByName_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_GetScmConnectionByName_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-2)
-		for i, a := range args[2:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -1889,7 +1707,7 @@ func (_c *ConsoleClientMock_GetScmConnectionByName_Call) Return(_a0 *gqlclient.S
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetScmConnectionByName_Call) RunAndReturn(run func(context.Context, string, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_GetScmConnectionByName_Call {
+func (_c *ConsoleClientMock_GetScmConnectionByName_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_GetScmConnectionByName_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1949,6 +1767,64 @@ func (_c *ConsoleClientMock_GetService_Call) Return(_a0 *gqlclient.ServiceDeploy
 }
 
 func (_c *ConsoleClientMock_GetService_Call) RunAndReturn(run func(string, string) (*gqlclient.ServiceDeploymentExtended, error)) *ConsoleClientMock_GetService_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetServiceContext provides a mock function with given fields: name
+func (_m *ConsoleClientMock) GetServiceContext(name string) (*gqlclient.ServiceContextFragment, error) {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetServiceContext")
+	}
+
+	var r0 *gqlclient.ServiceContextFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*gqlclient.ServiceContextFragment, error)); ok {
+		return rf(name)
+	}
+	if rf, ok := ret.Get(0).(func(string) *gqlclient.ServiceContextFragment); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.ServiceContextFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetServiceContext_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetServiceContext'
+type ConsoleClientMock_GetServiceContext_Call struct {
+	*mock.Call
+}
+
+// GetServiceContext is a helper method to define mock.On call
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetServiceContext(name interface{}) *ConsoleClientMock_GetServiceContext_Call {
+	return &ConsoleClientMock_GetServiceContext_Call{Call: _e.mock.On("GetServiceContext", name)}
+}
+
+func (_c *ConsoleClientMock_GetServiceContext_Call) Run(run func(name string)) *ConsoleClientMock_GetServiceContext_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetServiceContext_Call) Return(_a0 *gqlclient.ServiceContextFragment, _a1 error) *ConsoleClientMock_GetServiceContext_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetServiceContext_Call) RunAndReturn(run func(string) (*gqlclient.ServiceContextFragment, error)) *ConsoleClientMock_GetServiceContext_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2942,16 +2818,9 @@ func (_c *ConsoleClientMock_UpdateGlobalService_Call) RunAndReturn(run func(stri
 	return _c
 }
 
-// UpdatePrAutomation provides a mock function with given fields: ctx, id, attributes, options
-func (_m *ConsoleClientMock) UpdatePrAutomation(ctx context.Context, id string, attributes gqlclient.PrAutomationAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, id, attributes)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// UpdatePrAutomation provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdatePrAutomation(ctx context.Context, id string, attributes gqlclient.PrAutomationAttributes) (*gqlclient.PrAutomationFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdatePrAutomation")
@@ -2959,19 +2828,19 @@ func (_m *ConsoleClientMock) UpdatePrAutomation(ctx context.Context, id string, 
 
 	var r0 *gqlclient.PrAutomationFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)); ok {
-		return rf(ctx, id, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.PrAutomationAttributes) (*gqlclient.PrAutomationFragment, error)); ok {
+		return rf(ctx, id, attributes)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) *gqlclient.PrAutomationFragment); ok {
-		r0 = rf(ctx, id, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.PrAutomationAttributes) *gqlclient.PrAutomationFragment); ok {
+		r0 = rf(ctx, id, attributes)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.PrAutomationFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, id, attributes, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.PrAutomationAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2988,21 +2857,13 @@ type ConsoleClientMock_UpdatePrAutomation_Call struct {
 //   - ctx context.Context
 //   - id string
 //   - attributes gqlclient.PrAutomationAttributes
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) UpdatePrAutomation(ctx interface{}, id interface{}, attributes interface{}, options ...interface{}) *ConsoleClientMock_UpdatePrAutomation_Call {
-	return &ConsoleClientMock_UpdatePrAutomation_Call{Call: _e.mock.On("UpdatePrAutomation",
-		append([]interface{}{ctx, id, attributes}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) UpdatePrAutomation(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdatePrAutomation_Call {
+	return &ConsoleClientMock_UpdatePrAutomation_Call{Call: _e.mock.On("UpdatePrAutomation", ctx, id, attributes)}
 }
 
-func (_c *ConsoleClientMock_UpdatePrAutomation_Call) Run(run func(ctx context.Context, id string, attributes gqlclient.PrAutomationAttributes, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_UpdatePrAutomation_Call {
+func (_c *ConsoleClientMock_UpdatePrAutomation_Call) Run(run func(ctx context.Context, id string, attributes gqlclient.PrAutomationAttributes)) *ConsoleClientMock_UpdatePrAutomation_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-3)
-		for i, a := range args[3:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.PrAutomationAttributes), variadicArgs...)
+		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.PrAutomationAttributes))
 	})
 	return _c
 }
@@ -3012,21 +2873,14 @@ func (_c *ConsoleClientMock_UpdatePrAutomation_Call) Return(_a0 *gqlclient.PrAut
 	return _c
 }
 
-func (_c *ConsoleClientMock_UpdatePrAutomation_Call) RunAndReturn(run func(context.Context, string, gqlclient.PrAutomationAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_UpdatePrAutomation_Call {
+func (_c *ConsoleClientMock_UpdatePrAutomation_Call) RunAndReturn(run func(context.Context, string, gqlclient.PrAutomationAttributes) (*gqlclient.PrAutomationFragment, error)) *ConsoleClientMock_UpdatePrAutomation_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// UpdateProvider provides a mock function with given fields: ctx, id, attributes, options
-func (_m *ConsoleClientMock) UpdateProvider(ctx context.Context, id string, attributes gqlclient.ClusterProviderUpdateAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, id, attributes)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// UpdateProvider provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdateProvider(ctx context.Context, id string, attributes gqlclient.ClusterProviderUpdateAttributes) (*gqlclient.ClusterProviderFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateProvider")
@@ -3034,19 +2888,19 @@ func (_m *ConsoleClientMock) UpdateProvider(ctx context.Context, id string, attr
 
 	var r0 *gqlclient.ClusterProviderFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ClusterProviderUpdateAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error)); ok {
-		return rf(ctx, id, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ClusterProviderUpdateAttributes) (*gqlclient.ClusterProviderFragment, error)); ok {
+		return rf(ctx, id, attributes)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ClusterProviderUpdateAttributes, ...gqlgencclient.HTTPRequestOption) *gqlclient.ClusterProviderFragment); ok {
-		r0 = rf(ctx, id, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ClusterProviderUpdateAttributes) *gqlclient.ClusterProviderFragment); ok {
+		r0 = rf(ctx, id, attributes)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.ClusterProviderFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.ClusterProviderUpdateAttributes, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, id, attributes, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.ClusterProviderUpdateAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -3063,21 +2917,13 @@ type ConsoleClientMock_UpdateProvider_Call struct {
 //   - ctx context.Context
 //   - id string
 //   - attributes gqlclient.ClusterProviderUpdateAttributes
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) UpdateProvider(ctx interface{}, id interface{}, attributes interface{}, options ...interface{}) *ConsoleClientMock_UpdateProvider_Call {
-	return &ConsoleClientMock_UpdateProvider_Call{Call: _e.mock.On("UpdateProvider",
-		append([]interface{}{ctx, id, attributes}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) UpdateProvider(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdateProvider_Call {
+	return &ConsoleClientMock_UpdateProvider_Call{Call: _e.mock.On("UpdateProvider", ctx, id, attributes)}
 }
 
-func (_c *ConsoleClientMock_UpdateProvider_Call) Run(run func(ctx context.Context, id string, attributes gqlclient.ClusterProviderUpdateAttributes, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_UpdateProvider_Call {
+func (_c *ConsoleClientMock_UpdateProvider_Call) Run(run func(ctx context.Context, id string, attributes gqlclient.ClusterProviderUpdateAttributes)) *ConsoleClientMock_UpdateProvider_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-3)
-		for i, a := range args[3:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.ClusterProviderUpdateAttributes), variadicArgs...)
+		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.ClusterProviderUpdateAttributes))
 	})
 	return _c
 }
@@ -3087,7 +2933,7 @@ func (_c *ConsoleClientMock_UpdateProvider_Call) Return(_a0 *gqlclient.ClusterPr
 	return _c
 }
 
-func (_c *ConsoleClientMock_UpdateProvider_Call) RunAndReturn(run func(context.Context, string, gqlclient.ClusterProviderUpdateAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ClusterProviderFragment, error)) *ConsoleClientMock_UpdateProvider_Call {
+func (_c *ConsoleClientMock_UpdateProvider_Call) RunAndReturn(run func(context.Context, string, gqlclient.ClusterProviderUpdateAttributes) (*gqlclient.ClusterProviderFragment, error)) *ConsoleClientMock_UpdateProvider_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3151,16 +2997,9 @@ func (_c *ConsoleClientMock_UpdateRepository_Call) RunAndReturn(run func(string,
 	return _c
 }
 
-// UpdateScmConnection provides a mock function with given fields: ctx, id, attributes, options
-func (_m *ConsoleClientMock) UpdateScmConnection(ctx context.Context, id string, attributes gqlclient.ScmConnectionAttributes, options ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, id, attributes)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// UpdateScmConnection provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdateScmConnection(ctx context.Context, id string, attributes gqlclient.ScmConnectionAttributes) (*gqlclient.ScmConnectionFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateScmConnection")
@@ -3168,19 +3007,19 @@ func (_m *ConsoleClientMock) UpdateScmConnection(ctx context.Context, id string,
 
 	var r0 *gqlclient.ScmConnectionFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)); ok {
-		return rf(ctx, id, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ScmConnectionAttributes) (*gqlclient.ScmConnectionFragment, error)); ok {
+		return rf(ctx, id, attributes)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) *gqlclient.ScmConnectionFragment); ok {
-		r0 = rf(ctx, id, attributes, options...)
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ScmConnectionAttributes) *gqlclient.ScmConnectionFragment); ok {
+		r0 = rf(ctx, id, attributes)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.ScmConnectionFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) error); ok {
-		r1 = rf(ctx, id, attributes, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.ScmConnectionAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -3197,21 +3036,13 @@ type ConsoleClientMock_UpdateScmConnection_Call struct {
 //   - ctx context.Context
 //   - id string
 //   - attributes gqlclient.ScmConnectionAttributes
-//   - options ...gqlgencclient.HTTPRequestOption
-func (_e *ConsoleClientMock_Expecter) UpdateScmConnection(ctx interface{}, id interface{}, attributes interface{}, options ...interface{}) *ConsoleClientMock_UpdateScmConnection_Call {
-	return &ConsoleClientMock_UpdateScmConnection_Call{Call: _e.mock.On("UpdateScmConnection",
-		append([]interface{}{ctx, id, attributes}, options...)...)}
+func (_e *ConsoleClientMock_Expecter) UpdateScmConnection(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdateScmConnection_Call {
+	return &ConsoleClientMock_UpdateScmConnection_Call{Call: _e.mock.On("UpdateScmConnection", ctx, id, attributes)}
 }
 
-func (_c *ConsoleClientMock_UpdateScmConnection_Call) Run(run func(ctx context.Context, id string, attributes gqlclient.ScmConnectionAttributes, options ...gqlgencclient.HTTPRequestOption)) *ConsoleClientMock_UpdateScmConnection_Call {
+func (_c *ConsoleClientMock_UpdateScmConnection_Call) Run(run func(ctx context.Context, id string, attributes gqlclient.ScmConnectionAttributes)) *ConsoleClientMock_UpdateScmConnection_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := make([]gqlgencclient.HTTPRequestOption, len(args)-3)
-		for i, a := range args[3:] {
-			if a != nil {
-				variadicArgs[i] = a.(gqlgencclient.HTTPRequestOption)
-			}
-		}
-		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.ScmConnectionAttributes), variadicArgs...)
+		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.ScmConnectionAttributes))
 	})
 	return _c
 }
@@ -3221,7 +3052,7 @@ func (_c *ConsoleClientMock_UpdateScmConnection_Call) Return(_a0 *gqlclient.ScmC
 	return _c
 }
 
-func (_c *ConsoleClientMock_UpdateScmConnection_Call) RunAndReturn(run func(context.Context, string, gqlclient.ScmConnectionAttributes, ...gqlgencclient.HTTPRequestOption) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_UpdateScmConnection_Call {
+func (_c *ConsoleClientMock_UpdateScmConnection_Call) RunAndReturn(run func(context.Context, string, gqlclient.ScmConnectionAttributes) (*gqlclient.ScmConnectionFragment, error)) *ConsoleClientMock_UpdateScmConnection_Call {
 	_c.Call.Return(run)
 	return _c
 }

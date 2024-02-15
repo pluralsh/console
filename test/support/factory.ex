@@ -314,6 +314,7 @@ defmodule Console.Factory do
 
   def pipeline_gate_factory do
     %Schema.PipelineGate{
+      state: :pending,
       name: sequence(:gate, & "gate-#{&1}"),
       edge: build(:pipeline_edge),
       type: :approval
@@ -402,6 +403,13 @@ defmodule Console.Factory do
   def cluster_restore_factory do
     %Schema.ClusterRestore{
       backup: build(:cluster_backup)
+    }
+  end
+
+  def pipeline_context_factory do
+    %Schema.PipelineContext{
+      context: %{some: "context"},
+      pipeline: build(:pipeline)
     }
   end
 

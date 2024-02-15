@@ -158,6 +158,11 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              contexts:
+                description: Contexts contain dependent service context names
+                items:
+                  type: string
+                type: array
               dependencies:
                 description: Dependencies contain dependent services
                 items:

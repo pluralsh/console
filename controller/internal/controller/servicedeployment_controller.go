@@ -152,14 +152,15 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return attr.Configuration[i].Name < attr.Configuration[j].Name
 	})
 	updater := console.ServiceUpdateAttributes{
-		Version:       attr.Version,
-		Protect:       attr.Protect,
-		Git:           attr.Git,
-		Helm:          attr.Helm,
-		Configuration: attr.Configuration,
-		Kustomize:     attr.Kustomize,
-		ReadBindings:  attr.ReadBindings,
-		WriteBindings: attr.WriteBindings,
+		Version:         attr.Version,
+		Protect:         attr.Protect,
+		Git:             attr.Git,
+		Helm:            attr.Helm,
+		Configuration:   attr.Configuration,
+		Kustomize:       attr.Kustomize,
+		ReadBindings:    attr.ReadBindings,
+		WriteBindings:   attr.WriteBindings,
+		ContextBindings: attr.ContextBindings,
 	}
 
 	sha, err := utils.HashObject(updater)
@@ -232,13 +233,23 @@ func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.Servic
 
 func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
 	attr := &console.ServiceDeploymentAttributes{
-		Name:         service.ConsoleName(),
-		Namespace:    service.ConsoleNamespace(),
-		Version:      service.Spec.Version,
-		DocsPath:     service.Spec.DocsPath,
-		Protect:      &service.Spec.Protect,
-		RepositoryID: repositoryId,
+		Name:            service.ConsoleName(),
+		Namespace:       service.ConsoleNamespace(),
+		Version:         service.Spec.Version,
+		DocsPath:        service.Spec.DocsPath,
+		Protect:         &service.Spec.Protect,
+		RepositoryID:    repositoryId,
+		ContextBindings: make([]*console.ContextBindingAttributes, 0),
 	}
+
+	for _, contextName := range service.Spec.Contexts {
+		sc, err := r.ConsoleClient.GetServiceContext(contextName)
+		if err != nil {
+			return nil, err
+		}
+		attr.ContextBindings = append(attr.ContextBindings, &console.ContextBindingAttributes{ContextID: sc.ID})
+	}
+
 	if service.Spec.Bindings != nil {
 		attr.ReadBindings = make([]*console.PolicyBindingAttributes, 0)
 		attr.WriteBindings = make([]*console.PolicyBindingAttributes, 0)

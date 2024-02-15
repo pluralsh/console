@@ -1,13 +1,14 @@
 defmodule Console.GraphQl.Deployments.Git do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Deployments
-  alias Console.Schema.{GitRepository, ScmConnection, ScmWebhook, PrAutomation, Configuration}
+  alias Console.Schema.{GitRepository, PullRequest, ScmConnection, ScmWebhook, PrAutomation, Configuration}
 
   ecto_enum :auth_method, GitRepository.AuthMethod
   ecto_enum :git_health, GitRepository.Health
   ecto_enum :scm_type, ScmConnection.Type
   ecto_enum :match_strategy, PrAutomation.MatchStrategy
   ecto_enum :pr_role, PrAutomation.Role
+  ecto_enum :pr_status, PullRequest.Status
   ecto_enum :configuration_type, Configuration.Type
   ecto_enum :operation, Configuration.Condition.Operation
 
@@ -285,10 +286,12 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "A reference to a pull request for your kubernetes related IaC"
   object :pull_request do
-    field :id,     non_null(:id)
-    field :url,    non_null(:string)
-    field :title,  :string
-    field :labels, list_of(:string)
+    field :id,      non_null(:id)
+    field :status,  non_null(:pr_status)
+    field :url,     non_null(:string)
+    field :title,   :string
+    field :creator, :string
+    field :labels,  list_of(:string)
 
     field :cluster, :cluster, description: "the cluster this pr is meant to modify",
       resolve: dataloader(Deployments)
@@ -314,11 +317,21 @@ defmodule Console.GraphQl.Deployments.Git do
     timestamps()
   end
 
+  @desc "A representation to a service which configures renovate for a scm connection"
+  object :dependency_management_service do
+    field :id, non_null(:id)
+    field :connection, :scm_connection, resolve: dataloader(Deployments)
+    field :service, :service_deployment, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
   connection node_type: :git_repository
   connection node_type: :scm_connection
   connection node_type: :pr_automation
   connection node_type: :pull_request
   connection node_type: :scm_webhook
+  connection node_type: :dependency_management_service
 
   delta :git_repository
 
@@ -393,6 +406,12 @@ defmodule Console.GraphQl.Deployments.Git do
 
       resolve &Deployments.list_scm_webhooks/2
     end
+
+    connection field :dependency_management_services, node_type: :dependency_management_service do
+      middleware Authenticated
+
+      resolve &Deployments.list_dependency_management_services/2
+    end
   end
 
   object :git_mutations do
@@ -440,6 +459,14 @@ defmodule Console.GraphQl.Deployments.Git do
       safe_resolve &Deployments.delete_scm_connection/2
     end
 
+    field :create_scm_webhook, :scm_webhook do
+      middleware Authenticated
+      arg :connection_id, non_null(:id)
+      arg :owner,         non_null(:string)
+
+      safe_resolve &Deployments.create_webhook_for_connection/2
+    end
+
     field :create_pr_automation, :pr_automation do
       middleware Authenticated
       arg :attributes, non_null(:pr_automation_attributes)
@@ -466,9 +493,19 @@ defmodule Console.GraphQl.Deployments.Git do
     field :setup_renovate, :service_deployment do
       middleware Authenticated
       arg :connection_id, non_null(:id)
-      arg :repos, list_of(:string)
+      arg :repos,         list_of(:string)
+      arg :name,          :string, description: "the name of the owning service"
+      arg :namespace,     :string, description: "the namespace of the owning service"
 
       safe_resolve &Deployments.setup_renovate/2
+    end
+
+    field :reconfigure_renovate, :service_deployment do
+      middleware Authenticated
+      arg :repos,      list_of(:string)
+      arg :service_id, non_null(:id)
+
+      safe_resolve &Deployments.reconfigure_renovate/2
     end
 
     field :create_pull_request, :pull_request do

@@ -37,6 +37,11 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :spec,       :gate_spec_attributes, description: "a specification for more complex gate types"
   end
 
+  @desc "attributes needed to create a new pipeline context"
+  input_object :pipeline_context_attributes do
+    field :context, non_null(:json)
+  end
+
   @desc "the allowed inputs for a deployment agent gate update"
   input_object :gate_update_attributes do
     field :state,  :gate_state
@@ -106,9 +111,31 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :id,     non_null(:id)
     field :name,   non_null(:string), description: "the name of the pipeline"
     field :stages, list_of(:pipeline_stage), description: "the stages of this pipeline", resolve: dataloader(Deployments)
+
+    field :status, :pipeline_status, resolve: fn
+      %{id: id}, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.Resolvers.PipelineGateLoader, :pipeline, id)
+    end
+
     field :edges,  list_of(:pipeline_stage_edge),
       description: "edges linking two stages w/in the pipeline in a full DAG",
       resolve: dataloader(Deployments)
+
+    @desc "lists the contexts applied to a pipeline"
+    connection field :contexts, node_type: :pipeline_context do
+      resolve &Deployments.pipeline_contexts/3
+    end
+
+    timestamps()
+  end
+
+  @desc "A variable context that can be used to generate pull requests as a pipeline progresses"
+  object :pipeline_context do
+    field :id,            non_null(:id)
+    field :context,       non_null(:map), description: "the context map that will be passed to the pipeline"
+    field :pipeline,      :pipeline, resolve: dataloader(Deployments)
+    field :pull_requests, list_of(:pull_request), resolve: dataloader(Deployments),
+      description: "a history of pull requests created by this context thus far"
 
     timestamps()
   end
@@ -118,6 +145,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :id,        non_null(:id)
     field :name,      non_null(:string), description: "the name of this stage (eg dev, prod, staging)"
     field :services,  list_of(:stage_service), description: "the services within this stage", resolve: dataloader(Deployments)
+    field :context,   :pipeline_context,
+      description: "the context that is to be applied to this stage for PR promotions",
+      resolve: dataloader(Deployments)
     field :promotion, :pipeline_promotion,
       description: "a promotion which might be outstanding for this stage",
       resolve: dataloader(Deployments)
@@ -235,8 +265,15 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     timestamps()
   end
 
+  @desc "a report of gate statuses within a pipeline to gauge its health"
+  object :pipeline_status do
+    field :pending, :integer, description: "if > 0, consider the pipeline running"
+    field :closed,  :integer, description: "if > 0, consider the pipeline stopped"
+  end
+
   connection node_type: :pipeline
   connection node_type: :pipeline_gate
+  connection node_type: :pipeline_context
 
   object :public_pipeline_queries do
     field :cluster_gates, list_of(:pipeline_gate) do
@@ -290,6 +327,13 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
       resolve &Deployments.resolve_gate/2
     end
+
+    field :pipeline_context, :pipeline_context do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_pipeline_context/2
+    end
   end
 
   object :pipeline_mutations do
@@ -300,6 +344,15 @@ defmodule Console.GraphQl.Deployments.Pipeline do
       arg :attributes, non_null(:pipeline_attributes)
 
       resolve &Deployments.upsert_pipeline/2
+    end
+
+    @desc "creates a new pipeline context and binds it to the beginning stage"
+    field :create_pipeline_context, :pipeline_context do
+      middleware Authenticated
+      arg :pipeline_id, non_null(:id)
+      arg :attributes,  non_null(:pipeline_context_attributes)
+
+      resolve &Deployments.create_pipeline_context/2
     end
 
     field :delete_pipeline, :pipeline do

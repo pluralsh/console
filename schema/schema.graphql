@@ -181,6 +181,8 @@ type RootQueryType {
 
   scmWebhooks(after: String, first: Int, before: String, last: Int): ScmWebhookConnection
 
+  dependencyManagementServices(after: String, first: Int, before: String, last: Int): DependencyManagementServiceConnection
+
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
 
@@ -263,6 +265,8 @@ type RootQueryType {
   pipeline(id: ID!): Pipeline
 
   pipelineGate(id: ID!): PipelineGate
+
+  pipelineContext(id: ID!): PipelineContext
 
   clusterBackup(id: ID, clusterId: ID, namespace: String, name: String): ClusterBackup
 
@@ -400,6 +404,8 @@ type RootMutationType {
 
   deleteScmConnection(id: ID!): ScmConnection
 
+  createScmWebhook(connectionId: ID!, owner: String!): ScmWebhook
+
   createPrAutomation(attributes: PrAutomationAttributes!): PrAutomation
 
   updatePrAutomation(id: ID!, attributes: PrAutomationAttributes!): PrAutomation
@@ -407,7 +413,19 @@ type RootMutationType {
   deletePrAutomation(id: ID!): PrAutomation
 
   "creates the service to enable self-hosted renovate in one pass"
-  setupRenovate(connectionId: ID!, repos: [String]): ServiceDeployment
+  setupRenovate(
+    connectionId: ID!
+
+    repos: [String]
+
+    "the name of the owning service"
+    name: String
+
+    "the namespace of the owning service"
+    namespace: String
+  ): ServiceDeployment
+
+  reconfigureRenovate(repos: [String], serviceId: ID!): ServiceDeployment
 
   createPullRequest(
     "the id of the PR automation instance to use"
@@ -533,6 +551,9 @@ type RootMutationType {
 
   "upserts a pipeline with a given name"
   savePipeline(name: String!, attributes: PipelineAttributes!): Pipeline
+
+  "creates a new pipeline context and binds it to the beginning stage"
+  createPipelineContext(pipelineId: ID!, attributes: PipelineContextAttributes!): PipelineContext
 
   deletePipeline(id: ID!): Pipeline
 
@@ -859,6 +880,11 @@ input PipelineGateAttributes {
   spec: GateSpecAttributes
 }
 
+"attributes needed to create a new pipeline context"
+input PipelineContextAttributes {
+  context: Json!
+}
+
 "the allowed inputs for a deployment agent gate update"
 input GateUpdateAttributes {
   state: GateState
@@ -952,8 +978,30 @@ type Pipeline {
   "the stages of this pipeline"
   stages: [PipelineStage]
 
+  status: PipelineStatus
+
   "edges linking two stages w\/in the pipeline in a full DAG"
   edges: [PipelineStageEdge]
+
+  "lists the contexts applied to a pipeline"
+  contexts(after: String, first: Int, before: String, last: Int): PipelineContextConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"A variable context that can be used to generate pull requests as a pipeline progresses"
+type PipelineContext {
+  id: ID!
+
+  "the context map that will be passed to the pipeline"
+  context: Map!
+
+  pipeline: Pipeline
+
+  "a history of pull requests created by this context thus far"
+  pullRequests: [PullRequest]
 
   insertedAt: DateTime
 
@@ -969,6 +1017,9 @@ type PipelineStage {
 
   "the services within this stage"
   services: [StageService]
+
+  "the context that is to be applied to this stage for PR promotions"
+  context: PipelineContext
 
   "a promotion which might be outstanding for this stage"
   promotion: PipelinePromotion
@@ -1135,6 +1186,15 @@ type PromotionService {
   updatedAt: DateTime
 }
 
+"a report of gate statuses within a pipeline to gauge its health"
+type PipelineStatus {
+  "if > 0, consider the pipeline running"
+  pending: Int
+
+  "if > 0, consider the pipeline stopped"
+  closed: Int
+}
+
 type PipelineConnection {
   pageInfo: PageInfo!
   edges: [PipelineEdge]
@@ -1143,6 +1203,11 @@ type PipelineConnection {
 type PipelineGateConnection {
   pageInfo: PageInfo!
   edges: [PipelineGateEdge]
+}
+
+type PipelineContextConnection {
+  pageInfo: PageInfo!
+  edges: [PipelineContextEdge]
 }
 
 enum ComponentState {
@@ -1614,6 +1679,7 @@ type ServiceContext {
 
 "A tree view of the kubernetes object hierarchy beneath a component"
 type ComponentTree {
+  root: KubernetesUnstructured
   deployments: [Deployment]
   statefulsets: [StatefulSet]
   replicasets: [ReplicaSet]
@@ -2283,6 +2349,12 @@ enum PrRole {
   UPGRADE
 }
 
+enum PrStatus {
+  OPEN
+  MERGED
+  CLOSED
+}
+
 enum ConfigurationType {
   STRING
   INT
@@ -2691,9 +2763,13 @@ type PrConfigurationCondition {
 type PullRequest {
   id: ID!
 
+  status: PrStatus!
+
   url: String!
 
   title: String
+
+  creator: String
 
   labels: [String]
 
@@ -2726,6 +2802,15 @@ type ScmWebhook {
   updatedAt: DateTime
 }
 
+"A representation to a service which configures renovate for a scm connection"
+type DependencyManagementService {
+  id: ID!
+  connection: ScmConnection
+  service: ServiceDeployment
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type GitRepositoryConnection {
   pageInfo: PageInfo!
   edges: [GitRepositoryEdge]
@@ -2749,6 +2834,11 @@ type PullRequestConnection {
 type ScmWebhookConnection {
   pageInfo: PageInfo!
   edges: [ScmWebhookEdge]
+}
+
+type DependencyManagementServiceConnection {
+  pageInfo: PageInfo!
+  edges: [DependencyManagementServiceEdge]
 }
 
 input CloneAttributes {
@@ -4420,6 +4510,11 @@ type WebhookEdge {
   cursor: String
 }
 
+type DependencyManagementServiceEdge {
+  node: DependencyManagementService
+  cursor: String
+}
+
 type ScmWebhookEdge {
   node: ScmWebhook
   cursor: String
@@ -4467,6 +4562,11 @@ type RevisionEdge {
 
 type ServiceDeploymentEdge {
   node: ServiceDeployment
+  cursor: String
+}
+
+type PipelineContextEdge {
+  node: PipelineContext
   cursor: String
 }
 
