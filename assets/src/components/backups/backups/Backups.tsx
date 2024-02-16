@@ -37,7 +37,7 @@ import { ColClusterContentSC } from '../../cd/clusters/ClustersColumns'
 
 import { useSlicePolling } from '../../utils/tableFetchHelpers'
 
-import { extendConnection } from '../../../utils/graphql'
+import { Edge, extendConnection } from '../../../utils/graphql'
 
 import ConfigureClusterBackups from './ConfigureClusterBackups'
 import { DeleteClusterBackups } from './DeleteClusterBackups'
@@ -59,25 +59,29 @@ export const BACKUPS_BACKUPS_BASE_CRUMBS: Breadcrumb[] = [
   },
 ]
 
-const columnHelper = createColumnHelper<ClustersObjectStoresFragment>()
+const columnHelper = createColumnHelper<Edge<ClustersObjectStoresFragment>>()
 
 const columns = [
-  columnHelper.accessor((node) => node?.name, {
+  columnHelper.accessor(({ node }) => node?.name, {
     id: 'cluster',
     header: 'Cluster',
     enableSorting: true,
     enableGlobalFilter: true,
-    cell: ({ row: { original: cluster } }) => (
+    cell: ({
+      row: {
+        original: { node: cluster },
+      },
+    }) => (
       <ColClusterContentSC>
         <DynamicClusterIcon
           self={!!cluster?.self}
           type="tertiary"
         />
-        {cluster.name}
+        {cluster?.name}
       </ColClusterContentSC>
     ),
   }),
-  columnHelper.accessor((node) => node?.objectStore, {
+  columnHelper.accessor(({ node }) => node?.objectStore, {
     id: 'provider',
     header: 'Storage provider',
     cell: ({ getValue }) => {
@@ -95,18 +99,24 @@ const columns = [
       )
     },
   }),
-  columnHelper.accessor((node) => node?.objectStore?.name, {
+  columnHelper.accessor(({ node }) => node?.objectStore?.name, {
     id: 'name',
     header: 'Storage name',
     enableSorting: true,
     enableGlobalFilter: true,
     cell: ({ getValue }) => getValue(),
   }),
-  columnHelper.accessor((node) => node?.id, {
+  columnHelper.accessor(({ node }) => node?.id, {
     id: 'actions',
     header: '',
     meta: { gridTemplate: `fit-content(100px)` },
-    cell: ({ table, row: { original }, getValue }) => {
+    cell: ({
+      table,
+      row: {
+        original: { node },
+      },
+      getValue,
+    }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
       const { refetch } = table.options.meta as { refetch?: () => void }
@@ -122,7 +132,7 @@ const columns = [
           }}
         >
           <DeleteClusterBackups
-            cluster={original}
+            cluster={node}
             refetch={refetch}
           />
           <IconFrame
