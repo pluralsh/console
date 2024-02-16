@@ -4128,6 +4128,7 @@ export type RootQueryTypeClusterStatusesArgs = {
 
 export type RootQueryTypeClustersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
+  backups?: InputMaybe<Scalars['Boolean']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   healthy?: InputMaybe<Scalars['Boolean']['input']>;

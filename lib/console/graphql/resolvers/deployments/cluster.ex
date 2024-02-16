@@ -140,6 +140,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
       {:tag, %{name: n, value: v}}, q -> Cluster.with_tag(q, n, v)
       {:tag_query, tq}, q -> Cluster.with_tag_query(q, tq)
       {:healthy, h}, q -> Cluster.health(q, h)
+      {:backups, e}, q -> Cluster.with_backups(q, !!e)
       _, q -> q
     end)
   end

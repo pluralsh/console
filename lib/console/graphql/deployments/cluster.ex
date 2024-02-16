@@ -513,6 +513,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :healthy,   :boolean
       arg :tag,       :tag_input
       arg :tag_query, :tag_query
+      arg :backups,   :boolean
 
       resolve &Deployments.list_clusters/2
     end
