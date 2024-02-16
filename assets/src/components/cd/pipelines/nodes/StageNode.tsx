@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom'
 
 import styled from 'styled-components'
 
-import { PIPELINE_GRID_GAP } from '../Pipeline'
+import { PIPELINE_GRID_GAP } from '../PipelineGraph'
 
 import {
   BaseNode,

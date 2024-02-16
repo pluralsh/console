@@ -1,168 +1,97 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useState } from 'react'
 import {
-  AppIcon,
-  Card,
-  EmptyState,
-  PipelineIcon,
+  Input2,
+  LoopingLogo,
+  SearchIcon,
+  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import styled, { useTheme } from 'styled-components'
-import isEmpty from 'lodash/isEmpty'
-import { ReactFlowProvider } from 'reactflow'
-import { NetworkStatus } from '@apollo/client'
-import { useNavigate, useParams } from 'react-router-dom'
+import { type Row } from '@tanstack/react-table'
+import { useTheme } from 'styled-components'
+import { type VirtualItem } from '@tanstack/react-virtual'
+import { useNavigate } from 'react-router-dom'
 
-import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
-import { Edge, extendConnection } from 'utils/graphql'
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
-  VirtualList,
-  type VirtualListRenderer,
-} from 'components/utils/VirtualList'
-import { CD_BASE_CRUMBS } from 'components/cd/ContinuousDeployment'
+  PR_QUERY_PAGE_SIZE,
+  REACT_VIRTUAL_OPTIONS,
+} from 'components/pr/queue/PrQueue'
 
-import { Pipeline } from './Pipeline'
+import { GqlError } from 'components/utils/Alert'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import { useSlicePolling } from 'components/utils/tableFetchHelpers'
+import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
+import { Edge, extendConnection } from 'utils/graphql'
 
-const POLL_INTERVAL = 10 * 1000
+import { useThrottle } from 'components/hooks/useThrottle'
+
+import { CD_BASE_CRUMBS, POLL_INTERVAL } from '../ContinuousDeployment'
+
+import { columns } from './PipelinesColumns'
+
+export const QUERY_PAGE_SIZE = 100
 
 export const PIPELINES_CRUMBS = [
   ...CD_BASE_CRUMBS,
   { label: 'pipelines', url: PIPELINES_ABS_PATH },
 ]
 
-const PipelineList = styled(VirtualList)(({ theme }) => ({
-  ...theme.partials.reset.list,
-  display: 'flex',
-  height: '100%',
-  width: 200,
-  flexShrink: 0,
-}))
-
-export const PipelineEditAreaSC = styled.div(({ theme }) => ({
-  border: theme.borders.default,
-  width: '100%',
-  height: '100%',
-  borderRadius: theme.borderRadiuses.large,
-  position: 'relative',
-  overflow: 'hidden',
-}))
-
-type ListMeta = {
-  selectedId: string
-  setSelectedId: (string) => void
-}
-
-const PipelineListItemSC = styled(Card)(({ theme, selected }) => ({
-  '&&': {
-    width: '100%',
-    padding: theme.spacing.medium,
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing.medium,
-    borderColor: selected ? theme.colors['border-secondary'] : undefined,
-  },
-}))
-const PipelineListItem: VirtualListRenderer<Edge<PipelineFragment>, ListMeta> =
-  // eslint-disable-next-line func-names
-  function ({ row, meta }) {
-    const theme = useTheme()
-    const { node } = row
-
-    if (!node) {
-      return null
-    }
-    const isSelected = node.id === meta.selectedId
-
-    return (
-      <PipelineListItemSC
-        clickable
-        selected={isSelected}
-        onClick={(e) => {
-          e.preventDefault()
-          meta?.setSelectedId?.(node.id)
-        }}
-      >
-        <AppIcon
-          type="secondary"
-          size="xxsmall"
-          icon={
-            <PipelineIcon
-              color={
-                isSelected
-                  ? theme.colors['icon-info']
-                  : theme.colors['icon-light']
-              }
-            />
-          }
-        />
-        <div>{row.node?.name}</div>
-      </PipelineListItemSC>
-    )
-  }
-
-function Pipelines() {
+export default function PipelineList() {
   const theme = useTheme()
-  const { data, error, fetchMore, networkStatus } = usePipelinesQuery({
+  const navigate = useNavigate()
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useThrottle(searchString, 100)
+  const [virtualSlice, _setVirtualSlice] = useState<
+    | {
+        start: VirtualItem | undefined
+        end: VirtualItem | undefined
+      }
+    | undefined
+  >()
+
+  useSetBreadcrumbs(PIPELINES_CRUMBS)
+  const queryResult = usePipelinesQuery({
+    variables: {
+      first: QUERY_PAGE_SIZE,
+      q: debouncedSearchString,
+    },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
     notifyOnNetworkStatusChange: true,
   })
-  const pageInfo = data?.pipelines?.pageInfo
-  const pipeEdges = data?.pipelines?.edges
-  const selectedPipeline = useParams().pipelineId
-  const navigate = useNavigate()
-  const setSelectedPipeline = useCallback(
-    (pipelineId: string) => {
-      navigate(`${PIPELINES_ABS_PATH}/${pipelineId}`)
-    },
-    [navigate]
-  )
-  const pipeline = useMemo(
-    () => pipeEdges?.find((p) => p?.node?.id === selectedPipeline)?.node,
-    [pipeEdges, selectedPipeline]
-  )
-
-  if (data && !pipeline) {
-    const firstId = pipeEdges?.[0]?.node?.id
-
-    if (firstId) {
-      setSelectedPipeline(firstId)
-    } else if (selectedPipeline) {
-      setSelectedPipeline('')
-    }
-  }
-
-  useSetBreadcrumbs(PIPELINES_CRUMBS)
-
-  const loadNextPage = useCallback(() => {
-    if (!pageInfo?.hasNextPage) {
+  const {
+    data: currentData,
+    previousData,
+    loading,
+    error,
+    fetchMore,
+  } = queryResult
+  const data = currentData || previousData
+  const pipelines = data?.pipelines
+  const pageInfo = pipelines?.pageInfo
+  const { refetch: _ } = useSlicePolling(queryResult, {
+    virtualSlice,
+    pageSize: PR_QUERY_PAGE_SIZE,
+    key: 'pipelines',
+    interval: POLL_INTERVAL,
+  })
+  const fetchNextPage = useCallback(() => {
+    if (!pageInfo?.endCursor) {
       return
     }
     fetchMore({
-      variables: { cursor: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult: { pipelines } }) =>
-        extendConnection(prev, pipelines, 'pipelines'),
+      variables: { after: pageInfo.endCursor },
+      updateQuery: (prev, { fetchMoreResult }) =>
+        extendConnection(prev, fetchMoreResult.pipelines, 'pipelines'),
     })
-  }, [fetchMore, pageInfo?.endCursor, pageInfo?.hasNextPage])
-
-  const meta = useMemo(
-    () => ({
-      selectedId: selectedPipeline,
-      setSelectedId: setSelectedPipeline,
-    }),
-    [selectedPipeline, setSelectedPipeline]
-  )
-  const emptyState = (
-    <EmptyState message="Looks like you don't have any pipelines yet." />
-  )
+  }, [fetchMore, pageInfo?.endCursor])
 
   if (error) {
-    return emptyState
+    return <GqlError error={error} />
   }
   if (!data) {
-    return <LoadingIndicator />
+    return <LoopingLogo />
   }
 
   return (
@@ -174,40 +103,34 @@ function Pipelines() {
         height: '100%',
       }}
     >
-      {/* <PipelinesFilters setFilterString={setFilterString} /> */}
-      {data?.pipelines?.edges && !isEmpty(data?.pipelines?.edges) ? (
-        <div
-          css={{ display: 'flex', gap: theme.spacing.medium, height: '100%' }}
-        >
-          <PipelineList
-            data={data.pipelines.edges}
-            loadNextPage={loadNextPage}
-            hasNextPage={pageInfo?.hasNextPage}
-            isLoadingNextPage={networkStatus === NetworkStatus.fetchMore}
-            renderer={PipelineListItem}
-            gap={theme.spacing.xsmall}
-            meta={meta}
-          />
-          <PipelineEditAreaSC>
-            {pipeline && (
-              <Pipeline
-                pipeline={pipeline}
-                key={pipeline.id}
-              />
-            )}
-          </PipelineEditAreaSC>
-        </div>
-      ) : (
-        emptyState
-      )}
+      <div css={{ display: 'flex', minWidth: 0, gap: theme.spacing.medium }}>
+        <Input2
+          placeholder="Search"
+          startIcon={<SearchIcon />}
+          showClearButton
+          value={searchString}
+          onChange={(e) => setSearchString(e.currentTarget.value)}
+          css={{ flexGrow: 1 }}
+        />
+      </div>
+      <FullHeightTableWrap>
+        <Table
+          columns={columns}
+          reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+          data={data?.pipelines?.edges || []}
+          virtualizeRows
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          onRowClick={(_e, { original }: Row<Edge<PipelineFragment>>) => {
+            navigate(`${PIPELINES_ABS_PATH}/${original.node?.id}`)
+          }}
+          css={{
+            maxHeight: 'unset',
+            height: '100%',
+          }}
+        />
+      </FullHeightTableWrap>
     </div>
-  )
-}
-
-export default function PipelinesWrapper() {
-  return (
-    <ReactFlowProvider>
-      <Pipelines />
-    </ReactFlowProvider>
   )
 }

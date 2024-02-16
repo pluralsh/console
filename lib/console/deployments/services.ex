@@ -1,11 +1,15 @@
 defmodule Console.Deployments.Services do
   use Console.Services.Base
+  use Nebulex.Caching
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository, ServiceContext}
   alias Console.Deployments.{Secrets.Store, Settings, Git, Clusters, Deprecations.Checker, AddOns, Tar}
   alias Console.Deployments.Helm
   require Logger
+
+  @cache_adapter Console.conf(:cache_adapter)
+  @secrets_ttl :timer.hours(1)
 
   @type service_resp :: {:ok, Service.t} | Console.error
   @type revision_resp :: {:ok, Revision.t} | Console.error
@@ -273,6 +277,19 @@ defmodule Console.Deployments.Services do
       }, cluster.id, user)
     end)
     |> execute(extract: :service)
+  end
+
+  @spec kick(binary | Service.t, User.t) :: service_resp
+  def kick(%Service{} = service, %User{} = user) do
+    with {:ok, svc} <- allow(service, user, :write),
+         svc <- Repo.preload(svc, [:repository]),
+         _ <- Git.Discovery.kick(svc.repository),
+      do: notify(svc, :update, user)
+  end
+
+  def kick(service_id, user) when is_binary(service_id) do
+    get_service!(service_id)
+    |> kick(user)
   end
 
   @doc """
@@ -582,9 +599,10 @@ defmodule Console.Deployments.Services do
   Fetches a service's configuration from the configured store
   """
   @spec configuration(Service.t | Revision.t) :: Store.secrets_resp
-  def configuration(%Service{revision_id: nil}), do: {:ok, %{}}
-  def configuration(%Service{revision_id: revision_id}), do: secret_store().fetch(revision_id)
+  @decorate cacheable(cache: @cache_adapter, key: {:secrets, id}, opts: [ttl: @secrets_ttl])
   def configuration(%Revision{id: id}), do: secret_store().fetch(id)
+  def configuration(%Service{revision_id: id}) when is_binary(id), do: secret_store().fetch(id)
+  def configuration(%Service{revision_id: id}) when is_nil(id), do: {:ok, %{}}
 
   @doc """
   fetches all revisions of a service

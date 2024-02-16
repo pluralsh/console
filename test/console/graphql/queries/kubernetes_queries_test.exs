@@ -8,7 +8,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   describe "statefulSet" do
     test "it can fetch statefulsets by namespace/name" do
       user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, stateful_set("namespace", "name")} end)
 
@@ -36,7 +36,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
 
     test "it won't choke on errors" do
       user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:error, {:http_error, 404, "an error"}} end)
 
@@ -61,7 +61,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   describe "deployment" do
     test "it can fetch deployments by namespace/name" do
       user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, deployment("namespace", "name")} end)
 
@@ -91,7 +91,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   describe "service" do
     test "it can fetch services by namespace/name" do
       user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, service("namespace", "name")} end)
 
@@ -118,7 +118,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   describe "ingress" do
     test "it can fetch ingresses by namespace/name" do
       user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, ingress("namespace", "name")} end)
 
@@ -164,7 +164,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
             spec { providerId }
           }
         }
-      """, %{}, %{current_user: insert(:user)})
+      """, %{}, %{current_user: admin_user()})
 
       assert node["metadata"]["name"]
       assert node["status"]["allocatable"]["cpu"]
@@ -204,7 +204,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   describe "cronJob" do
     test "it can read a cron job" do
       user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, cron("cron")} end)
 
@@ -229,7 +229,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   describe "job" do
     test "it can read a job" do
       user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, job("job")} end)
 
@@ -253,7 +253,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   describe "certificate" do
     test "it can read a certificate crd" do
       user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, certificate("certificate")} end)
 
@@ -279,7 +279,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   describe "pod" do
     test "it can query an individual pod" do
       user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, pod("name")} end)
 
@@ -300,7 +300,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
 
     test "it can query logs for a pod" do
       user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, 2, fn
         %{path: "/api/v1/namespaces/name/pods/name/log"} -> {:ok, "some logs\nreturned"}
@@ -358,7 +358,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   describe "logfilters" do
     test "it can query logfilters" do
       user = insert(:user)
-      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, %{items: [logfilter("name")]}} end)
 
@@ -568,7 +568,6 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
 
   describe "configMaps" do
     test "users can list config maps" do
-      user = insert(:user)
       expect(Kazan, :run, fn _ -> {:ok, %{items: [config_map("name")]}} end)
 
       {:ok, %{data: %{"configMaps" => [conf]}}} = run_query("""
@@ -578,7 +577,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
             data
           }
         }
-      """, %{"name" => "name"}, %{current_user: user})
+      """, %{"name" => "name"}, %{current_user: admin_user()})
 
       assert conf["metadata"]["name"] == "name"
       assert conf["data"]["some"] == "config"

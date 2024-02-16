@@ -17,7 +17,7 @@ import { ComponentIcon } from 'components/apps/app/components/misc'
 import { TRUNCATE } from 'components/utils/truncate'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-import { ComponentRawCode } from '../ComponentRaw'
+import { RawYaml } from '../ComponentRaw'
 
 export type CardStatus = 'ok' | 'closed' | 'pending'
 
@@ -177,7 +177,7 @@ function DetailsModal({
       maxWidth={`min(1000px, 100vw - ${theme.spacing.xlarge * 2}px)`}
       {...props}
     >
-      <ComponentRawCode raw={data.raw} />
+      <RawYaml raw={data.raw} />
     </Modal>
   )
 }

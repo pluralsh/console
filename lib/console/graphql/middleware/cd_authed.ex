@@ -26,8 +26,7 @@ defmodule Console.Middleware.CdAuthenticated do
     end
   end
 
-  def call(res, opts) do
-    perm = Keyword.get(opts, :perm) || :read
-    Console.Middleware.Rbac.call(res, perm: perm, arg: :namespace)
+  def call(res, _opts) do
+    Console.Middleware.Rbac.call(res, perm: :operate, arg: :namespace)
   end
 end

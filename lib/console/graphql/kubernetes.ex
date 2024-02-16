@@ -159,6 +159,7 @@ defmodule Console.GraphQl.Kubernetes do
 
     field :nodes, list_of(:node) do
       middleware Authenticated
+      middleware AdminRequired
 
       safe_resolve &Kubernetes.list_nodes/2
     end
@@ -238,6 +239,7 @@ defmodule Console.GraphQl.Kubernetes do
 
     field :cached_pods, list_of(:pod) do
       middleware Authenticated
+      middleware AdminRequired
       arg :namespaces, list_of(:string)
 
       safe_resolve &Kubernetes.list_cached_pods/2
@@ -253,7 +255,7 @@ defmodule Console.GraphQl.Kubernetes do
     field :log_filters, list_of(:log_filter) do
       middleware Authenticated
       arg :namespace, non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      middleware Rbac, perm: :operate, arg: :namespace
 
       safe_resolve &Kubernetes.list_log_filters/2
     end

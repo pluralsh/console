@@ -138,6 +138,11 @@ fragment PipelineStageEdge on PipelineStageEdge {
   }
 }
 
+fragment PipelineStatus on PipelineStatus {
+  closed
+  pending
+}
+
 fragment Pipeline on Pipeline {
   id
   name
@@ -149,10 +154,13 @@ fragment Pipeline on Pipeline {
   stages {
     ...PipelineStage
   }
+  status {
+    ...PipelineStatus
+  }
 }
 
-query Pipelines($first: Int = 50, $after: String) {
-  pipelines(first: $first, after: $after) {
+query Pipelines($q: String, $first: Int = 50, $after: String) {
+  pipelines(q: $q, first: $first, after: $after) {
     edges {
       cursor
       node {
@@ -215,6 +223,12 @@ query JobGateLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
 
 query Pipeline($id: ID!) {
   pipeline(id: $id) {
+    ...Pipeline
+  }
+}
+
+mutation deletePipeline($id: ID!) {
+  deletePipeline(id: $id) {
     ...Pipeline
   }
 }

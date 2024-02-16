@@ -1,4 +1,4 @@
-import { Card, Code, SubTab, TabList } from '@pluralsh/design-system'
+import { Card, SubTab, TabList } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
@@ -11,6 +11,8 @@ import { useLayoutEffect, useRef } from 'react'
 import { LinkTabWrap } from 'components/utils/Tabs'
 
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
+
+import { RawYaml } from 'components/component/ComponentRaw'
 
 import { usePipelineJob } from './PipelineJob'
 
@@ -64,19 +66,7 @@ export default function PipelineJobStatus() {
         </TabList>
       }
     >
-      {currentTab?.path === 'raw' && (
-        /* @ts-ignore */
-        <Code
-          showLineNumbers
-          lang="yaml"
-          css={{
-            overflowY: 'auto',
-            maxHeight: '100%',
-          }}
-        >
-          {raw || ''}
-        </Code>
-      )}
+      {currentTab?.path === 'raw' && <RawYaml raw={raw} />}
       {currentTab?.path === '' && (
         <Card
           css={{

@@ -71,6 +71,7 @@ defmodule Console.GraphQl.Configuration do
 
     field :external_token, :string do
       middleware Authenticated
+      middleware AdminRequired
       middleware Sandboxed
       resolve &Plural.resolve_external_token/2
     end

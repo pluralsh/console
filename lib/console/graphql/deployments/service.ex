@@ -17,6 +17,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :repository_id,    :id
     field :dry_run,          :boolean
     field :interval,         :string
+    field :templated,        :boolean, description: "if you should apply liquid templating to raw yaml files, defaults to true"
     field :git,              :git_ref_attributes
     field :helm,             :helm_config_attributes
     field :kustomize,        :kustomize_attributes
@@ -54,6 +55,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :protect,          :boolean
     field :dry_run,          :boolean
     field :interval,         :string
+    field :templated,        :boolean, description: "if you should apply liquid templating to raw yaml files, defaults to true"
     field :git,              :git_ref_attributes
     field :helm,             :helm_config_attributes
     field :configuration,    list_of(:config_attributes)
@@ -139,6 +141,7 @@ defmodule Console.GraphQl.Deployments.Service do
       svc, _, _ -> {:ok, svc.helm}
     end
     field :promotion,        :service_promotion, description: "how you'd like to perform a canary promotion"
+    field :templated,        :boolean, description: "if you should apply liquid templating to raw yaml files, defaults to true"
     field :protect,          :boolean, description: "if true, deletion of this service is not allowed"
     field :sha,              :string, description: "latest git sha we pulled from"
     field :tarball,          :string, resolve: &Deployments.tarball/3, description: "https url to fetch the latest tarball of kubernetes manifests"
@@ -496,6 +499,15 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :attributes, non_null(:service_clone_attributes)
 
       safe_resolve &Deployments.clone_service/2
+    end
+
+    field :kick_service, :service_deployment do
+      middleware Authenticated
+      arg :service_id, :id
+      arg :cluster,    :string, description: "the handle of the cluster for this service"
+      arg :name,       :string
+
+      resolve &Deployments.kick_service/2
     end
 
     field :self_manage, :service_deployment do
