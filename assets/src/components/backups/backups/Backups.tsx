@@ -37,6 +37,7 @@ import ConfigureClusterBackups from './ConfigureClusterBackups'
 import { DeleteClusterBackups } from './DeleteClusterBackups'
 
 const POLL_INTERVAL = 10 * 1000
+const QUERY_PAGE_SIZE = 100
 
 export const BACKUPS_BACKUPS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'backups', url: BACKUPS_ABS_PATH },
@@ -128,9 +129,10 @@ export default function Backups() {
   const theme = useTheme()
 
   const { data, error, loading, refetch } = useClustersObjectStoresQuery({
+    variables: { first: QUERY_PAGE_SIZE },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
-  }) // TODO: Pagination.
+  })
 
   const { clustersWithBackups, clustersWithoutBackups } = useMemo(() => {
     const clusters: ClustersObjectStoresFragment[] = (

@@ -12,6 +12,8 @@ import { GqlError } from '../../utils/Alert'
 import { ClusterSelect } from '../../cd/addOns/ClusterSelect'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
+const QUERY_PAGE_SIZE = 100
+
 export default function ConfigureClusterBackupsModal({
   open,
   onClose,
@@ -38,8 +40,9 @@ export default function ConfigureClusterBackupsModal({
     error: loadError,
     loading: loadingData,
   } = useObjectStoresQuery({
+    variables: { first: QUERY_PAGE_SIZE },
     fetchPolicy: 'cache-and-network',
-  }) // TODO: Pagination.
+  })
 
   const [mutation, { loading, error }] = useConfigureBackupsMutation({
     variables: { clusterId, storeId },
