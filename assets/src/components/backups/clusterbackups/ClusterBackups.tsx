@@ -1,4 +1,10 @@
-import { EmptyState, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  EmptyState,
+  HistoryIcon,
+  IconFrame,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { ComponentProps, useMemo, useState } from 'react'
 import { TableState, createColumnHelper } from '@tanstack/react-table'
@@ -16,6 +22,7 @@ import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import { Edge } from '../../../utils/graphql'
 import { BACKUPS_BACKUPS_BASE_CRUMBS } from '../backups/Backups'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
+import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -36,6 +43,26 @@ const columns = [
     enableGlobalFilter: true,
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
+  columnHelper.accessor(({ node }) => node, {
+    id: 'actions',
+    header: '',
+    meta: { gridTemplate: `fit-content(100px)` },
+    cell: ({ getValue }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const backup = getValue()
+
+      return (
+        <IconFrame
+          clickable
+          icon={<HistoryIcon />}
+          textValue="Restore backup"
+          tooltip
+          type="secondary"
+          // TODO: Restore.
+        />
+      )
+    },
+  }),
 ]
 
 export default function ClusterBackups() {
@@ -46,7 +73,7 @@ export default function ClusterBackups() {
     variables: { clusterId },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
-  })
+  }) // TODO: Pagination.
 
   useSetBreadcrumbs(
     useMemo(
@@ -91,30 +118,35 @@ export default function ClusterBackups() {
   }
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        height: '100%',
-      }}
+    <ResponsivePageFullWidth
+      heading="Backups"
+      scrollable={false}
     >
-      {!isEmpty(data?.clusterBackups?.edges) ? (
-        <FullHeightTableWrap>
-          <Table
-            data={data?.clusterBackups?.edges || []}
-            columns={columns}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-            reactTableOptions={reactTableOptions}
-            loose
-          />
-        </FullHeightTableWrap>
-      ) : (
-        <EmptyState message="Looks like this cluster doesn't have any backups yet." />
-      )}
-    </div>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.small,
+          height: '100%',
+        }}
+      >
+        {!isEmpty(data?.clusterBackups?.edges) ? (
+          <FullHeightTableWrap>
+            <Table
+              data={data?.clusterBackups?.edges || []}
+              columns={columns}
+              css={{
+                maxHeight: 'unset',
+                height: '100%',
+              }}
+              reactTableOptions={reactTableOptions}
+              loose
+            />
+          </FullHeightTableWrap>
+        ) : (
+          <EmptyState message="Looks like this cluster doesn't have any backups yet." />
+        )}
+      </div>
+    </ResponsivePageFullWidth>
   )
 }
