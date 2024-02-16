@@ -571,6 +571,8 @@ type RootMutationType {
 
   configureBackups(clusterId: ID!, storeId: ID!): Cluster
 
+  delinkBackups(clusterId: ID!): Cluster
+
   createClusterRestore(backupId: ID!): ClusterRestore
 
   "a regular status ping to be sent by the deploy operator"

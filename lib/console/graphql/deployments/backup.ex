@@ -196,6 +196,13 @@ defmodule Console.GraphQl.Deployments.Backup do
       resolve &Deployments.configure_backups/2
     end
 
+    field :delink_backups, :cluster do
+      middleware Authenticated
+      arg :cluster_id, non_null(:id)
+
+      resolve &Deployments.delink_backups/2
+    end
+
     field :create_cluster_restore, :cluster_restore do
       middleware Authenticated
       arg :backup_id, non_null(:id)

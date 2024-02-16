@@ -145,6 +145,25 @@ defmodule Console.Deployments.Backups do
     |> execute(extract: :update)
   end
 
+  @doc """
+  Delete backup configuration from a cluster
+  """
+  @spec delink_backups(binary, User.t) :: Clusters.cluster_resp
+  def delink_backups(cluster_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:cluster, fn _ ->
+      Clusters.get_cluster!(cluster_id)
+      |> Ecto.Changeset.change(%{object_store_id: nil})
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:svc, fn %{cluster: %{id: id}} ->
+      svc = Services.get_service_by_name!(id, "velero")
+      Services.delete_service(svc.id, user)
+    end)
+    |> execute(extract: :cluster)
+  end
+
   defp upsert_service(cluster_id, repo, store, user) do
     config = ObjectStore.configuration(store)
              |> Enum.map(fn {k, v} -> %{name: k, value: v} end)
@@ -156,7 +175,7 @@ defmodule Console.Deployments.Backups do
         protect: true,
         namespace: "velero",
         configuration: config,
-        git: %{ref: "main", folder: "charts/velero"},
+        git: %{ref: "master", folder: "charts/velero"},
       }, cluster_id, tmp_admin(user))
     end
   end

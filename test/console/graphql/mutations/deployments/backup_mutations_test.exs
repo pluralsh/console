@@ -121,4 +121,22 @@ defmodule Console.GraphQl.Deployments.BackupMutationsTest do
       assert updated["objectStore"]["id"] == store.id
     end
   end
+
+  describe "delinkBackups" do
+    test "it removes backup configuration for a cluster" do
+      store = insert(:object_store, s3: %{bucket: "bucket"})
+      cluster = insert(:cluster, object_store: store)
+      svc = insert(:service, cluster: cluster, name: "velero")
+
+      {:ok, %{data: %{"delinkBackups" => updated}}} = run_query("""
+        mutation Delink($id: ID!) {
+          delinkBackups(clusterId: $id) { id }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert updated["id"] == cluster.id
+      refute refetch(cluster).object_store_id
+      assert refetch(svc).deleted_at
+    end
+  end
 end

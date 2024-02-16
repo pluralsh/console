@@ -3208,6 +3208,7 @@ export type RootMutationType = {
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteWebhook?: Maybe<Webhook>;
+  delinkBackups?: Maybe<Cluster>;
   /** soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects */
   detachCluster?: Maybe<Cluster>;
   /** removes a service from storage, but bypasses waiting for the agent to fully drain it from its hosting cluster */
@@ -3566,6 +3567,11 @@ export type RootMutationTypeDeleteUserArgs = {
 
 export type RootMutationTypeDeleteWebhookArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDelinkBackupsArgs = {
+  clusterId: Scalars['ID']['input'];
 };
 
 
