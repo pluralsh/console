@@ -32,7 +32,7 @@ defmodule Console.GraphQl.Deployments.Backup do
 
   input_object :gcs_store_attributes do
     field :bucket, non_null(:string)
-    field :region, non_null(:string)
+    field :region, :string
     field :application_credentials, non_null(:string)
   end
 
@@ -40,6 +40,7 @@ defmodule Console.GraphQl.Deployments.Backup do
     field :storage_account, non_null(:string)
     field :container,       non_null(:string)
     field :subscription_id, non_null(:string)
+    field :resource_group,  non_null(:string)
     field :tenant_id,       non_null(:string)
     field :client_id,       non_null(:string)
     field :client_secret,   non_null(:string)
@@ -91,13 +92,14 @@ defmodule Console.GraphQl.Deployments.Backup do
 
   object :gcs_store do
     field :bucket, non_null(:string)
-    field :region, non_null(:string)
+    field :region, :string
   end
 
   object :azure_store do
     field :storage_account, non_null(:string)
     field :container,       non_null(:string)
     field :subscription_id, non_null(:string)
+    field :resource_group,  non_null(:string)
     field :tenant_id,       non_null(:string)
     field :client_id,       non_null(:string)
   end

@@ -21,6 +21,7 @@ defmodule Console.Schema.ObjectStore do
 
     embeds_one :azure, Azure, on_replace: :update do
       field :storage_account, :string
+      field :resource_group,  :string
       field :container,       :string
       field :subscription_id, :string
       field :tenant_id,       :string
@@ -71,7 +72,7 @@ defmodule Console.Schema.ObjectStore do
 
   def azure_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(container storage_account subscription_id tenant_id client_id client_secret)a)
-    |> validate_required(~w(container storage_account subscription_id tenant_id client_id client_secret)a)
+    |> cast(attrs, ~w(container storage_account resource_group subscription_id tenant_id client_id client_secret)a)
+    |> validate_required(~w(container storage_account resource_group subscription_id tenant_id client_id client_secret)a)
   end
 end

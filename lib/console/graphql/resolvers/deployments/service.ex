@@ -132,6 +132,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
   def rollback(%{id: id, revision_id: rev}, %{context: %{current_user: user}}),
     do: Services.rollback(rev, id, user)
 
+  def kick_service(%{cluster: c, name: n} = args, %{context: %{current_user: user}})
+    when is_binary(c) and is_binary(n) do
+    svc = fetch_service(args)
+    Services.kick(svc.id, user)
+  end
+  def kick_service(%{id: id}, %{context: %{current_user: user}}),
+    do: Services.kick(id, user)
+
   def update_service_components(%{id: id} = args, %{context: %{cluster: cluster}}),
     do: Services.update_components(Map.take(args, [:errors, :components]), id, cluster)
 

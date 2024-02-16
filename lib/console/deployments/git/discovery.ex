@@ -6,20 +6,22 @@ defmodule Console.Deployments.Git.Discovery do
   alias Console.Deployments.Git.{Agent, Supervisor}
   alias Console.Schema.{GitRepository, Service}
 
-  @spec fetch(Service.t) :: {:ok, File.t} | Console.error
+  @type error :: Console.error
+
+  @spec fetch(Service.t) :: {:ok, File.t} | error
   def fetch(%Service{} = svc) do
     %{repository: repo} = Console.Repo.preload(svc, [:repository])
     with {:ok, pid} <- find(repo),
       do: Agent.fetch(pid, svc)
   end
 
-  @spec fetch(GitRepository.t, Service.Git.t) :: {:ok, File.t} | Console.error
+  @spec fetch(GitRepository.t, Service.Git.t) :: {:ok, File.t} | error
   def fetch(%GitRepository{} = repo, ref) do
     with {:ok, pid} <- find(repo),
       do: Agent.fetch(pid, ref)
   end
 
-  @spec docs(Service.t) :: {:ok, File.t} | Console.error
+  @spec docs(Service.t) :: {:ok, File.t} | error
   def docs(%Service{} = svc) do
     %{repository: repo} = Console.Repo.preload(svc, [:repository])
     with {:ok, pid} <- find(repo),
@@ -32,11 +34,21 @@ defmodule Console.Deployments.Git.Discovery do
       do: Agent.addons(pid)
   end
 
-  @spec refs(GitRepository.t) :: {:ok, [binary]}
+  @spec refs(GitRepository.t) :: {:ok, [binary]} | error
   def refs(%GitRepository{} = repo) do
     with {:ok, pid} <- find(repo),
       do: Agent.refs(pid)
   end
+
+  @spec kick(GitRepository.t) :: {:ok, GitRepository.t} | error
+  def kick(%GitRepository{} = repo) do
+    debounce = Timex.now() |> Timex.shift(seconds: -15)
+    with true <- Timex.before?(repo.pulled_at, debounce),
+         {:ok, pid} <- find(repo),
+          _ <- Agent.kick(pid),
+      do: {:ok, repo}
+  end
+  def kick(_), do: {:error, "not a git repository"}
 
   def find(%GitRepository{} = repo) do
     case start(repo) do
