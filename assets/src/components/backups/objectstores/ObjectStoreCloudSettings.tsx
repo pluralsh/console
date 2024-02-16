@@ -1,10 +1,8 @@
-import { FormField, Input, styledTheme } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
+import { FormField, Input } from '@pluralsh/design-system'
 
 import { ObjectStoreAttributes } from '../../../generated/graphql'
 import { InputRevealer } from '../../cd/providers/InputRevealer'
 import GcpCredentials from '../../cd/providers/GcpCredentials'
-import { getProviderIconUrl } from '../../utils/Provider'
 
 export function S3Settings({
   settings,
@@ -111,7 +109,16 @@ export function AzureSettings({
           }}
         />
       </FormField>
-      <FormField label="Storage Account">
+      <FormField label="Resource group">
+        <Input
+          type="text"
+          value={settings?.resourceGroup}
+          onChange={(e) => {
+            updateSettings({ resourceGroup: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField label="Storage account">
         <Input
           type="text"
           value={settings?.storageAccount}
@@ -150,15 +157,6 @@ export function GcsSettings({
           updateSettings({ applicationCredentials: creds })
         }}
       />
-      <FormField label="Region">
-        <Input
-          type="text"
-          value={settings?.region}
-          onChange={(e) => {
-            updateSettings({ region: e.currentTarget.value })
-          }}
-        />
-      </FormField>
       <FormField label="Bucket">
         <Input
           type="text"
