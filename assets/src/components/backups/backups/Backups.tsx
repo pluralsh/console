@@ -3,14 +3,17 @@ import {
   Breadcrumb,
   EmptyState,
   IconFrame,
+  LoopingLogo,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { ComponentProps, useMemo, useState } from 'react'
-import { TableState, createColumnHelper } from '@tanstack/react-table'
+import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { Link } from 'react-router-dom'
+
+import { VirtualItem } from '@tanstack/react-virtual'
 
 import {
   BACKUPS_ABS_PATH,
@@ -22,7 +25,6 @@ import {
 } from '../../../generated/graphql'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { GqlError } from '../../utils/Alert'
-import LoadingIndicator from '../../utils/LoadingIndicator'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
   ObjectStoreCloudIcon,
@@ -33,11 +35,21 @@ import { ColWithIcon } from '../../utils/table/ColWithIcon'
 import { DynamicClusterIcon } from '../../cd/clusters/DynamicClusterIcon'
 import { ColClusterContentSC } from '../../cd/clusters/ClustersColumns'
 
+import { useSlicePolling } from '../../utils/tableFetchHelpers'
+
+import { extendConnection } from '../../../utils/graphql'
+
 import ConfigureClusterBackups from './ConfigureClusterBackups'
 import { DeleteClusterBackups } from './DeleteClusterBackups'
 
 const POLL_INTERVAL = 10 * 1000
 const QUERY_PAGE_SIZE = 100
+
+const REACT_VIRTUAL_OPTIONS: ComponentProps<
+  typeof Table
+>['reactVirtualOptions'] = {
+  overscan: 10,
+}
 
 export const BACKUPS_BACKUPS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'backups', url: BACKUPS_ABS_PATH },
@@ -127,67 +139,59 @@ const columns = [
 
 export default function Backups() {
   const theme = useTheme()
-
-  const { data, error, loading, refetch } = useClustersObjectStoresQuery({
-    variables: { first: QUERY_PAGE_SIZE },
+  const [virtualSlice, _setVirtualSlice] = useState<
+    | {
+        start: VirtualItem | undefined
+        end: VirtualItem | undefined
+      }
+    | undefined
+  >()
+  const queryResult = useClustersObjectStoresQuery({
+    variables: { backups: true, first: QUERY_PAGE_SIZE },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    // Important so loading will be updated on fetchMore to send to Table
+    notifyOnNetworkStatusChange: true,
   })
-
-  const { clustersWithBackups, clustersWithoutBackups } = useMemo(() => {
-    const clusters: ClustersObjectStoresFragment[] = (
-      data?.clusters?.edges || []
-    )
-      .map((e) => e?.node)
-      .filter((c): c is ClustersObjectStoresFragment => !!c)
-
-    return {
-      clustersWithBackups: clusters.filter((c) => c.objectStore) || [],
-      clustersWithoutBackups: clusters.filter((c) => !c.objectStore) || [],
+  const {
+    error,
+    fetchMore,
+    loading,
+    data: currentData,
+    previousData,
+  } = queryResult
+  const data = currentData || previousData
+  const clusters = data?.clusters
+  const pageInfo = clusters?.pageInfo
+  const { refetch } = useSlicePolling(queryResult, {
+    virtualSlice,
+    pageSize: QUERY_PAGE_SIZE,
+    key: 'clusters',
+    interval: POLL_INTERVAL,
+  })
+  const fetchNextPage = useCallback(() => {
+    if (!pageInfo?.endCursor) {
+      return
     }
-  }, [data])
+    fetchMore({
+      variables: { after: pageInfo.endCursor },
+      updateQuery: (prev, { fetchMoreResult }) =>
+        extendConnection(prev, fetchMoreResult.clusters, 'clusters'),
+    })
+  }, [fetchMore, pageInfo?.endCursor])
 
   const headerActions = useMemo(
-    () => (
-      <ConfigureClusterBackups
-        clusters={clustersWithoutBackups}
-        refetch={refetch}
-      />
-    ),
-    [clustersWithoutBackups, refetch]
+    () => <ConfigureClusterBackups refetch={refetch} />,
+    [refetch]
   )
 
   useSetPageHeaderContent(headerActions)
   useSetBreadcrumbs(BACKUPS_BACKUPS_BASE_CRUMBS)
 
-  const [tableFilters, _] = useState<
-    Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
-  >({
-    globalFilter: '',
-  })
-
-  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
-    useMemo(
-      () => ({
-        state: {
-          ...tableFilters,
-        },
-        meta: { refetch },
-      }),
-      [tableFilters, refetch]
-    )
-
   if (error) {
-    return (
-      <GqlError
-        header="Something went wrong"
-        error={error}
-      />
-    )
+    return <GqlError error={error} />
   }
-
-  if (loading) {
-    return <LoadingIndicator />
+  if (!data) {
+    return <LoopingLogo />
   }
 
   return (
@@ -199,17 +203,22 @@ export default function Backups() {
         height: '100%',
       }}
     >
-      {!isEmpty(clustersWithBackups) ? (
+      {!isEmpty(clusters?.edges) ? (
         <FullHeightTableWrap>
           <Table
-            data={clustersWithBackups}
+            loose
             columns={columns}
+            reactTableOptions={{ meta: { refetch } }}
+            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            data={clusters?.edges || []}
+            virtualizeRows
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
             css={{
               maxHeight: 'unset',
               height: '100%',
             }}
-            reactTableOptions={reactTableOptions}
-            loose
           />
         </FullHeightTableWrap>
       ) : (

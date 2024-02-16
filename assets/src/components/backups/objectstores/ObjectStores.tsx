@@ -21,7 +21,6 @@ import {
   OBJECT_STORES_REL_PATH,
 } from '../../../routes/backupRoutesConsts'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
-import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ObjectStore, useObjectStoresQuery } from '../../../generated/graphql'
 import { Edge, extendConnection } from '../../../utils/graphql'
 import { ColWithIcon } from '../../utils/table/ColWithIcon'
@@ -184,10 +183,6 @@ export default function ObjectStores() {
   }
   if (!data) {
     return <LoopingLogo />
-  }
-
-  if (!data) {
-    return <LoadingIndicator />
   }
 
   return (
