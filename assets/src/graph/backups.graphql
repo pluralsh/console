@@ -10,13 +10,13 @@ fragment ObjectStore on ObjectStore {
   azure {
     container
     storageAccount
+    resourceGroup
     subscriptionId
     clientId
     tenantId
   }
   gcs {
     bucket
-    region
   }
   insertedAt
   updatedAt
@@ -115,7 +115,13 @@ mutation DeleteObjectStore($id: ID!) {
 
 mutation ConfigureBackups($clusterId: ID!, $storeId: ID!) {
   configureBackups(clusterId: $clusterId, storeId: $storeId) {
-    id
+    ...ClusterTiny
+  }
+}
+
+mutation DelinkBackups($clusterId: ID!) {
+  delinkBackups(clusterId: $clusterId) {
+    ...ClusterTiny
   }
 }
 
