@@ -5696,6 +5696,16 @@ export type DeleteScmConnectionMutationVariables = Exact<{
 
 export type DeleteScmConnectionMutation = { __typename?: 'RootMutationType', deleteScmConnection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null };
 
+export type SetupRenovateMutationVariables = Exact<{
+  connectionId: Scalars['ID']['input'];
+  repos: Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SetupRenovateMutation = { __typename?: 'RootMutationType', setupRenovate?: { __typename?: 'ServiceDeployment', id: string } | null };
+
 export type PageInfoFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null };
 
 export type PluralContextQueryVariables = Exact<{ [key: string]: never; }>;
@@ -6094,7 +6104,7 @@ export type DeleteClusterProviderMutationVariables = Exact<{
 
 export type DeleteClusterProviderMutation = { __typename?: 'RootMutationType', deleteClusterProvider?: { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, supportedVersions?: Array<string | null> | null, deletedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null, credentials?: Array<{ __typename?: 'ProviderCredential', id: string, insertedAt?: string | null, kind: string, name: string, namespace: string, updatedAt?: string | null } | null> | null } | null };
 
-export type PullRequestFragment = { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+export type PullRequestFragment = { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status: PrStatus, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
 export type CreatePullRequestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6103,7 +6113,7 @@ export type CreatePullRequestMutationVariables = Exact<{
 }>;
 
 
-export type CreatePullRequestMutation = { __typename?: 'RootMutationType', createPullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+export type CreatePullRequestMutation = { __typename?: 'RootMutationType', createPullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status: PrStatus, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
 
 export type PullRequestsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -6114,7 +6124,7 @@ export type PullRequestsQueryVariables = Exact<{
 }>;
 
 
-export type PullRequestsQuery = { __typename?: 'RootQueryType', pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
+export type PullRequestsQuery = { __typename?: 'RootQueryType', pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status: PrStatus, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
 
 export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null } | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null };
 
@@ -7609,6 +7619,8 @@ export const PullRequestFragmentDoc = gql`
   service {
     id
     name
+    protect
+    deletedAt
   }
   cluster {
     ...ClusterBasic
@@ -7616,6 +7628,8 @@ export const PullRequestFragmentDoc = gql`
   title
   url
   labels
+  creator
+  status
   insertedAt
   updatedAt
 }
@@ -8713,6 +8727,47 @@ export function useDeleteScmConnectionMutation(baseOptions?: Apollo.MutationHook
 export type DeleteScmConnectionMutationHookResult = ReturnType<typeof useDeleteScmConnectionMutation>;
 export type DeleteScmConnectionMutationResult = Apollo.MutationResult<DeleteScmConnectionMutation>;
 export type DeleteScmConnectionMutationOptions = Apollo.BaseMutationOptions<DeleteScmConnectionMutation, DeleteScmConnectionMutationVariables>;
+export const SetupRenovateDocument = gql`
+    mutation SetupRenovate($connectionId: ID!, $repos: [String]!, $name: String, $namespace: String) {
+  setupRenovate(
+    connectionId: $connectionId
+    repos: $repos
+    name: $name
+    namespace: $namespace
+  ) {
+    id
+  }
+}
+    `;
+export type SetupRenovateMutationFn = Apollo.MutationFunction<SetupRenovateMutation, SetupRenovateMutationVariables>;
+
+/**
+ * __useSetupRenovateMutation__
+ *
+ * To run a mutation, you first call `useSetupRenovateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetupRenovateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setupRenovateMutation, { data, loading, error }] = useSetupRenovateMutation({
+ *   variables: {
+ *      connectionId: // value for 'connectionId'
+ *      repos: // value for 'repos'
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useSetupRenovateMutation(baseOptions?: Apollo.MutationHookOptions<SetupRenovateMutation, SetupRenovateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetupRenovateMutation, SetupRenovateMutationVariables>(SetupRenovateDocument, options);
+      }
+export type SetupRenovateMutationHookResult = ReturnType<typeof useSetupRenovateMutation>;
+export type SetupRenovateMutationResult = Apollo.MutationResult<SetupRenovateMutation>;
+export type SetupRenovateMutationOptions = Apollo.BaseMutationOptions<SetupRenovateMutation, SetupRenovateMutationVariables>;
 export const PluralContextDocument = gql`
     query PluralContext {
   pluralContext {
@@ -12753,6 +12808,7 @@ export const namedOperations = {
     CreateScmConnection: 'CreateScmConnection',
     UpdateScmConnection: 'UpdateScmConnection',
     DeleteScmConnection: 'DeleteScmConnection',
+    SetupRenovate: 'SetupRenovate',
     CreateBuild: 'CreateBuild',
     InstallAddOn: 'InstallAddOn',
     UpdateClusterBindings: 'UpdateClusterBindings',
