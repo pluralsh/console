@@ -10,7 +10,6 @@ import { useTheme } from 'styled-components'
 import { ComponentProps, useMemo, useState } from 'react'
 import { TableState, createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
-
 import { Link } from 'react-router-dom'
 
 import {
@@ -25,7 +24,6 @@ import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { GqlError } from '../../utils/Alert'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
-
 import {
   ObjectStoreCloudIcon,
   getObjectStoreCloud,
@@ -36,6 +34,7 @@ import { DynamicClusterIcon } from '../../cd/clusters/DynamicClusterIcon'
 import { ColClusterContentSC } from '../../cd/clusters/ClustersColumns'
 
 import ConfigureClusterBackups from './ConfigureClusterBackups'
+import { DeleteClusterBackups } from './DeleteClusterBackups'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -94,14 +93,34 @@ const columns = [
     id: 'actions',
     header: '',
     meta: { gridTemplate: `fit-content(100px)` },
-    cell: ({ getValue }) => (
-      <IconFrame
-        type="tertiary"
-        icon={<ArrowTopRightIcon />}
-        as={Link}
-        to={`/backups/backups/${getValue()}`}
-      />
-    ),
+    cell: ({ table, row: { original }, getValue }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
+      const { refetch } = table.options.meta as { refetch?: () => void }
+
+      return (
+        <div
+          css={{
+            display: 'flex',
+            flexGrow: 0,
+            gap: theme.spacing.medium,
+            alignItems: 'center',
+            alignSelf: 'end',
+          }}
+        >
+          <DeleteClusterBackups
+            cluster={original}
+            refetch={refetch}
+          />
+          <IconFrame
+            type="tertiary"
+            icon={<ArrowTopRightIcon />}
+            as={Link}
+            to={`/backups/backups/${getValue()}`}
+          />
+        </div>
+      )
+    },
   }),
 ]
 

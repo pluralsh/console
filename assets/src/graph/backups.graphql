@@ -130,11 +130,3 @@ mutation CreateClusterRestore($backupId: ID!) {
     ...ClusterRestore
   }
 }
-
-
-
-
-
-
-
-
