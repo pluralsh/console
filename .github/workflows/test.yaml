@@ -21,6 +21,7 @@ jobs:
           # list of Docker images to use as base name for tags
           images: |
             ghcr.io/pluralsh/console
+            docker.io/pluralsh/console
           # generate Docker tags based on the following events/attributes
           tags: |
             type=sha
@@ -36,6 +37,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Test Build console image
         uses: docker/build-push-action@v3
         with:
