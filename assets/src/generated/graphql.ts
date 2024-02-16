@@ -5715,8 +5715,11 @@ export type ObjectStoresQueryVariables = Exact<{
 export type ObjectStoresQuery = { __typename?: 'RootQueryType', objectStores?: { __typename?: 'ObjectStoreConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ObjectStoreEdge', node?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null } | null } | null> | null } | null };
 
 export type ClustersObjectStoresQueryVariables = Exact<{
-  first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  backups?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -8913,8 +8916,14 @@ export type ObjectStoresLazyQueryHookResult = ReturnType<typeof useObjectStoresL
 export type ObjectStoresSuspenseQueryHookResult = ReturnType<typeof useObjectStoresSuspenseQuery>;
 export type ObjectStoresQueryResult = Apollo.QueryResult<ObjectStoresQuery, ObjectStoresQueryVariables>;
 export const ClustersObjectStoresDocument = gql`
-    query ClustersObjectStores($first: Int = 100, $after: String) {
-  clusters(first: $first, after: $after) {
+    query ClustersObjectStores($after: String, $first: Int = 100, $before: String, $last: Int, $backups: Boolean) {
+  clusters(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    backups: $backups
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -8940,8 +8949,11 @@ ${ClustersObjectStoresFragmentDoc}`;
  * @example
  * const { data, loading, error } = useClustersObjectStoresQuery({
  *   variables: {
- *      first: // value for 'first'
  *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *      backups: // value for 'backups'
  *   },
  * });
  */

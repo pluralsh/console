@@ -63,8 +63,8 @@ query ObjectStores($after: String, $first: Int = 100, $before: String, $last: In
   }
 }
 
-query ClustersObjectStores($first: Int = 100, $after: String) {
-  clusters(first: $first, after: $after) {
+query ClustersObjectStores($after: String, $first: Int = 100, $before: String, $last: Int, $backups: Boolean ) {
+  clusters(after: $after, first: $first, before: $before, last: $last, backups: $backups) {
     pageInfo {
       ...PageInfo
     }
@@ -82,7 +82,7 @@ query ClusterBackup($id: ID, $clusterId: ID, $namespace: String, $name: String) 
   }
 }
 
-query ClusterBackups($after: String, $first: Int = 100, $before: String, $last: Int, $clusterId: ID! ) {
+query ClusterBackups($after: String, $first: Int = 100, $before: String, $last: Int, $clusterId: ID!) {
   clusterBackups(last: $last, first: $first, before: $before, after: $after, clusterId: $clusterId) {
     pageInfo {
       ...PageInfo
