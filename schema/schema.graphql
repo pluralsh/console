@@ -516,6 +516,15 @@ type RootMutationType {
     attributes: ServiceCloneAttributes!
   ): ServiceDeployment
 
+  kickService(
+    serviceId: ID
+
+    "the handle of the cluster for this service"
+    cluster: String
+
+    name: String
+  ): ServiceDeployment
+
   selfManage(values: String!): ServiceDeployment
 
   "marks a service as being able to proceed to the next stage of a canary rollout"
@@ -746,7 +755,7 @@ input S3StoreAttributes {
 
 input GcsStoreAttributes {
   bucket: String!
-  region: String!
+  region: String
   applicationCredentials: String!
 }
 
@@ -754,6 +763,7 @@ input AzureStoreAttributes {
   storageAccount: String!
   container: String!
   subscriptionId: String!
+  resourceGroup: String!
   tenantId: String!
   clientId: String!
   clientSecret: String!
@@ -796,13 +806,14 @@ type S3Store {
 
 type GcsStore {
   bucket: String!
-  region: String!
+  region: String
 }
 
 type AzureStore {
   storageAccount: String!
   container: String!
   subscriptionId: String!
+  resourceGroup: String!
   tenantId: String!
   clientId: String!
 }
@@ -1235,20 +1246,38 @@ enum ServicePromotion {
 
 input ServiceDeploymentAttributes {
   name: String!
+
   namespace: String!
+
   version: String
+
   docsPath: String
+
   syncConfig: SyncConfigAttributes
+
   protect: Boolean
+
   repositoryId: ID
+
   dryRun: Boolean
+
   interval: String
+
+  "if you should apply liquid templating to raw yaml files, defaults to true"
+  templated: Boolean
+
   git: GitRefAttributes
+
   helm: HelmConfigAttributes
+
   kustomize: KustomizeAttributes
+
   configuration: [ConfigAttributes]
+
   readBindings: [PolicyBindingAttributes]
+
   writeBindings: [PolicyBindingAttributes]
+
   contextBindings: [ContextBindingAttributes]
 }
 
@@ -1280,15 +1309,28 @@ input HelmValueAttributes {
 
 input ServiceUpdateAttributes {
   version: String
+
   protect: Boolean
+
   dryRun: Boolean
+
   interval: String
+
+  "if you should apply liquid templating to raw yaml files, defaults to true"
+  templated: Boolean
+
   git: GitRefAttributes
+
   helm: HelmConfigAttributes
+
   configuration: [ConfigAttributes]
+
   kustomize: KustomizeAttributes
+
   readBindings: [PolicyBindingAttributes]
+
   writeBindings: [PolicyBindingAttributes]
+
   contextBindings: [ContextBindingAttributes]
 }
 
@@ -1391,6 +1433,9 @@ type ServiceDeployment {
 
   "how you'd like to perform a canary promotion"
   promotion: ServicePromotion
+
+  "if you should apply liquid templating to raw yaml files, defaults to true"
+  templated: Boolean
 
   "if true, deletion of this service is not allowed"
   protect: Boolean

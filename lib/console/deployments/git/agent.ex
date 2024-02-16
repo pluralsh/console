@@ -29,6 +29,8 @@ defmodule Console.Deployments.Git.Agent do
 
   def addons(pid), do: GenServer.call(pid, :addons, 30_000)
 
+  def kick(pid), do: send(pid, :pull)
+
   def start(%GitRepository{} = repo) do
     GenServer.start(__MODULE__, repo, name: via(repo))
   end

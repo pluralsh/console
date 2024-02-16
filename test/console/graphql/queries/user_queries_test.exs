@@ -154,13 +154,20 @@ defmodule Console.GraphQl.UserQueriesTest do
       expect(HTTPoison, :post, fn _, _, _ ->
         {:ok, %{body: Poison.encode!(%{data: %{externalToken: "external-token"}})}}
       end)
-      user = insert(:user)
 
       {:ok, %{data: %{"externalToken" => token}}} = run_query("""
         query { externalToken }
-      """, %{}, %{current_user: user})
+      """, %{}, %{current_user: admin_user()})
 
       assert token == "external-token"
+    end
+
+    test "non-admins cannot fetch external tokens" do
+      user = insert(:user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query { externalToken }
+      """, %{}, %{current_user: user})
     end
   end
 

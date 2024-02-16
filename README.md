@@ -69,8 +69,8 @@ For Mac Machines, if unable to download Erlang via `asdf` (this is very common, 
 
 ```sh
 brew install erlang@24
-cp -r /opt/homebrew/opt/erlang@24/lib/erlang ~/.asdf/installs/erlang/24.3.4.14 # this exact version will drift a lot, as long as its erlang 24 it's good
-asdf reshim erlang 24.3.4.14
+cp -r /opt/homebrew/opt/erlang@24/lib/erlang ~/.asdf/installs/erlang/24.3.4.16 # this exact version will drift a lot, as long as its erlang 24 it's good
+asdf reshim erlang 24.3.4.16
 ```
 
 You can also use the make target in our root Makefile to automate this, eg:

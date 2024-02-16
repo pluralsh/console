@@ -379,6 +379,7 @@ export type AzureStore = {
   __typename?: 'AzureStore';
   clientId: Scalars['String']['output'];
   container: Scalars['String']['output'];
+  resourceGroup: Scalars['String']['output'];
   storageAccount: Scalars['String']['output'];
   subscriptionId: Scalars['String']['output'];
   tenantId: Scalars['String']['output'];
@@ -388,6 +389,7 @@ export type AzureStoreAttributes = {
   clientId: Scalars['String']['input'];
   clientSecret: Scalars['String']['input'];
   container: Scalars['String']['input'];
+  resourceGroup: Scalars['String']['input'];
   storageAccount: Scalars['String']['input'];
   subscriptionId: Scalars['String']['input'];
   tenantId: Scalars['String']['input'];
@@ -1459,13 +1461,13 @@ export type GcpSettingsAttributes = {
 export type GcsStore = {
   __typename?: 'GcsStore';
   bucket: Scalars['String']['output'];
-  region: Scalars['String']['output'];
+  region?: Maybe<Scalars['String']['output']>;
 };
 
 export type GcsStoreAttributes = {
   applicationCredentials: Scalars['String']['input'];
   bucket: Scalars['String']['input'];
-  region: Scalars['String']['input'];
+  region?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GitAttributes = {
@@ -3220,6 +3222,7 @@ export type RootMutationType = {
   installAddOn?: Maybe<ServiceDeployment>;
   installRecipe?: Maybe<Build>;
   installStack?: Maybe<Build>;
+  kickService?: Maybe<ServiceDeployment>;
   loginLink?: Maybe<User>;
   markRead?: Maybe<User>;
   /** merges configuration for a service */
@@ -3617,6 +3620,13 @@ export type RootMutationTypeInstallStackArgs = {
   context: ContextAttributes;
   name: Scalars['String']['input'];
   oidc?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type RootMutationTypeKickServiceArgs = {
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -5082,6 +5092,8 @@ export type ServiceDeployment = {
   syncConfig?: Maybe<SyncConfig>;
   /** https url to fetch the latest tarball of kubernetes manifests */
   tarball?: Maybe<Scalars['String']['output']>;
+  /** if you should apply liquid templating to raw yaml files, defaults to true */
+  templated?: Maybe<Scalars['Boolean']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** semver of this service */
   version: Scalars['String']['output'];
@@ -5113,6 +5125,8 @@ export type ServiceDeploymentAttributes = {
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   syncConfig?: InputMaybe<SyncConfigAttributes>;
+  /** if you should apply liquid templating to raw yaml files, defaults to true */
+  templated?: InputMaybe<Scalars['Boolean']['input']>;
   version?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
@@ -5193,6 +5207,8 @@ export type ServiceUpdateAttributes = {
   kustomize?: InputMaybe<KustomizeAttributes>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  /** if you should apply liquid templating to raw yaml files, defaults to true */
+  templated?: InputMaybe<Scalars['Boolean']['input']>;
   version?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
