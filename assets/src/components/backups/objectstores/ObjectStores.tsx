@@ -1,7 +1,8 @@
-import { ComponentProps, useMemo, useState } from 'react'
+import { ComponentProps, useCallback, useMemo, useState } from 'react'
 import {
   Breadcrumb,
   EmptyState,
+  LoopingLogo,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -10,7 +11,9 @@ import isEmpty from 'lodash/isEmpty'
 
 import { useTheme } from 'styled-components'
 
-import { TableState, createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
+
+import { VirtualItem } from '@tanstack/react-virtual'
 
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import {
@@ -20,10 +23,12 @@ import {
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ObjectStore, useObjectStoresQuery } from '../../../generated/graphql'
-import { Edge } from '../../../utils/graphql'
+import { Edge, extendConnection } from '../../../utils/graphql'
 import { ColWithIcon } from '../../utils/table/ColWithIcon'
 
 import { GqlError } from '../../utils/Alert'
+
+import { useSlicePolling } from '../../utils/tableFetchHelpers'
 
 import CreateObjectStore from './CreateObjectStore'
 import {
@@ -35,6 +40,14 @@ import { DeleteObjectStore } from './DeleteObjectStore'
 import UpdateObjectStore from './UpdateObjectStore'
 
 const POLL_INTERVAL = 10 * 1000
+
+const QUERY_PAGE_SIZE = 100
+
+const REACT_VIRTUAL_OPTIONS: ComponentProps<
+  typeof Table
+>['reactVirtualOptions'] = {
+  overscan: 10,
+}
 
 const BACKUPS_OBJECT_STORES_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'backups', url: BACKUPS_ABS_PATH },
@@ -115,11 +128,48 @@ export const columns = [
 
 export default function ObjectStores() {
   const theme = useTheme()
+  const [virtualSlice, _setVirtualSlice] = useState<
+    | {
+        start: VirtualItem | undefined
+        end: VirtualItem | undefined
+      }
+    | undefined
+  >()
 
-  const { data, error, refetch } = useObjectStoresQuery({
+  const queryResult = useObjectStoresQuery({
+    variables: {
+      first: QUERY_PAGE_SIZE,
+    },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  }) // TODO: Pagination.
+    // Important so loading will be updated on fetchMore to send to Table
+    notifyOnNetworkStatusChange: true,
+  })
+  const {
+    error,
+    fetchMore,
+    loading,
+    data: currentData,
+    previousData,
+  } = queryResult
+  const data = currentData || previousData
+  const objectStores = data?.objectStores
+  const pageInfo = objectStores?.pageInfo
+  const { refetch } = useSlicePolling(queryResult, {
+    virtualSlice,
+    pageSize: QUERY_PAGE_SIZE,
+    key: 'objectStores',
+    interval: POLL_INTERVAL,
+  })
+  const fetchNextPage = useCallback(() => {
+    if (!pageInfo?.endCursor) {
+      return
+    }
+    fetchMore({
+      variables: { after: pageInfo.endCursor },
+      updateQuery: (prev, { fetchMoreResult }) =>
+        extendConnection(prev, fetchMoreResult.objectStores, 'objectStores'),
+    })
+  }, [fetchMore, pageInfo?.endCursor])
 
   const headerActions = useMemo(
     () => <CreateObjectStore refetch={refetch} />,
@@ -129,30 +179,11 @@ export default function ObjectStores() {
   useSetPageHeaderContent(headerActions)
   useSetBreadcrumbs(BACKUPS_OBJECT_STORES_BASE_CRUMBS)
 
-  const [tableFilters, _] = useState<
-    Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
-  >({
-    globalFilter: '',
-  })
-
-  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
-    useMemo(
-      () => ({
-        state: {
-          ...tableFilters,
-        },
-        meta: { refetch },
-      }),
-      [tableFilters, refetch]
-    )
-
   if (error) {
-    return (
-      <GqlError
-        header="Something went wrong"
-        error={error}
-      />
-    )
+    return <GqlError error={error} />
+  }
+  if (!data) {
+    return <LoopingLogo />
   }
 
   if (!data) {
@@ -168,17 +199,22 @@ export default function ObjectStores() {
         height: '100%',
       }}
     >
-      {!isEmpty(data?.objectStores?.edges) ? (
+      {!isEmpty(objectStores?.edges) ? (
         <FullHeightTableWrap>
           <Table
-            data={data?.objectStores?.edges || []}
+            loose
             columns={columns}
+            reactTableOptions={{ meta: { refetch } }}
+            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            data={objectStores?.edges || []}
+            virtualizeRows
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
             css={{
               maxHeight: 'unset',
               height: '100%',
             }}
-            reactTableOptions={reactTableOptions}
-            loose
           />
         </FullHeightTableWrap>
       ) : (
