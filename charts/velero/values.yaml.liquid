@@ -7,7 +7,7 @@
 #
 # Azure configuration:
 # - provider        - Provider name, "azure".
-# - bucket          - Azure blob container name.
+# - container       - Azure blob container name.
 # - subscriptionId  - Azure subscription ID.
 # - tenantId        - Azure tenant ID.
 # - clientId        - Azure client ID.
@@ -20,7 +20,11 @@ velero:
     backupStorageLocation:
       - name: default
         provider: {{ configuration.provider }}
+        {% if configuration.provider == "azure" -%}
+        bucket: {{ configuration.container }}
+        {% else -%}
         bucket: {{ configuration.bucket }}
+        {% endif -%}
         config:
           {% if configuration.provider == "aws" -%}
           region: {{ configuration.region }}
