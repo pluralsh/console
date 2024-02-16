@@ -188,7 +188,7 @@ type RootQueryType {
 
   "a relay connection of all clusters visible to the current user"
   clusters(
-    after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput, tagQuery: TagQuery
+    after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput, tagQuery: TagQuery, backups: Boolean
   ): ClusterConnection
 
   "gets summary information for all healthy\/unhealthy clusters in your fleet"

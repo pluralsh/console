@@ -134,6 +134,14 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: ilike(c.name, ^"#{sq}%"))
   end
 
+  def with_backups(query \\ __MODULE__, enabled)
+  def with_backups(query, true) do
+    from(c in query, left_join: o in assoc(c, :object_store), where: not is_nil(o.id))
+  end
+  def with_backups(query, false) do
+    from(c in query, left_join: o in assoc(c, :object_store), where: is_nil(o.id))
+  end
+
   def ignore_ids(query \\ __MODULE__, ids) do
     from(c in query, where: c.id not in ^ids)
   end
