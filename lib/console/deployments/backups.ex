@@ -157,8 +157,12 @@ defmodule Console.Deployments.Backups do
       |> allow(user, :write)
       |> when_ok(:update)
     end)
-    |> add_operation(:svc, fn %{cluster: %{id: id}} ->
-      svc = Services.get_service_by_name!(id, "velero")
+    |> add_operation(:disable, fn %{cluster: %{id: id}} ->
+      Services.get_service_by_name!(id, "velero")
+      |> Ecto.Changeset.change(%{protect: false})
+      |> Repo.update()
+    end)
+    |> add_operation(:svc, fn %{disable: svc} ->
       Services.delete_service(svc.id, user)
     end)
     |> execute(extract: :cluster)

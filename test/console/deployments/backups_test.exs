@@ -139,7 +139,7 @@ defmodule Console.Deployments.BackupsTest do
     test "it will remove backup configuration from a cluster" do
       store = insert(:object_store, s3: %{bucket: "bucket"})
       cluster = insert(:cluster, object_store: store)
-      svc = insert(:service, cluster: cluster, name: "velero")
+      svc = insert(:service, protect: true, cluster: cluster, name: "velero")
 
       {:ok, updated} = Backups.delink_backups(cluster.id, admin_user())
 
