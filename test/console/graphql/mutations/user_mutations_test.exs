@@ -443,4 +443,102 @@ defmodule Console.GraphQl.UserMutationsTest do
       """, %{"id" => svc.id}, %{current_user: admin})
     end
   end
+
+  describe "createPersona" do
+    test "admins can create a persona" do
+      group = insert(:group)
+      {:ok, %{data: %{"createPersona" => persona}}} = run_query("""
+        mutation Create($attrs: PersonaAttributes!) {
+          createPersona(attributes: $attrs) {
+            id
+            bindings { group { id } }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "some-persona",
+        "bindings" => [%{"groupId" => group.id}],
+      }}, %{current_user: admin_user()})
+
+      assert persona["id"]
+      assert hd(persona["bindings"])["group"]["id"] == group.id
+    end
+
+    test "nonadmins cannot create a persona" do
+      group = insert(:group)
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Create($attrs: PersonaAttributes!) {
+          createPersona(attributes: $attrs) {
+            id
+            bindings { group { id } }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "some-persona",
+        "bindings" => [%{"groupId" => group.id}],
+      }}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "updatePersona" do
+    test "admins can update a persona" do
+      group = insert(:group)
+      persona = insert(:persona)
+      {:ok, %{data: %{"updatePersona" => updated}}} = run_query("""
+        mutation Update($id: ID!, $attrs: PersonaAttributes!) {
+          updatePersona(id: $id, attributes: $attrs) {
+            id
+            bindings { group { id } }
+          }
+        }
+      """, %{"id" => persona.id, "attrs" => %{
+        "name" => "some-persona",
+        "bindings" => [%{"groupId" => group.id}],
+      }}, %{current_user: admin_user()})
+
+      assert updated["id"] == persona.id
+      assert hd(updated["bindings"])["group"]["id"] == group.id
+    end
+
+    test "nonadmins cannot update a persona" do
+      group = insert(:group)
+      persona = insert(:persona)
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Update($id: ID!, $attrs: PersonaAttributes!) {
+          updatePersona(id: $id, attributes: $attrs) {
+            id
+            bindings { group { id } }
+          }
+        }
+      """, %{"id" => persona.id, "attrs" => %{
+        "name" => "some-persona",
+        "bindings" => [%{"groupId" => group.id}],
+      }}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "deletePersona" do
+    test "admins can delete a persona" do
+      persona = insert(:persona)
+      {:ok, %{data: %{"deletePersona" => deleted}}} = run_query("""
+        mutation Create($id: ID!) {
+          deletePersona(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => persona.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == persona.id
+    end
+
+    test "nonadmins cannot delete a persona" do
+      persona = insert(:persona)
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Delete($id: ID) {
+          deletePersona(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => persona.id}, %{current_user: insert(:user)})
+    end
+  end
 end

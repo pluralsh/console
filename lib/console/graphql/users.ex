@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Users do
   use Console.GraphQl.Schema.Base
-  alias Console.GraphQl.Resolvers.User
+  alias Console.GraphQl.Resolvers.{User, Deployments}
   alias Console.Middleware.{AllowJwt, Sandboxed}
   alias Console.Schema.Notification.{Severity, Status}
 
@@ -62,6 +62,33 @@ defmodule Console.GraphQl.Users do
     field :group_id, :id
   end
 
+  input_object :persona_attributes do
+    field :name,          :string
+    field :description,   :string, description: "longform description of this persona"
+    field :configuration, :persona_configuration_attributes
+    field :bindings,      list_of(:binding_attributes)
+  end
+
+  input_object :persona_configuration_attributes do
+    field :all,         :boolean, description: "enable full ui for this persona"
+    field :deployments, :persona_deployment_attributes, description: "enable individual parts of the deployments views"
+    field :sidebar,     :persona_sidebar_attributes, description: "enable individual aspects of the sidebar"
+  end
+
+  input_object :persona_deployment_attributes do
+    field :deployments, :boolean
+    field :services,    :boolean
+    field :pipelines,   :boolean
+    field :providers,   :boolean
+    field :add_ons,     :boolean
+  end
+
+  input_object :persona_sidebar_attributes do
+    field :audits,        :boolean
+    field :kubernetes,    :boolean
+    field :pull_requests, :boolean
+  end
+
   object :user do
     field :id,              non_null(:id)
     field :name,            non_null(:string)
@@ -75,6 +102,9 @@ defmodule Console.GraphQl.Users do
 
     field :assume_bindings, list_of(:policy_binding), resolve: dataloader(User)
     field :groups, list_of(:group), resolve: dataloader(User)
+
+    field :personas, list_of(:persona), resolve: &User.list_personas/3
+
     field :bound_roles,     list_of(:role), resolve: fn user, _, _ ->
       {:ok, Console.Schema.User.roles(user)}
     end
@@ -194,6 +224,36 @@ defmodule Console.GraphQl.Users do
     timestamps()
   end
 
+  object :persona do
+    field :id,            non_null(:id)
+    field :name,          non_null(:string), description: "the name for this persona"
+    field :description,   :string, description: "longform description of this persona"
+    field :configuration, :persona_configuration, description: "the ui configuration for this persona (additive across personas)"
+    field :bindings,      list_of(:policy_binding),
+      resolve: dataloader(Deployments), description: "the group bindings for this persona"
+
+    timestamps()
+  end
+
+  object :persona_configuration do
+    field :all,         :boolean, description: "enable full ui for this persona"
+    field :deployments, :persona_deployment, description: "enable individual parts of the deployments views"
+    field :sidebar,     :persona_sidebar, description: "enable individual aspects of the sidebar"
+  end
+
+  object :persona_deployment do
+    field :deployments, :boolean
+    field :services,    :boolean
+    field :pipelines,   :boolean
+    field :providers,   :boolean
+    field :add_ons,     :boolean
+  end
+
+  object :persona_sidebar do
+    field :audits,        :boolean
+    field :kubernetes,    :boolean
+    field :pull_requests, :boolean
+  end
 
   connection node_type: :user
   connection node_type: :group
@@ -202,6 +262,7 @@ defmodule Console.GraphQl.Users do
   connection node_type: :notification
   connection node_type: :access_token
   connection node_type: :access_token_audit
+  connection node_type: :persona
 
   delta :notification
 
@@ -303,6 +364,19 @@ defmodule Console.GraphQl.Users do
       arg :id, non_null(:id)
 
       resolve &User.resolve_token/2
+    end
+
+    field :persona, :persona do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &User.get_persona/2
+    end
+
+    connection field :personas, node_type: :persona do
+      middleware Authenticated
+
+      resolve &User.list_personas/2
     end
   end
 
@@ -491,6 +565,31 @@ defmodule Console.GraphQl.Users do
       arg :token, non_null(:string)
 
       safe_resolve &User.delete_access_token/2
+    end
+
+    field :create_persona, :persona do
+      middleware Authenticated
+      middleware AdminRequired
+      arg :attributes, non_null(:persona_attributes)
+
+      resolve &User.create_persona/2
+    end
+
+    field :update_persona, :persona do
+      middleware Authenticated
+      middleware AdminRequired
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:persona_attributes)
+
+      resolve &User.update_persona/2
+    end
+
+    field :delete_persona, :persona do
+      middleware Authenticated
+      middleware AdminRequired
+      arg :id, non_null(:id)
+
+      resolve &User.delete_persona/2
     end
   end
 

@@ -2271,6 +2271,90 @@ export enum Permission {
   Read = 'READ'
 }
 
+export type Persona = {
+  __typename?: 'Persona';
+  /** the group bindings for this persona */
+  bindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the ui configuration for this persona (additive across personas) */
+  configuration?: Maybe<PersonaConfiguration>;
+  /** longform description of this persona */
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name for this persona */
+  name: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type PersonaAttributes = {
+  bindings?: InputMaybe<Array<InputMaybe<BindingAttributes>>>;
+  configuration?: InputMaybe<PersonaConfigurationAttributes>;
+  /** longform description of this persona */
+  description?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PersonaConfiguration = {
+  __typename?: 'PersonaConfiguration';
+  /** enable full ui for this persona */
+  all?: Maybe<Scalars['Boolean']['output']>;
+  /** enable individual parts of the deployments views */
+  deployments?: Maybe<PersonaDeployment>;
+  /** enable individual aspects of the sidebar */
+  sidebar?: Maybe<PersonaSidebar>;
+};
+
+export type PersonaConfigurationAttributes = {
+  /** enable full ui for this persona */
+  all?: InputMaybe<Scalars['Boolean']['input']>;
+  /** enable individual parts of the deployments views */
+  deployments?: InputMaybe<PersonaDeploymentAttributes>;
+  /** enable individual aspects of the sidebar */
+  sidebar?: InputMaybe<PersonaSidebarAttributes>;
+};
+
+export type PersonaConnection = {
+  __typename?: 'PersonaConnection';
+  edges?: Maybe<Array<Maybe<PersonaEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PersonaDeployment = {
+  __typename?: 'PersonaDeployment';
+  addOns?: Maybe<Scalars['Boolean']['output']>;
+  deployments?: Maybe<Scalars['Boolean']['output']>;
+  pipelines?: Maybe<Scalars['Boolean']['output']>;
+  providers?: Maybe<Scalars['Boolean']['output']>;
+  services?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type PersonaDeploymentAttributes = {
+  addOns?: InputMaybe<Scalars['Boolean']['input']>;
+  deployments?: InputMaybe<Scalars['Boolean']['input']>;
+  pipelines?: InputMaybe<Scalars['Boolean']['input']>;
+  providers?: InputMaybe<Scalars['Boolean']['input']>;
+  services?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type PersonaEdge = {
+  __typename?: 'PersonaEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Persona>;
+};
+
+export type PersonaSidebar = {
+  __typename?: 'PersonaSidebar';
+  audits?: Maybe<Scalars['Boolean']['output']>;
+  kubernetes?: Maybe<Scalars['Boolean']['output']>;
+  pullRequests?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type PersonaSidebarAttributes = {
+  audits?: InputMaybe<Scalars['Boolean']['input']>;
+  kubernetes?: InputMaybe<Scalars['Boolean']['input']>;
+  pullRequests?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 /** a release pipeline, composed of multiple stages each with potentially multiple services */
 export type Pipeline = {
   __typename?: 'Pipeline';
@@ -3172,6 +3256,7 @@ export type RootMutationType = {
   createInvite?: Maybe<Invite>;
   createObjectStore?: Maybe<ObjectStore>;
   createPeer?: Maybe<WireguardPeer>;
+  createPersona?: Maybe<Persona>;
   /** creates a new pipeline context and binds it to the beginning stage */
   createPipelineContext?: Maybe<PipelineContext>;
   createPrAutomation?: Maybe<PrAutomation>;
@@ -3199,6 +3284,7 @@ export type RootMutationType = {
   deleteNode?: Maybe<Node>;
   deleteObjectStore?: Maybe<ObjectStore>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
+  deletePersona?: Maybe<Persona>;
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
   deletePrAutomation?: Maybe<PrAutomation>;
@@ -3259,6 +3345,7 @@ export type RootMutationType = {
   updateGlobalService?: Maybe<GlobalService>;
   updateGroup?: Maybe<Group>;
   updateObjectStore?: Maybe<ObjectStore>;
+  updatePersona?: Maybe<Persona>;
   updatePrAutomation?: Maybe<PrAutomation>;
   /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
@@ -3376,6 +3463,11 @@ export type RootMutationTypeCreatePeerArgs = {
   email?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeCreatePersonaArgs = {
+  attributes: PersonaAttributes;
 };
 
 
@@ -3513,6 +3605,11 @@ export type RootMutationTypeDeleteObjectStoreArgs = {
 
 export type RootMutationTypeDeletePeerArgs = {
   name: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeDeletePersonaArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3802,6 +3899,12 @@ export type RootMutationTypeUpdateObjectStoreArgs = {
 };
 
 
+export type RootMutationTypeUpdatePersonaArgs = {
+  attributes: PersonaAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdatePrAutomationArgs = {
   attributes: PrAutomationAttributes;
   id: Scalars['ID']['input'];
@@ -3940,6 +4043,8 @@ export type RootQueryType = {
   objectStores?: Maybe<ObjectStoreConnection>;
   pagedClusterGates?: Maybe<PipelineGateConnection>;
   pagedClusterServices?: Maybe<ServiceDeploymentConnection>;
+  persona?: Maybe<Persona>;
+  personas?: Maybe<PersonaConnection>;
   pipeline?: Maybe<Pipeline>;
   pipelineContext?: Maybe<PipelineContext>;
   pipelineGate?: Maybe<PipelineGate>;
@@ -4354,6 +4459,19 @@ export type RootQueryTypePagedClusterGatesArgs = {
 
 
 export type RootQueryTypePagedClusterServicesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypePersonaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypePersonasArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -5463,6 +5581,7 @@ export type User = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   jwt?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
+  personas?: Maybe<Array<Maybe<Persona>>>;
   pluralId?: Maybe<Scalars['String']['output']>;
   profile?: Maybe<Scalars['String']['output']>;
   readTimestamp?: Maybe<Scalars['DateTime']['output']>;

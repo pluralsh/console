@@ -3,7 +3,7 @@ defmodule Console.Services.Users do
   use Nebulex.Caching
 
   alias Console.PubSub
-  alias Console.Schema.{User, Invite, Group, GroupMember, Role, Notification, AccessToken}
+  alias Console.Schema.{User, Invite, Group, GroupMember, Role, Notification, AccessToken, Persona}
   alias Console.Repo
 
   @cache_adapter Console.conf(:cache_adapter)
@@ -16,12 +16,16 @@ defmodule Console.Services.Users do
   @type role_resp :: {:ok, Role.t} | error
   @type group_member_resp :: {:ok, GroupMember.t} | error
   @type token_resp :: {:ok, AccessToken.t} | error
+  @type persona_resp :: {:ok, Persona.t} | error
 
   @spec get_user(binary) :: User.t | nil
   def get_user(id), do: Repo.get(User, id)
 
   @spec get_user!(binary) :: User.t
   def get_user!(id), do: Repo.get!(User, id)
+
+  @spec get_persona(binary) :: Persona.t | nil
+  def get_persona(id), do: Repo.get(Persona, id)
 
   @decorate cacheable(cache: @cache_adapter, key: :console_bot, opts: [ttl: @ttl])
   def console(), do: Repo.get_by(User, email: "console@plural.sh")
@@ -246,6 +250,27 @@ defmodule Console.Services.Users do
     do: Map.put(attrs, :email, email) |> create_user()
   def create_user(attrs, invite_id) when is_binary(invite_id),
     do: create_user(attrs, get_invite!(invite_id))
+
+  @spec create_persona(map) :: persona_resp
+  def create_persona(attrs) do
+    %Persona{}
+    |> Persona.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec update_persona(map, binary) :: persona_resp
+  def update_persona(attrs, id) do
+    Repo.get(Persona, id)
+    |> Repo.preload([:bindings])
+    |> Persona.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @spec delete_persona(binary) :: persona_resp
+  def delete_persona(id) do
+    Repo.get(Persona, id)
+    |> Repo.delete()
+  end
 
   @spec disable_user(binary, boolean, User.t) :: user_resp
   def disable_user(user_id, disable, %User{}) do
