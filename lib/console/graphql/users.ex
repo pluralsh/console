@@ -76,6 +76,7 @@ defmodule Console.GraphQl.Users do
   end
 
   input_object :persona_deployment_attributes do
+    field :clusters,    :boolean
     field :deployments, :boolean
     field :services,    :boolean
     field :pipelines,   :boolean
@@ -87,6 +88,7 @@ defmodule Console.GraphQl.Users do
     field :audits,        :boolean
     field :kubernetes,    :boolean
     field :pull_requests, :boolean
+    field :settings,      :boolean
   end
 
   object :user do
@@ -242,6 +244,7 @@ defmodule Console.GraphQl.Users do
   end
 
   object :persona_deployment do
+    field :clusters,    :boolean
     field :deployments, :boolean
     field :services,    :boolean
     field :pipelines,   :boolean
@@ -253,6 +256,7 @@ defmodule Console.GraphQl.Users do
     field :audits,        :boolean
     field :kubernetes,    :boolean
     field :pull_requests, :boolean
+    field :settings,      :boolean
   end
 
   connection node_type: :user

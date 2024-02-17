@@ -4183,6 +4183,7 @@ input PersonaConfigurationAttributes {
 }
 
 input PersonaDeploymentAttributes {
+  clusters: Boolean
   deployments: Boolean
   services: Boolean
   pipelines: Boolean
@@ -4194,6 +4195,7 @@ input PersonaSidebarAttributes {
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
+  settings: Boolean
 }
 
 type User {
@@ -4341,6 +4343,7 @@ type PersonaConfiguration {
 }
 
 type PersonaDeployment {
+  clusters: Boolean
   deployments: Boolean
   services: Boolean
   pipelines: Boolean
@@ -4352,6 +4355,7 @@ type PersonaSidebar {
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
+  settings: Boolean
 }
 
 type UserConnection {

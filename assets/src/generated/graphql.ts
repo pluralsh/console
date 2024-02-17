@@ -2322,6 +2322,7 @@ export type PersonaConnection = {
 export type PersonaDeployment = {
   __typename?: 'PersonaDeployment';
   addOns?: Maybe<Scalars['Boolean']['output']>;
+  clusters?: Maybe<Scalars['Boolean']['output']>;
   deployments?: Maybe<Scalars['Boolean']['output']>;
   pipelines?: Maybe<Scalars['Boolean']['output']>;
   providers?: Maybe<Scalars['Boolean']['output']>;
@@ -2330,6 +2331,7 @@ export type PersonaDeployment = {
 
 export type PersonaDeploymentAttributes = {
   addOns?: InputMaybe<Scalars['Boolean']['input']>;
+  clusters?: InputMaybe<Scalars['Boolean']['input']>;
   deployments?: InputMaybe<Scalars['Boolean']['input']>;
   pipelines?: InputMaybe<Scalars['Boolean']['input']>;
   providers?: InputMaybe<Scalars['Boolean']['input']>;
@@ -2347,12 +2349,14 @@ export type PersonaSidebar = {
   audits?: Maybe<Scalars['Boolean']['output']>;
   kubernetes?: Maybe<Scalars['Boolean']['output']>;
   pullRequests?: Maybe<Scalars['Boolean']['output']>;
+  settings?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type PersonaSidebarAttributes = {
   audits?: InputMaybe<Scalars['Boolean']['input']>;
   kubernetes?: InputMaybe<Scalars['Boolean']['input']>;
   pullRequests?: InputMaybe<Scalars['Boolean']['input']>;
+  settings?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** a release pipeline, composed of multiple stages each with potentially multiple services */

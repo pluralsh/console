@@ -8,11 +8,11 @@ defmodule Console.Schema.Persona do
     embedded_schema do
       field :all, :boolean
       embeds_one :deployments, Deployments, on_replace: :update do
-        boolean_fields [:deployments, :services, :pipelines, :providers, :add_ons]
+        boolean_fields [:clusters, :deployments, :services, :pipelines, :providers, :add_ons]
       end
 
       embeds_one :sidebar, Sidebar, on_replace: :update do
-        boolean_fields [:all, :kubernetes, :audits, :pull_requests]
+        boolean_fields [:all, :kubernetes, :audits, :pull_requests, :settings]
       end
     end
 
