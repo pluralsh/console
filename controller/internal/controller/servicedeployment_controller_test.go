@@ -45,6 +45,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 			namespace   = "default"
 			id          = "123"
 			repoUrl     = "https://test"
+			sha         = "RJ4MMHJS33KWZKJTVNAGHXEEEHLMTEM5EQGPT37JCTRRZCDLSY7Q===="
 		)
 
 		ctx := context.Background()
@@ -117,7 +118,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 				expectedStatus: v1alpha1.ServiceStatus{
 					Status: v1alpha1.Status{
 						ID:  lo.ToPtr("123"),
-						SHA: lo.ToPtr("E2KK4GJDZD4C62CW2OXWRDOWPOQ6XQJ4XHGZYFTANUMGIN7SGTPQ===="),
+						SHA: lo.ToPtr(sha),
 						Conditions: []metav1.Condition{
 							{
 								Type:    v1alpha1.ReadyConditionType.String(),
@@ -169,7 +170,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 				expectedStatus: v1alpha1.ServiceStatus{
 					Status: v1alpha1.Status{
 						ID:  lo.ToPtr("123"),
-						SHA: lo.ToPtr("E2KK4GJDZD4C62CW2OXWRDOWPOQ6XQJ4XHGZYFTANUMGIN7SGTPQ===="),
+						SHA: lo.ToPtr(sha),
 						Conditions: []metav1.Condition{
 							{
 								Type:    v1alpha1.ReadyConditionType.String(),
