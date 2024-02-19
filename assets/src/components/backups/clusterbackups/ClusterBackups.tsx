@@ -1,4 +1,5 @@
 import {
+  Chip,
   EmptyState,
   LoopingLogo,
   Table,
@@ -89,6 +90,28 @@ const columns = [
     enableSorting: true,
     enableGlobalFilter: true,
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+  }),
+  columnHelper.accessor(({ node }) => node?.garbageCollected, {
+    id: 'status',
+    header: 'Status',
+    enableSorting: true,
+    enableGlobalFilter: true,
+    cell: ({ getValue }) =>
+      getValue() ? (
+        <Chip
+          size="small"
+          severity="danger"
+        >
+          Garbage collected
+        </Chip>
+      ) : (
+        <Chip
+          size="small"
+          severity="success"
+        >
+          Ready
+        </Chip>
+      ),
   }),
   columnHelper.accessor(({ node }) => node, {
     id: 'actions',
