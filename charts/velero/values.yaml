@@ -1,6 +1,9 @@
 nameOverride: ""
 fullnameOverride: ""
 
+schedule: 0 7 * * *
+ttl: 72h0m0s
+
 velero:
   initContainers:
     - name: velero-plugin-for-aws

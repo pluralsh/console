@@ -5,6 +5,6 @@ metadata:
   labels:
     {{- include "velero.labels" . | nindent 4 }}
 spec:
-  schedule: 0 7 * * *
+  schedule: {{ .Values.schedule }}
   template:
-    ttl: 72h0m0s
+    ttl: {{ .Values.ttl }}
