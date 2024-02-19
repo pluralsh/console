@@ -1,10 +1,5 @@
-import { useState } from 'react'
-import {
-  Button,
-  LoopingLogo,
-  Tooltip,
-  WrapWithIf,
-} from '@pluralsh/design-system'
+import { useMemo, useState } from 'react'
+import { Button, Tooltip, WrapWithIf } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 
 import { useOpenTransition } from '../../hooks/suspense/useOpenTransition'
@@ -34,25 +29,25 @@ export default function ConfigureClusterBackups({
     fetchPolicy: 'cache-and-network',
   })
 
-  if (loading) {
-    return <LoopingLogo />
-  }
-
   const clusters = (data?.clusters?.edges || [])
     .map((e) => e?.node)
     .filter((c): c is ClustersObjectStoresFragment => !!c)
-  const noClustersAvailable = isEmpty(clusters)
-  const disabled = !backupsEnabled || noClustersAvailable || error
-  const tooltip = error
-    ? `An error occured: ${error.message}`
-    : noClustersAvailable
-    ? 'All clusters already have backups configured.'
-    : 'Backups are not available.'
+  const noClusters = isEmpty(clusters)
+  const disabled = !backupsEnabled || noClusters || !!error || loading
+
+  const tooltip = useMemo(() => {
+    if (loading) return 'Loading...'
+    if (error) return `An error occured: ${error.message}`
+    if (noClusters) return 'All clusters already have backups configured.'
+    if (!backupsEnabled) return 'Backups are not available.'
+
+    return undefined
+  }, [loading, error, noClusters, backupsEnabled])
 
   return (
     <>
       <WrapWithIf
-        condition={noClustersAvailable}
+        condition={disabled}
         wrapper={<Tooltip label={tooltip} />}
       >
         <div>
