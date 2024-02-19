@@ -337,6 +337,10 @@ type Condition struct {
 }
 
 func (in *Condition) Attributes() *console.ConditionAttributes {
+	if in == nil {
+		return nil
+	}
+
 	return &console.ConditionAttributes{
 		Operation: in.Operation,
 		Field:     in.Field,
