@@ -308,6 +308,12 @@ query Cluster($id: ID!) {
   }
 }
 
+query ClusterTiny($id: ID!) {
+  cluster(id: $id) {
+    ...ClusterTiny
+  }
+}
+
 query ClusterPods($clusterId: ID, $namespace: String) {
   pods(first: 100, clusterId: $clusterId, namespace: $namespace) {
     pageInfo {

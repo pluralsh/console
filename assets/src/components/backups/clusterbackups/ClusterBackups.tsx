@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom'
 import {
   ClusterBackup,
   useClusterBackupsQuery,
+  useClusterTinyQuery,
 } from '../../../generated/graphql'
 import { GqlError } from '../../utils/Alert'
 import LoadingIndicator from '../../utils/LoadingIndicator'
@@ -25,6 +26,11 @@ const POLL_INTERVAL = 10 * 1000
 const columnHelper = createColumnHelper<Edge<ClusterBackup>>()
 
 const columns = [
+  columnHelper.accessor(({ node }) => node?.id, {
+    id: 'cluster',
+    header: 'Cluster',
+    cell: ({ getValue }) => getValue(),
+  }),
   columnHelper.accessor(({ node }) => node?.id, {
     id: 'id',
     header: 'Backup ID',
@@ -56,22 +62,33 @@ export default function ClusterBackups() {
   const theme = useTheme()
   const { clusterId = '' } = useParams()
 
+  const {
+    data: clusterData,
+    error: clusterError,
+    loading: clusterLoading,
+  } = useClusterTinyQuery({
+    variables: { id: clusterId },
+    fetchPolicy: 'cache-and-network',
+  })
+
   const { data, error, loading, refetch } = useClusterBackupsQuery({
     variables: { clusterId },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   }) // TODO: Pagination.
 
+  const cluster = clusterData?.cluster
+
   useSetBreadcrumbs(
     useMemo(
       () => [
         ...BACKUPS_BACKUPS_BASE_CRUMBS,
         {
-          label: clusterId, // TODO: Cluster name.
+          label: cluster?.name ?? clusterId,
           url: `/backups/backups/${clusterId}`,
         },
       ],
-      [clusterId]
+      [cluster, clusterId]
     )
   )
   const [tableFilters, _] = useState<
@@ -91,16 +108,11 @@ export default function ClusterBackups() {
       [tableFilters, refetch]
     )
 
-  if (error) {
-    return (
-      <GqlError
-        header="Something went wrong"
-        error={error}
-      />
-    )
+  if (clusterError || error) {
+    return <GqlError error={error} />
   }
 
-  if (loading) {
+  if (clusterLoading || loading) {
     return <LoadingIndicator />
   }
 
