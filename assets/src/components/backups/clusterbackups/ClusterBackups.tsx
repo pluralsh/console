@@ -44,8 +44,9 @@ const columns = [
       return (
         <ColClusterContentSC>
           <DynamicClusterIcon
+            deleting={!!cluster?.deletedAt}
+            protect={!!cluster?.protect}
             self={!!cluster?.self}
-            type="tertiary"
           />
           <StackedText
             first={
