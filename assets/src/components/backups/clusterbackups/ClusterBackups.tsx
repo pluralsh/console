@@ -98,19 +98,9 @@ const columns = [
     enableGlobalFilter: true,
     cell: ({ getValue }) =>
       getValue() ? (
-        <Chip
-          size="small"
-          severity="danger"
-        >
-          Garbage collected
-        </Chip>
+        <Chip severity="danger">Garbage collected</Chip>
       ) : (
-        <Chip
-          size="small"
-          severity="success"
-        >
-          Ready
-        </Chip>
+        <Chip severity="success">Ready</Chip>
       ),
   }),
   columnHelper.accessor(({ node }) => node, {
@@ -201,11 +191,7 @@ export default function ClusterBackups() {
     return <GqlError error={error} />
   }
 
-  if (clusterLoading || loading) {
-    return <LoadingIndicator />
-  }
-
-  if (!data) {
+  if (clusterLoading || !data) {
     return <LoopingLogo />
   }
 
