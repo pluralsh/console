@@ -380,6 +380,10 @@ spec:
                       type: string
                     type: object
                 type: object
+              templated:
+                description: Templated should apply liquid templating to raw yaml
+                  files, defaults to true
+                type: boolean
               version:
                 type: string
             required:

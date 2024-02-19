@@ -84,6 +84,9 @@ type ServiceSpec struct {
 	// Contexts contain dependent service context names
 	// +kubebuilder:validation:Optional
 	Contexts []string `json:"contexts,omitempty"`
+	// Templated should apply liquid templating to raw yaml files, defaults to true
+	// +kubebuilder:validation:Optional
+	Templated *bool `json:"templated,omitempty"`
 }
 
 type ServiceStatus struct {
