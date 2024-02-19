@@ -55,6 +55,7 @@ export function getObjectStoreCloudAttributes(
         clientSecret: '',
         subscriptionId: os.azure.subscriptionId,
         tenantId: os.azure.tenantId,
+        resourceGroup: os.azure.resourceGroup,
         storageAccount: os.azure.storageAccount,
         container: os.azure.container,
       },
