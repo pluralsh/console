@@ -161,6 +161,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		ReadBindings:    attr.ReadBindings,
 		WriteBindings:   attr.WriteBindings,
 		ContextBindings: attr.ContextBindings,
+		Templated:       attr.Templated,
 	}
 
 	sha, err := utils.HashObject(updater)
@@ -240,6 +241,11 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		Protect:         &service.Spec.Protect,
 		RepositoryID:    repositoryId,
 		ContextBindings: make([]*console.ContextBindingAttributes, 0),
+		Templated:       lo.ToPtr(true),
+	}
+
+	if service.Spec.Templated != nil {
+		attr.Templated = service.Spec.Templated
 	}
 
 	for _, contextName := range service.Spec.Contexts {
