@@ -77,7 +77,8 @@ export function AzureSettings({
   return (
     <>
       <FormField label="Client ID">
-        <InputRevealer
+        <Input
+          type="text"
           value={settings?.clientId}
           onChange={(e) => {
             updateSettings({ clientId: e.currentTarget.value })
@@ -93,7 +94,8 @@ export function AzureSettings({
         />
       </FormField>
       <FormField label="Tenant ID">
-        <InputRevealer
+        <Input
+          type="text"
           value={settings?.tenantId}
           onChange={(e) => {
             updateSettings({ tenantId: e.currentTarget.value })
