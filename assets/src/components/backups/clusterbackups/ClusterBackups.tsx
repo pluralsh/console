@@ -7,8 +7,9 @@ import { useParams } from 'react-router-dom'
 
 import {
   ClusterBackup,
+  ClusterBasicFragment,
   useClusterBackupsQuery,
-  useClusterTinyQuery,
+  useClusterBasicQuery,
 } from '../../../generated/graphql'
 import { GqlError } from '../../utils/Alert'
 import LoadingIndicator from '../../utils/LoadingIndicator'
@@ -18,6 +19,9 @@ import { Edge } from '../../../utils/graphql'
 import { BACKUPS_BACKUPS_BASE_CRUMBS } from '../backups/Backups'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
+
+import { DynamicClusterIcon } from '../../cd/clusters/DynamicClusterIcon'
+import { ColClusterContentSC } from '../../cd/clusters/ClustersColumns'
 
 import { RestoreClusterBackup } from './RestoreClusterBackup'
 
@@ -29,7 +33,21 @@ const columns = [
   columnHelper.accessor(({ node }) => node?.id, {
     id: 'cluster',
     header: 'Cluster',
-    cell: ({ getValue }) => getValue(),
+    cell: ({ table }) => {
+      const { cluster } = table.options.meta as {
+        cluster?: ClusterBasicFragment
+      }
+
+      return (
+        <ColClusterContentSC>
+          <DynamicClusterIcon
+            self={!!cluster?.self}
+            type="tertiary"
+          />
+          {cluster?.name}
+        </ColClusterContentSC>
+      )
+    },
   }),
   columnHelper.accessor(({ node }) => node?.id, {
     id: 'id',
@@ -66,12 +84,12 @@ export default function ClusterBackups() {
     data: clusterData,
     error: clusterError,
     loading: clusterLoading,
-  } = useClusterTinyQuery({
+  } = useClusterBasicQuery({
     variables: { id: clusterId },
     fetchPolicy: 'cache-and-network',
   })
 
-  const { data, error, loading, refetch } = useClusterBackupsQuery({
+  const { data, error, loading } = useClusterBackupsQuery({
     variables: { clusterId },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
@@ -103,9 +121,9 @@ export default function ClusterBackups() {
         state: {
           ...tableFilters,
         },
-        meta: { refetch },
+        meta: { cluster },
       }),
-      [tableFilters, refetch]
+      [tableFilters, cluster]
     )
 
   if (clusterError || error) {

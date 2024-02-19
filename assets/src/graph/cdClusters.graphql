@@ -308,9 +308,9 @@ query Cluster($id: ID!) {
   }
 }
 
-query ClusterTiny($id: ID!) {
+query ClusterBasic($id: ID!) {
   cluster(id: $id) {
-    ...ClusterTiny
+    ...ClusterBasic
   }
 }
 

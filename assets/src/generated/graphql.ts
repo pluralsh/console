@@ -5892,12 +5892,12 @@ export type ClusterQueryVariables = Exact<{
 
 export type ClusterQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null } | null };
 
-export type ClusterTinyQueryVariables = Exact<{
+export type ClusterBasicQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ClusterTinyQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+export type ClusterBasicQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
 export type ClusterPodsQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
@@ -9695,46 +9695,46 @@ export type ClusterQueryHookResult = ReturnType<typeof useClusterQuery>;
 export type ClusterLazyQueryHookResult = ReturnType<typeof useClusterLazyQuery>;
 export type ClusterSuspenseQueryHookResult = ReturnType<typeof useClusterSuspenseQuery>;
 export type ClusterQueryResult = Apollo.QueryResult<ClusterQuery, ClusterQueryVariables>;
-export const ClusterTinyDocument = gql`
-    query ClusterTiny($id: ID!) {
+export const ClusterBasicDocument = gql`
+    query ClusterBasic($id: ID!) {
   cluster(id: $id) {
-    ...ClusterTiny
+    ...ClusterBasic
   }
 }
-    ${ClusterTinyFragmentDoc}`;
+    ${ClusterBasicFragmentDoc}`;
 
 /**
- * __useClusterTinyQuery__
+ * __useClusterBasicQuery__
  *
- * To run a query within a React component, call `useClusterTinyQuery` and pass it any options that fit your needs.
- * When your component renders, `useClusterTinyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useClusterBasicQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterBasicQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useClusterTinyQuery({
+ * const { data, loading, error } = useClusterBasicQuery({
  *   variables: {
  *      id: // value for 'id'
  *   },
  * });
  */
-export function useClusterTinyQuery(baseOptions: Apollo.QueryHookOptions<ClusterTinyQuery, ClusterTinyQueryVariables>) {
+export function useClusterBasicQuery(baseOptions: Apollo.QueryHookOptions<ClusterBasicQuery, ClusterBasicQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ClusterTinyQuery, ClusterTinyQueryVariables>(ClusterTinyDocument, options);
+        return Apollo.useQuery<ClusterBasicQuery, ClusterBasicQueryVariables>(ClusterBasicDocument, options);
       }
-export function useClusterTinyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterTinyQuery, ClusterTinyQueryVariables>) {
+export function useClusterBasicLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterBasicQuery, ClusterBasicQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ClusterTinyQuery, ClusterTinyQueryVariables>(ClusterTinyDocument, options);
+          return Apollo.useLazyQuery<ClusterBasicQuery, ClusterBasicQueryVariables>(ClusterBasicDocument, options);
         }
-export function useClusterTinySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterTinyQuery, ClusterTinyQueryVariables>) {
+export function useClusterBasicSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterBasicQuery, ClusterBasicQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ClusterTinyQuery, ClusterTinyQueryVariables>(ClusterTinyDocument, options);
+          return Apollo.useSuspenseQuery<ClusterBasicQuery, ClusterBasicQueryVariables>(ClusterBasicDocument, options);
         }
-export type ClusterTinyQueryHookResult = ReturnType<typeof useClusterTinyQuery>;
-export type ClusterTinyLazyQueryHookResult = ReturnType<typeof useClusterTinyLazyQuery>;
-export type ClusterTinySuspenseQueryHookResult = ReturnType<typeof useClusterTinySuspenseQuery>;
-export type ClusterTinyQueryResult = Apollo.QueryResult<ClusterTinyQuery, ClusterTinyQueryVariables>;
+export type ClusterBasicQueryHookResult = ReturnType<typeof useClusterBasicQuery>;
+export type ClusterBasicLazyQueryHookResult = ReturnType<typeof useClusterBasicLazyQuery>;
+export type ClusterBasicSuspenseQueryHookResult = ReturnType<typeof useClusterBasicSuspenseQuery>;
+export type ClusterBasicQueryResult = Apollo.QueryResult<ClusterBasicQuery, ClusterBasicQueryVariables>;
 export const ClusterPodsDocument = gql`
     query ClusterPods($clusterId: ID, $namespace: String) {
   pods(first: 100, clusterId: $clusterId, namespace: $namespace) {
@@ -13365,7 +13365,7 @@ export const namedOperations = {
     ClustersTiny: 'ClustersTiny',
     ClusterSelector: 'ClusterSelector',
     Cluster: 'Cluster',
-    ClusterTiny: 'ClusterTiny',
+    ClusterBasic: 'ClusterBasic',
     ClusterPods: 'ClusterPods',
     ClusterNamespaces: 'ClusterNamespaces',
     ClusterBindings: 'ClusterBindings',
