@@ -11,7 +11,7 @@ import { useTheme } from 'styled-components'
 import { ComponentProps, useCallback, useMemo, useState } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { VirtualItem } from '@tanstack/react-virtual'
 
@@ -161,6 +161,7 @@ const columns = [
 
 export default function Backups() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const [virtualSlice, _setVirtualSlice] = useState<
     | {
         start: VirtualItem | undefined
@@ -237,6 +238,9 @@ export default function Backups() {
             hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
+            onRowClick={(e, { original: { node } }) =>
+              navigate(`/backups/backups/${node?.id}`)
+            }
             css={{
               maxHeight: 'unset',
               height: '100%',
