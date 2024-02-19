@@ -49,6 +49,23 @@ defmodule Console.GraphQl.UserQueriesTest do
 
       assert found["unreadNotifications"] == 3
     end
+
+    test "it can sideload a users personas" do
+      me = insert(:user)
+      group = insert(:group)
+      insert(:group_member, group: group, user: me)
+      persona = insert(:persona, bindings: [%{group_id: group.id}])
+
+      {:ok, %{data: %{"me" => found}}} = run_query("""
+        query {
+          me {
+            personas { id }
+          }
+        }
+      """, %{}, %{current_user: me})
+
+      assert hd(found["personas"])["id"] == persona.id
+    end
   end
 
   describe "invite" do
@@ -302,6 +319,37 @@ defmodule Console.GraphQl.UserQueriesTest do
 
       assert from_connection(found)
              |> ids_equal(tokens)
+    end
+  end
+
+  describe "persona" do
+    test "it can fetch a persona by id" do
+      persona = insert(:persona)
+
+      {:ok, %{data: %{"persona" => found}}} = run_query("""
+        query Persona($id: ID!) {
+          persona(id: $id) { id }
+        }
+      """, %{"id" => persona.id}, %{current_user: insert(:user)})
+
+      assert found["id"] == persona.id
+    end
+  end
+
+  describe "personas" do
+    test "it can fetch a persona by id" do
+      personas = insert_list(3, :persona)
+
+      {:ok, %{data: %{"personas" => found}}} = run_query("""
+        query {
+          personas(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(personas)
     end
   end
 end

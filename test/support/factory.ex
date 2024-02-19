@@ -413,6 +413,17 @@ defmodule Console.Factory do
     }
   end
 
+  def persona_factory do
+    %Schema.Persona{
+      name: sequence(:persona, & "persona-#{&1}"),
+      bindings_id: Ecto.UUID.generate(),
+      configuration: %{
+        deployments: %{deployments: true},
+        sidebar: %{kubernetes: true}
+      }
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

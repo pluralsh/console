@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Resolvers.User do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.User
-  alias Console.Schema.{Group, GroupMember, Role, RoleBinding, Notification, AccessToken, AccessTokenAudit, PolicyBinding}
+  alias Console.Schema.{Group, GroupMember, Role, RoleBinding, Notification, AccessToken, AccessTokenAudit, PolicyBinding, Persona}
   alias Console.Services.Users
   require Logger
 
@@ -8,11 +8,14 @@ defmodule Console.GraphQl.Resolvers.User do
   def query(Role, _), do: Role
   def query(RoleBinding, _), do: RoleBinding
   def query(PolicyBinding, _), do: PolicyBinding
+  def query(Persona, _), do: Persona
   def query(_, _), do: User
 
   def get_user(%{email: email}, _), do: {:ok, Users.get_user_by_email!(email)}
 
   def get_group(%{name: name}, _), do: {:ok, Users.get_group_by_name!(name)}
+
+  def get_persona(%{id: id}, _), do: {:ok, Users.get_persona(id)}
 
   def login_link(%{key: k}, _) do
     Console.conf(:login_link)
@@ -66,6 +69,17 @@ defmodule Console.GraphQl.Resolvers.User do
   def list_token_audits(args, %{source: %{id: id}}) do
     AccessTokenAudit.for_token(id)
     |> AccessTokenAudit.ordered()
+    |> paginate(args)
+  end
+
+  def list_personas(user, _, _) do
+    Persona.for_user(user)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
+  def list_personas(args, _) do
+    Persona.ordered()
     |> paginate(args)
   end
 
@@ -202,6 +216,15 @@ defmodule Console.GraphQl.Resolvers.User do
 
   def delete_access_token(%{token: token}, %{context: %{current_user: user}}),
     do: Users.delete_access_token(token, user)
+
+  def create_persona(%{attributes: attrs}, _),
+    do: Users.create_persona(attrs)
+
+  def update_persona(%{id: id, attributes: attrs}, _),
+    do: Users.update_persona(attrs, id)
+
+  def delete_persona(%{id: id}, _),
+    do: Users.delete_persona(id)
 
   defp with_permissions(%{permissions: perms} = attrs) when is_list(perms) do
     perm_set = MapSet.new(perms)

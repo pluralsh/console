@@ -45,6 +45,10 @@ type RootQueryType {
 
   accessToken(id: ID!): AccessToken
 
+  persona(id: ID!): Persona
+
+  personas(after: String, first: Int, before: String, last: Int): PersonaConnection
+
   dashboards(repo: String!): [Dashboard]
 
   dashboard(repo: String!, name: String!, step: String, offset: Int, labels: [LabelInput]): Dashboard
@@ -357,6 +361,12 @@ type RootMutationType {
   createServiceAccountToken(id: ID!, scopes: [ScopeAttributes]): AccessToken
 
   deleteAccessToken(token: String!): AccessToken
+
+  createPersona(attributes: PersonaAttributes!): Persona
+
+  updatePersona(id: ID!, attributes: PersonaAttributes!): Persona
+
+  deletePersona(id: ID!): Persona
 
   deleteCertificate(name: String!, namespace: String!): Boolean
 
@@ -4150,6 +4160,44 @@ input BindingAttributes {
   groupId: ID
 }
 
+input PersonaAttributes {
+  name: String
+
+  "longform description of this persona"
+  description: String
+
+  configuration: PersonaConfigurationAttributes
+
+  bindings: [BindingAttributes]
+}
+
+input PersonaConfigurationAttributes {
+  "enable full ui for this persona"
+  all: Boolean
+
+  "enable individual parts of the deployments views"
+  deployments: PersonaDeploymentAttributes
+
+  "enable individual aspects of the sidebar"
+  sidebar: PersonaSidebarAttributes
+}
+
+input PersonaDeploymentAttributes {
+  clusters: Boolean
+  deployments: Boolean
+  services: Boolean
+  pipelines: Boolean
+  providers: Boolean
+  addOns: Boolean
+}
+
+input PersonaSidebarAttributes {
+  audits: Boolean
+  kubernetes: Boolean
+  pullRequests: Boolean
+  settings: Boolean
+}
+
 type User {
   id: ID!
   name: String!
@@ -4162,6 +4210,7 @@ type User {
   buildTimestamp: DateTime
   assumeBindings: [PolicyBinding]
   groups: [Group]
+  personas: [Persona]
   boundRoles: [Role]
   jwt: String
   unreadNotifications: Int
@@ -4262,6 +4311,53 @@ type AccessTokenAudit {
   updatedAt: DateTime
 }
 
+type Persona {
+  id: ID!
+
+  "the name for this persona"
+  name: String!
+
+  "longform description of this persona"
+  description: String
+
+  "the ui configuration for this persona (additive across personas)"
+  configuration: PersonaConfiguration
+
+  "the group bindings for this persona"
+  bindings: [PolicyBinding]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type PersonaConfiguration {
+  "enable full ui for this persona"
+  all: Boolean
+
+  "enable individual parts of the deployments views"
+  deployments: PersonaDeployment
+
+  "enable individual aspects of the sidebar"
+  sidebar: PersonaSidebar
+}
+
+type PersonaDeployment {
+  clusters: Boolean
+  deployments: Boolean
+  services: Boolean
+  pipelines: Boolean
+  providers: Boolean
+  addOns: Boolean
+}
+
+type PersonaSidebar {
+  audits: Boolean
+  kubernetes: Boolean
+  pullRequests: Boolean
+  settings: Boolean
+}
+
 type UserConnection {
   pageInfo: PageInfo!
   edges: [UserEdge]
@@ -4295,6 +4391,11 @@ type AccessTokenConnection {
 type AccessTokenAuditConnection {
   pageInfo: PageInfo!
   edges: [AccessTokenAuditEdge]
+}
+
+type PersonaConnection {
+  pageInfo: PageInfo!
+  edges: [PersonaEdge]
 }
 
 type NotificationDelta {
@@ -4484,6 +4585,11 @@ type CommandEdge {
 
 type BuildEdge {
   node: Build
+  cursor: String
+}
+
+type PersonaEdge {
+  node: Persona
   cursor: String
 }
 
