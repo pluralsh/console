@@ -39,6 +39,10 @@ import { useSlicePolling } from '../../utils/tableFetchHelpers'
 
 import { Edge, extendConnection } from '../../../utils/graphql'
 
+import { StackedText } from '../../utils/table/StackedText'
+
+import { BasicLink } from '../../utils/typography/BasicLink'
+
 import ConfigureClusterBackups from './ConfigureClusterBackups'
 import { DeleteClusterBackups } from './DeleteClusterBackups'
 
@@ -77,7 +81,14 @@ const columns = [
           self={!!cluster?.self}
           type="tertiary"
         />
-        {cluster?.name}
+        <StackedText
+          first={
+            <BasicLink css={{ whiteSpace: 'nowrap' }}>
+              {cluster?.name}
+            </BasicLink>
+          }
+          second={`handle: ${cluster?.handle}`}
+        />
       </ColClusterContentSC>
     ),
   }),

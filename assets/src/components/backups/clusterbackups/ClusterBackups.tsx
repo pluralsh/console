@@ -3,7 +3,7 @@ import { useTheme } from 'styled-components'
 import { ComponentProps, useMemo, useState } from 'react'
 import { TableState, createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 import {
   ClusterBackup,
@@ -22,6 +22,9 @@ import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWi
 
 import { DynamicClusterIcon } from '../../cd/clusters/DynamicClusterIcon'
 import { ColClusterContentSC } from '../../cd/clusters/ClustersColumns'
+
+import { BasicLink } from '../../utils/typography/BasicLink'
+import { StackedText } from '../../utils/table/StackedText'
 
 import { RestoreClusterBackup } from './RestoreClusterBackup'
 
@@ -44,7 +47,14 @@ const columns = [
             self={!!cluster?.self}
             type="tertiary"
           />
-          {cluster?.name}
+          <StackedText
+            first={
+              <BasicLink css={{ whiteSpace: 'nowrap' }}>
+                {cluster?.name}
+              </BasicLink>
+            }
+            second={`handle: ${cluster?.handle}`}
+          />
         </ColClusterContentSC>
       )
     },
