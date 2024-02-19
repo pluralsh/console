@@ -19,10 +19,10 @@
 # - resourceGroup   - Azure resource group name.
 # - storageAccount  - Azure storage account name.
 
-{% if configuration.schedule -%}
+{% if configuration.schedule %}
 schedule: {{ configuration.schedule }}
 {% endif %}
-{% if configuration.ttl -%}
+{% if configuration.ttl %}
 ttl: {{ configuration.ttl }}
 {% endif %}
 
