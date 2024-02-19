@@ -1,10 +1,4 @@
-import {
-  EmptyState,
-  HistoryIcon,
-  IconFrame,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { EmptyState, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { ComponentProps, useMemo, useState } from 'react'
 import { TableState, createColumnHelper } from '@tanstack/react-table'
@@ -23,6 +17,8 @@ import { Edge } from '../../../utils/graphql'
 import { BACKUPS_BACKUPS_BASE_CRUMBS } from '../backups/Backups'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
+
+import { RestoreClusterBackup } from './RestoreClusterBackup'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -51,16 +47,7 @@ const columns = [
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const backup = getValue()
 
-      return (
-        <IconFrame
-          clickable
-          icon={<HistoryIcon />}
-          textValue="Restore backup"
-          tooltip
-          type="secondary"
-          // TODO: Restore.
-        />
-      )
+      return <RestoreClusterBackup backup={backup} />
     },
   }),
 ]
