@@ -38,7 +38,7 @@ export function RestoreClusterBackup({
         open={confirm}
         submit={() => mutation()}
         title="Restore cluster configuration"
-        text={`Are you sure you want to restore ${backup?.cluster?.name} configuration from ${backup?.name}?`}
+        text={`Are you sure you want to restore ${backup?.cluster?.name} configuration?`}
       />
     </div>
   )
