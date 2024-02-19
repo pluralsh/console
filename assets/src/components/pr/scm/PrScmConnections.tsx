@@ -18,6 +18,7 @@ import { PR_BASE_CRUMBS, PR_SCM_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { columns } from './PrScmConnectionsColumns'
 import { CreateScmConnection } from './CreateScmConnection'
+import { SetupDependencyAutomation } from './SetupDependencyAutomation'
 
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -89,7 +90,17 @@ export default function ScmConnections() {
     })
   }, [fetchMore, pageInfo?.endCursor])
 
-  useSetPageHeaderContent(<CreateScmConnection refetch={refetch} />)
+  useSetPageHeaderContent(
+    <div
+      css={{
+        display: 'flex',
+        gap: theme.spacing.small,
+      }}
+    >
+      <SetupDependencyAutomation refetch={refetch} />
+      <CreateScmConnection refetch={refetch} />
+    </div>
+  )
 
   if (error) {
     return <GqlError error={error} />

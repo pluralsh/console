@@ -3,6 +3,8 @@ fragment PullRequest on PullRequest {
   service {
     id
     name
+    protect
+    deletedAt
   }
   cluster {
     ...ClusterBasic
@@ -10,6 +12,8 @@ fragment PullRequest on PullRequest {
   title
   url
   labels
+  creator
+  status
   insertedAt
   updatedAt
 }
