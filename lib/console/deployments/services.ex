@@ -284,7 +284,7 @@ defmodule Console.Deployments.Services do
     with {:ok, svc} <- allow(service, user, :write),
          svc <- Repo.preload(svc, [:repository]),
          _ <- Git.Discovery.kick(svc.repository),
-      do: notify(svc, :update, user)
+      do: notify({:ok, svc}, :update, user)
   end
 
   def kick(service_id, user) when is_binary(service_id) do
