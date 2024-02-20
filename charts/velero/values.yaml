@@ -18,6 +18,12 @@ velero:
       volumeMounts:
         - mountPath: /target
           name: plugins
+    - name: velero-plugin-for-gcp
+      image: velero/velero-plugin-for-gcp:v1.9.0
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /target
+          name: plugins
   configuration:
     backupStorageLocation: {}
     volumeSnapshotLocation: {}
