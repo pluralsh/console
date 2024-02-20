@@ -16,6 +16,14 @@ defmodule Console.GraphQl.Deployments.Backup do
     field :name,              non_null(:string)
     field :namespace,         non_null(:string)
     field :garbage_collected, :boolean
+    field :ttl,               :string
+    field :namespaces,        :resource_selector_attributes
+    field :resources,         :resource_selector_attributes
+  end
+
+  input_object :resource_selector_attributes do
+    field :included, list_of(:string)
+    field :excluded, list_of(:string)
   end
 
   input_object :restore_attributes do
@@ -60,11 +68,19 @@ defmodule Console.GraphQl.Deployments.Backup do
     field :id,                non_null(:id)
     field :name,              non_null(:string)
     field :namespace,         non_null(:string)
+    field :ttl,               :string
     field :garbage_collected, :boolean
+    field :namespaces,        :resource_selector
+    field :resources,         :resource_selector
 
     field :cluster, :cluster, resolve: dataloader(Deployments)
 
     timestamps()
+  end
+
+  object :resource_selector do
+    field :included, list_of(:string)
+    field :excluded, list_of(:string)
   end
 
   object :cluster_restore do

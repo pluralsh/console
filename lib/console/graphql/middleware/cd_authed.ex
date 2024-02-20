@@ -32,6 +32,6 @@ defmodule Console.Middleware.CdAuthenticated do
   end
 
   defp check_namespace(%{namespace: ns}, %Service{namespace: ns}), do: true
-  defp check_namespace(%{namespace: _}, _), do: false
+  defp check_namespace(%{namespace: n}, _) when is_binary(n), do: false
   defp check_namespace(_, _), do: true
 end
