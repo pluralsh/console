@@ -49,7 +49,12 @@ fragment ClusterRestore on ClusterRestore {
   updatedAt
 }
 
-query ObjectStores($after: String, $first: Int = 100, $before: String, $last: Int) {
+query ObjectStores(
+  $after: String
+  $first: Int = 100
+  $before: String
+  $last: Int
+) {
   objectStores(after: $after, first: $first, before: $before, last: $last) {
     pageInfo {
       ...PageInfo
@@ -62,8 +67,20 @@ query ObjectStores($after: String, $first: Int = 100, $before: String, $last: In
   }
 }
 
-query ClustersObjectStores($after: String, $first: Int = 100, $before: String, $last: Int, $backups: Boolean ) {
-  clusters(after: $after, first: $first, before: $before, last: $last, backups: $backups) {
+query ClustersObjectStores(
+  $after: String
+  $first: Int = 100
+  $before: String
+  $last: Int
+  $backups: Boolean
+) {
+  clusters(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    backups: $backups
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -75,14 +92,36 @@ query ClustersObjectStores($after: String, $first: Int = 100, $before: String, $
   }
 }
 
-query ClusterBackup($id: ID, $clusterId: ID, $namespace: String, $name: String) {
-  clusterBackup(id: $id, clusterId: $clusterId, namespace: $namespace, name: $name) {
+query ClusterBackup(
+  $id: ID
+  $clusterId: ID
+  $namespace: String
+  $name: String
+) {
+  clusterBackup(
+    id: $id
+    clusterId: $clusterId
+    namespace: $namespace
+    name: $name
+  ) {
     ...ClusterBackup
   }
 }
 
-query ClusterBackups($after: String, $first: Int = 100, $before: String, $last: Int, $clusterId: ID!) {
-  clusterBackups(last: $last, first: $first, before: $before, after: $after, clusterId: $clusterId) {
+query ClusterBackups(
+  $after: String
+  $first: Int = 100
+  $before: String
+  $last: Int
+  $clusterId: ID!
+) {
+  clusterBackups(
+    last: $last
+    first: $first
+    before: $before
+    after: $after
+    clusterId: $clusterId
+  ) {
     pageInfo {
       ...PageInfo
     }
