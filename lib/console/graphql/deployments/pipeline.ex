@@ -100,10 +100,11 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
   @desc "actions to perform if this stage service were promoted"
   input_object :promotion_criteria_attributes do
-    field :handle,    :string, description: "the handle of the cluster for the source service"
-    field :name,      :string, description: "the name of the source service"
-    field :source_id, :id, description: "the id of the service to promote from"
-    field :secrets,   list_of(:string), description: "the secrets to copy over in a promotion"
+    field :handle,           :string, description: "the handle of the cluster for the source service"
+    field :name,             :string, description: "the name of the source service"
+    field :source_id,        :id, description: "the id of the service to promote from"
+    field :pr_automation_id, :id, description: "the id of a pr automation to update this service"
+    field :secrets,          list_of(:string), description: "the secrets to copy over in a promotion"
   end
 
   @desc "a release pipeline, composed of multiple stages each with potentially multiple services"
