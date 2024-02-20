@@ -2934,6 +2934,8 @@ export type PromotionCriteriaAttributes = {
   handle?: InputMaybe<Scalars['String']['input']>;
   /** the name of the source service */
   name?: InputMaybe<Scalars['String']['input']>;
+  /** the id of a pr automation to update this service */
+  prAutomationId?: InputMaybe<Scalars['ID']['input']>;
   /** the secrets to copy over in a promotion */
   secrets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the id of the service to promote from */
