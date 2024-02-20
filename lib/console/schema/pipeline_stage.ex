@@ -28,7 +28,7 @@ defmodule Console.Schema.PipelineStage do
   end
 
   def pending_context(query \\ __MODULE__) do
-    from(s in query, where: not is_nil(s.context_id) and (is_nil(s.applied_context_id) or s.context_id != s.applied_context))
+    from(s in query, where: not is_nil(s.context_id) and (is_nil(s.applied_context_id) or s.context_id != s.applied_context_id))
   end
 
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
