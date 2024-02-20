@@ -44,6 +44,7 @@ velero:
         {% else -%}
         bucket: {{ configuration.bucket }}
         {% endif -%}
+        {% if configuration.provider == "aws" or configuration.provider == "azure" -%}
         config:
           {% if configuration.provider == "aws" -%}
           region: {{ configuration.region }}
@@ -52,6 +53,7 @@ velero:
           resourceGroup: {{ configuration.resourceGroup }}
           storageAccount: {{ configuration.storageAccount }}
           {% endif -%}
+        {% endif -%}
     volumeSnapshotLocation:
       - name: default
         provider: {{ configuration.provider }}
