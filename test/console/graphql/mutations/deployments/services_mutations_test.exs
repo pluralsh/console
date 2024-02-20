@@ -577,6 +577,23 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
     end
   end
 
+  describe "kickService" do
+    test "it will kick a service" do
+      service = insert(:service)
+      expect(Console.Deployments.Git.Discovery, :kick, fn _ -> :ok end)
+
+      {:ok, %{data: %{"kickService" => svc}}} = run_query("""
+        mutation Kick($id: ID!) {
+          kickService(serviceId: $id) { id }
+        }
+      """, %{"id" => service.id}, %{current_user: admin_user()})
+
+      assert svc["id"] == service.id
+
+      assert_receive {:event, %Console.PubSub.ServiceUpdated{}}
+    end
+  end
+
   describe "setupRenovate" do
     test "it can initialize a renovate cron" do
       insert(:git_repository, url: "https://github.com/pluralsh/scaffolds.git")
