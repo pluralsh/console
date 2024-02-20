@@ -1,28 +1,28 @@
 # Common configuration:
-# - schedule          - default schedule CRON.
-# - ttl               - time to live for backups created by default schedule.
+# - schedule  - default schedule CRON.
+# - ttl       - time to live for backups created by default schedule.
 #
 # AWS configuration:
-# - provider          - Provider name, "aws".
-# - bucket            - Amazon S3 bucket name.
-# - region            - AWS region.
-# - accessKeyId       - AWS access key ID.
-# - secretAccessKey   - AWS secret access key.
+# - provider        - Provider name, "aws".
+# - bucket          - Amazon S3 bucket name.
+# - region          - AWS region.
+# - accessKeyId     - AWS access key ID.
+# - secretAccessKey - AWS secret access key.
 #
 # Azure configuration:
-# - provider          - Provider name, "azure".
-# - container         - Azure blob container name.
-# - subscriptionId    - Azure subscription ID.
-# - tenantId          - Azure tenant ID.
-# - clientId          - Azure client ID.
-# - clientSecret      - Azure client secret.
-# - resourceGroup     - Azure resource group name.
-# - storageAccount    - Azure storage account name.
+# - provider        - Provider name, "azure".
+# - container       - Azure blob container name.
+# - subscriptionId  - Azure subscription ID.
+# - tenantId        - Azure tenant ID.
+# - clientId        - Azure client ID.
+# - clientSecret    - Azure client secret.
+# - resourceGroup   - Azure resource group name.
+# - storageAccount  - Azure storage account name.
 #
 # GCS configuration:
-# - provider          - Provider name, "gcp".
-# - bucket            - GCS bucket name.
-# - serviceAccountKey - Google service account key.
+# - provider                - Provider name, "gcp".
+# - bucket                  - GCS bucket name.
+# - applicationCredentials  - Google service account key.
 
 {% if configuration.schedule %}
 schedule: {{ configuration.schedule }}
@@ -75,5 +75,5 @@ velero:
         AZURE_RESOURCE_GROUP={{ configuration.resourceGroup }}
         {%- endif -%}
         {% if configuration.provider == "gcp" -%}
-        {{ configuration.serviceAccountKey }}
+        {{ configuration.applicationCredentials }}
         {%- endif -%}
