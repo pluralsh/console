@@ -5829,6 +5829,100 @@ export type SetupRenovateMutationVariables = Exact<{
 
 export type SetupRenovateMutation = { __typename?: 'RootMutationType', setupRenovate?: { __typename?: 'ServiceDeployment', id: string } | null };
 
+export type ObjectStoreFragment = { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null };
+
+export type ClustersObjectStoresFragment = { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
+
+export type ClusterBackupFragment = { __typename?: 'ClusterBackup', id: string, garbageCollected?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+
+export type ClusterRestoreFragment = { __typename?: 'ClusterRestore', id: string, status: RestoreStatus, insertedAt?: string | null, updatedAt?: string | null, backup?: { __typename?: 'ClusterBackup', id: string, garbageCollected?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+
+export type ObjectStoresQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ObjectStoresQuery = { __typename?: 'RootQueryType', objectStores?: { __typename?: 'ObjectStoreConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ObjectStoreEdge', node?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null } | null } | null> | null } | null };
+
+export type ClustersObjectStoresQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  backups?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type ClustersObjectStoresQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
+
+export type ClusterBackupQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ClusterBackupQuery = { __typename?: 'RootQueryType', clusterBackup?: { __typename?: 'ClusterBackup', id: string, garbageCollected?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+
+export type ClusterBackupsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  clusterId: Scalars['ID']['input'];
+}>;
+
+
+export type ClusterBackupsQuery = { __typename?: 'RootQueryType', clusterBackups?: { __typename?: 'ClusterBackupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterBackupEdge', node?: { __typename?: 'ClusterBackup', id: string, garbageCollected?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
+
+export type CreateObjectStoreMutationVariables = Exact<{
+  attributes: ObjectStoreAttributes;
+}>;
+
+
+export type CreateObjectStoreMutation = { __typename?: 'RootMutationType', createObjectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null } | null };
+
+export type UpdateObjectStoreMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ObjectStoreAttributes;
+}>;
+
+
+export type UpdateObjectStoreMutation = { __typename?: 'RootMutationType', updateObjectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null } | null };
+
+export type DeleteObjectStoreMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteObjectStoreMutation = { __typename?: 'RootMutationType', deleteObjectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null } | null };
+
+export type ConfigureBackupsMutationVariables = Exact<{
+  clusterId: Scalars['ID']['input'];
+  storeId: Scalars['ID']['input'];
+}>;
+
+
+export type ConfigureBackupsMutation = { __typename?: 'RootMutationType', configureBackups?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+
+export type DelinkBackupsMutationVariables = Exact<{
+  clusterId: Scalars['ID']['input'];
+}>;
+
+
+export type DelinkBackupsMutation = { __typename?: 'RootMutationType', delinkBackups?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+
+export type CreateClusterRestoreMutationVariables = Exact<{
+  backupId: Scalars['ID']['input'];
+}>;
+
+
+export type CreateClusterRestoreMutation = { __typename?: 'RootMutationType', createClusterRestore?: { __typename?: 'ClusterRestore', id: string, status: RestoreStatus, insertedAt?: string | null, updatedAt?: string | null, backup?: { __typename?: 'ClusterBackup', id: string, garbageCollected?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null };
+
 export type PageInfoFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null };
 
 export type PluralContextQueryVariables = Exact<{ [key: string]: never; }>;
@@ -5920,6 +6014,13 @@ export type ClusterQueryVariables = Exact<{
 
 
 export type ClusterQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, handle?: string | null, pingedAt?: string | null, self?: boolean | null, version?: string | null, protect?: boolean | null, distro?: ClusterDistro | null, installed?: boolean | null, deletedAt?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string, minSize: number, maxSize: number, instanceType: string, spot?: boolean | null, labels?: Record<string, unknown> | null, taints?: Array<{ __typename?: 'Taint', effect: string, key: string, value: string } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null, phase?: string | null, allocatable?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', controlPlaneReady?: boolean | null, failureMessage?: string | null, failureReason?: string | null, phase?: string | null, conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null } | null };
+
+export type ClusterBasicQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ClusterBasicQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
 export type ClusterPodsQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
@@ -6863,6 +6964,83 @@ export const RepositoryFragmentDoc = gql`
 }
     ${ConfigurationFragmentDoc}
 ${FileContentFragmentDoc}`;
+export const ClusterTinyFragmentDoc = gql`
+    fragment ClusterTiny on Cluster {
+  id
+  name
+  provider {
+    cloud
+  }
+  distro
+}
+    `;
+export const ClusterBasicFragmentDoc = gql`
+    fragment ClusterBasic on Cluster {
+  ...ClusterTiny
+  handle
+  self
+  protect
+  deletedAt
+  version
+  currentVersion
+}
+    ${ClusterTinyFragmentDoc}`;
+export const ObjectStoreFragmentDoc = gql`
+    fragment ObjectStore on ObjectStore {
+  id
+  name
+  s3 {
+    bucket
+    region
+    endpoint
+    accessKeyId
+  }
+  azure {
+    container
+    storageAccount
+    resourceGroup
+    subscriptionId
+    clientId
+    tenantId
+  }
+  gcs {
+    bucket
+  }
+  insertedAt
+  updatedAt
+}
+    `;
+export const ClustersObjectStoresFragmentDoc = gql`
+    fragment ClustersObjectStores on Cluster {
+  ...ClusterBasic
+  objectStore {
+    ...ObjectStore
+  }
+}
+    ${ClusterBasicFragmentDoc}
+${ObjectStoreFragmentDoc}`;
+export const ClusterBackupFragmentDoc = gql`
+    fragment ClusterBackup on ClusterBackup {
+  id
+  cluster {
+    ...ClusterBasic
+  }
+  garbageCollected
+  insertedAt
+  updatedAt
+}
+    ${ClusterBasicFragmentDoc}`;
+export const ClusterRestoreFragmentDoc = gql`
+    fragment ClusterRestore on ClusterRestore {
+  id
+  status
+  backup {
+    ...ClusterBackup
+  }
+  insertedAt
+  updatedAt
+}
+    ${ClusterBackupFragmentDoc}`;
 export const PageInfoFragmentDoc = gql`
     fragment PageInfo on PageInfo {
   hasNextPage
@@ -6977,27 +7155,6 @@ export const ApiDeprecationFragmentDoc = gql`
   replacement
 }
     `;
-export const ClusterTinyFragmentDoc = gql`
-    fragment ClusterTiny on Cluster {
-  id
-  name
-  provider {
-    cloud
-  }
-  distro
-}
-    `;
-export const ClusterBasicFragmentDoc = gql`
-    fragment ClusterBasic on Cluster {
-  ...ClusterTiny
-  handle
-  self
-  protect
-  deletedAt
-  version
-  currentVersion
-}
-    ${ClusterTinyFragmentDoc}`;
 export const ScmConnectionFragmentDoc = gql`
     fragment ScmConnection on ScmConnection {
   id
@@ -8891,6 +9048,421 @@ export function useSetupRenovateMutation(baseOptions?: Apollo.MutationHookOption
 export type SetupRenovateMutationHookResult = ReturnType<typeof useSetupRenovateMutation>;
 export type SetupRenovateMutationResult = Apollo.MutationResult<SetupRenovateMutation>;
 export type SetupRenovateMutationOptions = Apollo.BaseMutationOptions<SetupRenovateMutation, SetupRenovateMutationVariables>;
+export const ObjectStoresDocument = gql`
+    query ObjectStores($after: String, $first: Int = 100, $before: String, $last: Int) {
+  objectStores(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ObjectStore
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ObjectStoreFragmentDoc}`;
+
+/**
+ * __useObjectStoresQuery__
+ *
+ * To run a query within a React component, call `useObjectStoresQuery` and pass it any options that fit your needs.
+ * When your component renders, `useObjectStoresQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useObjectStoresQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useObjectStoresQuery(baseOptions?: Apollo.QueryHookOptions<ObjectStoresQuery, ObjectStoresQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ObjectStoresQuery, ObjectStoresQueryVariables>(ObjectStoresDocument, options);
+      }
+export function useObjectStoresLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ObjectStoresQuery, ObjectStoresQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ObjectStoresQuery, ObjectStoresQueryVariables>(ObjectStoresDocument, options);
+        }
+export function useObjectStoresSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ObjectStoresQuery, ObjectStoresQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ObjectStoresQuery, ObjectStoresQueryVariables>(ObjectStoresDocument, options);
+        }
+export type ObjectStoresQueryHookResult = ReturnType<typeof useObjectStoresQuery>;
+export type ObjectStoresLazyQueryHookResult = ReturnType<typeof useObjectStoresLazyQuery>;
+export type ObjectStoresSuspenseQueryHookResult = ReturnType<typeof useObjectStoresSuspenseQuery>;
+export type ObjectStoresQueryResult = Apollo.QueryResult<ObjectStoresQuery, ObjectStoresQueryVariables>;
+export const ClustersObjectStoresDocument = gql`
+    query ClustersObjectStores($after: String, $first: Int = 100, $before: String, $last: Int, $backups: Boolean) {
+  clusters(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    backups: $backups
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClustersObjectStores
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClustersObjectStoresFragmentDoc}`;
+
+/**
+ * __useClustersObjectStoresQuery__
+ *
+ * To run a query within a React component, call `useClustersObjectStoresQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClustersObjectStoresQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClustersObjectStoresQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *      backups: // value for 'backups'
+ *   },
+ * });
+ */
+export function useClustersObjectStoresQuery(baseOptions?: Apollo.QueryHookOptions<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>(ClustersObjectStoresDocument, options);
+      }
+export function useClustersObjectStoresLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>(ClustersObjectStoresDocument, options);
+        }
+export function useClustersObjectStoresSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>(ClustersObjectStoresDocument, options);
+        }
+export type ClustersObjectStoresQueryHookResult = ReturnType<typeof useClustersObjectStoresQuery>;
+export type ClustersObjectStoresLazyQueryHookResult = ReturnType<typeof useClustersObjectStoresLazyQuery>;
+export type ClustersObjectStoresSuspenseQueryHookResult = ReturnType<typeof useClustersObjectStoresSuspenseQuery>;
+export type ClustersObjectStoresQueryResult = Apollo.QueryResult<ClustersObjectStoresQuery, ClustersObjectStoresQueryVariables>;
+export const ClusterBackupDocument = gql`
+    query ClusterBackup($id: ID, $clusterId: ID, $namespace: String, $name: String) {
+  clusterBackup(
+    id: $id
+    clusterId: $clusterId
+    namespace: $namespace
+    name: $name
+  ) {
+    ...ClusterBackup
+  }
+}
+    ${ClusterBackupFragmentDoc}`;
+
+/**
+ * __useClusterBackupQuery__
+ *
+ * To run a query within a React component, call `useClusterBackupQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterBackupQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterBackupQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      clusterId: // value for 'clusterId'
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useClusterBackupQuery(baseOptions?: Apollo.QueryHookOptions<ClusterBackupQuery, ClusterBackupQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterBackupQuery, ClusterBackupQueryVariables>(ClusterBackupDocument, options);
+      }
+export function useClusterBackupLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterBackupQuery, ClusterBackupQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterBackupQuery, ClusterBackupQueryVariables>(ClusterBackupDocument, options);
+        }
+export function useClusterBackupSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterBackupQuery, ClusterBackupQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterBackupQuery, ClusterBackupQueryVariables>(ClusterBackupDocument, options);
+        }
+export type ClusterBackupQueryHookResult = ReturnType<typeof useClusterBackupQuery>;
+export type ClusterBackupLazyQueryHookResult = ReturnType<typeof useClusterBackupLazyQuery>;
+export type ClusterBackupSuspenseQueryHookResult = ReturnType<typeof useClusterBackupSuspenseQuery>;
+export type ClusterBackupQueryResult = Apollo.QueryResult<ClusterBackupQuery, ClusterBackupQueryVariables>;
+export const ClusterBackupsDocument = gql`
+    query ClusterBackups($after: String, $first: Int = 100, $before: String, $last: Int, $clusterId: ID!) {
+  clusterBackups(
+    last: $last
+    first: $first
+    before: $before
+    after: $after
+    clusterId: $clusterId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterBackup
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClusterBackupFragmentDoc}`;
+
+/**
+ * __useClusterBackupsQuery__
+ *
+ * To run a query within a React component, call `useClusterBackupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterBackupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterBackupsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useClusterBackupsQuery(baseOptions: Apollo.QueryHookOptions<ClusterBackupsQuery, ClusterBackupsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterBackupsQuery, ClusterBackupsQueryVariables>(ClusterBackupsDocument, options);
+      }
+export function useClusterBackupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterBackupsQuery, ClusterBackupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterBackupsQuery, ClusterBackupsQueryVariables>(ClusterBackupsDocument, options);
+        }
+export function useClusterBackupsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterBackupsQuery, ClusterBackupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterBackupsQuery, ClusterBackupsQueryVariables>(ClusterBackupsDocument, options);
+        }
+export type ClusterBackupsQueryHookResult = ReturnType<typeof useClusterBackupsQuery>;
+export type ClusterBackupsLazyQueryHookResult = ReturnType<typeof useClusterBackupsLazyQuery>;
+export type ClusterBackupsSuspenseQueryHookResult = ReturnType<typeof useClusterBackupsSuspenseQuery>;
+export type ClusterBackupsQueryResult = Apollo.QueryResult<ClusterBackupsQuery, ClusterBackupsQueryVariables>;
+export const CreateObjectStoreDocument = gql`
+    mutation CreateObjectStore($attributes: ObjectStoreAttributes!) {
+  createObjectStore(attributes: $attributes) {
+    ...ObjectStore
+  }
+}
+    ${ObjectStoreFragmentDoc}`;
+export type CreateObjectStoreMutationFn = Apollo.MutationFunction<CreateObjectStoreMutation, CreateObjectStoreMutationVariables>;
+
+/**
+ * __useCreateObjectStoreMutation__
+ *
+ * To run a mutation, you first call `useCreateObjectStoreMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateObjectStoreMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createObjectStoreMutation, { data, loading, error }] = useCreateObjectStoreMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateObjectStoreMutation(baseOptions?: Apollo.MutationHookOptions<CreateObjectStoreMutation, CreateObjectStoreMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateObjectStoreMutation, CreateObjectStoreMutationVariables>(CreateObjectStoreDocument, options);
+      }
+export type CreateObjectStoreMutationHookResult = ReturnType<typeof useCreateObjectStoreMutation>;
+export type CreateObjectStoreMutationResult = Apollo.MutationResult<CreateObjectStoreMutation>;
+export type CreateObjectStoreMutationOptions = Apollo.BaseMutationOptions<CreateObjectStoreMutation, CreateObjectStoreMutationVariables>;
+export const UpdateObjectStoreDocument = gql`
+    mutation UpdateObjectStore($id: ID!, $attributes: ObjectStoreAttributes!) {
+  updateObjectStore(id: $id, attributes: $attributes) {
+    ...ObjectStore
+  }
+}
+    ${ObjectStoreFragmentDoc}`;
+export type UpdateObjectStoreMutationFn = Apollo.MutationFunction<UpdateObjectStoreMutation, UpdateObjectStoreMutationVariables>;
+
+/**
+ * __useUpdateObjectStoreMutation__
+ *
+ * To run a mutation, you first call `useUpdateObjectStoreMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateObjectStoreMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateObjectStoreMutation, { data, loading, error }] = useUpdateObjectStoreMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateObjectStoreMutation(baseOptions?: Apollo.MutationHookOptions<UpdateObjectStoreMutation, UpdateObjectStoreMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateObjectStoreMutation, UpdateObjectStoreMutationVariables>(UpdateObjectStoreDocument, options);
+      }
+export type UpdateObjectStoreMutationHookResult = ReturnType<typeof useUpdateObjectStoreMutation>;
+export type UpdateObjectStoreMutationResult = Apollo.MutationResult<UpdateObjectStoreMutation>;
+export type UpdateObjectStoreMutationOptions = Apollo.BaseMutationOptions<UpdateObjectStoreMutation, UpdateObjectStoreMutationVariables>;
+export const DeleteObjectStoreDocument = gql`
+    mutation DeleteObjectStore($id: ID!) {
+  deleteObjectStore(id: $id) {
+    ...ObjectStore
+  }
+}
+    ${ObjectStoreFragmentDoc}`;
+export type DeleteObjectStoreMutationFn = Apollo.MutationFunction<DeleteObjectStoreMutation, DeleteObjectStoreMutationVariables>;
+
+/**
+ * __useDeleteObjectStoreMutation__
+ *
+ * To run a mutation, you first call `useDeleteObjectStoreMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteObjectStoreMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteObjectStoreMutation, { data, loading, error }] = useDeleteObjectStoreMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteObjectStoreMutation(baseOptions?: Apollo.MutationHookOptions<DeleteObjectStoreMutation, DeleteObjectStoreMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteObjectStoreMutation, DeleteObjectStoreMutationVariables>(DeleteObjectStoreDocument, options);
+      }
+export type DeleteObjectStoreMutationHookResult = ReturnType<typeof useDeleteObjectStoreMutation>;
+export type DeleteObjectStoreMutationResult = Apollo.MutationResult<DeleteObjectStoreMutation>;
+export type DeleteObjectStoreMutationOptions = Apollo.BaseMutationOptions<DeleteObjectStoreMutation, DeleteObjectStoreMutationVariables>;
+export const ConfigureBackupsDocument = gql`
+    mutation ConfigureBackups($clusterId: ID!, $storeId: ID!) {
+  configureBackups(clusterId: $clusterId, storeId: $storeId) {
+    ...ClusterTiny
+  }
+}
+    ${ClusterTinyFragmentDoc}`;
+export type ConfigureBackupsMutationFn = Apollo.MutationFunction<ConfigureBackupsMutation, ConfigureBackupsMutationVariables>;
+
+/**
+ * __useConfigureBackupsMutation__
+ *
+ * To run a mutation, you first call `useConfigureBackupsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConfigureBackupsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [configureBackupsMutation, { data, loading, error }] = useConfigureBackupsMutation({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *      storeId: // value for 'storeId'
+ *   },
+ * });
+ */
+export function useConfigureBackupsMutation(baseOptions?: Apollo.MutationHookOptions<ConfigureBackupsMutation, ConfigureBackupsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ConfigureBackupsMutation, ConfigureBackupsMutationVariables>(ConfigureBackupsDocument, options);
+      }
+export type ConfigureBackupsMutationHookResult = ReturnType<typeof useConfigureBackupsMutation>;
+export type ConfigureBackupsMutationResult = Apollo.MutationResult<ConfigureBackupsMutation>;
+export type ConfigureBackupsMutationOptions = Apollo.BaseMutationOptions<ConfigureBackupsMutation, ConfigureBackupsMutationVariables>;
+export const DelinkBackupsDocument = gql`
+    mutation DelinkBackups($clusterId: ID!) {
+  delinkBackups(clusterId: $clusterId) {
+    ...ClusterTiny
+  }
+}
+    ${ClusterTinyFragmentDoc}`;
+export type DelinkBackupsMutationFn = Apollo.MutationFunction<DelinkBackupsMutation, DelinkBackupsMutationVariables>;
+
+/**
+ * __useDelinkBackupsMutation__
+ *
+ * To run a mutation, you first call `useDelinkBackupsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDelinkBackupsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [delinkBackupsMutation, { data, loading, error }] = useDelinkBackupsMutation({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useDelinkBackupsMutation(baseOptions?: Apollo.MutationHookOptions<DelinkBackupsMutation, DelinkBackupsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DelinkBackupsMutation, DelinkBackupsMutationVariables>(DelinkBackupsDocument, options);
+      }
+export type DelinkBackupsMutationHookResult = ReturnType<typeof useDelinkBackupsMutation>;
+export type DelinkBackupsMutationResult = Apollo.MutationResult<DelinkBackupsMutation>;
+export type DelinkBackupsMutationOptions = Apollo.BaseMutationOptions<DelinkBackupsMutation, DelinkBackupsMutationVariables>;
+export const CreateClusterRestoreDocument = gql`
+    mutation CreateClusterRestore($backupId: ID!) {
+  createClusterRestore(backupId: $backupId) {
+    ...ClusterRestore
+  }
+}
+    ${ClusterRestoreFragmentDoc}`;
+export type CreateClusterRestoreMutationFn = Apollo.MutationFunction<CreateClusterRestoreMutation, CreateClusterRestoreMutationVariables>;
+
+/**
+ * __useCreateClusterRestoreMutation__
+ *
+ * To run a mutation, you first call `useCreateClusterRestoreMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateClusterRestoreMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createClusterRestoreMutation, { data, loading, error }] = useCreateClusterRestoreMutation({
+ *   variables: {
+ *      backupId: // value for 'backupId'
+ *   },
+ * });
+ */
+export function useCreateClusterRestoreMutation(baseOptions?: Apollo.MutationHookOptions<CreateClusterRestoreMutation, CreateClusterRestoreMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateClusterRestoreMutation, CreateClusterRestoreMutationVariables>(CreateClusterRestoreDocument, options);
+      }
+export type CreateClusterRestoreMutationHookResult = ReturnType<typeof useCreateClusterRestoreMutation>;
+export type CreateClusterRestoreMutationResult = Apollo.MutationResult<CreateClusterRestoreMutation>;
+export type CreateClusterRestoreMutationOptions = Apollo.BaseMutationOptions<CreateClusterRestoreMutation, CreateClusterRestoreMutationVariables>;
 export const PluralContextDocument = gql`
     query PluralContext {
   pluralContext {
@@ -9245,6 +9817,46 @@ export type ClusterQueryHookResult = ReturnType<typeof useClusterQuery>;
 export type ClusterLazyQueryHookResult = ReturnType<typeof useClusterLazyQuery>;
 export type ClusterSuspenseQueryHookResult = ReturnType<typeof useClusterSuspenseQuery>;
 export type ClusterQueryResult = Apollo.QueryResult<ClusterQuery, ClusterQueryVariables>;
+export const ClusterBasicDocument = gql`
+    query ClusterBasic($id: ID!) {
+  cluster(id: $id) {
+    ...ClusterBasic
+  }
+}
+    ${ClusterBasicFragmentDoc}`;
+
+/**
+ * __useClusterBasicQuery__
+ *
+ * To run a query within a React component, call `useClusterBasicQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterBasicQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterBasicQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useClusterBasicQuery(baseOptions: Apollo.QueryHookOptions<ClusterBasicQuery, ClusterBasicQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterBasicQuery, ClusterBasicQueryVariables>(ClusterBasicDocument, options);
+      }
+export function useClusterBasicLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterBasicQuery, ClusterBasicQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterBasicQuery, ClusterBasicQueryVariables>(ClusterBasicDocument, options);
+        }
+export function useClusterBasicSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterBasicQuery, ClusterBasicQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterBasicQuery, ClusterBasicQueryVariables>(ClusterBasicDocument, options);
+        }
+export type ClusterBasicQueryHookResult = ReturnType<typeof useClusterBasicQuery>;
+export type ClusterBasicLazyQueryHookResult = ReturnType<typeof useClusterBasicLazyQuery>;
+export type ClusterBasicSuspenseQueryHookResult = ReturnType<typeof useClusterBasicSuspenseQuery>;
+export type ClusterBasicQueryResult = Apollo.QueryResult<ClusterBasicQuery, ClusterBasicQueryVariables>;
 export const ClusterPodsDocument = gql`
     query ClusterPods($clusterId: ID, $namespace: String) {
   pods(first: 100, clusterId: $clusterId, namespace: $namespace) {
@@ -12865,12 +13477,17 @@ export const namedOperations = {
     Repository: 'Repository',
     PrAutomations: 'PrAutomations',
     ScmConnections: 'ScmConnections',
+    ObjectStores: 'ObjectStores',
+    ClustersObjectStores: 'ClustersObjectStores',
+    ClusterBackup: 'ClusterBackup',
+    ClusterBackups: 'ClusterBackups',
     PluralContext: 'PluralContext',
     ClusterAddOns: 'ClusterAddOns',
     Clusters: 'Clusters',
     ClustersTiny: 'ClustersTiny',
     ClusterSelector: 'ClusterSelector',
     Cluster: 'Cluster',
+    ClusterBasic: 'ClusterBasic',
     ClusterPods: 'ClusterPods',
     ClusterNamespaces: 'ClusterNamespaces',
     ClusterBindings: 'ClusterBindings',
@@ -12932,6 +13549,12 @@ export const namedOperations = {
     UpdateScmConnection: 'UpdateScmConnection',
     DeleteScmConnection: 'DeleteScmConnection',
     SetupRenovate: 'SetupRenovate',
+    CreateObjectStore: 'CreateObjectStore',
+    UpdateObjectStore: 'UpdateObjectStore',
+    DeleteObjectStore: 'DeleteObjectStore',
+    ConfigureBackups: 'ConfigureBackups',
+    DelinkBackups: 'DelinkBackups',
+    CreateClusterRestore: 'CreateClusterRestore',
     CreateBuild: 'CreateBuild',
     InstallAddOn: 'InstallAddOn',
     UpdateClusterBindings: 'UpdateClusterBindings',
@@ -12980,6 +13603,10 @@ export const namedOperations = {
     Repository: 'Repository',
     PrAutomation: 'PrAutomation',
     ScmConnection: 'ScmConnection',
+    ObjectStore: 'ObjectStore',
+    ClustersObjectStores: 'ClustersObjectStores',
+    ClusterBackup: 'ClusterBackup',
+    ClusterRestore: 'ClusterRestore',
     PageInfo: 'PageInfo',
     AddOnConfigCondition: 'AddOnConfigCondition',
     AddOnConfiguration: 'AddOnConfiguration',

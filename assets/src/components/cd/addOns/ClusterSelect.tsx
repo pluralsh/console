@@ -10,8 +10,14 @@ import { ClusterProviderIcon } from 'components/utils/Provider'
 
 export function ClusterSelect({
   clusters,
+  withoutTitleContent = false,
+  withoutLeftContent = false,
   ...props
-}: { clusters: ClusterTinyFragment[] } & Omit<SelectPropsSingle, 'children'>) {
+}: {
+  clusters: ClusterTinyFragment[]
+  withoutTitleContent?: boolean
+  withoutLeftContent?: boolean
+} & Omit<SelectPropsSingle, 'children'>) {
   const theme = useTheme()
   const { selectedKey } = props
 
@@ -20,16 +26,20 @@ export function ClusterSelect({
   return (
     <Select
       titleContent={
-        <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-          <ClusterIcon />
-          Cluster
-        </div>
+        withoutTitleContent ? undefined : (
+          <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+            <ClusterIcon />
+            Cluster
+          </div>
+        )
       }
       leftContent={
-        <ClusterProviderIcon
-          cluster={currentCluster}
-          size={16}
-        />
+        withoutLeftContent ? undefined : (
+          <ClusterProviderIcon
+            cluster={currentCluster}
+            size={16}
+          />
+        )
       }
       {...props}
     >

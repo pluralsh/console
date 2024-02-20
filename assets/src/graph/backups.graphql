@@ -1,0 +1,170 @@
+fragment ObjectStore on ObjectStore {
+  id
+  name
+  s3 {
+    bucket
+    region
+    endpoint
+    accessKeyId
+  }
+  azure {
+    container
+    storageAccount
+    resourceGroup
+    subscriptionId
+    clientId
+    tenantId
+  }
+  gcs {
+    bucket
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment ClustersObjectStores on Cluster {
+  ...ClusterBasic
+  objectStore {
+    ...ObjectStore
+  }
+}
+
+fragment ClusterBackup on ClusterBackup {
+  id
+  cluster {
+    ...ClusterBasic
+  }
+  garbageCollected
+  insertedAt
+  updatedAt
+}
+
+fragment ClusterRestore on ClusterRestore {
+  id
+  status
+  backup {
+    ...ClusterBackup
+  }
+  insertedAt
+  updatedAt
+}
+
+query ObjectStores(
+  $after: String
+  $first: Int = 100
+  $before: String
+  $last: Int
+) {
+  objectStores(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ObjectStore
+      }
+    }
+  }
+}
+
+query ClustersObjectStores(
+  $after: String
+  $first: Int = 100
+  $before: String
+  $last: Int
+  $backups: Boolean
+) {
+  clusters(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    backups: $backups
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClustersObjectStores
+      }
+    }
+  }
+}
+
+query ClusterBackup(
+  $id: ID
+  $clusterId: ID
+  $namespace: String
+  $name: String
+) {
+  clusterBackup(
+    id: $id
+    clusterId: $clusterId
+    namespace: $namespace
+    name: $name
+  ) {
+    ...ClusterBackup
+  }
+}
+
+query ClusterBackups(
+  $after: String
+  $first: Int = 100
+  $before: String
+  $last: Int
+  $clusterId: ID!
+) {
+  clusterBackups(
+    last: $last
+    first: $first
+    before: $before
+    after: $after
+    clusterId: $clusterId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterBackup
+      }
+    }
+  }
+}
+
+mutation CreateObjectStore($attributes: ObjectStoreAttributes!) {
+  createObjectStore(attributes: $attributes) {
+    ...ObjectStore
+  }
+}
+
+mutation UpdateObjectStore($id: ID!, $attributes: ObjectStoreAttributes!) {
+  updateObjectStore(id: $id, attributes: $attributes) {
+    ...ObjectStore
+  }
+}
+
+mutation DeleteObjectStore($id: ID!) {
+  deleteObjectStore(id: $id) {
+    ...ObjectStore
+  }
+}
+
+mutation ConfigureBackups($clusterId: ID!, $storeId: ID!) {
+  configureBackups(clusterId: $clusterId, storeId: $storeId) {
+    ...ClusterTiny
+  }
+}
+
+mutation DelinkBackups($clusterId: ID!) {
+  delinkBackups(clusterId: $clusterId) {
+    ...ClusterTiny
+  }
+}
+
+mutation CreateClusterRestore($backupId: ID!) {
+  createClusterRestore(backupId: $backupId) {
+    ...ClusterRestore
+  }
+}

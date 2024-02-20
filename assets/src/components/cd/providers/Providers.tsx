@@ -3,15 +3,9 @@ import { EmptyState, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import type { TableState } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
-
-import {
-  type ServiceDeploymentsRowFragment,
-  useClusterProvidersQuery,
-} from 'generated/graphql'
-
+import { useClusterProvidersQuery } from 'generated/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-
 import { mapExistingNodes } from 'utils/graphql'
 
 import {
@@ -25,10 +19,6 @@ import { CreateProvider } from './CreateProvider'
 const POLL_INTERVAL = 10 * 1000
 const PROVIDERS_CRUMBS = [...CD_BASE_CRUMBS, { label: 'providers' }]
 
-export type ServicesCluster = Exclude<
-  ServiceDeploymentsRowFragment['cluster'],
-  undefined | null
->
 const columns = [ColProvider, ColName, ColActions]
 
 export default function Providers() {

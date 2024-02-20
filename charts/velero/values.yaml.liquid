@@ -1,3 +1,7 @@
+# Common configuration:
+# - schedule        - default schedule CRON.
+# - ttl             - time to live for backups created by default schedule.
+#
 # AWS configuration:
 # - provider        - Provider name, "aws".
 # - bucket          - Amazon S3 bucket name.
@@ -14,6 +18,13 @@
 # - clientSecret    - Azure client secret.
 # - resourceGroup   - Azure resource group name.
 # - storageAccount  - Azure storage account name.
+
+{% if configuration.schedule %}
+schedule: {{ configuration.schedule }}
+{% endif %}
+{% if configuration.ttl %}
+ttl: {{ configuration.ttl }}
+{% endif %}
 
 velero:
   configuration:

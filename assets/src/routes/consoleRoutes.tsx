@@ -32,6 +32,7 @@ import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
 import { cdRoutes } from './cdRoutes'
 import { prRoutes } from './prRoutes'
+import { backupsRoutes } from './backupRoutes'
 
 const buildsRoutes = [
   <Route
@@ -205,6 +206,9 @@ export const consoleComponentRoutes = [
 
   /* BUILDS */
   ...buildsRoutes,
+
+  /* BACKUPS */
+  ...backupsRoutes,
 
   /* AUDITS */
   ...auditsRoutes,

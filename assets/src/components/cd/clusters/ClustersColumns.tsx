@@ -53,7 +53,7 @@ import { DynamicClusterIcon } from './DynamicClusterIcon'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
-const ColClusterContentSC = styled.div(({ theme }) => ({
+export const ColClusterContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.xsmall,
