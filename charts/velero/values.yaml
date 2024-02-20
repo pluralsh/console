@@ -1,9 +1,6 @@
 nameOverride: ""
 fullnameOverride: ""
 
-schedule: 0 7 * * *
-ttl: 72h0m0s
-
 velero:
   initContainers:
     - name: velero-plugin-for-aws
@@ -28,6 +25,12 @@ velero:
     backupStorageLocation: {}
     volumeSnapshotLocation: {}
   snapshotsEnabled: false
+  schedules:
+    default:
+      disabled: false
+      schedule: 0 7 * * *
+      template:
+        ttl: 72h0m0s
   deployNodeAgent: false
   credentials:
     secretContents:
