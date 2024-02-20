@@ -12,7 +12,6 @@ import { ComponentProps, useCallback, useMemo, useState } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { Link, useNavigate } from 'react-router-dom'
-
 import { VirtualItem } from '@tanstack/react-virtual'
 
 import {
@@ -34,13 +33,9 @@ import {
 import { ColWithIcon } from '../../utils/table/ColWithIcon'
 import { DynamicClusterIcon } from '../../cd/clusters/DynamicClusterIcon'
 import { ColClusterContentSC } from '../../cd/clusters/ClustersColumns'
-
 import { useSlicePolling } from '../../utils/tableFetchHelpers'
-
 import { Edge, extendConnection } from '../../../utils/graphql'
-
 import { StackedText } from '../../utils/table/StackedText'
-
 import { BasicLink } from '../../utils/typography/BasicLink'
 
 import ConfigureClusterBackups from './ConfigureClusterBackups'

@@ -10,7 +10,6 @@ import { ComponentProps, useCallback, useMemo, useState } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { useParams } from 'react-router-dom'
-
 import { VirtualItem } from '@tanstack/react-virtual'
 
 import {
@@ -20,20 +19,15 @@ import {
   useClusterBasicQuery,
 } from '../../../generated/graphql'
 import { GqlError } from '../../utils/Alert'
-import LoadingIndicator from '../../utils/LoadingIndicator'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
-
 import { Edge, extendConnection } from '../../../utils/graphql'
 import { BACKUPS_BACKUPS_BASE_CRUMBS } from '../backups/Backups'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
-
 import { DynamicClusterIcon } from '../../cd/clusters/DynamicClusterIcon'
 import { ColClusterContentSC } from '../../cd/clusters/ClustersColumns'
-
 import { BasicLink } from '../../utils/typography/BasicLink'
 import { StackedText } from '../../utils/table/StackedText'
-
 import { useSlicePolling } from '../../utils/tableFetchHelpers'
 
 import { RestoreClusterBackup } from './RestoreClusterBackup'
