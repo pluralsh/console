@@ -137,7 +137,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
     svc = fetch_service(args)
     Services.kick(svc.id, user)
   end
-  def kick_service(%{id: id}, %{context: %{current_user: user}}),
+  def kick_service(%{service_id: id}, %{context: %{current_user: user}}),
     do: Services.kick(id, user)
 
   def update_service_components(%{id: id} = args, %{context: %{cluster: cluster}}),
