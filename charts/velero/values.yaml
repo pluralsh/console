@@ -7,13 +7,13 @@ ttl: 72h0m0s
 velero:
   initContainers:
     - name: velero-plugin-for-aws
-      image: velero/velero-plugin-for-aws:v1.8.0
+      image: velero/velero-plugin-for-aws:v1.9.0
       imagePullPolicy: IfNotPresent
       volumeMounts:
         - mountPath: /target
           name: plugins
     - name: velero-plugin-for-microsoft-azure
-      image: velero/velero-plugin-for-microsoft-azure:v1.8.2
+      image: velero/velero-plugin-for-microsoft-azure:v1.9.0
       imagePullPolicy: IfNotPresent
       volumeMounts:
         - mountPath: /target
