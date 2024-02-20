@@ -8,6 +8,7 @@
 # - region          - AWS region.
 # - accessKeyId     - AWS access key ID.
 # - secretAccessKey - AWS secret access key.
+# For more information, see: https://github.com/vmware-tanzu/velero-plugin-for-aws#setup
 #
 # Azure configuration:
 # - provider        - Provider name, "azure".
@@ -18,11 +19,13 @@
 # - clientSecret    - Azure client secret.
 # - resourceGroup   - Azure resource group name.
 # - storageAccount  - Azure storage account name.
+# For more information, see: https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure#setup
 #
 # GCS configuration:
 # - provider                - Provider name, "gcp".
 # - bucket                  - GCS bucket name.
 # - applicationCredentials  - Google service account key.
+# For more information, see: https://github.com/vmware-tanzu/velero-plugin-for-gcp#setup
 
 {% if configuration.schedule %}
 schedule: {{ configuration.schedule }}
