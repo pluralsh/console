@@ -20,6 +20,7 @@ import {
   columnHelper,
 } from '../../../cluster/containers/ContainersList'
 import { Readiness } from '../../../../utils/status'
+import { getServicePodDetailsPath } from '../../../../routes/cdRoutesConsts'
 
 function ViewLogsButton() {
   return (
@@ -43,13 +44,23 @@ export const ColActions = columnHelper.display({
       original: { name, readiness },
     },
   }: any) => {
-    const { clusterId, namespace, podName } = table.options.meta as any
+    const { serviceId, clusterId, namespace, podName } = table.options
+      .meta as any
 
     return (
       readiness &&
       readiness === Readiness.Ready && (
         <ShellLink
-          to={`/cd/clusters/${clusterId}/pods/${namespace}/${podName}/shell?container=${name}`}
+          to={
+            serviceId
+              ? `${getServicePodDetailsPath({
+                  clusterId,
+                  serviceId,
+                  name: podName,
+                  namespace,
+                })}/shell?container=${name}`
+              : `/cd/clusters/${clusterId}/pods/${namespace}/${podName}/shell?container=${name}`
+          }
           textValue={`Launch ${name} shell`}
         />
       )
@@ -70,7 +81,7 @@ const columns = [
 
 // It's used by multiple routes.
 export default function PodInfo() {
-  const { clusterId } = useParams()
+  const { clusterId, serviceId } = useParams()
   const { pod } = useOutletContext() as { pod: Pod }
   const containers = pod.spec.containers || []
   const initContainers = pod.spec.initContainers || []
@@ -97,6 +108,7 @@ export default function PodInfo() {
             initContainers={initContainers}
             initContainerStatuses={initContainerStatuses}
             clusterId={clusterId}
+            serviceId={serviceId}
             namespace={pod.metadata.namespace || ''}
             podName={pod.metadata.name}
             columns={columns}

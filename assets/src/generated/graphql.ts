@@ -6362,6 +6362,8 @@ export type ServiceDeploymentComponentFragment = { __typename?: 'ServiceComponen
 
 export type ServiceDeploymentRevisionsFragment = { __typename?: 'ServiceDeployment', revision?: { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null } | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null } | null, revisions?: { __typename?: 'RevisionConnection', edges?: Array<{ __typename?: 'RevisionEdge', node?: { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null } | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null } | null } | null> | null } | null };
 
+export type ServiceDeploymentTinyFragment = { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null };
+
 export type ServiceDeploymentsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6377,7 +6379,7 @@ export type ServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDep
 export type ServiceDeploymentsTinyQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ServiceDeploymentsTinyQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null };
+export type ServiceDeploymentsTinyQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null } | null> | null } | null };
 
 export type ServiceDeploymentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6385,6 +6387,13 @@ export type ServiceDeploymentQueryVariables = Exact<{
 
 
 export type ServiceDeploymentQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
+
+export type ServiceDeploymentTinyQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentTinyQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null };
 
 export type ServiceDeploymentComponentsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8050,6 +8059,17 @@ export const ServiceDeploymentRevisionsFragmentDoc = gql`
   }
 }
     ${ServiceDeploymentRevisionFragmentDoc}`;
+export const ServiceDeploymentTinyFragmentDoc = gql`
+    fragment ServiceDeploymentTiny on ServiceDeployment {
+  id
+  name
+  cluster {
+    id
+    name
+    handle
+  }
+}
+    `;
 export const ServiceDeploymentBindingsFragmentDoc = gql`
     fragment ServiceDeploymentBindings on ServiceDeployment {
   readBindings {
@@ -11375,17 +11395,13 @@ export const ServiceDeploymentsTinyDocument = gql`
     }
     edges {
       node {
-        id
-        name
-        cluster {
-          id
-          name
-        }
+        ...ServiceDeploymentTiny
       }
     }
   }
 }
-    ${PageInfoFragmentDoc}`;
+    ${PageInfoFragmentDoc}
+${ServiceDeploymentTinyFragmentDoc}`;
 
 /**
  * __useServiceDeploymentsTinyQuery__
@@ -11458,6 +11474,46 @@ export type ServiceDeploymentQueryHookResult = ReturnType<typeof useServiceDeplo
 export type ServiceDeploymentLazyQueryHookResult = ReturnType<typeof useServiceDeploymentLazyQuery>;
 export type ServiceDeploymentSuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentSuspenseQuery>;
 export type ServiceDeploymentQueryResult = Apollo.QueryResult<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>;
+export const ServiceDeploymentTinyDocument = gql`
+    query ServiceDeploymentTiny($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentTiny
+  }
+}
+    ${ServiceDeploymentTinyFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentTinyQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentTinyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentTinyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentTinyQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentTinyQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentTinyQuery, ServiceDeploymentTinyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentTinyQuery, ServiceDeploymentTinyQueryVariables>(ServiceDeploymentTinyDocument, options);
+      }
+export function useServiceDeploymentTinyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentTinyQuery, ServiceDeploymentTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentTinyQuery, ServiceDeploymentTinyQueryVariables>(ServiceDeploymentTinyDocument, options);
+        }
+export function useServiceDeploymentTinySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceDeploymentTinyQuery, ServiceDeploymentTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceDeploymentTinyQuery, ServiceDeploymentTinyQueryVariables>(ServiceDeploymentTinyDocument, options);
+        }
+export type ServiceDeploymentTinyQueryHookResult = ReturnType<typeof useServiceDeploymentTinyQuery>;
+export type ServiceDeploymentTinyLazyQueryHookResult = ReturnType<typeof useServiceDeploymentTinyLazyQuery>;
+export type ServiceDeploymentTinySuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentTinySuspenseQuery>;
+export type ServiceDeploymentTinyQueryResult = Apollo.QueryResult<ServiceDeploymentTinyQuery, ServiceDeploymentTinyQueryVariables>;
 export const ServiceDeploymentComponentsDocument = gql`
     query ServiceDeploymentComponents($id: ID!) {
   serviceDeployment(id: $id) {
@@ -13519,6 +13575,7 @@ export const namedOperations = {
     ServiceDeployments: 'ServiceDeployments',
     ServiceDeploymentsTiny: 'ServiceDeploymentsTiny',
     ServiceDeployment: 'ServiceDeployment',
+    ServiceDeploymentTiny: 'ServiceDeploymentTiny',
     ServiceDeploymentComponents: 'ServiceDeploymentComponents',
     ServiceDeploymentSecrets: 'ServiceDeploymentSecrets',
     ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
@@ -13664,6 +13721,7 @@ export const namedOperations = {
     ServiceDeploymentDetails: 'ServiceDeploymentDetails',
     ServiceDeploymentComponent: 'ServiceDeploymentComponent',
     ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
+    ServiceDeploymentTiny: 'ServiceDeploymentTiny',
     ServiceDeploymentBindings: 'ServiceDeploymentBindings',
     ServiceStatusCount: 'ServiceStatusCount',
     ComponentTree: 'ComponentTree',

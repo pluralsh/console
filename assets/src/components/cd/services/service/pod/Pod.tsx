@@ -28,7 +28,10 @@ import {
   getNodeDetailsPath,
   getServicePodDetailsPath,
 } from '../../../../../routes/cdRoutesConsts'
-import { usePodQuery } from '../../../../../generated/graphql'
+import {
+  usePodQuery,
+  useServiceDeploymentTinyQuery,
+} from '../../../../../generated/graphql'
 import { LinkTabWrap } from '../../../../utils/Tabs'
 import { podStatusToReadiness } from '../../../../../utils/status'
 import { StatusChip } from '../../../../cluster/TableElements'
@@ -54,12 +57,23 @@ export default function Pod() {
   const tab = useMatch(`${SERVICE_POD_ABS_PATH}/:tab`)?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
 
+  const { data: serviceData } = useServiceDeploymentTinyQuery({
+    variables: { id: serviceId ?? '' },
+  })
+
   useSetBreadcrumbs(
     useMemo(
       () => [
         ...getServiceDetailsBreadcrumbs({
-          cluster: { id: clusterId || '' }, // TODO: Use name if possible.
-          service: { id: serviceId || '' }, // TODO: Use name if possible.
+          cluster: {
+            id: clusterId || '',
+            name: serviceData?.serviceDeployment?.cluster?.name,
+            handle: serviceData?.serviceDeployment?.cluster?.handle,
+          },
+          service: {
+            id: serviceId || '',
+            name: serviceData?.serviceDeployment?.name,
+          },
         }),
         { label: 'pods' },
         ...(serviceId && name && namespace
@@ -77,7 +91,7 @@ export default function Pod() {
             ]
           : []),
       ],
-      [clusterId, serviceId, name, namespace, tab]
+      [serviceData, clusterId, serviceId, name, namespace, tab]
     )
   )
 

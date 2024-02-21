@@ -125,6 +125,16 @@ fragment ServiceDeploymentRevisions on ServiceDeployment {
   }
 }
 
+fragment ServiceDeploymentTiny on ServiceDeployment {
+  id
+  name
+  cluster {
+    id
+    name
+    handle
+  }
+}
+
 query ServiceDeployments(
   $first: Int = 100
   $after: String
@@ -162,12 +172,7 @@ query ServiceDeploymentsTiny {
     }
     edges {
       node {
-        id
-        name
-        cluster {
-          id
-          name
-        }
+        ...ServiceDeploymentTiny
       }
     }
   }
@@ -178,6 +183,13 @@ query ServiceDeployment($id: ID!) {
     ...ServiceDeploymentDetails
   }
 }
+
+query ServiceDeploymentTiny($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentTiny
+  }
+}
+
 
 query ServiceDeploymentComponents($id: ID!) {
   serviceDeployment(id: $id) {

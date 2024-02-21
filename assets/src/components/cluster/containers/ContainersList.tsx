@@ -219,6 +219,7 @@ type ContainersListProps = {
   namespace: string
   podName: string
   clusterId?: string
+  serviceId?: string
   refetch?: any
   columns?: any[]
   rowLink?: boolean
@@ -266,6 +267,7 @@ export function ContainersList({
   namespace,
   podName,
   clusterId,
+  serviceId,
   rowLink = true,
 }: ContainersListProps) {
   const navigate = useNavigate()
@@ -313,6 +315,7 @@ export function ContainersList({
       reactTableOptions={{
         meta: {
           clusterId,
+          serviceId,
           podName,
           namespace,
         },
