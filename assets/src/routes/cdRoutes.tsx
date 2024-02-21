@@ -1,8 +1,4 @@
-import { createContext, useContext, useMemo } from 'react'
-
-import ContinuousDeployment, {
-  POLL_INTERVAL,
-} from 'components/cd/ContinuousDeployment'
+import ContinuousDeployment from 'components/cd/ContinuousDeployment'
 import Clusters from 'components/cd/clusters/Clusters'
 import Repositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
@@ -36,11 +32,6 @@ import SelfManage from 'components/cd/globalSettings/SelfManage'
 import Pipelines from 'components/cd/pipelines/Pipelines'
 
 import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
-
-import {
-  DeploymentSettingsFragment,
-  useDeploymentSettingsQuery,
-} from 'generated/graphql'
 
 import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
 
@@ -140,33 +131,10 @@ export const componentRoutes = (
   </Route>
 )
 
-const CDContext = createContext<{
-  deploymentSettings?: DeploymentSettingsFragment | undefined | null
-}>({})
-
-export function useDeploymentSettings() {
-  const ctx = useContext(CDContext)
-
-  return ctx?.deploymentSettings
-}
-
 export function CdRoot() {
-  const { data } = useDeploymentSettingsQuery({
-    pollInterval: POLL_INTERVAL,
-  })
-
   useCDEnabled({ redirect: true })
 
-  const providerValue = useMemo(
-    () => ({ deploymentSettings: data?.deploymentSettings }),
-    [data?.deploymentSettings]
-  )
-
-  return (
-    <CDContext.Provider value={providerValue}>
-      <Outlet />
-    </CDContext.Provider>
-  )
+  return <Outlet />
 }
 
 const mainRoutes = (

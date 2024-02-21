@@ -10,6 +10,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { ColumnDef } from '@tanstack/react-table'
 
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
+
 import { SHORT_POLL_INTERVAL } from '../constants'
 import { NODES_Q } from '../queries'
 
@@ -37,6 +39,7 @@ const breadcrumbs = [{ label: 'nodes', url: '/nodes' }]
 
 export default function Nodes() {
   useSetBreadcrumbs(breadcrumbs)
+  const { prometheusConnection } = useDeploymentSettings()
 
   const { data, refetch } = useQuery<{
     nodes: Node[]
@@ -87,12 +90,14 @@ export default function Nodes() {
           direction="column"
           gap="xlarge"
         >
-          <Card padding="xlarge">
-            <ClusterMetrics
-              nodes={data.nodes}
-              usage={usage}
-            />
-          </Card>
+          {!!prometheusConnection && (
+            <Card padding="xlarge">
+              <ClusterMetrics
+                nodes={data.nodes}
+                usage={usage}
+              />
+            </Card>
+          )}
           <NodesList
             nodes={data.nodes}
             nodeMetrics={data.nodeMetrics}

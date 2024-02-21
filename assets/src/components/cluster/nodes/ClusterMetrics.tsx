@@ -1,6 +1,8 @@
 import { Flex } from 'honorable'
 import { ClusterFragment, Node } from 'generated/graphql'
 
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
+
 import { ClusterMetrics as Metrics } from '../constants'
 
 import { ClusterGauges } from './ClusterGauges'
@@ -22,6 +24,10 @@ export function ClusterMetrics({
   usage: ResourceUsage
   cluster?: ClusterFragment
 }) {
+  const { prometheusConnection } = useDeploymentSettings()
+
+  if (!prometheusConnection) return null
+
   return (
     <Flex
       flex={false}

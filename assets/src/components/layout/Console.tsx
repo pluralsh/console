@@ -10,6 +10,8 @@ import { Outlet } from 'react-router-dom'
 import { CommandPalette } from 'components/CommandPalette'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import { DeploymentSettingsProvider } from 'components/contexts/DeploymentSettingsContext'
+
 import { PluralProvider } from '../contexts/PluralContext'
 import { InstallationsProvider } from '../Installations'
 import { EnsureLogin } from '../login/Login'
@@ -39,7 +41,9 @@ export default function Console() {
                   <BillingSubscriptionProvider>
                     <BreadcrumbsProvider>
                       <TerminalThemeProvider>
-                        <ConsoleContent />
+                        <DeploymentSettingsProvider>
+                          <ConsoleContent />
+                        </DeploymentSettingsProvider>
                       </TerminalThemeProvider>
                     </BreadcrumbsProvider>
                   </BillingSubscriptionProvider>
