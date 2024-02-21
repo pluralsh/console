@@ -9,6 +9,8 @@ import { cpuParser } from 'utils/kubernetes'
 
 import RadialBarChart from 'components/utils/RadialBarChart'
 
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
+
 import { ClusterMetrics as Metrics } from '../constants'
 import { NODE_METRICS_Q } from '../queries'
 import { GaugeWrap, ResourceGauge } from '../Gauges'
@@ -30,6 +32,7 @@ export function ClusterGauges({
   usage: ResourceUsage
   cluster?: ClusterFragment
 }) {
+  const { prometheusConnection } = useDeploymentSettings()
   const { data } = useQuery<{
     cpuRequests: MetricResponse[]
     cpuLimits: MetricResponse[]
@@ -37,6 +40,7 @@ export function ClusterGauges({
     memLimits: MetricResponse[]
     pods: MetricResponse[]
   }>(NODE_METRICS_Q, {
+    skip: !prometheusConnection,
     variables: {
       clusterId: cluster?.id,
       cpuRequests: cluster
@@ -105,9 +109,8 @@ export function ClusterGauges({
     }
   }, [data, nodes, usage])
 
-  if (!chartData) {
-    return <LoopingLogo />
-  }
+  if (!prometheusConnection) return null
+  if (!chartData) return <LoopingLogo />
 
   return (
     <>

@@ -6,6 +6,8 @@ import { Graph } from 'components/utils/Graph'
 
 import { Div } from 'honorable'
 
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
+
 import { CLUSTER_SATURATION } from '../queries'
 
 import { datum } from '../utils'
@@ -19,7 +21,10 @@ export function SaturationGraphs({
   mem: string
   clusterId?: string
 }) {
+  const { prometheusConnection } = useDeploymentSettings()
+
   const { data } = useQuery(CLUSTER_SATURATION, {
+    skip: !prometheusConnection,
     variables: {
       cpuUtilization: cpu,
       memUtilization: mem,

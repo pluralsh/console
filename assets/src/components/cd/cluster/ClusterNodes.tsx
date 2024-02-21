@@ -6,7 +6,7 @@ import sumBy from 'lodash/sumBy'
 import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
-import { useDeploymentSettings } from 'routes/cdRoutes'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 import { Cluster, Node } from 'generated/graphql'
 
 import {
@@ -45,7 +45,7 @@ export const ColActions = (clusterId?: string) =>
 
 export default function ClusterNodes() {
   const theme = useTheme()
-  const settings = useDeploymentSettings()
+  const { prometheusConnection } = useDeploymentSettings()
   const { cluster } = useOutletContext() as { cluster: Cluster }
 
   const columns: ColumnDef<TableData, any>[] = useMemo(
@@ -87,18 +87,15 @@ export default function ClusterNodes() {
         gap: theme.spacing.medium,
       }}
     >
-      {!isEmpty(cluster.nodes) &&
-        (cluster?.self || settings?.prometheusConnection) && (
-          <Card padding="xlarge">
-            <ClusterMetrics
-              nodes={
-                cluster?.nodes?.filter((node): node is Node => !!node) || []
-              }
-              usage={usage}
-              cluster={cluster}
-            />
-          </Card>
-        )}
+      {!isEmpty(cluster.nodes) && prometheusConnection && (
+        <Card padding="xlarge">
+          <ClusterMetrics
+            nodes={cluster?.nodes?.filter((node): node is Node => !!node) || []}
+            usage={usage}
+            cluster={cluster}
+          />
+        </Card>
+      )}
       <NodesList
         nodes={cluster?.nodes || []}
         nodeMetrics={cluster?.nodeMetrics || []}
