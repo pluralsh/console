@@ -69,6 +69,9 @@ import PodEvents from '../components/cluster/pods/PodEvents'
 import Logs from '../components/cd/cluster/pod/logs/Logs'
 import PodShell from '../components/cd/cluster/pod/PodShell'
 
+import ServicePod from '../components/cd/services/service/pod/Pod'
+import ServicePodShell from '../components/cd/services/service/pod/PodShell'
+
 import ComponentDryRun from '../components/component/ComponentDryRun'
 
 import {
@@ -92,6 +95,7 @@ import {
   SERVICE_COMPONENTS_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
   SERVICE_PARAM_CLUSTER_ID,
+  SERVICE_POD_REL_PATH,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
@@ -368,6 +372,34 @@ const podDetailsRoutes = (
   </Route>
 )
 
+const servicePodDetailsRoutes = (
+  <Route
+    path={SERVICE_POD_REL_PATH}
+    element={<ServicePod />}
+  >
+    <Route
+      index
+      element={<PodInfo />}
+    />
+    <Route
+      path="events"
+      element={<PodEvents />}
+    />
+    <Route
+      path="raw"
+      element={<PodRaw />}
+    />
+    <Route
+      path="logs"
+      element={<Logs />}
+    />
+    <Route
+      path="shell"
+      element={<ServicePodShell />}
+    />
+  </Route>
+)
+
 const serviceDetailsRoutes = (
   <Route
     path={SERVICE_REL_PATH}
@@ -441,6 +473,7 @@ export const cdRoutes = [
     {clusterDetailsRoutes}
     {nodeDetailsRoutes}
     {podDetailsRoutes}
+    {servicePodDetailsRoutes}
     {serviceDetailsRoutes}
     {componentRoutes}
     {pipelineRoutes}

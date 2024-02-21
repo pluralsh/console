@@ -68,6 +68,7 @@ const columns = [
   ColActions,
 ]
 
+// It's used by multiple routes.
 export default function PodInfo() {
   const { clusterId } = useParams()
   const { pod } = useOutletContext() as { pod: Pod }
