@@ -70,7 +70,6 @@ import Logs from '../components/cd/cluster/pod/logs/Logs'
 import PodShell from '../components/cd/cluster/pod/PodShell'
 
 import ServicePod from '../components/cd/services/service/pod/Pod'
-import ServicePodShell from '../components/cd/services/service/pod/PodShell'
 
 import ComponentDryRun from '../components/component/ComponentDryRun'
 
@@ -395,7 +394,7 @@ const servicePodDetailsRoutes = (
     />
     <Route
       path="shell"
-      element={<ServicePodShell />}
+      element={<PodShell />}
     />
   </Route>
 )

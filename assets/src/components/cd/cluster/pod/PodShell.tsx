@@ -13,10 +13,12 @@ import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
 
 import { ShellContext, TerminalActions } from '../../../terminal/Terminal'
 import { ShellWithContext } from '../../../cluster/containers/ContainerShell'
+import { getServicePodDetailsPath } from '../../../../routes/cdRoutesConsts'
 
+// It's used by multiple routes.
 export default function PodShell() {
   const { pod } = useOutletContext() as { pod: Pod }
-  const { clusterId, namespace, name } = useParams()
+  const { clusterId, serviceId, namespace, name } = useParams()
   const [searchParams] = useSearchParams()
   const container = searchParams.get('container')
   const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
@@ -39,10 +41,21 @@ export default function PodShell() {
   )
 
   useEffect(() => {
-    navigate(
-      `/cd/clusters/${clusterId}/pods/${namespace}/${name}/shell?container=${selected}`
-    )
-  }, [selected, clusterId, namespace, name, container, navigate])
+    if (serviceId) {
+      navigate(
+        `${getServicePodDetailsPath({
+          clusterId,
+          serviceId,
+          name,
+          namespace,
+        })}/shell?container=${selected}`
+      )
+    } else {
+      navigate(
+        `/cd/clusters/${clusterId}/pods/${namespace}/${name}/shell?container=${selected}`
+      )
+    }
+  }, [selected, serviceId, clusterId, namespace, name, container, navigate])
 
   return (
     <ScrollablePage

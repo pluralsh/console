@@ -62,7 +62,7 @@ export function ShellWithContext({
   const { command, setCommand, defaultCommand, isDefault } = useCommand(null)
 
   const shellContext = useContext(ShellContext)
-  const cluster = clusterId ? `${clusterId}:` : ''
+  const cluster = clusterId ?? ''
   const room = `pod:${cluster}${namespace}:${name}:${container}`
 
   return (
