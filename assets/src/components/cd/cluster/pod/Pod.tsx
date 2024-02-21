@@ -28,7 +28,7 @@ import {
   getNodeDetailsPath,
   getPodDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
-import { usePodQuery } from '../../../../generated/graphql'
+import { useClusterQuery, usePodQuery } from '../../../../generated/graphql'
 import { LinkTabWrap } from '../../../utils/Tabs'
 import { podStatusToReadiness } from '../../../../utils/status'
 import { StatusChip } from '../../../cluster/TableElements'
@@ -53,11 +53,15 @@ export default function Pod() {
   const tab = useMatch(`${POD_ABS_PATH}/:tab`)?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
 
+  const { data: clusterData } = useClusterQuery({
+    variables: { id: clusterId },
+  })
+
   useSetBreadcrumbs(
     useMemo(
       () => [
         ...getClusterBreadcrumbs({
-          cluster: { id: clusterId },
+          cluster: clusterData?.cluster || { id: clusterId },
           tab: 'pods',
         }),
         ...(clusterId && name && namespace
@@ -77,7 +81,7 @@ export default function Pod() {
             ]
           : []),
       ],
-      [clusterId, name, namespace, tab]
+      [clusterData?.cluster, clusterId, name, namespace, tab]
     )
   )
 
