@@ -399,6 +399,9 @@ export type BackupAttributes = {
   garbageCollected?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  namespaces?: InputMaybe<ResourceSelectorAttributes>;
+  resources?: InputMaybe<ResourceSelectorAttributes>;
+  ttl?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type BindingAttributes = {
@@ -699,6 +702,9 @@ export type ClusterBackup = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
+  namespaces?: Maybe<ResourceSelector>;
+  resources?: Maybe<ResourceSelector>;
+  ttl?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -3135,6 +3141,17 @@ export type ResourceEdge = {
   __typename?: 'ResourceEdge';
   from: Scalars['String']['output'];
   to: Scalars['String']['output'];
+};
+
+export type ResourceSelector = {
+  __typename?: 'ResourceSelector';
+  excluded?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  included?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+export type ResourceSelectorAttributes = {
+  excluded?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  included?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 export type ResourceSpec = {

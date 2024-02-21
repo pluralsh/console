@@ -749,6 +749,14 @@ input BackupAttributes {
   name: String!
   namespace: String!
   garbageCollected: Boolean
+  ttl: String
+  namespaces: ResourceSelectorAttributes
+  resources: ResourceSelectorAttributes
+}
+
+input ResourceSelectorAttributes {
+  included: [String]
+  excluded: [String]
 }
 
 input RestoreAttributes {
@@ -793,10 +801,18 @@ type ClusterBackup {
   id: ID!
   name: String!
   namespace: String!
+  ttl: String
   garbageCollected: Boolean
+  namespaces: ResourceSelector
+  resources: ResourceSelector
   cluster: Cluster
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+type ResourceSelector {
+  included: [String]
+  excluded: [String]
 }
 
 type ClusterRestore {

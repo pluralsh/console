@@ -21,6 +21,9 @@ defmodule Kube.Utils do
   end
   def raw_meta(_), do: nil
 
+  def ns(%{"metadata" => meta}), do: meta["namespace"]
+  def ns(%{metadata: %MetaV1.ObjectMeta{namespace: ns}}), do: ns
+
   def identifier(%{"apiVersion" => gv, "kind" => k, "metadata" => %{"name" => n} = meta}) do
     {g, v} = group_version(gv)
     {g, v, k, Map.get(meta, "namespace"), n}
@@ -29,6 +32,33 @@ defmodule Kube.Utils do
     {g, v} = group_version(gv)
     {g, v, k, Map.get(meta, :namespace), n}
   end
+
+  def for_identifier({g, v, k, ns, n}) do
+    Kube.Client.Base.path(g, v, k, ns, n)
+    |> Kube.Client.raw()
+  end
+
+  def parent(%{"metadata" => %{"ownerReferences" => [_ | _] = owners}}, ns) do
+    with %{} = ref <- Enum.find(owners, & &1["controller"]),
+         {g, v} <- group_version(ref["apiVersion"]),
+         {:ok, res} <- for_identifier({g, v, ref["kind"], ns, ref["name"]}) do
+      res
+    else
+      _ -> nil
+    end
+  end
+
+  def parent(%{metadata: %MetaV1.ObjectMeta{owner_references: [_ | _] = owners}}, ns) do
+    with %MetaV1.OwnerReference{api_version: vsn, kind: k, name: n} <- Enum.find(owners, & &1.controller),
+         {g, v} <- group_version(vsn),
+         {:ok, res} <- for_identifier({g, v, k, ns, n}) do
+      res
+    else
+      _ -> nil
+    end
+  end
+
+  def parent(_, _), do: nil
 
   def group_version(api_version) do
     case String.split(api_version, "/") do

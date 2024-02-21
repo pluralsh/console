@@ -3,10 +3,9 @@ defmodule Console.Middleware.CdAuthenticated do
   alias Console.Deployments.{Services, Clusters}
   alias Console.Schema.{User, Service}
 
-  def call(%{arguments: %{service_id: svc_id} = args, context: %{current_user: %User{} = user}} = res, _config) when is_binary(svc_id) do
+  def call(%{arguments: %{service_id: svc_id}, context: %{current_user: %User{} = user}} = res, _config) when is_binary(svc_id) do
     with {:ok, svc} <- Services.authorized(svc_id, user),
          %Service{cluster: cluster} = svc <- Console.Repo.preload(svc, [cluster: :provider]),
-         true <- check_namespace(args, svc),
          %Kazan.Server{} = server <- Clusters.control_plane(cluster) do
        Kube.Utils.save_kubeconfig(server)
        put_in(res.context[:service], svc)
@@ -30,8 +29,4 @@ defmodule Console.Middleware.CdAuthenticated do
   def call(res, _opts) do
     Console.Middleware.Rbac.call(res, perm: :operate, arg: :namespace)
   end
-
-  defp check_namespace(%{namespace: ns}, %Service{namespace: ns}), do: true
-  defp check_namespace(%{namespace: _}, _), do: false
-  defp check_namespace(_, _), do: true
 end
