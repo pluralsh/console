@@ -13,7 +13,6 @@ import { useTheme } from 'styled-components'
 
 import {
   SERVICE_PARAM_CLUSTER_ID,
-  getPodDetailsPath,
   getServicePodDetailsPath,
 } from '../../../routes/cdRoutesConsts'
 

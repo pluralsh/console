@@ -190,7 +190,6 @@ query ServiceDeploymentTiny($id: ID!) {
   }
 }
 
-
 query ServiceDeploymentComponents($id: ID!) {
   serviceDeployment(id: $id) {
     id
