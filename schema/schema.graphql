@@ -2839,7 +2839,7 @@ type PrConfigurationCondition {
 type PullRequest {
   id: ID!
 
-  status: PrStatus!
+  status: PrStatus
 
   url: String!
 
