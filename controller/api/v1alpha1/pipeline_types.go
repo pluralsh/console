@@ -55,7 +55,12 @@ type PipelineStageService struct {
 // PipelineStageServicePromotionCriteria represents actions to perform if this stage service were promoted.
 type PipelineStageServicePromotionCriteria struct {
 	// ServiceRef pointing to source service to promote from.
+	// +kubebuilder:validation:Optional
 	ServiceRef *v1.ObjectReference `json:"serviceRef,omitempty"`
+
+	// PrAutomationRef pointing to source PR automation to promote from.
+	// +kubebuilder:validation:Optional
+	PrAutomationRef *v1.ObjectReference `json:"prAutomationRef,omitempty"`
 
 	// Secrets to copy over in a promotion.
 	// +kubebuilder:validation:Optional
