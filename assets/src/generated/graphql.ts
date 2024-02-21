@@ -6729,6 +6729,7 @@ export type PodQueryVariables = Exact<{
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -12902,8 +12903,13 @@ export type NodeMetricLazyQueryHookResult = ReturnType<typeof useNodeMetricLazyQ
 export type NodeMetricSuspenseQueryHookResult = ReturnType<typeof useNodeMetricSuspenseQuery>;
 export type NodeMetricQueryResult = Apollo.QueryResult<NodeMetricQuery, NodeMetricQueryVariables>;
 export const PodDocument = gql`
-    query Pod($name: String!, $namespace: String!, $clusterId: ID) {
-  pod(name: $name, namespace: $namespace, clusterId: $clusterId) {
+    query Pod($name: String!, $namespace: String!, $clusterId: ID, $serviceId: ID) {
+  pod(
+    name: $name
+    namespace: $namespace
+    clusterId: $clusterId
+    serviceId: $serviceId
+  ) {
     ...PodWithEvents
   }
 }
@@ -12924,6 +12930,7 @@ export const PodDocument = gql`
  *      name: // value for 'name'
  *      namespace: // value for 'namespace'
  *      clusterId: // value for 'clusterId'
+ *      serviceId: // value for 'serviceId'
  *   },
  * });
  */
