@@ -4,7 +4,7 @@ import { Pod } from 'generated/graphql'
 
 import EventsTable from '../../utils/EventsTable'
 
-// It's used by two different routes.
+// It's used by multiple routes.
 export default function PodEvents() {
   const { pod } = useOutletContext() as { pod: Pod }
 

@@ -5,7 +5,7 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { RawPageCode } from '../RawPageCode'
 
-// It's used by two different routes.
+// It's used by multiple routes.
 export default function PodRaw() {
   const { pod } = useOutletContext() as { pod: Pod }
   const content = stringify(JSON.parse(pod.raw))

@@ -5,8 +5,13 @@ fragment PodWithEvents on Pod {
   }
 }
 
-query Pod($name: String!, $namespace: String!, $clusterId: ID) {
-  pod(name: $name, namespace: $namespace, clusterId: $clusterId) {
+query Pod($name: String!, $namespace: String!, $clusterId: ID, $serviceId: ID) {
+  pod(
+    name: $name
+    namespace: $namespace
+    clusterId: $clusterId
+    serviceId: $serviceId
+  ) {
     ...PodWithEvents
   }
 }
