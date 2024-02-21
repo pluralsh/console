@@ -2,7 +2,7 @@ defmodule Console.GraphQl.Kubernetes do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Kubernetes
   alias Console.GraphQl.Resolvers.VPN
-  alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature}
+  alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature, CheckComponent, CheckNamespace}
 
   object :metadata do
     field :labels,             list_of(:label_pair), resolve: fn %{labels: labels}, _, _ -> {:ok, make_labels(labels)} end
@@ -114,6 +114,7 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_service/2
+      middleware CheckComponent
     end
 
     field :cluster_info, :cluster_info do
@@ -128,6 +129,7 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_deployment/2
+      middleware CheckComponent
     end
 
     field :stateful_set, :stateful_set do
@@ -137,6 +139,7 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_stateful_set/2
+      middleware CheckComponent
     end
 
     field :daemon_set, :daemon_set do
@@ -146,6 +149,7 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_daemon_set/2
+      middleware CheckComponent
     end
 
     field :ingress, :ingress do
@@ -155,6 +159,7 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_ingress/2
+      middleware CheckComponent
     end
 
     field :nodes, list_of(:node) do
@@ -179,6 +184,7 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_cron_job/2
+      middleware CheckComponent
     end
 
     field :job, :job do
@@ -188,6 +194,7 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_job/2
+      middleware CheckComponent
     end
 
     field :certificate, :certificate do
@@ -197,6 +204,7 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_certificate/2
+      middleware CheckComponent
     end
 
     field :pod, :pod do
@@ -204,6 +212,7 @@ defmodule Console.GraphQl.Kubernetes do
       arg :namespace, non_null(:string)
       arg :name, non_null(:string)
       hybrid_authorized :read
+      middleware CheckNamespace
 
       safe_resolve &Kubernetes.resolve_pod/2
     end
@@ -282,6 +291,7 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_canary/2
+      middleware CheckComponent
     end
 
 
@@ -292,6 +302,7 @@ defmodule Console.GraphQl.Kubernetes do
       service_authorized :read
 
       safe_resolve &Kubernetes.resolve_upgrade_plan/2
+      middleware CheckComponent
     end
 
     field :configuration_overlays, list_of(:configuration_overlay) do
