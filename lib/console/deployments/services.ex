@@ -46,7 +46,7 @@ defmodule Console.Deployments.Services do
   before sending it upstream to the given client.
   """
   @spec tarstream(Service.t) :: {:ok, File.t} | Console.error
-  def tarstream(%Service{repository_id: id, helm: %Service.Helm{values_files: [_ | _] = files} = helm} = svc) when is_binary(id) do
+  def tarstream(%Service{repository_id: id, helm: %Service.Helm{chart: c, values_files: [_ | _] = files} = helm} = svc) when is_binary(id) and is_binary(c) do
     with {:ok, f} <- Git.Discovery.fetch(svc),
          {:ok, contents} <- Tar.tar_stream(f),
          contents = Map.new(contents),
