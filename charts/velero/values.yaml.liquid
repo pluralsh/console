@@ -35,10 +35,10 @@ velero:
       {% if configuration.schedule %}
       schedule: {{ configuration.schedule }}
       {% endif %}
+      {% if configuration.ttl %}
       template:
-        {% if configuration.ttl %}
         ttl: {{ configuration.ttl }}
-        {% endif %}
+      {% endif %}
   {% endif %}
   configuration:
     backupStorageLocation:
