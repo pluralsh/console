@@ -26,8 +26,6 @@ export function DeploymentSettingsProvider({
     errorPolicy: 'all',
   })
 
-  useCDEnabled({ redirect: false })
-
   const providerValue = useMemo(
     () => data?.deploymentSettings,
     [data?.deploymentSettings]
