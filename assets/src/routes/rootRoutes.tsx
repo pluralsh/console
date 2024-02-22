@@ -12,7 +12,6 @@ import { OAuthCallback } from 'components/login/OauthCallback'
 import { consoleRoutes } from './consoleRoutes'
 
 function Root() {
-
   return (
     <Suspense fallback={<LoadingIndicator />}>
       <Outlet />
