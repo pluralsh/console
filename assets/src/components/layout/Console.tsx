@@ -60,8 +60,6 @@ export default function Console() {
 function ConsoleContent() {
   const isProduction = import.meta.env.MODE === 'production'
 
-  // usePosthogIdentify()
-
   return (
     <Flex
       position="relative"

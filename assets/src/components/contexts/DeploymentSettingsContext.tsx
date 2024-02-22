@@ -1,6 +1,5 @@
 import { createContext, useContext, useMemo } from 'react'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import {
   DeploymentSettingsFragment,
   useDeploymentSettingsQuery,
@@ -25,8 +24,6 @@ export function DeploymentSettingsProvider({
     pollInterval: POLL_INTERVAL,
     errorPolicy: 'all',
   })
-
-  useCDEnabled({ redirect: false })
 
   const providerValue = useMemo(
     () => data?.deploymentSettings,
