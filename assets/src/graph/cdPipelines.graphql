@@ -143,6 +143,16 @@ fragment PipelineStatus on PipelineStatus {
   pending
 }
 
+fragment PipelineContextRow on PipelineContext {
+  id
+  context
+  insertedAt
+  updatedAt
+  pullRequests {
+    ...PullRequest
+  }
+}
+
 fragment Pipeline on Pipeline {
   id
   name
@@ -224,6 +234,25 @@ query JobGateLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
 query Pipeline($id: ID!) {
   pipeline(id: $id) {
     ...Pipeline
+  }
+}
+
+query PipelineContexts(
+  $id: ID!
+  $before: String
+  $after: String
+  $first: Int!
+  $last: Int
+) {
+  pipeline(id: $id) {
+    id
+    contexts(after: $after, before: $before, first: $first, last: $last) {
+      edges {
+        node {
+          ...PipelineContextRow
+        }
+      }
+    }
   }
 }
 
