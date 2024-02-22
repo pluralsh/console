@@ -31,17 +31,6 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Create the name for the credentials secret.
-*/}}
-{{- define "velero.secretName" -}}
-{{- if .Values.credentials.existingSecret -}}
-  {{- .Values.credentials.existingSecret -}}
-{{- else -}}
-  {{ default (include "velero.fullname" .) .Values.credentials.name }}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Common labels
 */}}
 {{- define "velero.labels" -}}
@@ -51,6 +40,3 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
-
-
-
