@@ -27,7 +27,7 @@ import (
 type PipelineContextSpec struct {
 	// PipelineRef pointing to source Pipeline.
 	// +kubebuilder:validation:Optional
-	PipelineRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
+	PipelineRef *corev1.ObjectReference `json:"pipelineRef,omitempty"`
 
 	// Context is a Pipeline context
 	Context runtime.RawExtension `json:"context,omitempty"`

@@ -9,4 +9,11 @@ metadata:
     app.kubernetes.io/created-by: controller
   name: pipelinecontext-sample
 spec:
-  # TODO(user): Add fields here
+  pipelineRef:
+    name: test
+    namespace: default
+  context:
+    test:
+      a:b
+      c:d
+

@@ -43,7 +43,7 @@ spec:
                 description: Context is a Pipeline context
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
-              serviceRef:
+              pipelineRef:
                 description: PipelineRef pointing to source Pipeline.
                 properties:
                   apiVersion:
