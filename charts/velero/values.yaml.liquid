@@ -26,8 +26,9 @@
 # - applicationCredentials  - Google service account key.
 {% endcomment %}
 
+{% assign secret = "credentials" %}
 {% if configuration.provider == "gcp" -%}
-secret: gcp-credentials
+secret: {{ secret }}
 cloudBase64: {{ configuration.applicationCredentialsEncoded }}
 {% endif %}
 
@@ -73,21 +74,22 @@ velero:
           region: {{ configuration.region }}
         {% endif %}
   credentials:
-    {% if configuration.provider == "gcp" -%}
-    existingSecret: gcp-credentials
-    {% endif %}
+    {% if configuration.provider == "aws" -%}
     secretContents:
-      {% if configuration.provider == "aws" -%}
       cloud: |
         [default]
         aws_access_key_id={{ configuration.accessKeyId }}
         aws_secret_access_key={{ configuration.secretAccessKey }}
-      {%- endif -%}
-      {% if configuration.provider == "azure" -%}
+    {%- endif -%}
+    {% if configuration.provider == "azure" -%}
+    secretContents:
       cloud: |
         AZURE_SUBSCRIPTION_ID={{ configuration.subscriptionId }}
         AZURE_TENANT_ID={{ configuration.tenantId }}
         AZURE_CLIENT_ID={{ configuration.clientId }}
         AZURE_CLIENT_SECRET={{ configuration.clientSecret }}
         AZURE_RESOURCE_GROUP={{ configuration.resourceGroup }}
-      {%- endif -%}
+    {%- endif -%}
+    {% if configuration.provider == "gcp" -%}
+    existingSecret: {{ secret }}
+    {% endif %}
