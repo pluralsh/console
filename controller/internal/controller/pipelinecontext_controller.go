@@ -75,14 +75,14 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	pipline := &v1alpha1.Pipeline{}
 	if err := r.Get(ctx, client.ObjectKey{Name: pipelineContext.Spec.PipelineRef.Name, Namespace: pipelineContext.Spec.PipelineRef.Namespace}, pipline); err != nil {
 		utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return
+		return ctrl.Result{}, err
 	}
 
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, pipelineContext)
 	if err != nil {
 		utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return
+		return ctrl.Result{}, err
 	}
 	if !exists {
 		pc, err := r.ConsoleClient.CreatePipelineContext(ctx, pipline.Status.GetID(), console.PipelineContextAttributes{
@@ -90,7 +90,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		})
 		if err != nil {
 			utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return
+			return ctrl.Result{}, err
 		}
 		pipelineContext.Status.ID = &pc.CreatePipelineContext.ID
 	}
