@@ -69,7 +69,7 @@ velero:
         {% if configuration.provider == "aws" -%}
         config:
           region: {{ configuration.region }}
-        {% endif -%}
+        {% endif %}
   credentials:
     secretContents:
       {% if configuration.provider == "aws" -%}
