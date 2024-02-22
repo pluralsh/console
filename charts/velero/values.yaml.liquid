@@ -38,7 +38,7 @@ velero:
       template:
         ttl: {{ configuration.ttl }}
       {% endif -%}
-  {% endif -%}
+  {% endif %}
   configuration:
     backupStorageLocation:
       - name: default
@@ -57,7 +57,7 @@ velero:
           resourceGroup: {{ configuration.resourceGroup }}
           storageAccount: {{ configuration.storageAccount }}
           {% endif -%}
-        {% endif -%}
+        {% endif %}
     volumeSnapshotLocation:
       - name: default
         provider: {{ configuration.provider }}
