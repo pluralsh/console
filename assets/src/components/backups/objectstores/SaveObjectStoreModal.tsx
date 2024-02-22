@@ -155,9 +155,7 @@ export default function SaveObjectStoreModal({
       disabled =
         disabled ||
         !(
-          cloudSettings.gcs?.applicationCredentials &&
-          cloudSettings.gcs?.region &&
-          cloudSettings.gcs?.bucket
+          cloudSettings.gcs?.applicationCredentials && cloudSettings.gcs?.bucket
         )
       break
     case ObjectStoreCloud.Azure:

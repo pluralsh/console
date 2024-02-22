@@ -1,8 +1,9 @@
+{% comment %}
 # Common configuration:
-# - schedule        - default schedule CRON.
-# - ttl             - time to live for backups created by default schedule.
+# - schedule  - default schedule CRON.
+# - ttl       - time to live for backups created by default schedule.
 #
-# AWS configuration:
+# S3 configuration:
 # - provider        - Provider name, "aws".
 # - bucket          - Amazon S3 bucket name.
 # - region          - AWS region.
@@ -18,15 +19,31 @@
 # - clientSecret    - Azure client secret.
 # - resourceGroup   - Azure resource group name.
 # - storageAccount  - Azure storage account name.
+#
+# GCS configuration:
+# - provider                - Provider name, "gcp".
+# - bucket                  - GCS bucket name.
+# - applicationCredentials  - Google service account key.
+{% endcomment %}
 
-{% if configuration.schedule %}
-schedule: {{ configuration.schedule }}
-{% endif %}
-{% if configuration.ttl %}
-ttl: {{ configuration.ttl }}
+{% assign secret = "credentials" %}
+{% if configuration.provider == "gcp" -%}
+secret: {{ secret }}
+cloudBase64: {{ configuration.applicationCredentials | b64enc }}
 {% endif %}
 
 velero:
+  {% if configuration.schedule or configuration.ttl %}
+  schedules:
+    default:
+      {% if configuration.schedule %}
+      schedule: {{ configuration.schedule }}
+      {% endif -%}
+      {% if configuration.ttl %}
+      template:
+        ttl: {{ configuration.ttl }}
+      {% endif %}
+  {% endif %}
   configuration:
     backupStorageLocation:
       - name: default
@@ -36,6 +53,7 @@ velero:
         {% else -%}
         bucket: {{ configuration.bucket }}
         {% endif -%}
+        {% if configuration.provider == "aws" or configuration.provider == "azure" -%}
         config:
           {% if configuration.provider == "aws" -%}
           region: {{ configuration.region }}
@@ -44,6 +62,7 @@ velero:
           resourceGroup: {{ configuration.resourceGroup }}
           storageAccount: {{ configuration.storageAccount }}
           {% endif -%}
+        {% endif %}
     volumeSnapshotLocation:
       - name: default
         provider: {{ configuration.provider }}
@@ -53,19 +72,24 @@ velero:
         {% if configuration.provider == "aws" -%}
         config:
           region: {{ configuration.region }}
-        {% endif -%}
+        {% endif %}
   credentials:
+    {% if configuration.provider == "aws" -%}
     secretContents:
       cloud: |
-        {% if configuration.provider == "aws" -%}
         [default]
         aws_access_key_id={{ configuration.accessKeyId }}
         aws_secret_access_key={{ configuration.secretAccessKey }}
-        {%- endif -%}
-        {% if configuration.provider == "azure" -%}
+    {%- endif -%}
+    {% if configuration.provider == "azure" -%}
+    secretContents:
+      cloud: |
         AZURE_SUBSCRIPTION_ID={{ configuration.subscriptionId }}
         AZURE_TENANT_ID={{ configuration.tenantId }}
         AZURE_CLIENT_ID={{ configuration.clientId }}
         AZURE_CLIENT_SECRET={{ configuration.clientSecret }}
         AZURE_RESOURCE_GROUP={{ configuration.resourceGroup }}
-        {%- endif -%}
+    {%- endif -%}
+    {% if configuration.provider == "gcp" -%}
+    existingSecret: {{ secret }}
+    {% endif %}

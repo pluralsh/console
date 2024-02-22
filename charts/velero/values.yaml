@@ -1,19 +1,25 @@
 nameOverride: ""
 fullnameOverride: ""
 
-schedule: 0 7 * * *
-ttl: 72h0m0s
+secret: ""
+cloudBase64: ""
 
 velero:
   initContainers:
     - name: velero-plugin-for-aws
-      image: velero/velero-plugin-for-aws:v1.8.0
+      image: velero/velero-plugin-for-aws:v1.9.0
       imagePullPolicy: IfNotPresent
       volumeMounts:
         - mountPath: /target
           name: plugins
     - name: velero-plugin-for-microsoft-azure
-      image: velero/velero-plugin-for-microsoft-azure:v1.8.2
+      image: velero/velero-plugin-for-microsoft-azure:v1.9.0
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /target
+          name: plugins
+    - name: velero-plugin-for-gcp
+      image: velero/velero-plugin-for-gcp:v1.9.0
       imagePullPolicy: IfNotPresent
       volumeMounts:
         - mountPath: /target
@@ -22,6 +28,12 @@ velero:
     backupStorageLocation: {}
     volumeSnapshotLocation: {}
   snapshotsEnabled: false
+  schedules:
+    default:
+      disabled: false
+      schedule: 0 7 * * *
+      template:
+        ttl: 72h0m0s
   deployNodeAgent: false
   credentials:
     secretContents:
