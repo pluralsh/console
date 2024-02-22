@@ -33,7 +33,7 @@ defmodule Console.Schema.ObjectStore do
   end
 
   def configuration(%__MODULE__{s3: %__MODULE__.S3{} = s3}), do: with_provider(s3, "aws")
-  def configuration(%__MODULE__{gcs: %__MODULE__.GCS{} = gcs}), do: with_provider(gcs, "gcs")
+  def configuration(%__MODULE__{gcs: %__MODULE__.GCS{} = gcs}), do: with_provider(gcs, "gcp")
   def configuration(%__MODULE__{azure: %__MODULE__.Azure{} = azure}), do: with_provider(azure, "azure")
 
   defp with_provider(struct, provider) do
@@ -67,7 +67,7 @@ defmodule Console.Schema.ObjectStore do
   def gcs_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(bucket region application_credentials)a)
-    |> validate_required(~w(bucket region application_credentials)a)
+    |> validate_required(~w(bucket application_credentials)a)
   end
 
   def azure_changeset(model, attrs) do

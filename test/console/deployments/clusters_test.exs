@@ -59,6 +59,7 @@ defmodule Console.Deployments.ClustersTest do
       assert svc.repository_id == git.id
       assert svc.git.ref == Console.Deployments.Settings.agent_ref()
       assert svc.git.folder == "charts/deployment-operator"
+      assert svc.templated
 
       {:ok, %{"deployToken" => token, "url" => url} = secrets} = Services.configuration(svc)
       assert token == cluster.deploy_token

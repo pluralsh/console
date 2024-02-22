@@ -79,7 +79,7 @@ defmodule Console.Schema.Service do
     field :version,          :string
     field :promotion,        Promotion
     field :proceed,          :boolean, default: false
-    field :templated,        :boolean, default: false
+    field :templated,        :boolean, default: true
     field :sha,              :string
     field :namespace,        :string
     field :docs_path,        :string
