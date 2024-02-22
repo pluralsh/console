@@ -27,16 +27,16 @@
 {% endcomment %}
 
 velero:
-  {% if configuration.schedule or configuration.ttl -%}
+  {% if configuration.schedule or configuration.ttl %}
   schedules:
     default:
-      {% if configuration.schedule -%}
+      {% if configuration.schedule %}
       schedule: {{ configuration.schedule }}
       {% endif -%}
-      {% if configuration.ttl -%}
+      {% if configuration.ttl %}
       template:
         ttl: {{ configuration.ttl }}
-      {% endif -%}
+      {% endif %}
   {% endif %}
   configuration:
     backupStorageLocation:
