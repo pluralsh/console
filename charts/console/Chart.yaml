@@ -2,13 +2,13 @@ apiVersion: v2
 name: console
 description: >-
   deploys the plural console and additional dependencies, for use in bring-your-own-kube setups
-appVersion: 0.8.10
-version: 0.1.33
+appVersion: 0.8.11
+version: 0.1.34
 dependencies:
   - name: kas
     version: 0.0.5
     repository: file://../../plural/helm/kas
   - name: controller
-    version: 0.0.16
+    version: 0.0.17
     repository: file://../controller
 type: application
