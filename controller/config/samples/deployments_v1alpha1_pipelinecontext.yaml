@@ -1,0 +1,19 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: PipelineContext
+metadata:
+  labels:
+    app.kubernetes.io/name: pipelinecontext
+    app.kubernetes.io/instance: pipelinecontext-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: pipelinecontext-sample
+spec:
+  pipelineRef:
+    name: test
+    namespace: default
+  context:
+    test:
+      a:b
+      c:d
+

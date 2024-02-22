@@ -1,6 +1,8 @@
 package client
 
 import (
+	"context"
+
 	console "github.com/pluralsh/console-client-go"
 	internalerror "github.com/pluralsh/console/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -57,4 +59,23 @@ func (c *client) IsPipelineExisting(id string) bool {
 	}
 
 	return err == nil
+}
+
+func (c *client) GetPipelineContext(ctx context.Context, id string) (*console.PipelineContextFragment, error) {
+	response, err := c.consoleClient.GetPipelineContext(ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err == nil && (response == nil || response.PipelineContext == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.PipelineContext, err
+}
+
+func (c *client) CreatePipelineContext(ctx context.Context, pipelineID string, attributes console.PipelineContextAttributes) (*console.CreatePipelineContext, error) {
+	return c.consoleClient.CreatePipelineContext(ctx, pipelineID, attributes)
 }

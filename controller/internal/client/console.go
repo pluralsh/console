@@ -81,6 +81,8 @@ type ConsoleClient interface {
 	IsPrAutomationExists(ctx context.Context, id string) bool
 	IsPrAutomationExistsByName(ctx context.Context, name string) bool
 	GetServiceContext(name string) (*console.ServiceContextFragment, error)
+	GetPipelineContext(ctx context.Context, id string) (*console.PipelineContextFragment, error)
+	CreatePipelineContext(ctx context.Context, pipelineID string, attributes console.PipelineContextAttributes) (*console.CreatePipelineContext, error)
 }
 
 func New(url, token string) ConsoleClient {
