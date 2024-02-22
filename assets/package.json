@@ -77,7 +77,6 @@
     "moment": "2.29.4",
     "phoenix": "1.7.3",
     "pluralsh-absinthe-socket-apollo-link": "0.2.0",
-    "posthog-js": "1.66.1",
     "query-string": "8.1.0",
     "randomcolor": "0.6.2",
     "react": "18.2.0",

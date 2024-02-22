@@ -237,7 +237,6 @@ export default function Sidebar() {
   const handleLogout = useCallback(() => {
     setIsMenuOpen(false)
     wipeToken()
-    posthog.reset()
     const w: Window = window
 
     w.location = '/login'
