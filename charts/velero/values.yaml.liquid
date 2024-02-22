@@ -1,31 +1,33 @@
-# Common configuration:
-# - schedule  - default schedule CRON.
-# - ttl       - time to live for backups created by default schedule.
-#
-# S3 configuration:
-# - provider        - Provider name, "aws".
-# - bucket          - Amazon S3 bucket name.
-# - region          - AWS region.
-# - accessKeyId     - AWS access key ID.
-# - secretAccessKey - AWS secret access key.
-# For more information, see: https://github.com/vmware-tanzu/velero-plugin-for-aws#setup
-#
-# Azure configuration:
-# - provider        - Provider name, "azure".
-# - container       - Azure blob container name.
-# - subscriptionId  - Azure subscription ID.
-# - tenantId        - Azure tenant ID.
-# - clientId        - Azure client ID.
-# - clientSecret    - Azure client secret.
-# - resourceGroup   - Azure resource group name.
-# - storageAccount  - Azure storage account name.
-# For more information, see: https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure#setup
-#
-# GCS configuration:
-# - provider                - Provider name, "gcp".
-# - bucket                  - GCS bucket name.
-# - applicationCredentials  - Google service account key.
-# For more information, see: https://github.com/vmware-tanzu/velero-plugin-for-gcp#setup
+{%
+  # Common configuration:
+  # - schedule  - default schedule CRON.
+  # - ttl       - time to live for backups created by default schedule.
+  #
+  # S3 configuration:
+  # - provider        - Provider name, "aws".
+  # - bucket          - Amazon S3 bucket name.
+  # - region          - AWS region.
+  # - accessKeyId     - AWS access key ID.
+  # - secretAccessKey - AWS secret access key.
+  # For more information, see: https://github.com/vmware-tanzu/velero-plugin-for-aws#setup
+  #
+  # Azure configuration:
+  # - provider        - Provider name, "azure".
+  # - container       - Azure blob container name.
+  # - subscriptionId  - Azure subscription ID.
+  # - tenantId        - Azure tenant ID.
+  # - clientId        - Azure client ID.
+  # - clientSecret    - Azure client secret.
+  # - resourceGroup   - Azure resource group name.
+  # - storageAccount  - Azure storage account name.
+  # For more information, see: https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure#setup
+  #
+  # GCS configuration:
+  # - provider                - Provider name, "gcp".
+  # - bucket                  - GCS bucket name.
+  # - applicationCredentials  - Google service account key.
+  # For more information, see: https://github.com/vmware-tanzu/velero-plugin-for-gcp#setup
+%}
 
 velero:
   {% if configuration.schedule or configuration.ttl -%}
