@@ -84,6 +84,5 @@ velero:
         AZURE_RESOURCE_GROUP={{ configuration.resourceGroup }}
       {%- endif -%}
       {% if configuration.provider == "gcp" -%}
-      cloud: |
-      {{ configuration.applicationCredentialsEncoded |  b64dec }}
+      cloud: {{ configuration.applicationCredentialsEncoded | b64dec | quote }}
       {%- endif %}
