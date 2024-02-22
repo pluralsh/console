@@ -26,6 +26,11 @@
 # - applicationCredentials  - Google service account key.
 {% endcomment %}
 
+{% if configuration.provider == "gcp" -%}
+secret: gcp-credentials
+cloudBase64: {{ configuration.applicationCredentialsEncoded }}
+{% endif %}
+
 velero:
   {% if configuration.schedule or configuration.ttl %}
   schedules:
@@ -68,6 +73,9 @@ velero:
           region: {{ configuration.region }}
         {% endif %}
   credentials:
+    {% if configuration.provider == "gcp" -%}
+    existingSecret: gcp-credentials
+    {% endif %}
     secretContents:
       {% if configuration.provider == "aws" -%}
       cloud: |
@@ -83,6 +91,3 @@ velero:
         AZURE_CLIENT_SECRET={{ configuration.clientSecret }}
         AZURE_RESOURCE_GROUP={{ configuration.resourceGroup }}
       {%- endif -%}
-      {% if configuration.provider == "gcp" -%}
-      cloud: {{ configuration.applicationCredentialsEncoded | b64dec | quote }}
-      {%- endif %}

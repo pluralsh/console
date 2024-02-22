@@ -1,6 +1,9 @@
 nameOverride: ""
 fullnameOverride: ""
 
+secret: ""
+cloudBase64: ""
+
 velero:
   initContainers:
     - name: velero-plugin-for-aws
