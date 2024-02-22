@@ -749,6 +749,14 @@ input BackupAttributes {
   name: String!
   namespace: String!
   garbageCollected: Boolean
+  ttl: String
+  namespaces: ResourceSelectorAttributes
+  resources: ResourceSelectorAttributes
+}
+
+input ResourceSelectorAttributes {
+  included: [String]
+  excluded: [String]
 }
 
 input RestoreAttributes {
@@ -793,10 +801,18 @@ type ClusterBackup {
   id: ID!
   name: String!
   namespace: String!
+  ttl: String
   garbageCollected: Boolean
+  namespaces: ResourceSelector
+  resources: ResourceSelector
   cluster: Cluster
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+type ResourceSelector {
+  included: [String]
+  excluded: [String]
 }
 
 type ClusterRestore {
@@ -986,6 +1002,9 @@ input PromotionCriteriaAttributes {
 
   "the id of the service to promote from"
   sourceId: ID
+
+  "the id of a pr automation to update this service"
+  prAutomationId: ID
 
   "the secrets to copy over in a promotion"
   secrets: [String]
@@ -2820,7 +2839,7 @@ type PrConfigurationCondition {
 type PullRequest {
   id: ID!
 
-  status: PrStatus!
+  status: PrStatus
 
   url: String!
 

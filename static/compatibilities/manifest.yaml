@@ -6,3 +6,4 @@ names:
 - kube-prometheus-stack
 - istio
 - linkerd
+- cilium

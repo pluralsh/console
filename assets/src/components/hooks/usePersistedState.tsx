@@ -20,7 +20,7 @@ function usePersistedState<T>(
 
       if (item) return parser(JSON.parse(item))
     } catch (error) {
-      console.log('Error on localStorage.getItem of', key)
+      console.error('Error on localStorage.getItem of', key)
     }
 
     return defaultValue

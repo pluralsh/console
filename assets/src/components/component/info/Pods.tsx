@@ -13,7 +13,7 @@ import { useTheme } from 'styled-components'
 
 import {
   SERVICE_PARAM_CLUSTER_ID,
-  getPodDetailsPath,
+  getServicePodDetailsPath,
 } from '../../../routes/cdRoutesConsts'
 
 import { InfoSectionH2 } from './common'
@@ -54,9 +54,12 @@ export default function Pods({ pods }) {
         columns={columns}
         serviceId={rest?.serviceId}
         refetch={refetch}
-        {...(clusterId
+        {...(clusterId && rest?.serviceId
           ? {
-              linkBasePath: getPodDetailsPath({ clusterId }),
+              linkBasePath: getServicePodDetailsPath({
+                serviceId: rest?.serviceId,
+                clusterId,
+              }),
             }
           : {})}
       />

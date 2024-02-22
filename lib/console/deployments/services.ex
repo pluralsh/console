@@ -191,17 +191,15 @@ defmodule Console.Deployments.Services do
     |> notify(:update, user)
   end
 
-  def accessible(%Service{} = svc, k8s_resource) do
-    %{components: components} = Repo.preload(svc, [:components])
-    {g, v, k, ns, n} = Kube.Utils.identifier(k8s_resource)
-
-    Enum.any?(components, fn
-      %ServiceComponent{group: ^g, version: ^v, kind: ^k, namespace: ^ns, name: ^n} -> true
-      _ -> false
-    end)
+  @doc "Determine if a kubernetes resource matches a component w/in the given service"
+  @spec accessible(Service.t, map) :: {:ok, map} | Console.error
+  def accessible(%Service{} = svc, k8s_resource) when is_map(k8s_resource) do
+    ServiceComponent.for_service(svc.id)
+    |> ServiceComponent.for_identifier(Kube.Utils.identifier(k8s_resource))
+    |> Repo.exists?()
     |> case do
       true -> {:ok, k8s_resource}
-      _ -> {:error, "forbidden"}
+      false -> accessible(svc, Kube.Utils.parent(k8s_resource, Kube.Utils.ns(k8s_resource)))
     end
   end
   def accessible(_, _), do: {:error, "forbidden"}
@@ -284,7 +282,7 @@ defmodule Console.Deployments.Services do
     with {:ok, svc} <- allow(service, user, :write),
          svc <- Repo.preload(svc, [:repository]),
          _ <- Git.Discovery.kick(svc.repository),
-      do: notify(svc, :update, user)
+      do: notify({:ok, svc}, :update, user)
   end
 
   def kick(service_id, user) when is_binary(service_id) do

@@ -1,8 +1,4 @@
-import { createContext, useContext, useMemo } from 'react'
-
-import ContinuousDeployment, {
-  POLL_INTERVAL,
-} from 'components/cd/ContinuousDeployment'
+import ContinuousDeployment from 'components/cd/ContinuousDeployment'
 import Clusters from 'components/cd/clusters/Clusters'
 import Repositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
@@ -37,11 +33,6 @@ import Pipelines from 'components/cd/pipelines/Pipelines'
 
 import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
 
-import {
-  DeploymentSettingsFragment,
-  useDeploymentSettingsQuery,
-} from 'generated/graphql'
-
 import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
 
 import Cluster from '../components/cd/cluster/Cluster'
@@ -69,6 +60,8 @@ import PodEvents from '../components/cluster/pods/PodEvents'
 import Logs from '../components/cd/cluster/pod/logs/Logs'
 import PodShell from '../components/cd/cluster/pod/PodShell'
 
+import ServicePod from '../components/cd/services/service/pod/Pod'
+
 import ComponentDryRun from '../components/component/ComponentDryRun'
 
 import {
@@ -92,6 +85,7 @@ import {
   SERVICE_COMPONENTS_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
   SERVICE_PARAM_CLUSTER_ID,
+  SERVICE_POD_REL_PATH,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
@@ -137,33 +131,10 @@ export const componentRoutes = (
   </Route>
 )
 
-const CDContext = createContext<{
-  deploymentSettings?: DeploymentSettingsFragment | undefined | null
-}>({})
-
-export function useDeploymentSettings() {
-  const ctx = useContext(CDContext)
-
-  return ctx?.deploymentSettings
-}
-
 export function CdRoot() {
-  const { data } = useDeploymentSettingsQuery({
-    pollInterval: POLL_INTERVAL,
-  })
-
   useCDEnabled({ redirect: true })
 
-  const providerValue = useMemo(
-    () => ({ deploymentSettings: data?.deploymentSettings }),
-    [data?.deploymentSettings]
-  )
-
-  return (
-    <CDContext.Provider value={providerValue}>
-      <Outlet />
-    </CDContext.Provider>
-  )
+  return <Outlet />
 }
 
 const mainRoutes = (
@@ -368,6 +339,34 @@ const podDetailsRoutes = (
   </Route>
 )
 
+const servicePodDetailsRoutes = (
+  <Route
+    path={SERVICE_POD_REL_PATH}
+    element={<ServicePod />}
+  >
+    <Route
+      index
+      element={<PodInfo />}
+    />
+    <Route
+      path="events"
+      element={<PodEvents />}
+    />
+    <Route
+      path="raw"
+      element={<PodRaw />}
+    />
+    <Route
+      path="logs"
+      element={<Logs />}
+    />
+    <Route
+      path="shell"
+      element={<PodShell />}
+    />
+  </Route>
+)
+
 const serviceDetailsRoutes = (
   <Route
     path={SERVICE_REL_PATH}
@@ -441,6 +440,7 @@ export const cdRoutes = [
     {clusterDetailsRoutes}
     {nodeDetailsRoutes}
     {podDetailsRoutes}
+    {servicePodDetailsRoutes}
     {serviceDetailsRoutes}
     {componentRoutes}
     {pipelineRoutes}
