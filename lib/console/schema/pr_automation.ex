@@ -93,7 +93,7 @@ defmodule Console.Schema.PrAutomation do
     model
     |> cast(attrs, [])
     |> cast_embed(:git)
-    |> cast_embed(:creates, with: &template_changeset/2)
+    |> cast_embed(:templates, with: &template_changeset/2)
   end
 
   defp template_changeset(model, attrs) do
