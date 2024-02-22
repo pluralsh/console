@@ -199,6 +199,66 @@ func (_c *ConsoleClientMock_CreateGlobalService_Call) RunAndReturn(run func(stri
 	return _c
 }
 
+// CreatePipelineContext provides a mock function with given fields: ctx, pipelineID, attributes
+func (_m *ConsoleClientMock) CreatePipelineContext(ctx context.Context, pipelineID string, attributes gqlclient.PipelineContextAttributes) (*gqlclient.CreatePipelineContext, error) {
+	ret := _m.Called(ctx, pipelineID, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreatePipelineContext")
+	}
+
+	var r0 *gqlclient.CreatePipelineContext
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.PipelineContextAttributes) (*gqlclient.CreatePipelineContext, error)); ok {
+		return rf(ctx, pipelineID, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.PipelineContextAttributes) *gqlclient.CreatePipelineContext); ok {
+		r0 = rf(ctx, pipelineID, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.CreatePipelineContext)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.PipelineContextAttributes) error); ok {
+		r1 = rf(ctx, pipelineID, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreatePipelineContext_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreatePipelineContext'
+type ConsoleClientMock_CreatePipelineContext_Call struct {
+	*mock.Call
+}
+
+// CreatePipelineContext is a helper method to define mock.On call
+//   - ctx context.Context
+//   - pipelineID string
+//   - attributes gqlclient.PipelineContextAttributes
+func (_e *ConsoleClientMock_Expecter) CreatePipelineContext(ctx interface{}, pipelineID interface{}, attributes interface{}) *ConsoleClientMock_CreatePipelineContext_Call {
+	return &ConsoleClientMock_CreatePipelineContext_Call{Call: _e.mock.On("CreatePipelineContext", ctx, pipelineID, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreatePipelineContext_Call) Run(run func(ctx context.Context, pipelineID string, attributes gqlclient.PipelineContextAttributes)) *ConsoleClientMock_CreatePipelineContext_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.PipelineContextAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreatePipelineContext_Call) Return(_a0 *gqlclient.CreatePipelineContext, _a1 error) *ConsoleClientMock_CreatePipelineContext_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreatePipelineContext_Call) RunAndReturn(run func(context.Context, string, gqlclient.PipelineContextAttributes) (*gqlclient.CreatePipelineContext, error)) *ConsoleClientMock_CreatePipelineContext_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreatePrAutomation provides a mock function with given fields: ctx, attributes
 func (_m *ConsoleClientMock) CreatePrAutomation(ctx context.Context, attributes gqlclient.PrAutomationAttributes) (*gqlclient.PrAutomationFragment, error) {
 	ret := _m.Called(ctx, attributes)
@@ -1296,6 +1356,65 @@ func (_c *ConsoleClientMock_GetPipeline_Call) Return(_a0 *gqlclient.PipelineFrag
 }
 
 func (_c *ConsoleClientMock_GetPipeline_Call) RunAndReturn(run func(string) (*gqlclient.PipelineFragment, error)) *ConsoleClientMock_GetPipeline_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetPipelineContext provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetPipelineContext(ctx context.Context, id string) (*gqlclient.PipelineContextFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPipelineContext")
+	}
+
+	var r0 *gqlclient.PipelineContextFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.PipelineContextFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.PipelineContextFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.PipelineContextFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetPipelineContext_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPipelineContext'
+type ConsoleClientMock_GetPipelineContext_Call struct {
+	*mock.Call
+}
+
+// GetPipelineContext is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetPipelineContext(ctx interface{}, id interface{}) *ConsoleClientMock_GetPipelineContext_Call {
+	return &ConsoleClientMock_GetPipelineContext_Call{Call: _e.mock.On("GetPipelineContext", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetPipelineContext_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetPipelineContext_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPipelineContext_Call) Return(_a0 *gqlclient.PipelineContextFragment, _a1 error) *ConsoleClientMock_GetPipelineContext_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPipelineContext_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.PipelineContextFragment, error)) *ConsoleClientMock_GetPipelineContext_Call {
 	_c.Call.Return(run)
 	return _c
 }
