@@ -202,7 +202,8 @@ defmodule Console.Deployments.GitTest do
         name: "cluster-upgrade",
         title: "pr title",
         message: "pr message",
-        connection_id: conn.id
+        connection_id: conn.id,
+        creates: %{templates: [%{source: "somewhere", destination: "elsewhere"}]}
       }, admin)
 
       assert pr.name == "cluster-upgrade"
