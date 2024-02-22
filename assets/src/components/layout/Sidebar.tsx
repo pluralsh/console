@@ -203,7 +203,7 @@ export default function Sidebar() {
       isActiveMenuItem(menuItem, pathname),
     [pathname]
   )
-  const isCDEnabled = useCDEnabled()
+  const isCDEnabled = useCDEnabled({ redirect: false })
 
   const menuItems = useMemo(
     () =>

@@ -25,7 +25,7 @@ export function DeploymentSettingsProvider({
     pollInterval: POLL_INTERVAL,
   })
 
-  useCDEnabled({ redirect: true })
+  useCDEnabled({ redirect: false })
 
   const providerValue = useMemo(
     () => data?.deploymentSettings,
