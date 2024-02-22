@@ -23,6 +23,7 @@ export function DeploymentSettingsProvider({
 }) {
   const { data } = useDeploymentSettingsQuery({
     pollInterval: POLL_INTERVAL,
+    errorPolicy: 'all',
   })
 
   useCDEnabled({ redirect: false })
