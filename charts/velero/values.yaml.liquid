@@ -29,7 +29,7 @@
 {% assign secret = "credentials" %}
 {% if configuration.provider == "gcp" -%}
 secret: {{ secret }}
-cloudBase64: {{ configuration.applicationCredentialsEncoded }}
+cloudBase64: {{ configuration.applicationCredentials | b64enc }}
 {% endif %}
 
 velero:
