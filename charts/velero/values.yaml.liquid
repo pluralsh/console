@@ -85,5 +85,5 @@ velero:
       {%- endif -%}
       {% if configuration.provider == "gcp" -%}
       cloud: |
-        {{ configuration.applicationCredentials }}
+        {{ configuration.applicationCredentials |  json }}
       {%- endif %}
