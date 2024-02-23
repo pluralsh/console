@@ -5,7 +5,7 @@ import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import {
-  BACKUPS_ABS_PATH,
+  CLUSTER_ABS_PATH,
   CLUSTER_BACKUPS_REL_PATH,
   CLUSTER_RESTORES_REL_PATH,
   getBackupsClusterAbsPath,
@@ -57,10 +57,10 @@ export default function Cluster() {
   )
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${BACKUPS_ABS_PATH}/:tab*`)
+  const pathMatch = useMatch(`${CLUSTER_ABS_PATH}/:tab*`)
   // @ts-expect-error
   const tab = pathMatch?.params?.tab || ''
-  const currentTab = directory.find(({ path }) => path === tab)
+  const currentTab = directory.find(({ path }) => path.includes(tab))
 
   return (
     <ResponsivePageFullWidth

@@ -243,7 +243,7 @@ export default function Restores() {
           />
         </FullHeightTableWrap>
       ) : (
-        <EmptyState message="Looks like this cluster doesn't have any backups yet." />
+        <EmptyState message="Looks like this cluster doesn't have any restores yet." />
       )}
     </div>
   )
