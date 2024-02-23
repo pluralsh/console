@@ -46,6 +46,11 @@ defmodule Console.TestHelpers do
 
   def refetch(%{__struct__: schema, id: id}), do: Console.Repo.get(schema, id)
 
+  def update_record(model, attrs) do
+    Ecto.Changeset.change(model, attrs)
+    |> Console.Repo.update()
+  end
+
   def run_query(query, variables, context \\ %{}),
     do: Absinthe.run(query, Console.GraphQl, variables: variables, context: context)
 

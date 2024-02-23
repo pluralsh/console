@@ -2195,6 +2195,74 @@ export type NotificationEdge = {
   node?: Maybe<Notification>;
 };
 
+export type NotificationFilter = {
+  __typename?: 'NotificationFilter';
+  cluster?: Maybe<Cluster>;
+  id: Scalars['ID']['output'];
+  pipeline?: Maybe<Pipeline>;
+  service?: Maybe<Service>;
+};
+
+export type NotificationRouter = {
+  __typename?: 'NotificationRouter';
+  /** events this router subscribes to, use * for all */
+  events?: Maybe<Array<Scalars['String']['output']>>;
+  /** resource-based filters to select events for services, clusters, pipelines */
+  filters?: Maybe<Array<Maybe<NotificationFilter>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** name of this router */
+  name: Scalars['String']['output'];
+  /** sinks to deliver notifications to */
+  sinks?: Maybe<Array<Maybe<NotificationSink>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type NotificationRouterAttributes = {
+  /** the events to trigger, or use * for any */
+  events?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** filters by object type */
+  filters?: InputMaybe<Array<InputMaybe<RouterFilterAttributes>>>;
+  /** the name of this router */
+  name: Scalars['String']['input'];
+  /** sinks to deliver notifications to */
+  routerSinks?: InputMaybe<Array<InputMaybe<RouterSinkAttributes>>>;
+};
+
+export type NotificationSink = {
+  __typename?: 'NotificationSink';
+  /** type specific sink configuration */
+  configuration: SinkConfiguration;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of the sink */
+  name: Scalars['String']['output'];
+  /** the channel type of the sink, eg slack or teams */
+  type: SinkType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type NotificationSinkAttributes = {
+  /** configuration for the specific type */
+  configuration: SinkConfigurationAttributes;
+  /** the name of this sink */
+  name: Scalars['String']['input'];
+  /** the channel type of this sink */
+  type: SinkType;
+};
+
+export type NotificationSinkConnection = {
+  __typename?: 'NotificationSinkConnection';
+  edges?: Maybe<Array<Maybe<NotificationSinkEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type NotificationSinkEdge = {
+  __typename?: 'NotificationSinkEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<NotificationSink>;
+};
+
 export enum NotificationStatus {
   Firing = 'FIRING',
   Resolved = 'RESOLVED'
@@ -3305,6 +3373,8 @@ export type RootMutationType = {
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
   deleteNode?: Maybe<Node>;
+  deleteNotificationRouter?: Maybe<NotificationRouter>;
+  deleteNotificationSink?: Maybe<NotificationSink>;
   deleteObjectStore?: Maybe<ObjectStore>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePersona?: Maybe<Persona>;
@@ -3380,6 +3450,8 @@ export type RootMutationType = {
   updateServiceDeployment?: Maybe<ServiceDeployment>;
   updateSmtp?: Maybe<Smtp>;
   updateUser?: Maybe<User>;
+  upsertNotificationRouter?: Maybe<NotificationRouter>;
+  upsertNotificationSink?: Maybe<NotificationSink>;
 };
 
 
@@ -3618,6 +3690,16 @@ export type RootMutationTypeDeleteJobArgs = {
 
 export type RootMutationTypeDeleteNodeArgs = {
   name: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeDeleteNotificationRouterArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteNotificationSinkArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3985,6 +4067,16 @@ export type RootMutationTypeUpdateUserArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
 };
 
+
+export type RootMutationTypeUpsertNotificationRouterArgs = {
+  attributes: NotificationRouterAttributes;
+};
+
+
+export type RootMutationTypeUpsertNotificationSinkArgs = {
+  attributes: NotificationSinkAttributes;
+};
+
 export type RootQueryType = {
   __typename?: 'RootQueryType';
   accessToken?: Maybe<AccessToken>;
@@ -4062,6 +4154,10 @@ export type RootQueryType = {
   nodeMetric?: Maybe<NodeMetric>;
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   nodes?: Maybe<Array<Maybe<Node>>>;
+  notificationRouter?: Maybe<NotificationRouter>;
+  notificationRouters?: Maybe<NotificationSinkConnection>;
+  notificationSink?: Maybe<NotificationSink>;
+  notificationSinks?: Maybe<NotificationSinkConnection>;
   notifications?: Maybe<NotificationConnection>;
   objectStores?: Maybe<ObjectStoreConnection>;
   pagedClusterGates?: Maybe<PipelineGateConnection>;
@@ -4456,6 +4552,34 @@ export type RootQueryTypeNodeMetricsArgs = {
 };
 
 
+export type RootQueryTypeNotificationRouterArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeNotificationRoutersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeNotificationSinkArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeNotificationSinksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypeNotificationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   all?: InputMaybe<Scalars['Boolean']['input']>;
@@ -4831,6 +4955,19 @@ export type RootSubscriptionTypeBuildDeltaArgs = {
 
 export type RootSubscriptionTypeCommandDeltaArgs = {
   buildId: Scalars['ID']['input'];
+};
+
+export type RouterFilterAttributes = {
+  /** whether to enable delivery for events associated with this cluster */
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  /** whether to enable delivery for events associated with this pipeline */
+  pipelineId?: InputMaybe<Scalars['ID']['input']>;
+  /** whether to enable delivery for events associated with this service */
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type RouterSinkAttributes = {
+  sinkId: Scalars['ID']['input'];
 };
 
 export type Runbook = {
@@ -5363,6 +5500,23 @@ export enum Severity {
   None = 'NONE'
 }
 
+export type SinkConfiguration = {
+  __typename?: 'SinkConfiguration';
+  id: Scalars['ID']['output'];
+  slack?: Maybe<UrlSinkConfiguration>;
+  teams?: Maybe<UrlSinkConfiguration>;
+};
+
+export type SinkConfigurationAttributes = {
+  slack?: InputMaybe<UrlSinkAttributes>;
+  teams?: InputMaybe<UrlSinkAttributes>;
+};
+
+export enum SinkType {
+  Slack = 'SLACK',
+  Teams = 'TEAMS'
+}
+
 export type Smtp = {
   __typename?: 'Smtp';
   password?: Maybe<Scalars['String']['output']>;
@@ -5590,6 +5744,17 @@ export enum UpgradePolicyType {
   Deploy = 'DEPLOY',
   Ignore = 'IGNORE'
 }
+
+export type UrlSinkAttributes = {
+  url: Scalars['String']['input'];
+};
+
+/** A notification sink based off slack incoming webhook urls */
+export type UrlSinkConfiguration = {
+  __typename?: 'UrlSinkConfiguration';
+  /** incoming webhook url to deliver to */
+  url: Scalars['String']['output'];
+};
 
 export type User = {
   __typename?: 'User';

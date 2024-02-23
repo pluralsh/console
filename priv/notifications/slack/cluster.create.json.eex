@@ -1,0 +1,11 @@
+{
+    "text": "Cluster <%= @cluster.name %> has been added to your fleet",
+    "blocks": [
+        {
+            "type": "section",
+            "fields": [
+                {"type": "mrkdwn", "text": "*Url*\n<%= Console.url("/cd/clusters/#{@cluster.id}/services") %>"}
+            ]
+        }
+    ]
+}

@@ -306,6 +306,14 @@ type RootQueryType {
 
   clusterRestore(id: ID!): ClusterRestore
 
+  notificationSink(name: String, id: ID): NotificationSink
+
+  notificationRouter(name: String, id: ID): NotificationRouter
+
+  notificationSinks(after: String, first: Int, before: String, last: Int): NotificationSinkConnection
+
+  notificationRouters(after: String, first: Int, before: String, last: Int): NotificationSinkConnection
+
   deploymentSettings: DeploymentSettings
 }
 
@@ -610,6 +618,14 @@ type RootMutationType {
 
   updateClusterRestore(id: ID!, attributes: RestoreAttributes!): ClusterRestore
 
+  upsertNotificationSink(attributes: NotificationSinkAttributes!): NotificationSink
+
+  upsertNotificationRouter(attributes: NotificationRouterAttributes!): NotificationRouter
+
+  deleteNotificationSink(id: ID!): NotificationSink
+
+  deleteNotificationRouter(id: ID!): NotificationRouter
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
 
@@ -729,6 +745,121 @@ input HttpConnectionAttributes {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+enum SinkType {
+  SLACK
+  TEAMS
+}
+
+input NotificationSinkAttributes {
+  "the name of this sink"
+  name: String!
+
+  "the channel type of this sink"
+  type: SinkType!
+
+  "configuration for the specific type"
+  configuration: SinkConfigurationAttributes!
+}
+
+input SinkConfigurationAttributes {
+  slack: UrlSinkAttributes
+  teams: UrlSinkAttributes
+}
+
+input UrlSinkAttributes {
+  url: String!
+}
+
+input NotificationRouterAttributes {
+  "the name of this router"
+  name: String!
+
+  "the events to trigger, or use * for any"
+  events: [String!]
+
+  "filters by object type"
+  filters: [RouterFilterAttributes]
+
+  "sinks to deliver notifications to"
+  routerSinks: [RouterSinkAttributes]
+}
+
+input RouterFilterAttributes {
+  "whether to enable delivery for events associated with this service"
+  serviceId: ID
+
+  "whether to enable delivery for events associated with this cluster"
+  clusterId: ID
+
+  "whether to enable delivery for events associated with this pipeline"
+  pipelineId: ID
+}
+
+input RouterSinkAttributes {
+  sinkId: ID!
+}
+
+type NotificationSink {
+  id: ID!
+
+  "the name of the sink"
+  name: String!
+
+  "the channel type of the sink, eg slack or teams"
+  type: SinkType!
+
+  "type specific sink configuration"
+  configuration: SinkConfiguration!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type NotificationRouter {
+  id: ID!
+
+  "name of this router"
+  name: String!
+
+  "events this router subscribes to, use * for all"
+  events: [String!]
+
+  "resource-based filters to select events for services, clusters, pipelines"
+  filters: [NotificationFilter]
+
+  "sinks to deliver notifications to"
+  sinks: [NotificationSink]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type NotificationFilter {
+  id: ID!
+  service: Service
+  cluster: Cluster
+  pipeline: Pipeline
+}
+
+type SinkConfiguration {
+  id: ID!
+  slack: UrlSinkConfiguration
+  teams: UrlSinkConfiguration
+}
+
+"A notification sink based off slack incoming webhook urls"
+type UrlSinkConfiguration {
+  "incoming webhook url to deliver to"
+  url: String!
+}
+
+type NotificationSinkConnection {
+  pageInfo: PageInfo!
+  edges: [NotificationSinkEdge]
 }
 
 enum RestoreStatus {
@@ -4764,5 +4895,10 @@ type ClusterBackupEdge {
 
 type ObjectStoreEdge {
   node: ObjectStore
+  cursor: String
+}
+
+type NotificationSinkEdge {
+  node: NotificationSink
   cursor: String
 }

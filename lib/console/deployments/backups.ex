@@ -114,9 +114,20 @@ defmodule Console.Deployments.Backups do
   """
   @spec update_cluster_restore(map, binary, Cluster.t) :: restore_resp
   def update_cluster_restore(attrs, id, %Cluster{}) do
-    get_cluster_restore(id)
-    |> ClusterRestore.changeset(attrs)
-    |> Repo.update()
+    start_transaction()
+    |> add_operation(:restore, fn _ ->
+      get_cluster_restore(id)
+      |> ClusterRestore.changeset(attrs)
+      |> Repo.update()
+    end)
+    |> add_operation(:delink, fn
+      %{restore: %ClusterRestore{status: s} = restore} when s in ~w(failed successful)a ->
+        %{backup: %{cluster: cluster}} = Repo.preload(restore, [backup: :cluster])
+        Ecto.Changeset.change(cluster, %{restore_id: nil})
+        |> Repo.update()
+      _ -> {:ok, %{}}
+    end)
+    |> execute(extract: :restore)
   end
 
   @doc """

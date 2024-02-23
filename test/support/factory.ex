@@ -424,6 +424,34 @@ defmodule Console.Factory do
     }
   end
 
+  def notification_sink_factory do
+    %Schema.NotificationSink{
+      name: sequence(:sink, & "sink-#{&1}"),
+      type: :slack,
+      configuration: %{slack: %{url: "https://example.com"}}
+    }
+  end
+
+  def notification_router_factory do
+    %Schema.NotificationRouter{
+      name: sequence(:router, & "router-#{&1}"),
+      events: ["*"]
+    }
+  end
+
+  def router_filter_factory do
+    %Schema.RouterFilter{
+      router: build(:notification_router)
+    }
+  end
+
+  def router_sink_factory do
+    %Schema.RouterSink{
+      router: build(:notification_router),
+      sink: build(:notification_sink)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
