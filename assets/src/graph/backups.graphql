@@ -133,6 +133,31 @@ query ClusterBackups(
   }
 }
 
+query ClusterRestores(
+  $after: String
+  $first: Int = 100
+  $before: String
+  $last: Int
+  $clusterId: ID!
+) {
+  clusterRestores(
+    last: $last
+    first: $first
+    before: $before
+    after: $after
+    clusterId: $clusterId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterRestore
+      }
+    }
+  }
+}
+
 mutation CreateObjectStore($attributes: ObjectStoreAttributes!) {
   createObjectStore(attributes: $attributes) {
     ...ObjectStore
