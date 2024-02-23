@@ -9,6 +9,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import styled, { useTheme } from 'styled-components'
 import { Link } from 'react-router-dom'
+import capitalize from 'lodash/capitalize'
 
 import {
   Cluster,
@@ -95,6 +96,8 @@ const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
       }
     }, [status, theme.colors])
 
+    if (!status) return null
+
     return (
       <Chip
         css={{
@@ -103,7 +106,7 @@ const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
           },
         }}
       >
-        {status}
+        {capitalize(status)}
       </Chip>
     )
   },
