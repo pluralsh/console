@@ -1,4 +1,5 @@
 import {
+  Chip,
   EmptyState,
   LoopingLogo,
   Table,
@@ -10,11 +11,12 @@ import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { useParams } from 'react-router-dom'
 import { VirtualItem } from '@tanstack/react-virtual'
+import { capitalize } from 'lodash'
 
 import {
-  ClusterBackup,
   ClusterBasicFragment,
-  useClusterBackupsQuery,
+  ClusterRestore,
+  RestoreStatus,
   useClusterBasicQuery,
   useClusterRestoresQuery,
 } from '../../../../generated/graphql'
@@ -32,9 +34,20 @@ import {
   CLUSTER_RESTORES_REL_PATH,
   getBackupsClusterAbsPath,
 } from '../../../../routes/backupRoutesConsts'
+import { DateTimeCol } from '../../../utils/table/DateTimeCol'
 
 const POLL_INTERVAL = 10 * 1000
 const QUERY_PAGE_SIZE = 100
+
+const restoreStatusSeverity = {
+  [RestoreStatus.Created]: 'info',
+  [RestoreStatus.Pending]: 'info',
+  [RestoreStatus.Failed]: 'danger',
+  [RestoreStatus.Successful]: 'success',
+} as const satisfies Record<
+  RestoreStatus,
+  ComponentProps<typeof Chip>['severity']
+>
 
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -42,7 +55,7 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-const columnHelper = createColumnHelper<Edge<ClusterBackup>>()
+const columnHelper = createColumnHelper<Edge<ClusterRestore>>()
 
 const columns = [
   columnHelper.accessor(({ node }) => node?.id, {
@@ -72,32 +85,49 @@ const columns = [
       )
     },
   }),
-  // columnHelper.accessor(({ node }) => node?.id, {
-  //   id: 'id',
-  //   header: 'Backup ID',
-  //   enableSorting: true,
-  //   enableGlobalFilter: true,
-  //   cell: ({ getValue }) => getValue(),
-  // }),
-  // columnHelper.accessor(({ node }) => node?.insertedAt, {
-  //   id: 'date',
-  //   header: 'Backup date',
-  //   enableSorting: true,
-  //   enableGlobalFilter: true,
-  //   cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
-  // }),
-  // columnHelper.accessor(({ node }) => node?.garbageCollected, {
-  //   id: 'status',
-  //   header: 'Status',
-  //   enableSorting: true,
-  //   enableGlobalFilter: true,
-  //   cell: ({ getValue }) =>
-  //     getValue() ? (
-  //       <Chip severity="danger">Garbage collected</Chip>
-  //     ) : (
-  //       <Chip severity="success">Ready</Chip>
-  //     ),
-  // }),
+  columnHelper.accessor(({ node }) => node?.backup?.id, {
+    id: 'backupId',
+    header: 'Backup ID',
+    enableSorting: true,
+    enableGlobalFilter: true,
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor(({ node }) => node?.backup?.insertedAt, {
+    id: 'backupDate',
+    header: 'Backup date',
+    enableSorting: true,
+    enableGlobalFilter: true,
+    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+  }),
+  columnHelper.accessor(({ node }) => node?.id, {
+    id: 'restoreId',
+    header: 'Restore ID',
+    enableSorting: true,
+    enableGlobalFilter: true,
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor(({ node }) => node?.insertedAt, {
+    id: 'restoreDate',
+    header: 'Restore date',
+    enableSorting: true,
+    enableGlobalFilter: true,
+    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+  }),
+  columnHelper.accessor(({ node }) => node?.status, {
+    id: 'status',
+    header: 'Restore status',
+    enableSorting: true,
+    enableGlobalFilter: true,
+    cell: ({ getValue }) => {
+      const status = getValue() ?? 'Unknown'
+
+      return (
+        <Chip severity={restoreStatusSeverity[status]}>
+          {capitalize(status)}
+        </Chip>
+      )
+    },
+  }),
 ]
 
 export default function Restores() {
