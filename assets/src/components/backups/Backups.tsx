@@ -8,7 +8,7 @@ import { useTheme } from 'styled-components'
 
 import {
   BACKUPS_ABS_PATH,
-  BACKUPS_REL_PATH,
+  CLUSTERS_REL_PATH,
   OBJECT_STORES_REL_PATH,
 } from '../../routes/backupRoutesConsts'
 import { LinkTabWrap } from '../utils/Tabs'
@@ -21,7 +21,7 @@ import {
 
 const directory = [
   { path: OBJECT_STORES_REL_PATH, label: 'Object Store Credentials' },
-  { path: BACKUPS_REL_PATH, label: 'Backups' },
+  { path: CLUSTERS_REL_PATH, label: 'Clusters' },
 ] as const
 
 export default function Backups() {

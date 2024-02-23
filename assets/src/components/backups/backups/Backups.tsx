@@ -16,7 +16,7 @@ import { VirtualItem } from '@tanstack/react-virtual'
 
 import {
   BACKUPS_ABS_PATH,
-  BACKUPS_REL_PATH,
+  CLUSTERS_REL_PATH,
 } from '../../../routes/backupRoutesConsts'
 import {
   ClustersObjectStoresFragment,
@@ -53,8 +53,8 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
 export const BACKUPS_BACKUPS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'backups', url: BACKUPS_ABS_PATH },
   {
-    label: 'backups',
-    url: `${BACKUPS_ABS_PATH}/${BACKUPS_REL_PATH}`,
+    label: 'clusters',
+    url: `${BACKUPS_ABS_PATH}/${CLUSTERS_REL_PATH}`,
   },
 ]
 

@@ -8,8 +8,8 @@ import ClusterBackups from '../components/backups/clusterbackups/ClusterBackups'
 import {
   BACKUPS_ABS_PATH,
   BACKUPS_DEFAULT_REL_PATH,
-  BACKUPS_REL_PATH,
-  CLUSTER_BACKUPS_ABS_PATH,
+  CLUSTERS_REL_PATH,
+  CLUSTER_ABS_PATH,
   OBJECT_STORES_REL_PATH,
 } from './backupRoutesConsts'
 
@@ -32,12 +32,12 @@ export const backupsRoutes = [
       element={<ObjectStores />}
     />
     <Route
-      path={BACKUPS_REL_PATH}
+      path={CLUSTERS_REL_PATH}
       element={<Backups />}
     />
   </Route>,
   <Route
-    path={CLUSTER_BACKUPS_ABS_PATH}
+    path={CLUSTER_ABS_PATH}
     element={<ClusterBackups />}
   />,
 ]
