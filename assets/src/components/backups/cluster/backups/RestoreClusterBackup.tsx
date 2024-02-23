@@ -1,22 +1,33 @@
 import { useState } from 'react'
-
 import { HistoryIcon, IconFrame } from '@pluralsh/design-system'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { Confirm } from '../../../utils/Confirm'
 import {
   ClusterBackup,
   useCreateClusterRestoreMutation,
 } from '../../../../generated/graphql'
+import {
+  CLUSTER_RESTORES_REL_PATH,
+  getBackupsClusterAbsPath,
+} from '../../../../routes/backupRoutesConsts'
 
 export function RestoreClusterBackup({
   backup,
 }: {
   backup: Nullable<ClusterBackup>
 }) {
+  const navigate = useNavigate()
+  const { clusterId = '' } = useParams()
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading, error }] = useCreateClusterRestoreMutation({
     variables: { backupId: backup?.id ?? '' },
-    onCompleted: () => setConfirm(false),
+    onCompleted: () => {
+      setConfirm(false)
+      navigate(
+        `${getBackupsClusterAbsPath(clusterId)}/${CLUSTER_RESTORES_REL_PATH}`
+      )
+    },
   })
 
   return (
