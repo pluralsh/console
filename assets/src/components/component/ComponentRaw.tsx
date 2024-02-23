@@ -39,3 +39,33 @@ export function RawYaml({ raw }: { raw?: object | string | null | undefined }) {
     </Code>
   )
 }
+
+export function RawJson({ raw }: { raw?: object | string | null | undefined }) {
+  const rawStr = useMemo(() => {
+    let json = ''
+
+    try {
+      json = raw
+        ? JSON.stringify(typeof raw === 'string' ? JSON.parse(raw) : raw, null, 2)
+        : ''
+    } catch {
+      json = typeof raw === 'string' ? raw : ''
+    }
+
+    return json
+  }, [raw])
+
+  if (isEmpty(raw)) {
+    return <EmptyState message="No data available." />
+  }
+
+  return (
+    <Code
+      language="json"
+      maxHeight="100%"
+      overflowY="auto"
+    >
+      {rawStr}
+    </Code>
+  )
+}

@@ -7,12 +7,18 @@ import PipelineJobSpecs from 'components/cd/pipelines/job/PipelineJobSpecs'
 
 import PipelineDetails from 'components/cd/pipelines/PipelineDetails'
 
+import { PipelineContextDetails } from 'components/cd/pipelines/context/PipelineContextDetails'
+
 import { PIPELINES_REL_PATH } from './cdRoutesConsts'
 
 export const pipelineRoutes = [
   <Route
     path={`${PIPELINES_REL_PATH}/:pipelineId`}
     element={<PipelineDetails />}
+  />,
+  <Route
+    path={`${PIPELINES_REL_PATH}/:pipelineId/context/:contextId`}
+    element={<PipelineContextDetails />}
   />,
   <Route
     path={`${PIPELINES_REL_PATH}/jobs/:jobId`}

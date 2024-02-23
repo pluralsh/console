@@ -245,13 +245,21 @@ query PipelineContexts(
   $last: Int
 ) {
   pipeline(id: $id) {
-    id
     contexts(after: $after, before: $before, first: $first, last: $last) {
       edges {
         node {
           ...PipelineContextRow
         }
       }
+    }
+  }
+}
+
+query PipelineContext($id: ID!) {
+  pipelineContext(id: $id) {
+    ...PipelineContextRow
+    pipeline {
+      ...Pipeline
     }
   }
 }

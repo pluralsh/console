@@ -148,7 +148,10 @@ export const SplitPane = forwardRef(
     useEffect(() => {
       const listener = (e) => {
         console.log('mousemove', e.clientY)
-        const nextSplit = Math.min(1, Math.max(0, (e.clientY - boxTop) / boxHeight))
+        const nextSplit = Math.min(
+          1,
+          Math.max(0, (e.clientY - boxTop) / boxHeight)
+        )
 
         console.log('nextSplit', nextSplit)
         setSplit(nextSplit)

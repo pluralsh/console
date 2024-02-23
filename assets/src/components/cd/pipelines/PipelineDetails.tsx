@@ -138,10 +138,6 @@ export function PipelineTabs() {
   const view = searchParams.get('view')
   const tabKey = view && tabs[view] ? (view as keyof typeof tabs) : ''
 
-  console.log('view', searchParams.get('view'))
-
-  console.log('tabKey', tabKey)
-
   return (
     <TabList
       gap="xxsmall"
@@ -258,17 +254,11 @@ function PipelineDetailsBase() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [
-        ...PIPELINES_CRUMBS,
-        ...(!pipeline
-          ? []
-          : [
-              {
-                label: pipeline?.name,
-                url: `${PIPELINES_ABS_PATH}/${pipelineId}`,
-              },
-            ]),
-      ],
+      () =>
+        getPipelineBreadcrumbs({
+          pipelineName: pipeline?.name,
+          pipelineId,
+        }),
       [pipeline, pipelineId]
     )
   )
@@ -340,6 +330,26 @@ function PipelineDetailsBase() {
       )}
     </ResponsivePageFullWidth>
   )
+}
+
+export function getPipelineBreadcrumbs({
+  pipelineName,
+  pipelineId,
+}: {
+  pipelineName: Nullable<string>
+  pipelineId: Nullable<string>
+}) {
+  return [
+    ...PIPELINES_CRUMBS,
+    ...(!pipelineName
+      ? []
+      : [
+          {
+            label: pipelineName,
+            url: `${PIPELINES_ABS_PATH}/${pipelineId}`,
+          },
+        ]),
+  ]
 }
 
 export default function PipelineDetails() {

@@ -1,24 +1,19 @@
-import {
-  Button,
-  Modal,
-  PrOpenIcon,
-  Table,
-  Tooltip,
-} from '@pluralsh/design-system'
+import { Button, PrOpenIcon, Table, Tooltip } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 import {
   PipelineContextRowFragment,
   PipelineFragment,
-  PullRequestFragment,
   usePipelineContextsQuery,
 } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { ComponentProps, useMemo, useState } from 'react'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { columns as pullRequestsColumns } from 'components/pr/queue/PrQueueColumns'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import { ComponentProps, useState } from 'react'
+
+import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
+
+import { TEST_CONTEXTS } from './TEST_CONTEXTS'
+import { PipelinePullRequestsModal } from './PipelinePullRequests'
 
 type RowData = Edge<PipelineContextRowFragment>
 export const columnHelper = createColumnHelper<RowData>()
@@ -37,19 +32,26 @@ const ColId = columnHelper.accessor((row) => row.node?.id, {
         label={props.getValue()}
         placement="top"
       >
-        <> {props.getValue()} </>
+        <span> {props.getValue()} </span>
       </Tooltip>
     )
   },
 })
 
-const ColService = columnHelper.accessor(() => 'TODO', {
-  id: 'service',
-  header: 'Service',
-  cell: function Cell(props) {
-    return props.getValue()
-  },
-})
+export const tableInteractiveTargetingProp =
+  'data-plural-table-interactive' as const
+
+export function TableInteractive({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      {...{ [tableInteractiveTargetingProp]: '' }}
+      style={{ display: 'contents' }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {children}
+    </div>
+  )
+}
 
 export const ColJSON = columnHelper.accessor((row) => row.node?.context, {
   id: 'json',
@@ -79,7 +81,7 @@ const ColPrs = columnHelper.display({
     }
 
     return (
-      <>
+      <TableInteractive>
         <Button
           secondary
           startIcon={<PrOpenIcon />}
@@ -87,67 +89,32 @@ const ColPrs = columnHelper.display({
         >
           View PRs
         </Button>
-        <PullRequestsModal
+        <PipelinePullRequestsModal
           pullRequests={pullRequests}
           open={open}
           onClose={() => setOpen(false)}
         />
-      </>
+      </TableInteractive>
     )
   },
 })
 
-function PullRequestsModal({
-  pullRequests,
-  ...props
-}: {
-  pullRequests: Nullable<PullRequestFragment>[]
-} & ComponentProps<typeof Modal>) {
-  const tableData = useMemo(
-    () => pullRequests.map((pr) => ({ node: pr })),
-    [pullRequests]
-  )
-
-  return (
-    <ModalMountTransition open={!!props.open}>
-      <Modal
-        header="Generated PRs"
-        {...props}
-      >
-        <FullHeightTableWrap>
-          <Table
-            columns={pullRequestsColumns}
-            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
-            data={tableData || []}
-            virtualizeRows
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
-        </FullHeightTableWrap>
-      </Modal>
-    </ModalMountTransition>
-  )
-}
-
 const ColInsertedAt = columnHelper.accessor((row) => row.node?.insertedAt, {
   id: 'insertedAt',
-  header: 'Creation time',
+  header: 'Created',
+  cell: function Cell(props) {
+    return <DateTimeCol date={props.getValue()} />
+  },
+})
+const ColUpdatedAt = columnHelper.accessor((row) => row.node?.updatedAt, {
+  id: 'updatedAt',
+  header: 'Updated',
   cell: function Cell(props) {
     return <DateTimeCol date={props.getValue()} />
   },
 })
 
-const ColStatus = columnHelper.accessor(() => 'TODO', {
-  id: 'insertedAt',
-  header: 'Status',
-  cell: function Cell(props) {
-    return <DateTimeCol date={props.getValue()} />
-  },
-})
-
-const columns = [ColId, ColService, ColJSON, ColPrs, ColInsertedAt, ColStatus]
+const columns = [ColId, ColJSON, ColPrs, ColInsertedAt, ColUpdatedAt]
 
 export function PipelineContexts({
   pipeline,
@@ -160,16 +127,23 @@ export function PipelineContexts({
     variables: { id: pipeline?.id || '', first: 100 },
     skip: !pipeline?.id,
   })
-  const tableData = data?.pipeline?.contexts?.edges ?? []
+  let tableData = data?.pipeline?.contexts?.edges ?? []
 
-  console.log('pipeline contexts error', error)
+  tableData = TEST_CONTEXTS
+
+
+  if (!pipeline?.id) return null
 
   return (
     <Table
       loose
       data={tableData}
       columns={columns}
-      onRowClick={(_e, { original }: Row<RowData>) => navigate(`/todo`)}
+      onRowClick={(_e, { original }: Row<RowData>) =>
+        navigate(
+          `${PIPELINES_ABS_PATH}/${pipeline?.id}/context/${original.node?.id}`
+        )
+      }
       emptyStateProps={{ message: 'No contexts available.' }}
     />
   )
