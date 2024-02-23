@@ -191,7 +191,7 @@ export default function ClusterBackups() {
 
   return (
     <ResponsivePageFullWidth
-      heading="Backups"
+      heading="Clusters"
       scrollable={false}
     >
       <div

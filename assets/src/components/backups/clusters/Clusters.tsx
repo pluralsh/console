@@ -154,7 +154,7 @@ const columns = [
   }),
 ]
 
-export default function Backups() {
+export default function Clusters() {
   const theme = useTheme()
   const navigate = useNavigate()
   const [virtualSlice, _setVirtualSlice] = useState<
