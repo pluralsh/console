@@ -132,7 +132,7 @@ function getMenuItems({
       text: 'Backups',
       icon: <HistoryIcon />,
       path: '/backups',
-      enabled: false, // isCDEnabled, TODO: Enable once 100% code complete.
+      enabled: isCDEnabled,
     },
     {
       text: 'Audits',
