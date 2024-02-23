@@ -16,6 +16,7 @@ import {
   ClusterBasicFragment,
   useClusterBackupsQuery,
   useClusterBasicQuery,
+  useClusterRestoresQuery,
 } from '../../../../generated/graphql'
 import { GqlError } from '../../../utils/Alert'
 import { FullHeightTableWrap } from '../../../utils/layout/FullHeightTableWrap'
@@ -120,7 +121,7 @@ export default function Restores() {
       }
     | undefined
   >()
-  const queryResult = useClusterBackupsQuery({
+  const queryResult = useClusterRestoresQuery({
     variables: { clusterId, first: QUERY_PAGE_SIZE },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
@@ -134,12 +135,12 @@ export default function Restores() {
     previousData,
   } = queryResult
   const data = currentData || previousData
-  const clusterBackups = data?.clusterBackups
-  const pageInfo = clusterBackups?.pageInfo
+  const clusterRestores = data?.clusterRestores
+  const pageInfo = clusterRestores?.pageInfo
   const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
     pageSize: QUERY_PAGE_SIZE,
-    key: 'clusterBackups',
+    key: 'clusterRestores',
     interval: POLL_INTERVAL,
   })
   const fetchNextPage = useCallback(() => {
@@ -151,8 +152,8 @@ export default function Restores() {
       updateQuery: (prev, { fetchMoreResult }) =>
         extendConnection(
           prev,
-          fetchMoreResult.clusterBackups,
-          'clusterBackups'
+          fetchMoreResult.clusterRestores,
+          'clusterRestores'
         ),
     })
   }, [fetchMore, pageInfo?.endCursor])
@@ -193,14 +194,14 @@ export default function Restores() {
         height: '100%',
       }}
     >
-      {!isEmpty(data?.clusterBackups?.edges) ? (
+      {!isEmpty(data?.clusterRestores?.edges) ? (
         <FullHeightTableWrap>
           <Table
             loose
             columns={columns}
             reactTableOptions={{ meta: { refetch, cluster } }}
             reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
-            data={data?.clusterBackups?.edges || []}
+            data={data?.clusterRestores?.edges || []}
             virtualizeRows
             hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}
