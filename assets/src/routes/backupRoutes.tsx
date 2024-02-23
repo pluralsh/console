@@ -1,9 +1,9 @@
 import { Navigate, Route } from 'react-router-dom'
 
 import Root from '../components/backups/Backups'
-import Backups from '../components/backups/backups/Backups'
+import Clusters from '../components/backups/clusters/Clusters'
 import ObjectStores from '../components/backups/objectstores/ObjectStores'
-import ClusterBackups from '../components/backups/clusterbackups/ClusterBackups'
+import Cluster from '../components/backups/cluster/Cluster'
 
 import {
   BACKUPS_ABS_PATH,
@@ -33,11 +33,11 @@ export const backupsRoutes = [
     />
     <Route
       path={CLUSTERS_REL_PATH}
-      element={<Backups />}
+      element={<Clusters />}
     />
   </Route>,
   <Route
     path={CLUSTER_ABS_PATH}
-    element={<ClusterBackups />}
+    element={<Cluster />}
   />,
 ]

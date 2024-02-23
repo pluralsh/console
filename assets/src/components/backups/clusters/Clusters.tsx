@@ -50,7 +50,7 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-export const BACKUPS_BACKUPS_BASE_CRUMBS: Breadcrumb[] = [
+export const BACKUPS_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'backups', url: BACKUPS_ABS_PATH },
   {
     label: 'clusters',
@@ -203,7 +203,7 @@ export default function Clusters() {
   )
 
   useSetPageHeaderContent(headerActions)
-  useSetBreadcrumbs(BACKUPS_BACKUPS_BASE_CRUMBS)
+  useSetBreadcrumbs(BACKUPS_CLUSTERS_BASE_CRUMBS)
 
   if (error) {
     return <GqlError error={error} />

@@ -21,7 +21,7 @@ import {
 import { GqlError } from '../../utils/Alert'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import { Edge, extendConnection } from '../../../utils/graphql'
-import { BACKUPS_BACKUPS_BASE_CRUMBS } from '../backups/Backups'
+import { BACKUPS_CLUSTERS_BASE_CRUMBS } from '../clusters/Clusters'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
 import { DynamicClusterIcon } from '../../cd/clusters/DynamicClusterIcon'
@@ -110,7 +110,7 @@ const columns = [
   }),
 ]
 
-export default function ClusterBackups() {
+export default function Cluster() {
   const theme = useTheme()
   const { clusterId = '' } = useParams()
 
@@ -171,7 +171,7 @@ export default function ClusterBackups() {
   useSetBreadcrumbs(
     useMemo(
       () => [
-        ...BACKUPS_BACKUPS_BASE_CRUMBS,
+        ...BACKUPS_CLUSTERS_BASE_CRUMBS,
         {
           label: cluster?.name ?? clusterId,
           url: `/backups/backups/${clusterId}`,
