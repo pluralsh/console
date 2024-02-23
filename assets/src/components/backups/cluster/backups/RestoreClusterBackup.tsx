@@ -2,11 +2,11 @@ import { useState } from 'react'
 
 import { HistoryIcon, IconFrame } from '@pluralsh/design-system'
 
-import { Confirm } from '../../utils/Confirm'
+import { Confirm } from '../../../utils/Confirm'
 import {
   ClusterBackup,
   useCreateClusterRestoreMutation,
-} from '../../../generated/graphql'
+} from '../../../../generated/graphql'
 
 export function RestoreClusterBackup({
   backup,

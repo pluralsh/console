@@ -17,6 +17,7 @@ import { VirtualItem } from '@tanstack/react-virtual'
 import {
   BACKUPS_ABS_PATH,
   CLUSTERS_REL_PATH,
+  getBackupsClusterAbsPath,
 } from '../../../routes/backupRoutesConsts'
 import {
   ClustersObjectStoresFragment,
@@ -146,7 +147,7 @@ const columns = [
             type="tertiary"
             icon={<ArrowTopRightIcon />}
             as={Link}
-            to={`/backups/backups/${getValue()}`}
+            to={getBackupsClusterAbsPath(getValue())}
           />
         </div>
       )
@@ -234,7 +235,7 @@ export default function Clusters() {
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             onRowClick={(e, { original: { node } }) =>
-              navigate(`/backups/backups/${node?.id}`)
+              navigate(getBackupsClusterAbsPath(node?.id))
             }
             css={{
               maxHeight: 'unset',
