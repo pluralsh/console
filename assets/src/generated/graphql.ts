@@ -6776,6 +6776,7 @@ export type PodLogsQueryVariables = Exact<{
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
   container: Scalars['String']['input'];
   sinceSeconds: Scalars['Int']['input'];
 }>;
@@ -13093,8 +13094,13 @@ export type PodLazyQueryHookResult = ReturnType<typeof usePodLazyQuery>;
 export type PodSuspenseQueryHookResult = ReturnType<typeof usePodSuspenseQuery>;
 export type PodQueryResult = Apollo.QueryResult<PodQuery, PodQueryVariables>;
 export const PodLogsDocument = gql`
-    query PodLogs($name: String!, $namespace: String!, $clusterId: ID, $container: String!, $sinceSeconds: Int!) {
-  pod(name: $name, namespace: $namespace, clusterId: $clusterId) {
+    query PodLogs($name: String!, $namespace: String!, $clusterId: ID, $serviceId: ID, $container: String!, $sinceSeconds: Int!) {
+  pod(
+    name: $name
+    namespace: $namespace
+    clusterId: $clusterId
+    serviceId: $serviceId
+  ) {
     logs(container: $container, sinceSeconds: $sinceSeconds)
   }
 }
@@ -13115,6 +13121,7 @@ export const PodLogsDocument = gql`
  *      name: // value for 'name'
  *      namespace: // value for 'namespace'
  *      clusterId: // value for 'clusterId'
+ *      serviceId: // value for 'serviceId'
  *      container: // value for 'container'
  *      sinceSeconds: // value for 'sinceSeconds'
  *   },

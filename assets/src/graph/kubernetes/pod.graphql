@@ -20,10 +20,11 @@ query PodLogs(
   $name: String!
   $namespace: String!
   $clusterId: ID
+  $serviceId: ID
   $container: String!
   $sinceSeconds: Int!
 ) {
-  pod(name: $name, namespace: $namespace, clusterId: $clusterId) {
+  pod(name: $name, namespace: $namespace, clusterId: $clusterId, serviceId: $serviceId) {
     logs(container: $container, sinceSeconds: $sinceSeconds)
   }
 }
