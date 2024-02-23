@@ -91,7 +91,7 @@ function ContainerLogs({
   sinceSeconds?: number
   container: string
 }) {
-  const { clusterId } = useParams()
+  const { clusterId, serviceId } = useParams()
   const { pod } = useOutletContext() as { pod: Pod }
   const {
     data: currentData,
@@ -102,9 +102,9 @@ function ContainerLogs({
     variables: {
       name: pod.metadata.name!,
       namespace: pod.metadata.namespace!,
-      clusterId,
       container,
       sinceSeconds,
+      ...(serviceId ? { serviceId } : { clusterId }),
     },
     fetchPolicy: 'no-cache',
     notifyOnNetworkStatusChange: true,
