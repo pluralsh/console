@@ -1,31 +1,26 @@
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { Outlet, useMatch } from 'react-router-dom'
-
+import { Outlet, useMatch, useParams } from 'react-router-dom'
 import { ReactNode, Suspense, useMemo, useRef, useState } from 'react'
 import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
-
 import { useTheme } from 'styled-components'
 
 import {
-  BACKUPS_ABS_PATH,
-  CLUSTERS_REL_PATH,
-  OBJECT_STORES_REL_PATH,
-} from '../../routes/backupRoutesConsts'
-import { LinkTabWrap } from '../utils/Tabs'
-import { PluralErrorBoundary } from '../cd/PluralErrorBoundary'
-import LoadingIndicator from '../utils/LoadingIndicator'
+  CLUSTER_ABS_PATH,
+  CLUSTER_BACKUPS_REL_PATH,
+  CLUSTER_RESTORES_REL_PATH,
+  getBackupsClusterAbsPath,
+} from '../../../routes/backupRoutesConsts'
+import { LinkTabWrap } from '../../utils/Tabs'
+import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 import {
   PageHeaderContext,
   PageScrollableContext,
-} from '../cd/ContinuousDeployment'
+} from '../../cd/ContinuousDeployment'
 
-const directory = [
-  { path: OBJECT_STORES_REL_PATH, label: 'Object Store Credentials' },
-  { path: CLUSTERS_REL_PATH, label: 'Clusters' },
-] as const
-
-export default function Backups() {
+export default function Cluster() {
   const theme = useTheme()
+  const { clusterId = '' } = useParams()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [scrollable, setScrollable] = useState(false)
 
@@ -42,11 +37,30 @@ export default function Backups() {
     []
   )
 
+  const directory = useMemo(
+    () =>
+      [
+        {
+          path: `${getBackupsClusterAbsPath(
+            clusterId
+          )}/${CLUSTER_BACKUPS_REL_PATH}`,
+          label: 'Backups',
+        },
+        {
+          path: `${getBackupsClusterAbsPath(
+            clusterId
+          )}/${CLUSTER_RESTORES_REL_PATH}`,
+          label: 'Restores',
+        },
+      ] as const,
+    [clusterId]
+  )
+
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${BACKUPS_ABS_PATH}/:tab*`)
+  const pathMatch = useMatch(`${CLUSTER_ABS_PATH}/:tab*`)
   // @ts-expect-error
   const tab = pathMatch?.params?.tab || ''
-  const currentTab = directory.find(({ path }) => path === tab)
+  const currentTab = directory.find(({ path }) => path.includes(tab))
 
   return (
     <ResponsivePageFullWidth
@@ -74,7 +88,7 @@ export default function Backups() {
                 subTab
                 key={path}
                 textValue={label}
-                to={`${BACKUPS_ABS_PATH}/${path}`}
+                to={path}
               >
                 <SubTab
                   key={path}

@@ -16,7 +16,8 @@ import { VirtualItem } from '@tanstack/react-virtual'
 
 import {
   BACKUPS_ABS_PATH,
-  BACKUPS_REL_PATH,
+  CLUSTERS_REL_PATH,
+  getBackupsClusterAbsPath,
 } from '../../../routes/backupRoutesConsts'
 import {
   ClustersObjectStoresFragment,
@@ -50,11 +51,11 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-export const BACKUPS_BACKUPS_BASE_CRUMBS: Breadcrumb[] = [
+export const BACKUPS_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'backups', url: BACKUPS_ABS_PATH },
   {
-    label: 'backups',
-    url: `${BACKUPS_ABS_PATH}/${BACKUPS_REL_PATH}`,
+    label: 'clusters',
+    url: `${BACKUPS_ABS_PATH}/${CLUSTERS_REL_PATH}`,
   },
 ]
 
@@ -146,7 +147,7 @@ const columns = [
             type="tertiary"
             icon={<ArrowTopRightIcon />}
             as={Link}
-            to={`/backups/backups/${getValue()}`}
+            to={getBackupsClusterAbsPath(getValue())}
           />
         </div>
       )
@@ -154,7 +155,7 @@ const columns = [
   }),
 ]
 
-export default function Backups() {
+export default function Clusters() {
   const theme = useTheme()
   const navigate = useNavigate()
   const [virtualSlice, _setVirtualSlice] = useState<
@@ -203,7 +204,7 @@ export default function Backups() {
   )
 
   useSetPageHeaderContent(headerActions)
-  useSetBreadcrumbs(BACKUPS_BACKUPS_BASE_CRUMBS)
+  useSetBreadcrumbs(BACKUPS_CLUSTERS_BASE_CRUMBS)
 
   if (error) {
     return <GqlError error={error} />
@@ -234,7 +235,7 @@ export default function Backups() {
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             onRowClick={(e, { original: { node } }) =>
-              navigate(`/backups/backups/${node?.id}`)
+              navigate(getBackupsClusterAbsPath(node?.id))
             }
             css={{
               maxHeight: 'unset',

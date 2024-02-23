@@ -20,7 +20,9 @@ export const TimeSC = styled.div((_) => ({
   display: 'flex',
   justifyContent: 'space-between',
 }))
-export const TooltipTimeSC = styled.div``
+export const TooltipTimeSC = styled.div`
+  cursor: pointer;
+`
 
 type BaseProps = {
   startContent?: ReactNode

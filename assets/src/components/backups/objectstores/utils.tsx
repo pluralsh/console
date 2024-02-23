@@ -112,6 +112,7 @@ export function ObjectStoreCloudIcon({
       <img
         alt={cloud}
         src={getObjectStoreIconUrl(cloud, theme.mode)}
+        height={size}
       />
     </div>
   )

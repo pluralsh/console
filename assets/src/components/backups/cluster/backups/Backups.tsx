@@ -17,18 +17,22 @@ import {
   ClusterBasicFragment,
   useClusterBackupsQuery,
   useClusterBasicQuery,
-} from '../../../generated/graphql'
-import { GqlError } from '../../utils/Alert'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
-import { Edge, extendConnection } from '../../../utils/graphql'
-import { BACKUPS_BACKUPS_BASE_CRUMBS } from '../backups/Backups'
-import { DateTimeCol } from '../../utils/table/DateTimeCol'
-import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
-import { DynamicClusterIcon } from '../../cd/clusters/DynamicClusterIcon'
-import { ColClusterContentSC } from '../../cd/clusters/ClustersColumns'
-import { BasicLink } from '../../utils/typography/BasicLink'
-import { StackedText } from '../../utils/table/StackedText'
-import { useSlicePolling } from '../../utils/tableFetchHelpers'
+} from '../../../../generated/graphql'
+import { GqlError } from '../../../utils/Alert'
+import { FullHeightTableWrap } from '../../../utils/layout/FullHeightTableWrap'
+import { Edge, extendConnection } from '../../../../utils/graphql'
+import { BACKUPS_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
+import { DateTimeCol } from '../../../utils/table/DateTimeCol'
+import { DynamicClusterIcon } from '../../../cd/clusters/DynamicClusterIcon'
+import { ColClusterContentSC } from '../../../cd/clusters/ClustersColumns'
+import { BasicLink } from '../../../utils/typography/BasicLink'
+import { StackedText } from '../../../utils/table/StackedText'
+import { useSlicePolling } from '../../../utils/tableFetchHelpers'
+
+import {
+  CLUSTER_BACKUPS_REL_PATH,
+  getBackupsClusterAbsPath,
+} from '../../../../routes/backupRoutesConsts'
 
 import { RestoreClusterBackup } from './RestoreClusterBackup'
 
@@ -110,7 +114,7 @@ const columns = [
   }),
 ]
 
-export default function ClusterBackups() {
+export default function Backups() {
   const theme = useTheme()
   const { clusterId = '' } = useParams()
 
@@ -171,10 +175,16 @@ export default function ClusterBackups() {
   useSetBreadcrumbs(
     useMemo(
       () => [
-        ...BACKUPS_BACKUPS_BASE_CRUMBS,
+        ...BACKUPS_CLUSTERS_BASE_CRUMBS,
         {
           label: cluster?.name ?? clusterId,
-          url: `/backups/backups/${clusterId}`,
+          url: getBackupsClusterAbsPath(clusterId),
+        },
+        {
+          label: 'backups',
+          url: `${getBackupsClusterAbsPath(
+            clusterId
+          )}/${CLUSTER_BACKUPS_REL_PATH}`,
         },
       ],
       [cluster, clusterId]
@@ -190,40 +200,35 @@ export default function ClusterBackups() {
   }
 
   return (
-    <ResponsivePageFullWidth
-      heading="Backups"
-      scrollable={false}
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.small,
+        height: '100%',
+      }}
     >
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.small,
-          height: '100%',
-        }}
-      >
-        {!isEmpty(data?.clusterBackups?.edges) ? (
-          <FullHeightTableWrap>
-            <Table
-              loose
-              columns={columns}
-              reactTableOptions={{ meta: { refetch, cluster } }}
-              reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
-              data={data?.clusterBackups?.edges || []}
-              virtualizeRows
-              hasNextPage={pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              isFetchingNextPage={loading}
-              css={{
-                maxHeight: 'unset',
-                height: '100%',
-              }}
-            />
-          </FullHeightTableWrap>
-        ) : (
-          <EmptyState message="Looks like this cluster doesn't have any backups yet." />
-        )}
-      </div>
-    </ResponsivePageFullWidth>
+      {!isEmpty(data?.clusterBackups?.edges) ? (
+        <FullHeightTableWrap>
+          <Table
+            loose
+            columns={columns}
+            reactTableOptions={{ meta: { refetch, cluster } }}
+            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            data={data?.clusterBackups?.edges || []}
+            virtualizeRows
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            css={{
+              maxHeight: 'unset',
+              height: '100%',
+            }}
+          />
+        </FullHeightTableWrap>
+      ) : (
+        <EmptyState message="Looks like this cluster doesn't have any backups yet." />
+      )}
+    </div>
   )
 }
