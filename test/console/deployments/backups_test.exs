@@ -110,10 +110,13 @@ defmodule Console.Deployments.BackupsTest do
   describe "#update_cluster_restore/2" do
     test "it can update the state of a cluster restore object" do
       restore = insert(:cluster_restore)
+      {:ok, cluster} = update_record(restore.backup.cluster, %{restore_id: restore.id})
+      assert cluster.restore_id == restore.id
 
       {:ok, updated} = Backups.update_cluster_restore(%{status: :successful}, restore.id, restore.backup.cluster)
 
       assert updated.status == :successful
+      refute refetch(cluster).restore_id
     end
   end
 

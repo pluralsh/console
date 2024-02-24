@@ -33,7 +33,10 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ClusterBackup,
     ObjectStore,
     PullRequest,
-    PipelineContext
+    PipelineContext,
+    NotificationSink,
+    NotificationRouter,
+    NotificationFilter
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -65,6 +68,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ObjectStore, _), do: ObjectStore
   def query(PullRequest, _), do: PullRequest
   def query(PipelineContext, _), do: PipelineContext
+  def query(NotificationSink, _), do: NotificationSink
+  def query(NotificationRouter, _), do: NotificationRouter
+  def query(NotificationFilter, _), do: NotificationFilter
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -72,6 +78,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Service
   delegates Console.GraphQl.Resolvers.Deployments.Pipeline
   delegates Console.GraphQl.Resolvers.Deployments.Backup
+  delegates Console.GraphQl.Resolvers.Deployments.Notification
 
   def list_addons(_, _), do: AddOns.addons()
 

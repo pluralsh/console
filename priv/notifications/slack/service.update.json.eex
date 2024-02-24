@@ -1,0 +1,13 @@
+{
+    "text": "Service <%= @service.name %> for cluster <%= @service.cluster.name %> has a new revision",
+    "blocks": [
+        {
+            "type": "section",
+            "fields": [
+                {"type": "mrkdwn", "text": "*Url*\n<%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>"},
+                {"type": "mrkdwn", "text": "*Revision*\n<%= @service.sha %>"},
+                {"type": "mrkdwn", "text": "*Source*\n<%= @source.url %>@<%= @source.ref %>"}
+            ]
+        }
+    ]
+}

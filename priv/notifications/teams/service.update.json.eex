@@ -1,0 +1,34 @@
+{
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "0076D7",
+    "summary": "Service <%= @service.name %> for cluster <%= @service.cluster.name %> has a new revision",
+    "sections": [{
+        "activityTitle": "Your service <%= @service.name %> has a recent update",
+        "activitySubtitle": "<%= @service.message %>",
+        "facts": [{
+            "name": "Repository",
+            "value": "<%= @service.source %>"
+        },
+        {
+            "name": "Status",
+            "value": "<%= @service.status %>"
+        },
+        {
+            "name": "Source",
+            "value": "<%= @source.url %>@<%= @source.ref %>"
+        }, {
+            "name": "Revision",
+            "value": "<%= @service.sha %>"
+        }],
+        "markdown": true
+    }],
+    "potentialAction": [{
+        "@type": "OpenUri",
+        "name": "Go to URL",
+        "targets": [{
+            "os": "default",
+            "uri": "<%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>"
+        }]
+    }]
+}
