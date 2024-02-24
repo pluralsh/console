@@ -169,11 +169,12 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
   @desc "A gate blocking promotion along a release pipeline"
   object :pipeline_gate do
-    field :id,    non_null(:id)
-    field :name,  non_null(:string), description: "the name of this gate as seen in the UI"
-    field :type,  non_null(:gate_type), description: "the type of gate this is"
-    field :state, non_null(:gate_state), description: "the current state of this gate"
-    field :spec,  :gate_spec, description: "more detailed specification for complex gates"
+    field :id,     non_null(:id)
+    field :name,   non_null(:string), description: "the name of this gate as seen in the UI"
+    field :type,   non_null(:gate_type), description: "the type of gate this is"
+    field :state,  non_null(:gate_state), description: "the current state of this gate"
+    field :spec,   :gate_spec, description: "more detailed specification for complex gates"
+    field :status, :gate_status, description: "state related to the current status of this job"
 
     @desc "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
     field :job, :job do
@@ -190,6 +191,11 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   @desc "detailed gate specifications"
   object :gate_spec do
     field :job, :job_gate_spec
+  end
+
+  @desc "state delineating the current status of this gate"
+  object :gate_status do
+    field :job_ref, :job_reference
   end
 
   @desc "the full specification of a job gate"

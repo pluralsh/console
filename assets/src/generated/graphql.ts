@@ -1430,6 +1430,12 @@ export enum GateState {
   Pending = 'PENDING'
 }
 
+/** state delineating the current status of this gate */
+export type GateStatus = {
+  __typename?: 'GateStatus';
+  jobRef?: Maybe<JobReference>;
+};
+
 export type GateStatusAttributes = {
   jobRef?: InputMaybe<NamespacedName>;
 };
@@ -2538,6 +2544,8 @@ export type PipelineGate = {
   spec?: Maybe<GateSpec>;
   /** the current state of this gate */
   state: GateState;
+  /** state related to the current status of this job */
+  status?: Maybe<GateStatus>;
   /** the type of gate this is */
   type: GateType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;

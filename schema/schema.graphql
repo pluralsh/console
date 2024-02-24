@@ -1236,6 +1236,9 @@ type PipelineGate {
   "more detailed specification for complex gates"
   spec: GateSpec
 
+  "state related to the current status of this job"
+  status: GateStatus
+
   "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
   job: Job
 
@@ -1253,6 +1256,11 @@ type PipelineGate {
 "detailed gate specifications"
 type GateSpec {
   job: JobGateSpec
+}
+
+"state delineating the current status of this gate"
+type GateStatus {
+  jobRef: JobReference
 }
 
 "the full specification of a job gate"
