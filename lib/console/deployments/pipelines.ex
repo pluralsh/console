@@ -281,7 +281,10 @@ defmodule Console.Deployments.Pipelines do
       case promo.revised do
         true ->
           PipelineGate.for_stage(id)
+          |> PipelineGate.selected()
           |> Repo.update_all(set: [state: :pending, approver_id: nil])
+          |> elem(1)
+          |> send_updates()
           |> ok()
         _ -> {:ok, 0}
       end
@@ -388,6 +391,11 @@ defmodule Console.Deployments.Pipelines do
     end)
   end
   defp diff?(_, _), do: true
+
+  defp send_updates(gates) do
+    Enum.each(gates, &handle_notify(PubSub.PipelineGateUpdated, &1))
+    gates
+  end
 
   defp notify({:ok, %PipelinePromotion{} = promo}, :create),
     do: handle_notify(PubSub.PromotionCreated, promo)
