@@ -24,14 +24,7 @@ import {
   SidebarSection,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
-import {
-  ReactElement,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
 import { Avatar, Flex, Menu, MenuItem, useOutsideClick } from 'honorable'
 import { wipeToken } from 'helpers/auth'
 import { ME_Q } from 'components/graphql/users'
@@ -44,7 +37,14 @@ import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
-import { LoginContext } from '../contexts'
+import {
+  PersonaConfigurationFragment,
+  PersonaFragment,
+} from 'generated/graphql'
+
+import { isArray, mergeWith } from 'lodash'
+
+import { LoginContext, useLogin } from '../contexts'
 
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
@@ -62,10 +62,12 @@ type MenuItem = {
 function getMenuItems({
   isCDEnabled,
   isByok,
+  personaConfig,
 }: {
   isSandbox: boolean
   isCDEnabled: boolean
   isByok: boolean
+  personaConfig: Nullable<PersonaConfigurationFragment>
 }): MenuItem[] {
   return [
     {
@@ -87,7 +89,9 @@ function getMenuItems({
       icon: <GearTrainIcon />,
       path: `${CD_ABS_PATH}/settings`,
       pathRegexp: /^\/cd\/settings.*$/,
-      enabled: isCDEnabled,
+      enabled:
+        isCDEnabled &&
+        !!(personaConfig?.all || personaConfig?.sidebar?.settings),
     },
     {
       text: 'Builds',
@@ -110,7 +114,9 @@ function getMenuItems({
       icon: <PrOpenIcon />,
       path: PR_DEFAULT_ABS_PATH,
       pathRegexp: /^(\/pr)|(\/pr\/.*)$/,
-      enabled: isCDEnabled,
+      enabled:
+        isCDEnabled &&
+        !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
     },
     {
       text: 'Database management',
@@ -138,6 +144,7 @@ function getMenuItems({
       text: 'Audits',
       icon: <ListIcon />,
       path: '/audits',
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.audits),
     },
     {
       text: 'Account',
@@ -187,6 +194,21 @@ const NotificationsCountSC = styled.div(({ theme }) => ({
   userSelect: 'none',
 }))
 
+const mergePersonaConfigs = (
+  personas: Nullable<PersonaFragment>[]
+): Nullable<PersonaConfigurationFragment>[] => {
+  if (!isArray(personas)) return []
+
+  return mergeWith(
+    {},
+    personas.map((persona) => persona?.configuration),
+    (
+      objValue: string | boolean | null | undefined,
+      srcValue: string | boolean | null | undefined
+    ) => objValue || srcValue
+  )
+}
+
 export default function Sidebar() {
   const menuItemRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -195,7 +217,7 @@ export default function Sidebar() {
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] =
     useState(false)
   const sidebarWidth = 64
-  const { me, configuration } = useContext<any>(LoginContext)
+  const { me, configuration } = useLogin()
   const { pathname } = useLocation()
   const isActive = useCallback(
     (menuItem: Parameters<typeof isActiveMenuItem>[0]) =>
@@ -204,15 +226,19 @@ export default function Sidebar() {
   )
   const isCDEnabled = useCDEnabled({ redirect: false })
 
-  const menuItems = useMemo(
-    () =>
-      getMenuItems({
-        isSandbox: configuration.isSandbox,
-        isCDEnabled,
-        isByok: configuration.byok,
-      }),
-    [configuration.byok, configuration.isSandbox, isCDEnabled]
-  )
+  const menuItems = useMemo(() => {
+    const mergedconfig = mergePersonaConfigs(me?.personas || [])
+
+    console.log('mergedconfig personas', me?.personas)
+    console.log('mergedconfig', mergedconfig)
+
+    return getMenuItems({
+      isSandbox: !!configuration?.isSandbox,
+      isCDEnabled,
+      isByok: !!configuration?.byok,
+      personaConfig: mergedconfig,
+    })
+  }, [me?.personas, configuration?.isSandbox, configuration?.byok, isCDEnabled])
 
   const [mutation] = useMutation(MARK_READ, {
     update: (cache) =>
