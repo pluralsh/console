@@ -6688,6 +6688,13 @@ export type SelfManageMutationVariables = Exact<{
 
 export type SelfManageMutation = { __typename?: 'RootMutationType', selfManage?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
 
+export type KickServiceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type KickServiceMutation = { __typename?: 'RootMutationType', kickService?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
+
 export type ServiceDeploymentBindingsFragment = { __typename?: 'ServiceDeployment', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
 export type ServiceDeploymentBindingsQueryVariables = Exact<{
@@ -12219,6 +12226,39 @@ export function useSelfManageMutation(baseOptions?: Apollo.MutationHookOptions<S
 export type SelfManageMutationHookResult = ReturnType<typeof useSelfManageMutation>;
 export type SelfManageMutationResult = Apollo.MutationResult<SelfManageMutation>;
 export type SelfManageMutationOptions = Apollo.BaseMutationOptions<SelfManageMutation, SelfManageMutationVariables>;
+export const KickServiceDocument = gql`
+    mutation KickService($id: ID!) {
+  kickService(serviceId: $id) {
+    ...ServiceDeploymentsRow
+  }
+}
+    ${ServiceDeploymentsRowFragmentDoc}`;
+export type KickServiceMutationFn = Apollo.MutationFunction<KickServiceMutation, KickServiceMutationVariables>;
+
+/**
+ * __useKickServiceMutation__
+ *
+ * To run a mutation, you first call `useKickServiceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useKickServiceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [kickServiceMutation, { data, loading, error }] = useKickServiceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useKickServiceMutation(baseOptions?: Apollo.MutationHookOptions<KickServiceMutation, KickServiceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<KickServiceMutation, KickServiceMutationVariables>(KickServiceDocument, options);
+      }
+export type KickServiceMutationHookResult = ReturnType<typeof useKickServiceMutation>;
+export type KickServiceMutationResult = Apollo.MutationResult<KickServiceMutation>;
+export type KickServiceMutationOptions = Apollo.BaseMutationOptions<KickServiceMutation, KickServiceMutationVariables>;
 export const ServiceDeploymentBindingsDocument = gql`
     query ServiceDeploymentBindings($id: ID!) {
   serviceDeployment(id: $id) {
@@ -13916,6 +13956,7 @@ export const namedOperations = {
     ProceedService: 'ProceedService',
     UpdateRbac: 'UpdateRbac',
     SelfManage: 'SelfManage',
+    KickService: 'KickService',
     RestorePostgres: 'RestorePostgres',
     CreateGroupMember: 'CreateGroupMember',
     DeleteGroupMember: 'DeleteGroupMember',

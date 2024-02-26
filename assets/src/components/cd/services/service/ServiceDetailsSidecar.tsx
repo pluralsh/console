@@ -20,6 +20,7 @@ import { ServiceStatusChip } from '../ServiceStatusChip'
 
 import { countDeprecations } from './deprecationUtils'
 import ServicePromote from './ServicePromote'
+import ServiceKick from './ServiceKick'
 
 export function ServiceDetailsSidecar({
   serviceDeployment,
@@ -48,6 +49,7 @@ export function ServiceDetailsSidecar({
           margin: theme.spacing.small,
         }}
       >
+        <ServiceKick id={id} />
         {status === ServiceDeploymentStatus.Paused &&
           serviceDeployment.promotion === ServicePromotion.Ignore && (
             <ServicePromote id={id} />
