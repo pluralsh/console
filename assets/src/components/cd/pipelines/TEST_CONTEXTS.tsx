@@ -168,7 +168,8 @@ export const TEST_CONTEXTS: PipelineContextEdge[] = [
       pipeline: {
         id: 'testid',
         name: 'pipelinetestname',
-      }, },
+      },
+    },
   },
   {
     node: {
@@ -180,7 +181,8 @@ export const TEST_CONTEXTS: PipelineContextEdge[] = [
       pipeline: {
         id: 'testid',
         name: 'pipelinetestname',
-      }, },
+      },
+    },
   },
   {
     node: {
@@ -192,6 +194,7 @@ export const TEST_CONTEXTS: PipelineContextEdge[] = [
       pipeline: {
         id: 'testid',
         name: 'pipelinetestname',
-      },  },
+      },
+    },
   },
 ]

@@ -1,7 +1,5 @@
 import {
   Card,
-  Code,
-  Date,
   LoopingLogo,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -17,7 +15,7 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 
 import { Subtitle1H1 } from 'components/utils/typography/Text'
 
-import { RawJson, RawYaml } from 'components/component/ComponentRaw'
+import { RawJson } from 'components/component/ComponentRaw'
 
 import { PropWideBold } from 'components/component/info/common'
 
