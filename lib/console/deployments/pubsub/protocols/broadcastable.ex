@@ -29,3 +29,9 @@ defimpl Console.Deployments.PubSub.Broadcastable, for: [Console.PubSub.ClusterRe
     {"cluster:#{cluster_id}", "restore.event", %{"id" => id}}
   end
 end
+
+defimpl Console.Deployments.PubSub.Broadcastable, for: [Console.PubSub.PipelineGateUpdated] do
+  def message(%{item: %{type: :job, id: id, cluster_id: cid}}) when is_binary(cid),
+    do: {"cluster:#{cid}", "gate.event", %{"id" => id}}
+  def message(_), do: :ok
+end

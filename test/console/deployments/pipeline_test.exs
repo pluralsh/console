@@ -262,7 +262,7 @@ defmodule Console.Deployments.PipelinesTest do
       insert(:pipeline_edge, from: stage)
       insert(:stage_service, stage: stage, service: svc)
       edge = insert(:pipeline_edge, from: stage, to: prod)
-      gate = insert(:pipeline_gate, edge: edge, state: :open)
+      %{id: gate_id} = gate = insert(:pipeline_gate, edge: edge, state: :open)
 
       {:ok, promo} = Pipelines.build_promotion(stage)
 
@@ -273,6 +273,8 @@ defmodule Console.Deployments.PipelinesTest do
       assert service.revision_id == svc.revision_id
 
       assert refetch(gate).state == :pending
+
+      assert_receive {:event, %PubSub.PipelineGateUpdated{item: %{id: ^gate_id}}}
     end
 
     test "it will revise a promotion if there is a change" do

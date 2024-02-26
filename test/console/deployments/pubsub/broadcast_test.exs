@@ -49,4 +49,15 @@ defmodule Console.Deployments.PubSub.BroadcastTest do
       Broadcast.handle_event(event)
     end
   end
+
+  describe "PipelineGateUpdated" do
+    test "job gates send events" do
+      %{id: id} = cluster = insert(:cluster)
+      %{id: gate_id} = gate = insert(:pipeline_gate, type: :job, cluster: cluster)
+      expect(Phoenix.Channel.Server, :broadcast, fn Console.PubSub, "cluster:" <> ^id, "gate.event", %{"id" => ^gate_id} -> :ok end)
+
+      event = %PubSub.PipelineGateUpdated{item: gate}
+      Broadcast.handle_event(event)
+    end
+  end
 end
