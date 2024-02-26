@@ -46,7 +46,11 @@ export function RawJson({ raw }: { raw?: object | string | null | undefined }) {
 
     try {
       json = raw
-        ? JSON.stringify(typeof raw === 'string' ? JSON.parse(raw) : raw, null, 2)
+        ? JSON.stringify(
+            typeof raw === 'string' ? JSON.parse(raw) : raw,
+            null,
+            2
+          )
         : ''
     } catch {
       json = typeof raw === 'string' ? raw : ''

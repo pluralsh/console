@@ -12,6 +12,9 @@ import { ComponentProps, useState } from 'react'
 
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
+import { PipelinePullRequestsModal } from './PipelinePullRequests'
+import { TEST_CONTEXTS } from './TEST_CONTEXTS'
+
 type RowData = Edge<PipelineContextRowFragment>
 export const columnHelper = createColumnHelper<RowData>()
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
@@ -120,7 +123,7 @@ export function PipelineContexts({
 }) {
   const navigate = useNavigate()
 
-  const { data, error } = usePipelineContextsQuery({
+  const { data } = usePipelineContextsQuery({
     variables: { id: pipeline?.id || '', first: 100 },
     skip: !pipeline?.id,
   })

@@ -1,8 +1,4 @@
-import {
-  Card,
-  LoopingLogo,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { Card, LoopingLogo, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { useParams } from 'react-router-dom'
@@ -85,7 +81,7 @@ export function PipelineContextDetails() {
             gap: theme.spacing.medium,
           }}
         >
-          <Subtitle1H1 as="h2">Pull Requests</Subtitle1H1>
+          <Subtitle1H1 as="h2">Pull requests</Subtitle1H1>
           <PipelinePullRequestsTable pullRequestEdges={pullRequestEdges} />
         </div>
 

@@ -46,7 +46,7 @@ export default function OutstandingPrs() {
         end: VirtualItem | undefined
       }
     | undefined
-  >() 
+  >()
 
   useSetBreadcrumbs(
     useMemo(
