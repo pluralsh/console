@@ -12,7 +12,7 @@ import { useResizeObserver } from '@pluralsh/design-system'
 import usePersistedState from 'components/hooks/usePersistedState'
 
 const RESIZER_HEIGHT = 24
-const PANE_MIN = 50
+const PANE_MIN = 100
 const KEY_INC = 10
 const SHIFT_MULT = 5
 

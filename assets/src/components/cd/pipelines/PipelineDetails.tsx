@@ -29,6 +29,8 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { SplitPane } from 'components/utils/SplitPane'
 
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+
 import { Pipeline } from './PipelineGraph'
 import { PIPELINES_CRUMBS } from './Pipelines'
 import { PipelineContexts } from './PipelineContexts'
@@ -284,7 +286,7 @@ function PipelineDetailsBase() {
       )}
     </PipelineEditAreaSC>
   )
-  const contentContexts = <PipelineContexts pipeline={pipeline} />
+  const contentContexts = <FullHeightTableWrap><PipelineContexts pipeline={pipeline} /></FullHeightTableWrap>
 
   let content = (
     <SplitPane

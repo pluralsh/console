@@ -144,6 +144,10 @@ export function PipelineContexts({
         )
       }
       emptyStateProps={{ message: 'No contexts available.' }}
+      css={{
+        maxHeight: 'unset',
+        height: '100%',
+      }}
     />
   )
 }
