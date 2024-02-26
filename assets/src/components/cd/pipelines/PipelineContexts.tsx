@@ -13,7 +13,6 @@ import { ComponentProps, useState } from 'react'
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import { PipelinePullRequestsModal } from './PipelinePullRequests'
-import { TEST_CONTEXTS } from './TEST_CONTEXTS'
 
 type RowData = Edge<PipelineContextRowFragment>
 export const columnHelper = createColumnHelper<RowData>()
@@ -127,9 +126,9 @@ export function PipelineContexts({
     variables: { id: pipeline?.id || '', first: 100 },
     skip: !pipeline?.id,
   })
-  let tableData = data?.pipeline?.contexts?.edges ?? []
+  const tableData = data?.pipeline?.contexts?.edges ?? []
 
-  tableData = TEST_CONTEXTS
+  // tableData = TEST_CONTEXTS
 
   if (!pipeline?.id) return null
 

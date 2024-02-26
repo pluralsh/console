@@ -120,6 +120,9 @@ fragment PipelineStage on PipelineStage {
   services {
     ...StageService
   }
+  context {
+    ...PipelineContextRow
+  }
 }
 
 fragment PipelineStageEdge on PipelineStageEdge {

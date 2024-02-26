@@ -99,6 +99,9 @@ export function StageNode(
   } = props
   const status = meta.stageStatus
 
+  console.log('stage context', stage.context)
+  console.log('stage', stage)
+
   return (
     <StageNodeSC {...props}>
       <div className="headerArea">

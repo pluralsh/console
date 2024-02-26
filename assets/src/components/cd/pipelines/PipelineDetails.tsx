@@ -286,7 +286,11 @@ function PipelineDetailsBase() {
       )}
     </PipelineEditAreaSC>
   )
-  const contentContexts = <FullHeightTableWrap><PipelineContexts pipeline={pipeline} /></FullHeightTableWrap>
+  const contentContexts = (
+    <FullHeightTableWrap>
+      <PipelineContexts pipeline={pipeline} />
+    </FullHeightTableWrap>
+  )
 
   let content = (
     <SplitPane

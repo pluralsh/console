@@ -16,7 +16,7 @@ import { RawJson } from 'components/component/ComponentRaw'
 import { PropWideBold } from 'components/component/info/common'
 
 import { PipelinePullRequestsTable } from '../PipelinePullRequests'
-import { TEST_CONTEXTS } from '../TEST_CONTEXTS'
+// import { TEST_CONTEXTS } from '../TEST_CONTEXTS'
 import { getPipelineBreadcrumbs } from '../PipelineDetails'
 
 export function PipelineContextDetails() {
@@ -27,12 +27,12 @@ export function PipelineContextDetails() {
     variables: { id: contextId || '' },
     skip: !contextId,
   })
-  let context = data?.pipelineContext
+  const context = data?.pipelineContext
 
-  if (!context) {
-    context = TEST_CONTEXTS.find((context) => context.node?.id === contextId)
-      ?.node
-  }
+  // if (!context) {
+  //   context = TEST_CONTEXTS.find((context) => context.node?.id === contextId)
+  //     ?.node
+  // }
 
   const pipelineName = context?.pipeline?.name
 
