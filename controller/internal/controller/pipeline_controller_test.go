@@ -242,7 +242,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(pipeline.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(pipelineConsoleID),
-				SHA: lo.ToPtr("CD336FRXMBI6RSIWXEOVKHEFYYX7YQCCUDT52PXCBMQZCGMQYSNA===="),
+				SHA: lo.ToPtr("MLGN5FUNNKPQ2CXPEXUFS654NXCT3JIC25J7KYDRA7CNP3UHYH4A===="),
 				Conditions: []metav1.Condition{
 					{
 						Type:   v1alpha1.SynchronizedConditionType.String(),
@@ -278,7 +278,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(pipeline.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(pipelineConsoleID),
-				SHA: lo.ToPtr("CD336FRXMBI6RSIWXEOVKHEFYYX7YQCCUDT52PXCBMQZCGMQYSNA===="),
+				SHA: lo.ToPtr("MLGN5FUNNKPQ2CXPEXUFS654NXCT3JIC25J7KYDRA7CNP3UHYH4A===="),
 				Conditions: []metav1.Condition{
 					{
 						Type:   v1alpha1.SynchronizedConditionType.String(),

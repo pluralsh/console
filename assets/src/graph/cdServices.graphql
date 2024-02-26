@@ -289,6 +289,12 @@ mutation SelfManage($values: String!) {
   }
 }
 
+mutation KickService($id: ID!) {
+  kickService(serviceId: $id) {
+    ...ServiceDeploymentsRow
+  }
+}
+
 fragment ServiceDeploymentBindings on ServiceDeployment {
   readBindings {
     ...PolicyBinding
