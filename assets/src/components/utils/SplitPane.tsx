@@ -63,7 +63,6 @@ const ResizerFunctionalHandleSC = styled.div((_) => ({
 
 // role=separator and aria-orientation=horizontal and tabindex=0
 function Resizer(props: ComponentProps<typeof ResizerFunctionalHandleSC>) {
-  console.log('resizer')
   const ref = useRef<HTMLDivElement>(null)
 
   return (
@@ -124,7 +123,6 @@ export const SplitPane = forwardRef(
       (val) => (typeof val === 'number' ? Math.min(1, Math.max(0, val)) : 0.5)
     )
 
-    console.log('boxHeight', boxHeight)
     useResizeObserver(
       ref,
       useCallback((rect) => {
@@ -132,7 +130,6 @@ export const SplitPane = forwardRef(
       }, [])
     )
     useEffect(() => {
-      console.log('ref paneTop', ref.current?.getBoundingClientRect().top)
       const updateTop = () => {
         setBoxTop((pT) => ref.current?.getBoundingClientRect().top || pT)
       }
@@ -147,13 +144,11 @@ export const SplitPane = forwardRef(
 
     useEffect(() => {
       const listener = (e) => {
-        console.log('mousemove', e.clientY)
         const nextSplit = Math.min(
           1,
           Math.max(0, (e.clientY - boxTop) / boxHeight)
         )
 
-        console.log('nextSplit', nextSplit)
         setSplit(nextSplit)
       }
 
@@ -164,7 +159,6 @@ export const SplitPane = forwardRef(
         return () => window.removeEventListener('mousemove', listener)
       }
     }, [dragging, boxTop, boxHeight, setSplit])
-    console.log('split', split)
     const pane1Height =
       Math.min(
         Math.max(PANE_MIN + RESIZER_HEIGHT * 0.5, split * boxHeight),
