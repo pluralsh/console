@@ -25,7 +25,6 @@ import (
 	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -108,14 +107,12 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 
 	var sourceID *string
 	var prAutomationID *string
-	var clusterRef *corev1.ObjectReference
 	if criteria.PrAutomationRef != nil {
 		prAutomation, err := utils.GetPrAutomation(ctx, r.Client, criteria.PrAutomationRef)
 		if err != nil {
 			return nil, err
 		}
 		prAutomationID = prAutomation.Status.ID
-		clusterRef = prAutomation.Spec.ClusterRef
 	}
 	if criteria.ServiceRef != nil {
 		service, err := utils.GetServiceDeployment(ctx, r.Client, criteria.ServiceRef)
@@ -123,18 +120,9 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 			return nil, err
 		}
 		sourceID = service.Status.ID
-		clusterRef = &service.Spec.ClusterRef
-	}
-
-	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageServicePromotionCriteria.ClusterRef).
-	cluster, err := utils.GetCluster(ctx, r.Client, clusterRef)
-	if err != nil {
-		return nil, err
 	}
 
 	return &console.PromotionCriteriaAttributes{
-		Handle:         cluster.Status.ID, // Using cluster ID instead of handle.
-		Name:           nil,               // Using SourceID instead.
 		SourceID:       sourceID,
 		PrAutomationID: prAutomationID,
 		Secrets:        criteria.Secrets,
