@@ -3149,15 +3149,23 @@ export type Recommendation = {
 /** a fully specified regex/replace flow */
 export type RegexReplacement = {
   __typename?: 'RegexReplacement';
+  /** the file to apply this replacement on */
+  file: Scalars['String']['output'];
   regex: Scalars['String']['output'];
   /** template string to replace any match with */
   replacement: Scalars['String']['output'];
+  /** Whether to apply liquid templating before compiling this regex */
+  templated?: Maybe<Scalars['Boolean']['output']>;
 };
 
 /** a fully specify regex/replace flow */
 export type RegexReplacementAttributes = {
+  /** the filename to apply this regex on */
+  file: Scalars['String']['input'];
   regex: Scalars['String']['input'];
   replacement: Scalars['String']['input'];
+  /** whether you want to apply liquid templating on the regex before compiling */
+  templated?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type ReplicaSet = {

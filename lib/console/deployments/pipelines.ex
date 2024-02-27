@@ -128,7 +128,8 @@ defmodule Console.Deployments.Pipelines do
       service = svc.service
       add_operation(xact, {:pull, svc.id}, fn _ ->
         branch = "plrl/pipeline-#{stage.pipeline.name}-#{service.name}-#{String.slice(service.id, 0..4)}-#{String.slice(ctx.id, 0..4)}"
-        Git.create_pull_request(ctx.context, svc.criteria.pr_automation_id, branch, bot)
+        context = build_pr_context(ctx.context, svc, stage)
+        Git.create_pull_request(context, svc.criteria.pr_automation_id, branch, bot)
       end)
       |> add_operation({:ptr, svc.id}, fn res ->
         pr = Map.get(res, {:pull, svc.id})
@@ -142,6 +143,14 @@ defmodule Console.Deployments.Pipelines do
       |> Repo.update()
     end)
     |> execute()
+  end
+
+  defp build_pr_context(ctx, %StageService{service: svc}, %PipelineStage{} = stage) do
+    Map.put(ctx, "pipeline", %{
+      "service" => Map.take(svc, ~w(name namespace)a),
+      "stage" => Map.take(stage, ~w(name)a)
+    })
+    |> Console.string_map()
   end
 
   @doc """
