@@ -38,6 +38,11 @@ defmodule Console do
   end
   def mapify(v), do: v
 
+  def string_map(%{} = map) do
+    Poison.encode!(map)
+    |> Poison.decode!()
+  end
+
   def url(path), do: Path.join(Console.conf(:url), path)
 
   def is_set(var) do

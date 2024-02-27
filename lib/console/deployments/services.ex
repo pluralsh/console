@@ -505,7 +505,7 @@ defmodule Console.Deployments.Services do
   @spec add_deprecations(Service.t) :: {:ok, map} | Console.error
   def add_deprecations(%Service{} = service) do
     %{components: components, cluster: cluster} = Repo.preload(service, [:components, :cluster])
-    Enum.map(components, fn component ->
+    found_deprecations = Enum.map(components, fn component ->
       case Checker.check(component, cluster) do
         {entry, blocking} ->
           Map.from_struct(entry)
@@ -516,8 +516,9 @@ defmodule Console.Deployments.Services do
       end
     end)
     |> Enum.filter(& &1)
-    |> case do
-      [_ | _] = deprecations ->
+
+    case {found_deprecations, has_deprecations?(service)} do
+      {[_ | _] = deprecations, _} ->
         start_transaction()
         |> add_operation(:wipe, fn _ ->
           ApiDeprecation.for_service(service.id)
@@ -536,11 +537,21 @@ defmodule Console.Deployments.Services do
           |> ok()
         end)
         |> execute()
-      _ ->
+      {[], true} ->
         ApiDeprecation.for_service(service.id)
         |> Repo.delete_all()
         |> ok()
+      _ -> {:ok, 0}
     end
+  end
+
+  @doc """
+  Determines whether a service has any discovered api deprecations
+  """
+  @spec has_deprecations?(Service.t) :: boolean
+  def has_deprecations?(%Service{id: id}) do
+    ApiDeprecation.for_service(id)
+    |> Repo.exists?()
   end
 
   @doc """

@@ -2728,7 +2728,14 @@ input PrAutomationCreateSpecAttributes {
 "a fully specify regex\/replace flow"
 input RegexReplacementAttributes {
   regex: String!
+
   replacement: String!
+
+  "the filename to apply this regex on"
+  file: String!
+
+  "whether you want to apply liquid templating on the regex before compiling"
+  templated: Boolean
 }
 
 "templates to apply in this pr"
@@ -2946,8 +2953,14 @@ type PrTemplateSpec {
 type RegexReplacement {
   regex: String!
 
+  "the file to apply this replacement on"
+  file: String!
+
   "template string to replace any match with"
   replacement: String!
+
+  "Whether to apply liquid templating before compiling this regex"
+  templated: Boolean
 }
 
 "the a configuration item for creating a new pr, used for templating the ultimate code changes made"

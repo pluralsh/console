@@ -37,6 +37,8 @@ defmodule Console.Schema.PrAutomation do
       embeds_many :regex_replacements, RegexReplacement, on_replace: :delete do
         field :regex,       :string
         field :replacement, :string
+        field :file,        :string
+        field :templated,   :boolean, default: true
       end
     end
 
@@ -103,6 +105,6 @@ defmodule Console.Schema.PrAutomation do
   end
 
   defp regex_replacement_cs(model, attrs) do
-    cast(model, attrs, ~w(regex replacement)a)
+    cast(model, attrs, ~w(regex replacement file templated)a)
   end
 end

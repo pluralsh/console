@@ -100,6 +100,9 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :regex_replacement_attributes do
     field :regex,       non_null(:string)
     field :replacement, non_null(:string)
+    field :file,        non_null(:string), description: "the filename to apply this regex on"
+    field :templated,   :boolean,
+      description: "whether you want to apply liquid templating on the regex before compiling"
   end
 
   @desc "templates to apply in this pr"
@@ -262,7 +265,9 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "a fully specified regex/replace flow"
   object :regex_replacement do
     field :regex,       non_null(:string)
+    field :file,        non_null(:string), description: "the file to apply this replacement on"
     field :replacement, non_null(:string), description: "template string to replace any match with"
+    field :templated,   :boolean, description: "Whether to apply liquid templating before compiling this regex"
   end
 
   @desc "the a configuration item for creating a new pr, used for templating the ultimate code changes made"
