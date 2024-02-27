@@ -22,12 +22,8 @@ import upperFirst from 'lodash/upperFirst'
 import { MergeDeep } from 'type-fest'
 
 import {
-  PipelineContextQueryHookResult,
-  PipelineContextQueryResult,
   PipelineContextsDocument,
   PipelineContextsQuery,
-  PipelineDocument,
-  PipelineQuery,
   PipelineStageFragment,
   ServiceDeploymentStatus,
   useCreatePipelineContextMutation,
