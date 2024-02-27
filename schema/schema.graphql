@@ -1176,6 +1176,9 @@ type PipelineContext {
   "a history of pull requests created by this context thus far"
   pullRequests: [PullRequest]
 
+  "a list of pipeline-specific PRs for this context"
+  pipelinePullRequests: [PipelinePullRequest]
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -1374,6 +1377,13 @@ type PipelineStatus {
 
   "if > 0, consider the pipeline stopped"
   closed: Int
+}
+
+"A pull request created in the course of executing a pipeline"
+type PipelinePullRequest {
+  id: ID!
+  service: ServiceDeployment
+  pullRequest: PullRequest
 }
 
 type PipelineConnection {

@@ -137,6 +137,8 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :pipeline,      :pipeline, resolve: dataloader(Deployments)
     field :pull_requests, list_of(:pull_request), resolve: dataloader(Deployments),
       description: "a history of pull requests created by this context thus far"
+    field :pipeline_pull_requests, list_of(:pipeline_pull_request), resolve: dataloader(Deployments),
+      description: "a list of pipeline-specific PRs for this context"
 
     timestamps()
   end
@@ -276,6 +278,13 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   object :pipeline_status do
     field :pending, :integer, description: "if > 0, consider the pipeline running"
     field :closed,  :integer, description: "if > 0, consider the pipeline stopped"
+  end
+
+  @desc "A pull request created in the course of executing a pipeline"
+  object :pipeline_pull_request do
+    field :id,           non_null(:id)
+    field :service,      :service_deployment, resolve: dataloader(Deployments)
+    field :pull_request, :pull_request, resolve: dataloader(Deployments)
   end
 
   connection node_type: :pipeline

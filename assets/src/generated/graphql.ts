@@ -2485,6 +2485,8 @@ export type PipelineContext = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   pipeline?: Maybe<Pipeline>;
+  /** a list of pipeline-specific PRs for this context */
+  pipelinePullRequests?: Maybe<Array<Maybe<PipelinePullRequest>>>;
   /** a history of pull requests created by this context thus far */
   pullRequests?: Maybe<Array<Maybe<PullRequest>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -2589,6 +2591,14 @@ export type PipelinePromotion = {
   /** the services included in this promotion */
   services?: Maybe<Array<Maybe<PromotionService>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** A pull request created in the course of executing a pipeline */
+export type PipelinePullRequest = {
+  __typename?: 'PipelinePullRequest';
+  id: Scalars['ID']['output'];
+  pullRequest?: Maybe<PullRequest>;
+  service?: Maybe<ServiceDeployment>;
 };
 
 /** a pipeline stage, has a list of services and potentially a promotion which might be pending */

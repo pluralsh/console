@@ -3,8 +3,8 @@ defmodule Console.Schema.StageService do
   alias Console.Schema.{PipelineStage, Service, PromotionCriteria}
 
   schema "stage_services" do
-    belongs_to :stage,    PipelineStage
-    belongs_to :service,  Service
+    belongs_to :stage,   PipelineStage
+    belongs_to :service, Service
 
     has_one :criteria, PromotionCriteria, on_replace: :update
 
