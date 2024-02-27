@@ -102,6 +102,11 @@ if git_url && String.starts_with?(git_url, "https") do
     git_ssh_key: :pass
 end
 
+if is_set("GITHUB_RAW_URL") do
+  config :console,
+    github_raw_url: get_env("GITHUB_RAW_URL")
+end
+
 if !!get_env("CONSOLE_LOGIN_KEY") and get_env("CONSOLE_LOGIN_EMAIL") do
   config :console, :login_link,
     key: get_env("CONSOLE_LOGIN_KEY"),

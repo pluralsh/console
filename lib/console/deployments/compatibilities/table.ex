@@ -8,7 +8,7 @@ defmodule Console.Deployments.Compatibilities.Table do
 
   @table :addon_compatibilities
   @poll :timer.minutes(30)
-  @url "https://raw.githubusercontent.com/pluralsh/console/master/static/compatibilities/"
+  @url "/pluralsh/console/master/static/compatibilities/"
 
   defmodule State do
     defstruct [:table, :url]
@@ -22,7 +22,7 @@ defmodule Console.Deployments.Compatibilities.Table do
     :timer.send_interval(@poll, :poll)
     send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
-    {:ok, %State{table: table, url: @url}}
+    {:ok, %State{table: table, url: Console.github_raw_url(@url)}}
   end
 
   def fetch(%RuntimeService{name: name, version: vsn}) do

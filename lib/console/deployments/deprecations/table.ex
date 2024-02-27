@@ -6,7 +6,7 @@ defmodule Console.Deployments.Deprecations.Table do
 
   @table :api_deprecations
   @poll :timer.minutes(60)
-  @url "https://raw.githubusercontent.com/pluralsh/console/master/static/versions.yml"
+  @url "/pluralsh/console/master/static/versions.yml"
 
   defmodule State do
     defstruct [:table, :url]
@@ -26,7 +26,7 @@ defmodule Console.Deployments.Deprecations.Table do
     :timer.send_interval(@poll, :poll)
     send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
-    {:ok, %State{table: table, url: @url}}
+    {:ok, %State{table: table, url: Console.github_raw_url(@url)}}
   end
 
   def fetch(%ServiceComponent{} = component) do
