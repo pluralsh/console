@@ -2,6 +2,7 @@ import {
   Button,
   ClusterIcon,
   ErrorIcon,
+  InfoIcon,
   ListBoxItem,
   Select,
   Table,
@@ -356,8 +357,8 @@ export default function ClusterUpgrade({
               width={16}
             />
           ) : (
-            <WarningIcon
-              color="icon-warning"
+            <InfoIcon
+              color="icon-info"
               width={16}
             />
           )
