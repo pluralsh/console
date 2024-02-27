@@ -272,15 +272,25 @@ type RegexReplacement struct {
 	// +kubebuilder:validation:Required
 	Regex string `json:"regex"`
 
-	// Replacement ...
-	// +kubebuilder:validation:Optional
+	// The file this replacement will work on
+	// +kubebuilder:validation:Required
+	File string `json:"file"`
+
+	// Replacement to be substituted for the match in the regex
+	// +kubebuilder:validation:Required
 	Replacement string `json:"replacement"`
+
+	// Whether you want to apply templating to the regex before compiling
+	// +kubebuilder:validation:Optional
+	Templated *bool `json:"templated"`
 }
 
 func (in *RegexReplacement) Attributes() *console.RegexReplacementAttributes {
 	return &console.RegexReplacementAttributes{
 		Regex:       in.Regex,
 		Replacement: in.Replacement,
+		File:        in.File,
+		Templated:   in.Templated,
 	}
 }
 

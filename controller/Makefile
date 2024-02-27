@@ -158,6 +158,7 @@ helm: manifests kustomize helmify
 .PHONY: chart-crds
 chart-crds:
 	@cp -a config/crd/bases/. ../charts/controller/crds
+	@cp -a ../charts/controller/crds/. ../plural/helm/console/crds
 
 .PHONY: chart-rbac
 chart-rbac: helm
