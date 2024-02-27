@@ -7,7 +7,6 @@ import {
   Select,
   Table,
   Tooltip,
-  WarningIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { useCallback, useEffect, useMemo, useState } from 'react'
