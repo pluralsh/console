@@ -146,13 +146,26 @@ fragment PipelineStatus on PipelineStatus {
   pending
 }
 
+fragment PipelinePullRequest on PipelinePullRequest {
+  id
+  service {
+    id
+    name
+    protect
+    deletedAt
+  }
+  pullRequest {
+    ...PullRequest
+  }
+}
+
 fragment PipelineContext on PipelineContext {
   id
   context
   insertedAt
   updatedAt
-  pullRequests {
-    ...PullRequest
+  pipelinePullRequests {
+    ...PipelinePullRequest
   }
 }
 

@@ -160,7 +160,11 @@ export function StageNode(
   const status = meta.stageStatus
 
   const isRootStage = isEmpty(incomers) && !isEmpty(outgoers)
-  const pullRequests = stage.context?.pullRequests
+  const pullRequests = stage.context?.pipelinePullRequests?.map?.(
+    (pr) => pr?.pullRequest
+  )
+
+  console.log('prs', stage.context?.pipelinePullRequests)
 
   return (
     <StageNodeSC {...props}>
