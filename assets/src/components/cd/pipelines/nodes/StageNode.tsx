@@ -119,7 +119,11 @@ const IconHeadingInnerSC = styled.div(({ theme }) => ({
   width: '100%',
 }))
 
-function PrsButton({ pullRequests }: { pullRequests: PullRequestFragment[] }) {
+function PrsButton({
+  pullRequests,
+}: {
+  pullRequests: Nullable<PullRequestFragment>[]
+}) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -156,6 +160,7 @@ export function StageNode(
   const status = meta.stageStatus
 
   const isRootStage = isEmpty(incomers) && !isEmpty(outgoers)
+  const pullRequests = stage.context?.pullRequests
 
   return (
     <StageNodeSC {...props}>
@@ -171,9 +176,7 @@ export function StageNode(
       <IconHeading icon={<ClusterIcon />}>
         <IconHeadingInnerSC>
           Deploy to {stage.name}
-          {!isEmpty(stage.context?.pullRequests) && (
-            <PrsButton pullRequests={stage.context?.pullRequests} />
-          )}
+          {pullRequests?.length && <PrsButton pullRequests={pullRequests} />}
         </IconHeadingInnerSC>
       </IconHeading>
 
