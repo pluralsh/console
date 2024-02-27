@@ -6,7 +6,9 @@ import {
   ClusterIcon,
   CodeEditor,
   FormField,
+  IconFrame,
   Modal,
+  PrOpenIcon,
 } from '@pluralsh/design-system'
 import {
   ComponentProps,
@@ -20,11 +22,13 @@ import { type NodeProps } from 'reactflow'
 import isEmpty from 'lodash/isEmpty'
 import upperFirst from 'lodash/upperFirst'
 import { MergeDeep } from 'type-fest'
+import { produce } from 'immer'
 
 import {
   PipelineContextsDocument,
   PipelineContextsQuery,
   PipelineStageFragment,
+  PullRequestFragment,
   ServiceDeploymentStatus,
   useCreatePipelineContextMutation,
 } from 'generated/graphql'
@@ -34,9 +38,8 @@ import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
 
-import { produce } from 'immer'
-
 import { PIPELINE_GRID_GAP } from '../PipelineGraph'
+import { PipelinePullRequestsModal } from '../PipelinePullRequests'
 
 import {
   BaseNode,
@@ -108,6 +111,35 @@ const StageNodeSC = styled(BaseNode)((_) => ({
   '&&': { minWidth: 10 * PIPELINE_GRID_GAP },
 }))
 
+const IconHeadingInnerSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.medium,
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  width: '100%',
+}))
+
+function PrsButton({ pullRequests }: { pullRequests: PullRequestFragment[] }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <IconFrame
+        type="secondary"
+        clickable
+        onClick={() => setOpen(true)}
+        icon={<PrOpenIcon />}
+        tooltip="View pull requests"
+      />
+      <PipelinePullRequestsModal
+        open={open}
+        onClose={() => setOpen(false)}
+        pullRequests={pullRequests}
+      />
+    </>
+  )
+}
+
 export function StageNode(
   props: NodeProps<
     PipelineStageFragment &
@@ -136,7 +168,14 @@ export function StageNode(
           {status}
         </Chip>
       </div>
-      <IconHeading icon={<ClusterIcon />}>Deploy to {stage.name}</IconHeading>
+      <IconHeading icon={<ClusterIcon />}>
+        <IconHeadingInnerSC>
+          Deploy to {stage.name}
+          {!isEmpty(stage.context?.pullRequests) && (
+            <PrsButton pullRequests={stage.context?.pullRequests} />
+          )}
+        </IconHeadingInnerSC>
+      </IconHeading>
 
       {!isEmpty(stage.services) && (
         <div className="section">
@@ -275,7 +314,7 @@ function AddContextModal({
       disabled={!json || jsonError}
       loading={loading}
     >
-      Create context
+      Add context
     </Button>
   )
 
@@ -284,7 +323,7 @@ function AddContextModal({
       portal
       asForm
       formProps={{ onSubmit }}
-      header="Create context"
+      header="Add context"
       actions={actions}
       {...props}
     >
