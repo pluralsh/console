@@ -127,11 +127,6 @@ export function StageNode(
   } = props
   const status = meta.stageStatus
 
-  console.log('stage context', stage?.context)
-  console.log('stage', stage)
-  console.log('incomers', incomers)
-  console.log('outgoers', outgoers)
-
   const isRootStage = isEmpty(incomers) && !isEmpty(outgoers)
 
   return (
@@ -227,26 +222,17 @@ function AddContextModal({
       props?.onClose?.()
     },
     update: (cache, { data }) => {
-      console.log('data', data)
-
       const pipelineId = data?.createPipelineContext?.pipeline?.id
 
       if (!data?.createPipelineContext || !pipelineId) {
         return
       }
       const { pipeline: _, ...newContext } = data.createPipelineContext
-
       const params = {
         query: PipelineContextsDocument,
         variables: { id: pipelineId, first: 100 },
       }
-
-      console.log('newContext', newContext)
-
       const prev = cache.readQuery<PipelineContextsQuery>(params)
-
-      console.log('prev', prev)
-
       const next = produce(prev, (draft) => {
         draft?.pipeline?.contexts?.edges?.unshift?.({
           __typename: 'PipelineContextEdge',
@@ -254,14 +240,10 @@ function AddContextModal({
         })
       })
 
-      console.log('next', next)
-
       cache.writeQuery({
         ...params,
         data: next,
       })
-
-      console.log('cache', cache)
     },
   })
 
@@ -280,7 +262,6 @@ function AddContextModal({
 
         return
       }
-      console.log('submitting', json)
       mutation({
         variables: { pipelineId, attributes: { context: json } },
       })
@@ -301,9 +282,6 @@ function AddContextModal({
       Create context
     </Button>
   )
-
-  console.log('error', error)
-  console.log('jsonError', jsonError)
 
   return (
     <Modal
