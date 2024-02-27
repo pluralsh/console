@@ -369,14 +369,24 @@ spec:
                     items:
                       description: RegexReplacement ...
                       properties:
+                        file:
+                          description: The file this replacement will work on
+                          type: string
                         regex:
                           description: Regex ...
                           type: string
                         replacement:
-                          description: Replacement ...
+                          description: Replacement to be substituted for the match
+                            in the regex
                           type: string
+                        templated:
+                          description: Whether you want to apply templating to the
+                            regex before compiling
+                          type: boolean
                       required:
+                      - file
                       - regex
+                      - replacement
                       type: object
                     type: array
                   regexes:
