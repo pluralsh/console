@@ -16,7 +16,6 @@ import { RawJson } from 'components/component/ComponentRaw'
 import { PropWideBold } from 'components/component/info/common'
 
 import { PipelinePullRequestsTable } from '../PipelinePullRequests'
-// import { TEST_CONTEXTS } from '../TEST_CONTEXTS'
 import { getPipelineBreadcrumbs } from '../PipelineDetails'
 
 export function PipelineContextDetails() {
@@ -28,12 +27,6 @@ export function PipelineContextDetails() {
     skip: !contextId,
   })
   const context = data?.pipelineContext
-
-  // if (!context) {
-  //   context = TEST_CONTEXTS.find((context) => context.node?.id === contextId)
-  //     ?.node
-  // }
-
   const pipelineName = context?.pipeline?.name
 
   useSetBreadcrumbs(

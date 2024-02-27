@@ -237,13 +237,6 @@ query JobGateLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
 query Pipeline($id: ID!) {
   pipeline(id: $id) {
     ...Pipeline
-    # contexts(first: 100) {
-    #   edges {
-    #     node {
-    #       ...PipelineContextRow
-    #     }
-    #   }
-    # }
   }
 }
 
@@ -268,7 +261,7 @@ query PipelineContexts(
 
 query PipelineContext($id: ID!) {
   pipelineContext(id: $id) {
-    id
+    ...PipelineContextRow
     pipeline {
       ...Pipeline
     }
