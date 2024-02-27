@@ -237,6 +237,13 @@ query JobGateLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
 query Pipeline($id: ID!) {
   pipeline(id: $id) {
     ...Pipeline
+    # contexts(first: 100) {
+    #   edges {
+    #     node {
+    #       ...PipelineContextRow
+    #     }
+    #   }
+    # }
   }
 }
 
@@ -248,6 +255,7 @@ query PipelineContexts(
   $last: Int
 ) {
   pipeline(id: $id) {
+    id
     contexts(after: $after, before: $before, first: $first, last: $last) {
       edges {
         node {
@@ -260,7 +268,7 @@ query PipelineContexts(
 
 query PipelineContext($id: ID!) {
   pipelineContext(id: $id) {
-    ...PipelineContextRow
+    id
     pipeline {
       ...Pipeline
     }
@@ -276,5 +284,17 @@ mutation deletePipeline($id: ID!) {
 mutation ApproveGate($id: ID!) {
   approveGate(id: $id) {
     ...PipelineGate
+  }
+}
+
+mutation CreatePipelineContext(
+  $pipelineId: ID!
+  $attributes: PipelineContextAttributes!
+) {
+  createPipelineContext(pipelineId: $pipelineId, attributes: $attributes) {
+    ...PipelineContextRow
+    pipeline {
+      id
+    }
   }
 }
