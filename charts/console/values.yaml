@@ -74,6 +74,10 @@ shutdownDelay: 30
 ingress:
   enabled: true
   ingressClass: nginx
+
+  tls:
+    enabled: true
+
   annotations:
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
