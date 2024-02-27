@@ -24,7 +24,12 @@ query PodLogs(
   $container: String!
   $sinceSeconds: Int!
 ) {
-  pod(name: $name, namespace: $namespace, clusterId: $clusterId, serviceId: $serviceId) {
+  pod(
+    name: $name
+    namespace: $namespace
+    clusterId: $clusterId
+    serviceId: $serviceId
+  ) {
     logs(container: $container, sinceSeconds: $sinceSeconds)
   }
 }

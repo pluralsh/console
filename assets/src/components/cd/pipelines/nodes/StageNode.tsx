@@ -1,19 +1,40 @@
-import { Chip, ClusterIcon } from '@pluralsh/design-system'
+import { useNavigate, useParams } from 'react-router-dom'
+import styled, { useTheme } from 'styled-components'
 import {
-  PipelineStageFragment,
-  ServiceDeploymentStatus,
-} from 'generated/graphql'
-import { ComponentProps, ComponentPropsWithoutRef } from 'react'
+  Button,
+  Chip,
+  ClusterIcon,
+  CodeEditor,
+  FormField,
+  Modal,
+} from '@pluralsh/design-system'
+import {
+  ComponentProps,
+  ComponentPropsWithoutRef,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import { type NodeProps } from 'reactflow'
 import isEmpty from 'lodash/isEmpty'
 import upperFirst from 'lodash/upperFirst'
 import { MergeDeep } from 'type-fest'
 
+import {
+  PipelineContextsDocument,
+  PipelineContextsQuery,
+  PipelineStageFragment,
+  ServiceDeploymentStatus,
+  useCreatePipelineContextMutation,
+} from 'generated/graphql'
+
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
+import { useNodeEdges } from 'components/hooks/reactFlowHooks'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { GqlError } from 'components/utils/Alert'
 
-import { useNavigate } from 'react-router-dom'
-
-import styled from 'styled-components'
+import { produce } from 'immer'
 
 import { PIPELINE_GRID_GAP } from '../PipelineGraph'
 
@@ -94,10 +115,15 @@ export function StageNode(
   >
 ) {
   const navigate = useNavigate()
+  const { incomers, outgoers } = useNodeEdges(props.id)
+  const pipelineId = useParams().pipelineId!
+
   const {
     data: { meta, ...stage },
   } = props
   const status = meta.stageStatus
+
+  const isRootStage = isEmpty(incomers) && !isEmpty(outgoers)
 
   return (
     <StageNodeSC {...props}>
@@ -148,6 +174,141 @@ export function StageNode(
           </NodeCardList>
         </div>
       )}
+      {isRootStage && pipelineId && (
+        <AddPipelineContext pipelineId={pipelineId} />
+      )}
     </StageNodeSC>
+  )
+}
+
+function AddPipelineContext({ pipelineId }: { pipelineId: string }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        secondary
+        onClick={() => setOpen(true)}
+      >
+        Add context
+      </Button>
+
+      <ModalMountTransition open={open}>
+        <AddContextModal
+          open={open}
+          onClose={() => setOpen(false)}
+          pipelineId={pipelineId}
+        />
+      </ModalMountTransition>
+    </>
+  )
+}
+
+function AddContextModal({
+  pipelineId,
+  ...props
+}: { pipelineId: string } & ComponentProps<typeof Modal>) {
+  const theme = useTheme()
+  const [json, setJson] = useState('')
+  const [jsonError, setJsonError] = useState('')
+
+  const [mutation, { error, loading }] = useCreatePipelineContextMutation({
+    onCompleted: () => {
+      setJson('')
+      props?.onClose?.()
+    },
+    update: (cache, { data }) => {
+      const pipelineId = data?.createPipelineContext?.pipeline?.id
+
+      if (!data?.createPipelineContext || !pipelineId) {
+        return
+      }
+      const { pipeline: _, ...newContext } = data.createPipelineContext
+      const params = {
+        query: PipelineContextsDocument,
+        variables: { id: pipelineId, first: 100 },
+      }
+      const prev = cache.readQuery<PipelineContextsQuery>(params)
+      const next = produce(prev, (draft) => {
+        draft?.pipeline?.contexts?.edges?.unshift?.({
+          __typename: 'PipelineContextEdge',
+          node: newContext,
+        })
+      })
+
+      cache.writeQuery({
+        ...params,
+        data: next,
+      })
+    },
+  })
+
+  const onSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault()
+      if (!json) {
+        setJsonError('JSON is required')
+
+        return
+      }
+      try {
+        JSON.parse(json)
+      } catch (e) {
+        setJsonError('Invalid JSON')
+
+        return
+      }
+      mutation({
+        variables: { pipelineId, attributes: { context: json } },
+      })
+    },
+    [json, mutation, pipelineId]
+  )
+
+  useEffect(() => {
+    setJsonError('')
+  }, [json])
+
+  const actions = (
+    <Button
+      type="submit"
+      disabled={!json || jsonError}
+      loading={loading}
+    >
+      Create context
+    </Button>
+  )
+
+  return (
+    <Modal
+      portal
+      asForm
+      formProps={{ onSubmit }}
+      header="Create context"
+      actions={actions}
+      {...props}
+    >
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.medium,
+        }}
+      >
+        <FormField
+          label="JSON"
+          required
+        >
+          <CodeEditor
+            value={json}
+            language="json"
+            onChange={setJson}
+            height="160px"
+            options={{ lineNumbers: false, minimap: { enabled: false } }}
+          />
+        </FormField>
+        {(jsonError || error) && <GqlError error={jsonError || error} />}
+      </div>
+    </Modal>
   )
 }

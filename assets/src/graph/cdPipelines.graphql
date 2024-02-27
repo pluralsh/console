@@ -120,6 +120,9 @@ fragment PipelineStage on PipelineStage {
   services {
     ...StageService
   }
+  context {
+    ...PipelineContextRow
+  }
 }
 
 fragment PipelineStageEdge on PipelineStageEdge {
@@ -141,6 +144,16 @@ fragment PipelineStageEdge on PipelineStageEdge {
 fragment PipelineStatus on PipelineStatus {
   closed
   pending
+}
+
+fragment PipelineContextRow on PipelineContext {
+  id
+  context
+  insertedAt
+  updatedAt
+  pullRequests {
+    ...PullRequest
+  }
 }
 
 fragment Pipeline on Pipeline {
@@ -227,6 +240,34 @@ query Pipeline($id: ID!) {
   }
 }
 
+query PipelineContexts(
+  $id: ID!
+  $before: String
+  $after: String
+  $first: Int!
+  $last: Int
+) {
+  pipeline(id: $id) {
+    id
+    contexts(after: $after, before: $before, first: $first, last: $last) {
+      edges {
+        node {
+          ...PipelineContextRow
+        }
+      }
+    }
+  }
+}
+
+query PipelineContext($id: ID!) {
+  pipelineContext(id: $id) {
+    ...PipelineContextRow
+    pipeline {
+      ...Pipeline
+    }
+  }
+}
+
 mutation deletePipeline($id: ID!) {
   deletePipeline(id: $id) {
     ...Pipeline
@@ -236,5 +277,17 @@ mutation deletePipeline($id: ID!) {
 mutation ApproveGate($id: ID!) {
   approveGate(id: $id) {
     ...PipelineGate
+  }
+}
+
+mutation CreatePipelineContext(
+  $pipelineId: ID!
+  $attributes: PipelineContextAttributes!
+) {
+  createPipelineContext(pipelineId: $pipelineId, attributes: $attributes) {
+    ...PipelineContextRow
+    pipeline {
+      id
+    }
   }
 }
