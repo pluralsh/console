@@ -38,11 +38,12 @@ import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
 import {
+  PersonaConfiguration,
   PersonaConfigurationFragment,
   PersonaFragment,
 } from 'generated/graphql'
 
-import { isArray, mergeWith } from 'lodash'
+import { isArray, isObject, mergeWith } from 'lodash'
 
 import { LoginContext, useLogin } from '../contexts'
 
@@ -194,18 +195,81 @@ const NotificationsCountSC = styled.div(({ theme }) => ({
   userSelect: 'none',
 }))
 
-const mergePersonaConfigs = (
-  personas: Nullable<PersonaFragment>[]
-): Nullable<PersonaConfigurationFragment>[] => {
-  if (!isArray(personas)) return []
+const TEST_CONFIGS: PersonaConfigurationFragment[] = [
+  {
+    all: false,
+    deployments: {
+      addOns: true,
+      clusters: false,
+      deployments: false,
+      pipelines: true,
+      providers: false,
+      services: false,
+    },
+    sidebar: {
+      audits: false,
+      kubernetes: false,
+      pullRequests: false,
+      settings: false,
+    },
+  },
+  // {
+  //   all: true,
+  //   deployments: {
+  //     addOns: false,
+  //     clusters: true,
+  //     deployments: false,
+  //     pipelines: false,
+  //     providers: false,
+  //     services: false,
+  //   },
+  //   sidebar: {
+  //     audits: false,
+  //     kubernetes: true,
+  //     pullRequests: false,
+  //     settings: true,
+  //   },
+  // },
+  // {
+  //   deployments: {
+  //     addOns: false,
+  //     clusters: false,
+  //     deployments: true,
+  //     pipelines: false,
+  //     providers: false,
+  //     services: true,
+  //   },
+  // },
+  // {
+  //   sidebar: {
+  //     audits: false,
+  //     kubernetes: false,
+  //     pullRequests: true,
+  //     settings: true,
+  //   },
+  // },
+]
 
-  return mergeWith(
-    {},
-    personas.map((persona) => persona?.configuration),
-    (
-      objValue: string | boolean | null | undefined,
-      srcValue: string | boolean | null | undefined
-    ) => objValue || srcValue
+const reducePersonaConfigs = (
+  personas: Nullable<Nullable<PersonaFragment>[]>
+): PersonaConfigurationFragment => {
+  // if (!personas?.length) return { all: true }
+
+  // const configs: PersonaConfigurationFragment[] = personas.map(
+  //   (persona) => persona?.configuration
+  // )
+  const configs = TEST_CONFIGS
+
+  return configs.reduce(
+    (previous, current) =>
+      mergeWith(previous, current, (objValue, srcValue) => {
+        if (isObject(objValue) || isObject(srcValue)) {
+          return undefined
+        }
+
+        return objValue || srcValue
+      }),
+    {} as PersonaConfigurationFragment
   )
 }
 
@@ -227,7 +291,7 @@ export default function Sidebar() {
   const isCDEnabled = useCDEnabled({ redirect: false })
 
   const menuItems = useMemo(() => {
-    const mergedconfig = mergePersonaConfigs(me?.personas || [])
+    const mergedconfig = reducePersonaConfigs(me?.personas)
 
     console.log('mergedconfig personas', me?.personas)
     console.log('mergedconfig', mergedconfig)
