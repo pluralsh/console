@@ -37,15 +37,9 @@ import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 
-import {
-  PersonaConfiguration,
-  PersonaConfigurationFragment,
-  PersonaFragment,
-} from 'generated/graphql'
+import { PersonaConfigurationFragment } from 'generated/graphql'
 
-import { isArray, isObject, mergeWith } from 'lodash'
-
-import { LoginContext, useLogin } from '../contexts'
+import { useLogin } from '../contexts'
 
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
@@ -195,84 +189,6 @@ const NotificationsCountSC = styled.div(({ theme }) => ({
   userSelect: 'none',
 }))
 
-const TEST_CONFIGS: PersonaConfigurationFragment[] = [
-  {
-    all: false,
-    deployments: {
-      addOns: true,
-      clusters: false,
-      deployments: false,
-      pipelines: true,
-      providers: false,
-      services: false,
-    },
-    sidebar: {
-      audits: false,
-      kubernetes: false,
-      pullRequests: false,
-      settings: false,
-    },
-  },
-  // {
-  //   all: true,
-  //   deployments: {
-  //     addOns: false,
-  //     clusters: true,
-  //     deployments: false,
-  //     pipelines: false,
-  //     providers: false,
-  //     services: false,
-  //   },
-  //   sidebar: {
-  //     audits: false,
-  //     kubernetes: true,
-  //     pullRequests: false,
-  //     settings: true,
-  //   },
-  // },
-  // {
-  //   deployments: {
-  //     addOns: false,
-  //     clusters: false,
-  //     deployments: true,
-  //     pipelines: false,
-  //     providers: false,
-  //     services: true,
-  //   },
-  // },
-  // {
-  //   sidebar: {
-  //     audits: false,
-  //     kubernetes: false,
-  //     pullRequests: true,
-  //     settings: true,
-  //   },
-  // },
-]
-
-const reducePersonaConfigs = (
-  personas: Nullable<Nullable<PersonaFragment>[]>
-): PersonaConfigurationFragment => {
-  // if (!personas?.length) return { all: true }
-
-  // const configs: PersonaConfigurationFragment[] = personas.map(
-  //   (persona) => persona?.configuration
-  // )
-  const configs = TEST_CONFIGS
-
-  return configs.reduce(
-    (previous, current) =>
-      mergeWith(previous, current, (objValue, srcValue) => {
-        if (isObject(objValue) || isObject(srcValue)) {
-          return undefined
-        }
-
-        return objValue || srcValue
-      }),
-    {} as PersonaConfigurationFragment
-  )
-}
-
 export default function Sidebar() {
   const menuItemRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -281,7 +197,7 @@ export default function Sidebar() {
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] =
     useState(false)
   const sidebarWidth = 64
-  const { me, configuration } = useLogin()
+  const { me, configuration, personaConfiguration } = useLogin()
   const { pathname } = useLocation()
   const isActive = useCallback(
     (menuItem: Parameters<typeof isActiveMenuItem>[0]) =>
@@ -291,18 +207,20 @@ export default function Sidebar() {
   const isCDEnabled = useCDEnabled({ redirect: false })
 
   const menuItems = useMemo(() => {
-    const mergedconfig = reducePersonaConfigs(me?.personas)
-
-    console.log('mergedconfig personas', me?.personas)
-    console.log('mergedconfig', mergedconfig)
+    console.log('mergedconfig personas', personaConfiguration)
 
     return getMenuItems({
       isSandbox: !!configuration?.isSandbox,
       isCDEnabled,
       isByok: !!configuration?.byok,
-      personaConfig: mergedconfig,
+      personaConfig: personaConfiguration,
     })
-  }, [me?.personas, configuration?.isSandbox, configuration?.byok, isCDEnabled])
+  }, [
+    personaConfiguration,
+    configuration?.isSandbox,
+    configuration?.byok,
+    isCDEnabled,
+  ])
 
   const [mutation] = useMutation(MARK_READ, {
     update: (cache) =>
@@ -340,6 +258,7 @@ export default function Sidebar() {
   useOutsideClick(notificationsPanelRef, () => toggleNotificationPanel(false))
 
   if (!me) return null
+  const unreadNotifications = me.unreadNotifications || 0
 
   return (
     <>
@@ -396,13 +315,13 @@ export default function Sidebar() {
               event.stopPropagation()
               toggleNotificationPanel(!isNotificationsPanelOpen)
             }}
-            badge={me?.unreadNotifications}
+            badge={unreadNotifications}
             active={isNotificationsPanelOpen}
           >
             <BellIcon />
-            {me?.unreadNotifications > 0 && (
+            {unreadNotifications > 0 && (
               <NotificationsCountSC>
-                {me.unreadNotifications > 99 ? '!' : me.unreadNotifications}
+                {unreadNotifications > 99 ? '!' : unreadNotifications}
               </NotificationsCountSC>
             )}
           </SidebarItem>
