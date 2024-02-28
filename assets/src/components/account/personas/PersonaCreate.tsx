@@ -1,13 +1,5 @@
-import { useCallback, useContext, useRef, useState } from 'react'
-import {
-  Button,
-  Modal,
-  SubTab,
-  Switch,
-  TabList,
-  TabPanel,
-  ValidatedInput,
-} from '@pluralsh/design-system'
+import { useCallback, useContext, useState } from 'react'
+import { Button, Modal, ValidatedInput } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 import {
   BindingAttributes,
@@ -16,21 +8,15 @@ import {
   useCreatePersonaMutation,
 } from 'generated/graphql'
 import { RequiredDeep } from 'type-fest'
-import { produce } from 'immer'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
-
 import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModal'
-
 import { useTheme } from 'styled-components'
-
-import { Body2BoldP } from 'components/utils/typography/Text'
-
-import upperFirst from 'lodash/upperFirst'
-
 import capitalize from 'lodash/capitalize'
 
 import { appendConnection, updateCache } from '../../../utils/graphql'
 import { GqlError } from '../../utils/Alert'
+
+import { PersonaConfigurationEdit } from './PersonaConfigurationEdit'
 
 const DEFAULT_CONFIGURATION = {
   all: true,
@@ -50,7 +36,7 @@ const DEFAULT_CONFIGURATION = {
   },
 } as const satisfies RequiredDeep<PersonaConfigurationAttributes>
 
-const configTabs = {
+export const configTabs = {
   deployments: 'Deployments',
   sidebar: 'Sidebar',
 } as const satisfies Record<
@@ -58,79 +44,18 @@ const configTabs = {
   string
 >
 
-function configKeyToLabel(key: string) {
+export function configKeyToLabel(key: string) {
   return capitalize(key.split(/(?=[A-Z])/).join(' '))
 }
 
-export function PersonaConfigurationEdit({
-  configuration,
-  setConfiguration,
+export function PersonaBindingsEdit({
+  bindings,
+  setBindings,
 }: {
-  configuration: PersonaConfigurationAttributes
-  setConfiguration: (cfg: PersonaConfigurationAttributes) => void
+  bindings: any
+  setBindings: any
 }) {
-  const tabStateRef = useRef<any>()
-  const [tabKey, setTabKey] = useState<keyof typeof configTabs>('deployments')
-
-  return (
-    <div>
-      <Body2BoldP as="h2">Configuration options</Body2BoldP>
-
-      <Switch
-        checked={!!configuration.all}
-        onChange={() =>
-          setConfiguration(
-            produce(configuration, (draft) => {
-              draft.all = !configuration.all
-            })
-          )
-        }
-      >
-        All
-      </Switch>
-      {true && (
-        <div>
-          <TabList
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: tabKey,
-              onSelectionChange: (key) => setTabKey(key as any),
-            }}
-          >
-            {Object.entries(configTabs).map(([key, label]) => (
-              <SubTab key={key}>{upperFirst(label)}</SubTab>
-            ))}
-          </TabList>
-          {Object.entries(configTabs).map(([key]) => (
-            <TabPanel
-              key={key}
-              tabKey={key}
-              mode="multipanel"
-              stateRef={tabStateRef}
-            >
-              {Object.entries(configuration[key]).map(([subKey, checked]) => (
-                <Switch
-                  key={subKey}
-                  disabled={!!configuration.all}
-                  checked={!!configuration.all || !!checked}
-                  onChange={() =>
-                    setConfiguration(
-                      produce(configuration, (draft) => {
-                        draft[key][subKey] = !draft[key][subKey]
-                      })
-                    )
-                  }
-                >
-                  {configKeyToLabel(subKey)}
-                </Switch>
-              ))}
-            </TabPanel>
-          ))}
-        </div>
-      )}
-    </div>
-  )
+  return <div>PersonaBindingsEdit</div>
 }
 
 export default function PersonaCreate() {

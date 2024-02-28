@@ -1,6 +1,6 @@
 import { Modal, ValidatedInput } from '@pluralsh/design-system'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { Flex, usePrevious } from 'honorable'
+import { ComponentProps, ReactNode, useEffect, useMemo, useState } from 'react'
+import { Flex } from 'honorable'
 
 import { Actions } from 'components/utils/Actions'
 
@@ -8,71 +8,92 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 
 import {
   PersonaConfigurationAttributes,
+  PersonaFragment,
   useUpdatePersonaMutation,
 } from 'generated/graphql'
 
-import { produce } from 'immer'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-import capitalize from 'lodash/capitalize'
+import mergeWith from 'lodash/mergeWith'
+
+import { RequiredDeep } from 'type-fest'
 
 import { GqlError } from '../../utils/Alert'
 
-import { PersonaConfigurationEdit } from './PersonaCreate'
+import { deepOmitKey } from './deepOmitKey'
+import { PersonaConfigurationEdit } from './PersonaConfigurationEdit'
 
-function deepFilterByKey(obj: unknown, key: string) {
-  if (!obj || typeof obj !== 'object') {
-    return obj
-  }
+const BASE_CONFIGURATION = {
+  all: false,
+  deployments: {
+    addOns: true,
+    clusters: true,
+    deployments: true,
+    pipelines: true,
+    providers: true,
+    services: true,
+  },
+  sidebar: {
+    audits: true,
+    kubernetes: true,
+    pullRequests: true,
+    settings: true,
+  },
+} as const satisfies RequiredDeep<PersonaConfigurationAttributes>
 
-  if (Object.prototype.hasOwnProperty.call(obj, key)) {
-    delete obj[key]
-  }
-
-  for (const k in obj) {
-    if (obj[k] && typeof obj[k] === 'object') {
-      deepFilterByKey(obj[k], key)
-    }
-  }
-
-  return obj
-}
-
-function removeTypename(obj: unknown) {
-  return produce(obj, (draft) => deepFilterByKey(draft, '__typename'))
-}
-
-
-export function EditPersonaAttributes({ persona, open, onClose }: any) {
-  const prevOpen = usePrevious(open)
+export function EditPersonaAttributesModal({
+  persona,
+  open,
+  onClose,
+}: {
+  persona: PersonaFragment
+  open: boolean
+  onClose: () => void
+}) {
   const [errorMsg, setErrorMsg] = useState<ReactNode>()
+  const initialConfig = useMemo(
+    () =>
+      mergeWith(
+        {},
+        BASE_CONFIGURATION,
+        (deepOmitKey(persona?.configuration, '__typename' as const) || {
+          all: true,
+        }) as PersonaConfigurationAttributes,
+        (base, src) => {
+          if (!src) return base
+
+          return src
+        }
+      ),
+    [persona?.configuration]
+  )
 
   const {
     state: formState,
-    reset: resetForm,
     update,
     hasUpdates,
   } = useUpdateState({
     name: persona.name,
     description: persona.description,
-    configuration: removeTypename(persona.configuration),
+    configuration: initialConfig,
   })
-  const { name, description } = formState
+
+  const { name, description, configuration } = formState
 
   const [mutation, { loading, error }] = useUpdatePersonaMutation({
-    variables: { id: persona.id, attributes: { name, description } },
+    variables: {
+      id: persona.id,
+      attributes: {
+        name,
+        description,
+        configuration: configuration.all
+          ? { all: true, deployments: null, sidebar: null }
+          : configuration,
+      },
+    },
     onCompleted: onClose,
   })
 
-  const reset = useCallback(() => {
-    resetForm()
-    setErrorMsg(undefined)
-  }, [resetForm])
-
-  useEffect(() => {
-    if (open && open !== prevOpen) {
-      reset()
-    }
-  })
   useEffect(() => {
     setErrorMsg(
       error && (
@@ -123,5 +144,15 @@ export function EditPersonaAttributes({ persona, open, onClose }: any) {
         />
       </Flex>
     </Modal>
+  )
+}
+
+export function EditPersonaAttributes(
+  props: ComponentProps<typeof EditPersonaAttributesModal>
+) {
+  return (
+    <ModalMountTransition open={props.open}>
+      <EditPersonaAttributesModal {...props} />
+    </ModalMountTransition>
   )
 }

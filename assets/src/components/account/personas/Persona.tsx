@@ -73,15 +73,11 @@ export default function Persona({ persona }: { persona: PersonaT }) {
               <IconFrame
                 clickable
                 size="medium"
-                onClick={() => dialogKey === '' && setDialogKey('editMembers')}
+                onClick={() => setDialogKey('editMembers')}
                 tooltip="Edit members"
                 icon={<PeopleIcon />}
               />
-              <DeleteIconButton
-                onClick={() =>
-                  dialogKey === '' && setDialogKey('confirmDelete')
-                }
-              />
+              <DeleteIconButton onClick={() => setDialogKey('confirmDelete')} />
             </>
           </Flex>
         )}
@@ -96,6 +92,11 @@ export default function Persona({ persona }: { persona: PersonaT }) {
           persona={persona}
           open={dialogKey === 'editAttrs'}
           onClose={() => dialogKey === 'editAttrs' && setDialogKey('')}
+        />
+        <EditPersonaAttributes
+          persona={persona}
+          open={dialogKey === 'editMembers'}
+          onClose={() => dialogKey === 'editMembers' && setDialogKey('')}
         />
         <Confirm
           open={dialogKey === 'confirmDelete'}
