@@ -82,6 +82,7 @@ const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
     display: 'flex',
     gap: theme.spacing.small,
     alignItems: 'center',
+    justifyContent: 'space-between',
     width: '100%',
   },
   '.serviceName': {
@@ -231,6 +232,12 @@ export function StageNode(
                     }
                     statusLabel={upperFirst(service?.status.toLowerCase?.())}
                   >
+                    <div>
+                      <div className="serviceName">{service?.name}</div>
+                      <div className="clusterName">
+                        {service?.cluster?.name}
+                      </div>
+                    </div>
                     {servicePullRequests[serviceId]?.length && (
                       <StopPropagation>
                         <PrsButton
@@ -238,12 +245,6 @@ export function StageNode(
                         />
                       </StopPropagation>
                     )}
-                    <div>
-                      <div className="serviceName">{service?.name}</div>
-                      <div className="clusterName">
-                        {service?.cluster?.name}
-                      </div>
-                    </div>
                   </ServiceCard>
                 </li>
               )
