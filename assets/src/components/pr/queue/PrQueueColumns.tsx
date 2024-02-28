@@ -222,11 +222,11 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
 
 export const columns = [
   ColTitle,
+  ColLink,
   ColStatus,
   ColCluster,
   ColService,
   ColCreator,
   ColLabels,
   ColInsertedAt,
-  ColLink,
 ]
