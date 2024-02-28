@@ -9,7 +9,7 @@ the future
  */
 
 import { usePrevious } from '@pluralsh/design-system'
-import { ReactElement, useEffect, useState } from 'react'
+import { ReactElement, useLayoutEffect, useState } from 'react'
 import { Transition, TransitionGroup } from 'react-transition-group'
 
 export function ModalMountTransition({
@@ -22,7 +22,7 @@ export function ModalMountTransition({
   const wasOpen = usePrevious(open)
   const [counter, setCounter] = useState(0)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (open && !wasOpen) {
       setCounter(counter + 1)
     }

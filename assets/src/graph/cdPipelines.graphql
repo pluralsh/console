@@ -121,7 +121,7 @@ fragment PipelineStage on PipelineStage {
     ...StageService
   }
   context {
-    ...PipelineContextRow
+    ...PipelineContext
   }
 }
 
@@ -146,13 +146,29 @@ fragment PipelineStatus on PipelineStatus {
   pending
 }
 
-fragment PipelineContextRow on PipelineContext {
+fragment PipelinePullRequest on PipelinePullRequest {
+  id
+  service {
+    id
+    name
+    protect
+    deletedAt
+  }
+  pullRequest {
+    ...PullRequest
+  }
+}
+
+fragment PipelineContext on PipelineContext {
   id
   context
   insertedAt
   updatedAt
   pullRequests {
     ...PullRequest
+  }
+  pipelinePullRequests {
+    ...PipelinePullRequest
   }
 }
 
@@ -252,7 +268,7 @@ query PipelineContexts(
     contexts(after: $after, before: $before, first: $first, last: $last) {
       edges {
         node {
-          ...PipelineContextRow
+          ...PipelineContext
         }
       }
     }
@@ -261,7 +277,7 @@ query PipelineContexts(
 
 query PipelineContext($id: ID!) {
   pipelineContext(id: $id) {
-    ...PipelineContextRow
+    ...PipelineContext
     pipeline {
       ...Pipeline
     }
@@ -285,7 +301,7 @@ mutation CreatePipelineContext(
   $attributes: PipelineContextAttributes!
 ) {
   createPipelineContext(pipelineId: $pipelineId, attributes: $attributes) {
-    ...PipelineContextRow
+    ...PipelineContext
     pipeline {
       id
     }

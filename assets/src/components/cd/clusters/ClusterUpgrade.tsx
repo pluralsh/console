@@ -2,11 +2,11 @@ import {
   Button,
   ClusterIcon,
   ErrorIcon,
+  InfoIcon,
   ListBoxItem,
   Select,
   Table,
   Tooltip,
-  WarningIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -356,8 +356,8 @@ export default function ClusterUpgrade({
               width={16}
             />
           ) : (
-            <WarningIcon
-              color="icon-warning"
+            <InfoIcon
+              color="icon-info"
               width={16}
             />
           )

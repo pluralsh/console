@@ -3,6 +3,7 @@ fragment PrAutomation on PrAutomation {
   name
   documentation
   addon
+  identifier
   cluster {
     ...ClusterBasic
   }

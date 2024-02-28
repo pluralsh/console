@@ -6,7 +6,9 @@ import {
   ClusterIcon,
   CodeEditor,
   FormField,
+  IconFrame,
   Modal,
+  PrOpenIcon,
 } from '@pluralsh/design-system'
 import {
   ComponentProps,
@@ -14,17 +16,20 @@ import {
   FormEvent,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react'
 import { type NodeProps } from 'reactflow'
 import isEmpty from 'lodash/isEmpty'
 import upperFirst from 'lodash/upperFirst'
 import { MergeDeep } from 'type-fest'
+import { produce } from 'immer'
 
 import {
   PipelineContextsDocument,
   PipelineContextsQuery,
   PipelineStageFragment,
+  PullRequestFragment,
   ServiceDeploymentStatus,
   useCreatePipelineContextMutation,
 } from 'generated/graphql'
@@ -34,9 +39,12 @@ import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
 
-import { produce } from 'immer'
+import { groupBy, mapValues } from 'lodash'
 
 import { PIPELINE_GRID_GAP } from '../PipelineGraph'
+import { PipelinePullRequestsModal } from '../PipelinePullRequests'
+
+import { StopPropagation } from '../../../utils/StopPropagation'
 
 import {
   BaseNode,
@@ -68,6 +76,13 @@ const stageStatusToSeverity = {
 >
 const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
   '&&': {
+    width: '100%',
+  },
+  '.contentArea': {
+    display: 'flex',
+    gap: theme.spacing.small,
+    alignItems: 'center',
+    justifyContent: 'space-between',
     width: '100%',
   },
   '.serviceName': {
@@ -108,6 +123,42 @@ const StageNodeSC = styled(BaseNode)((_) => ({
   '&&': { minWidth: 10 * PIPELINE_GRID_GAP },
 }))
 
+const IconHeadingInnerSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.medium,
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  width: '100%',
+}))
+
+function PrsButton({
+  pullRequests,
+}: {
+  pullRequests: Nullable<PullRequestFragment>[]
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <IconFrame
+        type="secondary"
+        clickable
+        onClick={(e) => {
+          setOpen(true)
+          e.target?.blur()
+        }}
+        icon={<PrOpenIcon />}
+        tooltip="View pull requests"
+      />
+      <PipelinePullRequestsModal
+        open={open}
+        onClose={() => setOpen(false)}
+        pullRequests={pullRequests}
+      />
+    </>
+  )
+}
+
 export function StageNode(
   props: NodeProps<
     PipelineStageFragment &
@@ -125,6 +176,18 @@ export function StageNode(
 
   const isRootStage = isEmpty(incomers) && !isEmpty(outgoers)
 
+  const servicePullRequests = useMemo(
+    () =>
+      mapValues(
+        groupBy(
+          stage.context?.pipelinePullRequests,
+          (pipelinePr) => pipelinePr?.service?.id
+        ),
+        (prs) => prs?.map?.((pr) => pr?.pullRequest)
+      ),
+    [stage.context?.pipelinePullRequests]
+  )
+
   return (
     <StageNodeSC {...props}>
       <div className="headerArea">
@@ -136,41 +199,56 @@ export function StageNode(
           {status}
         </Chip>
       </div>
-      <IconHeading icon={<ClusterIcon />}>Deploy to {stage.name}</IconHeading>
+      <IconHeading icon={<ClusterIcon />}>
+        <IconHeadingInnerSC>Deploy to {stage.name}</IconHeadingInnerSC>
+      </IconHeading>
 
       {!isEmpty(stage.services) && (
         <div className="section">
           <NodeCardList>
-            {stage.services?.map((stageService) => (
-              <li>
-                <ServiceCard
-                  clickable
-                  onClick={() => {
-                    navigate(
-                      getServiceDetailsPath({
-                        clusterId: stageService?.service?.cluster?.id,
-                        serviceId: stageService?.service?.id,
-                      })
-                    )
-                  }}
-                  status={
-                    stageService?.service?.status
-                      ? serviceStateToCardStatus[stageService?.service?.status]
-                      : undefined
-                  }
-                  statusLabel={upperFirst(
-                    stageService?.service?.status.toLowerCase?.()
-                  )}
-                >
-                  <div className="serviceName">
-                    {stageService?.service?.name}
-                  </div>
-                  <div className="clusterName">
-                    {stageService?.service?.cluster?.name}
-                  </div>
-                </ServiceCard>
-              </li>
-            ))}
+            {stage.services?.map((stageService) => {
+              const service = stageService?.service
+              const serviceId = service?.id
+
+              if (!serviceId) return null
+
+              return (
+                <li>
+                  <ServiceCard
+                    clickable
+                    onClick={(e) => {
+                      console.log('e', e.target, e.currentTarget, e.nativeEvent)
+                      navigate(
+                        getServiceDetailsPath({
+                          clusterId: service?.cluster?.id,
+                          serviceId,
+                        })
+                      )
+                    }}
+                    status={
+                      service?.status
+                        ? serviceStateToCardStatus[service?.status]
+                        : undefined
+                    }
+                    statusLabel={upperFirst(service?.status.toLowerCase?.())}
+                  >
+                    <div>
+                      <div className="serviceName">{service?.name}</div>
+                      <div className="clusterName">
+                        {service?.cluster?.name}
+                      </div>
+                    </div>
+                    {servicePullRequests[serviceId]?.length && (
+                      <StopPropagation>
+                        <PrsButton
+                          pullRequests={servicePullRequests[serviceId]}
+                        />
+                      </StopPropagation>
+                    )}
+                  </ServiceCard>
+                </li>
+              )
+            })}
           </NodeCardList>
         </div>
       )}
@@ -275,7 +353,7 @@ function AddContextModal({
       disabled={!json || jsonError}
       loading={loading}
     >
-      Create context
+      Add context
     </Button>
   )
 
@@ -284,7 +362,7 @@ function AddContextModal({
       portal
       asForm
       formProps={{ onSubmit }}
-      header="Create context"
+      header="Add context"
       actions={actions}
       {...props}
     >

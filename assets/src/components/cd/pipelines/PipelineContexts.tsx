@@ -2,7 +2,7 @@ import { Button, PrOpenIcon, Table, Tooltip } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 import {
-  PipelineContextRowFragment,
+  PipelineContextFragment,
   PipelineFragment,
   usePipelineContextsQuery,
 } from 'generated/graphql'
@@ -14,7 +14,7 @@ import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import { PipelinePullRequestsModal } from './PipelinePullRequests'
 
-type RowData = Edge<PipelineContextRowFragment>
+type RowData = Edge<PipelineContextFragment>
 export const columnHelper = createColumnHelper<RowData>()
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -127,8 +127,6 @@ export function PipelineContexts({
     skip: !pipeline?.id,
   })
   const tableData = data?.pipeline?.contexts?.edges ?? []
-
-  // tableData = TEST_CONTEXTS
 
   if (!pipeline?.id) return null
 
