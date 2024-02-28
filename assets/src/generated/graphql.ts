@@ -7088,6 +7088,39 @@ export type UnstructuredResourceQueryVariables = Exact<{
 
 export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
 
+export type PersonaConfigurationFragment = { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, deployments?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null } | null };
+
+export type PersonaFragment = { __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, deployments?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null } | null } | null };
+
+export type PersonasQueryVariables = Exact<{
+  cursor?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PersonasQuery = { __typename?: 'RootQueryType', personas?: { __typename?: 'PersonaConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PersonaEdge', node?: { __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, deployments?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null } | null } | null } | null } | null> | null } | null };
+
+export type CreatePersonaMutationVariables = Exact<{
+  attributes: PersonaAttributes;
+}>;
+
+
+export type CreatePersonaMutation = { __typename?: 'RootMutationType', createPersona?: { __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, deployments?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null } | null } | null } | null };
+
+export type UpdatePersonaMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: PersonaAttributes;
+}>;
+
+
+export type UpdatePersonaMutation = { __typename?: 'RootMutationType', updatePersona?: { __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, deployments?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null } | null } | null } | null };
+
+export type DeletePersonaMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeletePersonaMutation = { __typename?: 'RootMutationType', deletePersona?: { __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, deployments?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null } | null } | null } | null };
+
 export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
 export type AccessTokenAuditFragment = { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null };
@@ -7118,10 +7151,6 @@ export type DeleteAccessTokenMutationVariables = Exact<{
 
 
 export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
-
-export type PersonaConfigurationFragment = { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, deployments?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null } | null };
-
-export type PersonaFragment = { __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, deployments?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null } | null } | null };
 
 export type UserFragment = { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, deployments?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null } | null } | null } | null> | null };
 
@@ -13802,6 +13831,154 @@ export type UnstructuredResourceQueryHookResult = ReturnType<typeof useUnstructu
 export type UnstructuredResourceLazyQueryHookResult = ReturnType<typeof useUnstructuredResourceLazyQuery>;
 export type UnstructuredResourceSuspenseQueryHookResult = ReturnType<typeof useUnstructuredResourceSuspenseQuery>;
 export type UnstructuredResourceQueryResult = Apollo.QueryResult<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>;
+export const PersonasDocument = gql`
+    query Personas($cursor: String) {
+  personas(first: 3, after: $cursor) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Persona
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${PersonaFragmentDoc}`;
+
+/**
+ * __usePersonasQuery__
+ *
+ * To run a query within a React component, call `usePersonasQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePersonasQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePersonasQuery({
+ *   variables: {
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function usePersonasQuery(baseOptions?: Apollo.QueryHookOptions<PersonasQuery, PersonasQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PersonasQuery, PersonasQueryVariables>(PersonasDocument, options);
+      }
+export function usePersonasLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PersonasQuery, PersonasQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PersonasQuery, PersonasQueryVariables>(PersonasDocument, options);
+        }
+export function usePersonasSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PersonasQuery, PersonasQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PersonasQuery, PersonasQueryVariables>(PersonasDocument, options);
+        }
+export type PersonasQueryHookResult = ReturnType<typeof usePersonasQuery>;
+export type PersonasLazyQueryHookResult = ReturnType<typeof usePersonasLazyQuery>;
+export type PersonasSuspenseQueryHookResult = ReturnType<typeof usePersonasSuspenseQuery>;
+export type PersonasQueryResult = Apollo.QueryResult<PersonasQuery, PersonasQueryVariables>;
+export const CreatePersonaDocument = gql`
+    mutation CreatePersona($attributes: PersonaAttributes!) {
+  createPersona(attributes: $attributes) {
+    ...Persona
+  }
+}
+    ${PersonaFragmentDoc}`;
+export type CreatePersonaMutationFn = Apollo.MutationFunction<CreatePersonaMutation, CreatePersonaMutationVariables>;
+
+/**
+ * __useCreatePersonaMutation__
+ *
+ * To run a mutation, you first call `useCreatePersonaMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePersonaMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPersonaMutation, { data, loading, error }] = useCreatePersonaMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreatePersonaMutation(baseOptions?: Apollo.MutationHookOptions<CreatePersonaMutation, CreatePersonaMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePersonaMutation, CreatePersonaMutationVariables>(CreatePersonaDocument, options);
+      }
+export type CreatePersonaMutationHookResult = ReturnType<typeof useCreatePersonaMutation>;
+export type CreatePersonaMutationResult = Apollo.MutationResult<CreatePersonaMutation>;
+export type CreatePersonaMutationOptions = Apollo.BaseMutationOptions<CreatePersonaMutation, CreatePersonaMutationVariables>;
+export const UpdatePersonaDocument = gql`
+    mutation UpdatePersona($id: ID!, $attributes: PersonaAttributes!) {
+  updatePersona(id: $id, attributes: $attributes) {
+    ...Persona
+  }
+}
+    ${PersonaFragmentDoc}`;
+export type UpdatePersonaMutationFn = Apollo.MutationFunction<UpdatePersonaMutation, UpdatePersonaMutationVariables>;
+
+/**
+ * __useUpdatePersonaMutation__
+ *
+ * To run a mutation, you first call `useUpdatePersonaMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePersonaMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePersonaMutation, { data, loading, error }] = useUpdatePersonaMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdatePersonaMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePersonaMutation, UpdatePersonaMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdatePersonaMutation, UpdatePersonaMutationVariables>(UpdatePersonaDocument, options);
+      }
+export type UpdatePersonaMutationHookResult = ReturnType<typeof useUpdatePersonaMutation>;
+export type UpdatePersonaMutationResult = Apollo.MutationResult<UpdatePersonaMutation>;
+export type UpdatePersonaMutationOptions = Apollo.BaseMutationOptions<UpdatePersonaMutation, UpdatePersonaMutationVariables>;
+export const DeletePersonaDocument = gql`
+    mutation DeletePersona($id: ID!) {
+  deletePersona(id: $id) {
+    ...Persona
+  }
+}
+    ${PersonaFragmentDoc}`;
+export type DeletePersonaMutationFn = Apollo.MutationFunction<DeletePersonaMutation, DeletePersonaMutationVariables>;
+
+/**
+ * __useDeletePersonaMutation__
+ *
+ * To run a mutation, you first call `useDeletePersonaMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePersonaMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePersonaMutation, { data, loading, error }] = useDeletePersonaMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeletePersonaMutation(baseOptions?: Apollo.MutationHookOptions<DeletePersonaMutation, DeletePersonaMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePersonaMutation, DeletePersonaMutationVariables>(DeletePersonaDocument, options);
+      }
+export type DeletePersonaMutationHookResult = ReturnType<typeof useDeletePersonaMutation>;
+export type DeletePersonaMutationResult = Apollo.MutationResult<DeletePersonaMutation>;
+export type DeletePersonaMutationOptions = Apollo.BaseMutationOptions<DeletePersonaMutation, DeletePersonaMutationVariables>;
 export const AccessTokensDocument = gql`
     query AccessTokens {
   accessTokens(first: 500) {
@@ -14204,6 +14381,7 @@ export const namedOperations = {
     Service: 'Service',
     StatefulSet: 'StatefulSet',
     UnstructuredResource: 'UnstructuredResource',
+    Personas: 'Personas',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
     Me: 'Me',
@@ -14260,6 +14438,9 @@ export const namedOperations = {
     CreateGroup: 'CreateGroup',
     UpdateGroup: 'UpdateGroup',
     DeleteGroup: 'DeleteGroup',
+    CreatePersona: 'CreatePersona',
+    UpdatePersona: 'UpdatePersona',
+    DeletePersona: 'DeletePersona',
     CreateAccessToken: 'CreateAccessToken',
     DeleteAccessToken: 'DeleteAccessToken'
   },
@@ -14363,10 +14544,10 @@ export const namedOperations = {
     Service: 'Service',
     StatefulSet: 'StatefulSet',
     UnstructuredResource: 'UnstructuredResource',
-    AccessToken: 'AccessToken',
-    AccessTokenAudit: 'AccessTokenAudit',
     PersonaConfiguration: 'PersonaConfiguration',
     Persona: 'Persona',
+    AccessToken: 'AccessToken',
+    AccessTokenAudit: 'AccessTokenAudit',
     User: 'User',
     Invite: 'Invite',
     RoleBinding: 'RoleBinding',

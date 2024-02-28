@@ -1,33 +1,3 @@
-fragment PersonaConfiguration on PersonaConfiguration {
-  all
-  deployments {
-    addOns
-    clusters
-    deployments
-    pipelines
-    providers
-    services
-  }
-  sidebar {
-    audits
-    kubernetes
-    pullRequests
-    settings
-  }
-}
-
-fragment Persona on Persona {
-  id
-  name
-  description
-  bindings {
-    ...PolicyBinding
-  }
-  configuration {
-    ...PersonaConfiguration
-  }
-}
-
 fragment User on User {
   id
   pluralId

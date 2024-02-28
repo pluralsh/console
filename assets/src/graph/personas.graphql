@@ -1,0 +1,60 @@
+fragment PersonaConfiguration on PersonaConfiguration {
+  all
+  deployments {
+    addOns
+    clusters
+    deployments
+    pipelines
+    providers
+    services
+  }
+  sidebar {
+    audits
+    kubernetes
+    pullRequests
+    settings
+  }
+}
+
+fragment Persona on Persona {
+  id
+  name
+  description
+  bindings {
+    ...PolicyBinding
+  }
+  configuration {
+    ...PersonaConfiguration
+  }
+}
+
+query Personas($cursor: String) {
+  personas(first: 3, after: $cursor) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Persona
+      }
+    }
+  }
+}
+
+mutation CreatePersona($attributes: PersonaAttributes!) {
+  createPersona(attributes: $attributes) {
+    ...Persona
+  }
+}
+
+mutation UpdatePersona($id: ID!, $attributes: PersonaAttributes!) {
+  updatePersona(id: $id, attributes: $attributes) {
+    ...Persona
+  }
+}
+
+mutation DeletePersona($id: ID!) {
+  deletePersona(id: $id) {
+    ...Persona
+  }
+}
