@@ -1,4 +1,4 @@
-import { ReactElement, useMemo, useState } from 'react'
+import { ComponentProps, ReactElement, useMemo, useState } from 'react'
 import {
   Chip,
   IconFrame,
@@ -83,32 +83,21 @@ const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   id: 'status',
   header: 'Status',
   cell: function Cell({ getValue }) {
-    const theme = useTheme()
     const status = getValue()
-    const color = useMemo(() => {
+    const severity: ComponentProps<typeof Chip>['severity'] = useMemo(() => {
       switch (status) {
         case PrStatus.Open:
-          return theme.colors.green['600']
+          return 'success'
         case PrStatus.Closed:
-          return theme.colors.red['400']
+          return 'danger'
         case PrStatus.Merged:
-          return theme.colors['graph-lilac']
+          return 'info'
       }
-    }, [status, theme.colors])
+    }, [status])
 
     if (!status) return null
 
-    return (
-      <Chip
-        css={{
-          '.children': {
-            color,
-          },
-        }}
-      >
-        {capitalize(status)}
-      </Chip>
-    )
+    return <Chip severity={severity}>{capitalize(status)}</Chip>
   },
 })
 

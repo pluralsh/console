@@ -60,11 +60,13 @@ const ColDocumentation = columnHelper.accessor(
   }
 )
 
-const ColRepoUrl = columnHelper.accessor(({ node }) => node?.repository?.url, {
+const ColRepo = columnHelper.accessor(({ node }) => node?.identifier, {
   id: 'repoUrl',
-  header: 'Repo url',
+  header: 'Repo',
   meta: { truncate: true },
-  cell: function Cell({ getValue }) {
+  cell: function Cell({ getValue, row }) {
+    console.log('row', row.original)
+
     return (
       <TruncateStart>
         <span>{getValue()}</span>
@@ -270,6 +272,6 @@ export const columns = [
   ColName,
   ColRole,
   ColDocumentation,
-  ColRepoUrl,
+  ColRepo,
   ColActions,
 ]
