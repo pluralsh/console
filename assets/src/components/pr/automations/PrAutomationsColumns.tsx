@@ -268,10 +268,4 @@ function AutomationPermissionsModal(
   )
 }
 
-export const columns = [
-  ColName,
-  ColRole,
-  ColDocumentation,
-  ColRepo,
-  ColActions,
-]
+export const columns = [ColName, ColRole, ColDocumentation, ColRepo, ColActions]
