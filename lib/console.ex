@@ -5,6 +5,8 @@ defmodule Console do
 
   def provider(), do: Console.conf(:provider)
 
+  def github_raw_url(url), do: "#{Console.conf(:github_raw_url)}#{url}"
+
   def byok?() do
     case {provider(), Console.conf(:byok)} do
       {_, true} -> true

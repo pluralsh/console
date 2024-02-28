@@ -33,6 +33,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ClusterBackup,
     ObjectStore,
     PullRequest,
+    PipelinePullRequest,
     PipelineContext,
     NotificationSink,
     NotificationRouter,
@@ -68,6 +69,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ObjectStore, _), do: ObjectStore
   def query(PullRequest, _), do: PullRequest
   def query(PipelineContext, _), do: PipelineContext
+  def query(PipelinePullRequest, _), do: PipelinePullRequest
   def query(NotificationSink, _), do: NotificationSink
   def query(NotificationRouter, _), do: NotificationRouter
   def query(NotificationFilter, _), do: NotificationFilter
