@@ -13,7 +13,7 @@ import PersonaCreate from './PersonaCreate'
 import Persona from './Persona'
 
 export function PersonasList({ q }: any) {
-  const { data, loading, fetchMore } = usePersonasQuery({ variables: { q } })
+  const { data, loading, fetchMore } = usePersonasQuery()
   const [listRef, setListRef] = useState<any>(null)
 
   if (!data?.personas) return <LoadingIndicator />
@@ -63,14 +63,8 @@ export function PersonasList({ q }: any) {
           setLoader={undefined}
         />
       ) : (
-        <EmptyState
-          message={
-            isEmpty(q)
-              ? "Looks like you don't have any personas yet."
-              : `No personas found for ${q}`
-          }
-        >
-          <PersonaCreate q={q} />
+        <EmptyState message={"Looks like you don't have any personas yet."}>
+          <PersonaCreate />
         </EmptyState>
       )}
     </Div>

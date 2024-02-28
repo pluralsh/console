@@ -1,8 +1,6 @@
 import { Modal } from '@pluralsh/design-system'
 
-import PersonaMembers from './PersonaMembers'
-
-export default function PersonaView({ persona, open, onClose }: any) {
+export default function PersonaView({ open, onClose }: any) {
   return (
     <Modal
       header="View persona"
@@ -10,7 +8,7 @@ export default function PersonaView({ persona, open, onClose }: any) {
       onClose={onClose}
       portal
     >
-      <PersonaMembers persona={persona} />
+      TODO: Add PersonaView content
     </Modal>
   )
 }

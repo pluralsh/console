@@ -14,7 +14,7 @@ import { removeConnection, updateCache } from '../../../utils/graphql'
 import { Info } from '../../utils/Info'
 import { Permissions, hasRbac } from '../misc'
 
-import { EditPersonaAttributes, EditPersonaMembers } from './PersonaEdit'
+import { EditPersonaAttributes } from './PersonaEdit'
 import PersonaView from './PersonaView'
 
 export default function Persona({ persona, q }: { persona: PersonaT; q: any }) {
@@ -31,7 +31,8 @@ export default function Persona({ persona, q }: { persona: PersonaT; q: any }) {
       updateCache(cache, {
         query: PersonasDocument,
         variables: { q },
-        update: (prev) => removeConnection(prev, data?.deletePersona, 'personas'),
+        update: (prev) =>
+          removeConnection(prev, data?.deletePersona, 'personas'),
       }),
   })
 
@@ -96,11 +97,6 @@ export default function Persona({ persona, q }: { persona: PersonaT; q: any }) {
           persona={persona}
           open={dialogKey === 'editAttrs'}
           onClose={() => dialogKey === 'editAttrs' && setDialogKey('')}
-        />
-        <EditPersonaMembers
-          persona={persona}
-          open={dialogKey === 'editMembers'}
-          onClose={() => dialogKey === 'editMembers' && setDialogKey('')}
         />
         <Confirm
           open={dialogKey === 'confirmDelete'}
