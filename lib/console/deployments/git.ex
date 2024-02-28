@@ -248,14 +248,15 @@ defmodule Console.Deployments.Git do
   Creates a pull request given a pr automation instance
   """
   @spec create_pull_request(map, binary, binary, User.t) :: pull_request_resp
-  def create_pull_request(ctx, id, branch, %User{} = user) do
+  def create_pull_request(attrs \\ %{}, ctx, id, branch, %User{} = user) do
     pr = get_pr_automation!(id)
          |> Repo.preload([:write_bindings, :create_bindings, :connection])
     with {:ok, pr} <- allow(pr, user, :create),
-         {:ok, title, url} <- Dispatcher.create(put_in(pr.connection.author, user), branch, ctx) do
+         {:ok, pr_attrs} <- Dispatcher.create(put_in(pr.connection.author, user), branch, ctx) do
       %PullRequest{}
       |> PullRequest.changeset(
-        Map.merge(%{title: title, url: url}, Map.take(pr, ~w(cluster_id service_id)a))
+        Map.merge(pr_attrs, Map.take(pr, ~w(cluster_id service_id)a))
+        |> Map.merge(attrs)
         |> Map.put(:notifications_bindings, Enum.map(pr.write_bindings, &Map.take(&1, [:user_id, :group_id])))
       )
       |> Repo.insert()

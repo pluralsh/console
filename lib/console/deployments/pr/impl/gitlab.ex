@@ -25,7 +25,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
         allow_collaboration: true,
       })
       |> case do
-        {:ok, %{"web_url" => url}} -> {:ok, title, url}
+        {:ok, %{"web_url" => url} = mr} -> {:ok, %{title: title, url: url, owner: owner(mr)}}
         err -> err
       end
     end
@@ -61,6 +61,9 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   defp state(%{"state" => "merged"}), do: :merged
   defp state(%{"state" => "closed"}), do: :closed
   defp state(_), do: :open
+
+  defp owner(%{"author" => %{"username" => owner}}), do: owner
+  defp owner(_), do: nil
 
   defp connection(conn) do
     with {:ok, url, token} <- url_and_token(conn, "https://gitlab.com"),
