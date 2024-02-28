@@ -164,6 +164,9 @@ fragment PipelineContext on PipelineContext {
   context
   insertedAt
   updatedAt
+  pullRequests {
+    ...PullRequest
+  }
   pipelinePullRequests {
     ...PipelinePullRequest
   }
