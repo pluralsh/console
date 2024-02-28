@@ -29,17 +29,12 @@ export function Personas() {
         <BillingLegacyUserBanner feature="personas" />
         {isAvailable ? (
           <List height="100%">
-            {/* <PersonaSearchHeader
-              q={q}
-              setQ={setQ}
-            /> */}
             <PersonasList />
           </List>
         ) : (
           <BillingFeatureBlockBanner
             feature="personas"
             description="Assign personas to your users to limit which parts of the app they can access."
-            placeholderImageURL="/placeholder-personas.png"
           />
         )}
       </div>

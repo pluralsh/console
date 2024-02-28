@@ -17,7 +17,7 @@ import { Permissions, hasRbac } from '../misc'
 import { EditPersonaAttributes } from './PersonaEdit'
 import PersonaView from './PersonaView'
 
-export default function Persona({ persona, q }: { persona: PersonaT; q: any }) {
+export default function Persona({ persona }: { persona: PersonaT }) {
   const { me } = useContext<any>(LoginContext)
   const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
   const [dialogKey, setDialogKey] = useState<
@@ -30,7 +30,6 @@ export default function Persona({ persona, q }: { persona: PersonaT; q: any }) {
     update: (cache, { data }) =>
       updateCache(cache, {
         query: PersonasDocument,
-        variables: { q },
         update: (prev) =>
           removeConnection(prev, data?.deletePersona, 'personas'),
       }),

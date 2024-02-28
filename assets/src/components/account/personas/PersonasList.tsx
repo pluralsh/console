@@ -12,7 +12,7 @@ import { StandardScroller } from '../../utils/SmoothScroller'
 import PersonaCreate from './PersonaCreate'
 import Persona from './Persona'
 
-export function PersonasList({ q }: any) {
+export function PersonasList() {
   const { data, loading, fetchMore } = usePersonasQuery()
   const [listRef, setListRef] = useState<any>(null)
 
@@ -21,9 +21,12 @@ export function PersonasList({ q }: any) {
   const { edges, pageInfo } = data.personas
 
   return (
-    <Div
-      flexGrow={1}
-      maxHeight="max-content"
+    <div
+      css={{
+        display: 'flex',
+        flexGrow: 1,
+        maxHeight: 'max-content',
+      }}
     >
       {!isEmpty(edges) ? (
         <StandardScroller
@@ -35,10 +38,7 @@ export function PersonasList({ q }: any) {
               key={persona.id}
               last={!next.node}
             >
-              <Persona
-                persona={persona}
-                q={q}
-              />
+              <Persona persona={persona} />
             </ListItem>
           )}
           loadNextPage={() =>
@@ -67,6 +67,6 @@ export function PersonasList({ q }: any) {
           <PersonaCreate />
         </EmptyState>
       )}
-    </Div>
+    </div>
   )
 }
