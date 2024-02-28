@@ -16,6 +16,7 @@ import {
   FormEvent,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react'
 import { type NodeProps } from 'reactflow'
@@ -38,8 +39,12 @@ import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
 
+import { groupBy, mapValues } from 'lodash'
+
 import { PIPELINE_GRID_GAP } from '../PipelineGraph'
 import { PipelinePullRequestsModal } from '../PipelinePullRequests'
+
+import { StopPropagation } from '../../../utils/StopPropagation'
 
 import {
   BaseNode,
@@ -71,6 +76,13 @@ const stageStatusToSeverity = {
 >
 const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
   '&&': {
+    width: '100%',
+  },
+  '.contentArea': {
+    display: 'flex',
+    gap: theme.spacing.small,
+    alignItems: 'center',
+    justifyContent: 'space-between',
     width: '100%',
   },
   '.serviceName': {
@@ -131,7 +143,10 @@ function PrsButton({
       <IconFrame
         type="secondary"
         clickable
-        onClick={() => setOpen(true)}
+        onClick={(e) => {
+          setOpen(true)
+          e.target?.blur()
+        }}
         icon={<PrOpenIcon />}
         tooltip="View pull requests"
       />
@@ -160,11 +175,18 @@ export function StageNode(
   const status = meta.stageStatus
 
   const isRootStage = isEmpty(incomers) && !isEmpty(outgoers)
-  const pullRequests = stage.context?.pipelinePullRequests?.map?.(
-    (pr) => pr?.pullRequest
-  )
 
-  console.log('prs', stage.context?.pipelinePullRequests)
+  const servicePullRequests = useMemo(
+    () =>
+      mapValues(
+        groupBy(
+          stage.context?.pipelinePullRequests,
+          (pipelinePr) => pipelinePr?.service?.id
+        ),
+        (prs) => prs?.map?.((pr) => pr?.pullRequest)
+      ),
+    [stage.context?.pipelinePullRequests]
+  )
 
   return (
     <StageNodeSC {...props}>
@@ -178,45 +200,55 @@ export function StageNode(
         </Chip>
       </div>
       <IconHeading icon={<ClusterIcon />}>
-        <IconHeadingInnerSC>
-          Deploy to {stage.name}
-          {pullRequests?.length && <PrsButton pullRequests={pullRequests} />}
-        </IconHeadingInnerSC>
+        <IconHeadingInnerSC>Deploy to {stage.name}</IconHeadingInnerSC>
       </IconHeading>
 
       {!isEmpty(stage.services) && (
         <div className="section">
           <NodeCardList>
-            {stage.services?.map((stageService) => (
-              <li>
-                <ServiceCard
-                  clickable
-                  onClick={() => {
-                    navigate(
-                      getServiceDetailsPath({
-                        clusterId: stageService?.service?.cluster?.id,
-                        serviceId: stageService?.service?.id,
-                      })
-                    )
-                  }}
-                  status={
-                    stageService?.service?.status
-                      ? serviceStateToCardStatus[stageService?.service?.status]
-                      : undefined
-                  }
-                  statusLabel={upperFirst(
-                    stageService?.service?.status.toLowerCase?.()
-                  )}
-                >
-                  <div className="serviceName">
-                    {stageService?.service?.name}
-                  </div>
-                  <div className="clusterName">
-                    {stageService?.service?.cluster?.name}
-                  </div>
-                </ServiceCard>
-              </li>
-            ))}
+            {stage.services?.map((stageService) => {
+              const service = stageService?.service
+              const serviceId = service?.id
+
+              if (!serviceId) return null
+
+              return (
+                <li>
+                  <ServiceCard
+                    clickable
+                    onClick={(e) => {
+                      console.log('e', e.target, e.currentTarget, e.nativeEvent)
+                      navigate(
+                        getServiceDetailsPath({
+                          clusterId: service?.cluster?.id,
+                          serviceId,
+                        })
+                      )
+                    }}
+                    status={
+                      service?.status
+                        ? serviceStateToCardStatus[service?.status]
+                        : undefined
+                    }
+                    statusLabel={upperFirst(service?.status.toLowerCase?.())}
+                  >
+                    <div>
+                      <div className="serviceName">{service?.name}</div>
+                      <div className="clusterName">
+                        {service?.cluster?.name}
+                      </div>
+                    </div>
+                    {servicePullRequests[serviceId]?.length && (
+                      <StopPropagation>
+                        <PrsButton
+                          pullRequests={servicePullRequests[serviceId]}
+                        />
+                      </StopPropagation>
+                    )}
+                  </ServiceCard>
+                </li>
+              )
+            })}
           </NodeCardList>
         </div>
       )}
