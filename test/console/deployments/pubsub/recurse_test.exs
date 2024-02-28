@@ -236,7 +236,7 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       ss = insert(:stage_service, service: svc, stage: dev)
       insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
 
-      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} -> {:ok, "some", "url"} end)
+      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} -> {:ok, %{title: "some", url: "url"}} end)
 
       event = %PubSub.PipelineStageUpdated{item: dev}
       {:ok, %{stg: stage}} = Recurse.handle_event(event)

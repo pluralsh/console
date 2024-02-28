@@ -235,12 +235,15 @@ defmodule Console.Deployments.PipelinesTest do
       ss = insert(:stage_service, service: svc, stage: dev)
       insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
 
-      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} -> {:ok, "some", "url"} end)
+      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} -> {:ok, %{title: "some", url: "url"}} end)
 
       {:ok, %{stg: stage}} = Pipelines.apply_pipeline_context(dev)
 
       assert stage.applied_context_id == ctx.id
-      assert Console.Repo.get_by(Console.Schema.PipelinePullRequest, context_id: ctx.id, service_id: svc.id)
+      pipe_pr = Console.Repo.get_by(Console.Schema.PipelinePullRequest, context_id: ctx.id, service_id: svc.id)
+      %{pull_request: pr} = Console.Repo.preload(pipe_pr, [:pull_request])
+
+      assert pr.service_id == svc.id
     end
   end
 

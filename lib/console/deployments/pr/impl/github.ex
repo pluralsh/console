@@ -14,7 +14,8 @@ defmodule Console.Deployments.Pr.Impl.Github do
         base: pr.branch || "main",
       })
       |> case do
-        {_, %{"html_url" => url}, _} -> {:ok, title, url}
+        {_, %{"html_url" => url} = body, _} ->
+          {:ok, %{title: title, url: url, owner: owner(body)}}
         {_, body, _} -> {:error, "failed to create pull request: #{inspect(body)}"}
       end
     end
@@ -56,6 +57,9 @@ defmodule Console.Deployments.Pr.Impl.Github do
       err -> err
     end
   end
+
+  defp owner(%{"user" => %{"login" => owner}}), do: owner
+  defp owner(_), do: nil
 
   defp state(%{"merged" => true}), do: :merged
   defp state(%{"state" => "closed", "merged_at" => merged}) when not is_nil(merged), do: :merged
