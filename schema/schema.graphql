@@ -49,6 +49,10 @@ type RootQueryType {
 
   personas(after: String, first: Int, before: String, last: Int): PersonaConnection
 
+  refreshTokens(after: String, first: Int, before: String, last: Int): RefreshTokenConnection
+
+  refresh(token: String!): User
+
   dashboards(repo: String!): [Dashboard]
 
   dashboard(repo: String!, name: String!, step: String, offset: Int, labels: [LabelInput]): Dashboard
@@ -327,6 +331,8 @@ type RootMutationType {
   approveBuild(id: ID!): Build
 
   signIn(email: String!, password: String!): User
+
+  logout: User
 
   loginLink(key: String!): User
 
@@ -4400,6 +4406,17 @@ type User {
   updatedAt: DateTime
 }
 
+type RefreshToken {
+  id: ID!
+
+  "the token to use to request a refresh"
+  token: String!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type UserRoles {
   admin: Boolean
 }
@@ -4577,6 +4594,11 @@ type AccessTokenAuditConnection {
 type PersonaConnection {
   pageInfo: PageInfo!
   edges: [PersonaEdge]
+}
+
+type RefreshTokenConnection {
+  pageInfo: PageInfo!
+  edges: [RefreshTokenEdge]
 }
 
 type NotificationDelta {
@@ -4766,6 +4788,11 @@ type CommandEdge {
 
 type BuildEdge {
   node: Build
+  cursor: String
+}
+
+type RefreshTokenEdge {
+  node: RefreshToken
   cursor: String
 }
 

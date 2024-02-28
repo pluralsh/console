@@ -1,6 +1,17 @@
 defmodule Console.GraphQl.Resolvers.User do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.User
-  alias Console.Schema.{Group, GroupMember, Role, RoleBinding, Notification, AccessToken, AccessTokenAudit, PolicyBinding, Persona}
+  alias Console.Schema.{
+    Group,
+    GroupMember,
+    Role,
+    RoleBinding,
+    Notification,
+    AccessToken,
+    AccessTokenAudit,
+    PolicyBinding,
+    Persona,
+    RefreshToken
+  }
   alias Console.Services.Users
   require Logger
 
@@ -81,6 +92,18 @@ defmodule Console.GraphQl.Resolvers.User do
   def list_personas(args, _) do
     Persona.ordered()
     |> paginate(args)
+  end
+
+  def list_refresh_tokens(args, %{context: %{current_user: user}}) do
+    RefreshToken.for_user(user.id)
+    |> paginate(args)
+  end
+
+  def logout(_, %{context: %{current_user: user}}), do: Users.logout_user(user)
+
+  def refresh(%{token: token}, %{context: %{current_user: user}}) do
+    Users.authorize_refresh(token, user)
+    |> with_jwt()
   end
 
   defp filter_unread(query, %{all: true}, _), do: query

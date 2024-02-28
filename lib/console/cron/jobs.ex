@@ -1,6 +1,6 @@
 defmodule Console.Cron.Jobs do
   alias Console.Repo
-  alias Console.Schema.{Build, Invite, Notification, Audit}
+  alias Console.Schema.{Build, Invite, Notification, Audit, RefreshToken}
   alias Console.PubSub.BuildFailed
   require Logger
 
@@ -21,6 +21,11 @@ defmodule Console.Cron.Jobs do
 
   def prune_audits() do
     Audit.expired()
+    |> Repo.delete_all()
+  end
+
+  def prune_refresh_tokens() do
+    RefreshToken.expired()
     |> Repo.delete_all()
   end
 

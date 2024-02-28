@@ -129,6 +129,13 @@ defmodule Console.GraphQl.Users do
     timestamps()
   end
 
+  object :refresh_token do
+    field :id,    non_null(:id)
+    field :token, non_null(:string), description: "the token to use to request a refresh"
+
+    timestamps()
+  end
+
   object :user_roles do
     field :admin, :boolean
   end
@@ -267,6 +274,7 @@ defmodule Console.GraphQl.Users do
   connection node_type: :access_token
   connection node_type: :access_token_audit
   connection node_type: :persona
+  connection node_type: :refresh_token
 
   delta :notification
 
@@ -382,6 +390,20 @@ defmodule Console.GraphQl.Users do
 
       resolve &User.list_personas/2
     end
+
+    connection field :refresh_tokens, node_type: :refresh_token do
+      middleware Authenticated
+
+      resolve &User.list_refresh_tokens/2
+    end
+
+    field :refresh, :user do
+      middleware Authenticated
+      middleware AllowJwt
+      arg :token, non_null(:string)
+
+      resolve &User.refresh/2
+    end
   end
 
   object :user_mutations do
@@ -391,6 +413,12 @@ defmodule Console.GraphQl.Users do
       arg :password, non_null(:string)
 
       safe_resolve &User.signin_user/2
+    end
+
+    field :logout, :user do
+      middleware Authenticated
+
+      safe_resolve &User.logout/2
     end
 
     field :login_link, :user do

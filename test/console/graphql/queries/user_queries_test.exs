@@ -336,6 +336,44 @@ defmodule Console.GraphQl.UserQueriesTest do
     end
   end
 
+  describe "refreshTokens" do
+    test "it will fetch a users refresh tokens" do
+      user = insert(:user)
+      tokens = insert_list(2, :refresh_token, user: user)
+      insert(:refresh_token)
+
+      {:ok, %{data: %{"refreshTokens" => found}}} = run_query("""
+        query {
+          refreshTokens(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(tokens)
+    end
+  end
+
+  describe "refresh" do
+    test "it can generate a new jwt for a user w/ a refresh token" do
+      user = insert(:user)
+      token = insert(:refresh_token, user: user)
+
+      {:ok, %{data: %{"refresh" => found}}} = run_query("""
+        query Refresh($token: String!) {
+          refresh(token: $token) {
+            id
+            jwt
+          }
+        }
+      """, %{"token" => token.token}, %{current_user: user})
+
+      assert found["id"] == user.id
+      assert found["jwt"]
+    end
+  end
+
   describe "personas" do
     test "it can fetch a persona by id" do
       personas = insert_list(3, :persona)
