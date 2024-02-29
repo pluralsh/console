@@ -32,8 +32,9 @@ export function PersonaBindings({
     <RoleFormBindings
       bindings={bindings}
       setBindings={setBindings}
+      showUsers={false}
+      showGroups
       hints={{
-        user: 'Users to assign to this persona',
         group: 'Groups to assign to this persona',
       }}
     />

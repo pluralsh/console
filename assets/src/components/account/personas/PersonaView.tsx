@@ -97,7 +97,7 @@ function PersonaMembers({
   bindings: Nullable<Nullable<PolicyBinding>[]>
 }) {
   const theme = useTheme()
-  const { userBindings, groupBindings } = splitBindings(bindings || [])
+  const { groupBindings } = splitBindings(bindings || [])
 
   return (
     <div
@@ -107,16 +107,6 @@ function PersonaMembers({
         gap: theme.spacing.large,
       }}
     >
-      <FormField label="Users">
-        {userBindings?.length ? (
-          <ChipList
-            values={userBindings.map(({ user }) => user?.email)}
-            limit={10}
-          />
-        ) : (
-          <Body2P css={{ color: theme.colors['text-light'] }}>No users</Body2P>
-        )}
-      </FormField>
       <FormField label="Groups">
         {groupBindings?.length ? (
           <ChipList
