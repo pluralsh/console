@@ -30,6 +30,8 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 
+import { Body2P } from 'components/utils/typography/Text'
+
 import { PersonaConfiguration } from './PersonaConfiguration'
 
 const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
@@ -60,28 +62,49 @@ export function PersonaAttributes({
   setConfiguration,
 }: {
   name: string
-  setName
+  setName?: (name: string) => void
   description: string
-  setDescription
+  setDescription?: (description: string) => void
   configuration: PersonaConfigurationAttributes
-  setConfiguration
+  setConfiguration?: (configuration: PersonaConfigurationAttributes) => void
 }) {
+  const theme = useTheme()
+  const viewOnly = !setDescription || !setName || !setConfiguration
+
   return (
-    <>
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.large,
+      }}
+    >
       <FormField
-        required
+        required={!viewOnly}
         label="Name"
       >
-        <Input2
-          value={name}
-          onChange={({ target: { value } }) => setName(value)}
-        />
+        {viewOnly ? (
+          <Body2P css={{ color: theme.colors['text-light'] }}>{name}</Body2P>
+        ) : (
+          <Input2
+            disabled={viewOnly}
+            value={name}
+            onChange={({ target: { value } }) => setName?.(value || '')}
+          />
+        )}
       </FormField>
       <FormField label="Description">
-        <Input2
-          value={description}
-          onChange={({ target: { value } }) => setDescription(value)}
-        />
+        {viewOnly ? (
+          <Body2P css={{ color: theme.colors['text-light'] }}>
+            {description}
+          </Body2P>
+        ) : (
+          <Input2
+            value={description}
+            disabled={viewOnly}
+            onChange={({ target: { value } }) => setDescription?.(value || '')}
+          />
+        )}
       </FormField>
       <div>
         <PersonaConfiguration
@@ -89,7 +112,24 @@ export function PersonaAttributes({
           setConfiguration={setConfiguration}
         />
       </div>
-    </>
+    </div>
+  )
+}
+
+export function getFullConfig(
+  configuration: Nullable<Partial<PersonaConfigurationAttributes>>
+) {
+  return mergeWith(
+    {},
+    BASE_CONFIGURATION,
+    (deepOmitKey(configuration, '__typename' as const) || {
+      all: true,
+    }) as PersonaConfigurationAttributes,
+    (base, src) => {
+      if (!src) return base
+
+      return src
+    }
   )
 }
 
@@ -105,19 +145,7 @@ export function EditPersonaAttributesModal({
   const theme = useTheme()
   const [errorMsg, setErrorMsg] = useState<ReactNode>()
   const initialConfig = useMemo(
-    () =>
-      mergeWith(
-        {},
-        BASE_CONFIGURATION,
-        (deepOmitKey(persona?.configuration, '__typename' as const) || {
-          all: true,
-        }) as PersonaConfigurationAttributes,
-        (base, src) => {
-          if (!src) return base
-
-          return src
-        }
-      ),
+    () => getFullConfig(persona?.configuration),
     [persona?.configuration]
   )
 

@@ -11,9 +11,10 @@ export function PersonaConfiguration({
   setConfiguration,
 }: {
   configuration: PersonaConfigurationAttributes
-  setConfiguration: (cfg: PersonaConfigurationAttributes) => void
+  setConfiguration?: (cfg: PersonaConfigurationAttributes) => void
 }) {
   const theme = useTheme()
+  const viewOnly = !setConfiguration
 
   return (
     <div
@@ -26,8 +27,9 @@ export function PersonaConfiguration({
       <Body2BoldP as="h2">Configuration options</Body2BoldP>
       <Switch
         checked={!!configuration.all}
+        disabled={viewOnly}
         onChange={() =>
-          setConfiguration(
+          setConfiguration?.(
             produce(configuration, (draft) => {
               draft.all = !configuration.all
             })
@@ -70,10 +72,10 @@ export function PersonaConfiguration({
                     ([subKey, checked]) => (
                       <Switch
                         key={subKey}
-                        disabled={!!configuration.all}
+                        disabled={!!configuration.all || viewOnly}
                         checked={!!configuration.all || !!checked}
                         onChange={() =>
-                          setConfiguration(
+                          setConfiguration?.(
                             produce(configuration, (draft) => {
                               draft[key][subKey] = !draft[key][subKey]
                             })

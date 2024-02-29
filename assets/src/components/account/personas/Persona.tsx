@@ -21,6 +21,7 @@ import { EditPersonaBindings } from './PersonaBindingsEdit'
 export default function Persona({ persona }: { persona: PersonaT }) {
   const { me } = useContext<any>(LoginContext)
   const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
+
   const [dialogKey, setDialogKey] = useState<
     'confirmDelete' | 'editAttrs' | 'editBindings' | 'viewPersona' | ''
   >('')
