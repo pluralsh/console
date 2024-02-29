@@ -76,12 +76,13 @@ defmodule Console.GraphQl.Users do
   end
 
   input_object :persona_deployment_attributes do
-    field :clusters,    :boolean
-    field :deployments, :boolean
-    field :services,    :boolean
-    field :pipelines,   :boolean
-    field :providers,   :boolean
-    field :add_ons,     :boolean
+    field :clusters,     :boolean
+    field :deployments,  :boolean
+    field :repositories, :boolean
+    field :services,     :boolean
+    field :pipelines,    :boolean
+    field :providers,    :boolean
+    field :add_ons,      :boolean
   end
 
   input_object :persona_sidebar_attributes do
@@ -252,12 +253,13 @@ defmodule Console.GraphQl.Users do
   end
 
   object :persona_deployment do
-    field :clusters,    :boolean
-    field :deployments, :boolean
-    field :services,    :boolean
-    field :pipelines,   :boolean
-    field :providers,   :boolean
-    field :add_ons,     :boolean
+    field :clusters,     :boolean
+    field :deployments,  :boolean
+    field :repositories, :boolean
+    field :services,     :boolean
+    field :pipelines,    :boolean
+    field :providers,    :boolean
+    field :add_ons,      :boolean
   end
 
   object :persona_sidebar do

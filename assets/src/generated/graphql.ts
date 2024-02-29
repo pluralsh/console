@@ -2407,6 +2407,7 @@ export type PersonaDeployment = {
   deployments?: Maybe<Scalars['Boolean']['output']>;
   pipelines?: Maybe<Scalars['Boolean']['output']>;
   providers?: Maybe<Scalars['Boolean']['output']>;
+  repositories?: Maybe<Scalars['Boolean']['output']>;
   services?: Maybe<Scalars['Boolean']['output']>;
 };
 
@@ -2416,6 +2417,7 @@ export type PersonaDeploymentAttributes = {
   deployments?: InputMaybe<Scalars['Boolean']['input']>;
   pipelines?: InputMaybe<Scalars['Boolean']['input']>;
   providers?: InputMaybe<Scalars['Boolean']['input']>;
+  repositories?: InputMaybe<Scalars['Boolean']['input']>;
   services?: InputMaybe<Scalars['Boolean']['input']>;
 };
 

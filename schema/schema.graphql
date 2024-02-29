@@ -4372,6 +4372,7 @@ input PersonaConfigurationAttributes {
 input PersonaDeploymentAttributes {
   clusters: Boolean
   deployments: Boolean
+  repositories: Boolean
   services: Boolean
   pipelines: Boolean
   providers: Boolean
@@ -4544,6 +4545,7 @@ type PersonaConfiguration {
 type PersonaDeployment {
   clusters: Boolean
   deployments: Boolean
+  repositories: Boolean
   services: Boolean
   pipelines: Boolean
   providers: Boolean
