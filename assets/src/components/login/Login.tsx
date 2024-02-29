@@ -27,6 +27,7 @@ const LOGIN_INFO = gql`
   query LoginInfo($redirect: String) {
     loginInfo(redirect: $redirect) {
       oidcUri
+      external
     }
   }
 `
@@ -214,7 +215,7 @@ export function EnsureLogin({ children }) {
   )
 }
 
-function OIDCLogin({ oidcUri }) {
+function OIDCLogin({ oidcUri, external }) {
   return (
     <LoginPortal>
       <Flex
@@ -242,7 +243,7 @@ function OIDCLogin({ oidcUri }) {
             window.location = oidcUri
           }}
         >
-          Log in with Plural
+          Log in with {external ? 'OIDC' : 'Plural'}
         </Button>
       </Flex>
     </LoginPortal>
@@ -276,7 +277,12 @@ export default function Login() {
   }
 
   if (loginData && loginData.loginInfo && loginData.loginInfo.oidcUri) {
-    return <OIDCLogin oidcUri={loginData.loginInfo.oidcUri} />
+    return (
+      <OIDCLogin
+        oidcUri={loginData.loginInfo.oidcUri}
+        external={loginData.loginInfo.external}
+      />
+    )
   }
 
   const disabled = form.password.length === 0 || !isValidEmail(form.email)

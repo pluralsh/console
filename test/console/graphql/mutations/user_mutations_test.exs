@@ -22,6 +22,25 @@ defmodule Console.GraphQl.UserMutationsTest do
     end
   end
 
+  describe "logout" do
+    test "it will wipe refresh tokens" do
+      user = insert(:user)
+      token = insert(:refresh_token, user: user)
+      ignore = insert(:refresh_token)
+
+      {:ok, %{data: %{"logout" => logout}}} = run_query("""
+        mutation {
+          logout { id }
+        }
+      """, %{}, %{current_user: user})
+
+      assert logout["id"] == user.id
+
+      refute refetch(token)
+      assert refetch(ignore)
+    end
+  end
+
   describe "loginLink" do
     test "A user can be signed in via a random link" do
       {:ok, user} = Users.create_user(%{

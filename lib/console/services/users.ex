@@ -3,7 +3,17 @@ defmodule Console.Services.Users do
   use Nebulex.Caching
 
   alias Console.PubSub
-  alias Console.Schema.{User, Invite, Group, GroupMember, Role, Notification, AccessToken, Persona}
+  alias Console.Schema.{
+    User,
+    Invite,
+    Group,
+    GroupMember,
+    Role,
+    Notification,
+    AccessToken,
+    Persona,
+    RefreshToken
+  }
   alias Console.Repo
 
   @cache_adapter Console.conf(:cache_adapter)
@@ -17,6 +27,7 @@ defmodule Console.Services.Users do
   @type group_member_resp :: {:ok, GroupMember.t} | error
   @type token_resp :: {:ok, AccessToken.t} | error
   @type persona_resp :: {:ok, Persona.t} | error
+  @type refresh_token_resp :: {:ok, RefreshToken.t} | error
 
   @spec get_user(binary) :: User.t | nil
   def get_user(id), do: Repo.get(User, id)
@@ -26,6 +37,9 @@ defmodule Console.Services.Users do
 
   @spec get_persona(binary) :: Persona.t | nil
   def get_persona(id), do: Repo.get(Persona, id)
+
+  @spec get_refresh_token(binary) :: RefreshToken.t | nil
+  def get_refresh_token(token), do: Repo.get_by(RefreshToken, token: token)
 
   @decorate cacheable(cache: @cache_adapter, key: :console_bot, opts: [ttl: @ttl])
   def console(), do: Repo.get_by(User, email: "console@plural.sh")
@@ -128,6 +142,24 @@ defmodule Console.Services.Users do
     end)
     |> hydrate_groups(attrs)
     |> execute(extract: :user)
+  end
+
+  @spec create_refresh_token(User.t) :: refresh_token_resp
+  def create_refresh_token(%User{id: user_id}) do
+    %RefreshToken{user_id: user_id}
+    |> RefreshToken.changeset()
+    |> Repo.insert()
+  end
+
+  @doc """
+  Determines if a user can refresh their jwt and returns the user back if so
+  """
+  @spec authorize_refresh(binary, User.t) :: user_resp
+  def authorize_refresh(token, %User{id: id} = user) do
+    case get_refresh_token(token) do
+      %RefreshToken{user_id: ^id} -> {:ok, user}
+      _ -> {:error, "could not fetch refresh token"}
+    end
   end
 
   def create_service_account(attrs) do
@@ -281,8 +313,23 @@ defmodule Console.Services.Users do
 
   @spec login_user(binary, binary) :: user_resp
   def login_user(email, password) do
-    get_user_by_email!(email)
-    |> validate_password(password)
+    start_transaction()
+    |> add_operation(:user, fn _ ->
+      get_user_by_email!(email)
+      |> validate_password(password)
+    end)
+    |> add_operation(:refresh, fn %{user: user} -> create_refresh_token(user) end)
+    |> execute(extract: :user)
+  end
+
+  @doc """
+  Wipes all active refresh tokens for the given user
+  """
+  @spec logout_user(User.t) :: user_resp
+  def logout_user(%User{} = user) do
+    RefreshToken.for_user(user.id)
+    |> Repo.delete_all()
+    {:ok, user}
   end
 
   @spec mark_read(User.t, :read | :build) :: user_resp

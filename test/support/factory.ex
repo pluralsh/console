@@ -452,6 +452,13 @@ defmodule Console.Factory do
     }
   end
 
+  def refresh_token_factory do
+    %Schema.RefreshToken{
+      user: build(:user),
+      token: sequence(:refresh, & "rt-#{&1}")
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

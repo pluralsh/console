@@ -15,7 +15,7 @@ if get_env("PLURAL_CLIENT_ID") do
     plural_login: true
   config :console, :oidc_providers,
     plural: [
-      discovery_document_uri: "https://oidc.plural.sh/.well-known/openid-configuration",
+      discovery_document_uri: get_env("PLURAL_DISCOVERY_URL") || "https://oidc.plural.sh/.well-known/openid-configuration",
       client_id: get_env("PLURAL_CLIENT_ID"),
       client_secret: get_env("PLURAL_CLIENT_SECRET"),
       redirect_uri: "https://#{get_env("HOST")}/oauth/callback",
@@ -26,7 +26,8 @@ end
 
 if get_env("OIDC_CLIENT_ID") do
   config :console,
-    plural_login: true
+    plural_login: true,
+    oidc_login: true
   config :console, :oidc_providers,
     plural: [
       discovery_document_uri: get_env("OIDC_DISCOVERY_URL"),

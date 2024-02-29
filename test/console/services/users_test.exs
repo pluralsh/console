@@ -5,13 +5,16 @@ defmodule Console.Services.UsersTest do
 
   describe "#login_user/2" do
     test "It will log in a user by email/pwd" do
-      {:ok, _user} = Users.create_user(%{
+      {:ok, user} = Users.create_user(%{
         name: "Some user",
         email: "user@example.com",
         password: "bogus password"
       })
 
       {:ok, _} = Users.login_user("user@example.com", "bogus password")
+
+      assert Console.Schema.RefreshToken.for_user(user.id) |> Console.Repo.exists?()
+
       {:error, _} = Users.login_user("user@example.com", "incorrect")
     end
 

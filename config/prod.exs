@@ -26,6 +26,7 @@ config :console, Console.Cron,
   jobs: [
     {"@daily", {Console.Cron.Jobs, :prune_builds, []}},
     {"@daily", {Console.Cron.Jobs, :prune_invites, []}},
+    {"@daily", {Console.Cron.Jobs, :prune_refresh_tokens, []}},
     {"*/15 * * * *", {Console.Cron.Jobs, :fail_builds, []}},
     {"*/5 * * * *", {Console.Deployments.Cron, :prune_clusters, []}},
     {"*/5 * * * *", {Console.Deployments.Cron, :prune_services, []}},

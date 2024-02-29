@@ -2002,6 +2002,7 @@ export type LogStream = {
 
 export type LoginInfo = {
   __typename?: 'LoginInfo';
+  external?: Maybe<Scalars['Boolean']['output']>;
   oidcUri?: Maybe<Scalars['String']['output']>;
 };
 
@@ -2406,6 +2407,7 @@ export type PersonaDeployment = {
   deployments?: Maybe<Scalars['Boolean']['output']>;
   pipelines?: Maybe<Scalars['Boolean']['output']>;
   providers?: Maybe<Scalars['Boolean']['output']>;
+  repositories?: Maybe<Scalars['Boolean']['output']>;
   services?: Maybe<Scalars['Boolean']['output']>;
 };
 
@@ -2415,6 +2417,7 @@ export type PersonaDeploymentAttributes = {
   deployments?: InputMaybe<Scalars['Boolean']['input']>;
   pipelines?: InputMaybe<Scalars['Boolean']['input']>;
   providers?: InputMaybe<Scalars['Boolean']['input']>;
+  repositories?: InputMaybe<Scalars['Boolean']['input']>;
   services?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -3156,6 +3159,27 @@ export type Recommendation = {
   containerRecommendations?: Maybe<Array<Maybe<ContainerRecommendation>>>;
 };
 
+export type RefreshToken = {
+  __typename?: 'RefreshToken';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the token to use to request a refresh */
+  token: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type RefreshTokenConnection = {
+  __typename?: 'RefreshTokenConnection';
+  edges?: Maybe<Array<Maybe<RefreshTokenEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type RefreshTokenEdge = {
+  __typename?: 'RefreshTokenEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<RefreshToken>;
+};
+
 /** a fully specified regex/replace flow */
 export type RegexReplacement = {
   __typename?: 'RegexReplacement';
@@ -3429,6 +3453,7 @@ export type RootMutationType = {
   installStack?: Maybe<Build>;
   kickService?: Maybe<ServiceDeployment>;
   loginLink?: Maybe<User>;
+  logout?: Maybe<User>;
   markRead?: Maybe<User>;
   /** merges configuration for a service */
   mergeService?: Maybe<ServiceDeployment>;
@@ -4207,6 +4232,8 @@ export type RootQueryType = {
   pullRequests?: Maybe<PullRequestConnection>;
   recipe?: Maybe<Recipe>;
   recipes?: Maybe<RecipeConnection>;
+  refresh?: Maybe<User>;
+  refreshTokens?: Maybe<RefreshTokenConnection>;
   repositories?: Maybe<RepositoryConnection>;
   repository?: Maybe<Repository>;
   role?: Maybe<Role>;
@@ -4757,6 +4784,19 @@ export type RootQueryTypeRecipesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   id: Scalars['ID']['input'];
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeRefreshArgs = {
+  token: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeRefreshTokensArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
