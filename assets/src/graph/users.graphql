@@ -9,6 +9,9 @@ fragment User on User {
   roles {
     admin
   }
+  personas {
+    ...Persona
+  }
 }
 
 fragment Invite on Invite {

@@ -24,12 +24,16 @@ export default function RoleFormBindings({
   bindings,
   setBindings,
   hints,
+  showUsers = true,
+  showGroups = true,
 }: {
   attributes?: any
   setAttributes?: any
   bindings: any
   setBindings: any
   hints?: { app?: string; user?: string; group?: string }
+  showUsers?: boolean
+  showGroups?: boolean
 }) {
   const theme = useTheme()
   const [repositories, setRepositories] = useState(
@@ -64,28 +68,32 @@ export default function RoleFormBindings({
           }}
         />
       )}
-      <BindingInput
-        type="user"
-        hint={hints?.user || 'Users that will receive this role'}
-        bindings={userBindings}
-        add={(user) => setBindings([...bindings, { user }])}
-        remove={(email) =>
-          setBindings(
-            bindings.filter(({ user }) => !user || user.email !== email)
-          )
-        }
-      />
-      <BindingInput
-        type="group"
-        hint={hints?.group || 'Groups that will receive this role'}
-        bindings={groupBindings}
-        add={(group) => setBindings([...bindings, { group }])}
-        remove={(name) =>
-          setBindings(
-            bindings.filter(({ group }) => !group || group.name !== name)
-          )
-        }
-      />
+      {showUsers && (
+        <BindingInput
+          type="user"
+          hint={hints?.user || 'Users that will receive this role'}
+          bindings={userBindings}
+          add={(user) => setBindings([...bindings, { user }])}
+          remove={(email) =>
+            setBindings(
+              bindings.filter(({ user }) => !user || user.email !== email)
+            )
+          }
+        />
+      )}
+      {showGroups && (
+        <BindingInput
+          type="group"
+          hint={hints?.group || 'Groups that will receive this role'}
+          bindings={groupBindings}
+          add={(group) => setBindings([...bindings, { group }])}
+          remove={(name) =>
+            setBindings(
+              bindings.filter(({ group }) => !group || group.name !== name)
+            )
+          }
+        />
+      )}
     </div>
   )
 }

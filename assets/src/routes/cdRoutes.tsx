@@ -1,4 +1,6 @@
-import ContinuousDeployment from 'components/cd/ContinuousDeployment'
+import ContinuousDeployment, {
+  useDefaultCDPath,
+} from 'components/cd/ContinuousDeployment'
 import Clusters from 'components/cd/clusters/Clusters'
 import Repositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
@@ -89,6 +91,17 @@ import {
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
+
+function CDRootRedirect() {
+  const defaultCDPath = useDefaultCDPath()
+
+  return (
+    <Navigate
+      replace
+      to={defaultCDPath}
+    />
+  )
+}
 
 export const componentRoutes = (
   <Route
@@ -428,12 +441,7 @@ export const cdRoutes = [
   >
     <Route
       index
-      element={
-        <Navigate
-          replace
-          to={CLUSTERS_REL_PATH}
-        />
-      }
+      element={<CDRootRedirect />}
     />
     {mainRoutes}
     {globalSettingsRoutes}

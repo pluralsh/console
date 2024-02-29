@@ -28,6 +28,8 @@ import { AccountVPN } from 'components/account/vpn/VPN'
 
 import Apps from 'components/apps/Apps'
 
+import { Personas } from 'components/account/personas/Personas'
+
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
 import { cdRoutes } from './cdRoutes'
@@ -150,6 +152,10 @@ const accountRoutes = [
     <Route
       path="roles"
       element={<Roles />}
+    />
+    <Route
+      path="personas"
+      element={<Personas />}
     />
     <Route
       path="webhooks"

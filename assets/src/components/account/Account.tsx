@@ -20,6 +20,7 @@ const getDirectory = (me, configuration) => [
   { path: 'users', label: 'Users', enabled: true },
   { path: 'groups', label: 'Groups', enabled: true },
   { path: 'roles', label: 'Roles', enabled: true },
+  { path: 'personas', label: 'Personas', enabled: true },
   { path: 'webhooks', label: 'Webhooks', enabled: true },
   {
     path: 'vpn',

@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useMemo, useRef, useState } from 'react'
+import { RefObject, useEffect, useRef, useState } from 'react'
 import { Button, LoopingLogo } from '@pluralsh/design-system'
 import { Div, Flex, Form, P } from 'honorable'
 import { useMutation, useQuery } from '@apollo/client'
@@ -189,12 +189,7 @@ export function EnsureLogin({ children }) {
     }
   }, [data, location, update])
 
-  const { me, externalToken, configuration } = data || {}
-
-  const loginContextValue = useMemo(
-    () => ({ me, configuration, token: externalToken }),
-    [configuration, externalToken, me]
-  )
+  const loginContextValue = data
 
   if (error || (!loading && !data?.clusterInfo)) {
     console.log(error)

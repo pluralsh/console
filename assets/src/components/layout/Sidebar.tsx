@@ -24,14 +24,7 @@ import {
   SidebarSection,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
-import {
-  ReactElement,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
 import { Avatar, Flex, Menu, MenuItem, useOutsideClick } from 'honorable'
 import { wipeToken } from 'helpers/auth'
 import { ME_Q } from 'components/graphql/users'
@@ -39,12 +32,15 @@ import { useMutation } from '@apollo/client'
 import { updateCache } from 'utils/graphql'
 import styled from 'styled-components'
 
-import { CD_ABS_PATH, CD_DEFAULT_REL_PATH } from 'routes/cdRoutesConsts'
+import { PersonaConfigurationFragment } from 'generated/graphql'
+
+import { CD_ABS_PATH } from 'routes/cdRoutesConsts'
 import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
+import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 
-import { LoginContext } from '../contexts'
+import { useLogin } from '../contexts'
 
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
@@ -61,11 +57,15 @@ type MenuItem = {
 
 function getMenuItems({
   isCDEnabled,
+  cdPath,
   isByok,
+  personaConfig,
 }: {
   isSandbox: boolean
   isCDEnabled: boolean
+  cdPath: string
   isByok: boolean
+  personaConfig: Nullable<PersonaConfigurationFragment>
 }): MenuItem[] {
   return [
     {
@@ -78,7 +78,7 @@ function getMenuItems({
     {
       text: 'Continuous deployment',
       icon: <GitPullIcon />,
-      path: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}`,
+      path: cdPath,
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
     },
@@ -87,7 +87,9 @@ function getMenuItems({
       icon: <GearTrainIcon />,
       path: `${CD_ABS_PATH}/settings`,
       pathRegexp: /^\/cd\/settings.*$/,
-      enabled: isCDEnabled,
+      enabled:
+        isCDEnabled &&
+        !!(personaConfig?.all || personaConfig?.sidebar?.settings),
     },
     {
       text: 'Builds',
@@ -110,7 +112,9 @@ function getMenuItems({
       icon: <PrOpenIcon />,
       path: PR_DEFAULT_ABS_PATH,
       pathRegexp: /^(\/pr)|(\/pr\/.*)$/,
-      enabled: isCDEnabled,
+      enabled:
+        isCDEnabled &&
+        !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
     },
     {
       text: 'Database management',
@@ -138,6 +142,7 @@ function getMenuItems({
       text: 'Audits',
       icon: <ListIcon />,
       path: '/audits',
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.audits),
     },
     {
       text: 'Account',
@@ -195,7 +200,7 @@ export default function Sidebar() {
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] =
     useState(false)
   const sidebarWidth = 64
-  const { me, configuration } = useContext<any>(LoginContext)
+  const { me, configuration, personaConfiguration } = useLogin()
   const { pathname } = useLocation()
   const isActive = useCallback(
     (menuItem: Parameters<typeof isActiveMenuItem>[0]) =>
@@ -203,15 +208,24 @@ export default function Sidebar() {
     [pathname]
   )
   const isCDEnabled = useCDEnabled({ redirect: false })
+  const defaultCDPath = useDefaultCDPath()
 
   const menuItems = useMemo(
     () =>
       getMenuItems({
-        isSandbox: configuration.isSandbox,
+        isSandbox: !!configuration?.isSandbox,
         isCDEnabled,
-        isByok: configuration.byok,
+        cdPath: defaultCDPath,
+        isByok: !!configuration?.byok,
+        personaConfig: personaConfiguration,
       }),
-    [configuration.byok, configuration.isSandbox, isCDEnabled]
+    [
+      personaConfiguration,
+      configuration?.isSandbox,
+      configuration?.byok,
+      isCDEnabled,
+      defaultCDPath,
+    ]
   )
 
   const [mutation] = useMutation(MARK_READ, {
@@ -250,6 +264,7 @@ export default function Sidebar() {
   useOutsideClick(notificationsPanelRef, () => toggleNotificationPanel(false))
 
   if (!me) return null
+  const unreadNotifications = me.unreadNotifications || 0
 
   return (
     <>
@@ -306,13 +321,13 @@ export default function Sidebar() {
               event.stopPropagation()
               toggleNotificationPanel(!isNotificationsPanelOpen)
             }}
-            badge={me?.unreadNotifications}
+            badge={unreadNotifications}
             active={isNotificationsPanelOpen}
           >
             <BellIcon />
-            {me?.unreadNotifications > 0 && (
+            {unreadNotifications > 0 && (
               <NotificationsCountSC>
-                {me.unreadNotifications > 99 ? '!' : me.unreadNotifications}
+                {unreadNotifications > 99 ? '!' : unreadNotifications}
               </NotificationsCountSC>
             )}
           </SidebarItem>

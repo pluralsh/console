@@ -118,7 +118,7 @@ export function EditGroupMembers({
             // isOpen
             inputProps={{
               value: userFilter,
-              placeholder: 'Search a user inputProps',
+              placeholder: 'Search a user',
             }}
             inputValue={userFilter}
             // @ts-expect-error

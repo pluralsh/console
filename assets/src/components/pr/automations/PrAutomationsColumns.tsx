@@ -64,9 +64,7 @@ const ColRepo = columnHelper.accessor(({ node }) => node?.identifier, {
   id: 'repoUrl',
   header: 'Repo',
   meta: { truncate: true },
-  cell: function Cell({ getValue, row }) {
-    console.log('row', row.original)
-
+  cell: function Cell({ getValue }) {
     return (
       <TruncateStart>
         <span>{getValue()}</span>

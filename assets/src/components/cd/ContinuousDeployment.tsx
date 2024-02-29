@@ -15,6 +15,7 @@ import { useTheme } from 'styled-components'
 import {
   ADDONS_REL_PATH,
   CD_ABS_PATH,
+  CD_DEFAULT_ABS_PATH,
   CD_DEFAULT_REL_PATH,
   CLUSTERS_REL_PATH,
   PIPELINES_REL_PATH,
@@ -27,6 +28,8 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import { LinkTabWrap } from 'components/utils/Tabs'
 import { MakeInert } from 'components/utils/MakeInert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import { useLogin } from 'components/contexts'
 
 import { useCDEnabled } from './utils/useCDEnabled'
 import { PluralErrorBoundary } from './PluralErrorBoundary'
@@ -88,17 +91,78 @@ export const useSetPageHeaderContent = (headerContent?: ReactNode) => {
 }
 
 export const CD_BASE_CRUMBS = [
-  { label: 'cd', url: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}` },
+  { label: 'cd', url: CD_ABS_PATH },
 ] as const satisfies readonly Breadcrumb[]
 
-const directory = [
-  { path: CLUSTERS_REL_PATH, label: 'Clusters' },
-  { path: SERVICES_REL_PATH, label: 'Services' },
-  { path: REPOS_REL_PATH, label: 'Repositories' },
-  { path: PIPELINES_REL_PATH, label: 'Pipelines' },
-  { path: PROVIDERS_REL_PATH, label: 'Providers' },
-  { path: ADDONS_REL_PATH, label: 'Add-ons' },
-] as const
+function useCurrentTab() {
+  const pathMatch = useMatch(`${CD_ABS_PATH}/:tab*`)
+  // @ts-expect-error
+  const tab = pathMatch?.params?.tab || ''
+
+  return tab
+}
+
+export function useDefaultCDPath() {
+  const cdEnabled = useCDEnabled()
+  const directory = useDirectory({ filtered: false })
+
+  return useMemo(() => {
+    const firstEnabledPath = directory.find(({ enabled }) => enabled)?.path
+
+    return !cdEnabled || !firstEnabledPath
+      ? CD_DEFAULT_ABS_PATH
+      : `${CD_ABS_PATH}/${firstEnabledPath}`
+  }, [cdEnabled, directory])
+}
+
+function useDirectory({ filtered = true }: { filtered?: boolean } = {}) {
+  const { personaConfiguration } = useLogin()
+  const config = personaConfiguration?.deployments
+  const currentRelPath = useCurrentTab()
+
+  return useMemo(() => {
+    const directory = [
+      {
+        path: CLUSTERS_REL_PATH,
+        label: 'Clusters',
+        enabled: personaConfiguration?.all || config?.clusters,
+      },
+      {
+        path: SERVICES_REL_PATH,
+        label: 'Services',
+        enabled: personaConfiguration?.all || config?.services,
+      },
+      {
+        path: REPOS_REL_PATH,
+        label: 'Repositories',
+        enabled: personaConfiguration?.all || config?.repositories,
+      },
+      {
+        path: PIPELINES_REL_PATH,
+        label: 'Pipelines',
+        enabled: personaConfiguration?.all || config?.pipelines,
+      },
+      {
+        path: PROVIDERS_REL_PATH,
+        label: 'Providers',
+        enabled: personaConfiguration?.all || config?.providers,
+      },
+      {
+        path: ADDONS_REL_PATH,
+        label: 'Add-ons',
+        enabled: personaConfiguration?.all || config?.addOns,
+      },
+    ]
+
+    if (!filtered) {
+      return directory
+    }
+
+    return directory.filter(
+      ({ enabled, path }) => enabled || currentRelPath === path
+    )
+  }, [config, personaConfiguration?.all, currentRelPath, filtered])
+}
 
 export default function ContinuousDeployment() {
   const theme = useTheme()
@@ -119,11 +183,10 @@ export default function ContinuousDeployment() {
   )
 
   const cdEnabled = useCDEnabled()
+  const directory = useDirectory({ filtered: true })
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${CD_ABS_PATH}/:tab*`)
-  // @ts-expect-error
-  const tab = pathMatch?.params?.tab || ''
+  const tab = useCurrentTab()
   const currentTab = directory.find(({ path }) => path === tab)
 
   return (

@@ -216,8 +216,7 @@ export function StageNode(
                 <li>
                   <ServiceCard
                     clickable
-                    onClick={(e) => {
-                      console.log('e', e.target, e.currentTarget, e.nativeEvent)
+                    onClick={() => {
                       navigate(
                         getServiceDetailsPath({
                           clusterId: service?.cluster?.id,
