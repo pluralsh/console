@@ -1,19 +1,19 @@
-import { Switch } from '@pluralsh/design-system';
-import { PersonaConfigurationAttributes } from 'generated/graphql';
-import { produce } from 'immer';
-import { useTheme } from 'styled-components';
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text';
+import { Switch } from '@pluralsh/design-system'
+import { PersonaConfigurationAttributes } from 'generated/graphql'
+import { produce } from 'immer'
+import { useTheme } from 'styled-components'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 
-import { configKeyToLabel, configTabs } from './PersonaCreate';
+import { configKeyToLabel, configTabs } from './PersonaCreate'
 
-
-export function PersonaConfigurationEdit({
-  configuration, setConfiguration,
+export function PersonaConfiguration({
+  configuration,
+  setConfiguration,
 }: {
-  configuration: PersonaConfigurationAttributes;
-  setConfiguration: (cfg: PersonaConfigurationAttributes) => void;
+  configuration: PersonaConfigurationAttributes
+  setConfiguration: (cfg: PersonaConfigurationAttributes) => void
 }) {
-  const theme = useTheme();
+  const theme = useTheme()
 
   return (
     <div
@@ -24,14 +24,15 @@ export function PersonaConfigurationEdit({
       }}
     >
       <Body2BoldP as="h2">Configuration options</Body2BoldP>
-
       <Switch
         checked={!!configuration.all}
-        onChange={() => setConfiguration(
-          produce(configuration, (draft) => {
-            draft.all = !configuration.all;
-          })
-        )}
+        onChange={() =>
+          setConfiguration(
+            produce(configuration, (draft) => {
+              draft.all = !configuration.all
+            })
+          )
+        }
       >
         Enable all
       </Switch>
@@ -71,11 +72,13 @@ export function PersonaConfigurationEdit({
                         key={subKey}
                         disabled={!!configuration.all}
                         checked={!!configuration.all || !!checked}
-                        onChange={() => setConfiguration(
-                          produce(configuration, (draft) => {
-                            draft[key][subKey] = !draft[key][subKey];
-                          })
-                        )}
+                        onChange={() =>
+                          setConfiguration(
+                            produce(configuration, (draft) => {
+                              draft[key][subKey] = !draft[key][subKey]
+                            })
+                          )
+                        }
                       >
                         {configKeyToLabel(subKey)}
                       </Switch>
@@ -87,5 +90,5 @@ export function PersonaConfigurationEdit({
         </div>
       )}
     </div>
-  );
+  )
 }

@@ -16,8 +16,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import {
   BindingInput,
-  groupSuggestion,
-  userSuggestion,
+  GroupSuggestion,
+  UserSuggestion,
 } from '../../../utils/BindingInput'
 
 import {
@@ -42,7 +42,7 @@ export function fetchUsers(client, query, setSuggestions) {
           users: { edges },
         },
       }) =>
-        edges.map(({ node }) => ({ value: node, label: userSuggestion(node) }))
+        edges.map(({ node }) => ({ value: node, label: UserSuggestion(node) }))
     )
     .then(setSuggestions)
 }
@@ -56,7 +56,7 @@ export function fetchGroups(client, query, setSuggestions) {
           groups: { edges },
         },
       }) =>
-        edges.map(({ node }) => ({ value: node, label: groupSuggestion(node) }))
+        edges.map(({ node }) => ({ value: node, label: GroupSuggestion(node) }))
     )
     .then(setSuggestions)
 }

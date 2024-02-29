@@ -1,10 +1,23 @@
-import { Modal, ValidatedInput } from '@pluralsh/design-system'
-import { ComponentProps, ReactNode, useEffect, useMemo, useState } from 'react'
+import {
+  Button,
+  FormField,
+  Input2,
+  Modal,
+  ValidatedInput,
+} from '@pluralsh/design-system'
+import {
+  ComponentProps,
+  FormEventHandler,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { Flex } from 'honorable'
-
-import { Actions } from 'components/utils/Actions'
-
-import { useUpdateState } from 'components/hooks/useUpdateState'
+import { RequiredDeep } from 'type-fest'
+import mergeWith from 'lodash/mergeWith'
+import { useTheme } from 'styled-components'
 
 import {
   PersonaConfigurationAttributes,
@@ -12,34 +25,72 @@ import {
   useUpdatePersonaMutation,
 } from 'generated/graphql'
 
+import { deepOmitKey } from 'utils/deepOmitKey'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { GqlError } from 'components/utils/Alert'
+import { useUpdateState } from 'components/hooks/useUpdateState'
 
-import mergeWith from 'lodash/mergeWith'
+import { PersonaConfiguration } from './PersonaConfiguration'
 
-import { RequiredDeep } from 'type-fest'
-
-import { GqlError } from '../../utils/Alert'
-
-import { deepOmitKey } from './deepOmitKey'
-import { PersonaConfigurationEdit } from './PersonaConfigurationEdit'
-
-const BASE_CONFIGURATION = {
+const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
   all: false,
   deployments: {
-    addOns: true,
-    clusters: true,
-    deployments: true,
-    pipelines: true,
-    providers: true,
-    services: true,
+    addOns: false,
+    clusters: false,
+    deployments: false,
+    pipelines: false,
+    providers: false,
+    services: false,
   },
   sidebar: {
-    audits: true,
-    kubernetes: true,
-    pullRequests: true,
-    settings: true,
+    audits: false,
+    kubernetes: false,
+    pullRequests: false,
+    settings: false,
   },
-} as const satisfies RequiredDeep<PersonaConfigurationAttributes>
+} satisfies RequiredDeep<PersonaConfigurationAttributes>
+
+export function PersonaAttributes({
+  name,
+  setName,
+  description,
+  setDescription,
+  configuration,
+  setConfiguration,
+}: {
+  name: string
+  setName
+  description: string
+  setDescription
+  configuration: PersonaConfigurationAttributes
+  setConfiguration
+}) {
+  return (
+    <>
+      <FormField
+        required
+        label="Name"
+      >
+        <Input2
+          value={name}
+          onChange={({ target: { value } }) => setName(value)}
+        />
+      </FormField>
+      <FormField label="Description">
+        <Input2
+          value={description}
+          onChange={({ target: { value } }) => setDescription(value)}
+        />
+      </FormField>
+      <div>
+        <PersonaConfiguration
+          configuration={configuration}
+          setConfiguration={setConfiguration}
+        />
+      </div>
+    </>
+  )
+}
 
 export function EditPersonaAttributesModal({
   persona,
@@ -50,6 +101,7 @@ export function EditPersonaAttributesModal({
   open: boolean
   onClose: () => void
 }) {
+  const theme = useTheme()
   const [errorMsg, setErrorMsg] = useState<ReactNode>()
   const initialConfig = useMemo(
     () =>
@@ -105,20 +157,49 @@ export function EditPersonaAttributesModal({
     )
   }, [error])
 
+  const allowSubmit = hasUpdates && !!name
+
+  const onSubmit: FormEventHandler<HTMLFormElement> = useCallback(
+    (e) => {
+      e.preventDefault()
+      if (allowSubmit) {
+        mutation()
+      }
+    },
+    [allowSubmit, mutation]
+  )
+
   return (
     <Modal
       header={<>Edit attributes of ‘{persona.name}’</>}
       portal
       open={open}
       size="large"
+      asForm
+      formProps={{ onSubmit }}
       onClose={onClose}
       actions={
-        <Actions
-          cancel={onClose}
-          submit={hasUpdates ? () => mutation() : undefined}
-          loading={loading}
-          action="Update"
-        />
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'row-reverse',
+            gap: theme.spacing.medium,
+          }}
+        >
+          <Button
+            disabled={!allowSubmit}
+            loading={loading}
+            type="submit"
+          >
+            Update
+          </Button>
+          <Button
+            secondary
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+        </div>
       }
     >
       <Flex
@@ -136,7 +217,7 @@ export function EditPersonaAttributesModal({
           value={description}
           onChange={({ target: { value } }) => update({ description: value })}
         />
-        <PersonaConfigurationEdit
+        <PersonaConfiguration
           configuration={formState.configuration}
           setConfiguration={(cfg: PersonaConfigurationAttributes) =>
             update({ configuration: cfg })

@@ -5,7 +5,7 @@ import {
 import { isObject, mergeWith } from 'lodash'
 import { isNonNullable } from 'utils/isNonNullable'
 
-const IS_TESTING = true
+const IS_TESTING = false
 const TEST_CONFIGS: PersonaConfigurationFragment[] = [
   {
     all: false,

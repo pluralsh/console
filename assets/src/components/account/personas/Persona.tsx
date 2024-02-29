@@ -14,14 +14,15 @@ import { removeConnection, updateCache } from '../../../utils/graphql'
 import { Info } from '../../utils/Info'
 import { Permissions, hasRbac } from '../misc'
 
-import { EditPersonaAttributes } from './PersonaEdit'
+import { EditPersonaAttributes } from './PersonaAttributesEdit'
 import PersonaView from './PersonaView'
+import { EditPersonaBindings } from './PersonaBindingsEdit'
 
 export default function Persona({ persona }: { persona: PersonaT }) {
   const { me } = useContext<any>(LoginContext)
   const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
   const [dialogKey, setDialogKey] = useState<
-    'confirmDelete' | 'editAttrs' | 'editMembers' | 'viewPersona' | ''
+    'confirmDelete' | 'editAttrs' | 'editBindings' | 'viewPersona' | ''
   >('')
 
   const [mutation, { loading, error }] = useDeletePersonaMutation({
@@ -73,7 +74,7 @@ export default function Persona({ persona }: { persona: PersonaT }) {
               <IconFrame
                 clickable
                 size="medium"
-                onClick={() => setDialogKey('editMembers')}
+                onClick={() => setDialogKey('editBindings')}
                 tooltip="Edit members"
                 icon={<PeopleIcon />}
               />
@@ -93,10 +94,10 @@ export default function Persona({ persona }: { persona: PersonaT }) {
           open={dialogKey === 'editAttrs'}
           onClose={() => dialogKey === 'editAttrs' && setDialogKey('')}
         />
-        <EditPersonaAttributes
+        <EditPersonaBindings
           persona={persona}
-          open={dialogKey === 'editMembers'}
-          onClose={() => dialogKey === 'editMembers' && setDialogKey('')}
+          open={dialogKey === 'editBindings'}
+          onClose={() => dialogKey === 'editBindings' && setDialogKey('')}
         />
         <Confirm
           open={dialogKey === 'confirmDelete'}

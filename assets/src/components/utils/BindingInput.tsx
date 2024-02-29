@@ -46,7 +46,7 @@ export function fetchUsers(client: ApolloClient<any>, query, setSuggestions) {
       ({ data }) =>
         data?.users?.edges?.map((edge) => ({
           value: edge?.node,
-          label: userSuggestion(edge?.node),
+          label: UserSuggestion(edge?.node),
         }))
     )
     .then(setSuggestions)
@@ -62,13 +62,13 @@ export function fetchGroups(client: ApolloClient<any>, query, setSuggestions) {
       ({ data }) =>
         data?.groups?.edges?.map((edge) => ({
           value: edge?.node,
-          label: groupSuggestion(edge?.node),
+          label: GroupSuggestion(edge?.node),
         }))
     )
     .then(setSuggestions)
 }
 
-export function userSuggestion({ name, email, avatar, id }: any) {
+export function UserSuggestion({ name, email, avatar, id }: any) {
   return (
     <ListBoxItem
       key={id}
@@ -87,7 +87,7 @@ export function userSuggestion({ name, email, avatar, id }: any) {
   )
 }
 
-export function groupSuggestion({ name, description, id }: any) {
+export function GroupSuggestion({ name, description, id }: any) {
   return (
     <ListBoxItem
       key={id}
