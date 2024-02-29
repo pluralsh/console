@@ -210,17 +210,13 @@ export default function Sidebar() {
   const isCDEnabled = useCDEnabled({ redirect: false })
   const defaultCDPath = useDefaultCDPath()
 
-  const menuItems = useMemo(() => {
-    console.log('mergedconfig personas', personaConfiguration)
-
-    return getMenuItems({
+  const menuItems = useMemo(() => getMenuItems({
       isSandbox: !!configuration?.isSandbox,
       isCDEnabled,
       cdPath: defaultCDPath,
       isByok: !!configuration?.byok,
       personaConfig: personaConfiguration,
-    })
-  }, [
+    }), [
     personaConfiguration,
     configuration?.isSandbox,
     configuration?.byok,

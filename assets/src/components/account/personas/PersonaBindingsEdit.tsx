@@ -63,8 +63,6 @@ export function EditPersonaBindingsModal({
   const [errorMsg, setErrorMsg] = useState<ReactNode>()
   const [bindings, setBindings] = useState(persona.bindings)
 
-  console.log('bindings', bindings)
-  console.log('persona bindings', persona?.bindings)
   const [mutation, { loading, error }] = useUpdatePersonaMutation({
     onCompleted: onClose,
   })
