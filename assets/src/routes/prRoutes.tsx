@@ -6,6 +6,8 @@ import PrQueue from 'components/pr/queue/PrQueue'
 import PrScmConnections from 'components/pr/scm/PrScmConnections'
 import PrAutomations from 'components/pr/automations/PrAutomations'
 
+import PrScmWebhooks from 'components/pr/scm/PrScmWebhooks'
+
 import { CdRoot } from './cdRoutes'
 import {
   PR_AUTOMATIONS_REL_PATH,
@@ -13,6 +15,7 @@ import {
   PR_QUEUE_REL_PATH,
   PR_REL_PATH,
   PR_SCM_REL_PATH,
+  PR_SCM_WEBHOOKS_REL_PATH,
 } from './prRoutesConsts'
 
 export const prRoutes = [
@@ -34,6 +37,10 @@ export const prRoutes = [
           {
             path: PR_SCM_REL_PATH,
             element: <PrScmConnections />,
+          },
+          {
+            path: PR_SCM_WEBHOOKS_REL_PATH,
+            element: <PrScmWebhooks />,
           },
           {
             path: PR_AUTOMATIONS_REL_PATH,

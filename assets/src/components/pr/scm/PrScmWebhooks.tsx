@@ -27,6 +27,9 @@ export const REACT_VIRTUAL_OPTIONS: ComponentProps<
 }
 
 export const PR_QUERY_PAGE_SIZE = 100
+export const SCM_WEBHOOKS_Q_VARS = {
+  first: PR_QUERY_PAGE_SIZE,
+}
 
 export default function ScmWebhooks() {
   const theme = useTheme()
@@ -52,9 +55,7 @@ export default function ScmWebhooks() {
   )
 
   const queryResult = useScmWebhooksQuery({
-    variables: {
-      first: PR_QUERY_PAGE_SIZE,
-    },
+    variables: SCM_WEBHOOKS_Q_VARS,
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
     notifyOnNetworkStatusChange: true,
@@ -67,12 +68,12 @@ export default function ScmWebhooks() {
     previousData,
   } = queryResult
   const data = currentData || previousData
-  const ScmWebhooks = data?.ScmWebhooks
-  const pageInfo = ScmWebhooks?.pageInfo
+  const scmWebhooks = data?.ScmWebhooks
+  const pageInfo = scmWebhooks?.pageInfo
   const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
     pageSize: PR_QUERY_PAGE_SIZE,
-    key: 'ScmWebhooks',
+    key: 'scmWebhooks',
     interval: POLL_INTERVAL,
   })
   const fetchNextPage = useCallback(() => {
