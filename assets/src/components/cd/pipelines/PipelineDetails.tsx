@@ -37,68 +37,6 @@ import { PipelineContexts } from './PipelineContexts'
 
 const POLL_INTERVAL = 10 * 1000
 
-// const PipelineList = styled(VirtualList)(({ theme }) => ({
-//   ...theme.partials.reset.list,
-//   display: 'flex',
-//   height: '100%',
-//   width: 200,
-//   flexShrink: 0,
-// }))
-
-// type ListMeta = {
-//   selectedId: string
-//   setSelectedId: (string) => void
-// }
-
-// const PipelineListItemSC = styled(Card)(({ theme, selected }) => ({
-//   '&&': {
-//     width: '100%',
-//     padding: theme.spacing.medium,
-//     display: 'flex',
-//     alignItems: 'center',
-//     gap: theme.spacing.medium,
-//     borderColor: selected ? theme.colors['border-secondary'] : undefined,
-//   },
-// }))
-
-// const PipelineListItem: VirtualListRenderer<Edge<PipelineFragment>, ListMeta> =
-//   // eslint-disable-next-line func-names
-//   function ({ row, meta }) {
-//     const theme = useTheme()
-//     const { node } = row
-
-//     if (!node) {
-//       return null
-//     }
-//     const isSelected = node.id === meta.selectedId
-
-//     return (
-//       <PipelineListItemSC
-//         clickable
-//         selected={isSelected}
-//         onClick={(e) => {
-//           e.preventDefault()
-//           meta?.setSelectedId?.(node.id)
-//         }}
-//       >
-//         <AppIcon
-//           type="secondary"
-//           size="xxsmall"
-//           icon={
-//             <PipelineIcon
-//               color={
-//                 isSelected
-//                   ? theme.colors['icon-info']
-//                   : theme.colors['icon-light']
-//               }
-//             />
-//           }
-//         />
-//         <div>{row.node?.name}</div>
-//       </PipelineListItemSC>
-//     )
-//   }
-
 export const PipelineEditAreaSC = styled.div(({ theme }) => ({
   border: theme.borders.default,
   width: '100%',
