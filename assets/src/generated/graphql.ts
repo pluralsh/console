@@ -6086,6 +6086,26 @@ export type SetupRenovateMutationVariables = Exact<{
 
 export type SetupRenovateMutation = { __typename?: 'RootMutationType', setupRenovate?: { __typename?: 'ServiceDeployment', id: string } | null };
 
+export type ScmWebhookFragment = { __typename?: 'ScmWebhook', id: string, name: string, owner: string, type: ScmType, url: string, insertedAt?: string | null, updatedAt?: string | null };
+
+export type ScmWebhooksQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ScmWebhooksQuery = { __typename?: 'RootQueryType', scmWebhooks?: { __typename?: 'ScmWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ScmWebhookEdge', node?: { __typename?: 'ScmWebhook', id: string, name: string, owner: string, type: ScmType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
+
+export type CreateScmWebhookMutationVariables = Exact<{
+  connectionId: Scalars['ID']['input'];
+  owner: Scalars['String']['input'];
+}>;
+
+
+export type CreateScmWebhookMutation = { __typename?: 'RootMutationType', createScmWebhook?: { __typename?: 'ScmWebhook', id: string, name: string, owner: string, type: ScmType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+
 export type ObjectStoreFragment = { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null };
 
 export type ClustersObjectStoresFragment = { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
@@ -6647,26 +6667,6 @@ export type PullRequestsQueryVariables = Exact<{
 
 
 export type PullRequestsQuery = { __typename?: 'RootQueryType', pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, self?: boolean | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
-
-export type ScmWebhookFragment = { __typename?: 'ScmWebhook', id: string, name: string, owner: string, type: ScmType, url: string, insertedAt?: string | null, updatedAt?: string | null };
-
-export type ScmWebhooksQueryVariables = Exact<{
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type ScmWebhooksQuery = { __typename?: 'RootQueryType', scmWebhooks?: { __typename?: 'ScmWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ScmWebhookEdge', node?: { __typename?: 'ScmWebhook', id: string, name: string, owner: string, type: ScmType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
-
-export type CreateScmWebhookMutationVariables = Exact<{
-  connectionId: Scalars['ID']['input'];
-  owner: Scalars['String']['input'];
-}>;
-
-
-export type CreateScmWebhookMutation = { __typename?: 'RootMutationType', createScmWebhook?: { __typename?: 'ScmWebhook', id: string, name: string, owner: string, type: ScmType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: string, sha?: string | null, version: string, message?: string | null, updatedAt?: string | null, insertedAt?: string | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null } | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null };
 
@@ -7333,6 +7333,17 @@ export const RepositoryFragmentDoc = gql`
 }
     ${ConfigurationFragmentDoc}
 ${FileContentFragmentDoc}`;
+export const ScmWebhookFragmentDoc = gql`
+    fragment ScmWebhook on ScmWebhook {
+  id
+  name
+  owner
+  type
+  url
+  insertedAt
+  updatedAt
+}
+    `;
 export const ClusterTinyFragmentDoc = gql`
     fragment ClusterTiny on Cluster {
   id
@@ -8355,17 +8366,6 @@ export const ClusterProviderFragmentDoc = gql`
   updatedAt
 }
     ${ProviderCredentialFragmentDoc}`;
-export const ScmWebhookFragmentDoc = gql`
-    fragment ScmWebhook on ScmWebhook {
-  id
-  name
-  owner
-  type
-  url
-  insertedAt
-  updatedAt
-}
-    `;
 export const ServiceDeploymentsRowFragmentDoc = gql`
     fragment ServiceDeploymentsRow on ServiceDeployment {
   id
@@ -9511,6 +9511,91 @@ export function useSetupRenovateMutation(baseOptions?: Apollo.MutationHookOption
 export type SetupRenovateMutationHookResult = ReturnType<typeof useSetupRenovateMutation>;
 export type SetupRenovateMutationResult = Apollo.MutationResult<SetupRenovateMutation>;
 export type SetupRenovateMutationOptions = Apollo.BaseMutationOptions<SetupRenovateMutation, SetupRenovateMutationVariables>;
+export const ScmWebhooksDocument = gql`
+    query ScmWebhooks($after: String, $before: String, $first: Int, $last: Int) {
+  scmWebhooks(after: $after, before: $before, first: $first, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ScmWebhook
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ScmWebhookFragmentDoc}`;
+
+/**
+ * __useScmWebhooksQuery__
+ *
+ * To run a query within a React component, call `useScmWebhooksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useScmWebhooksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useScmWebhooksQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useScmWebhooksQuery(baseOptions?: Apollo.QueryHookOptions<ScmWebhooksQuery, ScmWebhooksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ScmWebhooksQuery, ScmWebhooksQueryVariables>(ScmWebhooksDocument, options);
+      }
+export function useScmWebhooksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ScmWebhooksQuery, ScmWebhooksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ScmWebhooksQuery, ScmWebhooksQueryVariables>(ScmWebhooksDocument, options);
+        }
+export function useScmWebhooksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ScmWebhooksQuery, ScmWebhooksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ScmWebhooksQuery, ScmWebhooksQueryVariables>(ScmWebhooksDocument, options);
+        }
+export type ScmWebhooksQueryHookResult = ReturnType<typeof useScmWebhooksQuery>;
+export type ScmWebhooksLazyQueryHookResult = ReturnType<typeof useScmWebhooksLazyQuery>;
+export type ScmWebhooksSuspenseQueryHookResult = ReturnType<typeof useScmWebhooksSuspenseQuery>;
+export type ScmWebhooksQueryResult = Apollo.QueryResult<ScmWebhooksQuery, ScmWebhooksQueryVariables>;
+export const CreateScmWebhookDocument = gql`
+    mutation CreateScmWebhook($connectionId: ID!, $owner: String!) {
+  createScmWebhook(connectionId: $connectionId, owner: $owner) {
+    ...ScmWebhook
+  }
+}
+    ${ScmWebhookFragmentDoc}`;
+export type CreateScmWebhookMutationFn = Apollo.MutationFunction<CreateScmWebhookMutation, CreateScmWebhookMutationVariables>;
+
+/**
+ * __useCreateScmWebhookMutation__
+ *
+ * To run a mutation, you first call `useCreateScmWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateScmWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createScmWebhookMutation, { data, loading, error }] = useCreateScmWebhookMutation({
+ *   variables: {
+ *      connectionId: // value for 'connectionId'
+ *      owner: // value for 'owner'
+ *   },
+ * });
+ */
+export function useCreateScmWebhookMutation(baseOptions?: Apollo.MutationHookOptions<CreateScmWebhookMutation, CreateScmWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateScmWebhookMutation, CreateScmWebhookMutationVariables>(CreateScmWebhookDocument, options);
+      }
+export type CreateScmWebhookMutationHookResult = ReturnType<typeof useCreateScmWebhookMutation>;
+export type CreateScmWebhookMutationResult = Apollo.MutationResult<CreateScmWebhookMutation>;
+export type CreateScmWebhookMutationOptions = Apollo.BaseMutationOptions<CreateScmWebhookMutation, CreateScmWebhookMutationVariables>;
 export const ObjectStoresDocument = gql`
     query ObjectStores($after: String, $first: Int = 100, $before: String, $last: Int) {
   objectStores(after: $after, first: $first, before: $before, last: $last) {
@@ -11953,91 +12038,6 @@ export type PullRequestsQueryHookResult = ReturnType<typeof usePullRequestsQuery
 export type PullRequestsLazyQueryHookResult = ReturnType<typeof usePullRequestsLazyQuery>;
 export type PullRequestsSuspenseQueryHookResult = ReturnType<typeof usePullRequestsSuspenseQuery>;
 export type PullRequestsQueryResult = Apollo.QueryResult<PullRequestsQuery, PullRequestsQueryVariables>;
-export const ScmWebhooksDocument = gql`
-    query ScmWebhooks($after: String, $before: String, $first: Int, $last: Int) {
-  scmWebhooks(after: $after, before: $before, first: $first, last: $last) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...ScmWebhook
-      }
-    }
-  }
-}
-    ${PageInfoFragmentDoc}
-${ScmWebhookFragmentDoc}`;
-
-/**
- * __useScmWebhooksQuery__
- *
- * To run a query within a React component, call `useScmWebhooksQuery` and pass it any options that fit your needs.
- * When your component renders, `useScmWebhooksQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useScmWebhooksQuery({
- *   variables: {
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      first: // value for 'first'
- *      last: // value for 'last'
- *   },
- * });
- */
-export function useScmWebhooksQuery(baseOptions?: Apollo.QueryHookOptions<ScmWebhooksQuery, ScmWebhooksQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ScmWebhooksQuery, ScmWebhooksQueryVariables>(ScmWebhooksDocument, options);
-      }
-export function useScmWebhooksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ScmWebhooksQuery, ScmWebhooksQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ScmWebhooksQuery, ScmWebhooksQueryVariables>(ScmWebhooksDocument, options);
-        }
-export function useScmWebhooksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ScmWebhooksQuery, ScmWebhooksQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ScmWebhooksQuery, ScmWebhooksQueryVariables>(ScmWebhooksDocument, options);
-        }
-export type ScmWebhooksQueryHookResult = ReturnType<typeof useScmWebhooksQuery>;
-export type ScmWebhooksLazyQueryHookResult = ReturnType<typeof useScmWebhooksLazyQuery>;
-export type ScmWebhooksSuspenseQueryHookResult = ReturnType<typeof useScmWebhooksSuspenseQuery>;
-export type ScmWebhooksQueryResult = Apollo.QueryResult<ScmWebhooksQuery, ScmWebhooksQueryVariables>;
-export const CreateScmWebhookDocument = gql`
-    mutation CreateScmWebhook($connectionId: ID!, $owner: String!) {
-  createScmWebhook(connectionId: $connectionId, owner: $owner) {
-    ...ScmWebhook
-  }
-}
-    ${ScmWebhookFragmentDoc}`;
-export type CreateScmWebhookMutationFn = Apollo.MutationFunction<CreateScmWebhookMutation, CreateScmWebhookMutationVariables>;
-
-/**
- * __useCreateScmWebhookMutation__
- *
- * To run a mutation, you first call `useCreateScmWebhookMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateScmWebhookMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createScmWebhookMutation, { data, loading, error }] = useCreateScmWebhookMutation({
- *   variables: {
- *      connectionId: // value for 'connectionId'
- *      owner: // value for 'owner'
- *   },
- * });
- */
-export function useCreateScmWebhookMutation(baseOptions?: Apollo.MutationHookOptions<CreateScmWebhookMutation, CreateScmWebhookMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateScmWebhookMutation, CreateScmWebhookMutationVariables>(CreateScmWebhookDocument, options);
-      }
-export type CreateScmWebhookMutationHookResult = ReturnType<typeof useCreateScmWebhookMutation>;
-export type CreateScmWebhookMutationResult = Apollo.MutationResult<CreateScmWebhookMutation>;
-export type CreateScmWebhookMutationOptions = Apollo.BaseMutationOptions<CreateScmWebhookMutation, CreateScmWebhookMutationVariables>;
 export const ServiceDeploymentsDocument = gql`
     query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID, $status: ServiceDeploymentStatus) {
   serviceDeployments(
@@ -14444,6 +14444,7 @@ export const namedOperations = {
     Repository: 'Repository',
     PrAutomations: 'PrAutomations',
     ScmConnections: 'ScmConnections',
+    ScmWebhooks: 'ScmWebhooks',
     ObjectStores: 'ObjectStores',
     ClustersObjectStores: 'ClustersObjectStores',
     ClusterBackup: 'ClusterBackup',
@@ -14477,7 +14478,6 @@ export const namedOperations = {
     PipelineContext: 'PipelineContext',
     ClusterProviders: 'ClusterProviders',
     PullRequests: 'PullRequests',
-    ScmWebhooks: 'ScmWebhooks',
     ServiceDeployments: 'ServiceDeployments',
     ServiceDeploymentsTiny: 'ServiceDeploymentsTiny',
     ServiceDeployment: 'ServiceDeployment',
@@ -14522,6 +14522,7 @@ export const namedOperations = {
     UpdateScmConnection: 'UpdateScmConnection',
     DeleteScmConnection: 'DeleteScmConnection',
     SetupRenovate: 'SetupRenovate',
+    CreateScmWebhook: 'CreateScmWebhook',
     CreateObjectStore: 'CreateObjectStore',
     UpdateObjectStore: 'UpdateObjectStore',
     DeleteObjectStore: 'DeleteObjectStore',
@@ -14548,7 +14549,6 @@ export const namedOperations = {
     UpdateClusterProvider: 'UpdateClusterProvider',
     DeleteClusterProvider: 'DeleteClusterProvider',
     CreatePullRequest: 'CreatePullRequest',
-    CreateScmWebhook: 'CreateScmWebhook',
     CreateServiceDeployment: 'CreateServiceDeployment',
     UpdateServiceDeployment: 'UpdateServiceDeployment',
     MergeService: 'MergeService',
@@ -14582,6 +14582,7 @@ export const namedOperations = {
     Repository: 'Repository',
     PrAutomation: 'PrAutomation',
     ScmConnection: 'ScmConnection',
+    ScmWebhook: 'ScmWebhook',
     ObjectStore: 'ObjectStore',
     ClustersObjectStores: 'ClustersObjectStores',
     ClusterBackup: 'ClusterBackup',
@@ -14631,7 +14632,6 @@ export const namedOperations = {
     ProviderCredential: 'ProviderCredential',
     ClusterProvider: 'ClusterProvider',
     PullRequest: 'PullRequest',
-    ScmWebhook: 'ScmWebhook',
     ServiceDeploymentRevision: 'ServiceDeploymentRevision',
     ServiceDeploymentsRow: 'ServiceDeploymentsRow',
     ServiceDeploymentDetails: 'ServiceDeploymentDetails',

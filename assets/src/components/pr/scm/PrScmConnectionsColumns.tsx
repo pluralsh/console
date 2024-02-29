@@ -23,6 +23,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 
 import { EditScmConnectionModal } from './EditScmConnection'
+import { CreateScmWebhook } from './CreateScmWebhook'
 
 enum MenuItemKey {
   Edit = 'edit',
@@ -100,20 +101,22 @@ const ColTypeSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.xsmall,
 }))
-const ColType = columnHelper.accessor(({ node }) => node?.type, {
+
+export function ScmTypeCell({ getValue }) {
+  const type = getValue()
+  const label = scmTypeToLabel[type || ''] || scmTypeToLabel['']
+
+  return (
+    <ColTypeSC>
+      <DynamicScmTypeIcon type={type} />
+      <StackedText first={label} />
+    </ColTypeSC>
+  )
+}
+export const ColType = columnHelper.accessor(({ node }) => node?.type, {
   id: 'type',
   header: 'Provider type',
-  cell: function Cell({ getValue }) {
-    const type = getValue()
-    const label = scmTypeToLabel[type || ''] || scmTypeToLabel['']
-
-    return (
-      <ColTypeSC>
-        <DynamicScmTypeIcon type={type} />
-        <StackedText first={label} />
-      </ColTypeSC>
-    )
-  },
+  cell: ScmTypeCell,
 })
 
 export function DeleteScmConnectionModal({
@@ -163,12 +166,12 @@ export function DeleteScmConnectionModal({
   )
 }
 
-export const ColActions = columnHelper.accessor(({ node }) => node, {
+export const ColActions = columnHelper.display({
   id: 'actions',
   header: '',
-  cell: function Cell({ getValue }) {
+  cell: function Cell({ row }) {
     const theme = useTheme()
-    const scmConnection = getValue()
+    const scmConnection = row.original?.node
     const [menuKey, setMenuKey] = useState<MenuItemKey | ''>()
 
     if (!scmConnection) {
@@ -185,6 +188,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
           gap: theme.spacing.small,
         }}
       >
+        <CreateScmWebhook secondary connectionId={scmConnection.id} />
         <IconFrame
           size="medium"
           clickable

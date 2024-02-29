@@ -9,16 +9,11 @@ import { extendConnection } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { GqlError } from 'components/utils/Alert'
-import {
-  POLL_INTERVAL,
-  useSetPageHeaderContent,
-} from 'components/cd/ContinuousDeployment'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
 import { PR_BASE_CRUMBS, PR_SCM_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { columns } from './PrScmWebhooksColumns'
-import { CreateScmWebhook } from './CreateScmWebhook'
-import { SetupDependencyAutomation } from './SetupDependencyAutomation'
 
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -67,8 +62,10 @@ export default function ScmWebhooks() {
     data: currentData,
     previousData,
   } = queryResult
-  const data = currentData || previousData
-  const scmWebhooks = data?.ScmWebhooks
+    const data = currentData || previousData
+
+    console.log(data)
+  const scmWebhooks = data?.scmWebhooks
   const pageInfo = scmWebhooks?.pageInfo
   const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
@@ -86,18 +83,6 @@ export default function ScmWebhooks() {
         extendConnection(prev, fetchMoreResult.ScmWebhooks, 'ScmWebhooks'),
     })
   }, [fetchMore, pageInfo?.endCursor])
-
-  useSetPageHeaderContent(
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.small,
-      }}
-    >
-      <SetupDependencyAutomation refetch={refetch} />
-      <CreateScmWebhook refetch={refetch} />
-    </div>
-  )
 
   if (error) {
     return <GqlError error={error} />

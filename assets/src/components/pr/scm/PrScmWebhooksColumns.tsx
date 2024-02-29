@@ -1,28 +1,20 @@
-import { ReactElement, useState } from 'react'
+import { ReactElement } from 'react'
 import {
   GitHubLogoIcon,
   GitLabLogoIcon,
   HelpIcon,
   IconFrame,
-  PencilIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
-import {
-  ScmType,
-  ScmWebhookFragment,
-  ScmWebhooksDocument,
-  useDeleteScmWebhookMutation,
-} from 'generated/graphql'
+import { ScmType, ScmWebhookFragment } from 'generated/graphql'
 
-import { Edge, removeConnection, updateCache } from 'utils/graphql'
-import { Confirm } from 'components/utils/Confirm'
-import { TruncateStart } from 'components/utils/table/TruncateStart'
-import { StackedText } from 'components/utils/table/StackedText'
-import { DeleteIconButton } from 'components/utils/IconButtons'
+import { Edge } from 'utils/graphql'
 
-import { EditScmWebhookModal } from './EditScmWebhook'
+import { ScmTypeCell } from './PrScmConnectionsColumns'
+
+// import { EditScmWebhookModal } from './EditScmWebhook'
 
 // enum MenuItemKey {
 //   Edit = 'edit',
@@ -39,29 +31,11 @@ const ColName = columnHelper.accessor(({ node }) => node?.name, {
   },
 })
 
-const ColBaseUrl = columnHelper.accessor(({ node }) => node?.baseUrl, {
-  id: 'baseUrl',
-  header: 'Base url',
-  meta: { truncate: true },
+const ColOwner = columnHelper.accessor(({ node }) => node?.owner, {
+  id: 'owner',
+  header: 'Owner',
   cell: function Cell({ getValue }) {
-    return (
-      <TruncateStart>
-        <span>{getValue()}</span>
-      </TruncateStart>
-    )
-  },
-})
-
-const ColApiUrl = columnHelper.accessor(({ node }) => node?.apiUrl, {
-  id: 'apiUrl',
-  header: 'API url',
-  meta: { truncate: true },
-  cell: function Cell({ getValue }) {
-    return (
-      <TruncateStart>
-        <span>{getValue()}</span>
-      </TruncateStart>
-    )
+    return <span>{getValue()}</span>
   },
 })
 
@@ -95,119 +69,104 @@ export function DynamicScmTypeIcon({ type }: { type: Nullable<ScmType> }) {
   )
 }
 
-const ColTypeSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.xsmall,
-}))
-const ColType = columnHelper.accessor(({ node }) => node?.type, {
+export const ColType = columnHelper.accessor(({ node }) => node?.type, {
   id: 'type',
   header: 'Provider type',
-  cell: function Cell({ getValue }) {
-    const type = getValue()
-    const label = scmTypeToLabel[type || ''] || scmTypeToLabel['']
-
-    return (
-      <ColTypeSC>
-        <DynamicScmTypeIcon type={type} />
-        <StackedText first={label} />
-      </ColTypeSC>
-    )
-  },
+  cell: ScmTypeCell,
 })
 
-export function DeleteScmWebhookModal({
-  ScmWebhook,
-  open,
-  onClose,
-}: {
-  ScmWebhook: ScmWebhookFragment
-  open: boolean
-  onClose: Nullable<() => void>
-}) {
-  const theme = useTheme()
-  const [mutation, { loading, error }] = useDeleteScmWebhookMutation({
-    variables: { id: ScmWebhook.id },
-    update: (cache, { data }) =>
-      updateCache(cache, {
-        variables: {},
-        query: ScmWebhooksDocument,
-        update: (prev) =>
-          removeConnection(prev, data?.deleteScmWebhook, 'ScmWebhooks'),
-      }),
-    onCompleted: () => {
-      onClose?.()
-    },
-  })
+// export function DeleteScmWebhookModal({
+//   ScmWebhook,
+//   open,
+//   onClose,
+// }: {
+//   ScmWebhook: ScmWebhookFragment
+//   open: boolean
+//   onClose: Nullable<() => void>
+// }) {
+//   const theme = useTheme()
+//   const [mutation, { loading, error }] = useDeleteScmWebhookMutation({
+//     variables: { id: ScmWebhook.id },
+//     update: (cache, { data }) =>
+//       updateCache(cache, {
+//         variables: {},
+//         query: ScmWebhooksDocument,
+//         update: (prev) =>
+//           removeConnection(prev, data?.deleteScmWebhook, 'ScmWebhooks'),
+//       }),
+//     onCompleted: () => {
+//       onClose?.()
+//     },
+//   })
 
-  return (
-    <Confirm
-      close={() => onClose?.()}
-      destructive
-      label="Delete"
-      loading={loading}
-      error={error}
-      open={open}
-      submit={() => mutation()}
-      title="Delete SCM connection"
-      text={
-        <>
-          Are you sure you want to delete the{' '}
-          <span css={{ color: theme.colors['text-danger'] }}>
-            “{ScmWebhook.name}”
-          </span>{' '}
-          connection?
-        </>
-      }
-    />
-  )
-}
+//   return (
+//     <Confirm
+//       close={() => onClose?.()}
+//       destructive
+//       label="Delete"
+//       loading={loading}
+//       error={error}
+//       open={open}
+//       submit={() => mutation()}
+//       title="Delete SCM connection"
+//       text={
+//         <>
+//           Are you sure you want to delete the{' '}
+//           <span css={{ color: theme.colors['text-danger'] }}>
+//             “{ScmWebhook.name}”
+//           </span>{' '}
+//           connection?
+//         </>
+//       }
+//     />
+//   )
+// }
 
-export const ColActions = columnHelper.accessor(({ node }) => node, {
-  id: 'actions',
-  header: '',
-  cell: function Cell({ getValue }) {
-    const theme = useTheme()
-    const ScmWebhook = getValue()
-    const [menuKey, setMenuKey] = useState<MenuItemKey | ''>()
+// export const ColActions = columnHelper.accessor(({ node }) => node, {
+//   id: 'actions',
+//   header: '',
+//   cell: function Cell({ getValue }) {
+//     const theme = useTheme()
+//     const ScmWebhook = getValue()
+//     const [menuKey, setMenuKey] = useState<MenuItemKey | ''>()
 
-    if (!ScmWebhook) {
-      return null
-    }
+//     if (!ScmWebhook) {
+//       return null
+//     }
 
-    return (
-      <div
-        onClick={(e) => e.stopPropagation()}
-        css={{
-          alignItems: 'center',
-          alignSelf: 'end',
-          display: 'flex',
-          gap: theme.spacing.small,
-        }}
-      >
-        <IconFrame
-          size="medium"
-          clickable
-          icon={<PencilIcon />}
-          textValue="Edit"
-          onClick={() => setMenuKey(MenuItemKey.Edit)}
-        />
-        <DeleteIconButton onClick={() => setMenuKey(MenuItemKey.Delete)} />
-        {/* Modals */}
-        <DeleteScmWebhookModal
-          ScmWebhook={ScmWebhook}
-          open={menuKey === MenuItemKey.Delete}
-          onClose={() => setMenuKey('')}
-        />
-        <EditScmWebhookModal
-          // refetch={refetch}
-          ScmWebhook={ScmWebhook}
-          open={menuKey === MenuItemKey.Edit}
-          onClose={() => setMenuKey('')}
-        />
-      </div>
-    )
-  },
-})
+//     return (
+//       <div
+//         onClick={(e) => e.stopPropagation()}
+//         css={{
+//           alignItems: 'center',
+//           alignSelf: 'end',
+//           display: 'flex',
+//           gap: theme.spacing.small,
+//         }}
+//       >
+//         <IconFrame
+//           size="medium"
+//           clickable
+//           icon={<PencilIcon />}
+//           textValue="Edit"
+//           onClick={() => setMenuKey(MenuItemKey.Edit)}
+//         />
+//         <DeleteIconButton onClick={() => setMenuKey(MenuItemKey.Delete)} />
+//         {/* Modals */}
+//         <DeleteScmWebhookModal
+//           ScmWebhook={ScmWebhook}
+//           open={menuKey === MenuItemKey.Delete}
+//           onClose={() => setMenuKey('')}
+//         />
+//         <EditScmWebhookModal
+//           // refetch={refetch}
+//           ScmWebhook={ScmWebhook}
+//           open={menuKey === MenuItemKey.Edit}
+//           onClose={() => setMenuKey('')}
+//         />
+//       </div>
+//     )
+//   },
+// })
 
-export const columns = [ColType, ColName, ColBaseUrl, ColApiUrl, ColActions]
+export const columns = [ColType, ColName, ColType, ColOwner]

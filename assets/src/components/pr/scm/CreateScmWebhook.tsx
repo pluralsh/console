@@ -16,12 +16,10 @@ import { SCM_WEBHOOKS_Q_VARS } from './PrScmWebhooks'
 
 export function CreateScmWebhookModal({
   connectionId,
-  refetch,
   open,
   onClose,
 }: {
   connectionId: string
-  refetch: Nullable<() => void>
   open: boolean
   onClose: Nullable<() => void>
 }) {
@@ -40,7 +38,6 @@ export function CreateScmWebhookModal({
       }),
     onCompleted: () => {
       onClose?.()
-      refetch?.()
     },
   })
   const { owner } = formState
@@ -63,7 +60,7 @@ export function CreateScmWebhookModal({
       onClose={onClose || undefined}
       asForm
       onSubmit={onSubmit}
-      header="Create a new connection"
+      header="Create a new SCM webhook"
       actions={
         <div
           css={{
@@ -96,25 +93,21 @@ export function CreateScmWebhookModal({
   )
 }
 
-export function CreateScmWebhook({
-  refetch,
-}: {
-  refetch: Nullable<() => void>
-}) {
+export function CreateScmWebhook({ connectionId }: { connectionId: string }) {
   const [open, setOpen] = useState(false)
 
   return (
     <>
       <Button
-        primary
+        secondary
         onClick={() => setOpen(true)}
       >
-        Create connection
+        Create SCM webhook
       </Button>
       <ModalMountTransition open={open}>
         <CreateScmWebhookModal
+          connectionId={connectionId}
           open={open}
-          refetch={refetch}
           onClose={() => setOpen(false)}
         />
       </ModalMountTransition>
