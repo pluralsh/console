@@ -24,6 +24,8 @@ import (
 	deploymentsv1alpha1 "github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
 	"github.com/pluralsh/console/controller/internal/utils"
+	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -56,6 +58,25 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	pipline := &v1alpha1.Pipeline{}
+	if err := r.Get(ctx, client.ObjectKey{Name: pipelineContext.Spec.PipelineRef.Name, Namespace: pipelineContext.Spec.PipelineRef.Namespace}, pipline); err != nil {
+		utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	if !pipline.DeletionTimestamp.IsZero() {
+		return ctrl.Result{}, nil
+	}
+
+	if !pipline.Status.HasID() {
+		logger.Info("pipeline is not ready yet", "name", pipline.Name, "namespace", pipline.Namespace)
+		return ctrl.Result{}, nil
+	}
+
+	if err := utils.TryAddControllerRef(ctx, r.Client, pipline, pipelineContext, r.Scheme); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	scope, err := NewPipelineContextScope(ctx, r.Client, pipelineContext)
 	if err != nil {
 		utils.MarkFalse(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -72,9 +93,8 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	// Mark resource as not ready. This will be overridden in the end.
 	utils.MarkFalse(pipelineContext.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
 
-	pipline := &v1alpha1.Pipeline{}
-	if err := r.Get(ctx, client.ObjectKey{Name: pipelineContext.Spec.PipelineRef.Name, Namespace: pipelineContext.Spec.PipelineRef.Namespace}, pipline); err != nil {
-		utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+	sha, err := utils.HashObject(pipelineContext.Spec)
+	if err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -84,7 +104,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
-	if !exists {
+	if !exists || !pipelineContext.Status.IsSHAEqual(sha) {
 		pc, err := r.ConsoleClient.CreatePipelineContext(ctx, pipline.Status.GetID(), console.PipelineContextAttributes{
 			Context: string(pipelineContext.Spec.Context.Raw),
 		})
@@ -93,6 +113,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			return ctrl.Result{}, err
 		}
 		pipelineContext.Status.ID = &pc.CreatePipelineContext.ID
+		pipelineContext.Status.SHA = lo.ToPtr(sha)
 	}
 
 	utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
@@ -115,6 +136,9 @@ func (r *PipelineContextReconciler) isAlreadyExists(ctx context.Context, pipelin
 
 	_, err := r.ConsoleClient.GetPipelineContext(ctx, pipelineContext.Status.GetID())
 	if err != nil {
+		if errors.IsNotFound(err) {
+			return false, nil
+		}
 		return false, err
 	}
 
