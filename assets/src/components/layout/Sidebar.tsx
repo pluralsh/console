@@ -32,12 +32,13 @@ import { useMutation } from '@apollo/client'
 import { updateCache } from 'utils/graphql'
 import styled from 'styled-components'
 
-import { CD_ABS_PATH, CD_DEFAULT_REL_PATH } from 'routes/cdRoutesConsts'
+import { PersonaConfigurationFragment } from 'generated/graphql'
+
+import { CD_ABS_PATH } from 'routes/cdRoutesConsts'
 import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
-
-import { PersonaConfigurationFragment } from 'generated/graphql'
+import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 
 import { useLogin } from '../contexts'
 
@@ -56,11 +57,13 @@ type MenuItem = {
 
 function getMenuItems({
   isCDEnabled,
+  cdPath,
   isByok,
   personaConfig,
 }: {
   isSandbox: boolean
   isCDEnabled: boolean
+  cdPath: string
   isByok: boolean
   personaConfig: Nullable<PersonaConfigurationFragment>
 }): MenuItem[] {
@@ -75,7 +78,7 @@ function getMenuItems({
     {
       text: 'Continuous deployment',
       icon: <GitPullIcon />,
-      path: `${CD_ABS_PATH}/${CD_DEFAULT_REL_PATH}`,
+      path: cdPath,
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
     },
@@ -205,6 +208,7 @@ export default function Sidebar() {
     [pathname]
   )
   const isCDEnabled = useCDEnabled({ redirect: false })
+  const defaultCDPath = useDefaultCDPath()
 
   const menuItems = useMemo(() => {
     console.log('mergedconfig personas', personaConfiguration)
@@ -212,6 +216,7 @@ export default function Sidebar() {
     return getMenuItems({
       isSandbox: !!configuration?.isSandbox,
       isCDEnabled,
+      cdPath: defaultCDPath,
       isByok: !!configuration?.byok,
       personaConfig: personaConfiguration,
     })
@@ -220,6 +225,7 @@ export default function Sidebar() {
     configuration?.isSandbox,
     configuration?.byok,
     isCDEnabled,
+    defaultCDPath,
   ])
 
   const [mutation] = useMutation(MARK_READ, {

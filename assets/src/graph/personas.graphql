@@ -3,10 +3,10 @@ fragment PersonaConfiguration on PersonaConfiguration {
   deployments {
     addOns
     clusters
-    deployments
     pipelines
     providers
     services
+    # repositories
   }
   sidebar {
     audits
