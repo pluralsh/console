@@ -2207,6 +2207,7 @@ export type NotificationFilter = {
   cluster?: Maybe<Cluster>;
   id: Scalars['ID']['output'];
   pipeline?: Maybe<Pipeline>;
+  regex?: Maybe<Scalars['String']['output']>;
   service?: Maybe<Service>;
 };
 
@@ -2430,16 +2431,20 @@ export type PersonaEdge = {
 export type PersonaSidebar = {
   __typename?: 'PersonaSidebar';
   audits?: Maybe<Scalars['Boolean']['output']>;
+  backups?: Maybe<Scalars['Boolean']['output']>;
   kubernetes?: Maybe<Scalars['Boolean']['output']>;
   pullRequests?: Maybe<Scalars['Boolean']['output']>;
   settings?: Maybe<Scalars['Boolean']['output']>;
+  stacks?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type PersonaSidebarAttributes = {
   audits?: InputMaybe<Scalars['Boolean']['input']>;
+  backups?: InputMaybe<Scalars['Boolean']['input']>;
   kubernetes?: InputMaybe<Scalars['Boolean']['input']>;
   pullRequests?: InputMaybe<Scalars['Boolean']['input']>;
   settings?: InputMaybe<Scalars['Boolean']['input']>;
+  stacks?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** a release pipeline, composed of multiple stages each with potentially multiple services */
@@ -5028,6 +5033,8 @@ export type RouterFilterAttributes = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** whether to enable delivery for events associated with this pipeline */
   pipelineId?: InputMaybe<Scalars['ID']['input']>;
+  /** a regex for filtering by things like pr url */
+  regex?: InputMaybe<Scalars['String']['input']>;
   /** whether to enable delivery for events associated with this service */
   serviceId?: InputMaybe<Scalars['ID']['input']>;
 };

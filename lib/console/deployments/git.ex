@@ -260,6 +260,7 @@ defmodule Console.Deployments.Git do
         |> Map.put(:notifications_bindings, Enum.map(pr.write_bindings, &Map.take(&1, [:user_id, :group_id])))
       )
       |> Repo.insert()
+      |> notify(:create, user)
     end
   end
 
@@ -351,9 +352,14 @@ defmodule Console.Deployments.Git do
     do: handle_notify(PubSub.GitRepositoryUpdated, git, actor: user)
   defp notify({:ok, %GitRepository{} = git}, :delete, user),
     do: handle_notify(PubSub.GitRepositoryDeleted, git, actor: user)
+
+  defp notify({:ok, %PullRequest{} = pr}, :create, user),
+    do: handle_notify(PubSub.PullRequestCreated, pr, actor: user)
   defp notify(pass, _, _), do: pass
 
   defp notify({:ok, %GitRepository{} = git}, :update),
     do: handle_notify(PubSub.GitRepositoryUpdated, git)
+  defp notify({:ok, %PullRequest{} = pr}, :create),
+    do: handle_notify(PubSub.PullRequestCreated, pr)
   defp notify(pass, _), do: pass
 end

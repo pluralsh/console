@@ -3,6 +3,8 @@ defmodule Console.Schema.RouterFilter do
   alias Console.Schema.{Cluster, Service, Pipeline, NotificationRouter}
 
   schema "router_filters" do
+    field :regex, :string
+
     belongs_to :cluster,  Cluster
     belongs_to :service,  Service
     belongs_to :pipeline, Pipeline
@@ -11,7 +13,7 @@ defmodule Console.Schema.RouterFilter do
     timestamps()
   end
 
-  @valid ~w(cluster_id service_id pipeline_id router_id)a
+  @valid ~w(cluster_id service_id pipeline_id router_id regex)a
 
   def changeset(model, attrs \\ %{}) do
     model

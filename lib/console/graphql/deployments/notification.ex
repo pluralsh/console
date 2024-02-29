@@ -28,6 +28,7 @@ defmodule Console.GraphQl.Deployments.Notification do
   end
 
   input_object :router_filter_attributes do
+    field :regex,       :string, description: "a regex for filtering by things like pr url"
     field :service_id,  :id, description: "whether to enable delivery for events associated with this service"
     field :cluster_id,  :id, description: "whether to enable delivery for events associated with this cluster"
     field :pipeline_id, :id, description: "whether to enable delivery for events associated with this pipeline"
@@ -59,6 +60,7 @@ defmodule Console.GraphQl.Deployments.Notification do
 
   object :notification_filter do
     field :id,       non_null(:id)
+    field :regex,    :string
     field :service,  :service, resolve: dataloader(Deployments)
     field :cluster,  :cluster, resolve: dataloader(Deployments)
     field :pipeline, :pipeline, resolve: dataloader(Deployments)

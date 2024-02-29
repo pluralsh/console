@@ -1,0 +1,11 @@
+{
+    "text": "New pull request created:\n<%= @pr.title %>",
+    "blocks": [
+        {
+            "type": "section",
+            "fields": [
+                {"type": "mrkdwn", "text": "*Url*\n<%= @pr.url %>"}
+            ]
+        }
+    ]
+}
