@@ -111,7 +111,7 @@ defmodule Console.GraphQl.Resolvers.User do
 
   def login_info(args, _) do
     case Console.conf(:plural_login) do
-      true -> {:ok, %{oidc_uri: oidc_uri(args)}}
+      true -> {:ok, %{oidc_uri: oidc_uri(args), external: Console.conf(:oidc_login)}}
       false -> {:ok, %{oidc_uri: nil}}
     end
   end

@@ -2002,6 +2002,7 @@ export type LogStream = {
 
 export type LoginInfo = {
   __typename?: 'LoginInfo';
+  external?: Maybe<Scalars['Boolean']['output']>;
   oidcUri?: Maybe<Scalars['String']['output']>;
 };
 

@@ -4463,6 +4463,7 @@ type RoleBinding {
 
 type LoginInfo {
   oidcUri: String
+  external: Boolean
 }
 
 type Notification {

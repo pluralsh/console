@@ -182,6 +182,7 @@ defmodule Console.GraphQl.Users do
 
   object :login_info do
     field :oidc_uri, :string
+    field :external, :boolean
   end
 
   object :notification do
