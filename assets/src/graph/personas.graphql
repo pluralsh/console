@@ -5,8 +5,8 @@ fragment PersonaConfiguration on PersonaConfiguration {
     clusters
     pipelines
     providers
+    repositories
     services
-    # repositories
   }
   sidebar {
     audits

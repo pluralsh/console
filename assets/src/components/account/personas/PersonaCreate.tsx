@@ -43,6 +43,7 @@ const DEFAULT_CONFIGURATION = {
     deployments: true,
     pipelines: true,
     providers: true,
+    repositories: true,
     services: true,
   },
   sidebar: {

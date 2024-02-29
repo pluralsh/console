@@ -40,6 +40,7 @@ const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
     deployments: false,
     pipelines: false,
     providers: false,
+    repositories: false,
     services: false,
   },
   sidebar: {
