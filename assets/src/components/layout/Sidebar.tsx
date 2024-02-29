@@ -210,19 +210,23 @@ export default function Sidebar() {
   const isCDEnabled = useCDEnabled({ redirect: false })
   const defaultCDPath = useDefaultCDPath()
 
-  const menuItems = useMemo(() => getMenuItems({
-      isSandbox: !!configuration?.isSandbox,
+  const menuItems = useMemo(
+    () =>
+      getMenuItems({
+        isSandbox: !!configuration?.isSandbox,
+        isCDEnabled,
+        cdPath: defaultCDPath,
+        isByok: !!configuration?.byok,
+        personaConfig: personaConfiguration,
+      }),
+    [
+      personaConfiguration,
+      configuration?.isSandbox,
+      configuration?.byok,
       isCDEnabled,
-      cdPath: defaultCDPath,
-      isByok: !!configuration?.byok,
-      personaConfig: personaConfiguration,
-    }), [
-    personaConfiguration,
-    configuration?.isSandbox,
-    configuration?.byok,
-    isCDEnabled,
-    defaultCDPath,
-  ])
+      defaultCDPath,
+    ]
+  )
 
   const [mutation] = useMutation(MARK_READ, {
     update: (cache) =>

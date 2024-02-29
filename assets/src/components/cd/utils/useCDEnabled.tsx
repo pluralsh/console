@@ -4,9 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { CD_DEFAULT_ABS_PATH } from 'routes/cdRoutesConsts'
 import { useLogin } from 'components/contexts'
 
-
-
-
 export const useCDEnabled = (props?: { redirect?: boolean }) => {
   const login = useLogin()
   const navigate = useNavigate()
