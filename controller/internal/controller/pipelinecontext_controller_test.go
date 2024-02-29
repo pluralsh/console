@@ -83,7 +83,7 @@ var _ = Describe("Context Pipeline Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(pipeline.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 				ID:  lo.ToPtr(pipelineContextID),
-				SHA: nil,
+				SHA: lo.ToPtr("XSVPPXNATKHUWFMR4ZD65KSTAKEO5L5EIOQNXV545JZTG4YRUQSA===="),
 				Conditions: []metav1.Condition{
 					{
 						Type:   v1alpha1.SynchronizedConditionType.String(),
