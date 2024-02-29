@@ -105,7 +105,7 @@ export default function Persona({ persona }: { persona: PersonaT }) {
             <>
               Are you sure you want to delete the <b>{persona.name}</b> persona?
               This could have downstream effects on a large number of users and
-              their roles.
+              their personas.
             </>
           }
           close={() => dialogKey === 'confirmDelete' && setDialogKey('')}
