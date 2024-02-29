@@ -277,7 +277,12 @@ export default function Login() {
   }
 
   if (loginData && loginData.loginInfo && loginData.loginInfo.oidcUri) {
-    return <OIDCLogin oidcUri={loginData.loginInfo.oidcUri} external={loginData.loginInfo.external} />
+    return (
+      <OIDCLogin
+        oidcUri={loginData.loginInfo.oidcUri}
+        external={loginData.loginInfo.external}
+      />
+    )
   }
 
   const disabled = form.password.length === 0 || !isValidEmail(form.email)
