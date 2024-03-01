@@ -1,6 +1,13 @@
 import styled from 'styled-components'
 
-export const TruncateStart = styled.div((_) => ({
+export const TruncateEnd = styled.div((_) => ({
+  width: '100%',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+}))
+
+export const TruncateStart = styled(TruncateEnd)((_) => ({
   direction: 'rtl',
   textAlign: 'left',
   span: {

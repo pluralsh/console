@@ -4,7 +4,10 @@ import {
   GitLabLogoIcon,
   HelpIcon,
   IconFrame,
+  ListBoxItem,
   PencilIcon,
+  TrashCanIcon,
+  WebhooksIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import styled, { useTheme } from 'styled-components'
@@ -20,13 +23,15 @@ import { Edge, removeConnection, updateCache } from 'utils/graphql'
 import { Confirm } from 'components/utils/Confirm'
 import { TruncateStart } from 'components/utils/table/TruncateStart'
 import { StackedText } from 'components/utils/table/StackedText'
-import { DeleteIconButton } from 'components/utils/IconButtons'
+import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { EditScmConnectionModal } from './EditScmConnection'
+import { CreateScmWebhookModal } from './CreateScmWebhook'
 
 enum MenuItemKey {
   Edit = 'edit',
   Delete = 'delete',
+  CreateWebhook = 'createWebhook',
 }
 
 export const columnHelper = createColumnHelper<Edge<ScmConnectionFragment>>()
@@ -100,20 +105,22 @@ const ColTypeSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.xsmall,
 }))
-const ColType = columnHelper.accessor(({ node }) => node?.type, {
+
+export function ScmTypeCell({ getValue }) {
+  const type = getValue()
+  const label = scmTypeToLabel[type || ''] || scmTypeToLabel['']
+
+  return (
+    <ColTypeSC>
+      <DynamicScmTypeIcon type={type} />
+      <StackedText first={label} />
+    </ColTypeSC>
+  )
+}
+export const ColType = columnHelper.accessor(({ node }) => node?.type, {
   id: 'type',
   header: 'Provider type',
-  cell: function Cell({ getValue }) {
-    const type = getValue()
-    const label = scmTypeToLabel[type || ''] || scmTypeToLabel['']
-
-    return (
-      <ColTypeSC>
-        <DynamicScmTypeIcon type={type} />
-        <StackedText first={label} />
-      </ColTypeSC>
-    )
-  },
+  cell: ScmTypeCell,
 })
 
 export function DeleteScmConnectionModal({
@@ -163,12 +170,12 @@ export function DeleteScmConnectionModal({
   )
 }
 
-export const ColActions = columnHelper.accessor(({ node }) => node, {
+export const ColActions = columnHelper.display({
   id: 'actions',
   header: '',
-  cell: function Cell({ getValue }) {
+  cell: function Cell({ row }) {
     const theme = useTheme()
-    const scmConnection = getValue()
+    const scmConnection = row.original?.node
     const [menuKey, setMenuKey] = useState<MenuItemKey | ''>()
 
     if (!scmConnection) {
@@ -176,36 +183,46 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
     }
 
     return (
-      <div
-        onClick={(e) => e.stopPropagation()}
-        css={{
-          alignItems: 'center',
-          alignSelf: 'end',
-          display: 'flex',
-          gap: theme.spacing.small,
-        }}
-      >
-        <IconFrame
-          size="medium"
-          clickable
-          icon={<PencilIcon />}
-          textValue="Edit"
-          onClick={() => setMenuKey(MenuItemKey.Edit)}
-        />
-        <DeleteIconButton onClick={() => setMenuKey(MenuItemKey.Delete)} />
+      <>
+        <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
+          <ListBoxItem
+            key={MenuItemKey.CreateWebhook}
+            leftContent={<WebhooksIcon />}
+            label="Create webhook"
+            textValue="Create webhook"
+          />
+          <ListBoxItem
+            key={MenuItemKey.Edit}
+            leftContent={<PencilIcon />}
+            label="Edit connection"
+            textValue="Edit connection"
+          />
+          <ListBoxItem
+            key={MenuItemKey.Delete}
+            leftContent={
+              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+            }
+            label="Delete connection"
+            textValue="Delete connection"
+          />
+        </MoreMenu>
         {/* Modals */}
+        <CreateScmWebhookModal
+          connection={scmConnection}
+          open={menuKey === MenuItemKey.CreateWebhook}
+          onClose={() => setMenuKey('')}
+        />
+        <EditScmConnectionModal
+          scmConnection={scmConnection}
+          open={menuKey === MenuItemKey.Edit}
+          onClose={() => setMenuKey('')}
+        />
         <DeleteScmConnectionModal
           scmConnection={scmConnection}
           open={menuKey === MenuItemKey.Delete}
           onClose={() => setMenuKey('')}
         />
-        <EditScmConnectionModal
-          // refetch={refetch}
-          scmConnection={scmConnection}
-          open={menuKey === MenuItemKey.Edit}
-          onClose={() => setMenuKey('')}
-        />
-      </div>
+      </>
     )
   },
 })

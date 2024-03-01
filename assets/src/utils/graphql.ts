@@ -105,6 +105,21 @@ export function appendConnection(prev, next, key) {
   }
 }
 
+export function appendConnectionToEnd(prev, next, key) {
+  const { edges, pageInfo } = prev[key]
+
+  if (edges.find(({ node: { id } }) => id === next.id)) return prev
+
+  return {
+    ...prev,
+    [key]: {
+      ...prev[key],
+      pageInfo,
+      edges: [...edges, { __typename: `${next.__typename}Edge`, node: next }],
+    },
+  }
+}
+
 export function removeConnection(prev, val, key) {
   return {
     ...prev,

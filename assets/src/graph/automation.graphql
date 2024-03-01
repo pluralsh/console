@@ -130,3 +130,32 @@ mutation SetupRenovate(
     id
   }
 }
+
+fragment ScmWebhook on ScmWebhook {
+  id
+  name
+  owner
+  type
+  url
+  insertedAt
+  updatedAt
+}
+
+query ScmWebhooks($after: String, $before: String, $first: Int, $last: Int) {
+  scmWebhooks(after: $after, before: $before, first: $first, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ScmWebhook
+      }
+    }
+  }
+}
+
+mutation CreateScmWebhook($connectionId: ID!, $owner: String!) {
+  createScmWebhook(connectionId: $connectionId, owner: $owner) {
+    ...ScmWebhook
+  }
+}

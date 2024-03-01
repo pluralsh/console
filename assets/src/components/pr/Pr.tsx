@@ -8,6 +8,7 @@ import {
   PR_AUTOMATIONS_REL_PATH,
   PR_QUEUE_REL_PATH,
   PR_SCM_REL_PATH,
+  PR_SCM_WEBHOOKS_REL_PATH,
 } from 'routes/prRoutesConsts'
 import { PluralErrorBoundary } from 'components/cd/PluralErrorBoundary'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -29,6 +30,10 @@ const directory = [
   {
     path: PR_SCM_REL_PATH,
     label: 'SCM Connections',
+  },
+  {
+    path: PR_SCM_WEBHOOKS_REL_PATH,
+    label: 'SCM Webhooks',
   },
   {
     path: PR_AUTOMATIONS_REL_PATH,
