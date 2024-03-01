@@ -234,7 +234,8 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def read_job_logs(pass, args, %{source: %BatchV1.Job{metadata: metadata, spec: %{selector: selector}}}) do
     case list_pods(metadata, selector) do
-      {:ok, %{items: [pod | _]}} -> read_pod_logs(pass, args, %{source: pod})
+      {:ok, [pod | _]} -> read_pod_logs(pass, args, %{source: pod})
+      {:ok, _} -> {:error, "no pods present for job"}
       err -> err
     end
   end
