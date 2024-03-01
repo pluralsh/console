@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react'
-import { Button, FormField, Input2,Modal } from '@pluralsh/design-system'
+import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { ApolloError } from '@apollo/client'
+import { useNavigate } from 'react-router-dom'
 
 import {
   ScmConnectionFragment,
@@ -11,12 +12,11 @@ import {
 } from 'generated/graphql'
 import { appendConnection, updateCache } from 'utils/graphql'
 
+import { PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/prRoutesConsts'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
-
 import { GqlError } from 'components/utils/Alert'
-
+import { Body1P } from 'components/utils/typography/Text'
 
 import { SCM_WEBHOOKS_Q_VARS } from './ScmWebhooks'
 import { scmTypeToLabel } from './PrScmConnectionsColumns'
@@ -31,6 +31,8 @@ export function CreateScmWebhookModal({
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
+  const navigate = useNavigate()
+  const [success, setSuccess] = useState(false)
   const { state: formState, update: updateFormState } = useUpdateState<{
     owner: string
   }>({ owner: '' })
@@ -44,7 +46,7 @@ export function CreateScmWebhookModal({
           appendConnection(prev, data?.createScmWebhook, 'scmWebhooks'),
       }),
     onCompleted: () => {
-      onClose?.()
+      setSuccess(true)
     },
   })
   const { owner } = formState
@@ -52,12 +54,14 @@ export function CreateScmWebhookModal({
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault()
-
+      if (success) {
+        navigate(PR_SCM_WEBHOOKS_ABS_PATH)
+      }
       if (allowSubmit) {
         mutation({ variables: { connectionId: connection?.id, owner } })
       }
     },
-    [allowSubmit, connection, mutation, owner]
+    [allowSubmit, connection?.id, mutation, navigate, owner, success]
   )
 
   return (
@@ -78,26 +82,41 @@ export function CreateScmWebhookModal({
             gap: theme.spacing.small,
           }}
         >
-          <Button
-            loading={loading}
-            primary
-            disabled={!allowSubmit}
-            type="submit"
-          >
-            Create
-          </Button>
+          {success ? (
+            <Button
+              loading={loading}
+              primary
+              disabled={!allowSubmit}
+              type="submit"
+            >
+              View webhooks
+            </Button>
+          ) : (
+            <Button
+              loading={loading}
+              primary
+              disabled={!allowSubmit}
+              type="submit"
+            >
+              Create
+            </Button>
+          )}
           <Button
             secondary
             onClick={() => onClose?.()}
           >
-            Cancel
+            {success ? 'Close' : 'Cancel'}
           </Button>
         </div>
       }
     >
-      <ScmWebhookForm
-        {...{ type: 'create', connection, formState, updateFormState, error }}
-      />
+      {success ? (
+        <Body1P>Successfully created webhook for {connection.name}</Body1P>
+      ) : (
+        <ScmWebhookForm
+          {...{ type: 'create', connection, formState, updateFormState, error }}
+        />
+      )}
     </Modal>
   )
 }
