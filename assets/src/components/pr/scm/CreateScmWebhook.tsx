@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react'
 import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { ApolloError } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
 
 import {
