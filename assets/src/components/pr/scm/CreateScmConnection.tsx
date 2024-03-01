@@ -7,7 +7,7 @@ import {
   ScmConnectionsDocument,
   useCreateScmConnectionMutation,
 } from 'generated/graphql'
-import { appendConnectionToEnd, updateCache } from 'utils/graphql'
+import { appendConnection, updateCache } from 'utils/graphql'
 
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
@@ -43,7 +43,7 @@ export function CreateScmConnectionModal({
         variables: {},
         query: ScmConnectionsDocument,
         update: (prev) =>
-          appendConnectionToEnd(
+          appendConnection(
             prev,
             data?.createScmConnection,
             'scmConnections'
