@@ -185,6 +185,10 @@ const ColLink = columnHelper.accessor(({ node }) => node?.url, {
         href={getValue()}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={(e) => {
+          e.preventDefault()
+          window.open(getValue(), '_blank')
+        }}
       />
     )
   },
