@@ -11,9 +11,9 @@ import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { GqlError } from 'components/utils/Alert'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
-import { PR_BASE_CRUMBS, PR_SCM_ABS_PATH } from 'routes/prRoutesConsts'
+import { PR_BASE_CRUMBS, PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/prRoutesConsts'
 
-import { columns } from './PrScmWebhooksColumns'
+import { columns } from './ScmWebhooksColumns'
 
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -41,8 +41,8 @@ export default function ScmWebhooks() {
       () => [
         ...PR_BASE_CRUMBS,
         {
-          label: 'SCM connections',
-          url: PR_SCM_ABS_PATH,
+          label: 'SCM webhooks',
+          url: PR_SCM_WEBHOOKS_ABS_PATH,
         },
       ],
       []
@@ -62,9 +62,8 @@ export default function ScmWebhooks() {
     data: currentData,
     previousData,
   } = queryResult
-    const data = currentData || previousData
+  const data = currentData || previousData
 
-    console.log(data)
   const scmWebhooks = data?.scmWebhooks
   const pageInfo = scmWebhooks?.pageInfo
   const { refetch } = useSlicePolling(queryResult, {
@@ -80,7 +79,7 @@ export default function ScmWebhooks() {
     fetchMore({
       variables: { after: pageInfo.endCursor },
       updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(prev, fetchMoreResult.ScmWebhooks, 'ScmWebhooks'),
+        extendConnection(prev, fetchMoreResult.scmWebhooks, 'scmWebhooks'),
     })
   }, [fetchMore, pageInfo?.endCursor])
 
@@ -90,6 +89,7 @@ export default function ScmWebhooks() {
   if (!data) {
     return <LoopingLogo />
   }
+  console.log('scmWebhooks.edges', scmWebhooks?.edges)
 
   return (
     <div
@@ -105,7 +105,7 @@ export default function ScmWebhooks() {
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
           reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
-          data={data?.ScmWebhooks?.edges || []}
+          data={scmWebhooks?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}

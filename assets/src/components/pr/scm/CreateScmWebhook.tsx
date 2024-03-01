@@ -1,8 +1,11 @@
 import { useCallback, useState } from 'react'
-import { Button, Modal } from '@pluralsh/design-system'
+import { Button, FormField, Input2,Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
+import { ApolloError } from '@apollo/client'
 
 import {
+  ScmConnectionFragment,
+  ScmType,
   ScmWebhooksDocument,
   useCreateScmWebhookMutation,
 } from 'generated/graphql'
@@ -11,15 +14,19 @@ import { appendConnection, updateCache } from 'utils/graphql'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-import { ScmWebhookForm } from './EditScmWebhook'
-import { SCM_WEBHOOKS_Q_VARS } from './PrScmWebhooks'
+
+import { GqlError } from 'components/utils/Alert'
+
+
+import { SCM_WEBHOOKS_Q_VARS } from './ScmWebhooks'
+import { scmTypeToLabel } from './PrScmConnectionsColumns'
 
 export function CreateScmWebhookModal({
-  connectionId,
+  connection,
   open,
   onClose,
 }: {
-  connectionId: string
+  connection: ScmConnectionFragment
   open: boolean
   onClose: Nullable<() => void>
 }) {
@@ -41,16 +48,16 @@ export function CreateScmWebhookModal({
     },
   })
   const { owner } = formState
-  const allowSubmit = owner && connectionId
+  const allowSubmit = owner && connection?.id
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault()
 
       if (allowSubmit) {
-        mutation({ variables: { connectionId, owner } })
+        mutation({ variables: { connectionId: connection?.id, owner } })
       }
     },
-    [allowSubmit, connectionId, mutation, owner]
+    [allowSubmit, connection, mutation, owner]
   )
 
   return (
@@ -60,7 +67,9 @@ export function CreateScmWebhookModal({
       onClose={onClose || undefined}
       asForm
       onSubmit={onSubmit}
-      header="Create a new SCM webhook"
+      header={`Create a new ${
+        scmTypeToLabel[connection.type || ''] || 'SCM'
+      } webhook for ${connection.name}`}
       actions={
         <div
           css={{
@@ -87,13 +96,17 @@ export function CreateScmWebhookModal({
       }
     >
       <ScmWebhookForm
-        {...{ type: 'create', formState, updateFormState, error }}
+        {...{ type: 'create', connection, formState, updateFormState, error }}
       />
     </Modal>
   )
 }
 
-export function CreateScmWebhook({ connectionId }: { connectionId: string }) {
+export function CreateScmWebhook({
+  connection,
+}: {
+  connection: ScmConnectionFragment
+}) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -102,15 +115,61 @@ export function CreateScmWebhook({ connectionId }: { connectionId: string }) {
         secondary
         onClick={() => setOpen(true)}
       >
-        Create SCM webhook
+        Create webhook
       </Button>
       <ModalMountTransition open={open}>
         <CreateScmWebhookModal
-          connectionId={connectionId}
+          connection={connection}
           open={open}
           onClose={() => setOpen(false)}
         />
       </ModalMountTransition>
     </>
+  )
+}
+
+type ScmWebhookVars = {
+  owner: string
+}
+
+export function ScmWebhookForm({
+  connection,
+  formState,
+  updateFormState,
+  error,
+}: {
+  connection: Nullable<ScmConnectionFragment>
+  formState: Partial<ScmWebhookVars>
+  updateFormState: (update: Partial<ScmWebhookVars>) => void
+  error: ApolloError | undefined
+}) {
+  const theme = useTheme()
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.medium,
+      }}
+    >
+      <FormField
+        label={
+          connection?.type === ScmType.Github
+            ? (`${scmTypeToLabel[connection.type]} organization` as const)
+            : connection?.type === ScmType.Gitlab
+            ? (`${scmTypeToLabel[connection.type]} group` as const)
+            : 'Owner'
+        }
+        required
+      >
+        <Input2
+          value={formState.owner}
+          onChange={(e) => updateFormState({ owner: e.target.value })}
+        />
+      </FormField>
+
+      {error && <GqlError error={error} />}
+    </div>
   )
 }

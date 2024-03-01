@@ -188,7 +188,7 @@ export const ColActions = columnHelper.display({
           gap: theme.spacing.small,
         }}
       >
-        <CreateScmWebhook secondary connectionId={scmConnection.id} />
+        <CreateScmWebhook connection={scmConnection} />
         <IconFrame
           size="medium"
           clickable

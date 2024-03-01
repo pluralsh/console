@@ -6,7 +6,7 @@ import PrQueue from 'components/pr/queue/PrQueue'
 import PrScmConnections from 'components/pr/scm/PrScmConnections'
 import PrAutomations from 'components/pr/automations/PrAutomations'
 
-import PrScmWebhooks from 'components/pr/scm/PrScmWebhooks'
+import PrScmWebhooks from 'components/pr/scm/ScmWebhooks'
 
 import { CdRoot } from './cdRoutes'
 import {
