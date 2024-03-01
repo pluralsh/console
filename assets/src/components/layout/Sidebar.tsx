@@ -101,11 +101,13 @@ function getMenuItems({
       text: 'Nodes',
       icon: <ServersIcon />,
       path: '/nodes',
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
       text: 'Pods',
       icon: <ApiIcon />,
       path: '/pods',
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
       text: 'PR',
@@ -136,7 +138,9 @@ function getMenuItems({
       text: 'Backups',
       icon: <HistoryIcon />,
       path: '/backups',
-      enabled: isCDEnabled,
+      enabled:
+        isCDEnabled &&
+        !!(personaConfig?.all || personaConfig?.sidebar?.backups),
     },
     {
       text: 'Audits',
