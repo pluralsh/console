@@ -50,6 +50,8 @@ const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
     kubernetes: false,
     pullRequests: false,
     settings: false,
+    stacks: true,
+    backups: true,
   },
 } satisfies RequiredDeep<PersonaConfigurationAttributes>
 

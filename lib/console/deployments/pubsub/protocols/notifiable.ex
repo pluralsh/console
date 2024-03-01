@@ -13,10 +13,11 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Any do
 end
 
 defmodule Console.Deployments.Notifications.Utils do
-  alias Console.Schema.{Service, Cluster, Pipeline}
+  alias Console.Schema.{Service, Cluster, Pipeline, PullRequest}
   def filters(%Service{id: id, cluster_id: cid}), do: [service_id: id, cluster_id: cid]
   def filters(%Cluster{id: id}), do: [cluster_id: id]
   def filters(%Pipeline{id: id}), do: [pipeline_id: id]
+  def filters(%PullRequest{url: url}), do: [regex: url]
   def filters(_), do: []
 end
 
@@ -40,4 +41,12 @@ defimpl Console.Deployments.PubSub.Notifiable, for: [
   defp source(%{repository: %{url: url}, git: %{ref: ref, folder: folder}}), do: %{url: url, ref: "#{folder}@#{ref}"}
   defp source(%{helm: %{chart: c, version: v}}), do: %{url: c, ref: v}
   defp source(_), do: %{}
+end
+
+defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.PullRequestCreated do
+  alias Console.Deployments.Notifications.Utils
+
+  def message(%{item: pr}) do
+    {"pr.create", Utils.filters(pr), %{pr: pr}}
+  end
 end

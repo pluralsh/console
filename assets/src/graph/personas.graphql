@@ -13,6 +13,8 @@ fragment PersonaConfiguration on PersonaConfiguration {
     kubernetes
     pullRequests
     settings
+    backups
+    stacks
   }
 }
 

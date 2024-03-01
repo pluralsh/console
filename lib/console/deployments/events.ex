@@ -41,3 +41,6 @@ defmodule Console.PubSub.ClusterRestoreCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ObjectStoreCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ObjectStoreUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ObjectStoreDeleted, do: use Piazza.PubSub.Event
+
+
+defmodule Console.PubSub.PullRequestCreated, do: use Piazza.PubSub.Event

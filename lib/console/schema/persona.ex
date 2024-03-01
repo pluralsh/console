@@ -12,7 +12,7 @@ defmodule Console.Schema.Persona do
       end
 
       embeds_one :sidebar, Sidebar, on_replace: :update do
-        boolean_fields [:all, :kubernetes, :audits, :pull_requests, :settings]
+        boolean_fields [:all, :kubernetes, :audits, :pull_requests, :settings, :backups, :stacks]
       end
     end
 

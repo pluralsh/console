@@ -90,6 +90,8 @@ defmodule Console.GraphQl.Users do
     field :kubernetes,    :boolean
     field :pull_requests, :boolean
     field :settings,      :boolean
+    field :backups,       :boolean
+    field :stacks,        :boolean
   end
 
   object :user do
@@ -267,6 +269,8 @@ defmodule Console.GraphQl.Users do
     field :kubernetes,    :boolean
     field :pull_requests, :boolean
     field :settings,      :boolean
+    field :backups,       :boolean
+    field :stacks,        :boolean
   end
 
   connection node_type: :user

@@ -24,7 +24,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
   def webhook(%ScmConnection{} = conn, %ScmWebhook{owner: owner, hmac: hmac} = hook) do
     with {:ok, client} <- client(conn) do
       Tentacat.Organizations.Hooks.create(client, owner, %{
-        "name" => ScmWebhook.name(hook),
+        "name" => "web",
         "active" => true,
         "events" => ["pull_request"],
         "config" => %{

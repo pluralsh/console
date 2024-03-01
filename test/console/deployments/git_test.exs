@@ -280,6 +280,8 @@ defmodule Console.Deployments.GitTest do
       assert pr.cluster_id == pra.cluster_id
       assert pr.url == "https://github.com/pr/url"
       assert pr.title == pra.title
+
+      assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
     end
 
     test "users cannot create if they don't have permissions" do

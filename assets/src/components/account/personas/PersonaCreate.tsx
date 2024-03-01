@@ -51,6 +51,8 @@ const DEFAULT_CONFIGURATION = {
     kubernetes: true,
     pullRequests: true,
     settings: true,
+    stacks: true,
+    backups: true,
   },
 } as const satisfies RequiredDeep<PersonaConfigurationAttributes>
 

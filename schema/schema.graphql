@@ -793,6 +793,9 @@ input NotificationRouterAttributes {
 }
 
 input RouterFilterAttributes {
+  "a regex for filtering by things like pr url"
+  regex: String
+
   "whether to enable delivery for events associated with this service"
   serviceId: ID
 
@@ -846,6 +849,7 @@ type NotificationRouter {
 
 type NotificationFilter {
   id: ID!
+  regex: String
   service: Service
   cluster: Cluster
   pipeline: Pipeline
@@ -4384,6 +4388,8 @@ input PersonaSidebarAttributes {
   kubernetes: Boolean
   pullRequests: Boolean
   settings: Boolean
+  backups: Boolean
+  stacks: Boolean
 }
 
 type User {
@@ -4557,6 +4563,8 @@ type PersonaSidebar {
   kubernetes: Boolean
   pullRequests: Boolean
   settings: Boolean
+  backups: Boolean
+  stacks: Boolean
 }
 
 type UserConnection {
