@@ -10,7 +10,7 @@ import {
   ScmWebhooksDocument,
   useCreateScmWebhookMutation,
 } from 'generated/graphql'
-import { appendConnection, updateCache } from 'utils/graphql'
+import { appendConnectionToEnd, updateCache } from 'utils/graphql'
 
 import { PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/prRoutesConsts'
 import { useUpdateState } from 'components/hooks/useUpdateState'
@@ -43,7 +43,7 @@ export function CreateScmWebhookModal({
         variables: SCM_WEBHOOKS_Q_VARS,
         query: ScmWebhooksDocument,
         update: (prev) =>
-          appendConnection(prev, data?.createScmWebhook, 'scmWebhooks'),
+          appendConnectionToEnd(prev, data?.createScmWebhook, 'scmWebhooks'),
       }),
     onCompleted: () => {
       setSuccess(true)
@@ -56,9 +56,13 @@ export function CreateScmWebhookModal({
       e.preventDefault()
       if (success) {
         navigate(PR_SCM_WEBHOOKS_ABS_PATH)
+
+        return
       }
       if (allowSubmit) {
-        mutation({ variables: { connectionId: connection?.id, owner } })
+        mutation({
+          variables: { connectionId: connection?.id, owner: owner.trim() },
+        })
       }
     },
     [allowSubmit, connection?.id, mutation, navigate, owner, success]
@@ -113,9 +117,24 @@ export function CreateScmWebhookModal({
       {success ? (
         <Body1P>Successfully created webhook for {connection.name}</Body1P>
       ) : (
-        <ScmWebhookForm
-          {...{ type: 'create', connection, formState, updateFormState, error }}
-        />
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.medium,
+          }}
+        >
+          <ScmWebhookForm
+            {...{
+              type: 'create',
+              connection,
+              formState,
+              updateFormState,
+              error,
+            }}
+          />
+          {error && <GqlError error={error} />}
+        </div>
       )}
     </Modal>
   )
@@ -155,40 +174,26 @@ export function ScmWebhookForm({
   connection,
   formState,
   updateFormState,
-  error,
 }: {
   connection: Nullable<ScmConnectionFragment>
   formState: Partial<ScmWebhookVars>
   updateFormState: (update: Partial<ScmWebhookVars>) => void
-  error: ApolloError | undefined
 }) {
-  const theme = useTheme()
-
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.medium,
-      }}
+    <FormField
+      label={
+        connection?.type === ScmType.Github
+          ? (`${scmTypeToLabel[connection.type]} organization` as const)
+          : connection?.type === ScmType.Gitlab
+          ? (`${scmTypeToLabel[connection.type]} group` as const)
+          : 'Owner'
+      }
+      required
     >
-      <FormField
-        label={
-          connection?.type === ScmType.Github
-            ? (`${scmTypeToLabel[connection.type]} organization` as const)
-            : connection?.type === ScmType.Gitlab
-            ? (`${scmTypeToLabel[connection.type]} group` as const)
-            : 'Owner'
-        }
-        required
-      >
-        <Input2
-          value={formState.owner}
-          onChange={(e) => updateFormState({ owner: e.target.value })}
-        />
-      </FormField>
-
-      {error && <GqlError error={error} />}
-    </div>
+      <Input2
+        value={formState.owner}
+        onChange={(e) => updateFormState({ owner: e.target.value })}
+      />
+    </FormField>
   )
 }
