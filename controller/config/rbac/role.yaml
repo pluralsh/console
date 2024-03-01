@@ -51,6 +51,32 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - clusterrestoretriggers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - clusterrestoretriggers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - clusterrestoretriggers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - clusters
   verbs:
   - create
@@ -200,6 +226,32 @@ rules:
   - deployments.plural.sh
   resources:
   - prautomations/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - prautomationtriggers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - prautomationtriggers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - prautomationtriggers/status
   verbs:
   - get
   - patch

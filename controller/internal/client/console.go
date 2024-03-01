@@ -69,10 +69,10 @@ type ConsoleClient interface {
 	GetScmConnectionByName(ctx context.Context, name string) (*console.ScmConnectionFragment, error)
 	IsScmConnectionExists(ctx context.Context, name string) bool
 	GetClusterBackup(clusterId, namespace, name *string) (*console.ClusterBackupFragment, error)
-	GetClusterRestore(id string) (*console.ClusterRestoreFragment, error)
-	UpdateClusterRestore(id string, attrs console.RestoreAttributes) (*console.ClusterRestoreFragment, error)
-	CreateClusterRestore(backupId string) (*console.ClusterRestoreFragment, error)
-	IsClusterRestoreExisting(id string) bool
+	GetClusterRestore(ctx context.Context, id string) (*console.ClusterRestoreFragment, error)
+	UpdateClusterRestore(ctx context.Context, id string, attrs console.RestoreAttributes) (*console.ClusterRestoreFragment, error)
+	CreateClusterRestore(ctx context.Context, backupId string) (*console.ClusterRestoreFragment, error)
+	IsClusterRestoreExisting(ctx context.Context, id string) bool
 	CreatePrAutomation(ctx context.Context, attributes console.PrAutomationAttributes) (*console.PrAutomationFragment, error)
 	UpdatePrAutomation(ctx context.Context, id string, attributes console.PrAutomationAttributes) (*console.PrAutomationFragment, error)
 	DeletePrAutomation(ctx context.Context, id string) error
@@ -83,6 +83,7 @@ type ConsoleClient interface {
 	GetServiceContext(name string) (*console.ServiceContextFragment, error)
 	GetPipelineContext(ctx context.Context, id string) (*console.PipelineContextFragment, error)
 	CreatePipelineContext(ctx context.Context, pipelineID string, attributes console.PipelineContextAttributes) (*console.CreatePipelineContext, error)
+	CreatePullRequest(ctx context.Context, prAutomationID string, branch *string, context *string) (*console.CreatePullRequest, error)
 }
 
 func New(url, token string) ConsoleClient {

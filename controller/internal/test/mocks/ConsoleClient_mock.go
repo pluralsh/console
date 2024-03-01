@@ -82,9 +82,9 @@ func (_c *ConsoleClientMock_CreateCluster_Call) RunAndReturn(run func(gqlclient.
 	return _c
 }
 
-// CreateClusterRestore provides a mock function with given fields: backupId
-func (_m *ConsoleClientMock) CreateClusterRestore(backupId string) (*gqlclient.ClusterRestoreFragment, error) {
-	ret := _m.Called(backupId)
+// CreateClusterRestore provides a mock function with given fields: ctx, backupId
+func (_m *ConsoleClientMock) CreateClusterRestore(ctx context.Context, backupId string) (*gqlclient.ClusterRestoreFragment, error) {
+	ret := _m.Called(ctx, backupId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateClusterRestore")
@@ -92,19 +92,19 @@ func (_m *ConsoleClientMock) CreateClusterRestore(backupId string) (*gqlclient.C
 
 	var r0 *gqlclient.ClusterRestoreFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*gqlclient.ClusterRestoreFragment, error)); ok {
-		return rf(backupId)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.ClusterRestoreFragment, error)); ok {
+		return rf(ctx, backupId)
 	}
-	if rf, ok := ret.Get(0).(func(string) *gqlclient.ClusterRestoreFragment); ok {
-		r0 = rf(backupId)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.ClusterRestoreFragment); ok {
+		r0 = rf(ctx, backupId)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.ClusterRestoreFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(backupId)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, backupId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -118,14 +118,15 @@ type ConsoleClientMock_CreateClusterRestore_Call struct {
 }
 
 // CreateClusterRestore is a helper method to define mock.On call
+//   - ctx context.Context
 //   - backupId string
-func (_e *ConsoleClientMock_Expecter) CreateClusterRestore(backupId interface{}) *ConsoleClientMock_CreateClusterRestore_Call {
-	return &ConsoleClientMock_CreateClusterRestore_Call{Call: _e.mock.On("CreateClusterRestore", backupId)}
+func (_e *ConsoleClientMock_Expecter) CreateClusterRestore(ctx interface{}, backupId interface{}) *ConsoleClientMock_CreateClusterRestore_Call {
+	return &ConsoleClientMock_CreateClusterRestore_Call{Call: _e.mock.On("CreateClusterRestore", ctx, backupId)}
 }
 
-func (_c *ConsoleClientMock_CreateClusterRestore_Call) Run(run func(backupId string)) *ConsoleClientMock_CreateClusterRestore_Call {
+func (_c *ConsoleClientMock_CreateClusterRestore_Call) Run(run func(ctx context.Context, backupId string)) *ConsoleClientMock_CreateClusterRestore_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -135,7 +136,7 @@ func (_c *ConsoleClientMock_CreateClusterRestore_Call) Return(_a0 *gqlclient.Clu
 	return _c
 }
 
-func (_c *ConsoleClientMock_CreateClusterRestore_Call) RunAndReturn(run func(string) (*gqlclient.ClusterRestoreFragment, error)) *ConsoleClientMock_CreateClusterRestore_Call {
+func (_c *ConsoleClientMock_CreateClusterRestore_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.ClusterRestoreFragment, error)) *ConsoleClientMock_CreateClusterRestore_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -373,6 +374,67 @@ func (_c *ConsoleClientMock_CreateProvider_Call) Return(_a0 *gqlclient.ClusterPr
 }
 
 func (_c *ConsoleClientMock_CreateProvider_Call) RunAndReturn(run func(context.Context, gqlclient.ClusterProviderAttributes) (*gqlclient.ClusterProviderFragment, error)) *ConsoleClientMock_CreateProvider_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreatePullRequest provides a mock function with given fields: ctx, prAutomationID, branch, _a3
+func (_m *ConsoleClientMock) CreatePullRequest(ctx context.Context, prAutomationID string, branch *string, _a3 *string) (*gqlclient.CreatePullRequest, error) {
+	ret := _m.Called(ctx, prAutomationID, branch, _a3)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreatePullRequest")
+	}
+
+	var r0 *gqlclient.CreatePullRequest
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *string, *string) (*gqlclient.CreatePullRequest, error)); ok {
+		return rf(ctx, prAutomationID, branch, _a3)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *string, *string) *gqlclient.CreatePullRequest); ok {
+		r0 = rf(ctx, prAutomationID, branch, _a3)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.CreatePullRequest)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *string, *string) error); ok {
+		r1 = rf(ctx, prAutomationID, branch, _a3)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreatePullRequest_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreatePullRequest'
+type ConsoleClientMock_CreatePullRequest_Call struct {
+	*mock.Call
+}
+
+// CreatePullRequest is a helper method to define mock.On call
+//   - ctx context.Context
+//   - prAutomationID string
+//   - branch *string
+//   - _a3 *string
+func (_e *ConsoleClientMock_Expecter) CreatePullRequest(ctx interface{}, prAutomationID interface{}, branch interface{}, _a3 interface{}) *ConsoleClientMock_CreatePullRequest_Call {
+	return &ConsoleClientMock_CreatePullRequest_Call{Call: _e.mock.On("CreatePullRequest", ctx, prAutomationID, branch, _a3)}
+}
+
+func (_c *ConsoleClientMock_CreatePullRequest_Call) Run(run func(ctx context.Context, prAutomationID string, branch *string, _a3 *string)) *ConsoleClientMock_CreatePullRequest_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(*string), args[3].(*string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreatePullRequest_Call) Return(_a0 *gqlclient.CreatePullRequest, _a1 error) *ConsoleClientMock_CreatePullRequest_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreatePullRequest_Call) RunAndReturn(run func(context.Context, string, *string, *string) (*gqlclient.CreatePullRequest, error)) *ConsoleClientMock_CreatePullRequest_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1128,9 +1190,9 @@ func (_c *ConsoleClientMock_GetClusterByHandle_Call) RunAndReturn(run func(*stri
 	return _c
 }
 
-// GetClusterRestore provides a mock function with given fields: id
-func (_m *ConsoleClientMock) GetClusterRestore(id string) (*gqlclient.ClusterRestoreFragment, error) {
-	ret := _m.Called(id)
+// GetClusterRestore provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetClusterRestore(ctx context.Context, id string) (*gqlclient.ClusterRestoreFragment, error) {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetClusterRestore")
@@ -1138,19 +1200,19 @@ func (_m *ConsoleClientMock) GetClusterRestore(id string) (*gqlclient.ClusterRes
 
 	var r0 *gqlclient.ClusterRestoreFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*gqlclient.ClusterRestoreFragment, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.ClusterRestoreFragment, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(string) *gqlclient.ClusterRestoreFragment); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.ClusterRestoreFragment); ok {
+		r0 = rf(ctx, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.ClusterRestoreFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1164,14 +1226,15 @@ type ConsoleClientMock_GetClusterRestore_Call struct {
 }
 
 // GetClusterRestore is a helper method to define mock.On call
+//   - ctx context.Context
 //   - id string
-func (_e *ConsoleClientMock_Expecter) GetClusterRestore(id interface{}) *ConsoleClientMock_GetClusterRestore_Call {
-	return &ConsoleClientMock_GetClusterRestore_Call{Call: _e.mock.On("GetClusterRestore", id)}
+func (_e *ConsoleClientMock_Expecter) GetClusterRestore(ctx interface{}, id interface{}) *ConsoleClientMock_GetClusterRestore_Call {
+	return &ConsoleClientMock_GetClusterRestore_Call{Call: _e.mock.On("GetClusterRestore", ctx, id)}
 }
 
-func (_c *ConsoleClientMock_GetClusterRestore_Call) Run(run func(id string)) *ConsoleClientMock_GetClusterRestore_Call {
+func (_c *ConsoleClientMock_GetClusterRestore_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetClusterRestore_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -1181,7 +1244,7 @@ func (_c *ConsoleClientMock_GetClusterRestore_Call) Return(_a0 *gqlclient.Cluste
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetClusterRestore_Call) RunAndReturn(run func(string) (*gqlclient.ClusterRestoreFragment, error)) *ConsoleClientMock_GetClusterRestore_Call {
+func (_c *ConsoleClientMock_GetClusterRestore_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.ClusterRestoreFragment, error)) *ConsoleClientMock_GetClusterRestore_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2155,17 +2218,17 @@ func (_c *ConsoleClientMock_IsClusterExisting_Call) RunAndReturn(run func(*strin
 	return _c
 }
 
-// IsClusterRestoreExisting provides a mock function with given fields: id
-func (_m *ConsoleClientMock) IsClusterRestoreExisting(id string) bool {
-	ret := _m.Called(id)
+// IsClusterRestoreExisting provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) IsClusterRestoreExisting(ctx context.Context, id string) bool {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for IsClusterRestoreExisting")
 	}
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(string) bool); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
@@ -2179,14 +2242,15 @@ type ConsoleClientMock_IsClusterRestoreExisting_Call struct {
 }
 
 // IsClusterRestoreExisting is a helper method to define mock.On call
+//   - ctx context.Context
 //   - id string
-func (_e *ConsoleClientMock_Expecter) IsClusterRestoreExisting(id interface{}) *ConsoleClientMock_IsClusterRestoreExisting_Call {
-	return &ConsoleClientMock_IsClusterRestoreExisting_Call{Call: _e.mock.On("IsClusterRestoreExisting", id)}
+func (_e *ConsoleClientMock_Expecter) IsClusterRestoreExisting(ctx interface{}, id interface{}) *ConsoleClientMock_IsClusterRestoreExisting_Call {
+	return &ConsoleClientMock_IsClusterRestoreExisting_Call{Call: _e.mock.On("IsClusterRestoreExisting", ctx, id)}
 }
 
-func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) Run(run func(id string)) *ConsoleClientMock_IsClusterRestoreExisting_Call {
+func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_IsClusterRestoreExisting_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
@@ -2196,7 +2260,7 @@ func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) Return(_a0 bool) *Con
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) RunAndReturn(run func(string) bool) *ConsoleClientMock_IsClusterRestoreExisting_Call {
+func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) RunAndReturn(run func(context.Context, string) bool) *ConsoleClientMock_IsClusterRestoreExisting_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2771,9 +2835,9 @@ func (_c *ConsoleClientMock_UpdateCluster_Call) RunAndReturn(run func(string, gq
 	return _c
 }
 
-// UpdateClusterRestore provides a mock function with given fields: id, attrs
-func (_m *ConsoleClientMock) UpdateClusterRestore(id string, attrs gqlclient.RestoreAttributes) (*gqlclient.ClusterRestoreFragment, error) {
-	ret := _m.Called(id, attrs)
+// UpdateClusterRestore provides a mock function with given fields: ctx, id, attrs
+func (_m *ConsoleClientMock) UpdateClusterRestore(ctx context.Context, id string, attrs gqlclient.RestoreAttributes) (*gqlclient.ClusterRestoreFragment, error) {
+	ret := _m.Called(ctx, id, attrs)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateClusterRestore")
@@ -2781,19 +2845,19 @@ func (_m *ConsoleClientMock) UpdateClusterRestore(id string, attrs gqlclient.Res
 
 	var r0 *gqlclient.ClusterRestoreFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, gqlclient.RestoreAttributes) (*gqlclient.ClusterRestoreFragment, error)); ok {
-		return rf(id, attrs)
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.RestoreAttributes) (*gqlclient.ClusterRestoreFragment, error)); ok {
+		return rf(ctx, id, attrs)
 	}
-	if rf, ok := ret.Get(0).(func(string, gqlclient.RestoreAttributes) *gqlclient.ClusterRestoreFragment); ok {
-		r0 = rf(id, attrs)
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.RestoreAttributes) *gqlclient.ClusterRestoreFragment); ok {
+		r0 = rf(ctx, id, attrs)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*gqlclient.ClusterRestoreFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, gqlclient.RestoreAttributes) error); ok {
-		r1 = rf(id, attrs)
+	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.RestoreAttributes) error); ok {
+		r1 = rf(ctx, id, attrs)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2807,15 +2871,16 @@ type ConsoleClientMock_UpdateClusterRestore_Call struct {
 }
 
 // UpdateClusterRestore is a helper method to define mock.On call
+//   - ctx context.Context
 //   - id string
 //   - attrs gqlclient.RestoreAttributes
-func (_e *ConsoleClientMock_Expecter) UpdateClusterRestore(id interface{}, attrs interface{}) *ConsoleClientMock_UpdateClusterRestore_Call {
-	return &ConsoleClientMock_UpdateClusterRestore_Call{Call: _e.mock.On("UpdateClusterRestore", id, attrs)}
+func (_e *ConsoleClientMock_Expecter) UpdateClusterRestore(ctx interface{}, id interface{}, attrs interface{}) *ConsoleClientMock_UpdateClusterRestore_Call {
+	return &ConsoleClientMock_UpdateClusterRestore_Call{Call: _e.mock.On("UpdateClusterRestore", ctx, id, attrs)}
 }
 
-func (_c *ConsoleClientMock_UpdateClusterRestore_Call) Run(run func(id string, attrs gqlclient.RestoreAttributes)) *ConsoleClientMock_UpdateClusterRestore_Call {
+func (_c *ConsoleClientMock_UpdateClusterRestore_Call) Run(run func(ctx context.Context, id string, attrs gqlclient.RestoreAttributes)) *ConsoleClientMock_UpdateClusterRestore_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(gqlclient.RestoreAttributes))
+		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.RestoreAttributes))
 	})
 	return _c
 }
@@ -2825,7 +2890,7 @@ func (_c *ConsoleClientMock_UpdateClusterRestore_Call) Return(_a0 *gqlclient.Clu
 	return _c
 }
 
-func (_c *ConsoleClientMock_UpdateClusterRestore_Call) RunAndReturn(run func(string, gqlclient.RestoreAttributes) (*gqlclient.ClusterRestoreFragment, error)) *ConsoleClientMock_UpdateClusterRestore_Call {
+func (_c *ConsoleClientMock_UpdateClusterRestore_Call) RunAndReturn(run func(context.Context, string, gqlclient.RestoreAttributes) (*gqlclient.ClusterRestoreFragment, error)) *ConsoleClientMock_UpdateClusterRestore_Call {
 	_c.Call.Return(run)
 	return _c
 }

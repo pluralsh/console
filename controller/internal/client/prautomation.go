@@ -77,3 +77,7 @@ func (c *client) IsPrAutomationExistsByName(ctx context.Context, name string) bo
 	// We are assuming that if there is an error, and it is not ErrorNotFound then resource does not exist.
 	return err == nil
 }
+
+func (c *client) CreatePullRequest(ctx context.Context, prAutomationID string, branch *string, context *string) (*console.CreatePullRequest, error) {
+	return c.consoleClient.CreatePullRequest(ctx, prAutomationID, branch, context)
+}
