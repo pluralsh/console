@@ -22,26 +22,38 @@ defmodule ConsoleWeb.Router do
   end
 
   scope "/ext" do
-    pipe_through [:auth]
+    ## unauthenticated routes
+    scope "/" do
+      pipe_through [:api]
 
-    forward "/gql", Console.ExternalGraphQl.Plug,
-      schema: Console.ExternalGraphQl,
-      document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default]
+      scope "/v1", ConsoleWeb do
+        post "/webhooks/:type/:id", WebhookController, :scm
+      end
+    end
 
-    scope "/v1", ConsoleWeb do
-      get "/git/tarballs", GitController, :tarball
+    ## authenticated routes
+    scope "/" do
+      pipe_through [:auth]
 
-      post "/webhooks/:type/:id", WebhookController, :scm
+      forward "/gql", Console.ExternalGraphQl.Plug,
+        schema: Console.ExternalGraphQl,
+        document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default]
 
-      get "/gate/:cluster/:name", GitController, :proceed
-      get "/gate/:id", GitController, :proceed
-      post "/gate/:cluster/:name", GitController, :proceed
-      post "/gate/:id", GitController, :proceed
+      scope "/v1", ConsoleWeb do
+        get "/git/tarballs", GitController, :tarball
 
-      get "/rollback/:cluster/:name", GitController, :rollback
-      get "/rollback/:id", GitController, :rollback
-      post "/rollback/:cluster/:name", GitController, :rollback
-      post "/rollback/:id", GitController, :rollback
+        post "/webhooks/:type/:id", WebhookController, :scm
+
+        get "/gate/:cluster/:name", GitController, :proceed
+        get "/gate/:id", GitController, :proceed
+        post "/gate/:cluster/:name", GitController, :proceed
+        post "/gate/:id", GitController, :proceed
+
+        get "/rollback/:cluster/:name", GitController, :rollback
+        get "/rollback/:id", GitController, :rollback
+        post "/rollback/:cluster/:name", GitController, :rollback
+        post "/rollback/:id", GitController, :rollback
+      end
     end
   end
 

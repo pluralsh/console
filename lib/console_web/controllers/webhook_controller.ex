@@ -11,7 +11,7 @@ defmodule ConsoleWeb.WebhookController do
   plug ConsoleWeb.Verifier when action == :webhook
 
   def scm(conn, %{"id" => id}) do
-    with %ScmWebhook{} = hook <- Git.get_scm_webhook(id),
+    with %ScmWebhook{} = hook <- Git.get_scm_webhook_by_ext_id(id),
          :ok <- verify(conn, hook),
          {:ok, url, params} <- Dispatcher.pr(hook, conn.body_params),
          {:ok, _} <- Git.update_pull_request(params, url) do

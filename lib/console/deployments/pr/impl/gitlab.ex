@@ -53,8 +53,8 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     |> handle_response()
   end
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: 200, body: body}}),
-    do: Jason.decode(body)
+  defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}})
+    when code >= 200 and code < 300, do: Jason.decode(body)
   defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "failed to create pr: #{body}"}
   defp handle_response(_), do: {:error, "unknown gitlab error"}
 
