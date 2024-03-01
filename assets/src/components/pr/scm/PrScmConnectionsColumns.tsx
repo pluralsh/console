@@ -4,7 +4,10 @@ import {
   GitLabLogoIcon,
   HelpIcon,
   IconFrame,
+  ListBoxItem,
   PencilIcon,
+  TrashCanIcon,
+  WebhooksIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import styled, { useTheme } from 'styled-components'
@@ -20,14 +23,15 @@ import { Edge, removeConnection, updateCache } from 'utils/graphql'
 import { Confirm } from 'components/utils/Confirm'
 import { TruncateStart } from 'components/utils/table/TruncateStart'
 import { StackedText } from 'components/utils/table/StackedText'
-import { DeleteIconButton } from 'components/utils/IconButtons'
+import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { EditScmConnectionModal } from './EditScmConnection'
-import { CreateScmWebhook } from './CreateScmWebhook'
+import { CreateScmWebhookModal } from './CreateScmWebhook'
 
 enum MenuItemKey {
   Edit = 'edit',
   Delete = 'delete',
+  CreateWebhook = 'createWebhook',
 }
 
 export const columnHelper = createColumnHelper<Edge<ScmConnectionFragment>>()
@@ -179,37 +183,46 @@ export const ColActions = columnHelper.display({
     }
 
     return (
-      <div
-        onClick={(e) => e.stopPropagation()}
-        css={{
-          alignItems: 'center',
-          alignSelf: 'end',
-          display: 'flex',
-          gap: theme.spacing.small,
-        }}
-      >
-        <CreateScmWebhook connection={scmConnection} />
-        <IconFrame
-          size="medium"
-          clickable
-          icon={<PencilIcon />}
-          textValue="Edit"
-          onClick={() => setMenuKey(MenuItemKey.Edit)}
-        />
-        <DeleteIconButton onClick={() => setMenuKey(MenuItemKey.Delete)} />
+      <>
+        <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
+          <ListBoxItem
+            key={MenuItemKey.CreateWebhook}
+            leftContent={<WebhooksIcon />}
+            label="Create webhook"
+            textValue="Create webhook"
+          />
+          <ListBoxItem
+            key={MenuItemKey.Edit}
+            leftContent={<PencilIcon />}
+            label="Edit connection"
+            textValue="Edit connection"
+          />
+          <ListBoxItem
+            key={MenuItemKey.Delete}
+            leftContent={
+              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+            }
+            label="Delete connection"
+            textValue="Delete connection"
+          />
+        </MoreMenu>
         {/* Modals */}
+        <CreateScmWebhookModal
+          connection={scmConnection}
+          open={menuKey === MenuItemKey.CreateWebhook}
+          onClose={() => setMenuKey('')}
+        />
+        <EditScmConnectionModal
+          scmConnection={scmConnection}
+          open={menuKey === MenuItemKey.Edit}
+          onClose={() => setMenuKey('')}
+        />
         <DeleteScmConnectionModal
           scmConnection={scmConnection}
           open={menuKey === MenuItemKey.Delete}
           onClose={() => setMenuKey('')}
         />
-        <EditScmConnectionModal
-          // refetch={refetch}
-          scmConnection={scmConnection}
-          open={menuKey === MenuItemKey.Edit}
-          onClose={() => setMenuKey('')}
-        />
-      </div>
+      </>
     )
   },
 })

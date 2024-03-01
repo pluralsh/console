@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { ComponentProps, useCallback, useState } from 'react'
 import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router-dom'
@@ -20,7 +20,7 @@ import { Body1P } from 'components/utils/typography/Text'
 import { SCM_WEBHOOKS_Q_VARS } from './ScmWebhooks'
 import { scmTypeToLabel } from './PrScmConnectionsColumns'
 
-export function CreateScmWebhookModal({
+export function CreateScmWebhookModalBase({
   connection,
   open,
   onClose,
@@ -139,29 +139,13 @@ export function CreateScmWebhookModal({
   )
 }
 
-export function CreateScmWebhook({
-  connection,
-}: {
-  connection: ScmConnectionFragment
-}) {
-  const [open, setOpen] = useState(false)
-
+export function CreateScmWebhookModal(
+  props: ComponentProps<typeof CreateScmWebhookModalBase>
+) {
   return (
-    <>
-      <Button
-        secondary
-        onClick={() => setOpen(true)}
-      >
-        Create webhook
-      </Button>
-      <ModalMountTransition open={open}>
-        <CreateScmWebhookModal
-          connection={connection}
-          open={open}
-          onClose={() => setOpen(false)}
-        />
-      </ModalMountTransition>
-    </>
+    <ModalMountTransition open={props.open}>
+      <CreateScmWebhookModalBase {...props} />
+    </ModalMountTransition>
   )
 }
 
