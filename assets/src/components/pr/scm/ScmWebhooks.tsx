@@ -89,7 +89,6 @@ export default function ScmWebhooks() {
   if (!data) {
     return <LoopingLogo />
   }
-  console.log('scmWebhooks.edges', scmWebhooks?.edges)
 
   return (
     <div
