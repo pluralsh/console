@@ -67,6 +67,11 @@ jobs:
         with:
           version: latest
       - run: make testup
+      - name: download jwt verification key
+        run: | 
+          echo $JWT_PUBLIC_KEY > config/pubkey.pem
+        env:
+          JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       - name: Restore dependencies cache
         uses: actions/cache@v3
         with:

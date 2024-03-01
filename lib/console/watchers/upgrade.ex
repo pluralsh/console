@@ -29,10 +29,7 @@ defmodule Console.Watchers.Upgrade do
     {:reply, :ok, state}
   end
 
-  def handle_info(:start, state) do
-    Logger.info "starting upgrades watcher"
-    Logger.info "provider info: #{System.get_env("PROVIDER")}"
-
+  defp setup_queue(state) do
     Upgrades.create_queue(%{
       git: Console.conf(:git_url),
       domain: Console.conf(:url),
@@ -50,6 +47,18 @@ defmodule Console.Watchers.Upgrade do
       err ->
         Logger.error "failed to create upgrade queue: #{inspect(err)}"
         Process.send_after(self(), :start, :timer.seconds(5))
+        {:noreply, state}
+    end
+  end
+
+  def handle_info(:start, state) do
+    Logger.info "starting upgrades watcher"
+    Logger.info "provider info: #{System.get_env("PROVIDER")}"
+
+    case Console.Features.check_license() do
+      :ignore -> setup_queue(state)
+      _ ->
+        Logger.info "Bypass configuring upgrade queue for sandboxed instance"
         {:noreply, state}
     end
   end

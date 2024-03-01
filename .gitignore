@@ -35,3 +35,5 @@ watchman-*.tar
 # yalc
 .yalc
 yalc.lock
+
+config/pubkey.pem
