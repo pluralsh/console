@@ -1,5 +1,6 @@
 import { Button } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
+import styled, { useTheme } from 'styled-components'
 
 import { ScmType, ScmWebhookFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
@@ -7,6 +8,7 @@ import { Edge } from 'utils/graphql'
 import { StopPropagation } from 'components/utils/StopPropagation'
 import { TruncateStart } from 'components/utils/table/TruncateStart'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+import CopyButton from 'components/utils/CopyButton'
 
 import { ScmTypeCell, scmTypeToLabel } from './PrScmConnectionsColumns'
 
@@ -43,15 +45,30 @@ export const ColType = columnHelper.accessor(({ node }) => node?.type, {
   cell: ScmTypeCell,
 })
 
+const TruncateUrl = styled(TruncateStart)((_) => ({ width: 'auto' }))
+
 export const ColUrl = columnHelper.accessor(({ node }) => node?.url, {
   id: 'url',
   header: 'URL',
-  meta: { truncate: true },
+  meta: { gridTemplate: `minmax(100px, 1fr)` },
   cell: function Cell({ getValue }) {
+    const theme = useTheme()
+    const url = getValue()
+
     return (
-      <TruncateStart>
-        <span>{getValue()}</span>
-      </TruncateStart>
+      <div
+        css={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: theme.spacing.small,
+        }}
+      >
+        <TruncateUrl>
+          <span>{url}</span>
+        </TruncateUrl>
+        <CopyButton text={url} />
+      </div>
     )
   },
 })
