@@ -47,6 +47,10 @@ if get_env("LOKI_HOST") do
   config :console, :loki, get_env("LOKI_HOST")
 end
 
+if get_env("CONSOLE_LICENSE_KEY") do
+  config :console, :license_key, get_env("CONSOLE_LICENSE_KEY")
+end
+
 if get_env("GRAFANA_TENANT") do
   config :console, :grafana_tenant, get_env("GRAFANA_TENANT")
 end

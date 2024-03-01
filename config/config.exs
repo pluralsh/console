@@ -25,6 +25,11 @@ config :console, ConsoleWeb.Endpoint,
   pubsub_server: Console.PubSub,
   server: true
 
+or_nil = fn
+  {:ok, v} -> v
+  _ -> nil
+end
+
 config :console,
   secret_store: Console.Deployments.Secrets.Database,
   revision_history_limit: 20,
@@ -48,7 +53,8 @@ config :console,
   local_cache: Console.LocalCache,
   version: Mix.Project.config[:version],
   kas_dns: "https://kas.example.com",
-  qps: 40
+  qps: 40,
+  jwt_pub_key: or_nil.(File.read("config/pubkey.pem"))
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

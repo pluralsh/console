@@ -163,7 +163,12 @@ defmodule Console.Plural.Incident do
 end
 
 defmodule Console.Plural.Features do
-  defstruct [:vpn, :cd, :userManagement, :audit, :databaseManagement, :deployments]
+  @features ~w(vpn cd userManagement audit databaseManagement deployments)a
+  defstruct @features
+
+  def everything() do
+    struct(__MODULE__, Map.new(@features, & {&1, true}))
+  end
 end
 
 defmodule Console.Plural.Plan do
@@ -181,9 +186,18 @@ defmodule Console.Plural.Subscription do
 end
 
 defmodule Console.Plural.Account do
-  alias Console.Plural.{Features, Subscription}
+  alias Console.Plural.{Features, Subscription, Plan}
+
+  @dummy_id Ecto.UUID.generate()
 
   defstruct [:availableFeatures, :grandfatheredUntil, :delinquentAt, :subscription]
+
+  def enterprise() do
+    %__MODULE__{
+      availableFeatures: Features.everything(),
+      subscription: %Subscription{plan: %Plan{name: "Enterprise", id: @dummy_id, period: "YEARLY"}}
+    }
+  end
 
   def spec() do
     %__MODULE__{

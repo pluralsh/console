@@ -80,6 +80,8 @@ defmodule Console.MixProject do
       {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, "~>4.0"},
       {:ecto_sql, "~> 3.10.0"},
+      {:yajwt, "~> 1.4"},
+      {:joken, "~> 2.5.0"},
       {:piazza_core, "~> 0.3.8", git: "https://github.com/michaeljguarino/piazza_core"},
       {:flow, "~> 0.15.0"},
       {:bourne, "~> 1.1"},
