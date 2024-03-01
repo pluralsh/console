@@ -21,7 +21,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
       conn
       |> put_req_header("x-hub-signature-256", "sha256=#{hmac}")
       |> put_req_header("content-type", "application/json")
-      |> post("/ext/v1/webhooks/github/#{hook.id}", payload)
+      |> post("/ext/v1/webhooks/github/#{hook.external_id}", payload)
       |> response(200)
 
       assert refetch(pr).status == :merged
