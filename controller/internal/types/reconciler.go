@@ -13,16 +13,18 @@ import (
 type Reconciler string
 
 const (
-	GitRepositoryReconciler     Reconciler = "gitrepository"
-	ServiceDeploymentReconciler Reconciler = "servicedeployment"
-	ClusterReconciler           Reconciler = "cluster"
-	ClusterRestoreReconciler    Reconciler = "clusterrestore"
-	ProviderReconciler          Reconciler = "provider"
-	GlobalServiceReconciler     Reconciler = "globalservice"
-	PipelineReconciler          Reconciler = "pipeline"
-	ScmConnectionReconciler     Reconciler = "scmconnection"
-	PrAutomationReconciler      Reconciler = "prautomation"
-	PipelineContextReconciler   Reconciler = "pipelinecontext"
+	GitRepositoryReconciler         Reconciler = "gitrepository"
+	ServiceDeploymentReconciler     Reconciler = "servicedeployment"
+	ClusterReconciler               Reconciler = "cluster"
+	ClusterRestoreReconciler        Reconciler = "clusterrestore"
+	ProviderReconciler              Reconciler = "provider"
+	GlobalServiceReconciler         Reconciler = "globalservice"
+	PipelineReconciler              Reconciler = "pipeline"
+	ScmConnectionReconciler         Reconciler = "scmconnection"
+	PrAutomationReconciler          Reconciler = "prautomation"
+	PipelineContextReconciler       Reconciler = "pipelinecontext"
+	ClusterRestoreTriggerReconciler Reconciler = "restoretrigger"
+	PrAutomationTriggerReconciler   Reconciler = "prautomationtrigger"
 )
 
 // ToReconciler maps reconciler string to a Reconciler type.
@@ -45,6 +47,10 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 	case PrAutomationReconciler:
 		fallthrough
 	case PipelineContextReconciler:
+		fallthrough
+	case ClusterRestoreTriggerReconciler:
+		fallthrough
+	case PrAutomationTriggerReconciler:
 		fallthrough
 	case ProviderReconciler:
 		return Reconciler(reconciler), nil
@@ -116,6 +122,18 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
 		}, nil
+	case ClusterRestoreTriggerReconciler:
+		return &controller.ClusterRestoreTriggerReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}, nil
+	case PrAutomationTriggerReconciler:
+		return &controller.PrAutomationTriggerReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}, nil
 	default:
 		return nil, fmt.Errorf("reconciler %q is not supported", sc)
 	}
@@ -128,7 +146,7 @@ type ReconcilerList []Reconciler
 // Reconcilers defines a list of reconcilers that will be started by default
 // if '--reconcilers=...' flag is not provided.
 func Reconcilers() ReconcilerList {
-	return []Reconciler{GitRepositoryReconciler, ProviderReconciler, ClusterReconciler, ServiceDeploymentReconciler, GlobalServiceReconciler, PipelineReconciler, ScmConnectionReconciler, PrAutomationReconciler, PipelineContextReconciler}
+	return []Reconciler{GitRepositoryReconciler, ProviderReconciler, ClusterReconciler, ServiceDeploymentReconciler, GlobalServiceReconciler, PipelineReconciler, ScmConnectionReconciler, PrAutomationReconciler, PipelineContextReconciler, PrAutomationTriggerReconciler, ClusterRestoreTriggerReconciler}
 }
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.
