@@ -43,11 +43,7 @@ export function CreateScmConnectionModal({
         variables: {},
         query: ScmConnectionsDocument,
         update: (prev) =>
-          appendConnection(
-            prev,
-            data?.createScmConnection,
-            'scmConnections'
-          ),
+          appendConnection(prev, data?.createScmConnection, 'scmConnections'),
       }),
     onCompleted: () => {
       onClose?.()
