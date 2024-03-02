@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Pipelines do
   use Console.Services.Base
+  use Nebulex.Caching
   import Console.Deployments.Policies
   import Console.Deployments.Pipelines.Stability
   alias Console.PubSub
@@ -22,6 +23,9 @@ defmodule Console.Deployments.Pipelines do
     Service,
     Cluster
   }
+
+  @cache Console.conf(:cache_adapter)
+  @ttl :timer.minutes(5)
 
   @preload [:read_bindings, :write_bindings, edges: [:gates], stages: [services: :criteria]]
 
@@ -180,6 +184,22 @@ defmodule Console.Deployments.Pipelines do
   def pr_promoted?(%PipelineEdge{to: %PipelineStage{context_id: id}}, %PipelinePromotion{context_id: id})
     when is_binary(id), do: true
   def pr_promoted?(_, _), do: false
+
+  @doc """
+  Used to check if a pipeline has sent notifications recently
+  """
+  @spec debounce(binary) :: DateTime.t
+  @decorate cacheable(cache: @cache, key: {:pipe_debounce, id}, opts: [ttl: @ttl])
+  def debounce(id), do: Timex.now()
+
+  @doc """
+  Has this pipeline id had recent notifications delivered
+  """
+  @spec debounced?(binary) :: boolean
+  def debounced?(id) do
+    now = Timex.now() # need to compute this first
+    Timex.after?(debounce(id), now)
+  end
 
   @doc """
   Fetches all eligible gates for a cluster

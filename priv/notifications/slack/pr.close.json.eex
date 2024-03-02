@@ -1,0 +1,12 @@
+{
+    "text": "Pull Request <%= @pr.status %>:\n<%= @pr.title %>",
+    "blocks": [
+        {
+            "type": "section",
+            "fields": [
+                {"type": "mrkdwn", "text": "*Url*\n<%= @pr.url %>"}
+                {"type": "mrkdwn", "text": "*Status*\n<%= @pr.status %>"}
+            ]
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "0076D7",
+    "summary": "Pipeline <%= @pipe.name %> has pending changes",
+    "sections": [{
+        "activityTitle": "Pipeline <%= @pipe.name %> has pending changes",
+        "activitySubtitle": "Go to the pipeline page to see if changes can be promoted to the next stage",
+        "facts": [
+            {
+                "name": "Url",
+                "value": "<%= Console.url("/cd/pipelines/#{@pipe.id}") %>"
+            }
+        ],
+        "markdown": true
+    }],
+    "potentialAction": [{
+        "@type": "OpenUri",
+        "name": "Go to URL",
+        "targets": [{
+            "os": "default",
+            "uri": "<%= Console.url("/cd/pipelines/#{@pipe.id}") %>"
+        }]
+    }]
+}

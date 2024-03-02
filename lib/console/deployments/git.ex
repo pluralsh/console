@@ -275,6 +275,7 @@ defmodule Console.Deployments.Git do
     |> PullRequest.changeset(attrs)
     |> allow(user, :create)
     |> when_ok(:insert)
+    |> notify(:create, user)
   end
 
   @doc """
@@ -286,6 +287,7 @@ defmodule Console.Deployments.Git do
       %PullRequest{} = pr -> PullRequest.changeset(pr, attrs) |> Repo.update()
       _ -> {:error, :not_found}
     end
+    |> notify(:update)
   end
 
   @doc """
@@ -363,5 +365,7 @@ defmodule Console.Deployments.Git do
     do: handle_notify(PubSub.GitRepositoryUpdated, git)
   defp notify({:ok, %PullRequest{} = pr}, :create),
     do: handle_notify(PubSub.PullRequestCreated, pr)
+  defp notify({:ok, %PullRequest{} = pr}, :update),
+    do: handle_notify(PubSub.PullRequestUpdated, pr)
   defp notify(pass, _), do: pass
 end

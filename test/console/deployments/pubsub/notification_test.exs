@@ -20,7 +20,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
   end
 
   describe "PullRequestCreated" do
-    test "it can handle an updated service" do
+    test "it can handle an pr create" do
       pr = insert(:pull_request, url: "https://github.com/pluralsh/console/pulls/1")
       router = insert(:notification_router, events: ["pr.create"])
       insert(:router_sink, router: router)
@@ -28,6 +28,44 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
 
       event = %PubSub.PullRequestCreated{item: pr}
+      :ok = Notifications.handle_event(event)
+    end
+  end
+
+  describe "PullRequestUpdated" do
+    test "it can handle an merged pr" do
+      pr = insert(:pull_request, status: :merged, url: "https://github.com/pluralsh/console/pulls/1")
+      router = insert(:notification_router, events: ["pr.close"])
+      insert(:router_sink, router: router)
+      insert(:router_filter, router: router, regex: ".*/pluralsh/console/.*")
+      expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
+
+      event = %PubSub.PullRequestUpdated{item: pr}
+      :ok = Notifications.handle_event(event)
+    end
+
+    test "it can handle an closed pr" do
+      pr = insert(:pull_request, status: :closed, url: "https://github.com/pluralsh/console/pulls/1")
+      router = insert(:notification_router, events: ["pr.close"])
+      insert(:router_sink, router: router)
+      insert(:router_filter, router: router, regex: ".*/pluralsh/console/.*")
+      expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
+
+      event = %PubSub.PullRequestUpdated{item: pr}
+      :ok = Notifications.handle_event(event)
+    end
+  end
+
+  describe "PipelineGateUpdated" do
+    test "it will fire if a pipeline gate is pending" do
+      pipe = insert(:pipeline)
+      gate = insert(:pipeline_gate, state: :pending, edge: build(:pipeline_edge, pipeline: pipe))
+      router = insert(:notification_router, events: ["pipeline.update"])
+      insert(:router_sink, router: router)
+      insert(:router_filter, router: router, pipeline: pipe)
+      expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
+
+      event = %PubSub.PipelineGateUpdated{item: gate}
       :ok = Notifications.handle_event(event)
     end
   end
