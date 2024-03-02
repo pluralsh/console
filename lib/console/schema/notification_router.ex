@@ -33,7 +33,7 @@ defmodule Console.Schema.NotificationRouter do
 
   @valid ~w(name events)a
 
-  @events ~w(* service.update cluster.create pipeline.update pr.create)
+  @events ~w(* service.update cluster.create pipeline.update pr.create pr.close)
   @error_msg "events must all be one of [#{Enum.join(@events, ",")}]"
 
   def changeset(model, attrs \\ %{}) do

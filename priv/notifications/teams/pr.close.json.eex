@@ -1,0 +1,25 @@
+{
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "0076D7",
+    "summary": "A pull request has been <%= @pr.status %>",
+    "sections": [{
+        "activityTitle": "A pull request has been <%= @pr.status %>",
+        "activitySubtitle": "<%= @pr.title %>",
+        "facts": [
+            {
+                "name": "Url",
+                "value": "<%= @pr.url %>"
+            }
+        ],
+        "markdown": true
+    }],
+    "potentialAction": [{
+        "@type": "OpenUri",
+        "name": "Go to URL",
+        "targets": [{
+            "os": "default",
+            "uri": "<%= @pr.url %>"
+        }]
+    }]
+}

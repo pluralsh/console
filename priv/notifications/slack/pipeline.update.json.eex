@@ -1,10 +1,10 @@
 {
-    "text": "Pipeline <%= @pipeline.name %> has pending changes",
+    "text": "Pipeline <%= @pipe.name %> has pending changes",
     "blocks": [
         {
             "type": "section",
             "fields": [
-                {"type": "mrkdwn", "text": "*Url*\n<%= Console.url("/cd/pipelines/#{@pipeline.id}") %>"}
+                {"type": "mrkdwn", "text": "*Url*\n<%= Console.url("/cd/pipelines/#{@pipe.id}") %>"}
             ]
         }
     ]

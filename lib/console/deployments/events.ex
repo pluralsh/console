@@ -44,3 +44,4 @@ defmodule Console.PubSub.ObjectStoreDeleted, do: use Piazza.PubSub.Event
 
 
 defmodule Console.PubSub.PullRequestCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.PullRequestUpdated, do: use Piazza.PubSub.Event

@@ -50,3 +50,26 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.PullRequestCr
     {"pr.create", Utils.filters(pr), %{pr: pr}}
   end
 end
+
+defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.PullRequestUpdated do
+  alias Console.Deployments.Notifications.Utils
+
+  def message(%{item: %{status: status} = pr}) when status in ~w(merged closed)a do
+    {"pr.close", Utils.filters(pr), %{pr: pr}}
+  end
+  def message(_), do: :ok
+end
+
+defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.PipelineGateUpdated do
+  alias Console.Deployments.Notifications.Utils
+  alias Console.Deployments.Pipelines
+
+  def message(%{item: %{state: :pending} = gate}) do
+    %{edge: %{pipeline: pipe}} = Console.Repo.preload(gate, [edge: :pipeline])
+    case Pipelines.debounced?(pipe.id) do
+      true -> {"pipeline.update", Utils.filters(pipe), %{pipe: pipe}}
+      _ -> :ok
+    end
+  end
+  def message(_), do: :ok
+end
