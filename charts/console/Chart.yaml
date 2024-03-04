@@ -11,4 +11,8 @@ dependencies:
   - name: controller
     version: 0.0.20
     repository: file://../controller
+  - name: flux2
+    repository: https://fluxcd-community.github.io/helm-charts
+    version: 2.11.1
+    condition: flux2.enabled
 type: application

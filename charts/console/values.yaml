@@ -221,3 +221,20 @@ dashboard:
     #  namespaced: true
 
 provider: custom
+
+flux2:
+  enabled: false
+  helmController:
+    create: false
+  imageAutomationController:
+    create: false
+  imageReflectionController:
+    create: false
+  kustomizeController:
+    create: false
+  notificationController:
+    create: false
+  sourceController:
+    create: true
+  policies:
+    create: false
