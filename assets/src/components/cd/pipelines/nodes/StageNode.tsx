@@ -24,11 +24,13 @@ import isEmpty from 'lodash/isEmpty'
 import upperFirst from 'lodash/upperFirst'
 import { MergeDeep } from 'type-fest'
 import { produce } from 'immer'
+import { groupBy, mapValues } from 'lodash'
 
 import {
   PipelineContextsDocument,
   PipelineContextsQuery,
   PipelineStageFragment,
+  PrStatus,
   PullRequestFragment,
   ServiceDeploymentStatus,
   useCreatePipelineContextMutation,
@@ -38,8 +40,7 @@ import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
-
-import { groupBy, mapValues } from 'lodash'
+import { CountBadge } from 'components/help/CountBadge'
 
 import { PIPELINE_GRID_GAP } from '../PipelineGraph'
 import { PipelinePullRequestsModal } from '../PipelinePullRequests'
@@ -131,25 +132,51 @@ const IconHeadingInnerSC = styled.div(({ theme }) => ({
   width: '100%',
 }))
 
+export const PrCountBadgeSC = styled(CountBadge).attrs(() => ({
+  size: 'small',
+}))(({ theme }) => ({
+  position: 'absolute',
+  right: 0,
+  top: 4,
+  transform: 'translate(50%, -50%)',
+  backgroundColor: theme.colors['icon-warning'],
+  color:
+    theme.mode === 'light'
+      ? theme.colors['action-always-white']
+      : theme.colors['fill-zero'],
+}))
+
 function PrsButton({
   pullRequests,
 }: {
   pullRequests: Nullable<PullRequestFragment>[]
 }) {
   const [open, setOpen] = useState(false)
+  const numOpenPrs = pullRequests.reduce(
+    (acc, pr) => (pr?.status === PrStatus.Open ? acc + 1 : 0),
+    0
+  )
 
   return (
     <>
-      <IconFrame
-        type="secondary"
-        clickable
-        onClick={(e) => {
-          setOpen(true)
-          e.target?.blur()
-        }}
-        icon={<PrOpenIcon />}
-        tooltip="View pull requests"
-      />
+      <div css={{ position: 'relative' }}>
+        <PrCountBadgeSC count={numOpenPrs} />
+        <IconFrame
+          type="secondary"
+          clickable
+          onClick={(e) => {
+            setOpen(true)
+            e.target?.blur()
+          }}
+          icon={<PrOpenIcon />}
+          tooltip={
+            <>
+              View pull requests
+              <br />({numOpenPrs}/{pullRequests.length} open)
+            </>
+          }
+        />
+      </div>
       <PipelinePullRequestsModal
         open={open}
         onClose={() => setOpen(false)}
