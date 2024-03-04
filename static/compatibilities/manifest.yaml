@@ -7,3 +7,4 @@ names:
 - istio
 - linkerd
 - cilium
+- velero
