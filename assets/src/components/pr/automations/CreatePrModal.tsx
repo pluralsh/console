@@ -1,5 +1,15 @@
 import { ComponentProps, useState } from 'react'
-import { Button, FormField, LinkoutIcon, Modal } from '@pluralsh/design-system'
+import {
+  Button,
+  Code,
+  FormField,
+  GearTrainIcon,
+  GitPullIcon,
+  LinkoutIcon,
+  Modal,
+  Stepper,
+  SuccessIcon,
+} from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { Link } from 'react-router-dom'
 import Input2 from '@pluralsh/design-system/dist/components/Input2'
@@ -30,6 +40,14 @@ function CreateSuccess({ pr }: { pr: PullRequestFragment }) {
   )
 }
 
+type StepKey = 'config' | 'review' | 'success'
+const steps = [
+  { key: 'config', stepTitle: 'Configuration', IconComponent: GearTrainIcon },
+  { key: 'review', stepTitle: 'Branch', IconComponent: GitPullIcon },
+] as const satisfies ({ key: StepKey } & ComponentProps<
+  typeof Stepper
+>['steps'][number])[]
+
 function CreatePrModalBase({
   prAutomation,
   // refetch,
@@ -43,6 +61,8 @@ function CreatePrModalBase({
   onClose: Nullable<() => void>
 }) {
   const configuration = prAutomation.configuration || []
+  const [currentStep, setCurrentStep] = useState<StepKey>('config')
+  const stepIndex = steps.findIndex((s) => s.key === currentStep) 
   const [configVals, setConfigVals] = useState(
     Object.fromEntries(
       configuration.map((cfg) => [cfg?.name, cfg?.default || ''])
@@ -56,12 +76,19 @@ function CreatePrModalBase({
     onCompleted: (data) => {
       if (data.createPullRequest) {
         setSuccessPr(data.createPullRequest)
+        setCurrentStep('success')
       }
     },
   })
   const { isValid: configIsValid, values: filteredConfig } =
     validateAndFilterConfig(configuration, configVals)
   const allowSubmit = branch && configIsValid
+
+  const configJson = JSON.stringify(
+    Object.fromEntries(filteredConfig.map((cfg) => [cfg.name, cfg.value])),
+    undefined,
+    2
+  )
 
   return (
     <ModalMountTransition open={open}>
@@ -70,22 +97,24 @@ function CreatePrModalBase({
         asForm
         onSubmit={(e) => {
           e.preventDefault()
-          if (successPr) {
-            onClose?.()
+          switch (currentStep) {
+            case 'config':
+              if (configIsValid) setCurrentStep('review')
 
-            return
+              return
+            case 'review':
+              mutation({
+                variables: {
+                  id: prAutomation.id,
+                  branch,
+                  context: JSON.stringify(
+                    Object.fromEntries(
+                      filteredConfig.map((cfg) => [cfg.name, cfg.value])
+                    )
+                  ),
+                },
+              })
           }
-          mutation({
-            variables: {
-              id: prAutomation.id,
-              branch,
-              context: JSON.stringify(
-                Object.fromEntries(
-                  filteredConfig.map((cfg) => [cfg.name, cfg.value])
-                )
-              ),
-            },
-          })
         }}
         open={open}
         onClose={onClose || undefined}
@@ -102,19 +131,21 @@ function CreatePrModalBase({
               gap: theme.spacing.small,
             }}
           >
-            {successPr ? (
+            {currentStep === 'success' ? (
               <>
-                <Button
-                  primary
-                  type="button"
-                  endIcon={<LinkoutIcon />}
-                  as="a"
-                  href={successPr.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View PR
-                </Button>
+                {successPr && (
+                  <Button
+                    primary
+                    type="button"
+                    endIcon={<LinkoutIcon />}
+                    as="a"
+                    href={successPr?.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View PR
+                  </Button>
+                )}
                 <Button
                   secondary
                   type="button"
@@ -131,7 +162,7 @@ function CreatePrModalBase({
                   Close
                 </Button>
               </>
-            ) : (
+            ) : currentStep === 'review' ? (
               <>
                 <Button
                   loading={loading}
@@ -140,6 +171,29 @@ function CreatePrModalBase({
                   type="submit"
                 >
                   Create
+                </Button>
+                <Button
+                  secondary
+                  onClick={() => setCurrentStep('config')}
+                >
+                  Back
+                </Button>
+                <Button
+                  secondary
+                  onClick={() => onClose?.()}
+                >
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  loading={loading}
+                  primary
+                  disabled={!configIsValid}
+                  type="submit"
+                >
+                  Next
                 </Button>
                 <Button
                   secondary
@@ -152,36 +206,79 @@ function CreatePrModalBase({
           </div>
         }
       >
-        {successPr ? (
-          <CreateSuccess pr={successPr} />
-        ) : (
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.medium,
-            }}
-          >
-            <FormField
-              label="Branch"
-              required
-              name="branch"
-            >
-              <Input2
-                value={branch}
-                onChange={(e) => setBranch(e.target.value)}
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+          }}
+        >
+          {currentStep !== 'success' && (
+            <div css={{ display: 'flex' }}>
+              <Stepper
+                compact
+                steps={steps}
+                stepIndex={stepIndex}
+                css={{
+                  width: 'max-content',
+                }}
               />
-            </FormField>
-            <PrConfigurationFields
-              {...{
-                configuration: prAutomation.configuration,
-                configVals,
-                setConfigVals,
+            </div>
+          )}
+          {currentStep === 'config' && (
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.medium,
               }}
-            />
-            {error && <GqlError error={error} />}
-          </div>
-        )}
+            >
+              <Body1P>Provide some basic configuration for this PR:</Body1P>
+              <PrConfigurationFields
+                {...{
+                  configuration: prAutomation.configuration,
+                  configVals,
+                  setConfigVals,
+                }}
+              />
+            </div>
+          )}
+          {currentStep === 'review' && (
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.medium,
+              }}
+            >
+              <FormField
+                label="Configuration review"
+                name="configuration"
+              >
+                <Code
+                  language="json"
+                  showHeader={false}
+                >
+                  {configJson || ''}
+                </Code>
+              </FormField>{' '}
+              <FormField
+                label="Branch"
+                required
+                name="branch"
+              >
+                <Input2
+                  value={branch}
+                  onChange={(e) => setBranch(e.target.value)}
+                />
+              </FormField>
+              {error && <GqlError error={error} />}
+            </div>
+          )}
+          {currentStep === 'success' && successPr && (
+            <CreateSuccess pr={successPr} />
+          )}
+        </div>
       </Modal>
     </ModalMountTransition>
   )
