@@ -69,9 +69,9 @@ var _ = Describe("Cluster Restore Controller", Ordered, func() {
 
 		It("should successfully reconcile cluster restore", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetClusterRestore", mock.AnythingOfType("string")).Return(nil, errors.NewNotFound(schema.GroupResource{}, restoreName))
-			fakeConsoleClient.On("IsClusterRestoreExisting", mock.AnythingOfType("string")).Return(false)
-			fakeConsoleClient.On("CreateClusterRestore", restoreBackupID).Return(&gqlclient.ClusterRestoreFragment{ID: restoreConsoleID, Status: gqlclient.RestoreStatusSuccessful}, nil)
+			fakeConsoleClient.On("GetClusterRestore", mock.Anything, mock.AnythingOfType("string")).Return(nil, errors.NewNotFound(schema.GroupResource{}, restoreName))
+			fakeConsoleClient.On("IsClusterRestoreExisting", mock.Anything, mock.AnythingOfType("string")).Return(false)
+			fakeConsoleClient.On("CreateClusterRestore", mock.Anything, restoreBackupID).Return(&gqlclient.ClusterRestoreFragment{ID: restoreConsoleID, Status: gqlclient.RestoreStatusSuccessful}, nil)
 
 			controllerReconciler := &controller.ClusterRestoreReconciler{
 				Client:        k8sClient,

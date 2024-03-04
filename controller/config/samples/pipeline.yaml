@@ -1,10 +1,10 @@
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Provider
 metadata:
-  name: aws
+  name: gcp
 spec:
-  cloud: aws
-  name: aws
+  cloud: gcp
+  name: gcp
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Cluster
@@ -12,22 +12,8 @@ metadata:
   name: dev
   namespace: default
 spec:
-  handle: dev
-  cloud: aws
-  version: "1.26"
-  protect: false
-  providerRef:
-    name: aws
-  cloudSettings:
-    aws:
-      region: us-east-1
-  nodePools:
-    - name: pool1
-      instanceType: t5.large
-      minSize: 1
-      maxSize: 5
-  tags:
-    managed-by: plural-controller
+  handle: cd-demo
+  cloud: gcp
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Cluster
@@ -35,22 +21,8 @@ metadata:
   name: prod
   namespace: default
 spec:
-  handle: prod
-  cloud: aws
-  version: "1.26"
-  protect: false
-  providerRef:
-    name: aws
-  cloudSettings:
-    aws:
-      region: us-east-1
-  nodePools:
-    - name: pool1
-      instanceType: t5.large
-      minSize: 1
-      maxSize: 5
-  tags:
-    managed-by: plural-controller
+  handle: cd-demo-workload-1
+  cloud: gcp
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: GitRepository
@@ -142,8 +114,7 @@ spec:
                   args:
                     - /bin/sh
                     - -c
-                    - echo "Hello, World!"
-                    - echo $TEST_ENV_VAR
+                    - sleep 40
                   env:
                     - name: TEST_ENV_VAR
                       value: pipeline

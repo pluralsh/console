@@ -98,12 +98,12 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 }
 
 func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.ClusterRestore) (*console.ClusterRestoreFragment, error) {
-	exists := r.ConsoleClient.IsClusterRestoreExisting(restore.Status.GetID())
+	exists := r.ConsoleClient.IsClusterRestoreExisting(ctx, restore.Status.GetID())
 	logger := log.FromContext(ctx)
 
 	if exists {
 		logger.V(9).Info(fmt.Sprintf("No changes detected for %s cluster", restore.Name))
-		return r.ConsoleClient.GetClusterRestore(restore.Status.GetID())
+		return r.ConsoleClient.GetClusterRestore(ctx, restore.Status.GetID())
 	}
 
 	var backupID string
@@ -127,7 +127,7 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 	}
 
 	logger.Info(fmt.Sprintf("%s cluster does not exist, creating it", restore.Name))
-	return r.ConsoleClient.CreateClusterRestore(backupID)
+	return r.ConsoleClient.CreateClusterRestore(ctx, backupID)
 }
 
 // SetupWithManager sets up the controller with the Manager.
