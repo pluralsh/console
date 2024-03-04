@@ -153,7 +153,7 @@ function PrsButton({
 }) {
   const [open, setOpen] = useState(false)
   const numOpenPrs = pullRequests.reduce(
-    (acc, pr) => (pr?.status === PrStatus.Open ? acc + 1 : 0),
+    (acc, pr) => (pr?.status === PrStatus.Open ? acc + 1 : acc),
     0
   )
 
