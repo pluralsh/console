@@ -8,7 +8,6 @@ import {
   LinkoutIcon,
   Modal,
   Stepper,
-  SuccessIcon,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -33,10 +32,10 @@ function CreateSuccess({ pr }: { pr: PullRequestFragment }) {
   const theme = useTheme()
 
   return (
-    <>
-      <Body1BoldP as="div">Title: </Body1BoldP>
+    <div>
+      <Body1BoldP as="h2">Title:</Body1BoldP>
       <Body1P css={{ color: theme.colors['text-light'] }}>{pr.title}</Body1P>
-    </>
+    </div>
   )
 }
 
@@ -62,7 +61,7 @@ function CreatePrModalBase({
 }) {
   const configuration = prAutomation.configuration || []
   const [currentStep, setCurrentStep] = useState<StepKey>('config')
-  const stepIndex = steps.findIndex((s) => s.key === currentStep) 
+  const stepIndex = steps.findIndex((s) => s.key === currentStep)
   const [configVals, setConfigVals] = useState(
     Object.fromEntries(
       configuration.map((cfg) => [cfg?.name, cfg?.default || ''])
@@ -119,7 +118,7 @@ function CreatePrModalBase({
         open={open}
         onClose={onClose || undefined}
         header={
-          successPr
+          currentStep === 'success'
             ? `Successfully created PR`
             : `Pull request configuration for ${prAutomation?.name}`
         }
