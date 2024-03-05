@@ -40,6 +40,9 @@ extraSecretEnv:
   POSTGRES_URL: {{ configuration.postgresUrl }}
   CONSOLE_BYOK: 'true'
 
+flux2:
+  enabled: true
+
 kas:
   enabled: true
   consoleUrl: {{ configuration.consoleDns }}
