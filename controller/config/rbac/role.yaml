@@ -155,6 +155,32 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - notificationsinks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - notificationsinks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - notificationsinks/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - pipelinecontexts
   verbs:
   - create

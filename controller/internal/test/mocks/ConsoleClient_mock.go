@@ -723,6 +723,53 @@ func (_c *ConsoleClientMock_DeleteGlobalService_Call) RunAndReturn(run func(stri
 	return _c
 }
 
+// DeleteNotificationSink provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteNotificationSink(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteNotificationSink")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteNotificationSink_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteNotificationSink'
+type ConsoleClientMock_DeleteNotificationSink_Call struct {
+	*mock.Call
+}
+
+// DeleteNotificationSink is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteNotificationSink(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteNotificationSink_Call {
+	return &ConsoleClientMock_DeleteNotificationSink_Call{Call: _e.mock.On("DeleteNotificationSink", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteNotificationSink_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteNotificationSink_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteNotificationSink_Call) Return(_a0 error) *ConsoleClientMock_DeleteNotificationSink_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteNotificationSink_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteNotificationSink_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeletePipeline provides a mock function with given fields: id
 func (_m *ConsoleClientMock) DeletePipeline(id string) (*gqlclient.PipelineFragment, error) {
 	ret := _m.Called(id)
@@ -1361,6 +1408,124 @@ func (_c *ConsoleClientMock_GetGroup_Call) Return(_a0 *gqlclient.GroupFragment, 
 }
 
 func (_c *ConsoleClientMock_GetGroup_Call) RunAndReturn(run func(string) (*gqlclient.GroupFragment, error)) *ConsoleClientMock_GetGroup_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetNotificationSink provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetNotificationSink(ctx context.Context, id string) (*gqlclient.NotificationSinkFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetNotificationSink")
+	}
+
+	var r0 *gqlclient.NotificationSinkFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.NotificationSinkFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.NotificationSinkFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.NotificationSinkFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetNotificationSink_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNotificationSink'
+type ConsoleClientMock_GetNotificationSink_Call struct {
+	*mock.Call
+}
+
+// GetNotificationSink is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetNotificationSink(ctx interface{}, id interface{}) *ConsoleClientMock_GetNotificationSink_Call {
+	return &ConsoleClientMock_GetNotificationSink_Call{Call: _e.mock.On("GetNotificationSink", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetNotificationSink_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetNotificationSink_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetNotificationSink_Call) Return(_a0 *gqlclient.NotificationSinkFragment, _a1 error) *ConsoleClientMock_GetNotificationSink_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetNotificationSink_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.NotificationSinkFragment, error)) *ConsoleClientMock_GetNotificationSink_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetNotificationSinkByName provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) GetNotificationSinkByName(ctx context.Context, name string) (*gqlclient.NotificationSinkFragment, error) {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetNotificationSinkByName")
+	}
+
+	var r0 *gqlclient.NotificationSinkFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.NotificationSinkFragment, error)); ok {
+		return rf(ctx, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.NotificationSinkFragment); ok {
+		r0 = rf(ctx, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.NotificationSinkFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetNotificationSinkByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNotificationSinkByName'
+type ConsoleClientMock_GetNotificationSinkByName_Call struct {
+	*mock.Call
+}
+
+// GetNotificationSinkByName is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetNotificationSinkByName(ctx interface{}, name interface{}) *ConsoleClientMock_GetNotificationSinkByName_Call {
+	return &ConsoleClientMock_GetNotificationSinkByName_Call{Call: _e.mock.On("GetNotificationSinkByName", ctx, name)}
+}
+
+func (_c *ConsoleClientMock_GetNotificationSinkByName_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_GetNotificationSinkByName_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetNotificationSinkByName_Call) Return(_a0 *gqlclient.NotificationSinkFragment, _a1 error) *ConsoleClientMock_GetNotificationSinkByName_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetNotificationSinkByName_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.NotificationSinkFragment, error)) *ConsoleClientMock_GetNotificationSinkByName_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3284,6 +3449,65 @@ func (_c *ConsoleClientMock_UpdateService_Call) Return(_a0 error) *ConsoleClient
 }
 
 func (_c *ConsoleClientMock_UpdateService_Call) RunAndReturn(run func(string, gqlclient.ServiceUpdateAttributes) error) *ConsoleClientMock_UpdateService_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpsertNotificationSink provides a mock function with given fields: ctx, attr
+func (_m *ConsoleClientMock) UpsertNotificationSink(ctx context.Context, attr gqlclient.NotificationSinkAttributes) (*gqlclient.NotificationSinkFragment, error) {
+	ret := _m.Called(ctx, attr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpsertNotificationSink")
+	}
+
+	var r0 *gqlclient.NotificationSinkFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.NotificationSinkAttributes) (*gqlclient.NotificationSinkFragment, error)); ok {
+		return rf(ctx, attr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.NotificationSinkAttributes) *gqlclient.NotificationSinkFragment); ok {
+		r0 = rf(ctx, attr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.NotificationSinkFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.NotificationSinkAttributes) error); ok {
+		r1 = rf(ctx, attr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpsertNotificationSink_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertNotificationSink'
+type ConsoleClientMock_UpsertNotificationSink_Call struct {
+	*mock.Call
+}
+
+// UpsertNotificationSink is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attr gqlclient.NotificationSinkAttributes
+func (_e *ConsoleClientMock_Expecter) UpsertNotificationSink(ctx interface{}, attr interface{}) *ConsoleClientMock_UpsertNotificationSink_Call {
+	return &ConsoleClientMock_UpsertNotificationSink_Call{Call: _e.mock.On("UpsertNotificationSink", ctx, attr)}
+}
+
+func (_c *ConsoleClientMock_UpsertNotificationSink_Call) Run(run func(ctx context.Context, attr gqlclient.NotificationSinkAttributes)) *ConsoleClientMock_UpsertNotificationSink_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(gqlclient.NotificationSinkAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertNotificationSink_Call) Return(_a0 *gqlclient.NotificationSinkFragment, _a1 error) *ConsoleClientMock_UpsertNotificationSink_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertNotificationSink_Call) RunAndReturn(run func(context.Context, gqlclient.NotificationSinkAttributes) (*gqlclient.NotificationSinkFragment, error)) *ConsoleClientMock_UpsertNotificationSink_Call {
 	_c.Call.Return(run)
 	return _c
 }
