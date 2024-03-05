@@ -6,6 +6,10 @@ import (
 	"sort"
 
 	console "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/errors"
+	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -18,11 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-
-	"github.com/pluralsh/console/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/controller/internal/client"
-	"github.com/pluralsh/console/controller/internal/errors"
-	"github.com/pluralsh/console/controller/internal/utils"
+	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -310,9 +310,15 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			}
 			attr.Helm.Values = &val
 		}
-		if service.Spec.Helm.Values != nil {
-			attr.Helm.Values = lo.ToPtr(string(service.Spec.Helm.Values.Raw))
+
+		if service.Spec.Helm.ValuesFrom != nil || service.Spec.Helm.Values != nil {
+			values, err := r.MergeHelmValues(ctx, service.Spec.Helm.ValuesFrom, service.Spec.Helm.Values)
+			if err != nil {
+				return nil, err
+			}
+			attr.Helm.Values = values
 		}
+
 		if service.Spec.Helm.Chart != nil {
 			attr.Helm.Chart = service.Spec.Helm.Chart
 		}
@@ -345,6 +351,38 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 	}
 
 	return attr, nil
+}
+
+func (r *ServiceReconciler) MergeHelmValues(ctx context.Context, secretRef *corev1.SecretReference, values *runtime.RawExtension) (*string, error) {
+	valuesFromMap := map[string]interface{}{}
+	valuesMap := map[string]interface{}{}
+
+	if secretRef != nil {
+		valuesFromSecret, err := utils.GetSecret(ctx, r.Client, secretRef)
+		if err != nil {
+			return nil, err
+		}
+		for k, v := range valuesFromSecret.Data {
+			var out interface{}
+			if err := yaml.Unmarshal(v, &out); err != nil {
+				return nil, err
+			}
+			valuesFromMap[k] = out
+		}
+	}
+
+	if values != nil {
+		if err := yaml.Unmarshal(values.Raw, &valuesMap); err != nil {
+			return nil, err
+		}
+	}
+
+	result := algorithms.Merge(valuesMap, valuesFromMap)
+	out, err := yaml.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+	return lo.ToPtr(string(out)), nil
 }
 
 func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1alpha1.ServiceDeployment) error {

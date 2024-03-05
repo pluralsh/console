@@ -25,6 +25,8 @@ type ServiceKustomize struct {
 
 type ServiceHelm struct {
 	// +kubebuilder:validation:Optional
+	ValuesFrom *corev1.SecretReference `json:"valuesFrom,omitempty"`
+	// +kubebuilder:validation:Optional
 	ValuesConfigMapRef *corev1.ConfigMapKeySelector `json:"valuesConfigMapRef,omitempty"`
 	// +kubebuilder:validation:Optional
 	Values *runtime.RawExtension `json:"values,omitempty"`

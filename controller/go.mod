@@ -8,7 +8,7 @@ toolchain go1.21.1
 require (
 	github.com/Yamashou/gqlgenc v0.18.1
 	github.com/pluralsh/console-client-go v0.1.3
-	github.com/pluralsh/polly v0.1.4
+	github.com/pluralsh/polly v0.1.5
 	github.com/samber/lo v1.39.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
@@ -254,7 +254,7 @@ require (
 	mvdan.cc/unparam v0.0.0-20221223090309-7455f1af531d // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
-	sigs.k8s.io/yaml v1.4.0 // indirect
+	sigs.k8s.io/yaml v1.4.0
 )
 
 require github.com/onsi/ginkgo/v2 v2.13.1
