@@ -4,23 +4,21 @@ import (
 	"context"
 	"sort"
 
-	"github.com/pluralsh/console/controller/internal/controller"
-	common "github.com/pluralsh/console/controller/internal/test/common"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	gqlclient "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/controller"
+	common "github.com/pluralsh/console/controller/internal/test/common"
+	"github.com/pluralsh/console/controller/internal/test/mocks"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/internal/test/mocks"
 )
 
 func sanitizeServiceConditions(status v1alpha1.ServiceStatus) v1alpha1.ServiceStatus {
@@ -248,4 +246,150 @@ var _ = Describe("Service Controller", Ordered, func() {
 		})
 	})
 
+})
+
+var _ = Describe("Merge Helm Values", Ordered, func() {
+	Context("When creating attributes", func() {
+		ctx := context.Background()
+		const (
+			secretName    = "test"
+			namespace     = "default"
+			secretContent = `dashboard:
+  enabled: true
+postgres:
+  parameters:
+    max_connections: 202`
+		)
+
+		BeforeAll(func() {
+			By("creating the secret")
+			secret := &corev1.Secret{}
+			typeNamespacedName := types.NamespacedName{
+				Name:      secretName,
+				Namespace: namespace,
+			}
+			err := k8sClient.Get(ctx, typeNamespacedName, secret)
+			if err != nil && errors.IsNotFound(err) {
+				resource := &corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      secretName,
+						Namespace: namespace,
+					},
+					Data: map[string][]byte{
+						"console": []byte(secretContent),
+					},
+				}
+				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+			}
+		})
+
+		AfterAll(func() {
+			resource := &corev1.Secret{}
+			err := k8sClient.Get(ctx, types.NamespacedName{Name: secretName, Namespace: namespace}, resource)
+			Expect(err).NotTo(HaveOccurred())
+			By("Cleanup the specific resource instance Cluster")
+			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+		})
+
+		It("should successfully merge the maps", func() {
+			test := struct {
+				SecretRef *corev1.SecretReference
+				Values    *runtime.RawExtension
+			}{
+				SecretRef: &corev1.SecretReference{
+					Name:      secretName,
+					Namespace: namespace,
+				},
+				Values: &runtime.RawExtension{
+					Raw: []byte(`console:
+  dashboard:
+    enabled: false
+  postgres:
+    parameters:
+      max_connections: 101`),
+				},
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			serviceReconciler := &controller.ServiceReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			out, err := serviceReconciler.MergeHelmValues(ctx, test.SecretRef, test.Values)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(*out).To(Equal(`console:
+  dashboard:
+    enabled: true
+  postgres:
+    parameters:
+      max_connections: 202
+`))
+
+		})
+
+		It("should successfully return values", func() {
+			test := struct {
+				SecretRef *corev1.SecretReference
+				Values    *runtime.RawExtension
+			}{
+				Values: &runtime.RawExtension{
+					Raw: []byte(`console:
+  dashboard:
+    enabled: false
+  postgres:
+    parameters:
+      max_connections: 101`),
+				},
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			serviceReconciler := &controller.ServiceReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			out, err := serviceReconciler.MergeHelmValues(ctx, test.SecretRef, test.Values)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(*out).To(Equal(`console:
+  dashboard:
+    enabled: false
+  postgres:
+    parameters:
+      max_connections: 101
+`))
+
+		})
+
+		It("should successfully return fromValues", func() {
+			test := struct {
+				SecretRef *corev1.SecretReference
+				Values    *runtime.RawExtension
+			}{
+				SecretRef: &corev1.SecretReference{
+					Name:      secretName,
+					Namespace: namespace,
+				},
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			serviceReconciler := &controller.ServiceReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			out, err := serviceReconciler.MergeHelmValues(ctx, test.SecretRef, test.Values)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(*out).To(Equal(`console:
+  dashboard:
+    enabled: true
+  postgres:
+    parameters:
+      max_connections: 202
+`))
+		})
+	})
 })
