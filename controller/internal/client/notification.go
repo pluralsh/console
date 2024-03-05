@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+
 	console "github.com/pluralsh/console-client-go"
 	internalerror "github.com/pluralsh/console/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
