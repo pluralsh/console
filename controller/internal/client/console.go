@@ -84,6 +84,10 @@ type ConsoleClient interface {
 	GetPipelineContext(ctx context.Context, id string) (*console.PipelineContextFragment, error)
 	CreatePipelineContext(ctx context.Context, pipelineID string, attributes console.PipelineContextAttributes) (*console.CreatePipelineContext, error)
 	CreatePullRequest(ctx context.Context, prAutomationID string, branch *string, context *string) (*console.CreatePullRequest, error)
+	GetNotificationSink(ctx context.Context, id string) (*console.NotificationSinkFragment, error)
+	DeleteNotificationSink(ctx context.Context, id string) error
+	UpsertNotificationSink(ctx context.Context, attr console.NotificationSinkAttributes) (*console.NotificationSinkFragment, error)
+	GetNotificationSinkByName(ctx context.Context, name string) (*console.NotificationSinkFragment, error)
 }
 
 func New(url, token string) ConsoleClient {
