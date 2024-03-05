@@ -3,10 +3,13 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"sigs.k8s.io/yaml"
 	"sort"
 
 	console "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/errors"
+	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -19,11 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-
-	"github.com/pluralsh/console/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/controller/internal/client"
-	"github.com/pluralsh/console/controller/internal/errors"
-	"github.com/pluralsh/console/controller/internal/utils"
+	"sigs.k8s.io/yaml"
 )
 
 const (
