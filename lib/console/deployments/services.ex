@@ -351,6 +351,7 @@ defmodule Console.Deployments.Services do
     |> add_operation(:base, fn _ ->
       Repo.preload(svc, [:context_bindings, :read_bindings, :write_bindings])
       |> Service.changeset(Map.put(attrs, :status, :stale))
+      |> Service.update_changeset()
       |> Console.Repo.update()
     end)
     |> add_operation(:revision, fn %{base: base} ->

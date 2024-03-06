@@ -212,6 +212,28 @@ defmodule Console.Deployments.ServicesTest do
       assert revision.git.folder == updated.git.folder
     end
 
+    test "you cannot update the cluster id of a service" do
+      cluster = insert(:cluster)
+      user = admin_user()
+      git = insert(:git_repository)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      {:error, _} = Services.update_service(%{
+        cluster_id: insert(:cluster).id,
+      }, service.id, user)
+    end
+
     test "helm services can be updated" do
       cluster = insert(:cluster)
       user = admin_user()
