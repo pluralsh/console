@@ -22,6 +22,7 @@ import {
   ServersIcon,
   SidebarItem,
   SidebarSection,
+  WarningIcon,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
@@ -141,6 +142,12 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.backups),
+    },
+    {
+      text: 'Notifications',
+      icon: <WarningIcon />,
+      path: '/notifications',
+      enabled: isCDEnabled,
     },
     {
       text: 'Audits',
