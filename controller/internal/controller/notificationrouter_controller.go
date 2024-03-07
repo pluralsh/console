@@ -26,6 +26,7 @@ import (
 	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/containers"
 	"github.com/samber/lo"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -105,7 +106,12 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 	if !exists || !notificationRouter.Status.IsSHAEqual(sha) {
 		logger.Info("upsert notification router", "name", notificationRouter.NotificationName())
-		ns, err := r.ConsoleClient.UpsertNotificationRouter(ctx, genNotificationRouterAttr(notificationRouter))
+		attr, err := r.genNotificationRouterAttr(ctx, notificationRouter)
+		if err != nil {
+			utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+		ns, err := r.ConsoleClient.UpsertNotificationRouter(ctx, *attr)
 		if err != nil {
 			utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -121,8 +127,8 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 	return ctrl.Result{}, nil
 }
 
-func genNotificationRouterAttr(router *v1alpha1.NotificationRouter) console.NotificationRouterAttributes {
-	attr := console.NotificationRouterAttributes{
+func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Context, router *v1alpha1.NotificationRouter) (*console.NotificationRouterAttributes, error) {
+	attr := &console.NotificationRouterAttributes{
 		Name: router.NotificationName(),
 	}
 	events := containers.NewSet[string]()
@@ -139,18 +145,72 @@ func genNotificationRouterAttr(router *v1alpha1.NotificationRouter) console.Noti
 		attr.RouterSinks = []*console.RouterSinkAttributes{}
 	}
 	for _, filter := range router.Spec.Filters {
+		clusterID, err := r.getClusterID(ctx, filter.ClusterRef)
+		if err != nil {
+			return nil, err
+		}
+		serviceID, err := r.getServiceID(ctx, filter.ServiceRef)
+		if err != nil {
+			return nil, err
+		}
+		pipelineID, err := r.getPipelineID(ctx, filter.PipelineRef)
+		if err != nil {
+			return nil, err
+		}
 		attr.Filters = append(attr.Filters, &console.RouterFilterAttributes{
 			Regex:      filter.Regex,
-			ServiceID:  filter.ServiceID,
-			ClusterID:  filter.ClusterID,
-			PipelineID: filter.PipelineID,
+			ServiceID:  serviceID,
+			ClusterID:  clusterID,
+			PipelineID: pipelineID,
 		})
 	}
 	for _, sink := range router.Spec.RouterSinks {
 		attr.RouterSinks = append(attr.RouterSinks, &console.RouterSinkAttributes{SinkID: sink})
 	}
 
-	return attr
+	return attr, nil
+}
+
+func (r *NotificationRouterReconciler) getClusterID(ctx context.Context, obj *corev1.ObjectReference) (*string, error) {
+	if obj == nil {
+		return nil, nil
+	}
+	cluster := &v1alpha1.Cluster{}
+	if err := r.Get(ctx, client.ObjectKey{Name: obj.Name, Namespace: obj.Namespace}, cluster); err != nil {
+		return nil, err
+	}
+	if !cluster.Status.HasID() {
+		return nil, fmt.Errorf("cluster is not ready yet")
+	}
+	return cluster.Status.ID, nil
+}
+
+func (r *NotificationRouterReconciler) getServiceID(ctx context.Context, objRef *corev1.ObjectReference) (*string, error) {
+	if objRef == nil {
+		return nil, nil
+	}
+	resource := &v1alpha1.ServiceDeployment{}
+	if err := r.Get(ctx, client.ObjectKey{Name: objRef.Name, Namespace: objRef.Namespace}, resource); err != nil {
+		return nil, err
+	}
+	if !resource.Status.HasID() {
+		return nil, fmt.Errorf("cluster is not ready yet")
+	}
+	return resource.Status.ID, nil
+}
+
+func (r *NotificationRouterReconciler) getPipelineID(ctx context.Context, objRef *corev1.ObjectReference) (*string, error) {
+	if objRef == nil {
+		return nil, nil
+	}
+	resource := &v1alpha1.Pipeline{}
+	if err := r.Get(ctx, client.ObjectKey{Name: objRef.Name, Namespace: objRef.Namespace}, resource); err != nil {
+		return nil, err
+	}
+	if !resource.Status.HasID() {
+		return nil, fmt.Errorf("pipeline is not ready yet")
+	}
+	return resource.Status.ID, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

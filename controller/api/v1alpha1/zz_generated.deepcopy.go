@@ -2028,19 +2028,19 @@ func (in *RouterFilterAttributes) DeepCopyInto(out *RouterFilterAttributes) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.ServiceID != nil {
-		in, out := &in.ServiceID, &out.ServiceID
-		*out = new(string)
+	if in.ServiceRef != nil {
+		in, out := &in.ServiceRef, &out.ServiceRef
+		*out = new(v1.ObjectReference)
 		**out = **in
 	}
-	if in.ClusterID != nil {
-		in, out := &in.ClusterID, &out.ClusterID
-		*out = new(string)
+	if in.ClusterRef != nil {
+		in, out := &in.ClusterRef, &out.ClusterRef
+		*out = new(v1.ObjectReference)
 		**out = **in
 	}
-	if in.PipelineID != nil {
-		in, out := &in.PipelineID, &out.PipelineID
-		*out = new(string)
+	if in.PipelineRef != nil {
+		in, out := &in.PipelineRef, &out.PipelineRef
+		*out = new(v1.ObjectReference)
 		**out = **in
 	}
 }

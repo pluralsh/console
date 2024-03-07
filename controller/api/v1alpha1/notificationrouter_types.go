@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -45,13 +46,13 @@ type RouterFilterAttributes struct {
 	Regex *string `json:"regex,omitempty"`
 	// ServiceID whether to enable delivery for events associated with this service
 	// +kubebuilder:validation:Optional
-	ServiceID *string `json:"serviceId,omitempty"`
+	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
 	// ClusterID whether to enable delivery for events associated with this cluster
 	// +kubebuilder:validation:Optional
-	ClusterID *string `json:"clusterId,omitempty"`
+	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`
 	// PipelineID whether to enable delivery for events associated with this pipeline
 	// +kubebuilder:validation:Optional
-	PipelineID *string `json:"pipelineId,omitempty"`
+	PipelineRef *corev1.ObjectReference `json:"pipelineRef,omitempty"`
 }
 
 //+kubebuilder:object:root=true
