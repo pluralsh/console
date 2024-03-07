@@ -8,7 +8,7 @@ import {
 import { useTheme } from 'styled-components'
 import { VirtualItem } from '@tanstack/react-virtual'
 
-import { useNotificationSinksQuery } from 'generated/graphql'
+import { useNotificationRoutersQuery } from 'generated/graphql'
 import { extendConnection } from 'utils/graphql'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
@@ -21,11 +21,14 @@ import {
   useSetPageHeaderContent,
 } from 'components/cd/ContinuousDeployment'
 
-import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
+import {
+  NOTIFICATIONS_BASE_CRUMBS,
+  NOTIFICATIONS_ROUTERS_ABS_PATH,
+} from 'routes/notificationsRoutesConsts'
 
 import { columns } from './NotificationRoutersColumns'
-
-const DOCS_URL = 'https://docs.plural.sh/deployments/operator/pr-automations'
+import { CreateNotificationRouterModal } from './CreateNotificationRouterModal'
+import { CreateNotificationRouterModal as CreateTemp } from './EditNotificationRouterModal'
 
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -35,7 +38,45 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
 
 const QUERY_PAGE_SIZE = 100
 
-export default function AutomationPr() {
+function CreateRouterButton() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        primary
+        onClick={() => setOpen(true)}
+      >
+        New router
+      </Button>
+      <CreateNotificationRouterModal
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </>
+  )
+}
+
+function TempButton() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        primary
+        onClick={() => setOpen(true)}
+      >
+        Bootstrap new router
+      </Button>
+      <CreateTemp
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </>
+  )
+}
+
+export default function NotificationRouters() {
   const theme = useTheme()
   const [virtualSlice, _setVirtualSlice] = useState<
     | {
@@ -48,20 +89,17 @@ export default function AutomationPr() {
   useSetBreadcrumbs(
     useMemo(
       () => [
-        ...PR_BASE_CRUMBS,
+        ...NOTIFICATIONS_BASE_CRUMBS,
         {
-          label: 'outstanding PRs',
-          url: PR_QUEUE_ABS_PATH,
+          label: 'routers',
+          url: NOTIFICATIONS_ROUTERS_ABS_PATH,
         },
       ],
       []
     )
   )
 
-  return <div>TODO</div>
-}
-/*
-  const queryResult = useNotificationSinksQuery({
+  const queryResult = useNotificationRoutersQuery({
     variables: {
       first: QUERY_PAGE_SIZE,
     },
@@ -103,15 +141,10 @@ export default function AutomationPr() {
   useSetPageHeaderContent(
     useMemo(
       () => (
-        <Button
-          primary
-          as="a"
-          href={DOCS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          New router
-        </Button>
+        <>
+          <TempButton />
+          <CreateRouterButton />
+        </>
       ),
       []
     )
@@ -152,4 +185,3 @@ export default function AutomationPr() {
     </div>
   )
 }
-*/

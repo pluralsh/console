@@ -63,8 +63,6 @@ export default function ModalAlt({
   formProps = {},
   ...props
 }: ComponentProps<typeof ModalAltSC> & {
-  asForm?: boolean
-  formProps?: ComponentProps<'form'>
   headerContent?: ReactNode
 }) {
   return (

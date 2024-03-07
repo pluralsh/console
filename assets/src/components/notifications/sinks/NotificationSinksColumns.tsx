@@ -8,11 +8,10 @@ import {
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 
 import {
   NotificationSinkFragment,
-  PrRole,
   SinkType,
   useDeleteNotificationSinkMutation,
 } from 'generated/graphql'
@@ -22,7 +21,7 @@ import { Confirm } from 'components/utils/Confirm'
 import { TruncateEnd } from 'components/utils/table/TruncateStart'
 import { MoreMenu } from 'components/utils/MoreMenu'
 
-import { EditNotificationSinkModal } from './CreateNotificationSinkModal'
+import { EditNotificationSinkModal } from './UpsertNotificationSinkModal'
 
 enum MenuItemKey {
   Edit = 'edit',
@@ -73,29 +72,11 @@ const ColUrl = columnHelper.accessor(
   }
 )
 
-const DynamicSinkIconSC = styled.div((_) => ({
-  position: 'relative',
-}))
-
 export const sinkTypeToIcon = {
   [SinkType.Slack]: <SlackLogoIcon />,
   [SinkType.Teams]: <GitHubLogoIcon />,
   '': null,
 } as const satisfies Record<SinkType | '', ReactElement | null>
-
-export function DynamicRoleIcon({ role }: { role: Nullable<PrRole> }) {
-  const icon = sinkTypeToIcon[role || ''] || sinkTypeToIcon['']
-
-  return (
-    <DynamicSinkIconSC>
-      <IconFrame
-        size="medium"
-        type="secondary"
-        icon={icon}
-      />
-    </DynamicSinkIconSC>
-  )
-}
 
 export function DeleteNotificationSinkModal({
   sink,

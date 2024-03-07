@@ -51,26 +51,32 @@ fragment NotificationRouter on NotificationRouter {
   updatedAt
 }
 
-mutation CreateNotificationRouter($attributes: NotificationRouterAttributes!) {
+mutation UpsertNotificationRouter($attributes: NotificationRouterAttributes!) {
   upsertNotificationRouter(attributes: $attributes) {
     ...NotificationRouter
   }
 }
 
-# query NotificationRouters($first: Int = 100, $after: String) {
-#   notificationRouters(first: $first, after: $after) {
-#     pageInfo {
-#       ...PageInfo
-#     }
-#     edges {
-#       node {
-#         ...NotificationRouter
-#       }
-#     }
-#   }
-# }
+query NotificationRouters($first: Int = 100, $after: String) {
+  notificationRouters(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...NotificationRouter
+      }
+    }
+  }
+}
 
-mutation CreateNotificationSink($attributes: NotificationSinkAttributes!) {
+mutation DeleteNotificationRouter($id: ID!) {
+  deleteNotificationRouter(id: $id) {
+    ...NotificationRouter
+  }
+}
+
+mutation UpsertNotificationSink($attributes: NotificationSinkAttributes!) {
   upsertNotificationSink(attributes: $attributes) {
     ...NotificationSink
   }

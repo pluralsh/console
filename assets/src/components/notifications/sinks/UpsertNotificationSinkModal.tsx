@@ -9,7 +9,7 @@ import {
   NotificationSinkFragment,
   NotificationSinksDocument,
   SinkType,
-  useCreateNotificationSinkMutation,
+  useUpsertNotificationSinkMutation,
 } from 'generated/graphql'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
@@ -32,7 +32,7 @@ type ModalProps = {
   onClose: Nullable<() => void>
 } & ModalBaseProps
 
-function NotificationSinkModal({ mode, open, onClose, ...props }: ModalProps) {
+function UpsertNotificationSinkModal({ mode, open, onClose, ...props }: ModalProps) {
   const sink = mode === 'edit' ? props.sink : undefined
   const theme = useTheme()
   const initialState = useMemo(
@@ -62,7 +62,7 @@ function NotificationSinkModal({ mode, open, onClose, ...props }: ModalProps) {
     regex.test(state.hookUrl)
   )?.[0]
 
-  const [mutation, { loading }] = useCreateNotificationSinkMutation({
+  const [mutation, { loading }] = useUpsertNotificationSinkMutation({
     onCompleted: () => onClose?.(),
     update: (cache, { data }) =>
       updateCache(cache, {
@@ -187,11 +187,11 @@ function NotificationSinkModal({ mode, open, onClose, ...props }: ModalProps) {
 }
 
 export function CreateNotificationSinkModal(
-  props: Omit<ComponentProps<typeof NotificationSinkModal>, 'mode' | 'sink'>
+  props: Omit<ComponentProps<typeof UpsertNotificationSinkModal>, 'mode' | 'sink'>
 ) {
   return (
     <ModalMountTransition open={props.open}>
-      <NotificationSinkModal
+      <UpsertNotificationSinkModal
         mode="create"
         {...props}
       />
@@ -200,11 +200,11 @@ export function CreateNotificationSinkModal(
 }
 
 export function EditNotificationSinkModal(
-  props: Omit<ComponentProps<typeof NotificationSinkModal>, 'mode'>
+  props: Omit<ComponentProps<typeof UpsertNotificationSinkModal>, 'mode'>
 ) {
   return (
     <ModalMountTransition open={props.open}>
-      <NotificationSinkModal
+      <UpsertNotificationSinkModal
         mode="edit"
         {...props}
       />

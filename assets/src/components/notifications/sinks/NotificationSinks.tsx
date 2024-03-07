@@ -24,7 +24,7 @@ import {
 import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { columns } from './NotificationSinksColumns'
-import { CreateNotificationSinkModal } from './CreateNotificationSinkModal'
+import { CreateNotificationSinkModal } from './UpsertNotificationSinkModal'
 
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
