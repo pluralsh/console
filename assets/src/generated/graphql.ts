@@ -2237,6 +2237,18 @@ export type NotificationRouterAttributes = {
   routerSinks?: InputMaybe<Array<InputMaybe<RouterSinkAttributes>>>;
 };
 
+export type NotificationRouterConnection = {
+  __typename?: 'NotificationRouterConnection';
+  edges?: Maybe<Array<Maybe<NotificationRouterEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type NotificationRouterEdge = {
+  __typename?: 'NotificationRouterEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<NotificationRouter>;
+};
+
 export type NotificationSink = {
   __typename?: 'NotificationSink';
   /** type specific sink configuration */
@@ -4211,7 +4223,7 @@ export type RootQueryType = {
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   nodes?: Maybe<Array<Maybe<Node>>>;
   notificationRouter?: Maybe<NotificationRouter>;
-  notificationRouters?: Maybe<NotificationSinkConnection>;
+  notificationRouters?: Maybe<NotificationRouterConnection>;
   notificationSink?: Maybe<NotificationSink>;
   notificationSinks?: Maybe<NotificationSinkConnection>;
   notifications?: Maybe<NotificationConnection>;

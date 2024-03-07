@@ -316,7 +316,7 @@ type RootQueryType {
 
   notificationSinks(after: String, first: Int, before: String, last: Int): NotificationSinkConnection
 
-  notificationRouters(after: String, first: Int, before: String, last: Int): NotificationSinkConnection
+  notificationRouters(after: String, first: Int, before: String, last: Int): NotificationRouterConnection
 
   deploymentSettings: DeploymentSettings
 }
@@ -626,9 +626,9 @@ type RootMutationType {
 
   upsertNotificationSink(attributes: NotificationSinkAttributes!): NotificationSink
 
-  upsertNotificationRouter(attributes: NotificationRouterAttributes!): NotificationRouter
-
   deleteNotificationSink(id: ID!): NotificationSink
+
+  upsertNotificationRouter(attributes: NotificationRouterAttributes!): NotificationRouter
 
   deleteNotificationRouter(id: ID!): NotificationRouter
 
@@ -870,6 +870,11 @@ type UrlSinkConfiguration {
 type NotificationSinkConnection {
   pageInfo: PageInfo!
   edges: [NotificationSinkEdge]
+}
+
+type NotificationRouterConnection {
+  pageInfo: PageInfo!
+  edges: [NotificationRouterEdge]
 }
 
 enum RestoreStatus {
@@ -4964,6 +4969,11 @@ type ClusterBackupEdge {
 
 type ObjectStoreEdge {
   node: ObjectStore
+  cursor: String
+}
+
+type NotificationRouterEdge {
+  node: NotificationRouter
   cursor: String
 }
 
