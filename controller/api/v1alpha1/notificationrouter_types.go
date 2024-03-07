@@ -33,14 +33,14 @@ type NotificationRouterSpec struct {
 
 	// Filters filters by object type
 	// +kubebuilder:validation:Optional
-	Filters []RouterFilterAttributes `json:"filters,omitempty"`
+	Filters []RouterFilters `json:"filters,omitempty"`
 
 	// RouterSinks sinks to deliver notifications to
 	// +kubebuilder:validation:Optional
 	RouterSinks []string `json:"routerSinks,omitempty"`
 }
 
-type RouterFilterAttributes struct {
+type RouterFilters struct {
 	// Regex a regex for filtering by things like pr url
 	// +kubebuilder:validation:Optional
 	Regex *string `json:"regex,omitempty"`
