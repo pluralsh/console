@@ -44,13 +44,13 @@ type RouterFilterAttributes struct {
 	// Regex a regex for filtering by things like pr url
 	// +kubebuilder:validation:Optional
 	Regex *string `json:"regex,omitempty"`
-	// ServiceID whether to enable delivery for events associated with this service
+	// ServiceRef whether to enable delivery for events associated with this service
 	// +kubebuilder:validation:Optional
 	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
-	// ClusterID whether to enable delivery for events associated with this cluster
+	// ClusterRef whether to enable delivery for events associated with this cluster
 	// +kubebuilder:validation:Optional
 	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`
-	// PipelineID whether to enable delivery for events associated with this pipeline
+	// PipelineRef whether to enable delivery for events associated with this pipeline
 	// +kubebuilder:validation:Optional
 	PipelineRef *corev1.ObjectReference `json:"pipelineRef,omitempty"`
 }
