@@ -13,7 +13,7 @@ dependencies:
     repository: file://../controller
   - name: kubernetes-dashboard
     alias: dashboard
-    version: 7.0.0
+    version: 7.0.1
     repository: https://kubernetes.github.io/dashboard
     condition: kubernetes-dashboard.enabled
   - name: flux2
