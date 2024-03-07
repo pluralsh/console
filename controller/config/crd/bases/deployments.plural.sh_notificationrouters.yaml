@@ -4,20 +4,21 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: notificationsinks.deployments.plural.sh
+  name: notificationrouters.deployments.plural.sh
 spec:
   group: deployments.plural.sh
   names:
-    kind: NotificationSink
-    listKind: NotificationSinkList
-    plural: notificationsinks
-    singular: notificationsink
+    kind: NotificationRouter
+    listKind: NotificationRouterList
+    plural: notificationrouters
+    singular: notificationrouter
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: NotificationSink is the Schema for the notificationsinks API
+        description: NotificationRouter is the Schema for the notificationrouters
+          API
         properties:
           apiVersion:
             description: |-
@@ -37,38 +38,43 @@ spec:
           metadata:
             type: object
           spec:
-            description: NotificationSinkSpec defines the desired state of NotificationSink
+            description: NotificationRouterSpec defines the desired state of NotificationRouter
             properties:
-              configuration:
-                description: Configuration for the specific type
-                properties:
-                  slack:
-                    description: Slack url
-                    properties:
-                      url:
-                        type: string
-                    required:
-                    - url
-                    type: object
-                  teams:
-                    description: Teams url
-                    properties:
-                      url:
-                        type: string
-                    required:
-                    - url
-                    type: object
-                type: object
+              events:
+                description: Events the events to trigger, or use * for any
+                items:
+                  type: string
+                type: array
+              filters:
+                description: Filters filters by object type
+                items:
+                  properties:
+                    clusterId:
+                      description: ClusterID whether to enable delivery for events
+                        associated with this cluster
+                      type: string
+                    pipelineId:
+                      description: PipelineID whether to enable delivery for events
+                        associated with this pipeline
+                      type: string
+                    regex:
+                      description: Regex a regex for filtering by things like pr url
+                      type: string
+                    serviceId:
+                      description: ServiceID whether to enable delivery for events
+                        associated with this service
+                      type: string
+                  type: object
+                type: array
               name:
-                description: Name the name of this service, if not provided NotificationSink's
-                  own name from NotificationSink.ObjectMeta will be used.
+                description: Name the name of this router, if not provided NotificationRouter's
+                  own name from NotificationRouter.ObjectMeta will be used.
                 type: string
-              type:
-                description: Type the channel type of this sink.
-                enum:
-                - SLACK
-                - TEAMS
-                type: string
+              routerSinks:
+                description: RouterSinks sinks to deliver notifications to
+                items:
+                  type: string
+                type: array
             type: object
           status:
             properties:

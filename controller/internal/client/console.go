@@ -88,6 +88,10 @@ type ConsoleClient interface {
 	DeleteNotificationSink(ctx context.Context, id string) error
 	UpsertNotificationSink(ctx context.Context, attr console.NotificationSinkAttributes) (*console.NotificationSinkFragment, error)
 	GetNotificationSinkByName(ctx context.Context, name string) (*console.NotificationSinkFragment, error)
+	DeleteNotificationRouter(ctx context.Context, id string) error
+	GetNotificationRouterByName(ctx context.Context, name string) (*console.NotificationRouterFragment, error)
+	GetNotificationRouter(ctx context.Context, id string) (*console.NotificationRouterFragment, error)
+	UpsertNotificationRouter(ctx context.Context, attr console.NotificationRouterAttributes) (*console.NotificationRouterFragment, error)
 }
 
 func New(url, token string) ConsoleClient {
