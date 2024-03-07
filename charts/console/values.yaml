@@ -141,8 +141,8 @@ affinity:
 monitoring:
   enabled: false
 
-kubernetes-dashboard:
-  enabled: false
+dashboard:
+  enabled: true # todo disable before merge
   app:
     mode: 'api'
   api:

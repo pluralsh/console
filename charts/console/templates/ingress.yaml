@@ -25,9 +25,9 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: console-dashboard
+            name: {{ template "kubernetes-dashboard.fullname" (index $.Subcharts "kubernetes-dashboard") }}-{{ .Values.dashboard.api.role }}
             port:
-              name: {{ .Values.dashboardapi.role }}
+              name: {{ .Values.dashboard.api.role }}
       {{ end }}
       - path: /
         pathType: Prefix
