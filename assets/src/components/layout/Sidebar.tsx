@@ -6,6 +6,7 @@ import {
   ArrowTopRightIcon,
   BellIcon,
   BuildIcon,
+  ClusterIcon,
   Sidebar as DSSidebar,
   DatabaseIcon,
   DiscordIcon,
@@ -90,6 +91,11 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.settings),
+    },
+    {
+      text: 'Kubernetes',
+      icon: <ClusterIcon />,
+      path: '/kubernetes',
     },
     {
       text: 'Builds',

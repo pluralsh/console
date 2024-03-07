@@ -35,6 +35,7 @@ import { appsRoutes } from './appsRoutes'
 import { cdRoutes } from './cdRoutes'
 import { prRoutes } from './prRoutes'
 import { backupsRoutes } from './backupRoutes'
+import { kubernetesRoutes } from './kubernetesRoutes'
 
 const buildsRoutes = [
   <Route
@@ -227,6 +228,9 @@ export const consoleComponentRoutes = [
 
   /* CONTINUOUS DEPLOYMENT */
   ...cdRoutes,
+
+  /* KUBERNETES */
+  ...kubernetesRoutes,
 ]
 
 export const consoleRoutes: RouteObject[] = [
