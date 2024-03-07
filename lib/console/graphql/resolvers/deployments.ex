@@ -37,7 +37,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     PipelineContext,
     NotificationSink,
     NotificationRouter,
-    NotificationFilter
+    NotificationFilter,
+    RouterFilter,
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -73,6 +74,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(NotificationSink, _), do: NotificationSink
   def query(NotificationRouter, _), do: NotificationRouter
   def query(NotificationFilter, _), do: NotificationFilter
+  def query(RouterFilter, _), do: RouterFilter
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
