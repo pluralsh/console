@@ -1,0 +1,96 @@
+fragment UrlSinkConfiguration on UrlSinkConfiguration {
+  url
+}
+
+fragment SinkConfiguration on SinkConfiguration {
+  id
+  slack {
+    ...UrlSinkConfiguration
+  }
+  teams {
+    ...UrlSinkConfiguration
+  }
+}
+
+fragment NotificationSink on NotificationSink {
+  id
+  name
+  type
+  insertedAt
+  updatedAt
+  configuration {
+    ...SinkConfiguration
+  }
+}
+
+fragment NotificationFilter on NotificationFilter {
+  id
+  cluster {
+    ...Cluster
+  }
+  pipeline {
+    ...Pipeline
+  }
+  regex
+  service {
+    ...Service
+  }
+}
+
+fragment NotificationRouter on NotificationRouter {
+  id
+  name
+  sinks {
+    ...NotificationSink
+  }
+  events
+  filters {
+    ...NotificationFilter
+  }
+  insertedAt
+  updatedAt
+}
+
+mutation CreateNotificationRouter($attributes: NotificationRouterAttributes!) {
+  upsertNotificationRouter(attributes: $attributes) {
+    ...NotificationRouter
+  }
+}
+
+# query NotificationRouters($first: Int = 100, $after: String) {
+#   notificationRouters(first: $first, after: $after) {
+#     pageInfo {
+#       ...PageInfo
+#     }
+#     edges {
+#       node {
+#         ...NotificationRouter
+#       }
+#     }
+#   }
+# }
+
+mutation CreateNotificationSink($attributes: NotificationSinkAttributes!) {
+  upsertNotificationSink(attributes: $attributes) {
+    ...NotificationSink
+  }
+}
+
+mutation DeleteNotificationSink($id: ID!) {
+  deleteNotificationSink(id: $id) {
+    ...NotificationSink
+  }
+}
+
+query NotificationSinks($first: Int = 100, $after: String) {
+  notificationSinks(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...NotificationSink
+      }
+    }
+  }
+}

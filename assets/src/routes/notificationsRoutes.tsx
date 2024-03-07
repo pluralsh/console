@@ -1,50 +1,38 @@
 import { type RouteObject } from 'react-router'
 import { Navigate } from 'react-router-dom'
 
-import Pr from 'components/pr/Pr'
-import PrQueue from 'components/pr/queue/PrQueue'
-import PrScmConnections from 'components/pr/scm/PrScmConnections'
-import PrAutomations from 'components/pr/automations/PrAutomations'
-
-import PrScmWebhooks from 'components/pr/scm/ScmWebhooks'
+import Notifications from 'components/notifications/Notifications'
+import NotificationRouters from 'components/notifications/routers/NotificationRouters'
+import NotificationSinks from 'components/notifications/sinks/NotificationSinks'
 
 import { RequireCdEnabled } from './cdRoutes'
-import {
-  PR_AUTOMATIONS_REL_PATH,
-  PR_DEFAULT_REL_PATH,
-  PR_QUEUE_REL_PATH,
-  PR_REL_PATH,
-  PR_SCM_REL_PATH,
-  PR_SCM_WEBHOOKS_REL_PATH,
-} from './prRoutesConsts'
 
-export const prRoutes = [
+import {
+  NOTIFICATIONS_DEFAULT_REL_PATH,
+  NOTIFICATIONS_REL_PATH,
+  NOTIFICATIONS_ROUTERS_REL_PATH,
+  NOTIFICATIONS_SINKS_REL_PATH,
+} from './notificationsRoutesConsts'
+
+export const notificationsRoutes = [
   {
-    path: PR_REL_PATH,
+    path: NOTIFICATIONS_REL_PATH,
     element: <RequireCdEnabled />,
     children: [
       {
         index: true,
-        element: <Navigate to={PR_DEFAULT_REL_PATH} />,
+        element: <Navigate to={NOTIFICATIONS_DEFAULT_REL_PATH} />,
       },
       {
-        element: <Pr />,
+        element: <Notifications />,
         children: [
           {
-            path: PR_QUEUE_REL_PATH,
-            element: <PrQueue />,
+            path: NOTIFICATIONS_ROUTERS_REL_PATH,
+            element: <NotificationRouters />,
           },
           {
-            path: PR_SCM_REL_PATH,
-            element: <PrScmConnections />,
-          },
-          {
-            path: PR_SCM_WEBHOOKS_REL_PATH,
-            element: <PrScmWebhooks />,
-          },
-          {
-            path: PR_AUTOMATIONS_REL_PATH,
-            element: <PrAutomations />,
+            path: NOTIFICATIONS_SINKS_REL_PATH,
+            element: <NotificationSinks />,
           },
         ],
       },

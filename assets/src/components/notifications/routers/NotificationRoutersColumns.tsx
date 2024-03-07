@@ -30,8 +30,6 @@ import { Link } from 'react-router-dom'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { PrAutomationPermissionsModal } from 'components/pr/automations/PrAutomationPermissionsModal'
 
-import { CreatePrModal } from './CreatePrModal'
-
 enum MenuItemKey {
   Permissions = 'permissions',
   Delete = 'delete',
@@ -243,12 +241,6 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
         <AutomationPermissionsModal
           prAutomation={prAutomation}
           open={menuKey === MenuItemKey.Permissions}
-          onClose={() => setMenuKey('')}
-        />
-        <CreatePrModal
-          prAutomation={prAutomation}
-          refetch={refetch}
-          open={menuKey === MenuItemKey.CreatePr}
           onClose={() => setMenuKey('')}
         />
       </div>

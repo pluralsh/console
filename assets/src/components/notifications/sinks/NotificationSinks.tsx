@@ -23,9 +23,8 @@ import {
 
 import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
 
-import { columns } from './NotificationRoutersColumns'
-
-const DOCS_URL = 'https://docs.plural.sh/deployments/operator/pr-automations'
+import { columns } from './NotificationSinksColumns'
+import { CreateNotificationSinkModal } from './CreateNotificationSinkModal'
 
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -58,9 +57,6 @@ export default function AutomationPr() {
     )
   )
 
-  return <div>TODO</div>
-}
-/*
   const queryResult = useNotificationSinksQuery({
     variables: {
       first: QUERY_PAGE_SIZE,
@@ -77,12 +73,12 @@ export default function AutomationPr() {
     previousData,
   } = queryResult
   const data = currentData || previousData
-  const notificationRouters = data?.notificationRouters
-  const pageInfo = notificationRouters?.pageInfo
+  const notificationSinks = data?.notificationSinks
+  const pageInfo = notificationSinks?.pageInfo
   const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
     pageSize: QUERY_PAGE_SIZE,
-    key: 'notificationRouters',
+    key: 'notificationSinks',
     interval: POLL_INTERVAL,
   })
   const fetchNextPage = useCallback(() => {
@@ -94,28 +90,13 @@ export default function AutomationPr() {
       updateQuery: (prev, { fetchMoreResult }) =>
         extendConnection(
           prev,
-          fetchMoreResult.notificationRouters,
-          'notificationRouters'
+          fetchMoreResult.notificationSinks,
+          'notificationSinks'
         ),
     })
   }, [fetchMore, pageInfo?.endCursor])
 
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <Button
-          primary
-          as="a"
-          href={DOCS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          New router
-        </Button>
-      ),
-      []
-    )
-  )
+  useSetPageHeaderContent(useMemo(() => <CreateSinkButton />, []))
 
   if (error) {
     return <GqlError error={error} />
@@ -138,7 +119,7 @@ export default function AutomationPr() {
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
           reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
-          data={data?.notificationRouters?.edges || []}
+          data={data?.notificationSinks?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}
@@ -152,4 +133,24 @@ export default function AutomationPr() {
     </div>
   )
 }
-*/
+
+function CreateSinkButton() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        primary
+        onClick={() => {
+          setOpen(true)
+        }}
+      >
+        New sink
+      </Button>
+      <CreateNotificationSinkModal
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </>
+  )
+}

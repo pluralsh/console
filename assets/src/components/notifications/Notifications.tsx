@@ -4,12 +4,10 @@ import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import {
-  PR_ABS_PATH,
-  PR_AUTOMATIONS_REL_PATH,
-  PR_QUEUE_REL_PATH,
-  PR_SCM_REL_PATH,
-  PR_SCM_WEBHOOKS_REL_PATH,
-} from 'routes/prRoutesConsts'
+  NOTIFICATIONS_ABS_PATH,
+  NOTIFICATIONS_ROUTERS_REL_PATH,
+  NOTIFICATIONS_SINKS_REL_PATH,
+} from 'routes/notificationsRoutesConsts'
 import { PluralErrorBoundary } from 'components/cd/PluralErrorBoundary'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { Directory } from 'components/layout/SideNavEntries'
@@ -20,24 +18,12 @@ import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 
 const directory = [
   {
-    path: PR_QUEUE_REL_PATH,
-    label: 'Outstanding PRs',
-  },
-  // {
-  //   path: PR_DEPENDENCIES_REL_PATH,
-  //   label: 'Dependency dashboard',
-  // },
-  {
-    path: PR_SCM_REL_PATH,
-    label: 'SCM Connections',
+    path: NOTIFICATIONS_ROUTERS_REL_PATH,
+    label: 'Routers',
   },
   {
-    path: PR_SCM_WEBHOOKS_REL_PATH,
-    label: 'SCM Webhooks',
-  },
-  {
-    path: PR_AUTOMATIONS_REL_PATH,
-    label: 'PR Automations',
+    path: NOTIFICATIONS_SINKS_REL_PATH,
+    label: 'Sinks',
   },
 ] as const satisfies Directory
 
@@ -55,7 +41,7 @@ export default function Pr() {
   const cdEnabled = useCDEnabled({ redirect: true })
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${PR_ABS_PATH}/:tab*`)
+  const pathMatch = useMatch(`${NOTIFICATIONS_ABS_PATH}/:tab*`)
   // @ts-ignore
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
@@ -88,7 +74,7 @@ export default function Pr() {
                 subTab
                 key={path}
                 textValue={label}
-                to={`${PR_ABS_PATH}/${path}`}
+                to={`${NOTIFICATIONS_ABS_PATH}/${path}`}
               >
                 <SubTab
                   key={path}
