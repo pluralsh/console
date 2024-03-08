@@ -124,7 +124,7 @@ const ColSinks = columnHelper.accessor(
 const ColUpdated = columnHelper.accessor(({ node }) => node?.updatedAt, {
   id: 'updatedAt',
   header: 'Updated',
-  meta: {gridTemplate: 'max-content'},
+  meta: { gridTemplate: 'max-content' },
   cell: function Cell({ getValue }) {
     return <DateTimeCol date={getValue()} />
   },
@@ -176,7 +176,7 @@ export function DeleteNotificationRouterModal({
 export const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',
   header: '',
-  meta: {gridTemplate: 'max-content'},
+  meta: { gridTemplate: 'max-content' },
   cell: function Cell({ table, getValue }) {
     const theme = useTheme()
     const notificationRouter = getValue()

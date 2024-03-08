@@ -32,7 +32,12 @@ type ModalProps = {
   onClose: Nullable<() => void>
 } & ModalBaseProps
 
-function UpsertNotificationSinkModal({ mode, open, onClose, ...props }: ModalProps) {
+function UpsertNotificationSinkModal({
+  mode,
+  open,
+  onClose,
+  ...props
+}: ModalProps) {
   const sink = mode === 'edit' ? props.sink : undefined
   const theme = useTheme()
   const initialState = useMemo(
@@ -187,7 +192,10 @@ function UpsertNotificationSinkModal({ mode, open, onClose, ...props }: ModalPro
 }
 
 export function CreateNotificationSinkModal(
-  props: Omit<ComponentProps<typeof UpsertNotificationSinkModal>, 'mode' | 'sink'>
+  props: Omit<
+    ComponentProps<typeof UpsertNotificationSinkModal>,
+    'mode' | 'sink'
+  >
 ) {
   return (
     <ModalMountTransition open={props.open}>
