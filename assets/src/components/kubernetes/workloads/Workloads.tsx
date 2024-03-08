@@ -20,17 +20,17 @@ import {
   WORKLOADS_REL_PATH,
   getKubernetesAbsPath,
   getWorkloadsAbsPath,
-} from '../../routes/kubernetesRoutesConsts'
-import { LinkTabWrap } from '../utils/Tabs'
-import { PluralErrorBoundary } from '../cd/PluralErrorBoundary'
+} from '../../../routes/kubernetesRoutesConsts'
+import { LinkTabWrap } from '../../utils/Tabs'
+import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
 import {
   PageHeaderContext,
   PageScrollableContext,
-} from '../cd/ContinuousDeployment'
-import LoadingIndicator from '../utils/LoadingIndicator'
-import { ScrollablePage } from '../utils/layout/ScrollablePage'
+} from '../../cd/ContinuousDeployment'
+import LoadingIndicator from '../../utils/LoadingIndicator'
+import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 
-import { KubernetesContext } from './Kubernetes'
+import { KubernetesContext } from '../Kubernetes'
 
 const directory = [
   { path: DEPLOYMENTS_REL_PATH, label: 'Deployments' },

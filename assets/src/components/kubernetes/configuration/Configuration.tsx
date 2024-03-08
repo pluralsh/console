@@ -9,36 +9,31 @@ import {
 import { ReactNode, Suspense, useMemo, useRef, useState } from 'react'
 
 import {
-  PERSISTENT_VOLUME_CLAIMS_REL_PATH,
-  PERSISTENT_VOLUME_REL_PATH,
-  STORAGE_CLASSES_REL_PATH,
-  STORAGE_REL_PATH,
+  CONFIGURATION_REL_PATH,
+  CONFIG_MAPS_REL_PATH,
+  SECRETS_REL_PATH,
   WORKLOADS_REL_PATH,
+  getConfigurationAbsPath,
   getKubernetesAbsPath,
-  getStorageAbsPath,
-} from '../../routes/kubernetesRoutesConsts'
+} from '../../../routes/kubernetesRoutesConsts'
 
-import { ScrollablePage } from '../utils/layout/ScrollablePage'
-import { LinkTabWrap } from '../utils/Tabs'
-import { PluralErrorBoundary } from '../cd/PluralErrorBoundary'
+import { ScrollablePage } from '../../utils/layout/ScrollablePage'
+import { LinkTabWrap } from '../../utils/Tabs'
+import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
 import {
   PageHeaderContext,
   PageScrollableContext,
-} from '../cd/ContinuousDeployment'
-import LoadingIndicator from '../utils/LoadingIndicator'
+} from '../../cd/ContinuousDeployment'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { KubernetesContext } from './Kubernetes'
+import { KubernetesContext } from '../Kubernetes'
 
 const directory = [
-  {
-    path: PERSISTENT_VOLUME_CLAIMS_REL_PATH,
-    label: 'Persistent volume claims',
-  },
-  { path: PERSISTENT_VOLUME_REL_PATH, label: 'Persistent volumes' },
-  { path: STORAGE_CLASSES_REL_PATH, label: 'Storage classes' },
+  { path: CONFIG_MAPS_REL_PATH, label: 'Config maps' },
+  { path: SECRETS_REL_PATH, label: 'Secrets' },
 ] as const
 
-export default function Storage() {
+export default function Configuration() {
   const theme = useTheme()
   const { cluster } = useOutletContext() as KubernetesContext
   const [headerContent, setHeaderContent] = useState<ReactNode>()
@@ -77,8 +72,8 @@ export default function Storage() {
           url: getKubernetesAbsPath(cluster?.id),
         },
         {
-          label: 'storage',
-          url: `${getKubernetesAbsPath(cluster?.id)}/${STORAGE_REL_PATH}`,
+          label: 'configuration',
+          url: `${getKubernetesAbsPath(cluster?.id)}/${CONFIGURATION_REL_PATH}`,
         },
       ],
       [cluster]
@@ -113,7 +108,7 @@ export default function Storage() {
                 subTab
                 key={path}
                 textValue={label}
-                to={`${getStorageAbsPath(cluster?.id)}/${path}`}
+                to={`${getConfigurationAbsPath(cluster?.id)}/${path}`}
               >
                 <SubTab
                   key={path}

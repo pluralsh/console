@@ -14,18 +14,18 @@ import {
   WORKLOADS_REL_PATH,
   getKubernetesAbsPath,
   getServicesAbsPath,
-} from '../../routes/kubernetesRoutesConsts'
+} from '../../../routes/kubernetesRoutesConsts'
 
-import { ScrollablePage } from '../utils/layout/ScrollablePage'
-import { LinkTabWrap } from '../utils/Tabs'
-import { PluralErrorBoundary } from '../cd/PluralErrorBoundary'
+import { ScrollablePage } from '../../utils/layout/ScrollablePage'
+import { LinkTabWrap } from '../../utils/Tabs'
+import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
 import {
   PageHeaderContext,
   PageScrollableContext,
-} from '../cd/ContinuousDeployment'
-import LoadingIndicator from '../utils/LoadingIndicator'
+} from '../../cd/ContinuousDeployment'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { KubernetesContext } from './Kubernetes'
+import { KubernetesContext } from '../Kubernetes'
 
 const directory = [
   { path: SERVICES_REL_PATH, label: 'Services' },
