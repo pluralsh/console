@@ -1,8 +1,8 @@
 import { ReactElement, useState } from 'react'
 import {
-  GitHubLogoIcon,
   IconFrame,
   ListBoxItem,
+  MsTeamsLogoIcon,
   PencilIcon,
   SlackLogoIcon,
   Tooltip,
@@ -97,7 +97,7 @@ const ColUrl = columnHelper.accessor(
 
 export const sinkTypeToIcon = {
   [SinkType.Slack]: <SlackLogoIcon />,
-  [SinkType.Teams]: <GitHubLogoIcon />, // TODO_KLINK: Replace with Teams icon
+  [SinkType.Teams]: <MsTeamsLogoIcon />,
   '': null,
 } as const satisfies Record<SinkType | '', ReactElement | null>
 

@@ -28,7 +28,6 @@ import {
 
 import { columns } from './NotificationRoutersColumns'
 import { CreateNotificationRouterModal } from './CreateNotificationRouterModal'
-import { CreateNotificationRouterModal as CreateTemp } from './EditNotificationRouterModal'
 
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -50,25 +49,6 @@ function CreateRouterButton() {
         New router
       </Button>
       <CreateNotificationRouterModal
-        open={open}
-        onClose={() => setOpen(false)}
-      />
-    </>
-  )
-}
-
-function TempButton() {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      <Button
-        primary
-        onClick={() => setOpen(true)}
-      >
-        Bootstrap new router
-      </Button>
-      <CreateTemp
         open={open}
         onClose={() => setOpen(false)}
       />
@@ -138,17 +118,7 @@ export default function NotificationRouters() {
     })
   }, [fetchMore, pageInfo?.endCursor])
 
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <>
-          <TempButton />
-          <CreateRouterButton />
-        </>
-      ),
-      []
-    )
-  )
+  useSetPageHeaderContent(useMemo(() => <CreateRouterButton />, []))
 
   if (error) {
     return <GqlError error={error} />

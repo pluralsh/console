@@ -20,6 +20,8 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { isNonNullable } from 'utils/isNonNullable'
 
+import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+
 import { EditNotificationRouterModal } from './EditNotificationRouterModal'
 import { compareByPrefixes } from './compareByPrefixes'
 import { insertBetweenLimited } from './insertBetweenLimited'
@@ -119,6 +121,15 @@ const ColSinks = columnHelper.accessor(
   }
 )
 
+const ColUpdated = columnHelper.accessor(({ node }) => node?.updatedAt, {
+  id: 'updatedAt',
+  header: 'Updated',
+  meta: {gridTemplate: 'max-content'},
+  cell: function Cell({ getValue }) {
+    return <DateTimeCol date={getValue()} />
+  },
+})
+
 export function DeleteNotificationRouterModal({
   notificationRouter,
   refetch,
@@ -165,6 +176,7 @@ export function DeleteNotificationRouterModal({
 export const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',
   header: '',
+  meta: {gridTemplate: 'max-content'},
   cell: function Cell({ table, getValue }) {
     const theme = useTheme()
     const notificationRouter = getValue()
@@ -218,4 +230,4 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
   },
 })
 
-export const columns = [ColName, ColFilters, ColSinks, ColActions]
+export const columns = [ColName, ColFilters, ColSinks, ColUpdated, ColActions]

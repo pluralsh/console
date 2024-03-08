@@ -32,7 +32,7 @@ import { GqlError } from 'components/utils/Alert'
 import { SinkInfo, sinkEditColumns } from '../sinks/NotificationSinksColumns'
 
 type ModalBaseProps = {
-  mode: 'edit' | 'create'
+  mode: 'edit' | 'create' // TODO_KLINK: Remove when done testing
   notificationRouter?: NotificationRouterFragment
 }
 
@@ -45,7 +45,6 @@ type FormState = Omit<NotificationRouterAttributes, 'routerSinks'> & {
   sinks: NotificationSinkFragment[]
 }
 
-// reduce an array to a set of all it's ids
 function toIdSet<T extends { id: string }>(arr: T[]): Set<string> {
   return new Set(arr.map((item) => item.id))
 }
@@ -58,9 +57,31 @@ function areIdsEqual(arr1: { id: string }[], arr2: { id: string }[]): boolean {
   return isEqual(toIdSet(arr1), toIdSet(arr2))
 }
 
+// TODO_KLINK: Remove when done testing
+const CREATE_TEST_ATTRS = {
+  name: 'test-router-',
+  events: [
+    // '*',
+    // 'service.update',
+    // 'cluster.create',
+    'pipeline.update',
+    'pr.create',
+    'pr.close',
+  ],
+  filters: [
+    {
+      regex: 'someregex',
+      clusterId: 'fba73cfd-054a-419d-8b78-35c2b59ec085',
+      pipelineId: '35a600da-01cb-4aac-bd48-8fb126600047',
+      serviceId: 'ecad5277-0d1c-45de-ab67-06a9c9c30b2f',
+    },
+  ],
+  routerSinks: [],
+} as const satisfies Partial<NotificationRouterAttributes>
+
 function UpsertNotificationRouterModal({
   notificationRouter,
-  mode = 'edit',
+  mode = 'edit', // TODO_KLINK: Remove when done testing
   open,
   onClose,
 }: ModalProps) {
@@ -71,28 +92,10 @@ function UpsertNotificationRouterModal({
 
   const { data: sinksData, loading: sinksLoading } = useNotificationSinksQuery()
 
+  // TODO_KLINK: Remove when done testing
   const createMutationAttrs =
     mode === 'create'
-      ? ({
-          name: 'test-router-',
-          events: [
-            // '*',
-            // 'service.update',
-            // 'cluster.create',
-            'pipeline.update',
-            'pr.create',
-            'pr.close',
-          ],
-          filters: [
-            {
-              regex: 'someregex',
-              clusterId: 'fba73cfd-054a-419d-8b78-35c2b59ec085',
-              pipelineId: '35a600da-01cb-4aac-bd48-8fb126600047',
-              serviceId: 'ecad5277-0d1c-45de-ab67-06a9c9c30b2f',
-            },
-          ],
-          routerSinks: [],
-        } as const satisfies Partial<NotificationRouterAttributes>)
+      ? CREATE_TEST_ATTRS
       : ({} as const satisfies Partial<NotificationRouterAttributes>)
 
   const initialState = useMemo(
@@ -166,7 +169,7 @@ function UpsertNotificationRouterModal({
       open={open}
       onClose={onClose || undefined}
       header={`Edit notification router${
-        router?.name ? `– ${router.name}` : ''
+        router?.name ? ` – ${router.name}` : ''
       }`}
       actions={
         <div

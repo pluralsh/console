@@ -15,6 +15,7 @@ import {
   HistoryIcon,
   ListIcon,
   LogoutIcon,
+  MegaphoneIcon,
   PeopleIcon,
   PersonIcon,
   PrOpenIcon,
@@ -22,7 +23,6 @@ import {
   ServersIcon,
   SidebarItem,
   SidebarSection,
-  WarningIcon,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
@@ -145,7 +145,7 @@ function getMenuItems({
     },
     {
       text: 'Notifications',
-      icon: <WarningIcon />,
+      icon: <MegaphoneIcon />,
       path: '/notifications',
       enabled: isCDEnabled,
     },
