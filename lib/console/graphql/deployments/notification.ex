@@ -99,12 +99,14 @@ defmodule Console.GraphQl.Deployments.Notification do
 
     connection field :notification_sinks, node_type: :notification_sink do
       middleware Authenticated
+      arg :q, :string
 
       resolve &Deployments.list_sinks/2
     end
 
     connection field :notification_routers, node_type: :notification_router do
       middleware Authenticated
+      arg :q, :string
 
       resolve &Deployments.list_routers/2
     end

@@ -30,6 +30,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Base do
     end)
   end
 
+  def save_kubeconfig(cluster) do
+    with %Kazan.Server{} = server <- Clusters.control_plane(cluster),
+      do: Kube.Utils.save_kubeconfig(server)
+  end
+
   defmacro delegates(module) do
     module = Macro.to_string(module) |> String.split(".") |> Module.concat()
     module.__info__(:functions)

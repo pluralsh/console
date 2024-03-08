@@ -39,6 +39,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     NotificationRouter,
     NotificationFilter,
     RouterFilter,
+    PolicyConstraint,
+    ConstraintViolation,
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -75,6 +77,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(NotificationRouter, _), do: NotificationRouter
   def query(NotificationFilter, _), do: NotificationFilter
   def query(RouterFilter, _), do: RouterFilter
+  def query(PolicyConstraint, _), do: PolicyConstraint
+  def query(ConstraintViolation, _), do: ConstraintViolation
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -83,6 +87,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Pipeline
   delegates Console.GraphQl.Resolvers.Deployments.Backup
   delegates Console.GraphQl.Resolvers.Deployments.Notification
+  delegates Console.GraphQl.Resolvers.Deployments.Policy
 
   def list_addons(_, _), do: AddOns.addons()
 

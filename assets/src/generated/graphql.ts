@@ -621,6 +621,8 @@ export type Cluster = {
   objectStore?: Maybe<ObjectStore>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** lists OPA constraints registered in this cluster */
+  policyConstraints?: Maybe<PolicyConstraintConnection>;
   /** pr automations that are relevant to managing this cluster */
   prAutomations?: Maybe<Array<Maybe<PrAutomation>>>;
   /** if true, this cluster cannot be deleted */
@@ -633,8 +635,8 @@ export type Cluster = {
   repository?: Maybe<GitRepository>;
   /** the active restore for this cluster */
   restore?: Maybe<ClusterRestore>;
-  /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
-  revisions?: Maybe<RevisionConnection>;
+  /** a relay connection of all revisions of this cluster, these are periodically pruned up to a history limit */
+  revisions?: Maybe<ClusterRevisionConnection>;
   /** fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries */
   runtimeServices?: Maybe<Array<Maybe<RuntimeService>>>;
   /** whether this is the management cluster itself */
@@ -654,6 +656,15 @@ export type Cluster = {
   version?: Maybe<Scalars['String']['output']>;
   /** write policy for this cluster */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterPolicyConstraintsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -849,6 +860,28 @@ export type ClusterRestoreEdge = {
   __typename?: 'ClusterRestoreEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<ClusterRestore>;
+};
+
+/** a historical revision of a cluster, including version, cloud and node group configuration */
+export type ClusterRevision = {
+  __typename?: 'ClusterRevision';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  nodePools?: Maybe<Array<Maybe<NodePool>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+export type ClusterRevisionConnection = {
+  __typename?: 'ClusterRevisionConnection';
+  edges?: Maybe<Array<Maybe<ClusterRevisionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterRevisionEdge = {
+  __typename?: 'ClusterRevisionEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterRevision>;
 };
 
 export type ClusterServiceAttributes = {
@@ -1079,6 +1112,17 @@ export type ConsoleConfiguration = {
   manifest?: Maybe<PluralManifest>;
   pluralLogin?: Maybe<Scalars['Boolean']['output']>;
   vpnEnabled?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type ConstraintRef = {
+  __typename?: 'ConstraintRef';
+  kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type ConstraintRefAttributes = {
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
 };
 
 export type Container = {
@@ -2802,6 +2846,46 @@ export type PolicyBindingAttributes = {
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+/** A OPA Gatekeeper Constraint reference */
+export type PolicyConstraint = {
+  __typename?: 'PolicyConstraint';
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  /** Fetches the live constraint object from K8s, this is an expensive query and should not be done in list endpoints */
+  object?: Maybe<KubernetesUnstructured>;
+  recommendation?: Maybe<Scalars['String']['output']>;
+  /** pointer to the kubernetes resource itself */
+  ref?: Maybe<ConstraintRef>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  violationCount?: Maybe<Scalars['Int']['output']>;
+  violations?: Maybe<Array<Maybe<Violation>>>;
+};
+
+/** inputs to add constraint data from an OPA gatekeeper constraint CRD */
+export type PolicyConstraintAttributes = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  recommendation?: InputMaybe<Scalars['String']['input']>;
+  /** pointer to the group/name for the CR */
+  ref?: InputMaybe<ConstraintRefAttributes>;
+  violationCount?: InputMaybe<Scalars['Int']['input']>;
+  violations?: InputMaybe<Array<InputMaybe<ViolationAttributes>>>;
+};
+
+export type PolicyConstraintConnection = {
+  __typename?: 'PolicyConstraintConnection';
+  edges?: Maybe<Array<Maybe<PolicyConstraintEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PolicyConstraintEdge = {
+  __typename?: 'PolicyConstraintEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PolicyConstraint>;
+};
+
 export type Port = {
   __typename?: 'Port';
   containerPort?: Maybe<Scalars['Int']['output']>;
@@ -3520,6 +3604,7 @@ export type RootMutationType = {
   updateUser?: Maybe<User>;
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
+  upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -4145,6 +4230,11 @@ export type RootMutationTypeUpsertNotificationSinkArgs = {
   attributes: NotificationSinkAttributes;
 };
 
+
+export type RootMutationTypeUpsertPolicyConstraintsArgs = {
+  constraints?: InputMaybe<Array<InputMaybe<PolicyConstraintAttributes>>>;
+};
+
 export type RootQueryType = {
   __typename?: 'RootQueryType';
   accessToken?: Maybe<AccessToken>;
@@ -4242,6 +4332,7 @@ export type RootQueryType = {
   pluralServiceDeployment?: Maybe<PluralServiceDeployment>;
   pod?: Maybe<Pod>;
   pods?: Maybe<PodConnection>;
+  policyConstraint?: Maybe<PolicyConstraint>;
   postgresDatabase?: Maybe<Postgresql>;
   postgresDatabases?: Maybe<Array<Maybe<Postgresql>>>;
   prAutomation?: Maybe<PrAutomation>;
@@ -4633,6 +4724,7 @@ export type RootQueryTypeNotificationRoutersArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -4647,6 +4739,7 @@ export type RootQueryTypeNotificationSinksArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -4757,6 +4850,11 @@ export type RootQueryTypePodsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   namespace?: InputMaybe<Scalars['String']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
+export type RootQueryTypePolicyConstraintArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -5920,6 +6018,29 @@ export type VerticalPodAutoscalerStatus = {
 export type VerticalPodAutoscalerUpdatePolicy = {
   __typename?: 'VerticalPodAutoscalerUpdatePolicy';
   updateMode?: Maybe<Scalars['String']['output']>;
+};
+
+/** A violation of a given OPA Gatekeeper constraint */
+export type Violation = {
+  __typename?: 'Violation';
+  group?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  kind?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  namespace?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+export type ViolationAttributes = {
+  group?: InputMaybe<Scalars['String']['input']>;
+  kind?: InputMaybe<Scalars['String']['input']>;
+  message?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  version?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type WaitingState = {

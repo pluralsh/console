@@ -244,9 +244,14 @@ defmodule Console.GraphQl.Deployments.Cluster do
       description: "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null",
       resolve: &Deployments.resolve_cluster_status/3
 
-    @desc "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
-    connection field :revisions, node_type: :revision do
+    @desc "a relay connection of all revisions of this cluster, these are periodically pruned up to a history limit"
+    connection field :revisions, node_type: :cluster_revision do
       resolve &Deployments.list_cluster_revisions/3
+    end
+
+    @desc "lists OPA constraints registered in this cluster"
+    connection field :policy_constraints, node_type: :policy_constraint do
+      resolve &Deployments.list_policy_constraints/3
     end
 
     @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"

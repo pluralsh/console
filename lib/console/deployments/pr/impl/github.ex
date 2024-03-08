@@ -16,7 +16,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
       |> case do
         {_, %{"html_url" => url} = body, _} ->
           {:ok, %{title: title, url: url, owner: owner(body)}}
-        {_, body, _} -> {:error, "failed to create pull request: #{inspect(body)}"}
+        {_, body, _} -> {:error, "failed to create pull request: #{Jason.encode!(body)}"}
       end
     end
   end
@@ -35,7 +35,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
       })
       |> case do
         {_, %{"id" => _}, _} -> :ok
-        {_, body, _} -> {:error, "failed to create webhook: #{inspect(body)}"}
+        {_, body, _} -> {:error, "failed to create webhook: #{Jason.encode!(body)}"}
       end
     end
   end
