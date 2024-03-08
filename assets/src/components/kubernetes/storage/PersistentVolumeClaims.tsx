@@ -1,3 +1,3 @@
 export default function PersistentVolumeClaims() {
-  return 'pvc'
+  return <>PersistentVolumeClaims</>
 }

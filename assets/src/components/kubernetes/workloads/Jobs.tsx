@@ -1,3 +1,3 @@
 export default function Jobs() {
-  return 'jobs'
+  return <>Jobs</>
 }

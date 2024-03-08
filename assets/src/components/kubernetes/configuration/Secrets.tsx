@@ -1,3 +1,3 @@
 export default function Secrets() {
-  return 'secrets'
+  return <>Secrets</>
 }

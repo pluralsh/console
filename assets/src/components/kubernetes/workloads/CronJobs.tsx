@@ -1,3 +1,3 @@
 export default function CronJobs() {
-  return 'cronjobs'
+  return <>CronJobs</>
 }

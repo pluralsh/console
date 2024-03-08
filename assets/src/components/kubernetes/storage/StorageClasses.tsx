@@ -1,3 +1,3 @@
 export default function StorageClasses() {
-  return 'storageclasses'
+  return <>StorageClasses</>
 }

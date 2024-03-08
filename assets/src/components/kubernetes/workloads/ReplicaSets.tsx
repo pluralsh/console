@@ -1,3 +1,3 @@
 export default function ReplicaSets() {
-  return 'replicasets'
+  return <>ReplicaSets</>
 }

@@ -1,3 +1,3 @@
 export default function DaemonSets() {
-  return 'daemonsets'
+  return <>DaemonSets</>
 }

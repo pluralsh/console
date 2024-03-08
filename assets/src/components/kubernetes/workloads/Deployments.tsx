@@ -1,3 +1,3 @@
 export default function Deployments() {
-  return 'deployments'
+  return <>Deployments</>
 }
