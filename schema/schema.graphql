@@ -932,7 +932,7 @@ type NotificationRouter {
 type NotificationFilter {
   id: ID!
   regex: String
-  service: Service
+  service: ServiceDeployment
   cluster: Cluster
   pipeline: Pipeline
 }

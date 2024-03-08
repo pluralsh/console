@@ -2252,7 +2252,7 @@ export type NotificationFilter = {
   id: Scalars['ID']['output'];
   pipeline?: Maybe<Pipeline>;
   regex?: Maybe<Scalars['String']['output']>;
-  service?: Maybe<Service>;
+  service?: Maybe<ServiceDeployment>;
 };
 
 export type NotificationRouter = {

@@ -61,7 +61,7 @@ defmodule Console.GraphQl.Deployments.Notification do
   object :notification_filter do
     field :id,       non_null(:id)
     field :regex,    :string
-    field :service,  :service, resolve: dataloader(Deployments)
+    field :service,  :service_deployment, resolve: dataloader(Deployments)
     field :cluster,  :cluster, resolve: dataloader(Deployments)
     field :pipeline, :pipeline, resolve: dataloader(Deployments)
   end
