@@ -10,7 +10,6 @@ import { useTheme } from 'styled-components'
 
 import {
   NotificationRouterFragment,
-  ServiceFragment,
   useDeleteNotificationRouterMutation,
 } from 'generated/graphql'
 
