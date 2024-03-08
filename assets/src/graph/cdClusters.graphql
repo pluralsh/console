@@ -255,6 +255,7 @@ query Clusters(
 fragment ClusterTiny on Cluster {
   id
   name
+  self
   provider {
     cloud
   }
@@ -264,7 +265,6 @@ fragment ClusterTiny on Cluster {
 fragment ClusterBasic on Cluster {
   ...ClusterTiny
   handle
-  self
   protect
   deletedAt
   version
