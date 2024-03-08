@@ -16,9 +16,17 @@ import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayo
 import { Directory, SideNavEntries } from '../layout/SideNavEntries'
 import { ResponsiveLayoutContentContainer } from '../utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
-import { useClustersTinyQuery } from '../../generated/graphql'
+import {
+  ClusterTinyFragment,
+  useClustersTinyQuery,
+} from '../../generated/graphql'
 import { ClusterSelect } from '../cd/addOns/ClusterSelect'
 import { mapExistingNodes } from '../../utils/graphql'
+import LoadingIndicator from '../utils/LoadingIndicator'
+
+export type KubernetesContext = {
+  cluster?: ClusterTinyFragment
+}
 
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
@@ -53,6 +61,8 @@ export default function Kubernetes() {
     [clusterId, clusters]
   )
 
+  const context: KubernetesContext = useMemo(() => ({ cluster }), [cluster])
+
   useEffect(() => {
     if (!isEmpty(clusters) && !cluster) {
       const mgmtCluster = clusters.find(({ self }) => !!self)
@@ -62,6 +72,8 @@ export default function Kubernetes() {
       }
     }
   }, [cluster, clusters, navigate])
+
+  if (!cluster) return <LoadingIndicator />
 
   return (
     <ResponsiveLayoutPage>
@@ -95,7 +107,7 @@ export default function Kubernetes() {
         role="main"
         width="100%"
       >
-        <Outlet context={{ cluster }} />
+        <Outlet context={context} />
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer />
     </ResponsiveLayoutPage>

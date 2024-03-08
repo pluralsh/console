@@ -8,9 +8,11 @@ import {
   getKubernetesAbsPath,
 } from '../../routes/kubernetesRoutesConsts'
 
+import { KubernetesContext } from './Kubernetes'
+
 export default function Configuration() {
   const theme = useTheme()
-  const { cluster } = useOutletContext() as any
+  const { cluster } = useOutletContext() as KubernetesContext
 
   useSetBreadcrumbs(
     useMemo(
@@ -20,7 +22,7 @@ export default function Configuration() {
           url: getKubernetesAbsPath(cluster?.id),
         },
         {
-          label: cluster?.name,
+          label: cluster?.name ?? '',
           url: getKubernetesAbsPath(cluster?.id),
         },
         {
