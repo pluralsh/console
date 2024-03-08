@@ -5,6 +5,7 @@ import {
   ListBoxItem,
   PencilIcon,
   SlackLogoIcon,
+  Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -37,6 +38,46 @@ const ColName = columnHelper.accessor(({ node }) => node?.name, {
     return <>{getValue()}</>
   },
 })
+
+export function SinkInfo({
+  sink,
+}: {
+  sink: Nullable<NotificationSinkFragment>
+}) {
+  const theme = useTheme()
+  const type = sink?.type
+  const icon = sinkTypeToIcon[type || '']
+  const info =
+    sink?.configuration?.slack?.url || sink?.configuration?.teams?.url || ''
+
+  return (
+    <div
+      css={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        overflow: 'hidden',
+        gap: theme.spacing.small,
+      }}
+    >
+      {icon && (
+        <IconFrame
+          type="secondary"
+          secondary
+          icon={icon}
+        />
+      )}
+
+      <Tooltip
+        placement="top-start"
+        label={info}
+      >
+        <TruncateEnd>{info}</TruncateEnd>
+      </Tooltip>
+    </div>
+  )
+}
+
 const ColUrl = columnHelper.accessor(
   ({ node }) =>
     node?.configuration?.slack?.url || node?.configuration?.teams?.url || '',
@@ -44,37 +85,19 @@ const ColUrl = columnHelper.accessor(
     id: 'url',
     header: 'Webhook',
     meta: { gridTemplate: 'minmax(100px, 1fr)' },
-    cell: function Cell({ getValue, row }) {
-      const theme = useTheme()
-      const type = row.original.node?.type
-      const icon = sinkTypeToIcon[type || '']
+    cell: function Cell({ row }) {
+      const sink = row.original.node
 
-      return (
-        <div
-          css={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: theme.spacing.small,
-          }}
-        >
-          {icon && (
-            <IconFrame
-              type="secondary"
-              secondary
-              icon={icon}
-            />
-          )}
-          <TruncateEnd>{getValue()}</TruncateEnd>
-        </div>
-      )
+      if (!sink) return null
+
+      return <SinkInfo sink={sink} />
     },
   }
 )
 
 export const sinkTypeToIcon = {
   [SinkType.Slack]: <SlackLogoIcon />,
-  [SinkType.Teams]: <GitHubLogoIcon />,
+  [SinkType.Teams]: <GitHubLogoIcon />, // TODO_KLINK: Replace with Teams icon
   '': null,
 } as const satisfies Record<SinkType | '', ReactElement | null>
 
@@ -177,4 +200,50 @@ export const ColActions = columnHelper.display({
   },
 })
 
+export const RouterSinkActions = columnHelper.display({
+  id: 'actions',
+  header: '',
+  cell: function Cell({ table, row }) {
+    const theme = useTheme()
+    const sink = row.original.node
+    const { removeSink } = table.options.meta as {
+      removeSink?: (sinkId: string) => void
+    }
+
+    if (!sink) {
+      return null
+    }
+
+    return (
+      <div
+        onClick={(e) => e.stopPropagation()}
+        css={{
+          alignItems: 'center',
+          alignSelf: 'end',
+          display: 'flex',
+          columnGap: theme.spacing.medium,
+        }}
+      >
+        <MoreMenu
+          onSelectionChange={(key) => {
+            if (key === MenuItemKey.Delete) {
+              removeSink?.(sink.id)
+            }
+          }}
+        >
+          <ListBoxItem
+            key={MenuItemKey.Delete}
+            leftContent={
+              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+            }
+            label="Remove sink"
+            textValue="Remove sink"
+          />
+        </MoreMenu>
+      </div>
+    )
+  },
+})
+
 export const columns = [ColName, ColUrl, ColActions]
+export const sinkEditColumns = [ColName, ColUrl, RouterSinkActions]

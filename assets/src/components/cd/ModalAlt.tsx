@@ -9,7 +9,7 @@ const ModalAltSC = styled(Modal)(({ theme, actions }) => ({
       // Fixes z-index issue with gql error border
       // TODO: Fix this in design system modal
       position: 'relative',
-      zIndex: 0,
+      zIndex: 100,
     },
     '& > div > div:first-child, & > form > div:first-child': {
       display: 'flex',

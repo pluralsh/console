@@ -1,5 +1,12 @@
-import { ComponentProps, useCallback, useMemo,useState } from 'react'
-import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
+import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import {
+  Button,
+  ComboBox,
+  FormField,
+  Input2,
+  ListBoxItem,
+  Table,
+} from '@pluralsh/design-system'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { useTheme } from 'styled-components'
@@ -8,16 +15,25 @@ import {
   NotificationRouterAttributes,
   NotificationRouterFragment,
   NotificationRoutersDocument,
+  NotificationSinkFragment,
+  useNotificationSinksQuery,
   useUpsertNotificationRouterMutation,
 } from 'generated/graphql'
 
 import { appendConnection, updateCache } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import ModalAlt from 'components/cd/ModalAlt'
+import { isEmpty, isEqual } from 'lodash'
+
+import { Body2P } from 'components/utils/typography/Text'
+
+import { GqlError } from 'components/utils/Alert'
+
+import { SinkInfo, sinkEditColumns } from '../sinks/NotificationSinksColumns'
 
 type ModalBaseProps = {
   mode: 'edit' | 'create'
-  router?: NotificationRouterFragment
+  notificationRouter?: NotificationRouterFragment
 }
 
 type ModalProps = {
@@ -25,21 +41,35 @@ type ModalProps = {
   onClose: Nullable<() => void>
 } & ModalBaseProps
 
-/**
- * Upsert a notification router
- * @param mode Defaults to `edit`. `create` is only provided for debugging,
- * don't expose to users
- * @returns
- */
+type FormState = Omit<NotificationRouterAttributes, 'routerSinks'> & {
+  sinks: NotificationSinkFragment[]
+}
+
+// reduce an array to a set of all it's ids
+function toIdSet<T extends { id: string }>(arr: T[]): Set<string> {
+  return new Set(arr.map((item) => item.id))
+}
+
+function areIdsEqual(arr1: { id: string }[], arr2: { id: string }[]): boolean {
+  if (arr1.length !== arr2.length) {
+    return false
+  }
+
+  return isEqual(toIdSet(arr1), toIdSet(arr2))
+}
+
 function UpsertNotificationRouterModal({
+  notificationRouter,
   mode = 'edit',
   open,
   onClose,
-  ...props
 }: ModalProps) {
-  const router = mode === 'edit' ? props.router : undefined
   const theme = useTheme()
-  const [mOpen, setMOpen] = useState(false)
+  const router = mode === 'edit' ? notificationRouter : undefined
+  const events = router?.events || []
+  const [sinksQ, setSinksQ] = useState('')
+
+  const { data: sinksData, loading: sinksLoading } = useNotificationSinksQuery()
 
   const createMutationAttrs =
     mode === 'create'
@@ -53,6 +83,14 @@ function UpsertNotificationRouterModal({
             'pr.create',
             'pr.close',
           ],
+          filters: [
+            {
+              regex: 'someregex',
+              clusterId: 'fba73cfd-054a-419d-8b78-35c2b59ec085',
+              pipelineId: '35a600da-01cb-4aac-bd48-8fb126600047',
+              serviceId: 'ecad5277-0d1c-45de-ab67-06a9c9c30b2f',
+            },
+          ],
           routerSinks: [],
         } as const satisfies Partial<NotificationRouterAttributes>)
       : ({} as const satisfies Partial<NotificationRouterAttributes>)
@@ -61,18 +99,27 @@ function UpsertNotificationRouterModal({
     () =>
       ({
         name: router?.name || '',
-        routerSinks:
-          router?.sinks?.filter(isNonNullable).map((sink) => ({
-            sinkId: sink.id,
-          })) || [],
+        sinks: router?.sinks?.filter(isNonNullable) || [],
         ...createMutationAttrs,
-      }) as const satisfies NotificationRouterAttributes,
+      }) as const satisfies FormState,
     [createMutationAttrs, router?.name, router?.sinks]
   )
-  const { state, update, hasUpdates } =
-    useUpdateState<NotificationRouterAttributes>(initialState)
+  const { state, update, hasUpdates } = useUpdateState<FormState>(
+    initialState,
+    {
+      sinks: (sinksA, sinksB) =>
+        !areIdsEqual(
+          sinksA as NotificationSinkFragment[],
+          sinksB as NotificationSinkFragment[]
+        ),
+    }
+  )
+  const sinksOptions =
+    sinksData?.notificationSinks?.edges?.filter?.(
+      (sinkEdge) => !state.sinks.some((s) => s.id === sinkEdge?.node?.id)
+    ) || []
 
-  const [mutation, { loading }] = useUpsertNotificationRouterMutation({
+  const [mutation, { loading, error }] = useUpsertNotificationRouterMutation({
     onCompleted: () => onClose?.(),
     update: (cache, { data }) =>
       updateCache(cache, {
@@ -86,7 +133,7 @@ function UpsertNotificationRouterModal({
       }),
   })
 
-  const allowSubmit = state.name && hasUpdates
+  const allowSubmit = hasUpdates
 
   const onSubmit = useCallback(
     (e: SubmitEvent) => {
@@ -97,7 +144,14 @@ function UpsertNotificationRouterModal({
       }
       mutation({
         variables: {
-          attributes: state,
+          attributes: {
+            name: state.name,
+            ...(state.events ? { events: state.events } : {}),
+            ...(state.filters ? { filters: state.filters } : {}),
+            routerSinks: state.sinks.map((sink) => ({
+              sinkId: sink.id,
+            })),
+          },
         },
       })
     },
@@ -147,15 +201,6 @@ function UpsertNotificationRouterModal({
           gap: theme.spacing.large,
         }}
       >
-        <div>
-          <Button onClick={() => setMOpen(true)}>Thing</Button>
-          <Modal
-            open={mOpen}
-            onClose={() => setMOpen(false)}
-          >
-            thing
-          </Modal>
-        </div>
         {mode !== 'edit' && (
           <FormField label="name">
             <div css={{ display: 'flex', gap: theme.spacing.xxsmall }}>
@@ -167,17 +212,127 @@ function UpsertNotificationRouterModal({
             </div>
           </FormField>
         )}
-        <FormField label="name">
-          <div css={{ display: 'flex', gap: theme.spacing.xxsmall }}>
-            <Input2
-              value={state.name}
-              onChange={(e) => update({ name: e.target.value })}
-              placeholder="Name"
-            />
-          </div>
+        <FormField label="Events">
+          <ul
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.xxsmall,
+              color: theme.colors['text-light'],
+              ...theme.partials.reset.list,
+            }}
+          >
+            {events.map((event) => (
+              <li css={{ ...theme.partials.reset.li }}>
+                <Body2P>{event}</Body2P>
+              </li>
+            ))}
+          </ul>
         </FormField>
+        <RouterSinksTable
+          sinks={state.sinks || []}
+          setSinks={(sinks: typeof state.sinks) => update({ sinks })}
+        />
+        <FormField label="Add new sink">
+          <ComboBox
+            inputProps={{
+              placeholder: 'Choose a sink',
+            }}
+            inputValue={sinksQ}
+            onInputChange={(input) => setSinksQ(input)}
+            loading={sinksLoading}
+            onSelectionChange={(key) => {
+              if (state.sinks.find((sink) => sink.id === key)) {
+                return
+              }
+              const newSink = sinksOptions?.find?.(
+                (sink) => sink?.node?.id === key
+              )
+
+              if (!newSink?.node) {
+                return
+              }
+              update({
+                sinks: [...state.sinks, newSink.node],
+              })
+            }}
+          >
+            {isEmpty(sinksOptions) ? (
+              <ListBoxItem
+                label={
+                  sinksQ ? 'No sinks match your query' : 'No sinks available'
+                }
+              />
+            ) : (
+              sinksOptions?.map((sink) => (
+                <ListBoxItem
+                  key={sink?.node?.id}
+                  textValue={sink?.node?.name || ''}
+                  css={{
+                    '.center-content': {
+                      maxWidth: '100%',
+                      overflow: 'hidden',
+                    },
+                  }}
+                  label={
+                    <div
+                      css={{
+                        display: 'flex',
+                        gap: theme.spacing.medium,
+                        alignItems: 'center',
+                        overflow: 'hidden',
+                        width: '100%',
+                      }}
+                    >
+                      <div
+                        css={{
+                          flexShrink: 0,
+                          minWidth: 140,
+                        }}
+                      >
+                        {sink?.node?.name || ''}{' '}
+                      </div>
+                      <SinkInfo sink={sink?.node} />
+                    </div>
+                  }
+                />
+              ))
+            )}
+          </ComboBox>
+        </FormField>
+        {error && <GqlError error={error} />}
       </div>
     </ModalAlt>
+  )
+}
+
+function RouterSinksTable({
+  sinks,
+  setSinks,
+}: {
+  sinks: NotificationSinkFragment[]
+  setSinks: (sinks: NotificationSinkFragment[]) => void
+}) {
+  const sinkEdges = sinks?.map((sink) => ({ node: sink }))
+
+  const removeSink = useCallback(
+    (sinkId: string) => {
+      setSinks(sinks.filter((sink) => sink.id !== sinkId))
+    },
+    [setSinks, sinks]
+  )
+
+  return (
+    <Table
+      columns={sinkEditColumns}
+      data={sinkEdges || []}
+      reactTableOptions={{ meta: { removeSink } }}
+      emptyStateProps={{ message: 'No sinks assigned yet' }}
+      css={{
+        maxHeight: 'unset',
+        height: '100%',
+      }}
+    />
   )
 }
 

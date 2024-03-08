@@ -26,15 +26,19 @@ fragment NotificationSink on NotificationSink {
 fragment NotificationFilter on NotificationFilter {
   id
   cluster {
-    ...Cluster
+    id
+    name
   }
   pipeline {
-    ...Pipeline
+    id
+    name
   }
   regex
-  service {
-    ...Service
-  }
+  # service {
+  #   metadata {
+  #     name
+  #   }
+  # }
 }
 
 fragment NotificationRouter on NotificationRouter {
