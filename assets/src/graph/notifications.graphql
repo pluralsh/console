@@ -34,11 +34,11 @@ fragment NotificationFilter on NotificationFilter {
     name
   }
   regex
-  # service {
-  #   metadata {
-  #     name
-  #   }
-  # }
+  service {
+    metadata {
+      name
+    }
+  }
 }
 
 fragment NotificationRouter on NotificationRouter {
