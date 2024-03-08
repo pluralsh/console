@@ -157,6 +157,32 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - notificationrouters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - notificationrouters/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - notificationrouters/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - notificationsinks
   verbs:
   - create

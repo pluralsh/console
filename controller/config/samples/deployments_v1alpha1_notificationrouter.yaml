@@ -1,0 +1,14 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: NotificationRouter
+metadata:
+  labels:
+    app.kubernetes.io/name: notificationrouter
+    app.kubernetes.io/instance: notificationrouter-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: notificationrouter-sample
+spec:
+  name: test
+
+
