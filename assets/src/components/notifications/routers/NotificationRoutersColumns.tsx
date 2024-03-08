@@ -61,11 +61,8 @@ const ColFilters = columnHelper.accessor(
             if (f?.regex) {
               ret.push(`regex: ${f.regex}`)
             }
-            if ((f as { service?: ServiceFragment })?.service?.metadata?.name) {
-              ret.push(
-                `service: ${(f as { service?: ServiceFragment }).service
-                  ?.metadata?.name}`
-              )
+            if (f?.service?.metadata?.name) {
+              ret.push(`service: ${f.service?.metadata?.name}`)
             }
             if (f?.pipeline?.name) {
               ret.push(`pipeline: ${f.pipeline.name}`)

@@ -83,6 +83,7 @@ export default function NotificationRouters() {
     variables: {
       first: QUERY_PAGE_SIZE,
     },
+    errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
     notifyOnNetworkStatusChange: true,
@@ -120,7 +121,7 @@ export default function NotificationRouters() {
 
   useSetPageHeaderContent(useMemo(() => <CreateRouterButton />, []))
 
-  if (error) {
+  if (error && !data?.notificationRouters) {
     return <GqlError error={error} />
   }
   if (!data) {
