@@ -6,7 +6,9 @@ import { useEffect, useMemo } from 'react'
 import { isEmpty } from 'lodash'
 
 import {
+  CONFIGURATION_REL_PATH,
   SERVICES_REL_PATH,
+  STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
 } from '../../routes/kubernetesRoutesConsts'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
@@ -21,8 +23,12 @@ import { mapExistingNodes } from '../../utils/graphql'
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
   { path: SERVICES_REL_PATH, label: 'Services' },
-  { path: 'config', label: 'Config and Storage' },
-  { path: 'cluster', label: 'Cluster' },
+  { path: STORAGE_REL_PATH, label: 'Storage' },
+  { path: CONFIGURATION_REL_PATH, label: 'Configuration' },
+  // namespaces
+  // crs
+  // events
+  // ...
 ] as const
 
 export default function Kubernetes() {

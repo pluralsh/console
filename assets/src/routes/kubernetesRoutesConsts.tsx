@@ -3,3 +3,5 @@ export const KUBERNETES_ABS_PATH = `/kubernetes/${KUBERNETES_OPTIONAL_PARAM_CLUS
 
 export const WORKLOADS_REL_PATH = 'workloads'
 export const SERVICES_REL_PATH = 'services'
+export const STORAGE_REL_PATH = 'storage'
+export const CONFIGURATION_REL_PATH = 'configuration'

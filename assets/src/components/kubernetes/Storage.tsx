@@ -1,6 +1,6 @@
 import { useTheme } from 'styled-components'
 
-export default function Services() {
+export default function Storage() {
   const theme = useTheme()
 
   return (
@@ -12,7 +12,7 @@ export default function Services() {
         height: '100%',
       }}
     >
-      services ingresses
+      pvc pv storageclasses
     </div>
   )
 }

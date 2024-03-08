@@ -12,7 +12,8 @@ export default function Workloads() {
         height: '100%',
       }}
     >
-      workloads
+      deployments replicasets pods jobs cronjobs statefulsets daemonsets
+      replicationcontrollers
     </div>
   )
 }
