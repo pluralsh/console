@@ -1,6 +1,44 @@
 defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
   use Console.DataCase, async: true
 
+  describe "cluster" do
+    test "it can fetch namespace constraint statistics for a cluster" do
+      cluster = insert(:cluster)
+      con1 = insert(:policy_constraint, cluster: cluster)
+      insert_list(2, :constraint_violation, constraint: con1, namespace: "test")
+
+      {:ok, %{data: %{"cluster" => %{"violationStatistics" => [res]}}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            violationStatistics(field: NAMESPACE) { value count violations }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert res["value"] == "test"
+      assert res["count"] == 1
+      assert res["violations"] == 2
+    end
+
+    test "it can fetch namespace kind statistics for a cluster" do
+      cluster = insert(:cluster)
+      con1 = insert(:policy_constraint, cluster: cluster)
+      insert_list(2, :constraint_violation, constraint: con1, kind: "Service")
+
+      {:ok, %{data: %{"cluster" => %{"violationStatistics" => [res]}}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            violationStatistics(field: KIND) { value count violations }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert res["value"] == "Service"
+      assert res["count"] == 1
+      assert res["violations"] == 2
+    end
+  end
+
   describe "policyConstraint" do
     test "admins can query a policy constraint by id" do
       constraint = insert(:policy_constraint)

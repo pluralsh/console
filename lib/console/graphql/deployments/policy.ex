@@ -2,6 +2,11 @@ defmodule Console.GraphQl.Deployments.Policy do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Deployments
 
+  enum :constraint_violation_field do
+    value :namespace
+    value :kind
+  end
+
   @desc "inputs to add constraint data from an OPA gatekeeper constraint CRD"
   input_object :policy_constraint_attributes do
     field :name,            non_null(:string)
@@ -14,7 +19,7 @@ defmodule Console.GraphQl.Deployments.Policy do
 
   input_object :constraint_ref_attributes do
     field :kind, non_null(:string)
-    field :name,  non_null(:string)
+    field :name, non_null(:string)
   end
 
   input_object :violation_attributes do
@@ -47,7 +52,14 @@ defmodule Console.GraphQl.Deployments.Policy do
 
   object :constraint_ref do
     field :kind, non_null(:string)
-    field :name,  non_null(:string)
+    field :name, non_null(:string)
+  end
+
+  @desc "A summary of statistics for violations w/in a specific column"
+  object :violation_statistic do
+    field :value,      non_null(:string), description: "the value of this field being aggregated"
+    field :violations, :integer, description: "the total number of violations found"
+    field :count,      :integer, description: "the total number of policy constraints"
   end
 
   @desc "A violation of a given OPA Gatekeeper constraint"

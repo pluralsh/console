@@ -11,7 +11,25 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
   def list_policy_constraints(cluster, args, _) do
     PolicyConstraint.for_cluster(cluster.id)
     |> PolicyConstraint.ordered()
+    |> maybe_search(PolicyConstraint, args)
+    |> apply_filters(args)
     |> paginate(args)
+  end
+
+  defp apply_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:namespace, ns}, q -> PolicyConstraint.for_namespace(q, ns)
+      {:kind, k}, q -> PolicyConstraint.for_kind(q, k)
+      _, q -> q
+    end)
+  end
+
+  def violation_statistics(cluster, %{field: f}, _) do
+    PolicyConstraint.for_cluster(cluster.id)
+    |> PolicyConstraint.statistics(f)
+    |> Console.Repo.all()
+    |> IO.inspect()
+    |> ok()
   end
 
   def fetch_constraint(%{ref: %{name: name, kind: kind}, cluster_id: cluster_id}, _, _) do
