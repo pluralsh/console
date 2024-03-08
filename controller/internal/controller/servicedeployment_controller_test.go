@@ -254,11 +254,12 @@ var _ = Describe("Merge Helm Values", Ordered, func() {
 		const (
 			secretName    = "test"
 			namespace     = "default"
-			secretContent = `dashboard:
-  enabled: true
-postgres:
-  parameters:
-    max_connections: 202`
+			secretContent = `console:
+  dashboard:
+    enabled: true
+  postgres:
+    parameters:
+      max_connections: 202`
 		)
 
 		BeforeAll(func() {
@@ -276,7 +277,7 @@ postgres:
 						Namespace: namespace,
 					},
 					Data: map[string][]byte{
-						"console": []byte(secretContent),
+						"values.yaml": []byte(secretContent),
 					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())

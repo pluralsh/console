@@ -24,6 +24,7 @@ type ServiceKustomize struct {
 }
 
 type ServiceHelm struct {
+	// Fetches the helm values from a secret in this cluster, defaults to using the "values.yaml" key
 	// +kubebuilder:validation:Optional
 	ValuesFrom *corev1.SecretReference `json:"valuesFrom,omitempty"`
 	// +kubebuilder:validation:Optional
