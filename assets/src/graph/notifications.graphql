@@ -35,9 +35,8 @@ fragment NotificationFilter on NotificationFilter {
   }
   regex
   service {
-    metadata {
-      name
-    }
+    id
+    name
   }
 }
 
