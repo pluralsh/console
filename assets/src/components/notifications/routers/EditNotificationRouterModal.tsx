@@ -7,9 +7,14 @@ import {
   ListBoxItem,
   Table,
 } from '@pluralsh/design-system'
+import {
+  List,
+  ListItem,
+} from '@pluralsh/design-system/dist/markdoc/components/List'
+import { isEmpty, isEqual } from 'lodash'
+import { useTheme } from 'styled-components'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { useTheme } from 'styled-components'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import {
   NotificationRouterAttributes,
@@ -22,11 +27,8 @@ import {
 
 import { appendConnection, updateCache } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
+
 import ModalAlt from 'components/cd/ModalAlt'
-import { isEmpty, isEqual } from 'lodash'
-
-import { Body2P } from 'components/utils/typography/Text'
-
 import { GqlError } from 'components/utils/Alert'
 
 import { SinkInfo, sinkEditColumns } from '../sinks/NotificationSinksColumns'
@@ -216,21 +218,11 @@ function UpsertNotificationRouterModal({
           </FormField>
         )}
         <FormField label="Events">
-          <ul
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.xxsmall,
-              color: theme.colors['text-light'],
-              ...theme.partials.reset.list,
-            }}
-          >
+          <List>
             {events.map((event) => (
-              <li css={{ ...theme.partials.reset.li }}>
-                <Body2P>{event}</Body2P>
-              </li>
+              <ListItem>{event}</ListItem>
             ))}
-          </ul>
+          </List>
         </FormField>
         <RouterSinksTable
           sinks={state.sinks || []}
