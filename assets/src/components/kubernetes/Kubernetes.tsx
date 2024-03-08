@@ -15,7 +15,6 @@ import {
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 import { Directory, SideNavEntries } from '../layout/SideNavEntries'
-import { ResponsiveLayoutContentContainer } from '../utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
 import {
   ClusterTinyFragment,
@@ -92,9 +91,9 @@ export default function Kubernetes() {
             label="Select cluster"
             clusters={clusters}
             selectedKey={clusterId}
-            onSelectionChange={(id) => {
-              navigate(`/kubernetes/${id}`)
-            }}
+            onSelectionChange={(id) =>
+              navigate(getKubernetesAbsPath(id as string))
+            }
             withoutTitleContent
           />
           <SideNavEntries
@@ -104,12 +103,20 @@ export default function Kubernetes() {
           />
         </div>
       </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutContentContainer
-        role="main"
-        width="100%"
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+          flexShrink: 1,
+          height: '100%',
+          width: '100%',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+        }}
       >
         <Outlet context={context} />
-      </ResponsiveLayoutContentContainer>
+      </div>
       <ResponsiveLayoutSidecarContainer />
     </ResponsiveLayoutPage>
   )
