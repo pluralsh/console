@@ -10,6 +10,7 @@ import {
   SERVICES_REL_PATH,
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
+  getKubernetesAbsPath,
 } from '../../routes/kubernetesRoutesConsts'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
@@ -44,7 +45,7 @@ export default function Kubernetes() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { clusterId } = useParams()
-  const pathPrefix = clusterId ? `/kubernetes/${clusterId}` : `/kubernetes`
+  const pathPrefix = getKubernetesAbsPath(clusterId)
 
   const { data } = useClustersTinyQuery({
     pollInterval: 120_000,
@@ -68,7 +69,7 @@ export default function Kubernetes() {
       const mgmtCluster = clusters.find(({ self }) => !!self)
 
       if (mgmtCluster) {
-        navigate(`/kubernetes/${mgmtCluster.id}`)
+        navigate(getKubernetesAbsPath(mgmtCluster.id))
       }
     }
   }, [cluster, clusters, navigate])
