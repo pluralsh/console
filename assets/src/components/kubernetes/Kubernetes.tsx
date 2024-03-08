@@ -95,7 +95,7 @@ export default function Kubernetes() {
         role="main"
         width="100%"
       >
-        <Outlet />
+        <Outlet context={{ cluster }} />
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer />
     </ResponsiveLayoutPage>
