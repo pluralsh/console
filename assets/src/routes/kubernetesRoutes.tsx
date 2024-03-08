@@ -2,8 +2,8 @@ import { Navigate, Route } from 'react-router-dom'
 
 import Kubernetes from '../components/kubernetes/Kubernetes'
 import Workloads from '../components/kubernetes/workloads/Workloads'
+import ServicesAndIngresses from '../components/kubernetes/services/ServicesAndIngresses'
 import Services from '../components/kubernetes/services/Services'
-import Services2 from '../components/kubernetes/services/Services2'
 import Storage from '../components/kubernetes/storage/Storage'
 import Configuration from '../components/kubernetes/configuration/Configuration'
 import Deployments from '../components/kubernetes/workloads/Deployments'
@@ -14,13 +14,10 @@ import DaemonSets from '../components/kubernetes/workloads/DaemonSets'
 import Jobs from '../components/kubernetes/workloads/Jobs'
 import CronJobs from '../components/kubernetes/workloads/CronJobs'
 import ReplicationControllers from '../components/kubernetes/workloads/ReplicationControllers'
-
 import Ingresses from '../components/kubernetes/services/Ingresses'
-
 import PersistentVolumeClaims from '../components/kubernetes/storage/PersistentVolumeClaims'
 import PersistentVolumes from '../components/kubernetes/storage/PersistentVolumes'
 import StorageClasses from '../components/kubernetes/storage/StorageClasses'
-
 import ConfigMaps from '../components/kubernetes/configuration/ConfigMaps'
 import Secrets from '../components/kubernetes/configuration/Secrets'
 
@@ -39,6 +36,7 @@ import {
   REPLICATION_CONTROLLERS_REL_PATH,
   REPLICA_SETS_REL_PATH,
   SECRETS_REL_PATH,
+  SERVICES_AND_INGRESSES_REL_PATH,
   SERVICES_REL_PATH,
   STATEFUL_SETS_REL_PATH,
   STORAGE_CLASSES_REL_PATH,
@@ -107,8 +105,8 @@ export const kubernetesRoutes = [
       />
     </Route>
     <Route
-      path={SERVICES_REL_PATH}
-      element={<Services />}
+      path={SERVICES_AND_INGRESSES_REL_PATH}
+      element={<ServicesAndIngresses />}
     >
       <Route
         index
@@ -121,7 +119,7 @@ export const kubernetesRoutes = [
       />
       <Route
         path={SERVICES_REL_PATH}
-        element={<Services2 />}
+        element={<Services />}
       />
       <Route
         path={INGRESSES_REL_PATH}

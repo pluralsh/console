@@ -7,7 +7,7 @@ import { isEmpty } from 'lodash'
 
 import {
   CONFIGURATION_REL_PATH,
-  SERVICES_REL_PATH,
+  SERVICES_AND_INGRESSES_REL_PATH,
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
   getKubernetesAbsPath,
@@ -30,13 +30,10 @@ export type KubernetesContext = {
 
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
-  { path: SERVICES_REL_PATH, label: 'Services' },
+  { path: SERVICES_AND_INGRESSES_REL_PATH, label: 'Services and ingresses' },
   { path: STORAGE_REL_PATH, label: 'Storage' },
   { path: CONFIGURATION_REL_PATH, label: 'Configuration' },
-  // namespaces
-  // crs
-  // events
-  // ...
+  // namespaces, crs, events etc.
 ] as const
 
 export default function Kubernetes() {
@@ -88,7 +85,6 @@ export default function Kubernetes() {
           }}
         >
           <ClusterSelect
-            label="Select cluster"
             clusters={clusters}
             selectedKey={clusterId}
             onSelectionChange={(id) =>

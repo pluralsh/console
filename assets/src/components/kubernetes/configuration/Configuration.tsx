@@ -73,7 +73,7 @@ export default function Configuration() {
         },
         {
           label: 'configuration',
-          url: `${getKubernetesAbsPath(cluster?.id)}/${CONFIGURATION_REL_PATH}`,
+          url: getConfigurationAbsPath(cluster?.id),
         },
       ],
       [cluster]

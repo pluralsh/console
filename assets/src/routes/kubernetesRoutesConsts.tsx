@@ -3,7 +3,7 @@ export const KUBERNETES_ABS_PATH = getKubernetesAbsPath(
   KUBERNETES_OPTIONAL_PARAM_CLUSTER
 )
 
-export const SERVICES_REL_PATH = 'services'
+export const SERVICES_AND_INGRESSES_REL_PATH = 'servicesandingresses'
 export const STORAGE_REL_PATH = 'storage'
 export const CONFIGURATION_REL_PATH = 'configuration'
 
@@ -17,7 +17,7 @@ export const JOBS_REL_PATH = 'jobs'
 export const CRON_JOBS_REL_PATH = 'cronjobs'
 export const REPLICATION_CONTROLLERS_REL_PATH = 'replicationcontrollers'
 
-// export const SERVICES_REL_PATH = 'services'
+export const SERVICES_REL_PATH = 'services'
 export const INGRESSES_REL_PATH = 'ingresses'
 
 export const PERSISTENT_VOLUME_CLAIMS_REL_PATH = 'persistentvolumeclaims'
@@ -35,8 +35,10 @@ export function getWorkloadsAbsPath(clusterId: string | null | undefined) {
   return `/kubernetes/${clusterId}/${WORKLOADS_REL_PATH}`
 }
 
-export function getServicesAbsPath(clusterId: string | null | undefined) {
-  return `/kubernetes/${clusterId}/${SERVICES_REL_PATH}`
+export function getServicesAndIngressesAbsPath(
+  clusterId: string | null | undefined
+) {
+  return `/kubernetes/${clusterId}/${SERVICES_AND_INGRESSES_REL_PATH}`
 }
 
 export function getStorageAbsPath(clusterId: string | null | undefined) {
