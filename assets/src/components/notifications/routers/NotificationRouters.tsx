@@ -8,7 +8,7 @@ import {
 import { useTheme } from 'styled-components'
 import { VirtualItem } from '@tanstack/react-virtual'
 
-import { usePrAutomationsQuery } from 'generated/graphql'
+import { useNotificationRoutersQuery } from 'generated/graphql'
 import { extendConnection } from 'utils/graphql'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
@@ -21,11 +21,13 @@ import {
   useSetPageHeaderContent,
 } from 'components/cd/ContinuousDeployment'
 
-import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
+import {
+  NOTIFICATIONS_BASE_CRUMBS,
+  NOTIFICATIONS_ROUTERS_ABS_PATH,
+} from 'routes/notificationsRoutesConsts'
 
-import { columns } from './PrAutomationsColumns'
-
-const DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
+import { columns } from './NotificationRoutersColumns'
+import { CreateNotificationRouterModal } from './CreateNotificationRouterModal'
 
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -35,7 +37,26 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
 
 const QUERY_PAGE_SIZE = 100
 
-export default function AutomationPr() {
+function CreateRouterButton() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        primary
+        onClick={() => setOpen(true)}
+      >
+        New router
+      </Button>
+      <CreateNotificationRouterModal
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </>
+  )
+}
+
+export default function NotificationRouters() {
   const theme = useTheme()
   const [virtualSlice, _setVirtualSlice] = useState<
     | {
@@ -48,20 +69,21 @@ export default function AutomationPr() {
   useSetBreadcrumbs(
     useMemo(
       () => [
-        ...PR_BASE_CRUMBS,
+        ...NOTIFICATIONS_BASE_CRUMBS,
         {
-          label: 'outstanding PRs',
-          url: PR_QUEUE_ABS_PATH,
+          label: 'routers',
+          url: NOTIFICATIONS_ROUTERS_ABS_PATH,
         },
       ],
       []
     )
   )
 
-  const queryResult = usePrAutomationsQuery({
+  const queryResult = useNotificationRoutersQuery({
     variables: {
       first: QUERY_PAGE_SIZE,
     },
+    errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
     notifyOnNetworkStatusChange: true,
@@ -74,12 +96,12 @@ export default function AutomationPr() {
     previousData,
   } = queryResult
   const data = currentData || previousData
-  const prAutomations = data?.prAutomations
-  const pageInfo = prAutomations?.pageInfo
+  const notificationRouters = data?.notificationRouters
+  const pageInfo = notificationRouters?.pageInfo
   const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
     pageSize: QUERY_PAGE_SIZE,
-    key: 'prAutomations',
+    key: 'notificationRouters',
     interval: POLL_INTERVAL,
   })
   const fetchNextPage = useCallback(() => {
@@ -89,28 +111,17 @@ export default function AutomationPr() {
     fetchMore({
       variables: { after: pageInfo.endCursor },
       updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(prev, fetchMoreResult.prAutomations, 'prAutomations'),
+        extendConnection(
+          prev,
+          fetchMoreResult.notificationRouters,
+          'notificationRouters'
+        ),
     })
   }, [fetchMore, pageInfo?.endCursor])
 
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <Button
-          primary
-          as="a"
-          href={DOCS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Create automation
-        </Button>
-      ),
-      []
-    )
-  )
+  useSetPageHeaderContent(useMemo(() => <CreateRouterButton />, []))
 
-  if (error) {
+  if (error && !data?.notificationRouters) {
     return <GqlError error={error} />
   }
   if (!data) {
@@ -131,7 +142,7 @@ export default function AutomationPr() {
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
           reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
-          data={data?.prAutomations?.edges || []}
+          data={data?.notificationRouters?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}

@@ -15,6 +15,7 @@ import {
   HistoryIcon,
   ListIcon,
   LogoutIcon,
+  MegaphoneIcon,
   PeopleIcon,
   PersonIcon,
   PrOpenIcon,
@@ -141,6 +142,12 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.backups),
+    },
+    {
+      text: 'Notifications',
+      icon: <MegaphoneIcon />,
+      path: '/notifications',
+      enabled: isCDEnabled,
     },
     {
       text: 'Audits',

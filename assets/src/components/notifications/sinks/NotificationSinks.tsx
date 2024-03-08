@@ -8,7 +8,7 @@ import {
 import { useTheme } from 'styled-components'
 import { VirtualItem } from '@tanstack/react-virtual'
 
-import { usePrAutomationsQuery } from 'generated/graphql'
+import { useNotificationSinksQuery } from 'generated/graphql'
 import { extendConnection } from 'utils/graphql'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
@@ -23,9 +23,8 @@ import {
 
 import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
 
-import { columns } from './PrAutomationsColumns'
-
-const DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
+import { columns } from './NotificationSinksColumns'
+import { CreateNotificationSinkModal } from './UpsertNotificationSinkModal'
 
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -58,7 +57,7 @@ export default function AutomationPr() {
     )
   )
 
-  const queryResult = usePrAutomationsQuery({
+  const queryResult = useNotificationSinksQuery({
     variables: {
       first: QUERY_PAGE_SIZE,
     },
@@ -74,12 +73,12 @@ export default function AutomationPr() {
     previousData,
   } = queryResult
   const data = currentData || previousData
-  const prAutomations = data?.prAutomations
-  const pageInfo = prAutomations?.pageInfo
+  const notificationSinks = data?.notificationSinks
+  const pageInfo = notificationSinks?.pageInfo
   const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
     pageSize: QUERY_PAGE_SIZE,
-    key: 'prAutomations',
+    key: 'notificationSinks',
     interval: POLL_INTERVAL,
   })
   const fetchNextPage = useCallback(() => {
@@ -89,26 +88,15 @@ export default function AutomationPr() {
     fetchMore({
       variables: { after: pageInfo.endCursor },
       updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(prev, fetchMoreResult.prAutomations, 'prAutomations'),
+        extendConnection(
+          prev,
+          fetchMoreResult.notificationSinks,
+          'notificationSinks'
+        ),
     })
   }, [fetchMore, pageInfo?.endCursor])
 
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <Button
-          primary
-          as="a"
-          href={DOCS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Create automation
-        </Button>
-      ),
-      []
-    )
-  )
+  useSetPageHeaderContent(useMemo(() => <CreateSinkButton />, []))
 
   if (error) {
     return <GqlError error={error} />
@@ -131,7 +119,7 @@ export default function AutomationPr() {
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
           reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
-          data={data?.prAutomations?.edges || []}
+          data={data?.notificationSinks?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}
@@ -143,5 +131,26 @@ export default function AutomationPr() {
         />
       </FullHeightTableWrap>
     </div>
+  )
+}
+
+function CreateSinkButton() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        primary
+        onClick={() => {
+          setOpen(true)
+        }}
+      >
+        New sink
+      </Button>
+      <CreateNotificationSinkModal
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </>
   )
 }
