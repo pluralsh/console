@@ -611,6 +611,16 @@ entries:
     version: 0.1.1
   controller:
   - apiVersion: v2
+    appVersion: 0.8.15
+    created: "2024-03-09T18:17:39.307224273Z"
+    description: deploys the deployment operator for plural cd
+    digest: dfc01b0e7fd9c9f3d233f8706dcb192195bdcd268d3b34cb360f9a994c6e4aeb
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.21/controller-0.0.21.tgz
+    version: 0.0.21
+  - apiVersion: v2
     appVersion: 0.8.14
     created: "2024-03-04T21:40:14.848424921Z"
     description: deploys the deployment operator for plural cd
@@ -854,4 +864,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/velero-s3-proxy-chart-v0.1.0/velero-s3-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2024-03-04T21:40:14.848855861Z"
+generated: "2024-03-09T18:17:39.307465273Z"
