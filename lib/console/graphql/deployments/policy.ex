@@ -78,6 +78,22 @@ defmodule Console.GraphQl.Deployments.Policy do
   connection node_type: :policy_constraint
 
   object :policy_queries do
+    connection field :policy_constraints, node_type: :policy_constraint do
+      middleware Authenticated
+      arg :kind,      :string
+      arg :namespace, :string
+      arg :q,         :string
+
+      resolve &Deployments.list_policy_constraints/2
+    end
+
+    field :violation_statistics, list_of(:violation_statistic) do
+      middleware Authenticated
+      arg :field, non_null(:constraint_violation_field)
+
+      resolve &Deployments.violation_statistics/2
+    end
+
     field :policy_constraint, :policy_constraint do
       middleware Authenticated
       arg :id, non_null(:id)

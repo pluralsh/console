@@ -16,6 +16,7 @@ defmodule Console.Schema.PolicyConstraint do
     has_many :violations, ConstraintViolation,
       on_replace: :delete,
       foreign_key: :constraint_id
+
     belongs_to :cluster, Cluster
 
     timestamps()
@@ -23,6 +24,19 @@ defmodule Console.Schema.PolicyConstraint do
 
   def without_names(query \\ __MODULE__, names) do
     from(p in query, where: p.name not in ^names)
+  end
+
+  def for_user(query \\ __MODULE__, user) do
+    clusters = Cluster.for_user(user)
+    from(p in query,
+      join: c in subquery(clusters),
+        as: :clusters,
+        on: c.id == p.cluster_id
+    )
+  end
+
+  def globally_ordered(query \\ __MODULE__) do
+    from([p, clusters: c] in query, order_by: [asc: c.name, asc: p.name])
   end
 
   def for_cluster(query \\ __MODULE__, cluster_id) do

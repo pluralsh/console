@@ -8,6 +8,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     |> allow(user, :read)
   end
 
+  def list_policy_constraints(args, %{context: %{current_user: user}}) do
+    PolicyConstraint.for_user(user)
+    |> PolicyConstraint.globally_ordered()
+    |> maybe_search(PolicyConstraint, args)
+    |> apply_filters(args)
+    |> paginate(args)
+  end
+
   def list_policy_constraints(cluster, args, _) do
     PolicyConstraint.for_cluster(cluster.id)
     |> PolicyConstraint.ordered()
@@ -22,6 +30,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
       {:kind, k}, q -> PolicyConstraint.for_kind(q, k)
       _, q -> q
     end)
+  end
+
+  def violation_statistics(%{field: f}, %{context: %{current_user: user}}) do
+    PolicyConstraint.for_user(user)
+    |> PolicyConstraint.statistics(f)
+    |> Console.Repo.all()
+    |> ok()
   end
 
   def violation_statistics(cluster, %{field: f}, _) do

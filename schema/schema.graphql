@@ -318,6 +318,10 @@ type RootQueryType {
 
   notificationRouters(after: String, first: Int, before: String, last: Int, q: String): NotificationRouterConnection
 
+  policyConstraints(after: String, first: Int, before: String, last: Int, kind: String, namespace: String, q: String): PolicyConstraintConnection
+
+  violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
+
   policyConstraint(id: ID!): PolicyConstraint
 
   deploymentSettings: DeploymentSettings

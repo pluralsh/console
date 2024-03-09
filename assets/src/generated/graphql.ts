@@ -4349,6 +4349,7 @@ export type RootQueryType = {
   pod?: Maybe<Pod>;
   pods?: Maybe<PodConnection>;
   policyConstraint?: Maybe<PolicyConstraint>;
+  policyConstraints?: Maybe<PolicyConstraintConnection>;
   postgresDatabase?: Maybe<Postgresql>;
   postgresDatabases?: Maybe<Array<Maybe<Postgresql>>>;
   prAutomation?: Maybe<PrAutomation>;
@@ -4394,6 +4395,7 @@ export type RootQueryType = {
   upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
   user?: Maybe<User>;
   users?: Maybe<UserConnection>;
+  violationStatistics?: Maybe<Array<Maybe<ViolationStatistic>>>;
   webhooks?: Maybe<WebhookConnection>;
   wireguardPeer?: Maybe<WireguardPeer>;
   wireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
@@ -4874,6 +4876,17 @@ export type RootQueryTypePolicyConstraintArgs = {
 };
 
 
+export type RootQueryTypePolicyConstraintsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  kind?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypePostgresDatabaseArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -5120,6 +5133,11 @@ export type RootQueryTypeUsersArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeViolationStatisticsArgs = {
+  field: ConstraintViolationField;
 };
 
 
