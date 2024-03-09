@@ -141,7 +141,7 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 	if len(router.Spec.Filters) > 0 {
 		attr.Filters = []*console.RouterFilterAttributes{}
 	}
-	if len(router.Spec.RouterSinks) > 0 {
+	if len(router.Spec.Sinks) > 0 {
 		attr.RouterSinks = []*console.RouterSinkAttributes{}
 	}
 	for _, filter := range router.Spec.Filters {
@@ -164,8 +164,17 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 			PipelineID: pipelineID,
 		})
 	}
-	for _, sink := range router.Spec.RouterSinks {
-		attr.RouterSinks = append(attr.RouterSinks, &console.RouterSinkAttributes{SinkID: sink})
+	for _, sink := range router.Spec.Sinks {
+		notifSink, err := utils.GetNotificationSink(ctx, r.Client, &sink)
+		if err != nil {
+			return nil, err
+		}
+
+		if notifSink.Status.ID == nil {
+			return nil, fmt.Errorf("sink %s has not been reconciled", sink.Name)
+		}
+
+		attr.RouterSinks = append(attr.RouterSinks, &console.RouterSinkAttributes{SinkID: *notifSink.Status.ID})
 	}
 
 	return attr, nil

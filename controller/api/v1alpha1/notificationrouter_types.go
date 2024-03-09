@@ -35,9 +35,9 @@ type NotificationRouterSpec struct {
 	// +kubebuilder:validation:Optional
 	Filters []RouterFilters `json:"filters,omitempty"`
 
-	// RouterSinks sinks to deliver notifications to
+	// Sinks notification sinks to deliver notifications to
 	// +kubebuilder:validation:Optional
-	RouterSinks []string `json:"routerSinks,omitempty"`
+	Sinks []corev1.ObjectReference `json:"sinks,omitempty"`
 }
 
 type RouterFilters struct {
