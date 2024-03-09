@@ -1106,9 +1106,9 @@ func (in *NotificationRouterSpec) DeepCopyInto(out *NotificationRouterSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	if in.RouterSinks != nil {
-		in, out := &in.RouterSinks, &out.RouterSinks
-		*out = make([]string, len(*in))
+	if in.Sinks != nil {
+		in, out := &in.Sinks, &out.Sinks
+		*out = make([]v1.ObjectReference, len(*in))
 		copy(*out, *in)
 	}
 }
