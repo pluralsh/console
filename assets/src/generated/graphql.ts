@@ -654,6 +654,8 @@ export type Cluster = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** desired k8s version for the cluster */
   version?: Maybe<Scalars['String']['output']>;
+  /** Computes a list of statistics for OPA constraint violations w/in this cluster */
+  violationStatistics?: Maybe<Array<Maybe<ViolationStatistic>>>;
   /** write policy for this cluster */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
@@ -664,7 +666,10 @@ export type ClusterPolicyConstraintsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  kind?: InputMaybe<Scalars['String']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -674,6 +679,12 @@ export type ClusterRevisionsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterViolationStatisticsArgs = {
+  field: ConstraintViolationField;
 };
 
 /** A common kubernetes cluster add-on like cert-manager, istio, etc */
@@ -1124,6 +1135,11 @@ export type ConstraintRefAttributes = {
   kind: Scalars['String']['input'];
   name: Scalars['String']['input'];
 };
+
+export enum ConstraintViolationField {
+  Kind = 'KIND',
+  Namespace = 'NAMESPACE'
+}
 
 export type Container = {
   __typename?: 'Container';
@@ -4333,6 +4349,7 @@ export type RootQueryType = {
   pod?: Maybe<Pod>;
   pods?: Maybe<PodConnection>;
   policyConstraint?: Maybe<PolicyConstraint>;
+  policyConstraints?: Maybe<PolicyConstraintConnection>;
   postgresDatabase?: Maybe<Postgresql>;
   postgresDatabases?: Maybe<Array<Maybe<Postgresql>>>;
   prAutomation?: Maybe<PrAutomation>;
@@ -4378,6 +4395,7 @@ export type RootQueryType = {
   upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
   user?: Maybe<User>;
   users?: Maybe<UserConnection>;
+  violationStatistics?: Maybe<Array<Maybe<ViolationStatistic>>>;
   webhooks?: Maybe<WebhookConnection>;
   wireguardPeer?: Maybe<WireguardPeer>;
   wireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
@@ -4858,6 +4876,17 @@ export type RootQueryTypePolicyConstraintArgs = {
 };
 
 
+export type RootQueryTypePolicyConstraintsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  kind?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypePostgresDatabaseArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -5104,6 +5133,11 @@ export type RootQueryTypeUsersArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeViolationStatisticsArgs = {
+  field: ConstraintViolationField;
 };
 
 
@@ -6041,6 +6075,17 @@ export type ViolationAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   namespace?: InputMaybe<Scalars['String']['input']>;
   version?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** A summary of statistics for violations w/in a specific column */
+export type ViolationStatistic = {
+  __typename?: 'ViolationStatistic';
+  /** the total number of policy constraints */
+  count?: Maybe<Scalars['Int']['output']>;
+  /** the value of this field being aggregated */
+  value: Scalars['String']['output'];
+  /** the total number of violations found */
+  violations?: Maybe<Scalars['Int']['output']>;
 };
 
 export type WaitingState = {

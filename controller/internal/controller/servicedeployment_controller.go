@@ -363,11 +363,12 @@ func (r *ServiceReconciler) MergeHelmValues(ctx context.Context, secretRef *core
 			return nil, err
 		}
 
-		// TODO: allow users to specify this key in another CRD field.
-		if vals, ok := valuesFromSecret.Data["values.yaml"]; ok {
-			if err := yaml.Unmarshal(vals, &valuesFromMap); err != nil {
-				return nil, err
+		for _, vals := range valuesFromSecret.Data {
+			current := map[string]interface{}{}
+			if err := yaml.Unmarshal(vals, &current); err != nil {
+				continue
 			}
+			valuesFromMap = algorithms.Merge(valuesFromMap, current)
 		}
 	}
 
