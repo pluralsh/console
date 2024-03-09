@@ -289,9 +289,9 @@ spec:
                       type: string
                     type: array
                   valuesFrom:
-                    description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
+                    description: Fetches the helm values from a secret in this cluster,
+                      will consider any key with yaml data a values file and merge
+                      them iteratively
                     properties:
                       name:
                         description: name is unique within a namespace to reference

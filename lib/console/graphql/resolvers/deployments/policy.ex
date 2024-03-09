@@ -28,7 +28,6 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     PolicyConstraint.for_cluster(cluster.id)
     |> PolicyConstraint.statistics(f)
     |> Console.Repo.all()
-    |> IO.inspect()
     |> ok()
   end
 
