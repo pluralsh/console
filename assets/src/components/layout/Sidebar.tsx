@@ -84,15 +84,6 @@ function getMenuItems({
       ignoreRegexp: /^\/cd\/settings.*$/,
     },
     {
-      text: 'Deployment Settings',
-      icon: <GearTrainIcon />,
-      path: `${CD_ABS_PATH}/settings`,
-      pathRegexp: /^\/cd\/settings.*$/,
-      enabled:
-        isCDEnabled &&
-        !!(personaConfig?.all || personaConfig?.sidebar?.settings),
-    },
-    {
       text: 'Builds',
       icon: <BuildIcon />,
       plural: true,
@@ -148,6 +139,15 @@ function getMenuItems({
       icon: <MegaphoneIcon />,
       path: '/notifications',
       enabled: isCDEnabled,
+    },
+    {
+      text: 'Deployment Settings',
+      icon: <GearTrainIcon />,
+      path: `${CD_ABS_PATH}/settings`,
+      pathRegexp: /^\/cd\/settings.*$/,
+      enabled:
+        isCDEnabled &&
+        !!(personaConfig?.all || personaConfig?.sidebar?.settings),
     },
     {
       text: 'Audits',
