@@ -7340,6 +7340,7 @@ export type DeleteNotificationSinkMutationVariables = Exact<{
 export type DeleteNotificationSinkMutation = { __typename?: 'RootMutationType', deleteNotificationSink?: { __typename?: 'NotificationSink', id: string, name: string, type: SinkType, insertedAt?: string | null, updatedAt?: string | null, configuration: { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null } } | null };
 
 export type NotificationSinksQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -14432,8 +14433,8 @@ export type DeleteNotificationSinkMutationHookResult = ReturnType<typeof useDele
 export type DeleteNotificationSinkMutationResult = Apollo.MutationResult<DeleteNotificationSinkMutation>;
 export type DeleteNotificationSinkMutationOptions = Apollo.BaseMutationOptions<DeleteNotificationSinkMutation, DeleteNotificationSinkMutationVariables>;
 export const NotificationSinksDocument = gql`
-    query NotificationSinks($first: Int = 100, $after: String) {
-  notificationSinks(first: $first, after: $after) {
+    query NotificationSinks($q: String, $first: Int = 100, $after: String) {
+  notificationSinks(q: $q, first: $first, after: $after) {
     pageInfo {
       ...PageInfo
     }
@@ -14459,6 +14460,7 @@ ${NotificationSinkFragmentDoc}`;
  * @example
  * const { data, loading, error } = useNotificationSinksQuery({
  *   variables: {
+ *      q: // value for 'q'
  *      first: // value for 'first'
  *      after: // value for 'after'
  *   },
