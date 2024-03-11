@@ -186,7 +186,6 @@ test-base:
     CYPRESS_PASSWORD: ""
     CYPRESS_BASE_URL: ""
 
-
 dashboard:
   enabled: false
   app:
