@@ -4564,6 +4564,7 @@ type User {
   roles: UserRoles
   readTimestamp: DateTime
   buildTimestamp: DateTime
+  refreshToken: RefreshToken
   assumeBindings: [PolicyBinding]
   groups: [Group]
   personas: [Persona]

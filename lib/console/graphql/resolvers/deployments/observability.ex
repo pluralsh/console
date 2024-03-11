@@ -17,8 +17,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
 
   def service_logs(service, %{query: query} = args, _) do
     with_client(:loki, fn ->
+      service = Console.Repo.preload(service, [:cluster])
+
       {start, end_ts} = timestamps(args)
       add_label(query, %{name: "namespace", value: service.namespace})
+      |> add_label(%{name: "cluster", value: service.cluster.handle})
       |> Observability.get_logs(end_ts, start, args[:limit])
     end)
   end

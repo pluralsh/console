@@ -6031,6 +6031,7 @@ export type User = {
   pluralId?: Maybe<Scalars['String']['output']>;
   profile?: Maybe<Scalars['String']['output']>;
   readTimestamp?: Maybe<Scalars['DateTime']['output']>;
+  refreshToken?: Maybe<RefreshToken>;
   roles?: Maybe<UserRoles>;
   unreadNotifications?: Maybe<Scalars['Int']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;

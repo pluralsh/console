@@ -111,9 +111,14 @@ defmodule Console.Services.Users do
 
   @spec create_user(map) :: user_resp
   def create_user(attrs) do
-    %User{}
-    |> User.changeset(attrs)
-    |> Repo.insert()
+    start_transaction()
+    |> add_operation(:user, fn _ ->
+      %User{}
+      |> User.changeset(attrs)
+      |> Repo.insert()
+    end)
+    |> add_refresh_token()
+    |> execute(extract: :hydrated)
     |> notify(:create)
   end
 
@@ -141,7 +146,8 @@ defmodule Console.Services.Users do
       end
     end)
     |> hydrate_groups(attrs)
-    |> execute(extract: :user)
+    |> add_refresh_token()
+    |> execute(extract: :hydrated)
   end
 
   @spec create_refresh_token(User.t) :: refresh_token_resp
@@ -151,13 +157,22 @@ defmodule Console.Services.Users do
     |> Repo.insert()
   end
 
+  defp add_refresh_token(xact) do
+    add_operation(xact, :refresh, fn %{user: user} -> create_refresh_token(user) end)
+    |> add_operation(:hydrated, fn %{refresh: token, user: user} ->
+      {:ok, %{user | refresh_token: token}}
+    end)
+  end
+
   @doc """
   Determines if a user can refresh their jwt and returns the user back if so
   """
-  @spec authorize_refresh(binary, User.t) :: user_resp
-  def authorize_refresh(token, %User{id: id} = user) do
-    case get_refresh_token(token) do
-      %RefreshToken{user_id: ^id} -> {:ok, user}
+  @spec authorize_refresh(binary) :: user_resp
+  def authorize_refresh(token) do
+    get_refresh_token(token)
+    |> Repo.preload([:user])
+    |> case do
+      %RefreshToken{user: user} -> {:ok, user}
       _ -> {:error, "could not fetch refresh token"}
     end
   end
@@ -318,8 +333,8 @@ defmodule Console.Services.Users do
       get_user_by_email!(email)
       |> validate_password(password)
     end)
-    |> add_operation(:refresh, fn %{user: user} -> create_refresh_token(user) end)
-    |> execute(extract: :user)
+    |> add_refresh_token()
+    |> execute(extract: :hydrated)
   end
 
   @doc """
