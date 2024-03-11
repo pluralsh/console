@@ -17,6 +17,7 @@ export const DISCOVERY_REL_PATH = 'discovery'
 export const SERVICES_REL_PATH = 'services'
 export const INGRESSES_REL_PATH = 'ingresses'
 export const INGRESS_CLASSES_REL_PATH = 'ingressclasses'
+export const NETWORK_POLICIES_REL_PATH = 'networkpolicies'
 
 export const STORAGE_REL_PATH = 'storage'
 export const PERSISTENT_VOLUME_CLAIMS_REL_PATH = 'persistentvolumeclaims'
@@ -29,6 +30,10 @@ export const SECRETS_REL_PATH = 'secrets'
 
 export const CLUSTER_REL_PATH = 'cluster'
 export const NODES_REL_PATH = 'nodes'
+export const EVENTS_REL_PATH = 'events'
+export const NAMESPACES_REL_PATH = 'namespaces'
+
+export const CUSTOM_RESOURCES_REL_PATH = 'customresources'
 
 export function getKubernetesAbsPath(clusterId: string | null | undefined) {
   return `/kubernetes/${clusterId}`

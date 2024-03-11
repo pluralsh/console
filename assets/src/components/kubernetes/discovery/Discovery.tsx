@@ -10,6 +10,7 @@ import { Suspense, useMemo, useRef, useState } from 'react'
 import {
   INGRESSES_REL_PATH,
   INGRESS_CLASSES_REL_PATH,
+  NETWORK_POLICIES_REL_PATH,
   SERVICES_REL_PATH,
   getDiscoveryAbsPath,
   getKubernetesAbsPath,
@@ -30,6 +31,7 @@ const directory = [
   { path: SERVICES_REL_PATH, label: 'Services' },
   { path: INGRESSES_REL_PATH, label: 'Ingresses' },
   { path: INGRESS_CLASSES_REL_PATH, label: 'Ingress classes' },
+  { path: NETWORK_POLICIES_REL_PATH, label: 'Network policies' },
 ] as const
 
 export default function Discovery() {

@@ -9,6 +9,9 @@ import { Suspense, useMemo, useRef, useState } from 'react'
 
 import {
   CONFIG_MAPS_REL_PATH,
+  EVENTS_REL_PATH,
+  NAMESPACES_REL_PATH,
+  NODES_REL_PATH,
   SECRETS_REL_PATH,
   getClusterAbsPath,
   getKubernetesAbsPath,
@@ -26,8 +29,9 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { KubernetesContext } from '../Kubernetes'
 
 const directory = [
-  { path: CONFIG_MAPS_REL_PATH, label: 'Config maps' },
-  { path: SECRETS_REL_PATH, label: 'Secrets' },
+  { path: NODES_REL_PATH, label: 'Nodes' },
+  { path: EVENTS_REL_PATH, label: 'Events' },
+  { path: NAMESPACES_REL_PATH, label: 'Namespaces' },
 ] as const
 
 export default function Cluster() {

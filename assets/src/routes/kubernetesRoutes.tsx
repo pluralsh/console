@@ -23,19 +23,27 @@ import ConfigMaps from '../components/kubernetes/configuration/ConfigMaps'
 import Secrets from '../components/kubernetes/configuration/Secrets'
 import Cluster from '../components/kubernetes/cluster/Cluster'
 import Nodes from '../components/kubernetes/cluster/Nodes'
+import Events from '../components/kubernetes/cluster/Events'
+import Namespaces from '../components/kubernetes/cluster/Namespaces'
+import CustomResources from '../components/kubernetes/customresources/CustomResources'
+import NetworkPolicies from '../components/kubernetes/discovery/NetworkPolicies'
 
 import {
   CLUSTER_REL_PATH,
   CONFIGURATION_REL_PATH,
   CONFIG_MAPS_REL_PATH,
   CRON_JOBS_REL_PATH,
+  CUSTOM_RESOURCES_REL_PATH,
   DAEMON_SETS_REL_PATH,
   DEPLOYMENTS_REL_PATH,
   DISCOVERY_REL_PATH,
+  EVENTS_REL_PATH,
   INGRESSES_REL_PATH,
   INGRESS_CLASSES_REL_PATH,
   JOBS_REL_PATH,
   KUBERNETES_ABS_PATH,
+  NAMESPACES_REL_PATH,
+  NETWORK_POLICIES_REL_PATH,
   NODES_REL_PATH,
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
   PERSISTENT_VOLUME_REL_PATH,
@@ -135,6 +143,10 @@ export const kubernetesRoutes = [
         path={INGRESS_CLASSES_REL_PATH}
         element={<IngressClasses />}
       />
+      <Route
+        path={NETWORK_POLICIES_REL_PATH}
+        element={<NetworkPolicies />}
+      />
     </Route>
     <Route
       path={STORAGE_REL_PATH}
@@ -201,6 +213,18 @@ export const kubernetesRoutes = [
         path={NODES_REL_PATH}
         element={<Nodes />}
       />
+      <Route
+        path={EVENTS_REL_PATH}
+        element={<Events />}
+      />
+      <Route
+        path={NAMESPACES_REL_PATH}
+        element={<Namespaces />}
+      />
     </Route>
+    <Route
+      path={CUSTOM_RESOURCES_REL_PATH}
+      element={<CustomResources />}
+    />
   </Route>,
 ]
