@@ -109,7 +109,9 @@ export default function Kubernetes() {
     }
 
     setSearchParams(searchParams)
-  }, [namespace, searchParams, setSearchParams])
+    // We want to run it only if the namespace has changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [namespace])
 
   if (!cluster) return <LoadingIndicator />
 
