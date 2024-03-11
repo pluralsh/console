@@ -28,8 +28,18 @@ import Namespaces from '../components/kubernetes/cluster/Namespaces'
 import CustomResources from '../components/kubernetes/customresources/CustomResources'
 import NetworkPolicies from '../components/kubernetes/discovery/NetworkPolicies'
 
+import ClusterRoleBindings from '../components/kubernetes/access/ClusterRoleBindings'
+import ClusterRoles from '../components/kubernetes/access/ClusterRoles'
+import RoleBindings from '../components/kubernetes/access/RoleBindings'
+import Roles from '../components/kubernetes/access/Roles'
+
+import Access from '../components/kubernetes/access/Access'
+
 import {
+  ACCESS_REL_PATH,
   CLUSTER_REL_PATH,
+  CLUSTER_ROLES_REL_PATH,
+  CLUSTER_ROLE_BINDINGS_REL_PATH,
   CONFIGURATION_REL_PATH,
   CONFIG_MAPS_REL_PATH,
   CRON_JOBS_REL_PATH,
@@ -50,6 +60,8 @@ import {
   PODS_REL_PATH,
   REPLICATION_CONTROLLERS_REL_PATH,
   REPLICA_SETS_REL_PATH,
+  ROLES_REL_PATH,
+  ROLE_BINDINGS_REL_PATH,
   SECRETS_REL_PATH,
   SERVICES_REL_PATH,
   STATEFUL_SETS_REL_PATH,
@@ -220,6 +232,36 @@ export const kubernetesRoutes = [
       <Route
         path={NAMESPACES_REL_PATH}
         element={<Namespaces />}
+      />
+    </Route>
+    <Route
+      path={ACCESS_REL_PATH}
+      element={<Access />}
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to={ROLES_REL_PATH}
+          />
+        }
+      />
+      <Route
+        path={ROLES_REL_PATH}
+        element={<Roles />}
+      />
+      <Route
+        path={ROLE_BINDINGS_REL_PATH}
+        element={<RoleBindings />}
+      />
+      <Route
+        path={CLUSTER_ROLES_REL_PATH}
+        element={<ClusterRoles />}
+      />
+      <Route
+        path={CLUSTER_ROLE_BINDINGS_REL_PATH}
+        element={<ClusterRoleBindings />}
       />
     </Route>
     <Route

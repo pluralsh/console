@@ -11,6 +11,7 @@ import { isEmpty } from 'lodash'
 import { gql } from '@apollo/client'
 
 import {
+  ACCESS_REL_PATH,
   CLUSTER_REL_PATH,
   CONFIGURATION_REL_PATH,
   CUSTOM_RESOURCES_REL_PATH,
@@ -48,6 +49,7 @@ const directory: Directory = [
   { path: DISCOVERY_REL_PATH, label: 'Discovery' },
   { path: STORAGE_REL_PATH, label: 'Storage' },
   { path: CONFIGURATION_REL_PATH, label: 'Configuration' },
+  { path: ACCESS_REL_PATH, label: 'Access' },
   { path: CLUSTER_REL_PATH, label: 'Cluster' },
   { path: CUSTOM_RESOURCES_REL_PATH, label: 'Custom resources' },
 ] as const

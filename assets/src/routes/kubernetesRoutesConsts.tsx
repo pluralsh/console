@@ -28,6 +28,12 @@ export const CONFIGURATION_REL_PATH = 'configuration'
 export const CONFIG_MAPS_REL_PATH = 'configmaps'
 export const SECRETS_REL_PATH = 'secrets'
 
+export const ACCESS_REL_PATH = 'access'
+export const ROLES_REL_PATH = 'roles'
+export const ROLE_BINDINGS_REL_PATH = 'rolebindings'
+export const CLUSTER_ROLES_REL_PATH = 'clusterroles'
+export const CLUSTER_ROLE_BINDINGS_REL_PATH = 'clusterrolebindings'
+
 export const CLUSTER_REL_PATH = 'cluster'
 export const NODES_REL_PATH = 'nodes'
 export const EVENTS_REL_PATH = 'events'
@@ -57,4 +63,8 @@ export function getConfigurationAbsPath(clusterId: string | null | undefined) {
 
 export function getClusterAbsPath(clusterId: string | null | undefined) {
   return `/kubernetes/${clusterId}/${CLUSTER_REL_PATH}`
+}
+
+export function getAccessAbsPath(clusterId: string | null | undefined) {
+  return `/kubernetes/${clusterId}/${ACCESS_REL_PATH}`
 }
