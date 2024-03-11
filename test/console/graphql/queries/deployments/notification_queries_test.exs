@@ -27,6 +27,23 @@ defmodule Console.GraphQl.Deployments.NotificationQueriesTest do
 
       assert found["id"] == router.id
     end
+
+    test "it can sideload filters" do
+      router = insert(:notification_router)
+      filters = insert_list(3, :router_filter, router: router)
+
+      {:ok, %{data: %{"notificationRouter" => found}}} = run_query("""
+        query router($name: String!) {
+          notificationRouter(name: $name) {
+            id
+            filters { id }
+          }
+        }
+      """, %{"name" => router.name}, %{current_user: insert(:user)})
+
+      assert found["id"] == router.id
+      assert ids_equal(found["filters"], filters)
+    end
   end
 
   describe "notificationSinks" do

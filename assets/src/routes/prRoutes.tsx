@@ -8,7 +8,7 @@ import PrAutomations from 'components/pr/automations/PrAutomations'
 
 import PrScmWebhooks from 'components/pr/scm/ScmWebhooks'
 
-import { CdRoot } from './cdRoutes'
+import { RequireCdEnabled } from './cdRoutes'
 import {
   PR_AUTOMATIONS_REL_PATH,
   PR_DEFAULT_REL_PATH,
@@ -21,7 +21,7 @@ import {
 export const prRoutes = [
   {
     path: PR_REL_PATH,
-    element: <CdRoot />,
+    element: <RequireCdEnabled />,
     children: [
       {
         index: true,

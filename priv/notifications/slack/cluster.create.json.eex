@@ -3,6 +3,16 @@
     "blocks": [
         {
             "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "Cluster <%= @cluster.name %> has been added to your fleet",
+            }
+        },
+        {
+			"type": "divider"
+		},
+        {
+            "type": "section",
             "fields": [
                 {"type": "mrkdwn", "text": "*Url*\n<%= Console.url("/cd/clusters/#{@cluster.id}/services") %>"}
             ]

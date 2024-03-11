@@ -20,6 +20,7 @@
   import_types Console.GraphQl.Deployments.Pipeline
   import_types Console.GraphQl.Deployments.Backup
   import_types Console.GraphQl.Deployments.Notification
+  import_types Console.GraphQl.Deployments.Policy
 
   @desc "global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator"
   object :deployment_settings do
@@ -83,6 +84,7 @@
     import_fields :public_pipeline_queries
     import_fields :public_backup_queries
     import_fields :notification_queries
+    import_fields :policy_queries
 
     field :deployment_settings, :deployment_settings do
       middleware Authenticated
@@ -102,6 +104,7 @@
     import_fields :public_pipeline_mutations
     import_fields :public_backup_mutations
     import_fields :notification_mutations
+    import_fields :public_policy_mutations
 
     @desc "a reusable mutation for updating rbac settings on core services"
     field :update_rbac, :boolean do
