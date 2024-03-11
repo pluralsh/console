@@ -1,4 +1,10 @@
-import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
@@ -24,7 +30,7 @@ import LoadingIndicator from '../utils/LoadingIndicator'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
 
-import { ALL_NAMESPACES, NamespaceSelect } from './NamespaceSelect'
+import { NamespaceSelect } from './NamespaceSelect'
 
 export type KubernetesContext = {
   cluster?: ClusterTinyFragment
@@ -32,6 +38,8 @@ export type KubernetesContext = {
   namespace: string
   setNamespace: (string) => void
 }
+
+const NAMESPACE_PARAM = 'namespace'
 
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
@@ -58,7 +66,10 @@ export default function Kubernetes() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { clusterId } = useParams()
-  const [namespace, setNamespace] = useState(ALL_NAMESPACES) // TODO: Store in query param.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [namespace, setNamespace] = useState(
+    searchParams.get(NAMESPACE_PARAM) ?? ''
+  )
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [namespaces, setNamespaces] = useState<Array<string>>([])
   const pathPrefix = getKubernetesAbsPath(clusterId)
@@ -116,6 +127,18 @@ export default function Kubernetes() {
     }
   }, [cluster, clusters, navigate])
 
+  useEffect(() => {
+    if (isEmpty(namespace)) {
+      searchParams.delete(NAMESPACE_PARAM)
+    } else {
+      searchParams.set(NAMESPACE_PARAM, namespace)
+    }
+
+    setSearchParams(searchParams)
+    // We want to run it only if the namespace has changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [namespace])
+
   if (!cluster) return <LoadingIndicator />
 
   return (
@@ -169,8 +192,8 @@ export default function Kubernetes() {
             {headerContent}
             <NamespaceSelect
               namespaces={namespaces}
-              selectedKey={namespace}
-              onSelectionChange={setNamespace}
+              namespace={namespace}
+              onChange={setNamespace}
             />
           </div>
           <Outlet context={context} />
