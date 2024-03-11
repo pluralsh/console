@@ -142,7 +142,7 @@ monitoring:
   enabled: false
 
 dashboard:
-  enabled: true # todo disable before merge
+  enabled: false
   app:
     mode: 'api'
   api:
