@@ -7746,6 +7746,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"apollo-link-rest@npm:0.9.0":
+  version: 0.9.0
+  resolution: "apollo-link-rest@npm:0.9.0"
+  peerDependencies:
+    "@apollo/client": ">=3"
+    graphql: ">=0.11"
+    qs: ">=6"
+  checksum: 1aa2ca1311597a125dfd0ae08a8edce95e32b7e6f661a5bd980305e7c9fa0bf8d833d510407a7c93fc45a5ed85cb649d42918a4149c160d184348e43d7475abe
+  languageName: node
+  linkType: hard
+
 "apollo-link-retry@npm:2.2.16":
   version: 2.2.16
   resolution: "apollo-link-retry@npm:2.2.16"
@@ -9157,6 +9168,7 @@ __metadata:
     apollo-boost: 0.4.9
     apollo-link-context: 1.0.20
     apollo-link-error: 1.1.13
+    apollo-link-rest: 0.9.0
     apollo-link-retry: 2.2.16
     babel-plugin-styled-components: 2.1.4
     classnames: 2.3.2
