@@ -1,7 +1,7 @@
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import { useEffect, useMemo } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 
 import { isEmpty } from 'lodash'
 
@@ -15,7 +15,6 @@ import {
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 import { Directory, SideNavEntries } from '../layout/SideNavEntries'
-import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
 import {
   ClusterTinyFragment,
   useClustersTinyQuery,
@@ -24,8 +23,15 @@ import { ClusterSelect } from '../cd/addOns/ClusterSelect'
 import { mapExistingNodes } from '../../utils/graphql'
 import LoadingIndicator from '../utils/LoadingIndicator'
 
+import { PageHeaderContext } from '../cd/ContinuousDeployment'
+
+import { ALL_NAMESPACES, NamespaceSelect } from './NamespaceSelect'
+
 export type KubernetesContext = {
   cluster?: ClusterTinyFragment
+  namespaces: string[]
+  namespace: string
+  setNamespace: (string) => void
 }
 
 const directory: Directory = [
@@ -41,6 +47,8 @@ export default function Kubernetes() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { clusterId } = useParams()
+  const [namespace, setNamespace] = useState(ALL_NAMESPACES) // TODO: Store in query param.
+  const [headerContent, setHeaderContent] = useState<ReactNode>()
   const pathPrefix = getKubernetesAbsPath(clusterId)
 
   const { data } = useClustersTinyQuery({
@@ -58,7 +66,19 @@ export default function Kubernetes() {
     [clusterId, clusters]
   )
 
-  const context: KubernetesContext = useMemo(() => ({ cluster }), [cluster])
+  const namespaces = useMemo(() => ['test', 'default'], []) // TODO: Query from current cluster.
+
+  const pageHeaderContext = useMemo(
+    () => ({
+      setHeaderContent,
+    }),
+    []
+  )
+
+  const context: KubernetesContext = useMemo(
+    () => ({ cluster, namespaces, namespace, setNamespace }),
+    [cluster, namespaces, namespace, setNamespace]
+  )
 
   useEffect(() => {
     if (!isEmpty(clusters) && !cluster) {
@@ -87,8 +107,8 @@ export default function Kubernetes() {
           <ClusterSelect
             clusters={clusters}
             selectedKey={clusterId}
-            onSelectionChange={(id) =>
-              navigate(getKubernetesAbsPath(id as string))
+            onSelectionChange={
+              (id) => navigate(getKubernetesAbsPath(id as string)) // TODO: Keep current view if possible when switching clusters.
             }
             withoutTitleContent
           />
@@ -111,9 +131,25 @@ export default function Kubernetes() {
           overflowX: 'hidden',
         }}
       >
-        <Outlet context={context} />
+        <PageHeaderContext.Provider value={pageHeaderContext}>
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'row',
+              flexGrow: 1,
+              justifyContent: 'space-between',
+            }}
+          >
+            {headerContent}
+            <NamespaceSelect
+              namespaces={namespaces}
+              selectedKey={namespace}
+              onSelectionChange={setNamespace}
+            />
+          </div>
+          <Outlet context={context} />
+        </PageHeaderContext.Provider>
       </div>
-      <ResponsiveLayoutSidecarContainer />
     </ResponsiveLayoutPage>
   )
 }
