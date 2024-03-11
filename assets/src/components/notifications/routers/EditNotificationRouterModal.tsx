@@ -3,7 +3,6 @@ import {
   Button,
   ComboBox,
   FormField,
-  Input2,
   ListBoxItem,
   Table,
 } from '@pluralsh/design-system'
@@ -34,7 +33,6 @@ import { GqlError } from 'components/utils/Alert'
 import { SinkInfo, sinkEditColumns } from '../sinks/NotificationSinksColumns'
 
 type ModalBaseProps = {
-  mode: 'edit' | 'create' // TODO_KLINK: Remove when done testing
   notificationRouter?: NotificationRouterFragment
 }
 
@@ -59,55 +57,27 @@ function areIdsEqual(arr1: { id: string }[], arr2: { id: string }[]): boolean {
   return isEqual(toIdSet(arr1), toIdSet(arr2))
 }
 
-// TODO_KLINK: Remove when done testing
-const CREATE_TEST_ATTRS = {
-  name: 'test-router-',
-  events: [
-    // '*',
-    // 'service.update',
-    // 'cluster.create',
-    'pipeline.update',
-    'pr.create',
-    'pr.close',
-  ],
-  filters: [
-    {
-      regex: 'someregex',
-      clusterId: 'fba73cfd-054a-419d-8b78-35c2b59ec085',
-      pipelineId: '35a600da-01cb-4aac-bd48-8fb126600047',
-      serviceId: 'ecad5277-0d1c-45de-ab67-06a9c9c30b2f',
-    },
-  ],
-  routerSinks: [],
-} as const satisfies Partial<NotificationRouterAttributes>
-
-function UpsertNotificationRouterModal({
+function EditNotificationRouterModalBase({
   notificationRouter,
-  mode = 'edit', // TODO_KLINK: Remove when done testing
   open,
   onClose,
 }: ModalProps) {
   const theme = useTheme()
-  const router = mode === 'edit' ? notificationRouter : undefined
+  const router = notificationRouter
   const events = router?.events || []
   const [sinksQ, setSinksQ] = useState('')
 
-  const { data: sinksData, loading: sinksLoading } = useNotificationSinksQuery()
-
-  // TODO_KLINK: Remove when done testing
-  const createMutationAttrs =
-    mode === 'create'
-      ? CREATE_TEST_ATTRS
-      : ({} as const satisfies Partial<NotificationRouterAttributes>)
+  const { data: sinksData, loading: sinksLoading } = useNotificationSinksQuery({
+    variables: { q: sinksQ },
+  })
 
   const initialState = useMemo(
     () =>
       ({
         name: router?.name || '',
         sinks: router?.sinks?.filter(isNonNullable) || [],
-        ...createMutationAttrs,
       }) as const satisfies FormState,
-    [createMutationAttrs, router?.name, router?.sinks]
+    [router?.name, router?.sinks]
   )
   const { state, update, hasUpdates } = useUpdateState<FormState>(
     initialState,
@@ -187,7 +157,7 @@ function UpsertNotificationRouterModal({
             loading={loading}
             disabled={!allowSubmit}
           >
-            {mode === 'edit' ? 'Update' : 'Create'}
+            Update
           </Button>
           <Button
             secondary
@@ -206,17 +176,6 @@ function UpsertNotificationRouterModal({
           gap: theme.spacing.large,
         }}
       >
-        {mode !== 'edit' && (
-          <FormField label="name">
-            <div css={{ display: 'flex', gap: theme.spacing.xxsmall }}>
-              <Input2
-                value={state.name}
-                onChange={(e) => update({ name: e.target.value })}
-                placeholder="Name"
-              />
-            </div>
-          </FormField>
-        )}
         <FormField label="Events">
           <List>
             {events.map((event) => (
@@ -331,34 +290,12 @@ function RouterSinksTable({
   )
 }
 
-/**
- * For creating test routers only. Don't expose to users.
- */
-export function CreateNotificationRouterModal(
-  props: Omit<
-    ComponentProps<typeof UpsertNotificationRouterModal>,
-    'mode' | 'router'
-  >
-) {
-  return (
-    <ModalMountTransition open={props.open}>
-      <UpsertNotificationRouterModal
-        mode="create"
-        {...props}
-      />
-    </ModalMountTransition>
-  )
-}
-
 export function EditNotificationRouterModal(
-  props: Omit<ComponentProps<typeof UpsertNotificationRouterModal>, 'mode'>
+  props: Omit<ComponentProps<typeof EditNotificationRouterModalBase>, 'mode'>
 ) {
   return (
     <ModalMountTransition open={props.open}>
-      <UpsertNotificationRouterModal
-        mode="edit"
-        {...props}
-      />
+      <EditNotificationRouterModalBase {...props} />
     </ModalMountTransition>
   )
 }
