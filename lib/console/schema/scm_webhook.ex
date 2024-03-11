@@ -11,7 +11,7 @@ defmodule Console.Schema.ScmWebhook do
   end
 
   def url(%__MODULE__{external_id: ext_id, type: t}),
-    do: Console.url("/ext/v1/webhooks/#{t}/#{ext_id}")
+    do: Console.Deployments.Notifications.webhook_url("/v1/webhooks/#{t}/#{ext_id}")
 
   def name(%__MODULE__{id: id}), do: "plrl-#{id}"
 

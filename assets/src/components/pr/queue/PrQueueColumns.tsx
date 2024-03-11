@@ -87,11 +87,11 @@ const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
     const severity: ComponentProps<typeof Chip>['severity'] = useMemo(() => {
       switch (status) {
         case PrStatus.Open:
-          return 'success'
+          return 'info'
         case PrStatus.Closed:
           return 'danger'
         case PrStatus.Merged:
-          return 'info'
+          return 'success'
       }
     }, [status])
 

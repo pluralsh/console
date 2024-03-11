@@ -61,7 +61,7 @@ defmodule Console.GraphQl.Deployments.Notification do
   object :notification_filter do
     field :id,       non_null(:id)
     field :regex,    :string
-    field :service,  :service, resolve: dataloader(Deployments)
+    field :service,  :service_deployment, resolve: dataloader(Deployments)
     field :cluster,  :cluster, resolve: dataloader(Deployments)
     field :pipeline, :pipeline, resolve: dataloader(Deployments)
   end
@@ -99,12 +99,14 @@ defmodule Console.GraphQl.Deployments.Notification do
 
     connection field :notification_sinks, node_type: :notification_sink do
       middleware Authenticated
+      arg :q, :string
 
       resolve &Deployments.list_sinks/2
     end
 
-    connection field :notification_routers, node_type: :notification_sink do
+    connection field :notification_routers, node_type: :notification_router do
       middleware Authenticated
+      arg :q, :string
 
       resolve &Deployments.list_routers/2
     end
@@ -118,18 +120,18 @@ defmodule Console.GraphQl.Deployments.Notification do
       resolve &Deployments.upsert_sink/2
     end
 
-    field :upsert_notification_router, :notification_router do
-      middleware Authenticated
-      arg :attributes, non_null(:notification_router_attributes)
-
-      resolve &Deployments.upsert_router/2
-    end
-
     field :delete_notification_sink, :notification_sink do
       middleware Authenticated
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_sink/2
+    end
+
+    field :upsert_notification_router, :notification_router do
+      middleware Authenticated
+      arg :attributes, non_null(:notification_router_attributes)
+
+      resolve &Deployments.upsert_router/2
     end
 
     field :delete_notification_router, :notification_router do

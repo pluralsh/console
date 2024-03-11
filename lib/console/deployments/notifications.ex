@@ -19,6 +19,10 @@ defmodule Console.Deployments.Notifications do
 
   def get_sink_by_name(name), do: Repo.get_by(NotificationSink, name: name)
 
+  def webhook_url(path) do
+    Path.join([Console.conf(:webhook_url), "ext", path])
+  end
+
   @doc """
   Create or update a notification sink
   """

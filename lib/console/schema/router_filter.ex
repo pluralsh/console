@@ -22,6 +22,5 @@ defmodule Console.Schema.RouterFilter do
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:pipeline_id)
     |> foreign_key_constraint(:router_id)
-    |> validate_required(~w(cluster_id service_id pipeline_id)a)
   end
 end

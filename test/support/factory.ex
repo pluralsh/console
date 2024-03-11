@@ -459,6 +459,26 @@ defmodule Console.Factory do
     }
   end
 
+  def policy_constraint_factory do
+    %Schema.PolicyConstraint{
+      name: sequence(:constraint, & "constraint-#{&1}"),
+      cluster: build(:cluster),
+      ref: %{group: "SomeConstraint", name: "some-constraint"}
+    }
+  end
+
+  def constraint_violation_factory do
+    %Schema.ConstraintViolation{
+      constraint: build(:policy_constraint),
+      group: "networking.k8s.io",
+      version: "v1",
+      kind: "ingress",
+      namespace: "name",
+      name: "name",
+      message: "you messed up"
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

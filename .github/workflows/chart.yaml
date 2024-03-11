@@ -25,6 +25,8 @@ jobs:
         run: |
           helm repo add vmware https://vmware-tanzu.github.io/helm-charts
           helm repo add radar https://radar-base.github.io/radar-helm-charts
+          helm repo add fluxcd-community https://fluxcd-community.github.io/helm-charts
+          
       - name: Run chart-releaser
         id: release
         uses: helm/chart-releaser-action@v1.5.0

@@ -204,6 +204,7 @@ defmodule Console.Schema.Service do
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 
   @valid ~w(name protect interval docs_path component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message)a
+  @immutable ~w(cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -228,6 +229,15 @@ defmodule Console.Schema.Service do
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :namespace, :version, :cluster_id])
+  end
+
+  def update_changeset(changeset) do
+    Enum.reduce(@immutable, changeset, fn field, cs ->
+      case get_change(cs, field) do
+        nil -> cs
+        _ -> add_error(cs, field, "Field is immutable")
+      end
+    end)
   end
 
   def rollback_changeset(model, attrs \\ %{}) do

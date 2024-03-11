@@ -2,13 +2,17 @@ apiVersion: v2
 name: console
 description: >-
   deploys the plural console and additional dependencies, for use in bring-your-own-kube setups
-appVersion: 0.8.13
-version: 0.1.37
+appVersion: 0.8.17
+version: 0.1.41
 dependencies:
   - name: kas
     version: 0.0.5
     repository: file://../../plural/helm/kas
   - name: controller
-    version: 0.0.19
+    version: 0.0.22
     repository: file://../controller
+  - name: flux2
+    version: 2.11.1
+    repository: https://fluxcd-community.github.io/helm-charts
+    condition: flux2.enabled
 type: application

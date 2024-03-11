@@ -314,9 +314,15 @@ type RootQueryType {
 
   notificationRouter(name: String, id: ID): NotificationRouter
 
-  notificationSinks(after: String, first: Int, before: String, last: Int): NotificationSinkConnection
+  notificationSinks(after: String, first: Int, before: String, last: Int, q: String): NotificationSinkConnection
 
-  notificationRouters(after: String, first: Int, before: String, last: Int): NotificationSinkConnection
+  notificationRouters(after: String, first: Int, before: String, last: Int, q: String): NotificationRouterConnection
+
+  policyConstraints(after: String, first: Int, before: String, last: Int, kind: String, namespace: String, q: String): PolicyConstraintConnection
+
+  violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
+
+  policyConstraint(id: ID!): PolicyConstraint
 
   deploymentSettings: DeploymentSettings
 }
@@ -626,11 +632,13 @@ type RootMutationType {
 
   upsertNotificationSink(attributes: NotificationSinkAttributes!): NotificationSink
 
-  upsertNotificationRouter(attributes: NotificationRouterAttributes!): NotificationRouter
-
   deleteNotificationSink(id: ID!): NotificationSink
 
+  upsertNotificationRouter(attributes: NotificationRouterAttributes!): NotificationRouter
+
   deleteNotificationRouter(id: ID!): NotificationRouter
+
+  upsertPolicyConstraints(constraints: [PolicyConstraintAttributes]): Int
 
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
@@ -753,6 +761,101 @@ input RbacAttributes {
   writeBindings: [PolicyBindingAttributes]
 }
 
+enum ConstraintViolationField {
+  NAMESPACE
+  KIND
+}
+
+"inputs to add constraint data from an OPA gatekeeper constraint CRD"
+input PolicyConstraintAttributes {
+  name: String!
+
+  description: String
+
+  recommendation: String
+
+  violationCount: Int
+
+  "pointer to the group\/name for the CR"
+  ref: ConstraintRefAttributes
+
+  violations: [ViolationAttributes]
+}
+
+input ConstraintRefAttributes {
+  kind: String!
+  name: String!
+}
+
+input ViolationAttributes {
+  group: String
+  version: String
+  kind: String
+  namespace: String
+  name: String
+  message: String
+}
+
+"A OPA Gatekeeper Constraint reference"
+type PolicyConstraint {
+  id: ID!
+
+  name: String!
+
+  description: String
+
+  recommendation: String
+
+  violationCount: Int
+
+  "Fetches the live constraint object from K8s, this is an expensive query and should not be done in list endpoints"
+  object: KubernetesUnstructured
+
+  "pointer to the kubernetes resource itself"
+  ref: ConstraintRef
+
+  violations: [Violation]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type ConstraintRef {
+  kind: String!
+  name: String!
+}
+
+"A summary of statistics for violations w\/in a specific column"
+type ViolationStatistic {
+  "the value of this field being aggregated"
+  value: String!
+
+  "the total number of violations found"
+  violations: Int
+
+  "the total number of policy constraints"
+  count: Int
+}
+
+"A violation of a given OPA Gatekeeper constraint"
+type Violation {
+  id: ID!
+  group: String
+  version: String
+  kind: String
+  namespace: String
+  name: String
+  message: String
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type PolicyConstraintConnection {
+  pageInfo: PageInfo!
+  edges: [PolicyConstraintEdge]
+}
+
 enum SinkType {
   SLACK
   TEAMS
@@ -850,7 +953,7 @@ type NotificationRouter {
 type NotificationFilter {
   id: ID!
   regex: String
-  service: Service
+  service: ServiceDeployment
   cluster: Cluster
   pipeline: Pipeline
 }
@@ -870,6 +973,11 @@ type UrlSinkConfiguration {
 type NotificationSinkConnection {
   pageInfo: PageInfo!
   edges: [NotificationSinkEdge]
+}
+
+type NotificationRouterConnection {
+  pageInfo: PageInfo!
+  edges: [NotificationRouterEdge]
 }
 
 enum RestoreStatus {
@@ -2289,8 +2397,30 @@ type Cluster {
   "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
   status: ClusterStatus
 
-  "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
-  revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
+  "a relay connection of all revisions of this cluster, these are periodically pruned up to a history limit"
+  revisions(after: String, first: Int, before: String, last: Int): ClusterRevisionConnection
+
+  "lists OPA constraints registered in this cluster"
+  policyConstraints(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "only show constraints with a violation for the given namespace"
+    namespace: String
+
+    "only show constraints with a violation for the given kind"
+    kind: String
+
+    q: String
+  ): PolicyConstraintConnection
+
+  "Computes a list of statistics for OPA constraint violations w\/in this cluster"
+  violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
 
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]
@@ -2300,6 +2430,15 @@ type Cluster {
 
   insertedAt: DateTime
 
+  updatedAt: DateTime
+}
+
+"a historical revision of a cluster, including version, cloud and node group configuration"
+type ClusterRevision {
+  id: ID!
+  version: String
+  nodePools: [NodePool]
+  insertedAt: DateTime
   updatedAt: DateTime
 }
 
@@ -2548,6 +2687,11 @@ type ClusterConnection {
 type ClusterProviderConnection {
   pageInfo: PageInfo!
   edges: [ClusterProviderEdge]
+}
+
+type ClusterRevisionConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterRevisionEdge]
 }
 
 type TagConnection {
@@ -4917,6 +5061,11 @@ type TagEdge {
   cursor: String
 }
 
+type ClusterRevisionEdge {
+  node: ClusterRevision
+  cursor: String
+}
+
 type ClusterProviderEdge {
   node: ClusterProvider
   cursor: String
@@ -4967,7 +5116,17 @@ type ObjectStoreEdge {
   cursor: String
 }
 
+type NotificationRouterEdge {
+  node: NotificationRouter
+  cursor: String
+}
+
 type NotificationSinkEdge {
   node: NotificationSink
+  cursor: String
+}
+
+type PolicyConstraintEdge {
+  node: PolicyConstraint
   cursor: String
 }

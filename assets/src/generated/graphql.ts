@@ -621,6 +621,8 @@ export type Cluster = {
   objectStore?: Maybe<ObjectStore>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** lists OPA constraints registered in this cluster */
+  policyConstraints?: Maybe<PolicyConstraintConnection>;
   /** pr automations that are relevant to managing this cluster */
   prAutomations?: Maybe<Array<Maybe<PrAutomation>>>;
   /** if true, this cluster cannot be deleted */
@@ -633,8 +635,8 @@ export type Cluster = {
   repository?: Maybe<GitRepository>;
   /** the active restore for this cluster */
   restore?: Maybe<ClusterRestore>;
-  /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
-  revisions?: Maybe<RevisionConnection>;
+  /** a relay connection of all revisions of this cluster, these are periodically pruned up to a history limit */
+  revisions?: Maybe<ClusterRevisionConnection>;
   /** fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries */
   runtimeServices?: Maybe<Array<Maybe<RuntimeService>>>;
   /** whether this is the management cluster itself */
@@ -652,8 +654,22 @@ export type Cluster = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** desired k8s version for the cluster */
   version?: Maybe<Scalars['String']['output']>;
+  /** Computes a list of statistics for OPA constraint violations w/in this cluster */
+  violationStatistics?: Maybe<Array<Maybe<ViolationStatistic>>>;
   /** write policy for this cluster */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterPolicyConstraintsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  kind?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -663,6 +679,12 @@ export type ClusterRevisionsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterViolationStatisticsArgs = {
+  field: ConstraintViolationField;
 };
 
 /** A common kubernetes cluster add-on like cert-manager, istio, etc */
@@ -849,6 +871,28 @@ export type ClusterRestoreEdge = {
   __typename?: 'ClusterRestoreEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<ClusterRestore>;
+};
+
+/** a historical revision of a cluster, including version, cloud and node group configuration */
+export type ClusterRevision = {
+  __typename?: 'ClusterRevision';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  nodePools?: Maybe<Array<Maybe<NodePool>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+export type ClusterRevisionConnection = {
+  __typename?: 'ClusterRevisionConnection';
+  edges?: Maybe<Array<Maybe<ClusterRevisionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterRevisionEdge = {
+  __typename?: 'ClusterRevisionEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterRevision>;
 };
 
 export type ClusterServiceAttributes = {
@@ -1080,6 +1124,22 @@ export type ConsoleConfiguration = {
   pluralLogin?: Maybe<Scalars['Boolean']['output']>;
   vpnEnabled?: Maybe<Scalars['Boolean']['output']>;
 };
+
+export type ConstraintRef = {
+  __typename?: 'ConstraintRef';
+  kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type ConstraintRefAttributes = {
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+};
+
+export enum ConstraintViolationField {
+  Kind = 'KIND',
+  Namespace = 'NAMESPACE'
+}
 
 export type Container = {
   __typename?: 'Container';
@@ -2208,7 +2268,7 @@ export type NotificationFilter = {
   id: Scalars['ID']['output'];
   pipeline?: Maybe<Pipeline>;
   regex?: Maybe<Scalars['String']['output']>;
-  service?: Maybe<Service>;
+  service?: Maybe<ServiceDeployment>;
 };
 
 export type NotificationRouter = {
@@ -2235,6 +2295,18 @@ export type NotificationRouterAttributes = {
   name: Scalars['String']['input'];
   /** sinks to deliver notifications to */
   routerSinks?: InputMaybe<Array<InputMaybe<RouterSinkAttributes>>>;
+};
+
+export type NotificationRouterConnection = {
+  __typename?: 'NotificationRouterConnection';
+  edges?: Maybe<Array<Maybe<NotificationRouterEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type NotificationRouterEdge = {
+  __typename?: 'NotificationRouterEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<NotificationRouter>;
 };
 
 export type NotificationSink = {
@@ -2788,6 +2860,46 @@ export type PolicyBindingAttributes = {
   groupId?: InputMaybe<Scalars['ID']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
   userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** A OPA Gatekeeper Constraint reference */
+export type PolicyConstraint = {
+  __typename?: 'PolicyConstraint';
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  /** Fetches the live constraint object from K8s, this is an expensive query and should not be done in list endpoints */
+  object?: Maybe<KubernetesUnstructured>;
+  recommendation?: Maybe<Scalars['String']['output']>;
+  /** pointer to the kubernetes resource itself */
+  ref?: Maybe<ConstraintRef>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  violationCount?: Maybe<Scalars['Int']['output']>;
+  violations?: Maybe<Array<Maybe<Violation>>>;
+};
+
+/** inputs to add constraint data from an OPA gatekeeper constraint CRD */
+export type PolicyConstraintAttributes = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  recommendation?: InputMaybe<Scalars['String']['input']>;
+  /** pointer to the group/name for the CR */
+  ref?: InputMaybe<ConstraintRefAttributes>;
+  violationCount?: InputMaybe<Scalars['Int']['input']>;
+  violations?: InputMaybe<Array<InputMaybe<ViolationAttributes>>>;
+};
+
+export type PolicyConstraintConnection = {
+  __typename?: 'PolicyConstraintConnection';
+  edges?: Maybe<Array<Maybe<PolicyConstraintEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PolicyConstraintEdge = {
+  __typename?: 'PolicyConstraintEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PolicyConstraint>;
 };
 
 export type Port = {
@@ -3508,6 +3620,7 @@ export type RootMutationType = {
   updateUser?: Maybe<User>;
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
+  upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -4133,6 +4246,11 @@ export type RootMutationTypeUpsertNotificationSinkArgs = {
   attributes: NotificationSinkAttributes;
 };
 
+
+export type RootMutationTypeUpsertPolicyConstraintsArgs = {
+  constraints?: InputMaybe<Array<InputMaybe<PolicyConstraintAttributes>>>;
+};
+
 export type RootQueryType = {
   __typename?: 'RootQueryType';
   accessToken?: Maybe<AccessToken>;
@@ -4211,7 +4329,7 @@ export type RootQueryType = {
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   nodes?: Maybe<Array<Maybe<Node>>>;
   notificationRouter?: Maybe<NotificationRouter>;
-  notificationRouters?: Maybe<NotificationSinkConnection>;
+  notificationRouters?: Maybe<NotificationRouterConnection>;
   notificationSink?: Maybe<NotificationSink>;
   notificationSinks?: Maybe<NotificationSinkConnection>;
   notifications?: Maybe<NotificationConnection>;
@@ -4230,6 +4348,8 @@ export type RootQueryType = {
   pluralServiceDeployment?: Maybe<PluralServiceDeployment>;
   pod?: Maybe<Pod>;
   pods?: Maybe<PodConnection>;
+  policyConstraint?: Maybe<PolicyConstraint>;
+  policyConstraints?: Maybe<PolicyConstraintConnection>;
   postgresDatabase?: Maybe<Postgresql>;
   postgresDatabases?: Maybe<Array<Maybe<Postgresql>>>;
   prAutomation?: Maybe<PrAutomation>;
@@ -4275,6 +4395,7 @@ export type RootQueryType = {
   upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
   user?: Maybe<User>;
   users?: Maybe<UserConnection>;
+  violationStatistics?: Maybe<Array<Maybe<ViolationStatistic>>>;
   webhooks?: Maybe<WebhookConnection>;
   wireguardPeer?: Maybe<WireguardPeer>;
   wireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
@@ -4621,6 +4742,7 @@ export type RootQueryTypeNotificationRoutersArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -4635,6 +4757,7 @@ export type RootQueryTypeNotificationSinksArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -4745,6 +4868,22 @@ export type RootQueryTypePodsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   namespace?: InputMaybe<Scalars['String']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
+export type RootQueryTypePolicyConstraintArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypePolicyConstraintsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  kind?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -4994,6 +5133,11 @@ export type RootQueryTypeUsersArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeViolationStatisticsArgs = {
+  field: ConstraintViolationField;
 };
 
 
@@ -5908,6 +6052,40 @@ export type VerticalPodAutoscalerStatus = {
 export type VerticalPodAutoscalerUpdatePolicy = {
   __typename?: 'VerticalPodAutoscalerUpdatePolicy';
   updateMode?: Maybe<Scalars['String']['output']>;
+};
+
+/** A violation of a given OPA Gatekeeper constraint */
+export type Violation = {
+  __typename?: 'Violation';
+  group?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  kind?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  namespace?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+export type ViolationAttributes = {
+  group?: InputMaybe<Scalars['String']['input']>;
+  kind?: InputMaybe<Scalars['String']['input']>;
+  message?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  version?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** A summary of statistics for violations w/in a specific column */
+export type ViolationStatistic = {
+  __typename?: 'ViolationStatistic';
+  /** the total number of policy constraints */
+  count?: Maybe<Scalars['Int']['output']>;
+  /** the value of this field being aggregated */
+  value: Scalars['String']['output'];
+  /** the total number of violations found */
+  violations?: Maybe<Scalars['Int']['output']>;
 };
 
 export type WaitingState = {
@@ -7114,6 +7292,60 @@ export type UnstructuredResourceQueryVariables = Exact<{
 
 
 export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
+
+export type UrlSinkConfigurationFragment = { __typename?: 'UrlSinkConfiguration', url: string };
+
+export type SinkConfigurationFragment = { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null };
+
+export type NotificationSinkFragment = { __typename?: 'NotificationSink', id: string, name: string, type: SinkType, insertedAt?: string | null, updatedAt?: string | null, configuration: { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null } };
+
+export type NotificationFilterFragment = { __typename?: 'NotificationFilter', id: string, regex?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, pipeline?: { __typename?: 'Pipeline', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null };
+
+export type NotificationRouterFragment = { __typename?: 'NotificationRouter', id: string, name: string, events?: Array<string> | null, insertedAt?: string | null, updatedAt?: string | null, sinks?: Array<{ __typename?: 'NotificationSink', id: string, name: string, type: SinkType, insertedAt?: string | null, updatedAt?: string | null, configuration: { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null } } | null> | null, filters?: Array<{ __typename?: 'NotificationFilter', id: string, regex?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, pipeline?: { __typename?: 'Pipeline', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null };
+
+export type UpsertNotificationRouterMutationVariables = Exact<{
+  attributes: NotificationRouterAttributes;
+}>;
+
+
+export type UpsertNotificationRouterMutation = { __typename?: 'RootMutationType', upsertNotificationRouter?: { __typename?: 'NotificationRouter', id: string, name: string, events?: Array<string> | null, insertedAt?: string | null, updatedAt?: string | null, sinks?: Array<{ __typename?: 'NotificationSink', id: string, name: string, type: SinkType, insertedAt?: string | null, updatedAt?: string | null, configuration: { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null } } | null> | null, filters?: Array<{ __typename?: 'NotificationFilter', id: string, regex?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, pipeline?: { __typename?: 'Pipeline', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null } | null };
+
+export type NotificationRoutersQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type NotificationRoutersQuery = { __typename?: 'RootQueryType', notificationRouters?: { __typename?: 'NotificationRouterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'NotificationRouterEdge', node?: { __typename?: 'NotificationRouter', id: string, name: string, events?: Array<string> | null, insertedAt?: string | null, updatedAt?: string | null, sinks?: Array<{ __typename?: 'NotificationSink', id: string, name: string, type: SinkType, insertedAt?: string | null, updatedAt?: string | null, configuration: { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null } } | null> | null, filters?: Array<{ __typename?: 'NotificationFilter', id: string, regex?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, pipeline?: { __typename?: 'Pipeline', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null } | null } | null> | null } | null };
+
+export type DeleteNotificationRouterMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteNotificationRouterMutation = { __typename?: 'RootMutationType', deleteNotificationRouter?: { __typename?: 'NotificationRouter', id: string, name: string, events?: Array<string> | null, insertedAt?: string | null, updatedAt?: string | null, sinks?: Array<{ __typename?: 'NotificationSink', id: string, name: string, type: SinkType, insertedAt?: string | null, updatedAt?: string | null, configuration: { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null } } | null> | null, filters?: Array<{ __typename?: 'NotificationFilter', id: string, regex?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, pipeline?: { __typename?: 'Pipeline', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null } | null };
+
+export type UpsertNotificationSinkMutationVariables = Exact<{
+  attributes: NotificationSinkAttributes;
+}>;
+
+
+export type UpsertNotificationSinkMutation = { __typename?: 'RootMutationType', upsertNotificationSink?: { __typename?: 'NotificationSink', id: string, name: string, type: SinkType, insertedAt?: string | null, updatedAt?: string | null, configuration: { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null } } | null };
+
+export type DeleteNotificationSinkMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteNotificationSinkMutation = { __typename?: 'RootMutationType', deleteNotificationSink?: { __typename?: 'NotificationSink', id: string, name: string, type: SinkType, insertedAt?: string | null, updatedAt?: string | null, configuration: { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null } } | null };
+
+export type NotificationSinksQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type NotificationSinksQuery = { __typename?: 'RootQueryType', notificationSinks?: { __typename?: 'NotificationSinkConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'NotificationSinkEdge', node?: { __typename?: 'NotificationSink', id: string, name: string, type: SinkType, insertedAt?: string | null, updatedAt?: string | null, configuration: { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null } } | null } | null> | null } | null };
 
 export type PersonaConfigurationFragment = { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null };
 
@@ -8967,6 +9199,68 @@ export const UnstructuredResourceFragmentDoc = gql`
 }
     ${MetadataFragmentDoc}
 ${EventFragmentDoc}`;
+export const UrlSinkConfigurationFragmentDoc = gql`
+    fragment UrlSinkConfiguration on UrlSinkConfiguration {
+  url
+}
+    `;
+export const SinkConfigurationFragmentDoc = gql`
+    fragment SinkConfiguration on SinkConfiguration {
+  id
+  slack {
+    ...UrlSinkConfiguration
+  }
+  teams {
+    ...UrlSinkConfiguration
+  }
+}
+    ${UrlSinkConfigurationFragmentDoc}`;
+export const NotificationSinkFragmentDoc = gql`
+    fragment NotificationSink on NotificationSink {
+  id
+  name
+  type
+  insertedAt
+  updatedAt
+  configuration {
+    ...SinkConfiguration
+  }
+}
+    ${SinkConfigurationFragmentDoc}`;
+export const NotificationFilterFragmentDoc = gql`
+    fragment NotificationFilter on NotificationFilter {
+  id
+  cluster {
+    id
+    name
+  }
+  pipeline {
+    id
+    name
+  }
+  regex
+  service {
+    id
+    name
+  }
+}
+    `;
+export const NotificationRouterFragmentDoc = gql`
+    fragment NotificationRouter on NotificationRouter {
+  id
+  name
+  sinks {
+    ...NotificationSink
+  }
+  events
+  filters {
+    ...NotificationFilter
+  }
+  insertedAt
+  updatedAt
+}
+    ${NotificationSinkFragmentDoc}
+${NotificationFilterFragmentDoc}`;
 export const AccessTokenFragmentDoc = gql`
     fragment AccessToken on AccessToken {
   id
@@ -13956,6 +14250,236 @@ export type UnstructuredResourceQueryHookResult = ReturnType<typeof useUnstructu
 export type UnstructuredResourceLazyQueryHookResult = ReturnType<typeof useUnstructuredResourceLazyQuery>;
 export type UnstructuredResourceSuspenseQueryHookResult = ReturnType<typeof useUnstructuredResourceSuspenseQuery>;
 export type UnstructuredResourceQueryResult = Apollo.QueryResult<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>;
+export const UpsertNotificationRouterDocument = gql`
+    mutation UpsertNotificationRouter($attributes: NotificationRouterAttributes!) {
+  upsertNotificationRouter(attributes: $attributes) {
+    ...NotificationRouter
+  }
+}
+    ${NotificationRouterFragmentDoc}`;
+export type UpsertNotificationRouterMutationFn = Apollo.MutationFunction<UpsertNotificationRouterMutation, UpsertNotificationRouterMutationVariables>;
+
+/**
+ * __useUpsertNotificationRouterMutation__
+ *
+ * To run a mutation, you first call `useUpsertNotificationRouterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertNotificationRouterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertNotificationRouterMutation, { data, loading, error }] = useUpsertNotificationRouterMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpsertNotificationRouterMutation(baseOptions?: Apollo.MutationHookOptions<UpsertNotificationRouterMutation, UpsertNotificationRouterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertNotificationRouterMutation, UpsertNotificationRouterMutationVariables>(UpsertNotificationRouterDocument, options);
+      }
+export type UpsertNotificationRouterMutationHookResult = ReturnType<typeof useUpsertNotificationRouterMutation>;
+export type UpsertNotificationRouterMutationResult = Apollo.MutationResult<UpsertNotificationRouterMutation>;
+export type UpsertNotificationRouterMutationOptions = Apollo.BaseMutationOptions<UpsertNotificationRouterMutation, UpsertNotificationRouterMutationVariables>;
+export const NotificationRoutersDocument = gql`
+    query NotificationRouters($first: Int = 100, $after: String) {
+  notificationRouters(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...NotificationRouter
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${NotificationRouterFragmentDoc}`;
+
+/**
+ * __useNotificationRoutersQuery__
+ *
+ * To run a query within a React component, call `useNotificationRoutersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNotificationRoutersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNotificationRoutersQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useNotificationRoutersQuery(baseOptions?: Apollo.QueryHookOptions<NotificationRoutersQuery, NotificationRoutersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NotificationRoutersQuery, NotificationRoutersQueryVariables>(NotificationRoutersDocument, options);
+      }
+export function useNotificationRoutersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NotificationRoutersQuery, NotificationRoutersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NotificationRoutersQuery, NotificationRoutersQueryVariables>(NotificationRoutersDocument, options);
+        }
+export function useNotificationRoutersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NotificationRoutersQuery, NotificationRoutersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NotificationRoutersQuery, NotificationRoutersQueryVariables>(NotificationRoutersDocument, options);
+        }
+export type NotificationRoutersQueryHookResult = ReturnType<typeof useNotificationRoutersQuery>;
+export type NotificationRoutersLazyQueryHookResult = ReturnType<typeof useNotificationRoutersLazyQuery>;
+export type NotificationRoutersSuspenseQueryHookResult = ReturnType<typeof useNotificationRoutersSuspenseQuery>;
+export type NotificationRoutersQueryResult = Apollo.QueryResult<NotificationRoutersQuery, NotificationRoutersQueryVariables>;
+export const DeleteNotificationRouterDocument = gql`
+    mutation DeleteNotificationRouter($id: ID!) {
+  deleteNotificationRouter(id: $id) {
+    ...NotificationRouter
+  }
+}
+    ${NotificationRouterFragmentDoc}`;
+export type DeleteNotificationRouterMutationFn = Apollo.MutationFunction<DeleteNotificationRouterMutation, DeleteNotificationRouterMutationVariables>;
+
+/**
+ * __useDeleteNotificationRouterMutation__
+ *
+ * To run a mutation, you first call `useDeleteNotificationRouterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteNotificationRouterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteNotificationRouterMutation, { data, loading, error }] = useDeleteNotificationRouterMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteNotificationRouterMutation(baseOptions?: Apollo.MutationHookOptions<DeleteNotificationRouterMutation, DeleteNotificationRouterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteNotificationRouterMutation, DeleteNotificationRouterMutationVariables>(DeleteNotificationRouterDocument, options);
+      }
+export type DeleteNotificationRouterMutationHookResult = ReturnType<typeof useDeleteNotificationRouterMutation>;
+export type DeleteNotificationRouterMutationResult = Apollo.MutationResult<DeleteNotificationRouterMutation>;
+export type DeleteNotificationRouterMutationOptions = Apollo.BaseMutationOptions<DeleteNotificationRouterMutation, DeleteNotificationRouterMutationVariables>;
+export const UpsertNotificationSinkDocument = gql`
+    mutation UpsertNotificationSink($attributes: NotificationSinkAttributes!) {
+  upsertNotificationSink(attributes: $attributes) {
+    ...NotificationSink
+  }
+}
+    ${NotificationSinkFragmentDoc}`;
+export type UpsertNotificationSinkMutationFn = Apollo.MutationFunction<UpsertNotificationSinkMutation, UpsertNotificationSinkMutationVariables>;
+
+/**
+ * __useUpsertNotificationSinkMutation__
+ *
+ * To run a mutation, you first call `useUpsertNotificationSinkMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertNotificationSinkMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertNotificationSinkMutation, { data, loading, error }] = useUpsertNotificationSinkMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpsertNotificationSinkMutation(baseOptions?: Apollo.MutationHookOptions<UpsertNotificationSinkMutation, UpsertNotificationSinkMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertNotificationSinkMutation, UpsertNotificationSinkMutationVariables>(UpsertNotificationSinkDocument, options);
+      }
+export type UpsertNotificationSinkMutationHookResult = ReturnType<typeof useUpsertNotificationSinkMutation>;
+export type UpsertNotificationSinkMutationResult = Apollo.MutationResult<UpsertNotificationSinkMutation>;
+export type UpsertNotificationSinkMutationOptions = Apollo.BaseMutationOptions<UpsertNotificationSinkMutation, UpsertNotificationSinkMutationVariables>;
+export const DeleteNotificationSinkDocument = gql`
+    mutation DeleteNotificationSink($id: ID!) {
+  deleteNotificationSink(id: $id) {
+    ...NotificationSink
+  }
+}
+    ${NotificationSinkFragmentDoc}`;
+export type DeleteNotificationSinkMutationFn = Apollo.MutationFunction<DeleteNotificationSinkMutation, DeleteNotificationSinkMutationVariables>;
+
+/**
+ * __useDeleteNotificationSinkMutation__
+ *
+ * To run a mutation, you first call `useDeleteNotificationSinkMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteNotificationSinkMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteNotificationSinkMutation, { data, loading, error }] = useDeleteNotificationSinkMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteNotificationSinkMutation(baseOptions?: Apollo.MutationHookOptions<DeleteNotificationSinkMutation, DeleteNotificationSinkMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteNotificationSinkMutation, DeleteNotificationSinkMutationVariables>(DeleteNotificationSinkDocument, options);
+      }
+export type DeleteNotificationSinkMutationHookResult = ReturnType<typeof useDeleteNotificationSinkMutation>;
+export type DeleteNotificationSinkMutationResult = Apollo.MutationResult<DeleteNotificationSinkMutation>;
+export type DeleteNotificationSinkMutationOptions = Apollo.BaseMutationOptions<DeleteNotificationSinkMutation, DeleteNotificationSinkMutationVariables>;
+export const NotificationSinksDocument = gql`
+    query NotificationSinks($first: Int = 100, $after: String) {
+  notificationSinks(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...NotificationSink
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${NotificationSinkFragmentDoc}`;
+
+/**
+ * __useNotificationSinksQuery__
+ *
+ * To run a query within a React component, call `useNotificationSinksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNotificationSinksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNotificationSinksQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useNotificationSinksQuery(baseOptions?: Apollo.QueryHookOptions<NotificationSinksQuery, NotificationSinksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NotificationSinksQuery, NotificationSinksQueryVariables>(NotificationSinksDocument, options);
+      }
+export function useNotificationSinksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NotificationSinksQuery, NotificationSinksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NotificationSinksQuery, NotificationSinksQueryVariables>(NotificationSinksDocument, options);
+        }
+export function useNotificationSinksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NotificationSinksQuery, NotificationSinksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NotificationSinksQuery, NotificationSinksQueryVariables>(NotificationSinksDocument, options);
+        }
+export type NotificationSinksQueryHookResult = ReturnType<typeof useNotificationSinksQuery>;
+export type NotificationSinksLazyQueryHookResult = ReturnType<typeof useNotificationSinksLazyQuery>;
+export type NotificationSinksSuspenseQueryHookResult = ReturnType<typeof useNotificationSinksSuspenseQuery>;
+export type NotificationSinksQueryResult = Apollo.QueryResult<NotificationSinksQuery, NotificationSinksQueryVariables>;
 export const PersonasDocument = gql`
     query Personas($cursor: String) {
   personas(first: 3, after: $cursor) {
@@ -14507,6 +15031,8 @@ export const namedOperations = {
     Service: 'Service',
     StatefulSet: 'StatefulSet',
     UnstructuredResource: 'UnstructuredResource',
+    NotificationRouters: 'NotificationRouters',
+    NotificationSinks: 'NotificationSinks',
     Personas: 'Personas',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
@@ -14565,6 +15091,10 @@ export const namedOperations = {
     CreateGroup: 'CreateGroup',
     UpdateGroup: 'UpdateGroup',
     DeleteGroup: 'DeleteGroup',
+    UpsertNotificationRouter: 'UpsertNotificationRouter',
+    DeleteNotificationRouter: 'DeleteNotificationRouter',
+    UpsertNotificationSink: 'UpsertNotificationSink',
+    DeleteNotificationSink: 'DeleteNotificationSink',
     CreatePersona: 'CreatePersona',
     UpdatePersona: 'UpdatePersona',
     DeletePersona: 'DeletePersona',
@@ -14672,6 +15202,11 @@ export const namedOperations = {
     Service: 'Service',
     StatefulSet: 'StatefulSet',
     UnstructuredResource: 'UnstructuredResource',
+    UrlSinkConfiguration: 'UrlSinkConfiguration',
+    SinkConfiguration: 'SinkConfiguration',
+    NotificationSink: 'NotificationSink',
+    NotificationFilter: 'NotificationFilter',
+    NotificationRouter: 'NotificationRouter',
     PersonaConfiguration: 'PersonaConfiguration',
     Persona: 'Persona',
     AccessToken: 'AccessToken',

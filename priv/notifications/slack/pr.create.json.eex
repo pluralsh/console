@@ -3,6 +3,16 @@
     "blocks": [
         {
             "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "New pull request created:\n<%= @pr.title %>",
+            }
+        },
+        {
+			"type": "divider"
+		},
+        {
+            "type": "section",
             "fields": [
                 {"type": "mrkdwn", "text": "*Url*\n<%= @pr.url %>"}
             ]

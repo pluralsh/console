@@ -287,6 +287,24 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
         }
       """, %{"id" => cluster.id}, %{current_user: insert(:user)})
     end
+
+    test "it can fetch policy constraints for a cluster" do
+      cluster = insert(:cluster)
+      constraints = insert_list(3, :policy_constraint, cluster: cluster)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            policyConstraints(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert from_connection(found["policyConstraints"])
+             |> ids_equal(constraints)
+    end
   end
 
   describe "runtimeService" do

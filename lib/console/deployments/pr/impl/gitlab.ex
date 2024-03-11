@@ -55,7 +55,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
 
   defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}})
     when code >= 200 and code < 300, do: Jason.decode(body)
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "failed to create pr: #{body}"}
+  defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "gitlab request failed: #{body}"}
   defp handle_response(_), do: {:error, "unknown gitlab error"}
 
   defp state(%{"state" => "merged"}), do: :merged
