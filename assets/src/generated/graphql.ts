@@ -607,6 +607,8 @@ export type Cluster = {
   installed?: Maybe<Scalars['Boolean']['output']>;
   /** the url of the kas server you can access this cluster from */
   kasUrl?: Maybe<Scalars['String']['output']>;
+  /** Queries logs for a cluster out of loki */
+  logs?: Maybe<Array<Maybe<LogStream>>>;
   /** arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons) */
   metadata?: Maybe<Scalars['Map']['output']>;
   /** human readable name of this cluster, will also translate to cloud k8s name */
@@ -658,6 +660,15 @@ export type Cluster = {
   violationStatistics?: Maybe<Array<Maybe<ViolationStatistic>>>;
   /** write policy for this cluster */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterLogsArgs = {
+  end?: InputMaybe<Scalars['Long']['input']>;
+  limit: Scalars['Int']['input'];
+  query: LokiQuery;
+  start?: InputMaybe<Scalars['Long']['input']>;
 };
 
 
@@ -2064,6 +2075,25 @@ export type LoginInfo = {
   __typename?: 'LoginInfo';
   external?: Maybe<Scalars['Boolean']['output']>;
   oidcUri?: Maybe<Scalars['String']['output']>;
+};
+
+export type LokiLabelFilter = {
+  name: Scalars['String']['input'];
+  /** whether to apply a regex match for this label */
+  regex?: InputMaybe<Scalars['Boolean']['input']>;
+  value: Scalars['String']['input'];
+};
+
+export type LokiLineFilter = {
+  /** whether to treat this string as a regex match */
+  regex?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the string to filter for (eg what is put in our search ui) */
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type LokiQuery = {
+  filter?: InputMaybe<LokiLineFilter>;
+  labels?: InputMaybe<Array<InputMaybe<LokiLabelFilter>>>;
 };
 
 export type ManifestNetwork = {
@@ -5560,6 +5590,8 @@ export type ServiceDeployment = {
   interval?: Maybe<Scalars['String']['output']>;
   /** kustomize related service metadata */
   kustomize?: Maybe<Kustomize>;
+  /** Queries logs for a service out of loki */
+  logs?: Maybe<Array<Maybe<LogStream>>>;
   /** the commit message currently in use */
   message?: Maybe<Scalars['String']['output']>;
   /** human readable name of this service, must be unique per cluster */
@@ -5595,6 +5627,15 @@ export type ServiceDeployment = {
   version: Scalars['String']['output'];
   /** write policy of this service */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeploymentLogsArgs = {
+  end?: InputMaybe<Scalars['Long']['input']>;
+  limit: Scalars['Int']['input'];
+  query: LokiQuery;
+  start?: InputMaybe<Scalars['Long']['input']>;
 };
 
 
