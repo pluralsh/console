@@ -88,6 +88,8 @@ const ModalContentSC = styled.div<{
   $scrollable: boolean
   $hasActions: boolean
 }>(({ theme, $scrollable, $hasActions }) => ({
+  position: 'relative',
+  zIndex: 0,
   margin: theme.spacing.large,
   marginBottom: $hasActions ? 0 : theme.spacing.large,
   ...theme.partials.text.body1,
