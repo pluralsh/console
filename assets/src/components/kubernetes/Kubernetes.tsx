@@ -1,4 +1,10 @@
-import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import { ReactNode, useEffect, useMemo, useState } from 'react'
@@ -34,6 +40,8 @@ export type KubernetesContext = {
   setNamespace: (string) => void
 }
 
+const NAMESPACE_PARAM = 'namespace'
+
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
   { path: SERVICES_AND_INGRESSES_REL_PATH, label: 'Services and ingresses' },
@@ -47,7 +55,10 @@ export default function Kubernetes() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { clusterId } = useParams()
-  const [namespace, setNamespace] = useState('') // TODO: Store in query param.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [namespace, setNamespace] = useState(
+    searchParams.get(NAMESPACE_PARAM) ?? ''
+  )
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const pathPrefix = getKubernetesAbsPath(clusterId)
 
@@ -89,6 +100,16 @@ export default function Kubernetes() {
       }
     }
   }, [cluster, clusters, navigate])
+
+  useEffect(() => {
+    if (isEmpty(namespace)) {
+      searchParams.delete(NAMESPACE_PARAM)
+    } else {
+      searchParams.set(NAMESPACE_PARAM, namespace)
+    }
+
+    setSearchParams(searchParams)
+  }, [namespace, searchParams, setSearchParams])
 
   if (!cluster) return <LoadingIndicator />
 
