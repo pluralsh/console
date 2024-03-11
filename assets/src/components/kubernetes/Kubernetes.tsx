@@ -25,7 +25,7 @@ import LoadingIndicator from '../utils/LoadingIndicator'
 
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
 
-import { ALL_NAMESPACES, NamespaceSelect } from './NamespaceSelect'
+import { NamespaceSelect } from './NamespaceSelect'
 
 export type KubernetesContext = {
   cluster?: ClusterTinyFragment
@@ -47,7 +47,7 @@ export default function Kubernetes() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { clusterId } = useParams()
-  const [namespace, setNamespace] = useState(ALL_NAMESPACES) // TODO: Store in query param.
+  const [namespace, setNamespace] = useState('') // TODO: Store in query param.
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const pathPrefix = getKubernetesAbsPath(clusterId)
 
@@ -143,8 +143,8 @@ export default function Kubernetes() {
             {headerContent}
             <NamespaceSelect
               namespaces={namespaces}
-              selectedKey={namespace}
-              onSelectionChange={setNamespace}
+              namespace={namespace}
+              onChange={setNamespace}
             />
           </div>
           <Outlet context={context} />

@@ -1,37 +1,57 @@
-import { ListBoxItem, Select } from '@pluralsh/design-system'
+import { ComboBox, ListBoxItem } from '@pluralsh/design-system'
 
-export const ALL_NAMESPACES = ''
+import { useMemo, useState } from 'react'
+
+import Fuse from 'fuse.js'
+
+import { NamespaceListFooter } from '../cluster/pods/Pods'
 
 export function NamespaceSelect({
   namespaces,
-  selectedKey,
-  onSelectionChange,
+  namespace,
+  onChange,
 }: {
   namespaces: string[]
-  selectedKey: string
-  onSelectionChange?: (arg: any) => any
+  namespace: string
+  onChange: (arg: any) => any
 }) {
+  const [inputValue, setInputValue] = useState(namespace)
+
+  const filteredNamespaces = useMemo(() => {
+    const fuse = new Fuse(namespaces, { threshold: 0.25 })
+
+    return inputValue
+      ? fuse.search(inputValue).map(({ item }) => item)
+      : namespaces
+  }, [namespaces, inputValue])
+
   return (
-    <Select
-      label="Namespace"
-      titleContent="Namespace"
-      selectedKey={selectedKey}
-      onSelectionChange={onSelectionChange}
-    >
-      <>
-        {namespaces.map((namespace) => (
-          <ListBoxItem
-            key={namespace}
-            label={namespace}
-            textValue={namespace}
-          />
-        ))}
-        <ListBoxItem
-          key={ALL_NAMESPACES}
-          label="All Namespaces"
-          textValue="All Namespaces"
+    <ComboBox
+      inputProps={{ placeholder: 'Filter by namespace' }}
+      inputValue={inputValue}
+      onInputChange={setInputValue}
+      selectedKey={namespace}
+      onSelectionChange={(key) => {
+        onChange(key)
+        setInputValue(key as string)
+      }}
+      dropdownFooterFixed={
+        <NamespaceListFooter
+          onClick={() => {
+            setInputValue('')
+            onChange('')
+          }}
         />
-      </>
-    </Select>
+      }
+      aria-label="namespace"
+    >
+      {filteredNamespaces.map((namespace) => (
+        <ListBoxItem
+          key={namespace}
+          textValue={namespace}
+          label={namespace}
+        />
+      ))}
+    </ComboBox>
   )
 }
