@@ -41,6 +41,7 @@ export default defineConfig(() =>
       proxy: {
         '/v1': API_URL,
         '/gql': API_URL,
+        '/api/v1': API_URL,
         '/socket': WS_URL,
       },
     },
