@@ -190,9 +190,5 @@ dashboard:
   enabled: false
   app:
     mode: 'api'
-  api:
-    containers:
-      args:
-        - --metrics-provider=none
   kong:
     enabled: false
