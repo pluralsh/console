@@ -9,9 +9,10 @@ import { Suspense, useMemo, useRef, useState } from 'react'
 
 import {
   INGRESSES_REL_PATH,
+  INGRESS_CLASSES_REL_PATH,
   SERVICES_REL_PATH,
+  getDiscoveryAbsPath,
   getKubernetesAbsPath,
-  getServicesAndIngressesAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
@@ -28,9 +29,10 @@ import { KubernetesContext } from '../Kubernetes'
 const directory = [
   { path: SERVICES_REL_PATH, label: 'Services' },
   { path: INGRESSES_REL_PATH, label: 'Ingresses' },
+  { path: INGRESS_CLASSES_REL_PATH, label: 'Ingress classes' },
 ] as const
 
-export default function ServicesAndIngresses() {
+export default function Discovery() {
   const { cluster } = useOutletContext() as KubernetesContext
   const [scrollable, setScrollable] = useState(false)
 
@@ -42,9 +44,7 @@ export default function ServicesAndIngresses() {
   )
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(
-    `${getServicesAndIngressesAbsPath(cluster?.id)}/:tab*`
-  )
+  const pathMatch = useMatch(`${getDiscoveryAbsPath(cluster?.id)}/:tab*`)
   // @ts-expect-error
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
@@ -61,8 +61,8 @@ export default function ServicesAndIngresses() {
           url: getKubernetesAbsPath(cluster?.id),
         },
         {
-          label: 'services and ingresses',
-          url: getServicesAndIngressesAbsPath(cluster?.id),
+          label: 'discovery',
+          url: getDiscoveryAbsPath(cluster?.id),
         },
       ],
       [cluster]
@@ -84,7 +84,7 @@ export default function ServicesAndIngresses() {
             subTab
             key={path}
             textValue={label}
-            to={`${getServicesAndIngressesAbsPath(cluster?.id)}/${path}`}
+            to={`${getDiscoveryAbsPath(cluster?.id)}/${path}`}
           >
             <SubTab
               key={path}

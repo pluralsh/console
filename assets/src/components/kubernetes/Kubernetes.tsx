@@ -13,7 +13,7 @@ import { isEmpty } from 'lodash'
 
 import {
   CONFIGURATION_REL_PATH,
-  SERVICES_AND_INGRESSES_REL_PATH,
+  DISCOVERY_REL_PATH,
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
   getKubernetesAbsPath,
@@ -44,7 +44,7 @@ const NAMESPACE_PARAM = 'namespace'
 
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
-  { path: SERVICES_AND_INGRESSES_REL_PATH, label: 'Services and ingresses' },
+  { path: DISCOVERY_REL_PATH, label: 'Discovery' },
   { path: STORAGE_REL_PATH, label: 'Storage' },
   { path: CONFIGURATION_REL_PATH, label: 'Configuration' },
   // namespaces, crs, events etc.
@@ -101,18 +101,6 @@ export default function Kubernetes() {
     }
   }, [cluster, clusters, navigate])
 
-  useEffect(() => {
-    if (isEmpty(namespace)) {
-      searchParams.delete(NAMESPACE_PARAM)
-    } else {
-      searchParams.set(NAMESPACE_PARAM, namespace)
-    }
-
-    setSearchParams(searchParams)
-    // We want to run it only if the namespace has changed.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [namespace])
-
   if (!cluster) return <LoadingIndicator />
 
   return (
@@ -167,7 +155,10 @@ export default function Kubernetes() {
             <NamespaceSelect
               namespaces={namespaces}
               namespace={namespace}
-              onChange={setNamespace}
+              onChange={(ns) => {
+                setNamespace(ns)
+                setSearchParams({ namespace })
+              }}
             />
           </div>
           <Outlet context={context} />

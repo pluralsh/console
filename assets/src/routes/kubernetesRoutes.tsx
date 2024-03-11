@@ -2,8 +2,10 @@ import { Navigate, Route } from 'react-router-dom'
 
 import Kubernetes from '../components/kubernetes/Kubernetes'
 import Workloads from '../components/kubernetes/workloads/Workloads'
-import ServicesAndIngresses from '../components/kubernetes/services/ServicesAndIngresses'
-import Services from '../components/kubernetes/services/Services'
+import Discovery from '../components/kubernetes/discovery/Discovery'
+import Services from '../components/kubernetes/discovery/Services'
+import Ingresses from '../components/kubernetes/discovery/Ingresses'
+import IngressClasses from '../components/kubernetes/discovery/IngressClasses'
 import Storage from '../components/kubernetes/storage/Storage'
 import Configuration from '../components/kubernetes/configuration/Configuration'
 import Deployments from '../components/kubernetes/workloads/Deployments'
@@ -14,29 +16,33 @@ import DaemonSets from '../components/kubernetes/workloads/DaemonSets'
 import Jobs from '../components/kubernetes/workloads/Jobs'
 import CronJobs from '../components/kubernetes/workloads/CronJobs'
 import ReplicationControllers from '../components/kubernetes/workloads/ReplicationControllers'
-import Ingresses from '../components/kubernetes/services/Ingresses'
 import PersistentVolumeClaims from '../components/kubernetes/storage/PersistentVolumeClaims'
 import PersistentVolumes from '../components/kubernetes/storage/PersistentVolumes'
 import StorageClasses from '../components/kubernetes/storage/StorageClasses'
 import ConfigMaps from '../components/kubernetes/configuration/ConfigMaps'
 import Secrets from '../components/kubernetes/configuration/Secrets'
+import Cluster from '../components/kubernetes/cluster/Cluster'
+import Nodes from '../components/kubernetes/cluster/Nodes'
 
 import {
+  CLUSTER_REL_PATH,
   CONFIGURATION_REL_PATH,
   CONFIG_MAPS_REL_PATH,
   CRON_JOBS_REL_PATH,
   DAEMON_SETS_REL_PATH,
   DEPLOYMENTS_REL_PATH,
+  DISCOVERY_REL_PATH,
   INGRESSES_REL_PATH,
+  INGRESS_CLASSES_REL_PATH,
   JOBS_REL_PATH,
   KUBERNETES_ABS_PATH,
+  NODES_REL_PATH,
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
   PERSISTENT_VOLUME_REL_PATH,
   PODS_REL_PATH,
   REPLICATION_CONTROLLERS_REL_PATH,
   REPLICA_SETS_REL_PATH,
   SECRETS_REL_PATH,
-  SERVICES_AND_INGRESSES_REL_PATH,
   SERVICES_REL_PATH,
   STATEFUL_SETS_REL_PATH,
   STORAGE_CLASSES_REL_PATH,
@@ -105,8 +111,8 @@ export const kubernetesRoutes = [
       />
     </Route>
     <Route
-      path={SERVICES_AND_INGRESSES_REL_PATH}
-      element={<ServicesAndIngresses />}
+      path={DISCOVERY_REL_PATH}
+      element={<Discovery />}
     >
       <Route
         index
@@ -124,6 +130,10 @@ export const kubernetesRoutes = [
       <Route
         path={INGRESSES_REL_PATH}
         element={<Ingresses />}
+      />
+      <Route
+        path={INGRESS_CLASSES_REL_PATH}
+        element={<IngressClasses />}
       />
     </Route>
     <Route
@@ -172,6 +182,24 @@ export const kubernetesRoutes = [
       <Route
         path={SECRETS_REL_PATH}
         element={<Secrets />}
+      />
+    </Route>
+    <Route
+      path={CLUSTER_REL_PATH}
+      element={<Cluster />}
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to={NODES_REL_PATH}
+          />
+        }
+      />
+      <Route
+        path={NODES_REL_PATH}
+        element={<Nodes />}
       />
     </Route>
   </Route>,
