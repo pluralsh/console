@@ -108,6 +108,7 @@ export default function Cluster() {
           css={{ height: '100%' }}
           stateRef={tabStateRef}
         >
+          <PageHeaderContext.Provider value={pageHeaderContext}>
             <PageScrollableContext.Provider value={pageScrollableContext}>
               <Suspense fallback={<LoadingIndicator />}>
                 <Outlet />
