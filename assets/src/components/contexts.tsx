@@ -24,7 +24,6 @@ export type Login = {
   personaConfiguration: Omit<PersonaConfigurationFragment, '__typeName'>
   token: MeQuery['externalToken']
   logout: () => void
-  refresh: () => void
 }
 
 const JWT_REFRESH_THRESHOLD = 900_000 as const // 15 minutes
@@ -34,11 +33,7 @@ const DEFAULT_LOGIN = {
   configuration: undefined,
   personaConfiguration: undefined,
   token: undefined,
-  logout: () => {
-    wipeToken()
-    window.location = '/login' as any as Location
-  },
-  refresh: () => {},
+  logout: completeLogout,
 } as const satisfies Partial<Login>
 const LoginContext = createContext<Partial<Login>>(DEFAULT_LOGIN)
 
@@ -103,9 +98,8 @@ export function LoginContextProvider({
             token: valueProp.externalToken,
             personaConfiguration: personaConfig,
             logout,
-            refresh,
           },
-    [logout, personaConfig, refresh, valueProp]
+    [logout, personaConfig, valueProp]
   )
 
   return (
