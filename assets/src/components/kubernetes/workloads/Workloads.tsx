@@ -5,7 +5,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Suspense, useMemo, useRef, useState } from 'react'
-import { Outlet, useMatch, useOutletContext } from 'react-router-dom'
+import { Outlet, useMatch } from 'react-router-dom'
 
 import {
   CRON_JOBS_REL_PATH,
@@ -28,7 +28,7 @@ import {
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 
-import { KubernetesOutletContextT } from '../Kubernetes'
+import { useKubernetesContext } from '../Kubernetes'
 
 const directory = [
   { path: DEPLOYMENTS_REL_PATH, label: 'Deployments' },
@@ -42,7 +42,7 @@ const directory = [
 ] as const
 
 export default function Workloads() {
-  const { cluster } = useOutletContext() as KubernetesOutletContextT
+  const { cluster } = useKubernetesContext()
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(

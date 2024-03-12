@@ -6,7 +6,15 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { isEmpty } from 'lodash'
 
 import {
@@ -36,9 +44,25 @@ import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 import { NamespaceSelect } from './NamespaceSelect'
 import { ResourceListContext, ResourceListContextT } from './ResourceList'
 
-export type KubernetesOutletContextT = {
+export type KubernetesContextT = {
   cluster?: ClusterTinyFragment
   namespace: string
+}
+
+export const KubernetesContext = createContext<KubernetesContextT | undefined>(
+  undefined
+)
+
+export const useKubernetesContext = () => {
+  const ctx = useContext(KubernetesContext)
+
+  if (!ctx) {
+    throw Error(
+      'useKubernetesContext() must be used within a KubernetesContext'
+    )
+  }
+
+  return ctx
 }
 
 const NAMESPACE_PARAM = 'namespace'
@@ -101,20 +125,14 @@ export default function Kubernetes() {
     []
   )
 
-  const resourceListContext: ResourceListContextT = useMemo(
-    () => ({
-      setNamespaced,
-    }),
+  const resourceListContext = useMemo(
+    () => ({ setNamespaced }) as ResourceListContextT,
     []
   )
 
-  const outletContext: KubernetesOutletContextT = useMemo(
-    () => ({
-      cluster,
-      namespace,
-      setNamespaced,
-    }),
-    [cluster, namespace, setNamespaced]
+  const kubernetesContext = useMemo(
+    () => ({ cluster, namespace }) as KubernetesContextT,
+    [cluster, namespace]
   )
 
   useEffect(() => {
@@ -191,7 +209,9 @@ export default function Kubernetes() {
         </div>
         <PageHeaderContext.Provider value={pageHeaderContext}>
           <ResourceListContext.Provider value={resourceListContext}>
-            <Outlet context={outletContext} />
+            <KubernetesContext.Provider value={kubernetesContext}>
+              <Outlet />
+            </KubernetesContext.Provider>
           </ResourceListContext.Provider>
         </PageHeaderContext.Provider>
       </div>
