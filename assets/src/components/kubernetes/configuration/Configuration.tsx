@@ -23,7 +23,7 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { KubernetesContext } from '../Kubernetes'
+import { KubernetesOutletContext } from '../Kubernetes'
 
 const directory = [
   { path: CONFIG_MAPS_REL_PATH, label: 'Config maps' },
@@ -31,7 +31,7 @@ const directory = [
 ] as const
 
 export default function Configuration() {
-  const { cluster } = useOutletContext() as KubernetesContext
+  const { cluster } = useOutletContext() as KubernetesOutletContext
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(

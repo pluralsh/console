@@ -6,7 +6,14 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { isEmpty } from 'lodash'
 import { gql } from '@apollo/client'
 
@@ -35,11 +42,11 @@ import { KubernetesClient } from '../../helpers/kubernetes.client'
 
 import { NamespaceSelect } from './NamespaceSelect'
 
-export type KubernetesContext = {
+export type KubernetesOutletContext = {
   cluster?: ClusterTinyFragment
   namespaces: string[]
   namespace: string
-  setNamespace: (string) => void
+  setNamespace: Dispatch<SetStateAction<string>>
 }
 
 const NAMESPACE_PARAM = 'namespace'
@@ -101,7 +108,7 @@ export default function Kubernetes() {
     []
   )
 
-  const context: KubernetesContext = useMemo(
+  const context: KubernetesOutletContext = useMemo(
     () => ({ cluster, namespaces, namespace, setNamespace }),
     [cluster, namespaces, namespace, setNamespace]
   )

@@ -25,7 +25,7 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { KubernetesContext } from '../Kubernetes'
+import { KubernetesOutletContext } from '../Kubernetes'
 
 const directory = [
   { path: ROLES_REL_PATH, label: 'Roles' },
@@ -35,7 +35,7 @@ const directory = [
 ] as const
 
 export default function Access() {
-  const { cluster } = useOutletContext() as KubernetesContext
+  const { cluster } = useOutletContext() as KubernetesOutletContext
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(

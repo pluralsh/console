@@ -26,7 +26,7 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { KubernetesContext } from '../Kubernetes'
+import { KubernetesOutletContext } from '../Kubernetes'
 
 const directory = [
   { path: NODES_REL_PATH, label: 'Nodes' },
@@ -35,7 +35,7 @@ const directory = [
 ] as const
 
 export default function Cluster() {
-  const { cluster } = useOutletContext() as KubernetesContext
+  const { cluster } = useOutletContext() as KubernetesOutletContext
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(

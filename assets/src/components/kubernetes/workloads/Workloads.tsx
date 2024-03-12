@@ -28,7 +28,7 @@ import {
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 
-import { KubernetesContext } from '../Kubernetes'
+import { KubernetesOutletContext } from '../Kubernetes'
 
 const directory = [
   { path: DEPLOYMENTS_REL_PATH, label: 'Deployments' },
@@ -42,7 +42,7 @@ const directory = [
 ] as const
 
 export default function Workloads() {
-  const { cluster } = useOutletContext() as KubernetesContext
+  const { cluster } = useOutletContext() as KubernetesOutletContext
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(
