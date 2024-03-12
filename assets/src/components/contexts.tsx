@@ -7,7 +7,13 @@ import {
   useMemo,
 } from 'react'
 import { jwtDecode } from 'jwt-decode'
-import { fetchToken, setToken, wipeRefreshToken, wipeToken } from 'helpers/auth'
+import {
+  fetchRefreshToken,
+  fetchToken,
+  setToken,
+  wipeRefreshToken,
+  wipeToken,
+} from 'helpers/auth'
 
 import {
   MeQuery,
@@ -111,6 +117,3 @@ export function LoginContextProvider({
 }
 
 export { LoginContext }
-function fetchRefreshToken(): string {
-  throw new Error('Function not implemented.')
-}
