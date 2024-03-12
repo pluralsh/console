@@ -5,16 +5,13 @@ import { Alert, AlertStatus } from 'forge-core'
 import { useLocation } from 'react-router'
 import qs from 'query-string'
 import { useMutation } from '@apollo/client'
+import { useNavigate } from 'react-router-dom'
+import { Button } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
+
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-
 import { RefreshTokenFragment } from 'components/graphql/users'
-
-import { useNavigate } from 'react-router-dom'
-
-import { Button } from '@pluralsh/design-system'
-
-import { useTheme } from 'styled-components'
 
 import { setRefreshToken, setToken } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
@@ -94,10 +91,6 @@ export function OAuthCallback() {
         justifyContent: 'center',
         gap: theme.spacing.medium,
       }}
-      height="100vh"
-      width="100vw"
-      align="center"
-      justify="center"
     >
       <GqlError
         error={error}

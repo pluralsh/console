@@ -5,8 +5,7 @@ import { useParams } from 'react-router'
 import { LoopingLogo } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 
-import { setToken } from '../../helpers/auth'
-
+import { setRefreshToken, setToken } from '../../helpers/auth'
 import { LOGIN_LINK } from '../graphql/users'
 
 import { LoginPortal } from './LoginPortal'
@@ -21,7 +20,7 @@ export function LinkLogin() {
       setRefreshToken(refreshToken)
       navigate('/')
     },
-    onError: console.log,
+    onError: console.error,
   })
 
   useEffect(() => {

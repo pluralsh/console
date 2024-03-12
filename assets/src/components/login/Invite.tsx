@@ -102,7 +102,7 @@ export default function Invite() {
       setRefreshToken(refreshToken?.token)
       navigate('/')
     },
-    onError: console.log,
+    onError: console.error,
   })
   const { data, error } = useQuery(INVITE_Q, { variables: { id: inviteId } })
 

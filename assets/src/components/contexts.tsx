@@ -7,20 +7,11 @@ import {
   useMemo,
 } from 'react'
 import { jwtDecode } from 'jwt-decode'
-import {
-  fetchRefreshToken,
-  fetchToken,
-  setToken,
-  wipeRefreshToken,
-  wipeToken,
-} from 'helpers/auth'
-
-import { Edge } from 'utils/graphql'
+import { fetchToken, setToken, wipeRefreshToken, wipeToken } from 'helpers/auth'
 
 import {
   MeQuery,
   PersonaConfigurationFragment,
-  RefreshTokenFragment,
   useLogoutMutation,
   useRefreshLazyQuery,
 } from '../generated/graphql'
@@ -70,35 +61,26 @@ export function LoginContextProvider({
     [valueProp?.me?.personas]
   )
 
-  console.log('me.refreshToken', valueProp?.me?.refreshToken)
-
   const [logout] = useLogoutMutation({
     onCompleted: completeLogout,
     onError: completeLogout,
   })
-  const [refreshQuery, { loading: refreshLoading, ...refreshStatus }] =
-    useRefreshLazyQuery({
-      onCompleted: (res) => {
-        console.log('refreshQuery refreshed', res.refresh?.jwt)
-        setToken(res.refresh?.jwt)
-        if (!res.refresh?.jwt) {
-          logout()
-        }
-      },
-      onError: (err) => {
-        console.log('refreshQuery error', err)
+  const [refreshQuery, { loading: refreshLoading }] = useRefreshLazyQuery({
+    onCompleted: (res) => {
+      setToken(res.refresh?.jwt)
+      if (!res.refresh?.jwt) {
         logout()
-      },
-      fetchPolicy: 'network-only',
-    })
+      }
+    },
+    onError: () => {
+      logout()
+    },
+    fetchPolicy: 'network-only',
+  })
   const jwt = fetchToken()
 
-  console.log('refreshQuery loading', refreshLoading)
-  console.log('refreshQuery status', refreshStatus)
   const refresh = useCallback(() => {
-    console.log('try to refresh')
-
-    // refreshQuery({ variables: { token: fetchRefreshToken() || '' } })
+    refreshQuery({ variables: { token: fetchRefreshToken() || '' } })
   }, [refreshQuery])
 
   useEffect(() => {
@@ -120,13 +102,8 @@ export function LoginContextProvider({
             configuration: valueProp.configuration,
             token: valueProp.externalToken,
             personaConfiguration: personaConfig,
-            logout: () => {
-              logout()
-            },
-            refresh: () => {
-              console.log('refreshQuery refreshing')
-              refresh()
-            },
+            logout,
+            refresh,
           },
     [logout, personaConfig, refresh, valueProp]
   )
@@ -140,3 +117,6 @@ export function LoginContextProvider({
 }
 
 export { LoginContext }
+function fetchRefreshToken(): string {
+  throw new Error('Function not implemented.')
+}

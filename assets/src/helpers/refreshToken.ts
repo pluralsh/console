@@ -1,5 +1,6 @@
 import { RefreshDocument, RefreshQuery } from 'generated/graphql'
-import { FetchResult, Observable } from '@apollo/client'
+import { FetchResult } from '@apollo/client'
+import { Observable } from 'apollo-link'
 import { ErrorHandler } from 'apollo-link-error'
 
 import { client } from './client'
@@ -12,15 +13,12 @@ import {
 
 export const getRefreshedToken = async () => {
   const refreshToken = fetchRefreshToken()
-
   const refreshResolverResponse = await client.query<RefreshQuery>({
     query: RefreshDocument,
     variables: { token: refreshToken },
   })
-
   const jwt = refreshResolverResponse.data.refresh?.jwt
 
-  console.log('DID IT', jwt)
   setToken(jwt)
 
   return jwt
@@ -32,28 +30,17 @@ export const onErrorHandler: ErrorHandler = ({
   operation,
   forward,
 }) => {
-  console.log('networkError', networkError)
-  console.log('graphQLErrors', graphQLErrors)
   const refreshToken = fetchRefreshToken()
   const is401 = networkError && (networkError as any).statusCode === 401
-  const isUnauthenticated = graphQLErrors?.some((err) => {
-    console.log('err.message', err.message)
+  const isUnauthenticated = graphQLErrors?.some(
+    (err) => err.message === 'unauthenticated'
+  )
 
-    return err.message === 'unauthenticated'
-  })
-
-  console.log('is401', is401)
-  console.log('isUnauthenticated', isUnauthenticated)
-  console.log('refreshToken', refreshToken)
-
+  // Attempt to refresh jwt if we have a refresh token and the request is
+  // unauthenticated
   if (refreshToken && (is401 || isUnauthenticated)) {
-    console.log('refreshToken', refreshToken)
-    console.log('operation', operation.operationName)
-
-    // ignore 401 error for a refresh request
+    // Allow Refresh to fail without retrying
     if (operation.operationName === 'Refresh') {
-      console.log('Refresh request', operation.variables)
-
       return
     }
 
@@ -89,7 +76,6 @@ export const onErrorHandler: ErrorHandler = ({
     return observable
   }
   if (is401) {
-    console.log(networkError)
     onNetworkError()
   }
 }

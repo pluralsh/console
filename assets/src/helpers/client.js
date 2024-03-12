@@ -29,8 +29,6 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
 
   const authLink = setContext((req, { headers }) => {
     const token = fetchToken()
-
-    console.log('operationName:', req.operationName, '\ntoken:', token)
     const authHeaders = token ? { authorization: `Bearer ${token}` } : {}
 
     return { headers: { ...headers, ...authHeaders } }

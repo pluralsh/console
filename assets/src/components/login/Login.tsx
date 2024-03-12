@@ -12,8 +12,6 @@ import { isValidEmail } from 'utils/email'
 import { User, useMeQuery } from 'generated/graphql'
 import { useHelpSpacing } from 'components/help/HelpLauncher'
 
-import { set } from 'lodash'
-
 import { GqlError } from '../utils/Alert'
 import {
   setRefreshToken,
