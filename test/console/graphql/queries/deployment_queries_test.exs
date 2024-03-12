@@ -2,17 +2,25 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
   use Console.DataCase, async: true
 
   describe "globalService" do
-    test "a reader can fetch global services" do
+    test "a reader can fetch global services and subservices" do
       user = admin_user()
       global = insert(:global_service)
+      svcs = insert_list(3, :service, owner: global)
 
       {:ok, %{data: %{"globalService" => svc}}} = run_query("""
         query Global($id: ID!) {
-          globalService(id: $id) { id }
+          globalService(id: $id) {
+            id
+            services(first: 5) {
+              edges { node { id } }
+            }
+          }
         }
       """, %{"id" => global.id}, %{current_user: user})
 
       assert svc["id"] == global.id
+      assert from_connection(svc["services"])
+             |> ids_equal(svcs)
     end
   end
 

@@ -125,6 +125,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> allow(user, :read)
   end
 
+  def list_global_services(args, _) do
+    GlobalService.ordered()
+    |> paginate(args)
+  end
+
   def settings(_, _), do: {:ok, Settings.fetch_consistent()}
 
   def enable(_, %{context: %{current_user: user}}), do: Settings.enable(user)

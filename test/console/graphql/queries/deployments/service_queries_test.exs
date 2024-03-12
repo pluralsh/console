@@ -363,4 +363,21 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       assert statuses["HEALTHY"] == 2
     end
   end
+
+  describe "globalServices" do
+    test "it can list global services in the system" do
+      globals = insert_list(3, :global_service)
+
+      {:ok, %{data: %{"globalServices" => found}}} = run_query("""
+        query {
+          globalServices(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal(globals)
+    end
+  end
 end
