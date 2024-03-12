@@ -161,7 +161,7 @@ export default function Kubernetes() {
             clusters={clusters}
             selectedKey={clusterId}
             onSelectionChange={
-              (id) => navigate(getKubernetesAbsPath(id as string)) // TODO: Keep current view if possible when switching clusters.
+              (id) => navigate(getKubernetesAbsPath(id as string)) // TODO: Keep current view if possible when switching clusters. Keep search params as well.
             }
             withoutTitleContent
           />
