@@ -13,7 +13,7 @@ import { User, useMeQuery } from 'generated/graphql'
 import { useHelpSpacing } from 'components/help/HelpLauncher'
 
 import { GqlError } from '../utils/Alert'
-import { setToken, wipeToken } from '../../helpers/auth'
+import { setToken, wipeRefreshToken, wipeToken } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
 import { ME_Q, SIGNIN } from '../graphql/users'
 import { IncidentContext } from '../incidents/context'
@@ -39,16 +39,16 @@ const setInputFocus = (ref: RefObject<any>) => {
 }
 
 function LoginError({ error }) {
+  console.error('Login error', error)
   useEffect(() => {
     const to = setTimeout(() => {
       wipeToken()
+      wipeRefreshToken()
       window.location = '/login' as any as Location
     }, 2000)
 
     return () => clearTimeout(to)
   }, [])
-
-  console.error(error)
 
   return (
     <LoginPortal>
@@ -174,6 +174,7 @@ export function EnsureLogin({ children }) {
     pollInterval: POLL_INTERVAL,
     errorPolicy: 'ignore',
   })
+
   const { boot, update } = useIntercom()
   const intercomAttrs = useIntercomAttributes(data?.me)
 
@@ -192,8 +193,6 @@ export function EnsureLogin({ children }) {
   const loginContextValue = data
 
   if (error || (!loading && !data?.clusterInfo)) {
-    console.log(error)
-
     return <LoginError error={error} />
   }
 

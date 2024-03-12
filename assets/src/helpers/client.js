@@ -12,8 +12,10 @@ import { split } from 'apollo-link'
 
 import introspection from '../generated/fragments.json'
 
+import { onErrorHandler, onNetworkError } from './refreshToken'
+
 import customFetch from './uploadLink'
-import { fetchToken, wipeToken } from './auth'
+import { fetchToken } from './auth'
 
 const fragmentMatcher = new IntrospectionFragmentMatcher({
   introspectionQueryResultData: introspection,
@@ -25,22 +27,19 @@ const WS_URI = '/socket'
 export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
-  const authLink = setContext((_, { headers }) => {
+  const authLink = setContext((req, { headers }) => {
     const token = fetchToken()
+
+    console.log('operationName:', req.operationName, '\ntoken:', token)
     const authHeaders = token ? { authorization: `Bearer ${token}` } : {}
 
     return { headers: { ...headers, ...authHeaders } }
   })
 
-  const resetToken = onError(({ networkError }) => {
-    if (networkError && networkError.statusCode === 401) {
-      console.log(networkError)
-      onNetworkError()
-    }
-  })
+  const errorLink = onError(onErrorHandler)
 
   const retryLink = new RetryLink({
-    delay: { initial: 200 },
+    delay: { initial: 200000 },
     attempts: {
       max: Infinity,
       retryIf: (error) => !!error && !!fetchToken(),
@@ -58,7 +57,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const absintheSocket = AbsintheSocket.create(socket)
 
   const socketLink = createAbsintheSocketLink(absintheSocket)
-  const gqlLink = resetToken.concat(httpLink)
+  const gqlLink = errorLink.concat(httpLink)
 
   const splitLink = split(
     (operation) => hasSubscription(operation.query),
@@ -87,11 +86,6 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   })
 
   return { client, socket }
-}
-
-function onNetworkError() {
-  wipeToken()
-  window.location = '/login'
 }
 
 const { client, socket } = buildClient(

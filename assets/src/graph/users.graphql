@@ -59,6 +59,7 @@ fragment Manifest on PluralManifest {
 query Me {
   me {
     ...User
+    refreshToken
     boundRoles {
       ...Role
     }
@@ -88,6 +89,16 @@ query Me {
       ...AvailableFeatures
     }
   }
+  refreshTokens(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...RefreshToken
+      }
+    }
+  }
 }
 
 query Users($q: String, $cursor: String) {
@@ -113,5 +124,38 @@ query SearchUsers($q: String, $cursor: String) {
         ...User
       }
     }
+  }
+}
+
+mutation Logout {
+  logout {
+    ...User
+  }
+}
+
+fragment RefreshToken on RefreshToken {
+  id
+  token
+  insertedAt
+  updatedAt
+}
+
+query RefreshTokens($first: Int, $after: String, $last: Int, $before: String) {
+  refreshTokens(first: $first, after: $after, last: $last, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...RefreshToken
+      }
+    }
+  }
+}
+
+query Refresh($token: String!) {
+  refresh(token: $token) {
+    ...User
+    jwt
   }
 }

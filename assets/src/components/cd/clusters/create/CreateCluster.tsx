@@ -27,6 +27,8 @@ import ModalAlt from 'components/cd/ModalAlt'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
 
+import { useLogin } from 'components/contexts'
+
 import {
   CreateClusterContent,
   attributesAreValid,
@@ -285,6 +287,7 @@ export default function CreateCluster() {
 
   return (
     <>
+      <Refresh />
       <Button
         primary
         {...buttonProps}
@@ -299,5 +302,19 @@ export default function CreateCluster() {
         />
       </ModalMountTransition>
     </>
+  )
+}
+
+function Refresh() {
+  const { refresh } = useLogin()
+
+  return (
+    <Button
+      onClick={() => {
+        refresh?.()
+      }}
+    >
+      Refresh
+    </Button>
   )
 }
