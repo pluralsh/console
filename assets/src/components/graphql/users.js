@@ -16,6 +16,16 @@ export const UserFragment = gql`
     }
   }
 `
+
+export const RefreshTokenFragment = gql`
+  fragment RefreshTokenFragment on RefreshToken {
+    id
+    token
+    insertedAt
+    updatedAt
+  }
+`
+
 export const InviteFragment = gql`
   fragment InviteFragment on Invite {
     secureId
@@ -135,9 +145,13 @@ export const SIGNIN = gql`
     signIn(email: $email, password: $password) {
       ...UserFragment
       jwt
+      refreshToken {
+        ...RefreshTokenFragment
+      }
     }
   }
   ${UserFragment}
+  ${RefreshTokenFragment}
 `
 
 export const UPDATE_USER = gql`
@@ -187,9 +201,13 @@ export const SIGNUP = gql`
     signup(inviteId: $inviteId, attributes: $attributes) {
       ...UserFragment
       jwt
+      refreshToken {
+        ...RefreshTokenFragment
+      }
     }
   }
   ${UserFragment}
+  ${RefreshTokenFragment}
 `
 
 export const LOGIN_LINK = gql`
@@ -197,9 +215,13 @@ export const LOGIN_LINK = gql`
     loginLink(key: $key) {
       ...UserFragment
       jwt
+      refreshToken {
+        ...RefreshTokenFragment
+      }
     }
   }
   ${UserFragment}
+  ${RefreshTokenFragment}
 `
 
 export const NOTIFICATIONS_Q = gql`

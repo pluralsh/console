@@ -1,5 +1,6 @@
 import { RefreshDocument, RefreshQuery } from 'generated/graphql'
-import { ErrorLink } from 'apollo-link-error'
+import { FetchResult, Observable } from '@apollo/client'
+import { ErrorHandler } from 'apollo-link-error'
 
 import { client } from './client'
 import {
@@ -17,15 +18,15 @@ export const getRefreshedToken = async () => {
     variables: { token: refreshToken },
   })
 
-  console.log('refreshResolverResponse', refreshResolverResponse)
   const jwt = refreshResolverResponse.data.refresh?.jwt
 
+  console.log('DID IT', jwt)
   setToken(jwt)
 
   return jwt
 }
 
-export const onErrorHandler: ErrorLink.ErrorHandler = ({
+export const onErrorHandler: ErrorHandler = ({
   graphQLErrors,
   networkError,
   operation,
@@ -35,8 +36,17 @@ export const onErrorHandler: ErrorLink.ErrorHandler = ({
   console.log('graphQLErrors', graphQLErrors)
   const refreshToken = fetchRefreshToken()
   const is401 = networkError && (networkError as any).statusCode === 401
+  const isUnauthenticated = graphQLErrors?.some((err) => {
+    console.log('err.message', err.message)
 
-  if (is401 && refreshToken) {
+    return err.message === 'unauthenticated'
+  })
+
+  console.log('is401', is401)
+  console.log('isUnauthenticated', isUnauthenticated)
+  console.log('refreshToken', refreshToken)
+
+  if (refreshToken && (is401 || isUnauthenticated)) {
     console.log('refreshToken', refreshToken)
     console.log('operation', operation.operationName)
 
@@ -47,27 +57,36 @@ export const onErrorHandler: ErrorLink.ErrorHandler = ({
       return
     }
 
-    ;(async () => {
-      try {
-        const jwt = await getRefreshedToken()
+    const observable = new Observable<FetchResult>((observer) => {
+      ;(async () => {
+        try {
+          const jwt = await getRefreshedToken()
 
-        if (!jwt) {
+          if (!jwt) {
+            onNetworkError()
+          }
+          operation.setContext(({ headers = {} }) => ({
+            headers: {
+              authorization: `Bearer ${jwt}`,
+              ...headers,
+            },
+          }))
+          // Retry the failed request
+          const subscriber = {
+            next: observer.next.bind(observer),
+            error: observer.error.bind(observer),
+            complete: observer.complete.bind(observer),
+          }
+
+          forward(operation).subscribe(subscriber)
+        } catch (err) {
+          observer.error(err)
           onNetworkError()
         }
-        operation.setContext(({ headers = {} }) => ({
-          headers: {
-            authorization: `Bearer ${jwt}`,
-            ...headers,
-          },
-        }))
-        console.log('retry', operation)
-        // Retry the failed request
-        forward(operation)
-      } catch (err) {
-        console.log('refresh error', err)
-        onNetworkError()
-      }
-    })()
+      })()
+    })
+
+    return observable
   }
   if (is401) {
     console.log(networkError)
@@ -78,5 +97,5 @@ export const onErrorHandler: ErrorLink.ErrorHandler = ({
 export function onNetworkError() {
   wipeToken()
   wipeRefreshToken()
-  ;(window.location as any) = '/login'
+  window.location = '/login' as any as Location
 }

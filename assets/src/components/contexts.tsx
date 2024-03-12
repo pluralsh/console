@@ -1,6 +1,7 @@
 import {
   ComponentProps,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -9,15 +10,12 @@ import { jwtDecode } from 'jwt-decode'
 import {
   fetchRefreshToken,
   fetchToken,
-  setRefreshToken,
   setToken,
   wipeRefreshToken,
   wipeToken,
 } from 'helpers/auth'
 
 import { Edge } from 'utils/graphql'
-
-import { useNavigate } from 'react-router-dom'
 
 import {
   MeQuery,
@@ -55,33 +53,10 @@ const LoginContext = createContext<Partial<Login>>(DEFAULT_LOGIN)
 
 export const useLogin = () => useContext(LoginContext)
 
-const findLatestRefreshToken = (
-  tokenEdges: Nullable<Nullable<Edge<RefreshTokenFragment>>[]>
-) =>
-  tokenEdges?.reduce(
-    (newest, token, i) => {
-      console.log(i, token?.node?.token)
-      if (!newest && token?.node) return token.node
-      if (!token?.node) return undefined
-      if (
-        token?.node?.updatedAt &&
-        newest?.updatedAt &&
-        token.node.updatedAt > newest.updatedAt
-      ) {
-        console.log('updatedAt', token.node.updatedAt, newest.updatedAt)
-
-        return token.node
-      }
-
-      return newest
-    },
-    undefined as RefreshTokenFragment | undefined
-  )
-
 function completeLogout() {
   wipeToken()
   wipeRefreshToken()
-  // window.location = '/login' as any as Location
+  window.location = '/login' as any as Location
 }
 
 export function LoginContextProvider({
@@ -94,14 +69,8 @@ export function LoginContextProvider({
     () => reducePersonaConfigs(valueProp?.me?.personas),
     [valueProp?.me?.personas]
   )
-  const refreshToken = useMemo(
-    () => findLatestRefreshToken(valueProp?.refreshTokens?.edges)?.token,
-    [valueProp?.refreshTokens?.edges]
-  )
 
-  if (refreshToken) {
-    setRefreshToken(refreshToken)
-  }
+  console.log('me.refreshToken', valueProp?.me?.refreshToken)
 
   const [logout] = useLogoutMutation({
     onCompleted: completeLogout,
@@ -109,7 +78,6 @@ export function LoginContextProvider({
   })
   const [refreshQuery, { loading: refreshLoading, ...refreshStatus }] =
     useRefreshLazyQuery({
-      variables: { token: refreshToken || '' },
       onCompleted: (res) => {
         console.log('refreshQuery refreshed', res.refresh?.jwt)
         setToken(res.refresh?.jwt)
@@ -127,15 +95,21 @@ export function LoginContextProvider({
 
   console.log('refreshQuery loading', refreshLoading)
   console.log('refreshQuery status', refreshStatus)
+  const refresh = useCallback(() => {
+    console.log('try to refresh')
+
+    // refreshQuery({ variables: { token: fetchRefreshToken() || '' } })
+  }, [refreshQuery])
+
   useEffect(() => {
     if (
       !refreshLoading &&
       (!jwt ||
         (jwtDecode(jwt)?.exp ?? 0) * 1000 < Date.now() + JWT_REFRESH_THRESHOLD)
     ) {
-      refreshQuery()
+      refresh()
     }
-  }, [jwt, refreshLoading, refreshQuery])
+  }, [jwt, refresh, refreshLoading, refreshQuery])
 
   const value = useMemo(
     () =>
@@ -151,10 +125,10 @@ export function LoginContextProvider({
             },
             refresh: () => {
               console.log('refreshQuery refreshing')
-              refreshQuery({ variables: { token: fetchRefreshToken() || '' } })
+              refresh()
             },
           },
-    [logout, personaConfig, refreshQuery, valueProp]
+    [logout, personaConfig, refresh, valueProp]
   )
 
   return (

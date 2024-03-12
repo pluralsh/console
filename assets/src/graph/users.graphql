@@ -59,7 +59,9 @@ fragment Manifest on PluralManifest {
 query Me {
   me {
     ...User
-    refreshToken
+    refreshToken {
+      ...RefreshToken
+    }
     boundRoles {
       ...Role
     }

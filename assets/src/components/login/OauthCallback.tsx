@@ -8,7 +8,15 @@ import { useMutation } from '@apollo/client'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { setToken } from '../../helpers/auth'
+import { RefreshTokenFragment } from 'components/graphql/users'
+
+import { useNavigate } from 'react-router-dom'
+
+import { Button } from '@pluralsh/design-system'
+
+import { useTheme } from 'styled-components'
+
+import { setRefreshToken, setToken } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
 
 import { LoginPortal } from './LoginPortal'
@@ -17,8 +25,12 @@ const CALLBACK = gql`
   mutation Callback($code: String!, $redirect: String) {
     oauthCallback(code: $code, redirect: $redirect) {
       jwt
+      refreshToken {
+        ...RefreshTokenFragment
+      }
     }
   }
+  ${RefreshTokenFragment}
 `
 
 function OAuthError({ error: { error, error_description: description } }: any) {
@@ -45,13 +57,18 @@ function OAuthError({ error: { error, error_description: description } }: any) {
 
 export function OAuthCallback() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const theme = useTheme()
   const { code, ...oauthError } = qs.parse(location.search)
   const prevCode = useRef<any>()
   const [mutation, { error, loading }] = useMutation(CALLBACK, {
     variables: { code, redirect: localized('/oauth/callback') },
     onCompleted: (result) => {
-      setToken(result.oauthCallback.jwt)
-      window.location.href = '/'
+      const { jwt, refreshToken } = result?.oauthCallback || {}
+
+      setToken(jwt)
+      setRefreshToken(refreshToken?.token)
+      navigate('/')
     },
   })
 
@@ -67,7 +84,16 @@ export function OAuthCallback() {
   if (loading) return <LoadingIndicator />
 
   return error ? (
-    <Box
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        width: '100vw',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: theme.spacing.medium,
+      }}
       height="100vh"
       width="100vw"
       align="center"
@@ -77,6 +103,15 @@ export function OAuthCallback() {
         error={error}
         header="Failed to log in"
       />
-    </Box>
+      {error && (
+        <Button
+          onClick={() => {
+            navigate('/login')
+          }}
+        >
+          Go to login page
+        </Button>
+      )}
+    </div>
   ) : null
 }

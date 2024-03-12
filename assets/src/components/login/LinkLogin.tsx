@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import { useParams } from 'react-router'
 import { LoopingLogo } from '@pluralsh/design-system'
+import { useNavigate } from 'react-router-dom'
 
 import { setToken } from '../../helpers/auth'
 
@@ -11,12 +12,14 @@ import { LOGIN_LINK } from '../graphql/users'
 import { LoginPortal } from './LoginPortal'
 
 export function LinkLogin() {
+  const navigate = useNavigate()
   const { key } = useParams()
   const [mutation, { error }] = useMutation(LOGIN_LINK, {
     variables: { key },
-    onCompleted: ({ loginLink: { jwt } }) => {
+    onCompleted: ({ loginLink: { jwt, refreshToken } }) => {
       setToken(jwt)
-      window.location = '/' as any as Location
+      setRefreshToken(refreshToken)
+      navigate('/')
     },
     onError: console.log,
   })

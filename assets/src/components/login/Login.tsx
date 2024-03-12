@@ -6,14 +6,21 @@ import { Box } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
 import gql from 'graphql-tag'
 import { IntercomProps, useIntercom } from 'react-use-intercom'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import { isValidEmail } from 'utils/email'
 import { User, useMeQuery } from 'generated/graphql'
 import { useHelpSpacing } from 'components/help/HelpLauncher'
 
+import { set } from 'lodash'
+
 import { GqlError } from '../utils/Alert'
-import { setToken, wipeRefreshToken, wipeToken } from '../../helpers/auth'
+import {
+  setRefreshToken,
+  setToken,
+  wipeRefreshToken,
+  wipeToken,
+} from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
 import { ME_Q, SIGNIN } from '../graphql/users'
 import { IncidentContext } from '../incidents/context'
@@ -175,6 +182,8 @@ export function EnsureLogin({ children }) {
     errorPolicy: 'ignore',
   })
 
+  console.error('EnsureLogin error', error, 'data', data)
+
   const { boot, update } = useIntercom()
   const intercomAttrs = useIntercomAttributes(data?.me)
 
@@ -193,6 +202,8 @@ export function EnsureLogin({ children }) {
   const loginContextValue = data
 
   if (error || (!loading && !data?.clusterInfo)) {
+    return null
+
     return <LoginError error={error} />
   }
 
@@ -245,6 +256,7 @@ function OIDCLogin({ oidcUri, external }) {
 }
 
 export default function Login() {
+  const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
   const emailRef = useRef<any>()
 
@@ -256,12 +268,14 @@ export default function Login() {
   const { data: loginData } = useQuery(LOGIN_INFO, {
     variables: { redirect: localized('/oauth/callback') },
   })
+
   const [loginMutation, { loading: loginMLoading, error: loginMError }] =
     useMutation(SIGNIN, {
       variables: form,
-      onCompleted: ({ signIn: { jwt } }) => {
+      onCompleted: ({ signIn: { jwt, refreshToken } }) => {
         setToken(jwt)
-        window.location = '/' as any as Location
+        setRefreshToken(refreshToken?.token)
+        navigate('/')
       },
       onError: console.error,
     })

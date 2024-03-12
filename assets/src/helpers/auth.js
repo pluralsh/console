@@ -16,12 +16,14 @@ export function setToken(token) {
 export function setRefreshToken(token) {
   document.cookie = `${REFRESH_TOKEN}=${
     token || ''
-  }; path=/; secure; samesite=strict${
-    !token ? '; expires=Thu, 01 Jan 1970 00:00:00 UTC' : ''
-  }}`
+  }; path=/; secure; samesite=strict; expires=${new Date(
+    !token ? 0 : Date.now() + 365 * 24 * 60 * 60 * 1000
+  ).toUTCString()}`
+  console.log('setRefreshToken', token)
 }
 
 export function wipeRefreshToken() {
+  console.log('wipeRefreshToken')
   setRefreshToken('')
 }
 
