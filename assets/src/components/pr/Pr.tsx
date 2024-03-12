@@ -55,7 +55,7 @@ export default function Pr() {
   const cdEnabled = useCDEnabled({ redirect: true })
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${PR_ABS_PATH}/:tab*`)
+  const pathMatch = useMatch(`${PR_ABS_PATH}/:tab/*`)
   // @ts-ignore
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)

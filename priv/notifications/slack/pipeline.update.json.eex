@@ -3,6 +3,16 @@
     "blocks": [
         {
             "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "Pipeline <%= @pipe.name %> has pending changes",
+            }
+        },
+        {
+			"type": "divider"
+		},
+        {
+            "type": "section",
             "fields": [
                 {"type": "mrkdwn", "text": "*Url*\n<%= Console.url("/cd/pipelines/#{@pipe.id}") %>"}
             ]

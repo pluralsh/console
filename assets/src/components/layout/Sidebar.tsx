@@ -16,6 +16,7 @@ import {
   HistoryIcon,
   ListIcon,
   LogoutIcon,
+  MegaphoneIcon,
   PeopleIcon,
   PersonIcon,
   PrOpenIcon,
@@ -84,15 +85,6 @@ function getMenuItems({
       ignoreRegexp: /^\/cd\/settings.*$/,
     },
     {
-      text: 'Deployment Settings',
-      icon: <GearTrainIcon />,
-      path: `${CD_ABS_PATH}/settings`,
-      pathRegexp: /^\/cd\/settings.*$/,
-      enabled:
-        isCDEnabled &&
-        !!(personaConfig?.all || personaConfig?.sidebar?.settings),
-    },
-    {
       text: 'Kubernetes',
       icon: <ClusterIcon />,
       path: '/kubernetes',
@@ -147,6 +139,21 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.backups),
+    },
+    {
+      text: 'Notifications',
+      icon: <MegaphoneIcon />,
+      path: '/notifications',
+      enabled: isCDEnabled,
+    },
+    {
+      text: 'Deployment Settings',
+      icon: <GearTrainIcon />,
+      path: `${CD_ABS_PATH}/settings`,
+      pathRegexp: /^\/cd\/settings.*$/,
+      enabled:
+        isCDEnabled &&
+        !!(personaConfig?.all || personaConfig?.sidebar?.settings),
     },
     {
       text: 'Audits',

@@ -220,6 +220,15 @@ func GetPrAutomation(ctx context.Context, client ctrlruntimeclient.Client, ref *
 	return prAutomation, nil
 }
 
+func GetNotificationSink(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1.ObjectReference) (*v1alpha1.NotificationSink, error) {
+	sink := &v1alpha1.NotificationSink{}
+	if err := client.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, sink); err != nil {
+		return nil, err
+	}
+
+	return sink, nil
+}
+
 func GetConfigMapData(ctx context.Context, client ctrlruntimeclient.Client, namespace string, ref *corev1.ConfigMapKeySelector) (string, error) {
 	configMap := &corev1.ConfigMap{}
 	if err := client.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: namespace}, configMap); err != nil {

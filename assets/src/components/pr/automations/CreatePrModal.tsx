@@ -90,196 +90,194 @@ function CreatePrModalBase({
   )
 
   return (
-    <ModalMountTransition open={open}>
-      <Modal
-        portal
-        asForm
-        onSubmit={(e) => {
-          e.preventDefault()
-          switch (currentStep) {
-            case 'config':
-              if (configIsValid) setCurrentStep('review')
+    <Modal
+      portal
+      asForm
+      onSubmit={(e) => {
+        e.preventDefault()
+        switch (currentStep) {
+          case 'config':
+            if (configIsValid) setCurrentStep('review')
 
-              return
-            case 'review':
-              mutation({
-                variables: {
-                  id: prAutomation.id,
-                  branch,
-                  context: JSON.stringify(
-                    Object.fromEntries(
-                      filteredConfig.map((cfg) => [cfg.name, cfg.value])
-                    )
-                  ),
-                },
-              })
-          }
-        }}
-        open={open}
-        onClose={onClose || undefined}
-        header={
-          currentStep === 'success'
-            ? `Successfully created PR`
-            : `Pull request configuration for ${prAutomation?.name}`
+            return
+          case 'review':
+            mutation({
+              variables: {
+                id: prAutomation.id,
+                branch,
+                context: JSON.stringify(
+                  Object.fromEntries(
+                    filteredConfig.map((cfg) => [cfg.name, cfg.value])
+                  )
+                ),
+              },
+            })
         }
-        actions={
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'row-reverse',
-              gap: theme.spacing.small,
-            }}
-          >
-            {currentStep === 'success' ? (
-              <>
-                {successPr && (
-                  <Button
-                    primary
-                    type="button"
-                    endIcon={<LinkoutIcon />}
-                    as="a"
-                    href={successPr?.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View PR
-                  </Button>
-                )}
-                <Button
-                  secondary
-                  type="button"
-                  as={Link}
-                  to={PR_QUEUE_ABS_PATH}
-                >
-                  View all PRs
-                </Button>
-                <Button
-                  secondary
-                  type="button"
-                  onClick={() => onClose?.()}
-                >
-                  Close
-                </Button>
-              </>
-            ) : currentStep === 'review' ? (
-              <>
-                <Button
-                  loading={loading}
-                  primary
-                  disabled={!allowSubmit}
-                  type="submit"
-                >
-                  Create
-                </Button>
-                <Button
-                  secondary
-                  onClick={() => setCurrentStep('config')}
-                >
-                  Back
-                </Button>
-                <Button
-                  secondary
-                  onClick={() => onClose?.()}
-                >
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  loading={loading}
-                  primary
-                  disabled={!configIsValid}
-                  type="submit"
-                >
-                  Next
-                </Button>
-                <Button
-                  secondary
-                  onClick={() => onClose?.()}
-                >
-                  Cancel
-                </Button>
-              </>
-            )}
-          </div>
-        }
-      >
+      }}
+      open={open}
+      onClose={onClose || undefined}
+      header={
+        currentStep === 'success'
+          ? `Successfully created PR`
+          : `Pull request configuration for ${prAutomation?.name}`
+      }
+      actions={
         <div
           css={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.large,
+            flexDirection: 'row-reverse',
+            gap: theme.spacing.small,
           }}
         >
-          {currentStep !== 'success' && (
-            <div css={{ display: 'flex' }}>
-              <Stepper
-                compact
-                steps={steps}
-                stepIndex={stepIndex}
-                css={{
-                  width: 'max-content',
-                }}
-              />
-            </div>
-          )}
-          {currentStep === 'config' && (
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.medium,
-              }}
-            >
-              <Body1P>Provide some basic configuration for this PR:</Body1P>
-              <PrConfigurationFields
-                {...{
-                  configuration: prAutomation.configuration,
-                  configVals,
-                  setConfigVals,
-                }}
-              />
-            </div>
-          )}
-          {currentStep === 'review' && (
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.medium,
-              }}
-            >
-              <FormField
-                label="Configuration review"
-                name="configuration"
-              >
-                <Code
-                  language="json"
-                  showHeader={false}
+          {currentStep === 'success' ? (
+            <>
+              {successPr && (
+                <Button
+                  primary
+                  type="button"
+                  endIcon={<LinkoutIcon />}
+                  as="a"
+                  href={successPr?.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  {configJson || ''}
-                </Code>
-              </FormField>{' '}
-              <FormField
-                label="Branch"
-                required
-                name="branch"
+                  View PR
+                </Button>
+              )}
+              <Button
+                secondary
+                type="button"
+                as={Link}
+                to={PR_QUEUE_ABS_PATH}
               >
-                <Input2
-                  value={branch}
-                  onChange={(e) => setBranch(e.target.value)}
-                />
-              </FormField>
-              {error && <GqlError error={error} />}
-            </div>
-          )}
-          {currentStep === 'success' && successPr && (
-            <CreateSuccess pr={successPr} />
+                View all PRs
+              </Button>
+              <Button
+                secondary
+                type="button"
+                onClick={() => onClose?.()}
+              >
+                Close
+              </Button>
+            </>
+          ) : currentStep === 'review' ? (
+            <>
+              <Button
+                loading={loading}
+                primary
+                disabled={!allowSubmit}
+                type="submit"
+              >
+                Create
+              </Button>
+              <Button
+                secondary
+                onClick={() => setCurrentStep('config')}
+              >
+                Back
+              </Button>
+              <Button
+                secondary
+                onClick={() => onClose?.()}
+              >
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                loading={loading}
+                primary
+                disabled={!configIsValid}
+                type="submit"
+              >
+                Next
+              </Button>
+              <Button
+                secondary
+                onClick={() => onClose?.()}
+              >
+                Cancel
+              </Button>
+            </>
           )}
         </div>
-      </Modal>
-    </ModalMountTransition>
+      }
+    >
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.large,
+        }}
+      >
+        {currentStep !== 'success' && (
+          <div css={{ display: 'flex' }}>
+            <Stepper
+              compact
+              steps={steps}
+              stepIndex={stepIndex}
+              css={{
+                width: 'max-content',
+              }}
+            />
+          </div>
+        )}
+        {currentStep === 'config' && (
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.medium,
+            }}
+          >
+            <Body1P>Provide some basic configuration for this PR:</Body1P>
+            <PrConfigurationFields
+              {...{
+                configuration: prAutomation.configuration,
+                configVals,
+                setConfigVals,
+              }}
+            />
+          </div>
+        )}
+        {currentStep === 'review' && (
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.medium,
+            }}
+          >
+            <FormField
+              label="Configuration review"
+              name="configuration"
+            >
+              <Code
+                language="json"
+                showHeader={false}
+              >
+                {configJson || ''}
+              </Code>
+            </FormField>
+            <FormField
+              label="Branch"
+              required
+              name="branch"
+            >
+              <Input2
+                value={branch}
+                onChange={(e) => setBranch(e.target.value)}
+              />
+            </FormField>
+            {error && <GqlError error={error} />}
+          </div>
+        )}
+        {currentStep === 'success' && successPr && (
+          <CreateSuccess pr={successPr} />
+        )}
+      </div>
+    </Modal>
   )
 }
 

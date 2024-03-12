@@ -144,7 +144,7 @@ export const componentRoutes = (
   </Route>
 )
 
-export function CdRoot() {
+export function RequireCdEnabled() {
   useCDEnabled({ redirect: true })
 
   return <Outlet />
@@ -437,7 +437,7 @@ const serviceDetailsRoutes = (
 export const cdRoutes = [
   <Route
     path={CD_REL_PATH}
-    element={<CdRoot />}
+    element={<RequireCdEnabled />}
   >
     <Route
       index

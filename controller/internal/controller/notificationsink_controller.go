@@ -106,7 +106,7 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 	if !exists || !notificationSink.Status.IsSHAEqual(sha) {
 		logger.Info("upsert notification sink", "name", notificationSink.NotificationName())
-		ns, err := r.ConsoleClient.UpsertNotificationSink(ctx, genAttr(notificationSink))
+		ns, err := r.ConsoleClient.UpsertNotificationSink(ctx, genNotificationSinkAttr(notificationSink))
 		if err != nil {
 			utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -224,7 +224,7 @@ func (r *NotificationSinkReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func genAttr(notificationSink *v1alpha1.NotificationSink) console.NotificationSinkAttributes {
+func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) console.NotificationSinkAttributes {
 	attr := console.NotificationSinkAttributes{
 		Name:          notificationSink.NotificationName(),
 		Type:          notificationSink.Spec.Type,

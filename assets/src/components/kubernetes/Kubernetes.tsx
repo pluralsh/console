@@ -6,14 +6,7 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import {
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
 
 import {
@@ -41,12 +34,11 @@ import { KubernetesClient } from '../../helpers/kubernetes.client'
 import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 
 import { NamespaceSelect } from './NamespaceSelect'
+import { ResourceListContext, ResourceListContextT } from './ResourceList'
 
-export type KubernetesOutletContext = {
+export type KubernetesOutletContextT = {
   cluster?: ClusterTinyFragment
-  namespaces: string[]
   namespace: string
-  setNamespace: Dispatch<SetStateAction<string>>
 }
 
 const NAMESPACE_PARAM = 'namespace'
@@ -71,6 +63,7 @@ export default function Kubernetes() {
     searchParams.get(NAMESPACE_PARAM) ?? ''
   )
   const [headerContent, setHeaderContent] = useState<ReactNode>()
+  const [namespaced, setNamespaced] = useState<boolean>(false)
   const pathPrefix = getKubernetesAbsPath(clusterId)
 
   const { data: namespacesQuery } = useNamespacesQuery({
@@ -108,9 +101,20 @@ export default function Kubernetes() {
     []
   )
 
-  const context: KubernetesOutletContext = useMemo(
-    () => ({ cluster, namespaces, namespace, setNamespace }),
-    [cluster, namespaces, namespace, setNamespace]
+  const resourceListContext: ResourceListContextT = useMemo(
+    () => ({
+      setNamespaced,
+    }),
+    []
+  )
+
+  const outletContext: KubernetesOutletContextT = useMemo(
+    () => ({
+      cluster,
+      namespace,
+      setNamespaced,
+    }),
+    [cluster, namespace, setNamespaced]
   )
 
   useEffect(() => {
@@ -141,7 +145,7 @@ export default function Kubernetes() {
             clusters={clusters}
             selectedKey={clusterId}
             onSelectionChange={
-              (id) => navigate(getKubernetesAbsPath(id as string)) // TODO: Keep current view if possible when switching clusters.
+              (id) => navigate(getKubernetesAbsPath(id as string)) // TODO: Keep current view if possible when switching clusters. Keep search params as well.
             }
             withoutTitleContent
           />
@@ -164,26 +168,31 @@ export default function Kubernetes() {
           overflowX: 'hidden',
         }}
       >
-        <PageHeaderContext.Provider value={pageHeaderContext}>
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'row',
-              flexGrow: 1,
-              justifyContent: 'space-between',
-            }}
-          >
-            {headerContent}
-            <NamespaceSelect
-              namespaces={namespaces}
-              namespace={namespace}
-              onChange={(ns) => {
-                setNamespace(ns)
-                setSearchParams({ namespace })
+        <div css={{ display: 'flex' }}>
+          {headerContent}
+          {namespaced && (
+            <div
+              css={{
+                display: 'flex',
+                flexGrow: 1,
+                justifyContent: 'flex-end',
               }}
-            />
-          </div>
-          <Outlet context={context} />
+            >
+              <NamespaceSelect
+                namespaces={namespaces}
+                namespace={namespace}
+                onChange={(ns) => {
+                  setNamespace(ns)
+                  setSearchParams({ namespace })
+                }}
+              />
+            </div>
+          )}
+        </div>
+        <PageHeaderContext.Provider value={pageHeaderContext}>
+          <ResourceListContext.Provider value={resourceListContext}>
+            <Outlet context={outletContext} />
+          </ResourceListContext.Provider>
         </PageHeaderContext.Provider>
       </div>
     </ResponsiveLayoutPage>

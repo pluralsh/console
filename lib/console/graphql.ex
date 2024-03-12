@@ -61,7 +61,7 @@ defmodule Console.GraphQl do
     import_fields :kubernetes_queries
     import_fields :audit_queries
     import_fields :plural_queries
-    import_fields :policy_queries
+    import_fields :upgrade_policy_queries
     import_fields :runbook_queries
     import_fields :webhook_queries
     import_fields :database_queries
@@ -73,7 +73,7 @@ defmodule Console.GraphQl do
     import_fields :user_mutations
     import_fields :kubernetes_mutations
     import_fields :plural_mutations
-    import_fields :policy_mutations
+    import_fields :upgrade_policy_mutations
     import_fields :runbook_mutations
     import_fields :webhook_mutations
     import_fields :database_mutations

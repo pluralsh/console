@@ -3,6 +3,16 @@
     "blocks": [
         {
             "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "Pull Request <%= @pr.status %>:\n<%= @pr.title %>",
+            }
+        },
+        {
+			"type": "divider"
+		},
+        {
+            "type": "section",
             "fields": [
                 {"type": "mrkdwn", "text": "*Url*\n<%= @pr.url %>"}
                 {"type": "mrkdwn", "text": "*Status*\n<%= @pr.status %>"}

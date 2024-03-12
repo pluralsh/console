@@ -27,13 +27,12 @@ import Events from '../components/kubernetes/cluster/Events'
 import Namespaces from '../components/kubernetes/cluster/Namespaces'
 import CustomResources from '../components/kubernetes/customresources/CustomResources'
 import NetworkPolicies from '../components/kubernetes/discovery/NetworkPolicies'
-
 import ClusterRoleBindings from '../components/kubernetes/access/ClusterRoleBindings'
 import ClusterRoles from '../components/kubernetes/access/ClusterRoles'
 import RoleBindings from '../components/kubernetes/access/RoleBindings'
 import Roles from '../components/kubernetes/access/Roles'
-
 import Access from '../components/kubernetes/access/Access'
+import ResourceList from '../components/kubernetes/ResourceList'
 
 import {
   ACCESS_REL_PATH,
@@ -99,35 +98,67 @@ export const kubernetesRoutes = [
       />
       <Route
         path={DEPLOYMENTS_REL_PATH}
-        element={<Deployments />}
+        element={
+          <ResourceList namespaced>
+            <Deployments />
+          </ResourceList>
+        }
       />
       <Route
         path={PODS_REL_PATH}
-        element={<Pods />}
+        element={
+          <ResourceList namespaced>
+            <Pods />
+          </ResourceList>
+        }
       />
       <Route
         path={REPLICA_SETS_REL_PATH}
-        element={<ReplicaSets />}
+        element={
+          <ResourceList namespaced>
+            <ReplicaSets />
+          </ResourceList>
+        }
       />
       <Route
         path={STATEFUL_SETS_REL_PATH}
-        element={<StatefulSets />}
+        element={
+          <ResourceList namespaced>
+            <StatefulSets />
+          </ResourceList>
+        }
       />
       <Route
         path={DAEMON_SETS_REL_PATH}
-        element={<DaemonSets />}
+        element={
+          <ResourceList namespaced>
+            <DaemonSets />
+          </ResourceList>
+        }
       />
       <Route
         path={JOBS_REL_PATH}
-        element={<Jobs />}
+        element={
+          <ResourceList namespaced>
+            <Jobs />
+          </ResourceList>
+        }
       />
       <Route
         path={CRON_JOBS_REL_PATH}
-        element={<CronJobs />}
+        element={
+          <ResourceList namespaced>
+            <CronJobs />
+          </ResourceList>
+        }
       />
       <Route
         path={REPLICATION_CONTROLLERS_REL_PATH}
-        element={<ReplicationControllers />}
+        element={
+          <ResourceList namespaced>
+            <ReplicationControllers />
+          </ResourceList>
+        }
       />
     </Route>
     <Route
@@ -145,19 +176,35 @@ export const kubernetesRoutes = [
       />
       <Route
         path={SERVICES_REL_PATH}
-        element={<Services />}
+        element={
+          <ResourceList namespaced>
+            <Services />
+          </ResourceList>
+        }
       />
       <Route
         path={INGRESSES_REL_PATH}
-        element={<Ingresses />}
+        element={
+          <ResourceList namespaced>
+            <Ingresses />
+          </ResourceList>
+        }
       />
       <Route
         path={INGRESS_CLASSES_REL_PATH}
-        element={<IngressClasses />}
+        element={
+          <ResourceList>
+            <IngressClasses />
+          </ResourceList>
+        }
       />
       <Route
         path={NETWORK_POLICIES_REL_PATH}
-        element={<NetworkPolicies />}
+        element={
+          <ResourceList>
+            <NetworkPolicies />
+          </ResourceList>
+        }
       />
     </Route>
     <Route
@@ -175,15 +222,27 @@ export const kubernetesRoutes = [
       />
       <Route
         path={PERSISTENT_VOLUME_CLAIMS_REL_PATH}
-        element={<PersistentVolumeClaims />}
+        element={
+          <ResourceList namespaced>
+            <PersistentVolumeClaims />
+          </ResourceList>
+        }
       />
       <Route
         path={PERSISTENT_VOLUME_REL_PATH}
-        element={<PersistentVolumes />}
+        element={
+          <ResourceList>
+            <PersistentVolumes />
+          </ResourceList>
+        }
       />
       <Route
         path={STORAGE_CLASSES_REL_PATH}
-        element={<StorageClasses />}
+        element={
+          <ResourceList>
+            <StorageClasses />
+          </ResourceList>
+        }
       />
     </Route>
     <Route
@@ -201,11 +260,19 @@ export const kubernetesRoutes = [
       />
       <Route
         path={CONFIG_MAPS_REL_PATH}
-        element={<ConfigMaps />}
+        element={
+          <ResourceList namespaced>
+            <ConfigMaps />
+          </ResourceList>
+        }
       />
       <Route
         path={SECRETS_REL_PATH}
-        element={<Secrets />}
+        element={
+          <ResourceList namespaced>
+            <Secrets />
+          </ResourceList>
+        }
       />
     </Route>
     <Route
@@ -223,15 +290,27 @@ export const kubernetesRoutes = [
       />
       <Route
         path={NODES_REL_PATH}
-        element={<Nodes />}
+        element={
+          <ResourceList>
+            <Nodes />
+          </ResourceList>
+        }
       />
       <Route
         path={EVENTS_REL_PATH}
-        element={<Events />}
+        element={
+          <ResourceList namespaced>
+            <Events />
+          </ResourceList>
+        }
       />
       <Route
         path={NAMESPACES_REL_PATH}
-        element={<Namespaces />}
+        element={
+          <ResourceList>
+            <Namespaces />
+          </ResourceList>
+        }
       />
     </Route>
     <Route
@@ -249,24 +328,44 @@ export const kubernetesRoutes = [
       />
       <Route
         path={ROLES_REL_PATH}
-        element={<Roles />}
+        element={
+          <ResourceList namespaced>
+            <Roles />
+          </ResourceList>
+        }
       />
       <Route
         path={ROLE_BINDINGS_REL_PATH}
-        element={<RoleBindings />}
+        element={
+          <ResourceList namespaced>
+            <RoleBindings />
+          </ResourceList>
+        }
       />
       <Route
         path={CLUSTER_ROLES_REL_PATH}
-        element={<ClusterRoles />}
+        element={
+          <ResourceList>
+            <ClusterRoles />
+          </ResourceList>
+        }
       />
       <Route
         path={CLUSTER_ROLE_BINDINGS_REL_PATH}
-        element={<ClusterRoleBindings />}
+        element={
+          <ResourceList>
+            <ClusterRoleBindings />
+          </ResourceList>
+        }
       />
     </Route>
     <Route
       path={CUSTOM_RESOURCES_REL_PATH}
-      element={<CustomResources />}
+      element={
+        <ResourceList>
+          <CustomResources />
+        </ResourceList>
+      }
     />
   </Route>,
 ]
