@@ -181,15 +181,15 @@ export default function Kubernetes() {
         }}
       >
         <PageHeaderContext.Provider value={pageHeaderContext}>
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'row',
-              flexGrow: 1,
-              justifyContent: 'space-between',
-            }}
-          >
+          <div css={{ display: 'flex' }}>
             {headerContent}
+            <div
+              css={{
+                display: 'flex',
+                flexGrow: 1,
+                justifyContent: 'flex-end',
+              }}
+            />
             <NamespaceSelect
               namespaces={namespaces}
               namespace={namespace}
