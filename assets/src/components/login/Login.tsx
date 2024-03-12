@@ -44,7 +44,6 @@ const setInputFocus = (ref: RefObject<any>) => {
 }
 
 function LoginError({ error }) {
-  console.error('Login error', error)
   useEffect(() => {
     const to = setTimeout(() => {
       wipeToken()
@@ -54,6 +53,8 @@ function LoginError({ error }) {
 
     return () => clearTimeout(to)
   }, [])
+
+  console.error('Login error:', error)
 
   return (
     <LoginPortal>
@@ -179,9 +180,6 @@ export function EnsureLogin({ children }) {
     pollInterval: POLL_INTERVAL,
     errorPolicy: 'ignore',
   })
-
-  console.error('EnsureLogin error', error, 'data', data)
-
   const { boot, update } = useIntercom()
   const intercomAttrs = useIntercomAttributes(data?.me)
 
@@ -200,8 +198,6 @@ export function EnsureLogin({ children }) {
   const loginContextValue = data
 
   if (error || (!loading && !data?.clusterInfo)) {
-    return null
-
     return <LoginError error={error} />
   }
 
