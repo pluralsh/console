@@ -16,7 +16,7 @@
         },
         {
             "name": "Source",
-            "value": "<%= @source.url %>@<%= @source.ref %>"
+            "value": "<%= @source.url %> <%= @source.ref %>"
         }, {
             "name": "Revision",
             "value": "<%= @service.sha %>"

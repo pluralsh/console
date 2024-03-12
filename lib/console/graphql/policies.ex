@@ -25,7 +25,7 @@ defmodule Console.GraphQl.Policies do
     timestamps()
   end
 
-  object :policy_queries do
+  object :upgrade_policy_queries do
     field :upgrade_policies, list_of(:upgrade_policy) do
       middleware Authenticated
 
@@ -33,7 +33,7 @@ defmodule Console.GraphQl.Policies do
     end
   end
 
-  object :policy_mutations do
+  object :upgrade_policy_mutations do
     field :create_upgrade_policy, :upgrade_policy do
       middleware Authenticated
       middleware AdminRequired

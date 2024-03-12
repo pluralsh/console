@@ -24,7 +24,7 @@ import (
 
 // NotificationSinkSpec defines the desired state of NotificationSink
 type NotificationSinkSpec struct {
-	// Name the name of this service, if not provided ServiceDeployment's own name from ServiceDeployment.ObjectMeta will be used.
+	// Name the name of this service, if not provided NotificationSink's own name from NotificationSink.ObjectMeta will be used.
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 

@@ -5,8 +5,8 @@ import { merge } from 'lodash'
 import { PartialDeep } from 'type-fest'
 
 import {
+  CloudProviderSettingsAttributes,
   ClusterProviderFragment,
-  CloudProviderSettingsAttributes as SettingsTemp,
   useUpdateClusterProviderMutation,
 } from 'generated/graphql'
 import {
@@ -27,11 +27,6 @@ import { getProviderName } from 'components/utils/Provider'
 import ModalAlt from '../ModalAlt'
 
 import { AwsSettings, GcpSettings } from './ProviderSettings'
-
-// TODO: Replace when api updated
-type CloudProviderSettingsAttributes = SettingsTemp & {
-  azure?: Record<string, string> | null | undefined
-}
 
 const updateSettings = produce(
   (

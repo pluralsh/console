@@ -362,12 +362,13 @@ func (r *ServiceReconciler) MergeHelmValues(ctx context.Context, secretRef *core
 		if err != nil {
 			return nil, err
 		}
-		for k, v := range valuesFromSecret.Data {
-			var out interface{}
-			if err := yaml.Unmarshal(v, &out); err != nil {
-				return nil, err
+
+		for _, vals := range valuesFromSecret.Data {
+			current := map[string]interface{}{}
+			if err := yaml.Unmarshal(vals, &current); err != nil {
+				continue
 			}
-			valuesFromMap[k] = out
+			valuesFromMap = algorithms.Merge(valuesFromMap, current)
 		}
 	}
 

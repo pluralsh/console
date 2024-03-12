@@ -15,7 +15,8 @@ defmodule Console.Deployments.Policies.Rbac do
     PipelineContext,
     AgentMigration,
     RuntimeService,
-    PrAutomation
+    PrAutomation,
+    PolicyConstraint
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -63,6 +64,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(Settings.fetch(), user, action)
   def evaluate(%DeploymentSettings{} = settings, %User{} = user, action),
     do: recurse(settings, user, action)
+  def evaluate(%PolicyConstraint{} = constraint, %User{} = user, action),
+    do: recurse(constraint, user, action, & &1.cluster)
   def evaluate(_, _, _), do: false
 
   def preload(%PipelineContext{} = ctx), do: Repo.preload(ctx, [pipeline: [:read_bindings, :write_bindings]])
@@ -82,6 +85,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(settings, [:read_bindings, :write_bindings, :git_bindings, :create_bindings])
   def preload(%PrAutomation{} = pr),
     do: Repo.preload(pr, [:write_bindings, :create_bindings])
+  def preload(%PolicyConstraint{} = pr),
+    do: Repo.preload(pr, [:cluster])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)

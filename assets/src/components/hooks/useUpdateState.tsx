@@ -3,12 +3,12 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { isSubsetEqual } from 'utils/isSubsetEqual'
 
-type IsEqualFn<T = any> = (a: T, b: T) => boolean
-type IsEqualFns<T> = Partial<Record<keyof T, IsEqualFn<T[keyof T]>>>
+type IsDifferentFn<T = any> = (a: T, b: T) => boolean
+type IsDifferentFns<T> = Partial<Record<keyof T, IsDifferentFn<T[keyof T]>>>
 
 export function useUpdateState<T extends Record<string, unknown>>(
   initialState: T,
-  isEqualFns?: IsEqualFns<T>
+  isDifferentFns?: IsDifferentFns<T>
 ) {
   const initialStateRef = useRef(initialState)
 
@@ -38,10 +38,10 @@ export function useUpdateState<T extends Record<string, unknown>>(
 
   const hasUpdates = useMemo(() => {
     for (const [key, value] of Object.entries(state)) {
-      const isEqualFn = isEqualFns?.[key]
+      const isDifferentFn = isDifferentFns?.[key]
 
-      if (isEqualFn) {
-        if (isEqualFn(value as any, initialState[key] as any)) {
+      if (isDifferentFn) {
+        if (isDifferentFn(value as any, initialState[key] as any)) {
           return true
         }
       } else if (!isEqual(value, initialState[key])) {
@@ -50,7 +50,7 @@ export function useUpdateState<T extends Record<string, unknown>>(
     }
 
     return false
-  }, [isEqualFns, initialState, state])
+  }, [isDifferentFns, initialState, state])
 
   return {
     state: { ...state },
