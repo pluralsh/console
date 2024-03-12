@@ -265,6 +265,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve &Deployments.violation_statistics/3
     end
 
+    @desc "Queries logs for a cluster out of loki"
+    field :logs, list_of(:log_stream) do
+      arg :query,      non_null(:loki_query)
+      arg :start,      :long
+      arg :end,        :long
+      arg :limit,      non_null(:integer)
+
+      resolve &Deployments.cluster_logs/3
+    end
+
     @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
     field :runtime_services, list_of(:runtime_service), resolve: &Deployments.runtime_services/3
 

@@ -13,6 +13,7 @@ defmodule Console.Schema.User do
     field :plural_id,        :string
     field :password,         :string, virtual: true
     field :jwt,              :string, virtual: true
+    field :refresh_token,    :string, virtual: true
     field :service_account,  :boolean
     field :deleted_at,       :utc_datetime_usec
     field :read_timestamp,   :utc_datetime_usec

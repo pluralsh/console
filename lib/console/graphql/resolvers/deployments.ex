@@ -88,6 +88,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Backup
   delegates Console.GraphQl.Resolvers.Deployments.Notification
   delegates Console.GraphQl.Resolvers.Deployments.Policy
+  delegates Console.GraphQl.Resolvers.Deployments.Observability
 
   def list_addons(_, _), do: AddOns.addons()
 

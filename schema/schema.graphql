@@ -662,6 +662,28 @@ input PolicyBindingAttributes {
   groupId: ID
 }
 
+input LokiQuery {
+  labels: [LokiLabelFilter]
+  filter: LokiLineFilter
+}
+
+input LokiLabelFilter {
+  name: String!
+
+  value: String!
+
+  "whether to apply a regex match for this label"
+  regex: Boolean
+}
+
+input LokiLineFilter {
+  "the string to filter for (eg what is put in our search ui)"
+  text: String
+
+  "whether to treat this string as a regex match"
+  regex: Boolean
+}
+
 type PolicyBinding {
   id: ID
   user: User
@@ -1768,6 +1790,9 @@ type ServiceDeployment {
 
   helmRepository: HelmRepository
 
+  "Queries logs for a service out of loki"
+  logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
+
   "read policy for this service"
   readBindings: [PolicyBinding]
 
@@ -2421,6 +2446,9 @@ type Cluster {
 
   "Computes a list of statistics for OPA constraint violations w\/in this cluster"
   violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
+
+  "Queries logs for a cluster out of loki"
+  logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
 
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]
@@ -3667,18 +3695,8 @@ type DashboardMetric {
   results: [MetricResult]
 }
 
-type MetricResult {
-  timestamp: Long
-  value: String
-}
-
 type MetricResponse {
   metric: Map
-  values: [MetricResult]
-}
-
-type LogStream {
-  stream: Map
   values: [MetricResult]
 }
 
@@ -4546,6 +4564,7 @@ type User {
   roles: UserRoles
   readTimestamp: DateTime
   buildTimestamp: DateTime
+  refreshToken: RefreshToken
   assumeBindings: [PolicyBinding]
   groups: [Group]
   personas: [Persona]
@@ -4906,6 +4925,16 @@ enum Delta {
   CREATE
   UPDATE
   DELETE
+}
+
+type MetricResult {
+  timestamp: Long
+  value: String
+}
+
+type LogStream {
+  stream: Map
+  values: [MetricResult]
 }
 
 scalar Map

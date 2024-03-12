@@ -43,21 +43,11 @@ defmodule Console.GraphQl.Observability do
     field :results, list_of(:metric_result)
   end
 
-  object :metric_result do
-    field :timestamp, :long, resolve: fn %{timestamp: ts}, _, _ -> {:ok, ceil(ts)} end
-    field :value,     :string
-  end
-
   object :metric_response do
     field :metric, :map
     field :values, list_of(:metric_result), resolve: fn %{values: vals}, _, _ ->
       {:ok, Enum.map(vals, fn [ts, val] -> %{timestamp: ts, value: val} end)}
     end
-  end
-
-  object :log_stream do
-    field :stream, :map
-    field :values, list_of(:metric_result)
   end
 
   object :observability_queries do

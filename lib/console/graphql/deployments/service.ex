@@ -162,6 +162,16 @@ defmodule Console.GraphQl.Deployments.Service do
         manual_dataloader(loader, Console.GraphQl.Resolvers.HelmRepositoryLoader, :helm, svc)
     end
 
+    @desc "Queries logs for a service out of loki"
+    field :logs, list_of(:log_stream) do
+      arg :query,      non_null(:loki_query)
+      arg :start,      :long
+      arg :end,        :long
+      arg :limit,      non_null(:integer)
+
+      resolve &Deployments.service_logs/3
+    end
+
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this service"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
 

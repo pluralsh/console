@@ -101,8 +101,8 @@ defmodule Console.GraphQl.Resolvers.User do
 
   def logout(_, %{context: %{current_user: user}}), do: Users.logout_user(user)
 
-  def refresh(%{token: token}, %{context: %{current_user: user}}) do
-    Users.authorize_refresh(token, user)
+  def refresh(%{token: token}, _) do
+    Users.authorize_refresh(token)
     |> with_jwt()
   end
 
