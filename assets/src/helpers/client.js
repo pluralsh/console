@@ -27,7 +27,7 @@ const WS_URI = '/socket'
 export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
-  const authLink = setContext((req, { headers }) => {
+  const authLink = setContext((_, { headers }) => {
     const token = fetchToken()
     const authHeaders = token ? { authorization: `Bearer ${token}` } : {}
 
@@ -37,7 +37,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const errorLink = onError(onErrorHandler)
 
   const retryLink = new RetryLink({
-    delay: { initial: 200000 },
+    delay: { initial: 200 },
     attempts: {
       max: Infinity,
       retryIf: (error) => !!error && !!fetchToken(),
