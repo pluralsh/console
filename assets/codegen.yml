@@ -24,6 +24,17 @@ generates:
           content:
             - '/* eslint-disable */'
             - '/* prettier-ignore */'
+  src/generated/graphql-kubernetes.ts:
+    schema: 'https://raw.githubusercontent.com/kubernetes/dashboard/feat/openapi/modules/web/schema/schema.graphql'
+    documents: './src/graph-kubernetes/**/*.graphql'
+    plugins:
+    - 'typescript'
+    - 'typescript-operations'
+    - 'typescript-react-apollo'
+    - add:
+        content:
+        - '/* eslint-disable */'
+        - '/* prettier-ignore */'
 config:
   scalars:
     Map: Record<string, unknown>

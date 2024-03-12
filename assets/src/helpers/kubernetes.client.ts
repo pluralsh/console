@@ -6,7 +6,11 @@ import { fetchToken } from './auth'
 const K8S_API_URL = '/api/v1/'
 const CLIENT_MAP = new Map<string, ApolloClient<any>>()
 
-function KubernetesClient(clusterID: string): ApolloClient<any> {
+function KubernetesClient(clusterID: string): ApolloClient<any> | undefined {
+  if (!clusterID) {
+    return undefined
+  }
+
   if (CLIENT_MAP.has(clusterID)) {
     return CLIENT_MAP.get(clusterID)!
   }

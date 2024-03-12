@@ -15,7 +15,6 @@ import {
   useState,
 } from 'react'
 import { isEmpty } from 'lodash'
-import { gql } from '@apollo/client'
 
 import {
   ACCESS_REL_PATH,
@@ -39,6 +38,7 @@ import { mapExistingNodes } from '../../utils/graphql'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
+import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 
 import { NamespaceSelect } from './NamespaceSelect'
 
@@ -61,18 +61,6 @@ const directory: Directory = [
   { path: CUSTOM_RESOURCES_REL_PATH, label: 'Custom resources' },
 ] as const
 
-const query = gql`
-  query Namespaces {
-    namespaceList @rest(type: "NamespaceList", path: "namespace") {
-      namespaces {
-        objectMeta {
-          name
-        }
-      }
-    }
-  }
-`
-
 export default function Kubernetes() {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -83,8 +71,20 @@ export default function Kubernetes() {
     searchParams.get(NAMESPACE_PARAM) ?? ''
   )
   const [headerContent, setHeaderContent] = useState<ReactNode>()
-  const [namespaces, setNamespaces] = useState<Array<string>>([])
   const pathPrefix = getKubernetesAbsPath(clusterId)
+
+  const { data: namespacesQuery } = useNamespacesQuery({
+    client: KubernetesClient(clusterId!),
+    skip: !clusterId,
+  })
+
+  const namespaces = useMemo(
+    () =>
+      namespacesQuery?.handleGetNamespaces?.namespaces?.map(
+        (namespace) => namespace?.objectMeta?.name ?? ''
+      ) ?? [],
+    [namespacesQuery?.handleGetNamespaces?.namespaces]
+  )
 
   const { data } = useClustersTinyQuery({
     pollInterval: 120_000,
@@ -112,22 +112,6 @@ export default function Kubernetes() {
     () => ({ cluster, namespaces, namespace, setNamespace }),
     [cluster, namespaces, namespace, setNamespace]
   )
-
-  useEffect(() => {
-    if (!clusterId) {
-      return
-    }
-
-    KubernetesClient(clusterId)
-      .query({ query })
-      .then((response) => {
-        setNamespaces(
-          response?.data?.namespaceList?.namespaces?.map(
-            (namespace) => namespace?.objectMeta?.name
-          )
-        )
-      })
-  }, [clusterId])
 
   useEffect(() => {
     if (!isEmpty(clusters) && !cluster) {

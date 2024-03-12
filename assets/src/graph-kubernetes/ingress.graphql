@@ -1,0 +1,13 @@
+query Ingresses($namespace: String!) {
+    handleGetIngressList(namespace: $namespace) @rest(path: "ingress/{args.namespace}") {
+        listMeta {
+            totalItems
+        }
+        items {
+            objectMeta {
+                name
+                namespace
+            }
+        }
+    }
+}
