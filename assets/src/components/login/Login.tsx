@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef, useState } from 'react'
+import { RefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, LoopingLogo } from '@pluralsh/design-system'
 import { Div, Flex, Form, P } from 'honorable'
 import { useMutation, useQuery } from '@apollo/client'
@@ -197,16 +197,20 @@ export function EnsureLogin({ children }) {
 
   const loginContextValue = data
 
+  const incidentContextValue = useMemo(() => {
+    const { __typename: _, ...clusterInformation } = data?.clusterInfo || {}
+
+    return { clusterInformation }
+  }, [data?.clusterInfo])
+
   if (error || (!loading && !data?.clusterInfo)) {
     return <LoginError error={error} />
   }
 
   if (!data?.clusterInfo) return null
-  const { __typename, ...clusterInformation } = data.clusterInfo
 
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <IncidentContext.Provider value={{ clusterInformation }}>
+    <IncidentContext.Provider value={incidentContextValue}>
       <LoginContextProvider value={loginContextValue}>
         {children}
       </LoginContextProvider>
