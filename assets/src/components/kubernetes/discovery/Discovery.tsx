@@ -25,7 +25,7 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { KubernetesOutletContext } from '../Kubernetes'
+import { KubernetesOutletContextT } from '../Kubernetes'
 
 const directory = [
   { path: SERVICES_REL_PATH, label: 'Services' },
@@ -35,7 +35,7 @@ const directory = [
 ] as const
 
 export default function Discovery() {
-  const { cluster } = useOutletContext() as KubernetesOutletContext
+  const { cluster } = useOutletContext() as KubernetesOutletContextT
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(
@@ -46,8 +46,7 @@ export default function Discovery() {
   )
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${getDiscoveryAbsPath(cluster?.id)}/:tab*`)
-  // @ts-expect-error
+  const pathMatch = useMatch(`${getDiscoveryAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 

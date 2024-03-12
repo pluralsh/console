@@ -28,7 +28,7 @@ import {
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 
-import { KubernetesOutletContext } from '../Kubernetes'
+import { KubernetesOutletContextT } from '../Kubernetes'
 
 const directory = [
   { path: DEPLOYMENTS_REL_PATH, label: 'Deployments' },
@@ -42,7 +42,7 @@ const directory = [
 ] as const
 
 export default function Workloads() {
-  const { cluster } = useOutletContext() as KubernetesOutletContext
+  const { cluster } = useOutletContext() as KubernetesOutletContextT
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(
@@ -53,8 +53,7 @@ export default function Workloads() {
   )
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${getWorkloadsAbsPath(cluster?.id)}/:tab*`)
-  // @ts-expect-error
+  const pathMatch = useMatch(`${getWorkloadsAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 
