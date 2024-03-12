@@ -7487,6 +7487,20 @@ export type SearchUsersQueryVariables = Exact<{
 
 export type SearchUsersQuery = { __typename?: 'RootQueryType', users?: { __typename?: 'UserConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'UserEdge', node?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null } | null> | null } | null };
 
+export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LogoutMutation = { __typename?: 'RootMutationType', logout?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
+
+export type RefreshTokenFragment = { __typename?: 'RefreshToken', id: string, token: string, insertedAt?: string | null, updatedAt?: string | null };
+
+export type RefreshQueryVariables = Exact<{
+  token: Scalars['String']['input'];
+}>;
+
+
+export type RefreshQuery = { __typename?: 'RootQueryType', refresh?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
+
 export const ApplicationSpecFragmentDoc = gql`
     fragment ApplicationSpec on ApplicationSpec {
   descriptor {
@@ -9378,6 +9392,14 @@ export const ManifestFragmentDoc = gql`
   }
   cluster
   bucketPrefix
+}
+    `;
+export const RefreshTokenFragmentDoc = gql`
+    fragment RefreshToken on RefreshToken {
+  id
+  token
+  insertedAt
+  updatedAt
 }
     `;
 export const AppDocument = gql`
@@ -15005,6 +15027,79 @@ export type SearchUsersQueryHookResult = ReturnType<typeof useSearchUsersQuery>;
 export type SearchUsersLazyQueryHookResult = ReturnType<typeof useSearchUsersLazyQuery>;
 export type SearchUsersSuspenseQueryHookResult = ReturnType<typeof useSearchUsersSuspenseQuery>;
 export type SearchUsersQueryResult = Apollo.QueryResult<SearchUsersQuery, SearchUsersQueryVariables>;
+export const LogoutDocument = gql`
+    mutation Logout {
+  logout {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMutationVariables>;
+
+/**
+ * __useLogoutMutation__
+ *
+ * To run a mutation, you first call `useLogoutMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLogoutMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [logoutMutation, { data, loading, error }] = useLogoutMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, options);
+      }
+export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
+export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
+export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
+export const RefreshDocument = gql`
+    query Refresh($token: String!) {
+  refresh(token: $token) {
+    ...User
+    jwt
+  }
+}
+    ${UserFragmentDoc}`;
+
+/**
+ * __useRefreshQuery__
+ *
+ * To run a query within a React component, call `useRefreshQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRefreshQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRefreshQuery({
+ *   variables: {
+ *      token: // value for 'token'
+ *   },
+ * });
+ */
+export function useRefreshQuery(baseOptions: Apollo.QueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
+      }
+export function useRefreshLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
+        }
+export function useRefreshSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RefreshQuery, RefreshQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<RefreshQuery, RefreshQueryVariables>(RefreshDocument, options);
+        }
+export type RefreshQueryHookResult = ReturnType<typeof useRefreshQuery>;
+export type RefreshLazyQueryHookResult = ReturnType<typeof useRefreshLazyQuery>;
+export type RefreshSuspenseQueryHookResult = ReturnType<typeof useRefreshSuspenseQuery>;
+export type RefreshQueryResult = Apollo.QueryResult<RefreshQuery, RefreshQueryVariables>;
 export const namedOperations = {
   Query: {
     App: 'App',
@@ -15082,7 +15177,8 @@ export const namedOperations = {
     TokenAudits: 'TokenAudits',
     Me: 'Me',
     Users: 'Users',
-    SearchUsers: 'SearchUsers'
+    SearchUsers: 'SearchUsers',
+    Refresh: 'Refresh'
   },
   Mutation: {
     CreatePrAutomation: 'CreatePrAutomation',
@@ -15143,7 +15239,8 @@ export const namedOperations = {
     UpdatePersona: 'UpdatePersona',
     DeletePersona: 'DeletePersona',
     CreateAccessToken: 'CreateAccessToken',
-    DeleteAccessToken: 'DeleteAccessToken'
+    DeleteAccessToken: 'DeleteAccessToken',
+    Logout: 'Logout'
   },
   Fragment: {
     CostAnalysis: 'CostAnalysis',
@@ -15260,6 +15357,7 @@ export const namedOperations = {
     RoleBinding: 'RoleBinding',
     Role: 'Role',
     AvailableFeatures: 'AvailableFeatures',
-    Manifest: 'Manifest'
+    Manifest: 'Manifest',
+    RefreshToken: 'RefreshToken'
   }
 }
