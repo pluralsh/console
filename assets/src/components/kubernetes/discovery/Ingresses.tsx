@@ -12,12 +12,6 @@ import { useKubernetesContext } from '../Kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
-function renderLabel(label: [string, unknown]) {
-  const [key, value] = label
-
-  return `${key}: ${value}`
-}
-
 const columnHelper = createColumnHelper<IngressT>()
 
 const columns = [
@@ -49,7 +43,7 @@ const columns = [
           size="small"
           limit={1}
           values={Object.entries(labels || {})}
-          transformValue={renderLabel}
+          transformValue={(label) => label.join(': ')}
         />
       )
     },
