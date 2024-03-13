@@ -4609,7 +4609,7 @@ export const IngressesDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "ingress/{args.namespace}?filterBy={args.filterBy}$sortBy={args.sortBy}$itemsPerPage={args.itemsPerPage}$page={args.page}") {
+  ) @rest(path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     listMeta {
       totalItems
     }
