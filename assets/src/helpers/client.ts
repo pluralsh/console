@@ -19,12 +19,14 @@ import { fetchToken } from './auth'
 const GQL_URL = '/gql'
 const WS_URI = '/socket'
 
+export const REFRESH_OP_NAME = 'Refresh'
+
 export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
   // Set the Authorization header for all requests except for token refreshes
   const authLink = setContext(({ operationName }, { headers }) => {
-    const token = operationName === 'Refresh' ? undefined : fetchToken()
+    const token = operationName === REFRESH_OP_NAME ? undefined : fetchToken()
     const authHeaders = token ? { authorization: `Bearer ${token}` } : {}
 
     return { headers: { ...headers, ...authHeaders } }
@@ -59,7 +61,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
     authLink.concat(retryLink).concat(gqlLink)
   )
 
-    const client = new ApolloClient({
+  const client = new ApolloClient({
     // @ts-ignore
     link: splitLink,
     cache: new InMemoryCache({

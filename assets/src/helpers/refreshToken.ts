@@ -3,7 +3,7 @@ import { FetchResult } from '@apollo/client'
 import { Observable } from 'apollo-link'
 import { ErrorHandler } from 'apollo-link-error'
 
-import { client } from './client'
+import { REFRESH_OP_NAME, client } from './client'
 import {
   fetchRefreshToken,
   setToken,
@@ -36,14 +36,19 @@ export const onErrorHandler: ErrorHandler = ({
     (err) => err.message === 'unauthenticated'
   )
 
+  if (
+    operation.operationName === REFRESH_OP_NAME &&
+    (is401 || isUnauthenticated)
+  ) {
+    onNetworkError()
+  }
   // Attempt to refresh jwt if we have a refresh token and the request is
-  // unauthenticated
-  if (refreshToken && (is401 || isUnauthenticated)) {
-    // Allow Refresh to fail without retrying
-    if (operation.operationName === 'Refresh') {
-      return
-    }
-
+  // unauthenticated and request is not a refresh request
+  if (
+    operation.operationName !== REFRESH_OP_NAME &&
+    refreshToken &&
+    (is401 || isUnauthenticated)
+  ) {
     const observable = new Observable<FetchResult>((observer) => {
       ;(async () => {
         try {
@@ -83,5 +88,7 @@ export const onErrorHandler: ErrorHandler = ({
 export function onNetworkError() {
   wipeToken()
   wipeRefreshToken()
-  window.location = '/login' as any as Location
+  if (window.location.pathname !== '/login') {
+    window.location = '/login' as any as Location
+  }
 }
