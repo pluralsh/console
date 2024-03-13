@@ -40,16 +40,23 @@ export enum HttpMethod {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** stores ImagePullSecret in a Kubernetes Secret */
   handleCreateImagePullSecret?: Maybe<Secret_Secret>;
+  /** create a Namespace */
   handleCreateNamespace: Namespace_NamespaceSpec;
+  /** deletes a resource from a namespace */
   handleDeleteResource?: Maybe<Scalars['JSON']['output']>;
   /** creates an application based on provided deployment.AppDeploymentSpec */
   handleDeploy: Deployment_AppDeploymentSpec;
   /** create an application from file */
   handleDeployFromFile?: Maybe<Deployment_AppDeploymentFromFileResponse>;
+  /** pauses the Deployment */
   handleDeploymentPause?: Maybe<Deployment_DeploymentDetail>;
+  /** rollout restart of the Deployment */
   handleDeploymentRestart: Deployment_RolloutSpec;
+  /** resumes the Deployment */
   handleDeploymentResume?: Maybe<Deployment_DeploymentDetail>;
+  /** rolls back the Deployment to the target revision */
   handleDeploymentRollback: Deployment_RolloutSpec;
   /** checks if provided image is valid */
   handleImageReferenceValidity?: Maybe<Validation_ImageReferenceValidity>;
@@ -57,8 +64,11 @@ export type Mutation = {
   handleNameValidity?: Maybe<Validation_AppNameValidity>;
   /** checks if provided service protocol is valid */
   handleProtocolValidity?: Maybe<Validation_ProtocolValidity>;
-  handlePutResource?: Maybe<Scalars['JSON']['output']>;
+  /** creates a resource in a namespace */
+  handlePutResource: Runtime_Unknown;
+  /** scales a non-namespaced resource */
   handleScaleResource?: Maybe<Scaling_ReplicaCounts>;
+  /** triggers a Job based on CronJob */
   handleTriggerCronJob?: Maybe<Scalars['JSON']['output']>;
   /** scales ReplicationController to a number of replicas */
   handleUpdateReplicasCount?: Maybe<Scalars['JSON']['output']>;
@@ -66,121 +76,326 @@ export type Mutation = {
 
 
 export type MutationHandleCreateImagePullSecretArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
   input: Secret_ImagePullSecretSpec_Input;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type MutationHandleCreateNamespaceArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
   input: Namespace_NamespaceSpec_Input;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationHandleDeleteResourceArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type MutationHandleDeployArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
   input: Deployment_AppDeploymentSpec_Input;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type MutationHandleDeployFromFileArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
   input: Deployment_AppDeploymentFromFileSpec_Input;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationHandleDeploymentPauseArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  deployment: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationHandleDeploymentRestartArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  deployment: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationHandleDeploymentResumeArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  deployment: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type MutationHandleDeploymentRollbackArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  deployment: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
   input: Deployment_RolloutSpec_Input;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type MutationHandleImageReferenceValidityArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
   input: Validation_ImageReferenceValiditySpec_Input;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type MutationHandleNameValidityArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
   input: Validation_AppNameValiditySpec_Input;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type MutationHandleProtocolValidityArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
   input: Validation_ProtocolValiditySpec_Input;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationHandlePutResourceArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  input: Runtime_Unknown_Input;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationHandleScaleResourceArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationHandleTriggerCronJobArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type MutationHandleUpdateReplicasCountArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
   input: Replicationcontroller_ReplicationControllerSpec_Input;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
   namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
   replicationController: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Query = {
   __typename?: 'Query';
+  /** handles exec into pod */
   handleExecShell?: Maybe<Handler_TerminalResponse>;
   /** returns a list of available protocols for the service */
   handleGetAvailableProtocols?: Maybe<Deployment_Protocols>;
+  /** returns detailed information about ClusterRoleBinding */
   handleGetClusterRoleBindingDetail?: Maybe<Clusterrolebinding_ClusterRoleBindingDetail>;
+  /** returns a list of ClusterRoleBindings */
   handleGetClusterRoleBindingList?: Maybe<Clusterrolebinding_ClusterRoleBindingList>;
+  /** returns detailed information about ClusterRole */
   handleGetClusterRoleDetail?: Maybe<Clusterrole_ClusterRoleDetail>;
+  /** returns a list of ClusterRoles */
   handleGetClusterRoleList?: Maybe<Clusterrole_ClusterRoleList>;
+  /** returns detailed information about ConfigMap */
   handleGetConfigMapDetail?: Maybe<Configmap_ConfigMapDetail>;
+  /** returns a list of ConfigMaps in a namespaces */
   handleGetConfigMapList?: Maybe<Configmap_ConfigMapList>;
+  /** returns detailed information about CronJob */
   handleGetCronJobDetail?: Maybe<Cronjob_CronJobDetail>;
+  /** returns a list of Events for CronJob */
   handleGetCronJobEvents?: Maybe<Common_EventList>;
+  /** returns a list of Jobs for CronJob */
   handleGetCronJobJobs?: Maybe<Job_JobList>;
+  /** returns a list of CronJobs in a namespaces */
   handleGetCronJobList?: Maybe<Cronjob_CronJobList>;
   /** generates a one-time CSRF token that can be used by POST request */
   handleGetCsrfToken?: Maybe<Csrf_Response>;
+  /** returns detailed information about CustomResourceDefinition */
   handleGetCustomResourceDefinitionDetail?: Maybe<Types_CustomResourceDefinitionDetail>;
+  /** returns a list of CustomResourceDefinition */
   handleGetCustomResourceDefinitionList?: Maybe<Types_CustomResourceDefinitionList>;
+  /** returns detailed information about custom resource object */
   handleGetCustomResourceObjectDetail?: Maybe<Types_CustomResourceObjectDetail>;
+  /** returns Events for custom resource object */
   handleGetCustomResourceObjectEvents?: Maybe<Common_EventList>;
+  /** returns a list of objects of CustomResourceDefinition */
   handleGetCustomResourceObjectList?: Maybe<Types_CustomResourceObjectList>;
+  /** returns detailed information about DaemonSet */
   handleGetDaemonSetDetail?: Maybe<Daemonset_DaemonSetDetail>;
+  /** returns a list of Events for DaemonSet */
   handleGetDaemonSetEvents?: Maybe<Common_EventList>;
+  /** returns a list of DaemonSets in a namespaces */
   handleGetDaemonSetList?: Maybe<Daemonset_DaemonSetList>;
+  /** returns a list of Pods for DaemonSet */
   handleGetDaemonSetPods?: Maybe<Pod_PodList>;
+  /** returns a list of Services for DaemonSet */
   handleGetDaemonSetServices?: Maybe<Service_ServiceList>;
+  /** returns detailed information about Deployment */
   handleGetDeploymentDetail?: Maybe<Deployment_DeploymentDetail>;
+  /** returns a list of Events for Deployment */
   handleGetDeploymentEvents?: Maybe<Common_EventList>;
+  /** returns a list of new ReplicaSets for Deployment */
   handleGetDeploymentNewReplicaSet?: Maybe<Replicaset_ReplicaSet>;
+  /** returns a list of old ReplicaSets for Deployment */
   handleGetDeploymentOldReplicaSets?: Maybe<Replicaset_ReplicaSetList>;
+  /** returns a list of Deployments in a namespaces */
   handleGetDeployments?: Maybe<Deployment_DeploymentList>;
+  /** returns a list of Events in a namespace */
   handleGetEventList?: Maybe<Common_EventList>;
+  /** returns detailed information about HorizontalPodAutoscaler */
   handleGetHorizontalPodAutoscalerDetail?: Maybe<Horizontalpodautoscaler_HorizontalPodAutoscalerDetail>;
+  /** returns a list of HorizontalPodAutoscalers in a namespaces */
   handleGetHorizontalPodAutoscalerList?: Maybe<Horizontalpodautoscaler_HorizontalPodAutoscalerList>;
+  /** returns a list of HorizontalPodAutoscalers for resource */
   handleGetHorizontalPodAutoscalerListForResource?: Maybe<Horizontalpodautoscaler_HorizontalPodAutoscalerList>;
+  /** returns detailed information about IngressClass */
   handleGetIngressClass?: Maybe<Ingressclass_IngressClass>;
+  /** returns a list of IngressClasses */
   handleGetIngressClassList?: Maybe<Ingressclass_IngressClassList>;
+  /** returns detailed information about Ingress */
   handleGetIngressDetail?: Maybe<Ingress_IngressDetail>;
+  /** returns a list of Events for Ingress */
   handleGetIngressEvent?: Maybe<Common_EventList>;
-  /** get ingresses for namespace */
+  /** returns a list of Ingresses in a namespaces */
   handleGetIngressList?: Maybe<Ingress_IngressList>;
+  /** returns detailed information about Job */
   handleGetJobDetail?: Maybe<Job_JobDetail>;
+  /** returns a list of Events for Job */
   handleGetJobEvents?: Maybe<Common_EventList>;
+  /** returns a list of Jobs in a namespaces */
   handleGetJobList?: Maybe<Job_JobList>;
+  /** returns a list of Pods for Job */
   handleGetJobPods?: Maybe<Pod_PodList>;
+  /** returns detailed information about Namespace */
   handleGetNamespaceDetail?: Maybe<Namespace_NamespaceDetail>;
+  /** returns a list of Events for Namespace */
   handleGetNamespaceEvents?: Maybe<Common_EventList>;
+  /** returns a list of Namespaces */
   handleGetNamespaces?: Maybe<Namespace_NamespaceList>;
+  /** returns detailed information about NetworkPolicy */
   handleGetNetworkPolicyDetail?: Maybe<Networkpolicy_NetworkPolicyDetail>;
+  /** returns a list of NetworkPolicies in a namespaces */
   handleGetNetworkPolicyList?: Maybe<Networkpolicy_NetworkPolicyList>;
+  /** returns detailed information about Node */
   handleGetNodeDetail?: Maybe<Node_NodeDetail>;
+  /** returns a list of Events for Node */
   handleGetNodeEvents?: Maybe<Common_EventList>;
+  /** returns a list of Nodes */
   handleGetNodeList?: Maybe<Node_NodeList>;
+  /** returns a list of Pods for Node */
   handleGetNodePods?: Maybe<Pod_PodList>;
+  /** returns detailed information about PersistentVolumeClaim */
   handleGetPersistentVolumeClaimDetail?: Maybe<Persistentvolumeclaim_PersistentVolumeClaimDetail>;
+  /** returns a list of PersistentVolumeClaim from specified namespace */
   handleGetPersistentVolumeClaimList?: Maybe<Persistentvolumeclaim_PersistentVolumeClaimList>;
+  /** returns detailed information about PersistentVolume */
   handleGetPersistentVolumeDetail?: Maybe<Persistentvolume_PersistentVolumeDetail>;
+  /** returns a list of PersistentVolumes from all namespaces */
   handleGetPersistentVolumeList?: Maybe<Persistentvolume_PersistentVolumeList>;
+  /** returns a list of containers for Pod */
   handleGetPodContainers?: Maybe<Pod_PodDetail>;
+  /** returns detailed information about Pod */
   handleGetPodDetail?: Maybe<Pod_PodDetail>;
+  /** returns a list of Events for Pod */
   handleGetPodEvents?: Maybe<Common_EventList>;
+  /** returns a list of containers for Pod */
   handleGetPodPersistentVolumeClaims?: Maybe<Persistentvolumeclaim_PersistentVolumeClaimList>;
+  /** returns a list of Pods in a namespaces */
   handleGetPods?: Maybe<Pod_PodList>;
+  /** returns a number of replicas of non-namespaced resource */
   handleGetReplicaCount?: Maybe<Scaling_ReplicaCounts>;
+  /** returns detailed information about ReplicaSet */
   handleGetReplicaSetDetail?: Maybe<Replicaset_ReplicaSetDetail>;
+  /** returns a list of Events for ReplicaSet */
   handleGetReplicaSetEvents?: Maybe<Common_EventList>;
+  /** returns a list of Pods for ReplicaSet */
   handleGetReplicaSetPods?: Maybe<Pod_PodList>;
+  /** returns a list of Services for ReplicaSet */
   handleGetReplicaSetServices?: Maybe<Pod_PodList>;
-  /** returns a list of Services for ReplicationController */
+  /** returns a list of ReplicaSets in a namespace */
   handleGetReplicaSets?: Maybe<Replicaset_ReplicaSetList>;
   /** returns detailed information about ReplicationController */
   handleGetReplicationControllerDetail?: Maybe<Replicationcontroller_ReplicationControllerDetail>;
@@ -192,77 +407,1179 @@ export type Query = {
   handleGetReplicationControllerPods?: Maybe<Pod_PodList>;
   /** returns a list of Services for ReplicationController */
   handleGetReplicationControllerServices?: Maybe<Service_ServiceList>;
-  handleGetResource?: Maybe<Scalars['JSON']['output']>;
+  /** returns unstructured resource from a namespace */
+  handleGetResource?: Maybe<Unstructured_Unstructured>;
+  /** returns detailed information about RoleBinding */
   handleGetRoleBindingDetail?: Maybe<Rolebinding_RoleBindingDetail>;
+  /** returns a list of RoleBindings in a namespace */
   handleGetRoleBindingList?: Maybe<Rolebinding_RoleBindingList>;
+  /** returns detailed information about Role */
   handleGetRoleDetail?: Maybe<Role_RoleDetail>;
+  /** returns a list of Roles in a namespace */
   handleGetRoleList?: Maybe<Role_RoleList>;
+  /** returns detailed information about Secret */
   handleGetSecretDetail?: Maybe<Secret_SecretDetail>;
+  /** returns a list of Secrets in a namespace */
   handleGetSecretList?: Maybe<Secret_SecretList>;
+  /** returns detailed information about ServiceAccount */
   handleGetServiceAccountDetail?: Maybe<Serviceaccount_ServiceAccountDetail>;
+  /** returns a list of ImagePullSecret Secrets for ServiceAccount */
   handleGetServiceAccountImagePullSecrets?: Maybe<Secret_SecretList>;
+  /** returns a list of ServiceAccounts in a namespaces */
   handleGetServiceAccountList?: Maybe<Serviceaccount_ServiceAccountList>;
+  /** returns a list of Secrets for ServiceAccount */
   handleGetServiceAccountSecrets?: Maybe<Secret_SecretList>;
+  /** returns detailed information about Service */
   handleGetServiceDetail?: Maybe<Service_ServiceDetail>;
+  /** returns a list of Events for Service */
   handleGetServiceEvent?: Maybe<Common_EventList>;
+  /** returns a list of Ingresses for Service */
   handleGetServiceIngressList?: Maybe<Ingress_IngressList>;
+  /** returns a list of Services in a namespace */
   handleGetServiceList?: Maybe<Service_ServiceList>;
+  /** returns a list of Pods for Service */
   handleGetServicePods?: Maybe<Pod_PodList>;
   handleGetState?: Maybe<Scalars['JSON']['output']>;
+  /** returns detailed information about StatefulSets */
   handleGetStatefulSetDetail?: Maybe<Statefulset_StatefulSetDetail>;
+  /** returns a list of Events for StatefulSets */
   handleGetStatefulSetEvents?: Maybe<Common_EventList>;
+  /** returns a list of StatefulSets in a namespaces */
   handleGetStatefulSetList?: Maybe<Statefulset_StatefulSetList>;
+  /** returns  a list of Pods for StatefulSets */
   handleGetStatefulSetPods?: Maybe<Pod_PodList>;
+  /** returns detailed information about StorageClass */
   handleGetStorageClass?: Maybe<Storageclass_StorageClass>;
+  /** returns a list of StorageClasses */
   handleGetStorageClassList?: Maybe<Storageclass_StorageClassList>;
+  /** returns a list of PersistentVolumes assigned to StorageClass */
   handleGetStorageClassPersistentVolumes?: Maybe<Persistentvolume_PersistentVolumeList>;
-  handleLogFile?: Maybe<Logs_LogDetails>;
+  /** returns a text file with logs from a Container */
+  handleLogFile?: Maybe<Array<Maybe<Scalars['Int']['output']>>>;
+  /** returns log sources for a resource */
   handleLogSource?: Maybe<Controller_LogSources>;
+  /** returns logs from a Container */
   handleLogs?: Maybe<Logs_LogDetails>;
+};
+
+
+export type QueryHandleExecShellArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  container: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  pod: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetAvailableProtocolsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetClusterRoleBindingDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetClusterRoleBindingListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetClusterRoleDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetClusterRoleListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetConfigMapDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  configmap: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetConfigMapListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetCronJobDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetCronJobEventsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetCronJobJobsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetCronJobListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryHandleGetCsrfTokenArgs = {
   action: Scalars['String']['input'];
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetCustomResourceDefinitionDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  crd: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetCustomResourceDefinitionListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetCustomResourceObjectDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  crd: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  object: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetCustomResourceObjectEventsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  crd: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  object: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetCustomResourceObjectListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  crd: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetDaemonSetDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  daemonSet: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetDaemonSetEventsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  daemonSet: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetDaemonSetListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetDaemonSetPodsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  daemonSet: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetDaemonSetServicesArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  daemonSet: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetDeploymentDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  deployment: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetDeploymentEventsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  deployment: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetDeploymentNewReplicaSetArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  deployment: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetDeploymentOldReplicaSetsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  deployment: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetDeploymentsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetEventListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetHorizontalPodAutoscalerDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  horizontalpodautoscaler: Scalars['String']['input'];
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetHorizontalPodAutoscalerListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetHorizontalPodAutoscalerListForResourceArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetIngressClassArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  ingressclass: Scalars['String']['input'];
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetIngressClassListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetIngressDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetIngressEventArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryHandleGetIngressListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
   namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetJobDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetJobEventsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetJobListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetJobPodsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetNamespaceDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetNamespaceEventsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetNamespacesArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetNetworkPolicyDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  networkpolicy: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetNetworkPolicyListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetNodeDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetNodeEventsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetNodeListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetNodePodsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetPersistentVolumeClaimDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetPersistentVolumeClaimListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetPersistentVolumeDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  persistentvolume: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetPersistentVolumeListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetPodContainersArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  pod: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetPodDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  pod: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetPodEventsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  pod: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetPodPersistentVolumeClaimsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  pod: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetPodsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetReplicaCountArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetReplicaSetDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  replicaSet: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetReplicaSetEventsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  replicaSet: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetReplicaSetPodsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  replicaSet: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetReplicaSetServicesArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  replicaSet: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryHandleGetReplicaSetsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
   namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryHandleGetReplicationControllerDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
   namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
   replicationController: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryHandleGetReplicationControllerEventsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
   namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
   replicationController: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryHandleGetReplicationControllerListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
   namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryHandleGetReplicationControllerPodsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
   namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
   replicationController: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type QueryHandleGetReplicationControllerServicesArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
   namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
   replicationController: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetResourceArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetRoleBindingDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetRoleBindingListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetRoleDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetRoleListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetSecretDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetSecretListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetServiceAccountDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  serviceaccount: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetServiceAccountImagePullSecretsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  serviceaccount: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetServiceAccountListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetServiceAccountSecretsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  serviceaccount: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetServiceDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  service: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetServiceEventArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  service: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetServiceIngressListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  service: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetServiceListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetServicePodsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  service: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetStateArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetStatefulSetDetailArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  statefulset: Scalars['String']['input'];
+};
+
+
+export type QueryHandleGetStatefulSetEventsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  statefulset: Scalars['String']['input'];
+};
+
+
+export type QueryHandleGetStatefulSetListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetStatefulSetPodsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  statefulset: Scalars['String']['input'];
+};
+
+
+export type QueryHandleGetStorageClassArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  storageclass: Scalars['String']['input'];
+};
+
+
+export type QueryHandleGetStorageClassListArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleGetStorageClassPersistentVolumesArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  storageclass: Scalars['String']['input'];
+};
+
+
+export type QueryHandleLogFileArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  container: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  pod: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleLogSourceArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  resourceName: Scalars['String']['input'];
+  resourceType: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryHandleLogsArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  container: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  namespace: Scalars['String']['input'];
+  page?: InputMaybe<Scalars['String']['input']>;
+  pod: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Api_DataPoint = {
@@ -1432,6 +2749,21 @@ export type Rolebinding_RoleBindingList = {
   listMeta: Types_ListMeta;
 };
 
+export type Runtime_Unknown = {
+  __typename?: 'runtime_Unknown';
+  ContentEncoding: Scalars['String']['output'];
+  ContentType: Scalars['String']['output'];
+  apiVersion?: Maybe<Scalars['String']['output']>;
+  kind?: Maybe<Scalars['String']['output']>;
+};
+
+export type Runtime_Unknown_Input = {
+  ContentEncoding: Scalars['String']['input'];
+  ContentType: Scalars['String']['input'];
+  apiVersion?: InputMaybe<Scalars['String']['input']>;
+  kind?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Scaling_ReplicaCounts = {
   __typename?: 'scaling_ReplicaCounts';
   actualReplicas: Scalars['Int']['output'];
@@ -1653,6 +2985,11 @@ export type Types_TypeMeta = {
   kind?: Maybe<Scalars['String']['output']>;
   restartable?: Maybe<Scalars['Boolean']['output']>;
   scalable?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type Unstructured_Unstructured = {
+  __typename?: 'unstructured_Unstructured';
+  Object: Scalars['JSON']['output'];
 };
 
 /**
@@ -1984,9 +3321,9 @@ export type V1_EndpointPort = {
    * * Un-prefixed protocol names - reserved for IANA standard service names (as per RFC-6335 and https://www.iana.org/assignments/service-names).
    *
    * * Kubernetes-defined prefixed names:
-   *   * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
-   *   * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
-   *   * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
+   * * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
+   * * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
+   * * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
    *
    * * Other protocols should use implementation-defined prefixed names such as mycompany.com/my-custom-protocol.
    */
@@ -2173,15 +3510,15 @@ export type V1_HttpIngressPath = {
   path?: Maybe<Scalars['String']['output']>;
   /**
    * pathType determines the interpretation of the path matching. PathType can be one of the following values: * Exact: Matches the URL path exactly. * Prefix: Matches based on a URL path prefix split by '/'. Matching is
-   *   done on a path element by element basis. A path element refers is the
-   *   list of labels in the path split by the '/' separator. A request is a
-   *   match for path p if every p is an element-wise prefix of p of the
-   *   request path. Note that if the last element of the path is a substring
-   *   of the last element in request path, it is not a match (e.g. /foo/bar
-   *   matches /foo/bar/baz, but does not match /foo/barbaz).
+   * done on a path element by element basis. A path element refers is the
+   * list of labels in the path split by the '/' separator. A request is a
+   * match for path p if every p is an element-wise prefix of p of the
+   * request path. Note that if the last element of the path is a substring
+   * of the last element in request path, it is not a match (e.g. /foo/bar
+   * matches /foo/bar/baz, but does not match /foo/barbaz).
    * * ImplementationSpecific: Interpretation of the Path matching is up to
-   *   the IngressClass. Implementations can treat this as a separate PathType
-   *   or treat it identically to Prefix or Exact path types.
+   * the IngressClass. Implementations can treat this as a separate PathType
+   * or treat it identically to Prefix or Exact path types.
    * Implementations are required to support all path types.
    */
   pathType: Scalars['String']['output'];
@@ -2294,9 +3631,9 @@ export type V1_IngressPortStatus = {
   __typename?: 'v1_IngressPortStatus';
   /**
    * error is to record the problem with the service port The format of the error shall comply with the following rules: - built-in error values shall be specified in this file and those shall use
-   *   CamelCase names
+   * CamelCase names
    * - cloud provider specific error values must have names that comply with the
-   *   format foo.example.com/CamelCase.
+   * format foo.example.com/CamelCase.
    */
   error?: Maybe<Scalars['String']['output']>;
   /** port is the port number of the ingress port. */
@@ -2310,10 +3647,10 @@ export type V1_IngressRule = {
   __typename?: 'v1_IngressRule';
   /**
    * host is the fully qualified domain name of a network host, as defined by RFC 3986. Note the following deviations from the "host" part of the URI as defined in RFC 3986: 1. IPs are not allowed. Currently an IngressRuleValue can only apply to
-   *    the IP in the Spec of the parent Ingress.
+   * the IP in the Spec of the parent Ingress.
    * 2. The `:` delimiter is not respected because ports are not allowed.
-   * 	  Currently the port of an Ingress is implicitly :80 for http and
-   * 	  :443 for https.
+   * Currently the port of an Ingress is implicitly :80 for http and
+   * :443 for https.
    * Both these may change in the future. Incoming requests are matched against the host before the IngressRuleValue. If the host is unspecified, the Ingress routes all traffic based on the specified IngressRuleValue.
    *
    * host can be "precise" which is a domain name without the terminating dot of a network host (e.g. "foo.bar.com") or "wildcard", which is a domain name prefixed with a single wildcard label (e.g. "*.foo.com"). The wildcard character '*' must appear by itself as the first DNS label and matches only a single label. You cannot have a wildcard label by itself (e.g. Host == "*"). Requests will be matched against the Host field in the following way: 1. If host is precise, the request matches this rule if the http host header is equal to Host. 2. If host is a wildcard, then the request matches this rule if the http host header is to equal to the suffix (removing the first label) of the wildcard rule.
@@ -3249,18 +4586,14 @@ export type Validation_ProtocolValiditySpec_Input = {
 
 export type IngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
+  filterBy: Scalars['String']['input'];
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
 export type IngressesQuery = { __typename?: 'Query', handleGetIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, protocol: string, nodePort: number } | null> } | null> } | null> } | null };
-
-export type IngressQueryVariables = Exact<{
-  name: Scalars['String']['input'];
-  namespace: Scalars['String']['input'];
-}>;
-
-
-export type IngressQuery = { __typename?: 'Query', handleGetIngressDetail?: { __typename?: 'ingress_IngressDetail', objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null, namespace?: string | null } } | null, handleGetIngressEvent?: { __typename?: 'common_EventList', events: Array<{ __typename?: 'common_Event', message: string, objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null } } | null> } | null };
 
 export type NamespacesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3269,8 +4602,8 @@ export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __
 
 
 export const IngressesDocument = gql`
-    query Ingresses($namespace: String!) {
-  handleGetIngressList(namespace: $namespace) @rest(path: "ingress/{args.namespace}") {
+    query Ingresses($namespace: String!, $filterBy: String!, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetIngressList(namespace: $namespace, filterBy: $filterBy) @rest(path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     listMeta {
       totalItems
     }
@@ -3308,6 +4641,10 @@ export const IngressesDocument = gql`
  * const { data, loading, error } = useIngressesQuery({
  *   variables: {
  *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -3327,58 +4664,6 @@ export type IngressesQueryHookResult = ReturnType<typeof useIngressesQuery>;
 export type IngressesLazyQueryHookResult = ReturnType<typeof useIngressesLazyQuery>;
 export type IngressesSuspenseQueryHookResult = ReturnType<typeof useIngressesSuspenseQuery>;
 export type IngressesQueryResult = Apollo.QueryResult<IngressesQuery, IngressesQueryVariables>;
-export const IngressDocument = gql`
-    query Ingress($name: String!, $namespace: String!) {
-  handleGetIngressDetail @rest(path: "ingress/{args.namespace}/{args.name}") {
-    objectMeta {
-      name
-      namespace
-    }
-  }
-  handleGetIngressEvent @rest(path: "ingress/{args.namespace}/{args.name}/event") {
-    events {
-      objectMeta {
-        name
-      }
-      message
-    }
-  }
-}
-    `;
-
-/**
- * __useIngressQuery__
- *
- * To run a query within a React component, call `useIngressQuery` and pass it any options that fit your needs.
- * When your component renders, `useIngressQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useIngressQuery({
- *   variables: {
- *      name: // value for 'name'
- *      namespace: // value for 'namespace'
- *   },
- * });
- */
-export function useIngressQuery(baseOptions: Apollo.QueryHookOptions<IngressQuery, IngressQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<IngressQuery, IngressQueryVariables>(IngressDocument, options);
-      }
-export function useIngressLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IngressQuery, IngressQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<IngressQuery, IngressQueryVariables>(IngressDocument, options);
-        }
-export function useIngressSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IngressQuery, IngressQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<IngressQuery, IngressQueryVariables>(IngressDocument, options);
-        }
-export type IngressQueryHookResult = ReturnType<typeof useIngressQuery>;
-export type IngressLazyQueryHookResult = ReturnType<typeof useIngressLazyQuery>;
-export type IngressSuspenseQueryHookResult = ReturnType<typeof useIngressSuspenseQuery>;
-export type IngressQueryResult = Apollo.QueryResult<IngressQuery, IngressQueryVariables>;
 export const NamespacesDocument = gql`
     query Namespaces {
   handleGetNamespaces @rest(path: "namespace") {

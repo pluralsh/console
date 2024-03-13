@@ -81,7 +81,10 @@ export default function Ingresses() {
   const { data, loading } = useIngressesQuery({
     client: KubernetesClient(cluster?.id ?? ''),
     skip: !cluster,
-    variables: { namespace },
+    variables: {
+      namespace,
+      filterBy: `name,${filter}`,
+    },
   }) // TODO: Pagination, sorting and filtering (filterBy=name,...).
 
   const ingresses = data?.handleGetIngressList?.items || []

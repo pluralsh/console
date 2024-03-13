@@ -25,7 +25,7 @@ generates:
             - '/* eslint-disable */'
             - '/* prettier-ignore */'
   src/generated/graphql-kubernetes.ts:
-    schema: 'https://raw.githubusercontent.com/kubernetes/dashboard/feat/openapi/modules/web/schema/schema.graphql'
+    schema: 'schema/kubernetes-schema.graphql'
     documents: './src/graph-kubernetes/**/*.graphql'
     plugins:
     - 'typescript'
