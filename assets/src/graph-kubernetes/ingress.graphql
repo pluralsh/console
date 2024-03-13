@@ -13,7 +13,7 @@ query Ingresses(
     page: $page
   )
     @rest(
-      path: "ingress/{args.namespace}?filterBy={args.filterBy}$sortBy={args.sortBy}$itemsPerPage={args.itemsPerPage}$page={args.page}"
+      path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     listMeta {
       totalItems
