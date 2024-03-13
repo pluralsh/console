@@ -3199,6 +3199,14 @@ export type IngressesQueryVariables = Exact<{
 
 export type IngressesQuery = { __typename?: 'Query', handleGetIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null, namespace?: string | null } } | null> } | null };
 
+export type IngressQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type IngressQuery = { __typename?: 'Query', handleGetIngressDetail?: { __typename?: 'ingress_IngressDetail', objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null, namespace?: string | null } } | null, handleGetIngressEvent?: { __typename?: 'common_EventList', events: Array<{ __typename?: 'common_Event', message: string, objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null } } | null> } | null };
+
 export type NamespacesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -3253,6 +3261,58 @@ export type IngressesQueryHookResult = ReturnType<typeof useIngressesQuery>;
 export type IngressesLazyQueryHookResult = ReturnType<typeof useIngressesLazyQuery>;
 export type IngressesSuspenseQueryHookResult = ReturnType<typeof useIngressesSuspenseQuery>;
 export type IngressesQueryResult = Apollo.QueryResult<IngressesQuery, IngressesQueryVariables>;
+export const IngressDocument = gql`
+    query Ingress($name: String!, $namespace: String!) {
+  handleGetIngressDetail @rest(path: "ingress/{args.namespace}/{args.name}") {
+    objectMeta {
+      name
+      namespace
+    }
+  }
+  handleGetIngressEvent @rest(path: "ingress/{args.namespace}/{args.name}/event") {
+    events {
+      objectMeta {
+        name
+      }
+      message
+    }
+  }
+}
+    `;
+
+/**
+ * __useIngressQuery__
+ *
+ * To run a query within a React component, call `useIngressQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIngressQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIngressQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useIngressQuery(baseOptions: Apollo.QueryHookOptions<IngressQuery, IngressQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IngressQuery, IngressQueryVariables>(IngressDocument, options);
+      }
+export function useIngressLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IngressQuery, IngressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IngressQuery, IngressQueryVariables>(IngressDocument, options);
+        }
+export function useIngressSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IngressQuery, IngressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<IngressQuery, IngressQueryVariables>(IngressDocument, options);
+        }
+export type IngressQueryHookResult = ReturnType<typeof useIngressQuery>;
+export type IngressLazyQueryHookResult = ReturnType<typeof useIngressLazyQuery>;
+export type IngressSuspenseQueryHookResult = ReturnType<typeof useIngressSuspenseQuery>;
+export type IngressQueryResult = Apollo.QueryResult<IngressQuery, IngressQueryVariables>;
 export const NamespacesDocument = gql`
     query Namespaces {
   handleGetNamespaces @rest(path: "namespace") {
