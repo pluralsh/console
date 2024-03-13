@@ -3,7 +3,7 @@ import { FetchResult } from '@apollo/client'
 import { Observable } from 'apollo-link'
 import { ErrorHandler } from 'apollo-link-error'
 
-import { client } from './client'
+import { authlessClient } from './client'
 import {
   fetchRefreshToken,
   setToken,
@@ -13,7 +13,7 @@ import {
 
 export const getRefreshedToken = async () => {
   const refreshToken = fetchRefreshToken()
-  const refreshResolverResponse = await client.query<RefreshQuery>({
+  const refreshResolverResponse = await authlessClient.query<RefreshQuery>({
     query: RefreshDocument,
     variables: { token: refreshToken },
   })
@@ -33,7 +33,8 @@ export const onErrorHandler: ErrorHandler = ({
   const refreshToken = fetchRefreshToken()
   const is401 = networkError && (networkError as any).statusCode === 401
   const isUnauthenticated = graphQLErrors?.some(
-    (err) => err.message === 'unauthenticated'
+    (err) =>
+      err.message === 'unauthenticated' || err.message === 'invalid_token'
   )
 
   // Attempt to refresh jwt if we have a refresh token and the request is

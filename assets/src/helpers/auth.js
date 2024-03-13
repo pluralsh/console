@@ -1,4 +1,4 @@
-export const AUTH_TOKEN = 'watchman-token'
+export const AUTH_TOKEN = 'auth-token'
 export const REFRESH_TOKEN = 'refresh-token'
 
 export function wipeToken() {
@@ -10,7 +10,7 @@ export function fetchToken() {
 }
 
 export function setToken(token) {
-  localStorage.setItem(AUTH_TOKEN, token)
+  localStorage.setItem(AUTH_TOKEN, token || '')
 }
 
 export function setRefreshToken(token) {
