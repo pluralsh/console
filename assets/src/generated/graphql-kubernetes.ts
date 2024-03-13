@@ -4586,7 +4586,7 @@ export type Validation_ProtocolValiditySpec_Input = {
 
 export type IngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
-  filterBy: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
   itemsPerPage?: InputMaybe<Scalars['String']['input']>;
   page?: InputMaybe<Scalars['String']['input']>;
@@ -4602,8 +4602,14 @@ export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __
 
 
 export const IngressesDocument = gql`
-    query Ingresses($namespace: String!, $filterBy: String!, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetIngressList(namespace: $namespace, filterBy: $filterBy) @rest(path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    query Ingresses($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetIngressList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "ingress/{args.namespace}?filterBy={args.filterBy}$sortBy={args.sortBy}$itemsPerPage={args.itemsPerPage}$page={args.page}") {
     listMeta {
       totalItems
     }

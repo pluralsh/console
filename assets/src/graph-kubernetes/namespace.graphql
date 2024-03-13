@@ -1,12 +1,12 @@
 query Namespaces {
-    handleGetNamespaces @rest(path: "namespace") {
-        listMeta {
-            totalItems
-        }
-        namespaces {
-            objectMeta {
-                name
-            }
-        }
+  handleGetNamespaces @rest(path: "namespace") {
+    listMeta {
+      totalItems
     }
+    namespaces {
+      objectMeta {
+        name
+      }
+    }
+  }
 }
