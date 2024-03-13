@@ -22,7 +22,7 @@
     "fix:css": "stylelint src/**/*.css --fix",
     "e2e:start": "concurrently -kill-others --success first \"yarn start\" \"wait-on -c waitOnConfig.json -v https-get://localhost:3000 && cd e2e/ && npx cypress run\"",
     "e2e:open": "concurrently -kill-others --success first \"yarn start\" \"wait-on -c waitOnConfig.json -v https-get://localhost:3000 && cd e2e/ && npx cypress open\"",
-    "graphql:codegen": "graphql-codegen --config codegen.yml && eslint ./src/generated --fix"
+    "graphql:codegen": "graphql-codegen --config codegen.yml"
   },
   "engines": {
     "node": "18.16.0"

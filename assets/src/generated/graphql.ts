@@ -15393,19 +15393,3 @@ export const namedOperations = {
     RefreshToken: 'RefreshToken'
   }
 }
-
-      export interface PossibleTypesResultData {
-        possibleTypes: {
-          [key: string]: string[]
-        }
-      }
-      const result: PossibleTypesResultData = {
-  "possibleTypes": {
-    "KubernetesData": [
-      "Deployment",
-      "StatefulSet"
-    ]
-  }
-};
-      export default result;
-    
