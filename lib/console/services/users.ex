@@ -149,6 +149,7 @@ defmodule Console.Services.Users do
     |> add_refresh_token()
     |> execute(extract: :hydrated)
   end
+  def bootstrap_user(_, _), do: {:error, "Failed to bootstrap user, likely missing email claim in oidc id token"}
 
   @spec create_refresh_token(User.t) :: refresh_token_resp
   def create_refresh_token(%User{id: user_id}) do
