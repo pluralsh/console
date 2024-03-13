@@ -11,7 +11,6 @@ import {
   createContext,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useState,
 } from 'react'
@@ -90,17 +89,17 @@ export default function Kubernetes() {
   const [namespaced, setNamespaced] = useState<boolean>(false)
   const pathPrefix = getKubernetesAbsPath(clusterId)
 
-  const { data: namespacesQuery } = useNamespacesQuery({
+  const { data: namespacesData } = useNamespacesQuery({
     client: KubernetesClient(clusterId!),
     skip: !clusterId,
   })
 
   const namespaces = useMemo(
     () =>
-      namespacesQuery?.handleGetNamespaces?.namespaces?.map(
-        (namespace) => namespace?.objectMeta?.name ?? ''
-      ) ?? [],
-    [namespacesQuery?.handleGetNamespaces?.namespaces]
+      (namespacesData?.handleGetNamespaces?.namespaces ?? [])
+        .map((namespace) => namespace?.objectMeta?.name)
+        .filter((namespace): namespace is string => !isEmpty(namespace)),
+    [namespacesData?.handleGetNamespaces?.namespaces]
   )
 
   const { data } = useClustersTinyQuery({

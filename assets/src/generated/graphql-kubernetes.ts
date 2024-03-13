@@ -43,18 +43,24 @@ export type Mutation = {
   handleCreateImagePullSecret?: Maybe<Secret_Secret>;
   handleCreateNamespace: Namespace_NamespaceSpec;
   handleDeleteResource?: Maybe<Scalars['JSON']['output']>;
+  /** creates an application based on provided deployment.AppDeploymentSpec */
   handleDeploy: Deployment_AppDeploymentSpec;
+  /** create an application from file */
   handleDeployFromFile?: Maybe<Deployment_AppDeploymentFromFileResponse>;
   handleDeploymentPause?: Maybe<Deployment_DeploymentDetail>;
   handleDeploymentRestart: Deployment_RolloutSpec;
   handleDeploymentResume?: Maybe<Deployment_DeploymentDetail>;
   handleDeploymentRollback: Deployment_RolloutSpec;
+  /** checks if provided image is valid */
   handleImageReferenceValidity?: Maybe<Validation_ImageReferenceValidity>;
+  /** checks if provided name is valid */
   handleNameValidity?: Maybe<Validation_AppNameValidity>;
+  /** checks if provided service protocol is valid */
   handleProtocolValidity?: Maybe<Validation_ProtocolValidity>;
   handlePutResource?: Maybe<Scalars['JSON']['output']>;
   handleScaleResource?: Maybe<Scaling_ReplicaCounts>;
   handleTriggerCronJob?: Maybe<Scalars['JSON']['output']>;
+  /** scales ReplicationController to a number of replicas */
   handleUpdateReplicasCount?: Maybe<Scalars['JSON']['output']>;
 };
 
@@ -101,11 +107,14 @@ export type MutationHandleProtocolValidityArgs = {
 
 export type MutationHandleUpdateReplicasCountArgs = {
   input: Replicationcontroller_ReplicationControllerSpec_Input;
+  namespace: Scalars['String']['input'];
+  replicationController: Scalars['String']['input'];
 };
 
 export type Query = {
   __typename?: 'Query';
   handleExecShell?: Maybe<Handler_TerminalResponse>;
+  /** returns a list of available protocols for the service */
   handleGetAvailableProtocols?: Maybe<Deployment_Protocols>;
   handleGetClusterRoleBindingDetail?: Maybe<Clusterrolebinding_ClusterRoleBindingDetail>;
   handleGetClusterRoleBindingList?: Maybe<Clusterrolebinding_ClusterRoleBindingList>;
@@ -117,6 +126,7 @@ export type Query = {
   handleGetCronJobEvents?: Maybe<Common_EventList>;
   handleGetCronJobJobs?: Maybe<Job_JobList>;
   handleGetCronJobList?: Maybe<Cronjob_CronJobList>;
+  /** generates a one-time CSRF token that can be used by POST request */
   handleGetCsrfToken?: Maybe<Csrf_Response>;
   handleGetCustomResourceDefinitionDetail?: Maybe<Types_CustomResourceDefinitionDetail>;
   handleGetCustomResourceDefinitionList?: Maybe<Types_CustomResourceDefinitionList>;
@@ -170,11 +180,17 @@ export type Query = {
   handleGetReplicaSetEvents?: Maybe<Common_EventList>;
   handleGetReplicaSetPods?: Maybe<Pod_PodList>;
   handleGetReplicaSetServices?: Maybe<Pod_PodList>;
+  /** returns a list of Services for ReplicationController */
   handleGetReplicaSets?: Maybe<Replicaset_ReplicaSetList>;
+  /** returns detailed information about ReplicationController */
   handleGetReplicationControllerDetail?: Maybe<Replicationcontroller_ReplicationControllerDetail>;
+  /** returns a list of Events for ReplicationController */
   handleGetReplicationControllerEvents?: Maybe<Common_EventList>;
+  /** returns a list of ReplicationController in a namespace */
   handleGetReplicationControllerList?: Maybe<Replicationcontroller_ReplicationControllerList>;
+  /** returns a list of Pods for ReplicationController */
   handleGetReplicationControllerPods?: Maybe<Pod_PodList>;
+  /** returns a list of Services for ReplicationController */
   handleGetReplicationControllerServices?: Maybe<Service_ServiceList>;
   handleGetResource?: Maybe<Scalars['JSON']['output']>;
   handleGetRoleBindingDetail?: Maybe<Rolebinding_RoleBindingDetail>;
@@ -206,8 +222,47 @@ export type Query = {
 };
 
 
+export type QueryHandleGetCsrfTokenArgs = {
+  action: Scalars['String']['input'];
+};
+
+
 export type QueryHandleGetIngressListArgs = {
   namespace: Scalars['String']['input'];
+};
+
+
+export type QueryHandleGetReplicaSetsArgs = {
+  namespace: Scalars['String']['input'];
+};
+
+
+export type QueryHandleGetReplicationControllerDetailArgs = {
+  namespace: Scalars['String']['input'];
+  replicationController: Scalars['String']['input'];
+};
+
+
+export type QueryHandleGetReplicationControllerEventsArgs = {
+  namespace: Scalars['String']['input'];
+  replicationController: Scalars['String']['input'];
+};
+
+
+export type QueryHandleGetReplicationControllerListArgs = {
+  namespace: Scalars['String']['input'];
+};
+
+
+export type QueryHandleGetReplicationControllerPodsArgs = {
+  namespace: Scalars['String']['input'];
+  replicationController: Scalars['String']['input'];
+};
+
+
+export type QueryHandleGetReplicationControllerServicesArgs = {
+  namespace: Scalars['String']['input'];
+  replicationController: Scalars['String']['input'];
 };
 
 export type Api_DataPoint = {
@@ -3197,7 +3252,7 @@ export type IngressesQueryVariables = Exact<{
 }>;
 
 
-export type IngressesQuery = { __typename?: 'Query', handleGetIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null, namespace?: string | null } } | null> } | null };
+export type IngressesQuery = { __typename?: 'Query', handleGetIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, protocol: string, nodePort: number } | null> } | null> } | null> } | null };
 
 export type NamespacesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3215,7 +3270,18 @@ export const IngressesDocument = gql`
       objectMeta {
         name
         namespace
+        labels
+        creationTimestamp
       }
+      endpoints {
+        host
+        ports {
+          port
+          protocol
+          nodePort
+        }
+      }
+      hosts
     }
   }
 }
