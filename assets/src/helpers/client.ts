@@ -1,5 +1,4 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client'
-import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
 import { setContext } from 'apollo-link-context'
 import { createLink } from 'apollo-absinthe-upload-link'
 import { onError } from 'apollo-link-error'
@@ -10,16 +9,12 @@ import { RetryLink } from 'apollo-link-retry'
 import { hasSubscription } from '@jumpn/utils-graphql'
 import { split } from 'apollo-link'
 
-import introspection from '../generated/fragments.json'
+import fragments from '../generated/fragments.json'
 
 import { onErrorHandler, onNetworkError } from './refreshToken'
 
 import customFetch from './uploadLink'
 import { fetchToken } from './auth'
-
-const fragmentMatcher = new IntrospectionFragmentMatcher({
-  introspectionQueryResultData: introspection,
-})
 
 const GQL_URL = '/gql'
 const WS_URI = '/socket'
@@ -27,8 +22,9 @@ const WS_URI = '/socket'
 export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
-  const authLink = setContext((_, { headers }) => {
-    const token = fetchToken()
+  // Set the Authorization header for all requests except for token refreshes
+  const authLink = setContext(({ operationName }, { headers }) => {
+    const token = operationName === 'Refresh' ? undefined : fetchToken()
     const authHeaders = token ? { authorization: `Bearer ${token}` } : {}
 
     return { headers: { ...headers, ...authHeaders } }
@@ -63,10 +59,11 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
     authLink.concat(retryLink).concat(gqlLink)
   )
 
-  const client = new ApolloClient({
+    const client = new ApolloClient({
+    // @ts-ignore
     link: splitLink,
     cache: new InMemoryCache({
-      fragmentMatcher,
+      possibleTypes: fragments.possibleTypes,
       typePolicies: {
         Command: {
           fields: {

@@ -22,7 +22,7 @@
     "fix:css": "stylelint src/**/*.css --fix",
     "e2e:start": "concurrently -kill-others --success first \"yarn start\" \"wait-on -c waitOnConfig.json -v https-get://localhost:3000 && cd e2e/ && npx cypress run\"",
     "e2e:open": "concurrently -kill-others --success first \"yarn start\" \"wait-on -c waitOnConfig.json -v https-get://localhost:3000 && cd e2e/ && npx cypress open\"",
-    "graphql:codegen": "graphql-codegen --config codegen.yml"
+    "graphql:codegen": "graphql-codegen --config codegen.yml && eslint ./src/generated --fix"
   },
   "engines": {
     "node": "18.16.0"
@@ -130,6 +130,7 @@
     "@cypress/webpack-preprocessor": "5.17.1",
     "@graphql-codegen/add": "5.0.0",
     "@graphql-codegen/cli": "5.0.0",
+    "@graphql-codegen/fragment-matcher": "5.0.2",
     "@graphql-codegen/introspection": "4.0.0",
     "@graphql-codegen/typescript": "4.0.1",
     "@graphql-codegen/typescript-operations": "4.0.1",
