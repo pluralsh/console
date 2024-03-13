@@ -1,16 +1,18 @@
 import { ChipList, Table } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { Row, createColumnHelper } from '@tanstack/react-table'
 
 import { isEmpty } from 'lodash'
 
 import {
   Ingress_Ingress as IngressT,
+  Pod_Pod as PodT,
   useIngressesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { useKubernetesContext } from '../Kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
+import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
 const columnHelper = createColumnHelper<IngressT>()
 
@@ -92,13 +94,16 @@ export default function Ingresses() {
   if (loading) return <LoadingIndicator />
 
   return (
-    <Table
-      data={ingresses}
-      columns={columns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
-    />
+    <FullHeightTableWrap>
+      <Table
+        data={ingresses}
+        columns={columns}
+        onRowClick={(_e, { original }: Row<IngressT>) => console.log(original)} // TODO: Redirect.
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+      />
+    </FullHeightTableWrap>
   )
 }

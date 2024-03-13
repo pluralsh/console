@@ -1,5 +1,7 @@
-import { ChipList, Table } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { ChipList, LoopingLogo, Table } from '@pluralsh/design-system'
+import { Row, createColumnHelper } from '@tanstack/react-table'
+
+import { useCallback, useState } from 'react'
 
 import { useKubernetesContext } from '../Kubernetes'
 import {
@@ -7,8 +9,10 @@ import {
   usePodsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import LoadingIndicator from '../../utils/LoadingIndicator'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
+import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
+
+const itemsPerPage = 10
 
 const columnHelper = createColumnHelper<PodT>()
 
@@ -57,30 +61,46 @@ const columns = [
 
 export default function Pods() {
   const { cluster, namespace, filter } = useKubernetesContext()
+  const [page, setPage] = useState(1)
 
-  const { data, loading } = usePodsQuery({
+  const { data, loading, fetchMore } = usePodsQuery({
     client: KubernetesClient(cluster?.id ?? ''),
     skip: !cluster,
     variables: {
       namespace,
       filterBy: `name,${filter}`,
+      itemsPerPage: `${itemsPerPage}`,
+      page: `${page}`,
     },
   }) // TODO: Pagination and sorting.
 
-  console.log(data)
-
   const pods = data?.handleGetPods?.pods || []
+  const totalItems = data?.handleGetPods?.listMeta.totalItems ?? 0
+  const pages = Math.ceil(totalItems / itemsPerPage)
+  const hasNextPage = page < pages
 
-  if (loading) return <LoadingIndicator />
+  const fetchNextPage = useCallback(() => {}, [])
+
+  if (!data) return <LoopingLogo />
 
   return (
-    <Table
-      data={pods}
-      columns={columns}
-      css={{
-        maxHeight: 'unset',
-        height: '100%',
-      }}
-    />
+    <FullHeightTableWrap>
+      <Table
+        data={pods}
+        columns={columns}
+        // virtualizeRows
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        // reactTableOptions={reactTableOptions}
+        // reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
+        // onVirtualSliceChange={setVirtualSlice}
+        onRowClick={(_e, { original }: Row<PodT>) => console.log(original)} // TODO: Redirect.
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+      />
+    </FullHeightTableWrap>
   )
 }
