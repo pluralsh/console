@@ -1659,9 +1659,20 @@ export type GlobalService = {
   provider?: Maybe<ClusterProvider>;
   /** the service to replicate across clusters */
   service?: Maybe<ServiceDeployment>;
+  services?: Maybe<ServiceDeploymentConnection>;
   /** a set of tags to select clusters for this global service */
   tags?: Maybe<Array<Maybe<Tag>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+/** a rules based mechanism to redeploy a service across a fleet of clusters */
+export type GlobalServiceServicesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** A reference for a globalized service, which targets clusters based on the configured criteria */
@@ -1674,6 +1685,18 @@ export type GlobalServiceAttributes = {
   providerId?: InputMaybe<Scalars['ID']['input']>;
   /** the cluster tags to target */
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
+};
+
+export type GlobalServiceConnection = {
+  __typename?: 'GlobalServiceConnection';
+  edges?: Maybe<Array<Maybe<GlobalServiceEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type GlobalServiceEdge = {
+  __typename?: 'GlobalServiceEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<GlobalService>;
 };
 
 export type Group = {
@@ -4336,6 +4359,7 @@ export type RootQueryType = {
   gitRepositories?: Maybe<GitRepositoryConnection>;
   gitRepository?: Maybe<GitRepository>;
   globalService?: Maybe<GlobalService>;
+  globalServices?: Maybe<GlobalServiceConnection>;
   group?: Maybe<Group>;
   groupMembers?: Maybe<GroupMemberConnection>;
   groups?: Maybe<GroupConnection>;
@@ -4653,6 +4677,14 @@ export type RootQueryTypeGitRepositoryArgs = {
 
 export type RootQueryTypeGlobalServiceArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeGlobalServicesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

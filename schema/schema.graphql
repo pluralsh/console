@@ -260,6 +260,8 @@ type RootQueryType {
 
   globalService(id: ID!): GlobalService
 
+  globalServices(after: String, first: Int, before: String, last: Int): GlobalServiceConnection
+
   serviceContext(name: String!): ServiceContext
 
   "renders a full hierarchy of resources recursively owned by this component (useful for CRD views)"
@@ -2001,6 +2003,8 @@ type GlobalService {
   "whether to only apply to clusters with this provider"
   provider: ClusterProvider
 
+  services(after: String, first: Int, before: String, last: Int, q: String): ServiceDeploymentConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -2075,6 +2079,11 @@ type ServiceDeploymentConnection {
 type RevisionConnection {
   pageInfo: PageInfo!
   edges: [RevisionEdge]
+}
+
+type GlobalServiceConnection {
+  pageInfo: PageInfo!
+  edges: [GlobalServiceEdge]
 }
 
 enum ClusterDistro {
@@ -5102,6 +5111,11 @@ type ClusterProviderEdge {
 
 type ClusterEdge {
   node: Cluster
+  cursor: String
+}
+
+type GlobalServiceEdge {
+  node: GlobalService
   cursor: String
 }
 

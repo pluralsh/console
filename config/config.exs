@@ -72,6 +72,8 @@ config :console, Console.Repo,
 
 config :libcluster, :topologies, []
 
+config :tzdata, :autoupdate, :disabled
+
 config :kazan, :server, :in_cluster
 
 config :ra,
