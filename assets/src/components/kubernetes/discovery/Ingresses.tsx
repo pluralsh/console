@@ -85,7 +85,7 @@ export default function Ingresses() {
       namespace,
       filterBy: `name,${filter}`,
     },
-  }) // TODO: Pagination, sorting and filtering (filterBy=name,...).
+  }) // TODO: Pagination and sorting.
 
   const ingresses = data?.handleGetIngressList?.items || []
 
