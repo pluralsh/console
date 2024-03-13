@@ -20,7 +20,10 @@ query Pods(
     }
     pods {
       objectMeta {
-        ...ObjectMeta
+        name
+        namespace
+        labels
+        creationTimestamp
       }
     }
   }

@@ -20,7 +20,10 @@ query Ingresses(
     }
     items {
       objectMeta {
-        ...ObjectMeta
+        name
+        namespace
+        labels
+        creationTimestamp
       }
       endpoints {
         host

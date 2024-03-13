@@ -1,8 +1,0 @@
-fragment ObjectMeta on types_ObjectMeta {
-    name
-    namespace
-    uid
-    labels
-    annotations
-    creationTimestamp
-}

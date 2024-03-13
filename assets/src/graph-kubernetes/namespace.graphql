@@ -5,7 +5,7 @@ query Namespaces {
     }
     namespaces {
       objectMeta {
-        ...ObjectMeta
+        name
       }
     }
   }

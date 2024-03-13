@@ -4600,6 +4600,17 @@ export type NamespacesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null } } | null> } | null };
 
+export type PodsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 
 export const IngressesDocument = gql`
     query Ingresses($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
@@ -4716,3 +4727,63 @@ export type NamespacesQueryHookResult = ReturnType<typeof useNamespacesQuery>;
 export type NamespacesLazyQueryHookResult = ReturnType<typeof useNamespacesLazyQuery>;
 export type NamespacesSuspenseQueryHookResult = ReturnType<typeof useNamespacesSuspenseQuery>;
 export type NamespacesQueryResult = Apollo.QueryResult<NamespacesQuery, NamespacesQueryVariables>;
+export const PodsDocument = gql`
+    query Pods($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetPods(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "pod/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    pods {
+      objectMeta {
+        name
+        namespace
+        labels
+        creationTimestamp
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __usePodsQuery__
+ *
+ * To run a query within a React component, call `usePodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePodsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function usePodsQuery(baseOptions: Apollo.QueryHookOptions<PodsQuery, PodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PodsQuery, PodsQueryVariables>(PodsDocument, options);
+      }
+export function usePodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PodsQuery, PodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PodsQuery, PodsQueryVariables>(PodsDocument, options);
+        }
+export function usePodsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PodsQuery, PodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PodsQuery, PodsQueryVariables>(PodsDocument, options);
+        }
+export type PodsQueryHookResult = ReturnType<typeof usePodsQuery>;
+export type PodsLazyQueryHookResult = ReturnType<typeof usePodsLazyQuery>;
+export type PodsSuspenseQueryHookResult = ReturnType<typeof usePodsSuspenseQuery>;
+export type PodsQueryResult = Apollo.QueryResult<PodsQuery, PodsQueryVariables>;
