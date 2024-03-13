@@ -7,7 +7,9 @@ import {
 } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
+  Dispatch,
   ReactNode,
+  SetStateAction,
   createContext,
   useContext,
   useEffect,
@@ -15,7 +17,13 @@ import {
   useState,
 } from 'react'
 import { isEmpty } from 'lodash'
-import { Input, SearchIcon } from '@pluralsh/design-system'
+import Fuse from 'fuse.js'
+import {
+  ComboBox,
+  Input,
+  ListBoxItem,
+  SearchIcon,
+} from '@pluralsh/design-system'
 
 import {
   ACCESS_REL_PATH,
@@ -40,17 +48,83 @@ import LoadingIndicator from '../utils/LoadingIndicator'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
 import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
+import { NamespaceListFooter } from '../cluster/pods/Pods'
 
-import { NamespaceFilter } from './NamespaceFilter'
 import { ResourceListContext, ResourceListContextT } from './ResourceList'
 
-export type KubernetesContextT = {
-  cluster?: ClusterTinyFragment
-  namespace: string
-  filter: string
+function NameFilter({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: Dispatch<SetStateAction<string>>
+}) {
+  return (
+    <Input
+      startIcon={<SearchIcon />}
+      placeholder="Filter by name"
+      value={value}
+      onChange={(e) => onChange(e.currentTarget.value)}
+      width={300}
+    />
+  )
 }
 
-export const KubernetesContext = createContext<KubernetesContextT | undefined>(
+function NamespaceFilter({
+  namespaces,
+  namespace,
+  onChange,
+}: {
+  namespaces: string[]
+  namespace: string
+  onChange: (arg: any) => any
+}) {
+  const [value, setValue] = useState(namespace)
+
+  const filteredNamespaces = useMemo(() => {
+    const fuse = new Fuse(namespaces, { threshold: 0.25 })
+
+    return value ? fuse.search(value).map(({ item }) => item) : namespaces
+  }, [namespaces, value])
+
+  return (
+    <ComboBox
+      inputProps={{ placeholder: 'Filter by namespace' }}
+      inputValue={value}
+      onInputChange={setValue}
+      selectedKey={namespace}
+      onSelectionChange={(key) => {
+        onChange(key)
+        setValue(key as string)
+      }}
+      dropdownFooterFixed={
+        <NamespaceListFooter
+          onClick={() => {
+            setValue('')
+            onChange('')
+          }}
+        />
+      }
+      aria-label="namespace"
+    >
+      {filteredNamespaces.map((namespace) => (
+        <ListBoxItem
+          key={namespace}
+          textValue={namespace}
+          label={namespace}
+        />
+      ))}
+    </ComboBox>
+  )
+}
+
+type KubernetesContextT = {
+  cluster?: ClusterTinyFragment // Currently selected cluster.
+  namespace: string // Namespace filter.
+  filter: string // Name filter.
+}
+
+const KubernetesContext = createContext<KubernetesContextT | undefined>(
   undefined
 )
 
@@ -198,12 +272,9 @@ export default function Kubernetes() {
               justifyContent: 'flex-end',
             }}
           >
-            <Input
-              startIcon={<SearchIcon />}
-              placeholder="Filter"
+            <NameFilter
               value={filter}
-              onChange={(e) => setFilter(e.currentTarget.value)}
-              width={300}
+              onChange={(e) => setFilter(e)}
             />
             {namespaced && (
               <NamespaceFilter
