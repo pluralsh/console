@@ -15,6 +15,7 @@ import {
   useState,
 } from 'react'
 import { isEmpty } from 'lodash'
+import { Input, SearchIcon } from '@pluralsh/design-system'
 
 import {
   ACCESS_REL_PATH,
@@ -40,12 +41,13 @@ import { PageHeaderContext } from '../cd/ContinuousDeployment'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
 import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 
-import { NamespaceSelect } from './NamespaceSelect'
+import { NamespaceFilter } from './NamespaceFilter'
 import { ResourceListContext, ResourceListContextT } from './ResourceList'
 
 export type KubernetesContextT = {
   cluster?: ClusterTinyFragment
   namespace: string
+  filter: string
 }
 
 export const KubernetesContext = createContext<KubernetesContextT | undefined>(
@@ -82,6 +84,7 @@ export default function Kubernetes() {
   const { pathname } = useLocation()
   const { clusterId } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
+  const [filter, setFilter] = useState('') // TODO: Keep in search params as well?
   const [namespace, setNamespace] = useState(
     searchParams.get(NAMESPACE_PARAM) ?? ''
   )
@@ -130,8 +133,8 @@ export default function Kubernetes() {
   )
 
   const kubernetesContext = useMemo(
-    () => ({ cluster, namespace }) as KubernetesContextT,
-    [cluster, namespace]
+    () => ({ cluster, namespace, filter }) as KubernetesContextT,
+    [cluster, namespace, filter]
   )
 
   useEffect(() => {
@@ -187,15 +190,23 @@ export default function Kubernetes() {
       >
         <div css={{ display: 'flex' }}>
           {headerContent}
-          {namespaced && (
-            <div
-              css={{
-                display: 'flex',
-                flexGrow: 1,
-                justifyContent: 'flex-end',
-              }}
-            >
-              <NamespaceSelect
+          <div
+            css={{
+              display: 'flex',
+              flexGrow: 1,
+              gap: theme.spacing.medium,
+              justifyContent: 'flex-end',
+            }}
+          >
+            <Input
+              startIcon={<SearchIcon />}
+              placeholder="Filter"
+              value={filter}
+              onChange={(e) => setFilter(e.currentTarget.value)}
+              width={300}
+            />
+            {namespaced && (
+              <NamespaceFilter
                 namespaces={namespaces}
                 namespace={namespace}
                 onChange={(ns) => {
@@ -203,8 +214,8 @@ export default function Kubernetes() {
                   setSearchParams({ namespace })
                 }}
               />
-            </div>
-          )}
+            )}
+          </div>
         </div>
         <PageHeaderContext.Provider value={pageHeaderContext}>
           <ResourceListContext.Provider value={resourceListContext}>

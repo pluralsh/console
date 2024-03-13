@@ -6,7 +6,7 @@ import Fuse from 'fuse.js'
 
 import { NamespaceListFooter } from '../cluster/pods/Pods'
 
-export function NamespaceSelect({
+export function NamespaceFilter({
   namespaces,
   namespace,
   onChange,
