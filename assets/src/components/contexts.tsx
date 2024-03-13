@@ -32,7 +32,7 @@ export type Login = {
   logout: () => void
 }
 
-const JWT_REFRESH_THRESHOLD = 900_000 as const // 15 minutes
+const JWT_REFRESH_THRESHOLD = 300_000 as const // 5 minutes
 
 const DEFAULT_LOGIN = {
   me: undefined,
