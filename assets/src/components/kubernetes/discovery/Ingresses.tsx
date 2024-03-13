@@ -1,4 +1,4 @@
-import { Table } from '@pluralsh/design-system'
+import { ChipList, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { isEmpty } from 'lodash'
@@ -11,6 +11,12 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { useKubernetesContext } from '../Kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
+
+function renderLabel(label: [string, unknown]) {
+  const [key, value] = label
+
+  return `${key}: ${value}`
+}
 
 const columnHelper = createColumnHelper<IngressT>()
 
@@ -35,7 +41,18 @@ const columns = [
     header: 'Labels',
     enableSorting: true,
     enableGlobalFilter: true,
-    cell: ({ getValue }) => JSON.stringify(getValue()),
+    cell: ({ getValue }) => {
+      const labels = getValue()
+
+      return (
+        <ChipList
+          size="small"
+          limit={1}
+          values={Object.entries(labels || {})}
+          transformValue={renderLabel}
+        />
+      )
+    },
   }),
   columnHelper.accessor((ingress) => ingress?.endpoints, {
     id: 'endpoints',
