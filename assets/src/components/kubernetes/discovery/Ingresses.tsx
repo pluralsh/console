@@ -76,13 +76,13 @@ const columns = [
 ]
 
 export default function Ingresses() {
-  const { cluster, namespace } = useKubernetesContext()
+  const { cluster, namespace, filter } = useKubernetesContext()
 
   const { data, loading } = useIngressesQuery({
     client: KubernetesClient(cluster?.id ?? ''),
     skip: !cluster,
     variables: { namespace },
-  }) // TODO: Pagination, sorting and filtering.
+  }) // TODO: Pagination, sorting and filtering (filterBy=name,...).
 
   const ingresses = data?.handleGetIngressList?.items || []
 
