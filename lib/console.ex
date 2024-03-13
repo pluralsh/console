@@ -79,6 +79,23 @@ defmodule Console do
     end
   end
 
+  def df(path \\ ".", acc \\ {0, 0})
+  def df(path, {count, size}) do
+    cond do
+      File.regular?(path) ->
+        stat = File.stat!(path)
+        {count + 1, size + stat.size}
+      File.dir?(path) ->
+        File.ls!(path)
+        |> Enum.map(&Path.join(path, &1))
+        |> Enum.reduce({count, size}, fn p, {c, s} ->
+          {c2, s2} = df(p)
+          {c + c2, s + s2}
+        end)
+      true -> {count, size}
+    end
+  end
+
   def dump_folder(path, contents) do
     Enum.reduce_while(contents, :ok, fn {p, data}, _ ->
       fullpath = Path.join(path, p)
