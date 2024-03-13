@@ -7,7 +7,18 @@ query Ingresses($namespace: String!) {
             objectMeta {
                 name
                 namespace
+                labels
+                creationTimestamp
             }
+            endpoints {
+                host
+                ports {
+                    port
+                    protocol
+                    nodePort
+                }
+            }
+            hosts
         }
     }
 }

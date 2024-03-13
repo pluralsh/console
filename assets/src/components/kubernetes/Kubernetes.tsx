@@ -6,8 +6,24 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { isEmpty } from 'lodash'
+import Fuse from 'fuse.js'
+import {
+  ComboBox,
+  Input,
+  ListBoxItem,
+  SearchIcon,
+} from '@pluralsh/design-system'
 
 import {
   ACCESS_REL_PATH,
@@ -32,13 +48,96 @@ import LoadingIndicator from '../utils/LoadingIndicator'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
 import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
+import { NamespaceListFooter } from '../cluster/pods/Pods'
 
-import { NamespaceSelect } from './NamespaceSelect'
 import { ResourceListContext, ResourceListContextT } from './ResourceList'
 
-export type KubernetesOutletContextT = {
-  cluster?: ClusterTinyFragment
+function NameFilter({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: Dispatch<SetStateAction<string>>
+}) {
+  return (
+    <Input
+      startIcon={<SearchIcon />}
+      placeholder="Filter by name"
+      value={value}
+      onChange={(e) => onChange(e.currentTarget.value)}
+      width={300}
+    />
+  )
+}
+
+function NamespaceFilter({
+  namespaces,
+  namespace,
+  onChange,
+}: {
+  namespaces: string[]
   namespace: string
+  onChange: (arg: any) => any
+}) {
+  const [value, setValue] = useState(namespace)
+
+  const filteredNamespaces = useMemo(() => {
+    const fuse = new Fuse(namespaces, { threshold: 0.25 })
+
+    return value ? fuse.search(value).map(({ item }) => item) : namespaces
+  }, [namespaces, value])
+
+  return (
+    <ComboBox
+      inputProps={{ placeholder: 'Filter by namespace' }}
+      inputValue={value}
+      onInputChange={setValue}
+      selectedKey={namespace}
+      onSelectionChange={(key) => {
+        onChange(key)
+        setValue(key as string)
+      }}
+      dropdownFooterFixed={
+        <NamespaceListFooter
+          onClick={() => {
+            setValue('')
+            onChange('')
+          }}
+        />
+      }
+      aria-label="namespace"
+    >
+      {filteredNamespaces.map((namespace) => (
+        <ListBoxItem
+          key={namespace}
+          textValue={namespace}
+          label={namespace}
+        />
+      ))}
+    </ComboBox>
+  )
+}
+
+type KubernetesContextT = {
+  cluster?: ClusterTinyFragment // Currently selected cluster.
+  namespace: string // Namespace filter.
+  filter: string // Name filter.
+}
+
+const KubernetesContext = createContext<KubernetesContextT | undefined>(
+  undefined
+)
+
+export const useKubernetesContext = () => {
+  const ctx = useContext(KubernetesContext)
+
+  if (!ctx) {
+    throw Error(
+      'useKubernetesContext() must be used within a KubernetesContext'
+    )
+  }
+
+  return ctx
 }
 
 const NAMESPACE_PARAM = 'namespace'
@@ -59,6 +158,7 @@ export default function Kubernetes() {
   const { pathname } = useLocation()
   const { clusterId } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
+  const [filter, setFilter] = useState('') // TODO: Keep in search params as well?
   const [namespace, setNamespace] = useState(
     searchParams.get(NAMESPACE_PARAM) ?? ''
   )
@@ -66,17 +166,17 @@ export default function Kubernetes() {
   const [namespaced, setNamespaced] = useState<boolean>(false)
   const pathPrefix = getKubernetesAbsPath(clusterId)
 
-  const { data: namespacesQuery } = useNamespacesQuery({
+  const { data: namespacesData } = useNamespacesQuery({
     client: KubernetesClient(clusterId!),
     skip: !clusterId,
   })
 
   const namespaces = useMemo(
     () =>
-      namespacesQuery?.handleGetNamespaces?.namespaces?.map(
-        (namespace) => namespace?.objectMeta?.name ?? ''
-      ) ?? [],
-    [namespacesQuery?.handleGetNamespaces?.namespaces]
+      (namespacesData?.handleGetNamespaces?.namespaces ?? [])
+        .map((namespace) => namespace?.objectMeta?.name)
+        .filter((namespace): namespace is string => !isEmpty(namespace)),
+    [namespacesData?.handleGetNamespaces?.namespaces]
   )
 
   const { data } = useClustersTinyQuery({
@@ -101,20 +201,14 @@ export default function Kubernetes() {
     []
   )
 
-  const resourceListContext: ResourceListContextT = useMemo(
-    () => ({
-      setNamespaced,
-    }),
+  const resourceListContext = useMemo(
+    () => ({ setNamespaced }) as ResourceListContextT,
     []
   )
 
-  const outletContext: KubernetesOutletContextT = useMemo(
-    () => ({
-      cluster,
-      namespace,
-      setNamespaced,
-    }),
-    [cluster, namespace, setNamespaced]
+  const kubernetesContext = useMemo(
+    () => ({ cluster, namespace, filter }) as KubernetesContextT,
+    [cluster, namespace, filter]
   )
 
   useEffect(() => {
@@ -170,15 +264,20 @@ export default function Kubernetes() {
       >
         <div css={{ display: 'flex' }}>
           {headerContent}
-          {namespaced && (
-            <div
-              css={{
-                display: 'flex',
-                flexGrow: 1,
-                justifyContent: 'flex-end',
-              }}
-            >
-              <NamespaceSelect
+          <div
+            css={{
+              display: 'flex',
+              flexGrow: 1,
+              gap: theme.spacing.medium,
+              justifyContent: 'flex-end',
+            }}
+          >
+            <NameFilter
+              value={filter}
+              onChange={(e) => setFilter(e)}
+            />
+            {namespaced && (
+              <NamespaceFilter
                 namespaces={namespaces}
                 namespace={namespace}
                 onChange={(ns) => {
@@ -186,12 +285,14 @@ export default function Kubernetes() {
                   setSearchParams({ namespace })
                 }}
               />
-            </div>
-          )}
+            )}
+          </div>
         </div>
         <PageHeaderContext.Provider value={pageHeaderContext}>
           <ResourceListContext.Provider value={resourceListContext}>
-            <Outlet context={outletContext} />
+            <KubernetesContext.Provider value={kubernetesContext}>
+              <Outlet />
+            </KubernetesContext.Provider>
           </ResourceListContext.Provider>
         </PageHeaderContext.Provider>
       </div>

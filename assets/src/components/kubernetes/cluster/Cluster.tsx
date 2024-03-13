@@ -1,4 +1,4 @@
-import { Outlet, useMatch, useOutletContext } from 'react-router-dom'
+import { Outlet, useMatch } from 'react-router-dom'
 import {
   SubTab,
   TabList,
@@ -8,11 +8,9 @@ import {
 import { Suspense, useMemo, useRef, useState } from 'react'
 
 import {
-  CONFIG_MAPS_REL_PATH,
   EVENTS_REL_PATH,
   NAMESPACES_REL_PATH,
   NODES_REL_PATH,
-  SECRETS_REL_PATH,
   getClusterAbsPath,
   getKubernetesAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
@@ -26,7 +24,7 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { KubernetesOutletContextT } from '../Kubernetes'
+import { useKubernetesContext } from '../Kubernetes'
 
 const directory = [
   { path: NODES_REL_PATH, label: 'Nodes' },
@@ -35,7 +33,7 @@ const directory = [
 ] as const
 
 export default function Cluster() {
-  const { cluster } = useOutletContext() as KubernetesOutletContextT
+  const { cluster } = useKubernetesContext()
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(
