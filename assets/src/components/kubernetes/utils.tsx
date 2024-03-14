@@ -1,14 +1,63 @@
 import uniqWith from 'lodash/uniqWith'
 import { useMemo, useState } from 'react'
-import { SortingState, TableOptions } from '@tanstack/react-table'
+import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
+
+import { ChipList } from '@pluralsh/design-system'
 
 import { Types_ListMeta as ListMetaT } from '../../generated/graphql-kubernetes'
+import { DateTimeCol } from '../utils/table/DateTimeCol'
 
 export const ITEMS_PER_PAGE = 25
 
 export const DEFAULT_DATA_SELECT = {
   itemsPerPage: `${ITEMS_PER_PAGE}`,
   page: '1',
+}
+
+export function useDefaultColumns<T>(columnHelper: ColumnHelper<T>) {
+  return useMemo(
+    () => ({
+      colName: columnHelper.accessor((r) => r?.objectMeta.name, {
+        id: 'name',
+        header: 'Name',
+        enableSorting: true,
+        meta: { truncate: true },
+        cell: ({ getValue }) => getValue(),
+      }),
+      colNamespace: columnHelper.accessor((r) => r?.objectMeta.namespace, {
+        id: 'namespace',
+        header: 'Namespace',
+        enableSorting: true,
+        cell: ({ getValue }) => getValue(),
+      }),
+      colLabels: columnHelper.accessor((r) => r?.objectMeta.labels, {
+        id: 'labels',
+        header: 'Labels',
+        cell: ({ getValue }) => {
+          const labels = getValue()
+
+          return (
+            <ChipList
+              size="small"
+              limit={1}
+              values={Object.entries(labels || {})}
+              transformValue={(label) => label.join(': ')}
+            />
+          )
+        },
+      }),
+      colCreationTimestamp: columnHelper.accessor(
+        (r) => r?.objectMeta.creationTimestamp,
+        {
+          id: 'creationTimestamp',
+          header: 'Creation',
+          enableSorting: true,
+          cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+        }
+      ),
+    }),
+    []
+  )
 }
 
 export function usePageInfo(items: any[], listMeta: ListMetaT | undefined) {

@@ -1,6 +1,6 @@
-import { ChipList, LoopingLogo, Table } from '@pluralsh/design-system'
+import { LoopingLogo, Table } from '@pluralsh/design-system'
 import { Row, createColumnHelper } from '@tanstack/react-table'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { useKubernetesContext } from '../Kubernetes'
 import {
@@ -8,54 +8,16 @@ import {
   usePodsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
   DEFAULT_DATA_SELECT,
   extendConnection,
+  useDefaultColumns,
   usePageInfo,
   useSortedTableOptions,
 } from '../utils'
 
 const columnHelper = createColumnHelper<PodT>()
-
-const columns = [
-  columnHelper.accessor((pod) => pod?.objectMeta.name, {
-    id: 'name',
-    header: 'Name',
-    enableSorting: true,
-    meta: { truncate: true },
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor((pod) => pod?.objectMeta.namespace, {
-    id: 'namespace',
-    header: 'Namespace',
-    enableSorting: true,
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor((pod) => pod?.objectMeta.labels, {
-    id: 'labels',
-    header: 'Labels',
-    cell: ({ getValue }) => {
-      const labels = getValue()
-
-      return (
-        <ChipList
-          size="small"
-          limit={1}
-          values={Object.entries(labels || {})}
-          transformValue={(label) => label.join(': ')}
-        />
-      )
-    },
-  }),
-  columnHelper.accessor((pod) => pod?.objectMeta.creationTimestamp, {
-    id: 'creationTimestamp',
-    header: 'Creation',
-    enableSorting: true,
-    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
-  }),
-]
 
 export default function Pods() {
   const { cluster, namespace, filter } = useKubernetesContext()
@@ -83,6 +45,13 @@ export default function Pods() {
         extendConnection(prev, fetchMoreResult, 'handleGetPods', 'pods'),
     })
   }, [fetchMore, hasNextPage, page])
+
+  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+    useDefaultColumns<PodT>(columnHelper)
+  const columns = useMemo(
+    () => [colName, colNamespace, colLabels, colCreationTimestamp],
+    [colName, colNamespace, colLabels, colCreationTimestamp]
+  )
 
   if (!data) return <LoopingLogo />
 
