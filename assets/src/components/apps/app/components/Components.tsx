@@ -53,6 +53,7 @@ const KIND_ORDER = [
   'ingress',
   'cronjob',
   'job',
+  'service',
   'certificate',
   'secret',
   'configmap',
