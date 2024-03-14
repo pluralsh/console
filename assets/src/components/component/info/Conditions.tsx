@@ -1,6 +1,7 @@
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { StatusConditionFragment } from 'generated/graphql'
+import { ComponentProps } from 'react'
 
 const columnHelper = createColumnHelper<StatusConditionFragment>()
 
@@ -38,11 +39,18 @@ const ColStatus = columnHelper.accessor((row) => row.reason, {
 
 const columns = [ColType, ColStatus, ColReason, ColMessage]
 
-export function ConditionsTable({ conditions, ...props }) {
+export function ConditionsTable({
+  conditions,
+  emptyStateProps,
+  ...props
+}: {
+  conditions: Nullable<Nullable<StatusConditionFragment>[]>
+} & Omit<ComponentProps<typeof Table>, 'columns' | 'data'>) {
   return (
     <Table
       columns={columns}
-      data={conditions}
+      emptyStateProps={{ message: 'No conditions found', ...emptyStateProps }}
+      data={conditions || []}
       {...props}
     />
   )

@@ -7311,6 +7311,19 @@ export type NodeMetricQueryVariables = Exact<{
 
 export type NodeMetricQuery = { __typename?: 'RootQueryType', nodeMetric?: { __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null };
 
+export type PluralObjectStatusFragment = { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
+
+export type PluralServiceDeploymentFragment = { __typename?: 'PluralServiceDeployment', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, reference?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null, status: { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null } };
+
+export type PluralServiceDeploymentQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type PluralServiceDeploymentQuery = { __typename?: 'RootQueryType', pluralServiceDeployment?: { __typename?: 'PluralServiceDeployment', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, reference?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null, status: { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null } } | null };
+
 export type PodWithEventsFragment = { __typename?: 'Pod', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } };
 
 export type PodQueryVariables = Exact<{
@@ -8691,107 +8704,6 @@ export const ClusterProviderFragmentDoc = gql`
   updatedAt
 }
     ${ProviderCredentialFragmentDoc}`;
-export const ServiceDeploymentsRowFragmentDoc = gql`
-    fragment ServiceDeploymentsRow on ServiceDeployment {
-  id
-  name
-  protect
-  promotion
-  message
-  git {
-    ref
-    folder
-  }
-  helm {
-    chart
-    version
-    repository {
-      namespace
-      name
-    }
-  }
-  cluster {
-    id
-    name
-    provider {
-      name
-      cloud
-    }
-    distro
-  }
-  helmRepository {
-    spec {
-      url
-    }
-    status {
-      ready
-      message
-    }
-  }
-  repository {
-    id
-    url
-  }
-  insertedAt
-  updatedAt
-  deletedAt
-  componentStatus
-  status
-  errors {
-    message
-    source
-  }
-  components {
-    apiDeprecations {
-      blocking
-    }
-  }
-  globalService {
-    id
-    name
-  }
-  dryRun
-}
-    `;
-export const ServiceDeploymentComponentFragmentDoc = gql`
-    fragment ServiceDeploymentComponent on ServiceComponent {
-  id
-  name
-  group
-  kind
-  namespace
-  state
-  synced
-  version
-  apiDeprecations {
-    ...ApiDeprecation
-  }
-  content {
-    desired
-    live
-  }
-}
-    ${ApiDeprecationFragmentDoc}`;
-export const ServiceDeploymentDetailsFragmentDoc = gql`
-    fragment ServiceDeploymentDetails on ServiceDeployment {
-  ...ServiceDeploymentsRow
-  namespace
-  message
-  version
-  helm {
-    values
-    valuesFiles
-  }
-  docs {
-    content
-    path
-  }
-  components {
-    ...ServiceDeploymentComponent
-  }
-}
-    ${ServiceDeploymentsRowFragmentDoc}
-${ServiceDeploymentComponentFragmentDoc}`;
 export const ServiceDeploymentRevisionFragmentDoc = gql`
     fragment ServiceDeploymentRevision on Revision {
   id
@@ -9228,6 +9140,135 @@ export const NodeFragmentDoc = gql`
     ${MetadataFragmentDoc}
 ${PodFragmentDoc}
 ${EventFragmentDoc}`;
+export const ServiceDeploymentsRowFragmentDoc = gql`
+    fragment ServiceDeploymentsRow on ServiceDeployment {
+  id
+  name
+  protect
+  promotion
+  message
+  git {
+    ref
+    folder
+  }
+  helm {
+    chart
+    version
+    repository {
+      namespace
+      name
+    }
+  }
+  cluster {
+    id
+    name
+    provider {
+      name
+      cloud
+    }
+    distro
+  }
+  helmRepository {
+    spec {
+      url
+    }
+    status {
+      ready
+      message
+    }
+  }
+  repository {
+    id
+    url
+  }
+  insertedAt
+  updatedAt
+  deletedAt
+  componentStatus
+  status
+  errors {
+    message
+    source
+  }
+  components {
+    apiDeprecations {
+      blocking
+    }
+  }
+  globalService {
+    id
+    name
+  }
+  dryRun
+}
+    `;
+export const ServiceDeploymentComponentFragmentDoc = gql`
+    fragment ServiceDeploymentComponent on ServiceComponent {
+  id
+  name
+  group
+  kind
+  namespace
+  state
+  synced
+  version
+  apiDeprecations {
+    ...ApiDeprecation
+  }
+  content {
+    desired
+    live
+  }
+}
+    ${ApiDeprecationFragmentDoc}`;
+export const ServiceDeploymentDetailsFragmentDoc = gql`
+    fragment ServiceDeploymentDetails on ServiceDeployment {
+  ...ServiceDeploymentsRow
+  namespace
+  message
+  version
+  helm {
+    values
+    valuesFiles
+  }
+  docs {
+    content
+    path
+  }
+  components {
+    ...ServiceDeploymentComponent
+  }
+}
+    ${ServiceDeploymentsRowFragmentDoc}
+${ServiceDeploymentComponentFragmentDoc}`;
+export const PluralObjectStatusFragmentDoc = gql`
+    fragment PluralObjectStatus on PluralObjectStatus {
+  id
+  conditions {
+    ...StatusCondition
+  }
+}
+    ${StatusConditionFragmentDoc}`;
+export const PluralServiceDeploymentFragmentDoc = gql`
+    fragment PluralServiceDeployment on PluralServiceDeployment {
+  events {
+    ...Event
+  }
+  metadata {
+    ...Metadata
+  }
+  reference {
+    ...ServiceDeploymentDetails
+  }
+  status {
+    ...PluralObjectStatus
+  }
+  raw
+}
+    ${EventFragmentDoc}
+${MetadataFragmentDoc}
+${ServiceDeploymentDetailsFragmentDoc}
+${PluralObjectStatusFragmentDoc}`;
 export const PodWithEventsFragmentDoc = gql`
     fragment PodWithEvents on Pod {
   ...Pod
@@ -14101,6 +14142,52 @@ export type NodeMetricQueryHookResult = ReturnType<typeof useNodeMetricQuery>;
 export type NodeMetricLazyQueryHookResult = ReturnType<typeof useNodeMetricLazyQuery>;
 export type NodeMetricSuspenseQueryHookResult = ReturnType<typeof useNodeMetricSuspenseQuery>;
 export type NodeMetricQueryResult = Apollo.QueryResult<NodeMetricQuery, NodeMetricQueryVariables>;
+export const PluralServiceDeploymentDocument = gql`
+    query PluralServiceDeployment($name: String!, $namespace: String!, $serviceId: ID) {
+  pluralServiceDeployment(
+    name: $name
+    namespace: $namespace
+    serviceId: $serviceId
+  ) {
+    ...PluralServiceDeployment
+  }
+}
+    ${PluralServiceDeploymentFragmentDoc}`;
+
+/**
+ * __usePluralServiceDeploymentQuery__
+ *
+ * To run a query within a React component, call `usePluralServiceDeploymentQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePluralServiceDeploymentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePluralServiceDeploymentQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function usePluralServiceDeploymentQuery(baseOptions: Apollo.QueryHookOptions<PluralServiceDeploymentQuery, PluralServiceDeploymentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PluralServiceDeploymentQuery, PluralServiceDeploymentQueryVariables>(PluralServiceDeploymentDocument, options);
+      }
+export function usePluralServiceDeploymentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PluralServiceDeploymentQuery, PluralServiceDeploymentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PluralServiceDeploymentQuery, PluralServiceDeploymentQueryVariables>(PluralServiceDeploymentDocument, options);
+        }
+export function usePluralServiceDeploymentSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PluralServiceDeploymentQuery, PluralServiceDeploymentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PluralServiceDeploymentQuery, PluralServiceDeploymentQueryVariables>(PluralServiceDeploymentDocument, options);
+        }
+export type PluralServiceDeploymentQueryHookResult = ReturnType<typeof usePluralServiceDeploymentQuery>;
+export type PluralServiceDeploymentLazyQueryHookResult = ReturnType<typeof usePluralServiceDeploymentLazyQuery>;
+export type PluralServiceDeploymentSuspenseQueryHookResult = ReturnType<typeof usePluralServiceDeploymentSuspenseQuery>;
+export type PluralServiceDeploymentQueryResult = Apollo.QueryResult<PluralServiceDeploymentQuery, PluralServiceDeploymentQueryVariables>;
 export const PodDocument = gql`
     query Pod($name: String!, $namespace: String!, $clusterId: ID, $serviceId: ID) {
   pod(
@@ -15201,6 +15288,7 @@ export const namedOperations = {
     Job: 'Job',
     Node: 'Node',
     NodeMetric: 'NodeMetric',
+    PluralServiceDeployment: 'PluralServiceDeployment',
     Pod: 'Pod',
     PodLogs: 'PodLogs',
     Service: 'Service',
@@ -15375,6 +15463,8 @@ export const namedOperations = {
     JobStatus: 'JobStatus',
     Node: 'Node',
     NodeMetric: 'NodeMetric',
+    PluralObjectStatus: 'PluralObjectStatus',
+    PluralServiceDeployment: 'PluralServiceDeployment',
     PodWithEvents: 'PodWithEvents',
     Service: 'Service',
     StatefulSet: 'StatefulSet',
