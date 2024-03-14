@@ -65,7 +65,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const splitLink = split(
     (operation) => hasSubscription(operation.query),
     socketLink,
-    authLink.concat(errorLink).concat(retryLink).concat(gqlLink)
+    authLink.concat(retryLink).concat(gqlLink)
   )
 
   const client = new ApolloClient({
