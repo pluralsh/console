@@ -59,13 +59,21 @@ type ChildrenType = ReactElement<TabBaseProps> | ReactElement<TabBaseProps>[]
 type TabListProps = {
   stateRef: TabStateRef
   stateProps?: TabListStateProps
+  scrollable?: boolean
   renderer?: Renderer
   as?: ReactElement & { ref?: MutableRefObject<any> }
   children?: ChildrenType
 }
 
 function TabListRef(
-  { stateRef, stateProps, renderer, as, ...props }: TabListProps & FlexProps,
+  {
+    stateRef,
+    stateProps,
+    renderer,
+    as,
+    scrollable,
+    ...props
+  }: TabListProps & FlexProps,
   incomingRef: RefObject<HTMLElement>
 ) {
   const wrappedChildren = useItemWrappedChildren(props.children)
@@ -135,6 +143,12 @@ function TabListRef(
       alignItems={
         stateProps.orientation === 'vertical' ? 'flex-start' : 'flex-end'
       }
+      css={{
+        ...(scrollable && {
+          overflow: 'auto',
+          whiteSpace: 'nowrap',
+        }),
+      }}
       ref={mergedRef as any}
     >
       {tabChildren}
