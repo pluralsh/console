@@ -1,12 +1,6 @@
 import { ChipList, LoopingLogo, Table } from '@pluralsh/design-system'
-import {
-  Row,
-  createColumnHelper,
-  TableOptions,
-  SortingState,
-} from '@tanstack/react-table'
-
-import { useCallback, useMemo, useState } from 'react'
+import { Row, createColumnHelper } from '@tanstack/react-table'
+import { useCallback } from 'react'
 
 import { useKubernetesContext } from '../Kubernetes'
 import {
@@ -16,7 +10,12 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
-import { DEFAULT_DATA_SELECT, extendConnection, usePageInfo } from '../utils'
+import {
+  DEFAULT_DATA_SELECT,
+  extendConnection,
+  usePageInfo,
+  useSortedTableOptions,
+} from '../utils'
 
 const columnHelper = createColumnHelper<PodT>()
 
@@ -60,7 +59,7 @@ const columns = [
 
 export default function Pods() {
   const { cluster, namespace, filter } = useKubernetesContext()
-  const [sort, setSort] = useState<SortingState>([])
+  const { sorting, reactTableOptions } = useSortedTableOptions<PodT>()
 
   const { data, loading, fetchMore } = usePodsQuery({
     client: KubernetesClient(cluster?.id ?? ''),
@@ -69,7 +68,7 @@ export default function Pods() {
       namespace,
       ...DEFAULT_DATA_SELECT,
       filterBy: `name,${filter}`,
-      sortBy: sort.map((s) => `${s.desc ? 'd' : 'a'},${s.id}`).join(','),
+      sortBy: sorting.map((s) => `${s.desc ? 'd' : 'a'},${s.id}`).join(','),
     },
   })
 
@@ -84,18 +83,6 @@ export default function Pods() {
         extendConnection(prev, fetchMoreResult, 'handleGetPods', 'pods'),
     })
   }, [fetchMore, hasNextPage, page])
-
-  const reactTableOptions = useMemo(
-    () =>
-      ({
-        onSortingChange: setSort,
-        manualSorting: true,
-        state: {
-          sorting: sort,
-        },
-      }) as TableOptions<PodT>,
-    [sort, setSort]
-  )
 
   if (!data) return <LoopingLogo />
 
