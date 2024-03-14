@@ -16,12 +16,10 @@ export const getRefreshedToken = async () => {
   const refreshResolverResponse = await authlessClient.query<RefreshQuery>({
     query: RefreshDocument,
     variables: { token: refreshToken },
+    fetchPolicy: 'no-cache',
   })
-  const jwt = refreshResolverResponse.data.refresh?.jwt
 
-  setToken(jwt)
-
-  return jwt
+  return refreshResolverResponse.data.refresh?.jwt
 }
 
 export const onErrorHandler: ErrorHandler = ({
@@ -37,10 +35,6 @@ export const onErrorHandler: ErrorHandler = ({
       err.message === 'unauthenticated' || err.message === 'invalid_token'
   )
 
-  console.log(refreshToken)
-  console.log(networkError)
-  console.log(is401)
-
   // Attempt to refresh jwt if we have a refresh token and the request is
   // unauthenticated
   if (refreshToken && (is401 || isUnauthenticated)) {
@@ -49,18 +43,21 @@ export const onErrorHandler: ErrorHandler = ({
       return
     }
 
-    const observable = new Observable<FetchResult>((observer) => {
+    return new Observable<FetchResult>((observer) => {
       ;(async () => {
         try {
           const jwt = await getRefreshedToken()
 
           if (!jwt) {
             onNetworkError()
+          } else {
+            setToken(jwt)
           }
+
           operation.setContext(({ headers = {} }) => ({
             headers: {
-              authorization: `Bearer ${jwt}`,
               ...headers,
+              authorization: `Bearer ${jwt}`,
             },
           }))
           // Retry the failed request
@@ -77,9 +74,8 @@ export const onErrorHandler: ErrorHandler = ({
         }
       })()
     })
-
-    return observable
   }
+
   if (is401) {
     onNetworkError()
   }

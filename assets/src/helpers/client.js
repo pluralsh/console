@@ -42,7 +42,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const errorLink = onError(onErrorHandler)
 
   const retryLink = new RetryLink({
-    delay: { initial: 200, max: 1000 * 5 },
+    delay: { initial: 200, max: 5000 },
     attempts: {
       max: Infinity,
       retryIf: (error) => !!error && !!fetchToken(),
@@ -60,11 +60,12 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const absintheSocket = AbsintheSocket.create(socket)
 
   const socketLink = createAbsintheSocketLink(absintheSocket)
+  const gqlLink = errorLink.concat(httpLink)
 
   const splitLink = split(
     (operation) => hasSubscription(operation.query),
     socketLink,
-    authLink.concat(errorLink).concat(retryLink).concat(httpLink)
+    authLink.concat(errorLink).concat(retryLink).concat(gqlLink)
   )
 
   const client = new ApolloClient({
