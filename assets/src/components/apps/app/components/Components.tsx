@@ -46,7 +46,6 @@ const FilterTrigger = styled(SelectButton)<{ $width?: number }>(
 )
 
 const KIND_ORDER = [
-  'service',
   'deployment',
   'statefulset',
   'daemonset',
