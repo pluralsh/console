@@ -18,7 +18,9 @@ export function ComponentList<C extends Component>({
   const theme = useTheme()
   const filteredComponents = useMemo(
     () =>
-      components?.filter((comp) => selectedKinds.has(comp?.kind)).sort(compareComponents),
+      components
+        ?.filter((comp) => selectedKinds.has(comp?.kind))
+        .sort(compareComponents),
     [components, selectedKinds]
   )
 
