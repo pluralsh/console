@@ -45,25 +45,49 @@ const FilterTrigger = styled(SelectButton)<{ $width?: number }>(
   })
 )
 
-const ORDER = {
-  deployment: 1,
-  statefulset: 2,
-  certificate: 3,
-  ingress: 4,
-  cronjob: 5,
-  service: 6,
-  job: 7,
+const KIND_ORDER = [
+  'deployment',
+  'statefulset',
+  'daemonset',
+  'ingress',
+  'cronjob',
+  'job',
+  'service',
+  'certificate',
+  'secret',
+  'configmap',
+] as const satisfies string[]
+
+const getKindIdx = (kind: Nullable<string>) => {
+  const i = KIND_ORDER.findIndex((k) => k === kind?.toLowerCase())
+
+  return i === -1 ? Number.MAX_VALUE : i
 }
 
-const kindInd = (kind) => ORDER[kind.toLowerCase()] || 7
-
-export function orderBy(
-  { kind: k1, name: n1 }: any,
-  { kind: k2, name: n2 }: any
+export function compareComponentKinds(
+  k1: Nullable<string>,
+  k2: Nullable<string>
 ) {
-  if (k1 === k2) return n1 > n2 ? 1 : n1 === n2 ? 0 : -1
+  if (k1 === k2) return 0
 
-  return kindInd(k1) - kindInd(k2)
+  const k1Idx = getKindIdx(k1)
+  const k2Idx = getKindIdx(k2)
+
+  if (k1Idx === k2Idx) return (k1 || '')?.localeCompare(k2 || '')
+
+  return k1Idx - k2Idx
+}
+
+export function compareComponents<
+  T extends { kind?: Nullable<string>; name?: Nullable<string> },
+>({ kind: k1, name: n1 }: T, { kind: k2, name: n2 }: T) {
+  const kindCompare = compareComponentKinds(k1, k2)
+
+  if (kindCompare !== 0) {
+    return kindCompare
+  }
+
+  return (n1 || '')?.localeCompare(n2 || '')
 }
 
 export function useComponentKindSelect(
@@ -114,7 +138,7 @@ function getUniqueKinds(
 
       return kinds
     }, new Set<string>([])) || []
-  ).sort()
+  ).sort(compareComponentKinds)
 }
 
 function ComponentKindSelect({
