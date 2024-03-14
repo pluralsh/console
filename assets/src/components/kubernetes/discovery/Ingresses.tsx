@@ -1,7 +1,9 @@
-import { ChipList, Table } from '@pluralsh/design-system'
+import { ChipList, LoopingLogo, Table } from '@pluralsh/design-system'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 
 import { isEmpty } from 'lodash'
+
+import { useCallback } from 'react'
 
 import {
   Ingress_Ingress as IngressT,
@@ -10,9 +12,14 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { useKubernetesContext } from '../Kubernetes'
-import LoadingIndicator from '../../utils/LoadingIndicator'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
+import {
+  DEFAULT_DATA_SELECT,
+  extendConnection,
+  usePageInfo,
+  useSortedTableOptions,
+} from '../utils'
 
 const columnHelper = createColumnHelper<IngressT>()
 
@@ -21,7 +28,6 @@ const columns = [
     id: 'name',
     header: 'Name',
     enableSorting: true,
-    enableGlobalFilter: true,
     meta: { truncate: true },
     cell: ({ getValue }) => getValue(),
   }),
@@ -29,14 +35,11 @@ const columns = [
     id: 'namespace',
     header: 'Namespace',
     enableSorting: true,
-    enableGlobalFilter: true,
     cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor((ingress) => ingress?.objectMeta.labels, {
     id: 'labels',
     header: 'Labels',
-    enableSorting: true,
-    enableGlobalFilter: true,
     cell: ({ getValue }) => {
       const labels = getValue()
 
@@ -53,15 +56,11 @@ const columns = [
   columnHelper.accessor((ingress) => ingress?.endpoints, {
     id: 'endpoints',
     header: 'Endpoints',
-    enableSorting: true,
-    enableGlobalFilter: true,
     cell: ({ getValue }) => JSON.stringify(getValue()),
   }),
   columnHelper.accessor((ingress) => ingress?.hosts, {
     id: 'hosts',
     header: 'Hosts',
-    enableSorting: true,
-    enableGlobalFilter: true,
     cell: ({ getValue }) => {
       const hosts = getValue()
 
@@ -69,36 +68,60 @@ const columns = [
     },
   }),
   columnHelper.accessor((ingress) => ingress?.objectMeta.creationTimestamp, {
-    id: 'created',
-    header: 'Created',
+    id: 'creationTimestamp',
+    header: 'Creation',
     enableSorting: true,
-    enableGlobalFilter: true,
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
 ]
 
 export default function Ingresses() {
   const { cluster, namespace, filter } = useKubernetesContext()
+  const { sortBy, reactTableOptions } = useSortedTableOptions<IngressT>()
 
-  const { data, loading } = useIngressesQuery({
+  const { data, loading, fetchMore } = useIngressesQuery({
     client: KubernetesClient(cluster?.id ?? ''),
     skip: !cluster,
     variables: {
       namespace,
+      ...DEFAULT_DATA_SELECT,
       filterBy: `name,${filter}`,
+      sortBy,
     },
-  }) // TODO: Pagination and sorting.
+  })
 
   const ingresses = data?.handleGetIngressList?.items || []
+  const { page, hasNextPage } = usePageInfo(
+    ingresses,
+    data?.handleGetIngressList?.listMeta
+  )
 
-  if (loading) return <LoadingIndicator />
+  const fetchNextPage = useCallback(() => {
+    if (!hasNextPage) return
+    fetchMore({
+      variables: { page: page + 1 },
+      updateQuery: (prev, { fetchMoreResult }) =>
+        extendConnection(
+          prev,
+          fetchMoreResult,
+          'handleGetIngressList',
+          'items'
+        ),
+    })
+  }, [fetchMore, hasNextPage, page])
+
+  if (!data) return <LoopingLogo />
 
   return (
     <FullHeightTableWrap>
       <Table
         data={ingresses}
         columns={columns}
-        onRowClick={(_e, { original }: Row<IngressT>) => console.log(original)} // TODO: Redirect.
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        reactTableOptions={reactTableOptions}
+        onRowClick={(_e, { original }: Row<PodT>) => console.log(original)}
         css={{
           maxHeight: 'unset',
           height: '100%',
