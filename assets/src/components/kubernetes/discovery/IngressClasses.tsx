@@ -48,7 +48,7 @@ export default function IngressClasses() {
         extendConnection(
           prev,
           fetchMoreResult,
-          'handleGetIngressList',
+          'handleGetIngressClassList',
           'items'
         ),
     })
