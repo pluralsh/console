@@ -4264,9 +4264,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:3.24.0":
-  version: 3.24.0
-  resolution: "@pluralsh/design-system@npm:3.24.0"
+"@pluralsh/design-system@npm:3.25.0":
+  version: 3.25.0
+  resolution: "@pluralsh/design-system@npm:3.25.0"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@loomhq/loom-embed": 1.5.0
@@ -4314,7 +4314,7 @@ __metadata:
     react-dom: ">=18.2.0"
     react-transition-group: ">=4.4.5"
     styled-components: ">=5.3.11"
-  checksum: fceec15a6e39769cce4b1d4d71d997e134b4b7d5b2dd63dd090006102d701834ebd1fab16e7305f4d7f7ebf6d0f4e700bb1ba2c262a59d71bf4d210d8db18617
+  checksum: 61a2377862905f6cc9b78949a4234b53521d99c17392ba8d87251f3bdbd612bc436485fc8529285d1f0c790b0728119875af4457618203b49d84765c75d26acd
   languageName: node
   linkType: hard
 
@@ -9503,7 +9503,7 @@ __metadata:
     "@nivo/pie": 0.83.0
     "@nivo/radial-bar": 0.83.0
     "@nivo/tooltip": 0.83.0
-    "@pluralsh/design-system": 3.24.0
+    "@pluralsh/design-system": 3.25.0
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0
@@ -9582,7 +9582,7 @@ __metadata:
     react-dnd-html5-backend: 16.0.1
     react-dom: 18.2.0
     react-dropzone: 14.2.3
-    react-embed: 3.6.0
+    react-embed: 3.7.0
     react-error-boundary: 4.0.11
     react-file-icon: 1.3.0
     react-file-picker: 0.0.6
@@ -16749,23 +16749,6 @@ __metadata:
   peerDependencies:
     react: ">= 16.8 || 18.0.0"
   checksum: 174b744d5ca898cf3d84ec1aeb6cef5211c446697e45dc8ece8287a03d291f8d07253206d5a1247ef156fd385d65e7de666d4d5c2986020b8543b8f2434e8b40
-  languageName: node
-  linkType: hard
-
-"react-embed@npm:3.6.0":
-  version: 3.6.0
-  resolution: "react-embed@npm:3.6.0"
-  dependencies:
-    p4-css: ^1.5.1
-    react-instagram-embed: ^1.5.0
-    react-player: ^1.15.3
-    react-simple-player: ^1.1.0
-    react-youtube: ^7.13.1
-    scriptjs: ^2.5.9
-  peerDependencies:
-    react: "*"
-    react-dom: "*"
-  checksum: eba7b3498642209c308a7629308dbb1fa38ba8d976aa36cbef31b98c5c19859a9701fe4d5afe618dcf2f1d36f428146bf5281f5fa62194738156cb496ee1352a
   languageName: node
   linkType: hard
 
