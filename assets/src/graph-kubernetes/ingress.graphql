@@ -20,6 +20,7 @@ query Ingresses(
     }
     items {
       objectMeta {
+        uid
         name
         namespace
         labels
