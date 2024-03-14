@@ -61,6 +61,7 @@ function NameFilter({
 }) {
   return (
     <Input
+      height="fit-content"
       startIcon={<SearchIcon />}
       placeholder="Filter by name"
       value={value}
