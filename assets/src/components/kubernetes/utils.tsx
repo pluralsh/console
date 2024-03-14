@@ -56,7 +56,7 @@ export function useDefaultColumns<T>(columnHelper: ColumnHelper<T>) {
         }
       ),
     }),
-    []
+    [columnHelper]
   )
 }
 
