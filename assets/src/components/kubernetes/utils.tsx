@@ -1,6 +1,11 @@
 import uniqWith from 'lodash/uniqWith'
 
-import { Types_ListMeta as ListMetaT } from '../../generated/graphql-kubernetes'
+import {
+  Pod_Pod as PodT,
+  Types_ListMeta as ListMetaT,
+} from '../../generated/graphql-kubernetes'
+import { useMemo, useState } from 'react'
+import { SortingState, TableOptions } from '@tanstack/react-table'
 
 // TODO: Use generic types.
 
@@ -18,6 +23,24 @@ export function usePageInfo(items: any[], listMeta: ListMetaT | undefined) {
   const hasNextPage = page < pages
 
   return { page, hasNextPage }
+}
+
+export function useSortedTableOptions<T>() {
+  const [sorting, setSorting] = useState<SortingState>([])
+
+  return useMemo(
+    () => ({
+      sorting,
+      reactTableOptions: {
+        onSortingChange: setSorting,
+        manualSorting: true,
+        state: {
+          sorting,
+        },
+      } as TableOptions<T>,
+    }),
+    [sorting, setSorting]
+  )
 }
 
 export function extendConnection(
