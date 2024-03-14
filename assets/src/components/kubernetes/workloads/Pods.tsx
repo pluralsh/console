@@ -51,7 +51,7 @@ const columns = [
   }),
   columnHelper.accessor((pod) => pod?.objectMeta.creationTimestamp, {
     id: 'creationTimestamp',
-    header: 'Created',
+    header: 'Creation',
     enableSorting: true,
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
@@ -59,7 +59,7 @@ const columns = [
 
 export default function Pods() {
   const { cluster, namespace, filter } = useKubernetesContext()
-  const { sorting, reactTableOptions } = useSortedTableOptions<PodT>()
+  const { sortBy, reactTableOptions } = useSortedTableOptions<PodT>()
 
   const { data, loading, fetchMore } = usePodsQuery({
     client: KubernetesClient(cluster?.id ?? ''),
@@ -68,7 +68,7 @@ export default function Pods() {
       namespace,
       ...DEFAULT_DATA_SELECT,
       filterBy: `name,${filter}`,
-      sortBy: sorting.map((s) => `${s.desc ? 'd' : 'a'},${s.id}`).join(','),
+      sortBy,
     },
   })
 
@@ -95,9 +95,6 @@ export default function Pods() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         reactTableOptions={reactTableOptions}
-        // virtualizeRows
-        // reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
-        // onVirtualSliceChange={setVirtualSlice}
         onRowClick={(_e, { original }: Row<PodT>) => console.log(original)} // TODO: Redirect.
         css={{
           maxHeight: 'unset',
