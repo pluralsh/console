@@ -57,6 +57,20 @@ defmodule Console.Schema.PolicyConstraint do
     )
   end
 
+  def for_namespaces(query \\ __MODULE__, ns) do
+    from(p in query,
+      join: v in assoc(p, :violations),
+      where: v.namespace in ^ns
+    )
+  end
+
+  def for_kinds(query \\ __MODULE__, kinds) do
+    from(p in query,
+      join: v in assoc(p, :violations),
+      where: v.kind in ^kinds
+    )
+  end
+
   def search(query \\ __MODULE__, q) do
     from(p in query, where: ilike(p.name, ^"%#{q}%"))
   end

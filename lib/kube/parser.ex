@@ -156,6 +156,7 @@ defmodule Kube.Parser do
     |> String.to_atom()
   end
 
+  defp metadata([crd]), do: metadata(crd)
   defp metadata(%{
     "spec" => %{
       "group" => group,

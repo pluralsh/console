@@ -678,8 +678,10 @@ export type ClusterPolicyConstraintsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   kind?: InputMaybe<Scalars['String']['input']>;
+  kinds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   last?: InputMaybe<Scalars['Int']['input']>;
   namespace?: InputMaybe<Scalars['String']['input']>;
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -4943,8 +4945,10 @@ export type RootQueryTypePolicyConstraintsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   kind?: InputMaybe<Scalars['String']['input']>;
+  kinds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   last?: InputMaybe<Scalars['Int']['input']>;
   namespace?: InputMaybe<Scalars['String']['input']>;
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
 
