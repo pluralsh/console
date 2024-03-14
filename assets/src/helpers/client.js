@@ -42,7 +42,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const errorLink = onError(onErrorHandler)
 
   const retryLink = new RetryLink({
-    delay: { initial: 200 },
+    delay: { initial: 200, max: 1000 * 5 },
     attempts: {
       max: Infinity,
       retryIf: (error) => !!error && !!fetchToken(),

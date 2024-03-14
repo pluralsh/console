@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie'
+
 export const AUTH_TOKEN = 'auth-token'
 export const REFRESH_TOKEN = 'refresh-token'
 
@@ -14,22 +16,18 @@ export function setToken(token) {
 }
 
 export function setRefreshToken(token) {
-  document.cookie = `${REFRESH_TOKEN}=${
-    token || ''
-  }; path=/; secure; samesite=strict; expires=${new Date(
-    !token ? 0 : Date.now() + 365 * 24 * 60 * 60 * 1000
-  ).toUTCString()}`
+  Cookies.set(REFRESH_TOKEN, token || '', {
+    path: '/',
+    secure: true,
+    sameSite: 'strict',
+    expires: 30,
+  })
 }
 
 export function wipeRefreshToken() {
-  setRefreshToken('')
+  Cookies.remove(REFRESH_TOKEN)
 }
 
 export function fetchRefreshToken() {
-  const refreshToken = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith(`${REFRESH_TOKEN}=`))
-    ?.split('=')[1]
-
-  return refreshToken
+  return Cookies.get(REFRESH_TOKEN)
 }

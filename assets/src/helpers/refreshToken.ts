@@ -37,6 +37,10 @@ export const onErrorHandler: ErrorHandler = ({
       err.message === 'unauthenticated' || err.message === 'invalid_token'
   )
 
+  console.log(refreshToken)
+  console.log(networkError)
+  console.log(is401)
+
   // Attempt to refresh jwt if we have a refresh token and the request is
   // unauthenticated
   if (refreshToken && (is401 || isUnauthenticated)) {
