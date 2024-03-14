@@ -24,6 +24,11 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
 const GQL_URL = '/gql'
 const WS_URI = '/socket'
 
+export const authlessClient = new ApolloClient({
+  link: createLink({ uri: GQL_URL }),
+  cache: new InMemoryCache(),
+})
+
 export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
@@ -37,7 +42,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const errorLink = onError(onErrorHandler)
 
   const retryLink = new RetryLink({
-    delay: { initial: 200 },
+    delay: { initial: 200, max: 5000 },
     attempts: {
       max: Infinity,
       retryIf: (error) => !!error && !!fetchToken(),

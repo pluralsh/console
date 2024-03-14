@@ -64,8 +64,9 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 config :console, Console.Guardian,
-  issuer: "watchman",
-  secret_key: "watchman_secret"
+  ttl: {30, :minutes},
+  issuer: "console",
+  secret_key: "console_secret" # this gets overwritten in release config
 
 config :console, Console.Repo,
   migration_timestamps: [type: :utc_datetime_usec]

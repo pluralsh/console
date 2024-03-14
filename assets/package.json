@@ -68,6 +68,7 @@
     "honorable-theme-default": "1.0.0-beta.5",
     "humanize-duration": "3.31.0",
     "immer": "10.0.3",
+    "js-cookie": "^3.0.5",
     "js-file-download": "0.4.12",
     "js-yaml": "4.1.0",
     "jsonpath": "1.1.1",
