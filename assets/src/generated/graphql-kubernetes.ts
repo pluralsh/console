@@ -4606,12 +4606,33 @@ export type IngressesQueryVariables = Exact<{
 }>;
 
 
-export type IngressesQuery = { __typename?: 'Query', handleGetIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, protocol: string, nodePort: number } | null> } | null> } | null> } | null };
+export type IngressesQuery = { __typename?: 'Query', handleGetIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, protocol: string, nodePort: number } | null> } | null> } | null> } | null };
+
+export type IngressClassesQueryVariables = Exact<{
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type IngressClassesQuery = { __typename?: 'Query', handleGetIngressClassList?: { __typename?: 'ingressclass_IngressClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingressclass_IngressClass', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NamespacesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null } } | null> } | null };
+export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null } } | null> } | null };
+
+export type NetworkPoliciesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type NetworkPoliciesQuery = { __typename?: 'Query', handleGetNetworkPolicyList?: { __typename?: 'networkpolicy_NetworkPolicyList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'networkpolicy_NetworkPolicy', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type PodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4623,6 +4644,17 @@ export type PodsQueryVariables = Exact<{
 
 
 export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type ServicesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export const ObjectMetaFragmentDoc = gql`
     fragment ObjectMeta on types_ObjectMeta {
@@ -4705,6 +4737,7 @@ export const IngressesDocument = gql`
     }
     items {
       objectMeta {
+        uid
         name
         namespace
         labels
@@ -4760,6 +4793,65 @@ export type IngressesQueryHookResult = ReturnType<typeof useIngressesQuery>;
 export type IngressesLazyQueryHookResult = ReturnType<typeof useIngressesLazyQuery>;
 export type IngressesSuspenseQueryHookResult = ReturnType<typeof useIngressesSuspenseQuery>;
 export type IngressesQueryResult = Apollo.QueryResult<IngressesQuery, IngressesQueryVariables>;
+export const IngressClassesDocument = gql`
+    query IngressClasses($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetIngressClassList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "ingressclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta {
+        uid
+        name
+        namespace
+        labels
+        creationTimestamp
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useIngressClassesQuery__
+ *
+ * To run a query within a React component, call `useIngressClassesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIngressClassesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIngressClassesQuery({
+ *   variables: {
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useIngressClassesQuery(baseOptions?: Apollo.QueryHookOptions<IngressClassesQuery, IngressClassesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IngressClassesQuery, IngressClassesQueryVariables>(IngressClassesDocument, options);
+      }
+export function useIngressClassesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IngressClassesQuery, IngressClassesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IngressClassesQuery, IngressClassesQueryVariables>(IngressClassesDocument, options);
+        }
+export function useIngressClassesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IngressClassesQuery, IngressClassesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<IngressClassesQuery, IngressClassesQueryVariables>(IngressClassesDocument, options);
+        }
+export type IngressClassesQueryHookResult = ReturnType<typeof useIngressClassesQuery>;
+export type IngressClassesLazyQueryHookResult = ReturnType<typeof useIngressClassesLazyQuery>;
+export type IngressClassesSuspenseQueryHookResult = ReturnType<typeof useIngressClassesSuspenseQuery>;
+export type IngressClassesQueryResult = Apollo.QueryResult<IngressClassesQuery, IngressClassesQueryVariables>;
 export const NamespacesDocument = gql`
     query Namespaces {
   handleGetNamespaces @rest(path: "namespace") {
@@ -4768,6 +4860,7 @@ export const NamespacesDocument = gql`
     }
     namespaces {
       objectMeta {
+        uid
         name
       }
     }
@@ -4806,6 +4899,67 @@ export type NamespacesQueryHookResult = ReturnType<typeof useNamespacesQuery>;
 export type NamespacesLazyQueryHookResult = ReturnType<typeof useNamespacesLazyQuery>;
 export type NamespacesSuspenseQueryHookResult = ReturnType<typeof useNamespacesSuspenseQuery>;
 export type NamespacesQueryResult = Apollo.QueryResult<NamespacesQuery, NamespacesQueryVariables>;
+export const NetworkPoliciesDocument = gql`
+    query NetworkPolicies($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetNetworkPolicyList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "networkpolicy/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta {
+        uid
+        name
+        namespace
+        labels
+        creationTimestamp
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useNetworkPoliciesQuery__
+ *
+ * To run a query within a React component, call `useNetworkPoliciesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNetworkPoliciesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNetworkPoliciesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useNetworkPoliciesQuery(baseOptions: Apollo.QueryHookOptions<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>(NetworkPoliciesDocument, options);
+      }
+export function useNetworkPoliciesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>(NetworkPoliciesDocument, options);
+        }
+export function useNetworkPoliciesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>(NetworkPoliciesDocument, options);
+        }
+export type NetworkPoliciesQueryHookResult = ReturnType<typeof useNetworkPoliciesQuery>;
+export type NetworkPoliciesLazyQueryHookResult = ReturnType<typeof useNetworkPoliciesLazyQuery>;
+export type NetworkPoliciesSuspenseQueryHookResult = ReturnType<typeof useNetworkPoliciesSuspenseQuery>;
+export type NetworkPoliciesQueryResult = Apollo.QueryResult<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>;
 export const PodsDocument = gql`
     query Pods($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetPods(
@@ -4867,3 +5021,64 @@ export type PodsQueryHookResult = ReturnType<typeof usePodsQuery>;
 export type PodsLazyQueryHookResult = ReturnType<typeof usePodsLazyQuery>;
 export type PodsSuspenseQueryHookResult = ReturnType<typeof usePodsSuspenseQuery>;
 export type PodsQueryResult = Apollo.QueryResult<PodsQuery, PodsQueryVariables>;
+export const ServicesDocument = gql`
+    query Services($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetServiceList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "service/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    services {
+      objectMeta {
+        uid
+        name
+        namespace
+        labels
+        creationTimestamp
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useServicesQuery__
+ *
+ * To run a query within a React component, call `useServicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServicesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useServicesQuery(baseOptions: Apollo.QueryHookOptions<ServicesQuery, ServicesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServicesQuery, ServicesQueryVariables>(ServicesDocument, options);
+      }
+export function useServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServicesQuery, ServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServicesQuery, ServicesQueryVariables>(ServicesDocument, options);
+        }
+export function useServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServicesQuery, ServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServicesQuery, ServicesQueryVariables>(ServicesDocument, options);
+        }
+export type ServicesQueryHookResult = ReturnType<typeof useServicesQuery>;
+export type ServicesLazyQueryHookResult = ReturnType<typeof useServicesLazyQuery>;
+export type ServicesSuspenseQueryHookResult = ReturnType<typeof useServicesSuspenseQuery>;
+export type ServicesQueryResult = Apollo.QueryResult<ServicesQuery, ServicesQueryVariables>;
