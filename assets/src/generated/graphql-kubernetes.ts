@@ -4595,6 +4595,16 @@ export type IngressesQueryVariables = Exact<{
 
 export type IngressesQuery = { __typename?: 'Query', handleGetIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, protocol: string, nodePort: number } | null> } | null> } | null> } | null };
 
+export type IngressClassesQueryVariables = Exact<{
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type IngressClassesQuery = { __typename?: 'Query', handleGetIngressClassList?: { __typename?: 'ingressclass_IngressClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingressclass_IngressClass', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export type NamespacesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -4682,6 +4692,65 @@ export type IngressesQueryHookResult = ReturnType<typeof useIngressesQuery>;
 export type IngressesLazyQueryHookResult = ReturnType<typeof useIngressesLazyQuery>;
 export type IngressesSuspenseQueryHookResult = ReturnType<typeof useIngressesSuspenseQuery>;
 export type IngressesQueryResult = Apollo.QueryResult<IngressesQuery, IngressesQueryVariables>;
+export const IngressClassesDocument = gql`
+    query IngressClasses($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetIngressClassList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "ingressclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta {
+        uid
+        name
+        namespace
+        labels
+        creationTimestamp
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useIngressClassesQuery__
+ *
+ * To run a query within a React component, call `useIngressClassesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIngressClassesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIngressClassesQuery({
+ *   variables: {
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useIngressClassesQuery(baseOptions?: Apollo.QueryHookOptions<IngressClassesQuery, IngressClassesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IngressClassesQuery, IngressClassesQueryVariables>(IngressClassesDocument, options);
+      }
+export function useIngressClassesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IngressClassesQuery, IngressClassesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IngressClassesQuery, IngressClassesQueryVariables>(IngressClassesDocument, options);
+        }
+export function useIngressClassesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IngressClassesQuery, IngressClassesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<IngressClassesQuery, IngressClassesQueryVariables>(IngressClassesDocument, options);
+        }
+export type IngressClassesQueryHookResult = ReturnType<typeof useIngressClassesQuery>;
+export type IngressClassesLazyQueryHookResult = ReturnType<typeof useIngressClassesLazyQuery>;
+export type IngressClassesSuspenseQueryHookResult = ReturnType<typeof useIngressClassesSuspenseQuery>;
+export type IngressClassesQueryResult = Apollo.QueryResult<IngressClassesQuery, IngressClassesQueryVariables>;
 export const NamespacesDocument = gql`
     query Namespaces {
   handleGetNamespaces @rest(path: "namespace") {

@@ -1,8 +1,6 @@
 import { LoopingLogo, Table } from '@pluralsh/design-system'
 import { Row, createColumnHelper } from '@tanstack/react-table'
-
 import { isEmpty } from 'lodash'
-
 import { useCallback, useMemo } from 'react'
 
 import {
