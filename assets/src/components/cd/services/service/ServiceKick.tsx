@@ -28,7 +28,7 @@ export default function ServiceKick({ id }) {
           onClick={mutation}
           loading={loading}
         >
-          Resync Service
+          Resync service
         </Button>
       </Tooltip>
     </div>
