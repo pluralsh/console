@@ -139,9 +139,9 @@ export function ComponentDetails({
     }),
     [component, data, loading, refetch, serviceComponents, service]
   )
-  const serviceDeploymentServiceId = (
+  const pluralServiceDeploymentRef = (
     data?.pluralServiceDeployment as Nullable<PluralServiceDeploymentFragment>
-  )?.status.id
+  )?.reference
 
   const hasNotFoundError = useMemo(
     () => !data && error && error?.message?.includes('not found'),
@@ -209,17 +209,18 @@ export function ComponentDetails({
                 </LinkTabWrap>
               ))}
             </TabList>
-            {serviceDeploymentServiceId && service?.cluster?.id && (
-              <Button
-                as={Link}
-                to={getServiceDetailsPath({
-                  serviceId: serviceDeploymentServiceId,
-                  clusterId: service?.cluster?.id,
-                })}
-              >
-                View service
-              </Button>
-            )}
+            {pluralServiceDeploymentRef?.id &&
+              pluralServiceDeploymentRef?.cluster?.id && (
+                <Button
+                  as={Link}
+                  to={getServiceDetailsPath({
+                    serviceId: pluralServiceDeploymentRef?.id,
+                    clusterId: pluralServiceDeploymentRef?.cluster.id,
+                  })}
+                >
+                  View service
+                </Button>
+              )}
 
             <ScalingRecommenderModal
               kind={kind}
