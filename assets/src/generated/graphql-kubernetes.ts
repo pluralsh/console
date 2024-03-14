@@ -4610,6 +4610,17 @@ export type NamespacesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null } } | null> } | null };
 
+export type NetworkPoliciesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type NetworkPoliciesQuery = { __typename?: 'Query', handleGetNetworkPolicyList?: { __typename?: 'networkpolicy_NetworkPolicyList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'networkpolicy_NetworkPolicy', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export type PodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -4809,6 +4820,67 @@ export type NamespacesQueryHookResult = ReturnType<typeof useNamespacesQuery>;
 export type NamespacesLazyQueryHookResult = ReturnType<typeof useNamespacesLazyQuery>;
 export type NamespacesSuspenseQueryHookResult = ReturnType<typeof useNamespacesSuspenseQuery>;
 export type NamespacesQueryResult = Apollo.QueryResult<NamespacesQuery, NamespacesQueryVariables>;
+export const NetworkPoliciesDocument = gql`
+    query NetworkPolicies($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetNetworkPolicyList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "networkpolicy/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta {
+        uid
+        name
+        namespace
+        labels
+        creationTimestamp
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useNetworkPoliciesQuery__
+ *
+ * To run a query within a React component, call `useNetworkPoliciesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNetworkPoliciesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNetworkPoliciesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useNetworkPoliciesQuery(baseOptions: Apollo.QueryHookOptions<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>(NetworkPoliciesDocument, options);
+      }
+export function useNetworkPoliciesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>(NetworkPoliciesDocument, options);
+        }
+export function useNetworkPoliciesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>(NetworkPoliciesDocument, options);
+        }
+export type NetworkPoliciesQueryHookResult = ReturnType<typeof useNetworkPoliciesQuery>;
+export type NetworkPoliciesLazyQueryHookResult = ReturnType<typeof useNetworkPoliciesLazyQuery>;
+export type NetworkPoliciesSuspenseQueryHookResult = ReturnType<typeof useNetworkPoliciesSuspenseQuery>;
+export type NetworkPoliciesQueryResult = Apollo.QueryResult<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>;
 export const PodsDocument = gql`
     query Pods($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetPods(
