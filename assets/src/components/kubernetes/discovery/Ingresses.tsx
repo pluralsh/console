@@ -5,7 +5,6 @@ import { useCallback, useMemo } from 'react'
 
 import {
   Ingress_Ingress as IngressT,
-  Pod_Pod as PodT,
   useIngressesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
@@ -97,7 +96,7 @@ export default function Ingresses() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         reactTableOptions={reactTableOptions}
-        onRowClick={(_e, { original }: Row<PodT>) => console.log(original)}
+        onRowClick={(_e, { original }: Row<IngressT>) => console.log(original)}
         css={{
           maxHeight: 'unset',
           height: '100%',

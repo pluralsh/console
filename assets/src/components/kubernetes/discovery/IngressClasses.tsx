@@ -4,7 +4,6 @@ import { LoopingLogo, Table } from '@pluralsh/design-system'
 
 import {
   Ingressclass_IngressClass as IngressClassT,
-  Pod_Pod as PodT,
   useIngressClassesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { useKubernetesContext } from '../Kubernetes'
@@ -34,9 +33,9 @@ export default function IngressClasses() {
     },
   })
 
-  const ingresses = data?.handleGetIngressClassList?.items || []
+  const ingressClasses = data?.handleGetIngressClassList?.items || []
   const { page, hasNextPage } = usePageInfo(
-    ingresses,
+    ingressClasses,
     data?.handleGetIngressClassList?.listMeta
   )
 
@@ -66,13 +65,15 @@ export default function IngressClasses() {
   return (
     <FullHeightTableWrap>
       <Table
-        data={ingresses}
+        data={ingressClasses}
         columns={columns}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         reactTableOptions={reactTableOptions}
-        onRowClick={(_e, { original }: Row<PodT>) => console.log(original)}
+        onRowClick={(_e, { original }: Row<IngressClassT>) =>
+          console.log(original)
+        }
         css={{
           maxHeight: 'unset',
           height: '100%',
