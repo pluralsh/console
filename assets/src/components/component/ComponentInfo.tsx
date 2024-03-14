@@ -15,6 +15,7 @@ import Metadata from './info/Metadata'
 import { ComponentDetailsContext } from './ComponentDetails'
 import DaemonSet from './info/Daemonset'
 import CanaryInfo from './info/Canary'
+import PluralServiceDeployment from './info/PluralServiceDeployment'
 
 const componentsWithPods: string[] = [
   'deployment',
@@ -50,6 +51,8 @@ function getInfo(kind: string): JSX.Element | undefined {
       return <DaemonSet />
     case 'canary':
       return <CanaryInfo />
+    case 'servicedeployment':
+      return <PluralServiceDeployment />
     default:
       return undefined
   }

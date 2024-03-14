@@ -1,6 +1,6 @@
-import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
+import { Button, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { useContext, useEffect, useMemo, useRef } from 'react'
-import { Outlet, useMatch, useNavigate } from 'react-router-dom'
+import { Link, Outlet, useMatch, useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import {
   POLL_INTERVAL,
@@ -22,6 +22,8 @@ import {
   DeploymentDocument,
   IngressDocument,
   JobDocument,
+  PluralServiceDeploymentDocument,
+  PluralServiceDeploymentFragment,
   ServiceDeploymentComponentFragment,
   ServiceDeploymentDetailsFragment,
   ServiceDocument,
@@ -31,6 +33,7 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
 export const kindToQuery = {
   certificate: CertificateDocument,
@@ -42,6 +45,7 @@ export const kindToQuery = {
   statefulset: StatefulSetDocument,
   daemonset: DaemonSetDocument,
   canary: CanaryDocument,
+  servicedeployment: PluralServiceDeploymentDocument,
 } as const
 
 type DetailsComponent = {
@@ -135,6 +139,9 @@ export function ComponentDetails({
     }),
     [component, data, loading, refetch, serviceComponents, service]
   )
+  const serviceDeploymentServiceId = (
+    data?.pluralServiceDeployment as Nullable<PluralServiceDeploymentFragment>
+  )?.status.id
 
   const hasNotFoundError = useMemo(
     () => !data && error && error?.message?.includes('not found'),
@@ -174,44 +181,58 @@ export function ComponentDetails({
       }
       heading={componentName}
       headingContent={
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.medium,
-            className: 'DELETE',
-            margin: `${theme.spacing.medium}px 0`,
-          }}
-        >
-          <TabList
-            gap="xxsmall"
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
+        <div>
+          <div
+            css={{
+              display: 'flex',
+              gap: theme.spacing.medium,
+              className: 'DELETE',
+              margin: `${theme.spacing.medium}px 0`,
             }}
           >
-            {filteredDirectory.map(({ label, path }) => (
-              <LinkTabWrap
-                key={path}
-                textValue={label}
-                to={path}
-                subTab
+            <TabList
+              gap="xxsmall"
+              stateRef={tabStateRef}
+              stateProps={{
+                orientation: 'horizontal',
+                selectedKey: currentTab?.path,
+              }}
+            >
+              {filteredDirectory.map(({ label, path }) => (
+                <LinkTabWrap
+                  key={path}
+                  textValue={label}
+                  to={path}
+                  subTab
+                >
+                  <SubTab>{label}</SubTab>
+                </LinkTabWrap>
+              ))}
+            </TabList>
+            {serviceDeploymentServiceId && service?.cluster?.id && (
+              <Button
+                as={Link}
+                to={getServiceDetailsPath({
+                  serviceId: serviceDeploymentServiceId,
+                  clusterId: service?.cluster?.id,
+                })}
               >
-                <SubTab>{label}</SubTab>
-              </LinkTabWrap>
-            ))}
-          </TabList>
-          <ScalingRecommenderModal
-            kind={kind}
-            componentName={componentName}
-            namespace={component.namespace || ''}
-          />
-          {!service?.id && (
-            <ViewLogsButton
-              metadata={value?.metadata}
-              kind={componentKind}
+                View service
+              </Button>
+            )}
+
+            <ScalingRecommenderModal
+              kind={kind}
+              componentName={componentName}
+              namespace={component.namespace || ''}
             />
-          )}
+            {!service?.id && (
+              <ViewLogsButton
+                metadata={value?.metadata}
+                kind={componentKind}
+              />
+            )}
+          </div>
         </div>
       }
     >
