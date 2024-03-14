@@ -4609,7 +4609,7 @@ export type PodsQueryVariables = Exact<{
 }>;
 
 
-export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', objectMeta: { __typename?: 'types_ObjectMeta', name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 
 export const IngressesDocument = gql`
@@ -4741,6 +4741,7 @@ export const PodsDocument = gql`
     }
     pods {
       objectMeta {
+        uid
         name
         namespace
         labels

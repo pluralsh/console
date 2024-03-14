@@ -20,6 +20,7 @@ query Pods(
     }
     pods {
       objectMeta {
+        uid
         name
         namespace
         labels

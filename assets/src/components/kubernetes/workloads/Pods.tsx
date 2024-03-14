@@ -1,4 +1,4 @@
-import { ChipList, LoopingLogo, Table } from '@pluralsh/design-system'
+import { Button, ChipList, LoopingLogo, Table } from '@pluralsh/design-system'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 
 import { useCallback, useState } from 'react'
@@ -11,6 +11,7 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
+import uniqWith from 'lodash/uniqWith'
 
 const itemsPerPage = 10
 
@@ -61,7 +62,6 @@ const columns = [
 
 export default function Pods() {
   const { cluster, namespace, filter } = useKubernetesContext()
-  const [page, setPage] = useState(1)
 
   const { data, loading, fetchMore } = usePodsQuery({
     client: KubernetesClient(cluster?.id ?? ''),
@@ -70,16 +70,46 @@ export default function Pods() {
       namespace,
       filterBy: `name,${filter}`,
       itemsPerPage: `${itemsPerPage}`,
-      page: `${page}`,
+      page: '1',
+      sortBy: 'a,name', // TODO: Sorting.
     },
-  }) // TODO: Pagination and sorting.
+  })
 
   const pods = data?.handleGetPods?.pods || []
   const totalItems = data?.handleGetPods?.listMeta.totalItems ?? 0
   const pages = Math.ceil(totalItems / itemsPerPage)
+  const page = Math.ceil(pods.length / itemsPerPage)
   const hasNextPage = page < pages
 
-  const fetchNextPage = useCallback(() => {}, [])
+  const fetchNextPage = useCallback(() => {
+    if (!hasNextPage) {
+      return
+    }
+    fetchMore({
+      variables: { page: page + 1 },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!fetchMoreResult) {
+          return prev
+        }
+
+        const uniq = uniqWith(
+          [
+            ...(prev.handleGetPods?.pods ?? []),
+            ...(fetchMoreResult.handleGetPods?.pods ?? []),
+          ],
+          (a, b) =>
+            a?.objectMeta.uid ? a?.objectMeta.uid === b?.objectMeta.uid : false
+        )
+
+        return {
+          handleGetPods: {
+            ...prev.handleGetPods,
+            pods: uniq,
+          },
+        }
+      },
+    })
+  }, [fetchMore, hasNextPage, page])
 
   if (!data) return <LoopingLogo />
 
