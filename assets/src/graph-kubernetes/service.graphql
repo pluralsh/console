@@ -1,11 +1,11 @@
-query Ingresses(
+query Services(
   $namespace: String!
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
   $page: String
 ) {
-  handleGetIngressList(
+  handleGetServiceList(
     namespace: $namespace
     filterBy: $filterBy
     sortBy: $sortBy
@@ -13,12 +13,12 @@ query Ingresses(
     page: $page
   )
     @rest(
-      path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "service/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     listMeta {
       totalItems
     }
-    items {
+    services {
       objectMeta {
         uid
         name
@@ -26,15 +26,6 @@ query Ingresses(
         labels
         creationTimestamp
       }
-      endpoints {
-        host
-        ports {
-          port
-          protocol
-          nodePort
-        }
-      }
-      hosts
     }
   }
 }

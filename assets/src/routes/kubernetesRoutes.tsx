@@ -201,7 +201,7 @@ export const kubernetesRoutes = [
       <Route
         path={NETWORK_POLICIES_REL_PATH}
         element={
-          <ResourceList>
+          <ResourceList namespaced>
             <NetworkPolicies />
           </ResourceList>
         }

@@ -5,6 +5,7 @@ query Namespaces {
     }
     namespaces {
       objectMeta {
+        uid
         name
       }
     }

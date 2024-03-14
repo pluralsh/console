@@ -1,11 +1,11 @@
-query Ingresses(
+query NetworkPolicies(
   $namespace: String!
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
   $page: String
 ) {
-  handleGetIngressList(
+  handleGetNetworkPolicyList(
     namespace: $namespace
     filterBy: $filterBy
     sortBy: $sortBy
@@ -13,7 +13,7 @@ query Ingresses(
     page: $page
   )
     @rest(
-      path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "networkpolicy/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     listMeta {
       totalItems
@@ -26,15 +26,6 @@ query Ingresses(
         labels
         creationTimestamp
       }
-      endpoints {
-        host
-        ports {
-          port
-          protocol
-          nodePort
-        }
-      }
-      hosts
     }
   }
 }

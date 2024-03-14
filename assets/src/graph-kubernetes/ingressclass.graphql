@@ -1,19 +1,17 @@
-query Ingresses(
-  $namespace: String!
+query IngressClasses(
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
   $page: String
 ) {
-  handleGetIngressList(
-    namespace: $namespace
+  handleGetIngressClassList(
     filterBy: $filterBy
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
   )
     @rest(
-      path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "ingressclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     listMeta {
       totalItems
@@ -26,15 +24,6 @@ query Ingresses(
         labels
         creationTimestamp
       }
-      endpoints {
-        host
-        ports {
-          port
-          protocol
-          nodePort
-        }
-      }
-      hosts
     }
   }
 }
