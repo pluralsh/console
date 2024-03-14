@@ -1,9 +1,9 @@
-import { ChipList, LoopingLogo, Table } from '@pluralsh/design-system'
+import { LoopingLogo, Table } from '@pluralsh/design-system'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 
 import { isEmpty } from 'lodash'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import {
   Ingress_Ingress as IngressT,
@@ -12,68 +12,32 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { useKubernetesContext } from '../Kubernetes'
-import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
   DEFAULT_DATA_SELECT,
   extendConnection,
+  useDefaultColumns,
   usePageInfo,
   useSortedTableOptions,
 } from '../utils'
 
 const columnHelper = createColumnHelper<IngressT>()
 
-const columns = [
-  columnHelper.accessor((ingress) => ingress?.objectMeta.name, {
-    id: 'name',
-    header: 'Name',
-    enableSorting: true,
-    meta: { truncate: true },
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor((ingress) => ingress?.objectMeta.namespace, {
-    id: 'namespace',
-    header: 'Namespace',
-    enableSorting: true,
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor((ingress) => ingress?.objectMeta.labels, {
-    id: 'labels',
-    header: 'Labels',
-    cell: ({ getValue }) => {
-      const labels = getValue()
+const colEndpoints = columnHelper.accessor((ingress) => ingress?.endpoints, {
+  id: 'endpoints',
+  header: 'Endpoints',
+  cell: ({ getValue }) => JSON.stringify(getValue()),
+})
 
-      return (
-        <ChipList
-          size="small"
-          limit={1}
-          values={Object.entries(labels || {})}
-          transformValue={(label) => label.join(': ')}
-        />
-      )
-    },
-  }),
-  columnHelper.accessor((ingress) => ingress?.endpoints, {
-    id: 'endpoints',
-    header: 'Endpoints',
-    cell: ({ getValue }) => JSON.stringify(getValue()),
-  }),
-  columnHelper.accessor((ingress) => ingress?.hosts, {
-    id: 'hosts',
-    header: 'Hosts',
-    cell: ({ getValue }) => {
-      const hosts = getValue()
+const colHosts = columnHelper.accessor((ingress) => ingress?.hosts, {
+  id: 'hosts',
+  header: 'Hosts',
+  cell: ({ getValue }) => {
+    const hosts = getValue()
 
-      return isEmpty(hosts) ? '-' : hosts.map((host) => <div>{host}</div>)
-    },
-  }),
-  columnHelper.accessor((ingress) => ingress?.objectMeta.creationTimestamp, {
-    id: 'creationTimestamp',
-    header: 'Creation',
-    enableSorting: true,
-    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
-  }),
-]
+    return isEmpty(hosts) ? '-' : hosts.map((host) => <div>{host}</div>)
+  },
+})
 
 export default function Ingresses() {
   const { cluster, namespace, filter } = useKubernetesContext()
@@ -109,6 +73,20 @@ export default function Ingresses() {
         ),
     })
   }, [fetchMore, hasNextPage, page])
+
+  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+    useDefaultColumns<IngressT>(columnHelper)
+  const columns = useMemo(
+    () => [
+      colName,
+      colNamespace,
+      colLabels,
+      colHosts,
+      colEndpoints,
+      colCreationTimestamp,
+    ],
+    [colName, colNamespace, colLabels, colCreationTimestamp]
+  )
 
   if (!data) return <LoopingLogo />
 
