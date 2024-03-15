@@ -83,9 +83,9 @@ export default function CustomResources() {
         css={{
           position: 'absolute',
           width: '100%',
-          height: 'stretch',
-          marginTop: theme.spacing.medium,
-          marginBottom: theme.spacing.large,
+          height: '100%',
+          paddingTop: theme.spacing.medium,
+          paddingBottom: theme.spacing.large,
         }}
       >
         <ResourceList<
