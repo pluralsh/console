@@ -23,7 +23,7 @@ export default function Secrets() {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colType, colCreationTimestamp],
+    () => [colName, colNamespace, colType, colLabels, colCreationTimestamp],
     [colName, colNamespace, colLabels, colCreationTimestamp]
   )
 

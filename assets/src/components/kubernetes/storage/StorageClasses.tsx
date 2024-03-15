@@ -51,9 +51,9 @@ export default function StorageClasses() {
   const columns = useMemo(
     () => [
       colName,
-      colLabels,
       colProvisioner,
       colParameters,
+      colLabels,
       colCreationTimestamp,
     ],
     [colName, colLabels, colCreationTimestamp]
