@@ -4672,9 +4672,16 @@ export type ConfigMapsQueryVariables = Exact<{
 
 export type ConfigMapsQuery = { __typename?: 'Query', handleGetConfigMapList?: { __typename?: 'configmap_ConfigMapList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'configmap_ConfigMap', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
-export type ListMetaFragment = { __typename?: 'types_ListMeta', totalItems: number };
+export type SecretsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
 
-export type ObjectMetaFragment = { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null };
+
+export type SecretsQuery = { __typename?: 'Query', handleGetSecretList?: { __typename?: 'secret_SecretList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, secrets: Array<{ __typename?: 'secret_Secret', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type IngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4708,6 +4715,21 @@ export type NetworkPoliciesQueryVariables = Exact<{
 
 export type NetworkPoliciesQuery = { __typename?: 'Query', handleGetNetworkPolicyList?: { __typename?: 'networkpolicy_NetworkPolicyList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'networkpolicy_NetworkPolicy', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type ServicesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type ListMetaFragment = { __typename?: 'types_ListMeta', totalItems: number };
+
+export type ObjectMetaFragment = { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null };
+
 export type PersistentVolumesQueryVariables = Exact<{
   filterBy?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
@@ -4728,28 +4750,6 @@ export type PersistentVolumeClaimsQueryVariables = Exact<{
 
 
 export type PersistentVolumeClaimsQuery = { __typename?: 'Query', handleGetPersistentVolumeClaimList?: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
-export type SecretsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type SecretsQuery = { __typename?: 'Query', handleGetSecretList?: { __typename?: 'secret_SecretList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, secrets: Array<{ __typename?: 'secret_Secret', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
-export type ServicesQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type StorageClassesQueryVariables = Exact<{
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5324,6 +5324,64 @@ export type ConfigMapsQueryHookResult = ReturnType<typeof useConfigMapsQuery>;
 export type ConfigMapsLazyQueryHookResult = ReturnType<typeof useConfigMapsLazyQuery>;
 export type ConfigMapsSuspenseQueryHookResult = ReturnType<typeof useConfigMapsSuspenseQuery>;
 export type ConfigMapsQueryResult = Apollo.QueryResult<ConfigMapsQuery, ConfigMapsQueryVariables>;
+export const SecretsDocument = gql`
+    query Secrets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetSecretList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "secret/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    secrets {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useSecretsQuery__
+ *
+ * To run a query within a React component, call `useSecretsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSecretsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSecretsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useSecretsQuery(baseOptions: Apollo.QueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
+      }
+export function useSecretsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
+        }
+export function useSecretsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
+        }
+export type SecretsQueryHookResult = ReturnType<typeof useSecretsQuery>;
+export type SecretsLazyQueryHookResult = ReturnType<typeof useSecretsLazyQuery>;
+export type SecretsSuspenseQueryHookResult = ReturnType<typeof useSecretsSuspenseQuery>;
+export type SecretsQueryResult = Apollo.QueryResult<SecretsQuery, SecretsQueryVariables>;
 export const IngressesDocument = gql`
     query Ingresses($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetIngressList(
@@ -5505,6 +5563,64 @@ export type NetworkPoliciesQueryHookResult = ReturnType<typeof useNetworkPolicie
 export type NetworkPoliciesLazyQueryHookResult = ReturnType<typeof useNetworkPoliciesLazyQuery>;
 export type NetworkPoliciesSuspenseQueryHookResult = ReturnType<typeof useNetworkPoliciesSuspenseQuery>;
 export type NetworkPoliciesQueryResult = Apollo.QueryResult<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>;
+export const ServicesDocument = gql`
+    query Services($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetServiceList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "service/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    services {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useServicesQuery__
+ *
+ * To run a query within a React component, call `useServicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServicesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useServicesQuery(baseOptions: Apollo.QueryHookOptions<ServicesQuery, ServicesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServicesQuery, ServicesQueryVariables>(ServicesDocument, options);
+      }
+export function useServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServicesQuery, ServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServicesQuery, ServicesQueryVariables>(ServicesDocument, options);
+        }
+export function useServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServicesQuery, ServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServicesQuery, ServicesQueryVariables>(ServicesDocument, options);
+        }
+export type ServicesQueryHookResult = ReturnType<typeof useServicesQuery>;
+export type ServicesLazyQueryHookResult = ReturnType<typeof useServicesLazyQuery>;
+export type ServicesSuspenseQueryHookResult = ReturnType<typeof useServicesSuspenseQuery>;
+export type ServicesQueryResult = Apollo.QueryResult<ServicesQuery, ServicesQueryVariables>;
 export const PersistentVolumesDocument = gql`
     query PersistentVolumes($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetPersistentVolumeList(
@@ -5619,122 +5735,6 @@ export type PersistentVolumeClaimsQueryHookResult = ReturnType<typeof usePersist
 export type PersistentVolumeClaimsLazyQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsLazyQuery>;
 export type PersistentVolumeClaimsSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsSuspenseQuery>;
 export type PersistentVolumeClaimsQueryResult = Apollo.QueryResult<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>;
-export const SecretsDocument = gql`
-    query Secrets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetSecretList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "secret/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    secrets {
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useSecretsQuery__
- *
- * To run a query within a React component, call `useSecretsQuery` and pass it any options that fit your needs.
- * When your component renders, `useSecretsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useSecretsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useSecretsQuery(baseOptions: Apollo.QueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
-      }
-export function useSecretsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
-        }
-export function useSecretsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
-        }
-export type SecretsQueryHookResult = ReturnType<typeof useSecretsQuery>;
-export type SecretsLazyQueryHookResult = ReturnType<typeof useSecretsLazyQuery>;
-export type SecretsSuspenseQueryHookResult = ReturnType<typeof useSecretsSuspenseQuery>;
-export type SecretsQueryResult = Apollo.QueryResult<SecretsQuery, SecretsQueryVariables>;
-export const ServicesDocument = gql`
-    query Services($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetServiceList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "service/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    services {
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useServicesQuery__
- *
- * To run a query within a React component, call `useServicesQuery` and pass it any options that fit your needs.
- * When your component renders, `useServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useServicesQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useServicesQuery(baseOptions: Apollo.QueryHookOptions<ServicesQuery, ServicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ServicesQuery, ServicesQueryVariables>(ServicesDocument, options);
-      }
-export function useServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServicesQuery, ServicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ServicesQuery, ServicesQueryVariables>(ServicesDocument, options);
-        }
-export function useServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServicesQuery, ServicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ServicesQuery, ServicesQueryVariables>(ServicesDocument, options);
-        }
-export type ServicesQueryHookResult = ReturnType<typeof useServicesQuery>;
-export type ServicesLazyQueryHookResult = ReturnType<typeof useServicesLazyQuery>;
-export type ServicesSuspenseQueryHookResult = ReturnType<typeof useServicesSuspenseQuery>;
-export type ServicesQueryResult = Apollo.QueryResult<ServicesQuery, ServicesQueryVariables>;
 export const StorageClassesDocument = gql`
     query StorageClasses($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetStorageClassList(
