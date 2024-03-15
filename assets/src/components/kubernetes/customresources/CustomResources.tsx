@@ -1,10 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import React, { useMemo } from 'react'
-
 import { useTheme } from 'styled-components'
-
-import { Span } from 'honorable'
-
 import { ChipList } from '@pluralsh/design-system'
 
 import {
@@ -24,7 +20,7 @@ const colName = columnHelper.accessor((r) => r?.objectMeta.name, {
   header: 'Name',
   enableSorting: true,
   cell: ({ getValue }) => (
-    <Span
+    <span
       css={{
         maxWidth: 350,
         whiteSpace: 'nowrap',
@@ -33,7 +29,7 @@ const colName = columnHelper.accessor((r) => r?.objectMeta.name, {
       }}
     >
       {getValue()}
-    </Span>
+    </span>
   ),
 })
 
