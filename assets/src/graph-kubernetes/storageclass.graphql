@@ -1,17 +1,17 @@
-query IngressClasses(
+query StorageClasses(
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
   $page: String
 ) {
-  handleGetIngressClassList(
+  handleGetStorageClassList(
     filterBy: $filterBy
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
   )
     @rest(
-      path: "ingressclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "storageclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     listMeta {
       totalItems

@@ -1,17 +1,17 @@
-query IngressClasses(
+query PersistentVolumes(
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
   $page: String
 ) {
-  handleGetIngressClassList(
+  handleGetPersistentVolumeList(
     filterBy: $filterBy
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
   )
     @rest(
-      path: "ingressclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "persistentvolume?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     listMeta {
       totalItems

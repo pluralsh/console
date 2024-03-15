@@ -19,12 +19,8 @@ query Services(
       totalItems
     }
     services {
-      objectMeta {
-        uid
-        name
-        namespace
-        labels
-        creationTimestamp
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }
