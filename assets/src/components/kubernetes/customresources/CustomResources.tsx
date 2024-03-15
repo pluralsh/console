@@ -65,8 +65,8 @@ export default function CustomResources() {
       colGroup,
       colVersion,
       colScope,
-      colLabels,
       colCategories,
+      colLabels,
       colCreationTimestamp,
     ],
     [colName, colLabels, colCreationTimestamp]
