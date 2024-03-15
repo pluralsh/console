@@ -4584,6 +4584,50 @@ export type Validation_ProtocolValiditySpec_Input = {
   protocol: Scalars['String']['input'];
 };
 
+export type ClusterRolesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ClusterRolesQuery = { __typename?: 'Query', handleGetClusterRoleList?: { __typename?: 'clusterrole_ClusterRoleList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'clusterrole_ClusterRole', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type ClusterRoleBindingsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ClusterRoleBindingsQuery = { __typename?: 'Query', handleGetClusterRoleBindingList?: { __typename?: 'clusterrolebinding_ClusterRoleBindingList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'clusterrolebinding_ClusterRoleBinding', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type RolesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type RolesQuery = { __typename?: 'Query', handleGetRoleList?: { __typename?: 'role_RoleList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'role_Role', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type RoleBindingsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type RoleBindingsQuery = { __typename?: 'Query', handleGetRoleBindingList?: { __typename?: 'rolebinding_RoleBindingList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'rolebinding_RoleBinding', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export type ConfigMapsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -4594,17 +4638,6 @@ export type ConfigMapsQueryVariables = Exact<{
 
 
 export type ConfigMapsQuery = { __typename?: 'Query', handleGetConfigMapList?: { __typename?: 'configmap_ConfigMapList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'configmap_ConfigMap', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
-export type DeploymentsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type DeploymentsQuery = { __typename?: 'Query', handleGetDeployments?: { __typename?: 'deployment_DeploymentList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ObjectMetaFragment = { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null };
 
@@ -4666,28 +4699,6 @@ export type PersistentVolumeClaimsQueryVariables = Exact<{
 
 export type PersistentVolumeClaimsQuery = { __typename?: 'Query', handleGetPersistentVolumeClaimList?: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
-export type PodsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
-export type ReplicaSetsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type ReplicaSetsQuery = { __typename?: 'Query', handleGetReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
 export type SecretsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -4720,6 +4731,94 @@ export type StorageClassesQueryVariables = Exact<{
 
 export type StorageClassesQuery = { __typename?: 'Query', handleGetStorageClassList?: { __typename?: 'storageclass_StorageClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'storageclass_StorageClass', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type CronJobsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type CronJobsQuery = { __typename?: 'Query', handleGetCronJobList?: { __typename?: 'cronjob_CronJobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type DaemonSetsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type DaemonSetsQuery = { __typename?: 'Query', handleGetDaemonSetList?: { __typename?: 'daemonset_DaemonSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, daemonSets: Array<{ __typename?: 'daemonset_DaemonSet', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type DeploymentsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type DeploymentsQuery = { __typename?: 'Query', handleGetDeployments?: { __typename?: 'deployment_DeploymentList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type JobsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type JobsQuery = { __typename?: 'Query', handleGetJobList?: { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type PodsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type ReplicaSetsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ReplicaSetsQuery = { __typename?: 'Query', handleGetReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type ReplicationControllersQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ReplicationControllersQuery = { __typename?: 'Query', handleGetReplicationControllerList?: { __typename?: 'replicationcontroller_ReplicationControllerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type StatefulSetsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type StatefulSetsQuery = { __typename?: 'Query', handleGetStatefulSetList?: { __typename?: 'statefulset_StatefulSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export const ObjectMetaFragmentDoc = gql`
     fragment ObjectMeta on types_ObjectMeta {
   uid
@@ -4730,6 +4829,232 @@ export const ObjectMetaFragmentDoc = gql`
   creationTimestamp
 }
     `;
+export const ClusterRolesDocument = gql`
+    query ClusterRoles($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetClusterRoleList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "clusterrole?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useClusterRolesQuery__
+ *
+ * To run a query within a React component, call `useClusterRolesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterRolesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterRolesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useClusterRolesQuery(baseOptions: Apollo.QueryHookOptions<ClusterRolesQuery, ClusterRolesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterRolesQuery, ClusterRolesQueryVariables>(ClusterRolesDocument, options);
+      }
+export function useClusterRolesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterRolesQuery, ClusterRolesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterRolesQuery, ClusterRolesQueryVariables>(ClusterRolesDocument, options);
+        }
+export function useClusterRolesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterRolesQuery, ClusterRolesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterRolesQuery, ClusterRolesQueryVariables>(ClusterRolesDocument, options);
+        }
+export type ClusterRolesQueryHookResult = ReturnType<typeof useClusterRolesQuery>;
+export type ClusterRolesLazyQueryHookResult = ReturnType<typeof useClusterRolesLazyQuery>;
+export type ClusterRolesSuspenseQueryHookResult = ReturnType<typeof useClusterRolesSuspenseQuery>;
+export type ClusterRolesQueryResult = Apollo.QueryResult<ClusterRolesQuery, ClusterRolesQueryVariables>;
+export const ClusterRoleBindingsDocument = gql`
+    query ClusterRoleBindings($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetClusterRoleBindingList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "clusterrolebinding?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useClusterRoleBindingsQuery__
+ *
+ * To run a query within a React component, call `useClusterRoleBindingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterRoleBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterRoleBindingsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useClusterRoleBindingsQuery(baseOptions: Apollo.QueryHookOptions<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>(ClusterRoleBindingsDocument, options);
+      }
+export function useClusterRoleBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>(ClusterRoleBindingsDocument, options);
+        }
+export function useClusterRoleBindingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>(ClusterRoleBindingsDocument, options);
+        }
+export type ClusterRoleBindingsQueryHookResult = ReturnType<typeof useClusterRoleBindingsQuery>;
+export type ClusterRoleBindingsLazyQueryHookResult = ReturnType<typeof useClusterRoleBindingsLazyQuery>;
+export type ClusterRoleBindingsSuspenseQueryHookResult = ReturnType<typeof useClusterRoleBindingsSuspenseQuery>;
+export type ClusterRoleBindingsQueryResult = Apollo.QueryResult<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>;
+export const RolesDocument = gql`
+    query Roles($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetRoleList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "role/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useRolesQuery__
+ *
+ * To run a query within a React component, call `useRolesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRolesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRolesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useRolesQuery(baseOptions: Apollo.QueryHookOptions<RolesQuery, RolesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RolesQuery, RolesQueryVariables>(RolesDocument, options);
+      }
+export function useRolesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RolesQuery, RolesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RolesQuery, RolesQueryVariables>(RolesDocument, options);
+        }
+export function useRolesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RolesQuery, RolesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<RolesQuery, RolesQueryVariables>(RolesDocument, options);
+        }
+export type RolesQueryHookResult = ReturnType<typeof useRolesQuery>;
+export type RolesLazyQueryHookResult = ReturnType<typeof useRolesLazyQuery>;
+export type RolesSuspenseQueryHookResult = ReturnType<typeof useRolesSuspenseQuery>;
+export type RolesQueryResult = Apollo.QueryResult<RolesQuery, RolesQueryVariables>;
+export const RoleBindingsDocument = gql`
+    query RoleBindings($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetRoleBindingList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "rolebinding/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useRoleBindingsQuery__
+ *
+ * To run a query within a React component, call `useRoleBindingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRoleBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRoleBindingsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useRoleBindingsQuery(baseOptions: Apollo.QueryHookOptions<RoleBindingsQuery, RoleBindingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RoleBindingsQuery, RoleBindingsQueryVariables>(RoleBindingsDocument, options);
+      }
+export function useRoleBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RoleBindingsQuery, RoleBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RoleBindingsQuery, RoleBindingsQueryVariables>(RoleBindingsDocument, options);
+        }
+export function useRoleBindingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RoleBindingsQuery, RoleBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<RoleBindingsQuery, RoleBindingsQueryVariables>(RoleBindingsDocument, options);
+        }
+export type RoleBindingsQueryHookResult = ReturnType<typeof useRoleBindingsQuery>;
+export type RoleBindingsLazyQueryHookResult = ReturnType<typeof useRoleBindingsLazyQuery>;
+export type RoleBindingsSuspenseQueryHookResult = ReturnType<typeof useRoleBindingsSuspenseQuery>;
+export type RoleBindingsQueryResult = Apollo.QueryResult<RoleBindingsQuery, RoleBindingsQueryVariables>;
 export const ConfigMapsDocument = gql`
     query ConfigMaps($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetConfigMapList(
@@ -4787,63 +5112,6 @@ export type ConfigMapsQueryHookResult = ReturnType<typeof useConfigMapsQuery>;
 export type ConfigMapsLazyQueryHookResult = ReturnType<typeof useConfigMapsLazyQuery>;
 export type ConfigMapsSuspenseQueryHookResult = ReturnType<typeof useConfigMapsSuspenseQuery>;
 export type ConfigMapsQueryResult = Apollo.QueryResult<ConfigMapsQuery, ConfigMapsQueryVariables>;
-export const DeploymentsDocument = gql`
-    query Deployments($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetDeployments(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "deployment/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
-    }
-    deployments {
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ObjectMetaFragmentDoc}`;
-
-/**
- * __useDeploymentsQuery__
- *
- * To run a query within a React component, call `useDeploymentsQuery` and pass it any options that fit your needs.
- * When your component renders, `useDeploymentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useDeploymentsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useDeploymentsQuery(baseOptions: Apollo.QueryHookOptions<DeploymentsQuery, DeploymentsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<DeploymentsQuery, DeploymentsQueryVariables>(DeploymentsDocument, options);
-      }
-export function useDeploymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeploymentsQuery, DeploymentsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<DeploymentsQuery, DeploymentsQueryVariables>(DeploymentsDocument, options);
-        }
-export function useDeploymentsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeploymentsQuery, DeploymentsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<DeploymentsQuery, DeploymentsQueryVariables>(DeploymentsDocument, options);
-        }
-export type DeploymentsQueryHookResult = ReturnType<typeof useDeploymentsQuery>;
-export type DeploymentsLazyQueryHookResult = ReturnType<typeof useDeploymentsLazyQuery>;
-export type DeploymentsSuspenseQueryHookResult = ReturnType<typeof useDeploymentsSuspenseQuery>;
-export type DeploymentsQueryResult = Apollo.QueryResult<DeploymentsQuery, DeploymentsQueryVariables>;
 export const IngressesDocument = gql`
     query Ingresses($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetIngressList(
@@ -5180,120 +5448,6 @@ export type PersistentVolumeClaimsQueryHookResult = ReturnType<typeof usePersist
 export type PersistentVolumeClaimsLazyQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsLazyQuery>;
 export type PersistentVolumeClaimsSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsSuspenseQuery>;
 export type PersistentVolumeClaimsQueryResult = Apollo.QueryResult<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>;
-export const PodsDocument = gql`
-    query Pods($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetPods(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "pod/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
-    }
-    pods {
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ObjectMetaFragmentDoc}`;
-
-/**
- * __usePodsQuery__
- *
- * To run a query within a React component, call `usePodsQuery` and pass it any options that fit your needs.
- * When your component renders, `usePodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePodsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function usePodsQuery(baseOptions: Apollo.QueryHookOptions<PodsQuery, PodsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PodsQuery, PodsQueryVariables>(PodsDocument, options);
-      }
-export function usePodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PodsQuery, PodsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PodsQuery, PodsQueryVariables>(PodsDocument, options);
-        }
-export function usePodsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PodsQuery, PodsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PodsQuery, PodsQueryVariables>(PodsDocument, options);
-        }
-export type PodsQueryHookResult = ReturnType<typeof usePodsQuery>;
-export type PodsLazyQueryHookResult = ReturnType<typeof usePodsLazyQuery>;
-export type PodsSuspenseQueryHookResult = ReturnType<typeof usePodsSuspenseQuery>;
-export type PodsQueryResult = Apollo.QueryResult<PodsQuery, PodsQueryVariables>;
-export const ReplicaSetsDocument = gql`
-    query ReplicaSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetReplicaSets(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "replicaset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
-    }
-    replicaSets {
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ObjectMetaFragmentDoc}`;
-
-/**
- * __useReplicaSetsQuery__
- *
- * To run a query within a React component, call `useReplicaSetsQuery` and pass it any options that fit your needs.
- * When your component renders, `useReplicaSetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useReplicaSetsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useReplicaSetsQuery(baseOptions: Apollo.QueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
-      }
-export function useReplicaSetsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
-        }
-export function useReplicaSetsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
-        }
-export type ReplicaSetsQueryHookResult = ReturnType<typeof useReplicaSetsQuery>;
-export type ReplicaSetsLazyQueryHookResult = ReturnType<typeof useReplicaSetsLazyQuery>;
-export type ReplicaSetsSuspenseQueryHookResult = ReturnType<typeof useReplicaSetsSuspenseQuery>;
-export type ReplicaSetsQueryResult = Apollo.QueryResult<ReplicaSetsQuery, ReplicaSetsQueryVariables>;
 export const SecretsDocument = gql`
     query Secrets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetSecretList(
@@ -5463,3 +5617,459 @@ export type StorageClassesQueryHookResult = ReturnType<typeof useStorageClassesQ
 export type StorageClassesLazyQueryHookResult = ReturnType<typeof useStorageClassesLazyQuery>;
 export type StorageClassesSuspenseQueryHookResult = ReturnType<typeof useStorageClassesSuspenseQuery>;
 export type StorageClassesQueryResult = Apollo.QueryResult<StorageClassesQuery, StorageClassesQueryVariables>;
+export const CronJobsDocument = gql`
+    query CronJobs($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetCronJobList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "cronjob/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useCronJobsQuery__
+ *
+ * To run a query within a React component, call `useCronJobsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCronJobsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCronJobsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useCronJobsQuery(baseOptions: Apollo.QueryHookOptions<CronJobsQuery, CronJobsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CronJobsQuery, CronJobsQueryVariables>(CronJobsDocument, options);
+      }
+export function useCronJobsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CronJobsQuery, CronJobsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CronJobsQuery, CronJobsQueryVariables>(CronJobsDocument, options);
+        }
+export function useCronJobsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CronJobsQuery, CronJobsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CronJobsQuery, CronJobsQueryVariables>(CronJobsDocument, options);
+        }
+export type CronJobsQueryHookResult = ReturnType<typeof useCronJobsQuery>;
+export type CronJobsLazyQueryHookResult = ReturnType<typeof useCronJobsLazyQuery>;
+export type CronJobsSuspenseQueryHookResult = ReturnType<typeof useCronJobsSuspenseQuery>;
+export type CronJobsQueryResult = Apollo.QueryResult<CronJobsQuery, CronJobsQueryVariables>;
+export const DaemonSetsDocument = gql`
+    query DaemonSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDaemonSetList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "daemonset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    daemonSets {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useDaemonSetsQuery__
+ *
+ * To run a query within a React component, call `useDaemonSetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDaemonSetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDaemonSetsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useDaemonSetsQuery(baseOptions: Apollo.QueryHookOptions<DaemonSetsQuery, DaemonSetsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DaemonSetsQuery, DaemonSetsQueryVariables>(DaemonSetsDocument, options);
+      }
+export function useDaemonSetsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DaemonSetsQuery, DaemonSetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DaemonSetsQuery, DaemonSetsQueryVariables>(DaemonSetsDocument, options);
+        }
+export function useDaemonSetsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DaemonSetsQuery, DaemonSetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DaemonSetsQuery, DaemonSetsQueryVariables>(DaemonSetsDocument, options);
+        }
+export type DaemonSetsQueryHookResult = ReturnType<typeof useDaemonSetsQuery>;
+export type DaemonSetsLazyQueryHookResult = ReturnType<typeof useDaemonSetsLazyQuery>;
+export type DaemonSetsSuspenseQueryHookResult = ReturnType<typeof useDaemonSetsSuspenseQuery>;
+export type DaemonSetsQueryResult = Apollo.QueryResult<DaemonSetsQuery, DaemonSetsQueryVariables>;
+export const DeploymentsDocument = gql`
+    query Deployments($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDeployments(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "deployment/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    deployments {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useDeploymentsQuery__
+ *
+ * To run a query within a React component, call `useDeploymentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeploymentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeploymentsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useDeploymentsQuery(baseOptions: Apollo.QueryHookOptions<DeploymentsQuery, DeploymentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeploymentsQuery, DeploymentsQueryVariables>(DeploymentsDocument, options);
+      }
+export function useDeploymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeploymentsQuery, DeploymentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeploymentsQuery, DeploymentsQueryVariables>(DeploymentsDocument, options);
+        }
+export function useDeploymentsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeploymentsQuery, DeploymentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeploymentsQuery, DeploymentsQueryVariables>(DeploymentsDocument, options);
+        }
+export type DeploymentsQueryHookResult = ReturnType<typeof useDeploymentsQuery>;
+export type DeploymentsLazyQueryHookResult = ReturnType<typeof useDeploymentsLazyQuery>;
+export type DeploymentsSuspenseQueryHookResult = ReturnType<typeof useDeploymentsSuspenseQuery>;
+export type DeploymentsQueryResult = Apollo.QueryResult<DeploymentsQuery, DeploymentsQueryVariables>;
+export const JobsDocument = gql`
+    query Jobs($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetJobList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "job/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    jobs {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useJobsQuery__
+ *
+ * To run a query within a React component, call `useJobsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useJobsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useJobsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useJobsQuery(baseOptions: Apollo.QueryHookOptions<JobsQuery, JobsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<JobsQuery, JobsQueryVariables>(JobsDocument, options);
+      }
+export function useJobsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<JobsQuery, JobsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<JobsQuery, JobsQueryVariables>(JobsDocument, options);
+        }
+export function useJobsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<JobsQuery, JobsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<JobsQuery, JobsQueryVariables>(JobsDocument, options);
+        }
+export type JobsQueryHookResult = ReturnType<typeof useJobsQuery>;
+export type JobsLazyQueryHookResult = ReturnType<typeof useJobsLazyQuery>;
+export type JobsSuspenseQueryHookResult = ReturnType<typeof useJobsSuspenseQuery>;
+export type JobsQueryResult = Apollo.QueryResult<JobsQuery, JobsQueryVariables>;
+export const PodsDocument = gql`
+    query Pods($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetPods(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "pod/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    pods {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __usePodsQuery__
+ *
+ * To run a query within a React component, call `usePodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePodsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function usePodsQuery(baseOptions: Apollo.QueryHookOptions<PodsQuery, PodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PodsQuery, PodsQueryVariables>(PodsDocument, options);
+      }
+export function usePodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PodsQuery, PodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PodsQuery, PodsQueryVariables>(PodsDocument, options);
+        }
+export function usePodsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PodsQuery, PodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PodsQuery, PodsQueryVariables>(PodsDocument, options);
+        }
+export type PodsQueryHookResult = ReturnType<typeof usePodsQuery>;
+export type PodsLazyQueryHookResult = ReturnType<typeof usePodsLazyQuery>;
+export type PodsSuspenseQueryHookResult = ReturnType<typeof usePodsSuspenseQuery>;
+export type PodsQueryResult = Apollo.QueryResult<PodsQuery, PodsQueryVariables>;
+export const ReplicaSetsDocument = gql`
+    query ReplicaSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetReplicaSets(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "replicaset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    replicaSets {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useReplicaSetsQuery__
+ *
+ * To run a query within a React component, call `useReplicaSetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReplicaSetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReplicaSetsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useReplicaSetsQuery(baseOptions: Apollo.QueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
+      }
+export function useReplicaSetsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
+        }
+export function useReplicaSetsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
+        }
+export type ReplicaSetsQueryHookResult = ReturnType<typeof useReplicaSetsQuery>;
+export type ReplicaSetsLazyQueryHookResult = ReturnType<typeof useReplicaSetsLazyQuery>;
+export type ReplicaSetsSuspenseQueryHookResult = ReturnType<typeof useReplicaSetsSuspenseQuery>;
+export type ReplicaSetsQueryResult = Apollo.QueryResult<ReplicaSetsQuery, ReplicaSetsQueryVariables>;
+export const ReplicationControllersDocument = gql`
+    query ReplicationControllers($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetReplicationControllerList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "replicationcontroller/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    replicationControllers {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useReplicationControllersQuery__
+ *
+ * To run a query within a React component, call `useReplicationControllersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReplicationControllersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReplicationControllersQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useReplicationControllersQuery(baseOptions: Apollo.QueryHookOptions<ReplicationControllersQuery, ReplicationControllersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ReplicationControllersQuery, ReplicationControllersQueryVariables>(ReplicationControllersDocument, options);
+      }
+export function useReplicationControllersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicationControllersQuery, ReplicationControllersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ReplicationControllersQuery, ReplicationControllersQueryVariables>(ReplicationControllersDocument, options);
+        }
+export function useReplicationControllersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicationControllersQuery, ReplicationControllersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ReplicationControllersQuery, ReplicationControllersQueryVariables>(ReplicationControllersDocument, options);
+        }
+export type ReplicationControllersQueryHookResult = ReturnType<typeof useReplicationControllersQuery>;
+export type ReplicationControllersLazyQueryHookResult = ReturnType<typeof useReplicationControllersLazyQuery>;
+export type ReplicationControllersSuspenseQueryHookResult = ReturnType<typeof useReplicationControllersSuspenseQuery>;
+export type ReplicationControllersQueryResult = Apollo.QueryResult<ReplicationControllersQuery, ReplicationControllersQueryVariables>;
+export const StatefulSetsDocument = gql`
+    query StatefulSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetStatefulSetList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    statefulSets {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useStatefulSetsQuery__
+ *
+ * To run a query within a React component, call `useStatefulSetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStatefulSetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStatefulSetsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useStatefulSetsQuery(baseOptions: Apollo.QueryHookOptions<StatefulSetsQuery, StatefulSetsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StatefulSetsQuery, StatefulSetsQueryVariables>(StatefulSetsDocument, options);
+      }
+export function useStatefulSetsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StatefulSetsQuery, StatefulSetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StatefulSetsQuery, StatefulSetsQueryVariables>(StatefulSetsDocument, options);
+        }
+export function useStatefulSetsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StatefulSetsQuery, StatefulSetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StatefulSetsQuery, StatefulSetsQueryVariables>(StatefulSetsDocument, options);
+        }
+export type StatefulSetsQueryHookResult = ReturnType<typeof useStatefulSetsQuery>;
+export type StatefulSetsLazyQueryHookResult = ReturnType<typeof useStatefulSetsLazyQuery>;
+export type StatefulSetsSuspenseQueryHookResult = ReturnType<typeof useStatefulSetsSuspenseQuery>;
+export type StatefulSetsQueryResult = Apollo.QueryResult<StatefulSetsQuery, StatefulSetsQueryVariables>;
