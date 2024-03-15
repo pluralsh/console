@@ -1,5 +1,6 @@
 import { RefreshDocument, RefreshQuery } from 'generated/graphql'
 import { FetchResult } from '@apollo/client'
+import { NetworkError } from '@apollo/client/errors'
 import { Observable } from 'apollo-link'
 import { ErrorHandler } from 'apollo-link-error'
 
@@ -19,7 +20,7 @@ export const getRefreshedToken = async () => {
     fetchPolicy: 'no-cache',
   })
 
-  return refreshResolverResponse.data.refresh?.jwt
+  return refreshResolverResponse?.data?.refresh?.jwt
 }
 
 export const onErrorHandler: ErrorHandler = ({
@@ -49,7 +50,7 @@ export const onErrorHandler: ErrorHandler = ({
           const jwt = await getRefreshedToken()
 
           if (!jwt) {
-            onNetworkError()
+            logout()
           } else {
             setToken(jwt)
           }
@@ -70,18 +71,25 @@ export const onErrorHandler: ErrorHandler = ({
           forward(operation).subscribe(subscriber)
         } catch (err) {
           observer.error(err)
-          onNetworkError()
+          // Prevent logout if refresh endpoint is just unreachable
+          if (
+            (err as Nullable<{ networkError?: Nullable<NetworkError> }>)
+              ?.networkError?.message === 'Failed to fetch'
+          ) {
+            return
+          }
+          logout()
         }
       })()
     })
   }
 
   if (is401) {
-    onNetworkError()
+    logout()
   }
 }
 
-export function onNetworkError() {
+export function logout() {
   wipeToken()
   wipeRefreshToken()
   window.location = '/login' as any as Location
