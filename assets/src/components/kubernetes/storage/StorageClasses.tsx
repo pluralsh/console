@@ -15,11 +15,11 @@ import { ResourceList } from '../ResourceList'
 const columnHelper = createColumnHelper<StorageClassT>()
 
 export default function StorageClasses() {
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    () => [colName, colLabels, colCreationTimestamp],
+    [colName, colLabels, colCreationTimestamp]
   )
 
   return (
