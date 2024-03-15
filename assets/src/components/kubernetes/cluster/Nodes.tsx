@@ -14,16 +14,15 @@ import { ResourceList } from '../ResourceList'
 const columnHelper = createColumnHelper<NodeT>()
 
 export default function Nodes() {
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    () => [colName, colLabels, colCreationTimestamp],
+    [colName, colLabels, colCreationTimestamp]
   )
 
   return (
     <ResourceList<NodeListT, NodeT, NodesQuery, NodesQueryVariables>
-      namespaced
       columns={columns}
       query={useNodesQuery}
       queryName="handleGetNodeList"

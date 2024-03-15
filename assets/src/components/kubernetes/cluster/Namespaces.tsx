@@ -14,11 +14,11 @@ import { ResourceList } from '../ResourceList'
 const columnHelper = createColumnHelper<NamespaceT>()
 
 export default function Namespaces() {
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    () => [colName, colLabels, colCreationTimestamp],
+    [colName, colLabels, colCreationTimestamp]
   )
 
   return (
@@ -28,7 +28,6 @@ export default function Namespaces() {
       NamespacesQuery,
       NamespacesQueryVariables
     >
-      namespaced
       columns={columns}
       query={useNamespacesQuery}
       queryName="handleGetNamespaces"
