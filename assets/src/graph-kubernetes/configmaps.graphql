@@ -1,0 +1,31 @@
+query ConfigMaps(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetConfigMapList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      path: "configmap/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta {
+        uid
+        name
+        namespace
+        labels
+        creationTimestamp
+      }
+    }
+  }
+}
