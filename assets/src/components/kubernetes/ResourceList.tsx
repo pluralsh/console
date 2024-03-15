@@ -1,6 +1,5 @@
 import {
   Dispatch,
-  JSX,
   type MouseEvent,
   ReactElement,
   SetStateAction,
@@ -25,6 +24,7 @@ import { FullHeightTableWrap } from '../utils/layout/FullHeightTableWrap'
 
 import {
   DEFAULT_DATA_SELECT,
+  ITEMS_PER_PAGE,
   extendConnection,
   usePageInfo,
   useSortedTableOptions,
@@ -38,17 +38,6 @@ export type ResourceListContextT = {
 export const ResourceListContext = createContext<
   ResourceListContextT | undefined
 >(undefined)
-
-// TODO: Remove after refactor
-export default function ResourceListProxy({
-  children,
-  namespaced = false,
-}: {
-  children: JSX.Element
-  namespaced?: boolean
-}): JSX.Element {
-  return children
-}
 
 interface DataSelectVariables extends OperationVariables {
   filterBy?: Nullable<string>
@@ -93,17 +82,19 @@ const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
     '100%': { backgroundPosition: '250px 0' },
   },
 
-  maxWidth: '200px',
-  width: '200px',
+  maxWidth: '400px',
+  width: '100%',
 
   span: {
     borderRadius: theme.borderRadiuses.medium,
-    maxWidth: '150px',
+    maxWidth: '400px',
+    width: 'unset',
+    minWidth: '150px',
     display: 'block',
     height: '12px',
-    background: 'linear-gradient(to right, #444 20%, #555 50%, #444 80%)',
+    background: `linear-gradient(to right, ${theme.colors.border} 20%, ${theme.colors['border-fill-two']} 50%, ${theme.colors.border} 80%)`,
     backgroundSize: '500px 100px',
-    animation: 'moving-gradient 1s infinite linear forwards',
+    animation: 'moving-gradient 2s infinite linear forwards',
   },
 }))
 
@@ -115,7 +106,6 @@ function SkeletonUnstyled({ ...props }): ReactElement {
   )
 }
 
-// TODO: Use default export
 export function ResourceList<
   TResourceList extends ResourceListT,
   TResource,
@@ -159,7 +149,7 @@ export function ResourceList<
   const items = useMemo(
     () =>
       loading
-        ? Array(10).fill({})
+        ? Array(ITEMS_PER_PAGE - 1).fill({})
         : (resourceList?.[itemsKey] as Array<TResource>) ?? [],
     [itemsKey, loading, resourceList]
   )
