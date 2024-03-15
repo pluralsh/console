@@ -14,7 +14,7 @@ export type ChipListProps<TValue> = {
   values: TValue[]
   transformValue?: TransformFn<TValue>
   limit: number
-  emptyState?: JSX.Element
+  emptyState?: JSX.Element | null
 } & ChipProps
 
 function ChipList<TValue = string>({
