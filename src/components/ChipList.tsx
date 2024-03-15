@@ -1,4 +1,5 @@
 import { Flex, Span } from 'honorable'
+import isEmpty from 'lodash-es/isEmpty'
 import { type ComponentProps, type ReactElement, useState } from 'react'
 
 import { HamburgerMenuCollapseIcon } from '../icons'
@@ -13,12 +14,14 @@ export type ChipListProps<TValue> = {
   values: TValue[]
   transformValue?: TransformFn<TValue>
   limit: number
+  emptyState?: JSX.Element
 } & ChipProps
 
 function ChipList<TValue = string>({
   values = [],
   transformValue,
   limit = 4,
+  emptyState,
   ...props
 }: ChipListProps<TValue>): ReactElement {
   const [collapsed, setCollapsed] = useState(true)
@@ -28,9 +31,12 @@ function ChipList<TValue = string>({
       gap="xsmall"
       wrap
     >
-      {values.length === 0 && (
-        <Span body2>There is nothing to display here.</Span>
-      )}
+      {isEmpty(values) &&
+        (emptyState !== undefined ? (
+          emptyState
+        ) : (
+          <Span body2>There is nothing to display here.</Span>
+        ))}
       {values.slice(0, collapsed ? limit : undefined).map((v, i) => (
         <Chip
           key={(v as any).key || i}
