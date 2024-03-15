@@ -42,6 +42,11 @@ jobs:
         with:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: download jwt verification key
+        run: | 
+          echo $JWT_PUBLIC_KEY > config/pubkey.pem
+        env:
+          JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       - name: Test Build console image
         uses: docker/build-push-action@v3
         with:
