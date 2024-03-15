@@ -13,11 +13,17 @@ import {
 
 const columnHelper = createColumnHelper<SecretT>()
 
+const colType = columnHelper.accessor((secret) => secret?.type, {
+  id: 'type',
+  header: 'Type',
+  cell: ({ getValue }) => getValue(),
+})
+
 export default function Secrets() {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
+    () => [colName, colNamespace, colLabels, colType, colCreationTimestamp],
     [colName, colNamespace, colLabels, colCreationTimestamp]
   )
 

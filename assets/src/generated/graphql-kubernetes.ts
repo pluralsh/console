@@ -4681,7 +4681,7 @@ export type SecretsQueryVariables = Exact<{
 }>;
 
 
-export type SecretsQuery = { __typename?: 'Query', handleGetSecretList?: { __typename?: 'secret_SecretList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, secrets: Array<{ __typename?: 'secret_Secret', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type SecretsQuery = { __typename?: 'Query', handleGetSecretList?: { __typename?: 'secret_SecretList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, secrets: Array<{ __typename?: 'secret_Secret', type: string, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type IngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5340,6 +5340,7 @@ export const SecretsDocument = gql`
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      type
     }
   }
 }
