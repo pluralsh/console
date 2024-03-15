@@ -1,9 +1,9 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 
 import { useTheme } from 'styled-components'
 
-import { Label } from 'honorable'
+import { Span } from 'honorable'
 
 import { ChipList } from '@pluralsh/design-system'
 
@@ -18,6 +18,24 @@ import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
 const columnHelper = createColumnHelper<CustomResourceT>()
+
+const colName = columnHelper.accessor((r) => r?.objectMeta.name, {
+  id: 'name',
+  header: 'Name',
+  enableSorting: true,
+  cell: ({ getValue }) => (
+    <Span
+      css={{
+        maxWidth: 350,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      }}
+    >
+      {getValue()}
+    </Span>
+  ),
+})
 
 const colGroup = columnHelper.accessor((crd) => crd?.group, {
   id: 'group',
@@ -48,7 +66,7 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
         size="small"
         limit={1}
         values={categories ?? []}
-        emptyState={null}
+        emptyState={<span>-</span>}
       />
     )
   },
@@ -57,8 +75,7 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
 export default function CustomResources() {
   const theme = useTheme()
 
-  const { colName, colLabels, colCreationTimestamp } =
-    useDefaultColumns(columnHelper)
+  const { colLabels, colCreationTimestamp } = useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [
       colName,
