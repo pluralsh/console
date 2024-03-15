@@ -1,11 +1,11 @@
-query Pods(
+query RoleBindings(
   $namespace: String!
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
   $page: String
 ) {
-  handleGetPods(
+  handleGetRoleBindingList(
     namespace: $namespace
     filterBy: $filterBy
     sortBy: $sortBy
@@ -13,18 +13,14 @@ query Pods(
     page: $page
   )
     @rest(
-      path: "pod/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "rolebinding/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     listMeta {
       totalItems
     }
-    pods {
-      objectMeta {
-        uid
-        name
-        namespace
-        labels
-        creationTimestamp
+    items {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }
