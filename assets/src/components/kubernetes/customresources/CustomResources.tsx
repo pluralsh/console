@@ -1,10 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
 import { useTheme } from 'styled-components'
-
-import { Label } from 'honorable'
-
 import { ChipList } from '@pluralsh/design-system'
 
 import {
