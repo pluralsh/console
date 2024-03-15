@@ -8,7 +8,7 @@ import {
   Secret_Secret as SecretT,
   SecretsQuery,
   SecretsQueryVariables,
-  useConfigMapsQuery,
+  useSecretsQuery,
 } from '../../../generated/graphql-kubernetes'
 
 const columnHelper = createColumnHelper<SecretT>()
@@ -25,7 +25,7 @@ export default function Secrets() {
     <ResourceList<SecretListT, SecretT, SecretsQuery, SecretsQueryVariables>
       namespaced
       columns={columns}
-      query={useConfigMapsQuery}
+      query={useSecretsQuery}
       queryName="handleGetSecretList"
       itemsKey="secrets"
     />
