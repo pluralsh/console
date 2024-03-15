@@ -38,7 +38,7 @@ const colHosts = columnHelper.accessor((ingress) => ingress?.hosts, {
 
 export default function Ingresses() {
   const { cluster, namespace, filter } = useKubernetesContext()
-  const { sortBy, reactTableOptions } = useSortedTableOptions<IngressT>()
+  const { sortBy, reactTableOptions } = useSortedTableOptions()
 
   const { data, loading, fetchMore } = useIngressesQuery({
     client: KubernetesClient(cluster?.id ?? ''),

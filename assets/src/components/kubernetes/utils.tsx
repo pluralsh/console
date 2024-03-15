@@ -4,7 +4,10 @@ import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
 
 import { ChipList } from '@pluralsh/design-system'
 
-import { Types_ListMeta as ListMetaT } from '../../generated/graphql-kubernetes'
+import {
+  Types_ListMeta as ListMetaT,
+  Types_ObjectMeta as ObjectMetaT,
+} from '../../generated/graphql-kubernetes'
 import { DateTimeCol } from '../utils/table/DateTimeCol'
 
 export const ITEMS_PER_PAGE = 25
@@ -14,7 +17,9 @@ export const DEFAULT_DATA_SELECT = {
   page: '1',
 }
 
-export function useDefaultColumns<T>(columnHelper: ColumnHelper<T>) {
+export function useDefaultColumns<
+  T extends { objectMeta: ObjectMetaT } = { objectMeta: ObjectMetaT },
+>(columnHelper: ColumnHelper<T>) {
   return useMemo(
     () => ({
       colName: columnHelper.accessor((r) => r?.objectMeta.name, {
@@ -69,7 +74,7 @@ export function usePageInfo(items: any[], listMeta: ListMetaT | undefined) {
   return { page, hasNextPage }
 }
 
-export function useSortedTableOptions<T>(options?: TableOptions<T>) {
+export function useSortedTableOptions(options?: TableOptions<any>) {
   const [sorting, setSorting] = useState<SortingState>([])
 
   return useMemo(
@@ -80,7 +85,7 @@ export function useSortedTableOptions<T>(options?: TableOptions<T>) {
         manualSorting: true,
         state: { sorting },
         ...options,
-      } as TableOptions<T>,
+      },
     }),
     [options, sorting, setSorting]
   )

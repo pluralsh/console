@@ -21,7 +21,7 @@ const columnHelper = createColumnHelper<NetworkPolicyT>()
 
 export default function NetworkPolicies() {
   const { cluster, namespace, filter } = useKubernetesContext()
-  const { sortBy, reactTableOptions } = useSortedTableOptions<NetworkPolicyT>()
+  const { sortBy, reactTableOptions } = useSortedTableOptions()
 
   const { data, loading, fetchMore } = useNetworkPoliciesQuery({
     client: KubernetesClient(cluster?.id ?? ''),

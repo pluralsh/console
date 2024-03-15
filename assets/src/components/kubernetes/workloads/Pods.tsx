@@ -21,7 +21,7 @@ const columnHelper = createColumnHelper<PodT>()
 
 export default function Pods() {
   const { cluster, namespace, filter } = useKubernetesContext()
-  const { sortBy, reactTableOptions } = useSortedTableOptions<PodT>()
+  const { sortBy, reactTableOptions } = useSortedTableOptions()
 
   const { data, loading, fetchMore } = usePodsQuery({
     client: KubernetesClient(cluster?.id ?? ''),

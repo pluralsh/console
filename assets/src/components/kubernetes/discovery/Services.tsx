@@ -21,7 +21,7 @@ const columnHelper = createColumnHelper<ServiceT>()
 
 export default function Services() {
   const { cluster, namespace, filter } = useKubernetesContext()
-  const { sortBy, reactTableOptions } = useSortedTableOptions<ServiceT>()
+  const { sortBy, reactTableOptions } = useSortedTableOptions()
 
   const { data, loading, fetchMore } = useServicesQuery({
     client: KubernetesClient(cluster?.id ?? ''),

@@ -4645,6 +4645,17 @@ export type PodsQueryVariables = Exact<{
 
 export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type ReplicaSetsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ReplicaSetsQuery = { __typename?: 'Query', handleGetReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export type ServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5021,6 +5032,63 @@ export type PodsQueryHookResult = ReturnType<typeof usePodsQuery>;
 export type PodsLazyQueryHookResult = ReturnType<typeof usePodsLazyQuery>;
 export type PodsSuspenseQueryHookResult = ReturnType<typeof usePodsSuspenseQuery>;
 export type PodsQueryResult = Apollo.QueryResult<PodsQuery, PodsQueryVariables>;
+export const ReplicaSetsDocument = gql`
+    query ReplicaSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetReplicaSets(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "replicaset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    replicaSets {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useReplicaSetsQuery__
+ *
+ * To run a query within a React component, call `useReplicaSetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReplicaSetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReplicaSetsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useReplicaSetsQuery(baseOptions: Apollo.QueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
+      }
+export function useReplicaSetsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
+        }
+export function useReplicaSetsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
+        }
+export type ReplicaSetsQueryHookResult = ReturnType<typeof useReplicaSetsQuery>;
+export type ReplicaSetsLazyQueryHookResult = ReturnType<typeof useReplicaSetsLazyQuery>;
+export type ReplicaSetsSuspenseQueryHookResult = ReturnType<typeof useReplicaSetsSuspenseQuery>;
+export type ReplicaSetsQueryResult = Apollo.QueryResult<ReplicaSetsQuery, ReplicaSetsQueryVariables>;
 export const ServicesDocument = gql`
     query Services($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetServiceList(

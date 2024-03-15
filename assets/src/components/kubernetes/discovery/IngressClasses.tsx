@@ -21,7 +21,7 @@ const columnHelper = createColumnHelper<IngressClassT>()
 
 export default function IngressClasses() {
   const { cluster, filter } = useKubernetesContext()
-  const { sortBy, reactTableOptions } = useSortedTableOptions<IngressClassT>()
+  const { sortBy, reactTableOptions } = useSortedTableOptions()
 
   const { data, loading, fetchMore } = useIngressClassesQuery({
     client: KubernetesClient(cluster?.id ?? ''),
