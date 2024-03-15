@@ -32,7 +32,6 @@ import ClusterRoles from '../components/kubernetes/access/ClusterRoles'
 import RoleBindings from '../components/kubernetes/access/RoleBindings'
 import Roles from '../components/kubernetes/access/Roles'
 import Access from '../components/kubernetes/access/Access'
-import ResourceListProxy from '../components/kubernetes/ResourceList'
 
 import {
   ACCESS_REL_PATH,
@@ -98,67 +97,35 @@ export const kubernetesRoutes = [
       />
       <Route
         path={DEPLOYMENTS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <Deployments />
-          </ResourceListProxy>
-        }
+        element={<Deployments />}
       />
       <Route
         path={PODS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <Pods />
-          </ResourceListProxy>
-        }
+        element={<Pods />}
       />
       <Route
         path={REPLICA_SETS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <ReplicaSets />
-          </ResourceListProxy>
-        }
+        element={<ReplicaSets />}
       />
       <Route
         path={STATEFUL_SETS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <StatefulSets />
-          </ResourceListProxy>
-        }
+        element={<StatefulSets />}
       />
       <Route
         path={DAEMON_SETS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <DaemonSets />
-          </ResourceListProxy>
-        }
+        element={<DaemonSets />}
       />
       <Route
         path={JOBS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <Jobs />
-          </ResourceListProxy>
-        }
+        element={<Jobs />}
       />
       <Route
         path={CRON_JOBS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <CronJobs />
-          </ResourceListProxy>
-        }
+        element={<CronJobs />}
       />
       <Route
         path={REPLICATION_CONTROLLERS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <ReplicationControllers />
-          </ResourceListProxy>
-        }
+        element={<ReplicationControllers />}
       />
     </Route>
     <Route
@@ -254,27 +221,15 @@ export const kubernetesRoutes = [
       />
       <Route
         path={NODES_REL_PATH}
-        element={
-          <ResourceListProxy>
-            <Nodes />
-          </ResourceListProxy>
-        }
+        element={<Nodes />}
       />
       <Route
         path={EVENTS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <Events />
-          </ResourceListProxy>
-        }
+        element={<Events />}
       />
       <Route
         path={NAMESPACES_REL_PATH}
-        element={
-          <ResourceListProxy>
-            <Namespaces />
-          </ResourceListProxy>
-        }
+        element={<Namespaces />}
       />
     </Route>
     <Route
@@ -292,44 +247,24 @@ export const kubernetesRoutes = [
       />
       <Route
         path={ROLES_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <Roles />
-          </ResourceListProxy>
-        }
+        element={<Roles />}
       />
       <Route
         path={ROLE_BINDINGS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <RoleBindings />
-          </ResourceListProxy>
-        }
+        element={<RoleBindings />}
       />
       <Route
         path={CLUSTER_ROLES_REL_PATH}
-        element={
-          <ResourceListProxy>
-            <ClusterRoles />
-          </ResourceListProxy>
-        }
+        element={<ClusterRoles />}
       />
       <Route
         path={CLUSTER_ROLE_BINDINGS_REL_PATH}
-        element={
-          <ResourceListProxy>
-            <ClusterRoleBindings />
-          </ResourceListProxy>
-        }
+        element={<ClusterRoleBindings />}
       />
     </Route>
     <Route
       path={CUSTOM_RESOURCES_REL_PATH}
-      element={
-        <ResourceListProxy>
-          <CustomResources />
-        </ResourceListProxy>
-      }
+      element={<CustomResources />}
     />
   </Route>,
 ]

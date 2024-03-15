@@ -1,6 +1,5 @@
 import {
   Dispatch,
-  JSX,
   type MouseEvent,
   ReactElement,
   SetStateAction,
@@ -39,17 +38,6 @@ export type ResourceListContextT = {
 export const ResourceListContext = createContext<
   ResourceListContextT | undefined
 >(undefined)
-
-// TODO: Remove after refactor
-export default function ResourceListProxy({
-  children,
-  namespaced = false,
-}: {
-  children: JSX.Element
-  namespaced?: boolean
-}): JSX.Element {
-  return children
-}
 
 interface DataSelectVariables extends OperationVariables {
   filterBy?: Nullable<string>
@@ -118,7 +106,6 @@ function SkeletonUnstyled({ ...props }): ReactElement {
   )
 }
 
-// TODO: Use default export
 export function ResourceList<
   TResourceList extends ResourceListT,
   TResource,
