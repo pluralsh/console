@@ -1,20 +1,22 @@
-query IngressClasses(
+query NetworkPolicies(
+  $namespace: String!
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
   $page: String
 ) {
-  handleGetIngressClassList(
+  handleGetNetworkPolicyList(
+    namespace: $namespace
     filterBy: $filterBy
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
   )
     @rest(
-      path: "ingressclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "networkpolicy/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {

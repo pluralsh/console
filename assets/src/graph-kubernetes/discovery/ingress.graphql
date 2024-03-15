@@ -1,18 +1,19 @@
-query ClusterRoleBindings(
+query Ingresses(
   $namespace: String!
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
   $page: String
 ) {
-  handleGetClusterRoleBindingList(
+  handleGetIngressList(
+    namespace: $namespace
     filterBy: $filterBy
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
   )
     @rest(
-      path: "clusterrolebinding?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
@@ -21,6 +22,15 @@ query ClusterRoleBindings(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      endpoints {
+        host
+        ports {
+          port
+          protocol
+          nodePort
+        }
+      }
+      hosts
     }
   }
 }

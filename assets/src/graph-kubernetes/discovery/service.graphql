@@ -1,11 +1,11 @@
-query PersistentVolumeClaims(
+query Services(
   $namespace: String!
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
   $page: String
 ) {
-  handleGetPersistentVolumeClaimList(
+  handleGetServiceList(
     namespace: $namespace
     filterBy: $filterBy
     sortBy: $sortBy
@@ -13,12 +13,12 @@ query PersistentVolumeClaims(
     page: $page
   )
     @rest(
-      path: "persistentvolumeclaim/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "service/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
-    items {
+    services {
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }

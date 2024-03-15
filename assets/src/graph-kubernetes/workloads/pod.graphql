@@ -15,8 +15,8 @@ query Pods(
     @rest(
       path: "pod/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     pods {
       objectMeta @type(name: "types_ObjectMeta") {

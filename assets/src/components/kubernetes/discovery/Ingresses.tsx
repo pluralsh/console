@@ -37,9 +37,9 @@ export default function Ingresses() {
     () => [
       colName,
       colNamespace,
-      colLabels,
       colHosts,
       colEndpoints,
+      colLabels,
       colCreationTimestamp,
     ],
     [colName, colNamespace, colLabels, colCreationTimestamp]
