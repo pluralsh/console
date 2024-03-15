@@ -62,3 +62,11 @@ kas:
   redis:
     auth:
       password: {{ configuration.kasRedis }}
+
+dashboard:
+  api:
+    containers:
+      args:
+        - --apiserver-host=https://{{ configuration.kasDns }}/k8s-proxy
+        - --apiserver-skip-tls-verify=true
+        - --act-as-proxy

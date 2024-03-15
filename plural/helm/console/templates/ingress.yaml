@@ -18,6 +18,15 @@ spec:
   - host: {{ .Values.ingress.console_dns | quote }}
     http:
       paths:
+      {{ if .Values.dashboard.enabled }}
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ template "kubernetes-dashboard.fullname" .Subcharts.dashboard }}-{{ .Values.dashboard.api.role }}
+            port:
+              name: {{ .Values.dashboard.api.role }}
+      {{ end }}
       - path: /
         pathType: Prefix
         backend:
