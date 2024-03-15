@@ -6,7 +6,7 @@ import {
   Service_Service as ServiceT,
   ServicesQuery,
   ServicesQueryVariables,
-  useNetworkPoliciesQuery,
+  useServicesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../utils'
 
@@ -26,7 +26,7 @@ export default function Services() {
     <ResourceList<ServiceListT, ServiceT, ServicesQuery, ServicesQueryVariables>
       namespaced
       columns={columns}
-      query={useNetworkPoliciesQuery}
+      query={useServicesQuery}
       queryName="handleGetServiceList"
       itemsKey="services"
     />

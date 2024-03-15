@@ -8,7 +8,6 @@ import {
   Secret_Secret as SecretT,
   SecretsQuery,
   SecretsQueryVariables,
-  useConfigMapsQuery,
   useSecretsQuery,
 } from '../../../generated/graphql-kubernetes'
 
