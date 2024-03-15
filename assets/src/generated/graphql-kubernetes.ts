@@ -4648,7 +4648,7 @@ export type NamespacesQueryVariables = Exact<{
 }>;
 
 
-export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', phase: string, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NodesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5177,6 +5177,7 @@ export const NamespacesDocument = gql`
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      phase
     }
   }
 }

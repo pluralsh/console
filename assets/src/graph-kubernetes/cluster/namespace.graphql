@@ -21,6 +21,7 @@ query Namespaces(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      phase
     }
   }
 }
