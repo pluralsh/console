@@ -47,6 +47,7 @@ export function useDefaultColumns<
               limit={1}
               values={Object.entries(labels || {})}
               transformValue={(label) => label.join(': ')}
+              emptyState={null}
             />
           )
         },
