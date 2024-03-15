@@ -137,6 +137,7 @@ export function ResourceList<
   const { data, loading, fetchMore } = query({
     client: KubernetesClient(cluster?.id ?? ''),
     skip: !cluster,
+    pollInterval: 30_000,
     variables: {
       ...(namespaced ? { namespace } : {}),
       ...DEFAULT_DATA_SELECT,

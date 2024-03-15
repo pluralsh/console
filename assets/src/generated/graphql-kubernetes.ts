@@ -4824,7 +4824,7 @@ export type PodsQueryVariables = Exact<{
 }>;
 
 
-export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, warnings: Array<{ __typename?: 'common_Event', message: string, type: string } | null> } | null> } | null };
+export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type ReplicaSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -6126,7 +6126,6 @@ export const PodsDocument = gql`
       restartCount
       warnings {
         message
-        type
       }
     }
   }

@@ -28,7 +28,6 @@ query Pods(
       restartCount
       warnings {
         message
-        type
       }
     }
   }

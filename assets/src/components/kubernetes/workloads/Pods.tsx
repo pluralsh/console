@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
-import { Chip } from '@pluralsh/design-system'
+import { Chip, Tooltip } from '@pluralsh/design-system'
 
 import {
   Pod_PodList as PodListT,
@@ -51,21 +51,31 @@ const statusToSeverity = {
   Terminating: 'danger',
 }
 
-const colStatus = columnHelper.accessor((pod) => pod?.status, {
+const colStatus = columnHelper.accessor((pod) => pod, {
   id: 'status',
   header: 'Status',
   enableSorting: true,
   cell: ({ getValue }) => {
-    const status = getValue()
-    const severity = statusToSeverity[status] ?? 'neutral'
+    const { status, warnings } = getValue()
+    let severity = statusToSeverity[status] ?? 'neutral'
+
+    if (warnings?.length > 0) {
+      severity = 'danger'
+    }
 
     return (
-      <Chip
-        size="small"
-        severity={severity}
+      <Tooltip
+        label={warnings?.map((ev) => ev?.message)?.join(', ')}
+        condition={warnings?.length > 0}
+        placement="bottom"
       >
-        {getValue()}
-      </Chip>
+        <Chip
+          size="small"
+          severity={severity}
+        >
+          {status}
+        </Chip>
+      </Tooltip>
     )
   },
 })
