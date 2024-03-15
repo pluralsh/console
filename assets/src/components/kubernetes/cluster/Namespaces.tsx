@@ -1,8 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
-import { Chip } from '@pluralsh/design-system'
-
 import {
   Namespace_NamespaceList as NamespaceListT,
   Namespace_Namespace as NamespaceT,
@@ -13,26 +11,14 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
-import { getNamespacePhaseSeverity } from './utils'
+import { NamespacePhaseChip } from './utils'
 
 const columnHelper = createColumnHelper<NamespaceT>()
 
 const colPhase = columnHelper.accessor((namespace) => namespace?.phase, {
   id: 'phase',
   header: 'Phase',
-  cell: ({ getValue }) => {
-    const phase = getValue()
-    const severity = getNamespacePhaseSeverity(phase)
-
-    return (
-      <Chip
-        size="small"
-        severity={severity}
-      >
-        {phase}
-      </Chip>
-    )
-  },
+  cell: ({ getValue }) => <NamespacePhaseChip phase={getValue()} />,
 })
 
 export default function Namespaces() {
