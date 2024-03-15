@@ -1,3 +1,7 @@
+fragment ListMeta on types_ListMeta {
+  totalItems
+}
+
 fragment ObjectMeta on types_ObjectMeta {
   uid
   name

@@ -15,8 +15,8 @@ query CronJobs(
     @rest(
       path: "cronjob/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {

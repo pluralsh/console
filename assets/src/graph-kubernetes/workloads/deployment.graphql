@@ -12,8 +12,8 @@ query Deployments(
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "deployment/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     deployments {
       objectMeta @type(name: "types_ObjectMeta") {

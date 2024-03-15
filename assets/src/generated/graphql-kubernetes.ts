@@ -4672,6 +4672,8 @@ export type ConfigMapsQueryVariables = Exact<{
 
 export type ConfigMapsQuery = { __typename?: 'Query', handleGetConfigMapList?: { __typename?: 'configmap_ConfigMapList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'configmap_ConfigMap', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type ListMetaFragment = { __typename?: 'types_ListMeta', totalItems: number };
+
 export type ObjectMetaFragment = { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null };
 
 export type IngressesQueryVariables = Exact<{
@@ -4847,6 +4849,11 @@ export type StatefulSetsQueryVariables = Exact<{
 
 export type StatefulSetsQuery = { __typename?: 'Query', handleGetStatefulSetList?: { __typename?: 'statefulset_StatefulSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export const ListMetaFragmentDoc = gql`
+    fragment ListMeta on types_ListMeta {
+  totalItems
+}
+    `;
 export const ObjectMetaFragmentDoc = gql`
     fragment ObjectMeta on types_ObjectMeta {
   uid
@@ -4865,8 +4872,8 @@ export const ClusterRolesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "clusterrole?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -4875,7 +4882,8 @@ export const ClusterRolesDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useClusterRolesQuery__
@@ -4921,8 +4929,8 @@ export const ClusterRoleBindingsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "clusterrolebinding?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -4931,7 +4939,8 @@ export const ClusterRoleBindingsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useClusterRoleBindingsQuery__
@@ -4978,8 +4987,8 @@ export const RolesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "role/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -4988,7 +4997,8 @@ export const RolesDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useRolesQuery__
@@ -5035,8 +5045,8 @@ export const RoleBindingsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "rolebinding/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5045,7 +5055,8 @@ export const RoleBindingsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useRoleBindingsQuery__
@@ -5092,8 +5103,8 @@ export const EventsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "event/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     events {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5102,7 +5113,8 @@ export const EventsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useEventsQuery__
@@ -5148,8 +5160,8 @@ export const NamespacesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "namespace?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     namespaces {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5158,7 +5170,8 @@ export const NamespacesDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useNamespacesQuery__
@@ -5204,8 +5217,8 @@ export const NodesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "node?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     nodes {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5214,7 +5227,8 @@ export const NodesDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useNodesQuery__
@@ -5261,8 +5275,8 @@ export const ConfigMapsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "configmap/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5271,7 +5285,8 @@ export const ConfigMapsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useConfigMapsQuery__
@@ -5318,8 +5333,8 @@ export const IngressesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5337,7 +5352,8 @@ export const IngressesDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useIngressesQuery__
@@ -5383,8 +5399,8 @@ export const IngressClassesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "ingressclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5393,7 +5409,8 @@ export const IngressClassesDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useIngressClassesQuery__
@@ -5439,8 +5456,8 @@ export const NetworkPoliciesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "networkpolicy/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5449,7 +5466,8 @@ export const NetworkPoliciesDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useNetworkPoliciesQuery__
@@ -5495,8 +5513,8 @@ export const PersistentVolumesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "persistentvolume?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5505,7 +5523,8 @@ export const PersistentVolumesDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __usePersistentVolumesQuery__
@@ -5551,8 +5570,8 @@ export const PersistentVolumeClaimsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "persistentvolumeclaim/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5561,7 +5580,8 @@ export const PersistentVolumeClaimsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __usePersistentVolumeClaimsQuery__
@@ -5608,8 +5628,8 @@ export const SecretsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "secret/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     secrets {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5618,7 +5638,8 @@ export const SecretsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useSecretsQuery__
@@ -5665,8 +5686,8 @@ export const ServicesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "service/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     services {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5675,7 +5696,8 @@ export const ServicesDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useServicesQuery__
@@ -5721,8 +5743,8 @@ export const StorageClassesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "storageclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5731,7 +5753,8 @@ export const StorageClassesDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useStorageClassesQuery__
@@ -5777,8 +5800,8 @@ export const CronJobsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "cronjob/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5787,7 +5810,8 @@ export const CronJobsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useCronJobsQuery__
@@ -5834,8 +5858,8 @@ export const DaemonSetsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "daemonset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     daemonSets {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5844,7 +5868,8 @@ export const DaemonSetsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useDaemonSetsQuery__
@@ -5891,8 +5916,8 @@ export const DeploymentsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "deployment/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     deployments {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5901,7 +5926,8 @@ export const DeploymentsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useDeploymentsQuery__
@@ -5948,8 +5974,8 @@ export const JobsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "job/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     jobs {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -5958,7 +5984,8 @@ export const JobsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useJobsQuery__
@@ -6005,8 +6032,8 @@ export const PodsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "pod/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     pods {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -6015,7 +6042,8 @@ export const PodsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __usePodsQuery__
@@ -6062,8 +6090,8 @@ export const ReplicaSetsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "replicaset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     replicaSets {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -6072,7 +6100,8 @@ export const ReplicaSetsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useReplicaSetsQuery__
@@ -6119,8 +6148,8 @@ export const ReplicationControllersDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "replicationcontroller/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     replicationControllers {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -6129,7 +6158,8 @@ export const ReplicationControllersDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useReplicationControllersQuery__
@@ -6176,8 +6206,8 @@ export const StatefulSetsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     statefulSets {
       objectMeta @type(name: "types_ObjectMeta") {
@@ -6186,7 +6216,8 @@ export const StatefulSetsDocument = gql`
     }
   }
 }
-    ${ObjectMetaFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useStatefulSetsQuery__

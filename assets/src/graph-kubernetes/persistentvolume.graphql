@@ -13,8 +13,8 @@ query PersistentVolumes(
     @rest(
       path: "persistentvolume?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     items {
       objectMeta @type(name: "types_ObjectMeta") {

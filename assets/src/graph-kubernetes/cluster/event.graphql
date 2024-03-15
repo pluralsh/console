@@ -15,8 +15,8 @@ query Events(
     @rest(
       path: "event/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     events {
       objectMeta @type(name: "types_ObjectMeta") {

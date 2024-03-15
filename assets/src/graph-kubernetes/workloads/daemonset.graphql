@@ -15,8 +15,8 @@ query DaemonSets(
     @rest(
       path: "daemonset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta {
-      totalItems
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
     }
     daemonSets {
       objectMeta @type(name: "types_ObjectMeta") {
