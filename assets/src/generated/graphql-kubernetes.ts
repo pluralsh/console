@@ -4759,7 +4759,7 @@ export type StorageClassesQueryVariables = Exact<{
 }>;
 
 
-export type StorageClassesQuery = { __typename?: 'Query', handleGetStorageClassList?: { __typename?: 'storageclass_StorageClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'storageclass_StorageClass', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type StorageClassesQuery = { __typename?: 'Query', handleGetStorageClassList?: { __typename?: 'storageclass_StorageClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'storageclass_StorageClass', parameters: any, provisioner: string, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type CronJobsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5751,6 +5751,8 @@ export const StorageClassesDocument = gql`
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      parameters
+      provisioner
     }
   }
 }

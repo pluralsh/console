@@ -20,6 +20,8 @@ query StorageClasses(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      parameters
+      provisioner
     }
   }
 }
