@@ -1,0 +1,37 @@
+query CustomResources(
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetCustomResourceDefinitionList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+  @rest(
+    path: "crd?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+  ) {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+      established
+      group
+      names {
+        categories
+        kind
+        listKind
+        plural
+        shortNames
+        singular
+      }
+      scope
+      version
+    }
+  }
+}

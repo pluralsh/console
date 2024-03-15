@@ -7,6 +7,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useMemo,
 } from 'react'
 import type { OperationVariables } from '@apollo/client/core'
 import type {
@@ -14,7 +15,9 @@ import type {
   QueryResult,
 } from '@apollo/client/react/types/types'
 import { Row } from '@tanstack/react-table'
-import { LoopingLogo, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
+
+import styled from 'styled-components'
 
 import { KubernetesClient } from '../../helpers/kubernetes.client'
 import { Types_ListMeta as ListMetaT } from '../../generated/graphql-kubernetes'
@@ -74,7 +77,7 @@ interface ResourceListProps<
   TQuery,
   TVariables extends ResourceVariables,
 > {
-  columns: Array<unknown>
+  columns: Array<object>
   query: (
     baseOptions: QueryHookOptions<TQuery, TVariables>
   ) => QueryResult<TQuery, TVariables>
@@ -82,6 +85,34 @@ interface ResourceListProps<
   itemsKey: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
   onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<TResource>) => void
+}
+
+const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
+  '@keyframes moving-gradient': {
+    '0%': { backgroundPosition: '-250px 0' },
+    '100%': { backgroundPosition: '250px 0' },
+  },
+
+  maxWidth: '200px',
+  width: '200px',
+
+  span: {
+    borderRadius: theme.borderRadiuses.medium,
+    maxWidth: '150px',
+    display: 'block',
+    height: '12px',
+    background: 'linear-gradient(to right, #444 20%, #555 50%, #444 80%)',
+    backgroundSize: '500px 100px',
+    animation: 'moving-gradient 1s infinite linear forwards',
+  },
+}))
+
+function SkeletonUnstyled({ ...props }): ReactElement {
+  return (
+    <div {...props}>
+      <span />
+    </div>
+  )
 }
 
 // TODO: Use default export
@@ -125,8 +156,25 @@ export function ResourceList<
   })
 
   const resourceList = data?.[queryName] as TResourceList
-  const items = (resourceList?.[itemsKey] as Array<TResource>) ?? []
+  const items = useMemo(
+    () =>
+      loading
+        ? Array(10).fill({})
+        : (resourceList?.[itemsKey] as Array<TResource>) ?? [],
+    [itemsKey, loading, resourceList]
+  )
   const { page, hasNextPage } = usePageInfo(items, resourceList?.listMeta)
+
+  const columnsData = useMemo(
+    () =>
+      loading
+        ? columns.map((col) => ({
+            ...col,
+            cell: <Skeleton />,
+          }))
+        : columns,
+    [columns, loading]
+  )
 
   const fetchNextPage = useCallback(() => {
     if (!hasNextPage) return
@@ -137,13 +185,11 @@ export function ResourceList<
     })
   }, [fetchMore, hasNextPage, page, queryName, itemsKey])
 
-  if (!data) return <LoopingLogo />
-
   return (
     <FullHeightTableWrap>
       <Table
         data={items}
-        columns={columns}
+        columns={columnsData}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}

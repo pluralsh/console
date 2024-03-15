@@ -14,11 +14,11 @@ import { ResourceList } from '../ResourceList'
 const columnHelper = createColumnHelper<EventT>()
 
 export default function Events() {
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colName, colNamespace, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    () => [colName, colNamespace, colCreationTimestamp],
+    [colName, colNamespace, colCreationTimestamp]
   )
 
   return (

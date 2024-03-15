@@ -259,8 +259,7 @@ export default function Kubernetes() {
           flexShrink: 1,
           height: '100%',
           width: '100%',
-          overflowY: 'auto',
-          overflowX: 'hidden',
+          overflow: 'hidden',
         }}
       >
         <div css={{ display: 'flex' }}>
