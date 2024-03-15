@@ -4628,6 +4628,39 @@ export type RoleBindingsQueryVariables = Exact<{
 
 export type RoleBindingsQuery = { __typename?: 'Query', handleGetRoleBindingList?: { __typename?: 'rolebinding_RoleBindingList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'rolebinding_RoleBinding', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type EventsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type EventsQuery = { __typename?: 'Query', handleGetEventList?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type NamespacesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type NodesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type NodesQuery = { __typename?: 'Query', handleGetNodeList?: { __typename?: 'node_NodeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, nodes: Array<{ __typename?: 'node_Node', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export type ConfigMapsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -4661,11 +4694,6 @@ export type IngressClassesQueryVariables = Exact<{
 
 
 export type IngressClassesQuery = { __typename?: 'Query', handleGetIngressClassList?: { __typename?: 'ingressclass_IngressClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingressclass_IngressClass', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
-export type NamespacesQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NetworkPoliciesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5055,6 +5083,175 @@ export type RoleBindingsQueryHookResult = ReturnType<typeof useRoleBindingsQuery
 export type RoleBindingsLazyQueryHookResult = ReturnType<typeof useRoleBindingsLazyQuery>;
 export type RoleBindingsSuspenseQueryHookResult = ReturnType<typeof useRoleBindingsSuspenseQuery>;
 export type RoleBindingsQueryResult = Apollo.QueryResult<RoleBindingsQuery, RoleBindingsQueryVariables>;
+export const EventsDocument = gql`
+    query Events($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetEventList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "event/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    events {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useEventsQuery__
+ *
+ * To run a query within a React component, call `useEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useEventsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useEventsQuery(baseOptions: Apollo.QueryHookOptions<EventsQuery, EventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<EventsQuery, EventsQueryVariables>(EventsDocument, options);
+      }
+export function useEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EventsQuery, EventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<EventsQuery, EventsQueryVariables>(EventsDocument, options);
+        }
+export function useEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<EventsQuery, EventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<EventsQuery, EventsQueryVariables>(EventsDocument, options);
+        }
+export type EventsQueryHookResult = ReturnType<typeof useEventsQuery>;
+export type EventsLazyQueryHookResult = ReturnType<typeof useEventsLazyQuery>;
+export type EventsSuspenseQueryHookResult = ReturnType<typeof useEventsSuspenseQuery>;
+export type EventsQueryResult = Apollo.QueryResult<EventsQuery, EventsQueryVariables>;
+export const NamespacesDocument = gql`
+    query Namespaces($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetNamespaces(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "namespace?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    namespaces {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useNamespacesQuery__
+ *
+ * To run a query within a React component, call `useNamespacesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNamespacesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNamespacesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useNamespacesQuery(baseOptions: Apollo.QueryHookOptions<NamespacesQuery, NamespacesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NamespacesQuery, NamespacesQueryVariables>(NamespacesDocument, options);
+      }
+export function useNamespacesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NamespacesQuery, NamespacesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NamespacesQuery, NamespacesQueryVariables>(NamespacesDocument, options);
+        }
+export function useNamespacesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NamespacesQuery, NamespacesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NamespacesQuery, NamespacesQueryVariables>(NamespacesDocument, options);
+        }
+export type NamespacesQueryHookResult = ReturnType<typeof useNamespacesQuery>;
+export type NamespacesLazyQueryHookResult = ReturnType<typeof useNamespacesLazyQuery>;
+export type NamespacesSuspenseQueryHookResult = ReturnType<typeof useNamespacesSuspenseQuery>;
+export type NamespacesQueryResult = Apollo.QueryResult<NamespacesQuery, NamespacesQueryVariables>;
+export const NodesDocument = gql`
+    query Nodes($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetNodeList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "node?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    nodes {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useNodesQuery__
+ *
+ * To run a query within a React component, call `useNodesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNodesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNodesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useNodesQuery(baseOptions: Apollo.QueryHookOptions<NodesQuery, NodesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NodesQuery, NodesQueryVariables>(NodesDocument, options);
+      }
+export function useNodesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NodesQuery, NodesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NodesQuery, NodesQueryVariables>(NodesDocument, options);
+        }
+export function useNodesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NodesQuery, NodesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NodesQuery, NodesQueryVariables>(NodesDocument, options);
+        }
+export type NodesQueryHookResult = ReturnType<typeof useNodesQuery>;
+export type NodesLazyQueryHookResult = ReturnType<typeof useNodesLazyQuery>;
+export type NodesSuspenseQueryHookResult = ReturnType<typeof useNodesSuspenseQuery>;
+export type NodesQueryResult = Apollo.QueryResult<NodesQuery, NodesQueryVariables>;
 export const ConfigMapsDocument = gql`
     query ConfigMaps($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetConfigMapList(
@@ -5233,52 +5430,6 @@ export type IngressClassesQueryHookResult = ReturnType<typeof useIngressClassesQ
 export type IngressClassesLazyQueryHookResult = ReturnType<typeof useIngressClassesLazyQuery>;
 export type IngressClassesSuspenseQueryHookResult = ReturnType<typeof useIngressClassesSuspenseQuery>;
 export type IngressClassesQueryResult = Apollo.QueryResult<IngressClassesQuery, IngressClassesQueryVariables>;
-export const NamespacesDocument = gql`
-    query Namespaces {
-  handleGetNamespaces @rest(path: "namespace") {
-    listMeta {
-      totalItems
-    }
-    namespaces {
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ObjectMetaFragmentDoc}`;
-
-/**
- * __useNamespacesQuery__
- *
- * To run a query within a React component, call `useNamespacesQuery` and pass it any options that fit your needs.
- * When your component renders, `useNamespacesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useNamespacesQuery({
- *   variables: {
- *   },
- * });
- */
-export function useNamespacesQuery(baseOptions?: Apollo.QueryHookOptions<NamespacesQuery, NamespacesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<NamespacesQuery, NamespacesQueryVariables>(NamespacesDocument, options);
-      }
-export function useNamespacesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NamespacesQuery, NamespacesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<NamespacesQuery, NamespacesQueryVariables>(NamespacesDocument, options);
-        }
-export function useNamespacesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NamespacesQuery, NamespacesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<NamespacesQuery, NamespacesQueryVariables>(NamespacesDocument, options);
-        }
-export type NamespacesQueryHookResult = ReturnType<typeof useNamespacesQuery>;
-export type NamespacesLazyQueryHookResult = ReturnType<typeof useNamespacesLazyQuery>;
-export type NamespacesSuspenseQueryHookResult = ReturnType<typeof useNamespacesSuspenseQuery>;
-export type NamespacesQueryResult = Apollo.QueryResult<NamespacesQuery, NamespacesQueryVariables>;
 export const NetworkPoliciesDocument = gql`
     query NetworkPolicies($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetNetworkPolicyList(
