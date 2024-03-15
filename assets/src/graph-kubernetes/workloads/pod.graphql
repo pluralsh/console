@@ -22,6 +22,14 @@ query Pods(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      status
+      containerImages
+      nodeName
+      restartCount
+      warnings {
+        message
+        type
+      }
     }
   }
 }
