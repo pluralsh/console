@@ -1,0 +1,27 @@
+query Events(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetEventList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      path: "event/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    listMeta {
+      totalItems
+    }
+    events {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}

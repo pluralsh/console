@@ -1,0 +1,26 @@
+query Nodes(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetNodeList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+  @rest(
+    path: "node?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+  ) {
+    listMeta {
+      totalItems
+    }
+    nodes {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
