@@ -48,6 +48,7 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
         size="small"
         limit={1}
         values={categories ?? []}
+        emptyState={null}
       />
     )
   },
@@ -64,8 +65,8 @@ export default function CustomResources() {
       colGroup,
       colVersion,
       colScope,
-      colLabels,
       colCategories,
+      colLabels,
       colCreationTimestamp,
     ],
     [colName, colLabels, colCreationTimestamp]

@@ -39,6 +39,7 @@ const colParameters = columnHelper.accessor(
           limit={1}
           values={Object.entries(params || {})}
           transformValue={(params) => params.join(': ')}
+          emptyState={null}
         />
       )
     },
