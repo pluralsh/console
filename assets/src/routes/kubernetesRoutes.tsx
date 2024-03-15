@@ -176,35 +176,19 @@ export const kubernetesRoutes = [
       />
       <Route
         path={SERVICES_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <Services />
-          </ResourceListProxy>
-        }
+        element={<Services />}
       />
       <Route
         path={INGRESSES_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <Ingresses />
-          </ResourceListProxy>
-        }
+        element={<Ingresses />}
       />
       <Route
         path={INGRESS_CLASSES_REL_PATH}
-        element={
-          <ResourceListProxy>
-            <IngressClasses />
-          </ResourceListProxy>
-        }
+        element={<IngressClasses />}
       />
       <Route
         path={NETWORK_POLICIES_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <NetworkPolicies />
-          </ResourceListProxy>
-        }
+        element={<NetworkPolicies />}
       />
     </Route>
     <Route
@@ -222,27 +206,15 @@ export const kubernetesRoutes = [
       />
       <Route
         path={PERSISTENT_VOLUME_CLAIMS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <PersistentVolumeClaims />
-          </ResourceListProxy>
-        }
+        element={<PersistentVolumeClaims />}
       />
       <Route
         path={PERSISTENT_VOLUME_REL_PATH}
-        element={
-          <ResourceListProxy>
-            <PersistentVolumes />
-          </ResourceListProxy>
-        }
+        element={<PersistentVolumes />}
       />
       <Route
         path={STORAGE_CLASSES_REL_PATH}
-        element={
-          <ResourceListProxy>
-            <StorageClasses />
-          </ResourceListProxy>
-        }
+        element={<StorageClasses />}
       />
     </Route>
     <Route
@@ -260,19 +232,11 @@ export const kubernetesRoutes = [
       />
       <Route
         path={CONFIG_MAPS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <ConfigMaps />
-          </ResourceListProxy>
-        }
+        element={<ConfigMaps />}
       />
       <Route
         path={SECRETS_REL_PATH}
-        element={
-          <ResourceListProxy namespaced>
-            <Secrets />
-          </ResourceListProxy>
-        }
+        element={<Secrets />}
       />
     </Route>
     <Route
