@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { useAddonReleaseUrlQuery } from 'generated/graphql'
+import { useRuntimeServiceQuery } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import isEmpty from 'lodash/isEmpty'
@@ -18,7 +18,7 @@ type Release = {
   url: string
 }
 
-const versionPlaceholder = '_VSN_PLACEHOLDER_'
+export const versionPlaceholder = '_VSN_PLACEHOLDER_'
 
 const columnHelper = createColumnHelper<Release>()
 
@@ -41,7 +41,7 @@ export default function ClusterAddOnReleases() {
 
   const columns = useMemo(() => [colVersion, colRelease], [])
 
-  const { data, loading, error } = useAddonReleaseUrlQuery({
+  const { data, loading, error } = useRuntimeServiceQuery({
     variables: { id: rts?.id, version: versionPlaceholder },
   })
 
