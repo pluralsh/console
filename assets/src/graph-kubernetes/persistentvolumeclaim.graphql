@@ -1,11 +1,11 @@
-query Ingresses(
+query PersistentVolumeClaims(
   $namespace: String!
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
   $page: String
 ) {
-  handleGetIngressList(
+  handleGetPersistentVolumeClaimList(
     namespace: $namespace
     filterBy: $filterBy
     sortBy: $sortBy
@@ -13,7 +13,7 @@ query Ingresses(
     page: $page
   )
     @rest(
-      path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "persistentvolumeclaim/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     listMeta {
       totalItems
@@ -22,15 +22,6 @@ query Ingresses(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
-      endpoints {
-        host
-        ports {
-          port
-          protocol
-          nodePort
-        }
-      }
-      hosts
     }
   }
 }

@@ -4593,7 +4593,7 @@ export type ConfigMapsQueryVariables = Exact<{
 }>;
 
 
-export type ConfigMapsQuery = { __typename?: 'Query', handleGetConfigMapList?: { __typename?: 'configmap_ConfigMapList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'configmap_ConfigMap', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type ConfigMapsQuery = { __typename?: 'Query', handleGetConfigMapList?: { __typename?: 'configmap_ConfigMapList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'configmap_ConfigMap', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type DeploymentsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4617,7 +4617,7 @@ export type IngressesQueryVariables = Exact<{
 }>;
 
 
-export type IngressesQuery = { __typename?: 'Query', handleGetIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, protocol: string, nodePort: number } | null> } | null> } | null> } | null };
+export type IngressesQuery = { __typename?: 'Query', handleGetIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, protocol: string, nodePort: number } | null> } | null> } | null> } | null };
 
 export type IngressClassesQueryVariables = Exact<{
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -4627,12 +4627,12 @@ export type IngressClassesQueryVariables = Exact<{
 }>;
 
 
-export type IngressClassesQuery = { __typename?: 'Query', handleGetIngressClassList?: { __typename?: 'ingressclass_IngressClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingressclass_IngressClass', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type IngressClassesQuery = { __typename?: 'Query', handleGetIngressClassList?: { __typename?: 'ingressclass_IngressClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingressclass_IngressClass', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NamespacesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null } } | null> } | null };
+export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NetworkPoliciesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4643,7 +4643,28 @@ export type NetworkPoliciesQueryVariables = Exact<{
 }>;
 
 
-export type NetworkPoliciesQuery = { __typename?: 'Query', handleGetNetworkPolicyList?: { __typename?: 'networkpolicy_NetworkPolicyList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'networkpolicy_NetworkPolicy', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type NetworkPoliciesQuery = { __typename?: 'Query', handleGetNetworkPolicyList?: { __typename?: 'networkpolicy_NetworkPolicyList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'networkpolicy_NetworkPolicy', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type PersistentVolumesQueryVariables = Exact<{
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PersistentVolumesQuery = { __typename?: 'Query', handleGetPersistentVolumeList?: { __typename?: 'persistentvolume_PersistentVolumeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolume_PersistentVolume', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type PersistentVolumeClaimsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PersistentVolumeClaimsQuery = { __typename?: 'Query', handleGetPersistentVolumeClaimList?: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type PodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4654,7 +4675,7 @@ export type PodsQueryVariables = Exact<{
 }>;
 
 
-export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ReplicaSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4676,7 +4697,7 @@ export type SecretsQueryVariables = Exact<{
 }>;
 
 
-export type SecretsQuery = { __typename?: 'Query', handleGetSecretList?: { __typename?: 'secret_SecretList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, secrets: Array<{ __typename?: 'secret_Secret', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type SecretsQuery = { __typename?: 'Query', handleGetSecretList?: { __typename?: 'secret_SecretList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, secrets: Array<{ __typename?: 'secret_Secret', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4687,7 +4708,17 @@ export type ServicesQueryVariables = Exact<{
 }>;
 
 
-export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type StorageClassesQueryVariables = Exact<{
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type StorageClassesQuery = { __typename?: 'Query', handleGetStorageClassList?: { __typename?: 'storageclass_StorageClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'storageclass_StorageClass', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export const ObjectMetaFragmentDoc = gql`
     fragment ObjectMeta on types_ObjectMeta {
@@ -4712,17 +4743,13 @@ export const ConfigMapsDocument = gql`
       totalItems
     }
     items {
-      objectMeta {
-        uid
-        name
-        namespace
-        labels
-        creationTimestamp
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }
 }
-    `;
+    ${ObjectMetaFragmentDoc}`;
 
 /**
  * __useConfigMapsQuery__
@@ -4830,12 +4857,8 @@ export const IngressesDocument = gql`
       totalItems
     }
     items {
-      objectMeta {
-        uid
-        name
-        namespace
-        labels
-        creationTimestamp
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
       endpoints {
         host
@@ -4849,7 +4872,7 @@ export const IngressesDocument = gql`
     }
   }
 }
-    `;
+    ${ObjectMetaFragmentDoc}`;
 
 /**
  * __useIngressesQuery__
@@ -4899,17 +4922,13 @@ export const IngressClassesDocument = gql`
       totalItems
     }
     items {
-      objectMeta {
-        uid
-        name
-        namespace
-        labels
-        creationTimestamp
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }
 }
-    `;
+    ${ObjectMetaFragmentDoc}`;
 
 /**
  * __useIngressClassesQuery__
@@ -4953,14 +4972,13 @@ export const NamespacesDocument = gql`
       totalItems
     }
     namespaces {
-      objectMeta {
-        uid
-        name
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }
 }
-    `;
+    ${ObjectMetaFragmentDoc}`;
 
 /**
  * __useNamespacesQuery__
@@ -5006,17 +5024,13 @@ export const NetworkPoliciesDocument = gql`
       totalItems
     }
     items {
-      objectMeta {
-        uid
-        name
-        namespace
-        labels
-        creationTimestamp
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }
 }
-    `;
+    ${ObjectMetaFragmentDoc}`;
 
 /**
  * __useNetworkPoliciesQuery__
@@ -5054,6 +5068,118 @@ export type NetworkPoliciesQueryHookResult = ReturnType<typeof useNetworkPolicie
 export type NetworkPoliciesLazyQueryHookResult = ReturnType<typeof useNetworkPoliciesLazyQuery>;
 export type NetworkPoliciesSuspenseQueryHookResult = ReturnType<typeof useNetworkPoliciesSuspenseQuery>;
 export type NetworkPoliciesQueryResult = Apollo.QueryResult<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>;
+export const PersistentVolumesDocument = gql`
+    query PersistentVolumes($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetPersistentVolumeList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "persistentvolume?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __usePersistentVolumesQuery__
+ *
+ * To run a query within a React component, call `usePersistentVolumesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePersistentVolumesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePersistentVolumesQuery({
+ *   variables: {
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function usePersistentVolumesQuery(baseOptions?: Apollo.QueryHookOptions<PersistentVolumesQuery, PersistentVolumesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PersistentVolumesQuery, PersistentVolumesQueryVariables>(PersistentVolumesDocument, options);
+      }
+export function usePersistentVolumesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PersistentVolumesQuery, PersistentVolumesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PersistentVolumesQuery, PersistentVolumesQueryVariables>(PersistentVolumesDocument, options);
+        }
+export function usePersistentVolumesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PersistentVolumesQuery, PersistentVolumesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PersistentVolumesQuery, PersistentVolumesQueryVariables>(PersistentVolumesDocument, options);
+        }
+export type PersistentVolumesQueryHookResult = ReturnType<typeof usePersistentVolumesQuery>;
+export type PersistentVolumesLazyQueryHookResult = ReturnType<typeof usePersistentVolumesLazyQuery>;
+export type PersistentVolumesSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumesSuspenseQuery>;
+export type PersistentVolumesQueryResult = Apollo.QueryResult<PersistentVolumesQuery, PersistentVolumesQueryVariables>;
+export const PersistentVolumeClaimsDocument = gql`
+    query PersistentVolumeClaims($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetPersistentVolumeClaimList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "persistentvolumeclaim/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __usePersistentVolumeClaimsQuery__
+ *
+ * To run a query within a React component, call `usePersistentVolumeClaimsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePersistentVolumeClaimsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePersistentVolumeClaimsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function usePersistentVolumeClaimsQuery(baseOptions: Apollo.QueryHookOptions<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>(PersistentVolumeClaimsDocument, options);
+      }
+export function usePersistentVolumeClaimsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>(PersistentVolumeClaimsDocument, options);
+        }
+export function usePersistentVolumeClaimsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>(PersistentVolumeClaimsDocument, options);
+        }
+export type PersistentVolumeClaimsQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsQuery>;
+export type PersistentVolumeClaimsLazyQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsLazyQuery>;
+export type PersistentVolumeClaimsSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsSuspenseQuery>;
+export type PersistentVolumeClaimsQueryResult = Apollo.QueryResult<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>;
 export const PodsDocument = gql`
     query Pods($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetPods(
@@ -5067,17 +5193,13 @@ export const PodsDocument = gql`
       totalItems
     }
     pods {
-      objectMeta {
-        uid
-        name
-        namespace
-        labels
-        creationTimestamp
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }
 }
-    `;
+    ${ObjectMetaFragmentDoc}`;
 
 /**
  * __usePodsQuery__
@@ -5185,17 +5307,13 @@ export const SecretsDocument = gql`
       totalItems
     }
     secrets {
-      objectMeta {
-        uid
-        name
-        namespace
-        labels
-        creationTimestamp
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }
 }
-    `;
+    ${ObjectMetaFragmentDoc}`;
 
 /**
  * __useSecretsQuery__
@@ -5246,17 +5364,13 @@ export const ServicesDocument = gql`
       totalItems
     }
     services {
-      objectMeta {
-        uid
-        name
-        namespace
-        labels
-        creationTimestamp
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }
 }
-    `;
+    ${ObjectMetaFragmentDoc}`;
 
 /**
  * __useServicesQuery__
@@ -5294,3 +5408,58 @@ export type ServicesQueryHookResult = ReturnType<typeof useServicesQuery>;
 export type ServicesLazyQueryHookResult = ReturnType<typeof useServicesLazyQuery>;
 export type ServicesSuspenseQueryHookResult = ReturnType<typeof useServicesSuspenseQuery>;
 export type ServicesQueryResult = Apollo.QueryResult<ServicesQuery, ServicesQueryVariables>;
+export const StorageClassesDocument = gql`
+    query StorageClasses($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetStorageClassList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "storageclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta {
+      totalItems
+    }
+    items {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useStorageClassesQuery__
+ *
+ * To run a query within a React component, call `useStorageClassesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStorageClassesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStorageClassesQuery({
+ *   variables: {
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useStorageClassesQuery(baseOptions?: Apollo.QueryHookOptions<StorageClassesQuery, StorageClassesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StorageClassesQuery, StorageClassesQueryVariables>(StorageClassesDocument, options);
+      }
+export function useStorageClassesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StorageClassesQuery, StorageClassesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StorageClassesQuery, StorageClassesQueryVariables>(StorageClassesDocument, options);
+        }
+export function useStorageClassesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StorageClassesQuery, StorageClassesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StorageClassesQuery, StorageClassesQueryVariables>(StorageClassesDocument, options);
+        }
+export type StorageClassesQueryHookResult = ReturnType<typeof useStorageClassesQuery>;
+export type StorageClassesLazyQueryHookResult = ReturnType<typeof useStorageClassesLazyQuery>;
+export type StorageClassesSuspenseQueryHookResult = ReturnType<typeof useStorageClassesSuspenseQuery>;
+export type StorageClassesQueryResult = Apollo.QueryResult<StorageClassesQuery, StorageClassesQueryVariables>;

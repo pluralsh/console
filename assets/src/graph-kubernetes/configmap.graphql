@@ -1,11 +1,11 @@
-query Secrets(
+query ConfigMaps(
   $namespace: String!
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
   $page: String
 ) {
-  handleGetSecretList(
+  handleGetConfigMapList(
     namespace: $namespace
     filterBy: $filterBy
     sortBy: $sortBy
@@ -13,18 +13,14 @@ query Secrets(
     page: $page
   )
     @rest(
-      path: "secret/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "configmap/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     listMeta {
       totalItems
     }
-    secrets {
-      objectMeta {
-        uid
-        name
-        namespace
-        labels
-        creationTimestamp
+    items {
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }

@@ -4,9 +4,8 @@ query Namespaces {
       totalItems
     }
     namespaces {
-      objectMeta {
-        uid
-        name
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }

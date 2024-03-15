@@ -17,12 +17,8 @@ query IngressClasses(
       totalItems
     }
     items {
-      objectMeta {
-        uid
-        name
-        namespace
-        labels
-        creationTimestamp
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
       }
     }
   }
