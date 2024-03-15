@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
-import { Chip, Tooltip } from '@pluralsh/design-system'
+import { Chip, Tooltip, WrapWithIf } from '@pluralsh/design-system'
 
 import {
   Pod_PodList as PodListT,
@@ -64,10 +64,14 @@ const colStatus = columnHelper.accessor((pod) => pod, {
     }
 
     return (
-      <Tooltip
-        label={warnings?.map((ev) => ev?.message)?.join(', ')}
+      <WrapWithIf
         condition={warnings?.length > 0}
-        placement="bottom"
+        wrapper={
+          <Tooltip
+            label={warnings?.map((ev) => ev?.message)?.join(', ')}
+            placement="bottom"
+          />
+        }
       >
         <Chip
           size="small"
@@ -75,7 +79,7 @@ const colStatus = columnHelper.accessor((pod) => pod, {
         >
           {status}
         </Chip>
-      </Tooltip>
+      </WrapWithIf>
     )
   },
 })
