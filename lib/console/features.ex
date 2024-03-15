@@ -47,7 +47,7 @@ defmodule Console.Features do
   end
 
   def check_license(license_key \\ nil) do
-    with key when is_binary(key) <- Console.conf(:jwt_pub_key),
+    with key when is_binary(key) <- Console.conf(:jwt_pub_key) |> format(),
          signer = Console.License.signer(key),
          jwt when is_binary(jwt) <- Console.conf(:license_key) || license_key,
          {:ok, %{"enterprise" => true}} <- Console.License.verify_and_validate(jwt, signer) do
@@ -58,4 +58,6 @@ defmodule Console.Features do
       _ -> :ignore
     end
   end
+
+  defp format(license), do: String.replace(license, " ", "\n")
 end
