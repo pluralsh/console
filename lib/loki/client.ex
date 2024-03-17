@@ -6,9 +6,9 @@ defmodule Loki.Client do
   def host(_), do: host()
 
   def auth(%Connection{user: u, password: p}) when is_binary(u) and is_binary(p) do
-    [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)}]
+    [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)}, {"X-Scope-OrgID", tenant()}]
   end
-  def auth(_), do: []
+  def auth(_), do: [{"X-Scope-OrgID", tenant()}]
 
   def host(), do: Application.get_env(:console, :loki)
 
@@ -17,7 +17,7 @@ defmodule Loki.Client do
 
     host(client)
     |> Path.join("/loki/api/v1/query_range?#{query}")
-    |> HTTPoison.get(headers() ++ auth(client))
+    |> HTTPoison.get(Enum.uniq_by(headers() ++ auth(client), &elem(&1, 0)))
     |> case do
       {:ok, %{body: body, status_code: 200}} ->
         {:ok, body
@@ -41,6 +41,13 @@ defmodule Loki.Client do
     case Console.conf(:grafana_tenant) do
       nil -> base
       tenant -> [{"X-Scope-OrgID", tenant} | base]
+    end
+  end
+
+  defp tenant() do
+    case Console.conf(:grafana_tenant) do
+      nil -> "1"
+      tenant -> tenant
     end
   end
 end

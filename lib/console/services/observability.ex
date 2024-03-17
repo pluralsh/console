@@ -36,8 +36,8 @@ defmodule Console.Services.Observability do
     "{#{label}}#{loki_filter(query[:filter])}"
   end
 
-  defp label_filter(%{name: n, value: v, regex: true}), do: "#{n}=~#{v}"
-  defp label_filter(%{name: n, value: v}), do: "#{n}=#{v}"
+  defp label_filter(%{name: n, value: v, regex: true}), do: "#{n}=~\"#{v}\""
+  defp label_filter(%{name: n, value: v}), do: "#{n}=\"#{v}\""
 
   defp loki_filter(%{regex: true, text: t}), do: " |~ #{t}"
   defp loki_filter(%{text: t}), do: " |= #{t}"
