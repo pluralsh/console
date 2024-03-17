@@ -443,3 +443,25 @@ query TagPairs($first: Int = 30, $q: String, $tag: String) {
     }
   }
 }
+
+fragment LogStream on LogStream {
+  stream
+  values {
+    timestamp
+    value
+  }
+}
+
+query ClusterLogs(
+  $clusterId: ID!
+  $query: LokiQuery!
+  $start: Long
+  $end: Long
+  $limit: Int!
+) {
+  cluster(id: $clusterId) {
+    logs(query: $query, start: $start, end: $end, limit: $limit) {
+      ...LogStream
+    }
+  }
+}

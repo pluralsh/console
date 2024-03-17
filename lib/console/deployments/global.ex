@@ -157,11 +157,17 @@ defmodule Console.Deployments.Global do
   end
 
   defp clean(val) do
-    case Console.mapify(val) do
-      %{id: _} = m -> Map.delete(m, :id)
-      r -> r
-    end
+    Console.mapify(val)
+    |> remove_ids()
   end
+
+  defp remove_ids(%{id: _} = map) do
+    Map.delete(map, :id)
+    |> remove_ids()
+  end
+  defp remove_ids(%{} = map), do: Map.new(map, fn {k, v} -> {k, remove_ids(v)} end)
+  defp remove_ids(l) when is_list(l), do: Enum.map(l, &remove_ids/1)
+  defp remove_ids(v), do: v
 
   def notify({:ok, %GlobalService{} = svc}, :create, user),
     do: handle_notify(PubSub.GlobalServiceCreated, svc, actor: user)

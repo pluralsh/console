@@ -37,6 +37,8 @@ import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSett
 
 import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
 
+import ServiceLogs from 'components/cd/services/service/ServiceLogs'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -413,6 +415,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceHelm />}
       path="helm"
+    />
+    <Route
+      element={<ServiceLogs />}
+      path="logs"
     />
     <Route
       element={<ServiceDryRun />}
