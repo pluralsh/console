@@ -13,6 +13,8 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
+import { CRDEstablishedChip } from './utils'
+
 const columnHelper = createColumnHelper<CustomResourceT>()
 
 const colName = columnHelper.accessor((r) => r?.objectMeta.name, {
@@ -51,6 +53,12 @@ const colScope = columnHelper.accessor((crd) => crd?.scope, {
   cell: ({ getValue }) => getValue(),
 })
 
+const colEstablished = columnHelper.accessor((crd) => crd?.established, {
+  id: 'established',
+  header: 'Established',
+  cell: ({ getValue }) => <CRDEstablishedChip established={getValue()} />,
+})
+
 const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
   id: 'categories',
   header: 'Categories',
@@ -78,6 +86,7 @@ export default function CustomResources() {
       colGroup,
       colVersion,
       colScope,
+      colEstablished,
       colCategories,
       colLabels,
       colCreationTimestamp,
