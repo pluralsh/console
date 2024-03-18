@@ -11,11 +11,11 @@ export function fetchToken() {
   return localStorage.getItem(AUTH_TOKEN)
 }
 
-export function setToken(token) {
+export function setToken(token: string | null | undefined) {
   localStorage.setItem(AUTH_TOKEN, token || '')
 }
 
-export function setRefreshToken(token) {
+export function setRefreshToken(token: string | null | undefined) {
   Cookies.set(REFRESH_TOKEN, token || '', {
     path: '/',
     secure: true,
