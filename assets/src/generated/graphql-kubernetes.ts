@@ -4813,7 +4813,7 @@ export type JobsQueryVariables = Exact<{
 }>;
 
 
-export type JobsQuery = { __typename?: 'Query', handleGetJobList?: { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type JobsQuery = { __typename?: 'Query', handleGetJobList?: { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', running: number, pending: number, desired?: number | null, failed: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } } | null> } | null };
 
 export type PodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -6115,6 +6115,18 @@ export const JobsDocument = gql`
     jobs {
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
+      }
+      initContainerImages
+      containerImages
+      podInfo {
+        running
+        pending
+        desired
+        failed
+        succeeded
+        warnings {
+          message
+        }
       }
     }
   }

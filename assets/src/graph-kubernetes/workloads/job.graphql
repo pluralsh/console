@@ -22,6 +22,18 @@ query Jobs(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      initContainerImages
+      containerImages
+      podInfo {
+        running
+        pending
+        desired
+        failed
+        succeeded
+        warnings {
+          message
+        }
+      }
     }
   }
 }

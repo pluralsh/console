@@ -22,6 +22,7 @@ query CronJobs(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      containerImages
     }
   }
 }

@@ -13,11 +13,37 @@ import { ResourceList } from '../ResourceList'
 
 const columnHelper = createColumnHelper<CronJobT>()
 
+const colImages = columnHelper.accessor((cj) => cj.containerImages, {
+  id: 'images',
+  header: 'Images',
+  cell: ({ getValue }) => (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        maxWidth: 300,
+      }}
+    >
+      {getValue()?.map((image) => (
+        <span
+          css={{
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {image}
+        </span>
+      ))}
+    </div>
+  ),
+})
+
 export default function CronJobs() {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
+    () => [colName, colNamespace, colImages, colLabels, colCreationTimestamp],
     [colName, colNamespace, colLabels, colCreationTimestamp]
   )
 
