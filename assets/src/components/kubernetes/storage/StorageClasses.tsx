@@ -17,7 +17,7 @@ import { ResourceList } from '../ResourceList'
 const columnHelper = createColumnHelper<StorageClassT>()
 
 const colProvisioner = columnHelper.accessor(
-  (storageClass) => storageClass?.provisioner,
+  (storageClass) => storageClass.provisioner,
   {
     id: 'provisioner',
     header: 'Provisioner',
@@ -26,7 +26,7 @@ const colProvisioner = columnHelper.accessor(
 )
 
 const colParameters = columnHelper.accessor(
-  (storageClass) => storageClass?.parameters,
+  (storageClass) => storageClass.parameters,
   {
     id: 'parameters',
     header: 'Parameters',

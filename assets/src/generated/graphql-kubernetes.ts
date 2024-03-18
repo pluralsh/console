@@ -4748,7 +4748,7 @@ export type PersistentVolumesQueryVariables = Exact<{
 }>;
 
 
-export type PersistentVolumesQuery = { __typename?: 'Query', handleGetPersistentVolumeList?: { __typename?: 'persistentvolume_PersistentVolumeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolume_PersistentVolume', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type PersistentVolumesQuery = { __typename?: 'Query', handleGetPersistentVolumeList?: { __typename?: 'persistentvolume_PersistentVolumeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolume_PersistentVolume', status: string, claim: string, storageClass: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type PersistentVolumeClaimsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4759,7 +4759,7 @@ export type PersistentVolumeClaimsQueryVariables = Exact<{
 }>;
 
 
-export type PersistentVolumeClaimsQuery = { __typename?: 'Query', handleGetPersistentVolumeClaimList?: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type PersistentVolumeClaimsQuery = { __typename?: 'Query', handleGetPersistentVolumeClaimList?: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type StorageClassesQueryVariables = Exact<{
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5760,6 +5760,12 @@ export const PersistentVolumesDocument = gql`
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      status
+      claim
+      storageClass
+      reason
+      reclaimPolicy
+      accessModes
     }
   }
 }
@@ -5817,6 +5823,9 @@ export const PersistentVolumeClaimsDocument = gql`
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      status
+      volume
+      storageClass
     }
   }
 }

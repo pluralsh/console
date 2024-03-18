@@ -20,6 +20,12 @@ query PersistentVolumes(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      status
+      claim
+      storageClass
+      reason
+      reclaimPolicy
+      accessModes
     }
   }
 }
