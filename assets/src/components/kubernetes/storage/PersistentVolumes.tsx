@@ -13,7 +13,7 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
-import { PVCStatusChip, PVStatusChip } from './utils'
+import { PVStatusChip } from './utils'
 
 const columnHelper = createColumnHelper<PersistentVolumeT>()
 

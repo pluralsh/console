@@ -10,9 +10,9 @@ query CustomResources(
     itemsPerPage: $itemsPerPage
     page: $page
   )
-  @rest(
-    path: "crd?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-  ) {
+    @rest(
+      path: "crd?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
     listMeta {
       totalItems
     }

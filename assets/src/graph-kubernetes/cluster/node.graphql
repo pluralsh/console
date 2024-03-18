@@ -11,9 +11,9 @@ query Nodes(
     itemsPerPage: $itemsPerPage
     page: $page
   )
-  @rest(
-    path: "node?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-  ) {
+    @rest(
+      path: "node?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }

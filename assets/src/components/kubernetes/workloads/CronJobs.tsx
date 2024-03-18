@@ -11,7 +11,6 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
-import { UsageText } from '../../cluster/TableElements'
 
 import { CronJobSuspendChip } from './utils'
 

@@ -12,9 +12,9 @@ query StatefulSets(
     itemsPerPage: $itemsPerPage
     page: $page
   )
-  @rest(
-    path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-  ) {
+    @rest(
+      path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
