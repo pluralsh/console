@@ -82,7 +82,7 @@ export default function CustomResources() {
       colLabels,
       colCreationTimestamp,
     ],
-    [colName, colLabels, colCreationTimestamp]
+    [colLabels, colCreationTimestamp]
   )
 
   return (
