@@ -1,5 +1,4 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo } from 'react'
 
 import {
   Common_EventList as EventListT,
@@ -8,19 +7,87 @@ import {
   EventsQueryVariables,
   useEventsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
+import { DateTimeCol } from '../../utils/table/DateTimeCol'
+
+import { EventTypeChip } from './utils'
 
 const columnHelper = createColumnHelper<EventT>()
 
-export default function Events() {
-  const { colName, colNamespace, colCreationTimestamp } =
-    useDefaultColumns(columnHelper)
-  const columns = useMemo(
-    () => [colName, colNamespace, colCreationTimestamp],
-    [colName, colNamespace, colCreationTimestamp]
-  )
+const colObjectName = columnHelper.accessor((event) => event?.objectName, {
+  id: 'objectName',
+  header: 'Name',
+  cell: ({ getValue }) => getValue(),
+})
 
+const colObjectNamespace = columnHelper.accessor(
+  (event) => event?.objectNamespace,
+  {
+    id: 'objectNamespace',
+    header: 'Namespace',
+    cell: ({ getValue }) => getValue(),
+  }
+)
+
+const colReason = columnHelper.accessor((event) => event.reason, {
+  id: 'reason',
+  header: 'Reason',
+  cell: ({ getValue }) => getValue(),
+})
+
+const colType = columnHelper.accessor((event) => event.type, {
+  id: 'type',
+  header: 'Type',
+  cell: ({ getValue }) => <EventTypeChip type={getValue()} />,
+})
+
+const colMessage = columnHelper.accessor((event) => event.message, {
+  id: 'message',
+  header: 'Message',
+  cell: ({ getValue }) => getValue(),
+})
+
+const colSource = columnHelper.accessor((event) => event, {
+  id: 'source',
+  header: 'Source',
+  cell: ({ getValue }) => {
+    const event = getValue()
+
+    return `${event.sourceComponent} ${event.sourceHost}`
+  },
+})
+
+const colCount = columnHelper.accessor((event) => event.count, {
+  id: 'count',
+  header: 'Count',
+  cell: ({ getValue }) => getValue(),
+})
+
+const colFirstSeen = columnHelper.accessor((event) => event.firstSeen, {
+  id: 'firstSeen',
+  header: 'First seen',
+  cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+})
+
+const colLastSeen = columnHelper.accessor((event) => event.lastSeen, {
+  id: 'lastSeen',
+  header: 'Last seen',
+  cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+})
+
+const columns = [
+  colObjectName,
+  colObjectNamespace,
+  colReason,
+  colType,
+  colMessage,
+  colSource,
+  colCount,
+  colFirstSeen,
+  colLastSeen,
+]
+
+export default function Events() {
   return (
     <ResourceList<EventListT, EventT, EventsQuery, EventsQueryVariables>
       namespaced

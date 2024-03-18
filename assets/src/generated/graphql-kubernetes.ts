@@ -4637,7 +4637,7 @@ export type EventsQueryVariables = Exact<{
 }>;
 
 
-export type EventsQuery = { __typename?: 'Query', handleGetEventList?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type EventsQuery = { __typename?: 'Query', handleGetEventList?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NamespacesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5120,6 +5120,16 @@ export const EventsDocument = gql`
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      objectName
+      objectNamespace
+      reason
+      type
+      message
+      sourceComponent
+      sourceHost
+      count
+      firstSeen
+      lastSeen
     }
   }
 }

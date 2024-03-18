@@ -22,6 +22,16 @@ query Events(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      objectName
+      objectNamespace
+      reason
+      type
+      message
+      sourceComponent
+      sourceHost
+      count
+      firstSeen
+      lastSeen
     }
   }
 }
