@@ -115,3 +115,23 @@ query SearchUsers($q: String, $cursor: String) {
     }
   }
 }
+
+mutation Logout {
+  logout {
+    ...User
+  }
+}
+
+fragment RefreshToken on RefreshToken {
+  id
+  token
+  insertedAt
+  updatedAt
+}
+
+query Refresh($token: String!) {
+  refresh(token: $token) {
+    ...User
+    jwt
+  }
+}

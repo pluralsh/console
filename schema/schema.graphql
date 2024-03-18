@@ -260,6 +260,8 @@ type RootQueryType {
 
   globalService(id: ID!): GlobalService
 
+  globalServices(after: String, first: Int, before: String, last: Int): GlobalServiceConnection
+
   serviceContext(name: String!): ServiceContext
 
   "renders a full hierarchy of resources recursively owned by this component (useful for CRD views)"
@@ -318,7 +320,9 @@ type RootQueryType {
 
   notificationRouters(after: String, first: Int, before: String, last: Int, q: String): NotificationRouterConnection
 
-  policyConstraints(after: String, first: Int, before: String, last: Int, kind: String, namespace: String, q: String): PolicyConstraintConnection
+  policyConstraints(
+    after: String, first: Int, before: String, last: Int, kind: String, namespace: String, kinds: [String], namespaces: [String], q: String
+  ): PolicyConstraintConnection
 
   violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
 
@@ -660,6 +664,28 @@ input PolicyBindingAttributes {
   id: ID
   userId: ID
   groupId: ID
+}
+
+input LokiQuery {
+  labels: [LokiLabelFilter]
+  filter: LokiLineFilter
+}
+
+input LokiLabelFilter {
+  name: String!
+
+  value: String!
+
+  "whether to apply a regex match for this label"
+  regex: Boolean
+}
+
+input LokiLineFilter {
+  "the string to filter for (eg what is put in our search ui)"
+  text: String
+
+  "whether to treat this string as a regex match"
+  regex: Boolean
 }
 
 type PolicyBinding {
@@ -1768,6 +1794,9 @@ type ServiceDeployment {
 
   helmRepository: HelmRepository
 
+  "Queries logs for a service out of loki"
+  logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
+
   "read policy for this service"
   readBindings: [PolicyBinding]
 
@@ -1976,6 +2005,8 @@ type GlobalService {
   "whether to only apply to clusters with this provider"
   provider: ClusterProvider
 
+  services(after: String, first: Int, before: String, last: Int, q: String): ServiceDeploymentConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -2050,6 +2081,11 @@ type ServiceDeploymentConnection {
 type RevisionConnection {
   pageInfo: PageInfo!
   edges: [RevisionEdge]
+}
+
+type GlobalServiceConnection {
+  pageInfo: PageInfo!
+  edges: [GlobalServiceEdge]
 }
 
 enum ClusterDistro {
@@ -2416,11 +2452,18 @@ type Cluster {
     "only show constraints with a violation for the given kind"
     kind: String
 
+    kinds: [String]
+
+    namespaces: [String]
+
     q: String
   ): PolicyConstraintConnection
 
   "Computes a list of statistics for OPA constraint violations w\/in this cluster"
   violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
+
+  "Queries logs for a cluster out of loki"
+  logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
 
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]
@@ -3667,18 +3710,8 @@ type DashboardMetric {
   results: [MetricResult]
 }
 
-type MetricResult {
-  timestamp: Long
-  value: String
-}
-
 type MetricResponse {
   metric: Map
-  values: [MetricResult]
-}
-
-type LogStream {
-  stream: Map
   values: [MetricResult]
 }
 
@@ -4546,6 +4579,7 @@ type User {
   roles: UserRoles
   readTimestamp: DateTime
   buildTimestamp: DateTime
+  refreshToken: RefreshToken
   assumeBindings: [PolicyBinding]
   groups: [Group]
   personas: [Persona]
@@ -4908,6 +4942,16 @@ enum Delta {
   DELETE
 }
 
+type MetricResult {
+  timestamp: Long
+  value: String
+}
+
+type LogStream {
+  stream: Map
+  values: [MetricResult]
+}
+
 scalar Map
 
 scalar Json
@@ -5073,6 +5117,11 @@ type ClusterProviderEdge {
 
 type ClusterEdge {
   node: Cluster
+  cursor: String
+}
+
+type GlobalServiceEdge {
+  node: GlobalService
   cursor: String
 }
 

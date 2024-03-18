@@ -38,7 +38,7 @@ config :console, Console.Guardian,
 
 config :console, ConsoleWeb.Endpoint,
   url: [host: get_env("HOST"), port: 80],
-  check_origin: ["//#{get_env("HOST")}", "//#{get_env("EXT_HOST") || get_env("HOST")}", "//console"]
+  check_origin: ["//#{get_env("HOST")}", "//#{get_env("EXT_HOST") || get_env("HOST")}", "//#{get_env("WEBHOOK_HOST") || get_env("HOST")}", "//console"]
 
 provider = case get_env("PROVIDER") do
   "google" -> :gcp

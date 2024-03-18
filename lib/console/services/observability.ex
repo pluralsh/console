@@ -20,11 +20,28 @@ defmodule Console.Services.Observability do
 
   def get_dashboard(name, id), do: Client.get_dashboard(name, id)
 
+  def get_logs(%{} = structured, start, stop, limit) do
+    parse_structured_query(structured)
+    |> get_logs(start, stop, limit)
+  end
+
   def get_logs(q, start, stop, limit) do
     client = get_connection(:loki)
     with {:ok, %{data: %{result: results}}} <- LokiClient.query(client, q, start, stop, limit),
       do: {:ok, results}
   end
+
+  defp parse_structured_query(%{labels: labels, filter: filter}) do
+    label = Enum.map(labels, &label_filter/1) |> Enum.join(",")
+    "{#{label}} #{loki_filter(filter)}"
+  end
+
+  defp label_filter(%{name: n, value: v, regex: true}), do: "#{n}=~#{v}"
+  defp label_filter(%{name: n, value: v}), do: "#{n}=#{v}"
+
+  defp loki_filter(%{regex: true, text: t}), do: "|~ #{t}"
+  defp loki_filter(%{text: t}), do: "|= #{t}"
+  defp loki_filter(_), do: ""
 
   def get_metric(q, start, stop, step) do
     client = get_connection(:prometheus)

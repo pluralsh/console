@@ -28,7 +28,6 @@ import {
 import { Link, useLocation } from 'react-router-dom'
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
 import { Avatar, Flex, Menu, MenuItem, useOutsideClick } from 'honorable'
-import { wipeToken } from 'helpers/auth'
 import { ME_Q } from 'components/graphql/users'
 import { useMutation } from '@apollo/client'
 import { updateCache } from 'utils/graphql'
@@ -264,13 +263,11 @@ export default function Sidebar() {
     [mutation, setIsNotificationsPanelOpen]
   )
 
+  const { logout } = useLogin()
   const handleLogout = useCallback(() => {
     setIsMenuOpen(false)
-    wipeToken()
-    const w: Window = window
-
-    w.location = '/login'
-  }, [])
+    logout?.()
+  }, [logout])
 
   useOutsideClick(menuRef, (event) => {
     if (!menuItemRef.current?.contains(event.target as any)) {

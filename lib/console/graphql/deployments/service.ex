@@ -162,6 +162,16 @@ defmodule Console.GraphQl.Deployments.Service do
         manual_dataloader(loader, Console.GraphQl.Resolvers.HelmRepositoryLoader, :helm, svc)
     end
 
+    @desc "Queries logs for a service out of loki"
+    field :logs, list_of(:log_stream) do
+      arg :query,      non_null(:loki_query)
+      arg :start,      :long
+      arg :end,        :long
+      arg :limit,      non_null(:integer)
+
+      resolve &Deployments.service_logs/3
+    end
+
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this service"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
 
@@ -281,6 +291,12 @@ defmodule Console.GraphQl.Deployments.Service do
     field :service,  :service_deployment, resolve: dataloader(Deployments), description: "the service to replicate across clusters"
     field :provider, :cluster_provider,   resolve: dataloader(Deployments), description: "whether to only apply to clusters with this provider"
 
+    connection field :services, node_type: :service_deployment do
+      arg :q, :string
+
+      resolve &Deployments.services_for_owner/3
+    end
+
     timestamps()
   end
 
@@ -348,6 +364,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   connection node_type: :service_deployment
   connection node_type: :revision
+  connection node_type: :global_service
 
   delta :service_deployment
 
@@ -413,6 +430,12 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.resolve_global/2
+    end
+
+    connection field :global_services, node_type: :global_service do
+      middleware Authenticated
+
+      safe_resolve &Deployments.list_global_services/2
     end
 
     field :service_context, :service_context do

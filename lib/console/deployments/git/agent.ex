@@ -8,6 +8,7 @@ defmodule Console.Deployments.Git.Agent do
   """
   use GenServer
   import Console.Deployments.Git.Cmd
+  alias Console.Prom.Metrics
   alias Console.Deployments.{Git.Cache, Git, Services}
   alias Console.Schema.{GitRepository, Service}
 
@@ -50,6 +51,7 @@ defmodule Console.Deployments.Git.Agent do
     schedule_pull()
     :timer.send_interval(@poll, :move)
     send self(), :clone
+    Metrics.inc(:git_agent, repo.url)
     {:ok, %State{git: repo, cache: cache}}
   end
 
@@ -134,6 +136,11 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def handle_info(_, state), do: {:noreply, state}
+
+  def terminate(_, %State{git: git}) do
+    Metrics.dec(:git_agent, git.url)
+  end
+  def terminate(_, _), do: :ok
 
   defp refresh(%GitRepository{} = repo) do
     with %GitRepository{} = git <- Console.Repo.get(GitRepository, repo.id),

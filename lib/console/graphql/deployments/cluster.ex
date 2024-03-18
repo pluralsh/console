@@ -251,9 +251,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     @desc "lists OPA constraints registered in this cluster"
     connection field :policy_constraints, node_type: :policy_constraint do
-      arg :namespace, :string, description: "only show constraints with a violation for the given namespace"
-      arg :kind,      :string, description: "only show constraints with a violation for the given kind"
-      arg :q,         :string
+      arg :namespace,  :string, description: "only show constraints with a violation for the given namespace"
+      arg :kind,       :string, description: "only show constraints with a violation for the given kind"
+      arg :kinds,      list_of(:string)
+      arg :namespaces, list_of(:string)
+      arg :q,          :string
 
       resolve &Deployments.list_policy_constraints/3
     end
@@ -263,6 +265,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :field, non_null(:constraint_violation_field)
 
       resolve &Deployments.violation_statistics/3
+    end
+
+    @desc "Queries logs for a cluster out of loki"
+    field :logs, list_of(:log_stream) do
+      arg :query,      non_null(:loki_query)
+      arg :start,      :long
+      arg :end,        :long
+      arg :limit,      non_null(:integer)
+
+      resolve &Deployments.cluster_logs/3
     end
 
     @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"

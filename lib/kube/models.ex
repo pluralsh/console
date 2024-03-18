@@ -20,9 +20,9 @@ Kube.Parser.parse(path: "crds/dashboard.yaml", module: Kube.Dashboard)
 Kube.Parser.parse(path: "crds/runbook.yaml", module: Kube.Runbook)
 
 # plural cd crds
-Kube.Parser.parse(path: "crds/plural-cluster.yaml", module: Kube.PluralCluster)
-Kube.Parser.parse(path: "crds/plural-gitrepo.yaml", module: Kube.GitRepository)
-Kube.Parser.parse(path: "crds/plural-service.yaml", module: Kube.ServiceDeployment)
+Kube.Parser.parse(path: "charts/controller/crds/deployments.plural.sh_clusters.yaml", module: Kube.PluralCluster)
+Kube.Parser.parse(path: "charts/controller/crds/deployments.plural.sh_gitrepositories.yaml", module: Kube.GitRepository)
+Kube.Parser.parse(path: "charts/controller/crds/deployments.plural.sh_servicedeployments.yaml", module: Kube.ServiceDeployment)
 
 Kube.Parser.parse(path: "crds/wireguardserver.yaml", module: Kube.WireguardServer)
 Kube.Parser.parse(path: "crds/wireguardpeer.yaml", module: Kube.WireguardPeer, ovveride: [

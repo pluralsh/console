@@ -28,6 +28,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     Enum.reduce(args, query, fn
       {:namespace, ns}, q -> PolicyConstraint.for_namespace(q, ns)
       {:kind, k}, q -> PolicyConstraint.for_kind(q, k)
+      {:kinds, ks}, q -> PolicyConstraint.for_kinds(q, ks)
+      {:namespaces, ns}, q -> PolicyConstraint.for_namespaces(q, ns)
       _, q -> q
     end)
   end

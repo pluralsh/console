@@ -88,6 +88,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Backup
   delegates Console.GraphQl.Resolvers.Deployments.Notification
   delegates Console.GraphQl.Resolvers.Deployments.Policy
+  delegates Console.GraphQl.Resolvers.Deployments.Observability
 
   def list_addons(_, _), do: AddOns.addons()
 
@@ -122,6 +123,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def resolve_global(%{id: id}, %{context: %{current_user: user}}) do
     Global.get!(id)
     |> allow(user, :read)
+  end
+
+  def list_global_services(args, _) do
+    GlobalService.ordered()
+    |> paginate(args)
   end
 
   def settings(_, _), do: {:ok, Settings.fetch_consistent()}

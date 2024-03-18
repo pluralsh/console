@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 
 import ComponentCard, { type Component } from './ComponentCard'
-import { orderBy } from './Components'
+import { compareComponents } from './Components'
 
 export function ComponentList<C extends Component>({
   components,
@@ -18,7 +18,9 @@ export function ComponentList<C extends Component>({
   const theme = useTheme()
   const filteredComponents = useMemo(
     () =>
-      components?.filter((comp) => selectedKinds.has(comp?.kind)).sort(orderBy),
+      components
+        ?.filter((comp) => selectedKinds.has(comp?.kind))
+        .sort(compareComponents),
     [components, selectedKinds]
   )
 

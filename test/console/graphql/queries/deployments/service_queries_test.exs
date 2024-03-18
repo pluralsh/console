@@ -278,6 +278,33 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
         }
       """, %{"id" => service.id}, %{current_user: insert(:user)})
     end
+
+    test "it can sideload logs for a service" do
+      user = insert(:user)
+      service = insert(:service, read_bindings: [%{user_id: user.id}])
+      deployment_settings(loki_connection: %{host: "https://loki", user: "user", password: "pwd"})
+
+      expect(HTTPoison, :get, fn _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+          %{stream: %{"var" => "val"}, values: [["1", "hello"]]},
+          %{stream: %{"var" => "val2"}, values: [["1", "world"]]}
+        ]}}
+      )}}
+      end)
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query serviceDeployment($id: ID!, $loki: LokiQuery!) {
+          serviceDeployment(id: $id) {
+            id
+            logs(query: $loki, limit: 50) {
+              values { timestamp value }
+            }
+          }
+        }
+      """, %{"id" => service.id, "loki" => %{"labels" => [], "filter" => %{"text" => "something"}}}, %{current_user: user})
+
+      assert Enum.flat_map(found["logs"], &Enum.map(&1["values"], fn v -> v["value"] end)) == ["hello", "world"]
+    end
   end
 
   describe "clusterServices" do
@@ -334,6 +361,23 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       statuses = Map.new(statuses, & {&1["status"], &1["count"]})
       assert statuses["STALE"] == 3
       assert statuses["HEALTHY"] == 2
+    end
+  end
+
+  describe "globalServices" do
+    test "it can list global services in the system" do
+      globals = insert_list(3, :global_service)
+
+      {:ok, %{data: %{"globalServices" => found}}} = run_query("""
+        query {
+          globalServices(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal(globals)
     end
   end
 end

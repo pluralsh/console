@@ -104,6 +104,7 @@ defmodule Console.GraphQl.Users do
     field :roles,           :user_roles
     field :read_timestamp,  :datetime
     field :build_timestamp, :datetime
+    field :refresh_token,   :refresh_token
 
     field :assume_bindings, list_of(:policy_binding), resolve: dataloader(User)
     field :groups, list_of(:group), resolve: dataloader(User)
@@ -405,7 +406,6 @@ defmodule Console.GraphQl.Users do
     end
 
     field :refresh, :user do
-      middleware Authenticated
       middleware AllowJwt
       arg :token, non_null(:string)
 

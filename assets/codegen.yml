@@ -4,14 +4,20 @@ generates:
     schema: '../schema/schema.graphql'
     documents: './src/graph/**/*.graphql'
     plugins:
-    - 'typescript'
-    - 'typescript-operations'
-    - 'typescript-react-apollo'
-    - 'named-operations-object'
-    - add:
-        content:
-        - '/* eslint-disable */'
-        - '/* prettier-ignore */'
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+      - 'named-operations-object'
+      - add:
+          content:
+            - '/* eslint-disable */'
+            - '/* prettier-ignore */'
+  src/generated/fragments.json:
+    schema: '../schema/schema.graphql'
+    plugins:
+      - 'fragment-matcher'
+    config:
+      - apolloClientVersion: 3
   src/generated/graphql-plural.ts:
     schema: 'https://raw.githubusercontent.com/pluralsh/plural/master/schema/schema.graphql'
     documents: './src/graph-plural/**/*.graphql'
@@ -41,6 +47,3 @@ config:
     UploadOrUrl: string
     DateTime: string
     Yaml: unknown
-hooks:
-  afterAllFileWrite:
-  - eslint --fix

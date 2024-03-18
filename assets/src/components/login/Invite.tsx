@@ -1,14 +1,12 @@
 import { ComponentProps, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
 import { Div, Flex, Form, P } from 'honorable'
 import { Button } from '@pluralsh/design-system'
-
 import { GqlError } from 'components/utils/Alert'
-
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 
-import { setToken } from '../../helpers/auth'
+import { setRefreshToken, setToken } from '../../helpers/auth'
 
 import { LabelledInput } from '../utils/LabelledInput'
 import { INVITE_Q, SIGNUP } from '../graphql/users'
@@ -93,16 +91,18 @@ export function ConfirmPasswordField({
 }
 
 export default function Invite() {
+  const navigate = useNavigate()
   const { inviteId } = useParams()
   const [attributes, setAttributes] = useState({ name: '', password: '' })
   const [confirm, setConfirm] = useState('')
   const [mutation, { loading, error: signupError }] = useMutation(SIGNUP, {
     variables: { inviteId, attributes },
-    onCompleted: ({ signup: { jwt } }) => {
+    onCompleted: ({ signup: { jwt, refreshToken } }) => {
       setToken(jwt)
-      window.location = '/' as any as Location
+      setRefreshToken(refreshToken?.token)
+      navigate('/')
     },
-    onError: console.log,
+    onError: console.error,
   })
   const { data, error } = useQuery(INVITE_Q, { variables: { id: inviteId } })
 
