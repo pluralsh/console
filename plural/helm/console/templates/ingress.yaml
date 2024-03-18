@@ -56,7 +56,7 @@ spec:
           service:
             name: console-kas-service
             port:
-              number: 8150
+              number: 8154
       - path: /ext/kas(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
