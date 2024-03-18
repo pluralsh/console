@@ -21,6 +21,22 @@ query Nodes(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      ready
+      allocatedResources {
+        cpuRequests
+        cpuRequestsFraction
+        cpuLimits
+        cpuLimitsFraction
+        cpuCapacity
+        memoryRequests
+        memoryRequestsFraction
+        memoryLimits
+        memoryLimitsFraction
+        memoryCapacity
+        allocatedPods
+        podFraction
+        podCapacity
+      }
     }
   }
 }

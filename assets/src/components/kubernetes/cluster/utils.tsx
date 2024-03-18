@@ -1,5 +1,11 @@
 import { Chip } from '@pluralsh/design-system'
 
+const nodeReadyConditionSeverity = {
+  true: 'success',
+  false: 'error',
+  unknown: 'warning',
+}
+
 const eventTypeSecerity = {
   warning: 'warning',
 }
@@ -7,6 +13,21 @@ const eventTypeSecerity = {
 const namespacePhaseSeverity = {
   active: 'success',
   terminating: 'error',
+}
+
+export function NodeReadyChip({ ready }: { ready: string | undefined }) {
+  if (!ready) return undefined
+
+  const severity = nodeReadyConditionSeverity[ready.toLowerCase()] ?? 'info'
+
+  return (
+    <Chip
+      size="small"
+      severity={severity}
+    >
+      {ready}
+    </Chip>
+  )
 }
 
 export function EventTypeChip({ type }: { type: string | undefined }) {
