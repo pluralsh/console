@@ -8,7 +8,7 @@ defmodule Loki.Client do
   def auth(%Connection{user: u, password: p}) when is_binary(u) and is_binary(p) do
     [{"Authorization", Plug.BasicAuth.encode_basic_auth(u, p)}, {"X-Scope-OrgID", tenant()}]
   end
-  def auth(_), do: [{"X-Scope-OrgID", tenant()}]
+  def auth(_), do: []
 
   def host(), do: Application.get_env(:console, :loki)
 

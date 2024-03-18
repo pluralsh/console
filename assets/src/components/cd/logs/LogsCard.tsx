@@ -9,13 +9,28 @@ import { useCallback, useMemo, useState } from 'react'
 const LIMIT = 1000
 const POLL_INTERVAL = 10 * 1000
 
+function doUpdate(prev, result) {
+  let key = 'cluster'
+
+  if (prev.service) {
+    key = 'service'
+  }
+
+  return {
+    ...prev,
+    [key]: {
+      ...prev[key],
+      logs: [...prev[key].logs, ...result[key].logs],
+    },
+  }
+}
+
 export function LogsCard({
   serviceId,
   clusterId,
   query,
   addLabel,
   fullscreen = false,
-  height = 800,
 }: any) {
   const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
@@ -56,7 +71,7 @@ export function LogsCard({
     <Card
       overflow="hidden"
       position="relative"
-      height={height}
+      height="100%"
       borderLeft="none"
       borderTopLeftRadius={0}
       borderBottomLeftRadius={0}
@@ -76,6 +91,9 @@ export function LogsCard({
             search={query}
             loading={loading}
             fetchMore={fetchMore}
+            updateFunc={(prev, { fetchMoreResult }) =>
+              doUpdate(prev, fetchMoreResult)
+            }
             onScroll={(arg) => setLive(!arg)}
             addLabel={addLabel}
             fullscreen={fullscreen}

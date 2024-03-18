@@ -20,6 +20,7 @@ import {
   CLUSTERS_REL_PATH,
   CLUSTER_ABS_PATH,
   CLUSTER_ADDONS_REL_PATH,
+  CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
   CLUSTER_PARAM_ID,
@@ -27,6 +28,8 @@ import {
   CLUSTER_SERVICES_PATH,
 } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
+
+import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
 
 import { ClusterFragment, useClusterQuery } from '../../../generated/graphql'
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
@@ -42,6 +45,7 @@ const directory = [
   { path: CLUSTER_NODES_PATH, label: 'Nodes' },
   { path: CLUSTER_PODS_PATH, label: 'Pods' },
   { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
+  { path: CLUSTER_LOGS_PATH, label: 'Logs', logs: true },
   { path: CLUSTER_ADDONS_REL_PATH, label: 'Add-ons' },
 ] as const
 
@@ -77,6 +81,10 @@ export const getClusterBreadcrumbs = ({
   ]
 }
 
+function tabEnabled(tab, logs) {
+  return !tab.logs || logs
+}
+
 export default function Cluster() {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -84,6 +92,7 @@ export default function Cluster() {
   const { clusterId } = useParams<{ clusterId: string }>()
   const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab`)?.params?.tab || ''
   const [refetchServices, setRefetchServices] = useState(() => () => {})
+  const logs = useLogsEnabled()
 
   const currentTab = directory.find(({ path }) => path === tab)
 
@@ -109,10 +118,15 @@ export default function Cluster() {
 
   return (
     <ResponsivePageFullWidth
-      scrollable={tab !== 'services' && tab !== 'pods' && tab !== 'addons'}
+      scrollable={
+        tab !== 'services' &&
+        tab !== 'pods' &&
+        tab !== 'addons' &&
+        tab !== 'logs'
+      }
       headingContent={
         <>
-          <div css={{ width: 360 }}>
+          <div css={{ width: 360, height: '100%' }}>
             <ClusterSelector
               clusterId={clusterId}
               allowDeselect={false}
@@ -131,24 +145,26 @@ export default function Cluster() {
               selectedKey: currentTab?.path,
             }}
           >
-            {directory.map(({ label, path }) => (
-              <LinkTabWrap
-                subTab
-                key={path}
-                textValue={label}
-                to={`${CLUSTER_ABS_PATH}/${path}`.replace(
-                  `:${CLUSTER_PARAM_ID}`,
-                  clusterId ?? ''
-                )}
-              >
-                <SubTab
+            {directory
+              .filter((t) => tabEnabled(t, logs))
+              .map(({ label, path }) => (
+                <LinkTabWrap
+                  subTab
                   key={path}
                   textValue={label}
+                  to={`${CLUSTER_ABS_PATH}/${path}`.replace(
+                    `:${CLUSTER_PARAM_ID}`,
+                    clusterId ?? ''
+                  )}
                 >
-                  {label}
-                </SubTab>
-              </LinkTabWrap>
-            ))}
+                  <SubTab
+                    key={path}
+                    textValue={label}
+                  >
+                    {label}
+                  </SubTab>
+                </LinkTabWrap>
+              ))}
           </TabList>
           <div
             css={{

@@ -39,6 +39,8 @@ import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSetting
 
 import ServiceLogs from 'components/cd/services/service/ServiceLogs'
 
+import ClusterLogs from 'components/cd/cluster/ClusterLogs'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -74,6 +76,7 @@ import {
   CLUSTERS_REL_PATH,
   CLUSTER_ADDONS_PARAM_ID,
   CLUSTER_ADDONS_REL_PATH,
+  CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
   CLUSTER_PODS_PATH,
@@ -268,6 +271,10 @@ const clusterDetailsRoutes = [
     <Route
       path={CLUSTER_METADATA_PATH}
       element={<ClusterMetadata />}
+    />
+    <Route
+      path={CLUSTER_LOGS_PATH}
+      element={<ClusterLogs />}
     />
     <Route
       path={CLUSTER_ADDONS_REL_PATH}

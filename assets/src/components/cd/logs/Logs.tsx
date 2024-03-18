@@ -1,8 +1,6 @@
 import { Input, SearchIcon } from '@pluralsh/design-system'
 import LogsLabels from 'components/apps/app/logs/LogsLabels'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { toMap, useQueryParams } from 'components/utils/query'
-import { Flex } from 'honorable'
 import { useCallback, useState } from 'react'
 
 import { LogsCard } from './LogsCard'
@@ -41,33 +39,31 @@ export function Logs({
     : { labels: labelList }
 
   return (
-    <ScrollablePage
-      heading="Logs"
-      scrollable={false}
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }}
     >
-      <Flex
-        height="100%"
-        flexDirection="column"
-      >
-        <Input
-          marginBottom={labelList?.length > 0 ? '' : 'medium'}
-          placeholder="Filter logs"
-          startIcon={<SearchIcon size={14} />}
-          value={search}
-          onChange={({ target: { value } }) => setSearch(value)}
-          flexShrink={0}
-        />
-        <LogsLabels
-          labels={labelList}
-          removeLabel={removeLabel}
-        />
-        <LogsCard
-          serviceId={serviceId}
-          clusterId={clusterId}
-          query={lokiQuery}
-          addLabel={addLabel}
-        />
-      </Flex>
-    </ScrollablePage>
+      <Input
+        marginBottom={labelList?.length > 0 ? '' : 'medium'}
+        placeholder="Filter logs"
+        startIcon={<SearchIcon size={14} />}
+        value={search}
+        onChange={({ target: { value } }) => setSearch(value)}
+        flexShrink={0}
+      />
+      <LogsLabels
+        labels={labelList}
+        removeLabel={removeLabel}
+      />
+      <LogsCard
+        serviceId={serviceId}
+        clusterId={clusterId}
+        query={lokiQuery}
+        addLabel={addLabel}
+      />
+    </div>
   )
 }

@@ -66,6 +66,11 @@ function Placeholder() {
   )
 }
 
+const defaultUpdate = (prev, { fetchMoreResult: { logs } }) => ({
+  ...prev,
+  logs: [...prev.logs, ...logs],
+})
+
 export default function LogContent({
   listRef,
   setListRef,
@@ -77,6 +82,7 @@ export default function LogContent({
   search,
   setLoader,
   addLabel,
+  updateFunc,
   fullscreen = false,
 }) {
   const [open, setOpen] = useState<any>(null)
@@ -124,10 +130,7 @@ export default function LogContent({
           !done &&
           fetchMore({
             variables: { start },
-            updateQuery: (prev, { fetchMoreResult: { logs } }) => ({
-              ...prev,
-              logs: [...prev.logs, ...logs],
-            }),
+            updateQuery: updateFunc || defaultUpdate,
           })
         }
         hasNextPage={!done}
