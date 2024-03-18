@@ -23,6 +23,10 @@ query CronJobs(
         ...ObjectMeta
       }
       containerImages
+      schedule
+      suspend
+      active
+      lastSchedule
     }
   }
 }

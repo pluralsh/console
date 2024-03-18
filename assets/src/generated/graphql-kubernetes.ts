@@ -4780,7 +4780,7 @@ export type CronJobsQueryVariables = Exact<{
 }>;
 
 
-export type CronJobsQuery = { __typename?: 'Query', handleGetCronJobList?: { __typename?: 'cronjob_CronJobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type CronJobsQuery = { __typename?: 'Query', handleGetCronJobList?: { __typename?: 'cronjob_CronJobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type DaemonSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5942,6 +5942,11 @@ export const CronJobsDocument = gql`
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      containerImages
+      schedule
+      suspend
+      active
+      lastSchedule
     }
   }
 }
