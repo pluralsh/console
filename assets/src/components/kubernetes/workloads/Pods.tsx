@@ -13,6 +13,8 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
+import { podStatusToSeverity } from './utils'
+
 const columnHelper = createColumnHelper<PodT>()
 
 const colImages = columnHelper.accessor((pod) => pod?.containerImages, {
@@ -41,23 +43,13 @@ const colImages = columnHelper.accessor((pod) => pod?.containerImages, {
   ),
 })
 
-const statusToSeverity = {
-  Running: 'success',
-  Completed: 'info',
-  Succeeded: 'info',
-  Pending: 'warning',
-  NotReady: 'warning',
-  Failed: 'danger',
-  Terminating: 'danger',
-}
-
 const colStatus = columnHelper.accessor((pod) => pod, {
   id: 'status',
   header: 'Status',
   enableSorting: true,
   cell: ({ getValue }) => {
     const { status, warnings } = getValue()
-    let severity = statusToSeverity[status] ?? 'neutral'
+    let severity = podStatusToSeverity[status] ?? 'neutral'
 
     if (warnings?.length > 0) {
       severity = 'danger'

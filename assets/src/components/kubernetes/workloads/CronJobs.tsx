@@ -11,6 +11,9 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
+import { UsageText } from '../../cluster/TableElements'
+
+import { CronJobSuspendChip } from './utils'
 
 const columnHelper = createColumnHelper<CronJobT>()
 
@@ -46,6 +49,18 @@ const colImages = columnHelper.accessor((cj) => cj.containerImages, {
   ),
 })
 
+const colSuspend = columnHelper.accessor((cj) => cj.suspend, {
+  id: 'suspend',
+  header: 'Suspended',
+  cell: ({ getValue }) => <CronJobSuspendChip suspend={getValue()} />,
+})
+
+const colActive = columnHelper.accessor((cj) => cj.active, {
+  id: 'active',
+  header: 'Active',
+  cell: ({ getValue }) => getValue(),
+})
+
 const colLastSchedule = columnHelper.accessor((cj) => cj.lastSchedule, {
   id: 'lastSchedule',
   header: 'Last schedule',
@@ -61,6 +76,8 @@ export default function CronJobs() {
       colNamespace,
       colSchedule,
       colLastSchedule,
+      colSuspend,
+      colActive,
       colImages,
       colLabels,
       colCreationTimestamp,
