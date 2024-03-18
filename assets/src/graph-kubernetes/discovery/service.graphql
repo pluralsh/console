@@ -22,6 +22,24 @@ query Services(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      type
+      clusterIP
+      internalEndpoint {
+        host
+        ports {
+          nodePort
+          port
+          protocol
+        }
+      }
+      externalEndpoints {
+        host
+        ports {
+          nodePort
+          port
+          protocol
+        }
+      }
     }
   }
 }

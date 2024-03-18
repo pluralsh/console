@@ -13,7 +13,7 @@ import {
 
 const columnHelper = createColumnHelper<SecretT>()
 
-const colType = columnHelper.accessor((secret) => secret?.type, {
+const colType = columnHelper.accessor((secret) => secret.type, {
   id: 'type',
   header: 'Type',
   cell: ({ getValue }) => getValue(),

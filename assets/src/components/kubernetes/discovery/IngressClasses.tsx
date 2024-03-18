@@ -13,11 +13,20 @@ import { ResourceList } from '../ResourceList'
 
 const columnHelper = createColumnHelper<IngressClassT>()
 
+const colController = columnHelper.accessor(
+  (ingressClass) => ingressClass.controller,
+  {
+    id: 'controller',
+    header: 'Controller',
+    cell: ({ getValue }) => getValue(),
+  }
+)
+
 export default function IngressClasses() {
   const { colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colLabels, colCreationTimestamp],
+    () => [colName, colController, colLabels, colCreationTimestamp],
     [colName, colLabels, colCreationTimestamp]
   )
 

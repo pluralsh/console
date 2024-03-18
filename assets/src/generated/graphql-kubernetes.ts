@@ -4712,7 +4712,7 @@ export type IngressClassesQueryVariables = Exact<{
 }>;
 
 
-export type IngressClassesQuery = { __typename?: 'Query', handleGetIngressClassList?: { __typename?: 'ingressclass_IngressClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingressclass_IngressClass', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type IngressClassesQuery = { __typename?: 'Query', handleGetIngressClassList?: { __typename?: 'ingressclass_IngressClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingressclass_IngressClass', controller: string, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NetworkPoliciesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4734,7 +4734,7 @@ export type ServicesQueryVariables = Exact<{
 }>;
 
 
-export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> } | null> } | null> } | null };
 
 export type ListMetaFragment = { __typename?: 'types_ListMeta', totalItems: number };
 
@@ -5569,6 +5569,7 @@ export const IngressClassesDocument = gql`
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      controller
     }
   }
 }
@@ -5683,6 +5684,24 @@ export const ServicesDocument = gql`
     services {
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
+      }
+      type
+      clusterIP
+      internalEndpoint {
+        host
+        ports {
+          nodePort
+          port
+          protocol
+        }
+      }
+      externalEndpoints {
+        host
+        ports {
+          nodePort
+          port
+          protocol
+        }
       }
     }
   }

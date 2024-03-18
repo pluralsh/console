@@ -11,13 +11,16 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
+import { TableText } from '../../cluster/TableElements'
+
+import { Endpoints } from './utils'
 
 const columnHelper = createColumnHelper<IngressT>()
 
 const colEndpoints = columnHelper.accessor((ingress) => ingress?.endpoints, {
   id: 'endpoints',
   header: 'Endpoints',
-  cell: ({ getValue }) => JSON.stringify(getValue()),
+  cell: ({ getValue }) => <Endpoints endpoints={getValue()} />,
 })
 
 const colHosts = columnHelper.accessor((ingress) => ingress?.hosts, {
@@ -26,7 +29,9 @@ const colHosts = columnHelper.accessor((ingress) => ingress?.hosts, {
   cell: ({ getValue }) => {
     const hosts = getValue()
 
-    return isEmpty(hosts) ? '-' : hosts.map((host) => <div>{host}</div>)
+    return isEmpty(hosts)
+      ? '-'
+      : hosts.map((host) => <TableText>{host}</TableText>)
   },
 })
 
@@ -37,8 +42,8 @@ export default function Ingresses() {
     () => [
       colName,
       colNamespace,
-      colHosts,
       colEndpoints,
+      colHosts,
       colLabels,
       colCreationTimestamp,
     ],
