@@ -37,6 +37,10 @@ import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSett
 
 import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
 
+import ServiceLogs from 'components/cd/services/service/ServiceLogs'
+
+import ClusterLogs from 'components/cd/cluster/ClusterLogs'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -72,6 +76,7 @@ import {
   CLUSTERS_REL_PATH,
   CLUSTER_ADDONS_PARAM_ID,
   CLUSTER_ADDONS_REL_PATH,
+  CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
   CLUSTER_PODS_PATH,
@@ -268,6 +273,10 @@ const clusterDetailsRoutes = [
       element={<ClusterMetadata />}
     />
     <Route
+      path={CLUSTER_LOGS_PATH}
+      element={<ClusterLogs />}
+    />
+    <Route
       path={CLUSTER_ADDONS_REL_PATH}
       element={<ClusterAddOns />}
     />
@@ -413,6 +422,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceHelm />}
       path="helm"
+    />
+    <Route
+      element={<ServiceLogs />}
+      path="logs"
     />
     <Route
       element={<ServiceDryRun />}

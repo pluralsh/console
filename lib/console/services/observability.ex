@@ -31,16 +31,16 @@ defmodule Console.Services.Observability do
       do: {:ok, results}
   end
 
-  defp parse_structured_query(%{labels: labels, filter: filter}) do
+  defp parse_structured_query(%{labels: labels} = query) do
     label = Enum.map(labels, &label_filter/1) |> Enum.join(",")
-    "{#{label}} #{loki_filter(filter)}"
+    "{#{label}}#{loki_filter(query[:filter])}"
   end
 
-  defp label_filter(%{name: n, value: v, regex: true}), do: "#{n}=~#{v}"
-  defp label_filter(%{name: n, value: v}), do: "#{n}=#{v}"
+  defp label_filter(%{name: n, value: v, regex: true}), do: "#{n}=~\"#{v}\""
+  defp label_filter(%{name: n, value: v}), do: "#{n}=\"#{v}\""
 
-  defp loki_filter(%{regex: true, text: t}), do: "|~ #{t}"
-  defp loki_filter(%{text: t}), do: "|= #{t}"
+  defp loki_filter(%{regex: true, text: t}), do: " |~ #{t}"
+  defp loki_filter(%{text: t}), do: " |= #{t}"
   defp loki_filter(_), do: ""
 
   def get_metric(q, start, stop, step) do

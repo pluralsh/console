@@ -6664,6 +6664,19 @@ export type TagPairsQueryVariables = Exact<{
 
 export type TagPairsQuery = { __typename?: 'RootQueryType', tagPairs?: { __typename?: 'TagConnection', edges?: Array<{ __typename?: 'TagEdge', node?: { __typename?: 'Tag', name: string, value: string, id: string } | null } | null> | null } | null };
 
+export type LogStreamFragment = { __typename?: 'LogStream', stream?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
+
+export type ClusterLogsQueryVariables = Exact<{
+  clusterId: Scalars['ID']['input'];
+  query: LokiQuery;
+  start?: InputMaybe<Scalars['Long']['input']>;
+  end?: InputMaybe<Scalars['Long']['input']>;
+  limit: Scalars['Int']['input'];
+}>;
+
+
+export type ClusterLogsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', logs?: Array<{ __typename?: 'LogStream', stream?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
+
 export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
 
 export type UsageQueryVariables = Exact<{
@@ -7083,6 +7096,17 @@ export type ServiceStatusesQueryVariables = Exact<{
 
 
 export type ServiceStatusesQuery = { __typename?: 'RootQueryType', serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
+
+export type ServiceLogsQueryVariables = Exact<{
+  serviceId: Scalars['ID']['input'];
+  query: LokiQuery;
+  start?: InputMaybe<Scalars['Long']['input']>;
+  end?: InputMaybe<Scalars['Long']['input']>;
+  limit: Scalars['Int']['input'];
+}>;
+
+
+export type ServiceLogsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', logs?: Array<{ __typename?: 'LogStream', stream?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
 
 export type ComponentTreeFragment = { __typename?: 'ComponentTree', root?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null, edges?: Array<{ __typename?: 'ResourceEdge', from: string, to: string } | null> | null, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, configmaps?: Array<{ __typename?: 'ConfigMap', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, cronjobs?: Array<{ __typename?: 'CronJob', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, daemonsets?: Array<{ __typename?: 'DaemonSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, deployments?: Array<{ __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, ingresses?: Array<{ __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, secrets?: Array<{ __typename?: 'Secret', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, services?: Array<{ __typename?: 'Service', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, statefulsets?: Array<{ __typename?: 'StatefulSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null };
 
@@ -8138,6 +8162,15 @@ export const ClusterStatusInfoFragmentDoc = gql`
     fragment ClusterStatusInfo on ClusterStatusInfo {
   count
   healthy
+}
+    `;
+export const LogStreamFragmentDoc = gql`
+    fragment LogStream on LogStream {
+  stream
+  values {
+    timestamp
+    value
+  }
 }
     `;
 export const MetricResponseFragmentDoc = gql`
@@ -11380,6 +11413,52 @@ export type TagPairsQueryHookResult = ReturnType<typeof useTagPairsQuery>;
 export type TagPairsLazyQueryHookResult = ReturnType<typeof useTagPairsLazyQuery>;
 export type TagPairsSuspenseQueryHookResult = ReturnType<typeof useTagPairsSuspenseQuery>;
 export type TagPairsQueryResult = Apollo.QueryResult<TagPairsQuery, TagPairsQueryVariables>;
+export const ClusterLogsDocument = gql`
+    query ClusterLogs($clusterId: ID!, $query: LokiQuery!, $start: Long, $end: Long, $limit: Int!) {
+  cluster(id: $clusterId) {
+    logs(query: $query, start: $start, end: $end, limit: $limit) {
+      ...LogStream
+    }
+  }
+}
+    ${LogStreamFragmentDoc}`;
+
+/**
+ * __useClusterLogsQuery__
+ *
+ * To run a query within a React component, call `useClusterLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterLogsQuery({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *      query: // value for 'query'
+ *      start: // value for 'start'
+ *      end: // value for 'end'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useClusterLogsQuery(baseOptions: Apollo.QueryHookOptions<ClusterLogsQuery, ClusterLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterLogsQuery, ClusterLogsQueryVariables>(ClusterLogsDocument, options);
+      }
+export function useClusterLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterLogsQuery, ClusterLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterLogsQuery, ClusterLogsQueryVariables>(ClusterLogsDocument, options);
+        }
+export function useClusterLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterLogsQuery, ClusterLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterLogsQuery, ClusterLogsQueryVariables>(ClusterLogsDocument, options);
+        }
+export type ClusterLogsQueryHookResult = ReturnType<typeof useClusterLogsQuery>;
+export type ClusterLogsLazyQueryHookResult = ReturnType<typeof useClusterLogsLazyQuery>;
+export type ClusterLogsSuspenseQueryHookResult = ReturnType<typeof useClusterLogsSuspenseQuery>;
+export type ClusterLogsQueryResult = Apollo.QueryResult<ClusterLogsQuery, ClusterLogsQueryVariables>;
 export const UsageDocument = gql`
     query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!, $clusterId: ID) {
   cpu: metric(clusterId: $clusterId, query: $cpu, offset: $offset, step: $step) {
@@ -13228,6 +13307,52 @@ export type ServiceStatusesQueryHookResult = ReturnType<typeof useServiceStatuse
 export type ServiceStatusesLazyQueryHookResult = ReturnType<typeof useServiceStatusesLazyQuery>;
 export type ServiceStatusesSuspenseQueryHookResult = ReturnType<typeof useServiceStatusesSuspenseQuery>;
 export type ServiceStatusesQueryResult = Apollo.QueryResult<ServiceStatusesQuery, ServiceStatusesQueryVariables>;
+export const ServiceLogsDocument = gql`
+    query ServiceLogs($serviceId: ID!, $query: LokiQuery!, $start: Long, $end: Long, $limit: Int!) {
+  serviceDeployment(id: $serviceId) {
+    logs(query: $query, start: $start, end: $end, limit: $limit) {
+      ...LogStream
+    }
+  }
+}
+    ${LogStreamFragmentDoc}`;
+
+/**
+ * __useServiceLogsQuery__
+ *
+ * To run a query within a React component, call `useServiceLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceLogsQuery({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      query: // value for 'query'
+ *      start: // value for 'start'
+ *      end: // value for 'end'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useServiceLogsQuery(baseOptions: Apollo.QueryHookOptions<ServiceLogsQuery, ServiceLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceLogsQuery, ServiceLogsQueryVariables>(ServiceLogsDocument, options);
+      }
+export function useServiceLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceLogsQuery, ServiceLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceLogsQuery, ServiceLogsQueryVariables>(ServiceLogsDocument, options);
+        }
+export function useServiceLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceLogsQuery, ServiceLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceLogsQuery, ServiceLogsQueryVariables>(ServiceLogsDocument, options);
+        }
+export type ServiceLogsQueryHookResult = ReturnType<typeof useServiceLogsQuery>;
+export type ServiceLogsLazyQueryHookResult = ReturnType<typeof useServiceLogsLazyQuery>;
+export type ServiceLogsSuspenseQueryHookResult = ReturnType<typeof useServiceLogsSuspenseQuery>;
+export type ServiceLogsQueryResult = Apollo.QueryResult<ServiceLogsQuery, ServiceLogsQueryVariables>;
 export const ComponentTreeDocument = gql`
     query ComponentTree($id: ID!) {
   componentTree(id: $id) {
@@ -15254,6 +15379,7 @@ export const namedOperations = {
     RuntimeService: 'RuntimeService',
     ClusterStatuses: 'ClusterStatuses',
     TagPairs: 'TagPairs',
+    ClusterLogs: 'ClusterLogs',
     Usage: 'Usage',
     GitRepositories: 'GitRepositories',
     HelmRepositories: 'HelmRepositories',
@@ -15277,6 +15403,7 @@ export const namedOperations = {
     ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
     ServiceDeploymentBindings: 'ServiceDeploymentBindings',
     ServiceStatuses: 'ServiceStatuses',
+    ServiceLogs: 'ServiceLogs',
     ComponentTree: 'ComponentTree',
     PostgresDatabases: 'PostgresDatabases',
     PostgresDatabase: 'PostgresDatabase',
@@ -15405,6 +15532,7 @@ export const namedOperations = {
     PolicyBinding: 'PolicyBinding',
     ClusterBindings: 'ClusterBindings',
     ClusterStatusInfo: 'ClusterStatusInfo',
+    LogStream: 'LogStream',
     MetricResponse: 'MetricResponse',
     GitRepository: 'GitRepository',
     HelmRepository: 'HelmRepository',

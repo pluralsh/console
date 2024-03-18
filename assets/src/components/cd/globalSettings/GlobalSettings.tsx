@@ -70,6 +70,8 @@ const getDirectory = ({
 type GlobalSettingsContextType = {
   refetch: () => void
   deploymentSettings: DeploymentSettingsFragment
+  logsEnabled?: boolean
+  metricsEnabled?: boolean
 }
 
 export const useGlobalSettingsContext = () =>
@@ -85,6 +87,8 @@ export function GlobalSettings() {
     () => ({
       refetch,
       ...data,
+      logsEnabled: !!data?.deploymentSettings?.lokiConnection,
+      metricsEnabled: !!data?.deploymentSettings?.prometheusConnection,
     }),
     [data, refetch]
   )
