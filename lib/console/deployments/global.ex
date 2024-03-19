@@ -108,7 +108,7 @@ defmodule Console.Deployments.Global do
   end
 
   def match?(%ManagedNamespace{target: nil}, _), do: true
-  def match?(%ManagedNamespace{target: target}, %Cluster{} = cluster) do
+  def match?(%ManagedNamespace{target: %{} = target}, %Cluster{} = cluster) do
     Enum.all?([
       {:field, target.distro, cluster.distro},
       {:tags, target.tags, cluster.tags},
