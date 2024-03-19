@@ -479,6 +479,27 @@ defmodule Console.Factory do
     }
   end
 
+  def managed_namespace_factory do
+    %Schema.ManagedNamespace{
+      name: sequence(:mns, &"namespace-#{&1}")
+    }
+  end
+
+  def namespace_instance_factory do
+    %Schema.NamespaceInstance{
+      namespace: build(:managed_namespace),
+      cluster: build(:cluster),
+      service: build(:service)
+    }
+  end
+
+  def namespace_cluster_factory do
+    %Schema.NamespaceCluster{
+      namespace: build(:managed_namespace),
+      cluster: build(:cluster)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

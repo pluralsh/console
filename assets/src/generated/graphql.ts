@@ -931,6 +931,23 @@ export type ClusterStatusInfo = {
   healthy?: Maybe<Scalars['Boolean']['output']>;
 };
 
+/** A spec for targeting clusters */
+export type ClusterTarget = {
+  __typename?: 'ClusterTarget';
+  /** kubernetes distribution to target */
+  distro?: Maybe<ClusterDistro>;
+  /** the cluster tags to target */
+  tags?: Maybe<Scalars['Json']['output']>;
+};
+
+/** A spec for targeting clusters */
+export type ClusterTargetAttributes = {
+  /** kubernetes distribution to target */
+  distro?: InputMaybe<ClusterDistro>;
+  /** the cluster tags to target */
+  tags?: InputMaybe<Scalars['Json']['input']>;
+};
+
 export type ClusterUpdateAttributes = {
   distro?: InputMaybe<ClusterDistro>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
@@ -2119,6 +2136,58 @@ export type LokiLineFilter = {
 export type LokiQuery = {
   filter?: InputMaybe<LokiLineFilter>;
   labels?: InputMaybe<Array<InputMaybe<LokiLabelFilter>>>;
+};
+
+/** A representation of a managed namespace, which is k8s namespace configuration + a service spec to define a namespace runtime */
+export type ManagedNamespace = {
+  __typename?: 'ManagedNamespace';
+  /** annotations for this namespace */
+  annotations?: Maybe<Scalars['Map']['output']>;
+  /** the timestamp this namespace was deleted at, indicating it's currently draining */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** A short description of the purpose of this namespace */
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** labels for this namespace */
+  labels?: Maybe<Scalars['Map']['output']>;
+  /** the name of this namespace once its placed on a cluster */
+  name: Scalars['String']['output'];
+  /** a list of pull secrets to attach to this namespace */
+  pullSecrets?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** A template for creating the core service for this namespace */
+  service?: Maybe<ServiceTemplate>;
+  /** The targeting criteria to select clusters this namespace is bound to */
+  target?: Maybe<ClusterTarget>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** Attributes for configuring a managed namespace */
+export type ManagedNamespaceAttributes = {
+  /** annotations for this namespace */
+  annotations?: InputMaybe<Scalars['Json']['input']>;
+  /** A short description of the purpose of this namespace */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** labels for this namespace */
+  labels?: InputMaybe<Scalars['Json']['input']>;
+  /** the name of this namespace once its placed on a cluster */
+  name: Scalars['String']['input'];
+  /** a list of pull secrets to attach to this namespace */
+  pullSecrets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  service?: InputMaybe<ServiceTemplateAttributes>;
+  target?: InputMaybe<ClusterTargetAttributes>;
+};
+
+export type ManagedNamespaceConnection = {
+  __typename?: 'ManagedNamespaceConnection';
+  edges?: Maybe<Array<Maybe<ManagedNamespaceEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ManagedNamespaceEdge = {
+  __typename?: 'ManagedNamespaceEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ManagedNamespace>;
 };
 
 export type ManifestNetwork = {
@@ -3567,6 +3636,7 @@ export type RootMutationType = {
   createGroup?: Maybe<Group>;
   createGroupMember?: Maybe<GroupMember>;
   createInvite?: Maybe<Invite>;
+  createManagedNamespace?: Maybe<ManagedNamespace>;
   createObjectStore?: Maybe<ObjectStore>;
   createPeer?: Maybe<WireguardPeer>;
   createPersona?: Maybe<Persona>;
@@ -3594,6 +3664,7 @@ export type RootMutationType = {
   deleteGroup?: Maybe<Group>;
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
+  deleteManagedNamespace?: Maybe<ManagedNamespace>;
   deleteNode?: Maybe<Node>;
   deleteNotificationRouter?: Maybe<NotificationRouter>;
   deleteNotificationSink?: Maybe<NotificationSink>;
@@ -3660,6 +3731,7 @@ export type RootMutationType = {
   updateGitRepository?: Maybe<GitRepository>;
   updateGlobalService?: Maybe<GlobalService>;
   updateGroup?: Maybe<Group>;
+  updateManagedNamespace?: Maybe<ManagedNamespace>;
   updateObjectStore?: Maybe<ObjectStore>;
   updatePersona?: Maybe<Persona>;
   updatePrAutomation?: Maybe<PrAutomation>;
@@ -3770,6 +3842,11 @@ export type RootMutationTypeCreateGroupMemberArgs = {
 
 export type RootMutationTypeCreateInviteArgs = {
   attributes: InviteAttributes;
+};
+
+
+export type RootMutationTypeCreateManagedNamespaceArgs = {
+  attributes: ManagedNamespaceAttributes;
 };
 
 
@@ -3909,6 +3986,11 @@ export type RootMutationTypeDeleteJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeDeleteManagedNamespaceArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -4222,6 +4304,12 @@ export type RootMutationTypeUpdateGroupArgs = {
 };
 
 
+export type RootMutationTypeUpdateManagedNamespaceArgs = {
+  attributes: ManagedNamespaceAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateObjectStoreArgs = {
   attributes: ObjectStoreAttributes;
   id: Scalars['ID']['input'];
@@ -4331,6 +4419,7 @@ export type RootQueryType = {
   clusterGate?: Maybe<PipelineGate>;
   clusterGates?: Maybe<Array<Maybe<PipelineGate>>>;
   clusterInfo?: Maybe<ClusterInfo>;
+  clusterManagedNamespaces?: Maybe<ManagedNamespaceConnection>;
   /** fetches an individual cluster provider */
   clusterProvider?: Maybe<ClusterProvider>;
   /** a relay connection of all providers visible to the current user */
@@ -4374,6 +4463,8 @@ export type RootQueryType = {
   logFilters?: Maybe<Array<Maybe<LogFilter>>>;
   loginInfo?: Maybe<LoginInfo>;
   logs?: Maybe<Array<Maybe<LogStream>>>;
+  managedNamespace?: Maybe<ManagedNamespace>;
+  managedNamespaces?: Maybe<ManagedNamespaceConnection>;
   me?: Maybe<User>;
   metric?: Maybe<Array<Maybe<MetricResponse>>>;
   /** tells you what cluster a deploy token points to */
@@ -4547,6 +4638,14 @@ export type RootQueryTypeClusterBackupsArgs = {
 
 export type RootQueryTypeClusterGateArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeClusterManagedNamespacesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -4762,6 +4861,19 @@ export type RootQueryTypeLogsArgs = {
   limit: Scalars['Int']['input'];
   query: Scalars['String']['input'];
   start?: InputMaybe<Scalars['Long']['input']>;
+};
+
+
+export type RootQueryTypeManagedNamespaceArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeManagedNamespacesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -5770,6 +5882,37 @@ export type ServiceStatusCount = {
   status: ServiceDeploymentStatus;
 };
 
+/** Attributes for configuring a service in something like a managed namespace */
+export type ServiceTemplate = {
+  __typename?: 'ServiceTemplate';
+  /** a list of context ids to add to this service */
+  contexts?: Maybe<Array<Maybe<Scalars['ID']['output']>>>;
+  /** settings to configure git for a service */
+  git?: Maybe<GitRef>;
+  /** settings to configure helm for a service */
+  helm?: Maybe<HelmSpec>;
+  /** settings for service kustomization */
+  kustomize?: Maybe<Kustomize>;
+  /** the id of a repository to source manifests for this service */
+  repositoryId?: Maybe<Scalars['ID']['output']>;
+  templated?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** Attributes for configuring a service in something like a managed namespace */
+export type ServiceTemplateAttributes = {
+  /** a list of context ids to add to this service */
+  contexts?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  /** settings to configure git for a service */
+  git?: InputMaybe<GitRefAttributes>;
+  /** settings to configure helm for a service */
+  helm?: InputMaybe<HelmConfigAttributes>;
+  /** settings for service kustomization */
+  kustomize?: InputMaybe<KustomizeAttributes>;
+  /** the id of a repository to source manifests for this service */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  templated?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type ServiceUpdateAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   contextBindings?: InputMaybe<Array<InputMaybe<ContextBindingAttributes>>>;
@@ -5913,10 +6056,13 @@ export type StatusCondition = {
 /** Advanced configuration of how to sync resources */
 export type SyncConfig = {
   __typename?: 'SyncConfig';
+  /** whether the agent should auto-create the namespace for this service */
+  createNamespace?: Maybe<Scalars['Boolean']['output']>;
   namespaceMetadata?: Maybe<NamespaceMetadata>;
 };
 
 export type SyncConfigAttributes = {
+  createNamespace?: InputMaybe<Scalars['Boolean']['input']>;
   namespaceMetadata?: InputMaybe<MetadataAttributes>;
 };
 
