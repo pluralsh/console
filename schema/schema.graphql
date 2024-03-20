@@ -258,10 +258,6 @@ type RootQueryType {
 
   serviceStatuses(clusterId: ID, q: String, status: ServiceDeploymentStatus): [ServiceStatusCount]
 
-  globalService(id: ID!): GlobalService
-
-  globalServices(after: String, first: Int, before: String, last: Int): GlobalServiceConnection
-
   serviceContext(name: String!): ServiceContext
 
   "renders a full hierarchy of resources recursively owned by this component (useful for CRD views)"
@@ -327,6 +323,16 @@ type RootQueryType {
   violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
 
   policyConstraint(id: ID!): PolicyConstraint
+
+  managedNamespaces(after: String, first: Int, before: String, last: Int): ManagedNamespaceConnection
+
+  globalService(id: ID!): GlobalService
+
+  globalServices(after: String, first: Int, before: String, last: Int): GlobalServiceConnection
+
+  clusterManagedNamespaces(after: String, first: Int, before: String, last: Int): ManagedNamespaceConnection
+
+  managedNamespace(id: ID!): ManagedNamespace
 
   deploymentSettings: DeploymentSettings
 }
@@ -573,21 +579,6 @@ type RootMutationType {
     promotion: ServicePromotion
   ): ServiceDeployment
 
-  createGlobalService(
-    serviceId: ID
-
-    "the handle of the cluster for this service"
-    cluster: String
-
-    name: String
-
-    attributes: GlobalServiceAttributes!
-  ): GlobalService
-
-  updateGlobalService(id: ID!, attributes: GlobalServiceAttributes!): GlobalService
-
-  deleteGlobalService(id: ID!): GlobalService
-
   saveServiceContext(name: String!, attributes: ServiceContextAttributes!): ServiceContext
 
   deleteServiceContext(id: ID!): ServiceContext
@@ -643,6 +634,27 @@ type RootMutationType {
   deleteNotificationRouter(id: ID!): NotificationRouter
 
   upsertPolicyConstraints(constraints: [PolicyConstraintAttributes]): Int
+
+  createGlobalService(
+    serviceId: ID
+
+    "the handle of the cluster for this service"
+    cluster: String
+
+    name: String
+
+    attributes: GlobalServiceAttributes!
+  ): GlobalService
+
+  updateGlobalService(id: ID!, attributes: GlobalServiceAttributes!): GlobalService
+
+  deleteGlobalService(id: ID!): GlobalService
+
+  createManagedNamespace(attributes: ManagedNamespaceAttributes!): ManagedNamespace
+
+  updateManagedNamespace(id: ID!, attributes: ManagedNamespaceAttributes!): ManagedNamespace
+
+  deleteManagedNamespace(id: ID!): ManagedNamespace
 
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
@@ -785,6 +797,171 @@ input HttpConnectionAttributes {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+"A reference for a globalized service, which targets clusters based on the configured criteria"
+input GlobalServiceAttributes {
+  "name for this global service"
+  name: String!
+
+  "the cluster tags to target"
+  tags: [TagAttributes]
+
+  "kubernetes distribution to target"
+  distro: ClusterDistro
+
+  "cluster api provider to target"
+  providerId: ID
+}
+
+"Attributes for configuring a managed namespace"
+input ManagedNamespaceAttributes {
+  "the name of this namespace once its placed on a cluster"
+  name: String!
+
+  "A short description of the purpose of this namespace"
+  description: String
+
+  "labels for this namespace"
+  labels: Json
+
+  "annotations for this namespace"
+  annotations: Json
+
+  "a list of pull secrets to attach to this namespace"
+  pullSecrets: [String]
+
+  service: ServiceTemplateAttributes
+
+  target: ClusterTargetAttributes
+}
+
+"Attributes for configuring a service in something like a managed namespace"
+input ServiceTemplateAttributes {
+  templated: Boolean
+
+  "the id of a repository to source manifests for this service"
+  repositoryId: ID
+
+  "a list of context ids to add to this service"
+  contexts: [ID]
+
+  "settings to configure git for a service"
+  git: GitRefAttributes
+
+  "settings to configure helm for a service"
+  helm: HelmConfigAttributes
+
+  "settings for service kustomization"
+  kustomize: KustomizeAttributes
+}
+
+"A spec for targeting clusters"
+input ClusterTargetAttributes {
+  "the cluster tags to target"
+  tags: Json
+
+  "kubernetes distribution to target"
+  distro: ClusterDistro
+}
+
+"a rules based mechanism to redeploy a service across a fleet of clusters"
+type GlobalService {
+  "internal id of this global service"
+  id: ID!
+
+  "a human readable name for this global service"
+  name: String!
+
+  "a set of tags to select clusters for this global service"
+  tags: [Tag]
+
+  "the kubernetes distribution to target with this global service"
+  distro: ClusterDistro
+
+  "the service to replicate across clusters"
+  service: ServiceDeployment
+
+  "whether to only apply to clusters with this provider"
+  provider: ClusterProvider
+
+  services(after: String, first: Int, before: String, last: Int, q: String): ServiceDeploymentConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"A representation of a managed namespace, which is k8s namespace configuration + a service spec to define a namespace runtime"
+type ManagedNamespace {
+  id: ID!
+
+  "the name of this namespace once its placed on a cluster"
+  name: String!
+
+  "A short description of the purpose of this namespace"
+  description: String
+
+  "labels for this namespace"
+  labels: Map
+
+  "annotations for this namespace"
+  annotations: Map
+
+  "a list of pull secrets to attach to this namespace"
+  pullSecrets: [String]
+
+  "A template for creating the core service for this namespace"
+  service: ServiceTemplate
+
+  "The targeting criteria to select clusters this namespace is bound to"
+  target: ClusterTarget
+
+  "the timestamp this namespace was deleted at, indicating it's currently draining"
+  deletedAt: DateTime
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"Attributes for configuring a service in something like a managed namespace"
+type ServiceTemplate {
+  templated: Boolean
+
+  "the id of a repository to source manifests for this service"
+  repositoryId: ID
+
+  "a list of context ids to add to this service"
+  contexts: [ID]
+
+  "settings to configure git for a service"
+  git: GitRef
+
+  "settings to configure helm for a service"
+  helm: HelmSpec
+
+  "settings for service kustomization"
+  kustomize: Kustomize
+}
+
+"A spec for targeting clusters"
+type ClusterTarget {
+  "the cluster tags to target"
+  tags: Json
+
+  "kubernetes distribution to target"
+  distro: ClusterDistro
+}
+
+type GlobalServiceConnection {
+  pageInfo: PageInfo!
+  edges: [GlobalServiceEdge]
+}
+
+type ManagedNamespaceConnection {
+  pageInfo: PageInfo!
+  edges: [ManagedNamespaceEdge]
 }
 
 enum ConstraintViolationField {
@@ -1604,6 +1781,7 @@ input ServiceDeploymentAttributes {
 }
 
 input SyncConfigAttributes {
+  createNamespace: Boolean
   namespaceMetadata: MetadataAttributes
 }
 
@@ -1705,21 +1883,6 @@ input ServiceContextAttributes {
 "a binding from a service to a service context"
 input ContextBindingAttributes {
   contextId: String!
-}
-
-"A reference for a globalized service, which targets clusters based on the configured criteria"
-input GlobalServiceAttributes {
-  "name for this global service"
-  name: String!
-
-  "the cluster tags to target"
-  tags: [TagAttributes]
-
-  "kubernetes distribution to target"
-  distro: ClusterDistro
-
-  "cluster api provider to target"
-  providerId: ID
 }
 
 input KustomizeAttributes {
@@ -1985,33 +2148,6 @@ type ApiDeprecation {
   component: ServiceComponent
 }
 
-"a rules based mechanism to redeploy a service across a fleet of clusters"
-type GlobalService {
-  "internal id of this global service"
-  id: ID!
-
-  "a human readable name for this global service"
-  name: String!
-
-  "a set of tags to select clusters for this global service"
-  tags: [Tag]
-
-  "the kubernetes distribution to target with this global service"
-  distro: ClusterDistro
-
-  "the service to replicate across clusters"
-  service: ServiceDeployment
-
-  "whether to only apply to clusters with this provider"
-  provider: ClusterProvider
-
-  services(after: String, first: Int, before: String, last: Int, q: String): ServiceDeploymentConnection
-
-  insertedAt: DateTime
-
-  updatedAt: DateTime
-}
-
 "an error sent from the deploy operator about sync progress"
 type ServiceError {
   source: String!
@@ -2032,6 +2168,9 @@ type ServiceStatusCount {
 
 "Advanced configuration of how to sync resources"
 type SyncConfig {
+  "whether the agent should auto-create the namespace for this service"
+  createNamespace: Boolean
+
   namespaceMetadata: NamespaceMetadata
 }
 
@@ -2081,11 +2220,6 @@ type ServiceDeploymentConnection {
 type RevisionConnection {
   pageInfo: PageInfo!
   edges: [RevisionEdge]
-}
-
-type GlobalServiceConnection {
-  pageInfo: PageInfo!
-  edges: [GlobalServiceEdge]
 }
 
 enum ClusterDistro {
@@ -5120,11 +5254,6 @@ type ClusterEdge {
   cursor: String
 }
 
-type GlobalServiceEdge {
-  node: GlobalService
-  cursor: String
-}
-
 type RevisionEdge {
   node: Revision
   cursor: String
@@ -5177,5 +5306,15 @@ type NotificationSinkEdge {
 
 type PolicyConstraintEdge {
   node: PolicyConstraint
+  cursor: String
+}
+
+type ManagedNamespaceEdge {
+  node: ManagedNamespace
+  cursor: String
+}
+
+type GlobalServiceEdge {
+  node: GlobalService
   cursor: String
 }

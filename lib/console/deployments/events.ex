@@ -45,3 +45,7 @@ defmodule Console.PubSub.ObjectStoreDeleted, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.PullRequestCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PullRequestUpdated, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.ManagedNamespaceCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.ManagedNamespaceUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.ManagedNamespaceDeleted, do: use Piazza.PubSub.Event

@@ -114,6 +114,11 @@ if !!get_env("CONSOLE_LOGIN_KEY") and get_env("CONSOLE_LOGIN_EMAIL") do
     email: get_env("CONSOLE_LOGIN_EMAIL")
 end
 
+if is_set("CONSOLE_ADMIN_EMAILS") do
+  config :console,
+    admin_emails: String.split(get_env("CONSOLE_ADMIN_EMAILS"), ~r/\s*,\s*/, trim: true)
+end
+
 if is_set("BACKUP_ACCESS_KEY") and is_set("BACKUP_SECRET_ACCESS_KEY") do
   config :console, :backup_keys,
     s3_access_key_id: get_env("BACKUP_ACCESS_KEY"),
