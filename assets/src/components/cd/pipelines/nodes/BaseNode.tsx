@@ -233,7 +233,11 @@ export function StatusCard({
               <div>
                 <Spinner
                   size={12}
-                  color={status === 'running' ? theme.colors['icon-info']: theme.colors['icon-warning']}
+                  color={
+                    status === 'running'
+                      ? theme.colors['icon-info']
+                      : theme.colors['icon-warning']
+                  }
                 />
               </div>
             )}
