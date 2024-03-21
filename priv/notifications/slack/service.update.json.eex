@@ -1,23 +1,71 @@
 {
-    "text": "Service <%= @service.name %> for cluster <%= @service.cluster.name %> has a new revision",
-    "blocks": [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "Service <%= @service.name %> for cluster <%= @service.cluster.name %> has a new revision"
-            }
-        },
-        {
-			"type": "divider"
+    "text": "🚀 Service <%= @service.name %> for cluster <%= @service.cluster.name %> has a new revision",
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "🚀 *Service <%= @service.name %> for cluster <%= @service.cluster.name %> has a new revision*"
+			}
 		},
-        {
-            "type": "section",
-            "fields": [
-                {"type": "mrkdwn", "text": "*Url*\n<%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>"},
-                {"type": "mrkdwn", "text": "*Revision*\n<%= @service.sha %>"},
-                {"type": "mrkdwn", "text": "*Source*\n<%= @source.url %> <%= @source.ref %>"}
-            ]
-        }
-    ]
+		{
+			"type": "rich_text",
+			"elements": [
+				{
+					"type": "rich_text_section",
+					"elements": [
+						{
+							"type": "text",
+							"text": "URL",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": "
+						},
+						{
+							"type": "link",
+							"url": "<%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>"
+						},
+						{
+							"type": "text",
+							"text": "\n\n"
+						},
+						{
+							"type": "text",
+							"text": "Revision",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": <%= @service.sha %>\n\n"
+						},
+						{
+							"type": "text",
+							"text": "Source",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": "
+						},
+						{
+							"type": "link",
+							"url": "<%= @source.url %>"
+						},
+						{
+							"type": "text",
+							"text": " <%= @source.ref %>"
+						}
+					]
+				}
+			]
+		}
+	]
 }

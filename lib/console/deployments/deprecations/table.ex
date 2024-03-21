@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Deprecations.Table do
   use GenServer
   alias Console.Schema.ServiceComponent
+  alias Console.Deployments.Static
   alias ETS.KeyValueSet
   require Logger
 
@@ -8,8 +9,9 @@ defmodule Console.Deployments.Deprecations.Table do
   @poll :timer.minutes(60)
   @url "/pluralsh/console/master/static/versions.yml"
 
+
   defmodule State do
-    defstruct [:table, :url]
+    defstruct [:table, :url, :static]
   end
 
   defmodule Entry do
@@ -26,7 +28,7 @@ defmodule Console.Deployments.Deprecations.Table do
     :timer.send_interval(@poll, :poll)
     send self(), :poll
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
-    {:ok, %State{table: table, url: Console.github_raw_url(@url)}}
+    {:ok, %State{table: table, url: Console.github_raw_url(@url), static: Console.conf(:airgap)}}
   end
 
   def fetch(%ServiceComponent{} = component) do
@@ -34,6 +36,11 @@ defmodule Console.Deployments.Deprecations.Table do
       {:ok, set} -> set[name(component)]
       _ -> nil
     end
+  end
+
+  def handle_info(:poll, %State{table: table, static: true} = state) do
+    table = Enum.reduce(Static.deprecations(), table, &KeyValueSet.put!(&2, name(&1), &1))
+    {:noreply, %{state | table: table}}
   end
 
   def handle_info(:poll, %State{table: table, url: url} = state) do
@@ -73,5 +80,11 @@ defmodule Console.Deployments.Deprecations.Table do
       [g, v] -> {g, v}
       [v] -> {"core", v}
     end
+  end
+
+  def static() do
+    {:ok, yaml} = File.read("static/versions.yml")
+    {:ok, %{"deprecated-versions" => [_ | _] = deprecated}} = YamlElixir.read_from_string(yaml)
+    Enum.map(deprecated, &to_entry/1)
   end
 end
