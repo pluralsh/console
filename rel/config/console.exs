@@ -96,7 +96,8 @@ config :console,
   provider: provider,
   build_id: get_env("CONSOLE_BUILD_ID"),
   kas_dns: get_env("KAS_DNS"),
-  byok: get_env("CONSOLE_BYOK") == "true"
+  byok: get_env("CONSOLE_BYOK") == "true",
+  airgap: get_env("CONSOLE_AIRGAP") == "true"
 
 if git_url && String.starts_with?(git_url, "https") do
   config :console,
@@ -118,6 +119,7 @@ if is_set("CONSOLE_ADMIN_EMAILS") do
   config :console,
     admin_emails: String.split(get_env("CONSOLE_ADMIN_EMAILS"), ~r/\s*,\s*/, trim: true)
 end
+
 
 if is_set("BACKUP_ACCESS_KEY") and is_set("BACKUP_SECRET_ACCESS_KEY") do
   config :console, :backup_keys,
