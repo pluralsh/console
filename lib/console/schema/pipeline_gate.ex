@@ -3,7 +3,7 @@ defmodule Console.Schema.PipelineGate do
   alias Console.Schema.{PipelineEdge, User, Cluster, Gates.JobSpec}
 
   defenum Type, approval: 0, window: 1, job: 2
-  defenum State, pending: 0, open: 1, closed: 2
+  defenum State, pending: 0, open: 1, closed: 2, running: 3
 
   schema "pipeline_gates" do
     field :name,  :string

@@ -1315,6 +1315,7 @@ enum GateState {
   PENDING
   OPEN
   CLOSED
+  RUNNING
 }
 
 enum GateType {

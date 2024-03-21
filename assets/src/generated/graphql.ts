@@ -1517,7 +1517,8 @@ export type GateSpecAttributes = {
 export enum GateState {
   Closed = 'CLOSED',
   Open = 'OPEN',
-  Pending = 'PENDING'
+  Pending = 'PENDING',
+  Running = 'RUNNING'
 }
 
 /** state delineating the current status of this gate */
