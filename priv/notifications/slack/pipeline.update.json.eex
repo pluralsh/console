@@ -1,11 +1,11 @@
 {
-    "text": "🚀 Pipeline <%= @pipe.name %> has pending changes",
+    "text": "🚰 Pipeline <%= @pipe.name %> has pending changes",
 	"blocks": [
 		{
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": "🚀 *Pipeline <%= @pipe.name %> has pending changes*"
+				"text": "🚰 *Pipeline <%= @pipe.name %> has pending changes*"
 			}
 		},
 		{
