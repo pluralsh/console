@@ -13,8 +13,9 @@ import {
 
 const gateStateToTestText = {
   [GateState.Open]: 'Passed',
-  [GateState.Pending]: 'In progress',
+  [GateState.Pending]: 'Pending',
   [GateState.Closed]: 'Failed',
+  [GateState.Running]: 'Running',
 } as const satisfies Record<GateState, string>
 
 export function TestsNode(props: EdgeNode) {

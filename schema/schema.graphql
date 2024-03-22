@@ -1315,6 +1315,7 @@ enum GateState {
   PENDING
   OPEN
   CLOSED
+  RUNNING
 }
 
 enum GateType {
@@ -1693,11 +1694,14 @@ type PromotionService {
 
 "a report of gate statuses within a pipeline to gauge its health"
 type PipelineStatus {
-  "if > 0, consider the pipeline running"
+  "if > 0, consider the pipeline pending"
   pending: Int
 
   "if > 0, consider the pipeline stopped"
   closed: Int
+
+  "if > 0, consider the pipeline runnning"
+  running: Int
 }
 
 "A pull request created in the course of executing a pipeline"

@@ -29,7 +29,7 @@ import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 
 import { reduceGateStates } from '../utils/reduceGateStatuses'
 
-export type CardStatus = 'ok' | 'closed' | 'pending'
+export type CardStatus = 'ok' | 'closed' | 'pending' | 'running'
 
 const HANDLE_SIZE = 10
 
@@ -37,6 +37,7 @@ export const gateStateToCardStatus = {
   [GateState.Open]: 'ok',
   [GateState.Closed]: 'closed',
   [GateState.Pending]: 'pending',
+  [GateState.Running]: 'running',
 } as const satisfies Record<GateState, CardStatus>
 
 export const NodeCardList = styled.ul(({ theme }) => ({
@@ -159,6 +160,7 @@ export const gateStateToSeverity = {
   [GateState.Open]: 'success',
   [GateState.Closed]: 'critical',
   [GateState.Pending]: 'warning',
+  [GateState.Running]: 'info',
 } as const satisfies Record<GateState, ComponentProps<typeof Chip>['severity']>
 
 export function IconHeading({
@@ -231,7 +233,11 @@ export function StatusCard({
               <div>
                 <Spinner
                   size={12}
-                  color={theme.colors['icon-warning']}
+                  color={
+                    status === 'running'
+                      ? theme.colors['icon-info']
+                      : theme.colors['icon-warning']
+                  }
                 />
               </div>
             )}
