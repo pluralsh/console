@@ -3718,6 +3718,8 @@ export type RootMutationType = {
   restorePostgres?: Maybe<Postgresql>;
   /** rewires this service to use the given revision id */
   rollbackService?: Maybe<ServiceDeployment>;
+  /** save the manifests in cache to be retrieved by the requesting user */
+  saveManifests?: Maybe<Scalars['Boolean']['output']>;
   /** upserts a pipeline with a given name */
   savePipeline?: Maybe<Pipeline>;
   saveServiceContext?: Maybe<ServiceContext>;
@@ -4216,6 +4218,12 @@ export type RootMutationTypeRollbackServiceArgs = {
 };
 
 
+export type RootMutationTypeSaveManifestsArgs = {
+  id: Scalars['ID']['input'];
+  manifests?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
 export type RootMutationTypeSavePipelineArgs = {
   attributes: PipelineAttributes;
   name: Scalars['String']['input'];
@@ -4451,6 +4459,8 @@ export type RootQueryType = {
   deployment?: Maybe<Deployment>;
   deploymentSettings?: Maybe<DeploymentSettings>;
   externalToken?: Maybe<Scalars['String']['output']>;
+  /** Fetches the manifests from cache once the agent has given us them, will be null otherwise */
+  fetchManifests?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   gitRepositories?: Maybe<GitRepositoryConnection>;
   gitRepository?: Maybe<GitRepository>;
   globalService?: Maybe<GlobalService>;
@@ -4512,6 +4522,8 @@ export type RootQueryType = {
   refreshTokens?: Maybe<RefreshTokenConnection>;
   repositories?: Maybe<RepositoryConnection>;
   repository?: Maybe<Repository>;
+  /** request manifests from an agent, to be returned by a future call to fetchManifests */
+  requestManifests?: Maybe<ServiceDeployment>;
   role?: Maybe<Role>;
   roles?: Maybe<RoleConnection>;
   runbook?: Maybe<Runbook>;
@@ -4763,6 +4775,11 @@ export type RootQueryTypeDeploymentArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeFetchManifestsArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -5138,6 +5155,11 @@ export type RootQueryTypeRepositoriesArgs = {
 
 export type RootQueryTypeRepositoryArgs = {
   name: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeRequestManifestsArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
