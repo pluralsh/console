@@ -266,6 +266,12 @@ type RootQueryType {
     id: ID!
   ): ComponentTree
 
+  "request manifests from an agent, to be returned by a future call to fetchManifests"
+  requestManifests(id: ID!): ServiceDeployment
+
+  "Fetches the manifests from cache once the agent has given us them, will be null otherwise"
+  fetchManifests(id: ID!): [String]
+
   pipelines(after: String, first: Int, before: String, last: Int, q: String): PipelineConnection
 
   pipeline(id: ID!): Pipeline
@@ -617,6 +623,9 @@ type RootMutationType {
 
   "updates only the components of a given service, to be sent after deploy operator syncs"
   updateServiceComponents(id: ID!, components: [ComponentAttributes], errors: [ServiceErrorAttributes]): ServiceDeployment
+
+  "save the manifests in cache to be retrieved by the requesting user"
+  saveManifests(id: ID!, manifests: [String]): Boolean
 
   updateGate(id: ID!, attributes: GateUpdateAttributes!): PipelineGate
 

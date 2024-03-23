@@ -377,6 +377,15 @@ defmodule Console.GraphQl.Deployments.Service do
 
       safe_resolve &Deployments.update_service_components/2
     end
+
+    @desc "save the manifests in cache to be retrieved by the requesting user"
+    field :save_manifests, :boolean do
+      middleware ClusterAuthenticated
+      arg :id, non_null(:id)
+      arg :manifests, list_of(:string)
+
+      safe_resolve &Deployments.save_manifests/2
+    end
   end
 
   object :service_queries do
@@ -412,6 +421,22 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :id, non_null(:id), description: "the id of the service component for the tree view"
 
       resolve &Deployments.tree/2
+    end
+
+    @desc "request manifests from an agent, to be returned by a future call to fetchManifests"
+    field :request_manifests, :service_deployment do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.request_manifests/2
+    end
+
+    @desc "Fetches the manifests from cache once the agent has given us them, will be null otherwise"
+    field :fetch_manifests, list_of(:string) do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.fetch_manifests/2
     end
   end
 
