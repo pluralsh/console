@@ -10,6 +10,12 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
+import { InlineLink } from '../../utils/typography/InlineLink'
+import {
+  NODES_REL_PATH,
+  getResourceDetailsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+import { ClusterTinyFragment } from '../../../generated/graphql'
 
 import { PodStatusChip, WorkloadImages } from './utils'
 
@@ -39,7 +45,24 @@ const colStatus = columnHelper.accessor((pod) => pod, {
 const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
   id: 'node',
   header: 'Node',
-  cell: ({ getValue }) => getValue(),
+  cell: ({ getValue, table }) => {
+    const { cluster } = table.options.meta as {
+      cluster?: ClusterTinyFragment
+    }
+
+    return (
+      <InlineLink
+        href={getResourceDetailsAbsPath(
+          NODES_REL_PATH,
+          cluster?.id,
+          getValue()
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {getValue()}
+      </InlineLink>
+    )
+  },
 })
 
 const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {

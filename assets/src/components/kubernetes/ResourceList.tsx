@@ -134,7 +134,9 @@ export function ResourceList<
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
   const navigate = useNavigate()
   const { cluster, namespace, filter } = useKubernetesContext()
-  const { sortBy, reactTableOptions } = useSortedTableOptions()
+  const { sortBy, reactTableOptions } = useSortedTableOptions({
+    meta: { cluster },
+  })
   const ctx = useContext(ResourceListContext)
 
   const { data, loading, fetchMore } = query({

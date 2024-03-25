@@ -9,6 +9,12 @@ import {
   Types_ObjectMeta as ObjectMetaT,
 } from '../../generated/graphql-kubernetes'
 import { DateTimeCol } from '../utils/table/DateTimeCol'
+import { ClusterTinyFragment } from '../../generated/graphql'
+import { InlineLink } from '../utils/typography/InlineLink'
+import {
+  NAMESPACES_REL_PATH,
+  getResourceDetailsAbsPath,
+} from '../../routes/kubernetesRoutesConsts'
 
 export const ITEMS_PER_PAGE = 25
 
@@ -33,7 +39,28 @@ export function useDefaultColumns<
         id: 'namespace',
         header: 'Namespace',
         enableSorting: true,
-        cell: ({ getValue }) => getValue(),
+        cell: ({ getValue, table }) => {
+          const namespace = getValue()
+
+          if (!namespace) return null
+
+          const { cluster } = table.options.meta as {
+            cluster?: ClusterTinyFragment
+          }
+
+          return (
+            <InlineLink
+              href={getResourceDetailsAbsPath(
+                NAMESPACES_REL_PATH,
+                cluster?.id,
+                namespace
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {getValue()}
+            </InlineLink>
+          )
+        },
       }),
       colLabels: columnHelper.accessor((r) => r?.objectMeta.labels, {
         id: 'labels',
@@ -75,7 +102,9 @@ export function usePageInfo(items: any[], listMeta: ListMetaT | undefined) {
   return { page, hasNextPage }
 }
 
-export function useSortedTableOptions(options?: TableOptions<any>) {
+export function useSortedTableOptions(
+  options?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
+) {
   const [sorting, setSorting] = useState<SortingState>([])
 
   return useMemo(
