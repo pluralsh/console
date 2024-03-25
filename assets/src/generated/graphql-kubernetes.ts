@@ -4846,7 +4846,7 @@ export type ReplicationControllersQueryVariables = Exact<{
 }>;
 
 
-export type ReplicationControllersQuery = { __typename?: 'Query', handleGetReplicationControllerList?: { __typename?: 'replicationcontroller_ReplicationControllerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type ReplicationControllersQuery = { __typename?: 'Query', handleGetReplicationControllerList?: { __typename?: 'replicationcontroller_ReplicationControllerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', running: number, desired?: number | null } } | null> } | null };
 
 export type StatefulSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -6313,6 +6313,12 @@ export const ReplicationControllersDocument = gql`
     replicationControllers {
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
+      }
+      initContainerImages
+      containerImages
+      podInfo {
+        running
+        desired
       }
     }
   }
