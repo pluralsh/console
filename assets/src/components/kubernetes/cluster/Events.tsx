@@ -95,6 +95,7 @@ export default function Events() {
       query={useEventsQuery}
       queryName="handleGetEventList"
       itemsKey="events"
+      disableOnRowClick
     />
   )
 }

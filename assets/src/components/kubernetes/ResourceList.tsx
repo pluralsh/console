@@ -84,6 +84,7 @@ interface ResourceListProps<
   queryName: QueryName<TQuery>
   itemsKey: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
+  disableOnRowClick?: boolean
 }
 
 const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
@@ -127,6 +128,7 @@ export function ResourceList<
   namespaced = false,
   queryName,
   itemsKey,
+  disableOnRowClick,
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
   const navigate = useNavigate()
   const { cluster, namespace, filter } = useKubernetesContext()
@@ -191,14 +193,18 @@ export function ResourceList<
         isFetchingNextPage={loading}
         reactTableOptions={reactTableOptions}
         virtualizeRows
-        onRowClick={(_, row: Row<ResourceT>) => {
-          navigate(
-            getResourceDetailsRelPath(
-              row.original.objectMeta.name!,
-              row.original.objectMeta.namespace
-            )
-          )
-        }}
+        onRowClick={
+          disableOnRowClick || loading
+            ? undefined
+            : (_, row: Row<ResourceT>) => {
+                navigate(
+                  getResourceDetailsRelPath(
+                    row.original.objectMeta.name!,
+                    row.original.objectMeta.namespace
+                  )
+                )
+              }
+        }
         css={{
           maxHeight: 'unset',
           height: '100%',
