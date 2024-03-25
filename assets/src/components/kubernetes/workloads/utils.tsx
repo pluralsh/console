@@ -109,3 +109,29 @@ export function WorkloadStatusChip({ podInfo }: { podInfo: PodInfoT }) {
     </WrapWithIf>
   )
 }
+
+export function WorkloadImages({ images }: { images: Maybe<string>[] }) {
+  if (isEmpty(images)) return null
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        maxWidth: 300,
+      }}
+    >
+      {images.map((image) => (
+        <span
+          css={{
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {image}
+        </span>
+      ))}
+    </div>
+  )
+}

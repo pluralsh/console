@@ -12,7 +12,7 @@ import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
-import { CronJobSuspendChip } from './utils'
+import { CronJobSuspendChip, WorkloadImages } from './utils'
 
 const columnHelper = createColumnHelper<CronJobT>()
 
@@ -25,27 +25,7 @@ const colSchedule = columnHelper.accessor((cj) => cj.schedule, {
 const colImages = columnHelper.accessor((cj) => cj.containerImages, {
   id: 'images',
   header: 'Images',
-  cell: ({ getValue }) => (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        maxWidth: 300,
-      }}
-    >
-      {getValue()?.map((image) => (
-        <span
-          css={{
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {image}
-        </span>
-      ))}
-    </div>
-  ),
+  cell: ({ getValue }) => <WorkloadImages images={getValue()} />,
 })
 
 const colSuspend = columnHelper.accessor((cj) => cj.suspend, {
