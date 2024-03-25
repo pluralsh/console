@@ -3,6 +3,8 @@ import { useMemo } from 'react'
 
 import { ChipList } from '@pluralsh/design-system'
 
+import { Link } from 'react-router-dom'
+
 import {
   Persistentvolumeclaim_PersistentVolumeClaimList as PersistentVolumeClaimListT,
   Persistentvolumeclaim_PersistentVolumeClaim as PersistentVolumeClaimT,
@@ -40,16 +42,16 @@ const colVolume = columnHelper.accessor((pvc) => pvc.volume, {
     }
 
     return (
-      <InlineLink
-        href={getResourceDetailsAbsPath(
+      <Link
+        to={getResourceDetailsAbsPath(
           cluster?.id,
           'persistentvolume',
-          getValue()!
+          getValue()
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        {getValue()}
-      </InlineLink>
+        <InlineLink>{getValue()}</InlineLink>
+      </Link>
     )
   },
 })
@@ -63,16 +65,12 @@ const colStorageClass = columnHelper.accessor((pvc) => pvc.storageClass, {
     }
 
     return (
-      <InlineLink
-        href={getResourceDetailsAbsPath(
-          cluster?.id,
-          'storageclass',
-          getValue()!
-        )}
+      <Link
+        to={getResourceDetailsAbsPath(cluster?.id, 'storageclass', getValue())}
         onClick={(e) => e.stopPropagation()}
       >
-        {getValue()}
-      </InlineLink>
+        <InlineLink>{getValue()}</InlineLink>
+      </Link>
     )
   },
 })

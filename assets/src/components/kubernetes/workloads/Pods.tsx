@@ -55,7 +55,7 @@ const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
         to={getResourceDetailsAbsPath(cluster?.id, 'node', getValue())}
         onClick={(e) => e.stopPropagation()}
       >
-        {getValue()}
+        <InlineLink>{getValue()}</InlineLink>
       </Link>
     )
   },

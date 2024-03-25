@@ -1,5 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table'
 
+import { Link } from 'react-router-dom'
+
 import {
   Common_EventList as EventListT,
   Common_Event as EventT,
@@ -42,12 +44,12 @@ const colObjectNamespace = columnHelper.accessor(
       }
 
       return (
-        <InlineLink
-          href={getResourceDetailsAbsPath(cluster?.id, 'namespace', namespace!)}
+        <Link
+          to={getResourceDetailsAbsPath(cluster?.id, 'namespace', namespace)}
           onClick={(e) => e.stopPropagation()}
         >
-          {getValue()}
-        </InlineLink>
+          <InlineLink>{getValue()}</InlineLink>
+        </Link>
       )
     },
   }

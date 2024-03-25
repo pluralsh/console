@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
 import { ChipList } from '@pluralsh/design-system'
+import { Link } from 'react-router-dom'
 
 import {
   Persistentvolume_PersistentVolumeList as PersistentVolumeListT,
@@ -15,10 +15,7 @@ import { ResourceList } from '../ResourceList'
 
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
-import {
-  STORAGE_CLASSES_REL_PATH,
-  getStorageResourceDetailsAbsPath,
-} from '../../../routes/kubernetesRoutesConsts'
+import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 
 import { PVStatusChip } from './utils'
 
@@ -40,17 +37,17 @@ const colClaim = columnHelper.accessor((pv) => pv.claim, {
     const [name, namespace] = (getValue() ?? '').split('/')
 
     return (
-      <InlineLink
-        href={getStorageResourceDetailsAbsPath(
-          STORAGE_CLASSES_REL_PATH,
+      <Link
+        to={getResourceDetailsAbsPath(
           cluster?.id,
+          'persistentvolumeclaim',
           name,
           namespace
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        {getValue()}
-      </InlineLink>
+        <InlineLink>{getValue()}</InlineLink>
+      </Link>
     )
   },
 })
@@ -64,16 +61,12 @@ const colStorageClass = columnHelper.accessor((pv) => pv.storageClass, {
     }
 
     return (
-      <InlineLink
-        href={getStorageResourceDetailsAbsPath(
-          STORAGE_CLASSES_REL_PATH,
-          cluster?.id,
-          getValue()
-        )}
+      <Link
+        to={getResourceDetailsAbsPath(cluster?.id, 'storageclass', getValue())}
         onClick={(e) => e.stopPropagation()}
       >
-        {getValue()}
-      </InlineLink>
+        <InlineLink>{getValue()}</InlineLink>
+      </Link>
     )
   },
 })
