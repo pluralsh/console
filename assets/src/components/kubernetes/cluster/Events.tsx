@@ -14,7 +14,7 @@ import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import {
   NAMESPACES_REL_PATH,
-  getClusterResourceDetailsAbsPath,
+  getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { EventTypeChip } from './utils'
@@ -43,11 +43,7 @@ const colObjectNamespace = columnHelper.accessor(
 
       return (
         <InlineLink
-          href={getClusterResourceDetailsAbsPath(
-            NAMESPACES_REL_PATH,
-            cluster?.id,
-            namespace
-          )}
+          href={getResourceDetailsAbsPath(cluster?.id, 'namespace', namespace!)}
           onClick={(e) => e.stopPropagation()}
         >
           {getValue()}

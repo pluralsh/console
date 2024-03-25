@@ -1,3 +1,5 @@
+import * as pluralize from 'pluralize'
+
 export const KUBERNETES_OPTIONAL_PARAM_CLUSTER = ':clusterId?'
 export const KUBERNETES_ABS_PATH = getKubernetesAbsPath(
   KUBERNETES_OPTIONAL_PARAM_CLUSTER
@@ -92,8 +94,8 @@ export function getResourceDetailsAbsPath(
   namespace?: Nullable<string>
 ): string {
   return namespace
-    ? `/kubernetes/${clusterId}/${kind}s/${namespace}/${name}`
-    : `/kubernetes/${clusterId}/${kind}s/${name}`
+    ? `/kubernetes/${clusterId}/${pluralize(kind)}/${namespace}/${name}`
+    : `/kubernetes/${clusterId}/${pluralize(kind)}/${name}`
 }
 
 export function getStorageResourceDetailsAbsPath(

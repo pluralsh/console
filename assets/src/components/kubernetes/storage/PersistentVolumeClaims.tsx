@@ -16,9 +16,8 @@ import { ResourceList } from '../ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import {
-  PERSISTENT_VOLUME_REL_PATH,
   STORAGE_CLASSES_REL_PATH,
-  getClusterResourceDetailsAbsPath,
+  getResourceDetailsAbsPath,
   getStorageResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
@@ -42,10 +41,10 @@ const colVolume = columnHelper.accessor((pvc) => pvc.volume, {
 
     return (
       <InlineLink
-        href={getStorageResourceDetailsAbsPath(
-          PERSISTENT_VOLUME_REL_PATH,
+        href={getResourceDetailsAbsPath(
           cluster?.id,
-          getValue()
+          'persistentvolume',
+          getValue()!
         )}
         onClick={(e) => e.stopPropagation()}
       >
@@ -65,10 +64,10 @@ const colStorageClass = columnHelper.accessor((pvc) => pvc.storageClass, {
 
     return (
       <InlineLink
-        href={getStorageResourceDetailsAbsPath(
-          STORAGE_CLASSES_REL_PATH,
+        href={getResourceDetailsAbsPath(
           cluster?.id,
-          getValue()
+          'storageclass',
+          getValue()!
         )}
         onClick={(e) => e.stopPropagation()}
       >

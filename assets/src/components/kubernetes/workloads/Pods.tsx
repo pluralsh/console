@@ -11,11 +11,9 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { InlineLink } from '../../utils/typography/InlineLink'
-import {
-  NODES_REL_PATH,
-  getClusterResourceDetailsAbsPath,
-} from '../../../routes/kubernetesRoutesConsts'
 import { ClusterTinyFragment } from '../../../generated/graphql'
+
+import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 
 import { PodStatusChip, WorkloadImages } from './utils'
 
@@ -52,11 +50,7 @@ const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
 
     return (
       <InlineLink
-        href={getClusterResourceDetailsAbsPath(
-          NODES_REL_PATH,
-          cluster?.id,
-          getValue()
-        )}
+        href={getResourceDetailsAbsPath(cluster?.id, 'node', getValue())}
         onClick={(e) => e.stopPropagation()}
       >
         {getValue()}

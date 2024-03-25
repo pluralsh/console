@@ -1,20 +1,17 @@
 import uniqWith from 'lodash/uniqWith'
 import { useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
-
 import { ChipList } from '@pluralsh/design-system'
 
 import {
   Types_ListMeta as ListMetaT,
   Types_ObjectMeta as ObjectMetaT,
+  Types_TypeMeta as TypeMetaT,
 } from '../../generated/graphql-kubernetes'
 import { DateTimeCol } from '../utils/table/DateTimeCol'
 import { ClusterTinyFragment } from '../../generated/graphql'
 import { InlineLink } from '../utils/typography/InlineLink'
-import {
-  NAMESPACES_REL_PATH,
-  getClusterResourceDetailsAbsPath,
-} from '../../routes/kubernetesRoutesConsts'
+import { getResourceDetailsAbsPath } from '../../routes/kubernetesRoutesConsts'
 
 export const ITEMS_PER_PAGE = 25
 
@@ -24,7 +21,10 @@ export const DEFAULT_DATA_SELECT = {
 }
 
 export function useDefaultColumns<
-  T extends { objectMeta: ObjectMetaT } = { objectMeta: ObjectMetaT },
+  T extends { objectMeta: ObjectMetaT; typeMeta: TypeMetaT } = {
+    objectMeta: ObjectMetaT
+    typeMeta: TypeMetaT
+  },
 >(columnHelper: ColumnHelper<T>) {
   return useMemo(
     () => ({
@@ -39,7 +39,7 @@ export function useDefaultColumns<
         id: 'namespace',
         header: 'Namespace',
         enableSorting: true,
-        cell: ({ getValue, table }) => {
+        cell: ({ getValue, table, row }) => {
           const namespace = getValue()
 
           if (!namespace) return null
@@ -50,10 +50,10 @@ export function useDefaultColumns<
 
           return (
             <InlineLink
-              href={getClusterResourceDetailsAbsPath(
-                NAMESPACES_REL_PATH,
+              href={getResourceDetailsAbsPath(
                 cluster?.id,
-                namespace
+                'namespace',
+                row.original.objectMeta.namespace!
               )}
               onClick={(e) => e.stopPropagation()}
             >

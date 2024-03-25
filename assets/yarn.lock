@@ -9574,6 +9574,7 @@ __metadata:
     moment-timezone: 0.5.43
     npm-run-all: 4.1.5
     phoenix: 1.7.3
+    pluralize: 8.0.0
     pluralsh-absinthe-socket-apollo-link: 0.2.0
     prettier: 3.0.3
     query-string: 8.1.0
@@ -16271,6 +16272,13 @@ __metadata:
   dependencies:
     find-up: ^3.0.0
   checksum: 5bac346b7c7c903613c057ae3ab722f320716199d753f4a7d053d38f2b5955460f3e6ab73b4762c62fd3e947f58e04f1343e92089e7bb6091c90877406fcd8c8
+  languageName: node
+  linkType: hard
+
+"pluralize@npm:8.0.0":
+  version: 8.0.0
+  resolution: "pluralize@npm:8.0.0"
+  checksum: 08931d4a6a4a5561a7f94f67a31c17e6632cb21e459ab3ff4f6f629d9a822984cf8afef2311d2005fbea5d7ef26016ebb090db008e2d8bce39d0a9a9d218736e
   languageName: node
   linkType: hard
 

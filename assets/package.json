@@ -78,6 +78,7 @@
     "lodash": "4.17.21",
     "moment": "2.29.4",
     "phoenix": "1.7.3",
+    "pluralize": "8.0.0",
     "pluralsh-absinthe-socket-apollo-link": "0.2.0",
     "query-string": "8.1.0",
     "randomcolor": "0.6.2",
