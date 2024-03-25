@@ -15,7 +15,7 @@ import { ResourceList } from '../ResourceList'
 
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 
-import { Usage, UsageText } from '../../cluster/TableElements'
+import { Usage } from '../../cluster/TableElements'
 
 import { NodeReadyChip } from './utils'
 
