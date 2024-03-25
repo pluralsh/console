@@ -612,4 +612,28 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
       assert svc["id"]
     end
   end
+
+  describe "saveManifests" do
+    test "clusters can save manifests" do
+      service = insert(:service)
+
+      {:ok, %{data: %{"saveManifests" => true}}} = run_query("""
+        mutation Save($manifests: [String], $id: ID!) {
+          saveManifests(id: $id, manifests: $manifests)
+        }
+      """, %{"manifests" => ["testing"], "id" => service.id}, %{cluster: service.cluster})
+
+      {:ok, ["testing"]} = Console.Deployments.Services.fetch_manifests(service.id, admin_user())
+    end
+
+    test "clusters cannot save manifests for services on other clusters" do
+      service = insert(:service)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Save($manifests: [String], $id: ID!) {
+          saveManifests(id: $id, manifests: $manifests)
+        }
+      """, %{"manifests" => ["testing"], "id" => service.id}, %{cluster: insert(:cluster)})
+    end
+  end
 end

@@ -98,6 +98,7 @@ defmodule Console.Schema.Service do
     embeds_one :sync_config, SyncConfig, on_replace: :update do
       embeds_many :diff_normalizers, DiffNormalizer
       embeds_one :namespace_metadata, Metadata
+      field :create_namespace, :boolean, default: true
     end
 
     embeds_one :kustomize, Kustomize, on_replace: :update do
@@ -258,7 +259,7 @@ defmodule Console.Schema.Service do
 
   def sync_config_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, [])
+    |> cast(attrs, ~w(create_namespace)a)
     |> cast_embed(:namespace_metadata)
     |> cast_embed(:diff_normalizers)
   end

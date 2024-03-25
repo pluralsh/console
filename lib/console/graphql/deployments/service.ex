@@ -28,6 +28,7 @@ defmodule Console.GraphQl.Deployments.Service do
   end
 
   input_object :sync_config_attributes do
+    field :create_namespace,   :boolean
     field :namespace_metadata, :metadata_attributes
   end
 
@@ -112,14 +113,6 @@ defmodule Console.GraphQl.Deployments.Service do
   @desc "a binding from a service to a service context"
   input_object :context_binding_attributes do
     field :context_id, non_null(:string)
-  end
-
-  @desc "A reference for a globalized service, which targets clusters based on the configured criteria"
-  input_object :global_service_attributes do
-    field :name,        non_null(:string), description: "name for this global service"
-    field :tags,        list_of(:tag_attributes), description: "the cluster tags to target"
-    field :distro,      :cluster_distro, description: "kubernetes distribution to target"
-    field :provider_id, :id, description: "cluster api provider to target"
   end
 
   input_object :kustomize_attributes do
@@ -281,25 +274,6 @@ defmodule Console.GraphQl.Deployments.Service do
     field :component, :service_component, resolve: dataloader(Deployments), description: "the component of this deprecation"
   end
 
-  @desc "a rules based mechanism to redeploy a service across a fleet of clusters"
-  object :global_service do
-    field :id,     non_null(:id), description: "internal id of this global service"
-    field :name,   non_null(:string), description: "a human readable name for this global service"
-    field :tags,   list_of(:tag), description: "a set of tags to select clusters for this global service"
-    field :distro, :cluster_distro, description: "the kubernetes distribution to target with this global service"
-
-    field :service,  :service_deployment, resolve: dataloader(Deployments), description: "the service to replicate across clusters"
-    field :provider, :cluster_provider,   resolve: dataloader(Deployments), description: "whether to only apply to clusters with this provider"
-
-    connection field :services, node_type: :service_deployment do
-      arg :q, :string
-
-      resolve &Deployments.services_for_owner/3
-    end
-
-    timestamps()
-  end
-
   @desc "an error sent from the deploy operator about sync progress"
   object :service_error do
     field :source, non_null(:string)
@@ -320,6 +294,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "Advanced configuration of how to sync resources"
   object :sync_config do
+    field :create_namespace,   :boolean, description: "whether the agent should auto-create the namespace for this service"
     field :namespace_metadata, :namespace_metadata
   end
 
@@ -364,7 +339,6 @@ defmodule Console.GraphQl.Deployments.Service do
 
   connection node_type: :service_deployment
   connection node_type: :revision
-  connection node_type: :global_service
 
   delta :service_deployment
 
@@ -403,6 +377,15 @@ defmodule Console.GraphQl.Deployments.Service do
 
       safe_resolve &Deployments.update_service_components/2
     end
+
+    @desc "save the manifests in cache to be retrieved by the requesting user"
+    field :save_manifests, :boolean do
+      middleware ClusterAuthenticated
+      arg :id, non_null(:id)
+      arg :manifests, list_of(:string)
+
+      safe_resolve &Deployments.save_manifests/2
+    end
   end
 
   object :service_queries do
@@ -425,19 +408,6 @@ defmodule Console.GraphQl.Deployments.Service do
       safe_resolve &Deployments.service_statuses/2
     end
 
-    field :global_service, :global_service do
-      middleware Authenticated
-      arg :id, non_null(:id)
-
-      safe_resolve &Deployments.resolve_global/2
-    end
-
-    connection field :global_services, node_type: :global_service do
-      middleware Authenticated
-
-      safe_resolve &Deployments.list_global_services/2
-    end
-
     field :service_context, :service_context do
       middleware Authenticated
       arg :name, non_null(:string)
@@ -451,6 +421,22 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :id, non_null(:id), description: "the id of the service component for the tree view"
 
       resolve &Deployments.tree/2
+    end
+
+    @desc "request manifests from an agent, to be returned by a future call to fetchManifests"
+    field :request_manifests, :service_deployment do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.request_manifests/2
+    end
+
+    @desc "Fetches the manifests from cache once the agent has given us them, will be null otherwise"
+    field :fetch_manifests, list_of(:string) do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.fetch_manifests/2
     end
   end
 
@@ -549,31 +535,6 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :promotion, :service_promotion
 
       resolve &Deployments.proceed/2
-    end
-
-    field :create_global_service, :global_service do
-      middleware Authenticated
-      arg :service_id, :id
-      arg :cluster,    :string, description: "the handle of the cluster for this service"
-      arg :name,       :string
-      arg :attributes, non_null(:global_service_attributes)
-
-      safe_resolve &Deployments.create_global_service/2
-    end
-
-    field :update_global_service, :global_service do
-      middleware Authenticated
-      arg :id, non_null(:id)
-      arg :attributes, non_null(:global_service_attributes)
-
-      safe_resolve &Deployments.update_global_service/2
-    end
-
-    field :delete_global_service, :global_service do
-      middleware Authenticated
-      arg :id, non_null(:id)
-
-      safe_resolve &Deployments.delete_global_service/2
     end
 
     field :save_service_context, :service_context do

@@ -78,8 +78,8 @@ end
 
 config :console,
   workspace_root: "/root",
-  git_askpass: "/root/bin/.git-askpass",
-  ssh_askpass: "/root/bin/.ssh-askpass",
+  git_askpass: "/opt/app/bin/.git-askpass",
+  ssh_askpass: "/opt/app/bin/.ssh-askpass",
   git_url: get_env("GIT_URL"),
   branch: get_env("BRANCH_NAME") || "master",
   repo_root: get_env("REPO_ROOT") || "workspace",
@@ -96,7 +96,8 @@ config :console,
   provider: provider,
   build_id: get_env("CONSOLE_BUILD_ID"),
   kas_dns: get_env("KAS_DNS"),
-  byok: get_env("CONSOLE_BYOK") == "true"
+  byok: get_env("CONSOLE_BYOK") == "true",
+  airgap: get_env("CONSOLE_AIRGAP") == "true"
 
 if git_url && String.starts_with?(git_url, "https") do
   config :console,
@@ -113,6 +114,12 @@ if !!get_env("CONSOLE_LOGIN_KEY") and get_env("CONSOLE_LOGIN_EMAIL") do
     key: get_env("CONSOLE_LOGIN_KEY"),
     email: get_env("CONSOLE_LOGIN_EMAIL")
 end
+
+if is_set("CONSOLE_ADMIN_EMAILS") do
+  config :console,
+    admin_emails: String.split(get_env("CONSOLE_ADMIN_EMAILS"), ~r/\s*,\s*/, trim: true)
+end
+
 
 if is_set("BACKUP_ACCESS_KEY") and is_set("BACKUP_SECRET_ACCESS_KEY") do
   config :console, :backup_keys,

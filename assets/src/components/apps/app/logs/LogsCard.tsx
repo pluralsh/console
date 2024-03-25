@@ -57,6 +57,7 @@ export function LogsCard({
             search={query}
             loading={loading}
             fetchMore={fetchMore}
+            updateFunc={null}
             onScroll={(arg) => setLive(!arg)}
             addLabel={addLabel}
             fullscreen={fullscreen}

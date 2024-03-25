@@ -1068,6 +1068,16 @@ defmodule Console.Deployments.ServicesAsyncTest do
     end
   end
 
+  describe "#request_manifests/2" do
+    test "an admin can request manifests" do
+      service = insert(:service)
+
+      {:ok, found} = Services.request_manifests(service.id, admin_user())
+
+      assert_receive {:event, %Console.PubSub.ServiceManifestsRequested{item: ^found}}
+    end
+  end
+
   describe "#tarstream/1" do
     test "it can fetch a chart for a helm service" do
       svc = insert(:service, helm: %{chart: "podinfo", version: "5.0", repository: %{name: "podinfo", namespace: "helm-charts"}})

@@ -1,21 +1,45 @@
 {
-    "text": "Cluster <%= @cluster.name %> has been added to your fleet",
-    "blocks": [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "Cluster <%= @cluster.name %> has been added to your fleet",
-            }
-        },
-        {
-			"type": "divider"
-		},
-        {
-            "type": "section",
-            "fields": [
-                {"type": "mrkdwn", "text": "*Url*\n<%= Console.url("/cd/clusters/#{@cluster.id}/services") %>"}
-            ]
-        }
-    ]
+    "text": "🆕 Cluster <%= @cluster.name %> has been added to your fleet",
+	"blocks": [
+		{
+			"type": "rich_text",
+			"elements": [
+				{
+					"type": "rich_text_section",
+					"elements": [
+						{
+							"type": "emoji",
+							"name": "new",
+							"unicode": "1f195",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": " Cluster <%= @cluster.name %> has been added to your fleet",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": "\n\n"
+						},
+						{
+							"type": "text",
+							"text": "URL",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": <%= Console.url("/cd/clusters/#{@cluster.id}/services") %>"
+						}
+					]
+				}
+			]
+		}
+	]
 }

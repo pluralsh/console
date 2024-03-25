@@ -2,8 +2,8 @@ defmodule Console.Deployments.Policies do
   use Piazza.Policy
   import Console.Deployments.Policies.Rbac, only: [rbac: 3]
   alias Console.Repo
-  alias Console.Deployments.{Services, Clusters}
-  alias Console.Schema.{User, Cluster, Service, PipelineGate, ClusterBackup, ClusterRestore}
+  alias Console.Deployments.{Services, Clusters, Global}
+  alias Console.Schema.{User, Cluster, Service, PipelineGate, ClusterBackup, ClusterRestore, ManagedNamespace}
 
   def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
     res = resource(res)
@@ -24,6 +24,15 @@ defmodule Console.Deployments.Policies do
     case Repo.preload(restore, [:backup]) do
       %ClusterRestore{backup: %ClusterBackup{cluster_id: ^id}} -> :pass
       _ -> {:error,  "forbidden"}
+    end
+  end
+
+  def can?(%User{}, %ManagedNamespace{}, :read), do: :pass
+  def can?(%Cluster{} = cluster, %ManagedNamespace{} = ns, :read) do
+    cluster = Repo.preload(cluster, [:tags])
+    case Global.match?(ns, cluster) do
+      true -> :pass
+      _ -> {:error, "this namespace is not bound to the cluster"}
     end
   end
 
@@ -67,6 +76,8 @@ defmodule Console.Deployments.Policies do
     end
   end
   def can?(u, resource, :delete), do: can?(u, %{resource | deleted_at: nil}, :write)
+  def can?(_, %ManagedNamespace{deleted_at: del}, :write) when not is_nil(del),
+    do: {:error, "namespace deleting"}
   def can?(_, %Cluster{deleted_at: del}, :write) when not is_nil(del),
     do: {:error, "cluster deleting"}
   def can?(_, %Service{deleted_at: del}, :write) when not is_nil(del),

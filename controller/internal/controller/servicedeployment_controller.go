@@ -392,7 +392,17 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 		if err != nil {
 			return err
 		}
-		if err := utils.TryAddControllerRef(ctx, r.Client, service, configurationSecret, r.Scheme); err != nil {
+		if err := utils.TryAddOwnerRef(ctx, r.Client, service, configurationSecret, r.Scheme); err != nil {
+			return err
+		}
+	}
+
+	if service.Spec.Helm != nil && service.Spec.Helm.ValuesFrom != nil {
+		valuesSecret, err := utils.GetSecret(ctx, r.Client, service.Spec.Helm.ValuesFrom)
+		if err != nil {
+			return err
+		}
+		if err := utils.TryAddOwnerRef(ctx, r.Client, service, valuesSecret, r.Scheme); err != nil {
 			return err
 		}
 	}
@@ -404,7 +414,7 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 		if err != nil {
 			return err
 		}
-		err = utils.TryAddControllerRef(ctx, r.Client, service, configMap, r.Scheme)
+		err = utils.TryAddOwnerRef(ctx, r.Client, service, configMap, r.Scheme)
 		if err != nil {
 			return err
 		}

@@ -10,7 +10,7 @@ defmodule Console.Schema.PolicyConstraint do
 
     embeds_one :ref, Ref, on_replace: :update do
       field :kind, :string
-      field :name,  :string
+      field :name, :string
     end
 
     has_many :violations, ConstraintViolation,

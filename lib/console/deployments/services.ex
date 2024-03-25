@@ -42,6 +42,40 @@ defmodule Console.Deployments.Services do
   def tarball(%Service{id: id}), do: api_url("v1/git/tarballs?id=#{id}")
 
   @doc """
+  Pushes a request to the relevant agent to gather manifests for a service
+  """
+  @spec request_manifests(binary, User.t) :: service_resp
+  def request_manifests(id, %User{} = user) do
+    get_service!(id)
+    |> allow(user, :write)
+    |> notify(:manifests, user)
+  end
+
+  @doc """
+  Saves the manifests in cache for 30 minutes to be queried by the ui
+  """
+  @spec save_manifests([binary], binary | Service.t, Cluster.t) :: :ok | Console.error
+  def save_manifests(manifests, %Service{id: id, cluster_id: cid}, %Cluster{id: cid}),
+    do: Console.Cache.put({:manifests, id}, manifests, ttl: :timer.minutes(30))
+  def save_manifests(_, %Service{}, %Cluster{}),
+    do: {:error, "service doesn't belong to this cluster"}
+  def save_manifests(manifests, id, %Cluster{} = cluster) when is_binary(id),
+    do: save_manifests(manifests, get_service!(id), cluster)
+
+  @doc """
+  Fetches the manifests from cache at query time
+  """
+  @spec fetch_manifests(binary, User.t) :: {:ok, [binary]} | Console.error
+  def fetch_manifests(id, %User{} = user) do
+    get_service!(id)
+    |> allow(user, :write)
+    |> when_ok(fn _ ->
+      Console.Cache.get({:manifests, id})
+      |> ok()
+    end)
+  end
+
+  @doc """
   Constructs a filestream for the tar artifact of a service, and perhaps performs some JIT modifications
   before sending it upstream to the given client.
   """
@@ -730,6 +764,8 @@ defmodule Console.Deployments.Services do
     do: handle_notify(PubSub.ServiceUpdated, svc, actor: user)
   defp notify({:ok, %Service{} = svc}, :delete, user),
     do: handle_notify(PubSub.ServiceDeleted, svc, actor: user)
+  defp notify({:ok, %Service{} = svc}, :manifests, user),
+    do: handle_notify(PubSub.ServiceManifestsRequested, svc, actor: user)
   defp notify(pass, _, _), do: pass
 
   defp notify({:ok, %Service{} = svc}, :components),

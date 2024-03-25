@@ -26,6 +26,7 @@ import {
 export const gateStateToApprovalText = {
   [GateState.Open]: 'Approved',
   [GateState.Pending]: 'Waiting',
+  [GateState.Running]: 'Running',
   [GateState.Closed]: 'Blocked',
 } as const satisfies Record<GateState, string>
 

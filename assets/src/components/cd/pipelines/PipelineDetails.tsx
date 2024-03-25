@@ -66,7 +66,7 @@ function PipelineHeading({
 }
 
 const tabs = {
-  '': 'Split',
+  split: 'Split',
   graph: 'Graph',
   contexts: 'Contexts',
 } as const
@@ -76,7 +76,7 @@ export function PipelineTabs() {
   const tabStateRef = useRef<any>(null)
 
   const view = searchParams.get('view')
-  const tabKey = view && tabs[view] ? (view as keyof typeof tabs) : ''
+  const tabKey = view && tabs[view] ? (view as keyof typeof tabs) : 'graph'
 
   return (
     <TabList
@@ -224,19 +224,14 @@ function PipelineDetailsBase() {
       )}
     </PipelineEditAreaSC>
   )
+
   const contentContexts = (
     <FullHeightTableWrap>
       <PipelineContexts pipeline={pipeline} />
     </FullHeightTableWrap>
   )
 
-  let content = (
-    <SplitPane
-      id="pipeline-details"
-      pane1={contentGraph}
-      pane2={contentContexts}
-    />
-  )
+  let content = contentGraph
 
   if (view === 'contexts') {
     content = (
@@ -251,8 +246,14 @@ function PipelineDetailsBase() {
         {contentContexts}
       </div>
     )
-  } else if (view === 'graph') {
-    content = contentGraph
+  } else if (view === 'split') {
+    content = (
+      <SplitPane
+        id="pipeline-details"
+        pane1={contentGraph}
+        pane2={contentContexts}
+      />
+    )
   }
 
   return (

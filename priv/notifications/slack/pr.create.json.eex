@@ -1,21 +1,46 @@
 {
-    "text": "New pull request created:\n<%= @pr.title %>",
-    "blocks": [
+	"blocks": [
         {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "New pull request created:\n<%= @pr.title %>",
+                "text": "🖥️ *New pull request created:\\n<%= @pr.title %>*"
             }
         },
-        {
-			"type": "divider"
+		{
+			"type": "rich_text",
+			"elements": [
+				{
+					"type": "rich_text_section",
+					"elements": [
+						{
+							"type": "text",
+							"text": "URL",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": <%= @pr.url %>"
+						}
+					]
+				}
+			]
 		},
-        {
-            "type": "section",
-            "fields": [
-                {"type": "mrkdwn", "text": "*Url*\n<%= @pr.url %>"}
-            ]
-        }
-    ]
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "View PR",
+						"emoji": true
+					},
+					"url": "<%= @pr.url %>"
+				}
+			]
+		}
+	]
 }

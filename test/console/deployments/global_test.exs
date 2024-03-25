@@ -250,4 +250,98 @@ defmodule Console.Deployments.GlobalTest do
       end
     end
   end
+
+  describe "#create_managed_namespace/2" do
+    test "admins can create managed namespaces" do
+      repo = insert(:git_repository)
+
+      {:ok, ns} = Global.create_managed_namespace(%{
+        name: "dev",
+        labels: %{"some" => "label"},
+        service: %{
+          repository_id: repo.id,
+          git: %{ref: "main", folder: "runtime"}
+        }
+      }, admin_user())
+
+      assert ns.name == "dev"
+      assert ns.labels["some"] == "label"
+      assert ns.service.repository_id == repo.id
+      assert ns.service.git.ref == "main"
+      assert ns.service.git.folder == "runtime"
+
+      assert_receive {:event, %PubSub.ManagedNamespaceCreated{item: ^ns}}
+    end
+
+    test "non-admins cannot create" do
+      repo = insert(:git_repository)
+
+      {:error, _} = Global.create_managed_namespace(%{
+        name: "dev",
+        labels: %{"some" => "label"},
+        service: %{
+          repository_id: repo.id,
+          git: %{ref: "main", folder: "runtime"}
+        }
+      }, insert(:user))
+    end
+  end
+
+  describe "#update_managed_namespace/3" do
+    test "admins can update managed namespaces" do
+      repo = insert(:git_repository)
+      ns = insert(:managed_namespace)
+
+      {:ok, updated} = Global.update_managed_namespace(%{
+        name: "dev",
+        labels: %{"some" => "label"},
+        service: %{
+          repository_id: repo.id,
+          git: %{ref: "main", folder: "runtime"}
+        }
+      }, ns.id, admin_user())
+
+      assert updated.id == ns.id
+      assert updated.name == "dev"
+      assert updated.labels["some"] == "label"
+      assert updated.service.repository_id == repo.id
+      assert updated.service.git.ref == "main"
+      assert updated.service.git.folder == "runtime"
+
+      assert_receive {:event, %PubSub.ManagedNamespaceUpdated{item: ^updated}}
+    end
+
+    test "non-admins cannot update" do
+      repo = insert(:git_repository)
+      ns = insert(:managed_namespace)
+
+      {:error, _} = Global.update_managed_namespace(%{
+        name: "dev",
+        labels: %{"some" => "label"},
+        service: %{
+          repository_id: repo.id,
+          git: %{ref: "main", folder: "runtime"}
+        }
+      }, ns.id, insert(:user))
+    end
+  end
+
+  describe "#delete_managed_namespace/2" do
+    test "admins can delete managed namespaces" do
+      ns = insert(:managed_namespace)
+
+      {:ok, deleted} = Global.delete_managed_namespace(ns.id, admin_user())
+
+      assert deleted.id == ns.id
+      refute refetch(deleted)
+
+      assert_receive {:event, %PubSub.ManagedNamespaceDeleted{item: ^deleted}}
+    end
+
+    test "non-admins cannot delete" do
+      ns = insert(:managed_namespace)
+
+      {:error, _} = Global.delete_managed_namespace(ns.id, insert(:user))
+    end
+  end
 end
