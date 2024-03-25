@@ -1,5 +1,6 @@
 import { Navigate, Route } from 'react-router-dom'
 
+import Pod from '../components/kubernetes/workloads/Pod'
 import Kubernetes from '../components/kubernetes/Kubernetes'
 import Workloads from '../components/kubernetes/workloads/Workloads'
 import Discovery from '../components/kubernetes/discovery/Discovery'
@@ -33,6 +34,17 @@ import RoleBindings from '../components/kubernetes/access/RoleBindings'
 import Roles from '../components/kubernetes/access/Roles'
 import Access from '../components/kubernetes/access/Access'
 
+import Deployment from '../components/kubernetes/workloads/Deployment'
+import ReplicaSet from '../components/kubernetes/workloads/ReplicaSet'
+
+import StatefulSet from '../components/kubernetes/workloads/StatefulSet'
+import DaemonSet from '../components/kubernetes/workloads/DaemonSet'
+
+import Job from '../components/kubernetes/workloads/Job'
+import CronJob from '../components/kubernetes/workloads/CronJob'
+
+import ReplicationController from '../components/kubernetes/workloads/ReplicationController'
+
 import {
   ACCESS_REL_PATH,
   CLUSTER_REL_PATH,
@@ -50,6 +62,7 @@ import {
   INGRESS_CLASSES_REL_PATH,
   JOBS_REL_PATH,
   KUBERNETES_ABS_PATH,
+  NAMESPACED_RESOURCE_DETAILS_REL_PATH,
   NAMESPACES_REL_PATH,
   NETWORK_POLICIES_REL_PATH,
   NODES_REL_PATH,
@@ -100,32 +113,79 @@ export const kubernetesRoutes = [
         element={<Deployments />}
       />
       <Route
+        index
+        path={`${DEPLOYMENTS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+        element={<Deployment />}
+      />
+
+      <Route
         path={PODS_REL_PATH}
         element={<Pods />}
       />
+      <Route
+        index
+        path={`${PODS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+        element={<Pod />}
+      />
+
       <Route
         path={REPLICA_SETS_REL_PATH}
         element={<ReplicaSets />}
       />
       <Route
+        index
+        path={`${REPLICA_SETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+        element={<ReplicaSet />}
+      />
+
+      <Route
         path={STATEFUL_SETS_REL_PATH}
         element={<StatefulSets />}
       />
+      <Route
+        index
+        path={`${STATEFUL_SETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+        element={<StatefulSet />}
+      />
+
       <Route
         path={DAEMON_SETS_REL_PATH}
         element={<DaemonSets />}
       />
       <Route
+        index
+        path={`${DAEMON_SETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+        element={<DaemonSet />}
+      />
+
+      <Route
         path={JOBS_REL_PATH}
         element={<Jobs />}
       />
+      <Route
+        index
+        path={`${JOBS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+        element={<Job />}
+      />
+
       <Route
         path={CRON_JOBS_REL_PATH}
         element={<CronJobs />}
       />
       <Route
+        index
+        path={`${CRON_JOBS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+        element={<CronJob />}
+      />
+
+      <Route
         path={REPLICATION_CONTROLLERS_REL_PATH}
         element={<ReplicationControllers />}
+      />
+      <Route
+        index
+        path={`${REPLICATION_CONTROLLERS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+        element={<ReplicationController />}
       />
     </Route>
     <Route

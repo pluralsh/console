@@ -1,11 +1,11 @@
 import {
   Dispatch,
-  type MouseEvent,
   ReactElement,
   SetStateAction,
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
 } from 'react'
 import type { OperationVariables } from '@apollo/client/core'
@@ -13,14 +13,22 @@ import type {
   QueryHookOptions,
   QueryResult,
 } from '@apollo/client/react/types/types'
-import { Row } from '@tanstack/react-table'
 import { Table } from '@pluralsh/design-system'
 
 import styled from 'styled-components'
 
+import { useNavigate } from 'react-router-dom'
+
+import { Row } from '@tanstack/react-table'
+
 import { KubernetesClient } from '../../helpers/kubernetes.client'
-import { Types_ListMeta as ListMetaT } from '../../generated/graphql-kubernetes'
+import {
+  Types_ListMeta as ListMetaT,
+  Types_ObjectMeta as ObjectMetaT,
+} from '../../generated/graphql-kubernetes'
 import { FullHeightTableWrap } from '../utils/layout/FullHeightTableWrap'
+
+import { getResourceDetailsRelPath } from '../../routes/kubernetesRoutesConsts'
 
 import {
   DEFAULT_DATA_SELECT,
@@ -54,6 +62,10 @@ interface ResourceListT {
   listMeta: ListMetaT
 }
 
+interface ResourceT {
+  objectMeta: ObjectMetaT
+}
+
 type QueryName<TQuery> = Exclude<Extract<keyof TQuery, string>, '__typename'>
 type ResourceListItemsKey<TResourceList> = Exclude<
   Extract<keyof TResourceList, string>,
@@ -62,7 +74,6 @@ type ResourceListItemsKey<TResourceList> = Exclude<
 
 interface ResourceListProps<
   TResourceList,
-  TResource,
   TQuery,
   TVariables extends ResourceVariables,
 > {
@@ -73,7 +84,6 @@ interface ResourceListProps<
   queryName: QueryName<TQuery>
   itemsKey: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
-  onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<TResource>) => void
 }
 
 const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
@@ -108,7 +118,7 @@ function SkeletonUnstyled({ ...props }): ReactElement {
 
 export function ResourceList<
   TResourceList extends ResourceListT,
-  TResource,
+  TResource extends ResourceT,
   TQuery,
   TVariables extends ResourceVariables,
 >({
@@ -117,22 +127,11 @@ export function ResourceList<
   namespaced = false,
   queryName,
   itemsKey,
-  onRowClick,
-}: ResourceListProps<
-  TResourceList,
-  TResource,
-  TQuery,
-  TVariables
->): ReactElement {
+}: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
+  const navigate = useNavigate()
   const { cluster, namespace, filter } = useKubernetesContext()
   const { sortBy, reactTableOptions } = useSortedTableOptions()
   const ctx = useContext(ResourceListContext)
-
-  if (!ctx) {
-    throw Error('ResourceList must be used within a ResourceListContext')
-  }
-
-  ctx.setNamespaced(namespaced)
 
   const { data, loading, fetchMore } = query({
     client: KubernetesClient(cluster?.id ?? ''),
@@ -176,6 +175,12 @@ export function ResourceList<
     })
   }, [fetchMore, hasNextPage, page, queryName, itemsKey])
 
+  useEffect(() => {
+    if (!ctx) return
+
+    ctx.setNamespaced(namespaced)
+  }, [ctx, namespaced])
+
   return (
     <FullHeightTableWrap>
       <Table
@@ -186,7 +191,14 @@ export function ResourceList<
         isFetchingNextPage={loading}
         reactTableOptions={reactTableOptions}
         virtualizeRows
-        onRowClick={onRowClick}
+        onRowClick={(_, row: Row<ResourceT>) => {
+          navigate(
+            getResourceDetailsRelPath(
+              row.original.objectMeta.name!,
+              row.original.objectMeta.namespace
+            )
+          )
+        }}
         css={{
           maxHeight: 'unset',
           height: '100%',

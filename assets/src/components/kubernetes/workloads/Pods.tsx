@@ -62,7 +62,7 @@ const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {
   cell: ({ getValue }) => getValue(),
 })
 
-export default function CronPods() {
+export default function Pods() {
   const { colName, colNamespace, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(

@@ -41,6 +41,9 @@ export const NAMESPACES_REL_PATH = 'namespaces'
 
 export const CUSTOM_RESOURCES_REL_PATH = 'customresources'
 
+export const NAMESPACED_RESOURCE_DETAILS_REL_PATH = ':namespace/:name'
+export const RESOURCE_DETAILS_REL_PATH = ':name'
+
 export function getKubernetesAbsPath(clusterId: string | null | undefined) {
   return `/kubernetes/${clusterId}`
 }
@@ -67,6 +70,13 @@ export function getClusterAbsPath(clusterId: string | null | undefined) {
 
 export function getAccessAbsPath(clusterId: string | null | undefined) {
   return `/kubernetes/${clusterId}/${ACCESS_REL_PATH}`
+}
+
+export function getResourceDetailsRelPath(
+  name: string,
+  namespace?: Nullable<string>
+): string {
+  return namespace ? `${namespace}/${name}` : name
 }
 
 export function getCustomResourcesAbsPath(
