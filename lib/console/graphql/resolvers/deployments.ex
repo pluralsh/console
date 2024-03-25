@@ -2,7 +2,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.Cluster
   import Console.Deployments.Policies, only: [allow: 3]
   import Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Deployments.{Clusters, Services, Settings, Global, AddOns}
+  alias Console.Deployments.{Clusters, Services, Settings, AddOns}
   alias Console.Schema.{
     Cluster,
     ClusterNodePool,
@@ -41,6 +41,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     RouterFilter,
     PolicyConstraint,
     ConstraintViolation,
+    ManagedNamespace,
+    NamespaceInstance,
+    NamespaceCluster
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -79,6 +82,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(RouterFilter, _), do: RouterFilter
   def query(PolicyConstraint, _), do: PolicyConstraint
   def query(ConstraintViolation, _), do: ConstraintViolation
+  def query(ManagedNamespace, _), do: ManagedNamespace
+  def query(NamespaceInstance, _), do: NamespaceInstance
+  def query(NamespaceCluster, _), do: NamespaceCluster
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -89,6 +95,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Notification
   delegates Console.GraphQl.Resolvers.Deployments.Policy
   delegates Console.GraphQl.Resolvers.Deployments.Observability
+  delegates Console.GraphQl.Resolvers.Deployments.Global
 
   def list_addons(_, _), do: AddOns.addons()
 
@@ -120,16 +127,6 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   defp tag_args(%{tag: _}), do: {[asc: :value], :value}
   defp tag_args(_), do: {[asc: :name], :name}
 
-  def resolve_global(%{id: id}, %{context: %{current_user: user}}) do
-    Global.get!(id)
-    |> allow(user, :read)
-  end
-
-  def list_global_services(args, _) do
-    GlobalService.ordered()
-    |> paginate(args)
-  end
-
   def settings(_, _), do: {:ok, Settings.fetch_consistent()}
 
   def enable(_, %{context: %{current_user: user}}), do: Settings.enable(user)
@@ -139,19 +136,6 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def update_settings(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Settings.update(attrs, user)
-
-  def create_global_service(%{cluster: _, name: _, attributes: attrs} = args, %{context: %{current_user: user}}) do
-    svc = fetch_service(args)
-    Global.create(attrs, svc.id, user)
-  end
-  def create_global_service(%{service_id: sid, attributes: attrs}, %{context: %{current_user: user}}),
-    do: Global.create(attrs, sid, user)
-
-  def update_global_service(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
-    do: Global.update(attrs, id, user)
-
-  def delete_global_service(%{id: id}, %{context: %{current_user: user}}),
-    do: Global.delete(id, user)
 
   def editable(resource, _, %{context: %{current_user: user}}) do
     case allow(resource, user, :write) do

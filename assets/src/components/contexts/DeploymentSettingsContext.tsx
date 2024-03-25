@@ -15,6 +15,18 @@ export function useDeploymentSettings() {
   return ctx || ({} as Partial<DeploymentSettingsFragment>)
 }
 
+export function useLogsEnabled() {
+  const ctx = useDeploymentSettings()
+
+  return !!ctx?.lokiConnection
+}
+
+export function useMetricsEnabled() {
+  const ctx = useDeploymentSettings()
+
+  return !!ctx?.prometheusConnection
+}
+
 export function DeploymentSettingsProvider({
   children,
 }: {

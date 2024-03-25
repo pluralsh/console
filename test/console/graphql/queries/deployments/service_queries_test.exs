@@ -380,4 +380,52 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
              |> ids_equal(globals)
     end
   end
+
+  describe "requestManifests" do
+    test "admins can request manifests" do
+      service = insert(:service)
+
+      {:ok, %{data: %{"requestManifests" => found}}} = run_query("""
+        query Request($id: ID!) {
+          requestManifests(id: $id) { id }
+        }
+      """, %{"id" => service.id}, %{current_user: admin_user()})
+
+
+      assert found["id"] == service.id
+    end
+
+    test "non-admins cannot request manifests" do
+      service = insert(:service)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Request($id: ID!) {
+          requestManifests(id: $id) { id }
+        }
+      """, %{"id" => service.id}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "fetchManifests" do
+    test "admins can fetch manifests" do
+      service = insert(:service)
+      Console.Deployments.Services.save_manifests(["testing"], service.id, service.cluster)
+
+      {:ok, %{data: %{"fetchManifests" => ["testing"]}}} = run_query("""
+        query Fetch($id: ID!) {
+          fetchManifests(id: $id)
+        }
+      """, %{"id" => service.id}, %{current_user: admin_user()})
+    end
+
+    test "non-admins cannot request manifests" do
+      service = insert(:service)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Request($id: ID!) {
+          fetchManifests(id: $id)
+        }
+      """, %{"id" => service.id}, %{current_user: insert(:user)})
+    end
+  end
 end

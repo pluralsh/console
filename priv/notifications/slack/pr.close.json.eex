@@ -1,22 +1,58 @@
 {
-    "text": "Pull Request <%= @pr.status %>:\n<%= @pr.title %>",
-    "blocks": [
-        {
+    "text": "✔ Pull Request Closed <%= @pr.status %>: <%= @pr.title %>"
+	"blocks": [
+         {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "Pull Request <%= @pr.status %>:\n<%= @pr.title %>",
+                "text": "✔ *Pull Request Closed <%= @pr.status %>: <%= @pr.title %>*"
             }
         },
-        {
-			"type": "divider"
+		{
+			"type": "rich_text",
+			"elements": [
+				{
+					"type": "rich_text_section",
+					"elements": [
+						{
+							"type": "text",
+							"text": "URL",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": <%= @pr.url %>\n\n"
+						},
+						{
+							"type": "text",
+							"text": "Status",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": <%= @pr.status %>"
+						}
+					]
+				}
+			]
 		},
-        {
-            "type": "section",
-            "fields": [
-                {"type": "mrkdwn", "text": "*Url*\n<%= @pr.url %>"}
-                {"type": "mrkdwn", "text": "*Status*\n<%= @pr.status %>"}
-            ]
-        }
-    ]
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "View PR",
+						"emoji": true
+					},
+					"url": "<%= @pr.url %>"
+				}
+			]
+		}
+	]
 }

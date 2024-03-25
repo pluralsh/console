@@ -164,6 +164,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
   def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
   def docs(svc, _, _), do: Services.docs(svc)
 
+  def fetch_manifests(%{id: id}, %{context: %{current_user: user}}),
+    do: Services.fetch_manifests(id, user)
+
+  def request_manifests(%{id: id}, %{context: %{current_user: user}}),
+    do: Services.request_manifests(id, user)
+
+  def save_manifests(%{id: id, manifests: mans}, %{context: %{cluster: cluster}}) do
+    with :ok <- Services.save_manifests(mans, id, cluster),
+      do: {:ok, true}
+  end
+
   defp service_filters(query, args) do
     Enum.reduce(args, query, fn
       {:cluster_id, id}, q -> Service.for_cluster(q, id)

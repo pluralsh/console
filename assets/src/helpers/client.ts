@@ -1,5 +1,4 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client'
-import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
 import { setContext } from 'apollo-link-context'
 import { createLink } from 'apollo-absinthe-upload-link'
 import { onError } from 'apollo-link-error'
@@ -10,21 +9,22 @@ import { RetryLink } from 'apollo-link-retry'
 import { hasSubscription } from '@jumpn/utils-graphql'
 import { split } from 'apollo-link'
 
-import introspection from '../generated/fragments.json'
+import fragments from '../generated/fragments.json'
 
-import { onErrorHandler, onNetworkError } from './refreshToken'
+import { onErrorHandler } from './refreshToken'
 
 import customFetch from './uploadLink'
 import { fetchToken } from './auth'
 
-const fragmentMatcher = new IntrospectionFragmentMatcher({
-  introspectionQueryResultData: introspection,
-})
-
 const GQL_URL = '/gql'
 const WS_URI = '/socket'
 
-export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
+export const authlessClient = new ApolloClient({
+  link: createLink({ uri: GQL_URL }),
+  cache: new InMemoryCache(),
+})
+
+export function buildClient(gqlUrl, wsUrl, fetchToken) {
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
   const authLink = setContext((_, { headers }) => {
@@ -37,7 +37,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const errorLink = onError(onErrorHandler)
 
   const retryLink = new RetryLink({
-    delay: { initial: 200 },
+    delay: { initial: 200, max: 5000 },
     attempts: {
       max: Infinity,
       retryIf: (error) => !!error && !!fetchToken(),
@@ -64,9 +64,10 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   )
 
   const client = new ApolloClient({
+    // @ts-ignore
     link: splitLink,
     cache: new InMemoryCache({
-      fragmentMatcher,
+      possibleTypes: fragments.possibleTypes,
       typePolicies: {
         Command: {
           fields: {
@@ -86,11 +87,6 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   return { client, socket }
 }
 
-const { client, socket } = buildClient(
-  GQL_URL,
-  WS_URI,
-  onNetworkError,
-  fetchToken
-)
+const { client, socket } = buildClient(GQL_URL, WS_URI, fetchToken)
 
 export { client, socket }

@@ -88,6 +88,8 @@ ingress:
     nginx.ingress.kubernetes.io/session-cookie-path: /socket
 
 externalIngress:
+  tls:
+    enabled: true
   ingressClass: nginx
   annotations:
     kubernetes.io/tls-acme: "true"

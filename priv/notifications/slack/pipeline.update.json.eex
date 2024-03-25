@@ -1,21 +1,37 @@
 {
-    "text": "Pipeline <%= @pipe.name %> has pending changes",
-    "blocks": [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "Pipeline <%= @pipe.name %> has pending changes",
-            }
-        },
-        {
-			"type": "divider"
+    "text": "🚰 Pipeline <%= @pipe.name %> has pending changes",
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "🚰 *Pipeline <%= @pipe.name %> has pending changes*"
+			}
 		},
-        {
-            "type": "section",
-            "fields": [
-                {"type": "mrkdwn", "text": "*Url*\n<%= Console.url("/cd/pipelines/#{@pipe.id}") %>"}
-            ]
-        }
-    ]
+		{
+			"type": "rich_text",
+			"elements": [
+				{
+					"type": "rich_text_section",
+					"elements": [
+						{
+							"type": "text",
+							"text": "URL",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": "
+						},
+						{
+							"type": "link",
+							"url": "<%= Console.url("/cd/pipelines/#{@pipe.id}") %>"
+						},
+					]
+				}
+			]
+		}
+	]
 }

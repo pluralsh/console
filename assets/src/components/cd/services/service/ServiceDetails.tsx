@@ -40,6 +40,8 @@ import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 
+import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
+
 import ServiceSelector from '../ServiceSelector'
 
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
@@ -92,9 +94,11 @@ const ErrorsLabel = memo(({ count }: { count: Nullable<number> }) => (
 export const getDirectory = ({
   serviceDeployment,
   docs = null,
+  logsEnabled = false,
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
   docs?: ReturnType<typeof getDocsData> | null
+  logsEnabled?: boolean | undefined
 }): Directory => {
   if (!serviceDeployment) {
     return []
@@ -113,6 +117,7 @@ export const getDirectory = ({
       enabled: true,
     },
     { path: 'settings', label: 'Settings', enabled: true },
+    { path: 'logs', label: 'Logs', enabled: logsEnabled },
     { path: 'secrets', label: 'Secrets', enabled: true },
     { path: 'helm', label: 'Helm values', enabled: !!helm },
     { path: 'dryrun', label: 'Dry run', enabled: !!dryRun },
@@ -137,6 +142,7 @@ function ServiceDetailsBase() {
     serviceId,
   })
   const docPageContext = useDocPageContext()
+  const logsEnabled = useLogsEnabled()
 
   const { data: serviceListData } = useServiceDeploymentsTinyQuery({
     pollInterval: POLL_INTERVAL,
@@ -163,8 +169,9 @@ function ServiceDetailsBase() {
       getDirectory({
         serviceDeployment,
         docs,
+        logsEnabled,
       }),
-    [docs, serviceDeployment]
+    [docs, logsEnabled, serviceDeployment]
   )
 
   return (

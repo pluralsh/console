@@ -34,7 +34,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useEffect, useMemo, useState } from 'react'
-import isEmpty from 'lodash/isEmpty'
 
 import ClusterAddOnDetailsSidecar from './ClusterAddOnDetailsSidecar'
 
@@ -72,28 +71,23 @@ export const getAddOnDetailsBreadcrumbs = ({
     : []),
 ]
 
-const useGetDirectory = (readme: string | null | undefined) =>
-  useMemo(() => {
-    const hasReadme = !isEmpty(readme)
-
-    return [
-      {
-        path: 'compatibility',
-        label: 'Compatibility',
-        enabled: true,
-      },
-      {
-        path: 'releases',
-        label: 'Releases',
-        enabled: true,
-      },
-      {
-        path: 'readme',
-        label: 'Readme',
-        enabled: hasReadme,
-      },
-    ]
-  }, [readme])
+const directory = [
+  {
+    path: 'compatibility',
+    label: 'Compatibility',
+    enabled: true,
+  },
+  {
+    path: 'releases',
+    label: 'Releases',
+    enabled: true,
+  },
+  {
+    path: 'readme',
+    label: 'Readme',
+    enabled: true,
+  },
+]
 
 export default function ClusterAddOnDetails() {
   const theme = useTheme()
@@ -124,7 +118,6 @@ export default function ClusterAddOnDetails() {
 
   useEffect(() => setKubeVersionVar(kubeVersion), [kubeVersion])
   const rts = runtimeServices?.find((rts) => rts?.id === addOnId)
-  const directory = useGetDirectory(rts?.addon?.readme)
 
   useSetBreadcrumbs(
     useMemo(

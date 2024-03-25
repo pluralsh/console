@@ -1,9 +1,10 @@
 import { RefreshDocument, RefreshQuery } from 'generated/graphql'
 import { FetchResult } from '@apollo/client'
+import { NetworkError } from '@apollo/client/errors'
 import { Observable } from 'apollo-link'
 import { ErrorHandler } from 'apollo-link-error'
 
-import { client } from './client'
+import { authlessClient } from './client'
 import {
   fetchRefreshToken,
   setToken,
@@ -13,15 +14,13 @@ import {
 
 export const getRefreshedToken = async () => {
   const refreshToken = fetchRefreshToken()
-  const refreshResolverResponse = await client.query<RefreshQuery>({
+  const refreshResolverResponse = await authlessClient.query<RefreshQuery>({
     query: RefreshDocument,
     variables: { token: refreshToken },
+    fetchPolicy: 'no-cache',
   })
-  const jwt = refreshResolverResponse.data.refresh?.jwt
 
-  setToken(jwt)
-
-  return jwt
+  return refreshResolverResponse?.data?.refresh?.jwt
 }
 
 export const onErrorHandler: ErrorHandler = ({
@@ -33,7 +32,8 @@ export const onErrorHandler: ErrorHandler = ({
   const refreshToken = fetchRefreshToken()
   const is401 = networkError && (networkError as any).statusCode === 401
   const isUnauthenticated = graphQLErrors?.some(
-    (err) => err.message === 'unauthenticated'
+    (err) =>
+      err.message === 'unauthenticated' || err.message === 'invalid_token'
   )
 
   // Attempt to refresh jwt if we have a refresh token and the request is
@@ -44,18 +44,21 @@ export const onErrorHandler: ErrorHandler = ({
       return
     }
 
-    const observable = new Observable<FetchResult>((observer) => {
+    return new Observable<FetchResult>((observer) => {
       ;(async () => {
         try {
           const jwt = await getRefreshedToken()
 
           if (!jwt) {
-            onNetworkError()
+            logout()
+          } else {
+            setToken(jwt)
           }
+
           operation.setContext(({ headers = {} }) => ({
             headers: {
-              authorization: `Bearer ${jwt}`,
               ...headers,
+              authorization: `Bearer ${jwt}`,
             },
           }))
           // Retry the failed request
@@ -68,19 +71,25 @@ export const onErrorHandler: ErrorHandler = ({
           forward(operation).subscribe(subscriber)
         } catch (err) {
           observer.error(err)
-          onNetworkError()
+          // Prevent logout if refresh endpoint is just unreachable
+          if (
+            (err as Nullable<{ networkError?: Nullable<NetworkError> }>)
+              ?.networkError?.message === 'Failed to fetch'
+          ) {
+            return
+          }
+          logout()
         }
       })()
     })
-
-    return observable
   }
+
   if (is401) {
-    onNetworkError()
+    logout()
   }
 }
 
-export function onNetworkError() {
+export function logout() {
   wipeToken()
   wipeRefreshToken()
   window.location = '/login' as any as Location

@@ -1,0 +1,36 @@
+fragment PluralObjectStatus on PluralObjectStatus {
+  id
+  conditions {
+    ...StatusCondition
+  }
+}
+
+fragment PluralServiceDeployment on PluralServiceDeployment {
+  events {
+    ...Event
+  }
+  metadata {
+    ...Metadata
+  }
+  reference {
+    ...ServiceDeploymentDetails
+  }
+  status {
+    ...PluralObjectStatus
+  }
+  raw
+}
+
+query PluralServiceDeployment(
+  $name: String!
+  $namespace: String!
+  $serviceId: ID
+) {
+  pluralServiceDeployment(
+    name: $name
+    namespace: $namespace
+    serviceId: $serviceId
+  ) {
+    ...PluralServiceDeployment
+  }
+}

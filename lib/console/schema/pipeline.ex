@@ -35,7 +35,8 @@ defmodule Console.Schema.Pipeline do
       select: %{
         id: p.id,
         pending: sum(fragment("case when ? = 0 then 1 else 0 end", g.state)),
-        closed: sum(fragment("case when ? = 2 then 1 else 0 end", g.state))
+        closed: sum(fragment("case when ? = 2 then 1 else 0 end", g.state)),
+        running: sum(fragment("case when ? = 3 then 1 else 0 end", g.state)),
       }
     )
   end

@@ -33,6 +33,7 @@ export const gateStateToJobText = {
   [GateState.Open]: 'Approved',
   [GateState.Pending]: 'Waiting',
   [GateState.Closed]: 'Blocked',
+  [GateState.Running]: 'Running',
 } as const satisfies Record<GateState, string>
 
 const JobInfoCardSC = styled(StatusCard)(({ theme }) => ({

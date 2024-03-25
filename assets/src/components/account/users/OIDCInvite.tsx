@@ -8,8 +8,9 @@ import {
 import { PluralApi } from 'components/PluralApi'
 import { UserManagementCard } from 'components/apps/app/oidc/UserManagement'
 import { INSTALLATION } from 'components/apps/app/oidc/queries'
+import { LoginContext } from 'components/contexts'
 import { GqlError } from 'components/utils/Alert'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 
 function OIDCInner() {
   const { data, error } = useQuery(INSTALLATION, {
@@ -40,7 +41,12 @@ function OIDCInner() {
 }
 
 export function OIDCInvite() {
+  const login = useContext(LoginContext)
   const [open, setOpen] = useState(false)
+
+  if (login?.configuration?.externalOidc) {
+    return null
+  }
 
   return (
     <>

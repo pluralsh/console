@@ -10,12 +10,11 @@ defmodule Console.Schema.Cluster do
     PolicyBinding,
     User,
     Tag,
-    GlobalService,
     ProviderCredential,
     ServiceError,
     PrAutomation,
     ClusterRestore,
-    ObjectStore
+    ObjectStore,
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
@@ -159,14 +158,21 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: c.name == ^name)
   end
 
-  def target(query \\ __MODULE__, %GlobalService{} = global) do
-    Map.take(global, [:provider_id, :tags, :distro])
+  def target(query \\ __MODULE__, %{} = resource) do
+    Map.take(resource, [:provider_id, :tags, :distro])
     |> Enum.reduce(query, fn
       {:distro, distro}, q when not is_nil(distro) -> for_distro(q, distro)
       {:provider_id, prov_id}, q when is_binary(prov_id) -> for_provider(q, prov_id)
       {:tags, [_ | _] = tags}, q -> for_tags(q, tags)
+      {:tags, %{} = tags}, q -> for_tags(q, tags)
       _, q -> q
     end)
+  end
+
+  def or_ids(query \\ __MODULE__, ids)
+  def or_ids(query, []), do: query
+  def or_ids(query, ids) do
+    from(c in query, or_where: c.id in ^ids)
   end
 
   def without_global(query \\ __MODULE__, global_id) do
@@ -245,7 +251,10 @@ defmodule Console.Schema.Cluster do
   end
 
   def for_tags(query \\ __MODULE__, tags) do
-    Enum.reduce(tags, query, fn %{name: n, value: v}, q -> with_tag(q, n, v) end)
+    Enum.reduce(tags, query, fn
+      %{name: n, value: v}, q -> with_tag(q, n, v)
+      {k, v}, q -> with_tag(q, k, v)
+    end)
   end
 
   def ordered(query \\ __MODULE__, order \\ [desc: :self, asc: :name]) do

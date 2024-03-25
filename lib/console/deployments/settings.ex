@@ -40,7 +40,7 @@ defmodule Console.Deployments.Settings do
   """
   @spec agent_helm_values() :: binary | nil
   def agent_helm_values() do
-    case fetch() do
+    case fetch_consistent() do
       %DeploymentSettings{agent_helm_values: vs} when is_binary(vs) and byte_size(vs) > 0 -> vs
       _ -> nil
     end

@@ -251,9 +251,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     @desc "lists OPA constraints registered in this cluster"
     connection field :policy_constraints, node_type: :policy_constraint do
-      arg :namespace, :string, description: "only show constraints with a violation for the given namespace"
-      arg :kind,      :string, description: "only show constraints with a violation for the given kind"
-      arg :q,         :string
+      arg :namespace,  :string, description: "only show constraints with a violation for the given namespace"
+      arg :kind,       :string, description: "only show constraints with a violation for the given kind"
+      arg :kinds,      list_of(:string)
+      arg :namespaces, list_of(:string)
+      arg :q,          :string
 
       resolve &Deployments.list_policy_constraints/3
     end

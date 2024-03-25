@@ -149,6 +149,7 @@ defmodule Console.Services.Users do
     |> add_refresh_token()
     |> execute(extract: :hydrated)
   end
+  def bootstrap_user(_, _), do: {:error, "Failed to bootstrap user, likely missing email claim in oidc id token"}
 
   @spec create_refresh_token(User.t) :: refresh_token_resp
   def create_refresh_token(%User{id: user_id}) do
@@ -208,7 +209,17 @@ defmodule Console.Services.Users do
 
   defp token_attrs(%{"admin" => true} = attrs), do: Map.put(attrs, "roles", %{"admin" => true})
   # defp token_attrs(%{"admin" => false} = attrs), do: Map.put(attrs, "roles", %{"admin" => false})
-  defp token_attrs(attrs), do: attrs
+  defp token_attrs(attrs), do: maybe_admin(attrs)
+
+  defp maybe_admin(%{"email" => email} = attrs) do
+    Console.conf(:admin_emails)
+    |> Enum.member?(email)
+    |> case do
+      true -> Map.put(attrs, "roles", %{"admin" => true})
+      _ -> attrs
+    end
+  end
+  defp maybe_admin(attrs), do: attrs
 
   def temporary_token(%User{} = user) do
     with {:ok, token, _} <- Console.Guardian.encode_and_sign(user, %{}, ttl: {1, :hour}) do

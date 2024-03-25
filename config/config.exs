@@ -50,6 +50,7 @@ config :console,
   ssh_askpass: "bin/.ssh-askpass",
   provider: :aws,
   audit_expiry: 30,
+  admin_emails: [],
   cache_adapter: Console.Cache,
   local_cache: Console.LocalCache,
   version: Mix.Project.config[:version],
@@ -64,8 +65,9 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 config :console, Console.Guardian,
-  issuer: "watchman",
-  secret_key: "watchman_secret"
+  ttl: {30, :minutes},
+  issuer: "console",
+  secret_key: "console_secret" # this gets overwritten in release config
 
 config :console, Console.Repo,
   migration_timestamps: [type: :utc_datetime_usec]
