@@ -13,7 +13,7 @@ import { useDefaultColumns } from '../utils'
 
 import { UsageText } from '../../cluster/TableElements'
 
-import { WorkloadStatusChip } from './utils'
+import { WorkloadImages, WorkloadStatusChip } from './utils'
 
 const columnHelper = createColumnHelper<StatefulSetT>()
 
@@ -21,31 +21,12 @@ const colImages = columnHelper.accessor((ss) => ss, {
   id: 'images',
   header: 'Images',
   cell: ({ getValue }) => {
-    const ss = getValue()
+    const { initContainerImages, containerImages } = getValue()
 
     return (
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          maxWidth: 300,
-        }}
-      >
-        {[
-          ...(ss.initContainerImages ?? []),
-          ...(ss.containerImages ?? []),
-        ]?.map((image) => (
-          <span
-            css={{
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {image}
-          </span>
-        ))}
-      </div>
+      <WorkloadImages
+        images={[...(initContainerImages ?? []), ...(containerImages ?? [])]}
+      />
     )
   },
 })

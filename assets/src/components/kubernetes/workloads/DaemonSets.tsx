@@ -13,7 +13,7 @@ import { ResourceList } from '../ResourceList'
 
 import { UsageText } from '../../cluster/TableElements'
 
-import { WorkloadStatusChip } from './utils'
+import { WorkloadImages, WorkloadStatusChip } from './utils'
 
 const columnHelper = createColumnHelper<DaemonSetT>()
 
@@ -21,31 +21,12 @@ const colImages = columnHelper.accessor((ds) => ds, {
   id: 'images',
   header: 'Images',
   cell: ({ getValue }) => {
-    const ds = getValue()
+    const { initContainerImages, containerImages } = getValue()
 
     return (
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          maxWidth: 300,
-        }}
-      >
-        {[
-          ...(ds.initContainerImages ?? []),
-          ...(ds.containerImages ?? []),
-        ]?.map((image) => (
-          <span
-            css={{
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {image}
-          </span>
-        ))}
-      </div>
+      <WorkloadImages
+        images={[...(initContainerImages ?? []), ...(containerImages ?? [])]}
+      />
     )
   },
 })

@@ -11,34 +11,14 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
-import { PodStatusChip } from './utils'
+import { PodStatusChip, WorkloadImages } from './utils'
 
 const columnHelper = createColumnHelper<PodT>()
 
 const colImages = columnHelper.accessor((pod) => pod?.containerImages, {
   id: 'images',
   header: 'Images',
-  cell: ({ getValue }) => (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        maxWidth: 300,
-      }}
-    >
-      {getValue()?.map((image) => (
-        <span
-          css={{
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {image}
-        </span>
-      ))}
-    </div>
-  ),
+  cell: ({ getValue }) => <WorkloadImages images={getValue()} />,
 })
 
 const colStatus = columnHelper.accessor((pod) => pod, {
@@ -56,6 +36,12 @@ const colStatus = columnHelper.accessor((pod) => pod, {
   },
 })
 
+const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
+  id: 'node',
+  header: 'Node',
+  cell: ({ getValue }) => getValue(),
+})
+
 const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {
   id: 'restarts',
   header: 'Restarts',
@@ -69,9 +55,11 @@ export default function Pods() {
     () => [
       colName,
       colNamespace,
-      colStatus,
-      colRestarts,
+      colNode,
       colImages,
+      colRestarts,
+      // TODO: Add CPU and memory.
+      colStatus,
       colCreationTimestamp,
     ],
     [colName, colNamespace, colCreationTimestamp]

@@ -13,7 +13,7 @@ import { useDefaultColumns } from '../utils'
 
 import { UsageText } from '../../cluster/TableElements'
 
-import { WorkloadStatusChip } from './utils'
+import { WorkloadImages, WorkloadStatusChip } from './utils'
 
 const columnHelper = createColumnHelper<ReplicaSetT>()
 
@@ -21,31 +21,12 @@ const colImages = columnHelper.accessor((rs) => rs, {
   id: 'images',
   header: 'Images',
   cell: ({ getValue }) => {
-    const rs = getValue()
+    const { initContainerImages, containerImages } = getValue()
 
     return (
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          maxWidth: 300,
-        }}
-      >
-        {[
-          ...(rs.initContainerImages ?? []),
-          ...(rs.containerImages ?? []),
-        ]?.map((image) => (
-          <span
-            css={{
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {image}
-          </span>
-        ))}
-      </div>
+      <WorkloadImages
+        images={[...(initContainerImages ?? []), ...(containerImages ?? [])]}
+      />
     )
   },
 })
