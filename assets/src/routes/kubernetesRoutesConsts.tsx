@@ -85,12 +85,13 @@ export function getResourceDetailsRelPath(
   return namespace ? `${namespace}/${name}` : name
 }
 
-export function getNodeAbsPath(
+export function getResourceDetailsAbsPath(
+  resourceRelPath,
   clusterId: string | null | undefined,
   name: string,
   namespace?: Nullable<string>
 ): string {
   return `${getClusterAbsPath(
     clusterId
-  )}/${NODES_REL_PATH}/${getResourceDetailsRelPath(name, namespace)}`
+  )}/${resourceRelPath}/${getResourceDetailsRelPath(name, namespace)}`
 }
