@@ -20,7 +20,7 @@ const colImages = columnHelper.accessor((job) => job, {
   id: 'images',
   header: 'Images',
   cell: ({ getValue }) => {
-    const job = getValue()
+    const { initContainerImages, containerImages } = getValue()
 
     return (
       <div
@@ -30,20 +30,19 @@ const colImages = columnHelper.accessor((job) => job, {
           maxWidth: 300,
         }}
       >
-        {[
-          ...(job.initContainerImages ?? []),
-          ...(job.containerImages ?? []),
-        ]?.map((image) => (
-          <span
-            css={{
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {image}
-          </span>
-        ))}
+        {[...(initContainerImages ?? []), ...(containerImages ?? [])]?.map(
+          (image) => (
+            <span
+              css={{
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {image}
+            </span>
+          )
+        )}
       </div>
     )
   },

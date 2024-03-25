@@ -21,7 +21,7 @@ const colImages = columnHelper.accessor((ds) => ds, {
   id: 'images',
   header: 'Images',
   cell: ({ getValue }) => {
-    const ds = getValue()
+    const { initContainerImages, containerImages } = getValue()
 
     return (
       <div
@@ -31,20 +31,19 @@ const colImages = columnHelper.accessor((ds) => ds, {
           maxWidth: 300,
         }}
       >
-        {[
-          ...(ds.initContainerImages ?? []),
-          ...(ds.containerImages ?? []),
-        ]?.map((image) => (
-          <span
-            css={{
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {image}
-          </span>
-        ))}
+        {[...(initContainerImages ?? []), ...(containerImages ?? [])]?.map(
+          (image) => (
+            <span
+              css={{
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {image}
+            </span>
+          )
+        )}
       </div>
     )
   },
