@@ -19,6 +19,9 @@ query Jobs(
       ...ListMeta
     }
     jobs {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }

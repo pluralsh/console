@@ -4,11 +4,11 @@ import { useTheme } from 'styled-components'
 import { ChipList } from '@pluralsh/design-system'
 
 import {
+  CustomResourceDefinitionsQuery,
+  CustomResourceDefinitionsQueryVariables,
   Types_CustomResourceDefinitionList as CustomResourceListT,
   Types_CustomResourceDefinition as CustomResourceT,
-  CustomResourcesQuery,
-  CustomResourcesQueryVariables,
-  useCustomResourcesQuery,
+  useCustomResourceDefinitionsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
@@ -76,7 +76,7 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
   },
 })
 
-export default function CustomResources() {
+export default function CustomResourceDefinitions() {
   const theme = useTheme()
 
   const { colLabels, colCreationTimestamp } = useDefaultColumns(columnHelper)
@@ -114,11 +114,11 @@ export default function CustomResources() {
         <ResourceList<
           CustomResourceListT,
           CustomResourceT,
-          CustomResourcesQuery,
-          CustomResourcesQueryVariables
+          CustomResourceDefinitionsQuery,
+          CustomResourceDefinitionsQueryVariables
         >
           columns={columns}
-          query={useCustomResourcesQuery}
+          query={useCustomResourceDefinitionsQuery}
           queryName="handleGetCustomResourceDefinitionList"
           itemsKey="items"
         />

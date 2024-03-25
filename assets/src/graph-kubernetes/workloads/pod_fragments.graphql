@@ -1,0 +1,12 @@
+fragment Container on pod_Container {
+  name
+  args
+  commands
+  image
+  livenessProbe @type(name: "v1_Probe") {
+    ...Probe
+  }
+  readinessProbe {
+    ...Probe
+  }
+}

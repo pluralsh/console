@@ -25,10 +25,11 @@ import { KubernetesClient } from '../../helpers/kubernetes.client'
 import {
   Types_ListMeta as ListMetaT,
   Types_ObjectMeta as ObjectMetaT,
+  Types_TypeMeta as TypeMetaT,
 } from '../../generated/graphql-kubernetes'
 import { FullHeightTableWrap } from '../utils/layout/FullHeightTableWrap'
 
-import { getResourceDetailsRelPath } from '../../routes/kubernetesRoutesConsts'
+import { getResourceDetailsAbsPath } from '../../routes/kubernetesRoutesConsts'
 
 import {
   DEFAULT_DATA_SELECT,
@@ -64,6 +65,7 @@ interface ResourceListT {
 
 interface ResourceT {
   objectMeta: ObjectMetaT
+  typeMeta: TypeMetaT
 }
 
 type QueryName<TQuery> = Exclude<Extract<keyof TQuery, string>, '__typename'>
@@ -198,7 +200,9 @@ export function ResourceList<
             ? undefined
             : (_, row: Row<ResourceT>) => {
                 navigate(
-                  getResourceDetailsRelPath(
+                  getResourceDetailsAbsPath(
+                    cluster?.id,
+                    row.original.typeMeta.kind!,
                     row.original.objectMeta.name!,
                     row.original.objectMeta.namespace
                   )

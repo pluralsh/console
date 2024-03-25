@@ -1,4 +1,4 @@
-query CustomResources(
+query CustomResourceDefinitions(
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
@@ -17,6 +17,9 @@ query CustomResources(
       totalItems
     }
     items {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }

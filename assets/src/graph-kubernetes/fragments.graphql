@@ -2,6 +2,12 @@ fragment ListMeta on types_ListMeta {
   totalItems
 }
 
+fragment TypeMeta on types_TypeMeta {
+  kind
+  restartable
+  scalable
+}
+
 fragment ObjectMeta on types_ObjectMeta {
   uid
   name
@@ -11,14 +17,49 @@ fragment ObjectMeta on types_ObjectMeta {
   creationTimestamp
 }
 
+fragment Condition on common_Condition {
+  message
+  type
+  status
+  lastProbeTime
+  lastTransitionTime
+  reason
+}
+
+fragment Probe on v1_Probe {
+  exec {
+    command
+  }
+  failureThreshold
+  initialDelaySeconds
+  periodSeconds
+  successThreshold
+  terminationGracePeriodSeconds
+  timeoutSeconds
+}
+
 fragment PodInfo on common_PodInfo {
-  desired
-  succeeded
   current
-  running
-  pending
+  desired
   failed
+  pending
+  running
+  succeeded
   warnings {
-    message
+    ...Event
+  }
+}
+
+fragment ResourceOwner on controller_ResourceOwner {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  containerImages
+  initContainerImages
+  pods {
+    ...PodInfo
   }
 }
