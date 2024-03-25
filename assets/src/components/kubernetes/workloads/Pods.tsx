@@ -1,6 +1,8 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
+import { Link } from 'react-router-dom'
+
 import {
   Pod_PodList as PodListT,
   Pod_Pod as PodT,
@@ -49,12 +51,12 @@ const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
     }
 
     return (
-      <InlineLink
-        href={getResourceDetailsAbsPath(cluster?.id, 'node', getValue())}
+      <Link
+        to={getResourceDetailsAbsPath(cluster?.id, 'node', getValue())}
         onClick={(e) => e.stopPropagation()}
       >
         {getValue()}
-      </InlineLink>
+      </Link>
     )
   },
 })

@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
 import { ChipList } from '@pluralsh/design-system'
 
+import { Link } from 'react-router-dom'
+
 import {
   Types_ListMeta as ListMetaT,
   Types_ObjectMeta as ObjectMetaT,
@@ -49,16 +51,16 @@ export function useDefaultColumns<
           }
 
           return (
-            <InlineLink
-              href={getResourceDetailsAbsPath(
+            <Link
+              to={getResourceDetailsAbsPath(
                 cluster?.id,
                 'namespace',
                 row.original.objectMeta.namespace!
               )}
               onClick={(e) => e.stopPropagation()}
             >
-              {getValue()}
-            </InlineLink>
+              <InlineLink>{getValue()}</InlineLink>
+            </Link>
           )
         },
       }),
