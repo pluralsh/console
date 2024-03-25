@@ -36,6 +36,12 @@ const colStatus = columnHelper.accessor((pod) => pod, {
   },
 })
 
+const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
+  id: 'node',
+  header: 'Node',
+  cell: ({ getValue }) => getValue(),
+})
+
 const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {
   id: 'restarts',
   header: 'Restarts',
@@ -49,9 +55,11 @@ export default function Pods() {
     () => [
       colName,
       colNamespace,
-      colStatus,
-      colRestarts,
+      colNode,
       colImages,
+      colRestarts,
+      // TODO: Add CPU and memory.
+      colStatus,
       colCreationTimestamp,
     ],
     [colName, colNamespace, colCreationTimestamp]
