@@ -9,6 +9,7 @@ import {
   Types_ObjectMeta as ObjectMetaT,
 } from '../../generated/graphql-kubernetes'
 import { DateTimeCol } from '../utils/table/DateTimeCol'
+import { ClusterTinyFragment } from '../../generated/graphql'
 
 export const ITEMS_PER_PAGE = 25
 
@@ -75,7 +76,9 @@ export function usePageInfo(items: any[], listMeta: ListMetaT | undefined) {
   return { page, hasNextPage }
 }
 
-export function useSortedTableOptions(options?: TableOptions<any>) {
+export function useSortedTableOptions(
+  options?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
+) {
   const [sorting, setSorting] = useState<SortingState>([])
 
   return useMemo(
