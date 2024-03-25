@@ -48,7 +48,10 @@ const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
     }
 
     return (
-      <InlineLink href={getNodeAbsPath(cluster?.id, getValue())}>
+      <InlineLink
+        href={getNodeAbsPath(cluster?.id, getValue())}
+        onClick={(e) => e.stopPropagation()}
+      >
         {getValue()}
       </InlineLink>
     )
