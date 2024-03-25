@@ -25,6 +25,8 @@ query Deployments(
       pods @type(name: "common_PodInfo") {
         ...PodInfo
       }
+      initContainerImages
+      containerImages
     }
   }
 }

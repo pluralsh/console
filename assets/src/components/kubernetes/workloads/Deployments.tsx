@@ -11,9 +11,57 @@ import {
 import { ResourceList } from '../ResourceList'
 import { useDefaultColumns } from '../utils'
 
+import { UsageText } from '../../cluster/TableElements'
+
 import { WorkloadStatusChip } from './utils'
 
 const columnHelper = createColumnHelper<DeploymentT>()
+
+const colImages = columnHelper.accessor((deployment) => deployment, {
+  id: 'images',
+  header: 'Images',
+  cell: ({ getValue }) => {
+    const { initContainerImages, containerImages } = getValue()
+
+    return (
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          maxWidth: 300,
+        }}
+      >
+        {[...(initContainerImages ?? []), ...(containerImages ?? [])]?.map(
+          (image) => (
+            <span
+              css={{
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {image}
+            </span>
+          )
+        )}
+      </div>
+    )
+  },
+})
+
+const colPods = columnHelper.accessor((deployment) => deployment.pods, {
+  id: 'pods',
+  header: 'Pods',
+  cell: ({ getValue }) => {
+    const podInfo = getValue()
+
+    return (
+      <UsageText>
+        {podInfo.running} / {podInfo.desired}
+      </UsageText>
+    )
+  },
+})
 
 const colStatus = columnHelper.accessor((deployment) => deployment.pods, {
   id: 'status',
@@ -25,7 +73,15 @@ export default function Deployments() {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colStatus, colLabels, colCreationTimestamp],
+    () => [
+      colName,
+      colNamespace,
+      colImages,
+      colPods,
+      colStatus,
+      colLabels,
+      colCreationTimestamp,
+    ],
     [colName, colNamespace, colLabels, colCreationTimestamp]
   )
 
