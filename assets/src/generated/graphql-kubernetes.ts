@@ -4804,7 +4804,7 @@ export type DeploymentsQueryVariables = Exact<{
 }>;
 
 
-export type DeploymentsQuery = { __typename?: 'Query', handleGetDeployments?: { __typename?: 'deployment_DeploymentList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', desired?: number | null, succeeded: number, current: number, running: number, pending: number, failed: number, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } } | null> } | null };
+export type DeploymentsQuery = { __typename?: 'Query', handleGetDeployments?: { __typename?: 'deployment_DeploymentList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', desired?: number | null, succeeded: number, current: number, running: number, pending: number, failed: number, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } } | null> } | null };
 
 export type JobsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -6083,6 +6083,8 @@ export const DeploymentsDocument = gql`
       pods @type(name: "common_PodInfo") {
         ...PodInfo
       }
+      initContainerImages
+      containerImages
     }
   }
 }
