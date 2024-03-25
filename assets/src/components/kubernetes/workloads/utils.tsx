@@ -70,7 +70,7 @@ function podInfoStatus(
   podInfo: PodInfoT
 ): [string, ComponentProps<typeof Chip>['severity']] {
   if (!podInfo) return ['Unknown', 'neutral']
-  const { succeeded, running, pending, failed, warnings } = podInfo
+  const { desired, succeeded, running, pending, failed, warnings } = podInfo
 
   if (!isEmpty(warnings)) return ['Warning', 'danger']
 
@@ -81,6 +81,8 @@ function podInfoStatus(
   if (running > 0) return ['Running', 'success']
 
   if (succeeded > 0) return ['Succeeded', 'success']
+
+  if (desired === 0) return ['Stopped', 'neutral']
 
   return ['Unknown', 'neutral']
 }

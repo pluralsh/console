@@ -25,6 +25,8 @@ query DaemonSets(
       podInfo @type(name: "common_PodInfo") {
         ...PodInfo
       }
+      initContainerImages
+      containerImages
     }
   }
 }

@@ -25,6 +25,8 @@ query StatefulSets(
       podInfo @type(name: "common_PodInfo") {
         ...PodInfo
       }
+      initContainerImages
+      containerImages
     }
   }
 }

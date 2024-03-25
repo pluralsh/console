@@ -4793,7 +4793,7 @@ export type DaemonSetsQueryVariables = Exact<{
 }>;
 
 
-export type DaemonSetsQuery = { __typename?: 'Query', handleGetDaemonSetList?: { __typename?: 'daemonset_DaemonSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, daemonSets: Array<{ __typename?: 'daemonset_DaemonSet', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', desired?: number | null, succeeded: number, current: number, running: number, pending: number, failed: number, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } } | null> } | null };
+export type DaemonSetsQuery = { __typename?: 'Query', handleGetDaemonSetList?: { __typename?: 'daemonset_DaemonSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, daemonSets: Array<{ __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', desired?: number | null, succeeded: number, current: number, running: number, pending: number, failed: number, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } } | null> } | null };
 
 export type DeploymentsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4837,7 +4837,7 @@ export type ReplicaSetsQueryVariables = Exact<{
 }>;
 
 
-export type ReplicaSetsQuery = { __typename?: 'Query', handleGetReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', desired?: number | null, succeeded: number, current: number, running: number, pending: number, failed: number, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } } | null> } | null };
+export type ReplicaSetsQuery = { __typename?: 'Query', handleGetReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', desired?: number | null, succeeded: number, current: number, running: number, pending: number, failed: number, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } } | null> } | null };
 
 export type ReplicationControllersQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4859,7 +4859,7 @@ export type StatefulSetsQueryVariables = Exact<{
 }>;
 
 
-export type StatefulSetsQuery = { __typename?: 'Query', handleGetStatefulSetList?: { __typename?: 'statefulset_StatefulSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', desired?: number | null, succeeded: number, current: number, running: number, pending: number, failed: number, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } } | null> } | null };
+export type StatefulSetsQuery = { __typename?: 'Query', handleGetStatefulSetList?: { __typename?: 'statefulset_StatefulSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', desired?: number | null, succeeded: number, current: number, running: number, pending: number, failed: number, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } } | null> } | null };
 
 export const ListMetaFragmentDoc = gql`
     fragment ListMeta on types_ListMeta {
@@ -6019,6 +6019,8 @@ export const DaemonSetsDocument = gql`
       podInfo @type(name: "common_PodInfo") {
         ...PodInfo
       }
+      initContainerImages
+      containerImages
     }
   }
 }
@@ -6272,6 +6274,8 @@ export const ReplicaSetsDocument = gql`
       podInfo @type(name: "common_PodInfo") {
         ...PodInfo
       }
+      initContainerImages
+      containerImages
     }
   }
 }
@@ -6398,6 +6402,8 @@ export const StatefulSetsDocument = gql`
       podInfo @type(name: "common_PodInfo") {
         ...PodInfo
       }
+      initContainerImages
+      containerImages
     }
   }
 }
