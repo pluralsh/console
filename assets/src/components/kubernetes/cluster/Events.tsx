@@ -10,6 +10,13 @@ import {
 import { ResourceList } from '../ResourceList'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import { InlineLink } from '../../utils/typography/InlineLink'
+import {
+  NAMESPACES_REL_PATH,
+  getClusterResourceDetailsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
 import { EventTypeChip } from './utils'
 
 const columnHelper = createColumnHelper<EventT>()
@@ -25,7 +32,28 @@ const colObjectNamespace = columnHelper.accessor(
   {
     id: 'objectNamespace',
     header: 'Namespace',
-    cell: ({ getValue }) => getValue(),
+    cell: ({ getValue, table }) => {
+      const namespace = getValue()
+
+      if (!namespace) return null
+
+      const { cluster } = table.options.meta as {
+        cluster?: ClusterTinyFragment
+      }
+
+      return (
+        <InlineLink
+          href={getClusterResourceDetailsAbsPath(
+            NAMESPACES_REL_PATH,
+            cluster?.id,
+            namespace
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {getValue()}
+        </InlineLink>
+      )
+    },
   }
 )
 

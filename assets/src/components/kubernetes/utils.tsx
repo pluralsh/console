@@ -13,7 +13,7 @@ import { ClusterTinyFragment } from '../../generated/graphql'
 import { InlineLink } from '../utils/typography/InlineLink'
 import {
   NAMESPACES_REL_PATH,
-  getResourceDetailsAbsPath,
+  getClusterResourceDetailsAbsPath,
 } from '../../routes/kubernetesRoutesConsts'
 
 export const ITEMS_PER_PAGE = 25
@@ -50,7 +50,7 @@ export function useDefaultColumns<
 
           return (
             <InlineLink
-              href={getResourceDetailsAbsPath(
+              href={getClusterResourceDetailsAbsPath(
                 NAMESPACES_REL_PATH,
                 cluster?.id,
                 namespace

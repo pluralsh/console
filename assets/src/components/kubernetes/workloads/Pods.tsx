@@ -13,7 +13,7 @@ import { ResourceList } from '../ResourceList'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import {
   NODES_REL_PATH,
-  getResourceDetailsAbsPath,
+  getClusterResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 
@@ -52,7 +52,7 @@ const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
 
     return (
       <InlineLink
-        href={getResourceDetailsAbsPath(
+        href={getClusterResourceDetailsAbsPath(
           NODES_REL_PATH,
           cluster?.id,
           getValue()

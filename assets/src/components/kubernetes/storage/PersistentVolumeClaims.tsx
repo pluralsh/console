@@ -13,6 +13,15 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import { InlineLink } from '../../utils/typography/InlineLink'
+import {
+  PERSISTENT_VOLUME_REL_PATH,
+  STORAGE_CLASSES_REL_PATH,
+  getClusterResourceDetailsAbsPath,
+  getStorageResourceDetailsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
 import { PVCStatusChip } from './utils'
 
 const columnHelper = createColumnHelper<PersistentVolumeClaimT>()
@@ -26,13 +35,47 @@ const colStatus = columnHelper.accessor((pvc) => pvc.status, {
 const colVolume = columnHelper.accessor((pvc) => pvc.volume, {
   id: 'volume',
   header: 'Volume',
-  cell: ({ getValue }) => getValue(),
+  cell: ({ getValue, table }) => {
+    const { cluster } = table.options.meta as {
+      cluster?: ClusterTinyFragment
+    }
+
+    return (
+      <InlineLink
+        href={getStorageResourceDetailsAbsPath(
+          PERSISTENT_VOLUME_REL_PATH,
+          cluster?.id,
+          getValue()
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {getValue()}
+      </InlineLink>
+    )
+  },
 })
 
 const colStorageClass = columnHelper.accessor((pvc) => pvc.storageClass, {
   id: 'storageClass',
   header: 'Storage class',
-  cell: ({ getValue }) => getValue(),
+  cell: ({ getValue, table }) => {
+    const { cluster } = table.options.meta as {
+      cluster?: ClusterTinyFragment
+    }
+
+    return (
+      <InlineLink
+        href={getStorageResourceDetailsAbsPath(
+          STORAGE_CLASSES_REL_PATH,
+          cluster?.id,
+          getValue()
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {getValue()}
+      </InlineLink>
+    )
+  },
 })
 
 const colAccessModes = columnHelper.accessor((pvc) => pvc.accessModes, {
