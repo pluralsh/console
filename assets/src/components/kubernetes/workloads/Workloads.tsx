@@ -27,7 +27,6 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
-
 import { useKubernetesContext } from '../Kubernetes'
 
 const directory = [

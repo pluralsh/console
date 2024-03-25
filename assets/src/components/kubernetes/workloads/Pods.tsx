@@ -1,7 +1,8 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
 import { Chip, Tooltip, WrapWithIf } from '@pluralsh/design-system'
+
+import { useNavigate } from 'react-router-dom'
 
 import {
   Pod_PodList as PodListT,
@@ -82,7 +83,7 @@ const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {
   cell: ({ getValue }) => getValue(),
 })
 
-export default function CronPods() {
+export default function Pods() {
   const { colName, colNamespace, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
