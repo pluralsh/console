@@ -22,6 +22,11 @@ query DaemonSets(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      podInfo @type(name: "common_PodInfo") {
+        ...PodInfo
+      }
+      initContainerImages
+      containerImages
     }
   }
 }

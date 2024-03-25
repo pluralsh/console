@@ -25,13 +25,9 @@ query Nodes(
       allocatedResources {
         cpuRequests
         cpuRequestsFraction
-        cpuLimits
-        cpuLimitsFraction
         cpuCapacity
         memoryRequests
         memoryRequestsFraction
-        memoryLimits
-        memoryLimitsFraction
         memoryCapacity
         allocatedPods
         podFraction

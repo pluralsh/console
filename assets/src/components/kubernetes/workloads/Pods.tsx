@@ -1,8 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { Chip, Tooltip, WrapWithIf } from '@pluralsh/design-system'
-
-import { useNavigate } from 'react-router-dom'
 
 import {
   Pod_PodList as PodListT,
@@ -14,7 +11,7 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
-import { podStatusToSeverity } from './utils'
+import { PodStatusChip } from './utils'
 
 const columnHelper = createColumnHelper<PodT>()
 
@@ -47,32 +44,14 @@ const colImages = columnHelper.accessor((pod) => pod?.containerImages, {
 const colStatus = columnHelper.accessor((pod) => pod, {
   id: 'status',
   header: 'Status',
-  enableSorting: true,
   cell: ({ getValue }) => {
     const { status, warnings } = getValue()
-    let severity = podStatusToSeverity[status] ?? 'neutral'
-
-    if (warnings?.length > 0) {
-      severity = 'danger'
-    }
 
     return (
-      <WrapWithIf
-        condition={warnings?.length > 0}
-        wrapper={
-          <Tooltip
-            label={warnings?.map((ev) => ev?.message)?.join(', ')}
-            placement="bottom"
-          />
-        }
-      >
-        <Chip
-          size="small"
-          severity={severity}
-        >
-          {status}
-        </Chip>
-      </WrapWithIf>
+      <PodStatusChip
+        status={status}
+        warnings={warnings}
+      />
     )
   },
 })

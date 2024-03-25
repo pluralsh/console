@@ -22,6 +22,11 @@ query ReplicationControllers(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      initContainerImages
+      containerImages
+      podInfo @type(name: "common_PodInfo") {
+        ...PodInfo
+      }
     }
   }
 }

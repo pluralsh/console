@@ -11,13 +11,21 @@ import {
 import { ResourceList } from '../ResourceList'
 import { useDefaultColumns } from '../utils'
 
+import { WorkloadStatusChip } from './utils'
+
 const columnHelper = createColumnHelper<DeploymentT>()
+
+const colStatus = columnHelper.accessor((deployment) => deployment.pods, {
+  id: 'status',
+  header: 'Status',
+  cell: ({ getValue }) => <WorkloadStatusChip podInfo={getValue()} />,
+})
 
 export default function Deployments() {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
+    () => [colName, colNamespace, colStatus, colLabels, colCreationTimestamp],
     [colName, colNamespace, colLabels, colCreationTimestamp]
   )
 
