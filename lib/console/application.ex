@@ -33,7 +33,7 @@ defmodule Console.Application do
       Console.Deployments.Deprecations.Table,
       Console.Deployments.Compatibilities.Table,
       Console.Buffers.Supervisor,
-      Console.Commands.Configuration,
+      # Console.Commands.Configuration,
       Console.Bootstrapper,
       {Absinthe.Subscription, ConsoleWeb.Endpoint},
       Console.Cached.Supervisor,

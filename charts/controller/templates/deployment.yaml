@@ -72,6 +72,10 @@ spec:
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
+        {{ if .Values.global.additionalVolumeMounts }}
+        volumeMounts:
+        {{ toYaml .Values.global.additionalVolumeMounts | nindent 8 }}
+        {{ end }}
         resources: {{- toYaml .Values.controllerManager.manager.resources | nindent 10
           }}
         securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
@@ -83,3 +87,7 @@ spec:
           type: RuntimeDefault
       serviceAccountName: {{ include "controller.fullname" . }}-controller-manager
       terminationGracePeriodSeconds: 10
+      {{ if .Values.global.additionalVolumes }}
+      volumes:
+      {{ toYaml .Valuess.global.additionalVolumes | nindent 6 }}
+      {{ end }}
