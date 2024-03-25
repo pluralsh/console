@@ -1,6 +1,8 @@
-import { Chip } from '@pluralsh/design-system'
+import { Chip, Tooltip, WrapWithIf } from '@pluralsh/design-system'
 
-export const podStatusToSeverity = {
+import { Common_Event, Maybe } from '../../../generated/graphql-kubernetes'
+
+const podStatusSeverity = {
   Running: 'success',
   Completed: 'info',
   Succeeded: 'info',
@@ -22,5 +24,38 @@ export function CronJobSuspendChip({
     >
       {suspend ? 'Suspended' : 'Running'}
     </Chip>
+  )
+}
+
+export function PodStatusChip({
+  status,
+  warnings,
+}: {
+  status: string
+  warnings: Maybe<Common_Event>[]
+}) {
+  let severity = podStatusSeverity[status] ?? 'neutral'
+
+  if (warnings?.length > 0) {
+    severity = 'danger'
+  }
+
+  return (
+    <WrapWithIf
+      condition={warnings?.length > 0}
+      wrapper={
+        <Tooltip
+          label={warnings?.map((ev) => ev?.message)?.join(', ')}
+          placement="bottom"
+        />
+      }
+    >
+      <Chip
+        size="small"
+        severity={severity}
+      >
+        {status}
+      </Chip>
+    </WrapWithIf>
   )
 }
