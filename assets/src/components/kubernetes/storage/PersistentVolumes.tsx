@@ -13,6 +13,13 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import { InlineLink } from '../../utils/typography/InlineLink'
+import {
+  STORAGE_CLASSES_REL_PATH,
+  getStorageResourceDetailsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
 import { PVStatusChip } from './utils'
 
 const columnHelper = createColumnHelper<PersistentVolumeT>()
@@ -26,13 +33,49 @@ const colStatus = columnHelper.accessor((pv) => pv.status, {
 const colClaim = columnHelper.accessor((pv) => pv.claim, {
   id: 'claim',
   header: 'Claim',
-  cell: ({ getValue }) => getValue(),
+  cell: ({ getValue, table }) => {
+    const { cluster } = table.options.meta as {
+      cluster?: ClusterTinyFragment
+    }
+    const [name, namespace] = (getValue() ?? '').split('/')
+
+    return (
+      <InlineLink
+        href={getStorageResourceDetailsAbsPath(
+          STORAGE_CLASSES_REL_PATH,
+          cluster?.id,
+          name,
+          namespace
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {getValue()}
+      </InlineLink>
+    )
+  },
 })
 
 const colStorageClass = columnHelper.accessor((pv) => pv.storageClass, {
   id: 'storageClass',
   header: 'Storage class',
-  cell: ({ getValue }) => getValue(),
+  cell: ({ getValue, table }) => {
+    const { cluster } = table.options.meta as {
+      cluster?: ClusterTinyFragment
+    }
+
+    return (
+      <InlineLink
+        href={getStorageResourceDetailsAbsPath(
+          STORAGE_CLASSES_REL_PATH,
+          cluster?.id,
+          getValue()
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {getValue()}
+      </InlineLink>
+    )
+  },
 })
 
 const colReclaimPolicy = columnHelper.accessor((pv) => pv.reclaimPolicy, {

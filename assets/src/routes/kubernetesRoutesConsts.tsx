@@ -85,13 +85,24 @@ export function getResourceDetailsRelPath(
   return namespace ? `${namespace}/${name}` : name
 }
 
-export function getResourceDetailsAbsPath(
+export function getClusterResourceDetailsAbsPath(
   resourceRelPath,
   clusterId: string | null | undefined,
   name: string,
   namespace?: Nullable<string>
 ): string {
   return `${getClusterAbsPath(
+    clusterId
+  )}/${resourceRelPath}/${getResourceDetailsRelPath(name, namespace)}`
+}
+
+export function getStorageResourceDetailsAbsPath(
+  resourceRelPath,
+  clusterId: string | null | undefined,
+  name: string,
+  namespace?: Nullable<string>
+): string {
+  return `${getStorageAbsPath(
     clusterId
   )}/${resourceRelPath}/${getResourceDetailsRelPath(name, namespace)}`
 }
