@@ -35,15 +35,14 @@ const colCpu = columnHelper.accessor((node) => node?.allocatedResources, {
 
     return (
       <>
-        <UsageText>
-          Requests: {allocatedResources.cpuRequests / 1000} (
-          {Math.round(allocatedResources.cpuRequestsFraction)}%)
-        </UsageText>
-        <UsageText>
-          Limits: {allocatedResources.cpuLimits / 1000} (
-          {Math.round(allocatedResources.cpuLimitsFraction)}%)
-        </UsageText>
-        <UsageText>Capacity: {allocatedResources.cpuCapacity / 1000}</UsageText>
+        <Usage
+          used={allocatedResources.cpuRequests / 1000}
+          total={allocatedResources.cpuCapacity / 1000}
+        />
+        <UsageBar
+          usage={allocatedResources.cpuRequestsFraction / 100}
+          width={120}
+        />
       </>
     )
   },
@@ -57,17 +56,14 @@ const colMemory = columnHelper.accessor((node) => node?.allocatedResources, {
 
     return (
       <>
-        <UsageText>
-          Requests: {filesize(allocatedResources.memoryRequests)} (
-          {Math.round(allocatedResources.memoryRequestsFraction)}%)
-        </UsageText>
-        <UsageText>
-          Limits: {filesize(allocatedResources.memoryLimits)} (
-          {Math.round(allocatedResources.memoryLimitsFraction)}%)
-        </UsageText>
-        <UsageText>
-          Capacity: {filesize(allocatedResources.memoryCapacity)}
-        </UsageText>
+        <Usage
+          used={filesize(allocatedResources.memoryRequests)}
+          total={filesize(allocatedResources.memoryCapacity)}
+        />
+        <UsageBar
+          usage={allocatedResources.memoryRequestsFraction / 100}
+          width={120}
+        />
       </>
     )
   },
