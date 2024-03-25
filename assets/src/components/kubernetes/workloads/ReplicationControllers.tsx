@@ -12,6 +12,8 @@ import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { UsageText } from '../../cluster/TableElements'
 
+import { WorkloadStatusChip } from './utils'
+
 const columnHelper = createColumnHelper<ReplicationControllerT>()
 
 const colImages = columnHelper.accessor((rc) => rc, {
@@ -61,7 +63,13 @@ const colPods = columnHelper.accessor((rc) => rc.podInfo, {
   },
 })
 
-export default function CronReplicationControllers() {
+const colStatus = columnHelper.accessor((rc) => rc.podInfo, {
+  id: 'status',
+  header: 'Status',
+  cell: ({ getValue }) => <WorkloadStatusChip podInfo={getValue()} />,
+})
+
+export default function ReplicationControllers() {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
@@ -70,6 +78,7 @@ export default function CronReplicationControllers() {
       colNamespace,
       colImages,
       colPods,
+      colStatus,
       colLabels,
       colCreationTimestamp,
     ],

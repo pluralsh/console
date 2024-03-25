@@ -24,9 +24,8 @@ query ReplicationControllers(
       }
       initContainerImages
       containerImages
-      podInfo {
-        running
-        desired
+      podInfo @type(name: "common_PodInfo") {
+        ...PodInfo
       }
     }
   }

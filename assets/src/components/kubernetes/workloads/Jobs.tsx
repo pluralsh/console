@@ -12,6 +12,8 @@ import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { UsageText } from '../../cluster/TableElements'
 
+import { WorkloadStatusChip } from './utils'
+
 const columnHelper = createColumnHelper<JobT>()
 
 const colImages = columnHelper.accessor((job) => job, {
@@ -61,6 +63,12 @@ const colPods = columnHelper.accessor((job) => job.podInfo, {
   },
 })
 
+const colStatus = columnHelper.accessor((job) => job.podInfo, {
+  id: 'status',
+  header: 'Status',
+  cell: ({ getValue }) => <WorkloadStatusChip podInfo={getValue()} />,
+})
+
 export default function CronJobs() {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
@@ -70,6 +78,7 @@ export default function CronJobs() {
       colNamespace,
       colImages,
       colPods,
+      colStatus,
       colLabels,
       colCreationTimestamp,
     ],

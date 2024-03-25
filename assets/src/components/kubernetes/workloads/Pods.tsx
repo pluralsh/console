@@ -44,7 +44,6 @@ const colImages = columnHelper.accessor((pod) => pod?.containerImages, {
 const colStatus = columnHelper.accessor((pod) => pod, {
   id: 'status',
   header: 'Status',
-  enableSorting: true,
   cell: ({ getValue }) => {
     const { status, warnings } = getValue()
 

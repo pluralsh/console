@@ -24,15 +24,8 @@ query Jobs(
       }
       initContainerImages
       containerImages
-      podInfo {
-        running
-        pending
-        desired
-        failed
-        succeeded
-        warnings {
-          message
-        }
+      podInfo @type(name: "common_PodInfo") {
+        ...PodInfo
       }
     }
   }

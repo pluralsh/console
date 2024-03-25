@@ -22,6 +22,9 @@ query Deployments(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
+      pods @type(name: "common_PodInfo") {
+        ...PodInfo
+      }
     }
   }
 }

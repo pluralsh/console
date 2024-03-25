@@ -11,13 +11,21 @@ import {
 import { ResourceList } from '../ResourceList'
 import { useDefaultColumns } from '../utils'
 
+import { WorkloadStatusChip } from './utils'
+
 const columnHelper = createColumnHelper<StatefulSetT>()
+
+const colStatus = columnHelper.accessor((ss) => ss.podInfo, {
+  id: 'status',
+  header: 'Status',
+  cell: ({ getValue }) => <WorkloadStatusChip podInfo={getValue()} />,
+})
 
 export default function StatefulSets() {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
+    () => [colName, colNamespace, colStatus, colLabels, colCreationTimestamp],
     [colName, colNamespace, colLabels, colCreationTimestamp]
   )
 

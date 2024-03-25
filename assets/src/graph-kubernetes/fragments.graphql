@@ -10,3 +10,15 @@ fragment ObjectMeta on types_ObjectMeta {
   annotations
   creationTimestamp
 }
+
+fragment PodInfo on common_PodInfo {
+  desired
+  succeeded
+  current
+  running
+  pending
+  failed
+  warnings {
+    message
+  }
+}
