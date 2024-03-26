@@ -73,20 +73,6 @@ export function getClusterAbsPath(clusterId: string | null | undefined) {
 export function getAccessAbsPath(clusterId: string | null | undefined) {
   return `/kubernetes/${clusterId}/${ACCESS_REL_PATH}`
 }
-
-export function getCustomResourcesAbsPath(
-  clusterId: string | null | undefined
-) {
-  return `/kubernetes/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}`
-}
-
-export function getResourceDetailsRelPath(
-  name: string,
-  namespace?: Nullable<string>
-): string {
-  return namespace ? `${namespace}/${name}` : name
-}
-
 export function getResourceDetailsAbsPath(
   clusterId: Nullable<string>,
   kind: string,
@@ -96,15 +82,4 @@ export function getResourceDetailsAbsPath(
   return namespace
     ? `/kubernetes/${clusterId}/${pluralize(kind)}/${namespace}/${name}`
     : `/kubernetes/${clusterId}/${pluralize(kind)}/${name}`
-}
-
-export function getStorageResourceDetailsAbsPath(
-  resourceRelPath,
-  clusterId: string | null | undefined,
-  name: string,
-  namespace?: Nullable<string>
-): string {
-  return `${getStorageAbsPath(
-    clusterId
-  )}/${resourceRelPath}/${getResourceDetailsRelPath(name, namespace)}`
 }

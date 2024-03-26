@@ -7,12 +7,13 @@ import {
 } from 'generated/graphql'
 import { ComponentProps } from 'react'
 
-type ReadinessI = 'Ready' | 'InProgress' | 'Failed' | 'Complete'
+type ReadinessI = 'Ready' | 'InProgress' | 'Failed' | 'Complete' | 'Running'
 export const Readiness = {
   Ready: 'Ready',
   InProgress: 'InProgress',
   Failed: 'Failed',
   Complete: 'Complete',
+  Running: 'Running',
 } as const satisfies Record<ReadinessI, ReadinessI>
 export type ReadinessT = (typeof Readiness)[ReadinessI]
 
@@ -21,6 +22,7 @@ export const readinessToLabel = {
   [Readiness.InProgress]: 'Pending',
   [Readiness.Failed]: 'Failed',
   [Readiness.Complete]: 'Complete',
+  [Readiness.Running]: 'Ready',
 } as const satisfies Record<ReadinessT, string>
 
 export const readinessToContainerLabel = {
@@ -28,6 +30,7 @@ export const readinessToContainerLabel = {
   [Readiness.InProgress]: 'Pending',
   [Readiness.Failed]: 'Failed',
   [Readiness.Complete]: 'Complete',
+  [Readiness.Running]: 'Ready',
 } as const satisfies Record<ReadinessT, string>
 
 export const readinessToSeverity = {
@@ -35,6 +38,7 @@ export const readinessToSeverity = {
   [Readiness.InProgress]: 'info',
   [Readiness.Failed]: 'critical',
   [Readiness.Complete]: 'neutral',
+  [Readiness.Running]: 'success',
 } as const satisfies Record<ReadinessT, ComponentProps<typeof Chip>['severity']>
 
 export const readinessToColor = {
@@ -42,6 +46,7 @@ export const readinessToColor = {
   [Readiness.InProgress]: 'text-warning-light',
   [Readiness.Failed]: 'text-danger-light',
   [Readiness.Complete]: 'text-success-light',
+  [Readiness.Running]: 'text-success-light',
 } as const satisfies Record<ReadinessT, string>
 
 export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
