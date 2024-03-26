@@ -6,7 +6,28 @@ fragment Container on pod_Container {
   livenessProbe @type(name: "v1_Probe") {
     ...Probe
   }
-  readinessProbe {
+  readinessProbe @type(name: "v1_Probe") {
     ...Probe
+  }
+  status @type(name: "v1_ContainerStatus") {
+    name
+    state {
+      running {
+        startedAt
+      }
+      terminated {
+        startedAt
+        reason
+        message
+        containerID
+        exitCode
+        finishedAt
+        signal
+      }
+      waiting {
+        message
+        reason
+      }
+    }
   }
 }

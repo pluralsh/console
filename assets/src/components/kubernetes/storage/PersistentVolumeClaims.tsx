@@ -1,8 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
 import { ChipList } from '@pluralsh/design-system'
-
 import { Link } from 'react-router-dom'
 
 import {
@@ -14,14 +12,9 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
-
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
-import {
-  STORAGE_CLASSES_REL_PATH,
-  getResourceDetailsAbsPath,
-  getStorageResourceDetailsAbsPath,
-} from '../../../routes/kubernetesRoutesConsts'
+import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 
 import { PVCStatusChip } from './utils'
 
