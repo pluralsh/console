@@ -1,12 +1,14 @@
 import uniqWith from 'lodash/uniqWith'
 import { useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
-import { ChipList } from '@pluralsh/design-system'
-
+import { Card, ChipList, Prop } from '@pluralsh/design-system'
 import { Link } from 'react-router-dom'
+import { useTheme } from 'styled-components'
+import moment from 'moment/moment'
 
 import {
   Types_ListMeta as ListMetaT,
+  Maybe,
   Types_ObjectMeta as ObjectMetaT,
   Types_TypeMeta as TypeMetaT,
 } from '../../generated/graphql-kubernetes'
@@ -145,4 +147,49 @@ export function extendConnection(
       [key]: uniq,
     },
   }
+}
+
+// TODO: Add size to prop and use bigger version here.
+export function Metadata({ objectMeta }: { objectMeta?: Maybe<ObjectMetaT> }) {
+  const theme = useTheme()
+
+  if (!objectMeta) return null
+
+  return (
+    <Card
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: theme.spacing.xlarge,
+        }}
+      >
+        <Prop title="Name">{objectMeta.name}</Prop>
+        <Prop title="Namespace">{objectMeta.namespace}</Prop>
+        <Prop title="UID">{objectMeta.uid}</Prop>
+        <Prop title="Creation date">
+          {moment(objectMeta.creationTimestamp).format('lll')}
+        </Prop>
+      </div>
+      <Prop title="Labels">
+        <ChipList
+          limit={5}
+          values={Object.entries(objectMeta.labels || {})}
+          transformValue={(label) => label.join(': ')}
+        />
+      </Prop>
+      <Prop title="Annotations">
+        <ChipList
+          limit={5}
+          values={Object.entries(objectMeta.annotations || {})}
+          transformValue={(annotation) => annotation.join(': ')}
+        />
+      </Prop>
+    </Card>
+  )
 }

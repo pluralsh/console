@@ -12,8 +12,8 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
-import { MetadataGrid, MetadataItem } from '../../utils/Metadata'
 import { SubTitle } from '../../cluster/nodes/SubTitle'
+import { Metadata } from '../utils'
 
 export default function ConfigMap(): ReactElement {
   const theme = useTheme()
@@ -48,6 +48,8 @@ export default function ConfigMap(): ReactElement {
     [cm?.data]
   )
 
+  // TODO: Breadcrumbs here and on the list.
+
   if (loading) return <LoadingIndicator />
 
   return (
@@ -61,10 +63,7 @@ export default function ConfigMap(): ReactElement {
       >
         <section>
           <SubTitle>Metadata</SubTitle>
-          <MetadataGrid heading="Metadata">
-            <MetadataItem heading="Name">{name}</MetadataItem>
-            <MetadataItem heading="Namespace">{namespace}</MetadataItem>
-          </MetadataGrid>
+          <Metadata objectMeta={cm?.objectMeta} />
         </section>
         <section>
           <SubTitle>Data</SubTitle>
