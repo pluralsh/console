@@ -2,7 +2,7 @@ import uniqWith from 'lodash/uniqWith'
 import { useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
 import { Card, ChipList, Prop } from '@pluralsh/design-system'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import moment from 'moment/moment'
 
@@ -13,9 +13,13 @@ import {
   Types_TypeMeta as TypeMetaT,
 } from '../../generated/graphql-kubernetes'
 import { DateTimeCol } from '../utils/table/DateTimeCol'
-import { ClusterTinyFragment } from '../../generated/graphql'
+import {
+  ClusterTinyFragment,
+  useClustersTinyQuery,
+} from '../../generated/graphql'
 import { InlineLink } from '../utils/typography/InlineLink'
 import { getResourceDetailsAbsPath } from '../../routes/kubernetesRoutesConsts'
+import { mapExistingNodes } from '../../utils/graphql'
 
 export const ITEMS_PER_PAGE = 25
 
@@ -149,7 +153,26 @@ export function extendConnection(
   }
 }
 
-// TODO: Add size to prop and use bigger version here.
+export function useKubernetesCluster() {
+  const { clusterId } = useParams()
+
+  const { data } = useClustersTinyQuery({
+    pollInterval: 120_000,
+    fetchPolicy: 'cache-and-network',
+  })
+
+  const clusters = useMemo(
+    () => mapExistingNodes(data?.clusters),
+    [data?.clusters]
+  )
+
+  return useMemo(
+    () => clusters.find(({ id }) => id === clusterId),
+    [clusterId, clusters]
+  )
+}
+
+// TODO: Add size to prop and use bigger version here, use medium chips as well then.
 export function Metadata({ objectMeta }: { objectMeta?: Maybe<ObjectMetaT> }) {
   const theme = useTheme()
 
@@ -178,6 +201,7 @@ export function Metadata({ objectMeta }: { objectMeta?: Maybe<ObjectMetaT> }) {
       </div>
       <Prop title="Labels">
         <ChipList
+          size="small"
           limit={5}
           values={Object.entries(objectMeta.labels || {})}
           transformValue={(label) => label.join(': ')}
@@ -185,6 +209,7 @@ export function Metadata({ objectMeta }: { objectMeta?: Maybe<ObjectMetaT> }) {
       </Prop>
       <Prop title="Annotations">
         <ChipList
+          size="small"
           limit={5}
           values={Object.entries(objectMeta.annotations || {})}
           transformValue={(annotation) => annotation.join(': ')}

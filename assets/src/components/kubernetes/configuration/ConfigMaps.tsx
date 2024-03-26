@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 
 import { createColumnHelper } from '@tanstack/react-table'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import {
@@ -9,12 +11,43 @@ import {
   Configmap_ConfigMap as ConfigMapT,
   ConfigMapsQuery,
   ConfigMapsQueryVariables,
+  Maybe,
   useConfigMapsQuery,
 } from '../../../generated/graphql-kubernetes'
+import {
+  CONFIG_MAPS_REL_PATH,
+  getConfigurationAbsPath,
+  getKubernetesAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import { useKubernetesContext } from '../Kubernetes'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  {
+    label: 'kubernetes',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+  {
+    label: cluster?.name ?? '',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+  {
+    label: 'configuration',
+    url: getConfigurationAbsPath(cluster?.id),
+  },
+  {
+    label: 'config maps',
+    url: `${getConfigurationAbsPath(cluster?.id)}/${CONFIG_MAPS_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<ConfigMapT>()
 
 export default function ConfigMaps() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(

@@ -1,5 +1,5 @@
 import { ReactElement, useMemo } from 'react'
-import { Code } from '@pluralsh/design-system'
+import { Code, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
@@ -13,11 +13,20 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
 import { SubTitle } from '../../cluster/nodes/SubTitle'
-import { Metadata } from '../utils'
+import { Metadata, useKubernetesCluster } from '../utils'
+import { NAMESPACE_PARAM } from '../Kubernetes'
+import {
+  CONFIG_MAPS_REL_PATH,
+  getConfigurationAbsPath,
+  getResourceDetailsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { getBreadcrumbs } from './ConfigMaps'
 
 export default function ConfigMap(): ReactElement {
   const theme = useTheme()
-  const { clusterId, name, namespace } = useParams()
+  const cluster = useKubernetesCluster()
+  const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useConfigMapQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
@@ -48,7 +57,29 @@ export default function ConfigMap(): ReactElement {
     [cm?.data]
   )
 
-  // TODO: Breadcrumbs here and on the list.
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...getBreadcrumbs(cluster),
+        {
+          label: namespace ?? '',
+          url: `${getConfigurationAbsPath(
+            cluster?.id
+          )}/${CONFIG_MAPS_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
+        },
+        {
+          label: name ?? '',
+          url: getResourceDetailsAbsPath(
+            clusterId,
+            'configmap',
+            name,
+            namespace
+          ),
+        },
+      ],
+      [cluster, clusterId, name, namespace]
+    )
+  )
 
   if (loading) return <LoadingIndicator />
 

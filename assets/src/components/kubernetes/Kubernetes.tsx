@@ -141,7 +141,7 @@ export const useKubernetesContext = () => {
   return ctx
 }
 
-const NAMESPACE_PARAM = 'namespace'
+export const NAMESPACE_PARAM = 'namespace'
 
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
