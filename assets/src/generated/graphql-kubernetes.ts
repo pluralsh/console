@@ -4695,6 +4695,14 @@ export type SecretsQueryVariables = Exact<{
 
 export type SecretsQuery = { __typename?: 'Query', handleGetSecretList?: { __typename?: 'secret_SecretList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, secrets: Array<{ __typename?: 'secret_Secret', type: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type SecretQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type SecretQuery = { __typename?: 'Query', handleGetSecretDetail?: { __typename?: 'secret_SecretDetail', type: string, data: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
+
 export type CustomResourceDefinitionsQueryVariables = Exact<{
   filterBy?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
@@ -5638,6 +5646,55 @@ export type SecretsQueryHookResult = ReturnType<typeof useSecretsQuery>;
 export type SecretsLazyQueryHookResult = ReturnType<typeof useSecretsLazyQuery>;
 export type SecretsSuspenseQueryHookResult = ReturnType<typeof useSecretsSuspenseQuery>;
 export type SecretsQueryResult = Apollo.QueryResult<SecretsQuery, SecretsQueryVariables>;
+export const SecretDocument = gql`
+    query Secret($name: String!, $namespace: String!) {
+  handleGetSecretDetail(namespace: $namespace, name: $name) @rest(path: "secret/{args.namespace}/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    type
+    data
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useSecretQuery__
+ *
+ * To run a query within a React component, call `useSecretQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSecretQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSecretQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useSecretQuery(baseOptions: Apollo.QueryHookOptions<SecretQuery, SecretQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SecretQuery, SecretQueryVariables>(SecretDocument, options);
+      }
+export function useSecretLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SecretQuery, SecretQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SecretQuery, SecretQueryVariables>(SecretDocument, options);
+        }
+export function useSecretSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SecretQuery, SecretQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SecretQuery, SecretQueryVariables>(SecretDocument, options);
+        }
+export type SecretQueryHookResult = ReturnType<typeof useSecretQuery>;
+export type SecretLazyQueryHookResult = ReturnType<typeof useSecretLazyQuery>;
+export type SecretSuspenseQueryHookResult = ReturnType<typeof useSecretSuspenseQuery>;
+export type SecretQueryResult = Apollo.QueryResult<SecretQuery, SecretQueryVariables>;
 export const CustomResourceDefinitionsDocument = gql`
     query CustomResourceDefinitions($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetCustomResourceDefinitionList(
