@@ -1,7 +1,17 @@
-import { ReactElement, useMemo } from 'react'
-import { Card, Prop, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { ReactElement, useMemo, useState } from 'react'
+import {
+  Card,
+  EyeClosedIcon,
+  EyeIcon,
+  IconFrame,
+  Prop,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+
+import { createColumnHelper } from '@tanstack/react-table'
 
 import {
   SecretQueryVariables,
@@ -20,6 +30,53 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { getBreadcrumbs } from './Secrets'
+
+type SecretDataEntry = {
+  key: string
+  value: any
+}
+
+function SecretDataValue({ value }: { value: any }) {
+  const theme = useTheme()
+  const [reveal, setReveal] = useState(false)
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: theme.spacing.xxsmall,
+      }}
+    >
+      <IconFrame
+        size="medium"
+        clickable
+        tooltip={reveal ? 'Hide value' : 'Reveal value'}
+        icon={reveal ? <EyeIcon /> : <EyeClosedIcon />}
+        onClick={() => setReveal(() => !reveal)}
+      />
+      <div css={{ wordBreak: 'break-word' }}>
+        {reveal ? atob(value) : value}
+      </div>
+    </div>
+  )
+}
+
+const columnHelper = createColumnHelper<SecretDataEntry>()
+
+const columns = [
+  columnHelper.accessor((row) => row.key, {
+    id: 'key',
+    header: 'Key',
+    meta: { gridTemplate: `fit-content(200px)` },
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor((row) => row.value, {
+    id: 'value',
+    header: 'Value',
+    cell: ({ getValue }) => <SecretDataValue value={getValue()} />,
+  }),
+]
 
 export default function Secret(): ReactElement {
   const theme = useTheme()
@@ -56,6 +113,15 @@ export default function Secret(): ReactElement {
     )
   )
 
+  const secretData: SecretDataEntry[] = useMemo(
+    () =>
+      Object.entries(secret?.data ?? {}).map(([key, value]) => ({
+        key,
+        value,
+      })),
+    [secret?.data]
+  )
+
   if (loading) return <LoadingIndicator />
 
   return (
@@ -84,15 +150,21 @@ export default function Secret(): ReactElement {
         </section>
         <section>
           <SubTitle>Data</SubTitle>
+          {/* TODO: Reveal all button. */}
           <Card
             css={{
               display: 'flex',
-              flexDirection: 'row',
+              flexDirection: 'column',
             }}
           >
-            {Object.entries(secret?.data)?.map(([key, value]) => (
-              <Prop title={key}>{value}</Prop>
-            ))}
+            <Table
+              data={secretData || []}
+              columns={columns}
+              css={{
+                maxHeight: 'unset',
+                height: '100%',
+              }}
+            />
           </Card>
         </section>
       </div>
