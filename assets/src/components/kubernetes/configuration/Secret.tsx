@@ -1,5 +1,5 @@
 import { ReactElement, useMemo } from 'react'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Card, Prop, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -72,7 +72,28 @@ export default function Secret(): ReactElement {
           <Metadata objectMeta={secret?.objectMeta} />
         </section>
         <section>
+          <SubTitle>Info</SubTitle>
+          <Card
+            css={{
+              display: 'flex',
+              flexDirection: 'row',
+            }}
+          >
+            <Prop title="Type">{secret?.type}</Prop>
+          </Card>
+        </section>
+        <section>
           <SubTitle>Data</SubTitle>
+          <Card
+            css={{
+              display: 'flex',
+              flexDirection: 'row',
+            }}
+          >
+            {Object.entries(secret?.data)?.map(([key, value]) => (
+              <Prop title={key}>{value}</Prop>
+            ))}
+          </Card>
         </section>
       </div>
     </ResponsivePageFullWidth>
