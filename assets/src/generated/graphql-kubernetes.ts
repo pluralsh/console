@@ -4676,6 +4676,14 @@ export type ConfigMapsQueryVariables = Exact<{
 
 export type ConfigMapsQuery = { __typename?: 'Query', handleGetConfigMapList?: { __typename?: 'configmap_ConfigMapList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'configmap_ConfigMap', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type ConfigMapQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type ConfigMapQuery = { __typename?: 'Query', handleGetConfigMapDetail?: { __typename?: 'configmap_ConfigMapDetail', data?: any | null, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
+
 export type SecretsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5519,6 +5527,54 @@ export type ConfigMapsQueryHookResult = ReturnType<typeof useConfigMapsQuery>;
 export type ConfigMapsLazyQueryHookResult = ReturnType<typeof useConfigMapsLazyQuery>;
 export type ConfigMapsSuspenseQueryHookResult = ReturnType<typeof useConfigMapsSuspenseQuery>;
 export type ConfigMapsQueryResult = Apollo.QueryResult<ConfigMapsQuery, ConfigMapsQueryVariables>;
+export const ConfigMapDocument = gql`
+    query ConfigMap($name: String!, $namespace: String!) {
+  handleGetConfigMapDetail(namespace: $namespace, configmap: $name) @rest(path: "configmap/{args.namespace}/{args.configmap}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    data
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useConfigMapQuery__
+ *
+ * To run a query within a React component, call `useConfigMapQuery` and pass it any options that fit your needs.
+ * When your component renders, `useConfigMapQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useConfigMapQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useConfigMapQuery(baseOptions: Apollo.QueryHookOptions<ConfigMapQuery, ConfigMapQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ConfigMapQuery, ConfigMapQueryVariables>(ConfigMapDocument, options);
+      }
+export function useConfigMapLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ConfigMapQuery, ConfigMapQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ConfigMapQuery, ConfigMapQueryVariables>(ConfigMapDocument, options);
+        }
+export function useConfigMapSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ConfigMapQuery, ConfigMapQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ConfigMapQuery, ConfigMapQueryVariables>(ConfigMapDocument, options);
+        }
+export type ConfigMapQueryHookResult = ReturnType<typeof useConfigMapQuery>;
+export type ConfigMapLazyQueryHookResult = ReturnType<typeof useConfigMapLazyQuery>;
+export type ConfigMapSuspenseQueryHookResult = ReturnType<typeof useConfigMapSuspenseQuery>;
+export type ConfigMapQueryResult = Apollo.QueryResult<ConfigMapQuery, ConfigMapQueryVariables>;
 export const SecretsDocument = gql`
     query Secrets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetSecretList(

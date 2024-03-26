@@ -12,9 +12,9 @@ query Pods(
     itemsPerPage: $itemsPerPage
     page: $page
   )
-  @rest(
-    path: "pod/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-  ) {
+    @rest(
+      path: "pod/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -36,17 +36,9 @@ query Pods(
   }
 }
 
-query Pod(
-  $name: String!
-  $namespace: String!
-) {
-  handleGetPodDetail(
-    namespace: $namespace
-    pod: $name
-  )
-  @rest(
-    path: "pod/{args.namespace}/{args.pod}"
-  ) {
+query Pod($name: String!, $namespace: String!) {
+  handleGetPodDetail(namespace: $namespace, pod: $name)
+    @rest(path: "pod/{args.namespace}/{args.pod}") {
     objectMeta @type(name: "types_ObjectMeta") {
       ...ObjectMeta
     }

@@ -28,3 +28,16 @@ query ConfigMaps(
     }
   }
 }
+
+query ConfigMap($name: String!, $namespace: String!) {
+  handleGetConfigMapDetail(namespace: $namespace, configmap: $name)
+    @rest(path: "configmap/{args.namespace}/{args.configmap}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    data
+  }
+}
