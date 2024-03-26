@@ -1,5 +1,6 @@
-import { ReactElement, useMemo, useState } from 'react'
+import { ReactElement, useEffect, useMemo, useState } from 'react'
 import {
+  Button,
   Card,
   EyeClosedIcon,
   EyeIcon,
@@ -10,7 +11,6 @@ import {
 } from '@pluralsh/design-system'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-
 import { createColumnHelper } from '@tanstack/react-table'
 
 import {
@@ -36,9 +36,17 @@ type SecretDataEntry = {
   value: any
 }
 
-function SecretDataValue({ value }: { value: any }) {
+function SecretDataValue({
+  value,
+  forceReveal,
+}: {
+  value: any
+  forceReveal: boolean
+}) {
   const theme = useTheme()
   const [reveal, setReveal] = useState(false)
+
+  useEffect(() => setReveal(forceReveal), [setReveal, forceReveal])
 
   return (
     <div
@@ -74,7 +82,17 @@ const columns = [
   columnHelper.accessor((row) => row.value, {
     id: 'value',
     header: 'Value',
-    cell: ({ getValue }) => <SecretDataValue value={getValue()} />,
+    cell: ({ getValue, table }) => {
+      const { revealAll } =
+        (table.options?.meta as { revealAll?: boolean }) || {}
+
+      return (
+        <SecretDataValue
+          value={getValue()}
+          forceReveal={!!revealAll}
+        />
+      )
+    },
   }),
 ]
 
@@ -82,6 +100,7 @@ export default function Secret(): ReactElement {
   const theme = useTheme()
   const cluster = useKubernetesCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
+  const [revealAll, setRevealAll] = useState(false)
   const { data, loading } = useSecretQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
@@ -149,8 +168,24 @@ export default function Secret(): ReactElement {
           </Card>
         </section>
         <section>
-          <SubTitle>Data</SubTitle>
-          {/* TODO: Reveal all button. */}
+          <div
+            css={{
+              ...theme.partials.text.subtitle1,
+              alignItems: 'end',
+              justifyContent: 'space-between',
+              display: 'flex',
+              marginBottom: theme.spacing.medium,
+            }}
+          >
+            <span>Data</span>
+            <Button
+              floating
+              startIcon={revealAll ? <EyeClosedIcon /> : <EyeIcon />}
+              onClick={() => setRevealAll(!revealAll)}
+            >
+              {revealAll ? 'Hide all' : 'Reveal all'}
+            </Button>
+          </div>
           <Card
             css={{
               display: 'flex',
@@ -160,6 +195,7 @@ export default function Secret(): ReactElement {
             <Table
               data={secretData || []}
               columns={columns}
+              reactTableOptions={{ meta: { revealAll } }}
               css={{
                 maxHeight: 'unset',
                 height: '100%',
