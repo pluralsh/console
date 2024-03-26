@@ -45,7 +45,7 @@ function SecretDataValue({ value }: { value: any }) {
       css={{
         display: 'flex',
         alignItems: 'center',
-        gap: theme.spacing.xxsmall,
+        gap: theme.spacing.large,
       }}
     >
       <IconFrame
