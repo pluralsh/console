@@ -64,12 +64,7 @@ export default function PersistentVolume(): ReactElement {
 export function PersistentVolumeInfo(): ReactElement {
   const pv = useOutletContext() as PersistentVolumeT
 
-  return (
-    <section>
-      <SubTitle>Info</SubTitle>
-      {pv.status}
-    </section>
-  )
+  return <section>TODO</section>
 }
 
 export function PersistentVolumeRaw(): ReactElement {

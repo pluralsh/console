@@ -1,17 +1,11 @@
 import { Outlet, useMatch } from 'react-router-dom'
-import {
-  SubTab,
-  TabList,
-  TabPanel,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { Suspense, useMemo, useRef, useState } from 'react'
 
 import {
   PERSISTENT_VOLUMES_REL_PATH,
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
   STORAGE_CLASSES_REL_PATH,
-  getKubernetesAbsPath,
   getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
@@ -50,26 +44,6 @@ export default function Storage() {
   const pathMatch = useMatch(`${getStorageAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
-
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        {
-          label: 'kubernetes',
-          url: getKubernetesAbsPath(cluster?.id),
-        },
-        {
-          label: cluster?.name ?? '',
-          url: getKubernetesAbsPath(cluster?.id),
-        },
-        {
-          label: 'storage',
-          url: getStorageAbsPath(cluster?.id),
-        },
-      ],
-      [cluster]
-    )
-  )
 
   const headerContent = useMemo(
     () => (

@@ -2,9 +2,10 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { useMemo } from 'react'
 
-import { ChipList } from '@pluralsh/design-system'
+import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
+  Maybe,
   Storageclass_StorageClassList as StorageClassListT,
   Storageclass_StorageClass as StorageClassT,
   StorageClassesQuery,
@@ -13,6 +14,32 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import {
+  STORAGE_CLASSES_REL_PATH,
+  getKubernetesAbsPath,
+  getStorageAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+import { useKubernetesContext } from '../Kubernetes'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  {
+    label: 'kubernetes',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+  {
+    label: cluster?.name ?? '',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+  {
+    label: 'storage',
+    url: getStorageAbsPath(cluster?.id),
+  },
+  {
+    label: 'storage classes',
+    url: `${getStorageAbsPath(cluster?.id)}/${STORAGE_CLASSES_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<StorageClassT>()
 
@@ -47,6 +74,10 @@ const colParameters = columnHelper.accessor(
 )
 
 export default function StorageClasses() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
