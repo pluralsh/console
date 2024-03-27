@@ -5919,8 +5919,14 @@ export type ServiceTemplate = {
   helm?: Maybe<HelmSpec>;
   /** settings for service kustomization */
   kustomize?: Maybe<Kustomize>;
+  /** the name for this service (optional for managed namespaces) */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the namespace for this service (optional for managed namespaces) */
+  namespace?: Maybe<Scalars['String']['output']>;
   /** the id of a repository to source manifests for this service */
   repositoryId?: Maybe<Scalars['ID']['output']>;
+  /** specification of how the templated service will be synced */
+  syncConfig?: Maybe<SyncConfig>;
   templated?: Maybe<Scalars['Boolean']['output']>;
 };
 
@@ -5934,8 +5940,14 @@ export type ServiceTemplateAttributes = {
   helm?: InputMaybe<HelmConfigAttributes>;
   /** settings for service kustomization */
   kustomize?: InputMaybe<KustomizeAttributes>;
+  /** the name for this service (optional for managed namespaces) */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the namespace for this service (optional for managed namespaces) */
+  namespace?: InputMaybe<Scalars['String']['input']>;
   /** the id of a repository to source manifests for this service */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  /** attributes to configure sync settings for this service */
+  syncConfig?: InputMaybe<SyncConfigAttributes>;
   templated?: InputMaybe<Scalars['Boolean']['input']>;
 };
 

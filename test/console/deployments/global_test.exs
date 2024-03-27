@@ -136,6 +136,20 @@ defmodule Console.Deployments.GlobalTest do
 
       :ok = Global.sync_service(source, dest, admin)
     end
+
+    test "it can sync a template global service" do
+      git = insert(:git_repository)
+      global = insert(:global_service,
+        template: %{repository_id: git.id, git: %{ref: "main", folder: "/"}, name: "svc", namespace: "prod"})
+      service = insert(:service, name: "svc", namespace: "prod", git: %{ref: "master", folder: "/k8s"})
+
+      {:ok, synced} = Global.sync_service(global, service, admin_user())
+
+      assert synced.id == service.id
+      assert synced.repository_id == git.id
+      assert synced.git.ref == "main"
+      assert synced.git.folder == "/"
+    end
   end
 
   describe "#sync_clusters/1" do
@@ -195,7 +209,7 @@ defmodule Console.Deployments.GlobalTest do
       refute Global.diff?(source, synced)
     end
 
-    test "it will sync to if provider is unspecified" do
+    test "it will sync too if provider is unspecified" do
       insert(:user, bot_name: "console", roles: %{admin: true})
       git = insert(:git_repository)
       cluster = insert(:cluster)
