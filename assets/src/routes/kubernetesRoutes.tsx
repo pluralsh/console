@@ -64,7 +64,9 @@ import IngressClass from '../components/kubernetes/discovery/IngressClass'
 import NetworkPolicy from '../components/kubernetes/discovery/NetworkPolicy'
 import PersistentVolumeClaim from '../components/kubernetes/storage/PersistentVolumeClaim'
 import StorageClass from '../components/kubernetes/storage/StorageClass'
-import ConfigMap from '../components/kubernetes/configuration/ConfigMap'
+import ConfigMap, {
+  ConfigMapInfo,
+} from '../components/kubernetes/configuration/ConfigMap'
 import Namespace from '../components/kubernetes/cluster/Namespace'
 
 import {
@@ -400,10 +402,19 @@ export const kubernetesRoutes = [
   />,
   // Configuration
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${CONFIG_MAPS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<ConfigMap />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<ConfigMapInfo />}
+    />
+    <Route
+      path="raw"
+      element={<SecretRaw />}
+    />
+  </Route>,
   <Route
     path={`${KUBERNETES_ABS_PATH}/${SECRETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<Secret />}
