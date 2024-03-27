@@ -67,7 +67,7 @@ defmodule Console.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 3.9.0", override: true},
+      {:ecto, "~> 3.11.0", override: true},
       {:ex_machina, "~> 2.3", only: :test},
       {:distillery, "~> 2.1"},
       {:libcluster, "~> 3.2"},
