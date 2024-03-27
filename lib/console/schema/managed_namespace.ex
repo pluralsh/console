@@ -1,6 +1,6 @@
 defmodule Console.Schema.ManagedNamespace do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{NamespaceCluster, NamespaceInstance, Cluster}
+  alias Console.Schema.{NamespaceCluster, NamespaceInstance, Cluster, ServiceTemplate}
 
   defmodule Target do
     use Piazza.Ecto.Schema
@@ -58,8 +58,9 @@ defmodule Console.Schema.ManagedNamespace do
     field :pull_secrets, {:array, :string}
     field :deleted_at,   :utc_datetime_usec
 
-    embeds_one :service, ServiceSpec, on_replace: :update
     embeds_one :target,  Target, on_replace: :update
+
+    belongs_to :service, ServiceTemplate, on_replace: :update
 
     has_many :clusters, NamespaceCluster,
       foreign_key: :namespace_id,
@@ -92,6 +93,10 @@ defmodule Console.Schema.ManagedNamespace do
     from(mn in query, order_by: ^order)
   end
 
+  def preloaded(query \\ __MODULE__, preloads \\ [:service]) do
+    from(mn in query, preload: ^preloads)
+  end
+
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
   @valid ~w(name description labels annotations pull_secrets)a
@@ -100,7 +105,7 @@ defmodule Console.Schema.ManagedNamespace do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:target)
-    |> cast_embed(:service)
+    |> cast_assoc(:service)
     |> cast_assoc(:clusters)
     |> validate_required(~w(name)a)
   end

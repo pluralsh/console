@@ -57,6 +57,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.ClusterCreated, Console.Pub
     |> Stream.run()
 
     ManagedNamespace.for_cluster(cluster)
+    |> ManagedNamespace.preloaded()
     |> ManagedNamespace.stream()
     |> Repo.stream(method: :keyset)
     |> Stream.each(&Global.sync_namespace(cluster, &1, bot))

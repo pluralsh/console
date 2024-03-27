@@ -76,6 +76,7 @@ defmodule Console.Deployments.Global do
   @spec update_managed_namespace(map, binary, User.t) :: namespace_resp
   def update_managed_namespace(attrs, namespace_id, %User{} = user) do
     get_namespace!(namespace_id)
+    |> Repo.preload([:service])
     |> ManagedNamespace.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
@@ -136,7 +137,7 @@ defmodule Console.Deployments.Global do
   Ensures a managed namespace is synchronized across all target clusters
   """
   def reconcile_namespace(%ManagedNamespace{} = ns) do
-    ns = Repo.preload(ns, [:clusters])
+    ns = Repo.preload(ns, [:clusters, :service])
     bot = bot()
 
     Cluster.target(ns.target || %{})
