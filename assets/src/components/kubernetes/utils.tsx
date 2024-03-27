@@ -190,7 +190,11 @@ export function MetadataSidecar({
       {objectMeta && (
         <>
           <SidecarItem heading="Name">{objectMeta.name}</SidecarItem>
-          <SidecarItem heading="Namespace">{objectMeta.namespace}</SidecarItem>
+          {objectMeta.namespace && (
+            <SidecarItem heading="Namespace">
+              {objectMeta.namespace}
+            </SidecarItem>
+          )}
           <SidecarItem heading="UID">{objectMeta.uid}</SidecarItem>
           <SidecarItem heading="Creation date">
             {moment(objectMeta.creationTimestamp).format('lll')}

@@ -8,8 +8,8 @@ import {
 import { Suspense, useMemo, useRef, useState } from 'react'
 
 import {
+  PERSISTENT_VOLUMES_REL_PATH,
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
-  PERSISTENT_VOLUME_REL_PATH,
   STORAGE_CLASSES_REL_PATH,
   getKubernetesAbsPath,
   getStorageAbsPath,
@@ -31,7 +31,7 @@ const directory = [
     path: PERSISTENT_VOLUME_CLAIMS_REL_PATH,
     label: 'Persistent volume claims',
   },
-  { path: PERSISTENT_VOLUME_REL_PATH, label: 'Persistent volumes' },
+  { path: PERSISTENT_VOLUMES_REL_PATH, label: 'Persistent volumes' },
   { path: STORAGE_CLASSES_REL_PATH, label: 'Storage classes' },
 ] as const
 

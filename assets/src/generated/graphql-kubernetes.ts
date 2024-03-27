@@ -4780,6 +4780,13 @@ export type PersistentVolumesQueryVariables = Exact<{
 
 export type PersistentVolumesQuery = { __typename?: 'Query', handleGetPersistentVolumeList?: { __typename?: 'persistentvolume_PersistentVolumeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolume_PersistentVolume', status: string, claim: string, storageClass: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type PersistentVolumeQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+
+export type PersistentVolumeQuery = { __typename?: 'Query', handleGetPersistentVolumeDetail?: { __typename?: 'persistentvolume_PersistentVolumeDetail', status: string, claim: string, storageClass: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
+
 export type PersistentVolumeClaimsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -6127,6 +6134,58 @@ export type PersistentVolumesQueryHookResult = ReturnType<typeof usePersistentVo
 export type PersistentVolumesLazyQueryHookResult = ReturnType<typeof usePersistentVolumesLazyQuery>;
 export type PersistentVolumesSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumesSuspenseQuery>;
 export type PersistentVolumesQueryResult = Apollo.QueryResult<PersistentVolumesQuery, PersistentVolumesQueryVariables>;
+export const PersistentVolumeDocument = gql`
+    query PersistentVolume($name: String!) {
+  handleGetPersistentVolumeDetail(persistentvolume: $name) @rest(path: "persistentvolume/{args.persistentvolume}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    status
+    claim
+    storageClass
+    reason
+    reclaimPolicy
+    accessModes
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __usePersistentVolumeQuery__
+ *
+ * To run a query within a React component, call `usePersistentVolumeQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePersistentVolumeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePersistentVolumeQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function usePersistentVolumeQuery(baseOptions: Apollo.QueryHookOptions<PersistentVolumeQuery, PersistentVolumeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PersistentVolumeQuery, PersistentVolumeQueryVariables>(PersistentVolumeDocument, options);
+      }
+export function usePersistentVolumeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PersistentVolumeQuery, PersistentVolumeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PersistentVolumeQuery, PersistentVolumeQueryVariables>(PersistentVolumeDocument, options);
+        }
+export function usePersistentVolumeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PersistentVolumeQuery, PersistentVolumeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PersistentVolumeQuery, PersistentVolumeQueryVariables>(PersistentVolumeDocument, options);
+        }
+export type PersistentVolumeQueryHookResult = ReturnType<typeof usePersistentVolumeQuery>;
+export type PersistentVolumeLazyQueryHookResult = ReturnType<typeof usePersistentVolumeLazyQuery>;
+export type PersistentVolumeSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumeSuspenseQuery>;
+export type PersistentVolumeQueryResult = Apollo.QueryResult<PersistentVolumeQuery, PersistentVolumeQueryVariables>;
 export const PersistentVolumeClaimsDocument = gql`
     query PersistentVolumeClaims($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetPersistentVolumeClaimList(

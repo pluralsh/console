@@ -1,9 +1,10 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { ChipList } from '@pluralsh/design-system'
+import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { Link } from 'react-router-dom'
 
 import {
+  Maybe,
   Persistentvolume_PersistentVolumeList as PersistentVolumeListT,
   Persistentvolume_PersistentVolume as PersistentVolumeT,
   PersistentVolumesQuery,
@@ -15,9 +16,35 @@ import { ResourceList } from '../ResourceList'
 
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
-import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
+import {
+  PERSISTENT_VOLUMES_REL_PATH,
+  getKubernetesAbsPath,
+  getResourceDetailsAbsPath,
+  getStorageAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
 
 import { PVStatusChip } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  {
+    label: 'kubernetes',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+  {
+    label: cluster?.name ?? '',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+  {
+    label: 'storage',
+    url: getStorageAbsPath(cluster?.id),
+  },
+  {
+    label: 'persistent volumes',
+    url: `${getStorageAbsPath(cluster?.id)}/${PERSISTENT_VOLUMES_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<PersistentVolumeT>()
 
@@ -102,6 +129,10 @@ const colAccessModes = columnHelper.accessor((pv) => pv.accessModes, {
 })
 
 export default function PersistentVolumes() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(

@@ -1,7 +1,10 @@
 import { Navigate, Route } from 'react-router-dom'
 
 import Service from 'components/kubernetes/discovery/Service'
-import PersistentVolume from 'components/kubernetes/storage/PersistentVolume'
+import PersistentVolume, {
+  PersistentVolumeInfo,
+  PersistentVolumeRaw,
+} from 'components/kubernetes/storage/PersistentVolume'
 import Secret, {
   SecretInfo,
   SecretRaw,
@@ -66,6 +69,7 @@ import PersistentVolumeClaim from '../components/kubernetes/storage/PersistentVo
 import StorageClass from '../components/kubernetes/storage/StorageClass'
 import ConfigMap, {
   ConfigMapInfo,
+  ConfigMapRaw,
 } from '../components/kubernetes/configuration/ConfigMap'
 import Namespace from '../components/kubernetes/cluster/Namespace'
 
@@ -90,8 +94,8 @@ import {
   NAMESPACES_REL_PATH,
   NETWORK_POLICIES_REL_PATH,
   NODES_REL_PATH,
+  PERSISTENT_VOLUMES_REL_PATH,
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
-  PERSISTENT_VOLUME_REL_PATH,
   PODS_REL_PATH,
   REPLICATION_CONTROLLERS_REL_PATH,
   REPLICA_SETS_REL_PATH,
@@ -214,7 +218,7 @@ export const kubernetesRoutes = [
         element={<PersistentVolumeClaims />}
       />
       <Route
-        path={PERSISTENT_VOLUME_REL_PATH}
+        path={PERSISTENT_VOLUMES_REL_PATH}
         element={<PersistentVolumes />}
       />
       <Route
@@ -391,10 +395,19 @@ export const kubernetesRoutes = [
     element={<PersistentVolumeClaim />}
   />,
   <Route
-    index
-    path={`${KUBERNETES_ABS_PATH}/${PERSISTENT_VOLUME_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
+    path={`${KUBERNETES_ABS_PATH}/${PERSISTENT_VOLUMES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<PersistentVolume />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<PersistentVolumeInfo />}
+    />
+    <Route
+      path="raw"
+      element={<PersistentVolumeRaw />}
+    />
+  </Route>,
   <Route
     index
     path={`${KUBERNETES_ABS_PATH}/${STORAGE_CLASSES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
@@ -412,7 +425,7 @@ export const kubernetesRoutes = [
     />
     <Route
       path="raw"
-      element={<SecretRaw />}
+      element={<ConfigMapRaw />}
     />
   </Route>,
   <Route
