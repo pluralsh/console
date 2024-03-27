@@ -1,19 +1,43 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import {
   Daemonset_DaemonSetList as DaemonSetListT,
   Daemonset_DaemonSet as DaemonSetT,
   DaemonSetsQuery,
   DaemonSetsQueryVariables,
+  Maybe,
   useDaemonSetsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
 import { UsageText } from '../../cluster/TableElements'
 
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import {
+  DAEMON_SETS_REL_PATH,
+  getConfigurationAbsPath,
+  getWorkloadsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
+
 import { WorkloadImages, WorkloadStatusChip } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'workloads',
+    url: getWorkloadsAbsPath(cluster?.id),
+  },
+  {
+    label: 'daemon sets',
+    url: `${getConfigurationAbsPath(cluster?.id)}/${DAEMON_SETS_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<DaemonSetT>()
 
@@ -52,6 +76,10 @@ const colStatus = columnHelper.accessor((ds) => ds.podInfo, {
 })
 
 export default function CronJobs() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(

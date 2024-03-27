@@ -1,9 +1,4 @@
-import {
-  SubTab,
-  TabList,
-  TabPanel,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { Suspense, useMemo, useRef, useState } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
 
@@ -16,7 +11,6 @@ import {
   REPLICATION_CONTROLLERS_REL_PATH,
   REPLICA_SETS_REL_PATH,
   STATEFUL_SETS_REL_PATH,
-  getKubernetesAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { LinkTabWrap } from '../../utils/Tabs'
@@ -55,26 +49,6 @@ export default function Workloads() {
   const pathMatch = useMatch(`${getWorkloadsAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
-
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        {
-          label: 'kubernetes',
-          url: getKubernetesAbsPath(cluster?.id),
-        },
-        {
-          label: cluster?.name ?? '',
-          url: getKubernetesAbsPath(cluster?.id),
-        },
-        {
-          label: 'workloads',
-          url: getWorkloadsAbsPath(cluster?.id),
-        },
-      ],
-      [cluster]
-    )
-  )
 
   const headerContent = useMemo(
     () => (

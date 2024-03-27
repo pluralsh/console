@@ -22,7 +22,6 @@ import { InlineLink } from '../../utils/typography/InlineLink'
 import {
   EVENTS_REL_PATH,
   getClusterAbsPath,
-  getKubernetesAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 

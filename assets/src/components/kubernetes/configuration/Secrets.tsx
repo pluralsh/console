@@ -17,7 +17,6 @@ import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   SECRETS_REL_PATH,
   getConfigurationAbsPath,
-  getKubernetesAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useKubernetesContext } from '../Kubernetes'
 

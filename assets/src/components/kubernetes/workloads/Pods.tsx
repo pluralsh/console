@@ -3,21 +3,43 @@ import { useMemo } from 'react'
 
 import { Link } from 'react-router-dom'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import {
+  Maybe,
   Pod_PodList as PodListT,
   Pod_Pod as PodT,
   PodsQuery,
   PodsQueryVariables,
   usePodsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 
-import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
+import {
+  PODS_REL_PATH,
+  getConfigurationAbsPath,
+  getResourceDetailsAbsPath,
+  getWorkloadsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
 
 import { PodStatusChip, WorkloadImages } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'workloads',
+    url: getWorkloadsAbsPath(cluster?.id),
+  },
+  {
+    label: 'pods',
+    url: `${getConfigurationAbsPath(cluster?.id)}/${PODS_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<PodT>()
 
@@ -68,6 +90,10 @@ const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {
 })
 
 export default function Pods() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colNamespace, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(

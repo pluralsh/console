@@ -9,7 +9,6 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { SubTitle } from '../../cluster/nodes/SubTitle'
 import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 

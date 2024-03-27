@@ -1,19 +1,43 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import {
   Deployment_DeploymentList as DeploymentListT,
   Deployment_Deployment as DeploymentT,
   DeploymentsQuery,
   DeploymentsQueryVariables,
+  Maybe,
   useDeploymentsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../ResourceList'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 
 import { UsageText } from '../../cluster/TableElements'
 
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import {
+  DEPLOYMENTS_REL_PATH,
+  getConfigurationAbsPath,
+  getWorkloadsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
+
 import { WorkloadImages, WorkloadStatusChip } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'workloads',
+    url: getWorkloadsAbsPath(cluster?.id),
+  },
+  {
+    label: ' deployments',
+    url: `${getConfigurationAbsPath(cluster?.id)}/${DEPLOYMENTS_REL_PATH}}`,
+  },
+]
 
 const columnHelper = createColumnHelper<DeploymentT>()
 
@@ -52,6 +76,10 @@ const colStatus = columnHelper.accessor((deployment) => deployment.pods, {
 })
 
 export default function Deployments() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(

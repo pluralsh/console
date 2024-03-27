@@ -1,18 +1,42 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import {
   Cronjob_CronJobList as CronJobListT,
   Cronjob_CronJob as CronJobT,
   CronJobsQuery,
   CronJobsQueryVariables,
+  Maybe,
   useCronJobsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import {
+  CRON_JOBS_REL_PATH,
+  getConfigurationAbsPath,
+  getWorkloadsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
+
 import { CronJobSuspendChip, WorkloadImages } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'workloads',
+    url: getWorkloadsAbsPath(cluster?.id),
+  },
+  {
+    label: 'cron jobs',
+    url: `${getConfigurationAbsPath(cluster?.id)}/${CRON_JOBS_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<CronJobT>()
 
@@ -47,6 +71,10 @@ const colLastSchedule = columnHelper.accessor((cj) => cj.lastSchedule, {
 })
 
 export default function CronJobs() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
