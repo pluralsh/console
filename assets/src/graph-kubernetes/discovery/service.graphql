@@ -26,7 +26,7 @@ query Services(
         ...ObjectMeta
       }
       type
-      clusterIP
+      clusterIp
       internalEndpoint {
         host
         ports {

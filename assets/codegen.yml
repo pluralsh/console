@@ -47,3 +47,4 @@ config:
     UploadOrUrl: string
     DateTime: string
     Yaml: unknown
+    Json: unknown

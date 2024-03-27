@@ -1,6 +1,8 @@
 import { ApolloClient, ApolloLink, InMemoryCache } from '@apollo/client'
 import { RestLink } from 'apollo-link-rest'
 
+import { Unstructured_Unstructured as UnstructuredT } from '../generated/graphql-kubernetes'
+
 import { fetchToken } from './auth'
 
 const K8S_API_URL = '/api/v1/'
@@ -23,7 +25,18 @@ function KubernetesClient(clusterID: string): ApolloClient<any> | undefined {
 }
 
 function buildClient({ clusterID, fetchToken }) {
-  const restLink = new RestLink({ uri: K8S_API_URL })
+  const restLink = new RestLink({
+    uri: K8S_API_URL,
+    responseTransformer: async (response: Response) => {
+      const body = await (response as Response).json()
+
+      if (response.url.includes(`${K8S_API_URL}_raw`)) {
+        return { object: body } as UnstructuredT
+      }
+
+      return body
+    },
+  })
 
   const authRestLink = new ApolloLink((operation, forward) => {
     operation.setContext(({ headers }) => {

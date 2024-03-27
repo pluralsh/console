@@ -49,8 +49,6 @@ const columns = [
 export default function Conditions({
   conditions,
 }: ConditionsProps): ReactElement {
-  console.log(conditions)
-
   return (
     <Table
       data={conditions}

@@ -43,8 +43,6 @@ const columns = [
 export default function Containers({
   containers,
 }: ContainersProps): ReactElement {
-  console.log(containers)
-
   return (
     <Table
       data={containers}

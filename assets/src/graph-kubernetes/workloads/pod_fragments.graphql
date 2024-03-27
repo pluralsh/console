@@ -19,7 +19,7 @@ fragment Container on pod_Container {
         startedAt
         reason
         message
-        containerID
+        containerId
         exitCode
         finishedAt
         signal

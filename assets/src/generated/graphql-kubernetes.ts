@@ -1995,18 +1995,18 @@ export type Handler_TerminalResponse = {
 
 export type Horizontalpodautoscaler_HorizontalPodAutoscaler = {
   __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler';
-  currentCPUUtilizationPercentage: Scalars['Int']['output'];
+  currentCpuUtilizationPercentage: Scalars['Int']['output'];
   maxReplicas: Scalars['Int']['output'];
   minReplicas: Scalars['Int']['output'];
   objectMeta: Types_ObjectMeta;
   scaleTargetRef: Horizontalpodautoscaler_ScaleTargetRef;
-  targetCPUUtilizationPercentage: Scalars['Int']['output'];
+  targetCpuUtilizationPercentage: Scalars['Int']['output'];
   typeMeta: Types_TypeMeta;
 };
 
 export type Horizontalpodautoscaler_HorizontalPodAutoscalerDetail = {
   __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerDetail';
-  currentCPUUtilizationPercentage: Scalars['Int']['output'];
+  currentCpuUtilizationPercentage: Scalars['Int']['output'];
   currentReplicas: Scalars['Int']['output'];
   desiredReplicas: Scalars['Int']['output'];
   lastScaleTime: Scalars['String']['output'];
@@ -2014,7 +2014,7 @@ export type Horizontalpodautoscaler_HorizontalPodAutoscalerDetail = {
   minReplicas: Scalars['Int']['output'];
   objectMeta: Types_ObjectMeta;
   scaleTargetRef: Horizontalpodautoscaler_ScaleTargetRef;
-  targetCPUUtilizationPercentage: Scalars['Int']['output'];
+  targetCpuUtilizationPercentage: Scalars['Int']['output'];
   typeMeta: Types_TypeMeta;
 };
 
@@ -2259,9 +2259,9 @@ export type Node_NodeDetail = {
   nodeInfo: V1_NodeSystemInfo;
   objectMeta: Types_ObjectMeta;
   phase: Scalars['String']['output'];
-  podCIDR: Scalars['String']['output'];
+  podCidr: Scalars['String']['output'];
   podList: Pod_PodList;
-  providerID: Scalars['String']['output'];
+  providerId: Scalars['String']['output'];
   ready: Scalars['String']['output'];
   taints?: Maybe<Array<Maybe<V1_Taint>>>;
   typeMeta: Types_TypeMeta;
@@ -2390,7 +2390,7 @@ export type Pod_PodDetail = {
   nodeName: Scalars['String']['output'];
   objectMeta: Types_ObjectMeta;
   persistentVolumeClaimList: Persistentvolumeclaim_PersistentVolumeClaimList;
-  podIP: Scalars['String']['output'];
+  podIp: Scalars['String']['output'];
   podPhase: Scalars['String']['output'];
   qosClass: Scalars['String']['output'];
   restartCount: Scalars['Int']['output'];
@@ -2545,16 +2545,16 @@ export type Replicationcontroller_ReplicationControllerSpec_Input = {
 
 export type Resource_Quantity = {
   __typename?: 'resource_Quantity';
-  Format: Scalars['String']['output'];
   d: Resource_InfDecAmount;
+  format: Scalars['String']['output'];
   i: Resource_Int64Amount;
   s: Scalars['String']['output'];
 };
 
 export type Resource_Quantity2 = {
   __typename?: 'resource_Quantity2';
-  Format: Scalars['String']['output'];
   d: Resource_InfDecAmount;
+  format: Scalars['String']['output'];
   i: Resource_Int64Amount;
   s: Scalars['String']['output'];
 };
@@ -2567,8 +2567,8 @@ export type Resource_Quantity2_Entry = {
 
 export type Resource_Quantity3 = {
   __typename?: 'resource_Quantity3';
-  Format: Scalars['String']['output'];
   d: Resource_InfDecAmount;
+  format: Scalars['String']['output'];
   i: Resource_Int64Amount;
   s: Scalars['String']['output'];
 };
@@ -2581,8 +2581,8 @@ export type Resource_Quantity3_Entry = {
 
 export type Resource_Quantity4 = {
   __typename?: 'resource_Quantity4';
-  Format: Scalars['String']['output'];
   d: Resource_InfDecAmount;
+  format: Scalars['String']['output'];
   i: Resource_Int64Amount;
   s: Scalars['String']['output'];
 };
@@ -2595,8 +2595,8 @@ export type Resource_Quantity4_Entry = {
 
 export type Resource_Quantity5 = {
   __typename?: 'resource_Quantity5';
-  Format: Scalars['String']['output'];
   d: Resource_InfDecAmount;
+  format: Scalars['String']['output'];
   i: Resource_Int64Amount;
   s: Scalars['String']['output'];
 };
@@ -2609,8 +2609,8 @@ export type Resource_Quantity5_Entry = {
 
 export type Resource_Quantity6 = {
   __typename?: 'resource_Quantity6';
-  Format: Scalars['String']['output'];
   d: Resource_InfDecAmount;
+  format: Scalars['String']['output'];
   i: Resource_Int64Amount;
   s: Scalars['String']['output'];
 };
@@ -2623,8 +2623,8 @@ export type Resource_Quantity6_Entry = {
 
 export type Resource_Quantity7 = {
   __typename?: 'resource_Quantity7';
-  Format: Scalars['String']['output'];
   d: Resource_InfDecAmount;
+  format: Scalars['String']['output'];
   i: Resource_Int64Amount;
   s: Scalars['String']['output'];
 };
@@ -2637,8 +2637,8 @@ export type Resource_Quantity7_Entry = {
 
 export type Resource_Quantity8 = {
   __typename?: 'resource_Quantity8';
-  Format: Scalars['String']['output'];
   d: Resource_InfDecAmount;
+  format: Scalars['String']['output'];
   i: Resource_Int64Amount;
   s: Scalars['String']['output'];
 };
@@ -2651,8 +2651,8 @@ export type Resource_Quantity8_Entry = {
 
 export type Resource_Quantity9 = {
   __typename?: 'resource_Quantity9';
-  Format: Scalars['String']['output'];
   d: Resource_InfDecAmount;
+  format: Scalars['String']['output'];
   i: Resource_Int64Amount;
   s: Scalars['String']['output'];
 };
@@ -2671,7 +2671,7 @@ export type Resource_Quantity_Entry = {
 
 export type Resource_InfDecAmount = {
   __typename?: 'resource_infDecAmount';
-  Dec: Inf_Dec;
+  dec: Inf_Dec;
 };
 
 export type Resource_Int64Amount = {
@@ -2751,16 +2751,16 @@ export type Rolebinding_RoleBindingList = {
 
 export type Runtime_Unknown = {
   __typename?: 'runtime_Unknown';
-  ContentEncoding: Scalars['String']['output'];
-  ContentType: Scalars['String']['output'];
   apiVersion?: Maybe<Scalars['String']['output']>;
+  contentEncoding: Scalars['String']['output'];
+  contentType: Scalars['String']['output'];
   kind?: Maybe<Scalars['String']['output']>;
 };
 
 export type Runtime_Unknown_Input = {
-  ContentEncoding: Scalars['String']['input'];
-  ContentType: Scalars['String']['input'];
   apiVersion?: InputMaybe<Scalars['String']['input']>;
+  contentEncoding: Scalars['String']['input'];
+  contentType: Scalars['String']['input'];
   kind?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -2800,7 +2800,7 @@ export type Secret_SecretList = {
 
 export type Service_Service = {
   __typename?: 'service_Service';
-  clusterIP: Scalars['String']['output'];
+  clusterIp: Scalars['String']['output'];
   externalEndpoints: Array<Maybe<Common_Endpoint>>;
   internalEndpoint: Common_Endpoint;
   objectMeta: Types_ObjectMeta;
@@ -2811,7 +2811,7 @@ export type Service_Service = {
 
 export type Service_ServiceDetail = {
   __typename?: 'service_ServiceDetail';
-  clusterIP: Scalars['String']['output'];
+  clusterIp: Scalars['String']['output'];
   endpointList: Endpoint_EndpointList;
   errors: Array<Maybe<Scalars['JSON']['output']>>;
   externalEndpoints: Array<Maybe<Common_Endpoint>>;
@@ -2989,7 +2989,7 @@ export type Types_TypeMeta = {
 
 export type Unstructured_Unstructured = {
   __typename?: 'unstructured_Unstructured';
-  Object: Scalars['JSON']['output'];
+  object: Scalars['JSON']['output'];
 };
 
 /**
@@ -3006,7 +3006,7 @@ export type V1_AwsElasticBlockStoreVolumeSource = {
   /** readOnly value true will force the readOnly setting in VolumeMounts. More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore */
   readOnly?: Maybe<Scalars['Boolean']['output']>;
   /** volumeID is unique ID of the persistent disk resource in AWS (Amazon EBS volume). More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore */
-  volumeID: Scalars['String']['output'];
+  volumeId: Scalars['String']['output'];
 };
 
 /** AzureDisk represents an Azure Data Disk mount on the host and bind mount to the pod. */
@@ -3017,7 +3017,7 @@ export type V1_AzureDiskVolumeSource = {
   /** diskName is the Name of the data disk in the blob storage */
   diskName: Scalars['String']['output'];
   /** diskURI is the URI of data disk in the blob storage */
-  diskURI: Scalars['String']['output'];
+  diskUri: Scalars['String']['output'];
   /** fsType is Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified. */
   fsType?: Maybe<Scalars['String']['output']>;
   /** kind expected values are Shared: multiple blob disks per storage account  Dedicated: single blob disk per storage account  Managed: azure managed data disk (only in managed availability set). defaults to shared */
@@ -3134,7 +3134,7 @@ export type V1_CinderPersistentVolumeSource = {
   readOnly?: Maybe<Scalars['Boolean']['output']>;
   secretRef?: Maybe<V1_SecretReference>;
   /** volumeID used to identify the volume in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md */
-  volumeID: Scalars['String']['output'];
+  volumeId: Scalars['String']['output'];
 };
 
 /** Represents a cinder volume resource in Openstack. A Cinder volume must exist before mounting to a container. The volume must also be in the same region as the kubelet. Cinder volumes support ownership management and SELinux relabeling. */
@@ -3146,7 +3146,7 @@ export type V1_CinderVolumeSource = {
   readOnly?: Maybe<Scalars['Boolean']['output']>;
   secretRef?: Maybe<V1_LocalObjectReference>;
   /** volumeID used to identify the volume in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md */
-  volumeID: Scalars['String']['output'];
+  volumeId: Scalars['String']['output'];
 };
 
 /** ClusterTrustBundleProjection describes how to select a set of ClusterTrustBundle objects and project their contents into the pod filesystem. */
@@ -3225,7 +3225,7 @@ export type V1_ContainerStateRunning = {
 export type V1_ContainerStateTerminated = {
   __typename?: 'v1_ContainerStateTerminated';
   /** Container's ID in the format '<type>://<container_id>' */
-  containerID?: Maybe<Scalars['String']['output']>;
+  containerId?: Maybe<Scalars['String']['output']>;
   /** Exit status from the last termination of the container */
   exitCode: Scalars['Int']['output'];
   /** Time at which the container last terminated */
@@ -3254,11 +3254,11 @@ export type V1_ContainerStatus = {
   __typename?: 'v1_ContainerStatus';
   allocatedResources?: Maybe<Query_HandleGetPodDetail_Containers_Items_Status_AllocatedResources>;
   /** ContainerID is the ID of the container in the format '<type>://<container_id>'. Where type is a container runtime identifier, returned from Version call of CRI API (for example "containerd"). */
-  containerID?: Maybe<Scalars['String']['output']>;
+  containerId?: Maybe<Scalars['String']['output']>;
   /** Image is the name of container image that the container is running. The container image may not match the image used in the PodSpec, as it may have been resolved by the runtime. More info: https://kubernetes.io/docs/concepts/containers/images. */
   image: Scalars['String']['output'];
   /** ImageID is the image ID of the container's image. The image ID may not match the image ID of the image used in the PodSpec, as it may have been resolved by the runtime. */
-  imageID: Scalars['String']['output'];
+  imageId: Scalars['String']['output'];
   lastState?: Maybe<V1_ContainerState>;
   /** Name is a DNS_LABEL representing the unique name of the container. Each container in a pod must have a unique name across all container types. Cannot be updated. */
   name: Scalars['String']['output'];
@@ -3321,9 +3321,9 @@ export type V1_EndpointPort = {
    * * Un-prefixed protocol names - reserved for IANA standard service names (as per RFC-6335 and https://www.iana.org/assignments/service-names).
    *
    * * Kubernetes-defined prefixed names:
-   *   * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
-   *   * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
-   *   * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
+   * * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
+   * * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
+   * * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
    *
    * * Other protocols should use implementation-defined prefixed names such as mycompany.com/my-custom-protocol.
    */
@@ -3368,7 +3368,7 @@ export type V1_FcVolumeSource = {
   /** readOnly is Optional: Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts. */
   readOnly?: Maybe<Scalars['Boolean']['output']>;
   /** targetWWNs is Optional: FC target worldwide names (WWNs) */
-  targetWWNs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  targetWwNs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** wwids Optional: FC volume world wide identifiers (wwids) Either wwids or combination of targetWWNs and lun must be set, but not both simultaneously. */
   wwids?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
 };
@@ -3407,7 +3407,7 @@ export type V1_FlockerVolumeSource = {
   /** datasetName is Name of the dataset stored as metadata -> name on the dataset for Flocker should be considered as deprecated */
   datasetName?: Maybe<Scalars['String']['output']>;
   /** datasetUUID is the UUID of the dataset. This is unique identifier of a Flocker dataset */
-  datasetUUID?: Maybe<Scalars['String']['output']>;
+  datasetUuid?: Maybe<Scalars['String']['output']>;
 };
 
 /**
@@ -3510,15 +3510,15 @@ export type V1_HttpIngressPath = {
   path?: Maybe<Scalars['String']['output']>;
   /**
    * pathType determines the interpretation of the path matching. PathType can be one of the following values: * Exact: Matches the URL path exactly. * Prefix: Matches based on a URL path prefix split by '/'. Matching is
-   *   done on a path element by element basis. A path element refers is the
-   *   list of labels in the path split by the '/' separator. A request is a
-   *   match for path p if every p is an element-wise prefix of p of the
-   *   request path. Note that if the last element of the path is a substring
-   *   of the last element in request path, it is not a match (e.g. /foo/bar
-   *   matches /foo/bar/baz, but does not match /foo/barbaz).
+   * done on a path element by element basis. A path element refers is the
+   * list of labels in the path split by the '/' separator. A request is a
+   * match for path p if every p is an element-wise prefix of p of the
+   * request path. Note that if the last element of the path is a substring
+   * of the last element in request path, it is not a match (e.g. /foo/bar
+   * matches /foo/bar/baz, but does not match /foo/barbaz).
    * * ImplementationSpecific: Interpretation of the Path matching is up to
-   *   the IngressClass. Implementations can treat this as a separate PathType
-   *   or treat it identically to Prefix or Exact path types.
+   * the IngressClass. Implementations can treat this as a separate PathType
+   * or treat it identically to Prefix or Exact path types.
    * Implementations are required to support all path types.
    */
   pathType: Scalars['String']['output'];
@@ -3631,9 +3631,9 @@ export type V1_IngressPortStatus = {
   __typename?: 'v1_IngressPortStatus';
   /**
    * error is to record the problem with the service port The format of the error shall comply with the following rules: - built-in error values shall be specified in this file and those shall use
-   *   CamelCase names
+   * CamelCase names
    * - cloud provider specific error values must have names that comply with the
-   *   format foo.example.com/CamelCase.
+   * format foo.example.com/CamelCase.
    */
   error?: Maybe<Scalars['String']['output']>;
   /** port is the port number of the ingress port. */
@@ -3647,10 +3647,10 @@ export type V1_IngressRule = {
   __typename?: 'v1_IngressRule';
   /**
    * host is the fully qualified domain name of a network host, as defined by RFC 3986. Note the following deviations from the "host" part of the URI as defined in RFC 3986: 1. IPs are not allowed. Currently an IngressRuleValue can only apply to
-   *    the IP in the Spec of the parent Ingress.
+   * the IP in the Spec of the parent Ingress.
    * 2. The `:` delimiter is not respected because ports are not allowed.
-   * 	  Currently the port of an Ingress is implicitly :80 for http and
-   * 	  :443 for https.
+   * Currently the port of an Ingress is implicitly :80 for http and
+   * :443 for https.
    * Both these may change in the future. Incoming requests are matched against the host before the IngressRuleValue. If the host is unspecified, the Ingress routes all traffic based on the specified IngressRuleValue.
    *
    * host can be "precise" which is a domain name without the terminating dot of a network host (e.g. "foo.bar.com") or "wildcard", which is a domain name prefixed with a single wildcard label (e.g. "*.foo.com"). The wildcard character '*' must appear by itself as the first DNS label and matches only a single label. You cannot have a wildcard label by itself (e.g. Host == "*"). Requests will be matched against the Host field in the following way: 1. If host is precise, the request matches this rule if the http host header is equal to Host. 2. If host is a wildcard, then the request matches this rule if the http host header is to equal to the suffix (removing the first label) of the wildcard rule.
@@ -3823,7 +3823,7 @@ export type V1_NodeSystemInfo = {
   /** The Architecture reported by the node */
   architecture: Scalars['String']['output'];
   /** Boot ID reported by the node. */
-  bootID: Scalars['String']['output'];
+  bootId: Scalars['String']['output'];
   /** ContainerRuntime Version reported by the node through runtime remote API (e.g. containerd://1.4.2). */
   containerRuntimeVersion: Scalars['String']['output'];
   /** Kernel Version reported by the node from 'uname -r' (e.g. 3.16.0-0.bpo.4-amd64). */
@@ -3833,13 +3833,13 @@ export type V1_NodeSystemInfo = {
   /** Kubelet Version reported by the node. */
   kubeletVersion: Scalars['String']['output'];
   /** MachineID reported by the node. For unique machine identification in the cluster this field is preferred. Learn more from man(5) machine-id: http://man7.org/linux/man-pages/man5/machine-id.5.html */
-  machineID: Scalars['String']['output'];
+  machineId: Scalars['String']['output'];
   /** The Operating System reported by the node */
   operatingSystem: Scalars['String']['output'];
   /** OS Image reported by the node from /etc/os-release (e.g. Debian GNU/Linux 7 (wheezy)). */
   osImage: Scalars['String']['output'];
   /** SystemUUID reported by the node. For unique machine identification MachineID is preferred. This field is specific to Red Hat hosts https://access.redhat.com/documentation/en-us/red_hat_subscription_management/1/html/rhsm/uuid */
-  systemUUID: Scalars['String']['output'];
+  systemUuid: Scalars['String']['output'];
 };
 
 /** ObjectFieldSelector selects an APIVersioned field of an object. */
@@ -4005,7 +4005,7 @@ export type V1_PersistentVolumeSource = {
   portworxVolume?: Maybe<V1_PortworxVolumeSource>;
   quobyte?: Maybe<V1_QuobyteVolumeSource>;
   rbd?: Maybe<V1_RbdPersistentVolumeSource>;
-  scaleIO?: Maybe<V1_ScaleIoPersistentVolumeSource>;
+  scaleIo?: Maybe<V1_ScaleIoPersistentVolumeSource>;
   storageos?: Maybe<V1_StorageOsPersistentVolumeSource>;
   vsphereVolume?: Maybe<V1_VsphereVirtualDiskVolumeSource>;
 };
@@ -4016,7 +4016,7 @@ export type V1_PhotonPersistentDiskVolumeSource = {
   /** fsType is the filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified. */
   fsType?: Maybe<Scalars['String']['output']>;
   /** pdID is the ID that identifies Photon Controller persistent disk */
-  pdID: Scalars['String']['output'];
+  pdId: Scalars['String']['output'];
 };
 
 /** PodSecurityContext holds pod-level security attributes and common container settings. Some fields are also present in container.securityContext.  Field values of container.securityContext take precedence over field values of PodSecurityContext. */
@@ -4051,7 +4051,7 @@ export type V1_PolicyRule = {
   /** APIGroups is the name of the APIGroup that contains the resources.  If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. "" represents the core API group and "*" represents all API groups. */
   apiGroups?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** NonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding. Rules can either apply to API resources (such as "pods" or "secrets") or non-resource URL paths (such as "/api"),  but not both. */
-  nonResourceURLs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  nonResourceUrLs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** ResourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed. */
   resourceNames?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** Resources is a list of resources this rule applies to. '*' represents all resources. */
@@ -4068,7 +4068,7 @@ export type V1_PortworxVolumeSource = {
   /** readOnly defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts. */
   readOnly?: Maybe<Scalars['Boolean']['output']>;
   /** volumeID uniquely identifies a Portworx volume */
-  volumeID: Scalars['String']['output'];
+  volumeId: Scalars['String']['output'];
 };
 
 /** Probe describes a health check to be performed against a container to determine whether it is alive or ready to receive traffic. */
@@ -4485,7 +4485,7 @@ export type V1_Volume = {
   cinder?: Maybe<V1_CinderVolumeSource>;
   configMap?: Maybe<V1_ConfigMapVolumeSource>;
   csi?: Maybe<V1_CsiVolumeSource>;
-  downwardAPI?: Maybe<V1_DownwardApiVolumeSource>;
+  downwardApi?: Maybe<V1_DownwardApiVolumeSource>;
   emptyDir?: Maybe<V1_EmptyDirVolumeSource>;
   ephemeral?: Maybe<V1_EphemeralVolumeSource>;
   fc?: Maybe<V1_FcVolumeSource>;
@@ -4505,7 +4505,7 @@ export type V1_Volume = {
   projected?: Maybe<V1_ProjectedVolumeSource>;
   quobyte?: Maybe<V1_QuobyteVolumeSource>;
   rbd?: Maybe<V1_RbdVolumeSource>;
-  scaleIO?: Maybe<V1_ScaleIoVolumeSource>;
+  scaleIo?: Maybe<V1_ScaleIoVolumeSource>;
   secret?: Maybe<V1_SecretVolumeSource>;
   storageos?: Maybe<V1_StorageOsVolumeSource>;
   vsphereVolume?: Maybe<V1_VsphereVirtualDiskVolumeSource>;
@@ -4516,7 +4516,7 @@ export type V1_VolumeProjection = {
   __typename?: 'v1_VolumeProjection';
   clusterTrustBundle?: Maybe<V1_ClusterTrustBundleProjection>;
   configMap?: Maybe<V1_ConfigMapProjection>;
-  downwardAPI?: Maybe<V1_DownwardApiProjection>;
+  downwardApi?: Maybe<V1_DownwardApiProjection>;
   secret?: Maybe<V1_SecretProjection>;
   serviceAccountToken?: Maybe<V1_ServiceAccountTokenProjection>;
 };
@@ -4534,7 +4534,7 @@ export type V1_VsphereVirtualDiskVolumeSource = {
   /** fsType is filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified. */
   fsType?: Maybe<Scalars['String']['output']>;
   /** storagePolicyID is the storage Policy Based Management (SPBM) profile ID associated with the StoragePolicyName. */
-  storagePolicyID?: Maybe<Scalars['String']['output']>;
+  storagePolicyId?: Maybe<Scalars['String']['output']>;
   /** storagePolicyName is the storage Policy Based Management (SPBM) profile name. */
   storagePolicyName?: Maybe<Scalars['String']['output']>;
   /** volumePath is the path that identifies vSphere volume vmdk */
@@ -4665,6 +4665,15 @@ export type NodesQueryVariables = Exact<{
 
 export type NodesQuery = { __typename?: 'Query', handleGetNodeList?: { __typename?: 'node_NodeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, nodes: Array<{ __typename?: 'node_Node', ready: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any } } | null> } | null };
 
+export type RawQueryVariables = Exact<{
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type RawQuery = { __typename?: 'Query', handleGetResource?: { __typename?: 'unstructured_Unstructured', object: any } | null };
+
 export type ConfigMapsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -4754,7 +4763,7 @@ export type ServicesQueryVariables = Exact<{
 }>;
 
 
-export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> } | null> } | null> } | null };
+export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIp: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> } | null> } | null> } | null };
 
 export type ListMetaFragment = { __typename?: 'types_ListMeta', totalItems: number };
 
@@ -4862,9 +4871,9 @@ export type PodQueryVariables = Exact<{
 }>;
 
 
-export type PodQuery = { __typename?: 'Query', handleGetPodDetail?: { __typename?: 'pod_PodDetail', nodeName: string, restartCount: number, serviceAccountName: string, podIP: string, podPhase: string, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, containers: Array<{ __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null } } | null>, controller?: { __typename?: 'controller_ResourceOwner', containerImages: Array<string | null>, initContainerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null, eventList: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null };
+export type PodQuery = { __typename?: 'Query', handleGetPodDetail?: { __typename?: 'pod_PodDetail', nodeName: string, restartCount: number, serviceAccountName: string, podIp: string, podPhase: string, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, containers: Array<{ __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerId?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null } } | null>, controller?: { __typename?: 'controller_ResourceOwner', containerImages: Array<string | null>, initContainerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null, eventList: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null };
 
-export type ContainerFragment = { __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null } };
+export type ContainerFragment = { __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerId?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null } };
 
 export type ReplicaSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5028,7 +5037,7 @@ export const ContainerFragmentDoc = gql`
         startedAt
         reason
         message
-        containerID
+        containerId
         exitCode
         finishedAt
         signal
@@ -5494,6 +5503,48 @@ export type NodesQueryHookResult = ReturnType<typeof useNodesQuery>;
 export type NodesLazyQueryHookResult = ReturnType<typeof useNodesLazyQuery>;
 export type NodesSuspenseQueryHookResult = ReturnType<typeof useNodesSuspenseQuery>;
 export type NodesQueryResult = Apollo.QueryResult<NodesQuery, NodesQueryVariables>;
+export const RawDocument = gql`
+    query Raw($kind: String!, $name: String!, $namespace: String!) {
+  handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {
+    object
+  }
+}
+    `;
+
+/**
+ * __useRawQuery__
+ *
+ * To run a query within a React component, call `useRawQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRawQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRawQuery({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useRawQuery(baseOptions: Apollo.QueryHookOptions<RawQuery, RawQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RawQuery, RawQueryVariables>(RawDocument, options);
+      }
+export function useRawLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RawQuery, RawQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RawQuery, RawQueryVariables>(RawDocument, options);
+        }
+export function useRawSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RawQuery, RawQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<RawQuery, RawQueryVariables>(RawDocument, options);
+        }
+export type RawQueryHookResult = ReturnType<typeof useRawQuery>;
+export type RawLazyQueryHookResult = ReturnType<typeof useRawLazyQuery>;
+export type RawSuspenseQueryHookResult = ReturnType<typeof useRawSuspenseQuery>;
+export type RawQueryResult = Apollo.QueryResult<RawQuery, RawQueryVariables>;
 export const ConfigMapsDocument = gql`
     query ConfigMaps($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetConfigMapList(
@@ -6001,7 +6052,7 @@ export const ServicesDocument = gql`
         ...ObjectMeta
       }
       type
-      clusterIP
+      clusterIp
       internalEndpoint {
         host
         ports {
@@ -6603,7 +6654,7 @@ export const PodDocument = gql`
     nodeName
     restartCount
     serviceAccountName
-    podIP
+    podIp
     podPhase
     conditions @type(name: "common_Condition") {
       ...Condition

@@ -1975,7 +1975,7 @@ type Query {
 }
 
 type unstructured_Unstructured {
-  Object: JSON!
+  object: JSON!
 }
 
 """
@@ -2035,7 +2035,7 @@ type v1_PolicyRule {
   """
   NonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding. Rules can either apply to API resources (such as "pods" or "secrets") or non-resource URL paths (such as "/api"),  but not both.
   """
-  nonResourceURLs: [String]
+  nonResourceUrLs: [String]
   """
   ResourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed.
   """
@@ -2419,7 +2419,7 @@ type service_ServiceList {
 }
 
 type service_Service {
-  clusterIP: String!
+  clusterIp: String!
   externalEndpoints: [common_Endpoint]!
   internalEndpoint: common_Endpoint!
   objectMeta: types_ObjectMeta!
@@ -2506,12 +2506,12 @@ type horizontalpodautoscaler_HorizontalPodAutoscalerList {
 }
 
 type horizontalpodautoscaler_HorizontalPodAutoscaler {
-  currentCPUUtilizationPercentage: Int!
+  currentCpuUtilizationPercentage: Int!
   maxReplicas: Int!
   minReplicas: Int!
   objectMeta: types_ObjectMeta!
   scaleTargetRef: horizontalpodautoscaler_ScaleTargetRef!
-  targetCPUUtilizationPercentage: Int!
+  targetCpuUtilizationPercentage: Int!
   typeMeta: types_TypeMeta!
 }
 
@@ -2521,7 +2521,7 @@ type horizontalpodautoscaler_ScaleTargetRef {
 }
 
 type horizontalpodautoscaler_HorizontalPodAutoscalerDetail {
-  currentCPUUtilizationPercentage: Int!
+  currentCpuUtilizationPercentage: Int!
   currentReplicas: Int!
   desiredReplicas: Int!
   lastScaleTime: String!
@@ -2529,7 +2529,7 @@ type horizontalpodautoscaler_HorizontalPodAutoscalerDetail {
   minReplicas: Int!
   objectMeta: types_ObjectMeta!
   scaleTargetRef: horizontalpodautoscaler_ScaleTargetRef!
-  targetCPUUtilizationPercentage: Int!
+  targetCpuUtilizationPercentage: Int!
   typeMeta: types_TypeMeta!
 }
 
@@ -2620,12 +2620,12 @@ IngressRule represents the rules mapping the paths under a specified host to the
 type v1_IngressRule {
   """
   host is the fully qualified domain name of a network host, as defined by RFC 3986. Note the following deviations from the "host" part of the URI as defined in RFC 3986: 1. IPs are not allowed. Currently an IngressRuleValue can only apply to
-     the IP in the Spec of the parent Ingress.
+  the IP in the Spec of the parent Ingress.
   2. The `:` delimiter is not respected because ports are not allowed.
-  	  Currently the port of an Ingress is implicitly :80 for http and
-  	  :443 for https.
+  Currently the port of an Ingress is implicitly :80 for http and
+  :443 for https.
   Both these may change in the future. Incoming requests are matched against the host before the IngressRuleValue. If the host is unspecified, the Ingress routes all traffic based on the specified IngressRuleValue.
-  
+
   host can be "precise" which is a domain name without the terminating dot of a network host (e.g. "foo.bar.com") or "wildcard", which is a domain name prefixed with a single wildcard label (e.g. "*.foo.com"). The wildcard character '*' must appear by itself as the first DNS label and matches only a single label. You cannot have a wildcard label by itself (e.g. Host == "*"). Requests will be matched against the Host field in the following way: 1. If host is precise, the request matches this rule if the http host header is equal to Host. 2. If host is a wildcard, then the request matches this rule if the http host header is to equal to the suffix (removing the first label) of the wildcard rule.
   """
   host: String
@@ -2651,15 +2651,15 @@ type v1_HTTPIngressPath {
   path: String
   """
   pathType determines the interpretation of the path matching. PathType can be one of the following values: * Exact: Matches the URL path exactly. * Prefix: Matches based on a URL path prefix split by '/'. Matching is
-    done on a path element by element basis. A path element refers is the
-    list of labels in the path split by the '/' separator. A request is a
-    match for path p if every p is an element-wise prefix of p of the
-    request path. Note that if the last element of the path is a substring
-    of the last element in request path, it is not a match (e.g. /foo/bar
-    matches /foo/bar/baz, but does not match /foo/barbaz).
+  done on a path element by element basis. A path element refers is the
+  list of labels in the path split by the '/' separator. A request is a
+  match for path p if every p is an element-wise prefix of p of the
+  request path. Note that if the last element of the path is a substring
+  of the last element in request path, it is not a match (e.g. /foo/bar
+  matches /foo/bar/baz, but does not match /foo/barbaz).
   * ImplementationSpecific: Interpretation of the Path matching is up to
-    the IngressClass. Implementations can treat this as a separate PathType
-    or treat it identically to Prefix or Exact path types.
+  the IngressClass. Implementations can treat this as a separate PathType
+  or treat it identically to Prefix or Exact path types.
   Implementations are required to support all path types.
   """
   pathType: String!
@@ -2708,9 +2708,9 @@ type v1_IngressLoadBalancerIngress {
 type v1_IngressPortStatus {
   """
   error is to record the problem with the service port The format of the error shall comply with the following rules: - built-in error values shall be specified in this file and those shall use
-    CamelCase names
+  CamelCase names
   - cloud provider specific error values must have names that comply with the
-    format foo.example.com/CamelCase.
+  format foo.example.com/CamelCase.
   """
   error: String
   """port is the port number of the ingress port."""
@@ -2969,9 +2969,9 @@ type node_NodeDetail {
   nodeInfo: v1_NodeSystemInfo!
   objectMeta: types_ObjectMeta!
   phase: String!
-  podCIDR: String!
+  podCidr: String!
   podList: pod_PodList!
-  providerID: String!
+  providerId: String!
   ready: String!
   taints: [v1_Taint]
   typeMeta: types_TypeMeta!
@@ -2991,7 +2991,7 @@ type v1_NodeSystemInfo {
   """The Architecture reported by the node"""
   architecture: String!
   """Boot ID reported by the node."""
-  bootID: String!
+  bootId: String!
   """
   ContainerRuntime Version reported by the node through runtime remote API (e.g. containerd://1.4.2).
   """
@@ -3007,7 +3007,7 @@ type v1_NodeSystemInfo {
   """
   MachineID reported by the node. For unique machine identification in the cluster this field is preferred. Learn more from man(5) machine-id: http://man7.org/linux/man-pages/man5/machine-id.5.html
   """
-  machineID: String!
+  machineId: String!
   """The Operating System reported by the node"""
   operatingSystem: String!
   """
@@ -3017,7 +3017,7 @@ type v1_NodeSystemInfo {
   """
   SystemUUID reported by the node. For unique machine identification MachineID is preferred. This field is specific to Red Hat hosts https://access.redhat.com/documentation/en-us/red_hat_subscription_management/1/html/rhsm/uuid
   """
-  systemUUID: String!
+  systemUuid: String!
 }
 
 """
@@ -3067,14 +3067,14 @@ type resource_Quantity_entry {
 }
 
 type resource_Quantity {
-  Format: String!
+  format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
 }
 
 type resource_infDecAmount {
-  Dec: inf_Dec!
+  dec: inf_Dec!
 }
 
 type inf_Dec {
@@ -3117,7 +3117,7 @@ type resource_Quantity2_entry {
 }
 
 type resource_Quantity2 {
-  Format: String!
+  format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -3146,7 +3146,7 @@ type v1_PersistentVolumeSource {
   portworxVolume: v1_PortworxVolumeSource
   quobyte: v1_QuobyteVolumeSource
   rbd: v1_RBDPersistentVolumeSource
-  scaleIO: v1_ScaleIOPersistentVolumeSource
+  scaleIo: v1_ScaleIOPersistentVolumeSource
   storageos: v1_StorageOSPersistentVolumeSource
   vsphereVolume: v1_VsphereVirtualDiskVolumeSource
 }
@@ -3172,7 +3172,7 @@ type v1_AWSElasticBlockStoreVolumeSource {
   """
   volumeID is unique ID of the persistent disk resource in AWS (Amazon EBS volume). More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore
   """
-  volumeID: String!
+  volumeId: String!
 }
 
 """
@@ -3184,7 +3184,7 @@ type v1_AzureDiskVolumeSource {
   """diskName is the Name of the data disk in the blob storage"""
   diskName: String!
   """diskURI is the URI of data disk in the blob storage"""
-  diskURI: String!
+  diskUri: String!
   """
   fsType is Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
   """
@@ -3274,7 +3274,7 @@ type v1_CinderPersistentVolumeSource {
   """
   volumeID used to identify the volume in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md
   """
-  volumeID: String!
+  volumeId: String!
 }
 
 """
@@ -3319,7 +3319,7 @@ type v1_FCVolumeSource {
   """
   readOnly: Boolean
   """targetWWNs is Optional: FC target worldwide names (WWNs)"""
-  targetWWNs: [String]
+  targetWwNs: [String]
   """
   wwids Optional: FC volume world wide identifiers (wwids) Either wwids or combination of targetWWNs and lun must be set, but not both simultaneously.
   """
@@ -3356,7 +3356,7 @@ type v1_FlockerVolumeSource {
   """
   datasetUUID is the UUID of the dataset. This is unique identifier of a Flocker dataset
   """
-  datasetUUID: String
+  datasetUuid: String
 }
 
 """
@@ -3501,7 +3501,7 @@ type v1_PhotonPersistentDiskVolumeSource {
   """
   fsType: String
   """pdID is the ID that identifies Photon Controller persistent disk"""
-  pdID: String!
+  pdId: String!
 }
 
 """PortworxVolumeSource represents a Portworx volume resource."""
@@ -3515,7 +3515,7 @@ type v1_PortworxVolumeSource {
   """
   readOnly: Boolean
   """volumeID uniquely identifies a Portworx volume"""
-  volumeID: String!
+  volumeId: String!
 }
 
 """
@@ -3678,7 +3678,7 @@ type v1_VsphereVirtualDiskVolumeSource {
   """
   storagePolicyID is the storage Policy Based Management (SPBM) profile ID associated with the StoragePolicyName.
   """
-  storagePolicyID: String
+  storagePolicyId: String
   """
   storagePolicyName is the storage Policy Based Management (SPBM) profile name.
   """
@@ -3713,7 +3713,7 @@ type resource_Quantity3_entry {
 }
 
 type resource_Quantity3 {
-  Format: String!
+  format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -3739,7 +3739,7 @@ type resource_Quantity4_entry {
 }
 
 type resource_Quantity4 {
-  Format: String!
+  format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -3757,7 +3757,7 @@ type pod_PodDetail {
   nodeName: String!
   objectMeta: types_ObjectMeta!
   persistentVolumeClaimList: persistentvolumeclaim_PersistentVolumeClaimList!
-  podIP: String!
+  podIp: String!
   podPhase: String!
   qosClass: String!
   restartCount: Int!
@@ -3892,7 +3892,7 @@ type v1_GRPCAction {
   port: Int!
   """
   Service is the name of the service to place in the gRPC HealthCheckRequest (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
-  
+
   If this is not specified, the default behavior is defined by gRPC.
   """
   service: String!
@@ -3940,9 +3940,9 @@ type v1_TCPSocketAction {
 type v1_ResourceRequirements {
   """
   Claims lists the names of resources, defined in spec.resourceClaims, that are used by this container.
-  
+
   This is an alpha field and requires enabling the DynamicResourceAllocation feature gate.
-  
+
   This field is immutable. It can only be set for containers.
   """
   claims: [v1_ResourceClaim]
@@ -3971,7 +3971,7 @@ type resource_Quantity5_entry {
 }
 
 type resource_Quantity5 {
-  Format: String!
+  format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -3990,7 +3990,7 @@ type resource_Quantity6_entry {
 }
 
 type resource_Quantity6 {
-  Format: String!
+  format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -4064,7 +4064,7 @@ type v1_SeccompProfile {
   localhostProfile: String
   """
   type indicates which kind of seccomp profile will be applied. Valid options are:
-  
+
   Localhost - a profile defined in a file on the node should be used. RuntimeDefault - the container runtime default profile should be used. Unconfined - no profile should be applied.
   """
   type: String!
@@ -4098,7 +4098,7 @@ type v1_ContainerStatus {
   """
   ContainerID is the ID of the container in the format '<type>://<container_id>'. Where type is a container runtime identifier, returned from Version call of CRI API (for example "containerd").
   """
-  containerID: String
+  containerId: String
   """
   Image is the name of container image that the container is running. The container image may not match the image used in the PodSpec, as it may have been resolved by the runtime. More info: https://kubernetes.io/docs/concepts/containers/images.
   """
@@ -4106,7 +4106,7 @@ type v1_ContainerStatus {
   """
   ImageID is the image ID of the container's image. The image ID may not match the image ID of the image used in the PodSpec, as it may have been resolved by the runtime.
   """
-  imageID: String!
+  imageId: String!
   lastState: v1_ContainerState
   """
   Name is a DNS_LABEL representing the unique name of the container. Each container in a pod must have a unique name across all container types. Cannot be updated.
@@ -4114,7 +4114,7 @@ type v1_ContainerStatus {
   name: String!
   """
   Ready specifies whether the container is currently passing its readiness check. The value will change as readiness probes keep executing. If no readiness probes are specified, this field defaults to true once the container is fully started (see Started field).
-  
+
   The value is typically used to determine whether a container is ready to accept traffic.
   """
   ready: Boolean!
@@ -4143,7 +4143,7 @@ type resource_Quantity7_entry {
 }
 
 type resource_Quantity7 {
-  Format: String!
+  format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -4167,7 +4167,7 @@ type v1_ContainerStateRunning {
 """ContainerStateTerminated is a terminated state of a container."""
 type v1_ContainerStateTerminated {
   """Container's ID in the format '<type>://<container_id>'"""
-  containerID: String
+  containerId: String
   """Exit status from the last termination of the container"""
   exitCode: Int!
   """Time at which the container last terminated"""
@@ -4209,7 +4209,7 @@ type v1_Volume {
   cinder: v1_CinderVolumeSource
   configMap: v1_ConfigMapVolumeSource
   csi: v1_CSIVolumeSource
-  downwardAPI: v1_DownwardAPIVolumeSource
+  downwardApi: v1_DownwardAPIVolumeSource
   emptyDir: v1_EmptyDirVolumeSource
   ephemeral: v1_EphemeralVolumeSource
   fc: v1_FCVolumeSource
@@ -4231,7 +4231,7 @@ type v1_Volume {
   projected: v1_ProjectedVolumeSource
   quobyte: v1_QuobyteVolumeSource
   rbd: v1_RBDVolumeSource
-  scaleIO: v1_ScaleIOVolumeSource
+  scaleIo: v1_ScaleIOVolumeSource
   secret: v1_SecretVolumeSource
   storageos: v1_StorageOSVolumeSource
   vsphereVolume: v1_VsphereVirtualDiskVolumeSource
@@ -4306,7 +4306,7 @@ type v1_CinderVolumeSource {
   """
   volumeID used to identify the volume in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md
   """
-  volumeID: String!
+  volumeId: String!
 }
 
 """
@@ -4435,7 +4435,7 @@ type v1_ObjectMeta {
   annotations: JSON
   """
   CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
-  
+
   Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
   """
   creationTimestamp: String
@@ -4445,7 +4445,7 @@ type v1_ObjectMeta {
   deletionGracePeriodSeconds: BigInt
   """
   DeletionTimestamp is RFC 3339 date and time at which this resource will be deleted. This field is set by the server when a graceful deletion is requested by the user, and is not directly settable by a client. The resource is expected to be deleted (no longer visible from resource lists, and not reachable by name) after the time in this field, once the finalizers list is empty. As long as the finalizers list contains items, deletion is blocked. Once the deletionTimestamp is set, this value may not be unset or be set further into the future, although it may be shortened or the resource may be deleted prior to this time. For example, a user may request that a pod is deleted in 30 seconds. The Kubelet will react by sending a graceful termination signal to the containers in the pod. After that 30 seconds, the Kubelet will send a hard termination signal (SIGKILL) to the container and after cleanup, remove the pod from the API. In the presence of network partitions, this object may still exist after this timestamp, until an administrator or automated process can determine the resource is fully terminated. If not set, graceful deletion of the object has not been requested.
-  
+
   Populated by the system when a graceful deletion is requested. Read-only. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
   """
   deletionTimestamp: String
@@ -4455,9 +4455,9 @@ type v1_ObjectMeta {
   finalizers: [String]
   """
   GenerateName is an optional prefix, used by the server, to generate a unique name ONLY IF the Name field has not been provided. If this field is used, the name returned to the client will be different than the name passed. This value will also be combined with a unique suffix. The provided value has the same validation rules as the Name field, and may be truncated by the length of the suffix required to make the value unique on the server.
-  
+
   If this field is specified and the generated name exists, the server will return a 409.
-  
+
   Applied only if Name is not specified. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency
   """
   generateName: String
@@ -4479,7 +4479,7 @@ type v1_ObjectMeta {
   name: String
   """
   Namespace defines the space within which each name must be unique. An empty namespace is equivalent to the "default" namespace, but "default" is the canonical representation. Not all objects are required to be scoped to a namespace - the value of this field for those objects will be empty.
-  
+
   Must be a DNS_LABEL. Cannot be updated. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces
   """
   namespace: String
@@ -4489,7 +4489,7 @@ type v1_ObjectMeta {
   ownerReferences: [v1_OwnerReference]
   """
   An opaque value that represents the internal version of this object that can be used by clients to determine when objects have changed. May be used for optimistic concurrency, change detection, and the watch operation on a resource or set of resources. Clients must treat these values as opaque and passed unmodified back to the server. They may only be valid for a particular resource or set of resources.
-  
+
   Populated by the system. Read-only. Value must be treated as opaque by clients and . More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
   """
   resourceVersion: String
@@ -4499,7 +4499,7 @@ type v1_ObjectMeta {
   selfLink: String
   """
   UID is the unique in time and space value for this object. It is typically generated by the server on successful creation of a resource and is not allowed to change on PUT operations.
-  
+
   Populated by the system. Read-only. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids
   """
   uid: String
@@ -4629,7 +4629,7 @@ type resource_Quantity8_entry {
 }
 
 type resource_Quantity8 {
-  Format: String!
+  format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -4648,7 +4648,7 @@ type resource_Quantity9_entry {
 }
 
 type resource_Quantity9 {
-  Format: String!
+  format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -4780,7 +4780,7 @@ Projection that may be projected along with other supported volume types
 type v1_VolumeProjection {
   clusterTrustBundle: v1_ClusterTrustBundleProjection
   configMap: v1_ConfigMapProjection
-  downwardAPI: v1_DownwardAPIProjection
+  downwardApi: v1_DownwardAPIProjection
   secret: v1_SecretProjection
   serviceAccountToken: v1_ServiceAccountTokenProjection
 }
@@ -4997,7 +4997,7 @@ PodSecurityContext holds pod-level security attributes and common container sett
 type v1_PodSecurityContext {
   """
   A special supplemental group that applies to all containers in a pod. Some volume types allow the Kubelet to change the ownership of that volume to be owned by the pod:
-  
+
   1. The owning GID will be the FSGroup 2. The setgid bit is set (new files created in the volume will be owned by FSGroup) 3. The permission bits are OR'd with rw-rw
   """
   fsGroup: BigInt
@@ -5141,7 +5141,7 @@ type secret_SecretDetail {
 }
 
 type service_ServiceDetail {
-  clusterIP: String!
+  clusterIp: String!
   endpointList: endpoint_EndpointList!
   errors: [JSON]!
   externalEndpoints: [common_Endpoint]!
@@ -5171,14 +5171,14 @@ type endpoint_Endpoint {
 type v1_EndpointPort {
   """
   The application protocol for this port. This is used as a hint for implementations to offer richer behavior for protocols that they understand. This field follows standard Kubernetes label syntax. Valid values are either:
-  
+
   * Un-prefixed protocol names - reserved for IANA standard service names (as per RFC-6335 and https://www.iana.org/assignments/service-names).
-  
+
   * Kubernetes-defined prefixed names:
-    * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
-    * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
-    * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
-  
+  * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
+  * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
+  * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
+
   * Other protocols should use implementation-defined prefixed names such as mycompany.com/my-custom-protocol.
   """
   appProtocol: String
@@ -5577,15 +5577,15 @@ type Mutation {
 }
 
 type runtime_Unknown {
-  ContentEncoding: String!
-  ContentType: String!
+  contentEncoding: String!
+  contentType: String!
   apiVersion: String
   kind: String
 }
 
 input runtime_Unknown_Input {
-  ContentEncoding: String!
-  ContentType: String!
+  contentEncoding: String!
+  contentType: String!
   apiVersion: String
   kind: String
 }

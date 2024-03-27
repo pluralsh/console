@@ -64,6 +64,8 @@ import StorageClass from '../components/kubernetes/storage/StorageClass'
 import ConfigMap from '../components/kubernetes/configuration/ConfigMap'
 import Namespace from '../components/kubernetes/cluster/Namespace'
 
+import Raw from '../components/kubernetes/common/Raw'
+
 import {
   ACCESS_REL_PATH,
   CLUSTER_REL_PATH,
@@ -302,7 +304,7 @@ export const kubernetesRoutes = [
   </Route>,
   // Workloads
   <Route
-    path={`${KUBERNETES_ABS_PATH}/${PODS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+    path={`${KUBERNETES_ABS_PATH}/:kind/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}/:tab?`}
     element={<Pod />}
   >
     <Route
@@ -320,7 +322,7 @@ export const kubernetesRoutes = [
     />
     <Route
       path="raw"
-      element={<PodRaw />}
+      element={<Raw />}
     />
   </Route>,
   <Route

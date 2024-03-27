@@ -45,7 +45,7 @@ query Pod($name: String!, $namespace: String!) {
     nodeName
     restartCount
     serviceAccountName
-    podIP
+    podIp
     podPhase
     conditions @type(name: "common_Condition") {
       ...Condition

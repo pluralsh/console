@@ -1,0 +1,6 @@
+query Raw($kind: String!, $name: String!, $namespace: String!) {
+  handleGetResource(kind: $kind, name: $name, namespace: $namespace)
+  @rest(path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {
+    object
+  }
+}
