@@ -96,6 +96,7 @@ export const SERVICE_COMPONENT_PATH_MATCHER_REL = getServiceComponentPath({
 })
 export const SERVICE_COMPONENT_PATH_MATCHER_ABS = `${CD_ABS_PATH}/${SERVICE_COMPONENT_PATH_MATCHER_REL}`
 export const ADDONS_REL_PATH = 'addons'
+export const GLOBAL_SERVICES_REL_PATH = 'global-services'
 export const GLOBAL_SETTINGS_REL_PATH = `settings`
 export const GLOBAL_SETTINGS_ABS_PATH = `${CD_ABS_PATH}/${GLOBAL_SETTINGS_REL_PATH}`
 
