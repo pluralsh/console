@@ -149,7 +149,7 @@ export default function ResourceDetails({
         </ResponsivePageFullWidth>
       </ResponsiveLayoutPage>
       <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutSidecarContainer>
+      <ResponsiveLayoutSidecarContainer width={360}>
         {sidecar}
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>

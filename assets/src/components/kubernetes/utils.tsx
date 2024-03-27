@@ -1,7 +1,13 @@
 import uniqWith from 'lodash/uniqWith'
-import { useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
-import { Card, ChipList, Prop } from '@pluralsh/design-system'
+import {
+  Card,
+  ChipList,
+  Prop,
+  Sidecar,
+  SidecarItem,
+} from '@pluralsh/design-system'
 import { Link, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import moment from 'moment/moment'
@@ -172,49 +178,44 @@ export function useKubernetesCluster() {
   )
 }
 
-// TODO: Add size to prop and use bigger version here, use medium chips as well then.
-export function Metadata({ objectMeta }: { objectMeta?: Maybe<ObjectMetaT> }) {
-  const theme = useTheme()
-
-  if (!objectMeta) return null
-
+export function MetadataSidecar({
+  objectMeta,
+  children,
+}: {
+  objectMeta?: Maybe<ObjectMetaT>
+  children?: ReactNode
+}) {
   return (
-    <Card
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'row',
-          gap: theme.spacing.xlarge,
-        }}
-      >
-        <Prop title="Name">{objectMeta.name}</Prop>
-        <Prop title="Namespace">{objectMeta.namespace}</Prop>
-        <Prop title="UID">{objectMeta.uid}</Prop>
-        <Prop title="Creation date">
-          {moment(objectMeta.creationTimestamp).format('lll')}
-        </Prop>
-      </div>
-      <Prop title="Labels">
-        <ChipList
-          size="small"
-          limit={5}
-          values={Object.entries(objectMeta.labels || {})}
-          transformValue={(label) => label.join(': ')}
-        />
-      </Prop>
-      <Prop title="Annotations">
-        <ChipList
-          size="small"
-          limit={5}
-          values={Object.entries(objectMeta.annotations || {})}
-          transformValue={(annotation) => annotation.join(': ')}
-        />
-      </Prop>
-    </Card>
+    <Sidecar heading="Metadata">
+      {objectMeta && (
+        <>
+          <SidecarItem heading="Name">{objectMeta.name}</SidecarItem>
+          <SidecarItem heading="Namespace">{objectMeta.namespace}</SidecarItem>
+          <SidecarItem heading="UID">{objectMeta.uid}</SidecarItem>
+          <SidecarItem heading="Creation date">
+            {moment(objectMeta.creationTimestamp).format('lll')}
+          </SidecarItem>
+          <SidecarItem heading="Labels">
+            <ChipList
+              size="small"
+              limit={3}
+              values={Object.entries(objectMeta.labels || {})}
+              transformValue={(label) => label.join(': ')}
+              emptyState={<div>None</div>}
+            />
+          </SidecarItem>
+          <SidecarItem heading="Annotations">
+            <ChipList
+              size="small"
+              limit={3}
+              values={Object.entries(objectMeta.annotations || {})}
+              transformValue={(annotation) => annotation.join(': ')}
+              emptyState={<div>None</div>}
+            />
+          </SidecarItem>
+        </>
+      )}
+      {children}
+    </Sidecar>
   )
 }

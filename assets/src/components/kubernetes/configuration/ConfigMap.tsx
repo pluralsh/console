@@ -13,7 +13,7 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
 import { SubTitle } from '../../cluster/nodes/SubTitle'
-import { Metadata, useKubernetesCluster } from '../utils'
+import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import { NAMESPACE_PARAM } from '../Kubernetes'
 import {
   CONFIG_MAPS_REL_PATH,
@@ -94,7 +94,7 @@ export default function ConfigMap(): ReactElement {
       >
         <section>
           <SubTitle>Metadata</SubTitle>
-          <Metadata objectMeta={cm?.objectMeta} />
+          <MetadataSidecar objectMeta={cm?.objectMeta} />
         </section>
         <section>
           <SubTitle>Data</SubTitle>

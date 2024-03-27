@@ -21,7 +21,7 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
 import { SubTitle } from '../../cluster/nodes/SubTitle'
-import { Metadata, useKubernetesCluster } from '../utils'
+import { Metadata, MetadataSidecar, useKubernetesCluster } from '../utils'
 import { NAMESPACE_PARAM } from '../Kubernetes'
 import {
   SECRETS_REL_PATH,
@@ -154,7 +154,7 @@ export default function Secret(): ReactElement {
       >
         <section>
           <SubTitle>Metadata</SubTitle>
-          <Metadata objectMeta={secret?.objectMeta} />
+          <MetadataSidecar objectMeta={secret?.objectMeta} />
         </section>
         <section>
           <SubTitle>Info</SubTitle>

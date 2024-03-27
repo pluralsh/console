@@ -1,5 +1,7 @@
 import { ReactElement } from 'react'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { SidecarItem } from '@pluralsh/design-system'
+import { A } from 'honorable'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
@@ -9,13 +11,12 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { SubTitle } from '../../cluster/nodes/SubTitle'
-import { Metadata } from '../utils'
 import Containers from '../common/Containers'
 import Conditions from '../common/Conditions'
-
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
-
-import PodSidecar from './PodSidecar'
+import { MetadataSidecar } from '../utils'
+import { StatusChip } from '../../cluster/TableElements'
+import { ReadinessT } from '../../../utils/status'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -45,7 +46,26 @@ export function Pod(): ReactElement {
   return (
     <ResourceDetails
       tabs={directory}
-      sidecar={<PodSidecar pod={pod} />}
+      sidecar={
+        <MetadataSidecar objectMeta={pod.objectMeta}>
+          <SidecarItem heading="IP">{pod?.podIP}</SidecarItem>
+          <SidecarItem heading="Parent node">
+            <A
+              as={Link}
+              to={`/nodes/${pod?.nodeName}`}
+              inline
+            >
+              {pod?.nodeName}
+            </A>
+          </SidecarItem>
+          <SidecarItem heading="Service account">
+            {pod?.serviceAccountName}
+          </SidecarItem>
+          <SidecarItem heading="Status">
+            <StatusChip readiness={pod?.podPhase as ReadinessT} />
+          </SidecarItem>
+        </MetadataSidecar>
+      }
     >
       <Outlet context={pod} />
     </ResourceDetails>
@@ -57,16 +77,10 @@ export function PodInfo(): ReactElement {
   const conditions = pod?.conditions
 
   return (
-    <>
-      <section>
-        <SubTitle>Conditions</SubTitle>
-        <Conditions conditions={conditions} />
-      </section>
-      <section>
-        <SubTitle>Metadata</SubTitle>
-        <Metadata objectMeta={pod?.objectMeta} />
-      </section>
-    </>
+    <section>
+      <SubTitle>Conditions</SubTitle>
+      <Conditions conditions={conditions} />
+    </section>
   )
 }
 
