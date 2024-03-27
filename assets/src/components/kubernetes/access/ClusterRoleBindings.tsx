@@ -11,25 +11,17 @@ import {
   Maybe,
   useClusterRoleBindingsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   CLUSTER_ROLE_BINDINGS_REL_PATH,
   getAccessAbsPath,
-  getKubernetesAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useKubernetesContext } from '../Kubernetes'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  {
-    label: 'kubernetes',
-    url: getKubernetesAbsPath(cluster?.id),
-  },
-  {
-    label: cluster?.name ?? '',
-    url: getKubernetesAbsPath(cluster?.id),
-  },
+  ...getBaseBreadcrumbs(cluster),
   {
     label: 'access',
     url: getAccessAbsPath(cluster?.id),

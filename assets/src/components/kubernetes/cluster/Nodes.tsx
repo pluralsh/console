@@ -12,7 +12,7 @@ import {
   NodesQueryVariables,
   useNodesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { Usage } from '../../cluster/TableElements'
@@ -28,14 +28,7 @@ import { useKubernetesContext } from '../Kubernetes'
 import { NodeReadyChip } from './utils'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  {
-    label: 'kubernetes',
-    url: getKubernetesAbsPath(cluster?.id),
-  },
-  {
-    label: cluster?.name ?? '',
-    url: getKubernetesAbsPath(cluster?.id),
-  },
+  ...getBaseBreadcrumbs(cluster),
   {
     label: 'cluster',
     url: getClusterAbsPath(cluster?.id),

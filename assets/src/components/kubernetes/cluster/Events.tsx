@@ -28,17 +28,12 @@ import {
 
 import { useKubernetesContext } from '../Kubernetes'
 
+import { getBaseBreadcrumbs } from '../utils'
+
 import { EventTypeChip } from './utils'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  {
-    label: 'kubernetes',
-    url: getKubernetesAbsPath(cluster?.id),
-  },
-  {
-    label: cluster?.name ?? '',
-    url: getKubernetesAbsPath(cluster?.id),
-  },
+  ...getBaseBreadcrumbs(cluster),
   {
     label: 'cluster',
     url: getClusterAbsPath(cluster?.id),

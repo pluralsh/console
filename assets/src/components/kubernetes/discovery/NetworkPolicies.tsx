@@ -11,7 +11,7 @@ import {
   Networkpolicy_NetworkPolicy as NetworkPolicyT,
   useNetworkPoliciesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 
 import { ResourceList } from '../ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
@@ -23,14 +23,7 @@ import {
 import { useKubernetesContext } from '../Kubernetes'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  {
-    label: 'kubernetes',
-    url: getKubernetesAbsPath(cluster?.id),
-  },
-  {
-    label: cluster?.name ?? '',
-    url: getKubernetesAbsPath(cluster?.id),
-  },
+  ...getBaseBreadcrumbs(cluster),
   {
     label: 'discovery',
     url: getDiscoveryAbsPath(cluster?.id),
