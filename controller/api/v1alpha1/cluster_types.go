@@ -88,12 +88,30 @@ func (c *Cluster) Attributes(providerId *string) console.ClusterAttributes {
 func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
 	nodePools := algorithms.Map(c.Spec.NodePools, func(np ClusterNodePool) *console.NodePoolAttributes { return np.Attributes() })
 	slices.SortFunc(nodePools, func(a, b *console.NodePoolAttributes) int { return strings.Compare(a.Name, b.Name) })
-
+	tagAttr := c.TagUpdateAttributes()
 	return console.ClusterUpdateAttributes{
 		Handle:    c.Spec.Handle,
 		Version:   c.Spec.Version,
 		Protect:   c.Spec.Protect,
 		NodePools: nodePools,
+		Tags:      tagAttr.Tags,
+	}
+}
+
+func (c *Cluster) TagUpdateAttributes() console.ClusterUpdateAttributes {
+	var tags []*console.TagAttributes
+	if len(c.Spec.Tags) > 0 {
+		for k, v := range c.Spec.Tags {
+			tags = append(tags, &console.TagAttributes{
+				Name:  k,
+				Value: v,
+			})
+		}
+		slices.SortFunc(tags, func(a, b *console.TagAttributes) int { return strings.Compare(a.Name, b.Name) })
+	}
+	return console.ClusterUpdateAttributes{
+		Handle: c.Spec.Handle,
+		Tags:   tags,
 	}
 }
 

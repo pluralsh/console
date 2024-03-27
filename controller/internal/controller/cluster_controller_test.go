@@ -319,7 +319,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				ID:             awsReadonlyClusterConsoleID,
 				CurrentVersion: lo.ToPtr("1.24.11"),
 			}, nil)
-
+			fakeConsoleClient.On("UpdateCluster", mock.Anything, mock.Anything).Return(nil, nil)
 			controllerReconciler := &controller.ClusterReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
@@ -334,7 +334,8 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
 				Status: v1alpha1.Status{
-					ID: lo.ToPtr(awsReadonlyClusterConsoleID),
+					ID:  lo.ToPtr(awsReadonlyClusterConsoleID),
+					SHA: lo.ToPtr("L3KK4BYJRB2JTXZVEU6NBBLEQUHLTNVQE2OHMRNDJBY6WKZFFA4A===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
@@ -359,6 +360,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				ID:             byokReadonlyClusterConsoleID,
 				CurrentVersion: lo.ToPtr("1.24.11"),
 			}, nil)
+			fakeConsoleClient.On("UpdateCluster", mock.Anything, mock.Anything).Return(nil, nil)
 
 			controllerReconciler := &controller.ClusterReconciler{
 				Client:        k8sClient,
@@ -374,7 +376,8 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
 				Status: v1alpha1.Status{
-					ID: lo.ToPtr(byokReadonlyClusterConsoleID),
+					ID:  lo.ToPtr(byokReadonlyClusterConsoleID),
+					SHA: lo.ToPtr("KUEGIQWRYFJEEYRIYV5KIVVWP6AWD66YSD3AODQ54VEIM27IX44A===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
