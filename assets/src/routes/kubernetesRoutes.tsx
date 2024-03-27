@@ -9,7 +9,13 @@ import ClusterRole from 'components/kubernetes/access/ClusterRole'
 import ClusterRoleBinding from 'components/kubernetes/access/ClusterRoleBinding'
 import CustomResourceDefinition from 'components/kubernetes/customresources/CustomResourceDefinition'
 
-import Pod from '../components/kubernetes/workloads/Pod'
+import {
+  Pod,
+  PodContainers,
+  PodEvents,
+  PodInfo,
+  PodRaw,
+} from '../components/kubernetes/workloads/Pod'
 import Kubernetes from '../components/kubernetes/Kubernetes'
 import Workloads from '../components/kubernetes/workloads/Workloads'
 import Discovery from '../components/kubernetes/discovery/Discovery'
@@ -296,10 +302,27 @@ export const kubernetesRoutes = [
   </Route>,
   // Workloads
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${PODS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<Pod />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<PodInfo />}
+    />
+    <Route
+      path="containers"
+      element={<PodContainers />}
+    />
+    <Route
+      path="events"
+      element={<PodEvents />}
+    />
+    <Route
+      path="raw"
+      element={<PodRaw />}
+    />
+  </Route>,
   <Route
     index
     path={`${KUBERNETES_ABS_PATH}/${DEPLOYMENTS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}

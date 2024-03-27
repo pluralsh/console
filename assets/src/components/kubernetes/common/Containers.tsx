@@ -51,7 +51,7 @@ export default function Containers({
       columns={columns}
       virtualizeRows
       css={{
-        maxHeight: 'unset',
+        maxHeight: '500px',
         height: '100%',
       }}
     />
