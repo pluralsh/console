@@ -104,5 +104,5 @@ spec:
           secretName: console-conf
       {{- end }}
       {{ if .Values.global.additionalVolumes }}
-      {{ toYaml .Valuess.global.additionalVolumes | nindent 6 }}
+      {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
       {{ end }}
