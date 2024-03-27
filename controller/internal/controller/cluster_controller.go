@@ -156,6 +156,18 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
+	// Calculate SHA to detect changes that should be applied in the Console API.
+	sha, err := utils.HashObject(cluster.UpdateTagAttributes())
+	if err != nil {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	if !cluster.Status.IsSHAEqual(sha) {
+		if _, err := r.ConsoleClient.UpdateCluster(apiCluster.ID, cluster.UpdateTagAttributes()); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+	cluster.Status.SHA = &sha
 	cluster.Status.ID = &apiCluster.ID
 	cluster.Status.KasURL = apiCluster.KasURL
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
