@@ -1,9 +1,11 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
 import { filesize } from 'filesize'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import {
+  Maybe,
   Node_NodeList as NodeListT,
   Node_Node as NodeT,
   NodesQuery,
@@ -12,12 +14,37 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
-
 import { UsageBar } from '../../cluster/nodes/UsageBar'
-
 import { Usage } from '../../cluster/TableElements'
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import {
+  NODES_REL_PATH,
+  getClusterAbsPath,
+  getKubernetesAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
 
 import { NodeReadyChip } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  {
+    label: 'kubernetes',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+  {
+    label: cluster?.name ?? '',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+  {
+    label: 'cluster',
+    url: getClusterAbsPath(cluster?.id),
+  },
+  {
+    label: 'nodes',
+    url: `${getClusterAbsPath(cluster?.id)}/${NODES_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<NodeT>()
 
@@ -91,6 +118,10 @@ const colPods = columnHelper.accessor((node) => node?.allocatedResources, {
 })
 
 export default function Nodes() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(

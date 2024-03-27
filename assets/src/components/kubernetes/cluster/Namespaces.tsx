@@ -1,7 +1,10 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import {
+  Maybe,
   Namespace_NamespaceList as NamespaceListT,
   Namespace_Namespace as NamespaceT,
   NamespacesQuery,
@@ -11,7 +14,35 @@ import {
 import { useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import {
+  NAMESPACES_REL_PATH,
+  getClusterAbsPath,
+  getKubernetesAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
+
 import { NamespacePhaseChip } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  {
+    label: 'kubernetes',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+  {
+    label: cluster?.name ?? '',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+  {
+    label: 'cluster',
+    url: getClusterAbsPath(cluster?.id),
+  },
+  {
+    label: 'namespaces',
+    url: `${getClusterAbsPath(cluster?.id)}/${NAMESPACES_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<NamespaceT>()
 
@@ -22,6 +53,10 @@ const colPhase = columnHelper.accessor((namespace) => namespace?.phase, {
 })
 
 export default function Namespaces() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
