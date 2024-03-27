@@ -23,7 +23,7 @@ export const NETWORK_POLICIES_REL_PATH = 'networkpolicies'
 
 export const STORAGE_REL_PATH = 'storage'
 export const PERSISTENT_VOLUME_CLAIMS_REL_PATH = 'persistentvolumeclaims'
-export const PERSISTENT_VOLUME_REL_PATH = 'persistentvolumes'
+export const PERSISTENT_VOLUMES_REL_PATH = 'persistentvolumes'
 export const STORAGE_CLASSES_REL_PATH = 'storageclasses'
 
 export const CONFIGURATION_REL_PATH = 'configuration'

@@ -1,35 +1,90 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react'
 import {
   Button,
-  Card,
   EyeClosedIcon,
   EyeIcon,
   IconFrame,
-  Prop,
+  SidecarItem,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useParams } from 'react-router-dom'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import {
   SecretQueryVariables,
+  Secret_SecretDetail as SecretT,
   useSecretQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
-import { SubTitle } from '../../cluster/nodes/SubTitle'
-import { Metadata, useKubernetesCluster } from '../utils'
+
+import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import { NAMESPACE_PARAM } from '../Kubernetes'
 import {
   SECRETS_REL_PATH,
   getConfigurationAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
+import ResourceDetails, { TabEntry } from '../ResourceDetails'
 
 import { getBreadcrumbs } from './Secrets'
+
+const directory: Array<TabEntry> = [
+  { path: '', label: 'Info' },
+  { path: 'raw', label: 'Raw' },
+] as const
+
+export default function Secret(): ReactElement {
+  const cluster = useKubernetesCluster()
+  const { clusterId, name = '', namespace = '' } = useParams()
+  const { data, loading } = useSecretQuery({
+    client: KubernetesClient(clusterId ?? ''),
+    skip: !clusterId,
+    pollInterval: 30_000,
+    variables: {
+      name,
+      namespace,
+    } as SecretQueryVariables,
+  })
+
+  const secret = data?.handleGetSecretDetail
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...getBreadcrumbs(cluster),
+        {
+          label: namespace ?? '',
+          url: `${getConfigurationAbsPath(
+            cluster?.id
+          )}/${SECRETS_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
+        },
+        {
+          label: name ?? '',
+          url: getResourceDetailsAbsPath(clusterId, 'secret', name, namespace),
+        },
+      ],
+      [cluster, clusterId, name, namespace]
+    )
+  )
+
+  if (loading) return <LoadingIndicator />
+
+  return (
+    <ResourceDetails
+      tabs={directory}
+      sidecar={
+        <MetadataSidecar objectMeta={secret?.objectMeta}>
+          <SidecarItem heading="Type">{secret?.type}</SidecarItem>
+        </MetadataSidecar>
+      }
+    >
+      <Outlet context={secret} />
+    </ResourceDetails>
+  )
+}
 
 type SecretDataEntry = {
   key: string
@@ -96,43 +151,11 @@ const columns = [
   }),
 ]
 
-export default function Secret(): ReactElement {
+export function SecretInfo(): ReactElement {
   const theme = useTheme()
-  const cluster = useKubernetesCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
+  const secret = useOutletContext() as SecretT
   const [revealAll, setRevealAll] = useState(false)
-  const { data, loading } = useSecretQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as SecretQueryVariables,
-  })
-
-  const secret = data?.handleGetSecretDetail
-
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...getBreadcrumbs(cluster),
-        {
-          label: namespace ?? '',
-          url: `${getConfigurationAbsPath(
-            cluster?.id
-          )}/${SECRETS_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
-        },
-        {
-          label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'secret', name, namespace),
-        },
-      ],
-      [cluster, clusterId, name, namespace]
-    )
-  )
-
-  const secretData: SecretDataEntry[] = useMemo(
+  const data: SecretDataEntry[] = useMemo(
     () =>
       Object.entries(secret?.data ?? {}).map(([key, value]) => ({
         key,
@@ -141,69 +164,39 @@ export default function Secret(): ReactElement {
     [secret?.data]
   )
 
-  if (loading) return <LoadingIndicator />
-
   return (
-    <ResponsivePageFullWidth>
+    <section>
       <div
         css={{
+          ...theme.partials.text.subtitle1,
+          alignItems: 'end',
+          justifyContent: 'space-between',
           display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.large,
+          marginBottom: theme.spacing.medium,
         }}
       >
-        <section>
-          <SubTitle>Metadata</SubTitle>
-          <Metadata objectMeta={secret?.objectMeta} />
-        </section>
-        <section>
-          <SubTitle>Info</SubTitle>
-          <Card
-            css={{
-              display: 'flex',
-              flexDirection: 'row',
-            }}
-          >
-            <Prop title="Type">{secret?.type}</Prop>
-          </Card>
-        </section>
-        <section>
-          <div
-            css={{
-              ...theme.partials.text.subtitle1,
-              alignItems: 'end',
-              justifyContent: 'space-between',
-              display: 'flex',
-              marginBottom: theme.spacing.medium,
-            }}
-          >
-            <span>Data</span>
-            <Button
-              floating
-              startIcon={revealAll ? <EyeClosedIcon /> : <EyeIcon />}
-              onClick={() => setRevealAll(!revealAll)}
-            >
-              {revealAll ? 'Hide all' : 'Reveal all'}
-            </Button>
-          </div>
-          <Card
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <Table
-              data={secretData || []}
-              columns={columns}
-              reactTableOptions={{ meta: { revealAll } }}
-              css={{
-                maxHeight: 'unset',
-                height: '100%',
-              }}
-            />
-          </Card>
-        </section>
+        <span>Data</span>
+        <Button
+          floating
+          startIcon={revealAll ? <EyeClosedIcon /> : <EyeIcon />}
+          onClick={() => setRevealAll(!revealAll)}
+        >
+          {revealAll ? 'Hide all' : 'Reveal all'}
+        </Button>
       </div>
-    </ResponsivePageFullWidth>
+      <Table
+        data={data}
+        columns={columns}
+        reactTableOptions={{ meta: { revealAll } }}
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+      />
+    </section>
   )
+}
+
+export function SecretRaw(): ReactElement {
+  return <>raw</>
 }

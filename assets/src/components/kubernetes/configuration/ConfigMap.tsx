@@ -1,19 +1,18 @@
 import { ReactElement, useMemo } from 'react'
 import { Code, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useParams } from 'react-router-dom'
-import { useTheme } from 'styled-components'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { isEmpty } from 'lodash'
 import yaml from 'js-yaml'
 
 import {
   ConfigMapQueryVariables,
+  Configmap_ConfigMapDetail as ConfigMapT,
   useConfigMapQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
 import { SubTitle } from '../../cluster/nodes/SubTitle'
-import { Metadata, useKubernetesCluster } from '../utils'
+import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import { NAMESPACE_PARAM } from '../Kubernetes'
 import {
   CONFIG_MAPS_REL_PATH,
@@ -21,10 +20,16 @@ import {
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
+import ResourceDetails, { TabEntry } from '../ResourceDetails'
+
 import { getBreadcrumbs } from './ConfigMaps'
 
+const directory: Array<TabEntry> = [
+  { path: '', label: 'Info' },
+  { path: 'raw', label: 'Raw' },
+] as const
+
 export default function ConfigMap(): ReactElement {
-  const theme = useTheme()
   const cluster = useKubernetesCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useConfigMapQuery({
@@ -38,24 +43,6 @@ export default function ConfigMap(): ReactElement {
   })
 
   const cm = data?.handleGetConfigMapDetail
-
-  const tabs = useMemo(
-    () => [
-      {
-        key: 'yaml',
-        label: 'YAML',
-        language: 'yaml',
-        content: yaml.dump(cm?.data),
-      },
-      {
-        key: 'json',
-        label: 'JSON',
-        language: 'json',
-        content: JSON.stringify(cm?.data, null, 2),
-      },
-    ],
-    [cm?.data]
-  )
 
   useSetBreadcrumbs(
     useMemo(
@@ -84,27 +71,47 @@ export default function ConfigMap(): ReactElement {
   if (loading) return <LoadingIndicator />
 
   return (
-    <ResponsivePageFullWidth>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.large,
-        }}
-      >
-        <section>
-          <SubTitle>Metadata</SubTitle>
-          <Metadata objectMeta={cm?.objectMeta} />
-        </section>
-        <section>
-          <SubTitle>Data</SubTitle>
-          {!isEmpty(cm?.data) ? (
-            <Code tabs={tabs} />
-          ) : (
-            'There is no data to display.'
-          )}
-        </section>
-      </div>
-    </ResponsivePageFullWidth>
+    <ResourceDetails
+      tabs={directory}
+      sidecar={<MetadataSidecar objectMeta={cm?.objectMeta} />}
+    >
+      <Outlet context={cm} />
+    </ResourceDetails>
   )
+}
+
+export function ConfigMapInfo(): ReactElement {
+  const cm = useOutletContext() as ConfigMapT
+  const tabs = useMemo(
+    () => [
+      {
+        key: 'yaml',
+        label: 'YAML',
+        language: 'yaml',
+        content: yaml.dump(cm?.data),
+      },
+      {
+        key: 'json',
+        label: 'JSON',
+        language: 'json',
+        content: JSON.stringify(cm?.data, null, 2),
+      },
+    ],
+    [cm?.data]
+  )
+
+  return (
+    <section>
+      <SubTitle>Data</SubTitle>
+      {!isEmpty(cm?.data) ? (
+        <Code tabs={tabs} />
+      ) : (
+        'There is no data to display.'
+      )}
+    </section>
+  )
+}
+
+export function ConfigMapRaw(): ReactElement {
+  return <>raw</>
 }
