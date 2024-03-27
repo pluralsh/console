@@ -189,6 +189,45 @@ defmodule Console.Deployments.PubSub.RecurseTest do
     end
   end
 
+  describe "ClusterUpdated" do
+    test "it will apply global services" do
+      bot("console")
+      cluster = insert(:cluster, tags: [%{name: "test", value: "tag"}])
+      global  = insert(:global_service, provider: cluster.provider)
+      global2 = insert(:global_service, tags: [%{name: "test", value: "tag"}])
+      global3 = insert(:global_service)
+      ignore  = insert(:global_service, tags: [%{name: "ignore", value: "tag"}])
+      ignore1 = insert(:global_service, provider: insert(:cluster_provider))
+
+      event = %PubSub.ClusterUpdated{item: cluster}
+      :ok = Recurse.handle_event(event)
+
+      for gs <- [global, global2, global3],
+        do: assert Services.get_service_by_name(cluster.id, gs.service.name)
+      for gs <- [ignore, ignore1],
+        do: refute Services.get_service_by_name(cluster.id, gs.service.name)
+    end
+
+    test "it will apply managed namespaces" do
+      bot("console")
+      repo = insert(:git_repository)
+      service_spec = %{repository_id: repo.id, git: %{ref: "main", folder: "runtime"}}
+      cluster = insert(:cluster, tags: [%{name: "test", value: "tag"}])
+      mns1 = insert(:managed_namespace, target: %{tags: %{"test" => "tag"}}, service: service_spec)
+      mns2 = insert(:managed_namespace, service: service_spec)
+      ignore  = insert(:managed_namespace, target: %{tags: %{"not" => "matching"}}, service: service_spec)
+      ignore1 = insert(:managed_namespace, target: %{distro: :aks})
+
+      event = %PubSub.ClusterUpdated{item: cluster}
+      :ok = Recurse.handle_event(event)
+
+      for mns <- [mns1, mns2],
+        do: assert Services.get_service_by_name(cluster.id, "#{mns.name}-core")
+      for mns <- [ignore, ignore1],
+        do: refute Services.get_service_by_name(cluster.id, "#{mns.name}-core")
+    end
+  end
+
   describe "ClusterPinged" do
     test "it will apply global services" do
       bot("console")

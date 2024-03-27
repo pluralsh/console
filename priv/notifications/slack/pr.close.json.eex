@@ -5,7 +5,7 @@
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "✔ *Pull Request Closed <%= @pr.status %>: <%= @pr.title %>*"
+                "text": "✔ *Pull Request Closed <%= @pr.status %>:*\n<%= @pr.title %>"
             }
         },
 		{

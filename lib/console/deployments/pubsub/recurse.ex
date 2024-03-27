@@ -41,7 +41,7 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceUpdated do
   def process(_), do: :ok
 end
 
-defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterCreated do
+defimpl Console.PubSub.Recurse, for: [Console.PubSub.ClusterCreated, Console.PubSub.ClusterUpdated] do
   alias Console.Repo
   alias Console.Deployments.{Global}
   alias Console.Services.Users
@@ -63,7 +63,6 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterCreated do
     |> Stream.run()
   end
 end
-
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterPinged do
   alias Console.Repo
