@@ -1,10 +1,5 @@
 import { Outlet, useMatch } from 'react-router-dom'
-import {
-  SubTab,
-  TabList,
-  TabPanel,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { Suspense, useMemo, useRef, useState } from 'react'
 
 import {
@@ -13,7 +8,6 @@ import {
   NETWORK_POLICIES_REL_PATH,
   SERVICES_REL_PATH,
   getDiscoveryAbsPath,
-  getKubernetesAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
@@ -49,26 +43,6 @@ export default function Discovery() {
   const pathMatch = useMatch(`${getDiscoveryAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
-
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        {
-          label: 'kubernetes',
-          url: getKubernetesAbsPath(cluster?.id),
-        },
-        {
-          label: cluster?.name ?? '',
-          url: getKubernetesAbsPath(cluster?.id),
-        },
-        {
-          label: 'discovery',
-          url: getDiscoveryAbsPath(cluster?.id),
-        },
-      ],
-      [cluster]
-    )
-  )
 
   const headerContent = useMemo(
     () => (
