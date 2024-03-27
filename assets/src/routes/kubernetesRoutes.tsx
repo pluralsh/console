@@ -2,7 +2,10 @@ import { Navigate, Route } from 'react-router-dom'
 
 import Service from 'components/kubernetes/discovery/Service'
 import PersistentVolume from 'components/kubernetes/storage/PersistentVolume'
-import Secret from 'components/kubernetes/configuration/Secret'
+import Secret, {
+  SecretInfo,
+  SecretRaw,
+} from 'components/kubernetes/configuration/Secret'
 import RoleBinding from 'components/kubernetes/access/RoleBinding'
 import Role from 'components/kubernetes/access/Role'
 import ClusterRole from 'components/kubernetes/access/ClusterRole'
@@ -402,10 +405,19 @@ export const kubernetesRoutes = [
     element={<ConfigMap />}
   />,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${SECRETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<Secret />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<SecretInfo />}
+    />
+    <Route
+      path="raw"
+      element={<SecretRaw />}
+    />
+  </Route>,
   // Cluster
   <Route
     index
