@@ -160,6 +160,10 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       ignore  = insert(:global_service, tags: [%{name: "ignore", value: "tag"}])
       ignore1 = insert(:global_service, provider: insert(:cluster_provider))
 
+      repo = insert(:git_repository)
+      service_spec = %{repository_id: repo.id, git: %{ref: "main", folder: "runtime"}, name: "svc", namespace: "ns"}
+      templated = insert(:global_service, template: service_spec)
+
       event = %PubSub.ClusterCreated{item: cluster}
       :ok = Recurse.handle_event(event)
 
@@ -167,6 +171,14 @@ defmodule Console.Deployments.PubSub.RecurseTest do
         do: assert Services.get_service_by_name(cluster.id, gs.service.name)
       for gs <- [ignore, ignore1],
         do: refute Services.get_service_by_name(cluster.id, gs.service.name)
+
+      res = Services.get_service_by_name(cluster.id, "svc")
+      assert res.owner_id == templated.id
+      assert res.name == "svc"
+      assert res.namespace == "ns"
+      assert res.repository_id == repo.id
+      assert res.git.ref == "main"
+      assert res.git.folder == "runtime"
     end
 
     test "it will apply managed namespaces" do

@@ -40,6 +40,14 @@ defmodule Console do
   end
   def mapify(v), do: v
 
+  def remove_ids(%{id: _} = map) do
+    Map.delete(map, :id)
+    |> remove_ids()
+  end
+  def remove_ids(%{} = map), do: Map.new(map, fn {k, v} -> {k, remove_ids(v)} end)
+  def remove_ids(l) when is_list(l), do: Enum.map(l, &remove_ids/1)
+  def remove_ids(v), do: v
+
   def string_map(%{} = map) do
     Poison.encode!(map)
     |> Poison.decode!()

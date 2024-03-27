@@ -847,6 +847,12 @@ input ManagedNamespaceAttributes {
 
 "Attributes for configuring a service in something like a managed namespace"
 input ServiceTemplateAttributes {
+  "the name for this service (optional for managed namespaces)"
+  name: String
+
+  "the namespace for this service (optional for managed namespaces)"
+  namespace: String
+
   templated: Boolean
 
   "the id of a repository to source manifests for this service"
@@ -863,6 +869,9 @@ input ServiceTemplateAttributes {
 
   "settings for service kustomization"
   kustomize: KustomizeAttributes
+
+  "attributes to configure sync settings for this service"
+  syncConfig: SyncConfigAttributes
 }
 
 "A spec for targeting clusters"
@@ -936,6 +945,12 @@ type ManagedNamespace {
 
 "Attributes for configuring a service in something like a managed namespace"
 type ServiceTemplate {
+  "the name for this service (optional for managed namespaces)"
+  name: String
+
+  "the namespace for this service (optional for managed namespaces)"
+  namespace: String
+
   templated: Boolean
 
   "the id of a repository to source manifests for this service"
@@ -952,6 +967,9 @@ type ServiceTemplate {
 
   "settings for service kustomization"
   kustomize: Kustomize
+
+  "specification of how the templated service will be synced"
+  syncConfig: SyncConfig
 }
 
 "A spec for targeting clusters"
