@@ -13,6 +13,7 @@ query Pods(
     page: $page
   )
     @rest(
+      type: "pod_PodList"
       path: "pod/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     listMeta @type(name: "types_ListMeta") {
@@ -45,12 +46,15 @@ query Pod($name: String!, $namespace: String!) {
     nodeName
     restartCount
     serviceAccountName
-    podIp
+    podIP
     podPhase
     conditions @type(name: "common_Condition") {
       ...Condition
     }
     containers @type(name: "pod_Container") {
+      ...Container
+    }
+    initContainers @type(name: "pod_Container") {
       ...Container
     }
     controller @type(name: "controller_ResourceOwner") {
@@ -59,5 +63,30 @@ query Pod($name: String!, $namespace: String!) {
     eventList @type(name: "common_EventList") {
       ...EventList
     }
+    securityContext @type(name: "v1_PodSecurityContext") {
+      ...PodSecurityContext
+    }
+  }
+}
+
+query PodEvents(
+  $name: String!
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String) {
+  handleGetPodEvents(
+    pod: $name
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page)
+  @rest(
+    type: "common_EventList"
+    path: "pod/{args.namespace}/{args.pod}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+  ) {
+    ...EventList
   }
 }

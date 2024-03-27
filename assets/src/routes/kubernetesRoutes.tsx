@@ -312,7 +312,7 @@ export const kubernetesRoutes = [
   </Route>,
   // Workloads
   <Route
-    path={`${KUBERNETES_ABS_PATH}/:kind/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}/:tab?`}
+    path={`${KUBERNETES_ABS_PATH}/:kind/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<Pod />}
   >
     <Route

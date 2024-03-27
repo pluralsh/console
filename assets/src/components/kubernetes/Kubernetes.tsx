@@ -142,6 +142,7 @@ export const useKubernetesContext = () => {
 }
 
 export const NAMESPACE_PARAM = 'namespace'
+export const FILTER_PARAM = 'search'
 
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
@@ -159,7 +160,7 @@ export default function Kubernetes() {
   const { pathname } = useLocation()
   const { clusterId } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [filter, setFilter] = useState('') // TODO: Keep in search params as well?
+  const [filter, setFilter] = useState(searchParams.get(FILTER_PARAM) ?? '')
   const [namespace, setNamespace] = useState(
     searchParams.get(NAMESPACE_PARAM) ?? ''
   )
@@ -274,7 +275,11 @@ export default function Kubernetes() {
           >
             <NameFilter
               value={filter}
-              onChange={(e) => setFilter(e)}
+              onChange={(e) => {
+                setFilter(e)
+                searchParams.set(FILTER_PARAM, e as string)
+                setSearchParams(searchParams)
+              }}
             />
             {namespaced && (
               <NamespaceFilter
@@ -282,7 +287,8 @@ export default function Kubernetes() {
                 namespace={namespace}
                 onChange={(ns) => {
                   setNamespace(ns)
-                  setSearchParams({ namespace })
+                  searchParams.set(NAMESPACE_PARAM, ns)
+                  setSearchParams(searchParams)
                 }}
               />
             )}

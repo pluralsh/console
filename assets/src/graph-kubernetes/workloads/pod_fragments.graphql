@@ -3,6 +3,9 @@ fragment Container on pod_Container {
   args
   commands
   image
+  securityContext @type(name: "v1_SecurityContext") {
+    ...SecurityContext
+  }
   livenessProbe @type(name: "v1_Probe") {
     ...Probe
   }
@@ -11,23 +14,100 @@ fragment Container on pod_Container {
   }
   status @type(name: "v1_ContainerStatus") {
     name
-    state {
-      running {
-        startedAt
-      }
-      terminated {
-        startedAt
-        reason
-        message
-        containerId
-        exitCode
-        finishedAt
-        signal
-      }
-      waiting {
-        message
-        reason
+    started
+    ready
+    containerID
+    image
+    imageID
+    restartCount
+    resources {
+      claims {
+        name
       }
     }
+    lastState @type(name: "v1_ContainerState") {
+      ...State
+    }
+    state @type(name: "v1_ContainerState") {
+      ...State
+    }
   }
+}
+
+fragment State on v1_ContainerState {
+  running {
+    startedAt
+  }
+  terminated {
+    startedAt
+    reason
+    message
+    containerID
+    exitCode
+    finishedAt
+    signal
+  }
+  waiting {
+    message
+    reason
+  }
+}
+
+fragment PodSecurityContext on v1_PodSecurityContext {
+  fsGroup
+  fsGroupChangePolicy
+  runAsUser
+  runAsGroup
+  runAsNonRoot
+  seccompProfile {
+    type
+    localhostProfile
+  }
+  seLinuxOptions {
+    type
+    level
+    role
+    user
+  }
+  supplementalGroups
+  sysctls {
+    name
+    value
+  }
+  windowsOptions {
+    gmsaCredentialSpec
+    gmsaCredentialSpecName
+    hostProcess
+    runAsUserName
+  }
+}
+
+fragment SecurityContext on v1_SecurityContext {
+  windowsOptions {
+    runAsUserName
+    hostProcess
+    gmsaCredentialSpecName
+    gmsaCredentialSpec
+  }
+  seLinuxOptions {
+    user
+    role
+    level
+    type
+  }
+  seccompProfile {
+    type
+    localhostProfile
+  }
+  runAsUser
+  runAsNonRoot
+  runAsGroup
+  allowPrivilegeEscalation
+  capabilities {
+    add
+    drop
+  }
+  privileged
+  procMount
+  readOnlyRootFilesystem
 }

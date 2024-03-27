@@ -24,7 +24,7 @@ export default function Raw(): ReactElement {
     } as RawQueryVariables,
   })
 
-  const object = data?.handleGetResource?.object
+  const object = data?.handleGetResource?.Object
   const tabs = useMemo(
     () => [
       {

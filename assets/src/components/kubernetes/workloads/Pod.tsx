@@ -5,8 +5,13 @@ import { A } from 'honorable'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
+  Common_EventList as EventListT,
+  Common_Event as EventT,
+  PodEventsQuery,
+  PodEventsQueryVariables,
   PodQueryVariables,
   Pod_PodDetail as PodT,
+  usePodEventsQuery,
   usePodQuery,
 } from '../../../generated/graphql-kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
@@ -17,6 +22,8 @@ import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { MetadataSidecar } from '../utils'
 import { StatusChip } from '../../cluster/TableElements'
 import { ReadinessT } from '../../../utils/status'
+import { ResourceList } from '../ResourceList'
+import { COLUMNS } from '../cluster/Events'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -48,7 +55,7 @@ export function Pod(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar objectMeta={pod.objectMeta}>
-          <SidecarItem heading="IP">{pod?.podIp}</SidecarItem>
+          <SidecarItem heading="IP">{pod?.podIP}</SidecarItem>
           <SidecarItem heading="Parent node">
             <A
               as={Link}
@@ -86,16 +93,40 @@ export function PodInfo(): ReactElement {
 
 export function PodContainers(): ReactElement {
   const pod = useOutletContext() as PodT
-  const containers = pod?.containers
 
   return (
-    <section>
-      <SubTitle>Containers</SubTitle>
-      <Containers containers={containers} />
-    </section>
+    <>
+      {pod?.initContainers && (
+        <section>
+          <SubTitle>Init Containers</SubTitle>
+          <Containers containers={pod?.initContainers} />
+        </section>
+      )}
+      <section>
+        <SubTitle>Containers</SubTitle>
+        <Containers containers={pod?.containers} />
+      </section>
+    </>
   )
 }
 
 export function PodEvents(): ReactElement {
-  return <>events</>
+  const { name, namespace } = useParams()
+
+  return (
+    <ResourceList<EventListT, EventT, PodEventsQuery, PodEventsQueryVariables>
+      namespaced
+      columns={COLUMNS}
+      query={usePodEventsQuery}
+      queryOptions={{
+        variables: {
+          namespace,
+          name,
+        } as PodEventsQueryVariables,
+      }}
+      queryName="handleGetPodEvents"
+      itemsKey="events"
+      disableOnRowClick
+    />
+  )
 }

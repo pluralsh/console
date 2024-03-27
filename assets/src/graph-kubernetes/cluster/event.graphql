@@ -13,28 +13,9 @@ query Events(
     page: $page
   )
     @rest(
+      type: "common_EventList"
       path: "event/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    events {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      objectName
-      objectNamespace
-      reason
-      type
-      message
-      sourceComponent
-      sourceHost
-      count
-      firstSeen
-      lastSeen
-    }
+    ...EventList
   }
 }

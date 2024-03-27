@@ -4,7 +4,7 @@ import { SubTab, TabList } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
 
-import { useMatch, useParams } from 'react-router-dom'
+import { useMatch, useParams, useResolvedPath } from 'react-router-dom'
 
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutHeader } from '../utils/layout/ResponsiveLayoutHeader'
@@ -48,10 +48,11 @@ export default function ResourceDetails({
 }: ResourceDetailsProps): ReactElement {
   const theme = useTheme()
   const { clusterId } = useParams()
-  const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`:tab/*`)
+  const basePath = useResolvedPath('.')
+  const pathMatch = useMatch(`${basePath.pathname}/:tab`)
   const tab = pathMatch?.params?.tab || ''
-  const currentTab = tabs.find(({ path }) => path === tab)
+  const tabStateRef = useRef<any>(null)
+  const currentTab = tabs.find(({ path }) => path === (tab ?? ''))
 
   const { data } = useClustersTinyQuery({
     pollInterval: 120_000,

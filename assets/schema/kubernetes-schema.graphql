@@ -1975,7 +1975,7 @@ type Query {
 }
 
 type unstructured_Unstructured {
-  object: JSON!
+  Object: JSON!
 }
 
 """
@@ -2035,7 +2035,7 @@ type v1_PolicyRule {
   """
   NonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding. Rules can either apply to API resources (such as "pods" or "secrets") or non-resource URL paths (such as "/api"),  but not both.
   """
-  nonResourceUrLs: [String]
+  nonResourceURLs: [String]
   """
   ResourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed.
   """
@@ -2419,7 +2419,7 @@ type service_ServiceList {
 }
 
 type service_Service {
-  clusterIp: String!
+  clusterIP: String!
   externalEndpoints: [common_Endpoint]!
   internalEndpoint: common_Endpoint!
   objectMeta: types_ObjectMeta!
@@ -2506,12 +2506,12 @@ type horizontalpodautoscaler_HorizontalPodAutoscalerList {
 }
 
 type horizontalpodautoscaler_HorizontalPodAutoscaler {
-  currentCpuUtilizationPercentage: Int!
+  currentCPUUtilizationPercentage: Int!
   maxReplicas: Int!
   minReplicas: Int!
   objectMeta: types_ObjectMeta!
   scaleTargetRef: horizontalpodautoscaler_ScaleTargetRef!
-  targetCpuUtilizationPercentage: Int!
+  targetCPUUtilizationPercentage: Int!
   typeMeta: types_TypeMeta!
 }
 
@@ -2521,7 +2521,7 @@ type horizontalpodautoscaler_ScaleTargetRef {
 }
 
 type horizontalpodautoscaler_HorizontalPodAutoscalerDetail {
-  currentCpuUtilizationPercentage: Int!
+  currentCPUUtilizationPercentage: Int!
   currentReplicas: Int!
   desiredReplicas: Int!
   lastScaleTime: String!
@@ -2529,7 +2529,7 @@ type horizontalpodautoscaler_HorizontalPodAutoscalerDetail {
   minReplicas: Int!
   objectMeta: types_ObjectMeta!
   scaleTargetRef: horizontalpodautoscaler_ScaleTargetRef!
-  targetCpuUtilizationPercentage: Int!
+  targetCPUUtilizationPercentage: Int!
   typeMeta: types_TypeMeta!
 }
 
@@ -2969,9 +2969,9 @@ type node_NodeDetail {
   nodeInfo: v1_NodeSystemInfo!
   objectMeta: types_ObjectMeta!
   phase: String!
-  podCidr: String!
+  podCIDR: String!
   podList: pod_PodList!
-  providerId: String!
+  providerID: String!
   ready: String!
   taints: [v1_Taint]
   typeMeta: types_TypeMeta!
@@ -2991,7 +2991,7 @@ type v1_NodeSystemInfo {
   """The Architecture reported by the node"""
   architecture: String!
   """Boot ID reported by the node."""
-  bootId: String!
+  bootID: String!
   """
   ContainerRuntime Version reported by the node through runtime remote API (e.g. containerd://1.4.2).
   """
@@ -3007,7 +3007,7 @@ type v1_NodeSystemInfo {
   """
   MachineID reported by the node. For unique machine identification in the cluster this field is preferred. Learn more from man(5) machine-id: http://man7.org/linux/man-pages/man5/machine-id.5.html
   """
-  machineId: String!
+  machineID: String!
   """The Operating System reported by the node"""
   operatingSystem: String!
   """
@@ -3017,7 +3017,7 @@ type v1_NodeSystemInfo {
   """
   SystemUUID reported by the node. For unique machine identification MachineID is preferred. This field is specific to Red Hat hosts https://access.redhat.com/documentation/en-us/red_hat_subscription_management/1/html/rhsm/uuid
   """
-  systemUuid: String!
+  systemUUID: String!
 }
 
 """
@@ -3067,14 +3067,14 @@ type resource_Quantity_entry {
 }
 
 type resource_Quantity {
-  format: String!
+  Format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
 }
 
 type resource_infDecAmount {
-  dec: inf_Dec!
+  Dec: inf_Dec!
 }
 
 type inf_Dec {
@@ -3117,7 +3117,7 @@ type resource_Quantity2_entry {
 }
 
 type resource_Quantity2 {
-  format: String!
+  Format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -3146,7 +3146,7 @@ type v1_PersistentVolumeSource {
   portworxVolume: v1_PortworxVolumeSource
   quobyte: v1_QuobyteVolumeSource
   rbd: v1_RBDPersistentVolumeSource
-  scaleIo: v1_ScaleIOPersistentVolumeSource
+  scaleIO: v1_ScaleIOPersistentVolumeSource
   storageos: v1_StorageOSPersistentVolumeSource
   vsphereVolume: v1_VsphereVirtualDiskVolumeSource
 }
@@ -3172,7 +3172,7 @@ type v1_AWSElasticBlockStoreVolumeSource {
   """
   volumeID is unique ID of the persistent disk resource in AWS (Amazon EBS volume). More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore
   """
-  volumeId: String!
+  volumeID: String!
 }
 
 """
@@ -3184,7 +3184,7 @@ type v1_AzureDiskVolumeSource {
   """diskName is the Name of the data disk in the blob storage"""
   diskName: String!
   """diskURI is the URI of data disk in the blob storage"""
-  diskUri: String!
+  diskURI: String!
   """
   fsType is Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
   """
@@ -3274,7 +3274,7 @@ type v1_CinderPersistentVolumeSource {
   """
   volumeID used to identify the volume in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md
   """
-  volumeId: String!
+  volumeID: String!
 }
 
 """
@@ -3319,7 +3319,7 @@ type v1_FCVolumeSource {
   """
   readOnly: Boolean
   """targetWWNs is Optional: FC target worldwide names (WWNs)"""
-  targetWwNs: [String]
+  targetWWNs: [String]
   """
   wwids Optional: FC volume world wide identifiers (wwids) Either wwids or combination of targetWWNs and lun must be set, but not both simultaneously.
   """
@@ -3356,7 +3356,7 @@ type v1_FlockerVolumeSource {
   """
   datasetUUID is the UUID of the dataset. This is unique identifier of a Flocker dataset
   """
-  datasetUuid: String
+  datasetUUID: String
 }
 
 """
@@ -3501,7 +3501,7 @@ type v1_PhotonPersistentDiskVolumeSource {
   """
   fsType: String
   """pdID is the ID that identifies Photon Controller persistent disk"""
-  pdId: String!
+  pdID: String!
 }
 
 """PortworxVolumeSource represents a Portworx volume resource."""
@@ -3515,7 +3515,7 @@ type v1_PortworxVolumeSource {
   """
   readOnly: Boolean
   """volumeID uniquely identifies a Portworx volume"""
-  volumeId: String!
+  volumeID: String!
 }
 
 """
@@ -3678,7 +3678,7 @@ type v1_VsphereVirtualDiskVolumeSource {
   """
   storagePolicyID is the storage Policy Based Management (SPBM) profile ID associated with the StoragePolicyName.
   """
-  storagePolicyId: String
+  storagePolicyID: String
   """
   storagePolicyName is the storage Policy Based Management (SPBM) profile name.
   """
@@ -3713,7 +3713,7 @@ type resource_Quantity3_entry {
 }
 
 type resource_Quantity3 {
-  format: String!
+  Format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -3739,7 +3739,7 @@ type resource_Quantity4_entry {
 }
 
 type resource_Quantity4 {
-  format: String!
+  Format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -3757,7 +3757,7 @@ type pod_PodDetail {
   nodeName: String!
   objectMeta: types_ObjectMeta!
   persistentVolumeClaimList: persistentvolumeclaim_PersistentVolumeClaimList!
-  podIp: String!
+  podIP: String!
   podPhase: String!
   qosClass: String!
   restartCount: Int!
@@ -3971,7 +3971,7 @@ type resource_Quantity5_entry {
 }
 
 type resource_Quantity5 {
-  format: String!
+  Format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -3990,7 +3990,7 @@ type resource_Quantity6_entry {
 }
 
 type resource_Quantity6 {
-  format: String!
+  Format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -4098,7 +4098,7 @@ type v1_ContainerStatus {
   """
   ContainerID is the ID of the container in the format '<type>://<container_id>'. Where type is a container runtime identifier, returned from Version call of CRI API (for example "containerd").
   """
-  containerId: String
+  containerID: String
   """
   Image is the name of container image that the container is running. The container image may not match the image used in the PodSpec, as it may have been resolved by the runtime. More info: https://kubernetes.io/docs/concepts/containers/images.
   """
@@ -4106,7 +4106,7 @@ type v1_ContainerStatus {
   """
   ImageID is the image ID of the container's image. The image ID may not match the image ID of the image used in the PodSpec, as it may have been resolved by the runtime.
   """
-  imageId: String!
+  imageID: String!
   lastState: v1_ContainerState
   """
   Name is a DNS_LABEL representing the unique name of the container. Each container in a pod must have a unique name across all container types. Cannot be updated.
@@ -4143,7 +4143,7 @@ type resource_Quantity7_entry {
 }
 
 type resource_Quantity7 {
-  format: String!
+  Format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -4167,7 +4167,7 @@ type v1_ContainerStateRunning {
 """ContainerStateTerminated is a terminated state of a container."""
 type v1_ContainerStateTerminated {
   """Container's ID in the format '<type>://<container_id>'"""
-  containerId: String
+  containerID: String
   """Exit status from the last termination of the container"""
   exitCode: Int!
   """Time at which the container last terminated"""
@@ -4209,7 +4209,7 @@ type v1_Volume {
   cinder: v1_CinderVolumeSource
   configMap: v1_ConfigMapVolumeSource
   csi: v1_CSIVolumeSource
-  downwardApi: v1_DownwardAPIVolumeSource
+  downwardAPI: v1_DownwardAPIVolumeSource
   emptyDir: v1_EmptyDirVolumeSource
   ephemeral: v1_EphemeralVolumeSource
   fc: v1_FCVolumeSource
@@ -4231,7 +4231,7 @@ type v1_Volume {
   projected: v1_ProjectedVolumeSource
   quobyte: v1_QuobyteVolumeSource
   rbd: v1_RBDVolumeSource
-  scaleIo: v1_ScaleIOVolumeSource
+  scaleIO: v1_ScaleIOVolumeSource
   secret: v1_SecretVolumeSource
   storageos: v1_StorageOSVolumeSource
   vsphereVolume: v1_VsphereVirtualDiskVolumeSource
@@ -4306,7 +4306,7 @@ type v1_CinderVolumeSource {
   """
   volumeID used to identify the volume in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md
   """
-  volumeId: String!
+  volumeID: String!
 }
 
 """
@@ -4629,7 +4629,7 @@ type resource_Quantity8_entry {
 }
 
 type resource_Quantity8 {
-  format: String!
+  Format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -4648,7 +4648,7 @@ type resource_Quantity9_entry {
 }
 
 type resource_Quantity9 {
-  format: String!
+  Format: String!
   d: resource_infDecAmount!
   i: resource_int64Amount!
   s: String!
@@ -4780,7 +4780,7 @@ Projection that may be projected along with other supported volume types
 type v1_VolumeProjection {
   clusterTrustBundle: v1_ClusterTrustBundleProjection
   configMap: v1_ConfigMapProjection
-  downwardApi: v1_DownwardAPIProjection
+  downwardAPI: v1_DownwardAPIProjection
   secret: v1_SecretProjection
   serviceAccountToken: v1_ServiceAccountTokenProjection
 }
@@ -5141,7 +5141,7 @@ type secret_SecretDetail {
 }
 
 type service_ServiceDetail {
-  clusterIp: String!
+  clusterIP: String!
   endpointList: endpoint_EndpointList!
   errors: [JSON]!
   externalEndpoints: [common_Endpoint]!
@@ -5577,15 +5577,15 @@ type Mutation {
 }
 
 type runtime_Unknown {
-  contentEncoding: String!
-  contentType: String!
+  ContentEncoding: String!
+  ContentType: String!
   apiVersion: String
   kind: String
 }
 
 input runtime_Unknown_Input {
-  contentEncoding: String!
-  contentType: String!
+  ContentEncoding: String!
+  ContentType: String!
   apiVersion: String
   kind: String
 }

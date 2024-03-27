@@ -31,7 +31,7 @@ function buildClient({ clusterID, fetchToken }) {
       const body = await (response as Response).json()
 
       if (response.url.includes(`${K8S_API_URL}_raw`)) {
-        return { object: body } as UnstructuredT
+        return { Object: body } as UnstructuredT
       }
 
       return body

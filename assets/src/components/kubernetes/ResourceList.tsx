@@ -14,11 +14,8 @@ import type {
   QueryResult,
 } from '@apollo/client/react/types/types'
 import { Table } from '@pluralsh/design-system'
-
 import styled from 'styled-components'
-
-import { useNavigate } from 'react-router-dom'
-
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Row } from '@tanstack/react-table'
 
 import { KubernetesClient } from '../../helpers/kubernetes.client'
@@ -28,17 +25,17 @@ import {
   Types_TypeMeta as TypeMetaT,
 } from '../../generated/graphql-kubernetes'
 import { FullHeightTableWrap } from '../utils/layout/FullHeightTableWrap'
-
 import { getResourceDetailsAbsPath } from '../../routes/kubernetesRoutesConsts'
 
 import {
   DEFAULT_DATA_SELECT,
   ITEMS_PER_PAGE,
   extendConnection,
+  useKubernetesCluster,
   usePageInfo,
   useSortedTableOptions,
 } from './utils'
-import { useKubernetesContext } from './Kubernetes'
+import { FILTER_PARAM, NAMESPACE_PARAM } from './Kubernetes'
 
 export type ResourceListContextT = {
   setNamespaced: Dispatch<SetStateAction<boolean>>
@@ -83,6 +80,7 @@ interface ResourceListProps<
   query: (
     baseOptions: QueryHookOptions<TQuery, TVariables>
   ) => QueryResult<TQuery, TVariables>
+  queryOptions?: QueryHookOptions<TQuery, TVariables>
   queryName: QueryName<TQuery>
   itemsKey: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
@@ -127,13 +125,17 @@ export function ResourceList<
 >({
   columns,
   query,
+  queryOptions,
   namespaced = false,
   queryName,
   itemsKey,
   disableOnRowClick,
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
   const navigate = useNavigate()
-  const { cluster, namespace, filter } = useKubernetesContext()
+  const cluster = useKubernetesCluster()
+  const [searchParams] = useSearchParams()
+  const filter = searchParams.get(FILTER_PARAM) ?? ''
+  const namespace = searchParams.get(NAMESPACE_PARAM) ?? ''
   const { sortBy, reactTableOptions } = useSortedTableOptions({
     meta: { cluster },
   })
@@ -145,11 +147,14 @@ export function ResourceList<
     pollInterval: 30_000,
     variables: {
       ...(namespaced ? { namespace } : {}),
+      ...(queryOptions?.variables ?? {}),
       ...DEFAULT_DATA_SELECT,
       filterBy: `name,${filter}`,
       sortBy,
     } as TVariables,
   })
+
+  console.log(data)
 
   const resourceList = data?.[queryName] as TResourceList
   const items = useMemo(

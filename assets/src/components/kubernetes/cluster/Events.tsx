@@ -124,7 +124,7 @@ const colLastSeen = columnHelper.accessor((event) => event.lastSeen, {
   cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
 })
 
-const columns = [
+export const COLUMNS = [
   colObjectName,
   colObjectNamespace,
   colReason,
@@ -144,7 +144,7 @@ export default function Events() {
   return (
     <ResourceList<EventListT, EventT, EventsQuery, EventsQueryVariables>
       namespaced
-      columns={columns}
+      columns={COLUMNS}
       query={useEventsQuery}
       queryName="handleGetEventList"
       itemsKey="events"
