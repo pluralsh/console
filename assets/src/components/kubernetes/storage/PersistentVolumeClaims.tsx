@@ -17,7 +17,6 @@ import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import {
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
-  getKubernetesAbsPath,
   getResourceDetailsAbsPath,
   getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'

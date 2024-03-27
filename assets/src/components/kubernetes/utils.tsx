@@ -18,8 +18,6 @@ import {
 } from '../../generated/graphql'
 import { InlineLink } from '../utils/typography/InlineLink'
 import {
-  INGRESS_CLASSES_REL_PATH,
-  getDiscoveryAbsPath,
   getKubernetesAbsPath,
   getResourceDetailsAbsPath,
 } from '../../routes/kubernetesRoutesConsts'

@@ -1,19 +1,33 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import React, { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { ChipList } from '@pluralsh/design-system'
+import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
   CustomResourceDefinitionsQuery,
   CustomResourceDefinitionsQueryVariables,
   Types_CustomResourceDefinitionList as CustomResourceListT,
   Types_CustomResourceDefinition as CustomResourceT,
+  Maybe,
   useCustomResourceDefinitionsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import { getCustomResourcesAbsPath } from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
+
 import { CRDEstablishedChip } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'custom resources',
+    url: getCustomResourcesAbsPath(cluster?.id),
+  },
+]
 
 const columnHelper = createColumnHelper<CustomResourceT>()
 
@@ -78,6 +92,9 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
 
 export default function CustomResourceDefinitions() {
   const theme = useTheme()
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   const { colLabels, colCreationTimestamp } = useDefaultColumns(columnHelper)
   const columns = useMemo(

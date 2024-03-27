@@ -35,7 +35,7 @@ query PersistentVolumes(
 
 query PersistentVolume($name: String!) {
   handleGetPersistentVolumeDetail(persistentvolume: $name)
-  @rest(path: "persistentvolume/{args.persistentvolume}") {
+    @rest(path: "persistentvolume/{args.persistentvolume}") {
     typeMeta @type(name: "types_TypeMeta") {
       ...TypeMeta
     }
@@ -50,4 +50,3 @@ query PersistentVolume($name: String!) {
     accessModes
   }
 }
-

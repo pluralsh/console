@@ -8,7 +8,6 @@ import {
   ROLES_REL_PATH,
   ROLE_BINDINGS_REL_PATH,
   getAccessAbsPath,
-  getKubernetesAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'

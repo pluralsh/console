@@ -73,6 +73,13 @@ export function getClusterAbsPath(clusterId: string | null | undefined) {
 export function getAccessAbsPath(clusterId: string | null | undefined) {
   return `/kubernetes/${clusterId}/${ACCESS_REL_PATH}`
 }
+
+export function getCustomResourcesAbsPath(
+  clusterId: string | null | undefined
+) {
+  return `/kubernetes/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}`
+}
+
 export function getResourceDetailsAbsPath(
   clusterId: Nullable<string>,
   kind: string,

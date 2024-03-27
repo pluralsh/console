@@ -1,7 +1,10 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import {
+  Maybe,
   Statefulset_StatefulSetList as StatefulSetListT,
   Statefulset_StatefulSet as StatefulSetT,
   StatefulSetsQuery,
@@ -9,11 +12,32 @@ import {
   useStatefulSetsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../ResourceList'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 
 import { UsageText } from '../../cluster/TableElements'
 
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import {
+  STATEFUL_SETS_REL_PATH,
+  getConfigurationAbsPath,
+  getWorkloadsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
+
 import { WorkloadImages, WorkloadStatusChip } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'workloads',
+    url: getWorkloadsAbsPath(cluster?.id),
+  },
+  {
+    label: 'stateful sets',
+    url: `${getConfigurationAbsPath(cluster?.id)}/${STATEFUL_SETS_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<StatefulSetT>()
 
@@ -52,6 +76,10 @@ const colStatus = columnHelper.accessor((ss) => ss.podInfo, {
 })
 
 export default function StatefulSets() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(

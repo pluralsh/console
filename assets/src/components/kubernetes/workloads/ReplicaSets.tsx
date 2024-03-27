@@ -1,7 +1,10 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import {
+  Maybe,
   Replicaset_ReplicaSetList as ReplicaSetListT,
   Replicaset_ReplicaSet as ReplicaSetT,
   ReplicaSetsQuery,
@@ -9,11 +12,32 @@ import {
   useReplicaSetsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../ResourceList'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 
 import { UsageText } from '../../cluster/TableElements'
 
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import {
+  REPLICA_SETS_REL_PATH,
+  getConfigurationAbsPath,
+  getWorkloadsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
+
 import { WorkloadImages, WorkloadStatusChip } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'workloads',
+    url: getWorkloadsAbsPath(cluster?.id),
+  },
+  {
+    label: 'replica sets',
+    url: `${getConfigurationAbsPath(cluster?.id)}/${REPLICA_SETS_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<ReplicaSetT>()
 
@@ -52,6 +76,10 @@ const colStatus = columnHelper.accessor((rs) => rs.podInfo, {
 })
 
 export default function ReplicaSets() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
