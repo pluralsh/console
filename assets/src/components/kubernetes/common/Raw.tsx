@@ -1,7 +1,6 @@
 import { ReactElement, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import yaml from 'js-yaml'
-import { isEmpty } from 'lodash'
 import { Code } from '@pluralsh/design-system'
 import * as pluralize from 'pluralize'
 
@@ -11,7 +10,6 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { SubTitle } from '../../cluster/nodes/SubTitle'
 
 export default function Raw(): ReactElement {
   const { clusterId, kind, name, namespace } = useParams()
@@ -26,23 +24,23 @@ export default function Raw(): ReactElement {
     } as RawQueryVariables,
   })
 
-  const json = JSON.stringify(data?.handleGetResource?.object)
+  const object = data?.handleGetResource?.object
   const tabs = useMemo(
     () => [
       {
         key: 'yaml',
         label: 'YAML',
         language: 'yaml',
-        content: yaml.dump(json),
+        content: yaml.dump(object),
       },
       {
         key: 'json',
         label: 'JSON',
         language: 'json',
-        content: JSON.stringify(json, null, 2),
+        content: JSON.stringify(object, null, 2),
       },
     ],
-    [json]
+    [object]
   )
 
   if (loading) {
@@ -51,7 +49,6 @@ export default function Raw(): ReactElement {
 
   return (
     <section>
-      <SubTitle>Data</SubTitle>
       <Code
         tabs={tabs}
         css={{

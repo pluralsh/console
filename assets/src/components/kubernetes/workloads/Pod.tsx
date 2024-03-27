@@ -48,7 +48,7 @@ export function Pod(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar objectMeta={pod.objectMeta}>
-          <SidecarItem heading="IP">{pod?.podIP}</SidecarItem>
+          <SidecarItem heading="IP">{pod?.podIp}</SidecarItem>
           <SidecarItem heading="Parent node">
             <A
               as={Link}
@@ -98,8 +98,4 @@ export function PodContainers(): ReactElement {
 
 export function PodEvents(): ReactElement {
   return <>events</>
-}
-
-export function PodRaw(): ReactElement {
-  return <>raw</>
 }

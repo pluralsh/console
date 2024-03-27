@@ -20,7 +20,6 @@ import {
   PodContainers,
   PodEvents,
   PodInfo,
-  PodRaw,
 } from '../components/kubernetes/workloads/Pod'
 import Kubernetes from '../components/kubernetes/Kubernetes'
 import Workloads from '../components/kubernetes/workloads/Workloads'
