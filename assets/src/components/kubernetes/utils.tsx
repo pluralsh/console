@@ -1,15 +1,8 @@
 import uniqWith from 'lodash/uniqWith'
 import { ReactNode, useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
-import {
-  Card,
-  ChipList,
-  Prop,
-  Sidecar,
-  SidecarItem,
-} from '@pluralsh/design-system'
+import { ChipList, Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Link, useParams } from 'react-router-dom'
-import { useTheme } from 'styled-components'
 import moment from 'moment/moment'
 
 import {
@@ -24,7 +17,12 @@ import {
   useClustersTinyQuery,
 } from '../../generated/graphql'
 import { InlineLink } from '../utils/typography/InlineLink'
-import { getResourceDetailsAbsPath } from '../../routes/kubernetesRoutesConsts'
+import {
+  INGRESS_CLASSES_REL_PATH,
+  getDiscoveryAbsPath,
+  getKubernetesAbsPath,
+  getResourceDetailsAbsPath,
+} from '../../routes/kubernetesRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 
 export const ITEMS_PER_PAGE = 25
@@ -177,6 +175,17 @@ export function useKubernetesCluster() {
     [clusterId, clusters]
   )
 }
+
+export const getBaseBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  {
+    label: 'kubernetes',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+  {
+    label: cluster?.name ?? '',
+    url: getKubernetesAbsPath(cluster?.id),
+  },
+]
 
 export function MetadataSidecar({
   objectMeta,

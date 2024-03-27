@@ -1,22 +1,44 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { ChipList } from '@pluralsh/design-system'
+import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { Link } from 'react-router-dom'
 
 import {
+  Maybe,
   Persistentvolumeclaim_PersistentVolumeClaimList as PersistentVolumeClaimListT,
   Persistentvolumeclaim_PersistentVolumeClaim as PersistentVolumeClaimT,
   PersistentVolumeClaimsQuery,
   PersistentVolumeClaimsQueryVariables,
   usePersistentVolumeClaimsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
-import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
+import {
+  PERSISTENT_VOLUME_CLAIMS_REL_PATH,
+  getKubernetesAbsPath,
+  getResourceDetailsAbsPath,
+  getStorageAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
 
 import { PVCStatusChip } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'storage',
+    url: getStorageAbsPath(cluster?.id),
+  },
+  {
+    label: 'persistent volume claims',
+    url: `${getStorageAbsPath(
+      cluster?.id
+    )}/${PERSISTENT_VOLUME_CLAIMS_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<PersistentVolumeClaimT>()
 
@@ -87,6 +109,10 @@ const colAccessModes = columnHelper.accessor((pvc) => pvc.accessModes, {
 })
 
 export default function PersistentVolumeClaims() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(

@@ -2,11 +2,16 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { Link } from 'react-router-dom'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
+import { useMemo } from 'react'
+
 import {
   Common_EventList as EventListT,
   Common_Event as EventT,
   EventsQuery,
   EventsQueryVariables,
+  Maybe,
   useEventsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../ResourceList'
@@ -15,11 +20,29 @@ import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import {
-  NAMESPACES_REL_PATH,
+  EVENTS_REL_PATH,
+  getClusterAbsPath,
+  getKubernetesAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
+import { useKubernetesContext } from '../Kubernetes'
+
+import { getBaseBreadcrumbs } from '../utils'
+
 import { EventTypeChip } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'cluster',
+    url: getClusterAbsPath(cluster?.id),
+  },
+  {
+    label: 'events',
+    url: `${getClusterAbsPath(cluster?.id)}/${EVENTS_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<EventT>()
 
@@ -114,6 +137,10 @@ const columns = [
 ]
 
 export default function Events() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   return (
     <ResourceList<EventListT, EventT, EventsQuery, EventsQueryVariables>
       namespaced

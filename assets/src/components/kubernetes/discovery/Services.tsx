@@ -1,17 +1,41 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import {
+  Maybe,
   Service_ServiceList as ServiceListT,
   Service_Service as ServiceT,
   ServicesQuery,
   ServicesQueryVariables,
   useServicesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import {
+  SERVICES_REL_PATH,
+  getDiscoveryAbsPath,
+  getKubernetesAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { useKubernetesContext } from '../Kubernetes'
+
 import { Endpoints, serviceTypeDisplayName } from './utils'
+
+export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'discovery',
+    url: getDiscoveryAbsPath(cluster?.id),
+  },
+  {
+    label: 'services',
+    url: `${getDiscoveryAbsPath(cluster?.id)}/${SERVICES_REL_PATH}`,
+  },
+]
 
 const columnHelper = createColumnHelper<ServiceT>()
 
@@ -47,6 +71,10 @@ const colExternalEndpoints = columnHelper.accessor(
 )
 
 export default function Services() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
