@@ -28,7 +28,9 @@ spec:
                 name: {{ include "kas.serviceName" . }}
                 port:
                   number: {{ .Values.service.externalPort }}
+  {{ if .Values.ingress.tls.enabled }}
   tls:
     - hosts:
         - {{ .Values.ingress.kas_dns | quote }}
       secretName: {{ .Values.ingress.tlsSecretName }}
+  {{ end }}

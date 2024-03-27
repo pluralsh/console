@@ -138,13 +138,21 @@ RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
 RUN mkdir -p /root/.plural && mkdir -p /root/.creds && mkdir /root/bin
 RUN ln -s /usr/local/bin/plural /usr/local/bin/forge
 
+COPY bin/ssh-add /root/ssh-add
+RUN chmod +x /root/ssh-add
+
 # add common repos to known hosts
 COPY bin /opt/app/bin
 RUN chmod +x /opt/app/bin/.git-askpass && \ 
       chmod +x /opt/app/bin/.ssh-askpass && \
-      chmod +x /opt/app/bin/ssh-add
+      chmod +x /opt/app/bin/ssh-add && \
+      chown console:app /opt/app/bin/.ssh-askpass && \
+      chown console:app /opt/app/bin/.git-askpass && \
+      chown console:app /opt/app/bin/ssh-add
 
-ENV GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet"
+ENV GIT_SSH_COMMAND="ssh -i /root/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet" \
+  SSH_ASKPASS_REQUIRE=force \
+  DISPLAY=1
 
 COPY --from=builder /opt/built .
 

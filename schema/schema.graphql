@@ -920,14 +920,14 @@ type ManagedNamespace {
   "a list of pull secrets to attach to this namespace"
   pullSecrets: [String]
 
-  "A template for creating the core service for this namespace"
-  service: ServiceTemplate
-
   "The targeting criteria to select clusters this namespace is bound to"
   target: ClusterTarget
 
   "the timestamp this namespace was deleted at, indicating it's currently draining"
   deletedAt: DateTime
+
+  "A template for creating the core service for this namespace"
+  service: ServiceTemplate
 
   insertedAt: DateTime
 

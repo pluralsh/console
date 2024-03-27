@@ -65,9 +65,11 @@ defmodule Console.GraphQl.Deployments.Global do
     field :labels,       :map, description: "labels for this namespace"
     field :annotations,  :map, description: "annotations for this namespace"
     field :pull_secrets, list_of(:string), description: "a list of pull secrets to attach to this namespace"
-    field :service,      :service_template, description: "A template for creating the core service for this namespace"
     field :target,       :cluster_target, description: "The targeting criteria to select clusters this namespace is bound to"
     field :deleted_at,   :datetime, description: "the timestamp this namespace was deleted at, indicating it's currently draining"
+    field :service,      :service_template,
+      description: "A template for creating the core service for this namespace",
+      resolve: dataloader(Deployments)
 
     timestamps()
   end
