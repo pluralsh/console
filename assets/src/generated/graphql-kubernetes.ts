@@ -4841,7 +4841,7 @@ export type StorageClassPersistentVolumesQueryVariables = Exact<{
 }>;
 
 
-export type StorageClassPersistentVolumesQuery = { __typename?: 'Query', handleGetStorageClassPersistentVolumes?: { __typename?: 'persistentvolume_PersistentVolumeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolume_PersistentVolume', status: string, claim: string, storageClass: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type StorageClassPersistentVolumesQuery = { __typename?: 'Query', handleGetStorageClassPersistentVolumes?: { __typename?: 'persistentvolume_PersistentVolumeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolume_PersistentVolume', status: string, claim: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type CronJobsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -6581,7 +6581,6 @@ export const StorageClassPersistentVolumesDocument = gql`
       }
       status
       claim
-      storageClass
       reason
       reclaimPolicy
       accessModes

@@ -38,15 +38,15 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<PersistentVolumeT>()
+export const columnHelper = createColumnHelper<PersistentVolumeT>()
 
-const colStatus = columnHelper.accessor((pv) => pv.status, {
+export const colStatus = columnHelper.accessor((pv) => pv.status, {
   id: 'status',
   header: 'Status',
   cell: ({ getValue }) => <PVStatusChip status={getValue()} />,
 })
 
-const colClaim = columnHelper.accessor((pv) => pv.claim, {
+export const colClaim = columnHelper.accessor((pv) => pv.claim, {
   id: 'claim',
   header: 'Claim',
   cell: ({ getValue, table }) => {
@@ -90,19 +90,22 @@ const colStorageClass = columnHelper.accessor((pv) => pv.storageClass, {
   },
 })
 
-const colReclaimPolicy = columnHelper.accessor((pv) => pv.reclaimPolicy, {
-  id: 'reclaimPolicy',
-  header: 'Reclaim policy',
-  cell: ({ getValue }) => getValue(),
-})
+export const colReclaimPolicy = columnHelper.accessor(
+  (pv) => pv.reclaimPolicy,
+  {
+    id: 'reclaimPolicy',
+    header: 'Reclaim policy',
+    cell: ({ getValue }) => getValue(),
+  }
+)
 
-const colReason = columnHelper.accessor((pv) => pv.reason, {
+export const colReason = columnHelper.accessor((pv) => pv.reason, {
   id: 'reason',
   header: 'Reason',
   cell: ({ getValue }) => getValue(),
 })
 
-const colAccessModes = columnHelper.accessor((pv) => pv.accessModes, {
+export const colAccessModes = columnHelper.accessor((pv) => pv.accessModes, {
   id: 'accessModes',
   header: 'Access modes',
   cell: ({ getValue }) => {

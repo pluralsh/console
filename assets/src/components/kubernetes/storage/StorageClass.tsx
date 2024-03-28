@@ -30,6 +30,13 @@ import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { ResourceList } from '../ResourceList'
 
 import { getBreadcrumbs } from './StorageClasses'
+import {
+  colAccessModes,
+  colClaim,
+  colReason,
+  colReclaimPolicy,
+  colStatus,
+} from './PersistentVolumes'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Persistent Volumes' },
@@ -98,13 +105,12 @@ export function StorageClassPersistentVolumes(): ReactElement {
   const columns = useMemo(
     () => [
       colName,
-      // colStatus,
-      // colClaim,
-      // colStorageClass,
-      // colReclaimPolicy,
-      // colReason,
+      colStatus,
+      colClaim,
+      colReclaimPolicy,
+      colReason,
       // TODO: Add capacity after solving type issue.
-      // colAccessModes,
+      colAccessModes,
       colLabels,
       colCreationTimestamp,
     ],
