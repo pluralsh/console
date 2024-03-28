@@ -196,7 +196,3 @@ export function SecretInfo(): ReactElement {
     </section>
   )
 }
-
-export function SecretRaw(): ReactElement {
-  return <>raw</>
-}

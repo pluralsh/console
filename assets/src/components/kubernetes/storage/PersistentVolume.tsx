@@ -65,7 +65,3 @@ export function PersistentVolumeInfo(): ReactElement {
 
   return <section>TODO</section>
 }
-
-export function PersistentVolumeRaw(): ReactElement {
-  return <>raw</>
-}

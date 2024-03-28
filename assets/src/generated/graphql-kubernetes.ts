@@ -4817,6 +4817,24 @@ export type StorageClassesQueryVariables = Exact<{
 
 export type StorageClassesQuery = { __typename?: 'Query', handleGetStorageClassList?: { __typename?: 'storageclass_StorageClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'storageclass_StorageClass', parameters: any, provisioner: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type StorageClassQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+
+export type StorageClassQuery = { __typename?: 'Query', handleGetStorageClass?: { __typename?: 'storageclass_StorageClass', parameters: any, provisioner: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
+
+export type StorageClassPersistentVolumesQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type StorageClassPersistentVolumesQuery = { __typename?: 'Query', handleGetStorageClassPersistentVolumes?: { __typename?: 'persistentvolume_PersistentVolumeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolume_PersistentVolume', status: string, claim: string, storageClass: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export type CronJobsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -6445,6 +6463,122 @@ export type StorageClassesQueryHookResult = ReturnType<typeof useStorageClassesQ
 export type StorageClassesLazyQueryHookResult = ReturnType<typeof useStorageClassesLazyQuery>;
 export type StorageClassesSuspenseQueryHookResult = ReturnType<typeof useStorageClassesSuspenseQuery>;
 export type StorageClassesQueryResult = Apollo.QueryResult<StorageClassesQuery, StorageClassesQueryVariables>;
+export const StorageClassDocument = gql`
+    query StorageClass($name: String!) {
+  handleGetStorageClass(storageclass: $name) @rest(path: "storageclass/{args.storageclass}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    parameters
+    provisioner
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useStorageClassQuery__
+ *
+ * To run a query within a React component, call `useStorageClassQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStorageClassQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStorageClassQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useStorageClassQuery(baseOptions: Apollo.QueryHookOptions<StorageClassQuery, StorageClassQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StorageClassQuery, StorageClassQueryVariables>(StorageClassDocument, options);
+      }
+export function useStorageClassLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StorageClassQuery, StorageClassQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StorageClassQuery, StorageClassQueryVariables>(StorageClassDocument, options);
+        }
+export function useStorageClassSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StorageClassQuery, StorageClassQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StorageClassQuery, StorageClassQueryVariables>(StorageClassDocument, options);
+        }
+export type StorageClassQueryHookResult = ReturnType<typeof useStorageClassQuery>;
+export type StorageClassLazyQueryHookResult = ReturnType<typeof useStorageClassLazyQuery>;
+export type StorageClassSuspenseQueryHookResult = ReturnType<typeof useStorageClassSuspenseQuery>;
+export type StorageClassQueryResult = Apollo.QueryResult<StorageClassQuery, StorageClassQueryVariables>;
+export const StorageClassPersistentVolumesDocument = gql`
+    query StorageClassPersistentVolumes($name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetStorageClassPersistentVolumes(
+    storageclass: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "storageclass/{args.storageclass}/persistentvolume?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    items {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+      status
+      claim
+      storageClass
+      reason
+      reclaimPolicy
+      accessModes
+    }
+  }
+}
+    ${ListMetaFragmentDoc}
+${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useStorageClassPersistentVolumesQuery__
+ *
+ * To run a query within a React component, call `useStorageClassPersistentVolumesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStorageClassPersistentVolumesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStorageClassPersistentVolumesQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useStorageClassPersistentVolumesQuery(baseOptions: Apollo.QueryHookOptions<StorageClassPersistentVolumesQuery, StorageClassPersistentVolumesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StorageClassPersistentVolumesQuery, StorageClassPersistentVolumesQueryVariables>(StorageClassPersistentVolumesDocument, options);
+      }
+export function useStorageClassPersistentVolumesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StorageClassPersistentVolumesQuery, StorageClassPersistentVolumesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StorageClassPersistentVolumesQuery, StorageClassPersistentVolumesQueryVariables>(StorageClassPersistentVolumesDocument, options);
+        }
+export function useStorageClassPersistentVolumesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StorageClassPersistentVolumesQuery, StorageClassPersistentVolumesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StorageClassPersistentVolumesQuery, StorageClassPersistentVolumesQueryVariables>(StorageClassPersistentVolumesDocument, options);
+        }
+export type StorageClassPersistentVolumesQueryHookResult = ReturnType<typeof useStorageClassPersistentVolumesQuery>;
+export type StorageClassPersistentVolumesLazyQueryHookResult = ReturnType<typeof useStorageClassPersistentVolumesLazyQuery>;
+export type StorageClassPersistentVolumesSuspenseQueryHookResult = ReturnType<typeof useStorageClassPersistentVolumesSuspenseQuery>;
+export type StorageClassPersistentVolumesQueryResult = Apollo.QueryResult<StorageClassPersistentVolumesQuery, StorageClassPersistentVolumesQueryVariables>;
 export const CronJobsDocument = gql`
     query CronJobs($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetCronJobList(

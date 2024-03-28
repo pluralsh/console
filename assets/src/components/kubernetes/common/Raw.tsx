@@ -1,5 +1,5 @@
 import { ReactElement, useMemo } from 'react'
-import { useParams } from 'react-router-dom'
+import { useMatch, useParams } from 'react-router-dom'
 import yaml from 'js-yaml'
 import { Code } from '@pluralsh/design-system'
 import * as pluralize from 'pluralize'
@@ -10,9 +10,13 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
+import { GqlError } from '../../utils/Alert'
 
 export default function Raw(): ReactElement {
-  const { clusterId, kind, name, namespace } = useParams()
+  const { clusterId, name, namespace } = useParams()
+  const pathMatch = useMatch(`${getKubernetesAbsPath(clusterId)}/:kind/*`)
+  const kind = pathMatch?.params?.kind || ''
   const { data, loading } = useRawQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
@@ -26,26 +30,29 @@ export default function Raw(): ReactElement {
 
   const object = data?.handleGetResource?.Object
   const tabs = useMemo(
-    () => [
-      {
-        key: 'yaml',
-        label: 'YAML',
-        language: 'yaml',
-        content: yaml.dump(object),
-      },
-      {
-        key: 'json',
-        label: 'JSON',
-        language: 'json',
-        content: JSON.stringify(object, null, 2),
-      },
-    ],
+    () =>
+      object
+        ? [
+            {
+              key: 'yaml',
+              label: 'YAML',
+              language: 'yaml',
+              content: yaml.dump(object),
+            },
+            {
+              key: 'json',
+              label: 'JSON',
+              language: 'json',
+              content: JSON.stringify(object, null, 2),
+            },
+          ]
+        : [],
     [object]
   )
 
-  if (loading) {
-    return <LoadingIndicator />
-  }
+  if (loading) return <LoadingIndicator />
+
+  if (!object) return <GqlError error="Could not fetch resource" />
 
   return (
     <section>

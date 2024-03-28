@@ -111,7 +111,3 @@ export function ConfigMapInfo(): ReactElement {
     </section>
   )
 }
-
-export function ConfigMapRaw(): ReactElement {
-  return <>raw</>
-}
