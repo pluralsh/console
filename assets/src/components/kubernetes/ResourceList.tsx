@@ -154,8 +154,6 @@ export function ResourceList<
     } as TVariables,
   })
 
-  console.log(data)
-
   const resourceList = data?.[queryName] as TResourceList
   const items = useMemo(
     () =>
