@@ -388,10 +388,15 @@ export const kubernetesRoutes = [
   />,
   // Storage
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${PERSISTENT_VOLUME_CLAIMS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<PersistentVolumeClaim />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     path={`${KUBERNETES_ABS_PATH}/${PERSISTENT_VOLUMES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<PersistentVolume />}

@@ -4813,7 +4813,15 @@ export type PersistentVolumeClaimsQueryVariables = Exact<{
 }>;
 
 
-export type PersistentVolumeClaimsQuery = { __typename?: 'Query', handleGetPersistentVolumeClaimList?: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type PersistentVolumeClaimsQuery = { __typename?: 'Query', handleGetPersistentVolumeClaimList?: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type PersistentVolumeClaimQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type PersistentVolumeClaimQuery = { __typename?: 'Query', handleGetPersistentVolumeClaimDetail?: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimDetail', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
 
 export type PersistentVolumeClaimFragment = { __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } };
 
@@ -6464,6 +6472,57 @@ export type PersistentVolumeClaimsQueryHookResult = ReturnType<typeof usePersist
 export type PersistentVolumeClaimsLazyQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsLazyQuery>;
 export type PersistentVolumeClaimsSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsSuspenseQuery>;
 export type PersistentVolumeClaimsQueryResult = Apollo.QueryResult<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>;
+export const PersistentVolumeClaimDocument = gql`
+    query PersistentVolumeClaim($name: String!, $namespace: String!) {
+  handleGetPersistentVolumeClaimDetail(namespace: $namespace, name: $name) @rest(path: "persistentvolumeclaim/{args.namespace}/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    status
+    volume
+    storageClass
+    accessModes
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __usePersistentVolumeClaimQuery__
+ *
+ * To run a query within a React component, call `usePersistentVolumeClaimQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePersistentVolumeClaimQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePersistentVolumeClaimQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function usePersistentVolumeClaimQuery(baseOptions: Apollo.QueryHookOptions<PersistentVolumeClaimQuery, PersistentVolumeClaimQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PersistentVolumeClaimQuery, PersistentVolumeClaimQueryVariables>(PersistentVolumeClaimDocument, options);
+      }
+export function usePersistentVolumeClaimLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PersistentVolumeClaimQuery, PersistentVolumeClaimQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PersistentVolumeClaimQuery, PersistentVolumeClaimQueryVariables>(PersistentVolumeClaimDocument, options);
+        }
+export function usePersistentVolumeClaimSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PersistentVolumeClaimQuery, PersistentVolumeClaimQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PersistentVolumeClaimQuery, PersistentVolumeClaimQueryVariables>(PersistentVolumeClaimDocument, options);
+        }
+export type PersistentVolumeClaimQueryHookResult = ReturnType<typeof usePersistentVolumeClaimQuery>;
+export type PersistentVolumeClaimLazyQueryHookResult = ReturnType<typeof usePersistentVolumeClaimLazyQuery>;
+export type PersistentVolumeClaimSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumeClaimSuspenseQuery>;
+export type PersistentVolumeClaimQueryResult = Apollo.QueryResult<PersistentVolumeClaimQuery, PersistentVolumeClaimQueryVariables>;
 export const StorageClassesDocument = gql`
     query StorageClasses($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetStorageClassList(
