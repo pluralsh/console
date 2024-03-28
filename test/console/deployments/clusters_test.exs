@@ -1037,4 +1037,62 @@ defmodule Console.Deployments.ClustersTest do
       assert msg == "helm failure"
     end
   end
+
+  describe "#create_pinned_custom_resource/2" do
+    test "admins can create a new pinned resource" do
+      {:ok, pinned} = Clusters.create_pinned_custom_resource(%{
+        kind: "ConstraintTemplate",
+        group: "gatekeeper.sh",
+        version: "v1beta1",
+        namespaced: false,
+        display_name: "Constraint Templates"
+      }, admin_user())
+
+      assert pinned.kind == "ConstraintTemplate"
+      assert pinned.group == "gatekeeper.sh"
+      assert pinned.version == "v1beta1"
+      assert pinned.display_name == "Constraint Templates"
+      refute pinned.namespaced
+    end
+
+    test "cluster writers can create a new pinned resource" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      {:ok, pinned} = Clusters.create_pinned_custom_resource(%{
+        kind: "ConstraintTemplate",
+        group: "gatekeeper.sh",
+        version: "v1beta1",
+        namespaced: false,
+        display_name: "Constraint Templates",
+        cluster_id: cluster.id
+      }, user)
+
+      assert pinned.kind == "ConstraintTemplate"
+      assert pinned.group == "gatekeeper.sh"
+      assert pinned.version == "v1beta1"
+      assert pinned.display_name == "Constraint Templates"
+      refute pinned.namespaced
+    end
+
+    test "non-writers cannot create" do
+      {:error, _} = Clusters.create_pinned_custom_resource(%{
+        kind: "ConstraintTemplate",
+        group: "gatekeeper.sh",
+        version: "v1beta1",
+        namespaced: false,
+        display_name: "Constraint Templates",
+      }, insert(:user))
+    end
+  end
+
+  describe "#delete_pinned_custom_resource/2" do
+    test "admins can delete" do
+      pcr = insert(:pinned_custom_resource)
+
+      {:ok, deleted} = Clusters.delete_pinned_custom_resource(pcr.id, admin_user())
+
+      assert deleted.id == pcr.id
+      refute refetch(pcr)
+    end
+  end
 end
