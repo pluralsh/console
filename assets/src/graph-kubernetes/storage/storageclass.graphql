@@ -70,7 +70,6 @@ query StorageClassPersistentVolumes(
       }
       status
       claim
-      storageClass
       reason
       reclaimPolicy
       accessModes
