@@ -28,6 +28,24 @@ query PersistentVolumeClaims(
       status
       volume
       storageClass
+      accessModes
     }
   }
 }
+
+query PersistentVolumeClaim($name: String!, $namespace: String!) {
+  handleGetPersistentVolumeClaimDetail(namespace: $namespace, name: $name)
+  @rest(path: "persistentvolumeclaim/{args.namespace}/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    status
+    volume
+    storageClass
+    accessModes
+  }
+}
+
