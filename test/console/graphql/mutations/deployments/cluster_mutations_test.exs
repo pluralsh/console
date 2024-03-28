@@ -285,4 +285,46 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
       refute refetch(cred)
     end
   end
+
+  describe "createPinnedCustomResource" do
+    test "admins can create a pcr" do
+      {:ok, %{data: %{"createPinnedCustomResource" => pinned}}} = run_query("""
+        mutation Create($attrs: PinnedCustomResourceAttributes!) {
+          createPinnedCustomResource(attributes: $attrs) {
+            id
+            displayName
+            group
+            version
+            kind
+          }
+        }
+      """, %{"attrs" => %{
+        "kind" => "ConstraintTemplate",
+        "group" => "gatekeeper.sh",
+        "version" => "v1beta1",
+        "namespaced" => false,
+        "displayName" => "Constraint Templates",
+      }}, %{current_user: admin_user()})
+
+      assert pinned["kind"] == "ConstraintTemplate"
+      assert pinned["group"] == "gatekeeper.sh"
+      assert pinned["version"] == "v1beta1"
+      assert pinned["displayName"] == "Constraint Templates"
+      refute pinned["namespaced"]
+    end
+  end
+
+  describe "deletePinnedCustomResource" do
+    test "admins can delete pcrs" do
+      pcr = insert(:pinned_custom_resource)
+      {:ok, %{data: %{"deletePinnedCustomResource" => pinned}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deletePinnedCustomResource(id: $id) { id }
+        }
+      """, %{"id" => pcr.id}, %{current_user: admin_user()})
+
+      assert pinned["id"] == pcr.id
+      refute refetch(pcr)
+    end
+  end
 end

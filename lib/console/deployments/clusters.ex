@@ -19,7 +19,8 @@ defmodule Console.Deployments.Clusters do
     ClusterRevision,
     ProviderCredential,
     RuntimeService,
-    AgentMigration
+    AgentMigration,
+    PinnedCustomResource
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -33,6 +34,7 @@ defmodule Console.Deployments.Clusters do
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
   @type credential_resp :: {:ok, ProviderCredential.t} | Console.error
   @type runtime_service_resp :: {:ok, RuntimeService.t} | Console.error
+  @type pinned_resp :: {:ok, PinnedCustomResource.t} | Console.error
 
   def find!(identifier) do
     case Uniq.UUID.parse(identifier) do
@@ -711,6 +713,27 @@ defmodule Console.Deployments.Clusters do
 
       _ -> {:ok, 0}
     end
+  end
+
+  @doc """
+  Creates a new pinned custom resource, can be cluster or global scoped
+  """
+  @spec create_pinned_custom_resource(map, User.t) :: pinned_resp
+  def create_pinned_custom_resource(attrs, %User{} = user) do
+    %PinnedCustomResource{}
+    |> PinnedCustomResource.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+  end
+
+  @doc """
+  Creates a new pinned custom resource, can be cluster or global scoped
+  """
+  @spec delete_pinned_custom_resource(binary, User.t) :: pinned_resp
+  def delete_pinned_custom_resource(id, %User{} = user) do
+    Repo.get!(PinnedCustomResource, id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   def kas_url() do

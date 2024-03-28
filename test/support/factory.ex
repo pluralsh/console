@@ -500,6 +500,17 @@ defmodule Console.Factory do
     }
   end
 
+  def pinned_custom_resource_factory do
+    %Schema.PinnedCustomResource{
+      kind: "ConstraintTemplate",
+      group: "gatekeeper.sh",
+      version: "v1beta1",
+      namespaced: false,
+      display_name: "Constraint Templates",
+      cluster: build(:cluster)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

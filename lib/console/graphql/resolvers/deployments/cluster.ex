@@ -5,7 +5,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     User,
     Cluster,
     ClusterProvider,
-    ClusterRevision
+    ClusterRevision,
+    PinnedCustomResource
   }
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
@@ -81,6 +82,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def list_node_metrics(cluster, _, _), do: Clusters.node_metrics(cluster)
 
+  def list_pinned_custom_resources(cluster, _, _) do
+    PinnedCustomResource.for_cluster(cluster.id)
+    |> PinnedCustomResource.ordered()
+    |> Console.Repo.all()
+    |> ok()
+  end
+
   def runtime_services(cluster, _, _), do: {:ok, Clusters.runtime_services(cluster)}
 
   def deploy_token(%{deploy_token: token} = cluster, _, %{context: %{current_user: user}}) do
@@ -131,6 +139,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def create_agent_migration(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.create_agent_migration(attrs, user)
+
+  def create_pinned_custom_resource(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Clusters.create_pinned_custom_resource(attrs, user)
+
+  def delete_pinned_custom_resource(%{id: id}, %{context: %{current_user: user}}),
+    do: Clusters.delete_pinned_custom_resource(id, user)
 
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Clusters.ping(attrs, cluster)
