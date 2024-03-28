@@ -185,8 +185,9 @@ function Entry({ heading, flex, children }: EntryProps): Nullable<ReactNode> {
       css={{
         display: 'flex',
         flexDirection: 'column',
-        flexGrow: 1,
-        flexBasis: flex ? '100%' : '20%',
+        flexGrow: 0,
+        flexShrink: 1,
+        flexBasis: flex ? '100%' : 'auto',
       }}
     >
       <div
@@ -202,7 +203,10 @@ function Entry({ heading, flex, children }: EntryProps): Nullable<ReactNode> {
         css={{
           ...theme.partials.text.body2,
           color: theme.colors.text,
-          wordBreak: 'break-word',
+
+          '*': {
+            wordBreak: 'break-all',
+          },
         }}
       >
         {isBoolean && (children ? 'true' : 'false')}
@@ -228,12 +232,7 @@ function Container({ container }: ContainerProps): ReactElement {
         }}
       >
         <Section>
-          <Entry
-            heading="Image"
-            flex
-          >
-            {container.image}
-          </Entry>
+          <Entry heading="Image">{container.image}</Entry>
           <Entry heading="Container ID">{container.status?.containerID}</Entry>
           <Entry heading="Env">
             {container.env && container.env.map((e) => <div>{e?.name}</div>)}
@@ -243,16 +242,7 @@ function Container({ container }: ContainerProps): ReactElement {
               container.commands.map((c) => <div>{c}</div>)}
           </Entry>
           <Entry heading="Args">
-            {container.args &&
-              container.args.map((arg) => (
-                <div
-                  css={{
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {arg}
-                </div>
-              ))}
+            {container.args && container.args.map((arg) => <div>{arg}</div>)}
           </Entry>
           {/* <Entry heading="Volume mounts">{container.volumeMounts}</Entry> */}
         </Section>

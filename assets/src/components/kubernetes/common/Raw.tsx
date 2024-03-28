@@ -5,8 +5,10 @@ import { Code } from '@pluralsh/design-system'
 import * as pluralize from 'pluralize'
 
 import {
-  RawQueryVariables,
-  useRawQuery,
+  NamespacedResourceQueryVariables,
+  ResourceQueryVariables,
+  useNamespacedResourceQuery,
+  useResourceQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
@@ -16,16 +18,23 @@ import { GqlError } from '../../utils/Alert'
 export default function Raw(): ReactElement {
   const { clusterId, name, namespace } = useParams()
   const pathMatch = useMatch(`${getKubernetesAbsPath(clusterId)}/:kind/*`)
-  const kind = pathMatch?.params?.kind || ''
-  const { data, loading } = useRawQuery({
+  const kind = useMemo(
+    () => pluralize(pathMatch?.params?.kind || '', 1),
+    [pathMatch?.params?.kind]
+  )
+  const resourceQuery = useMemo(
+    () => (namespace ? useNamespacedResourceQuery : useResourceQuery),
+    [namespace]
+  )
+  const { data, loading } = resourceQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     pollInterval: 30_000,
     variables: {
-      kind: pluralize(kind, 1),
+      kind,
       name,
       namespace,
-    } as RawQueryVariables,
+    } as ResourceQueryVariables & NamespacedResourceQueryVariables,
   })
 
   const object = data?.handleGetResource?.Object

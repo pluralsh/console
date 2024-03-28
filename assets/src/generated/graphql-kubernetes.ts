@@ -4665,14 +4665,22 @@ export type NodesQueryVariables = Exact<{
 
 export type NodesQuery = { __typename?: 'Query', handleGetNodeList?: { __typename?: 'node_NodeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, nodes: Array<{ __typename?: 'node_Node', ready: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any } } | null> } | null };
 
-export type RawQueryVariables = Exact<{
+export type NamespacedResourceQueryVariables = Exact<{
   kind: Scalars['String']['input'];
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
 }>;
 
 
-export type RawQuery = { __typename?: 'Query', handleGetResource?: { __typename?: 'unstructured_Unstructured', Object: any } | null };
+export type NamespacedResourceQuery = { __typename?: 'Query', handleGetResource?: { __typename?: 'unstructured_Unstructured', Object: any } | null };
+
+export type ResourceQueryVariables = Exact<{
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ResourceQuery = { __typename?: 'Query', handleGetResource?: { __typename?: 'unstructured_Unstructured', Object: any } | null };
 
 export type ConfigMapsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5617,8 +5625,8 @@ export type NodesQueryHookResult = ReturnType<typeof useNodesQuery>;
 export type NodesLazyQueryHookResult = ReturnType<typeof useNodesLazyQuery>;
 export type NodesSuspenseQueryHookResult = ReturnType<typeof useNodesSuspenseQuery>;
 export type NodesQueryResult = Apollo.QueryResult<NodesQuery, NodesQueryVariables>;
-export const RawDocument = gql`
-    query Raw($kind: String!, $name: String!, $namespace: String!) {
+export const NamespacedResourceDocument = gql`
+    query NamespacedResource($kind: String!, $name: String!, $namespace: String!) {
   handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {
     Object
   }
@@ -5626,16 +5634,16 @@ export const RawDocument = gql`
     `;
 
 /**
- * __useRawQuery__
+ * __useNamespacedResourceQuery__
  *
- * To run a query within a React component, call `useRawQuery` and pass it any options that fit your needs.
- * When your component renders, `useRawQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useNamespacedResourceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNamespacedResourceQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useRawQuery({
+ * const { data, loading, error } = useNamespacedResourceQuery({
  *   variables: {
  *      kind: // value for 'kind'
  *      name: // value for 'name'
@@ -5643,22 +5651,63 @@ export const RawDocument = gql`
  *   },
  * });
  */
-export function useRawQuery(baseOptions: Apollo.QueryHookOptions<RawQuery, RawQueryVariables>) {
+export function useNamespacedResourceQuery(baseOptions: Apollo.QueryHookOptions<NamespacedResourceQuery, NamespacedResourceQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RawQuery, RawQueryVariables>(RawDocument, options);
+        return Apollo.useQuery<NamespacedResourceQuery, NamespacedResourceQueryVariables>(NamespacedResourceDocument, options);
       }
-export function useRawLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RawQuery, RawQueryVariables>) {
+export function useNamespacedResourceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NamespacedResourceQuery, NamespacedResourceQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RawQuery, RawQueryVariables>(RawDocument, options);
+          return Apollo.useLazyQuery<NamespacedResourceQuery, NamespacedResourceQueryVariables>(NamespacedResourceDocument, options);
         }
-export function useRawSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RawQuery, RawQueryVariables>) {
+export function useNamespacedResourceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NamespacedResourceQuery, NamespacedResourceQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RawQuery, RawQueryVariables>(RawDocument, options);
+          return Apollo.useSuspenseQuery<NamespacedResourceQuery, NamespacedResourceQueryVariables>(NamespacedResourceDocument, options);
         }
-export type RawQueryHookResult = ReturnType<typeof useRawQuery>;
-export type RawLazyQueryHookResult = ReturnType<typeof useRawLazyQuery>;
-export type RawSuspenseQueryHookResult = ReturnType<typeof useRawSuspenseQuery>;
-export type RawQueryResult = Apollo.QueryResult<RawQuery, RawQueryVariables>;
+export type NamespacedResourceQueryHookResult = ReturnType<typeof useNamespacedResourceQuery>;
+export type NamespacedResourceLazyQueryHookResult = ReturnType<typeof useNamespacedResourceLazyQuery>;
+export type NamespacedResourceSuspenseQueryHookResult = ReturnType<typeof useNamespacedResourceSuspenseQuery>;
+export type NamespacedResourceQueryResult = Apollo.QueryResult<NamespacedResourceQuery, NamespacedResourceQueryVariables>;
+export const ResourceDocument = gql`
+    query Resource($kind: String!, $name: String!) {
+  handleGetResource(kind: $kind, name: $name, namespace: "") @rest(path: "_raw/{args.kind}/name/{args.name}") {
+    Object
+  }
+}
+    `;
+
+/**
+ * __useResourceQuery__
+ *
+ * To run a query within a React component, call `useResourceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useResourceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useResourceQuery({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useResourceQuery(baseOptions: Apollo.QueryHookOptions<ResourceQuery, ResourceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ResourceQuery, ResourceQueryVariables>(ResourceDocument, options);
+      }
+export function useResourceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ResourceQuery, ResourceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ResourceQuery, ResourceQueryVariables>(ResourceDocument, options);
+        }
+export function useResourceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ResourceQuery, ResourceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ResourceQuery, ResourceQueryVariables>(ResourceDocument, options);
+        }
+export type ResourceQueryHookResult = ReturnType<typeof useResourceQuery>;
+export type ResourceLazyQueryHookResult = ReturnType<typeof useResourceLazyQuery>;
+export type ResourceSuspenseQueryHookResult = ReturnType<typeof useResourceSuspenseQuery>;
+export type ResourceQueryResult = Apollo.QueryResult<ResourceQuery, ResourceQueryVariables>;
 export const ConfigMapsDocument = gql`
     query ConfigMaps($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetConfigMapList(

@@ -96,7 +96,7 @@ export function PodContainers(): ReactElement {
 
   return (
     <>
-      {pod?.initContainers && (
+      {pod?.initContainers?.length > 0 && (
         <section>
           <SubTitle>Init Containers</SubTitle>
           <Containers containers={pod?.initContainers} />
