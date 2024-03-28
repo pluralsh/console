@@ -23,11 +23,24 @@ query PersistentVolumeClaims(
 query PersistentVolumeClaim($name: String!, $namespace: String!) {
   handleGetPersistentVolumeClaimDetail(namespace: $namespace, name: $name)
   @rest(type: "persistentvolumeclaim_PersistentVolumeClaim" path: "persistentvolumeclaim/{args.namespace}/{args.name}") {
-    ...PersistentVolumeClaim
+    ...PersistentVolumeClaimDetail
   }
 }
 
 fragment PersistentVolumeClaim on persistentvolumeclaim_PersistentVolumeClaim {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  status
+  volume
+  storageClass
+  accessModes
+}
+
+fragment PersistentVolumeClaimDetail on persistentvolumeclaim_PersistentVolumeClaimDetail {
   typeMeta @type(name: "types_TypeMeta") {
     ...TypeMeta
   }
