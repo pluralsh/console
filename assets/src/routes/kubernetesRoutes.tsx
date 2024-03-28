@@ -3,12 +3,8 @@ import { Navigate, Route } from 'react-router-dom'
 import Service from 'components/kubernetes/discovery/Service'
 import PersistentVolume, {
   PersistentVolumeInfo,
-  PersistentVolumeRaw,
 } from 'components/kubernetes/storage/PersistentVolume'
-import Secret, {
-  SecretInfo,
-  SecretRaw,
-} from 'components/kubernetes/configuration/Secret'
+import Secret, { SecretInfo } from 'components/kubernetes/configuration/Secret'
 import RoleBinding from 'components/kubernetes/access/RoleBinding'
 import Role from 'components/kubernetes/access/Role'
 import ClusterRole from 'components/kubernetes/access/ClusterRole'
@@ -65,10 +61,11 @@ import Ingress from '../components/kubernetes/discovery/Ingress'
 import IngressClass from '../components/kubernetes/discovery/IngressClass'
 import NetworkPolicy from '../components/kubernetes/discovery/NetworkPolicy'
 import PersistentVolumeClaim from '../components/kubernetes/storage/PersistentVolumeClaim'
-import StorageClass from '../components/kubernetes/storage/StorageClass'
+import StorageClass, {
+  StorageClassPersistentVolumes,
+} from '../components/kubernetes/storage/StorageClass'
 import ConfigMap, {
   ConfigMapInfo,
-  ConfigMapRaw,
 } from '../components/kubernetes/configuration/ConfigMap'
 import Namespace from '../components/kubernetes/cluster/Namespace'
 
@@ -312,7 +309,7 @@ export const kubernetesRoutes = [
   </Route>,
   // Workloads
   <Route
-    path={`${KUBERNETES_ABS_PATH}/:kind/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+    path={`${KUBERNETES_ABS_PATH}/${PODS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<Pod />}
   >
     <Route
@@ -406,14 +403,23 @@ export const kubernetesRoutes = [
     />
     <Route
       path="raw"
-      element={<PersistentVolumeRaw />}
+      element={<Raw />}
     />
   </Route>,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${STORAGE_CLASSES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<StorageClass />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<StorageClassPersistentVolumes />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   // Configuration
   <Route
     path={`${KUBERNETES_ABS_PATH}/${CONFIG_MAPS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
@@ -426,7 +432,7 @@ export const kubernetesRoutes = [
     />
     <Route
       path="raw"
-      element={<ConfigMapRaw />}
+      element={<Raw />}
     />
   </Route>,
   <Route
@@ -440,7 +446,7 @@ export const kubernetesRoutes = [
     />
     <Route
       path="raw"
-      element={<SecretRaw />}
+      element={<Raw />}
     />
   </Route>,
   // Cluster
