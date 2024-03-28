@@ -70,7 +70,9 @@ release-vsn: # tags and pushes a new release
 
 update-schema:
 	MIX_ENV=test mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
+	curl -o assets/schema/kubernetes-schema.graphql https://raw.githubusercontent.com/kubernetes/dashboard/master/modules/web/schema/schema.graphql
 	cd assets && yarn graphql:codegen
+	cd assets && yarn fix
 
 
 k3s:  ## starts a k3d cluster for testing

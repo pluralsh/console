@@ -1,0 +1,52 @@
+query PersistentVolumes(
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetPersistentVolumeList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      path: "persistentvolume?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    items {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+      status
+      claim
+      storageClass
+      reason
+      reclaimPolicy
+      accessModes
+    }
+  }
+}
+
+query PersistentVolume($name: String!) {
+  handleGetPersistentVolumeDetail(persistentvolume: $name)
+    @rest(path: "persistentvolume/{args.persistentvolume}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    status
+    claim
+    storageClass
+    reason
+    reclaimPolicy
+    accessModes
+  }
+}

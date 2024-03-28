@@ -43,8 +43,7 @@ export default function Backups() {
   )
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${BACKUPS_ABS_PATH}/:tab*`)
-  // @ts-expect-error
+  const pathMatch = useMatch(`${BACKUPS_ABS_PATH}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 

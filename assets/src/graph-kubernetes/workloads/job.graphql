@@ -1,0 +1,35 @@
+query Jobs(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetJobList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      path: "job/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    jobs {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+      initContainerImages
+      containerImages
+      podInfo @type(name: "common_PodInfo") {
+        ...PodInfo
+      }
+    }
+  }
+}

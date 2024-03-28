@@ -1,0 +1,27 @@
+fragment EventList on common_EventList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  events @type(name: "common_Event") {
+    ...Event
+  }
+}
+
+fragment Event on common_Event {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  objectName
+  objectNamespace
+  reason
+  type
+  message
+  sourceComponent
+  sourceHost
+  count
+  firstSeen
+  lastSeen
+}

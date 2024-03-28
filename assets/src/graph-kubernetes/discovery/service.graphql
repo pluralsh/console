@@ -1,0 +1,48 @@
+query Services(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetServiceList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      path: "service/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    services {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+      type
+      clusterIP
+      internalEndpoint {
+        host
+        ports {
+          nodePort
+          port
+          protocol
+        }
+      }
+      externalEndpoints {
+        host
+        ports {
+          nodePort
+          port
+          protocol
+        }
+      }
+    }
+  }
+}
