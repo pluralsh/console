@@ -1,25 +1,18 @@
 import { ReactElement, createContext, useMemo, useRef } from 'react'
-
 import { SubTab, TabList } from '@pluralsh/design-system'
-
 import { useTheme } from 'styled-components'
-
 import { useMatch, useParams, useResolvedPath } from 'react-router-dom'
 
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutHeader } from '../utils/layout/ResponsiveLayoutHeader'
 import { LinkTabWrap } from '../utils/Tabs'
 import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth'
-
 import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
-
 import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
-
 import {
   ClusterTinyFragment,
   useClustersTinyQuery,
 } from '../../generated/graphql'
-
 import { mapExistingNodes } from '../../utils/graphql'
 
 interface ResourceDetailsContextT {
@@ -150,8 +143,22 @@ export default function ResourceDetails({
         </ResponsivePageFullWidth>
       </ResponsiveLayoutPage>
       <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutSidecarContainer width={360}>
-        {sidecar}
+      <ResponsiveLayoutSidecarContainer
+        width={360}
+        css={{
+          height: '100%',
+          overflow: 'hidden',
+          paddingBottom: theme.spacing.large,
+        }}
+      >
+        <div
+          css={{
+            height: '100%',
+            overflowY: 'auto',
+          }}
+        >
+          {sidecar}
+        </div>
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>
   )

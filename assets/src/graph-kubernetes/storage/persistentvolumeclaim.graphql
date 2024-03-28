@@ -13,21 +13,30 @@ query PersistentVolumeClaims(
     page: $page
   )
     @rest(
+      type: "persistentvolumeclaim_PersistentVolumeClaimList"
       path: "persistentvolumeclaim/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      status
-      volume
-      storageClass
-    }
+    ...PersistentVolumeClaimList
+  }
+}
+
+fragment PersistentVolumeClaim on persistentvolumeclaim_PersistentVolumeClaim {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  status
+  volume
+  storageClass
+}
+
+fragment PersistentVolumeClaimList on persistentvolumeclaim_PersistentVolumeClaimList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  items @type(name: "persistentvolumeclaim_PersistentVolumeClaim") {
+    ...PersistentVolumeClaim
   }
 }

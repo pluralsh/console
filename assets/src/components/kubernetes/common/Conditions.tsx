@@ -36,13 +36,13 @@ const columns = [
   columnHelper.accessor((condition) => condition?.reason, {
     id: 'reason',
     header: 'Reason',
-    cell: ({ getValue }) => getValue(),
+    cell: ({ getValue }) => getValue() || '-',
   }),
   // Message
   columnHelper.accessor((condition) => condition?.message, {
     id: 'message',
     header: 'Message',
-    cell: ({ getValue }) => getValue(),
+    cell: ({ getValue }) => getValue() || '-',
   }),
 ]
 
@@ -53,7 +53,6 @@ export default function Conditions({
     <Table
       data={conditions}
       columns={columns}
-      virtualizeRows
       css={{
         maxHeight: '500px',
         height: '100%',

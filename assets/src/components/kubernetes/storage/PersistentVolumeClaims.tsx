@@ -41,93 +41,93 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
 
 const columnHelper = createColumnHelper<PersistentVolumeClaimT>()
 
-const colStatus = columnHelper.accessor((pvc) => pvc.status, {
-  id: 'status',
-  header: 'Status',
-  cell: ({ getValue }) => <PVCStatusChip status={getValue()} />,
-})
-
-const colVolume = columnHelper.accessor((pvc) => pvc.volume, {
-  id: 'volume',
-  header: 'Volume',
-  cell: ({ getValue, table }) => {
-    const { cluster } = table.options.meta as {
-      cluster?: ClusterTinyFragment
-    }
-
-    return (
-      <Link
-        to={getResourceDetailsAbsPath(
-          cluster?.id,
-          'persistentvolume',
-          getValue()
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <InlineLink>{getValue()}</InlineLink>
-      </Link>
-    )
-  },
-})
-
-const colStorageClass = columnHelper.accessor((pvc) => pvc.storageClass, {
-  id: 'storageClass',
-  header: 'Storage class',
-  cell: ({ getValue, table }) => {
-    const { cluster } = table.options.meta as {
-      cluster?: ClusterTinyFragment
-    }
-
-    return (
-      <Link
-        to={getResourceDetailsAbsPath(cluster?.id, 'storageclass', getValue())}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <InlineLink>{getValue()}</InlineLink>
-      </Link>
-    )
-  },
-})
-
-const colAccessModes = columnHelper.accessor((pvc) => pvc.accessModes, {
-  id: 'accessModes',
-  header: 'Access modes',
-  cell: ({ getValue }) => {
-    const accessModes = getValue()
-
-    return (
-      <ChipList
-        size="small"
-        limit={1}
-        values={Object.entries(accessModes || {})}
-        transformValue={(accessModes) => accessModes.join(': ')}
-        emptyState={null}
-      />
-    )
-  },
-})
-
-export default function PersistentVolumeClaims() {
-  const { cluster } = useKubernetesContext()
-
-  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
-
+// TODO: add capacity after solving type issues
+export const usePersistentVolumeClaimListColumns = () => {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
-  const columns = useMemo(
+
+  return useMemo(
     () => [
       colName,
       colNamespace,
-      colStatus,
-      colVolume,
-      colStorageClass,
-      // TODO: Add capacity after solving type issue.
-      colAccessModes,
+      columnHelper.accessor((pvc) => pvc.status, {
+        id: 'status',
+        header: 'Status',
+        cell: ({ getValue }) => <PVCStatusChip status={getValue()} />,
+      }),
+      columnHelper.accessor((pvc) => pvc.volume, {
+        id: 'volume',
+        header: 'Volume',
+        cell: ({ getValue, table }) => {
+          const { cluster } = table.options.meta as {
+            cluster?: ClusterTinyFragment
+          }
+
+          return (
+            <Link
+              to={getResourceDetailsAbsPath(
+                cluster?.id,
+                'persistentvolume',
+                getValue()
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <InlineLink>{getValue()}</InlineLink>
+            </Link>
+          )
+        },
+      }),
+      columnHelper.accessor((pvc) => pvc.storageClass, {
+        id: 'storageClass',
+        header: 'Storage class',
+        cell: ({ getValue, table }) => {
+          const { cluster } = table.options.meta as {
+            cluster?: ClusterTinyFragment
+          }
+
+          return (
+            <Link
+              to={getResourceDetailsAbsPath(
+                cluster?.id,
+                'storageclass',
+                getValue()
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <InlineLink>{getValue()}</InlineLink>
+            </Link>
+          )
+        },
+      }),
+      columnHelper.accessor((pvc) => pvc.accessModes, {
+        id: 'accessModes',
+        header: 'Access modes',
+        cell: ({ getValue }) => {
+          const accessModes = getValue()
+
+          return (
+            <ChipList
+              size="small"
+              limit={1}
+              values={Object.entries(accessModes || {})}
+              transformValue={(accessModes) => accessModes.join(': ')}
+              emptyState={<>-</>}
+            />
+          )
+        },
+      }),
       colLabels,
       colCreationTimestamp,
     ],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    [colCreationTimestamp, colLabels, colName, colNamespace]
   )
+}
+
+export default function PersistentVolumeClaims() {
+  const { cluster } = useKubernetesContext()
+  const columns = usePersistentVolumeClaimListColumns()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
     <ResourceList<

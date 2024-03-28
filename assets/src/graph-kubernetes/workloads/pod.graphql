@@ -48,6 +48,7 @@ query Pod($name: String!, $namespace: String!) {
     serviceAccountName
     podIP
     podPhase
+    qosClass
     conditions @type(name: "common_Condition") {
       ...Condition
     }
@@ -57,11 +58,14 @@ query Pod($name: String!, $namespace: String!) {
     initContainers @type(name: "pod_Container") {
       ...Container
     }
+    imagePullSecrets {
+      name
+    }
+    persistentVolumeClaimList @type(name: "persistentvolumeclaim_PersistentVolumeClaimList") {
+      ...PersistentVolumeClaimList
+    }
     controller @type(name: "controller_ResourceOwner") {
       ...ResourceOwner
-    }
-    eventList @type(name: "common_EventList") {
-      ...EventList
     }
     securityContext @type(name: "v1_PodSecurityContext") {
       ...PodSecurityContext
