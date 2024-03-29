@@ -1,6 +1,10 @@
 import { ReactElement, useMemo } from 'react'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import {
+  ChipList,
+  SidecarItem,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
 
 import {
   ConfigMapQueryVariables,
@@ -14,7 +18,10 @@ import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConst
 
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 
+import { InlineLink } from '../../utils/typography/InlineLink'
+
 import { getBreadcrumbs } from './PersistentVolumes'
+import { PVStatusChip } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -48,12 +55,52 @@ export default function PersistentVolume(): ReactElement {
     )
   )
 
+  const [claimNamespace, claimName] = (pv?.claim ?? '').split('/')
+
   if (loading) return <LoadingIndicator />
 
   return (
     <ResourceDetails
       tabs={directory}
-      sidecar={<MetadataSidecar objectMeta={pv?.objectMeta} />}
+      sidecar={
+        <MetadataSidecar objectMeta={pv?.objectMeta}>
+          <SidecarItem heading="Claim">
+            <Link
+              to={getResourceDetailsAbsPath(
+                cluster?.id,
+                'persistentvolumeclaim',
+                claimName ?? '',
+                claimNamespace
+              )}
+            >
+              <InlineLink>{pv?.claim}</InlineLink>
+            </Link>
+          </SidecarItem>
+          <SidecarItem heading="Storage class">
+            <Link
+              to={getResourceDetailsAbsPath(
+                cluster?.id,
+                'storageclass',
+                pv?.storageClass ?? ''
+              )}
+            >
+              <InlineLink>{pv?.storageClass}</InlineLink>
+            </Link>
+          </SidecarItem>
+          <SidecarItem heading="Status">
+            <PVStatusChip status={pv?.status} />
+          </SidecarItem>
+          <SidecarItem heading="Access modes">
+            <ChipList
+              size="small"
+              limit={1}
+              values={Object.entries(pv?.accessModes || {})}
+              transformValue={(accessModes) => accessModes.join(': ')}
+              emptyState={null}
+            />
+          </SidecarItem>
+        </MetadataSidecar>
+      }
     >
       <Outlet context={pv} />
     </ResourceDetails>

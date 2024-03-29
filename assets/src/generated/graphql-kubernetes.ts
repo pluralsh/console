@@ -6492,7 +6492,7 @@ export type PersistentVolumeClaimsSuspenseQueryHookResult = ReturnType<typeof us
 export type PersistentVolumeClaimsQueryResult = Apollo.QueryResult<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>;
 export const PersistentVolumeClaimDocument = gql`
     query PersistentVolumeClaim($name: String!, $namespace: String!) {
-  handleGetPersistentVolumeClaimDetail(namespace: $namespace, name: $name) @rest(type: "persistentvolumeclaim_PersistentVolumeClaim", path: "persistentvolumeclaim/{args.namespace}/{args.name}") {
+  handleGetPersistentVolumeClaimDetail(namespace: $namespace, name: $name) @rest(type: "persistentvolumeclaim_PersistentVolumeClaimDetail", path: "persistentvolumeclaim/{args.namespace}/{args.name}") {
     ...PersistentVolumeClaimDetail
   }
 }

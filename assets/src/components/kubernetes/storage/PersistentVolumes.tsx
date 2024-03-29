@@ -53,7 +53,7 @@ export const colClaim = columnHelper.accessor((pv) => pv.claim, {
     const { cluster } = table.options.meta as {
       cluster?: ClusterTinyFragment
     }
-    const [name, namespace] = (getValue() ?? '').split('/')
+    const [namespace, name] = (getValue() ?? '').split('/')
 
     return (
       <Link
