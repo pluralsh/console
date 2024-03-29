@@ -252,3 +252,82 @@ export const GLOBAL_SERVICES_QUERY = gql`
     }
   }
 `
+
+export const GLOBAL_SERVICE_DETAIL_QUERY = gql`
+  query GetServiceData($serviceId: ID!, $first: Int) {
+    globalService(id: $serviceId) {
+      name
+      distro
+      tags {
+        name
+        value
+      }
+      services(first: $first) {
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        edges {
+          node {
+            name
+            componentStatus
+            repository {
+              id
+              url
+            }
+            helm {
+              chart
+              version
+              repository {
+                name
+                namespace
+              }
+            }
+            helmRepository {
+              status {
+                ready
+                message
+              }
+              spec {
+                url
+              }
+            }
+            git {
+              folder
+            }
+            protect
+            deletedAt
+            promotion
+            insertedAt
+            dryRun
+            message
+            cluster {
+              distro
+              id
+              name
+              provider {
+                name
+                cloud
+              }
+            }
+            status
+            updatedAt
+            repository {
+              id
+              url
+            }
+            errors {
+              message
+              source
+            }
+            components {
+              apiDeprecations {
+                blocking
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`

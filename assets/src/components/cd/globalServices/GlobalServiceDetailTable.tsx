@@ -6,14 +6,13 @@ import {
   useRef,
   useState,
 } from 'react'
-import { EmptyState, TabPanel, Table } from '@pluralsh/design-system'
+import { Card, EmptyState, TabPanel, Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
-import isEmpty from 'lodash/isEmpty'
 import { type VirtualItem } from '@tanstack/react-virtual'
 import { type ServiceDeploymentsRowFragment } from 'generated/graphql'
-import { getGlobalServiceDetailsPath } from 'routes/cdRoutesConsts'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge, extendConnection } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -22,20 +21,24 @@ import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 
 import { useQuery } from '@apollo/client'
 
-import { GLOBAL_SERVICES_QUERY } from 'components/cluster/queries'
+import { GLOBAL_SERVICE_DETAIL_QUERY } from 'components/cluster/queries'
+
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 
 import { POLL_INTERVAL } from '../ContinuousDeployment'
 
 import {
-  GLOBAL_SERVICES_QUERY_PAGE_SIZE,
-  GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS,
+  SERVICES_QUERY_PAGE_SIZE,
+  SERVICES_REACT_VIRTUAL_OPTIONS,
   columns,
-} from './GlobalService'
+} from '../services/Services'
 
-export function GlobalServicesTable({
+export function GlobalServiceDetailTable({
   setRefetch,
+  serviceId,
 }: {
   setRefetch?: (refetch: () => () => void) => void
+  serviceId?: string
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -48,9 +51,10 @@ export function GlobalServicesTable({
     | undefined
   >()
 
-  const queryResult = useQuery(GLOBAL_SERVICES_QUERY, {
+  const queryResult = useQuery(GLOBAL_SERVICE_DETAIL_QUERY, {
     variables: {
-      first: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
+      first: SERVICES_QUERY_PAGE_SIZE,
+      serviceId,
     },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
@@ -65,10 +69,12 @@ export function GlobalServicesTable({
   } = queryResult
   const data = currentData || previousData
 
-  const pageInfo = data?.globalServices?.pageInfo
+  const globalService = data?.globalService
+  const services = globalService?.services?.edges
+  const pageInfo = services?.pageInfo
   const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
-    pageSize: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
+    pageSize: SERVICES_QUERY_PAGE_SIZE,
     key: 'serviceDeployments',
     interval: POLL_INTERVAL,
   })
@@ -118,17 +124,37 @@ export function GlobalServicesTable({
         height: '100%',
       }}
     >
+      <Card
+        padding="large"
+        css={{
+          display: 'flex',
+          gap: theme.spacing.small,
+        }}
+      >
+        <div css={{ flexGrow: 1 }}>
+          <Body2BoldP>Distribution</Body2BoldP>
+          <Body2P>{globalService.distro || 'All distribution'}</Body2P>
+        </div>
+        <div css={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+          <Body2BoldP>Tags</Body2BoldP>
+          <Body2P>
+            {globalService.tags
+              ?.map((tag) => `${tag?.name}: ${tag?.value}`)
+              .join(', ')}
+          </Body2P>
+        </div>
+      </Card>
       <TabPanel
         stateRef={tabStateRef}
         css={{ height: '100%', overflow: 'hidden' }}
       >
         {!data ? (
           <LoadingIndicator />
-        ) : !isEmpty(data?.globalServices?.edges) ? (
+        ) : services.length ? (
           <FullHeightTableWrap>
             <Table
               virtualizeRows
-              data={data?.globalServices?.edges || []}
+              data={services || []}
               columns={columns}
               css={{
                 maxHeight: 'unset',
@@ -139,7 +165,8 @@ export function GlobalServicesTable({
                 { original }: Row<Edge<ServiceDeploymentsRowFragment>>
               ) =>
                 navigate(
-                  getGlobalServiceDetailsPath({
+                  getServiceDetailsPath({
+                    clusterId: original.node?.cluster?.id,
                     serviceId: original.node?.id,
                   })
                 )
@@ -148,7 +175,7 @@ export function GlobalServicesTable({
               fetchNextPage={fetchNextPage}
               isFetchingNextPage={loading}
               reactTableOptions={reactTableOptions}
-              reactVirtualOptions={GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS}
+              reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
               onVirtualSliceChange={setVirtualSlice}
             />
           </FullHeightTableWrap>
