@@ -68,6 +68,35 @@ function TextTemplate({ onFillLevel, ...args }: any) {
   )
 }
 
+function CustomClickTemplate({ onFillLevel, ...args }: any) {
+  const VALUES = [
+    'avengers',
+    'iron man',
+    'doctor strange',
+    'thor',
+    'black panther',
+    'guardians of the galaxy',
+  ]
+
+  return (
+    <WrapWithIf
+      condition={onFillLevel > 0}
+      wrapper={
+        <Card
+          width="600px"
+          padding="medium"
+          fillLevel={onFillLevel}
+        />
+      }
+    >
+      <ChipList
+        values={VALUES}
+        {...args}
+      />
+    </WrapWithIf>
+  )
+}
+
 interface Label {
   key?: string
   value: string
@@ -141,4 +170,13 @@ Empty.args = {
   severity: 'info',
   size: 'small',
   onFillLevel: 0,
+}
+
+export const CustomClick = CustomClickTemplate.bind({})
+CustomClick.args = {
+  severity: 'info',
+  size: 'small',
+  onFillLevel: 0,
+  onClickCondition: (value: string) => value === 'avengers',
+  onClick: (value: string) => alert(value),
 }

@@ -1,6 +1,11 @@
 import { Flex, Span } from 'honorable'
 import isEmpty from 'lodash-es/isEmpty'
-import { type ComponentProps, type ReactElement, useState } from 'react'
+import {
+  type ComponentProps,
+  type Dispatch,
+  type ReactElement,
+  useState,
+} from 'react'
 
 import { HamburgerMenuCollapseIcon } from '../icons'
 
@@ -15,6 +20,8 @@ export type ChipListProps<TValue> = {
   transformValue?: TransformFn<TValue>
   limit: number
   emptyState?: JSX.Element | null
+  onClickCondition?: (value: TValue) => boolean
+  onClick?: Dispatch<TValue>
 } & ChipProps
 
 function ChipList<TValue = string>({
@@ -22,6 +29,8 @@ function ChipList<TValue = string>({
   transformValue,
   limit = 4,
   emptyState,
+  onClickCondition,
+  onClick,
   ...props
 }: ChipListProps<TValue>): ReactElement {
   const [collapsed, setCollapsed] = useState(true)
@@ -37,14 +46,20 @@ function ChipList<TValue = string>({
         ) : (
           <Span body2>There is nothing to display here.</Span>
         ))}
-      {values.slice(0, collapsed ? limit : undefined).map((v, i) => (
-        <Chip
-          key={(v as any).key || i}
-          {...props}
-        >
-          {transformValue ? transformValue(v) : `${v}`}
-        </Chip>
-      ))}
+      {values.slice(0, collapsed ? limit : undefined).map((v, i) => {
+        const clickable = onClickCondition?.(v) ?? false
+
+        return (
+          <Chip
+            key={(v as any).key || i}
+            clickable={clickable}
+            onClick={() => clickable && onClick(v)}
+            {...props}
+          >
+            {transformValue ? transformValue(v) : `${v}`}
+          </Chip>
+        )
+      })}
       {values.length > limit && (
         <>
           {collapsed && (
