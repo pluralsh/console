@@ -73,7 +73,7 @@ export default function RoleBinding(): ReactElement {
     <ResourceDetails
       tabs={directory}
       sidecar={
-        <MetadataSidecar objectMeta={rb?.objectMeta}>
+        <MetadataSidecar resource={rb}>
           <SidecarItem heading="Role">
             <A
               as={Link}

@@ -69,7 +69,7 @@ export default function Role(): ReactElement {
   return (
     <ResourceDetails
       tabs={directory}
-      sidecar={<MetadataSidecar objectMeta={role?.objectMeta} />}
+      sidecar={<MetadataSidecar resource={role} />}
     >
       <Outlet context={role} />
     </ResourceDetails>

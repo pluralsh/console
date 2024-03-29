@@ -62,7 +62,7 @@ export default function ClusterRoleBinding(): ReactElement {
     <ResourceDetails
       tabs={directory}
       sidecar={
-        <MetadataSidecar objectMeta={crb?.objectMeta}>
+        <MetadataSidecar resource={crb}>
           <SidecarItem heading="Role">
             <A
               as={Link}

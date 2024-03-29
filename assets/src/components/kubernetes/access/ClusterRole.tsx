@@ -57,7 +57,7 @@ export default function ClusterRole(): ReactElement {
   return (
     <ResourceDetails
       tabs={directory}
-      sidecar={<MetadataSidecar objectMeta={cr?.objectMeta} />}
+      sidecar={<MetadataSidecar resource={cr} />}
     >
       <Outlet context={cr} />
     </ResourceDetails>
