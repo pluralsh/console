@@ -98,7 +98,10 @@ export function PodInfo(): ReactElement {
     <>
       <section>
         <SubTitle>Owner</SubTitle>
-        <ResourceOwner owner={pod?.controller} />
+        <ResourceOwner
+          clusterId={cluster?.id}
+          owner={pod?.controller}
+        />
       </section>
       <section>
         <SubTitle>Conditions</SubTitle>

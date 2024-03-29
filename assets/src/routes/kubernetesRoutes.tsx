@@ -75,6 +75,10 @@ import Namespace from '../components/kubernetes/cluster/Namespace'
 
 import Raw from '../components/kubernetes/common/Raw'
 
+import ServiceAccounts from '../components/kubernetes/access/ServiceAccounts'
+
+import ServiceAccount from '../components/kubernetes/access/ServiceAccount'
+
 import {
   ACCESS_REL_PATH,
   CLUSTER_REL_PATH,
@@ -106,6 +110,7 @@ import {
   ROLE_BINDINGS_REL_PATH,
   SECRETS_REL_PATH,
   SERVICES_REL_PATH,
+  SERVICE_ACCOUNTS_REL_PATH,
   STATEFUL_SETS_REL_PATH,
   STORAGE_CLASSES_REL_PATH,
   STORAGE_REL_PATH,
@@ -305,6 +310,10 @@ export const kubernetesRoutes = [
         path={CLUSTER_ROLE_BINDINGS_REL_PATH}
         element={<ClusterRoleBindings />}
       />
+      <Route
+        path={SERVICE_ACCOUNTS_REL_PATH}
+        element={<ServiceAccounts />}
+      />
     </Route>
     <Route
       path={CUSTOM_RESOURCES_REL_PATH}
@@ -492,6 +501,24 @@ export const kubernetesRoutes = [
       index
       path=""
       element={<RoleBindingSubjects />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
+  <Route
+    path={`${KUBERNETES_ABS_PATH}/${SERVICE_ACCOUNTS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+    element={<ServiceAccount />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="raw"
+        />
+      }
     />
     <Route
       path="raw"

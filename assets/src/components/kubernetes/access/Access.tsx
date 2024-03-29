@@ -7,6 +7,7 @@ import {
   CLUSTER_ROLE_BINDINGS_REL_PATH,
   ROLES_REL_PATH,
   ROLE_BINDINGS_REL_PATH,
+  SERVICE_ACCOUNTS_REL_PATH,
   getAccessAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
@@ -24,6 +25,7 @@ const directory = [
   { path: ROLE_BINDINGS_REL_PATH, label: 'Role bindings' },
   { path: CLUSTER_ROLES_REL_PATH, label: 'Cluster roles' },
   { path: CLUSTER_ROLE_BINDINGS_REL_PATH, label: 'Cluster role bindings' },
+  { path: SERVICE_ACCOUNTS_REL_PATH, label: 'Service Accounts' },
 ] as const
 
 export default function Access() {

@@ -4658,6 +4658,25 @@ export type RoleBindingQueryVariables = Exact<{
 
 export type RoleBindingQuery = { __typename?: 'Query', handleGetRoleBindingDetail?: { __typename?: 'rolebinding_RoleBindingDetail', errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, subjects?: Array<{ __typename?: 'v1_Subject', apiGroup?: string | null, kind: string, name: string, namespace?: string | null } | null> | null, roleRef: { __typename?: 'v1_RoleRef', name: string, kind: string, apiGroup: string } } | null };
 
+export type ServiceAccountsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ServiceAccountsQuery = { __typename?: 'Query', handleGetServiceAccountList?: { __typename?: 'serviceaccount_ServiceAccountList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'serviceaccount_ServiceAccount', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type ServiceAccountQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ServiceAccountQuery = { __typename?: 'Query', handleGetServiceAccountDetail?: { __typename?: 'serviceaccount_ServiceAccountDetail', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
+
 export type EventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5754,6 +5773,115 @@ export type RoleBindingQueryHookResult = ReturnType<typeof useRoleBindingQuery>;
 export type RoleBindingLazyQueryHookResult = ReturnType<typeof useRoleBindingLazyQuery>;
 export type RoleBindingSuspenseQueryHookResult = ReturnType<typeof useRoleBindingSuspenseQuery>;
 export type RoleBindingQueryResult = Apollo.QueryResult<RoleBindingQuery, RoleBindingQueryVariables>;
+export const ServiceAccountsDocument = gql`
+    query ServiceAccounts($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetServiceAccountList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "serviceaccount_ServiceAccountList", path: "serviceaccount/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    items {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${ListMetaFragmentDoc}
+${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useServiceAccountsQuery__
+ *
+ * To run a query within a React component, call `useServiceAccountsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceAccountsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceAccountsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useServiceAccountsQuery(baseOptions: Apollo.QueryHookOptions<ServiceAccountsQuery, ServiceAccountsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceAccountsQuery, ServiceAccountsQueryVariables>(ServiceAccountsDocument, options);
+      }
+export function useServiceAccountsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceAccountsQuery, ServiceAccountsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceAccountsQuery, ServiceAccountsQueryVariables>(ServiceAccountsDocument, options);
+        }
+export function useServiceAccountsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceAccountsQuery, ServiceAccountsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceAccountsQuery, ServiceAccountsQueryVariables>(ServiceAccountsDocument, options);
+        }
+export type ServiceAccountsQueryHookResult = ReturnType<typeof useServiceAccountsQuery>;
+export type ServiceAccountsLazyQueryHookResult = ReturnType<typeof useServiceAccountsLazyQuery>;
+export type ServiceAccountsSuspenseQueryHookResult = ReturnType<typeof useServiceAccountsSuspenseQuery>;
+export type ServiceAccountsQueryResult = Apollo.QueryResult<ServiceAccountsQuery, ServiceAccountsQueryVariables>;
+export const ServiceAccountDocument = gql`
+    query ServiceAccount($namespace: String!, $name: String!) {
+  handleGetServiceAccountDetail(namespace: $namespace, serviceaccount: $name) @rest(type: "serviceaccount_ServiceAccountDetail", path: "serviceaccount/{args.namespace}/{args.serviceaccount}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useServiceAccountQuery__
+ *
+ * To run a query within a React component, call `useServiceAccountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceAccountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceAccountQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useServiceAccountQuery(baseOptions: Apollo.QueryHookOptions<ServiceAccountQuery, ServiceAccountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceAccountQuery, ServiceAccountQueryVariables>(ServiceAccountDocument, options);
+      }
+export function useServiceAccountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceAccountQuery, ServiceAccountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceAccountQuery, ServiceAccountQueryVariables>(ServiceAccountDocument, options);
+        }
+export function useServiceAccountSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceAccountQuery, ServiceAccountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceAccountQuery, ServiceAccountQueryVariables>(ServiceAccountDocument, options);
+        }
+export type ServiceAccountQueryHookResult = ReturnType<typeof useServiceAccountQuery>;
+export type ServiceAccountLazyQueryHookResult = ReturnType<typeof useServiceAccountLazyQuery>;
+export type ServiceAccountSuspenseQueryHookResult = ReturnType<typeof useServiceAccountSuspenseQuery>;
+export type ServiceAccountQueryResult = Apollo.QueryResult<ServiceAccountQuery, ServiceAccountQueryVariables>;
 export const EventsDocument = gql`
     query Events($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetEventList(

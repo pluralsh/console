@@ -35,6 +35,7 @@ export const ROLES_REL_PATH = 'roles'
 export const ROLE_BINDINGS_REL_PATH = 'rolebindings'
 export const CLUSTER_ROLES_REL_PATH = 'clusterroles'
 export const CLUSTER_ROLE_BINDINGS_REL_PATH = 'clusterrolebindings'
+export const SERVICE_ACCOUNTS_REL_PATH = 'serviceaccounts'
 
 export const CLUSTER_REL_PATH = 'cluster'
 export const NODES_REL_PATH = 'nodes'
@@ -82,8 +83,8 @@ export function getCustomResourcesAbsPath(
 
 export function getResourceDetailsAbsPath(
   clusterId: Nullable<string>,
-  kind: string,
-  name: string,
+  kind: Nullable<string>,
+  name: Nullable<string>,
   namespace?: Nullable<string>
 ): string {
   return namespace
