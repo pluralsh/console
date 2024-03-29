@@ -38,6 +38,14 @@ fragment Probe on v1_Probe {
   timeoutSeconds
 }
 
+fragment PolicyRule on v1_PolicyRule {
+  apiGroups
+  nonResourceURLs
+  resourceNames
+  verbs
+  resources
+}
+
 fragment PodInfo on common_PodInfo {
   current
   desired

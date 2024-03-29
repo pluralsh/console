@@ -11,7 +11,6 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { SubTitle } from '../../cluster/nodes/SubTitle'
 import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import { NAMESPACE_PARAM } from '../Kubernetes'
 import {
@@ -25,7 +24,7 @@ import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { getBreadcrumbs } from './ConfigMaps'
 
 const directory: Array<TabEntry> = [
-  { path: '', label: 'Info' },
+  { path: '', label: 'Data' },
   { path: 'raw', label: 'Raw' },
 ] as const
 
@@ -80,7 +79,7 @@ export default function ConfigMap(): ReactElement {
   )
 }
 
-export function ConfigMapInfo(): ReactElement {
+export function ConfigMapData(): ReactElement {
   const cm = useOutletContext() as ConfigMapT
   const tabs = useMemo(
     () => [
@@ -100,14 +99,9 @@ export function ConfigMapInfo(): ReactElement {
     [cm?.data]
   )
 
-  return (
-    <section>
-      <SubTitle>Data</SubTitle>
-      {!isEmpty(cm?.data) ? (
-        <Code tabs={tabs} />
-      ) : (
-        'There is no data to display.'
-      )}
-    </section>
+  return !isEmpty(cm?.data) ? (
+    <Code tabs={tabs} />
+  ) : (
+    <div>There is no data to display.</div>
   )
 }

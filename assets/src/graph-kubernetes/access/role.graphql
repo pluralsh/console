@@ -28,3 +28,19 @@ query Roles(
     }
   }
 }
+
+query Role($name: String!, $namespace: String!) {
+  handleGetRoleDetail(namespace: $namespace, name: $name)
+  @rest(path: "role/{args.namespace}/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    rules @type(name: "v1_PolicyRule") {
+      ...PolicyRule
+    }
+    errors
+  }
+}

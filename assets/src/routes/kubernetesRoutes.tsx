@@ -4,9 +4,9 @@ import Service from 'components/kubernetes/discovery/Service'
 import PersistentVolume, {
   PersistentVolumeInfo,
 } from 'components/kubernetes/storage/PersistentVolume'
-import Secret, { SecretInfo } from 'components/kubernetes/configuration/Secret'
+import Secret, { SecretData } from 'components/kubernetes/configuration/Secret'
 import RoleBinding from 'components/kubernetes/access/RoleBinding'
-import Role from 'components/kubernetes/access/Role'
+import Role, { RolePolicyRules } from 'components/kubernetes/access/Role'
 import ClusterRole from 'components/kubernetes/access/ClusterRole'
 import ClusterRoleBinding from 'components/kubernetes/access/ClusterRoleBinding'
 import CustomResourceDefinition from 'components/kubernetes/customresources/CustomResourceDefinition'
@@ -65,7 +65,7 @@ import StorageClass, {
   StorageClassPersistentVolumes,
 } from '../components/kubernetes/storage/StorageClass'
 import ConfigMap, {
-  ConfigMapInfo,
+  ConfigMapData,
 } from '../components/kubernetes/configuration/ConfigMap'
 import Namespace from '../components/kubernetes/cluster/Namespace'
 
@@ -433,7 +433,7 @@ export const kubernetesRoutes = [
     <Route
       index
       path=""
-      element={<ConfigMapInfo />}
+      element={<ConfigMapData />}
     />
     <Route
       path="raw"
@@ -447,7 +447,7 @@ export const kubernetesRoutes = [
     <Route
       index
       path=""
-      element={<SecretInfo />}
+      element={<SecretData />}
     />
     <Route
       path="raw"
@@ -467,20 +467,38 @@ export const kubernetesRoutes = [
   />,
   // Access
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${ROLES_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<Role />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<RolePolicyRules />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     index
     path={`${KUBERNETES_ABS_PATH}/${ROLE_BINDINGS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<RoleBinding />}
   />,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${CLUSTER_ROLES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<ClusterRole />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<RolePolicyRules />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     index
     path={`${KUBERNETES_ABS_PATH}/${CLUSTER_ROLE_BINDINGS_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
