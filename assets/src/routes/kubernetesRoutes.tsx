@@ -10,7 +10,9 @@ import RoleBinding, {
 } from 'components/kubernetes/access/RoleBinding'
 import Role, { RolePolicyRules } from 'components/kubernetes/access/Role'
 import ClusterRole from 'components/kubernetes/access/ClusterRole'
-import ClusterRoleBinding from 'components/kubernetes/access/ClusterRoleBinding'
+import ClusterRoleBinding, {
+  ClusterRoleBindingSubjects,
+} from 'components/kubernetes/access/ClusterRoleBinding'
 import CustomResourceDefinition from 'components/kubernetes/customresources/CustomResourceDefinition'
 
 import {
@@ -511,10 +513,19 @@ export const kubernetesRoutes = [
     />
   </Route>,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${CLUSTER_ROLE_BINDINGS_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<ClusterRoleBinding />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<ClusterRoleBindingSubjects />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   // Custom Resource Definition
   <Route
     path={`${KUBERNETES_ABS_PATH}/${CUSTOM_RESOURCES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}

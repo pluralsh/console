@@ -4613,6 +4613,13 @@ export type ClusterRoleBindingsQueryVariables = Exact<{
 
 export type ClusterRoleBindingsQuery = { __typename?: 'Query', handleGetClusterRoleBindingList?: { __typename?: 'clusterrolebinding_ClusterRoleBindingList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'clusterrolebinding_ClusterRoleBinding', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type ClusterRoleBindingQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ClusterRoleBindingQuery = { __typename?: 'Query', handleGetClusterRoleBindingDetail?: { __typename?: 'clusterrolebinding_ClusterRoleBindingDetail', errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, subjects?: Array<{ __typename?: 'v1_Subject', apiGroup?: string | null, kind: string, name: string, namespace?: string | null } | null> | null, roleRef: { __typename?: 'v1_RoleRef', name: string, kind: string, apiGroup: string } } | null };
+
 export type RolesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5458,6 +5465,62 @@ export type ClusterRoleBindingsQueryHookResult = ReturnType<typeof useClusterRol
 export type ClusterRoleBindingsLazyQueryHookResult = ReturnType<typeof useClusterRoleBindingsLazyQuery>;
 export type ClusterRoleBindingsSuspenseQueryHookResult = ReturnType<typeof useClusterRoleBindingsSuspenseQuery>;
 export type ClusterRoleBindingsQueryResult = Apollo.QueryResult<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>;
+export const ClusterRoleBindingDocument = gql`
+    query ClusterRoleBinding($name: String!) {
+  handleGetClusterRoleBindingDetail(name: $name) @rest(path: "clusterrolebinding/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    subjects @type(name: "v1_Subject") {
+      ...Subject
+    }
+    roleRef {
+      name
+      kind
+      apiGroup
+    }
+    errors
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${SubjectFragmentDoc}`;
+
+/**
+ * __useClusterRoleBindingQuery__
+ *
+ * To run a query within a React component, call `useClusterRoleBindingQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterRoleBindingQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterRoleBindingQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useClusterRoleBindingQuery(baseOptions: Apollo.QueryHookOptions<ClusterRoleBindingQuery, ClusterRoleBindingQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterRoleBindingQuery, ClusterRoleBindingQueryVariables>(ClusterRoleBindingDocument, options);
+      }
+export function useClusterRoleBindingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterRoleBindingQuery, ClusterRoleBindingQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterRoleBindingQuery, ClusterRoleBindingQueryVariables>(ClusterRoleBindingDocument, options);
+        }
+export function useClusterRoleBindingSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterRoleBindingQuery, ClusterRoleBindingQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterRoleBindingQuery, ClusterRoleBindingQueryVariables>(ClusterRoleBindingDocument, options);
+        }
+export type ClusterRoleBindingQueryHookResult = ReturnType<typeof useClusterRoleBindingQuery>;
+export type ClusterRoleBindingLazyQueryHookResult = ReturnType<typeof useClusterRoleBindingLazyQuery>;
+export type ClusterRoleBindingSuspenseQueryHookResult = ReturnType<typeof useClusterRoleBindingSuspenseQuery>;
+export type ClusterRoleBindingQueryResult = Apollo.QueryResult<ClusterRoleBindingQuery, ClusterRoleBindingQueryVariables>;
 export const RolesDocument = gql`
     query Roles($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetRoleList(

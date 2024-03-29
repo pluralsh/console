@@ -12,7 +12,7 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import {
-  ROLES_REL_PATH,
+  ROLE_BINDINGS_REL_PATH,
   getAccessAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
@@ -21,7 +21,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import Subjects from '../common/Subjects'
 
-import { getBreadcrumbs } from './Roles'
+import { getBreadcrumbs } from './RoleBindings'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Subjects' },
@@ -51,7 +51,7 @@ export default function RoleBinding(): ReactElement {
           label: namespace ?? '',
           url: `${getAccessAbsPath(
             cluster?.id
-          )}/${ROLES_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
+          )}/${ROLE_BINDINGS_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
         },
         {
           label: name ?? '',
