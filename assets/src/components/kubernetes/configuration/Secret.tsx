@@ -76,7 +76,7 @@ export default function Secret(): ReactElement {
     <ResourceDetails
       tabs={directory}
       sidecar={
-        <MetadataSidecar objectMeta={secret?.objectMeta}>
+        <MetadataSidecar resource={secret}>
           <SidecarItem heading="Type">{secret?.type}</SidecarItem>
         </MetadataSidecar>
       }

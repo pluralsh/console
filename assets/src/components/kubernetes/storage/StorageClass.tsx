@@ -76,7 +76,7 @@ export default function StorageClass(): ReactElement {
     <ResourceDetails
       tabs={directory}
       sidecar={
-        <MetadataSidecar objectMeta={sc?.objectMeta}>
+        <MetadataSidecar resource={sc}>
           <SidecarItem heading="Parameters">
             <ChipList
               size="small"

@@ -63,7 +63,7 @@ export default function PersistentVolume(): ReactElement {
     <ResourceDetails
       tabs={directory}
       sidecar={
-        <MetadataSidecar objectMeta={pv?.objectMeta}>
+        <MetadataSidecar resource={pv}>
           <SidecarItem heading="Claim">
             <Link
               to={getResourceDetailsAbsPath(

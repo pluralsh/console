@@ -59,7 +59,7 @@ fragment ResourceOwner on controller_ResourceOwner {
   }
   containerImages
   initContainerImages
-  pods {
+  pods @type(name: "common_PodInfo") {
     ...PodInfo
   }
 }

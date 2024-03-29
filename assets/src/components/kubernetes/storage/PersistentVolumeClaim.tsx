@@ -76,7 +76,7 @@ export default function PersistentVolumeClaim(): ReactElement {
     <ResourceDetails
       tabs={directory}
       sidecar={
-        <MetadataSidecar objectMeta={pvc?.objectMeta}>
+        <MetadataSidecar resource={pvc}>
           <SidecarItem heading="Volume">
             <Link
               to={getResourceDetailsAbsPath(

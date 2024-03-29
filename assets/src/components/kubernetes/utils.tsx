@@ -5,6 +5,8 @@ import { ChipList, Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Link, useParams } from 'react-router-dom'
 import moment from 'moment/moment'
 
+import yaml from 'js-yaml'
+
 import {
   Types_ListMeta as ListMetaT,
   Maybe,
@@ -22,6 +24,9 @@ import {
   getResourceDetailsAbsPath,
 } from '../../routes/kubernetesRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
+
+import { ResourceT } from './ResourceList'
+import Annotations from './common/Annotations'
 
 export const ITEMS_PER_PAGE = 25
 
@@ -185,15 +190,48 @@ export const getBaseBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   },
 ]
 
+// TODO: Export type from design system
+type CodeTabData = {
+  key: string
+  label?: string
+  language?: string
+  content: string
+}
+
+export const useCodeTabs = (obj: Nullable<object>): Array<CodeTabData> =>
+  useMemo(
+    () =>
+      obj
+        ? [
+            {
+              key: 'yaml',
+              label: 'YAML',
+              language: 'yaml',
+              content: yaml.dump(obj),
+            },
+            {
+              key: 'json',
+              label: 'JSON',
+              language: 'json',
+              content: JSON.stringify(obj, null, 2),
+            },
+          ]
+        : [],
+    [obj]
+  )
+
 export function MetadataSidecar({
-  objectMeta,
+  resource,
   children,
 }: {
-  objectMeta?: Maybe<ObjectMetaT>
+  resource?: Maybe<ResourceT>
   children?: ReactNode
 }) {
+  const objectMeta = resource?.objectMeta
+  const typeMeta = resource?.typeMeta
+
   return (
-    <Sidecar heading="Metadata">
+    <Sidecar heading={typeMeta?.kind ?? 'Metadata'}>
       {objectMeta && (
         <>
           <SidecarItem heading="Name">{objectMeta.name}</SidecarItem>
@@ -216,13 +254,7 @@ export function MetadataSidecar({
             />
           </SidecarItem>
           <SidecarItem heading="Annotations">
-            <ChipList
-              size="small"
-              limit={3}
-              values={Object.entries(objectMeta.annotations || {})}
-              transformValue={(annotation) => annotation.join(': ')}
-              emptyState={<div>None</div>}
-            />
+            <Annotations annotations={objectMeta?.annotations} />
           </SidecarItem>
         </>
       )}

@@ -73,7 +73,7 @@ export default function ConfigMap(): ReactElement {
   return (
     <ResourceDetails
       tabs={directory}
-      sidecar={<MetadataSidecar objectMeta={cm?.objectMeta} />}
+      sidecar={<MetadataSidecar resource={cm} />}
     >
       <Outlet context={cm} />
     </ResourceDetails>

@@ -40,6 +40,9 @@ query Pods(
 query Pod($name: String!, $namespace: String!) {
   handleGetPodDetail(namespace: $namespace, pod: $name)
     @rest(path: "pod/{args.namespace}/{args.pod}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
     objectMeta @type(name: "types_ObjectMeta") {
       ...ObjectMeta
     }

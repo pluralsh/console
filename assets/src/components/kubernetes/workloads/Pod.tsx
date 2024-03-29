@@ -1,7 +1,6 @@
 import { ReactElement } from 'react'
 import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { SidecarItem, Table } from '@pluralsh/design-system'
-import { A } from 'honorable'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
@@ -25,12 +24,9 @@ import { ReadinessT } from '../../../utils/status'
 import { ResourceList } from '../ResourceList'
 import { COLUMNS } from '../cluster/Events'
 import { usePersistentVolumeClaimListColumns } from '../storage/PersistentVolumeClaims'
-import ResourceInfoCard, {
-  ResourceInfoCardEntry,
-  ResourceInfoCardSection,
-} from '../common/ResourceInfoCard'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
+import ResourceOwner from '../common/ResourceOwner'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -61,7 +57,7 @@ export function Pod(): ReactElement {
     <ResourceDetails
       tabs={directory}
       sidecar={
-        <MetadataSidecar objectMeta={pod.objectMeta}>
+        <MetadataSidecar resource={pod}>
           <SidecarItem heading="IP">{pod?.podIP}</SidecarItem>
           <SidecarItem heading="Parent node">
             <Link
@@ -73,9 +69,14 @@ export function Pod(): ReactElement {
           <SidecarItem heading="Service account">
             {pod?.serviceAccountName}
           </SidecarItem>
+          <SidecarItem heading="Restart Count">
+            {`${pod?.restartCount ?? 0}`}
+          </SidecarItem>
+          <SidecarItem heading="QOS Class">{pod?.qosClass}</SidecarItem>
           <SidecarItem heading="Status">
             <StatusChip readiness={pod?.podPhase as ReadinessT} />
           </SidecarItem>
+          <SidecarItem heading="Pod Phase">{pod?.podPhase}</SidecarItem>
         </MetadataSidecar>
       }
     >
@@ -89,44 +90,16 @@ export function PodInfo(): ReactElement {
   const pod = useOutletContext() as PodT
   const conditions = pod?.conditions
   const pvcList = pod?.persistentVolumeClaimList
-  const imagePullSecrets = pod?.imagePullSecrets
+  // TODO: handle pull secrets
+  // const imagePullSecrets = pod?.imagePullSecrets
   const pvcListColumns = usePersistentVolumeClaimListColumns()
 
   return (
     <>
-      <ResourceInfoCard title={pod?.objectMeta?.name ?? 'Info'}>
-        <ResourceInfoCardSection>
-          <ResourceInfoCardEntry heading="Image Pull Secrets">
-            {imagePullSecrets &&
-              imagePullSecrets.map((secret) => <div>{secret?.name}</div>)}
-          </ResourceInfoCardEntry>
-          <ResourceInfoCardEntry heading="Pod IP">
-            {pod?.podIP}
-          </ResourceInfoCardEntry>
-          <ResourceInfoCardEntry heading="Status">
-            <StatusChip readiness={pod?.podPhase as ReadinessT} />
-          </ResourceInfoCardEntry>
-          <ResourceInfoCardEntry heading="Pod Phase">
-            {pod?.podPhase}
-          </ResourceInfoCardEntry>
-          <ResourceInfoCardEntry heading="QOS Class">
-            {pod?.qosClass}
-          </ResourceInfoCardEntry>
-          <ResourceInfoCardEntry heading="Node Name">
-            <Link
-              to={getResourceDetailsAbsPath(cluster?.id, 'node', pod?.nodeName)}
-            >
-              <InlineLink>{pod?.nodeName}</InlineLink>
-            </Link>
-          </ResourceInfoCardEntry>
-          <ResourceInfoCardEntry heading="Restart Count">
-            {`${pod?.restartCount ?? 0}`}
-          </ResourceInfoCardEntry>
-          <ResourceInfoCardEntry heading="Service Account">
-            {pod?.serviceAccountName}
-          </ResourceInfoCardEntry>
-        </ResourceInfoCardSection>
-      </ResourceInfoCard>
+      <section>
+        <SubTitle>Owner</SubTitle>
+        <ResourceOwner owner={pod?.controller} />
+      </section>
       <section>
         <SubTitle>Conditions</SubTitle>
         <Conditions conditions={conditions} />

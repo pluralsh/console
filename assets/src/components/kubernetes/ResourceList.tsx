@@ -60,7 +60,7 @@ interface ResourceListT {
   listMeta: ListMetaT
 }
 
-interface ResourceT {
+export interface ResourceT {
   objectMeta: ObjectMetaT
   typeMeta: TypeMetaT
 }

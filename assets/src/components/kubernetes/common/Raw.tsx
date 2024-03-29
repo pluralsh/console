@@ -1,6 +1,5 @@
 import { ReactElement, useMemo } from 'react'
 import { useMatch, useParams } from 'react-router-dom'
-import yaml from 'js-yaml'
 import { Code } from '@pluralsh/design-system'
 import * as pluralize from 'pluralize'
 
@@ -14,6 +13,7 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { GqlError } from '../../utils/Alert'
+import { useCodeTabs } from '../utils'
 
 export default function Raw(): ReactElement {
   const { clusterId, name, namespace } = useParams()
@@ -38,26 +38,7 @@ export default function Raw(): ReactElement {
   })
 
   const object = data?.handleGetResource?.Object
-  const tabs = useMemo(
-    () =>
-      object
-        ? [
-            {
-              key: 'yaml',
-              label: 'YAML',
-              language: 'yaml',
-              content: yaml.dump(object),
-            },
-            {
-              key: 'json',
-              label: 'JSON',
-              language: 'json',
-              content: JSON.stringify(object, null, 2),
-            },
-          ]
-        : [],
-    [object]
-  )
+  const tabs = useCodeTabs(object)
 
   if (loading) return <LoadingIndicator />
 
