@@ -1,5 +1,96 @@
-import { ReactElement } from 'react'
+import { ReactElement, useMemo } from 'react'
+
+import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
+
+import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
+
+import { A } from 'honorable'
+
+import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import {
+  ClusterRoleBindingQueryVariables,
+  Clusterrolebinding_ClusterRoleBindingDetail as ClusterRoleBindingT,
+  useClusterRoleBindingQuery,
+} from '../../../generated/graphql-kubernetes'
+import { KubernetesClient } from '../../../helpers/kubernetes.client'
+
+import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
+
+import LoadingIndicator from '../../utils/LoadingIndicator'
+
+import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
+import Subjects from '../common/Subjects'
+
+import { getBreadcrumbs } from './ClusterRoleBindings'
+
+const directory: Array<TabEntry> = [
+  { path: '', label: 'Subjects' },
+  { path: 'raw', label: 'Raw' },
+] as const
 
 export default function ClusterRoleBinding(): ReactElement {
-  return <div>ClusterRoleBinding details</div>
+  const cluster = useKubernetesCluster()
+  const { clusterId, name = '' } = useParams()
+  const { data, loading } = useClusterRoleBindingQuery({
+    client: KubernetesClient(clusterId ?? ''),
+    skip: !clusterId,
+    pollInterval: 30_000,
+    variables: {
+      name,
+    } as ClusterRoleBindingQueryVariables,
+  })
+
+  const crb = data?.handleGetClusterRoleBindingDetail
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...getBreadcrumbs(cluster),
+        {
+          label: name ?? '',
+          url: getResourceDetailsAbsPath(clusterId, 'clusterrolebinding', name),
+        },
+      ],
+      [cluster, clusterId, name]
+    )
+  )
+
+  if (loading) return <LoadingIndicator />
+
+  return (
+    <ResourceDetails
+      tabs={directory}
+      sidecar={
+        <MetadataSidecar objectMeta={crb?.objectMeta}>
+          <SidecarItem heading="Role">
+            <A
+              as={Link}
+              to={getResourceDetailsAbsPath(
+                clusterId,
+                'clusterrole',
+                crb?.roleRef.name ?? ''
+              )}
+              inline
+            >
+              {crb?.roleRef.name}
+            </A>
+          </SidecarItem>
+        </MetadataSidecar>
+      }
+    >
+      <Outlet context={crb} />
+    </ResourceDetails>
+  )
+}
+
+// TODO: Add links.
+export function ClusterRoleBindingSubjects(): ReactElement {
+  const crb = useOutletContext() as ClusterRoleBindingT
+
+  return (
+    <FullHeightTableWrap>
+      <Subjects subjects={crb?.subjects} />
+    </FullHeightTableWrap>
+  )
 }

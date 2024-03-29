@@ -28,3 +28,25 @@ query RoleBindings(
     }
   }
 }
+
+
+query RoleBinding($name: String!, $namespace: String!) {
+  handleGetRoleBindingDetail(namespace: $namespace, name: $name)
+  @rest(path: "rolebinding/{args.namespace}/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    subjects @type(name: "v1_Subject") {
+      ...Subject
+    }
+    roleRef {
+      name
+      kind
+      apiGroup
+    }
+    errors
+  }
+}

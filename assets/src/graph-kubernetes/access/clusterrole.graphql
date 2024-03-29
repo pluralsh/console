@@ -27,3 +27,20 @@ query ClusterRoles(
     }
   }
 }
+
+query ClusterRole($name: String!) {
+  handleGetClusterRoleDetail(name: $name)
+  @rest(path: "clusterrole/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    rules @type(name: "v1_PolicyRule") {
+      ...PolicyRule
+    }
+    errors
+  }
+}
+

@@ -32,7 +32,7 @@ import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { getBreadcrumbs } from './Secrets'
 
 const directory: Array<TabEntry> = [
-  { path: '', label: 'Info' },
+  { path: '', label: 'Data' },
   { path: 'raw', label: 'Raw' },
 ] as const
 
@@ -151,7 +151,7 @@ const columns = [
   }),
 ]
 
-export function SecretInfo(): ReactElement {
+export function SecretData(): ReactElement {
   const theme = useTheme()
   const secret = useOutletContext() as SecretT
   const [revealAll, setRevealAll] = useState(false)
@@ -169,13 +169,11 @@ export function SecretInfo(): ReactElement {
       <div
         css={{
           ...theme.partials.text.subtitle1,
-          alignItems: 'end',
-          justifyContent: 'space-between',
+          justifyContent: 'end',
           display: 'flex',
-          marginBottom: theme.spacing.medium,
+          marginBottom: theme.spacing.small,
         }}
       >
-        <span>Data</span>
         <Button
           floating
           startIcon={revealAll ? <EyeClosedIcon /> : <EyeIcon />}
