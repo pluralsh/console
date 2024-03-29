@@ -22,7 +22,10 @@ query PersistentVolumeClaims(
 
 query PersistentVolumeClaim($name: String!, $namespace: String!) {
   handleGetPersistentVolumeClaimDetail(namespace: $namespace, name: $name)
-  @rest(type: "persistentvolumeclaim_PersistentVolumeClaim" path: "persistentvolumeclaim/{args.namespace}/{args.name}") {
+    @rest(
+      type: "persistentvolumeclaim_PersistentVolumeClaim"
+      path: "persistentvolumeclaim/{args.namespace}/{args.name}"
+    ) {
     ...PersistentVolumeClaimDetail
   }
 }

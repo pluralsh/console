@@ -61,7 +61,8 @@ query Pod($name: String!, $namespace: String!) {
     imagePullSecrets {
       name
     }
-    persistentVolumeClaimList @type(name: "persistentvolumeclaim_PersistentVolumeClaimList") {
+    persistentVolumeClaimList
+      @type(name: "persistentvolumeclaim_PersistentVolumeClaimList") {
       ...PersistentVolumeClaimList
     }
     controller @type(name: "controller_ResourceOwner") {
@@ -79,18 +80,20 @@ query PodEvents(
   $filterBy: String
   $sortBy: String
   $itemsPerPage: String
-  $page: String) {
+  $page: String
+) {
   handleGetPodEvents(
     pod: $name
     namespace: $namespace
     filterBy: $filterBy
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
-    page: $page)
-  @rest(
-    type: "common_EventList"
-    path: "pod/{args.namespace}/{args.pod}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-  ) {
+    page: $page
+  )
+    @rest(
+      type: "common_EventList"
+      path: "pod/{args.namespace}/{args.pod}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
     ...EventList
   }
 }
