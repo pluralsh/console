@@ -41,6 +41,8 @@ import ServiceLogs from 'components/cd/services/service/ServiceLogs'
 
 import ClusterLogs from 'components/cd/cluster/ClusterLogs'
 
+import GlobalServices from 'components/cd/globalServices/GlobalService'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -82,6 +84,7 @@ import {
   CLUSTER_PODS_PATH,
   CLUSTER_REL_PATH,
   CLUSTER_SERVICES_PATH,
+  GLOBAL_SERVICES_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NODE_REL_PATH,
   PIPELINES_REL_PATH,
@@ -189,6 +192,10 @@ const mainRoutes = (
     <Route
       path={ADDONS_REL_PATH}
       element={<AddOns />}
+    />
+    <Route
+      path={`${GLOBAL_SERVICES_REL_PATH}`}
+      element={<GlobalServices />}
     />
   </Route>
 )

@@ -75,6 +75,7 @@ export const SERVICE_POD_ABS_PATH = getServicePodDetailsPath({
 })
 
 export const SERVICE_PARAM_ID = 'serviceId' as const
+export const GLOBAL_SERVICE_PARAM_ID = 'globalServiceId' as const
 export const SERVICE_PARAM_CLUSTER_ID = 'clusterId' as const
 export const SERVICE_REL_PATH = getServiceDetailsPath({
   isRelative: true,
@@ -123,6 +124,16 @@ export function getServiceDetailsPath({
     clusterId,
     isRelative,
   })}/${SERVICES_REL_PATH}/${encodeSlashes(serviceId || '')}`
+}
+
+export function getGlobalServiceDetailsPath({
+  serviceId,
+}: {
+  serviceId: string | null | undefined
+}) {
+  return `${CD_ABS_PATH}/${GLOBAL_SERVICES_REL_PATH}/${encodeSlashes(
+    serviceId || ''
+  )}`
 }
 
 export function getClusterAddOnDetailsPath({

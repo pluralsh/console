@@ -221,3 +221,34 @@ export const CONFIGURATION_OVERLAYS = gql`
   }
   ${ConfigurationOverlayFragment}
 `
+
+export const GLOBAL_SERVICES_QUERY = gql`
+  query GetGlobalServices($first: Int) {
+    globalServices(first: $first) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          id
+          distro
+          provider {
+            cloud
+            id
+            name
+          }
+          service {
+            id
+          }
+          name
+          tags {
+            name
+            value
+          }
+          updatedAt
+        }
+      }
+    }
+  }
+`

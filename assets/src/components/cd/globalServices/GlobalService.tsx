@@ -1,0 +1,91 @@
+import { ComponentProps, useMemo, useState } from 'react'
+import { Button, Chip, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+
+import { AuthMethod } from 'generated/graphql'
+import { CD_REL_PATH, GLOBAL_SERVICES_REL_PATH } from 'routes/cdRoutesConsts'
+import { createMapperWithFallback } from 'utils/mapping'
+
+import { useTheme } from 'styled-components'
+
+import {
+  CD_BASE_CRUMBS,
+  useSetPageHeaderContent,
+} from '../ContinuousDeployment'
+
+import {
+  ColDistribution,
+  ColLastActivity,
+  ColServiceName,
+  ColTags,
+} from './GlobalServicesColumns'
+import { GlobalServicesTable } from './GlobalServicesTable'
+
+const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
+  {
+    SSH: 'SSH',
+    BASIC: 'Basic',
+  },
+  'Unknown'
+)
+
+export function AuthMethodChip({
+  authMethod,
+}: {
+  authMethod: AuthMethod | null | undefined
+}) {
+  return <Chip severity="neutral">{authMethodToLabel(authMethod)}</Chip>
+}
+
+export const GLOBAL_SERVICES_QUERY_PAGE_SIZE = 100
+
+export const GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
+  typeof Table
+>['reactVirtualOptions'] = {
+  overscan: 10,
+}
+
+export const columns = [
+  ColServiceName,
+  ColDistribution,
+  ColTags,
+  ColLastActivity,
+]
+
+export default function GlobalServices() {
+  const theme = useTheme()
+  const [refetch, setRefetch] = useState(() => () => {})
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...CD_BASE_CRUMBS,
+        {
+          label: 'global-services',
+          url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}`,
+        },
+      ],
+      []
+    )
+  )
+
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <div
+          css={{
+            display: 'flex',
+            justifyContent: 'end',
+            gap: theme.spacing.small,
+          }}
+        >
+          <Button onClick={() => setRefetch(() => () => {})}>
+            New Global Service
+          </Button>
+        </div>
+      ),
+      [refetch, theme.spacing.small]
+    )
+  )
+
+  return <GlobalServicesTable setRefetch={setRefetch} />
+}
