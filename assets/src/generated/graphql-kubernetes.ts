@@ -4643,6 +4643,14 @@ export type RoleBindingsQueryVariables = Exact<{
 
 export type RoleBindingsQuery = { __typename?: 'Query', handleGetRoleBindingList?: { __typename?: 'rolebinding_RoleBindingList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'rolebinding_RoleBinding', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type RoleBindingQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type RoleBindingQuery = { __typename?: 'Query', handleGetRoleBindingDetail?: { __typename?: 'rolebinding_RoleBindingDetail', errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, subjects?: Array<{ __typename?: 'v1_Subject', apiGroup?: string | null, kind: string, name: string, namespace?: string | null } | null> | null, roleRef: { __typename?: 'v1_RoleRef', name: string, kind: string, apiGroup: string } } | null };
+
 export type EventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -4799,6 +4807,8 @@ export type ConditionFragment = { __typename?: 'common_Condition', message: stri
 export type ProbeFragment = { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null };
 
 export type PolicyRuleFragment = { __typename?: 'v1_PolicyRule', apiGroups?: Array<string | null> | null, nonResourceURLs?: Array<string | null> | null, resourceNames?: Array<string | null> | null, verbs: Array<string | null>, resources?: Array<string | null> | null };
+
+export type SubjectFragment = { __typename?: 'v1_Subject', apiGroup?: string | null, kind: string, name: string, namespace?: string | null };
 
 export type PodInfoFragment = { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
 
@@ -5061,6 +5071,14 @@ export const PolicyRuleFragmentDoc = gql`
   resourceNames
   verbs
   resources
+}
+    `;
+export const SubjectFragmentDoc = gql`
+    fragment Subject on v1_Subject {
+  apiGroup
+  kind
+  name
+  namespace
 }
     `;
 export const PodInfoFragmentDoc = gql`
@@ -5616,6 +5634,63 @@ export type RoleBindingsQueryHookResult = ReturnType<typeof useRoleBindingsQuery
 export type RoleBindingsLazyQueryHookResult = ReturnType<typeof useRoleBindingsLazyQuery>;
 export type RoleBindingsSuspenseQueryHookResult = ReturnType<typeof useRoleBindingsSuspenseQuery>;
 export type RoleBindingsQueryResult = Apollo.QueryResult<RoleBindingsQuery, RoleBindingsQueryVariables>;
+export const RoleBindingDocument = gql`
+    query RoleBinding($name: String!, $namespace: String!) {
+  handleGetRoleBindingDetail(namespace: $namespace, name: $name) @rest(path: "rolebinding/{args.namespace}/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    subjects @type(name: "v1_Subject") {
+      ...Subject
+    }
+    roleRef {
+      name
+      kind
+      apiGroup
+    }
+    errors
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${SubjectFragmentDoc}`;
+
+/**
+ * __useRoleBindingQuery__
+ *
+ * To run a query within a React component, call `useRoleBindingQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRoleBindingQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRoleBindingQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useRoleBindingQuery(baseOptions: Apollo.QueryHookOptions<RoleBindingQuery, RoleBindingQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RoleBindingQuery, RoleBindingQueryVariables>(RoleBindingDocument, options);
+      }
+export function useRoleBindingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RoleBindingQuery, RoleBindingQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RoleBindingQuery, RoleBindingQueryVariables>(RoleBindingDocument, options);
+        }
+export function useRoleBindingSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RoleBindingQuery, RoleBindingQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<RoleBindingQuery, RoleBindingQueryVariables>(RoleBindingDocument, options);
+        }
+export type RoleBindingQueryHookResult = ReturnType<typeof useRoleBindingQuery>;
+export type RoleBindingLazyQueryHookResult = ReturnType<typeof useRoleBindingLazyQuery>;
+export type RoleBindingSuspenseQueryHookResult = ReturnType<typeof useRoleBindingSuspenseQuery>;
+export type RoleBindingQueryResult = Apollo.QueryResult<RoleBindingQuery, RoleBindingQueryVariables>;
 export const EventsDocument = gql`
     query Events($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetEventList(

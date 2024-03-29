@@ -19,8 +19,6 @@ import { NAMESPACE_PARAM } from '../Kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 
-import { SubTitle } from '../../cluster/nodes/SubTitle'
-
 import PolicyRules from '../common/PolicyRules'
 
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'

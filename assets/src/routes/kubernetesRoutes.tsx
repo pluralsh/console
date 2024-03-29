@@ -5,7 +5,9 @@ import PersistentVolume, {
   PersistentVolumeInfo,
 } from 'components/kubernetes/storage/PersistentVolume'
 import Secret, { SecretData } from 'components/kubernetes/configuration/Secret'
-import RoleBinding from 'components/kubernetes/access/RoleBinding'
+import RoleBinding, {
+  RoleBindingSubjects,
+} from 'components/kubernetes/access/RoleBinding'
 import Role, { RolePolicyRules } from 'components/kubernetes/access/Role'
 import ClusterRole from 'components/kubernetes/access/ClusterRole'
 import ClusterRoleBinding from 'components/kubernetes/access/ClusterRoleBinding'
@@ -481,10 +483,19 @@ export const kubernetesRoutes = [
     />
   </Route>,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${ROLE_BINDINGS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<RoleBinding />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<RoleBindingSubjects />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     path={`${KUBERNETES_ABS_PATH}/${CLUSTER_ROLES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<ClusterRole />}

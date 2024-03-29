@@ -46,6 +46,13 @@ fragment PolicyRule on v1_PolicyRule {
   resources
 }
 
+fragment Subject on v1_Subject {
+  apiGroup
+  kind
+  name
+  namespace
+}
+
 fragment PodInfo on common_PodInfo {
   current
   desired
