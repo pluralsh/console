@@ -92,6 +92,8 @@ type ConsoleClient interface {
 	GetNotificationRouterByName(ctx context.Context, name string) (*console.NotificationRouterFragment, error)
 	GetNotificationRouter(ctx context.Context, id string) (*console.NotificationRouterFragment, error)
 	UpsertNotificationRouter(ctx context.Context, attr console.NotificationRouterAttributes) (*console.NotificationRouterFragment, error)
+	GetNamespace(ctx context.Context, id string) (*console.ManagedNamespaceFragment, error)
+	DeleteNamespace(ctx context.Context, id string) error
 }
 
 func New(url, token string) ConsoleClient {
