@@ -34,16 +34,12 @@ const ScrollablePageContent = styled.div<{
       : {}),
     '& > .widthLimiter': {
       width: '100%',
+      height: '100%',
       ...(!noPadding && {
         paddingTop: theme.spacing.medium,
         paddingBottom: scrollable ? theme.spacing.xxlarge : theme.spacing.large,
       }),
 
-      ...(!scrollable
-        ? {
-            height: '100%',
-          }
-        : {}),
       ...(maxContentWidth
         ? { maxWidth: maxContentWidth, marginLeft: 'auto', marginRight: 'auto' }
         : {}),

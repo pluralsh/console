@@ -64,13 +64,11 @@ export function Pod(): ReactElement {
         <MetadataSidecar objectMeta={pod.objectMeta}>
           <SidecarItem heading="IP">{pod?.podIP}</SidecarItem>
           <SidecarItem heading="Parent node">
-            <A
-              as={Link}
-              to={`/nodes/${pod?.nodeName}`}
-              inline
+            <Link
+              to={getResourceDetailsAbsPath(clusterId, 'node', pod?.nodeName)}
             >
-              {pod?.nodeName}
-            </A>
+              <InlineLink>{pod?.nodeName}</InlineLink>
+            </Link>
           </SidecarItem>
           <SidecarItem heading="Service account">
             {pod?.serviceAccountName}
@@ -104,6 +102,9 @@ export function PodInfo(): ReactElement {
           </ResourceInfoCardEntry>
           <ResourceInfoCardEntry heading="Pod IP">
             {pod?.podIP}
+          </ResourceInfoCardEntry>
+          <ResourceInfoCardEntry heading="Status">
+            <StatusChip readiness={pod?.podPhase as ReadinessT} />
           </ResourceInfoCardEntry>
           <ResourceInfoCardEntry heading="Pod Phase">
             {pod?.podPhase}

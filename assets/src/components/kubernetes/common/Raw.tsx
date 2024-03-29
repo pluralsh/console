@@ -64,13 +64,11 @@ export default function Raw(): ReactElement {
   if (!object) return <GqlError error="Could not fetch resource" />
 
   return (
-    <section>
-      <Code
-        tabs={tabs}
-        css={{
-          height: '100%',
-        }}
-      />
-    </section>
+    <Code
+      tabs={tabs}
+      css={{
+        height: '100%',
+      }}
+    />
   )
 }
