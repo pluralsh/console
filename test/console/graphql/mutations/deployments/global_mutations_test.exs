@@ -53,7 +53,7 @@ defmodule Console.GraphQl.Deployments.GlobalMutationsTest do
       """, %{"id" => ns.id}, %{current_user: admin_user()})
 
       assert deleted["id"] == ns.id
-      refute refetch(ns)
+      assert refetch(ns).deleted_at
     end
   end
 end

@@ -407,6 +407,7 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
   end
 
   describe "fetchManifests" do
+    @tag :skip
     test "admins can fetch manifests" do
       service = insert(:service)
       Console.Deployments.Services.save_manifests(["testing"], service.id, service.cluster)

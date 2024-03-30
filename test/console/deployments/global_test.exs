@@ -274,7 +274,8 @@ defmodule Console.Deployments.GlobalTest do
         labels: %{"some" => "label"},
         service: %{
           repository_id: repo.id,
-          git: %{ref: "main", folder: "runtime"}
+          git: %{ref: "main", folder: "runtime"},
+          configuration: [%{name: "test", value: "secret"}]
         }
       }, admin_user())
 
@@ -283,6 +284,8 @@ defmodule Console.Deployments.GlobalTest do
       assert ns.service.repository_id == repo.id
       assert ns.service.git.ref == "main"
       assert ns.service.git.folder == "runtime"
+
+      {:ok, %{"test" => "secret"}} = Global.configuration(ns.service)
 
       assert_receive {:event, %PubSub.ManagedNamespaceCreated{item: ^ns}}
     end
@@ -347,7 +350,7 @@ defmodule Console.Deployments.GlobalTest do
       {:ok, deleted} = Global.delete_managed_namespace(ns.id, admin_user())
 
       assert deleted.id == ns.id
-      refute refetch(deleted)
+      assert deleted.deleted_at
 
       assert_receive {:event, %PubSub.ManagedNamespaceDeleted{item: ^deleted}}
     end
