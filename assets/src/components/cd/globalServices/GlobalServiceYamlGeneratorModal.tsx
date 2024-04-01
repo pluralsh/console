@@ -330,8 +330,8 @@ function getYaml(
         name: 'my-service',
         namespace: 'infra',
       },
+      distribution,
     },
-    distribution,
   }
 
   if (!isEmpty(tags)) {
