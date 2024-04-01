@@ -3,6 +3,7 @@ import styled, { useTheme } from 'styled-components'
 import {
   BrowserIcon,
   Button,
+  Code,
   FormField,
   GearTrainIcon,
   GlobeIcon,
@@ -17,6 +18,10 @@ import { InlineLink } from 'components/utils/typography/InlineLink'
 import { Body2P } from 'components/utils/typography/Text'
 
 import { getDistroProviderIconUrl } from 'components/utils/ClusterDistro'
+
+import { stringify } from 'yaml'
+
+import { isEmpty } from 'lodash'
 
 import ModalAlt, { StepBody } from '../ModalAlt'
 import { TagSelection } from '../services/TagSelection'
@@ -75,6 +80,7 @@ export function GlobalServiceYamlGeneratorModal({
           <Button
             type="submit"
             primary
+            disabled={modalStep === 'configure' && !name}
             onClick={(e) => {
               e.preventDefault()
               if (modalStep === 'configure') setModalStep('copy')
@@ -191,7 +197,18 @@ export function GlobalServiceYamlGeneratorModal({
               </Select>
             </FormField>
           </>
-        ) : null}
+        ) : (
+          <Code
+            language="yaml"
+            overflowY="auto"
+          >
+            {getYaml(
+              name,
+              tags,
+              distributionValue === 'all' ? '' : distributionValue
+            )}
+          </Code>
+        )}
       </div>
     </ModalAlt>
   )
@@ -294,4 +311,32 @@ function ModalIllustration({ modalStep }: { modalStep: 'configure' | 'copy' }) {
       </div>
     </div>
   )
+}
+
+function getYaml(
+  name: string,
+  tags: Record<string, string>,
+  distribution: string
+) {
+  const defaultObj: any = {
+    apiVersion: 'deployments.plural.sh/v1alpha1',
+    kind: 'GlobalService',
+    metadata: {
+      name,
+      namespace: 'infra',
+    },
+    spec: {
+      serviceRef: {
+        name: 'my-service',
+        namespace: 'infra',
+      },
+    },
+    distribution,
+  }
+
+  if (!isEmpty(tags)) {
+    defaultObj.spec.tags = tags
+  }
+
+  return stringify(defaultObj)
 }
