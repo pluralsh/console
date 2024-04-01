@@ -9,6 +9,7 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
 import { getDistroProviderIconUrl } from 'components/utils/ClusterDistro'
+import { GlobeIcon } from '@pluralsh/design-system'
 
 const columnHelper = createColumnHelper<Edge<GlobalService>>()
 
@@ -34,11 +35,17 @@ export const ColDistribution = columnHelper.accessor(({ node }) => node, {
 
     return (
       <ColWithIcon
-        icon={getDistroProviderIconUrl({
-          distro: globalService?.distro,
-          provider: globalService?.provider?.cloud,
-          mode: theme.mode,
-        })}
+        icon={
+          globalService?.distro ? (
+            getDistroProviderIconUrl({
+              distro: globalService?.distro,
+              provider: globalService?.provider?.cloud,
+              mode: theme.mode,
+            })
+          ) : (
+            <GlobeIcon size={16} />
+          )
+        }
       >
         {globalService?.distro || 'All Distributions'}
       </ColWithIcon>
