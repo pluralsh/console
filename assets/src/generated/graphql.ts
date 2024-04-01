@@ -5911,6 +5911,8 @@ export type ServiceStatusCount = {
 /** Attributes for configuring a service in something like a managed namespace */
 export type ServiceTemplate = {
   __typename?: 'ServiceTemplate';
+  /** possibly secret configuration for all spawned services, don't query this in list endpoints */
+  configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
   /** a list of context ids to add to this service */
   contexts?: Maybe<Array<Maybe<Scalars['ID']['output']>>>;
   /** settings to configure git for a service */
@@ -5932,6 +5934,8 @@ export type ServiceTemplate = {
 
 /** Attributes for configuring a service in something like a managed namespace */
 export type ServiceTemplateAttributes = {
+  /** a list of secure configuration that will be added to any services created by this template */
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   /** a list of context ids to add to this service */
   contexts?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   /** settings to configure git for a service */

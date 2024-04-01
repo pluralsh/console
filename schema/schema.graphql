@@ -861,6 +861,9 @@ input ServiceTemplateAttributes {
   "a list of context ids to add to this service"
   contexts: [ID]
 
+  "a list of secure configuration that will be added to any services created by this template"
+  configuration: [ConfigAttributes]
+
   "settings to configure git for a service"
   git: GitRefAttributes
 
@@ -958,6 +961,9 @@ type ServiceTemplate {
 
   "a list of context ids to add to this service"
   contexts: [ID]
+
+  "possibly secret configuration for all spawned services, don't query this in list endpoints"
+  configuration: [ServiceConfiguration]
 
   "settings to configure git for a service"
   git: GitRef
