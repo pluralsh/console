@@ -19,6 +19,7 @@ import {
   ColTags,
 } from './GlobalServicesColumns'
 import { GlobalServicesTable } from './GlobalServicesTable'
+import { GlobalServiceYamlGeneratorModal } from './GlobalServiceYamlGeneratorModal'
 
 const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
   {
@@ -53,7 +54,7 @@ export const columns = [
 
 export default function GlobalServices() {
   const theme = useTheme()
-  const [refetch, setRefetch] = useState(() => () => {})
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useSetBreadcrumbs(
     useMemo(
@@ -78,14 +79,18 @@ export default function GlobalServices() {
             gap: theme.spacing.small,
           }}
         >
-          <Button onClick={() => setRefetch(() => () => {})}>
+          <Button onClick={() => setIsModalOpen(true)}>
             New Global Service
           </Button>
+          <GlobalServiceYamlGeneratorModal
+            open={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          />
         </div>
       ),
-      [refetch, theme.spacing.small]
+      [theme.spacing.small, isModalOpen]
     )
   )
 
-  return <GlobalServicesTable setRefetch={setRefetch} />
+  return <GlobalServicesTable />
 }
