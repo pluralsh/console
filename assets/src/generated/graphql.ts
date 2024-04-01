@@ -623,6 +623,8 @@ export type Cluster = {
   objectStore?: Maybe<ObjectStore>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** custom resources with dedicated views for this cluster */
+  pinnedCustomResources?: Maybe<Array<Maybe<PinnedCustomResource>>>;
   /** lists OPA constraints registered in this cluster */
   policyConstraints?: Maybe<PolicyConstraintConnection>;
   /** pr automations that are relevant to managing this cluster */
@@ -2645,6 +2647,27 @@ export type PersonaSidebarAttributes = {
   stacks?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** A reference to a custom resource you want to be displayed in the k8s dashboard */
+export type PinnedCustomResource = {
+  __typename?: 'PinnedCustomResource';
+  cluster?: Maybe<Cluster>;
+  displayName: Scalars['String']['output'];
+  group: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  kind: Scalars['String']['output'];
+  namespaced?: Maybe<Scalars['Boolean']['output']>;
+  version: Scalars['String']['output'];
+};
+
+export type PinnedCustomResourceAttributes = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  displayName: Scalars['String']['input'];
+  group: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  namespaced?: InputMaybe<Scalars['Boolean']['input']>;
+  version: Scalars['String']['input'];
+};
+
 /** a release pipeline, composed of multiple stages each with potentially multiple services */
 export type Pipeline = {
   __typename?: 'Pipeline';
@@ -3644,6 +3667,7 @@ export type RootMutationType = {
   createObjectStore?: Maybe<ObjectStore>;
   createPeer?: Maybe<WireguardPeer>;
   createPersona?: Maybe<Persona>;
+  createPinnedCustomResource?: Maybe<PinnedCustomResource>;
   /** creates a new pipeline context and binds it to the beginning stage */
   createPipelineContext?: Maybe<PipelineContext>;
   createPrAutomation?: Maybe<PrAutomation>;
@@ -3675,6 +3699,7 @@ export type RootMutationType = {
   deleteObjectStore?: Maybe<ObjectStore>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePersona?: Maybe<Persona>;
+  deletePinnedCustomResource?: Maybe<PinnedCustomResource>;
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
   deletePrAutomation?: Maybe<PrAutomation>;
@@ -3873,6 +3898,11 @@ export type RootMutationTypeCreatePersonaArgs = {
 };
 
 
+export type RootMutationTypeCreatePinnedCustomResourceArgs = {
+  attributes: PinnedCustomResourceAttributes;
+};
+
+
 export type RootMutationTypeCreatePipelineContextArgs = {
   attributes: PipelineContextAttributes;
   pipelineId: Scalars['ID']['input'];
@@ -4026,6 +4056,11 @@ export type RootMutationTypeDeletePeerArgs = {
 
 
 export type RootMutationTypeDeletePersonaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeletePinnedCustomResourceArgs = {
   id: Scalars['ID']['input'];
 };
 

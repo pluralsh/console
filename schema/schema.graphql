@@ -508,6 +508,10 @@ type RootMutationType {
 
   createAgentMigration(attributes: AgentMigrationAttributes!): AgentMigration
 
+  createPinnedCustomResource(attributes: PinnedCustomResourceAttributes!): PinnedCustomResource
+
+  deletePinnedCustomResource(id: ID!): PinnedCustomResource
+
   createServiceDeployment(
     clusterId: ID
 
@@ -2448,6 +2452,15 @@ input AgentMigrationAttributes {
   configuration: Json
 }
 
+input PinnedCustomResourceAttributes {
+  displayName: String!
+  group: String!
+  version: String!
+  kind: String!
+  namespaced: Boolean
+  clusterId: ID
+}
+
 input TagInput {
   name: String!
   value: String!
@@ -2600,6 +2613,9 @@ type Cluster {
 
   "list the cached node metrics for a cluster, can also be stale up to 5m"
   nodeMetrics: [NodeMetric]
+
+  "custom resources with dedicated views for this cluster"
+  pinnedCustomResources: [PinnedCustomResource]
 
   "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
   status: ClusterStatus
@@ -2891,6 +2907,17 @@ type Tag {
 type ClusterStatusInfo {
   healthy: Boolean
   count: Int
+}
+
+"A reference to a custom resource you want to be displayed in the k8s dashboard"
+type PinnedCustomResource {
+  id: ID!
+  displayName: String!
+  group: String!
+  version: String!
+  kind: String!
+  namespaced: Boolean
+  cluster: Cluster
 }
 
 type ClusterConnection {
