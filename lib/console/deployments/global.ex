@@ -4,7 +4,17 @@ defmodule Console.Deployments.Global do
   alias Console.PubSub
   alias Console.Deployments.Services
   alias Console.Services.Users
-  alias Console.Schema.{GlobalService, Service, Cluster, User, Tag, ManagedNamespace, NamespaceInstance}
+  alias Console.Schema.{
+    GlobalService,
+    Service,
+    Cluster,
+    User,
+    Tag,
+    ManagedNamespace,
+    NamespaceInstance,
+    ServiceTemplate,
+    Revision
+  }
   require Logger
 
   @type global_resp :: {:ok, GlobalService.t} | Console.error
@@ -19,10 +29,20 @@ defmodule Console.Deployments.Global do
   """
   @spec create(map, binary, User.t) :: global_resp
   def create(attrs, service_id, %User{} = user) do
-    %GlobalService{service_id: service_id}
-    |> GlobalService.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:insert)
+    start_transaction()
+    |> add_operation(:global, fn _ ->
+      %GlobalService{service_id: service_id}
+      |> GlobalService.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:rev, fn %{global: global} ->
+      Repo.preload(global, [:template])
+      |> Map.get(:template)
+      |> ensure_revision(get_in(attrs, [:template, :configuration]))
+    end)
+    |> execute(extract: :global)
+    |> when_ok(&Repo.preload(&1, [:template], force: true))
     |> notify(:create, user)
   end
 
@@ -31,10 +51,21 @@ defmodule Console.Deployments.Global do
   Updates a global service by id
   """
   def update(attrs, id, %User{} = user) do
-    get!(id)
-    |> GlobalService.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:update)
+    start_transaction()
+    |> add_operation(:global, fn _ ->
+      get!(id)
+      |> Repo.preload([:template])
+      |> GlobalService.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:rev, fn %{global: global} ->
+      Repo.preload(global, [:template])
+      |> Map.get(:template)
+      |> ensure_revision(get_in(attrs, [:template, :configuration]))
+    end)
+    |> execute(extract: :global)
+    |> when_ok(&Repo.preload(&1, [:template], force: true))
     |> notify(:update, user)
   end
 
@@ -63,10 +94,20 @@ defmodule Console.Deployments.Global do
   """
   @spec create_managed_namespace(map, User.t) :: namespace_resp
   def create_managed_namespace(attrs, %User{} = user) do
-    %ManagedNamespace{}
-    |> ManagedNamespace.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:insert)
+    start_transaction()
+    |> add_operation(:ns, fn _ ->
+      %ManagedNamespace{}
+      |> ManagedNamespace.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:rev, fn %{ns: ns} ->
+      Repo.preload(ns, [:service])
+      |> Map.get(:service)
+      |> ensure_revision(get_in(attrs, [:service, :configuration]))
+    end)
+    |> execute(extract: :ns)
+    |> when_ok(&Repo.preload(&1, [:service], force: true))
     |> notify(:create, user)
   end
 
@@ -75,10 +116,21 @@ defmodule Console.Deployments.Global do
   """
   @spec update_managed_namespace(map, binary, User.t) :: namespace_resp
   def update_managed_namespace(attrs, namespace_id, %User{} = user) do
-    get_namespace!(namespace_id)
-    |> ManagedNamespace.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:update)
+    start_transaction()
+    |> add_operation(:ns, fn _ ->
+      get_namespace!(namespace_id)
+      |> Repo.preload([:service])
+      |> ManagedNamespace.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:rev, fn %{ns: ns} ->
+      Repo.preload(ns, [:service])
+      |> Map.get(:service)
+      |> ensure_revision(get_in(attrs, [:service, :configuration]))
+    end)
+    |> execute(extract: :ns)
+    |> when_ok(&Repo.preload(&1, [:service], force: true))
     |> notify(:update, user)
   end
 
@@ -91,7 +143,7 @@ defmodule Console.Deployments.Global do
     get_namespace!(namespace_id)
     |> Ecto.Changeset.change(%{deleted_at: Timex.now()})
     |> allow(user, :delete)
-    |> when_ok(:delete)
+    |> when_ok(:update)
     |> notify(:delete, user)
   end
 
@@ -128,15 +180,24 @@ defmodule Console.Deployments.Global do
   Clones the global service directly into the target cluster
   """
   @spec add_to_cluster(GlobalService.t, Cluster.t) :: Services.service_resp
-  def add_to_cluster(%GlobalService{id: gid, service_id: sid}, %Cluster{id: cid}) do
-    Services.clone_service(%{owner_id: gid}, sid, cid, bot())
+  def add_to_cluster(global, cluster), do: add_to_cluster(global, cluster, bot())
+
+  @spec add_to_cluster(GlobalService.t, Cluster.t, User.t) :: Services.service_resp
+  def add_to_cluster(%GlobalService{id: gid, template: %ServiceTemplate{} = tpl}, %Cluster{id: id}, user) do
+    ServiceTemplate.attributes(tpl)
+    |> Map.put(:owner_id, gid)
+    |> Services.create_service(id, user)
   end
+
+  def add_to_cluster(%GlobalService{id: gid, service_id: sid}, %Cluster{id: cid}, user),
+    do: Services.clone_service(%{owner_id: gid}, sid, cid, user)
 
   @doc """
   Ensures a managed namespace is synchronized across all target clusters
   """
   def reconcile_namespace(%ManagedNamespace{} = ns) do
-    ns = Repo.preload(ns, [:clusters])
+    ns = Repo.preload(ns, [:clusters, :service])
+         |> load_configuration()
     bot = bot()
 
     Cluster.target(ns.target || %{})
@@ -184,11 +245,8 @@ defmodule Console.Deployments.Global do
   end
   defp create_namespace_instance(ns, _, _), do: Logger.info "Namespace #{ns.name}[#{ns.id}] does not specify a service"
 
-  defp namespace_service_attrs(%ManagedNamespace{service: %{}} = ns) do
-    Console.mapify(ns.service)
-    |> Map.put(:context_bindings, Enum.map(ns.service.contexts || [], & %{context_id: &1}))
-    |> Map.put(:namespace, ns.name)
-    |> Map.put(:name, "#{ns.name}-core")
+  defp namespace_service_attrs(%ManagedNamespace{service: %{} = tpl} = ns) do
+    ServiceTemplate.attributes(tpl, ns.name, "#{ns.name}-core")
     |> Map.put(:sync_config, %{create_namespace: false})
   end
 
@@ -221,16 +279,17 @@ defmodule Console.Deployments.Global do
   """
   @spec sync_clusters(GlobalService.t) :: :ok
   def sync_clusters(%GlobalService{id: gid} = global) do
-    %{service: svc} = Repo.preload(global, [:service])
+    %{service: svc} = global = Repo.preload(global, [:service, :template])
+    global = load_configuration(global)
     bot = bot()
-    Cluster.ignore_ids([svc.cluster_id])
+    Cluster.ignore_ids(if not is_nil(svc), do: [svc.cluster_id], else: [])
     |> Cluster.target(global)
     |> Repo.all()
-    |> Enum.each(fn %{id: cluster_id} ->
+    |> Enum.each(fn %{id: cluster_id} = cluster ->
       case Services.get_service_by_name(cluster_id, svc.name) do
-        %Service{owner_id: ^gid} = dest -> sync_service(svc, dest, bot)
+        %Service{owner_id: ^gid} = dest -> sync_service(global, dest, bot)
         %Service{} -> :ok # ignore if the service was created out of band
-        nil -> Services.clone_service(%{owner_id: gid}, svc.id, cluster_id, bot)
+        nil -> add_to_cluster(global, cluster, bot)
       end
     end)
   end
@@ -240,7 +299,18 @@ defmodule Console.Deployments.Global do
   @doc """
   it can resync a service owned by a global service
   """
-  @spec sync_service(Service.t, Service.t, User.t) :: Services.service_resp | :ok
+  @spec sync_service(GlobalService.t | Service.t, Service.t, User.t) :: Services.service_resp | :ok
+  def sync_service(%GlobalService{template: %ServiceTemplate{} = tpl}, %Service{} = dest, %User{} = user) do
+    Logger.info "Attempting to resync service #{dest.id}"
+    case diff?(tpl, dest) do
+      true -> ServiceTemplate.attributes(tpl) |> Services.update_service(dest.id, user)
+      false -> Logger.info "did not update service due to no differences"
+    end
+  end
+
+  def sync_service(%GlobalService{service: %Service{} = source}, %Service{} = dest, %User{} = user),
+    do: sync_service(source, dest, user)
+
   def sync_service(%Service{} = source, %Service{} = dest, %User{} = user) do
     Logger.info "attempting to resync service #{dest.id}"
     with {:ok, source_secrets} <- Services.configuration(source),
@@ -260,11 +330,37 @@ defmodule Console.Deployments.Global do
   end
 
   @doc """
+  Fetches associated secure configuration of a service template
+  """
+  @spec configuration(ServiceTemplate.t) :: {:ok, map} | Console.error
+  def configuration(%ServiceTemplate{revision_id: id}) when is_binary(id), do: secret_store().fetch(id)
+  def configuration(_), do: {:ok, %{}}
+
+  def load_configuration(%GlobalService{template: %ServiceTemplate{} = tpl} = global) do
+    tpl = ServiceTemplate.load_configuration(tpl)
+    put_in(global.template, tpl)
+  end
+
+  def load_configuration(%ManagedNamespace{service: %ServiceTemplate{} = tpl} = ns) do
+    tpl = ServiceTemplate.load_configuration(tpl)
+    put_in(ns.service, tpl)
+  end
+
+  def load_configuration(pass), do: pass
+
+  @doc """
   Determines if services are different enough to merit resyncing
   """
-  @spec diff?(Service.t | ManagedNamespace.ServiceSpec.t, Service.t) :: boolean | {:error, term}
-  def diff?(%ManagedNamespace.ServiceSpec{} = spec, %Service{} = dest) do
-    spec.repository_id != dest.repository_id || spec.templated != dest.templated || specs_different?(spec, dest) || contexts_different?(spec, dest)
+  @spec diff?(Service.t | ManagedNamespace.t | ServiceTemplate.t, Service.t) :: boolean | {:error, term}
+  def diff?(%ManagedNamespace{service: %ServiceTemplate{} = template}, %Service{} = dest),
+    do: diff?(template, dest)
+
+  def diff?(%ServiceTemplate{} = spec, %Service{} = dest) do
+    with {:ok, source_secrets} <- configuration(spec),
+         {:ok, dest_secrets} <- Services.configuration(dest),
+      do: (spec.repository_id != dest.repository_id || spec.templated != dest.templated ||
+            specs_different?(spec, dest) || contexts_different?(spec, dest) ||
+            missing_source?(source_secrets, dest_secrets))
   end
 
   def diff?(%Service{} = source, %Service{} = dest) do
@@ -279,6 +375,28 @@ defmodule Console.Deployments.Global do
     missing_source?(source, dest) || specs_different?(s, d) || s.repository_id != d.repository_id || s.namespace != d.namespace
   end
 
+  defp ensure_revision(%ServiceTemplate{} = template, config) do
+    start_transaction()
+    |> add_operation(:revision, fn _ ->
+      case Repo.preload(template, [:revision]) do
+        %Revision{} = rev -> {:ok, rev}
+        _ -> Repo.insert(%Revision{template_id: template.id, version: "0.1.0"})
+      end
+    end)
+    |> add_operation(:update, fn %{revision: %{id: id}} ->
+      ServiceTemplate.changeset(template, %{revision_id: id})
+      |> Repo.update()
+    end)
+    |> add_operation(:secrets, fn %{revision: %{id: id}} ->
+      secrets = Enum.into(config || [], %{}, & {&1.name, &1.value})
+      secret_store().store(id, secrets)
+    end)
+    |> execute(extract: :update)
+  end
+  defp ensure_revision(nil, _), do: {:ok, %{}}
+
+  defp secret_store(), do: Console.conf(:secret_store)
+
   defp matches_tags?([], _), do: true
   defp matches_tags?(tags, other_tags) do
     dest = Tag.as_map(other_tags)
@@ -290,8 +408,9 @@ defmodule Console.Deployments.Global do
     Enum.any?(source, fn {k, v} -> dest[k] != v end)
   end
 
-  defp contexts_different?(%{contexts: ctxs}, svc) do
-    Enum.map(svc.context_bindings, & &1.context_id) == (ctxs || [])
+  defp contexts_different?(%ServiceTemplate{contexts: ctxs}, svc) do
+    MapSet.new(svc.context_bindings, & &1.context_id)
+    |> MapSet.equal?(MapSet.new(ctxs || []))
   end
 
   defp specs_different?(source, dest) do
@@ -304,16 +423,8 @@ defmodule Console.Deployments.Global do
 
   defp clean(val) do
     Console.mapify(val)
-    |> remove_ids()
+    |> Console.remove_ids()
   end
-
-  defp remove_ids(%{id: _} = map) do
-    Map.delete(map, :id)
-    |> remove_ids()
-  end
-  defp remove_ids(%{} = map), do: Map.new(map, fn {k, v} -> {k, remove_ids(v)} end)
-  defp remove_ids(l) when is_list(l), do: Enum.map(l, &remove_ids/1)
-  defp remove_ids(v), do: v
 
   def notify({:ok, %GlobalService{} = svc}, :create, user),
     do: handle_notify(PubSub.GlobalServiceCreated, svc, actor: user)

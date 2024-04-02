@@ -98,12 +98,14 @@ defmodule Console.Deployments.Git.Agent do
     with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
          resp <- clone(git),
          cache <- Cache.refresh(cache),
-         {:ok, %GitRepository{health: :pullable} = git} <- save_status(resp, git) do
+         {{:ok, %GitRepository{health: :pullable} = git}, cache} <- {save_status(resp, git), cache} do
       {:noreply, %{state | git: git, cache: cache}}
     else
       {:git, nil} -> {:stop, {:shutdown, :normal}, state}
-      {:ok, %GitRepository{health: :failed}} ->
-        {:stop, {:shutdown, :credentials}, state}
+      {{:ok, %GitRepository{url: url, health: :failed} = git}, cache} ->
+        Logger.info "failed to clone #{url}, retrying in 30 seconds"
+        Process.send_after(self(), :clone, :timer.seconds(30))
+        {:noreply, %{state | git: git, cache: cache}}
       err ->
         Logger.info "unknown git failure: #{inspect(err)}"
         {:stop, {:shutdown, :unknown}, state}

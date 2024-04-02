@@ -37,11 +37,11 @@ defmodule Console.Bootstrapper do
   end
 
   def status() do
-    KeyValueSet.wrap_existing!(@table)
-    |> KeyValueSet.to_list!()
-    |> case do
-      [] -> %{cloned: false, output: ""}
-      set -> Map.new(set)
+    with {:ok, table} <- KeyValueSet.wrap_existing(@table),
+         [_ | _] = set <- KeyValueSet.to_list!(table) do
+      Map.new(set)
+    else
+      _ -> %{cloned: false, output: ""}
     end
   end
 

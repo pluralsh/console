@@ -1,3 +1,7 @@
+global:
+  additionalVolumes: ~
+  additionalVolumeMounts: ~
+
 consoleUrl: ~
 fullnameOverride: console-operator
 tokenSecretRef:

@@ -44,8 +44,9 @@ metadata:
   labels:
 {{ include "console.labels" . | indent 4 }}
   annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  {{- with .Values.ingress.rewrite.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -83,16 +84,21 @@ metadata:
   name: console-external
   labels:
 {{ include "console.labels" . | indent 4 }}
-  {{- with .Values.externalIngress.annotations }}
   annotations:
+  {{- with .Values.externalIngress.rewrite.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.externalIngress.annotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   ingressClassName: {{ .Values.externalIngress.ingressClass }}
+  {{ if .Values.externalIngress.tls.enabled }}
   tls:
   - hosts:
     - {{ .Values.externalIngress.hostname | quote }}
     secretName: console-external-tls
+  {{ end }}
   rules:
   - host: {{ .Values.externalIngress.hostname | quote }}
     http:
@@ -112,8 +118,9 @@ metadata:
   labels:
 {{ include "console.labels" . | indent 4 }}
   annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /
+  {{- with .Values.externalIngress.rewrite.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.externalIngress.annotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}

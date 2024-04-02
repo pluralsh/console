@@ -8,3 +8,5 @@ names:
 - linkerd
 - cilium
 - velero
+- rook
+- jaeger

@@ -508,6 +508,10 @@ type RootMutationType {
 
   createAgentMigration(attributes: AgentMigrationAttributes!): AgentMigration
 
+  createPinnedCustomResource(attributes: PinnedCustomResourceAttributes!): PinnedCustomResource
+
+  deletePinnedCustomResource(id: ID!): PinnedCustomResource
+
   createServiceDeployment(
     clusterId: ID
 
@@ -847,6 +851,12 @@ input ManagedNamespaceAttributes {
 
 "Attributes for configuring a service in something like a managed namespace"
 input ServiceTemplateAttributes {
+  "the name for this service (optional for managed namespaces)"
+  name: String
+
+  "the namespace for this service (optional for managed namespaces)"
+  namespace: String
+
   templated: Boolean
 
   "the id of a repository to source manifests for this service"
@@ -854,6 +864,9 @@ input ServiceTemplateAttributes {
 
   "a list of context ids to add to this service"
   contexts: [ID]
+
+  "a list of secure configuration that will be added to any services created by this template"
+  configuration: [ConfigAttributes]
 
   "settings to configure git for a service"
   git: GitRefAttributes
@@ -863,6 +876,9 @@ input ServiceTemplateAttributes {
 
   "settings for service kustomization"
   kustomize: KustomizeAttributes
+
+  "attributes to configure sync settings for this service"
+  syncConfig: SyncConfigAttributes
 }
 
 "A spec for targeting clusters"
@@ -920,14 +936,14 @@ type ManagedNamespace {
   "a list of pull secrets to attach to this namespace"
   pullSecrets: [String]
 
-  "A template for creating the core service for this namespace"
-  service: ServiceTemplate
-
   "The targeting criteria to select clusters this namespace is bound to"
   target: ClusterTarget
 
   "the timestamp this namespace was deleted at, indicating it's currently draining"
   deletedAt: DateTime
+
+  "A template for creating the core service for this namespace"
+  service: ServiceTemplate
 
   insertedAt: DateTime
 
@@ -936,6 +952,12 @@ type ManagedNamespace {
 
 "Attributes for configuring a service in something like a managed namespace"
 type ServiceTemplate {
+  "the name for this service (optional for managed namespaces)"
+  name: String
+
+  "the namespace for this service (optional for managed namespaces)"
+  namespace: String
+
   templated: Boolean
 
   "the id of a repository to source manifests for this service"
@@ -943,6 +965,9 @@ type ServiceTemplate {
 
   "a list of context ids to add to this service"
   contexts: [ID]
+
+  "possibly secret configuration for all spawned services, don't query this in list endpoints"
+  configuration: [ServiceConfiguration]
 
   "settings to configure git for a service"
   git: GitRef
@@ -952,6 +977,9 @@ type ServiceTemplate {
 
   "settings for service kustomization"
   kustomize: Kustomize
+
+  "specification of how the templated service will be synced"
+  syncConfig: SyncConfig
 }
 
 "A spec for targeting clusters"
@@ -2424,6 +2452,15 @@ input AgentMigrationAttributes {
   configuration: Json
 }
 
+input PinnedCustomResourceAttributes {
+  displayName: String!
+  group: String!
+  version: String!
+  kind: String!
+  namespaced: Boolean
+  clusterId: ID
+}
+
 input TagInput {
   name: String!
   value: String!
@@ -2576,6 +2613,9 @@ type Cluster {
 
   "list the cached node metrics for a cluster, can also be stale up to 5m"
   nodeMetrics: [NodeMetric]
+
+  "custom resources with dedicated views for this cluster"
+  pinnedCustomResources: [PinnedCustomResource]
 
   "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
   status: ClusterStatus
@@ -2867,6 +2907,17 @@ type Tag {
 type ClusterStatusInfo {
   healthy: Boolean
   count: Int
+}
+
+"A reference to a custom resource you want to be displayed in the k8s dashboard"
+type PinnedCustomResource {
+  id: ID!
+  displayName: String!
+  group: String!
+  version: String!
+  kind: String!
+  namespaced: Boolean
+  cluster: Cluster
 }
 
 type ClusterConnection {

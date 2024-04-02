@@ -65,6 +65,9 @@ spec:
         - name: console-conf
           mountPath: {{ .Values.homeDir }}/.plural
         {{- end }}
+        {{ if .Values.global.additionalVolumeMounts }}
+        {{ toYaml .Values.global.additionalVolumeMounts | nindent 8 }}
+        {{ end }}
         ports:
         - name: http
           containerPort: {{ .Values.service.port }}
@@ -100,3 +103,6 @@ spec:
         secret:
           secretName: console-conf
       {{- end }}
+      {{ if .Values.global.additionalVolumes }}
+      {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
+      {{ end }}
