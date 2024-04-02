@@ -1,4 +1,38 @@
 apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: existing
+  namespace: default
+spec:
+  handle: mgmt
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: k8shelm
+spec:
+  url: https://github.com/zreigz/k8s-helm.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ServiceDeployment
+metadata:
+  name: k8saws
+  namespace: default
+spec:
+  version: 0.0.1
+  git:
+    folder: nginx
+    ref: master
+  repositoryRef:
+    kind: GitRepository
+    name: k8shelm
+    namespace: default
+  clusterRef:
+    kind: Cluster
+    name: existing
+    namespace: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
 kind: ManagedNamespace
 metadata:
   labels:
@@ -9,4 +43,13 @@ metadata:
     app.kubernetes.io/created-by: controller
   name: managednamespace-sample
 spec:
-  # TODO(user): Add fields here
+  name: test
+  service:
+    name: k8saws
+    namespace: default
+  labels:
+    name: test
+  annotations:
+    name: test
+    app.kubernetes.io/created-by: controller
+

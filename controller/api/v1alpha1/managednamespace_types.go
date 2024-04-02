@@ -115,3 +115,11 @@ func init() {
 func (p *ManagedNamespace) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&p.Status.Conditions, condition)
 }
+
+func (p *ManagedNamespace) NamespaceName() string {
+	if p.Spec.Name != nil && len(*p.Spec.Name) > 0 {
+		return *p.Spec.Name
+	}
+
+	return p.Name
+}

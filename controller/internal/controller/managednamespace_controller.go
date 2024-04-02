@@ -18,11 +18,17 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
+	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	deploymentsv1alpha1 "github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
 	"github.com/pluralsh/console/controller/internal/utils"
+	"github.com/pluralsh/polly/algorithms"
+	"github.com/samber/lo"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -30,6 +36,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/yaml"
 )
 
 const ManagedNamespaceFinalizer = "deployments.plural.sh/managed-namespace-protection"
@@ -74,6 +81,52 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, r.handleDelete(ctx, managedNamespace)
 	}
 
+	sha, err := utils.HashObject(managedNamespace.Spec)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	// Check if resource already exists in the API and only sync the ID
+	exists, err := r.isAlreadyExists(ctx, managedNamespace)
+	if err != nil {
+		utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	if !exists {
+		logger.Info("create managed namespace", "name", managedNamespace.Name)
+		attr, err := r.getNamespaceAttributes(ctx, managedNamespace)
+		if err != nil {
+			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+
+		ns, err := r.ConsoleClient.CreateNamespace(ctx, *attr)
+		if err != nil {
+			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+		managedNamespace.Status.ID = lo.ToPtr(ns.ID)
+		managedNamespace.Status.SHA = lo.ToPtr(sha)
+		controllerutil.AddFinalizer(managedNamespace, ManagedNamespaceFinalizer)
+	}
+	if exists && !managedNamespace.Status.IsSHAEqual(sha) {
+		logger.Info("update managed namespace", "name", managedNamespace.Name)
+		attr, err := r.getNamespaceAttributes(ctx, managedNamespace)
+		if err != nil {
+			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+		_, err = r.ConsoleClient.UpdateNamespace(ctx, managedNamespace.Status.GetID(), *attr)
+		if err != nil {
+			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+
+		managedNamespace.Status.SHA = lo.ToPtr(sha)
+	}
+
+	utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+
 	return ctrl.Result{}, nil
 }
 
@@ -102,6 +155,205 @@ func (r *ManagedNamespaceReconciler) handleDelete(ctx context.Context, namespace
 			}
 		}
 		controllerutil.RemoveFinalizer(namespace, ManagedNamespaceFinalizer)
+		logger.Info("namespace deleted successfully")
 	}
 	return nil
+}
+
+func (r *ManagedNamespaceReconciler) isAlreadyExists(ctx context.Context, namespace *deploymentsv1alpha1.ManagedNamespace) (bool, error) {
+	if !namespace.Status.HasID() {
+		return false, nil
+	}
+
+	_, err := r.ConsoleClient.GetNamespace(ctx, namespace.Status.GetID())
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*console.ManagedNamespaceAttributes, error) {
+	attr := &console.ManagedNamespaceAttributes{
+		Name:        ns.NamespaceName(),
+		Description: ns.Spec.Description,
+	}
+	if ns.Spec.Target != nil {
+		attr.Target = &console.ClusterTargetAttributes{
+			Distro: ns.Spec.Target.Distro,
+		}
+		if ns.Spec.Target.Tags != nil {
+			result, err := json.Marshal(ns.Spec.Target.Tags)
+			if err != nil {
+				return nil, err
+			}
+			rawTags := string(result)
+			attr.Target.Tags = &rawTags
+		}
+	}
+
+	if ns.Spec.Annotations != nil {
+		result, err := json.Marshal(ns.Spec.Annotations)
+		if err != nil {
+			return nil, err
+		}
+		rawAnnotations := string(result)
+		attr.Annotations = &rawAnnotations
+	}
+	if ns.Spec.Labels != nil {
+		result, err := json.Marshal(ns.Spec.Labels)
+		if err != nil {
+			return nil, err
+		}
+		rawLabels := string(result)
+		attr.Labels = &rawLabels
+	}
+	if ns.Spec.PullSecrets != nil {
+		attr.PullSecrets = make([]*string, 0)
+		attr.PullSecrets = algorithms.Map(ns.Spec.PullSecrets,
+			func(b string) *string { return &b })
+	}
+	if ns.Spec.Service != nil {
+		srv := ns.Spec.Service
+		repository, err := r.getRepository(ctx, ns)
+		if err != nil {
+			return nil, err
+		}
+		attr.Service = &console.ServiceTemplateAttributes{
+			Name:         srv.Name,
+			Namespace:    srv.Namespace,
+			Templated:    lo.ToPtr(true),
+			RepositoryID: repository.Status.ID,
+		}
+		if srv.Templated != nil {
+			attr.Service.Templated = srv.Templated
+		}
+		if srv.Contexts != nil {
+			attr.Service.Contexts = make([]*string, 0)
+			attr.Service.Contexts = algorithms.Map(srv.Contexts,
+				func(b string) *string { return &b })
+		}
+		if srv.Git != nil {
+			attr.Service.Git = &console.GitRefAttributes{
+				Ref:    srv.Git.Ref,
+				Folder: srv.Git.Folder,
+			}
+		}
+		if srv.Helm != nil {
+			attr.Service.Helm = &console.HelmConfigAttributes{
+				ValuesFiles: ns.Spec.Service.Helm.ValuesFiles,
+				Version:     ns.Spec.Service.Helm.Version,
+			}
+			if srv.Helm.Repository != nil {
+				attr.Service.Helm.Repository = &console.NamespacedName{
+					Name:      ns.Spec.Service.Helm.Repository.Name,
+					Namespace: ns.Spec.Service.Helm.Repository.Namespace,
+				}
+			}
+			if srv.Helm.ValuesConfigMapRef != nil {
+				val, err := utils.GetConfigMapData(ctx, r.Client, ns.GetNamespace(), srv.Helm.ValuesConfigMapRef)
+				if err != nil {
+					return nil, err
+				}
+				attr.Service.Helm.Values = &val
+			}
+
+			if srv.Helm.ValuesFrom != nil || srv.Helm.Values != nil {
+				values, err := r.MergeHelmValues(ctx, ns.Spec.Service.Helm.ValuesFrom, ns.Spec.Service.Helm.Values)
+				if err != nil {
+					return nil, err
+				}
+				attr.Service.Helm.Values = values
+			}
+
+			if srv.Helm.Chart != nil {
+				attr.Service.Helm.Chart = srv.Helm.Chart
+			}
+		}
+		if srv.Kustomize != nil {
+			attr.Service.Kustomize = &console.KustomizeAttributes{
+				Path: srv.Kustomize.Path,
+			}
+		}
+		if srv.SyncConfig != nil {
+			var annotations *string
+			var labels *string
+			if srv.SyncConfig.Annotations != nil {
+				result, err := json.Marshal(ns.Spec.Service.SyncConfig.Annotations)
+				if err != nil {
+					return nil, err
+				}
+				rawAnnotations := string(result)
+				annotations = &rawAnnotations
+			}
+			if srv.SyncConfig.Labels != nil {
+				result, err := json.Marshal(ns.Spec.Service.SyncConfig.Labels)
+				if err != nil {
+					return nil, err
+				}
+				rawLabels := string(result)
+				labels = &rawLabels
+			}
+			attr.Service.SyncConfig = &console.SyncConfigAttributes{
+				NamespaceMetadata: &console.MetadataAttributes{
+					Labels:      labels,
+					Annotations: annotations,
+				},
+			}
+		}
+	}
+
+	return attr, nil
+}
+
+func (r *ManagedNamespaceReconciler) MergeHelmValues(ctx context.Context, secretRef *corev1.SecretReference, values *runtime.RawExtension) (*string, error) {
+	valuesFromMap := map[string]interface{}{}
+	valuesMap := map[string]interface{}{}
+
+	if secretRef != nil {
+		valuesFromSecret, err := utils.GetSecret(ctx, r.Client, secretRef)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, vals := range valuesFromSecret.Data {
+			current := map[string]interface{}{}
+			if err := yaml.Unmarshal(vals, &current); err != nil {
+				continue
+			}
+			valuesFromMap = algorithms.Merge(valuesFromMap, current)
+		}
+	}
+
+	if values != nil {
+		if err := yaml.Unmarshal(values.Raw, &valuesMap); err != nil {
+			return nil, err
+		}
+	}
+
+	result := algorithms.Merge(valuesMap, valuesFromMap)
+	out, err := yaml.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+	return lo.ToPtr(string(out)), nil
+}
+
+func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*v1alpha1.GitRepository, error) {
+	repository := &v1alpha1.GitRepository{}
+	if ns.Spec.Service.RepositoryRef != nil {
+		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.Service.RepositoryRef.Name, Namespace: ns.Spec.Service.RepositoryRef.Namespace}, repository); err != nil {
+			return nil, err
+		}
+		if repository.Status.ID == nil {
+			return nil, fmt.Errorf("repository %s is not ready", repository.Name)
+		}
+		if repository.Status.Health == v1alpha1.GitHealthFailed {
+			return nil, fmt.Errorf("repository %s is not healthy", repository.Name)
+		}
+	}
+	return repository, nil
 }

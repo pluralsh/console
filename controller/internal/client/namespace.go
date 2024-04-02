@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
 	internalerror "github.com/pluralsh/console/controller/internal/errors"
@@ -30,4 +31,28 @@ func (c *client) DeleteNamespace(ctx context.Context, id string) error {
 		return err
 	}
 	return nil
+}
+
+func (c *client) CreateNamespace(ctx context.Context, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error) {
+	result, err := c.consoleClient.CreateNamespace(ctx, attributes)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, fmt.Errorf("new created namespace %s is nil", attributes.Name)
+	}
+	return result.CreateManagedNamespace, nil
+
+}
+
+func (c *client) UpdateNamespace(ctx context.Context, id string, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error) {
+	result, err := c.consoleClient.UpdateNamespace(ctx, id, attributes)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, fmt.Errorf("new created namespace %s is nil", attributes.Name)
+	}
+	return result.UpdateManagedNamespace, nil
+
 }
