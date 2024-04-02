@@ -43,7 +43,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ConstraintViolation,
     ManagedNamespace,
     NamespaceInstance,
-    NamespaceCluster
+    NamespaceCluster,
+    ServiceTemplate
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -85,6 +86,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ManagedNamespace, _), do: ManagedNamespace
   def query(NamespaceInstance, _), do: NamespaceInstance
   def query(NamespaceCluster, _), do: NamespaceCluster
+  def query(ServiceTemplate, _), do: ServiceTemplate
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

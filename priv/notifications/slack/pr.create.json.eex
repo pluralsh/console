@@ -1,10 +1,11 @@
 {
+	"text": "🖥️ New pull request created",
 	"blocks": [
         {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "🖥️ *New pull request created:\\n<%= @pr.title %>*"
+                "text": "🖥️ *New pull request created:*\n<%= @pr.title %>"
             }
         },
 		{

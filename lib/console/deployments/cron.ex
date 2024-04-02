@@ -116,6 +116,7 @@ defmodule Console.Deployments.Cron do
     Logger.info "backfilling global services into all clusters"
 
     GlobalService.stream()
+    |> GlobalService.preloaded()
     |> Repo.stream(method: :keyset)
     |> Stream.each(fn global ->
       Logger.info "syncing global service #{global.id}"

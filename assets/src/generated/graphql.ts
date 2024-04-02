@@ -623,6 +623,8 @@ export type Cluster = {
   objectStore?: Maybe<ObjectStore>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** custom resources with dedicated views for this cluster */
+  pinnedCustomResources?: Maybe<Array<Maybe<PinnedCustomResource>>>;
   /** lists OPA constraints registered in this cluster */
   policyConstraints?: Maybe<PolicyConstraintConnection>;
   /** pr automations that are relevant to managing this cluster */
@@ -2645,6 +2647,27 @@ export type PersonaSidebarAttributes = {
   stacks?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** A reference to a custom resource you want to be displayed in the k8s dashboard */
+export type PinnedCustomResource = {
+  __typename?: 'PinnedCustomResource';
+  cluster?: Maybe<Cluster>;
+  displayName: Scalars['String']['output'];
+  group: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  kind: Scalars['String']['output'];
+  namespaced?: Maybe<Scalars['Boolean']['output']>;
+  version: Scalars['String']['output'];
+};
+
+export type PinnedCustomResourceAttributes = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  displayName: Scalars['String']['input'];
+  group: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  namespaced?: InputMaybe<Scalars['Boolean']['input']>;
+  version: Scalars['String']['input'];
+};
+
 /** a release pipeline, composed of multiple stages each with potentially multiple services */
 export type Pipeline = {
   __typename?: 'Pipeline';
@@ -3644,6 +3667,7 @@ export type RootMutationType = {
   createObjectStore?: Maybe<ObjectStore>;
   createPeer?: Maybe<WireguardPeer>;
   createPersona?: Maybe<Persona>;
+  createPinnedCustomResource?: Maybe<PinnedCustomResource>;
   /** creates a new pipeline context and binds it to the beginning stage */
   createPipelineContext?: Maybe<PipelineContext>;
   createPrAutomation?: Maybe<PrAutomation>;
@@ -3675,6 +3699,7 @@ export type RootMutationType = {
   deleteObjectStore?: Maybe<ObjectStore>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePersona?: Maybe<Persona>;
+  deletePinnedCustomResource?: Maybe<PinnedCustomResource>;
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
   deletePrAutomation?: Maybe<PrAutomation>;
@@ -3873,6 +3898,11 @@ export type RootMutationTypeCreatePersonaArgs = {
 };
 
 
+export type RootMutationTypeCreatePinnedCustomResourceArgs = {
+  attributes: PinnedCustomResourceAttributes;
+};
+
+
 export type RootMutationTypeCreatePipelineContextArgs = {
   attributes: PipelineContextAttributes;
   pipelineId: Scalars['ID']['input'];
@@ -4026,6 +4056,11 @@ export type RootMutationTypeDeletePeerArgs = {
 
 
 export type RootMutationTypeDeletePersonaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeletePinnedCustomResourceArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -5911,6 +5946,8 @@ export type ServiceStatusCount = {
 /** Attributes for configuring a service in something like a managed namespace */
 export type ServiceTemplate = {
   __typename?: 'ServiceTemplate';
+  /** possibly secret configuration for all spawned services, don't query this in list endpoints */
+  configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
   /** a list of context ids to add to this service */
   contexts?: Maybe<Array<Maybe<Scalars['ID']['output']>>>;
   /** settings to configure git for a service */
@@ -5919,13 +5956,21 @@ export type ServiceTemplate = {
   helm?: Maybe<HelmSpec>;
   /** settings for service kustomization */
   kustomize?: Maybe<Kustomize>;
+  /** the name for this service (optional for managed namespaces) */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the namespace for this service (optional for managed namespaces) */
+  namespace?: Maybe<Scalars['String']['output']>;
   /** the id of a repository to source manifests for this service */
   repositoryId?: Maybe<Scalars['ID']['output']>;
+  /** specification of how the templated service will be synced */
+  syncConfig?: Maybe<SyncConfig>;
   templated?: Maybe<Scalars['Boolean']['output']>;
 };
 
 /** Attributes for configuring a service in something like a managed namespace */
 export type ServiceTemplateAttributes = {
+  /** a list of secure configuration that will be added to any services created by this template */
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   /** a list of context ids to add to this service */
   contexts?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   /** settings to configure git for a service */
@@ -5934,8 +5979,14 @@ export type ServiceTemplateAttributes = {
   helm?: InputMaybe<HelmConfigAttributes>;
   /** settings for service kustomization */
   kustomize?: InputMaybe<KustomizeAttributes>;
+  /** the name for this service (optional for managed namespaces) */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the namespace for this service (optional for managed namespaces) */
+  namespace?: InputMaybe<Scalars['String']['input']>;
   /** the id of a repository to source manifests for this service */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  /** attributes to configure sync settings for this service */
+  syncConfig?: InputMaybe<SyncConfigAttributes>;
   templated?: InputMaybe<Scalars['Boolean']['input']>;
 };
 

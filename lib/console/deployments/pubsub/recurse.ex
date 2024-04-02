@@ -41,7 +41,7 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceUpdated do
   def process(_), do: :ok
 end
 
-defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterCreated do
+defimpl Console.PubSub.Recurse, for: [Console.PubSub.ClusterCreated, Console.PubSub.ClusterUpdated] do
   alias Console.Repo
   alias Console.Deployments.{Global}
   alias Console.Services.Users
@@ -51,19 +51,20 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterCreated do
     cluster = Repo.preload(cluster, [:tags])
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
     GlobalService.stream()
+    |> GlobalService.preloaded()
     |> Repo.stream(method: :keyset)
     |> Stream.filter(&Global.match?(&1, cluster))
     |> Stream.each(&Global.add_to_cluster(&1, cluster))
     |> Stream.run()
 
     ManagedNamespace.for_cluster(cluster)
+    |> ManagedNamespace.preloaded()
     |> ManagedNamespace.stream()
     |> Repo.stream(method: :keyset)
     |> Stream.each(&Global.sync_namespace(cluster, &1, bot))
     |> Stream.run()
   end
 end
-
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterPinged do
   alias Console.Repo

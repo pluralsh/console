@@ -77,11 +77,17 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: etc-kas
-              mountPath: /etc/kas
-              readOnly: true
+          {{ if .Values.global.additionalVolumeMounts }}
+          {{ toYaml .Values.global.additionalVolumeMounts | nindent 10 }}
+          {{ end }}
+          - name: etc-kas
+            mountPath: /etc/kas
+            readOnly: true
       terminationGracePeriodSeconds: 300
       volumes:
+      {{ if .Values.global.additionalVolumes }}
+      {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
+      {{ end }}
       - name: etc-kas
         projected:
           defaultMode: 0440

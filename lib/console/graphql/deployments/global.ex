@@ -23,13 +23,17 @@ defmodule Console.GraphQl.Deployments.Global do
 
   @desc "Attributes for configuring a service in something like a managed namespace"
   input_object :service_template_attributes do
+    field :name,          :string, description: "the name for this service (optional for managed namespaces)"
+    field :namespace,     :string, description: "the namespace for this service (optional for managed namespaces)"
     field :templated,     :boolean
     field :repository_id, :id, description: "the id of a repository to source manifests for this service"
     field :contexts,      list_of(:id), description: "a list of context ids to add to this service"
+    field :configuration, list_of(:config_attributes), description: "a list of secure configuration that will be added to any services created by this template"
 
-    field :git,       :git_ref_attributes, description: "settings to configure git for a service"
-    field :helm,      :helm_config_attributes, description: "settings to configure helm for a service"
-    field :kustomize, :kustomize_attributes, description: "settings for service kustomization"
+    field :git,         :git_ref_attributes, description: "settings to configure git for a service"
+    field :helm,        :helm_config_attributes, description: "settings to configure helm for a service"
+    field :kustomize,   :kustomize_attributes, description: "settings for service kustomization"
+    field :sync_config, :sync_config_attributes, description: "attributes to configure sync settings for this service"
   end
 
   @desc "A spec for targeting clusters"
@@ -65,22 +69,31 @@ defmodule Console.GraphQl.Deployments.Global do
     field :labels,       :map, description: "labels for this namespace"
     field :annotations,  :map, description: "annotations for this namespace"
     field :pull_secrets, list_of(:string), description: "a list of pull secrets to attach to this namespace"
-    field :service,      :service_template, description: "A template for creating the core service for this namespace"
     field :target,       :cluster_target, description: "The targeting criteria to select clusters this namespace is bound to"
     field :deleted_at,   :datetime, description: "the timestamp this namespace was deleted at, indicating it's currently draining"
+    field :service,      :service_template,
+      description: "A template for creating the core service for this namespace",
+      resolve: dataloader(Deployments)
 
     timestamps()
   end
 
   @desc "Attributes for configuring a service in something like a managed namespace"
   object :service_template do
+    field :name,          :string, description: "the name for this service (optional for managed namespaces)"
+    field :namespace,     :string, description: "the namespace for this service (optional for managed namespaces)"
     field :templated,     :boolean
     field :repository_id, :id, description: "the id of a repository to source manifests for this service"
     field :contexts,      list_of(:id), description: "a list of context ids to add to this service"
 
-    field :git,       :git_ref, description: "settings to configure git for a service"
-    field :helm,      :helm_spec, description: "settings to configure helm for a service"
-    field :kustomize, :kustomize, description: "settings for service kustomization"
+    field :configuration, list_of(:service_configuration),
+      resolve: &Deployments.template_configuration/3,
+      description: "possibly secret configuration for all spawned services, don't query this in list endpoints"
+
+    field :git,         :git_ref, description: "settings to configure git for a service"
+    field :helm,        :helm_spec, description: "settings to configure helm for a service"
+    field :kustomize,   :kustomize, description: "settings for service kustomization"
+    field :sync_config, :sync_config, description: "specification of how the templated service will be synced"
   end
 
   @desc "A spec for targeting clusters"

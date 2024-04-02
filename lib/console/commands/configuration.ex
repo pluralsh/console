@@ -24,7 +24,7 @@ defmodule Console.Commands.Configuration do
 
   defp ssh_add(key) do
     Logger.info "executed ssh-add"
-    case System.cmd("ssh-add", [key], env: [{"SSH_ASKPASS_REQUIRE", "force"}]) do
+    case System.cmd("ssh-add", [key], env: [{"SSH_ASKPASS", ssh_askpass()}, {"DISPLAY", "1"}, {"SSH_ASKPASS_REQUIRE", "force"}]) do
       {out, 0} ->
         Logger.info out
         {:ok, out}
@@ -38,4 +38,6 @@ defmodule Console.Commands.Configuration do
   defp mkpath({:home, dir}), do: System.user_home!() |> Path.join(dir)
   defp mkpath(dir) when is_binary(dir), do: dir
   defp mkpath(nil), do: {:ok, :pass}
+
+  defp ssh_askpass(), do: Console.conf(:ssh_askpass)
 end
