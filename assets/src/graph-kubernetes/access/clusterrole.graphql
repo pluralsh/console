@@ -30,7 +30,7 @@ query ClusterRoles(
 
 query ClusterRole($name: String!) {
   handleGetClusterRoleDetail(name: $name)
-  @rest(path: "clusterrole/{args.name}") {
+    @rest(path: "clusterrole/{args.name}") {
     typeMeta @type(name: "types_TypeMeta") {
       ...TypeMeta
     }
@@ -43,4 +43,3 @@ query ClusterRole($name: String!) {
     errors
   }
 }
-

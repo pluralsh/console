@@ -30,7 +30,7 @@ query ClusterRoleBindings(
 
 query ClusterRoleBinding($name: String!) {
   handleGetClusterRoleBindingDetail(name: $name)
-  @rest(path: "clusterrolebinding/{args.name}") {
+    @rest(path: "clusterrolebinding/{args.name}") {
     typeMeta @type(name: "types_TypeMeta") {
       ...TypeMeta
     }
@@ -48,4 +48,3 @@ query ClusterRoleBinding($name: String!) {
     errors
   }
 }
-
