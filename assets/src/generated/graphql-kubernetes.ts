@@ -4737,7 +4737,7 @@ export type NodeQueryVariables = Exact<{
 }>;
 
 
-export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typename?: 'node_NodeDetail', providerID: string, containerImages: Array<string | null>, podCIDR: string, phase: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', architecture: string, bootID: string, containerRuntimeVersion: string, kernelVersion: string, kubeletVersion: string, kubeProxyVersion: string, machineID: string, operatingSystem: string, osImage: string, systemUUID: string } } | null };
+export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typename?: 'node_NodeDetail', providerID: string, containerImages: Array<string | null>, podCIDR: string, phase: string, unschedulable: boolean, ready: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', architecture: string, bootID: string, containerRuntimeVersion: string, kernelVersion: string, kubeletVersion: string, kubeProxyVersion: string, machineID: string, operatingSystem: string, osImage: string, systemUUID: string }, addresses?: Array<{ __typename?: 'v1_NodeAddress', type: string, address: string } | null> | null, taints?: Array<{ __typename?: 'v1_Taint', key: string, value?: string | null, effect: string } | null> | null } | null };
 
 export type NodeEventsQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -6392,10 +6392,21 @@ export const NodeDocument = gql`
       osImage
       systemUUID
     }
+    addresses {
+      type
+      address
+    }
+    taints {
+      key
+      value
+      effect
+    }
     providerID
     containerImages
     podCIDR
     phase
+    unschedulable
+    ready
     errors
   }
 }

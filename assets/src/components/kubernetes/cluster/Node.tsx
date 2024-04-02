@@ -1,6 +1,13 @@
 import { ReactElement, useMemo } from 'react'
-import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  Card,
+  ChipList,
+  SidecarItem,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+
+import { useTheme } from 'styled-components'
 
 import {
   Common_EventList as EventListT,
@@ -8,7 +15,7 @@ import {
   NodeEventsQuery,
   NodeEventsQueryVariables,
   NodeQueryVariables,
-  Node_Node as NodeT,
+  Node_NodeDetail as NodeT,
   useNodeEventsQuery,
   useNodeQuery,
 } from '../../../generated/graphql-kubernetes'
@@ -21,9 +28,13 @@ import ResourceDetails, { TabEntry } from '../ResourceDetails'
 
 import { ResourceList } from '../ResourceList'
 
-import { getBreadcrumbs } from './Namespaces'
-import { NamespacePhaseChip } from './utils'
-import { COLUMNS } from './Events'
+import { SubTitle } from '../../cluster/nodes/SubTitle'
+
+import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
+
+import { getBreadcrumbs } from './Nodes'
+import { useEventsColumns } from './Events'
+import { NodeReadyChip } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -43,7 +54,7 @@ export default function Node(): ReactElement {
     } as NodeQueryVariables,
   })
 
-  const namespace = data?.handleGetNodeDetail
+  const node = data?.handleGetNodeDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -64,31 +75,75 @@ export default function Node(): ReactElement {
     <ResourceDetails
       tabs={directory}
       sidecar={
-        <MetadataSidecar resource={namespace}>
-          <SidecarItem heading="Phase">
-            <NamespacePhaseChip phase={namespace?.phase} />
+        <MetadataSidecar resource={node}>
+          <SidecarItem heading="Ready">
+            {/* TODO: Fix on the API side? It works in the list view. */}
+            <NodeReadyChip ready={node?.ready} />
           </SidecarItem>
+          {/* TODO: Fix on the API side? */}
+          <SidecarItem heading="Phase">{node?.phase}</SidecarItem>
         </MetadataSidecar>
       }
     >
-      <Outlet context={namespace} />
+      <Outlet context={node} />
     </ResourceDetails>
   )
 }
 
 export function NodeInfo(): ReactElement {
+  const theme = useTheme()
   const node = useOutletContext() as NodeT
 
-  return <section>TODO</section>
+  return (
+    <section>
+      <SubTitle>Info</SubTitle>
+      <Card
+        css={{
+          display: 'flex',
+          gap: theme.spacing.large,
+          padding: theme.spacing.medium,
+        }}
+      >
+        <ResourceInfoCardEntry heading="Provider ID">
+          {node?.providerID}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Unschedulable">
+          {node?.unschedulable ? 'True' : 'False'}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Pod CIDR">
+          {node?.podCIDR}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Addresses">
+          <ChipList
+            size="small"
+            limit={5}
+            values={node.addresses || []}
+            transformValue={(a) => `${a?.type}: ${a?.address}`}
+            emptyState={<div>None</div>}
+          />
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Taints">
+          <ChipList
+            size="small"
+            limit={5}
+            values={node.taints || []}
+            transformValue={(t) => `${t?.key}=${t?.value}:${t?.effect}`}
+            emptyState={<div>None</div>}
+          />
+        </ResourceInfoCardEntry>
+      </Card>
+    </section>
+  )
 }
 
 export function NodeEvents(): ReactElement {
   const { name } = useParams()
+  const columns = useEventsColumns()
 
   return (
     <ResourceList<EventListT, EventT, NodeEventsQuery, NodeEventsQueryVariables>
       namespaced
-      columns={COLUMNS}
+      columns={columns}
       query={useNodeEventsQuery}
       queryOptions={{
         variables: { name } as NodeEventsQueryVariables,

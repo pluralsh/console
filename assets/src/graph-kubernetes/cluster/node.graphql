@@ -60,10 +60,21 @@ query Node($name: String!) {
       osImage
       systemUUID
     }
+    addresses {
+      type
+      address
+    }
+    taints {
+      key
+      value
+      effect
+    }
     providerID
     containerImages
     podCIDR
     phase
+    unschedulable
+    ready
     errors
   }
 }
