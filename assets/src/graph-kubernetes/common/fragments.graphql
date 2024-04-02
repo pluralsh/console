@@ -92,7 +92,8 @@ fragment HorizontalPodAutoscalerList on horizontalpodautoscaler_HorizontalPodAut
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
-  horizontalpodautoscalers @type(name: "horizontalpodautoscaler_HorizontalPodAutoscaler") {
+  horizontalpodautoscalers
+    @type(name: "horizontalpodautoscaler_HorizontalPodAutoscaler") {
     ...HorizontalPodAutoscaler
   }
 }
