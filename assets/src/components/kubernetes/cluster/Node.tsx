@@ -23,7 +23,7 @@ import { ResourceList } from '../ResourceList'
 
 import { getBreadcrumbs } from './Namespaces'
 import { NamespacePhaseChip } from './utils'
-import { COLUMNS } from './Events'
+import { useEventsColumns } from './Events'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -84,11 +84,12 @@ export function NodeInfo(): ReactElement {
 
 export function NodeEvents(): ReactElement {
   const { name } = useParams()
+  const columns = useEventsColumns()
 
   return (
     <ResourceList<EventListT, EventT, NodeEventsQuery, NodeEventsQueryVariables>
       namespaced
-      columns={COLUMNS}
+      columns={columns}
       query={useNodeEventsQuery}
       queryOptions={{
         variables: { name } as NodeEventsQueryVariables,
