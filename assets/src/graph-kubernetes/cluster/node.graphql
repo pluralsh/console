@@ -60,6 +60,17 @@ query Node($name: String!) {
       osImage
       systemUUID
     }
+    allocatedResources {
+      cpuRequests
+      cpuRequestsFraction
+      cpuCapacity
+      memoryRequests
+      memoryRequestsFraction
+      memoryCapacity
+      allocatedPods
+      podFraction
+      podCapacity
+    }
     addresses {
       type
       address

@@ -96,7 +96,7 @@ export function NodeInfo(): ReactElement {
 
   return (
     <section>
-      <SubTitle>Info</SubTitle>
+      <SubTitle>Node information</SubTitle>
       <Card
         css={{
           display: 'flex',
@@ -130,6 +130,36 @@ export function NodeInfo(): ReactElement {
             transformValue={(t) => `${t?.key}=${t?.value}:${t?.effect}`}
             emptyState={<div>None</div>}
           />
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Machine ID">
+          {node?.nodeInfo.machineID}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="System UUID">
+          {node?.nodeInfo.systemUUID}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Boot ID">
+          {node?.nodeInfo.bootID}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Kernel version">
+          {node?.nodeInfo.kernelVersion}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="OS image">
+          {node?.nodeInfo.osImage}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Container runtime version">
+          {node?.nodeInfo.containerRuntimeVersion}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="kubelet version">
+          {node?.nodeInfo.kubeletVersion}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="kube-proxy version">
+          {node?.nodeInfo.kubeProxyVersion}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Operating system">
+          {node?.nodeInfo.operatingSystem}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Architecture">
+          {node?.nodeInfo.architecture}
         </ResourceInfoCardEntry>
       </Card>
     </section>
