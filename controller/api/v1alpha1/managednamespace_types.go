@@ -41,13 +41,13 @@ type ManagedNamespaceSpec struct {
 	// +kubebuilder:validation:Optional
 	PullSecrets []string `json:"pullSecrets,omitempty"`
 	// +kubebuilder:validation:Optional
-	Service *ServiceTemplateAttributes `json:"service,omitempty"`
+	Service *ServiceTemplate `json:"service,omitempty"`
 	// +kubebuilder:validation:Optional
-	Target *ClusterTargetAttributes `json:"target,omitempty"`
+	Target *ClusterTarget `json:"target,omitempty"`
 }
 
 // A spec for targeting clusters
-type ClusterTargetAttributes struct {
+type ClusterTarget struct {
 	// Tags the cluster tags to target
 	// +kubebuilder:validation:Optional
 	Tags map[string]string `json:"tags,omitempty"`
@@ -59,7 +59,7 @@ type ClusterTargetAttributes struct {
 }
 
 // Attributes for configuring a service in something like a managed namespace
-type ServiceTemplateAttributes struct {
+type ServiceTemplate struct {
 	// Name the name for this service (optional for managed namespaces)
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
