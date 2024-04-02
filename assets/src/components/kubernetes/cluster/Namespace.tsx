@@ -26,7 +26,7 @@ import { SubTitle } from '../../cluster/nodes/SubTitle'
 
 import { getBreadcrumbs } from './Namespaces'
 import { NamespacePhaseChip } from './utils'
-import { COLUMNS } from './Events'
+import { useEventsColumns } from './Events'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -161,6 +161,7 @@ export function NamespaceInfo(): ReactElement {
 
 export function NamespaceEvents(): ReactElement {
   const { name } = useParams()
+  const columns = useEventsColumns()
 
   return (
     <ResourceList<
@@ -170,7 +171,7 @@ export function NamespaceEvents(): ReactElement {
       NamespaceEventsQueryVariables
     >
       namespaced
-      columns={COLUMNS}
+      columns={columns}
       query={useNamespaceEventsQuery}
       queryOptions={{
         variables: { name } as NamespaceEventsQueryVariables,
