@@ -78,3 +78,38 @@ fragment ResourceOwner on controller_ResourceOwner {
     ...PodInfo
   }
 }
+
+fragment Selector on v1_LabelSelector {
+  matchLabels
+  matchExpressions {
+    key
+    operator
+    values
+  }
+}
+
+fragment HorizontalPodAutoscalerList on horizontalpodautoscaler_HorizontalPodAutoscalerList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  horizontalpodautoscalers @type(name: "horizontalpodautoscaler_HorizontalPodAutoscaler") {
+    ...HorizontalPodAutoscaler
+  }
+}
+
+fragment HorizontalPodAutoscaler on horizontalpodautoscaler_HorizontalPodAutoscaler {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  currentCPUUtilizationPercentage
+  maxReplicas
+  minReplicas
+  targetCPUUtilizationPercentage
+  scaleTargetRef {
+    name
+    kind
+  }
+}

@@ -16,24 +16,7 @@ query Pods(
       type: "pod_PodList"
       path: "pod/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    pods {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      status
-      containerImages
-      nodeName
-      restartCount
-      warnings {
-        message
-      }
-    }
+    ...PodList
   }
 }
 

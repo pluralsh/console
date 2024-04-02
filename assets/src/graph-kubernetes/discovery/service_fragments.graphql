@@ -1,0 +1,31 @@
+fragment ServiceList on service_ServiceList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  services {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    type
+    clusterIP
+    internalEndpoint {
+      host
+      ports {
+        nodePort
+        port
+        protocol
+      }
+    }
+    externalEndpoints {
+      host
+      ports {
+        nodePort
+        port
+        protocol
+      }
+    }
+  }
+}

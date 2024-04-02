@@ -55,7 +55,12 @@ import RoleBindings from '../components/kubernetes/access/RoleBindings'
 import Roles from '../components/kubernetes/access/Roles'
 import Access from '../components/kubernetes/access/Access'
 import Deployment from '../components/kubernetes/workloads/Deployment'
-import ReplicaSet from '../components/kubernetes/workloads/ReplicaSet'
+import ReplicaSet, {
+  ReplicaSetEvents,
+  ReplicaSetInfo,
+  ReplicaSetPods,
+  ReplicaSetServices,
+} from '../components/kubernetes/workloads/ReplicaSet'
 import StatefulSet from '../components/kubernetes/workloads/StatefulSet'
 import DaemonSet from '../components/kubernetes/workloads/DaemonSet'
 import Job from '../components/kubernetes/workloads/Job'
@@ -349,10 +354,39 @@ export const kubernetesRoutes = [
     element={<Deployment />}
   />,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${REPLICA_SETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<ReplicaSet />}
-  />,
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="pods"
+        />
+      }
+    />
+    <Route
+      path="hpas"
+      element={<ReplicaSetInfo />}
+    />
+    <Route
+      path="pods"
+      element={<ReplicaSetPods />}
+    />
+    <Route
+      path="events"
+      element={<ReplicaSetEvents />}
+    />
+    <Route
+      path="services"
+      element={<ReplicaSetServices />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     index
     path={`${KUBERNETES_ABS_PATH}/${STATEFUL_SETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}

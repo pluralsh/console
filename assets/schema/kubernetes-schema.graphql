@@ -1380,7 +1380,7 @@ type Query {
     metricNames: String
     """Aggregations to be performed for each metric (default: sum)"""
     aggregations: String
-  ): pod_PodList @httpOperation(subgraph: "api", path: "/api/v1/replicaset/{args.namespace}/{args.replicaSet}/service", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: GET, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
+  ): service_ServiceList @httpOperation(subgraph: "api", path: "/api/v1/replicaset/{args.namespace}/{args.replicaSet}/service", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: GET, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
   """returns a list of ReplicationController in a namespace"""
   handleGetReplicationControllerList(
     """
