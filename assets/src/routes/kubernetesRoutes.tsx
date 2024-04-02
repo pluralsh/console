@@ -47,6 +47,7 @@ import Nodes from '../components/kubernetes/cluster/Nodes'
 import Node, {
   NodeEvents,
   NodeInfo,
+  NodePods,
 } from '../components/kubernetes/cluster/Node'
 import Events from '../components/kubernetes/cluster/Events'
 import Namespaces from '../components/kubernetes/cluster/Namespaces'
@@ -516,6 +517,10 @@ export const kubernetesRoutes = [
       index
       path=""
       element={<NodeInfo />}
+    />
+    <Route
+      path="pods"
+      element={<NodePods />}
     />
     <Route
       path="events"

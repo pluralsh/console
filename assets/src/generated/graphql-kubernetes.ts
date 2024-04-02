@@ -4737,7 +4737,15 @@ export type NodeQueryVariables = Exact<{
 }>;
 
 
-export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typename?: 'node_NodeDetail', providerID: string, containerImages: Array<string | null>, podCIDR: string, phase: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', architecture: string, bootID: string, containerRuntimeVersion: string, kernelVersion: string, kubeletVersion: string, kubeProxyVersion: string, machineID: string, operatingSystem: string, osImage: string, systemUUID: string } } | null };
+export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typename?: 'node_NodeDetail', providerID: string, containerImages: Array<string | null>, podCIDR: string, phase: string, unschedulable: boolean, ready: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', architecture: string, bootID: string, containerRuntimeVersion: string, kernelVersion: string, kubeletVersion: string, kubeProxyVersion: string, machineID: string, operatingSystem: string, osImage: string, systemUUID: string }, addresses?: Array<{ __typename?: 'v1_NodeAddress', type: string, address: string } | null> | null, taints?: Array<{ __typename?: 'v1_Taint', key: string, value?: string | null, effect: string } | null> | null } | null };
+
+export type NodePodsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type NodePodsQuery = { __typename?: 'Query', handleGetNodePods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type NodeEventsQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -6380,6 +6388,20 @@ export const NodeDocument = gql`
     objectMeta @type(name: "types_ObjectMeta") {
       ...ObjectMeta
     }
+    conditions @type(name: "common_Condition") {
+      ...Condition
+    }
+    allocatedResources {
+      cpuRequests
+      cpuRequestsFraction
+      cpuCapacity
+      memoryRequests
+      memoryRequestsFraction
+      memoryCapacity
+      allocatedPods
+      podFraction
+      podCapacity
+    }
     nodeInfo {
       architecture
       bootID
@@ -6392,15 +6414,27 @@ export const NodeDocument = gql`
       osImage
       systemUUID
     }
+    addresses {
+      type
+      address
+    }
+    taints {
+      key
+      value
+      effect
+    }
     providerID
     containerImages
     podCIDR
     phase
+    unschedulable
+    ready
     errors
   }
 }
     ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
+${ObjectMetaFragmentDoc}
+${ConditionFragmentDoc}`;
 
 /**
  * __useNodeQuery__
@@ -6434,6 +6468,47 @@ export type NodeQueryHookResult = ReturnType<typeof useNodeQuery>;
 export type NodeLazyQueryHookResult = ReturnType<typeof useNodeLazyQuery>;
 export type NodeSuspenseQueryHookResult = ReturnType<typeof useNodeSuspenseQuery>;
 export type NodeQueryResult = Apollo.QueryResult<NodeQuery, NodeQueryVariables>;
+export const NodePodsDocument = gql`
+    query NodePods($namespace: String!, $name: String!) {
+  handleGetNodePods(name: $name) @rest(type: "pod_PodList", path: "node/{args.name}/pod") {
+    ...PodList
+  }
+}
+    ${PodListFragmentDoc}`;
+
+/**
+ * __useNodePodsQuery__
+ *
+ * To run a query within a React component, call `useNodePodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNodePodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNodePodsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useNodePodsQuery(baseOptions: Apollo.QueryHookOptions<NodePodsQuery, NodePodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NodePodsQuery, NodePodsQueryVariables>(NodePodsDocument, options);
+      }
+export function useNodePodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NodePodsQuery, NodePodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NodePodsQuery, NodePodsQueryVariables>(NodePodsDocument, options);
+        }
+export function useNodePodsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NodePodsQuery, NodePodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NodePodsQuery, NodePodsQueryVariables>(NodePodsDocument, options);
+        }
+export type NodePodsQueryHookResult = ReturnType<typeof useNodePodsQuery>;
+export type NodePodsLazyQueryHookResult = ReturnType<typeof useNodePodsLazyQuery>;
+export type NodePodsSuspenseQueryHookResult = ReturnType<typeof useNodePodsSuspenseQuery>;
+export type NodePodsQueryResult = Apollo.QueryResult<NodePodsQuery, NodePodsQueryVariables>;
 export const NodeEventsDocument = gql`
     query NodeEvents($name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetNodeEvents(

@@ -48,6 +48,20 @@ query Node($name: String!) {
     objectMeta @type(name: "types_ObjectMeta") {
       ...ObjectMeta
     }
+    conditions @type(name: "common_Condition") {
+      ...Condition
+    }
+    allocatedResources {
+      cpuRequests
+      cpuRequestsFraction
+      cpuCapacity
+      memoryRequests
+      memoryRequestsFraction
+      memoryCapacity
+      allocatedPods
+      podFraction
+      podCapacity
+    }
     nodeInfo {
       architecture
       bootID
@@ -60,11 +74,37 @@ query Node($name: String!) {
       osImage
       systemUUID
     }
+    addresses {
+      type
+      address
+    }
+    taints {
+      key
+      value
+      effect
+    }
     providerID
     containerImages
     podCIDR
     phase
+    unschedulable
+    ready
     errors
+  }
+}
+
+query NodePods(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetNodePods(
+    name: $name
+  )
+  @rest(
+    type: "pod_PodList"
+    path: "node/{args.name}/pod"
+  ) {
+    ...PodList
   }
 }
 
