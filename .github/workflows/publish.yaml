@@ -29,11 +29,11 @@ jobs:
           path: _build
           key: ${{ runner.os }}-mix-1-${{ hashFiles('**/mix.lock') }}
           restore-keys: ${{ runner.os }}-mix-1-
-      - name: download jwt verification key
-        run: | 
-          echo $JWT_PUBLIC_KEY > config/pubkey.pem
-        env:
-          JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
+      # - name: download jwt verification key
+      #   run: | 
+      #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
+      #   env:
+      #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       - run: mix deps.get
       - run: mix test
       - uses: 8398a7/action-slack@v3
@@ -104,11 +104,11 @@ jobs:
       with:
         username: mjgpluralsh
         password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-    - name: download jwt verification key
-      run: | 
-        echo $JWT_PUBLIC_KEY > config/pubkey.pem
-      env:
-        JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
+    # - name: download jwt verification key
+    #   run: | 
+    #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
+    #   env:
+    #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
     - name: Build and push
       uses: docker/build-push-action@v3
       with:

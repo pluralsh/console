@@ -2,6 +2,10 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+global:
+  additionalVolumes: ~
+  additionalVolumeMounts: ~
+
 replicaCount: 2
 
 homeDir: /root
@@ -78,6 +82,12 @@ ingress:
   tls:
     enabled: true
 
+  rewrite:
+    annotations:
+      konghq.com/rewrite: /$2
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+
   annotations:
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -88,7 +98,16 @@ ingress:
     nginx.ingress.kubernetes.io/session-cookie-path: /socket
 
 externalIngress:
+  tls:
+    enabled: true
   ingressClass: nginx
+  
+  rewrite:
+    annotations:
+      konghq.com/rewrite: /
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      nginx.ingress.kubernetes.io/rewrite-target: /
+
   annotations:
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod

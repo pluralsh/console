@@ -305,6 +305,22 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert from_connection(found["policyConstraints"])
              |> ids_equal(constraints)
     end
+
+    test "it can fetch pinned custom resources for a cluster" do
+      cluster = insert(:cluster)
+      first = insert_list(2, :pinned_custom_resource, cluster: cluster)
+      second = insert_list(3, :pinned_custom_resource, cluster_id: nil, cluster: nil)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query Cluster($id: ID!) {
+          cluster(id: $id) {
+            pinnedCustomResources { id }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert ids_equal(found["pinnedCustomResources"], first ++ second)
+    end
   end
 
   describe "runtimeService" do

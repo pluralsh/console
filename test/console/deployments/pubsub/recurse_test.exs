@@ -160,6 +160,10 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       ignore  = insert(:global_service, tags: [%{name: "ignore", value: "tag"}])
       ignore1 = insert(:global_service, provider: insert(:cluster_provider))
 
+      repo = insert(:git_repository)
+      service_spec = %{repository_id: repo.id, git: %{ref: "main", folder: "runtime"}, name: "svc", namespace: "ns"}
+      templated = insert(:global_service, template: service_spec)
+
       event = %PubSub.ClusterCreated{item: cluster}
       :ok = Recurse.handle_event(event)
 
@@ -167,6 +171,72 @@ defmodule Console.Deployments.PubSub.RecurseTest do
         do: assert Services.get_service_by_name(cluster.id, gs.service.name)
       for gs <- [ignore, ignore1],
         do: refute Services.get_service_by_name(cluster.id, gs.service.name)
+
+      res = Services.get_service_by_name(cluster.id, "svc")
+      assert res.owner_id == templated.id
+      assert res.name == "svc"
+      assert res.namespace == "ns"
+      assert res.repository_id == repo.id
+      assert res.git.ref == "main"
+      assert res.git.folder == "runtime"
+    end
+
+    test "it will apply managed namespaces" do
+      bot("console")
+      repo = insert(:git_repository)
+      service_spec = %{repository_id: repo.id, git: %{ref: "main", folder: "runtime"}}
+      cluster = insert(:cluster, tags: [%{name: "test", value: "tag"}])
+      mns1 = insert(:managed_namespace, target: %{tags: %{"test" => "tag"}}, service: service_spec)
+      mns2 = insert(:managed_namespace, service: service_spec)
+      ignore  = insert(:managed_namespace, target: %{tags: %{"not" => "matching"}}, service: service_spec)
+      ignore1 = insert(:managed_namespace, target: %{distro: :aks})
+
+      event = %PubSub.ClusterCreated{item: cluster}
+      :ok = Recurse.handle_event(event)
+
+      for mns <- [mns1, mns2],
+        do: assert Services.get_service_by_name(cluster.id, "#{mns.name}-core")
+      for mns <- [ignore, ignore1],
+        do: refute Services.get_service_by_name(cluster.id, "#{mns.name}-core")
+    end
+  end
+
+  describe "ClusterUpdated" do
+    test "it will apply global services" do
+      bot("console")
+      cluster = insert(:cluster, tags: [%{name: "test", value: "tag"}])
+      global  = insert(:global_service, provider: cluster.provider)
+      global2 = insert(:global_service, tags: [%{name: "test", value: "tag"}])
+      global3 = insert(:global_service)
+      ignore  = insert(:global_service, tags: [%{name: "ignore", value: "tag"}])
+      ignore1 = insert(:global_service, provider: insert(:cluster_provider))
+
+      event = %PubSub.ClusterUpdated{item: cluster}
+      :ok = Recurse.handle_event(event)
+
+      for gs <- [global, global2, global3],
+        do: assert Services.get_service_by_name(cluster.id, gs.service.name)
+      for gs <- [ignore, ignore1],
+        do: refute Services.get_service_by_name(cluster.id, gs.service.name)
+    end
+
+    test "it will apply managed namespaces" do
+      bot("console")
+      repo = insert(:git_repository)
+      service_spec = %{repository_id: repo.id, git: %{ref: "main", folder: "runtime"}}
+      cluster = insert(:cluster, tags: [%{name: "test", value: "tag"}])
+      mns1 = insert(:managed_namespace, target: %{tags: %{"test" => "tag"}}, service: service_spec)
+      mns2 = insert(:managed_namespace, service: service_spec)
+      ignore  = insert(:managed_namespace, target: %{tags: %{"not" => "matching"}}, service: service_spec)
+      ignore1 = insert(:managed_namespace, target: %{distro: :aks})
+
+      event = %PubSub.ClusterUpdated{item: cluster}
+      :ok = Recurse.handle_event(event)
+
+      for mns <- [mns1, mns2],
+        do: assert Services.get_service_by_name(cluster.id, "#{mns.name}-core")
+      for mns <- [ignore, ignore1],
+        do: refute Services.get_service_by_name(cluster.id, "#{mns.name}-core")
     end
   end
 
@@ -214,6 +284,43 @@ defmodule Console.Deployments.PubSub.RecurseTest do
 
       synced = Services.get_service_by_name(sync.id, "source")
       refute Global.diff?(source, synced)
+    end
+  end
+
+  describe "ManagedNamespaceDeleted" do
+    test "it will begin draining the managed namespace" do
+      bot("console")
+      mns = insert(:managed_namespace, deleted_at: Timex.now())
+      instances = insert_list(3, :namespace_instance, namespace: mns)
+
+      event = %PubSub.ManagedNamespaceDeleted{item: mns}
+      Recurse.handle_event(event)
+
+      for inst <- instances,
+        do: assert refetch(inst.service).deleted_at
+    end
+  end
+
+  describe "ManagedNamespaceCreated" do
+    test "it will setup the managed namespace" do
+      bot("console")
+      repo = insert(:git_repository)
+      mns = insert(:managed_namespace,
+        target: %{tags: %{"test" => "tag"}},
+        service: %{repository_id: repo.id, git: %{ref: "main", folder: "runtime"}}
+      )
+      clusters = insert_list(2, :cluster, tags: [%{name: "test", value: "tag"}])
+      ignore = insert(:cluster)
+      ignore2 = insert(:cluster, tags: [%{name: "ignore", value: "tag"}])
+
+      event = %PubSub.ManagedNamespaceCreated{item: mns}
+      :ok = Recurse.handle_event(event)
+
+      for c <- clusters,
+        do: assert Services.get_service_by_name(c.id, "#{mns.name}-core")
+
+      for c <- [ignore, ignore2],
+        do: refute Services.get_service_by_name(c.id, "#{mns.name}-core")
     end
   end
 

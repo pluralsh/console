@@ -8,6 +8,22 @@
     field :group_id, :id
   end
 
+  input_object :loki_query do
+    field :labels, list_of(:loki_label_filter)
+    field :filter, :loki_line_filter
+  end
+
+  input_object :loki_label_filter do
+    field :name,  non_null(:string)
+    field :value, non_null(:string)
+    field :regex, :boolean, description: "whether to apply a regex match for this label"
+  end
+
+  input_object :loki_line_filter do
+    field :text,  :string, description: "the string to filter for (eg what is put in our search ui)"
+    field :regex, :boolean, description: "whether to treat this string as a regex match"
+  end
+
   object :policy_binding do
     field :id,    :id
     field :user,  :user, resolve: dataloader(User)
@@ -21,6 +37,7 @@
   import_types Console.GraphQl.Deployments.Backup
   import_types Console.GraphQl.Deployments.Notification
   import_types Console.GraphQl.Deployments.Policy
+  import_types Console.GraphQl.Deployments.Global
 
   @desc "global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator"
   object :deployment_settings do
@@ -85,6 +102,8 @@
     import_fields :public_backup_queries
     import_fields :notification_queries
     import_fields :policy_queries
+    import_fields :global_queries
+    import_fields :public_global_queries
 
     field :deployment_settings, :deployment_settings do
       middleware Authenticated
@@ -105,6 +124,7 @@
     import_fields :public_backup_mutations
     import_fields :notification_mutations
     import_fields :public_policy_mutations
+    import_fields :global_mutations
 
     @desc "a reusable mutation for updating rbac settings on core services"
     field :update_rbac, :boolean do

@@ -10,7 +10,7 @@ defmodule Console.Schema.PolicyConstraint do
 
     embeds_one :ref, Ref, on_replace: :update do
       field :kind, :string
-      field :name,  :string
+      field :name, :string
     end
 
     has_many :violations, ConstraintViolation,
@@ -54,6 +54,20 @@ defmodule Console.Schema.PolicyConstraint do
     from(p in query,
       join: v in assoc(p, :violations),
       where: v.kind == ^kind
+    )
+  end
+
+  def for_namespaces(query \\ __MODULE__, ns) do
+    from(p in query,
+      join: v in assoc(p, :violations),
+      where: v.namespace in ^ns
+    )
+  end
+
+  def for_kinds(query \\ __MODULE__, kinds) do
+    from(p in query,
+      join: v in assoc(p, :violations),
+      where: v.kind in ^kinds
     )
   end
 

@@ -37,6 +37,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
     |> paginate(args)
   end
 
+  def services_for_owner(%{id: id}, args, %{context: %{current_user: user}}) do
+    Service.for_user(user)
+    |> Service.for_owner(id)
+    |> service_filters(args)
+    |> maybe_search(Service, args)
+    |> Service.ordered()
+    |> paginate(args)
+  end
+
   def list_revisions(%{id: id}, args, _) do
     Revision.for_service(id)
     |> Revision.ordered()
@@ -154,6 +163,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
 
   def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
   def docs(svc, _, _), do: Services.docs(svc)
+
+  def fetch_manifests(%{id: id}, %{context: %{current_user: user}}),
+    do: Services.fetch_manifests(id, user)
+
+  def request_manifests(%{id: id}, %{context: %{current_user: user}}),
+    do: Services.request_manifests(id, user)
+
+  def save_manifests(%{id: id, manifests: mans}, %{context: %{cluster: cluster}}) do
+    with :ok <- Services.save_manifests(mans, id, cluster),
+      do: {:ok, true}
+  end
 
   defp service_filters(query, args) do
     Enum.reduce(args, query, fn

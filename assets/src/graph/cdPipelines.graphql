@@ -144,6 +144,7 @@ fragment PipelineStageEdge on PipelineStageEdge {
 fragment PipelineStatus on PipelineStatus {
   closed
   pending
+  running
 }
 
 fragment PipelinePullRequest on PipelinePullRequest {

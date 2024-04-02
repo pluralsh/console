@@ -1,6 +1,6 @@
 defmodule Console.Schema.Revision do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, ServiceConfiguration}
+  alias Console.Schema.{Service, ServiceConfiguration, ServiceTemplate}
 
   schema "revisions" do
     field :version, :string
@@ -12,6 +12,7 @@ defmodule Console.Schema.Revision do
     embeds_one :kustomize, Service.Kustomize, on_replace: :update
 
     belongs_to :service, Service
+    belongs_to :template, ServiceTemplate
     has_many :configuration, ServiceConfiguration
 
     timestamps()

@@ -40,6 +40,14 @@ defmodule Console do
   end
   def mapify(v), do: v
 
+  def remove_ids(%{id: _} = map) do
+    Map.delete(map, :id)
+    |> remove_ids()
+  end
+  def remove_ids(%{} = map), do: Map.new(map, fn {k, v} -> {k, remove_ids(v)} end)
+  def remove_ids(l) when is_list(l), do: Enum.map(l, &remove_ids/1)
+  def remove_ids(v), do: v
+
   def string_map(%{} = map) do
     Poison.encode!(map)
     |> Poison.decode!()
@@ -76,6 +84,23 @@ defmodule Console do
         |> Enum.map(&ls_r/1)
         |> Enum.concat()
       true -> []
+    end
+  end
+
+  def df(path \\ ".", acc \\ {0, 0})
+  def df(path, {count, size}) do
+    cond do
+      File.regular?(path) ->
+        stat = File.stat!(path)
+        {count + 1, size + stat.size}
+      File.dir?(path) ->
+        File.ls!(path)
+        |> Enum.map(&Path.join(path, &1))
+        |> Enum.reduce({count, size}, fn p, {c, s} ->
+          {c2, s2} = df(p)
+          {c + c2, s + s2}
+        end)
+      true -> {count, size}
     end
   end
 

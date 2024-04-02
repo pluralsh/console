@@ -258,8 +258,6 @@ type RootQueryType {
 
   serviceStatuses(clusterId: ID, q: String, status: ServiceDeploymentStatus): [ServiceStatusCount]
 
-  globalService(id: ID!): GlobalService
-
   serviceContext(name: String!): ServiceContext
 
   "renders a full hierarchy of resources recursively owned by this component (useful for CRD views)"
@@ -267,6 +265,12 @@ type RootQueryType {
     "the id of the service component for the tree view"
     id: ID!
   ): ComponentTree
+
+  "request manifests from an agent, to be returned by a future call to fetchManifests"
+  requestManifests(id: ID!): ServiceDeployment
+
+  "Fetches the manifests from cache once the agent has given us them, will be null otherwise"
+  fetchManifests(id: ID!): [String]
 
   pipelines(after: String, first: Int, before: String, last: Int, q: String): PipelineConnection
 
@@ -318,11 +322,23 @@ type RootQueryType {
 
   notificationRouters(after: String, first: Int, before: String, last: Int, q: String): NotificationRouterConnection
 
-  policyConstraints(after: String, first: Int, before: String, last: Int, kind: String, namespace: String, q: String): PolicyConstraintConnection
+  policyConstraints(
+    after: String, first: Int, before: String, last: Int, kind: String, namespace: String, kinds: [String], namespaces: [String], q: String
+  ): PolicyConstraintConnection
 
   violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
 
   policyConstraint(id: ID!): PolicyConstraint
+
+  managedNamespaces(after: String, first: Int, before: String, last: Int): ManagedNamespaceConnection
+
+  globalService(id: ID!): GlobalService
+
+  globalServices(after: String, first: Int, before: String, last: Int): GlobalServiceConnection
+
+  clusterManagedNamespaces(after: String, first: Int, before: String, last: Int): ManagedNamespaceConnection
+
+  managedNamespace(id: ID!): ManagedNamespace
 
   deploymentSettings: DeploymentSettings
 }
@@ -492,6 +508,10 @@ type RootMutationType {
 
   createAgentMigration(attributes: AgentMigrationAttributes!): AgentMigration
 
+  createPinnedCustomResource(attributes: PinnedCustomResourceAttributes!): PinnedCustomResource
+
+  deletePinnedCustomResource(id: ID!): PinnedCustomResource
+
   createServiceDeployment(
     clusterId: ID
 
@@ -569,21 +589,6 @@ type RootMutationType {
     promotion: ServicePromotion
   ): ServiceDeployment
 
-  createGlobalService(
-    serviceId: ID
-
-    "the handle of the cluster for this service"
-    cluster: String
-
-    name: String
-
-    attributes: GlobalServiceAttributes!
-  ): GlobalService
-
-  updateGlobalService(id: ID!, attributes: GlobalServiceAttributes!): GlobalService
-
-  deleteGlobalService(id: ID!): GlobalService
-
   saveServiceContext(name: String!, attributes: ServiceContextAttributes!): ServiceContext
 
   deleteServiceContext(id: ID!): ServiceContext
@@ -623,6 +628,9 @@ type RootMutationType {
   "updates only the components of a given service, to be sent after deploy operator syncs"
   updateServiceComponents(id: ID!, components: [ComponentAttributes], errors: [ServiceErrorAttributes]): ServiceDeployment
 
+  "save the manifests in cache to be retrieved by the requesting user"
+  saveManifests(id: ID!, manifests: [String]): Boolean
+
   updateGate(id: ID!, attributes: GateUpdateAttributes!): PipelineGate
 
   "upserts a cluster backup resource"
@@ -639,6 +647,27 @@ type RootMutationType {
   deleteNotificationRouter(id: ID!): NotificationRouter
 
   upsertPolicyConstraints(constraints: [PolicyConstraintAttributes]): Int
+
+  createGlobalService(
+    serviceId: ID
+
+    "the handle of the cluster for this service"
+    cluster: String
+
+    name: String
+
+    attributes: GlobalServiceAttributes!
+  ): GlobalService
+
+  updateGlobalService(id: ID!, attributes: GlobalServiceAttributes!): GlobalService
+
+  deleteGlobalService(id: ID!): GlobalService
+
+  createManagedNamespace(attributes: ManagedNamespaceAttributes!): ManagedNamespace
+
+  updateManagedNamespace(id: ID!, attributes: ManagedNamespaceAttributes!): ManagedNamespace
+
+  deleteManagedNamespace(id: ID!): ManagedNamespace
 
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
@@ -660,6 +689,28 @@ input PolicyBindingAttributes {
   id: ID
   userId: ID
   groupId: ID
+}
+
+input LokiQuery {
+  labels: [LokiLabelFilter]
+  filter: LokiLineFilter
+}
+
+input LokiLabelFilter {
+  name: String!
+
+  value: String!
+
+  "whether to apply a regex match for this label"
+  regex: Boolean
+}
+
+input LokiLineFilter {
+  "the string to filter for (eg what is put in our search ui)"
+  text: String
+
+  "whether to treat this string as a regex match"
+  regex: Boolean
 }
 
 type PolicyBinding {
@@ -759,6 +810,195 @@ input HttpConnectionAttributes {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+"A reference for a globalized service, which targets clusters based on the configured criteria"
+input GlobalServiceAttributes {
+  "name for this global service"
+  name: String!
+
+  "the cluster tags to target"
+  tags: [TagAttributes]
+
+  "kubernetes distribution to target"
+  distro: ClusterDistro
+
+  "cluster api provider to target"
+  providerId: ID
+}
+
+"Attributes for configuring a managed namespace"
+input ManagedNamespaceAttributes {
+  "the name of this namespace once its placed on a cluster"
+  name: String!
+
+  "A short description of the purpose of this namespace"
+  description: String
+
+  "labels for this namespace"
+  labels: Json
+
+  "annotations for this namespace"
+  annotations: Json
+
+  "a list of pull secrets to attach to this namespace"
+  pullSecrets: [String]
+
+  service: ServiceTemplateAttributes
+
+  target: ClusterTargetAttributes
+}
+
+"Attributes for configuring a service in something like a managed namespace"
+input ServiceTemplateAttributes {
+  "the name for this service (optional for managed namespaces)"
+  name: String
+
+  "the namespace for this service (optional for managed namespaces)"
+  namespace: String
+
+  templated: Boolean
+
+  "the id of a repository to source manifests for this service"
+  repositoryId: ID
+
+  "a list of context ids to add to this service"
+  contexts: [ID]
+
+  "a list of secure configuration that will be added to any services created by this template"
+  configuration: [ConfigAttributes]
+
+  "settings to configure git for a service"
+  git: GitRefAttributes
+
+  "settings to configure helm for a service"
+  helm: HelmConfigAttributes
+
+  "settings for service kustomization"
+  kustomize: KustomizeAttributes
+
+  "attributes to configure sync settings for this service"
+  syncConfig: SyncConfigAttributes
+}
+
+"A spec for targeting clusters"
+input ClusterTargetAttributes {
+  "the cluster tags to target"
+  tags: Json
+
+  "kubernetes distribution to target"
+  distro: ClusterDistro
+}
+
+"a rules based mechanism to redeploy a service across a fleet of clusters"
+type GlobalService {
+  "internal id of this global service"
+  id: ID!
+
+  "a human readable name for this global service"
+  name: String!
+
+  "a set of tags to select clusters for this global service"
+  tags: [Tag]
+
+  "the kubernetes distribution to target with this global service"
+  distro: ClusterDistro
+
+  "the service to replicate across clusters"
+  service: ServiceDeployment
+
+  "whether to only apply to clusters with this provider"
+  provider: ClusterProvider
+
+  services(after: String, first: Int, before: String, last: Int, q: String): ServiceDeploymentConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"A representation of a managed namespace, which is k8s namespace configuration + a service spec to define a namespace runtime"
+type ManagedNamespace {
+  id: ID!
+
+  "the name of this namespace once its placed on a cluster"
+  name: String!
+
+  "A short description of the purpose of this namespace"
+  description: String
+
+  "labels for this namespace"
+  labels: Map
+
+  "annotations for this namespace"
+  annotations: Map
+
+  "a list of pull secrets to attach to this namespace"
+  pullSecrets: [String]
+
+  "The targeting criteria to select clusters this namespace is bound to"
+  target: ClusterTarget
+
+  "the timestamp this namespace was deleted at, indicating it's currently draining"
+  deletedAt: DateTime
+
+  "A template for creating the core service for this namespace"
+  service: ServiceTemplate
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"Attributes for configuring a service in something like a managed namespace"
+type ServiceTemplate {
+  "the name for this service (optional for managed namespaces)"
+  name: String
+
+  "the namespace for this service (optional for managed namespaces)"
+  namespace: String
+
+  templated: Boolean
+
+  "the id of a repository to source manifests for this service"
+  repositoryId: ID
+
+  "a list of context ids to add to this service"
+  contexts: [ID]
+
+  "possibly secret configuration for all spawned services, don't query this in list endpoints"
+  configuration: [ServiceConfiguration]
+
+  "settings to configure git for a service"
+  git: GitRef
+
+  "settings to configure helm for a service"
+  helm: HelmSpec
+
+  "settings for service kustomization"
+  kustomize: Kustomize
+
+  "specification of how the templated service will be synced"
+  syncConfig: SyncConfig
+}
+
+"A spec for targeting clusters"
+type ClusterTarget {
+  "the cluster tags to target"
+  tags: Json
+
+  "kubernetes distribution to target"
+  distro: ClusterDistro
+}
+
+type GlobalServiceConnection {
+  pageInfo: PageInfo!
+  edges: [GlobalServiceEdge]
+}
+
+type ManagedNamespaceConnection {
+  pageInfo: PageInfo!
+  edges: [ManagedNamespaceEdge]
 }
 
 enum ConstraintViolationField {
@@ -1112,6 +1352,7 @@ enum GateState {
   PENDING
   OPEN
   CLOSED
+  RUNNING
 }
 
 enum GateType {
@@ -1490,11 +1731,14 @@ type PromotionService {
 
 "a report of gate statuses within a pipeline to gauge its health"
 type PipelineStatus {
-  "if > 0, consider the pipeline running"
+  "if > 0, consider the pipeline pending"
   pending: Int
 
   "if > 0, consider the pipeline stopped"
   closed: Int
+
+  "if > 0, consider the pipeline runnning"
+  running: Int
 }
 
 "A pull request created in the course of executing a pipeline"
@@ -1578,6 +1822,7 @@ input ServiceDeploymentAttributes {
 }
 
 input SyncConfigAttributes {
+  createNamespace: Boolean
   namespaceMetadata: MetadataAttributes
 }
 
@@ -1681,21 +1926,6 @@ input ContextBindingAttributes {
   contextId: String!
 }
 
-"A reference for a globalized service, which targets clusters based on the configured criteria"
-input GlobalServiceAttributes {
-  "name for this global service"
-  name: String!
-
-  "the cluster tags to target"
-  tags: [TagAttributes]
-
-  "kubernetes distribution to target"
-  distro: ClusterDistro
-
-  "cluster api provider to target"
-  providerId: ID
-}
-
 input KustomizeAttributes {
   "the path to the kustomization file to use"
   path: String!
@@ -1767,6 +1997,9 @@ type ServiceDeployment {
   repository: GitRepository
 
   helmRepository: HelmRepository
+
+  "Queries logs for a service out of loki"
+  logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
 
   "read policy for this service"
   readBindings: [PolicyBinding]
@@ -1956,31 +2189,6 @@ type ApiDeprecation {
   component: ServiceComponent
 }
 
-"a rules based mechanism to redeploy a service across a fleet of clusters"
-type GlobalService {
-  "internal id of this global service"
-  id: ID!
-
-  "a human readable name for this global service"
-  name: String!
-
-  "a set of tags to select clusters for this global service"
-  tags: [Tag]
-
-  "the kubernetes distribution to target with this global service"
-  distro: ClusterDistro
-
-  "the service to replicate across clusters"
-  service: ServiceDeployment
-
-  "whether to only apply to clusters with this provider"
-  provider: ClusterProvider
-
-  insertedAt: DateTime
-
-  updatedAt: DateTime
-}
-
 "an error sent from the deploy operator about sync progress"
 type ServiceError {
   source: String!
@@ -2001,6 +2209,9 @@ type ServiceStatusCount {
 
 "Advanced configuration of how to sync resources"
 type SyncConfig {
+  "whether the agent should auto-create the namespace for this service"
+  createNamespace: Boolean
+
   namespaceMetadata: NamespaceMetadata
 }
 
@@ -2241,6 +2452,15 @@ input AgentMigrationAttributes {
   configuration: Json
 }
 
+input PinnedCustomResourceAttributes {
+  displayName: String!
+  group: String!
+  version: String!
+  kind: String!
+  namespaced: Boolean
+  clusterId: ID
+}
+
 input TagInput {
   name: String!
   value: String!
@@ -2394,6 +2614,9 @@ type Cluster {
   "list the cached node metrics for a cluster, can also be stale up to 5m"
   nodeMetrics: [NodeMetric]
 
+  "custom resources with dedicated views for this cluster"
+  pinnedCustomResources: [PinnedCustomResource]
+
   "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
   status: ClusterStatus
 
@@ -2416,11 +2639,18 @@ type Cluster {
     "only show constraints with a violation for the given kind"
     kind: String
 
+    kinds: [String]
+
+    namespaces: [String]
+
     q: String
   ): PolicyConstraintConnection
 
   "Computes a list of statistics for OPA constraint violations w\/in this cluster"
   violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
+
+  "Queries logs for a cluster out of loki"
+  logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
 
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]
@@ -2677,6 +2907,17 @@ type Tag {
 type ClusterStatusInfo {
   healthy: Boolean
   count: Int
+}
+
+"A reference to a custom resource you want to be displayed in the k8s dashboard"
+type PinnedCustomResource {
+  id: ID!
+  displayName: String!
+  group: String!
+  version: String!
+  kind: String!
+  namespaced: Boolean
+  cluster: Cluster
 }
 
 type ClusterConnection {
@@ -3667,18 +3908,8 @@ type DashboardMetric {
   results: [MetricResult]
 }
 
-type MetricResult {
-  timestamp: Long
-  value: String
-}
-
 type MetricResponse {
   metric: Map
-  values: [MetricResult]
-}
-
-type LogStream {
-  stream: Map
   values: [MetricResult]
 }
 
@@ -4546,6 +4777,7 @@ type User {
   roles: UserRoles
   readTimestamp: DateTime
   buildTimestamp: DateTime
+  refreshToken: RefreshToken
   assumeBindings: [PolicyBinding]
   groups: [Group]
   personas: [Persona]
@@ -4803,6 +5035,7 @@ type ConsoleConfiguration {
   pluralLogin: Boolean
   vpnEnabled: Boolean
   byok: Boolean
+  externalOidc: Boolean
   features: AvailableFeatures
   manifest: PluralManifest
   gitStatus: GitStatus
@@ -4906,6 +5139,16 @@ enum Delta {
   CREATE
   UPDATE
   DELETE
+}
+
+type MetricResult {
+  timestamp: Long
+  value: String
+}
+
+type LogStream {
+  stream: Map
+  values: [MetricResult]
 }
 
 scalar Map
@@ -5128,5 +5371,15 @@ type NotificationSinkEdge {
 
 type PolicyConstraintEdge {
   node: PolicyConstraint
+  cursor: String
+}
+
+type ManagedNamespaceEdge {
+  node: ManagedNamespace
+  cursor: String
+}
+
+type GlobalServiceEdge {
+  node: GlobalService
   cursor: String
 }

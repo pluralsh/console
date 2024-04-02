@@ -74,6 +74,37 @@ defmodule Console.Services.UsersTest do
       assert Users.get_group_member(group.id, user.id)
     end
 
+    test "if the user is in the admin list, they'll become an admin" do
+      {:ok, user} = Users.bootstrap_user(%{
+        "email" => "admin@example.com",
+        "name" => "Some User",
+        "profile" => "https://some.image.com",
+        "groups" => ["general"],
+      })
+
+      assert user.name == "Some User"
+      assert user.email == "admin@example.com"
+      assert user.profile == "https://some.image.com"
+      assert user.roles.admin
+
+      group = Users.get_group_by_name("general")
+      assert group.description == "synced from Plural"
+
+      assert Users.get_group_member(group.id, user.id)
+
+      {:ok, user} = Users.bootstrap_user(%{
+        "email" => "regular@example.com",
+        "name" => "Some User",
+        "profile" => "https://some.image.com",
+        "groups" => ["general"],
+      })
+
+      assert user.name == "Some User"
+      assert user.email == "regular@example.com"
+      assert user.profile == "https://some.image.com"
+      refute user.roles
+    end
+
     test "it is robust to duplicate group names" do
       {:ok, user} = Users.bootstrap_user(%{
         "email" => "someone@example.com",

@@ -19,9 +19,9 @@ export function PluralApi({ children }) {
     const res = buildClient(
       PLURAL_GQL,
       PLURAL_WSS,
-      () => {
-        window.location = '/'
-      },
+      // () => {
+      //   window.location = '/'
+      // },
       () => token
     )
 

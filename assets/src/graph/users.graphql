@@ -77,6 +77,7 @@ query Me {
     isSandbox
     pluralLogin
     byok
+    externalOidc
     manifest {
       ...Manifest
     }
@@ -113,5 +114,25 @@ query SearchUsers($q: String, $cursor: String) {
         ...User
       }
     }
+  }
+}
+
+mutation Logout {
+  logout {
+    ...User
+  }
+}
+
+fragment RefreshToken on RefreshToken {
+  id
+  token
+  insertedAt
+  updatedAt
+}
+
+query Refresh($token: String!) {
+  refresh(token: $token) {
+    ...User
+    jwt
   }
 }

@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef, useState } from 'react'
+import { RefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, LoopingLogo } from '@pluralsh/design-system'
 import { Div, Flex, Form, P } from 'honorable'
 import { useMutation, useQuery } from '@apollo/client'
@@ -6,14 +6,19 @@ import { Box } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
 import gql from 'graphql-tag'
 import { IntercomProps, useIntercom } from 'react-use-intercom'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import { isValidEmail } from 'utils/email'
 import { User, useMeQuery } from 'generated/graphql'
 import { useHelpSpacing } from 'components/help/HelpLauncher'
 
 import { GqlError } from '../utils/Alert'
-import { setToken, wipeToken } from '../../helpers/auth'
+import {
+  setRefreshToken,
+  setToken,
+  wipeRefreshToken,
+  wipeToken,
+} from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
 import { ME_Q, SIGNIN } from '../graphql/users'
 import { IncidentContext } from '../incidents/context'
@@ -42,13 +47,14 @@ function LoginError({ error }) {
   useEffect(() => {
     const to = setTimeout(() => {
       wipeToken()
+      wipeRefreshToken()
       window.location = '/login' as any as Location
     }, 2000)
 
     return () => clearTimeout(to)
   }, [])
 
-  console.error(error)
+  console.error('Login error:', error)
 
   return (
     <LoginPortal>
@@ -191,18 +197,20 @@ export function EnsureLogin({ children }) {
 
   const loginContextValue = data
 
-  if (error || (!loading && !data?.clusterInfo)) {
-    console.log(error)
+  const incidentContextValue = useMemo(() => {
+    const { __typename: _, ...clusterInformation } = data?.clusterInfo || {}
 
+    return { clusterInformation }
+  }, [data?.clusterInfo])
+
+  if (error || (!loading && !data?.clusterInfo)) {
     return <LoginError error={error} />
   }
 
   if (!data?.clusterInfo) return null
-  const { __typename, ...clusterInformation } = data.clusterInfo
 
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <IncidentContext.Provider value={{ clusterInformation }}>
+    <IncidentContext.Provider value={incidentContextValue}>
       <LoginContextProvider value={loginContextValue}>
         {children}
       </LoginContextProvider>
@@ -246,6 +254,7 @@ function OIDCLogin({ oidcUri, external }) {
 }
 
 export default function Login() {
+  const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
   const emailRef = useRef<any>()
 
@@ -257,12 +266,14 @@ export default function Login() {
   const { data: loginData } = useQuery(LOGIN_INFO, {
     variables: { redirect: localized('/oauth/callback') },
   })
+
   const [loginMutation, { loading: loginMLoading, error: loginMError }] =
     useMutation(SIGNIN, {
       variables: form,
-      onCompleted: ({ signIn: { jwt } }) => {
+      onCompleted: ({ signIn: { jwt, refreshToken } }) => {
         setToken(jwt)
-        window.location = '/' as any as Location
+        setRefreshToken(refreshToken?.token)
+        navigate('/')
       },
       onError: console.error,
     })

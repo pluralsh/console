@@ -91,8 +91,8 @@ mutation DeleteNotificationSink($id: ID!) {
   }
 }
 
-query NotificationSinks($first: Int = 100, $after: String) {
-  notificationSinks(first: $first, after: $after) {
+query NotificationSinks($q: String, $first: Int = 100, $after: String) {
+  notificationSinks(q: $q, first: $first, after: $after) {
     pageInfo {
       ...PageInfo
     }

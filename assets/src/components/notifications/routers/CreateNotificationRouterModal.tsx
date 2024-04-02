@@ -34,7 +34,7 @@ export function CreateNotificationRouterModal({
         To create a new notification router, you can set up a router in your
         configuration files.{' '}
         <InlineLink
-          href="https://docs.plural.sh/" /* TODO_KLINK: Add more specific link */
+          href="https://docs.plural.sh/" /* TODO: Add more specific link */
           target="_blank"
           rel="noreferrer"
         >

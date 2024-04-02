@@ -47,6 +47,7 @@ defmodule Console.GraphQl.Configuration do
     field :plural_login,    :boolean
     field :vpn_enabled,     :boolean
     field :byok,            :boolean, resolve: fn _, _, _ -> {:ok, Console.byok?()} end
+    field :external_oidc,   :boolean, resolve: fn _, _, _ -> {:ok, !!Console.conf(:oidc_login)} end
     field :features,        :available_features
 
     field :manifest,        :plural_manifest, resolve: fn
@@ -54,7 +55,7 @@ defmodule Console.GraphQl.Configuration do
         case Console.Plural.Manifest.get() do
           {:ok, _} = res -> res
           error ->
-            Logger.error "could not fetch manifest: #{inspect(error)}"
+            Logger.info "could not fetch manifest: #{inspect(error)}"
             {:ok, %{}}
         end
     end

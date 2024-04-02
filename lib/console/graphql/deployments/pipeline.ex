@@ -276,8 +276,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
   @desc "a report of gate statuses within a pipeline to gauge its health"
   object :pipeline_status do
-    field :pending, :integer, description: "if > 0, consider the pipeline running"
+    field :pending, :integer, description: "if > 0, consider the pipeline pending"
     field :closed,  :integer, description: "if > 0, consider the pipeline stopped"
+    field :running, :integer, description: "if > 0, consider the pipeline runnning"
   end
 
   @desc "A pull request created in the course of executing a pipeline"

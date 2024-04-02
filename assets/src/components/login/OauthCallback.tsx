@@ -5,10 +5,15 @@ import { Alert, AlertStatus } from 'forge-core'
 import { useLocation } from 'react-router'
 import qs from 'query-string'
 import { useMutation } from '@apollo/client'
+import { useNavigate } from 'react-router-dom'
+import { Button } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
+
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { RefreshTokenFragment } from 'components/graphql/users'
 
-import { setToken } from '../../helpers/auth'
+import { setRefreshToken, setToken } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
 
 import { LoginPortal } from './LoginPortal'
@@ -17,8 +22,12 @@ const CALLBACK = gql`
   mutation Callback($code: String!, $redirect: String) {
     oauthCallback(code: $code, redirect: $redirect) {
       jwt
+      refreshToken {
+        ...RefreshTokenFragment
+      }
     }
   }
+  ${RefreshTokenFragment}
 `
 
 function OAuthError({ error: { error, error_description: description } }: any) {
@@ -45,13 +54,18 @@ function OAuthError({ error: { error, error_description: description } }: any) {
 
 export function OAuthCallback() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const theme = useTheme()
   const { code, ...oauthError } = qs.parse(location.search)
   const prevCode = useRef<any>()
   const [mutation, { error, loading }] = useMutation(CALLBACK, {
     variables: { code, redirect: localized('/oauth/callback') },
     onCompleted: (result) => {
-      setToken(result.oauthCallback.jwt)
-      window.location.href = '/'
+      const { jwt, refreshToken } = result?.oauthCallback || {}
+
+      setToken(jwt)
+      setRefreshToken(refreshToken?.token)
+      navigate('/')
     },
   })
 
@@ -67,16 +81,30 @@ export function OAuthCallback() {
   if (loading) return <LoadingIndicator />
 
   return error ? (
-    <Box
-      height="100vh"
-      width="100vw"
-      align="center"
-      justify="center"
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        width: '100vw',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: theme.spacing.medium,
+      }}
     >
       <GqlError
         error={error}
         header="Failed to log in"
       />
-    </Box>
+      {error && (
+        <Button
+          onClick={() => {
+            navigate('/login')
+          }}
+        >
+          Go to login page
+        </Button>
+      )}
+    </div>
   ) : null
 }

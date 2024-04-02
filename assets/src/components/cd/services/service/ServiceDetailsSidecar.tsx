@@ -40,13 +40,18 @@ export function ServiceDetailsSidecar({
   const { id, name, status, cluster, git, helm } = serviceDeployment
 
   return (
-    <>
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.small,
+      }}
+    >
       <div
         style={{
           display: 'flex',
-          alignItems: 'center',
-          alignContent: 'center',
-          margin: theme.spacing.small,
+          flexDirection: 'column',
+          gap: theme.spacing.small,
         }}
       >
         <ServiceKick id={id} />
@@ -120,6 +125,6 @@ export function ServiceDetailsSidecar({
           </SidecarItem>
         )}
       </Sidecar>
-    </>
+    </div>
   )
 }

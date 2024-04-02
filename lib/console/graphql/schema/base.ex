@@ -14,6 +14,16 @@ defmodule Console.GraphQl.Schema.Base do
     value :after
   end
 
+  object :metric_result do
+    field :timestamp, :long, resolve: fn %{timestamp: ts}, _, _ -> {:ok, ceil(ts)} end
+    field :value,     :string
+  end
+
+  object :log_stream do
+    field :stream, :map
+    field :values, list_of(:metric_result)
+  end
+
   defmacro __using__(_) do
     quote do
       use Absinthe.Schema.Notation

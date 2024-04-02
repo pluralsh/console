@@ -36,6 +36,46 @@ spec:
             name: console
             port: 
               name: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: console-kas-rewrite
+  labels:
+{{ include "console.labels" . | indent 4 }}
+  annotations:
+  {{- with .Values.ingress.rewrite.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.ingressClass }}
+  {{ if .Values.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.ingress.console_dns | quote }}
+    secretName: console-tls
+  {{ end }}
+  rules:
+  - host: {{ .Values.ingress.console_dns | quote }}
+    http:
+      paths:
+      - path: /kas(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: console-kas-service
+            port:
+              number: 8154
+      - path: /ext/kas(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: console-kas-service
+            port:
+              number: 8150
 {{ if .Values.externalIngress.hostname }}
 ---
 apiVersion: networking.k8s.io/v1
@@ -44,16 +84,21 @@ metadata:
   name: console-external
   labels:
 {{ include "console.labels" . | indent 4 }}
-  {{- with .Values.externalIngress.annotations }}
   annotations:
+  {{- with .Values.externalIngress.rewrite.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.externalIngress.annotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   ingressClassName: {{ .Values.externalIngress.ingressClass }}
+  {{ if .Values.externalIngress.tls.enabled }}
   tls:
   - hosts:
     - {{ .Values.externalIngress.hostname | quote }}
     secretName: console-external-tls
+  {{ end }}
   rules:
   - host: {{ .Values.externalIngress.hostname | quote }}
     http:
@@ -65,4 +110,37 @@ spec:
             name: console
             port: 
               name: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: console-ext-kas-rewrite
+  labels:
+{{ include "console.labels" . | indent 4 }}
+  annotations:
+  {{- with .Values.externalIngress.rewrite.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.externalIngress.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.externalIngress.ingressClass }}
+  {{ if .Values.externalIngress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.externalIngress.hostname | quote }}
+    secretName: console-external-tls
+  {{ end }}
+  rules:
+  - host: {{ .Values.externalIngress.hostname | quote }}
+    http:
+      paths:
+      - path: /ext/kas
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: console-kas-service
+            port:
+              number: 8150
 {{ end }}

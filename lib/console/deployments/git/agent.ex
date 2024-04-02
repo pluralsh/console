@@ -8,6 +8,7 @@ defmodule Console.Deployments.Git.Agent do
   """
   use GenServer
   import Console.Deployments.Git.Cmd
+  alias Console.Prom.Metrics
   alias Console.Deployments.{Git.Cache, Git, Services}
   alias Console.Schema.{GitRepository, Service}
 
@@ -50,6 +51,7 @@ defmodule Console.Deployments.Git.Agent do
     schedule_pull()
     :timer.send_interval(@poll, :move)
     send self(), :clone
+    Metrics.inc(:git_agent, repo.url)
     {:ok, %State{git: repo, cache: cache}}
   end
 
@@ -96,12 +98,14 @@ defmodule Console.Deployments.Git.Agent do
     with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
          resp <- clone(git),
          cache <- Cache.refresh(cache),
-         {:ok, %GitRepository{health: :pullable} = git} <- save_status(resp, git) do
+         {{:ok, %GitRepository{health: :pullable} = git}, cache} <- {save_status(resp, git), cache} do
       {:noreply, %{state | git: git, cache: cache}}
     else
       {:git, nil} -> {:stop, {:shutdown, :normal}, state}
-      {:ok, %GitRepository{health: :failed}} ->
-        {:stop, {:shutdown, :credentials}, state}
+      {{:ok, %GitRepository{url: url, health: :failed} = git}, cache} ->
+        Logger.info "failed to clone #{url}, retrying in 30 seconds"
+        Process.send_after(self(), :clone, :timer.seconds(30))
+        {:noreply, %{state | git: git, cache: cache}}
       err ->
         Logger.info "unknown git failure: #{inspect(err)}"
         {:stop, {:shutdown, :unknown}, state}
@@ -134,6 +138,11 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def handle_info(_, state), do: {:noreply, state}
+
+  def terminate(_, %State{git: git}) do
+    Metrics.dec(:git_agent, git.url)
+  end
+  def terminate(_, _), do: :ok
 
   defp refresh(%GitRepository{} = repo) do
     with %GitRepository{} = git <- Console.Repo.get(GitRepository, repo.id),

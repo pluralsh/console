@@ -39,11 +39,12 @@ const ColUpdated = columnHelper.accessor(({ node }) => node?.updatedAt, {
   },
 })
 
-type StatusLabel = 'Stopped' | 'Running' | 'Complete'
+type StatusLabel = 'Stopped' | 'Running' | 'Pending' | 'Complete'
 const statusLabelToSeverity = {
   Stopped: 'danger',
-  Running: 'warning',
+  Running: 'info',
   Complete: 'success',
+  Pending: 'warning',
 } as const satisfies Record<
   StatusLabel,
   ComponentProps<typeof Chip>['severity']
@@ -53,12 +54,14 @@ const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   header: 'Status',
   cell: function Cell({ getValue }) {
     const theme = useTheme()
-    const { closed, pending } = getValue() || {}
+    const { closed, pending, running } = getValue() || {}
     const label: StatusLabel =
       (closed || 0) > 0
         ? 'Stopped'
-        : (pending || 0) > 0
+        : (running || 0) > 0
         ? 'Running'
+        : (pending || 0) > 0
+        ? 'Pending'
         : 'Complete'
 
     return (

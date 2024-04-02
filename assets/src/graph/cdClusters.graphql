@@ -80,7 +80,6 @@ fragment RuntimeService on RuntimeService {
     versions {
       ...AddonVersion
     }
-    readme
   }
   service {
     git {
@@ -379,11 +378,16 @@ query RuntimeServices(
   }
 }
 
-query AddonReleaseURL($id: ID!, $version: String!) {
+query RuntimeService($id: ID!, $version: String!) {
   runtimeService(id: $id) {
     id
     addon {
+      icon
+      versions {
+        ...AddonVersion
+      }
       releaseUrl(version: $version)
+      readme
     }
   }
 }
@@ -436,6 +440,28 @@ query TagPairs($first: Int = 30, $q: String, $tag: String) {
         value
         id
       }
+    }
+  }
+}
+
+fragment LogStream on LogStream {
+  stream
+  values {
+    timestamp
+    value
+  }
+}
+
+query ClusterLogs(
+  $clusterId: ID!
+  $query: LokiQuery!
+  $start: Long
+  $end: Long
+  $limit: Int!
+) {
+  cluster(id: $clusterId) {
+    logs(query: $query, start: $start, end: $end, limit: $limit) {
+      ...LogStream
     }
   }
 }

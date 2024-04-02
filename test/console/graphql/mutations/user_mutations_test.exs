@@ -14,11 +14,13 @@ defmodule Console.GraphQl.UserMutationsTest do
         mutation SignIn($email: String!, $password: String!) {
           signIn(email: $email, password: $password) {
             id
+            refreshToken { id token }
           }
         }
       """, %{"email" => user.email, "password" => "bogus password"})
 
       assert signin["id"] == user.id
+      assert signin["refreshToken"]["token"]
     end
   end
 

@@ -157,6 +157,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :configuration, :json
   end
 
+  input_object :pinned_custom_resource_attributes do
+    field :display_name, non_null(:string)
+    field :group,        non_null(:string)
+    field :version,      non_null(:string)
+    field :kind,         non_null(:string)
+    field :namespaced,   :boolean
+    field :cluster_id,   :id
+  end
+
   input_object :tag_input do
     field :name,  non_null(:string)
     field :value, non_null(:string)
@@ -239,6 +248,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve: &Deployments.list_nodes/3
     field :node_metrics, list_of(:node_metric), description: "list the cached node metrics for a cluster, can also be stale up to 5m",
       resolve: &Deployments.list_node_metrics/3
+    field :pinned_custom_resources, list_of(:pinned_custom_resource), description: "custom resources with dedicated views for this cluster",
+      resolve: &Deployments.list_pinned_custom_resources/3
 
     field :status, :cluster_status,
       description: "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null",
@@ -251,9 +262,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     @desc "lists OPA constraints registered in this cluster"
     connection field :policy_constraints, node_type: :policy_constraint do
-      arg :namespace, :string, description: "only show constraints with a violation for the given namespace"
-      arg :kind,      :string, description: "only show constraints with a violation for the given kind"
-      arg :q,         :string
+      arg :namespace,  :string, description: "only show constraints with a violation for the given namespace"
+      arg :kind,       :string, description: "only show constraints with a violation for the given kind"
+      arg :kinds,      list_of(:string)
+      arg :namespaces, list_of(:string)
+      arg :q,          :string
 
       resolve &Deployments.list_policy_constraints/3
     end
@@ -263,6 +276,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :field, non_null(:constraint_violation_field)
 
       resolve &Deployments.violation_statistics/3
+    end
+
+    @desc "Queries logs for a cluster out of loki"
+    field :logs, list_of(:log_stream) do
+      arg :query,      non_null(:loki_query)
+      arg :start,      :long
+      arg :end,        :long
+      arg :limit,      non_null(:integer)
+
+      resolve &Deployments.cluster_logs/3
     end
 
     @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
@@ -478,6 +501,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :count,   :integer
   end
 
+  @desc "A reference to a custom resource you want to be displayed in the k8s dashboard"
+  object :pinned_custom_resource do
+    field :id,           non_null(:id)
+    field :display_name, non_null(:string)
+    field :group,        non_null(:string)
+    field :version,      non_null(:string)
+    field :kind,         non_null(:string)
+    field :namespaced,   :boolean
+    field :cluster,      :cluster, resolve: dataloader(Deployments)
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -687,6 +721,20 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :attributes, non_null(:agent_migration_attributes)
 
       resolve &Deployments.create_agent_migration/2
+    end
+
+    field :create_pinned_custom_resource, :pinned_custom_resource do
+      middleware Authenticated
+      arg :attributes, non_null(:pinned_custom_resource_attributes)
+
+      resolve &Deployments.create_pinned_custom_resource/2
+    end
+
+    field :delete_pinned_custom_resource, :pinned_custom_resource do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_pinned_custom_resource/2
     end
   end
 end

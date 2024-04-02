@@ -59,13 +59,9 @@ export default function Service() {
             {ports.map(({ name, protocol, port, targetPort }, i) => (
               <PropWideBold
                 key={i}
-                gap="small"
                 title={name || '-'}
               >
-                <span>{protocol}</span>
-                <span>
-                  {port} {'->'} {targetPort}
-                </span>
+                {protocol} {port} → {targetPort}
               </PropWideBold>
             ))}
           </>

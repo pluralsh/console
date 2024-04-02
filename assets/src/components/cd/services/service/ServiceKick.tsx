@@ -1,4 +1,4 @@
-import { Button } from '@pluralsh/design-system'
+import { Button, Tooltip } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useKickServiceMutation } from 'generated/graphql'
 import { useTheme } from 'styled-components'
@@ -23,12 +23,14 @@ export default function ServiceKick({ id }) {
           error={error}
         />
       )}
-      <Button
-        onClick={mutation}
-        loading={loading}
-      >
-        Resync Service
-      </Button>
+      <Tooltip label="Use this to sync this service now instead of in the next poll interval">
+        <Button
+          onClick={mutation}
+          loading={loading}
+        >
+          Resync service
+        </Button>
+      </Tooltip>
     </div>
   )
 }

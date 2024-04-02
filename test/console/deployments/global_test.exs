@@ -136,6 +136,20 @@ defmodule Console.Deployments.GlobalTest do
 
       :ok = Global.sync_service(source, dest, admin)
     end
+
+    test "it can sync a template global service" do
+      git = insert(:git_repository)
+      global = insert(:global_service,
+        template: %{repository_id: git.id, git: %{ref: "main", folder: "/"}, name: "svc", namespace: "prod"})
+      service = insert(:service, name: "svc", namespace: "prod", git: %{ref: "master", folder: "/k8s"})
+
+      {:ok, synced} = Global.sync_service(global, service, admin_user())
+
+      assert synced.id == service.id
+      assert synced.repository_id == git.id
+      assert synced.git.ref == "main"
+      assert synced.git.folder == "/"
+    end
   end
 
   describe "#sync_clusters/1" do
@@ -195,7 +209,7 @@ defmodule Console.Deployments.GlobalTest do
       refute Global.diff?(source, synced)
     end
 
-    test "it will sync to if provider is unspecified" do
+    test "it will sync too if provider is unspecified" do
       insert(:user, bot_name: "console", roles: %{admin: true})
       git = insert(:git_repository)
       cluster = insert(:cluster)
@@ -248,6 +262,103 @@ defmodule Console.Deployments.GlobalTest do
       for cluster <- [sync2, sync3] do
         refute Services.get_service_by_name(cluster.id, "source")
       end
+    end
+  end
+
+  describe "#create_managed_namespace/2" do
+    test "admins can create managed namespaces" do
+      repo = insert(:git_repository)
+
+      {:ok, ns} = Global.create_managed_namespace(%{
+        name: "dev",
+        labels: %{"some" => "label"},
+        service: %{
+          repository_id: repo.id,
+          git: %{ref: "main", folder: "runtime"},
+          configuration: [%{name: "test", value: "secret"}]
+        }
+      }, admin_user())
+
+      assert ns.name == "dev"
+      assert ns.labels["some"] == "label"
+      assert ns.service.repository_id == repo.id
+      assert ns.service.git.ref == "main"
+      assert ns.service.git.folder == "runtime"
+
+      {:ok, %{"test" => "secret"}} = Global.configuration(ns.service)
+
+      assert_receive {:event, %PubSub.ManagedNamespaceCreated{item: ^ns}}
+    end
+
+    test "non-admins cannot create" do
+      repo = insert(:git_repository)
+
+      {:error, _} = Global.create_managed_namespace(%{
+        name: "dev",
+        labels: %{"some" => "label"},
+        service: %{
+          repository_id: repo.id,
+          git: %{ref: "main", folder: "runtime"}
+        }
+      }, insert(:user))
+    end
+  end
+
+  describe "#update_managed_namespace/3" do
+    test "admins can update managed namespaces" do
+      repo = insert(:git_repository)
+      ns = insert(:managed_namespace)
+
+      {:ok, updated} = Global.update_managed_namespace(%{
+        name: "dev",
+        labels: %{"some" => "label"},
+        service: %{
+          repository_id: repo.id,
+          git: %{ref: "main", folder: "runtime"}
+        }
+      }, ns.id, admin_user())
+
+      assert updated.id == ns.id
+      assert updated.name == "dev"
+      assert updated.labels["some"] == "label"
+      assert updated.service.repository_id == repo.id
+      assert updated.service.git.ref == "main"
+      assert updated.service.git.folder == "runtime"
+
+      assert_receive {:event, %PubSub.ManagedNamespaceUpdated{item: ^updated}}
+    end
+
+    test "non-admins cannot update" do
+      repo = insert(:git_repository)
+      ns = insert(:managed_namespace)
+
+      {:error, _} = Global.update_managed_namespace(%{
+        name: "dev",
+        labels: %{"some" => "label"},
+        service: %{
+          repository_id: repo.id,
+          git: %{ref: "main", folder: "runtime"}
+        }
+      }, ns.id, insert(:user))
+    end
+  end
+
+  describe "#delete_managed_namespace/2" do
+    test "admins can delete managed namespaces" do
+      ns = insert(:managed_namespace)
+
+      {:ok, deleted} = Global.delete_managed_namespace(ns.id, admin_user())
+
+      assert deleted.id == ns.id
+      assert deleted.deleted_at
+
+      assert_receive {:event, %PubSub.ManagedNamespaceDeleted{item: ^deleted}}
+    end
+
+    test "non-admins cannot delete" do
+      ns = insert(:managed_namespace)
+
+      {:error, _} = Global.delete_managed_namespace(ns.id, insert(:user))
     end
   end
 end

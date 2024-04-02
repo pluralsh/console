@@ -1,3 +1,7 @@
+global:
+  additionalVolumes: ~
+  additionalVolumeMounts: ~
+
 image:
   # See: https://github.com/pluralsh/kubernetes-agent/pkgs/container/kas.
   repository: ghcr.io/pluralsh/kas
@@ -87,6 +91,10 @@ ingress:
   ingressClass: nginx
   kubernetesApiPath: /k8s-proxy
   tlsSecretName: kas-tls
+
+  tls:
+    enabled: true
+
   annotations:
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod

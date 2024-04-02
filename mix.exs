@@ -112,6 +112,7 @@ defmodule Console.MixProject do
       {:argon2_elixir, "~> 2.0"},
       {:prometheus_ex, "~> 3.0"},
       {:prometheus_plugs, "~> 1.1.1"},
+      {:prometheus_ecto, "~> 1.4.3"},
       {:guardian, "~> 1.2.1"},
       {:httpoison, "~> 1.7", override: true},
       {:nebulex, "== 2.0.0"},

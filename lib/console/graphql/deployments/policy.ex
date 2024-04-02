@@ -80,9 +80,11 @@ defmodule Console.GraphQl.Deployments.Policy do
   object :policy_queries do
     connection field :policy_constraints, node_type: :policy_constraint do
       middleware Authenticated
-      arg :kind,      :string
-      arg :namespace, :string
-      arg :q,         :string
+      arg :kind,       :string
+      arg :namespace,  :string
+      arg :kinds,      list_of(:string)
+      arg :namespaces, list_of(:string)
+      arg :q,          :string
 
       resolve &Deployments.list_policy_constraints/2
     end

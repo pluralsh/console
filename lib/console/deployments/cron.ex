@@ -2,7 +2,16 @@ defmodule Console.Deployments.Cron do
   use Console.Services.Base
   alias Console.Deployments.{Services, Clusters, Global}
   alias Console.Services.Users
-  alias Console.Schema.{Cluster, Service, ServiceComponent, GlobalService, PipelineStage, PipelinePromotion, AgentMigration}
+  alias Console.Schema.{
+    Cluster,
+    Service,
+    ServiceComponent,
+    GlobalService,
+    PipelineStage,
+    PipelinePromotion,
+    AgentMigration,
+    ManagedNamespace
+  }
   alias Console.Deployments.Pipelines.Discovery
 
   require Logger
@@ -107,10 +116,36 @@ defmodule Console.Deployments.Cron do
     Logger.info "backfilling global services into all clusters"
 
     GlobalService.stream()
+    |> GlobalService.preloaded()
     |> Repo.stream(method: :keyset)
     |> Stream.each(fn global ->
       Logger.info "syncing global service #{global.id}"
       Global.sync_clusters(global)
+    end)
+    |> Stream.run()
+  end
+
+  def backfill_managed_namespaces() do
+    Logger.info "backfilling managed namespaces across clusters"
+
+    ManagedNamespace.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn mns ->
+      Logger.info "syncing managed namespace #{mns.id}"
+      Global.reconcile_namespace(mns)
+    end)
+    |> Stream.run()
+  end
+
+  def drain_managed_namespaces() do
+    Logger.info "draining managed namespaces across clusters"
+
+    ManagedNamespace.deleted()
+    |> ManagedNamespace.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn mns ->
+      Logger.info "draining managed namespace #{mns.id}"
+      Global.drain_managed_namespace(mns)
     end)
     |> Stream.run()
   end

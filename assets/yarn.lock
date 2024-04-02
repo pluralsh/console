@@ -2778,6 +2778,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@graphql-codegen/fragment-matcher@npm:5.0.2":
+  version: 5.0.2
+  resolution: "@graphql-codegen/fragment-matcher@npm:5.0.2"
+  dependencies:
+    "@graphql-codegen/plugin-helpers": ^5.0.3
+    tslib: ~2.6.0
+  peerDependencies:
+    graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+  checksum: 136a77fe7fdb9eddcee4dff5fb3ac0f804bdf717b3de3596f37d74c4a14b8b9af02e164bcd3bf4624585a1916845c0efe561ef191143a513eb7999fe8fb9a89d
+  languageName: node
+  linkType: hard
+
 "@graphql-codegen/introspection@npm:4.0.0":
   version: 4.0.0
   resolution: "@graphql-codegen/introspection@npm:4.0.0"
@@ -2850,6 +2862,22 @@ __metadata:
   peerDependencies:
     graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
   checksum: 97faa8f87f41292bb5263097b1613733faf07fd0ff375ac89438aa0f2cd91e163d088b63dcafcdb6d66beaba8f7d13005bb980793e71979e9ad61fdfd206a730
+  languageName: node
+  linkType: hard
+
+"@graphql-codegen/plugin-helpers@npm:^5.0.3":
+  version: 5.0.3
+  resolution: "@graphql-codegen/plugin-helpers@npm:5.0.3"
+  dependencies:
+    "@graphql-tools/utils": ^10.0.0
+    change-case-all: 1.0.15
+    common-tags: 1.8.2
+    import-from: 4.0.0
+    lodash: ~4.17.0
+    tslib: ~2.6.0
+  peerDependencies:
+    graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+  checksum: 7116745edd88cabc61aa192c2a3632844950f00e33040f68f0ccc41bb2d6bf3a14fbeaa67d6d5ea01193ef1e709a9b5bd09860c3b3e262dacea0f1127ee61789
   languageName: node
   linkType: hard
 
@@ -9120,6 +9148,7 @@ __metadata:
     "@emotion/styled": 11.11.0
     "@graphql-codegen/add": 5.0.0
     "@graphql-codegen/cli": 5.0.0
+    "@graphql-codegen/fragment-matcher": 5.0.2
     "@graphql-codegen/introspection": 4.0.0
     "@graphql-codegen/named-operations-object": 3.0.0
     "@graphql-codegen/typescript": 4.0.1
@@ -9185,10 +9214,12 @@ __metadata:
     humanize-duration: 3.31.0
     husky: 8.0.3
     immer: 10.0.3
+    js-cookie: 3.0.5
     js-file-download: 0.4.12
     js-yaml: 4.1.0
     jsdom: 22.1.0
     jsonpath: 1.1.1
+    jwt-decode: 4.0.0
     kbar: 0.1.0-beta.44
     kubernetes-resource-parser: 0.1.0
     lint-staged: 15.0.2
@@ -13286,6 +13317,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-cookie@npm:3.0.5":
+  version: 3.0.5
+  resolution: "js-cookie@npm:3.0.5"
+  checksum: 2dbd2809c6180fbcf060c6957cb82dbb47edae0ead6bd71cbeedf448aa6b6923115003b995f7d3e3077bfe2cb76295ea6b584eb7196cca8ba0a09f389f64967a
+  languageName: node
+  linkType: hard
+
 "js-cookie@npm:^2.2.1":
   version: 2.2.1
   resolution: "js-cookie@npm:2.2.1"
@@ -13556,6 +13594,13 @@ __metadata:
     object.assign: ^4.1.4
     object.values: ^1.1.6
   checksum: f4b05fa4d7b5234230c905cfa88d36dc8a58a6666975a3891429b1a8cdc8a140bca76c297225cb7a499fad25a2c052ac93934449a2c31a44fc9edd06c773780a
+  languageName: node
+  linkType: hard
+
+"jwt-decode@npm:4.0.0":
+  version: 4.0.0
+  resolution: "jwt-decode@npm:4.0.0"
+  checksum: 390e2edcb31a92e86c8cbdd1edeea4c0d62acd371f8a8f0a8878e499390c0ecf4c658b365c4e941e4ef37d0170e4ca650aaa49f99a45c0b9695a235b210154b0
   languageName: node
   linkType: hard
 
