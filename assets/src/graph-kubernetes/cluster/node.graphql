@@ -39,3 +39,53 @@ query Nodes(
     }
   }
 }
+
+query Node($name: String!) {
+  handleGetNodeDetail(name: $name) @rest(path: "node/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    nodeInfo {
+      architecture
+      bootID
+      containerRuntimeVersion
+      kernelVersion
+      kubeletVersion
+      kubeProxyVersion
+      machineID
+      operatingSystem
+      osImage
+      systemUUID
+    }
+    providerID
+    containerImages
+    podCIDR
+    phase
+    errors
+  }
+}
+
+query NodeEvents(
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetNodeEvents(
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "common_EventList"
+      path: "node/{args.name}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...EventList
+  }
+}

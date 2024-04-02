@@ -44,7 +44,10 @@ import ConfigMaps from '../components/kubernetes/configuration/ConfigMaps'
 import Secrets from '../components/kubernetes/configuration/Secrets'
 import Cluster from '../components/kubernetes/cluster/Cluster'
 import Nodes from '../components/kubernetes/cluster/Nodes'
-import Node from '../components/kubernetes/cluster/Node'
+import Node, {
+  NodeEvents,
+  NodeInfo,
+} from '../components/kubernetes/cluster/Node'
 import Events from '../components/kubernetes/cluster/Events'
 import Namespaces from '../components/kubernetes/cluster/Namespaces'
 import CustomResourceDefinitions from '../components/kubernetes/customresources/CustomResourceDefinitions'
@@ -76,7 +79,10 @@ import StorageClass, {
 import ConfigMap, {
   ConfigMapData,
 } from '../components/kubernetes/configuration/ConfigMap'
-import Namespace from '../components/kubernetes/cluster/Namespace'
+import Namespace, {
+  NamespaceEvents,
+  NamespaceInfo,
+} from '../components/kubernetes/cluster/Namespace'
 
 import Raw from '../components/kubernetes/common/Raw'
 
@@ -503,15 +509,41 @@ export const kubernetesRoutes = [
   </Route>,
   // Cluster
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${NODES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<Node />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<NodeInfo />}
+    />
+    <Route
+      path="events"
+      element={<NodeEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${NAMESPACES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<Namespace />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<NamespaceInfo />}
+    />
+    <Route
+      path="events"
+      element={<NamespaceEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   // Access
   <Route
     path={`${KUBERNETES_ABS_PATH}/${ROLES_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}

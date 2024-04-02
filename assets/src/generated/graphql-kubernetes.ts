@@ -394,7 +394,7 @@ export type Query = {
   /** returns a list of Pods for ReplicaSet */
   handleGetReplicaSetPods?: Maybe<Pod_PodList>;
   /** returns a list of Services for ReplicaSet */
-  handleGetReplicaSetServices?: Maybe<Service_ServiceList>;
+  handleGetReplicaSetServices?: Maybe<Pod_PodList>;
   /** returns a list of ReplicaSets in a namespace */
   handleGetReplicaSets?: Maybe<Replicaset_ReplicaSetList>;
   /** returns detailed information about ReplicationController */
@@ -4703,6 +4703,24 @@ export type NamespacesQueryVariables = Exact<{
 
 export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', phase: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type NamespaceQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+
+export type NamespaceQuery = { __typename?: 'Query', handleGetNamespaceDetail?: { __typename?: 'namespace_NamespaceDetail', phase: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, resourceQuotaList: { __typename?: 'resourcequota_ResourceQuotaDetailList', items: Array<{ __typename?: 'resourcequota_ResourceQuotaDetail', scopes?: Array<string | null> | null, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, statusList?: { __typename?: 'query_handleGetNamespaceDetail_resourceQuotaList_items_items_statusList', additionalProperties?: Array<{ __typename?: 'resourcequota_ResourceStatus_entry', key: string, value?: { __typename?: 'resourcequota_ResourceStatus', hard?: string | null, used?: string | null } | null } | null> | null } | null } | null> }, resourceLimits: Array<{ __typename?: 'limitrange_LimitRangeItem', default?: string | null, defaultRequest?: string | null, max?: string | null, maxLimitRequestRatio?: string | null, min?: string | null, resourceName?: string | null, resourceType?: string | null } | null> } | null };
+
+export type NamespaceEventsQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type NamespaceEventsQuery = { __typename?: 'Query', handleGetNamespaceEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export type NodesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -4714,29 +4732,23 @@ export type NodesQueryVariables = Exact<{
 
 export type NodesQuery = { __typename?: 'Query', handleGetNodeList?: { __typename?: 'node_NodeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, nodes: Array<{ __typename?: 'node_Node', ready: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any } } | null> } | null };
 
-export type ListMetaFragment = { __typename?: 'types_ListMeta', totalItems: number };
+export type NodeQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
 
-export type TypeMetaFragment = { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null };
 
-export type ObjectMetaFragment = { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null };
+export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typename?: 'node_NodeDetail', providerID: string, containerImages: Array<string | null>, podCIDR: string, phase: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', architecture: string, bootID: string, containerRuntimeVersion: string, kernelVersion: string, kubeletVersion: string, kubeProxyVersion: string, machineID: string, operatingSystem: string, osImage: string, systemUUID: string } } | null };
 
-export type ConditionFragment = { __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string };
+export type NodeEventsQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
 
-export type ProbeFragment = { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null };
 
-export type PolicyRuleFragment = { __typename?: 'v1_PolicyRule', apiGroups?: Array<string | null> | null, nonResourceURLs?: Array<string | null> | null, resourceNames?: Array<string | null> | null, verbs: Array<string | null>, resources?: Array<string | null> | null };
-
-export type SubjectFragment = { __typename?: 'v1_Subject', apiGroup?: string | null, kind: string, name: string, namespace?: string | null };
-
-export type PodInfoFragment = { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
-
-export type ResourceOwnerFragment = { __typename?: 'controller_ResourceOwner', containerImages: Array<string | null>, initContainerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
-
-export type SelectorFragment = { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null };
-
-export type HorizontalPodAutoscalerListFragment = { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> };
-
-export type HorizontalPodAutoscalerFragment = { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } };
+export type NodeEventsQuery = { __typename?: 'Query', handleGetNodeEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NamespacedResourceQueryVariables = Exact<{
   kind: Scalars['String']['input'];
@@ -4846,7 +4858,23 @@ export type ServicesQueryVariables = Exact<{
 
 export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> } | null> } | null> } | null };
 
-export type ServiceListFragment = { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> } | null> } | null> };
+export type ListMetaFragment = { __typename?: 'types_ListMeta', totalItems: number };
+
+export type TypeMetaFragment = { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null };
+
+export type ObjectMetaFragment = { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null };
+
+export type ConditionFragment = { __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string };
+
+export type ProbeFragment = { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null };
+
+export type PolicyRuleFragment = { __typename?: 'v1_PolicyRule', apiGroups?: Array<string | null> | null, nonResourceURLs?: Array<string | null> | null, resourceNames?: Array<string | null> | null, verbs: Array<string | null>, resources?: Array<string | null> | null };
+
+export type SubjectFragment = { __typename?: 'v1_Subject', apiGroup?: string | null, kind: string, name: string, namespace?: string | null };
+
+export type PodInfoFragment = { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
+
+export type ResourceOwnerFragment = { __typename?: 'controller_ResourceOwner', containerImages: Array<string | null>, initContainerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
 export type PersistentVolumesQueryVariables = Exact<{
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5001,8 +5029,6 @@ export type PodSecurityContextFragment = { __typename?: 'v1_PodSecurityContext',
 
 export type SecurityContextFragment = { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null };
 
-export type PodListFragment = { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> };
-
 export type ReplicaSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5013,38 +5039,6 @@ export type ReplicaSetsQueryVariables = Exact<{
 
 
 export type ReplicaSetsQuery = { __typename?: 'Query', handleGetReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
-
-export type ReplicaSetQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-}>;
-
-
-export type ReplicaSetQuery = { __typename?: 'Query', handleGetReplicaSetDetail?: { __typename?: 'replicaset_ReplicaSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, selector: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null }, horizontalPodAutoscalerList: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } } | null };
-
-export type ReplicaSetEventsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-}>;
-
-
-export type ReplicaSetEventsQuery = { __typename?: 'Query', handleGetReplicaSetEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
-export type ReplicaSetPodsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-}>;
-
-
-export type ReplicaSetPodsQuery = { __typename?: 'Query', handleGetReplicaSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
-
-export type ReplicaSetServicesQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-}>;
-
-
-export type ReplicaSetServicesQuery = { __typename?: 'Query', handleGetReplicaSetServices?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> } | null> } | null> } | null };
 
 export type ReplicationControllersQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5179,81 +5173,6 @@ export const ResourceOwnerFragmentDoc = gql`
     ${TypeMetaFragmentDoc}
 ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}`;
-export const SelectorFragmentDoc = gql`
-    fragment Selector on v1_LabelSelector {
-  matchLabels
-  matchExpressions {
-    key
-    operator
-    values
-  }
-}
-    `;
-export const HorizontalPodAutoscalerFragmentDoc = gql`
-    fragment HorizontalPodAutoscaler on horizontalpodautoscaler_HorizontalPodAutoscaler {
-  typeMeta @type(name: "types_TypeMeta") {
-    ...TypeMeta
-  }
-  objectMeta @type(name: "types_ObjectMeta") {
-    ...ObjectMeta
-  }
-  currentCPUUtilizationPercentage
-  maxReplicas
-  minReplicas
-  targetCPUUtilizationPercentage
-  scaleTargetRef {
-    name
-    kind
-  }
-}
-    ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-export const HorizontalPodAutoscalerListFragmentDoc = gql`
-    fragment HorizontalPodAutoscalerList on horizontalpodautoscaler_HorizontalPodAutoscalerList {
-  listMeta @type(name: "types_ListMeta") {
-    ...ListMeta
-  }
-  horizontalpodautoscalers @type(name: "horizontalpodautoscaler_HorizontalPodAutoscaler") {
-    ...HorizontalPodAutoscaler
-  }
-}
-    ${ListMetaFragmentDoc}
-${HorizontalPodAutoscalerFragmentDoc}`;
-export const ServiceListFragmentDoc = gql`
-    fragment ServiceList on service_ServiceList {
-  listMeta @type(name: "types_ListMeta") {
-    ...ListMeta
-  }
-  services {
-    typeMeta @type(name: "types_TypeMeta") {
-      ...TypeMeta
-    }
-    objectMeta @type(name: "types_ObjectMeta") {
-      ...ObjectMeta
-    }
-    type
-    clusterIP
-    internalEndpoint {
-      host
-      ports {
-        nodePort
-        port
-        protocol
-      }
-    }
-    externalEndpoints {
-      host
-      ports {
-        nodePort
-        port
-        protocol
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
 export const PersistentVolumeClaimDetailFragmentDoc = gql`
     fragment PersistentVolumeClaimDetail on persistentvolumeclaim_PersistentVolumeClaimDetail {
   typeMeta @type(name: "types_TypeMeta") {
@@ -5428,30 +5347,6 @@ export const PodSecurityContextFragmentDoc = gql`
   }
 }
     `;
-export const PodListFragmentDoc = gql`
-    fragment PodList on pod_PodList {
-  listMeta @type(name: "types_ListMeta") {
-    ...ListMeta
-  }
-  pods {
-    typeMeta @type(name: "types_TypeMeta") {
-      ...TypeMeta
-    }
-    objectMeta @type(name: "types_ObjectMeta") {
-      ...ObjectMeta
-    }
-    status
-    containerImages
-    nodeName
-    restartCount
-    warnings {
-      message
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
 export const ClusterRolesDocument = gql`
     query ClusterRoles($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetClusterRoleList(
@@ -6135,6 +6030,133 @@ export type NamespacesQueryHookResult = ReturnType<typeof useNamespacesQuery>;
 export type NamespacesLazyQueryHookResult = ReturnType<typeof useNamespacesLazyQuery>;
 export type NamespacesSuspenseQueryHookResult = ReturnType<typeof useNamespacesSuspenseQuery>;
 export type NamespacesQueryResult = Apollo.QueryResult<NamespacesQuery, NamespacesQueryVariables>;
+export const NamespaceDocument = gql`
+    query Namespace($name: String!) {
+  handleGetNamespaceDetail(name: $name) @rest(path: "namespace/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    resourceQuotaList {
+      items {
+        typeMeta @type(name: "types_TypeMeta") {
+          ...TypeMeta
+        }
+        objectMeta @type(name: "types_ObjectMeta") {
+          ...ObjectMeta
+        }
+        scopes
+        statusList {
+          additionalProperties {
+            value {
+              hard
+              used
+            }
+            key
+          }
+        }
+      }
+    }
+    resourceLimits {
+      default
+      defaultRequest
+      max
+      maxLimitRequestRatio
+      min
+      resourceName
+      resourceType
+    }
+    phase
+    errors
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useNamespaceQuery__
+ *
+ * To run a query within a React component, call `useNamespaceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNamespaceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNamespaceQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useNamespaceQuery(baseOptions: Apollo.QueryHookOptions<NamespaceQuery, NamespaceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NamespaceQuery, NamespaceQueryVariables>(NamespaceDocument, options);
+      }
+export function useNamespaceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NamespaceQuery, NamespaceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NamespaceQuery, NamespaceQueryVariables>(NamespaceDocument, options);
+        }
+export function useNamespaceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NamespaceQuery, NamespaceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NamespaceQuery, NamespaceQueryVariables>(NamespaceDocument, options);
+        }
+export type NamespaceQueryHookResult = ReturnType<typeof useNamespaceQuery>;
+export type NamespaceLazyQueryHookResult = ReturnType<typeof useNamespaceLazyQuery>;
+export type NamespaceSuspenseQueryHookResult = ReturnType<typeof useNamespaceSuspenseQuery>;
+export type NamespaceQueryResult = Apollo.QueryResult<NamespaceQuery, NamespaceQueryVariables>;
+export const NamespaceEventsDocument = gql`
+    query NamespaceEvents($name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetNamespaceEvents(
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "namespace/{args.name}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useNamespaceEventsQuery__
+ *
+ * To run a query within a React component, call `useNamespaceEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNamespaceEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNamespaceEventsQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useNamespaceEventsQuery(baseOptions: Apollo.QueryHookOptions<NamespaceEventsQuery, NamespaceEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NamespaceEventsQuery, NamespaceEventsQueryVariables>(NamespaceEventsDocument, options);
+      }
+export function useNamespaceEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NamespaceEventsQuery, NamespaceEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NamespaceEventsQuery, NamespaceEventsQueryVariables>(NamespaceEventsDocument, options);
+        }
+export function useNamespaceEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NamespaceEventsQuery, NamespaceEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NamespaceEventsQuery, NamespaceEventsQueryVariables>(NamespaceEventsDocument, options);
+        }
+export type NamespaceEventsQueryHookResult = ReturnType<typeof useNamespaceEventsQuery>;
+export type NamespaceEventsLazyQueryHookResult = ReturnType<typeof useNamespaceEventsLazyQuery>;
+export type NamespaceEventsSuspenseQueryHookResult = ReturnType<typeof useNamespaceEventsSuspenseQuery>;
+export type NamespaceEventsQueryResult = Apollo.QueryResult<NamespaceEventsQuery, NamespaceEventsQueryVariables>;
 export const NodesDocument = gql`
     query Nodes($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetNodeList(
@@ -6208,6 +6230,119 @@ export type NodesQueryHookResult = ReturnType<typeof useNodesQuery>;
 export type NodesLazyQueryHookResult = ReturnType<typeof useNodesLazyQuery>;
 export type NodesSuspenseQueryHookResult = ReturnType<typeof useNodesSuspenseQuery>;
 export type NodesQueryResult = Apollo.QueryResult<NodesQuery, NodesQueryVariables>;
+export const NodeDocument = gql`
+    query Node($name: String!) {
+  handleGetNodeDetail(name: $name) @rest(path: "node/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    nodeInfo {
+      architecture
+      bootID
+      containerRuntimeVersion
+      kernelVersion
+      kubeletVersion
+      kubeProxyVersion
+      machineID
+      operatingSystem
+      osImage
+      systemUUID
+    }
+    providerID
+    containerImages
+    podCIDR
+    phase
+    errors
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useNodeQuery__
+ *
+ * To run a query within a React component, call `useNodeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNodeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNodeQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useNodeQuery(baseOptions: Apollo.QueryHookOptions<NodeQuery, NodeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NodeQuery, NodeQueryVariables>(NodeDocument, options);
+      }
+export function useNodeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NodeQuery, NodeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NodeQuery, NodeQueryVariables>(NodeDocument, options);
+        }
+export function useNodeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NodeQuery, NodeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NodeQuery, NodeQueryVariables>(NodeDocument, options);
+        }
+export type NodeQueryHookResult = ReturnType<typeof useNodeQuery>;
+export type NodeLazyQueryHookResult = ReturnType<typeof useNodeLazyQuery>;
+export type NodeSuspenseQueryHookResult = ReturnType<typeof useNodeSuspenseQuery>;
+export type NodeQueryResult = Apollo.QueryResult<NodeQuery, NodeQueryVariables>;
+export const NodeEventsDocument = gql`
+    query NodeEvents($name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetNodeEvents(
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "node/{args.name}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useNodeEventsQuery__
+ *
+ * To run a query within a React component, call `useNodeEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNodeEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNodeEventsQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useNodeEventsQuery(baseOptions: Apollo.QueryHookOptions<NodeEventsQuery, NodeEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NodeEventsQuery, NodeEventsQueryVariables>(NodeEventsDocument, options);
+      }
+export function useNodeEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NodeEventsQuery, NodeEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NodeEventsQuery, NodeEventsQueryVariables>(NodeEventsDocument, options);
+        }
+export function useNodeEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NodeEventsQuery, NodeEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NodeEventsQuery, NodeEventsQueryVariables>(NodeEventsDocument, options);
+        }
+export type NodeEventsQueryHookResult = ReturnType<typeof useNodeEventsQuery>;
+export type NodeEventsLazyQueryHookResult = ReturnType<typeof useNodeEventsLazyQuery>;
+export type NodeEventsSuspenseQueryHookResult = ReturnType<typeof useNodeEventsSuspenseQuery>;
+export type NodeEventsQueryResult = Apollo.QueryResult<NodeEventsQuery, NodeEventsQueryVariables>;
 export const NamespacedResourceDocument = gql`
     query NamespacedResource($kind: String!, $name: String!, $namespace: String!) {
   handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {
@@ -6786,11 +6921,41 @@ export const ServicesDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(type: "service_ServiceList", path: "service/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    ...ServiceList
+  ) @rest(path: "service/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    services {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+      type
+      clusterIP
+      internalEndpoint {
+        host
+        ports {
+          nodePort
+          port
+          protocol
+        }
+      }
+      externalEndpoints {
+        host
+        ports {
+          nodePort
+          port
+          protocol
+        }
+      }
+    }
   }
 }
-    ${ServiceListFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __useServicesQuery__
@@ -7494,10 +7659,29 @@ export const PodsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(type: "pod_PodList", path: "pod/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    ...PodList
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    pods {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+      status
+      containerImages
+      nodeName
+      restartCount
+      warnings {
+        message
+      }
+    }
   }
 }
-    ${PodListFragmentDoc}`;
+    ${ListMetaFragmentDoc}
+${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
 
 /**
  * __usePodsQuery__
@@ -7734,190 +7918,6 @@ export type ReplicaSetsQueryHookResult = ReturnType<typeof useReplicaSetsQuery>;
 export type ReplicaSetsLazyQueryHookResult = ReturnType<typeof useReplicaSetsLazyQuery>;
 export type ReplicaSetsSuspenseQueryHookResult = ReturnType<typeof useReplicaSetsSuspenseQuery>;
 export type ReplicaSetsQueryResult = Apollo.QueryResult<ReplicaSetsQuery, ReplicaSetsQueryVariables>;
-export const ReplicaSetDocument = gql`
-    query ReplicaSet($namespace: String!, $name: String!) {
-  handleGetReplicaSetDetail(namespace: $namespace, replicaSet: $name) @rest(path: "replicaset/{args.namespace}/{args.replicaSet}") {
-    typeMeta @type(name: "types_TypeMeta") {
-      ...TypeMeta
-    }
-    objectMeta @type(name: "types_ObjectMeta") {
-      ...ObjectMeta
-    }
-    podInfo @type(name: "common_PodInfo") {
-      ...PodInfo
-    }
-    selector @type(name: "v1_LabelSelector") {
-      ...Selector
-    }
-    horizontalPodAutoscalerList @type(name: "horizontalpodautoscaler_HorizontalPodAutoscalerList") {
-      ...HorizontalPodAutoscalerList
-    }
-    initContainerImages
-    containerImages
-  }
-}
-    ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}
-${SelectorFragmentDoc}
-${HorizontalPodAutoscalerListFragmentDoc}`;
-
-/**
- * __useReplicaSetQuery__
- *
- * To run a query within a React component, call `useReplicaSetQuery` and pass it any options that fit your needs.
- * When your component renders, `useReplicaSetQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useReplicaSetQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      name: // value for 'name'
- *   },
- * });
- */
-export function useReplicaSetQuery(baseOptions: Apollo.QueryHookOptions<ReplicaSetQuery, ReplicaSetQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ReplicaSetQuery, ReplicaSetQueryVariables>(ReplicaSetDocument, options);
-      }
-export function useReplicaSetLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicaSetQuery, ReplicaSetQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ReplicaSetQuery, ReplicaSetQueryVariables>(ReplicaSetDocument, options);
-        }
-export function useReplicaSetSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicaSetQuery, ReplicaSetQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ReplicaSetQuery, ReplicaSetQueryVariables>(ReplicaSetDocument, options);
-        }
-export type ReplicaSetQueryHookResult = ReturnType<typeof useReplicaSetQuery>;
-export type ReplicaSetLazyQueryHookResult = ReturnType<typeof useReplicaSetLazyQuery>;
-export type ReplicaSetSuspenseQueryHookResult = ReturnType<typeof useReplicaSetSuspenseQuery>;
-export type ReplicaSetQueryResult = Apollo.QueryResult<ReplicaSetQuery, ReplicaSetQueryVariables>;
-export const ReplicaSetEventsDocument = gql`
-    query ReplicaSetEvents($namespace: String!, $name: String!) {
-  handleGetReplicaSetEvents(namespace: $namespace, replicaSet: $name) @rest(type: "common_EventList", path: "replicaset/{args.namespace}/{args.replicaSet}/event") {
-    ...EventList
-  }
-}
-    ${EventListFragmentDoc}`;
-
-/**
- * __useReplicaSetEventsQuery__
- *
- * To run a query within a React component, call `useReplicaSetEventsQuery` and pass it any options that fit your needs.
- * When your component renders, `useReplicaSetEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useReplicaSetEventsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      name: // value for 'name'
- *   },
- * });
- */
-export function useReplicaSetEventsQuery(baseOptions: Apollo.QueryHookOptions<ReplicaSetEventsQuery, ReplicaSetEventsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ReplicaSetEventsQuery, ReplicaSetEventsQueryVariables>(ReplicaSetEventsDocument, options);
-      }
-export function useReplicaSetEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicaSetEventsQuery, ReplicaSetEventsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ReplicaSetEventsQuery, ReplicaSetEventsQueryVariables>(ReplicaSetEventsDocument, options);
-        }
-export function useReplicaSetEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicaSetEventsQuery, ReplicaSetEventsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ReplicaSetEventsQuery, ReplicaSetEventsQueryVariables>(ReplicaSetEventsDocument, options);
-        }
-export type ReplicaSetEventsQueryHookResult = ReturnType<typeof useReplicaSetEventsQuery>;
-export type ReplicaSetEventsLazyQueryHookResult = ReturnType<typeof useReplicaSetEventsLazyQuery>;
-export type ReplicaSetEventsSuspenseQueryHookResult = ReturnType<typeof useReplicaSetEventsSuspenseQuery>;
-export type ReplicaSetEventsQueryResult = Apollo.QueryResult<ReplicaSetEventsQuery, ReplicaSetEventsQueryVariables>;
-export const ReplicaSetPodsDocument = gql`
-    query ReplicaSetPods($namespace: String!, $name: String!) {
-  handleGetReplicaSetPods(namespace: $namespace, replicaSet: $name) @rest(type: "pod_PodList", path: "replicaset/{args.namespace}/{args.replicaSet}/pod") {
-    ...PodList
-  }
-}
-    ${PodListFragmentDoc}`;
-
-/**
- * __useReplicaSetPodsQuery__
- *
- * To run a query within a React component, call `useReplicaSetPodsQuery` and pass it any options that fit your needs.
- * When your component renders, `useReplicaSetPodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useReplicaSetPodsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      name: // value for 'name'
- *   },
- * });
- */
-export function useReplicaSetPodsQuery(baseOptions: Apollo.QueryHookOptions<ReplicaSetPodsQuery, ReplicaSetPodsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ReplicaSetPodsQuery, ReplicaSetPodsQueryVariables>(ReplicaSetPodsDocument, options);
-      }
-export function useReplicaSetPodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicaSetPodsQuery, ReplicaSetPodsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ReplicaSetPodsQuery, ReplicaSetPodsQueryVariables>(ReplicaSetPodsDocument, options);
-        }
-export function useReplicaSetPodsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicaSetPodsQuery, ReplicaSetPodsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ReplicaSetPodsQuery, ReplicaSetPodsQueryVariables>(ReplicaSetPodsDocument, options);
-        }
-export type ReplicaSetPodsQueryHookResult = ReturnType<typeof useReplicaSetPodsQuery>;
-export type ReplicaSetPodsLazyQueryHookResult = ReturnType<typeof useReplicaSetPodsLazyQuery>;
-export type ReplicaSetPodsSuspenseQueryHookResult = ReturnType<typeof useReplicaSetPodsSuspenseQuery>;
-export type ReplicaSetPodsQueryResult = Apollo.QueryResult<ReplicaSetPodsQuery, ReplicaSetPodsQueryVariables>;
-export const ReplicaSetServicesDocument = gql`
-    query ReplicaSetServices($namespace: String!, $name: String!) {
-  handleGetReplicaSetServices(namespace: $namespace, replicaSet: $name) @rest(type: "service_ServiceList", path: "replicaset/{args.namespace}/{args.replicaSet}/service") {
-    ...ServiceList
-  }
-}
-    ${ServiceListFragmentDoc}`;
-
-/**
- * __useReplicaSetServicesQuery__
- *
- * To run a query within a React component, call `useReplicaSetServicesQuery` and pass it any options that fit your needs.
- * When your component renders, `useReplicaSetServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useReplicaSetServicesQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      name: // value for 'name'
- *   },
- * });
- */
-export function useReplicaSetServicesQuery(baseOptions: Apollo.QueryHookOptions<ReplicaSetServicesQuery, ReplicaSetServicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ReplicaSetServicesQuery, ReplicaSetServicesQueryVariables>(ReplicaSetServicesDocument, options);
-      }
-export function useReplicaSetServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicaSetServicesQuery, ReplicaSetServicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ReplicaSetServicesQuery, ReplicaSetServicesQueryVariables>(ReplicaSetServicesDocument, options);
-        }
-export function useReplicaSetServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicaSetServicesQuery, ReplicaSetServicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ReplicaSetServicesQuery, ReplicaSetServicesQueryVariables>(ReplicaSetServicesDocument, options);
-        }
-export type ReplicaSetServicesQueryHookResult = ReturnType<typeof useReplicaSetServicesQuery>;
-export type ReplicaSetServicesLazyQueryHookResult = ReturnType<typeof useReplicaSetServicesLazyQuery>;
-export type ReplicaSetServicesSuspenseQueryHookResult = ReturnType<typeof useReplicaSetServicesSuspenseQuery>;
-export type ReplicaSetServicesQueryResult = Apollo.QueryResult<ReplicaSetServicesQuery, ReplicaSetServicesQueryVariables>;
 export const ReplicationControllersDocument = gql`
     query ReplicationControllers($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetReplicationControllerList(
