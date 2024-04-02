@@ -123,27 +123,33 @@ const colLastSeen = columnHelper.accessor((event) => event.lastSeen, {
   cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
 })
 
-export const COLUMNS = [
-  colObjectName,
-  colObjectNamespace,
-  colReason,
-  colType,
-  colMessage,
-  colSource,
-  colCount,
-  colFirstSeen,
-  colLastSeen,
-]
+export function useEventsColumns(): Array<object> {
+  return useMemo(
+    () => [
+      colObjectName,
+      colObjectNamespace,
+      colReason,
+      colType,
+      colMessage,
+      colSource,
+      colCount,
+      colFirstSeen,
+      colLastSeen,
+    ],
+    []
+  )
+}
 
 export default function Events() {
   const { cluster } = useKubernetesContext()
+  const columns = useEventsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
     <ResourceList<EventListT, EventT, EventsQuery, EventsQueryVariables>
       namespaced
-      columns={COLUMNS}
+      columns={columns}
       query={useEventsQuery}
       queryName="handleGetEventList"
       itemsKey="events"

@@ -1,6 +1,6 @@
-import { ReactElement } from 'react'
+import { ReactElement, useMemo } from 'react'
 import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
-import { SidecarItem, Table } from '@pluralsh/design-system'
+import { SidecarItem, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
@@ -22,11 +22,18 @@ import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import { StatusChip } from '../../cluster/TableElements'
 import { ReadinessT } from '../../../utils/status'
 import { ResourceList } from '../ResourceList'
-import { COLUMNS } from '../cluster/Events'
+import { useEventsColumns } from '../cluster/Events'
 import { usePersistentVolumeClaimListColumns } from '../storage/PersistentVolumeClaims'
-import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
+import {
+  PODS_REL_PATH,
+  getResourceDetailsAbsPath,
+  getWorkloadsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import ResourceOwner from '../common/ResourceOwner'
+import { NAMESPACE_PARAM } from '../Kubernetes'
+
+import { getBreadcrumbs } from './Pods'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -36,6 +43,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export function Pod(): ReactElement {
+  const cluster = useKubernetesCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = usePodQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -46,6 +54,25 @@ export function Pod(): ReactElement {
       namespace,
     } as PodQueryVariables,
   })
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...getBreadcrumbs(cluster),
+        {
+          label: namespace ?? '',
+          url: `${getWorkloadsAbsPath(
+            clusterId
+          )}/${PODS_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
+        },
+        {
+          label: name ?? '',
+          url: getResourceDetailsAbsPath(clusterId, 'pod', name, namespace),
+        },
+      ],
+      [cluster, clusterId, name, namespace]
+    )
+  )
 
   const pod = data?.handleGetPodDetail as PodT
 
@@ -147,11 +174,12 @@ export function PodContainers(): ReactElement {
 
 export function PodEvents(): ReactElement {
   const { name, namespace } = useParams()
+  const columns = useEventsColumns()
 
   return (
     <ResourceList<EventListT, EventT, PodEventsQuery, PodEventsQueryVariables>
       namespaced
-      columns={COLUMNS}
+      columns={columns}
       query={usePodEventsQuery}
       queryOptions={{
         variables: {

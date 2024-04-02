@@ -111,3 +111,24 @@ fragment SecurityContext on v1_SecurityContext {
   procMount
   readOnlyRootFilesystem
 }
+
+fragment PodList on pod_PodList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  pods {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    status
+    containerImages
+    nodeName
+    restartCount
+    warnings {
+      message
+    }
+  }
+}

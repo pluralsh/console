@@ -1,15 +1,10 @@
 import { ReactElement } from 'react'
-
 import moment from 'moment'
-
 import { ChipList } from '@pluralsh/design-system'
-
 import { Link } from 'react-router-dom'
 
 import { Controller_ResourceOwner as ResourceOwnerT } from '../../../generated/graphql-kubernetes'
-
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-
 import { InlineLink } from '../../utils/typography/InlineLink'
 
 import ResourceInfoCard, {

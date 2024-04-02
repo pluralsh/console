@@ -12,9 +12,9 @@ query ReplicaSets(
     itemsPerPage: $itemsPerPage
     page: $page
   )
-    @rest(
-      path: "replicaset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-    ) {
+  @rest(
+    path: "replicaset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+  ) {
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -31,5 +31,84 @@ query ReplicaSets(
       initContainerImages
       containerImages
     }
+  }
+}
+
+query ReplicaSet(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetReplicaSetDetail(
+    namespace: $namespace
+    replicaSet: $name
+  )
+  @rest(
+    path: "replicaset/{args.namespace}/{args.replicaSet}"
+  ) {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    podInfo @type(name: "common_PodInfo") {
+      ...PodInfo
+    }
+    selector @type(name: "v1_LabelSelector") {
+      ...Selector
+    }
+    horizontalPodAutoscalerList @type(name: "horizontalpodautoscaler_HorizontalPodAutoscalerList") {
+      ...HorizontalPodAutoscalerList
+    }
+    initContainerImages
+    containerImages
+  }
+}
+
+query ReplicaSetEvents(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetReplicaSetEvents(
+    namespace: $namespace
+    replicaSet: $name
+  )
+  @rest(
+    type: "common_EventList"
+    path: "replicaset/{args.namespace}/{args.replicaSet}/event"
+  ){
+    ...EventList
+  }
+}
+
+query ReplicaSetPods(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetReplicaSetPods(
+    namespace: $namespace
+    replicaSet: $name
+  )
+  @rest(
+    type: "pod_PodList"
+    path: "replicaset/{args.namespace}/{args.replicaSet}/pod"
+  ) {
+    ...PodList
+  }
+}
+
+query ReplicaSetServices(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetReplicaSetServices(
+    namespace: $namespace
+    replicaSet: $name
+  )
+  @rest(
+    type: "service_ServiceList"
+    path: "replicaset/{args.namespace}/{args.replicaSet}/service"
+  ) {
+    ...ServiceList
   }
 }

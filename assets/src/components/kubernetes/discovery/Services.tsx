@@ -69,14 +69,11 @@ const colExternalEndpoints = columnHelper.accessor(
   }
 )
 
-export default function Services() {
-  const { cluster } = useKubernetesContext()
-
-  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
-
+export function useServicesColumns(): Array<object> {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
-  const columns = useMemo(
+
+  return useMemo(
     () => [
       colName,
       colNamespace,
@@ -89,6 +86,13 @@ export default function Services() {
     ],
     [colName, colNamespace, colLabels, colCreationTimestamp]
   )
+}
+
+export default function Services() {
+  const { cluster } = useKubernetesContext()
+  const columns = useServicesColumns()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
     <ResourceList<ServiceListT, ServiceT, ServicesQuery, ServicesQueryVariables>
