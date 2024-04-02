@@ -71,7 +71,10 @@ import StorageClass, {
 import ConfigMap, {
   ConfigMapData,
 } from '../components/kubernetes/configuration/ConfigMap'
-import Namespace from '../components/kubernetes/cluster/Namespace'
+import Namespace, {
+  NamespaceEvents,
+  NamespaceInfo,
+} from '../components/kubernetes/cluster/Namespace'
 
 import Raw from '../components/kubernetes/common/Raw'
 
@@ -474,10 +477,23 @@ export const kubernetesRoutes = [
     element={<Node />}
   />,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${NAMESPACES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<Namespace />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<NamespaceInfo />}
+    />
+    <Route
+      path="events"
+      element={<NamespaceEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   // Access
   <Route
     path={`${KUBERNETES_ABS_PATH}/${ROLES_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}

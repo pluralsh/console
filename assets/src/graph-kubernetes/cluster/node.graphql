@@ -39,3 +39,32 @@ query Nodes(
     }
   }
 }
+
+query Node($name: String!) {
+  handleGetNodeDetail(name: $name)
+  @rest(path: "node/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    nodeInfo {
+      architecture
+      bootID
+      containerRuntimeVersion
+      kernelVersion
+      kubeletVersion
+      kubeProxyVersion
+      machineID
+      operatingSystem
+      osImage
+      systemUUID
+    }
+    providerID
+    containerImages
+    podCIDR
+    phase
+    errors
+  }
+}
