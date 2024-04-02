@@ -30,8 +30,7 @@ query Namespaces(
 }
 
 query Namespace($name: String!) {
-  handleGetNamespaceDetail(name: $name)
-  @rest(path: "namespace/{args.name}") {
+  handleGetNamespaceDetail(name: $name) @rest(path: "namespace/{args.name}") {
     typeMeta @type(name: "types_TypeMeta") {
       ...TypeMeta
     }
@@ -72,7 +71,6 @@ query Namespace($name: String!) {
   }
 }
 
-
 query NamespaceEvents(
   $name: String!
   $filterBy: String
@@ -87,10 +85,10 @@ query NamespaceEvents(
     itemsPerPage: $itemsPerPage
     page: $page
   )
-  @rest(
-    type: "common_EventList"
-    path: "namespace/{args.name}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-  ) {
+    @rest(
+      type: "common_EventList"
+      path: "namespace/{args.name}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
     ...EventList
   }
 }

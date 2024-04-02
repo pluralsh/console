@@ -4739,6 +4739,17 @@ export type NodeQueryVariables = Exact<{
 
 export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typename?: 'node_NodeDetail', providerID: string, containerImages: Array<string | null>, podCIDR: string, phase: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', architecture: string, bootID: string, containerRuntimeVersion: string, kernelVersion: string, kubeletVersion: string, kubeProxyVersion: string, machineID: string, operatingSystem: string, osImage: string, systemUUID: string } } | null };
 
+export type NodeEventsQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type NodeEventsQuery = { __typename?: 'Query', handleGetNodeEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export type NamespacedResourceQueryVariables = Exact<{
   kind: Scalars['String']['input'];
   name: Scalars['String']['input'];
@@ -6282,6 +6293,56 @@ export type NodeQueryHookResult = ReturnType<typeof useNodeQuery>;
 export type NodeLazyQueryHookResult = ReturnType<typeof useNodeLazyQuery>;
 export type NodeSuspenseQueryHookResult = ReturnType<typeof useNodeSuspenseQuery>;
 export type NodeQueryResult = Apollo.QueryResult<NodeQuery, NodeQueryVariables>;
+export const NodeEventsDocument = gql`
+    query NodeEvents($name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetNodeEvents(
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "node/{args.name}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useNodeEventsQuery__
+ *
+ * To run a query within a React component, call `useNodeEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNodeEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNodeEventsQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useNodeEventsQuery(baseOptions: Apollo.QueryHookOptions<NodeEventsQuery, NodeEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NodeEventsQuery, NodeEventsQueryVariables>(NodeEventsDocument, options);
+      }
+export function useNodeEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NodeEventsQuery, NodeEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NodeEventsQuery, NodeEventsQueryVariables>(NodeEventsDocument, options);
+        }
+export function useNodeEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NodeEventsQuery, NodeEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NodeEventsQuery, NodeEventsQueryVariables>(NodeEventsDocument, options);
+        }
+export type NodeEventsQueryHookResult = ReturnType<typeof useNodeEventsQuery>;
+export type NodeEventsLazyQueryHookResult = ReturnType<typeof useNodeEventsLazyQuery>;
+export type NodeEventsSuspenseQueryHookResult = ReturnType<typeof useNodeEventsSuspenseQuery>;
+export type NodeEventsQueryResult = Apollo.QueryResult<NodeEventsQuery, NodeEventsQueryVariables>;
 export const NamespacedResourceDocument = gql`
     query NamespacedResource($kind: String!, $name: String!, $namespace: String!) {
   handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {
