@@ -90,6 +90,21 @@ query Node($name: String!) {
   }
 }
 
+query NodePods(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetNodePods(
+    name: $name
+  )
+  @rest(
+    type: "pod_PodList"
+    path: "node/{args.name}/pod"
+  ) {
+    ...PodList
+  }
+}
+
 query NodeEvents(
   $name: String!
   $filterBy: String
