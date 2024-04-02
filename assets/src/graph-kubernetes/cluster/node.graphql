@@ -48,17 +48,8 @@ query Node($name: String!) {
     objectMeta @type(name: "types_ObjectMeta") {
       ...ObjectMeta
     }
-    nodeInfo {
-      architecture
-      bootID
-      containerRuntimeVersion
-      kernelVersion
-      kubeletVersion
-      kubeProxyVersion
-      machineID
-      operatingSystem
-      osImage
-      systemUUID
+    conditions @type(name: "common_Condition") {
+      ...Condition
     }
     allocatedResources {
       cpuRequests
@@ -70,6 +61,18 @@ query Node($name: String!) {
       allocatedPods
       podFraction
       podCapacity
+    }
+    nodeInfo {
+      architecture
+      bootID
+      containerRuntimeVersion
+      kernelVersion
+      kubeletVersion
+      kubeProxyVersion
+      machineID
+      operatingSystem
+      osImage
+      systemUUID
     }
     addresses {
       type

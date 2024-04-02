@@ -4737,7 +4737,7 @@ export type NodeQueryVariables = Exact<{
 }>;
 
 
-export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typename?: 'node_NodeDetail', providerID: string, containerImages: Array<string | null>, podCIDR: string, phase: string, unschedulable: boolean, ready: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', architecture: string, bootID: string, containerRuntimeVersion: string, kernelVersion: string, kubeletVersion: string, kubeProxyVersion: string, machineID: string, operatingSystem: string, osImage: string, systemUUID: string }, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any }, addresses?: Array<{ __typename?: 'v1_NodeAddress', type: string, address: string } | null> | null, taints?: Array<{ __typename?: 'v1_Taint', key: string, value?: string | null, effect: string } | null> | null } | null };
+export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typename?: 'node_NodeDetail', providerID: string, containerImages: Array<string | null>, podCIDR: string, phase: string, unschedulable: boolean, ready: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', architecture: string, bootID: string, containerRuntimeVersion: string, kernelVersion: string, kubeletVersion: string, kubeProxyVersion: string, machineID: string, operatingSystem: string, osImage: string, systemUUID: string }, addresses?: Array<{ __typename?: 'v1_NodeAddress', type: string, address: string } | null> | null, taints?: Array<{ __typename?: 'v1_Taint', key: string, value?: string | null, effect: string } | null> | null } | null };
 
 export type NodePodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -6388,17 +6388,8 @@ export const NodeDocument = gql`
     objectMeta @type(name: "types_ObjectMeta") {
       ...ObjectMeta
     }
-    nodeInfo {
-      architecture
-      bootID
-      containerRuntimeVersion
-      kernelVersion
-      kubeletVersion
-      kubeProxyVersion
-      machineID
-      operatingSystem
-      osImage
-      systemUUID
+    conditions @type(name: "common_Condition") {
+      ...Condition
     }
     allocatedResources {
       cpuRequests
@@ -6410,6 +6401,18 @@ export const NodeDocument = gql`
       allocatedPods
       podFraction
       podCapacity
+    }
+    nodeInfo {
+      architecture
+      bootID
+      containerRuntimeVersion
+      kernelVersion
+      kubeletVersion
+      kubeProxyVersion
+      machineID
+      operatingSystem
+      osImage
+      systemUUID
     }
     addresses {
       type
@@ -6430,7 +6433,8 @@ export const NodeDocument = gql`
   }
 }
     ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
+${ObjectMetaFragmentDoc}
+${ConditionFragmentDoc}`;
 
 /**
  * __useNodeQuery__

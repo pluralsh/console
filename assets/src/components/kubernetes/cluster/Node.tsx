@@ -41,6 +41,8 @@ import { GaugeWrap, ResourceGauge } from '../../cluster/Gauges'
 
 import { usePodColumns } from '../workloads/Pods'
 
+import Conditions from '../common/Conditions'
+
 import { getBreadcrumbs } from './Nodes'
 import { useEventsColumns } from './Events'
 import { NodeReadyChip } from './utils'
@@ -123,6 +125,10 @@ export function NodeInfo(): ReactElement {
           </GaugeWrap>
           TODO
         </Card>
+      </section>
+      <section>
+        <SubTitle>Conditions</SubTitle>
+        <Conditions conditions={node.conditions} />
       </section>
       <section>
         <SubTitle>Node information</SubTitle>
