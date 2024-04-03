@@ -1,16 +1,8 @@
-import {
-  ComponentProps,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useRef } from 'react'
 import { Card, EmptyState, TabPanel, Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
-import { type VirtualItem } from '@tanstack/react-virtual'
 import {
   type ServiceDeploymentsRowFragment,
   useGetServiceDataQuery,
@@ -20,11 +12,8 @@ import { Edge, extendConnection } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
-import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
-
-import { POLL_INTERVAL } from '../ContinuousDeployment'
 
 import {
   SERVICES_QUERY_PAGE_SIZE,
@@ -33,22 +22,13 @@ import {
 } from '../services/Services'
 
 export function GlobalServiceDetailTable({
-  setRefetch,
   serviceId,
 }: {
-  setRefetch?: (refetch: () => () => void) => void
   serviceId?: string
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
-  const [virtualSlice, setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
-      }
-    | undefined
-  >()
 
   const queryResult = useGetServiceDataQuery({
     variables: {
@@ -71,26 +51,6 @@ export function GlobalServiceDetailTable({
   const globalService = data?.globalService
   const services = globalService?.services?.edges
   const pageInfo = globalService?.services?.pageInfo
-  const { refetch } = useSlicePolling(queryResult, {
-    virtualSlice,
-    pageSize: SERVICES_QUERY_PAGE_SIZE,
-    key: 'globalService.services',
-    interval: POLL_INTERVAL,
-  })
-
-  useEffect(() => {
-    setRefetch?.(() => refetch)
-  }, [refetch, setRefetch])
-
-  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
-    useMemo(
-      () => ({
-        meta: {
-          refetch,
-        },
-      }),
-      [refetch]
-    )
 
   const fetchNextPage = useCallback(() => {
     if (!pageInfo?.endCursor) {
@@ -179,9 +139,8 @@ export function GlobalServiceDetailTable({
               hasNextPage={pageInfo?.hasNextPage}
               fetchNextPage={fetchNextPage}
               isFetchingNextPage={loading}
-              reactTableOptions={reactTableOptions}
+              reactTableOptions={{ meta: { refetch: () => null } }}
               reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
-              onVirtualSliceChange={setVirtualSlice}
             />
           </FullHeightTableWrap>
         ) : (
