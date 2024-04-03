@@ -1,6 +1,10 @@
 import { Navigate, Route } from 'react-router-dom'
 
-import Service from 'components/kubernetes/discovery/Service'
+import Service, {
+  ServiceEvents,
+  ServiceInfo,
+  ServicePods,
+} from 'components/kubernetes/discovery/Service'
 import PersistentVolume, {
   PersistentVolumeInfo,
 } from 'components/kubernetes/storage/PersistentVolume'
@@ -423,10 +427,26 @@ export const kubernetesRoutes = [
   />,
   // Discovery
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${SERVICES_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<Service />}
-  />,
+  >
+    <Route
+      path=""
+      element={<ServiceInfo />}
+    />
+    <Route
+      path="pods"
+      element={<ServicePods />}
+    />
+    <Route
+      path="events"
+      element={<ServiceEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     index
     path={`${KUBERNETES_ABS_PATH}/${INGRESSES_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}

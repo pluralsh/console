@@ -4927,6 +4927,22 @@ export type ServiceQueryVariables = Exact<{
 
 export type ServiceQuery = { __typename?: 'Query', handleGetServiceDetail?: { __typename?: 'service_ServiceDetail', type: string, sessionAffinity: string, selector: any, clusterIP: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null>, endpointList: { __typename?: 'endpoint_EndpointList', endpoints: Array<{ __typename?: 'endpoint_Endpoint', host: string, ready: boolean, nodeName: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, ports: Array<{ __typename?: 'v1_EndpointPort', name?: string | null, port: number, protocol?: string | null, appProtocol?: string | null } | null> } | null> } } | null };
 
+export type ServiceEventsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ServiceEventsQuery = { __typename?: 'Query', handleGetServiceEvent?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type ServicePodsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ServicePodsQuery = { __typename?: 'Query', handleGetServicePods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+
 export type ServiceListFragment = { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> };
 
 export type PersistentVolumesQueryVariables = Exact<{
@@ -7553,6 +7569,88 @@ export type ServiceQueryHookResult = ReturnType<typeof useServiceQuery>;
 export type ServiceLazyQueryHookResult = ReturnType<typeof useServiceLazyQuery>;
 export type ServiceSuspenseQueryHookResult = ReturnType<typeof useServiceSuspenseQuery>;
 export type ServiceQueryResult = Apollo.QueryResult<ServiceQuery, ServiceQueryVariables>;
+export const ServiceEventsDocument = gql`
+    query ServiceEvents($namespace: String!, $name: String!) {
+  handleGetServiceEvent(namespace: $namespace, service: $name) @rest(type: "common_EventList", path: "service/{args.namespace}/{args.service}/event") {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useServiceEventsQuery__
+ *
+ * To run a query within a React component, call `useServiceEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceEventsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useServiceEventsQuery(baseOptions: Apollo.QueryHookOptions<ServiceEventsQuery, ServiceEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceEventsQuery, ServiceEventsQueryVariables>(ServiceEventsDocument, options);
+      }
+export function useServiceEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceEventsQuery, ServiceEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceEventsQuery, ServiceEventsQueryVariables>(ServiceEventsDocument, options);
+        }
+export function useServiceEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceEventsQuery, ServiceEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceEventsQuery, ServiceEventsQueryVariables>(ServiceEventsDocument, options);
+        }
+export type ServiceEventsQueryHookResult = ReturnType<typeof useServiceEventsQuery>;
+export type ServiceEventsLazyQueryHookResult = ReturnType<typeof useServiceEventsLazyQuery>;
+export type ServiceEventsSuspenseQueryHookResult = ReturnType<typeof useServiceEventsSuspenseQuery>;
+export type ServiceEventsQueryResult = Apollo.QueryResult<ServiceEventsQuery, ServiceEventsQueryVariables>;
+export const ServicePodsDocument = gql`
+    query ServicePods($namespace: String!, $name: String!) {
+  handleGetServicePods(namespace: $namespace, service: $name) @rest(type: "pod_PodList", path: "service/{args.namespace}/{args.service}/pod") {
+    ...PodList
+  }
+}
+    ${PodListFragmentDoc}`;
+
+/**
+ * __useServicePodsQuery__
+ *
+ * To run a query within a React component, call `useServicePodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServicePodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServicePodsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useServicePodsQuery(baseOptions: Apollo.QueryHookOptions<ServicePodsQuery, ServicePodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServicePodsQuery, ServicePodsQueryVariables>(ServicePodsDocument, options);
+      }
+export function useServicePodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServicePodsQuery, ServicePodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServicePodsQuery, ServicePodsQueryVariables>(ServicePodsDocument, options);
+        }
+export function useServicePodsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServicePodsQuery, ServicePodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServicePodsQuery, ServicePodsQueryVariables>(ServicePodsDocument, options);
+        }
+export type ServicePodsQueryHookResult = ReturnType<typeof useServicePodsQuery>;
+export type ServicePodsLazyQueryHookResult = ReturnType<typeof useServicePodsLazyQuery>;
+export type ServicePodsSuspenseQueryHookResult = ReturnType<typeof useServicePodsSuspenseQuery>;
+export type ServicePodsQueryResult = Apollo.QueryResult<ServicePodsQuery, ServicePodsQueryVariables>;
 export const PersistentVolumesDocument = gql`
     query PersistentVolumes($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetPersistentVolumeList(
