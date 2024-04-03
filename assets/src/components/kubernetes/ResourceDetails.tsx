@@ -1,7 +1,7 @@
-import { ReactElement, createContext, useMemo, useRef } from 'react'
+import { ReactElement, useRef } from 'react'
 import { SubTab, TabList } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { useMatch, useParams, useResolvedPath } from 'react-router-dom'
+import { useMatch, useResolvedPath } from 'react-router-dom'
 
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutHeader } from '../utils/layout/ResponsiveLayoutHeader'
@@ -9,19 +9,6 @@ import { LinkTabWrap } from '../utils/Tabs'
 import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth'
 import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
-import {
-  ClusterTinyFragment,
-  useClustersTinyQuery,
-} from '../../generated/graphql'
-import { mapExistingNodes } from '../../utils/graphql'
-
-interface ResourceDetailsContextT {
-  cluster?: ClusterTinyFragment // Currently selected cluster.
-}
-
-const ResourceDetailsContext = createContext<
-  ResourceDetailsContextT | undefined
->(undefined)
 
 export interface TabEntry {
   label: string
@@ -40,32 +27,11 @@ export default function ResourceDetails({
   children,
 }: ResourceDetailsProps): ReactElement {
   const theme = useTheme()
-  const { clusterId } = useParams()
   const basePath = useResolvedPath('.')
   const pathMatch = useMatch(`${basePath.pathname}/:tab`)
   const tab = pathMatch?.params?.tab || ''
   const tabStateRef = useRef<any>(null)
   const currentTab = tabs.find(({ path }) => path === (tab ?? ''))
-
-  const { data } = useClustersTinyQuery({
-    pollInterval: 120_000,
-    fetchPolicy: 'cache-and-network',
-  })
-
-  const clusters = useMemo(
-    () => mapExistingNodes(data?.clusters),
-    [data?.clusters]
-  )
-
-  const cluster = useMemo(
-    () => clusters.find(({ id }) => id === clusterId),
-    [clusterId, clusters]
-  )
-
-  const context = useMemo(
-    () => ({ cluster }) as ResourceDetailsContextT,
-    [cluster]
-  )
 
   return (
     <ResponsiveLayoutPage>

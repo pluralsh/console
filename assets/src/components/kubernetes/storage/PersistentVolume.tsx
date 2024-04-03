@@ -108,7 +108,7 @@ export default function PersistentVolume(): ReactElement {
 }
 
 export function PersistentVolumeInfo(): ReactElement {
-  const pv = useOutletContext() as PersistentVolumeT
+  const _pv = useOutletContext() as PersistentVolumeT
 
   return <section>TODO</section>
 }
