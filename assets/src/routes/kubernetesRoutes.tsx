@@ -60,7 +60,11 @@ import ClusterRoles from '../components/kubernetes/access/ClusterRoles'
 import RoleBindings from '../components/kubernetes/access/RoleBindings'
 import Roles from '../components/kubernetes/access/Roles'
 import Access from '../components/kubernetes/access/Access'
-import Deployment from '../components/kubernetes/workloads/Deployment'
+import Deployment, {
+  DeploymentEvents,
+  DeploymentHorizontalPodAutoscalers,
+  DeploymentReplicaSets,
+} from '../components/kubernetes/workloads/Deployment'
 import ReplicaSet, {
   ReplicaSetEvents,
   ReplicaSetInfo,
@@ -358,10 +362,35 @@ export const kubernetesRoutes = [
     />
   </Route>,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${DEPLOYMENTS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<Deployment />}
-  />,
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="replicasets"
+        />
+      }
+    />
+    <Route
+      path="replicasets"
+      element={<DeploymentReplicaSets />}
+    />
+    <Route
+      path="hpas"
+      element={<DeploymentHorizontalPodAutoscalers />}
+    />
+    <Route
+      path="events"
+      element={<DeploymentEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     path={`${KUBERNETES_ABS_PATH}/${REPLICA_SETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<ReplicaSet />}

@@ -1,4 +1,3 @@
-import { Card } from '@pluralsh/design-system'
 import {
   FillLevel,
   FillLevelProvider,
@@ -14,31 +13,98 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNullish } from '@apollo/client/cache/inmemory/helpers'
+import { Card } from '@pluralsh/design-system'
+import isArray from 'lodash/isArray'
+
+const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
+  '@keyframes moving-gradient': {
+    '0%': { backgroundPosition: '-250px 0' },
+    '100%': { backgroundPosition: '250px 0' },
+  },
+
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.large,
+
+  '.title': {
+    borderRadius: theme.borderRadiuses.medium,
+    display: 'block',
+    width: '100px',
+    height: '20px',
+    background: `linear-gradient(to right, ${theme.colors.border} 20%, ${theme.colors['border-fill-two']} 50%, ${theme.colors.border} 80%)`,
+    backgroundSize: '500px 100px',
+    animation: 'moving-gradient 2s infinite linear forwards',
+  },
+
+  '.section': {
+    display: 'flex',
+    gap: theme.spacing.large,
+    flexWrap: 'wrap',
+  },
+
+  span: {
+    borderRadius: theme.borderRadiuses.medium,
+    display: 'block',
+    width: '250px',
+    height: '12px',
+    background: `linear-gradient(to right, ${theme.colors.border} 20%, ${theme.colors['border-fill-two']} 50%, ${theme.colors.border} 80%)`,
+    backgroundSize: '500px 100px',
+    animation: 'moving-gradient 2s infinite linear forwards',
+  },
+}))
+
+function SkeletonUnstyled({ ...props }): ReactElement {
+  return (
+    <div {...props}>
+      <div className="title" />
+      <div className="section">
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+      <div className="title" />
+      <div className="section">
+        <span />
+        <span />
+      </div>
+    </div>
+  )
+}
 
 interface ResourceInfoCardProps {
-  title: string
+  title?: string
+  loading?: boolean
   children: ReactElement | Array<ReactElement>
 }
 
 export default function ResourceInfoCard({
   title,
+  loading = false,
   children,
 }: ResourceInfoCardProps): ReactElement {
   const parentFillLevel = useFillLevel()
   const theme = useTheme()
+  const content = useMemo(
+    () => (loading ? <Skeleton /> : children),
+    [children, loading]
+  )
 
   return (
     <Card fillLevel={toFillLevel(Math.min(parentFillLevel + 1, 2))}>
-      <CodeHeader fillLevel={parentFillLevel}>
-        <TitleArea>{title}</TitleArea>
-      </CodeHeader>
-
+      {title && (
+        <CodeHeader fillLevel={parentFillLevel}>
+          <TitleArea>{title}</TitleArea>
+        </CodeHeader>
+      )}
       <div
         css={{
           padding: theme.spacing.medium,
         }}
       >
-        {children}
+        {content}
       </div>
     </Card>
   )
@@ -80,7 +146,7 @@ const TitleArea = styled.div(({ theme }) => ({
 
 interface SectionProps {
   heading?: string
-  children: Array<ReactElement>
+  children: Array<ReactElement> | ReactElement
 }
 
 export function ResourceInfoCardSection({
@@ -89,7 +155,10 @@ export function ResourceInfoCardSection({
 }: SectionProps): Nullable<ReactElement> {
   const theme = useTheme()
   const hasChildren = useMemo(
-    () => children.some((c) => !isNullish(c.props?.children)),
+    () =>
+      isArray(children)
+        ? children.some((c) => !isNullish(c.props?.children))
+        : !!children,
     [children]
   )
 

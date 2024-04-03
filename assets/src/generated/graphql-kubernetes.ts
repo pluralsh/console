@@ -4788,6 +4788,19 @@ export type HorizontalPodAutoscalerListFragment = { __typename?: 'horizontalpoda
 
 export type HorizontalPodAutoscalerFragment = { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } };
 
+export type HorizontalPodAutoscalersQueryVariables = Exact<{
+  kind: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type HorizontalPodAutoscalersQuery = { __typename?: 'Query', handleGetHorizontalPodAutoscalerListForResource?: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } | null };
+
 export type NamespacedResourceQueryVariables = Exact<{
   kind: Scalars['String']['input'];
   name: Scalars['String']['input'];
@@ -5032,6 +5045,48 @@ export type DeploymentsQueryVariables = Exact<{
 
 export type DeploymentsQuery = { __typename?: 'Query', handleGetDeployments?: { __typename?: 'deployment_DeploymentList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
+export type DeploymentQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type DeploymentQuery = { __typename?: 'Query', handleGetDeploymentDetail?: { __typename?: 'deployment_DeploymentDetail', selector: any, initContainerImages: Array<string | null>, containerImages: Array<string | null>, minReadySeconds: number, revisionHistoryLimit: number, strategy: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, rollingUpdateStrategy?: { __typename?: 'deployment_RollingUpdateStrategy', maxSurge: string, maxUnavailable: string } | null, statusInfo: { __typename?: 'deployment_StatusInfo', available: number, replicas: number, unavailable: number, updated: number } } | null };
+
+export type DeploymentEventsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type DeploymentEventsQuery = { __typename?: 'Query', handleGetDeploymentEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type DeploymentNewReplicaSetQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type DeploymentNewReplicaSetQuery = { __typename?: 'Query', handleGetDeploymentNewReplicaSet?: { __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null };
+
+export type DeploymentOldReplicaSetsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type DeploymentOldReplicaSetsQuery = { __typename?: 'Query', handleGetDeploymentOldReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
+
+export type DeploymentListFragment = { __typename?: 'deployment_DeploymentList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
+
+export type DeploymentFragment = { __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
+
+export type DeploymentDetailFragment = { __typename?: 'deployment_DeploymentDetail', selector: any, initContainerImages: Array<string | null>, containerImages: Array<string | null>, minReadySeconds: number, revisionHistoryLimit: number, strategy: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, rollingUpdateStrategy?: { __typename?: 'deployment_RollingUpdateStrategy', maxSurge: string, maxUnavailable: string } | null, statusInfo: { __typename?: 'deployment_StatusInfo', available: number, replicas: number, unavailable: number, updated: number } };
+
+export type RollingUpdateStrategyFragment = { __typename?: 'deployment_RollingUpdateStrategy', maxSurge: string, maxUnavailable: string };
+
+export type StatusInfoFragment = { __typename?: 'deployment_StatusInfo', available: number, replicas: number, unavailable: number, updated: number };
+
 export type JobsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5127,6 +5182,12 @@ export type ReplicaSetServicesQueryVariables = Exact<{
 
 export type ReplicaSetServicesQuery = { __typename?: 'Query', handleGetReplicaSetServices?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
 
+export type ReplicaSetListFragment = { __typename?: 'replicaset_ReplicaSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
+
+export type ReplicaSetFragment = { __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
+
+export type ReplicaSetDetailFragment = { __typename?: 'replicaset_ReplicaSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, selector: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null }, horizontalPodAutoscalerList: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } };
+
 export type ReplicationControllersQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5203,16 +5264,6 @@ export const EventListFragmentDoc = gql`
 }
     ${ListMetaFragmentDoc}
 ${EventFragmentDoc}`;
-export const ConditionFragmentDoc = gql`
-    fragment Condition on common_Condition {
-  message
-  type
-  status
-  lastProbeTime
-  lastTransitionTime
-  reason
-}
-    `;
 export const NetworkPolicyPortFragmentDoc = gql`
     fragment NetworkPolicyPort on v1_NetworkPolicyPort {
   port
@@ -5273,46 +5324,6 @@ export const ResourceOwnerFragmentDoc = gql`
     ${TypeMetaFragmentDoc}
 ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}`;
-export const SelectorFragmentDoc = gql`
-    fragment Selector on v1_LabelSelector {
-  matchLabels
-  matchExpressions {
-    key
-    operator
-    values
-  }
-}
-    `;
-export const HorizontalPodAutoscalerFragmentDoc = gql`
-    fragment HorizontalPodAutoscaler on horizontalpodautoscaler_HorizontalPodAutoscaler {
-  typeMeta @type(name: "types_TypeMeta") {
-    ...TypeMeta
-  }
-  objectMeta @type(name: "types_ObjectMeta") {
-    ...ObjectMeta
-  }
-  currentCPUUtilizationPercentage
-  maxReplicas
-  minReplicas
-  targetCPUUtilizationPercentage
-  scaleTargetRef {
-    name
-    kind
-  }
-}
-    ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-export const HorizontalPodAutoscalerListFragmentDoc = gql`
-    fragment HorizontalPodAutoscalerList on horizontalpodautoscaler_HorizontalPodAutoscalerList {
-  listMeta @type(name: "types_ListMeta") {
-    ...ListMeta
-  }
-  horizontalpodautoscalers @type(name: "horizontalpodautoscaler_HorizontalPodAutoscaler") {
-    ...HorizontalPodAutoscaler
-  }
-}
-    ${ListMetaFragmentDoc}
-${HorizontalPodAutoscalerFragmentDoc}`;
 export const EndpointFragmentDoc = gql`
     fragment Endpoint on common_Endpoint {
   host
@@ -5390,6 +5401,91 @@ export const PersistentVolumeClaimListFragmentDoc = gql`
 }
     ${ListMetaFragmentDoc}
 ${PersistentVolumeClaimFragmentDoc}`;
+export const DeploymentFragmentDoc = gql`
+    fragment Deployment on deployment_Deployment {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  pods @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}`;
+export const DeploymentListFragmentDoc = gql`
+    fragment DeploymentList on deployment_DeploymentList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  deployments @type(name: "deployment_Deployment") {
+    ...Deployment
+  }
+}
+    ${ListMetaFragmentDoc}
+${DeploymentFragmentDoc}`;
+export const ConditionFragmentDoc = gql`
+    fragment Condition on common_Condition {
+  message
+  type
+  status
+  lastProbeTime
+  lastTransitionTime
+  reason
+}
+    `;
+export const RollingUpdateStrategyFragmentDoc = gql`
+    fragment RollingUpdateStrategy on deployment_RollingUpdateStrategy {
+  maxSurge
+  maxUnavailable
+}
+    `;
+export const StatusInfoFragmentDoc = gql`
+    fragment StatusInfo on deployment_StatusInfo {
+  available
+  replicas
+  unavailable
+  updated
+}
+    `;
+export const DeploymentDetailFragmentDoc = gql`
+    fragment DeploymentDetail on deployment_DeploymentDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  pods @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  conditions @type(name: "common_Condition") {
+    ...Condition
+  }
+  rollingUpdateStrategy @type(name: "deployment_RollingUpdateStrategy") {
+    ...RollingUpdateStrategy
+  }
+  statusInfo @type(name: "deployment_StatusInfo") {
+    ...StatusInfo
+  }
+  selector
+  initContainerImages
+  containerImages
+  minReadySeconds
+  revisionHistoryLimit
+  strategy
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}
+${ConditionFragmentDoc}
+${RollingUpdateStrategyFragmentDoc}
+${StatusInfoFragmentDoc}`;
 export const SecurityContextFragmentDoc = gql`
     fragment SecurityContext on v1_SecurityContext {
   windowsOptions {
@@ -5547,6 +5643,99 @@ export const PodListFragmentDoc = gql`
     ${ListMetaFragmentDoc}
 ${TypeMetaFragmentDoc}
 ${ObjectMetaFragmentDoc}`;
+export const ReplicaSetFragmentDoc = gql`
+    fragment ReplicaSet on replicaset_ReplicaSet {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}`;
+export const ReplicaSetListFragmentDoc = gql`
+    fragment ReplicaSetList on replicaset_ReplicaSetList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  replicaSets @type(name: "replicaset_ReplicaSet") {
+    ...ReplicaSet
+  }
+}
+    ${ListMetaFragmentDoc}
+${ReplicaSetFragmentDoc}`;
+export const SelectorFragmentDoc = gql`
+    fragment Selector on v1_LabelSelector {
+  matchLabels
+  matchExpressions {
+    key
+    operator
+    values
+  }
+}
+    `;
+export const HorizontalPodAutoscalerFragmentDoc = gql`
+    fragment HorizontalPodAutoscaler on horizontalpodautoscaler_HorizontalPodAutoscaler {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  currentCPUUtilizationPercentage
+  maxReplicas
+  minReplicas
+  targetCPUUtilizationPercentage
+  scaleTargetRef {
+    name
+    kind
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+export const HorizontalPodAutoscalerListFragmentDoc = gql`
+    fragment HorizontalPodAutoscalerList on horizontalpodautoscaler_HorizontalPodAutoscalerList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  horizontalpodautoscalers @type(name: "horizontalpodautoscaler_HorizontalPodAutoscaler") {
+    ...HorizontalPodAutoscaler
+  }
+}
+    ${ListMetaFragmentDoc}
+${HorizontalPodAutoscalerFragmentDoc}`;
+export const ReplicaSetDetailFragmentDoc = gql`
+    fragment ReplicaSetDetail on replicaset_ReplicaSetDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  selector @type(name: "v1_LabelSelector") {
+    ...Selector
+  }
+  horizontalPodAutoscalerList @type(name: "horizontalpodautoscaler_HorizontalPodAutoscalerList") {
+    ...HorizontalPodAutoscalerList
+  }
+  initContainerImages
+  containerImages
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}
+${SelectorFragmentDoc}
+${HorizontalPodAutoscalerListFragmentDoc}`;
 export const ClusterRolesDocument = gql`
     query ClusterRoles($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetClusterRoleList(
@@ -6610,6 +6799,60 @@ export type NodeEventsQueryHookResult = ReturnType<typeof useNodeEventsQuery>;
 export type NodeEventsLazyQueryHookResult = ReturnType<typeof useNodeEventsLazyQuery>;
 export type NodeEventsSuspenseQueryHookResult = ReturnType<typeof useNodeEventsSuspenseQuery>;
 export type NodeEventsQueryResult = Apollo.QueryResult<NodeEventsQuery, NodeEventsQueryVariables>;
+export const HorizontalPodAutoscalersDocument = gql`
+    query HorizontalPodAutoscalers($kind: String!, $namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetHorizontalPodAutoscalerListForResource(
+    kind: $kind
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "horizontalpodautoscaler_HorizontalPodAutoscalerList", path: "{args.kind}/{args.namespace}/{args.name}/horizontalpodautoscaler?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...HorizontalPodAutoscalerList
+  }
+}
+    ${HorizontalPodAutoscalerListFragmentDoc}`;
+
+/**
+ * __useHorizontalPodAutoscalersQuery__
+ *
+ * To run a query within a React component, call `useHorizontalPodAutoscalersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHorizontalPodAutoscalersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHorizontalPodAutoscalersQuery({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useHorizontalPodAutoscalersQuery(baseOptions: Apollo.QueryHookOptions<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>(HorizontalPodAutoscalersDocument, options);
+      }
+export function useHorizontalPodAutoscalersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>(HorizontalPodAutoscalersDocument, options);
+        }
+export function useHorizontalPodAutoscalersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>(HorizontalPodAutoscalersDocument, options);
+        }
+export type HorizontalPodAutoscalersQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersQuery>;
+export type HorizontalPodAutoscalersLazyQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersLazyQuery>;
+export type HorizontalPodAutoscalersSuspenseQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersSuspenseQuery>;
+export type HorizontalPodAutoscalersQueryResult = Apollo.QueryResult<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>;
 export const NamespacedResourceDocument = gql`
     query NamespacedResource($kind: String!, $name: String!, $namespace: String!) {
   handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {
@@ -8082,29 +8325,11 @@ export const DeploymentsDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "deployment/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    deployments {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      pods @type(name: "common_PodInfo") {
-        ...PodInfo
-      }
-      initContainerImages
-      containerImages
-    }
+  ) @rest(type: "deployment_DeploymentList", path: "deployment/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...DeploymentList
   }
 }
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}`;
+    ${DeploymentListFragmentDoc}`;
 
 /**
  * __useDeploymentsQuery__
@@ -8142,6 +8367,170 @@ export type DeploymentsQueryHookResult = ReturnType<typeof useDeploymentsQuery>;
 export type DeploymentsLazyQueryHookResult = ReturnType<typeof useDeploymentsLazyQuery>;
 export type DeploymentsSuspenseQueryHookResult = ReturnType<typeof useDeploymentsSuspenseQuery>;
 export type DeploymentsQueryResult = Apollo.QueryResult<DeploymentsQuery, DeploymentsQueryVariables>;
+export const DeploymentDocument = gql`
+    query Deployment($namespace: String!, $name: String!) {
+  handleGetDeploymentDetail(namespace: $namespace, deployment: $name) @rest(type: "deployment_DeploymentDetail", path: "deployment/{args.namespace}/{args.deployment}") {
+    ...DeploymentDetail
+  }
+}
+    ${DeploymentDetailFragmentDoc}`;
+
+/**
+ * __useDeploymentQuery__
+ *
+ * To run a query within a React component, call `useDeploymentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeploymentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeploymentQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useDeploymentQuery(baseOptions: Apollo.QueryHookOptions<DeploymentQuery, DeploymentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeploymentQuery, DeploymentQueryVariables>(DeploymentDocument, options);
+      }
+export function useDeploymentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeploymentQuery, DeploymentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeploymentQuery, DeploymentQueryVariables>(DeploymentDocument, options);
+        }
+export function useDeploymentSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeploymentQuery, DeploymentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeploymentQuery, DeploymentQueryVariables>(DeploymentDocument, options);
+        }
+export type DeploymentQueryHookResult = ReturnType<typeof useDeploymentQuery>;
+export type DeploymentLazyQueryHookResult = ReturnType<typeof useDeploymentLazyQuery>;
+export type DeploymentSuspenseQueryHookResult = ReturnType<typeof useDeploymentSuspenseQuery>;
+export type DeploymentQueryResult = Apollo.QueryResult<DeploymentQuery, DeploymentQueryVariables>;
+export const DeploymentEventsDocument = gql`
+    query DeploymentEvents($namespace: String!, $name: String!) {
+  handleGetDeploymentEvents(namespace: $namespace, deployment: $name) @rest(type: "common_EventList", path: "deployment/{args.namespace}/{args.deployment}/event") {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useDeploymentEventsQuery__
+ *
+ * To run a query within a React component, call `useDeploymentEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeploymentEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeploymentEventsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useDeploymentEventsQuery(baseOptions: Apollo.QueryHookOptions<DeploymentEventsQuery, DeploymentEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeploymentEventsQuery, DeploymentEventsQueryVariables>(DeploymentEventsDocument, options);
+      }
+export function useDeploymentEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeploymentEventsQuery, DeploymentEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeploymentEventsQuery, DeploymentEventsQueryVariables>(DeploymentEventsDocument, options);
+        }
+export function useDeploymentEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeploymentEventsQuery, DeploymentEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeploymentEventsQuery, DeploymentEventsQueryVariables>(DeploymentEventsDocument, options);
+        }
+export type DeploymentEventsQueryHookResult = ReturnType<typeof useDeploymentEventsQuery>;
+export type DeploymentEventsLazyQueryHookResult = ReturnType<typeof useDeploymentEventsLazyQuery>;
+export type DeploymentEventsSuspenseQueryHookResult = ReturnType<typeof useDeploymentEventsSuspenseQuery>;
+export type DeploymentEventsQueryResult = Apollo.QueryResult<DeploymentEventsQuery, DeploymentEventsQueryVariables>;
+export const DeploymentNewReplicaSetDocument = gql`
+    query DeploymentNewReplicaSet($namespace: String!, $name: String!) {
+  handleGetDeploymentNewReplicaSet(namespace: $namespace, deployment: $name) @rest(type: "replicaset_ReplicaSet", path: "deployment/{args.namespace}/{args.deployment}/newreplicaset") {
+    ...ReplicaSet
+  }
+}
+    ${ReplicaSetFragmentDoc}`;
+
+/**
+ * __useDeploymentNewReplicaSetQuery__
+ *
+ * To run a query within a React component, call `useDeploymentNewReplicaSetQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeploymentNewReplicaSetQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeploymentNewReplicaSetQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useDeploymentNewReplicaSetQuery(baseOptions: Apollo.QueryHookOptions<DeploymentNewReplicaSetQuery, DeploymentNewReplicaSetQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeploymentNewReplicaSetQuery, DeploymentNewReplicaSetQueryVariables>(DeploymentNewReplicaSetDocument, options);
+      }
+export function useDeploymentNewReplicaSetLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeploymentNewReplicaSetQuery, DeploymentNewReplicaSetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeploymentNewReplicaSetQuery, DeploymentNewReplicaSetQueryVariables>(DeploymentNewReplicaSetDocument, options);
+        }
+export function useDeploymentNewReplicaSetSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeploymentNewReplicaSetQuery, DeploymentNewReplicaSetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeploymentNewReplicaSetQuery, DeploymentNewReplicaSetQueryVariables>(DeploymentNewReplicaSetDocument, options);
+        }
+export type DeploymentNewReplicaSetQueryHookResult = ReturnType<typeof useDeploymentNewReplicaSetQuery>;
+export type DeploymentNewReplicaSetLazyQueryHookResult = ReturnType<typeof useDeploymentNewReplicaSetLazyQuery>;
+export type DeploymentNewReplicaSetSuspenseQueryHookResult = ReturnType<typeof useDeploymentNewReplicaSetSuspenseQuery>;
+export type DeploymentNewReplicaSetQueryResult = Apollo.QueryResult<DeploymentNewReplicaSetQuery, DeploymentNewReplicaSetQueryVariables>;
+export const DeploymentOldReplicaSetsDocument = gql`
+    query DeploymentOldReplicaSets($namespace: String!, $name: String!) {
+  handleGetDeploymentOldReplicaSets(namespace: $namespace, deployment: $name) @rest(type: "replicaset_ReplicaSetList", path: "deployment/{args.namespace}/{args.deployment}/oldreplicaset") {
+    ...ReplicaSetList
+  }
+}
+    ${ReplicaSetListFragmentDoc}`;
+
+/**
+ * __useDeploymentOldReplicaSetsQuery__
+ *
+ * To run a query within a React component, call `useDeploymentOldReplicaSetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeploymentOldReplicaSetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeploymentOldReplicaSetsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useDeploymentOldReplicaSetsQuery(baseOptions: Apollo.QueryHookOptions<DeploymentOldReplicaSetsQuery, DeploymentOldReplicaSetsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeploymentOldReplicaSetsQuery, DeploymentOldReplicaSetsQueryVariables>(DeploymentOldReplicaSetsDocument, options);
+      }
+export function useDeploymentOldReplicaSetsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeploymentOldReplicaSetsQuery, DeploymentOldReplicaSetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeploymentOldReplicaSetsQuery, DeploymentOldReplicaSetsQueryVariables>(DeploymentOldReplicaSetsDocument, options);
+        }
+export function useDeploymentOldReplicaSetsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeploymentOldReplicaSetsQuery, DeploymentOldReplicaSetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeploymentOldReplicaSetsQuery, DeploymentOldReplicaSetsQueryVariables>(DeploymentOldReplicaSetsDocument, options);
+        }
+export type DeploymentOldReplicaSetsQueryHookResult = ReturnType<typeof useDeploymentOldReplicaSetsQuery>;
+export type DeploymentOldReplicaSetsLazyQueryHookResult = ReturnType<typeof useDeploymentOldReplicaSetsLazyQuery>;
+export type DeploymentOldReplicaSetsSuspenseQueryHookResult = ReturnType<typeof useDeploymentOldReplicaSetsSuspenseQuery>;
+export type DeploymentOldReplicaSetsQueryResult = Apollo.QueryResult<DeploymentOldReplicaSetsQuery, DeploymentOldReplicaSetsQueryVariables>;
 export const JobsDocument = gql`
     query Jobs($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetJobList(
@@ -8399,29 +8788,11 @@ export const ReplicaSetsDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "replicaset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    replicaSets {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      podInfo @type(name: "common_PodInfo") {
-        ...PodInfo
-      }
-      initContainerImages
-      containerImages
-    }
+  ) @rest(type: "replicaset_ReplicaSetList", path: "replicaset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...ReplicaSetList
   }
 }
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}`;
+    ${ReplicaSetListFragmentDoc}`;
 
 /**
  * __useReplicaSetsQuery__
@@ -8461,31 +8832,11 @@ export type ReplicaSetsSuspenseQueryHookResult = ReturnType<typeof useReplicaSet
 export type ReplicaSetsQueryResult = Apollo.QueryResult<ReplicaSetsQuery, ReplicaSetsQueryVariables>;
 export const ReplicaSetDocument = gql`
     query ReplicaSet($namespace: String!, $name: String!) {
-  handleGetReplicaSetDetail(namespace: $namespace, replicaSet: $name) @rest(path: "replicaset/{args.namespace}/{args.replicaSet}") {
-    typeMeta @type(name: "types_TypeMeta") {
-      ...TypeMeta
-    }
-    objectMeta @type(name: "types_ObjectMeta") {
-      ...ObjectMeta
-    }
-    podInfo @type(name: "common_PodInfo") {
-      ...PodInfo
-    }
-    selector @type(name: "v1_LabelSelector") {
-      ...Selector
-    }
-    horizontalPodAutoscalerList @type(name: "horizontalpodautoscaler_HorizontalPodAutoscalerList") {
-      ...HorizontalPodAutoscalerList
-    }
-    initContainerImages
-    containerImages
+  handleGetReplicaSetDetail(namespace: $namespace, replicaSet: $name) @rest(type: "replicaset_ReplicaSetDetail", path: "replicaset/{args.namespace}/{args.replicaSet}") {
+    ...ReplicaSetDetail
   }
 }
-    ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}
-${SelectorFragmentDoc}
-${HorizontalPodAutoscalerListFragmentDoc}`;
+    ${ReplicaSetDetailFragmentDoc}`;
 
 /**
  * __useReplicaSetQuery__

@@ -128,13 +128,15 @@ export default function ReplicaSet(): ReactElement {
 }
 
 export function ReplicaSetInfo(): ReactElement {
-  const rs = useOutletContext() as ReplicaSetT
+  const { name, namespace } = useParams()
 
   return (
     <section>
       <SubTitle>Horizontal Pod Autoscalers</SubTitle>
       <HorizontalPodAutoscalers
-        hpas={rs?.horizontalPodAutoscalerList?.horizontalpodautoscalers ?? []}
+        kind="replicaset"
+        namespace={namespace!}
+        name={name!}
       />
     </section>
   )

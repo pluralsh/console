@@ -1,17 +1,19 @@
 import { ReactElement } from 'react'
-import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Link } from 'react-router-dom'
 
 import {
+  Horizontalpodautoscaler_HorizontalPodAutoscalerList as HorizontalPodAutoscalerListT,
   Horizontalpodautoscaler_HorizontalPodAutoscaler as HorizontalPodAutoscalerT,
-  Maybe,
+  HorizontalPodAutoscalersQuery,
+  HorizontalPodAutoscalersQueryVariables,
+  useHorizontalPodAutoscalersQuery,
 } from '../../../generated/graphql-kubernetes'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
-import { useKubernetesCluster } from '../utils'
 import { ClusterTinyFragment } from '../../../generated/graphql'
+import { ResourceList } from '../ResourceList'
 
 const columnHelper = createColumnHelper<HorizontalPodAutoscalerT>()
 
@@ -64,23 +66,36 @@ const COLUMNS = [
 ]
 
 interface HorizontalPodAutoscalersProps {
-  hpas: Array<Maybe<HorizontalPodAutoscalerT>>
+  kind: string
+  namespace: string
+  name: string
 }
 
 export default function HorizontalPodAutoscalers({
-  hpas,
+  kind,
+  namespace,
+  name,
 }: HorizontalPodAutoscalersProps): ReactElement {
-  const cluster = useKubernetesCluster()
-
   return (
-    <Table
-      data={hpas}
+    <ResourceList<
+      HorizontalPodAutoscalerListT,
+      HorizontalPodAutoscalerT,
+      HorizontalPodAutoscalersQuery,
+      HorizontalPodAutoscalersQueryVariables
+    >
+      namespaced
       columns={COLUMNS}
-      reactTableOptions={{ meta: { cluster } }}
-      css={{
-        maxHeight: '500px',
-        height: '100%',
+      query={useHorizontalPodAutoscalersQuery}
+      queryOptions={{
+        variables: {
+          kind,
+          namespace,
+          name,
+        } as HorizontalPodAutoscalersQueryVariables,
       }}
+      queryName="handleGetHorizontalPodAutoscalerListForResource"
+      itemsKey="horizontalpodautoscalers"
+      disableOnRowClick
     />
   )
 }

@@ -70,14 +70,11 @@ const colStatus = columnHelper.accessor((rs) => rs.podInfo, {
   cell: ({ getValue }) => <WorkloadStatusChip podInfo={getValue()} />,
 })
 
-export default function ReplicaSets() {
-  const { cluster } = useKubernetesContext()
-
-  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
-
+export function useReplicaSetsColumns(): Array<object> {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
-  const columns = useMemo(
+
+  return useMemo(
     () => [
       colName,
       colNamespace,
@@ -89,6 +86,13 @@ export default function ReplicaSets() {
     ],
     [colName, colNamespace, colLabels, colCreationTimestamp]
   )
+}
+
+export default function ReplicaSets() {
+  const { cluster } = useKubernetesContext()
+  const columns = useReplicaSetsColumns()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
     <ResourceList<

@@ -1,0 +1,43 @@
+fragment ReplicaSetList on replicaset_ReplicaSetList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  replicaSets @type(name: "replicaset_ReplicaSet") {
+    ...ReplicaSet
+  }
+}
+
+fragment ReplicaSet on replicaset_ReplicaSet {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}
+
+fragment ReplicaSetDetail on replicaset_ReplicaSetDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  selector @type(name: "v1_LabelSelector") {
+    ...Selector
+  }
+  horizontalPodAutoscalerList
+  @type(name: "horizontalpodautoscaler_HorizontalPodAutoscalerList") {
+    ...HorizontalPodAutoscalerList
+  }
+  initContainerImages
+  containerImages
+}

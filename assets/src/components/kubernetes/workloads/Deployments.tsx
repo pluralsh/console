@@ -1,6 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
@@ -13,16 +12,12 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../ResourceList'
 import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-
 import { UsageText } from '../../cluster/TableElements'
-
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   DEPLOYMENTS_REL_PATH,
-  getConfigurationAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-
 import { useKubernetesContext } from '../Kubernetes'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
@@ -35,7 +30,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   },
   {
     label: ' deployments',
-    url: `${getConfigurationAbsPath(cluster?.id)}/${DEPLOYMENTS_REL_PATH}}`,
+    url: `${getWorkloadsAbsPath(cluster?.id)}/${DEPLOYMENTS_REL_PATH}`,
   },
 ]
 
