@@ -12,7 +12,7 @@ export function LabelSelector({ selector }: LabelSelectorProps): ReactNode {
   return (
     <ChipList
       size="small"
-      values={Object.entries(selector.matchLabels)}
+      values={Object.entries(selector?.matchLabels ?? {})}
       limit={3}
     />
   )

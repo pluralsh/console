@@ -54,7 +54,9 @@ const COLUMNS = [
             hpa?.objectMeta?.namespace
           )}
         >
-          <InlineLink>{ref?.name}</InlineLink>
+          <InlineLink>
+            {ref?.kind?.toLowerCase()}/{ref?.name}
+          </InlineLink>
         </Link>
       )
     },
