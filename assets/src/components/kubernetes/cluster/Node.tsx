@@ -6,8 +6,8 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
-
 import { useTheme } from 'styled-components'
+import { filesize } from 'filesize'
 
 import {
   Common_EventList as EventListT,
@@ -28,20 +28,15 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
-
 import { ResourceList } from '../ResourceList'
-
 import { SubTitle } from '../../cluster/nodes/SubTitle'
-
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
-
-import { GaugeWrap, ResourceGauge } from '../../cluster/Gauges'
-
+import { GaugeWrap } from '../../cluster/Gauges'
 import { usePodColumns } from '../workloads/Pods'
-
 import Conditions from '../common/Conditions'
+import RadialBarChart from '../../utils/RadialBarChart'
+import { cpuFmt, roundToTwoPlaces } from '../../cluster/utils'
 
 import { getBreadcrumbs } from './Nodes'
 import { useEventsColumns } from './Events'
@@ -94,6 +89,10 @@ export default function Node(): ReactElement {
           </SidecarItem>
           {/* TODO: Fix on the API side? */}
           <SidecarItem heading="Phase">{node?.phase}</SidecarItem>
+          <SidecarItem heading="Unschedulable">
+            {node?.unschedulable ? 'True' : 'False'}
+          </SidecarItem>
+          <SidecarItem heading="Pod CIDR">{node?.podCIDR}</SidecarItem>
         </MetadataSidecar>
       }
     >
@@ -106,24 +105,89 @@ export function NodeInfo(): ReactElement {
   const theme = useTheme()
   const node = useOutletContext() as NodeT
 
+  const { memoryData, cpuData, podsData } = useMemo(() => {
+    const {
+      cpuRequests,
+      cpuLimits,
+      cpuCapacity,
+      memoryRequests,
+      memoryLimits,
+      memoryCapacity,
+      allocatedPods,
+      podCapacity,
+    } = node.allocatedResources
+
+    return {
+      cpuData: [
+        { id: 'Capacity', data: [{ x: 'Capacity', y: cpuCapacity ?? 0 }] },
+        { id: 'Limits', data: [{ x: 'Limits', y: cpuLimits ?? 0 }] },
+        { id: 'Requests', data: [{ x: 'Requests', y: cpuRequests ?? 0 }] },
+      ],
+      memoryData: [
+        { id: 'Capacity', data: [{ x: 'Capacity', y: memoryCapacity ?? 0 }] },
+        { id: 'Limits', data: [{ x: 'Limits', y: memoryLimits ?? 0 }] },
+        { id: 'Requests', data: [{ x: 'Requests', y: memoryRequests ?? 0 }] },
+      ],
+      podsData: [
+        {
+          id: 'Pod usage',
+          data: [
+            { x: 'Pods used', y: allocatedPods },
+            { x: 'Pods available', y: podCapacity - allocatedPods },
+          ],
+        },
+      ],
+    }
+  }, [node.allocatedResources])
+
   return (
     <>
       <section>
         <SubTitle>Allocated resources</SubTitle>
-        <Card>
+        <Card
+          css={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'stretch',
+            justifyContent: 'center',
+            gap: theme.spacing.large,
+            padding: theme.spacing.medium,
+            flexWrap: 'wrap',
+          }}
+        >
+          <GaugeWrap
+            heading="CPU reservation"
+            width="auto"
+            height="auto"
+          >
+            <RadialBarChart
+              data={cpuData}
+              valueFormat={(val) =>
+                cpuFmt(roundToTwoPlaces(val ?? 0 / 1000)) as string
+              }
+            />
+          </GaugeWrap>
           <GaugeWrap
             heading="Memory reservation"
             width="auto"
             height="auto"
           >
-            <ResourceGauge
-              limits={node.allocatedResources.memoryLimits}
-              requests={node.allocatedResources.memoryRequests}
-              total={node.allocatedResources.memoryCapacity}
-              type="memory"
+            <RadialBarChart
+              data={memoryData}
+              valueFormat={(val) => filesize(roundToTwoPlaces(val)) as string}
             />
           </GaugeWrap>
-          TODO
+          <GaugeWrap
+            heading="Pods usage"
+            width="auto"
+            height="auto"
+          >
+            <RadialBarChart
+              data={podsData}
+              centerLabel="Used"
+              centerVal={`${Math.round(node.allocatedResources.podFraction)}%`}
+            />
+          </GaugeWrap>
         </Card>
       </section>
       <section>
@@ -146,6 +210,9 @@ export function NodeInfo(): ReactElement {
           <ResourceInfoCardEntry heading="Kernel">
             v{node?.nodeInfo.kernelVersion}
           </ResourceInfoCardEntry>
+          <ResourceInfoCardEntry heading="Provider ID">
+            {node?.providerID}
+          </ResourceInfoCardEntry>
           <ResourceInfoCardEntry heading="System image">
             {node?.nodeInfo.osImage}
           </ResourceInfoCardEntry>
@@ -167,14 +234,14 @@ export function NodeInfo(): ReactElement {
           <ResourceInfoCardEntry heading="Boot ID">
             {node?.nodeInfo.bootID}
           </ResourceInfoCardEntry>
-          <ResourceInfoCardEntry heading="Provider ID">
-            {node?.providerID}
-          </ResourceInfoCardEntry>
-          <ResourceInfoCardEntry heading="Unschedulable">
-            {node?.unschedulable ? 'True' : 'False'}
-          </ResourceInfoCardEntry>
-          <ResourceInfoCardEntry heading="Pod CIDR">
-            {node?.podCIDR}
+          <ResourceInfoCardEntry heading="Taints">
+            <ChipList
+              size="small"
+              limit={5}
+              values={node.taints || []}
+              transformValue={(t) => `${t?.key}=${t?.value}:${t?.effect}`}
+              emptyState={<div>None</div>}
+            />
           </ResourceInfoCardEntry>
           <ResourceInfoCardEntry heading="Addresses">
             <ChipList
@@ -182,15 +249,6 @@ export function NodeInfo(): ReactElement {
               limit={5}
               values={node.addresses || []}
               transformValue={(a) => `${a?.type}: ${a?.address}`}
-              emptyState={<div>None</div>}
-            />
-          </ResourceInfoCardEntry>
-          <ResourceInfoCardEntry heading="Taints">
-            <ChipList
-              size="small"
-              limit={5}
-              values={node.taints || []}
-              transformValue={(t) => `${t?.key}=${t?.value}:${t?.effect}`}
               emptyState={<div>None</div>}
             />
           </ResourceInfoCardEntry>
