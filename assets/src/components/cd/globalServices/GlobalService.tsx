@@ -85,6 +85,8 @@ export default function GlobalServices() {
           <YamlGeneratorModal
             open={isModalOpen}
             onClose={() => setIsModalOpen(false)}
+            header="Create global service"
+            kind="GlobalService"
           />
         </div>
       ),

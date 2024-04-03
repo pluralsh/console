@@ -45,9 +45,13 @@ distributionOptions.unshift({
 export function YamlGeneratorModal({
   open,
   onClose,
+  header,
+  kind,
 }: {
   open: boolean
   onClose: Nullable<() => void>
+  header: string
+  kind: string
 }) {
   const theme = useTheme()
   const [name, setName] = useState('')
@@ -68,7 +72,7 @@ export function YamlGeneratorModal({
 
   return (
     <ModalAlt
-      header="Create global service"
+      header={header}
       open={open}
       portal
       onClose={() => {
@@ -129,7 +133,7 @@ export function YamlGeneratorModal({
             </StepBody>
             <FormField
               required
-              label="Global service name"
+              label="Service name"
             >
               <Input
                 value={name}
@@ -205,7 +209,8 @@ export function YamlGeneratorModal({
             {getYaml(
               name,
               tags,
-              distributionValue === 'all' ? '' : distributionValue
+              distributionValue === 'all' ? '' : distributionValue,
+              kind
             )}
           </Code>
         )}
@@ -316,11 +321,12 @@ function ModalIllustration({ modalStep }: { modalStep: 'configure' | 'copy' }) {
 function getYaml(
   name: string,
   tags: Record<string, string>,
-  distribution: string
+  distribution: string,
+  kind: string
 ) {
   const defaultObj: any = {
     apiVersion: 'deployments.plural.sh/v1alpha1',
-    kind: 'GlobalService',
+    kind,
     metadata: {
       name,
       namespace: 'infra',
