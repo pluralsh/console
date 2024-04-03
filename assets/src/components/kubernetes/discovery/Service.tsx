@@ -1,6 +1,13 @@
-import { ReactElement, useMemo } from 'react'
-import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
+import React, { ReactElement, useMemo } from 'react'
+import {
+  Card,
+  ChipList,
+  SidecarItem,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+
+import { useTheme } from 'styled-components'
 
 import {
   Common_EventList as EventListT,
@@ -31,6 +38,8 @@ import { usePodColumns } from '../workloads/Pods'
 import { ResourceList } from '../ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import { SubTitle } from '../../cluster/nodes/SubTitle'
+
+import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 
 import { getBreadcrumbs } from './Services'
 
@@ -96,11 +105,30 @@ export default function Service(): ReactElement {
 }
 
 export function ServiceInfo(): ReactElement {
-  const _service = useOutletContext() as ServiceT
+  const theme = useTheme()
+  const service = useOutletContext() as ServiceT
 
   return (
     <section>
-      <SubTitle>TODO</SubTitle>
+      <SubTitle>Service information</SubTitle>
+      <Card
+        css={{
+          display: 'flex',
+          gap: theme.spacing.large,
+          padding: theme.spacing.medium,
+          flexWrap: 'wrap',
+        }}
+      >
+        <ResourceInfoCardEntry heading="Selector">
+          <ChipList
+            size="small"
+            limit={3}
+            values={Object.entries(service.selector)}
+            transformValue={(label) => label.join(': ')}
+            emptyState={<div>None</div>}
+          />
+        </ResourceInfoCardEntry>
+      </Card>
     </section>
   )
 }
