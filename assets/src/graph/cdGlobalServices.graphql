@@ -40,3 +40,38 @@ mutation DeleteGlobalService($id: ID!) {
     id
   }
 }
+
+query GetGlobalServices($first: Int, $after: String) {
+  globalServices(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...GlobalService
+        distro
+      }
+    }
+  }
+}
+
+query GetServiceData($serviceId: ID!, $first: Int, $after: String) {
+  globalService(id: $serviceId) {
+    name
+    distro
+    tags {
+      name
+      value
+    }
+    services(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ServiceDeploymentsRow
+        }
+      }
+    }
+  }
+}
