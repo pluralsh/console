@@ -1,5 +1,6 @@
 fragment GlobalService on GlobalService {
   id
+  distro
   name
   provider {
     id
@@ -49,7 +50,6 @@ query GetGlobalServices($first: Int, $after: String) {
     edges {
       node {
         ...GlobalService
-        distro
       }
     }
   }
