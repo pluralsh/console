@@ -64,20 +64,20 @@ query Service($name: String!, $namespace: String!) {
 
 query ServiceEvents($namespace: String!, $name: String!) {
   handleGetServiceEvent(namespace: $namespace, service: $name)
-  @rest(
-    type: "common_EventList"
-    path: "service/{args.namespace}/{args.service}/event"
-  ) {
+    @rest(
+      type: "common_EventList"
+      path: "service/{args.namespace}/{args.service}/event"
+    ) {
     ...EventList
   }
 }
 
 query ServicePods($namespace: String!, $name: String!) {
   handleGetServicePods(namespace: $namespace, service: $name)
-  @rest(
-    type: "pod_PodList"
-    path: "service/{args.namespace}/{args.service}/pod"
-  ) {
+    @rest(
+      type: "pod_PodList"
+      path: "service/{args.namespace}/{args.service}/pod"
+    ) {
     ...PodList
   }
 }

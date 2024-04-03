@@ -42,7 +42,7 @@ import { SubTitle } from '../../cluster/nodes/SubTitle'
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 
 import { getBreadcrumbs } from './Services'
-import { Endpoints, TableEndpoints } from './utils'
+import { Endpoints } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -120,7 +120,7 @@ export function ServiceInfo(): ReactElement {
           flexWrap: 'wrap',
         }}
       >
-        <ResourceInfoCardEntry heading="Internal endpoint">
+        <ResourceInfoCardEntry heading="Internal endpoints">
           <Endpoints endpoints={[service.internalEndpoint]} />
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="External endpoints">
