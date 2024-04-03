@@ -157,6 +157,32 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - managednamespaces
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - managednamespaces/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - managednamespaces/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - notificationrouters
   verbs:
   - create
