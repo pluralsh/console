@@ -144,3 +144,13 @@ test-base:
     CYPRESS_PASSWORD: {{ .Values.testBase.cypressPassword }}
     CYPRESS_BASE_URL: https://{{ .Values.console_dns }}/
 {{- end }}
+
+{{ if .Values.kas_dns }}
+dashboard:
+  api:
+    containers:
+      args:
+        - --apiserver-host=https://{{ .Values.kas_dns }}/k8s-proxy
+        - --apiserver-skip-tls-verify=true
+        - --act-as-proxy
+{{ end }}
