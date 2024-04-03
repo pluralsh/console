@@ -31,7 +31,7 @@ query NetworkPolicies(
 
 query NetworkPolicy($name: String!, $namespace: String!) {
   handleGetNetworkPolicyDetail(namespace: $namespace, networkpolicy: $name)
-  @rest(path: "networkpolicy/{args.namespace}/{args.networkpolicy}") {
+    @rest(path: "networkpolicy/{args.namespace}/{args.networkpolicy}") {
     typeMeta @type(name: "types_TypeMeta") {
       ...TypeMeta
     }
