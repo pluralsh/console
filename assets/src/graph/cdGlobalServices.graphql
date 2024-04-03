@@ -57,12 +57,7 @@ query GetGlobalServices($first: Int, $after: String) {
 
 query GetServiceData($serviceId: ID!, $first: Int, $after: String) {
   globalService(id: $serviceId) {
-    name
-    distro
-    tags {
-      name
-      value
-    }
+    ...GlobalService
     services(first: $first, after: $after) {
       pageInfo {
         ...PageInfo

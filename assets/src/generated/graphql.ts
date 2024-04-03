@@ -6951,7 +6951,7 @@ export type GetServiceDataQueryVariables = Exact<{
 }>;
 
 
-export type GetServiceDataQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', name: string, distro?: ClusterDistro | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null } | null };
+export type GetServiceDataQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, insertedAt?: string | null, updatedAt?: string | null, services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
 
 export type HttpConnectionFragment = { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null };
 
@@ -12115,12 +12115,7 @@ export type GetGlobalServicesQueryResult = Apollo.QueryResult<GetGlobalServicesQ
 export const GetServiceDataDocument = gql`
     query GetServiceData($serviceId: ID!, $first: Int, $after: String) {
   globalService(id: $serviceId) {
-    name
-    distro
-    tags {
-      name
-      value
-    }
+    ...GlobalService
     services(first: $first, after: $after) {
       pageInfo {
         ...PageInfo
@@ -12133,7 +12128,8 @@ export const GetServiceDataDocument = gql`
     }
   }
 }
-    ${PageInfoFragmentDoc}
+    ${GlobalServiceFragmentDoc}
+${PageInfoFragmentDoc}
 ${ServiceDeploymentsRowFragmentDoc}`;
 
 /**
