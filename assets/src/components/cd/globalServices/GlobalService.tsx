@@ -19,7 +19,7 @@ import {
   ColTags,
 } from './GlobalServicesColumns'
 import { GlobalServicesTable } from './GlobalServicesTable'
-import { YamlGeneratorModal } from './GlobalServiceYamlGeneratorModal'
+import { YamlGeneratorModal } from './YamlGeneratorModal'
 
 const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
   {
