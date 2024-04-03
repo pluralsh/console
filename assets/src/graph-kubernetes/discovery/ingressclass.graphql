@@ -27,3 +27,16 @@ query IngressClasses(
     }
   }
 }
+
+query IngressClass($name: String!) {
+  handleGetIngressClass(ingressclass: $name)
+  @rest(path: "service/{args.ingressclass}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    controller
+  }
+}

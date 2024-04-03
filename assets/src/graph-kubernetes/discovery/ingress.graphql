@@ -25,15 +25,89 @@ query Ingresses(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
-      endpoints {
-        host
-        ports {
-          port
-          protocol
-          nodePort
-        }
+      endpoints @type(name: "common_Endpoint") {
+        ...Endpoint
       }
       hosts
     }
+  }
+}
+
+query Ingress($name: String!, $namespace: String!) {
+  handleGetIngressDetail(namespace: $namespace, name: $name)
+  @rest(path: "ingress/{args.namespace}/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    endpoints @type(name: "common_Endpoint") {
+      ...Endpoint
+    }
+    spec {
+      ingressClassName
+      tls {
+        hosts
+        secretName
+      }
+      defaultBackend {
+        service {
+          name
+          port {
+            name
+            number
+          }
+        }
+        resource {
+          name
+          apiGroup
+          kind
+        }
+      }
+      rules {
+        host
+        http {
+          paths {
+            path
+            pathType
+            backend {
+              service {
+                name
+                port {
+                  name
+                  number
+                }
+              }
+              resource {
+                name
+                kind
+                apiGroup
+              }
+              service {
+                name
+                port {
+                  name
+                  number
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    status {
+      loadBalancer {
+        ingress {
+          ports {
+            port
+            protocol
+            error
+          }
+        }
+      }
+    }
+    hosts
+    errors
   }
 }
