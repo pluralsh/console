@@ -47,7 +47,7 @@ import ResourceInfoCard, {
 } from '../common/ResourceInfoCard'
 import Annotations from '../common/Annotations'
 import { InlineLink } from '../../utils/typography/InlineLink'
-import HorizontalPodAutoscalers from '../common/HorizontalPodAutoscalers'
+import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscalers'
 
 import { getBreadcrumbs } from './Deployments'
 import { useReplicaSetsColumns } from './ReplicaSets'
@@ -228,7 +228,7 @@ export function DeploymentHorizontalPodAutoscalers(): ReactElement {
   const { name, namespace } = useParams()
 
   return (
-    <HorizontalPodAutoscalers
+    <HorizontalPodAutoscalersForResource
       kind="deployment"
       namespace={namespace!}
       name={name!}

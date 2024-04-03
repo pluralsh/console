@@ -41,6 +41,7 @@ export const CLUSTER_REL_PATH = 'cluster'
 export const NODES_REL_PATH = 'nodes'
 export const EVENTS_REL_PATH = 'events'
 export const NAMESPACES_REL_PATH = 'namespaces'
+export const HPAS_REL_PATH = 'horizontalpodautoscalers'
 
 export const CUSTOM_RESOURCES_REL_PATH = 'customresourcedefinitions'
 

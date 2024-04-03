@@ -31,7 +31,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import { SubTitle } from '../../cluster/nodes/SubTitle'
-import HorizontalPodAutoscalers from '../common/HorizontalPodAutoscalers'
+import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscalers'
 import { PodInfo } from '../common/PodInfo'
 import { LabelSelector } from '../common/LabelSelector'
 import { ResourceList } from '../ResourceList'
@@ -133,7 +133,7 @@ export function ReplicaSetInfo(): ReactElement {
   return (
     <section>
       <SubTitle>Horizontal Pod Autoscalers</SubTitle>
-      <HorizontalPodAutoscalers
+      <HorizontalPodAutoscalersForResource
         kind="replicaset"
         namespace={namespace!}
         name={name!}

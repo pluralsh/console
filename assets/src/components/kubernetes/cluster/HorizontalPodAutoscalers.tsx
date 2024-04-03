@@ -1,21 +1,21 @@
 import { ReactElement } from 'react'
-import { createColumnHelper } from '@tanstack/react-table'
+
 import { Link } from 'react-router-dom'
 
+import { createColumnHelper } from '@tanstack/react-table'
+
+import { ResourceList } from '../ResourceList'
 import {
   Horizontalpodautoscaler_HorizontalPodAutoscalerList as HorizontalPodAutoscalerListT,
   Horizontalpodautoscaler_HorizontalPodAutoscaler as HorizontalPodAutoscalerT,
-  HorizontalPodAutoscalersForResourceQuery,
-  HorizontalPodAutoscalersForResourceQueryVariables,
   HorizontalPodAutoscalersQuery,
   HorizontalPodAutoscalersQueryVariables,
   useHorizontalPodAutoscalersQuery,
 } from '../../../generated/graphql-kubernetes'
-import { DateTimeCol } from '../../utils/table/DateTimeCol'
+import { ClusterTinyFragment } from '../../../generated/graphql'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
-import { ClusterTinyFragment } from '../../../generated/graphql'
-import { ResourceList } from '../ResourceList'
+import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
 const columnHelper = createColumnHelper<HorizontalPodAutoscalerT>()
 
@@ -67,35 +67,22 @@ const COLUMNS = [
   }),
 ]
 
-interface HorizontalPodAutoscalersProps {
-  kind: string
-  namespace: string
-  name: string
+export function useHorizontalPodAutoscalersColumns(): Array<object> {
+  return COLUMNS
 }
 
-export default function HorizontalPodAutoscalersForResource({
-  kind,
-  namespace,
-  name,
-}: HorizontalPodAutoscalersProps): ReactElement {
+export default function HorizontalPodAutoscalers(): ReactElement {
   return (
     <ResourceList<
       HorizontalPodAutoscalerListT,
       HorizontalPodAutoscalerT,
-      HorizontalPodAutoscalersForResourceQuery,
-      HorizontalPodAutoscalersForResourceQueryVariables
+      HorizontalPodAutoscalersQuery,
+      HorizontalPodAutoscalersQueryVariables
     >
       namespaced
       columns={COLUMNS}
       query={useHorizontalPodAutoscalersQuery}
-      queryOptions={{
-        variables: {
-          kind,
-          namespace,
-          name,
-        } as HorizontalPodAutoscalersForResourceQueryVariables,
-      }}
-      queryName="handleGetHorizontalPodAutoscalerListForResource"
+      queryName="handleGetHorizontalPodAutoscalerList"
       itemsKey="horizontalpodautoscalers"
       disableOnRowClick
     />

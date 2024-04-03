@@ -4,11 +4,11 @@ import { Suspense, useMemo, useRef, useState } from 'react'
 
 import {
   EVENTS_REL_PATH,
+  HPAS_REL_PATH,
   NAMESPACES_REL_PATH,
   NODES_REL_PATH,
   getClusterAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
@@ -17,13 +17,13 @@ import {
   useSetPageHeaderContent,
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-
 import { useKubernetesContext } from '../Kubernetes'
 
 const directory = [
   { path: NODES_REL_PATH, label: 'Nodes' },
   { path: EVENTS_REL_PATH, label: 'Events' },
   { path: NAMESPACES_REL_PATH, label: 'Namespaces' },
+  { path: HPAS_REL_PATH, label: 'Horizontal Pod Autoscalers' },
 ] as const
 
 export default function Cluster() {

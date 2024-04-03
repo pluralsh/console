@@ -4692,6 +4692,32 @@ export type EventListFragment = { __typename?: 'common_EventList', listMeta: { _
 
 export type EventFragment = { __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } };
 
+export type HorizontalPodAutoscalersQueryVariables = Exact<{
+  kind: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type HorizontalPodAutoscalersQuery = { __typename?: 'Query', handleGetHorizontalPodAutoscalerList?: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } | null };
+
+export type HorizontalPodAutoscalersForResourceQueryVariables = Exact<{
+  kind: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type HorizontalPodAutoscalersForResourceQuery = { __typename?: 'Query', handleGetHorizontalPodAutoscalerListForResource?: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } | null };
+
 export type NamespacesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -4787,19 +4813,6 @@ export type SelectorFragment = { __typename?: 'v1_LabelSelector', matchLabels?: 
 export type HorizontalPodAutoscalerListFragment = { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> };
 
 export type HorizontalPodAutoscalerFragment = { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } };
-
-export type HorizontalPodAutoscalersQueryVariables = Exact<{
-  kind: Scalars['String']['input'];
-  namespace: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type HorizontalPodAutoscalersQuery = { __typename?: 'Query', handleGetHorizontalPodAutoscalerListForResource?: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } | null };
 
 export type NamespacedResourceQueryVariables = Exact<{
   kind: Scalars['String']['input'];
@@ -6373,6 +6386,112 @@ export type EventsQueryHookResult = ReturnType<typeof useEventsQuery>;
 export type EventsLazyQueryHookResult = ReturnType<typeof useEventsLazyQuery>;
 export type EventsSuspenseQueryHookResult = ReturnType<typeof useEventsSuspenseQuery>;
 export type EventsQueryResult = Apollo.QueryResult<EventsQuery, EventsQueryVariables>;
+export const HorizontalPodAutoscalersDocument = gql`
+    query HorizontalPodAutoscalers($kind: String!, $namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetHorizontalPodAutoscalerList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "horizontalpodautoscaler_HorizontalPodAutoscalerList", path: "horizontalpodautoscaler/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...HorizontalPodAutoscalerList
+  }
+}
+    ${HorizontalPodAutoscalerListFragmentDoc}`;
+
+/**
+ * __useHorizontalPodAutoscalersQuery__
+ *
+ * To run a query within a React component, call `useHorizontalPodAutoscalersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHorizontalPodAutoscalersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHorizontalPodAutoscalersQuery({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useHorizontalPodAutoscalersQuery(baseOptions: Apollo.QueryHookOptions<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>(HorizontalPodAutoscalersDocument, options);
+      }
+export function useHorizontalPodAutoscalersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>(HorizontalPodAutoscalersDocument, options);
+        }
+export function useHorizontalPodAutoscalersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>(HorizontalPodAutoscalersDocument, options);
+        }
+export type HorizontalPodAutoscalersQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersQuery>;
+export type HorizontalPodAutoscalersLazyQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersLazyQuery>;
+export type HorizontalPodAutoscalersSuspenseQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersSuspenseQuery>;
+export type HorizontalPodAutoscalersQueryResult = Apollo.QueryResult<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>;
+export const HorizontalPodAutoscalersForResourceDocument = gql`
+    query HorizontalPodAutoscalersForResource($kind: String!, $namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetHorizontalPodAutoscalerListForResource(
+    kind: $kind
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "horizontalpodautoscaler_HorizontalPodAutoscalerList", path: "{args.kind}/{args.namespace}/{args.name}/horizontalpodautoscaler?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...HorizontalPodAutoscalerList
+  }
+}
+    ${HorizontalPodAutoscalerListFragmentDoc}`;
+
+/**
+ * __useHorizontalPodAutoscalersForResourceQuery__
+ *
+ * To run a query within a React component, call `useHorizontalPodAutoscalersForResourceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHorizontalPodAutoscalersForResourceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHorizontalPodAutoscalersForResourceQuery({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function useHorizontalPodAutoscalersForResourceQuery(baseOptions: Apollo.QueryHookOptions<HorizontalPodAutoscalersForResourceQuery, HorizontalPodAutoscalersForResourceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HorizontalPodAutoscalersForResourceQuery, HorizontalPodAutoscalersForResourceQueryVariables>(HorizontalPodAutoscalersForResourceDocument, options);
+      }
+export function useHorizontalPodAutoscalersForResourceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HorizontalPodAutoscalersForResourceQuery, HorizontalPodAutoscalersForResourceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HorizontalPodAutoscalersForResourceQuery, HorizontalPodAutoscalersForResourceQueryVariables>(HorizontalPodAutoscalersForResourceDocument, options);
+        }
+export function useHorizontalPodAutoscalersForResourceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HorizontalPodAutoscalersForResourceQuery, HorizontalPodAutoscalersForResourceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HorizontalPodAutoscalersForResourceQuery, HorizontalPodAutoscalersForResourceQueryVariables>(HorizontalPodAutoscalersForResourceDocument, options);
+        }
+export type HorizontalPodAutoscalersForResourceQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersForResourceQuery>;
+export type HorizontalPodAutoscalersForResourceLazyQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersForResourceLazyQuery>;
+export type HorizontalPodAutoscalersForResourceSuspenseQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersForResourceSuspenseQuery>;
+export type HorizontalPodAutoscalersForResourceQueryResult = Apollo.QueryResult<HorizontalPodAutoscalersForResourceQuery, HorizontalPodAutoscalersForResourceQueryVariables>;
 export const NamespacesDocument = gql`
     query Namespaces($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetNamespaces(
@@ -6815,60 +6934,6 @@ export type NodeEventsQueryHookResult = ReturnType<typeof useNodeEventsQuery>;
 export type NodeEventsLazyQueryHookResult = ReturnType<typeof useNodeEventsLazyQuery>;
 export type NodeEventsSuspenseQueryHookResult = ReturnType<typeof useNodeEventsSuspenseQuery>;
 export type NodeEventsQueryResult = Apollo.QueryResult<NodeEventsQuery, NodeEventsQueryVariables>;
-export const HorizontalPodAutoscalersDocument = gql`
-    query HorizontalPodAutoscalers($kind: String!, $namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetHorizontalPodAutoscalerListForResource(
-    kind: $kind
-    namespace: $namespace
-    name: $name
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(type: "horizontalpodautoscaler_HorizontalPodAutoscalerList", path: "{args.kind}/{args.namespace}/{args.name}/horizontalpodautoscaler?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    ...HorizontalPodAutoscalerList
-  }
-}
-    ${HorizontalPodAutoscalerListFragmentDoc}`;
-
-/**
- * __useHorizontalPodAutoscalersQuery__
- *
- * To run a query within a React component, call `useHorizontalPodAutoscalersQuery` and pass it any options that fit your needs.
- * When your component renders, `useHorizontalPodAutoscalersQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useHorizontalPodAutoscalersQuery({
- *   variables: {
- *      kind: // value for 'kind'
- *      namespace: // value for 'namespace'
- *      name: // value for 'name'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useHorizontalPodAutoscalersQuery(baseOptions: Apollo.QueryHookOptions<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>(HorizontalPodAutoscalersDocument, options);
-      }
-export function useHorizontalPodAutoscalersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>(HorizontalPodAutoscalersDocument, options);
-        }
-export function useHorizontalPodAutoscalersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>(HorizontalPodAutoscalersDocument, options);
-        }
-export type HorizontalPodAutoscalersQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersQuery>;
-export type HorizontalPodAutoscalersLazyQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersLazyQuery>;
-export type HorizontalPodAutoscalersSuspenseQueryHookResult = ReturnType<typeof useHorizontalPodAutoscalersSuspenseQuery>;
-export type HorizontalPodAutoscalersQueryResult = Apollo.QueryResult<HorizontalPodAutoscalersQuery, HorizontalPodAutoscalersQueryVariables>;
 export const NamespacedResourceDocument = gql`
     query NamespacedResource($kind: String!, $name: String!, $namespace: String!) {
   handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {

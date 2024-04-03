@@ -101,6 +101,8 @@ import ServiceAccounts from '../components/kubernetes/access/ServiceAccounts'
 
 import ServiceAccount from '../components/kubernetes/access/ServiceAccount'
 
+import HorizontalPodAutoscalers from '../components/kubernetes/cluster/HorizontalPodAutoscalers'
+
 import {
   ACCESS_REL_PATH,
   CLUSTER_REL_PATH,
@@ -114,6 +116,7 @@ import {
   DEPLOYMENTS_REL_PATH,
   DISCOVERY_REL_PATH,
   EVENTS_REL_PATH,
+  HPAS_REL_PATH,
   INGRESSES_REL_PATH,
   INGRESS_CLASSES_REL_PATH,
   JOBS_REL_PATH,
@@ -301,6 +304,10 @@ export const kubernetesRoutes = [
       <Route
         path={NAMESPACES_REL_PATH}
         element={<Namespaces />}
+      />
+      <Route
+        path={HPAS_REL_PATH}
+        element={<HorizontalPodAutoscalers />}
       />
     </Route>
     <Route
