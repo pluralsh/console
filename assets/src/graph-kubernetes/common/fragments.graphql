@@ -38,6 +38,17 @@ fragment Probe on v1_Probe {
   timeoutSeconds
 }
 
+fragment NetworkPolicyPort on v1_NetworkPolicyPort {
+  port
+  endPort
+  protocol
+}
+
+fragment IPBlock on v1_IPBlock {
+  except
+  cidr
+}
+
 fragment PolicyRule on v1_PolicyRule {
   apiGroups
   nonResourceURLs

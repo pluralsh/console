@@ -4768,6 +4768,10 @@ export type ConditionFragment = { __typename?: 'common_Condition', message: stri
 
 export type ProbeFragment = { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null };
 
+export type NetworkPolicyPortFragment = { __typename?: 'v1_NetworkPolicyPort', port?: string | null, endPort?: number | null, protocol?: string | null };
+
+export type IpBlockFragment = { __typename?: 'v1_IPBlock', except?: Array<string | null> | null, cidr: string };
+
 export type PolicyRuleFragment = { __typename?: 'v1_PolicyRule', apiGroups?: Array<string | null> | null, nonResourceURLs?: Array<string | null> | null, resourceNames?: Array<string | null> | null, verbs: Array<string | null>, resources?: Array<string | null> | null };
 
 export type SubjectFragment = { __typename?: 'v1_Subject', apiGroup?: string | null, kind: string, name: string, namespace?: string | null };
@@ -4878,6 +4882,14 @@ export type NetworkPoliciesQueryVariables = Exact<{
 
 
 export type NetworkPoliciesQuery = { __typename?: 'Query', handleGetNetworkPolicyList?: { __typename?: 'networkpolicy_NetworkPolicyList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'networkpolicy_NetworkPolicy', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type NetworkPolicyQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type NetworkPolicyQuery = { __typename?: 'Query', handleGetNetworkPolicyDetail?: { __typename?: 'networkpolicy_NetworkPolicyDetail', policyTypes?: Array<string | null> | null, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podSelector: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null }, egress?: Array<{ __typename?: 'v1_NetworkPolicyEgressRule', to?: Array<{ __typename?: 'v1_NetworkPolicyPeer', podSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null, namespaceSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null, ipBlock?: { __typename?: 'v1_IPBlock', except?: Array<string | null> | null, cidr: string } | null } | null> | null, ports?: Array<{ __typename?: 'v1_NetworkPolicyPort', port?: string | null, endPort?: number | null, protocol?: string | null } | null> | null } | null> | null, ingress?: Array<{ __typename?: 'v1_NetworkPolicyIngressRule', from?: Array<{ __typename?: 'v1_NetworkPolicyPeer', podSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null, namespaceSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null, ipBlock?: { __typename?: 'v1_IPBlock', except?: Array<string | null> | null, cidr: string } | null } | null> | null, ports?: Array<{ __typename?: 'v1_NetworkPolicyPort', port?: string | null, endPort?: number | null, protocol?: string | null } | null> | null } | null> | null } | null };
 
 export type ServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5174,6 +5186,19 @@ export const ConditionFragmentDoc = gql`
   lastProbeTime
   lastTransitionTime
   reason
+}
+    `;
+export const NetworkPolicyPortFragmentDoc = gql`
+    fragment NetworkPolicyPort on v1_NetworkPolicyPort {
+  port
+  endPort
+  protocol
+}
+    `;
+export const IpBlockFragmentDoc = gql`
+    fragment IPBlock on v1_IPBlock {
+  except
+  cidr
 }
     `;
 export const PolicyRuleFragmentDoc = gql`
@@ -7129,6 +7154,93 @@ export type NetworkPoliciesQueryHookResult = ReturnType<typeof useNetworkPolicie
 export type NetworkPoliciesLazyQueryHookResult = ReturnType<typeof useNetworkPoliciesLazyQuery>;
 export type NetworkPoliciesSuspenseQueryHookResult = ReturnType<typeof useNetworkPoliciesSuspenseQuery>;
 export type NetworkPoliciesQueryResult = Apollo.QueryResult<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>;
+export const NetworkPolicyDocument = gql`
+    query NetworkPolicy($name: String!, $namespace: String!) {
+  handleGetNetworkPolicyDetail(namespace: $namespace, networkpolicy: $name) @rest(path: "networkpolicy/{args.namespace}/{args.networkpolicy}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    podSelector @type(name: "v1_LabelSelector") {
+      ...Selector
+    }
+    egress {
+      to {
+        podSelector @type(name: "v1_LabelSelector") {
+          ...Selector
+        }
+        namespaceSelector @type(name: "v1_LabelSelector") {
+          ...Selector
+        }
+        ipBlock @type(name: "v1_IPBlock") {
+          ...IPBlock
+        }
+      }
+      ports @type(name: "v1_NetworkPolicyPort") {
+        ...NetworkPolicyPort
+      }
+    }
+    ingress {
+      from {
+        podSelector @type(name: "v1_LabelSelector") {
+          ...Selector
+        }
+        namespaceSelector @type(name: "v1_LabelSelector") {
+          ...Selector
+        }
+        ipBlock @type(name: "v1_IPBlock") {
+          ...IPBlock
+        }
+      }
+      ports @type(name: "v1_NetworkPolicyPort") {
+        ...NetworkPolicyPort
+      }
+    }
+    policyTypes
+    errors
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${SelectorFragmentDoc}
+${IpBlockFragmentDoc}
+${NetworkPolicyPortFragmentDoc}`;
+
+/**
+ * __useNetworkPolicyQuery__
+ *
+ * To run a query within a React component, call `useNetworkPolicyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNetworkPolicyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNetworkPolicyQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useNetworkPolicyQuery(baseOptions: Apollo.QueryHookOptions<NetworkPolicyQuery, NetworkPolicyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NetworkPolicyQuery, NetworkPolicyQueryVariables>(NetworkPolicyDocument, options);
+      }
+export function useNetworkPolicyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NetworkPolicyQuery, NetworkPolicyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NetworkPolicyQuery, NetworkPolicyQueryVariables>(NetworkPolicyDocument, options);
+        }
+export function useNetworkPolicySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NetworkPolicyQuery, NetworkPolicyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NetworkPolicyQuery, NetworkPolicyQueryVariables>(NetworkPolicyDocument, options);
+        }
+export type NetworkPolicyQueryHookResult = ReturnType<typeof useNetworkPolicyQuery>;
+export type NetworkPolicyLazyQueryHookResult = ReturnType<typeof useNetworkPolicyLazyQuery>;
+export type NetworkPolicySuspenseQueryHookResult = ReturnType<typeof useNetworkPolicySuspenseQuery>;
+export type NetworkPolicyQueryResult = Apollo.QueryResult<NetworkPolicyQuery, NetworkPolicyQueryVariables>;
 export const ServicesDocument = gql`
     query Services($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetServiceList(
