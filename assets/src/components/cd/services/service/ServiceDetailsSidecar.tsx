@@ -49,8 +49,6 @@ export function ServiceDetailsSidecar({
     helmRepository,
   } = serviceDeployment
 
-  console.log('repository', repository)
-
   return (
     <div
       css={{
