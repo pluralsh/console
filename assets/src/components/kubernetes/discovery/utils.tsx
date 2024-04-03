@@ -13,7 +13,11 @@ export const serviceTypeDisplayName = {
   nodeport: 'Node port',
 }
 
-export function Endpoints({ endpoints }: { endpoints: Maybe<EndpointT>[] }) {
+export function TableEndpoints({
+  endpoints,
+}: {
+  endpoints: Maybe<EndpointT>[]
+}) {
   return endpoints.map((endpoint) =>
     isEmpty(endpoint?.ports) ? (
       <TableText>{endpoint?.host}</TableText>

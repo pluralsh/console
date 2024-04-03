@@ -24,7 +24,7 @@ import {
 
 import { useKubernetesContext } from '../Kubernetes'
 
-import { Endpoints } from './utils'
+import { TableEndpoints } from './utils'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -43,7 +43,7 @@ const columnHelper = createColumnHelper<IngressT>()
 const colEndpoints = columnHelper.accessor((ingress) => ingress?.endpoints, {
   id: 'endpoints',
   header: 'Endpoints',
-  cell: ({ getValue }) => <Endpoints endpoints={getValue()} />,
+  cell: ({ getValue }) => <TableEndpoints endpoints={getValue()} />,
 })
 
 const colHosts = columnHelper.accessor((ingress) => ingress?.hosts, {
