@@ -8,13 +8,17 @@ import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { useMemo } from 'react'
 import {
+  AppIcon,
   Chip,
   DryRunIcon,
   ErrorIcon,
+  GitHubLogoIcon,
   Sidecar,
   SidecarItem,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
+
+import { getProviderIconUrl } from 'components/utils/Provider'
 
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
@@ -107,7 +111,21 @@ export function ServiceDetailsSidecar({
         </SidecarItem>
         {helmRepository && (
           <SidecarItem heading="Helm Repository">
-            {helmRepository.spec.url}
+            <div
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: theme.spacing.xsmall,
+              }}
+            >
+              <AppIcon
+                spacing="padding"
+                size="xxsmall"
+                icon={helm ? undefined : <GitHubLogoIcon />}
+                url={helm ? getProviderIconUrl('byok', theme.mode) : undefined}
+              />
+              {helmRepository.spec.url}
+            </div>
           </SidecarItem>
         )}
         {helm && <SidecarItem heading="Helm Chart">{helm.chart}</SidecarItem>}
@@ -122,7 +140,22 @@ export function ServiceDetailsSidecar({
           </SidecarItem>
         )}
         {repository && (
-          <SidecarItem heading="Git repository">{repository.url}</SidecarItem>
+          <SidecarItem heading="Git repository">
+            <div
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: theme.spacing.xsmall,
+              }}
+            >
+              <AppIcon
+                spacing="padding"
+                size="xxsmall"
+                icon={<GitHubLogoIcon />}
+              />
+              {repository.url}
+            </div>
+          </SidecarItem>
         )}
         {git && <SidecarItem heading="Git folder">{git.folder}</SidecarItem>}
         {git && (
