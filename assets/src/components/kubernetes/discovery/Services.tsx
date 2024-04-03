@@ -22,7 +22,7 @@ import {
 
 import { useKubernetesContext } from '../Kubernetes'
 
-import { Endpoints, serviceTypeDisplayName } from './utils'
+import { TableEndpoints, serviceTypeDisplayName } from './utils'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -56,7 +56,7 @@ const colInternalEndpoints = columnHelper.accessor(
   {
     id: 'internalEndpoints',
     header: 'Internal endpoints',
-    cell: ({ getValue }) => <Endpoints endpoints={[getValue()]} />,
+    cell: ({ getValue }) => <TableEndpoints endpoints={[getValue()]} />,
   }
 )
 
@@ -65,7 +65,7 @@ const colExternalEndpoints = columnHelper.accessor(
   {
     id: 'externalEndpoints',
     header: 'External endpoints',
-    cell: ({ getValue }) => <Endpoints endpoints={getValue()} />,
+    cell: ({ getValue }) => <TableEndpoints endpoints={getValue()} />,
   }
 )
 

@@ -35,7 +35,7 @@ query Ingresses(
 
 query Ingress($name: String!, $namespace: String!) {
   handleGetIngressDetail(namespace: $namespace, name: $name)
-  @rest(path: "ingress/{args.namespace}/{args.name}") {
+    @rest(path: "ingress/{args.namespace}/{args.name}") {
     typeMeta @type(name: "types_TypeMeta") {
       ...TypeMeta
     }

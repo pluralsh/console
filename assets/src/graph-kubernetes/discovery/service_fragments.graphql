@@ -9,7 +9,7 @@ fragment ServiceList on service_ServiceList {
     objectMeta @type(name: "types_ObjectMeta") {
       ...ObjectMeta
     }
-    internalEndpoint  @type(name: "common_Endpoint") {
+    internalEndpoint @type(name: "common_Endpoint") {
       ...Endpoint
     }
     externalEndpoints @type(name: "common_Endpoint") {

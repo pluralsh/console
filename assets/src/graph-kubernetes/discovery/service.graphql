@@ -22,14 +22,14 @@ query Services(
 
 query Service($name: String!, $namespace: String!) {
   handleGetServiceDetail(namespace: $namespace, service: $name)
-  @rest(path: "service/{args.namespace}/{args.service}") {
+    @rest(path: "service/{args.namespace}/{args.service}") {
     typeMeta @type(name: "types_TypeMeta") {
       ...TypeMeta
     }
     objectMeta @type(name: "types_ObjectMeta") {
       ...ObjectMeta
     }
-    internalEndpoint  @type(name: "common_Endpoint") {
+    internalEndpoint @type(name: "common_Endpoint") {
       ...Endpoint
     }
     externalEndpoints @type(name: "common_Endpoint") {
@@ -59,5 +59,25 @@ query Service($name: String!, $namespace: String!) {
     selector
     clusterIP
     errors
+  }
+}
+
+query ServiceEvents($namespace: String!, $name: String!) {
+  handleGetServiceEvent(namespace: $namespace, service: $name)
+    @rest(
+      type: "common_EventList"
+      path: "service/{args.namespace}/{args.service}/event"
+    ) {
+    ...EventList
+  }
+}
+
+query ServicePods($namespace: String!, $name: String!) {
+  handleGetServicePods(namespace: $namespace, service: $name)
+    @rest(
+      type: "pod_PodList"
+      path: "service/{args.namespace}/{args.service}/pod"
+    ) {
+    ...PodList
   }
 }

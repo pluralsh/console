@@ -1,5 +1,9 @@
 import { isEmpty } from 'lodash'
 
+import { Chip } from '@pluralsh/design-system'
+
+import { useTheme } from 'styled-components'
+
 import { TableText } from '../../cluster/TableElements'
 import {
   Common_Endpoint as EndpointT,
@@ -13,7 +17,11 @@ export const serviceTypeDisplayName = {
   nodeport: 'Node port',
 }
 
-export function Endpoints({ endpoints }: { endpoints: Maybe<EndpointT>[] }) {
+export function TableEndpoints({
+  endpoints,
+}: {
+  endpoints: Maybe<EndpointT>[]
+}) {
   return endpoints.map((endpoint) =>
     isEmpty(endpoint?.ports) ? (
       <TableText>{endpoint?.host}</TableText>
@@ -26,5 +34,25 @@ export function Endpoints({ endpoints }: { endpoints: Maybe<EndpointT>[] }) {
         ))}
       </div>
     )
+  )
+}
+
+export function Endpoints({ endpoints }: { endpoints: Maybe<EndpointT>[] }) {
+  const theme = useTheme()
+
+  return (
+    <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+      {endpoints.map((endpoint) =>
+        isEmpty(endpoint?.ports) ? (
+          <Chip size="small">{endpoint?.host}</Chip>
+        ) : (
+          endpoint?.ports.map((port) => (
+            <Chip size="small">
+              {endpoint?.host}:{port?.port ?? port?.nodePort} {port?.protocol}
+            </Chip>
+          ))
+        )
+      )}
+    </div>
   )
 }
