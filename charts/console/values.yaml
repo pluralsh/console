@@ -162,82 +162,10 @@ monitoring:
 
 dashboard:
   enabled: false
-  serviceAccount:
-    create: true
-    annotations: {}
-  
-  role: api
-  image:
-    repository: docker.io/kubernetesui/dashboard-api
-    tag: v1.0.0
-  containers:
-    ports:
-      - name: api
-        containerPort: 9000
-        protocol: TCP
-    # Additional container arguments
-    # Full list of arguments: https://github.com/kubernetes/dashboard/blob/master/docs/common/arguments.md
-    # args:
-    # - --system-banner="Welcome to the Kubernetes Dashboard"
-    args: []
-    # Additional container environment variables
-    # env:
-    # - name: SOME_VAR
-    #   value: 'some value'
-    env: []
-    # Additional volume mounts
-    # - mountPath: /kubeconfig
-    #   name: dashboard-kubeconfig
-    #   readOnly: true
-    volumeMounts:
-      # Create volume mount to store exec logs (required)
-      - mountPath: /tmp
-        name: tmp-volume
-    # TODO: Validate configuration
-    resources:
-      requests:
-        cpu: 100m
-        memory: 200Mi
-      limits:
-        cpu: 250m
-        memory: 400Mi
-  # Additional volumes
-  # - name: dashboard-kubeconfig
-  #   secret:
-  #     defaultMode: 420
-  #     secretName: dashboard-kubeconfig
-  volumes:
-    # Create on-disk volume to store exec logs (required)
-    - name: tmp-volume
-      emptyDir: {}
-  nodeSelector: {}
-  # Labels & annotations shared between API related resources
-  labels: {}
-  annotations: {}
-
-  settings:
-    ## Global dashboard settings
-    ## Note: Use all or none. Dashboard does not support default value merging currently.
-    global:
-    #  # Cluster name that appears in the browser window title if it is set
-    #  clusterName: ""
-    #  # Max number of items that can be displayed on each list page
-    #  itemsPerPage: 10
-    #  # Number of seconds between every auto-refresh of logs
-    #  logsAutoRefreshTimeInterval: 5
-    #  # Number of seconds between every auto-refresh of every resource. Set 0 to disable
-    #  resourceAutoRefreshTimeInterval: 5
-    #  # Hide all access denied warnings in the notification panel
-    #  disableAccessDeniedNotifications: false
-    ## Pinned CRDs that will be displayed in dashboard's menu
-    pinnedCRDs: []
-    # - kind: customresourcedefinition
-    #  #  Fully qualified name of a CRD
-    #  name: prometheus.monitoring.coreos.com
-    #  #  Display name
-    #  displayName: Prometheus
-    #  #  Is this CRD namespaced?
-    #  namespaced: true
+  app:
+    mode: 'api'
+  kong:
+    enabled: false
 
 provider: custom
 
