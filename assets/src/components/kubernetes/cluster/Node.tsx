@@ -41,6 +41,8 @@ import Conditions from '../common/Conditions'
 import RadialBarChart from '../../utils/RadialBarChart'
 import { cpuFmt, roundToTwoPlaces } from '../../cluster/utils'
 
+import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
+
 import { getBreadcrumbs } from './Nodes'
 import { useEventsColumns } from './Events'
 import { NodeReadyChip } from './utils'
@@ -263,10 +265,12 @@ export function NodeConditions(): ReactElement {
   const node = useOutletContext() as NodeT
 
   return (
-    <Conditions
-      conditions={node.conditions}
-      maxHeight="unset"
-    />
+    <FullHeightTableWrap>
+      <Conditions
+        conditions={node.conditions}
+        maxHeight="unset"
+      />
+    </FullHeightTableWrap>
   )
 }
 
@@ -284,11 +288,16 @@ export function NodeContainerImages(): ReactElement {
   const node = useOutletContext() as NodeT
 
   return (
-    <Table
-      data={node.containerImages}
-      columns={columns}
-      css={{ height: '100%', maxHeight: 'unset' }}
-    />
+    <FullHeightTableWrap>
+      <Table
+        data={node.containerImages}
+        columns={columns}
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+      />
+    </FullHeightTableWrap>
   )
 }
 export function NodePods(): ReactElement {
