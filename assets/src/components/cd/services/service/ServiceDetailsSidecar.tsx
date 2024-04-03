@@ -37,7 +37,19 @@ export function ServiceDetailsSidecar({
   if (!serviceDeployment) {
     return null
   }
-  const { id, name, status, cluster, git, helm } = serviceDeployment
+  const {
+    id,
+    name,
+    status,
+    cluster,
+    git,
+    helm,
+    namespace,
+    repository,
+    helmRepository,
+  } = serviceDeployment
+
+  console.log('repository', repository)
 
   return (
     <div
@@ -62,6 +74,9 @@ export function ServiceDetailsSidecar({
       </div>
       <Sidecar>
         {name && <SidecarItem heading="Service name"> {name}</SidecarItem>}
+        {namespace && (
+          <SidecarItem heading="Service namespace"> {namespace}</SidecarItem>
+        )}
         <SidecarItem heading="Status">
           <div
             css={{
@@ -92,6 +107,11 @@ export function ServiceDetailsSidecar({
             <Chip severity="success">None</Chip>
           )}
         </SidecarItem>
+        {helmRepository && (
+          <SidecarItem heading="Helm Repository">
+            {helmRepository.spec.url}
+          </SidecarItem>
+        )}
         {helm && <SidecarItem heading="Helm Chart">{helm.chart}</SidecarItem>}
         {helm && (
           <SidecarItem
@@ -102,6 +122,9 @@ export function ServiceDetailsSidecar({
           >
             {helm.version}
           </SidecarItem>
+        )}
+        {repository && (
+          <SidecarItem heading="Git repository">{repository.url}</SidecarItem>
         )}
         {git && <SidecarItem heading="Git folder">{git.folder}</SidecarItem>}
         {git && (
