@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react'
+import { memo, useContext, useMemo } from 'react'
 import {
   Outlet,
   useLocation,
@@ -41,6 +41,8 @@ import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 
 import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
+
+import { LoginContext } from 'components/contexts'
 
 import ServiceSelector from '../ServiceSelector'
 
@@ -95,15 +97,17 @@ export const getDirectory = ({
   serviceDeployment,
   docs = null,
   logsEnabled = false,
+  isAdmin = false,
 }: {
   serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
   docs?: ReturnType<typeof getDocsData> | null
   logsEnabled?: boolean | undefined
+  isAdmin?: boolean
 }): Directory => {
   if (!serviceDeployment) {
     return []
   }
-  const { name, componentStatus, helm, dryRun } = serviceDeployment
+  const { name, componentStatus, dryRun } = serviceDeployment
 
   return [
     {
@@ -119,7 +123,7 @@ export const getDirectory = ({
     { path: 'settings', label: 'Settings', enabled: true },
     { path: 'logs', label: 'Logs', enabled: logsEnabled },
     { path: 'secrets', label: 'Secrets', enabled: true },
-    { path: 'helm', label: 'Helm values', enabled: !!helm },
+    { path: 'helm', label: 'Helm values', enabled: isAdmin },
     { path: 'dryrun', label: 'Dry run', enabled: !!dryRun },
     { path: 'revisions', label: 'Revisions', enabled: true },
     {
@@ -134,6 +138,8 @@ export const getDirectory = ({
 function ServiceDetailsBase() {
   const theme = useTheme()
   const { pathname } = useLocation()
+  const { me } = useContext<any>(LoginContext)
+  const isAdmin = !!me.roles?.admin
   const params = useParams()
   const serviceId = params[SERVICE_PARAM_ID] as string
   const clusterId = params[SERVICE_PARAM_CLUSTER_ID] as string
@@ -170,8 +176,9 @@ function ServiceDetailsBase() {
         serviceDeployment,
         docs,
         logsEnabled,
+        isAdmin,
       }),
-    [docs, logsEnabled, serviceDeployment]
+    [docs, logsEnabled, serviceDeployment, isAdmin]
   )
 
   return (
