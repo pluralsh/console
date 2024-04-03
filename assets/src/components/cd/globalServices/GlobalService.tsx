@@ -19,7 +19,7 @@ import {
   ColTags,
 } from './GlobalServicesColumns'
 import { GlobalServicesTable } from './GlobalServicesTable'
-import { GlobalServiceYamlGeneratorModal } from './GlobalServiceYamlGeneratorModal'
+import { YamlGeneratorModal } from './GlobalServiceYamlGeneratorModal'
 
 const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
   {
@@ -82,7 +82,7 @@ export default function GlobalServices() {
           <Button onClick={() => setIsModalOpen(true)}>
             New Global Service
           </Button>
-          <GlobalServiceYamlGeneratorModal
+          <YamlGeneratorModal
             open={isModalOpen}
             onClose={() => setIsModalOpen(false)}
           />

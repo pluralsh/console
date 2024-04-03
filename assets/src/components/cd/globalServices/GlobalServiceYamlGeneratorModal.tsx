@@ -42,7 +42,7 @@ distributionOptions.unshift({
   label: 'All distributions',
 })
 
-export function GlobalServiceYamlGeneratorModal({
+export function YamlGeneratorModal({
   open,
   onClose,
 }: {
