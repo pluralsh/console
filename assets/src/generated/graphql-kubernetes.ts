@@ -7231,7 +7231,7 @@ export type IngressClassesSuspenseQueryHookResult = ReturnType<typeof useIngress
 export type IngressClassesQueryResult = Apollo.QueryResult<IngressClassesQuery, IngressClassesQueryVariables>;
 export const IngressClassDocument = gql`
     query IngressClass($name: String!) {
-  handleGetIngressClass(ingressclass: $name) @rest(path: "service/{args.ingressclass}") {
+  handleGetIngressClass(ingressclass: $name) @rest(path: "ingressclass/{args.ingressclass}") {
     typeMeta @type(name: "types_TypeMeta") {
       ...TypeMeta
     }

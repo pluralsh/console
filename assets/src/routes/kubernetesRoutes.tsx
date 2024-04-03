@@ -433,10 +433,15 @@ export const kubernetesRoutes = [
     element={<Ingress />}
   />,
   <Route
-    index
-    path={`${KUBERNETES_ABS_PATH}/${INGRESS_CLASSES_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
+    path={`${KUBERNETES_ABS_PATH}/${INGRESS_CLASSES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<IngressClass />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     index
     path={`${KUBERNETES_ABS_PATH}/${NETWORK_POLICIES_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
