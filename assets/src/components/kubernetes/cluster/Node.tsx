@@ -44,6 +44,7 @@ import { NodeReadyChip } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
+  { path: 'conditions', label: 'Conditions' },
   { path: 'pods', label: 'Pods' },
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
@@ -191,10 +192,6 @@ export function NodeInfo(): ReactElement {
         </Card>
       </section>
       <section>
-        <SubTitle>Conditions</SubTitle>
-        <Conditions conditions={node.conditions} />
-      </section>
-      <section>
         <SubTitle>Node information</SubTitle>
         <Card
           css={{
@@ -255,6 +252,17 @@ export function NodeInfo(): ReactElement {
         </Card>
       </section>
     </>
+  )
+}
+
+export function NodeConditions(): ReactElement {
+  const node = useOutletContext() as NodeT
+
+  return (
+    <Conditions
+      conditions={node.conditions}
+      maxHeight={null}
+    />
   )
 }
 

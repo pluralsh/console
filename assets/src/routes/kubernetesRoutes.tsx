@@ -45,6 +45,7 @@ import Secrets from '../components/kubernetes/configuration/Secrets'
 import Cluster from '../components/kubernetes/cluster/Cluster'
 import Nodes from '../components/kubernetes/cluster/Nodes'
 import Node, {
+  NodeConditions,
   NodeEvents,
   NodeInfo,
   NodePods,
@@ -521,6 +522,10 @@ export const kubernetesRoutes = [
     <Route
       path="pods"
       element={<NodePods />}
+    />
+    <Route
+      path="conditions"
+      element={<NodeConditions />}
     />
     <Route
       path="events"

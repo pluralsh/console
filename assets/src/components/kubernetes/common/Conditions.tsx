@@ -11,6 +11,7 @@ const columnHelper = createColumnHelper<ConditionT>()
 
 interface ConditionsProps {
   conditions: Array<Maybe<ConditionT>>
+  maxHeight: string | null
 }
 
 const columns = [
@@ -48,13 +49,14 @@ const columns = [
 
 export default function Conditions({
   conditions,
+  maxHeight = '500px',
 }: ConditionsProps): ReactElement {
   return (
     <Table
       data={conditions}
       columns={columns}
       css={{
-        maxHeight: '500px',
+        ...(maxHeight ? { maxHeight } : {}),
         height: '100%',
       }}
     />
