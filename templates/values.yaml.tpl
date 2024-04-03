@@ -60,3 +60,11 @@ kas:
   redis:
     auth:
       password: {{ .Values.kasRedis }}
+
+dashboard:
+  api:
+    containers:
+      args:
+        - --apiserver-host=https://{{ .Values.kasDns }}/k8s-proxy
+        - --apiserver-skip-tls-verify=true
+        - --act-as-proxy
