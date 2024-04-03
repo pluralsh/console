@@ -12,17 +12,16 @@ import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { type VirtualItem } from '@tanstack/react-virtual'
-import { type ServiceDeploymentsRowFragment } from 'generated/graphql'
+import {
+  type ServiceDeploymentsRowFragment,
+  useGetGlobalServicesQuery,
+} from 'generated/graphql'
 import { getGlobalServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge, extendConnection } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
-
-import { useQuery } from '@apollo/client'
-
-import { GLOBAL_SERVICES_QUERY } from 'components/cluster/queries'
 
 import { POLL_INTERVAL } from '../ContinuousDeployment'
 
@@ -48,7 +47,7 @@ export function GlobalServicesTable({
     | undefined
   >()
 
-  const queryResult = useQuery(GLOBAL_SERVICES_QUERY, {
+  const queryResult = useGetGlobalServicesQuery({
     variables: {
       first: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
     },
@@ -69,7 +68,7 @@ export function GlobalServicesTable({
   const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
     pageSize: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
-    key: 'serviceDeployments',
+    key: 'globalServices',
     interval: POLL_INTERVAL,
   })
 
@@ -96,8 +95,8 @@ export function GlobalServicesTable({
       updateQuery: (prev, { fetchMoreResult }) =>
         extendConnection(
           prev,
-          fetchMoreResult.serviceDeployments,
-          'serviceDeployments'
+          fetchMoreResult.globalServices,
+          'globalServices'
         ),
     })
   }, [fetchMore, pageInfo?.endCursor])

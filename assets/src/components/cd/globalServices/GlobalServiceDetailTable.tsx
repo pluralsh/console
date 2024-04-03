@@ -11,17 +11,16 @@ import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
 import { type VirtualItem } from '@tanstack/react-virtual'
-import { type ServiceDeploymentsRowFragment } from 'generated/graphql'
+import {
+  type ServiceDeploymentsRowFragment,
+  useGetServiceDataQuery,
+} from 'generated/graphql'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge, extendConnection } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
-
-import { useQuery } from '@apollo/client'
-
-import { GLOBAL_SERVICE_DETAIL_QUERY } from 'components/cluster/queries'
 
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 
@@ -51,10 +50,10 @@ export function GlobalServiceDetailTable({
     | undefined
   >()
 
-  const queryResult = useQuery(GLOBAL_SERVICE_DETAIL_QUERY, {
+  const queryResult = useGetServiceDataQuery({
     variables: {
       first: SERVICES_QUERY_PAGE_SIZE,
-      serviceId,
+      serviceId: serviceId || '',
     },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
@@ -71,11 +70,11 @@ export function GlobalServiceDetailTable({
 
   const globalService = data?.globalService
   const services = globalService?.services?.edges
-  const pageInfo = services?.pageInfo
+  const pageInfo = globalService?.services?.pageInfo
   const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
     pageSize: SERVICES_QUERY_PAGE_SIZE,
-    key: 'serviceDeployments',
+    key: 'globalService.services',
     interval: POLL_INTERVAL,
   })
 
@@ -99,12 +98,18 @@ export function GlobalServiceDetailTable({
     }
     fetchMore({
       variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(
-          prev,
-          fetchMoreResult.serviceDeployments,
-          'serviceDeployments'
-        ),
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!prev.globalService) return prev
+
+        return {
+          ...prev,
+          globalService: extendConnection(
+            prev.globalService,
+            fetchMoreResult.globalService?.services,
+            'services'
+          ),
+        }
+      },
     })
   }, [fetchMore, pageInfo?.endCursor])
 
@@ -133,12 +138,12 @@ export function GlobalServiceDetailTable({
       >
         <div css={{ flexGrow: 1 }}>
           <Body2BoldP>Distribution</Body2BoldP>
-          <Body2P>{globalService.distro || 'All distribution'}</Body2P>
+          <Body2P>{globalService?.distro || 'All distribution'}</Body2P>
         </div>
         <div css={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           <Body2BoldP>Tags</Body2BoldP>
           <Body2P>
-            {globalService.tags
+            {globalService?.tags
               ?.map((tag) => `${tag?.name}: ${tag?.value}`)
               .join(', ')}
           </Body2P>
@@ -150,7 +155,7 @@ export function GlobalServiceDetailTable({
       >
         {!data ? (
           <LoadingIndicator />
-        ) : services.length ? (
+        ) : services?.length ? (
           <FullHeightTableWrap>
             <Table
               virtualizeRows
