@@ -23,8 +23,8 @@ import { stringify } from 'yaml'
 
 import { isEmpty } from 'lodash'
 
-import ModalAlt, { StepBody } from '../ModalAlt'
-import { TagSelection } from '../services/TagSelection'
+import ModalAlt, { StepBody } from './ModalAlt'
+import { TagSelection } from './services/TagSelection'
 
 export const ChipList = styled(ListBoxItemChipList)(({ theme }) => ({
   marginTop: theme.spacing.small,

@@ -12,6 +12,8 @@ import {
   useSetPageHeaderContent,
 } from '../ContinuousDeployment'
 
+import { YamlGeneratorModal } from '../YamlGeneratorModal'
+
 import {
   ColDistribution,
   ColLastActivity,
@@ -19,7 +21,6 @@ import {
   ColTags,
 } from './GlobalServicesColumns'
 import { GlobalServicesTable } from './GlobalServicesTable'
-import { YamlGeneratorModal } from './YamlGeneratorModal'
 
 const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
   {
