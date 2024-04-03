@@ -11,7 +11,7 @@ const columnHelper = createColumnHelper<ConditionT>()
 
 interface ConditionsProps {
   conditions: Array<Maybe<ConditionT>>
-  maxHeight: string | null
+  maxHeight: string
 }
 
 const columns = [
@@ -56,8 +56,8 @@ export default function Conditions({
       data={conditions}
       columns={columns}
       css={{
-        ...(maxHeight ? { maxHeight } : {}),
         height: '100%',
+        ...(maxHeight ? { maxHeight } : {}),
       }}
     />
   )

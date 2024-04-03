@@ -3,11 +3,14 @@ import {
   Card,
   ChipList,
   SidecarItem,
+  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { filesize } from 'filesize'
+
+import { createColumnHelper } from '@tanstack/react-table'
 
 import {
   Common_EventList as EventListT,
@@ -45,6 +48,7 @@ import { NodeReadyChip } from './utils'
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
   { path: 'conditions', label: 'Conditions' },
+  { path: 'images', label: 'Container images' },
   { path: 'pods', label: 'Pods' },
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
@@ -261,11 +265,32 @@ export function NodeConditions(): ReactElement {
   return (
     <Conditions
       conditions={node.conditions}
-      maxHeight={null}
+      maxHeight="unset"
     />
   )
 }
 
+const columnHelper = createColumnHelper<string>()
+
+const columns = [
+  columnHelper.accessor((image) => image, {
+    id: 'image',
+    header: 'Image',
+    cell: ({ getValue }) => getValue(),
+  }),
+]
+
+export function NodeContainerImages(): ReactElement {
+  const node = useOutletContext() as NodeT
+
+  return (
+    <Table
+      data={node.containerImages}
+      columns={columns}
+      css={{ height: '100%', maxHeight: 'unset' }}
+    />
+  )
+}
 export function NodePods(): ReactElement {
   const { name } = useParams()
   const columns = usePodColumns()

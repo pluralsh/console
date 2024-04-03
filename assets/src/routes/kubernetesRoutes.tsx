@@ -46,6 +46,7 @@ import Cluster from '../components/kubernetes/cluster/Cluster'
 import Nodes from '../components/kubernetes/cluster/Nodes'
 import Node, {
   NodeConditions,
+  NodeContainerImages,
   NodeEvents,
   NodeInfo,
   NodePods,
@@ -520,12 +521,16 @@ export const kubernetesRoutes = [
       element={<NodeInfo />}
     />
     <Route
-      path="pods"
-      element={<NodePods />}
-    />
-    <Route
       path="conditions"
       element={<NodeConditions />}
+    />
+    <Route
+      path="images"
+      element={<NodeContainerImages />}
+    />
+    <Route
+      path="pods"
+      element={<NodePods />}
     />
     <Route
       path="events"
