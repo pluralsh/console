@@ -1,5 +1,5 @@
 import { ReactElement, useMemo } from 'react'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 
 import {
@@ -80,7 +80,15 @@ export default function Service(): ReactElement {
   return (
     <ResourceDetails
       tabs={directory}
-      sidecar={<MetadataSidecar resource={service} />}
+      sidecar={
+        <MetadataSidecar resource={service}>
+          <SidecarItem heading="Type">{service?.type}</SidecarItem>
+          <SidecarItem heading="Cluster IP">{service?.clusterIP}</SidecarItem>
+          <SidecarItem heading="Session affinity">
+            {service?.sessionAffinity}
+          </SidecarItem>
+        </MetadataSidecar>
+      }
     >
       <Outlet context={service} />
     </ResourceDetails>
