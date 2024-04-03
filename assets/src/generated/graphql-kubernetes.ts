@@ -4768,6 +4768,8 @@ export type ConditionFragment = { __typename?: 'common_Condition', message: stri
 
 export type ProbeFragment = { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null };
 
+export type EndpointFragment = { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> };
+
 export type NetworkPolicyPortFragment = { __typename?: 'v1_NetworkPolicyPort', port?: string | null, endPort?: number | null, protocol?: string | null };
 
 export type IpBlockFragment = { __typename?: 'v1_IPBlock', except?: Array<string | null> | null, cidr: string };
@@ -4901,6 +4903,14 @@ export type ServicesQueryVariables = Exact<{
 
 
 export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> } | null> } | null> } | null };
+
+export type ServiceQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type ServiceQuery = { __typename?: 'Query', handleGetServiceDetail?: { __typename?: 'service_ServiceDetail', type: string, sessionAffinity: string, selector: any, clusterIP: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null>, endpointList: { __typename?: 'endpoint_EndpointList', endpoints: Array<{ __typename?: 'endpoint_Endpoint', host: string, ready: boolean, nodeName: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, ports: Array<{ __typename?: 'v1_EndpointPort', name?: string | null, port: number, protocol?: string | null, appProtocol?: string | null } | null> } | null> } } | null };
 
 export type ServiceListFragment = { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', nodePort: number, port: number, protocol: string } | null> } | null> } | null> };
 
@@ -5186,6 +5196,16 @@ export const ConditionFragmentDoc = gql`
   lastProbeTime
   lastTransitionTime
   reason
+}
+    `;
+export const EndpointFragmentDoc = gql`
+    fragment Endpoint on common_Endpoint {
+  host
+  ports {
+    port
+    nodePort
+    protocol
+  }
 }
     `;
 export const NetworkPolicyPortFragmentDoc = gql`
@@ -7291,6 +7311,84 @@ export type ServicesQueryHookResult = ReturnType<typeof useServicesQuery>;
 export type ServicesLazyQueryHookResult = ReturnType<typeof useServicesLazyQuery>;
 export type ServicesSuspenseQueryHookResult = ReturnType<typeof useServicesSuspenseQuery>;
 export type ServicesQueryResult = Apollo.QueryResult<ServicesQuery, ServicesQueryVariables>;
+export const ServiceDocument = gql`
+    query Service($name: String!, $namespace: String!) {
+  handleGetServiceDetail(namespace: $namespace, service: $name) @rest(path: "service/{args.namespace}/{args.service}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    internalEndpoint @type(name: "common_Endpoint") {
+      ...Endpoint
+    }
+    externalEndpoints @type(name: "common_Endpoint") {
+      ...Endpoint
+    }
+    endpointList {
+      endpoints {
+        typeMeta @type(name: "types_TypeMeta") {
+          ...TypeMeta
+        }
+        objectMeta @type(name: "types_ObjectMeta") {
+          ...ObjectMeta
+        }
+        ports {
+          name
+          port
+          protocol
+          appProtocol
+        }
+        host
+        ready
+        nodeName
+      }
+    }
+    type
+    sessionAffinity
+    selector
+    clusterIP
+    errors
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${EndpointFragmentDoc}`;
+
+/**
+ * __useServiceQuery__
+ *
+ * To run a query within a React component, call `useServiceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useServiceQuery(baseOptions: Apollo.QueryHookOptions<ServiceQuery, ServiceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceQuery, ServiceQueryVariables>(ServiceDocument, options);
+      }
+export function useServiceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceQuery, ServiceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceQuery, ServiceQueryVariables>(ServiceDocument, options);
+        }
+export function useServiceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceQuery, ServiceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceQuery, ServiceQueryVariables>(ServiceDocument, options);
+        }
+export type ServiceQueryHookResult = ReturnType<typeof useServiceQuery>;
+export type ServiceLazyQueryHookResult = ReturnType<typeof useServiceLazyQuery>;
+export type ServiceSuspenseQueryHookResult = ReturnType<typeof useServiceSuspenseQuery>;
+export type ServiceQueryResult = Apollo.QueryResult<ServiceQuery, ServiceQueryVariables>;
 export const PersistentVolumesDocument = gql`
     query PersistentVolumes($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetPersistentVolumeList(

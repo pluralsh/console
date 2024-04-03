@@ -38,6 +38,15 @@ fragment Probe on v1_Probe {
   timeoutSeconds
 }
 
+fragment Endpoint on common_Endpoint {
+  host
+  ports {
+    port
+    nodePort
+    protocol
+  }
+}
+
 fragment NetworkPolicyPort on v1_NetworkPolicyPort {
   port
   endPort
