@@ -576,6 +576,7 @@ export type QueryHandleGetCronJobEventsArgs = {
 
 
 export type QueryHandleGetCronJobJobsArgs = {
+  active?: InputMaybe<Scalars['String']['input']>;
   aggregations?: InputMaybe<Scalars['String']['input']>;
   filterBy?: InputMaybe<Scalars['String']['input']>;
   itemsPerPage?: InputMaybe<Scalars['String']['input']>;
@@ -869,6 +870,7 @@ export type QueryHandleGetIngressDetailArgs = {
 export type QueryHandleGetIngressEventArgs = {
   aggregations?: InputMaybe<Scalars['String']['input']>;
   filterBy?: InputMaybe<Scalars['String']['input']>;
+  ingress: Scalars['String']['input'];
   itemsPerPage?: InputMaybe<Scalars['String']['input']>;
   metricNames?: InputMaybe<Scalars['String']['input']>;
   namespace: Scalars['String']['input'];
@@ -5081,6 +5083,7 @@ export type CronJobEventsQuery = { __typename?: 'Query', handleGetCronJobEvents?
 export type CronJobJobsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  active?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -8952,8 +8955,8 @@ export type CronJobEventsLazyQueryHookResult = ReturnType<typeof useCronJobEvent
 export type CronJobEventsSuspenseQueryHookResult = ReturnType<typeof useCronJobEventsSuspenseQuery>;
 export type CronJobEventsQueryResult = Apollo.QueryResult<CronJobEventsQuery, CronJobEventsQueryVariables>;
 export const CronJobJobsDocument = gql`
-    query CronJobJobs($namespace: String!, $name: String!) {
-  handleGetCronJobJobs(namespace: $namespace, name: $name) @rest(type: "job_JobList", path: "cronjob/{args.namespace}/{args.name}/job") {
+    query CronJobJobs($namespace: String!, $name: String!, $active: String) {
+  handleGetCronJobJobs(namespace: $namespace, name: $name, active: $active) @rest(type: "job_JobList", path: "cronjob/{args.namespace}/{args.name}/job?active={args.active}") {
     ...JobList
   }
 }
@@ -8973,6 +8976,7 @@ export const CronJobJobsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      active: // value for 'active'
  *   },
  * });
  */
