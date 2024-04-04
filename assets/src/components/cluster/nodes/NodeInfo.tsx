@@ -19,8 +19,9 @@ import {
 } from '../pods/PodsList'
 import { NODE_Q } from '../queries'
 
+import { SubTitle } from '../../utils/SubTitle'
+
 import { NodeGraphs } from './NodeGraphs'
-import { SubTitle } from './SubTitle'
 
 const columns = [
   ColName,

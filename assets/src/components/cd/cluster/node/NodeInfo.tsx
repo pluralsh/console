@@ -7,7 +7,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { isEmpty } from 'lodash'
 
-import { SubTitle } from '../../../cluster/nodes/SubTitle'
+import { SubTitle } from '../../../utils/SubTitle'
 import { NodeGraphs } from '../../../cluster/nodes/NodeGraphs'
 import {
   ColContainers,

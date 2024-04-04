@@ -7,7 +7,7 @@ import { Button, LogsIcon } from '@pluralsh/design-system'
 
 import PodConditions from '../../../cluster/pods/PodConditions'
 import Metadata from '../../../cluster/pods/PodMetadata'
-import { SubTitle } from '../../../cluster/nodes/SubTitle'
+import { SubTitle } from '../../../utils/SubTitle'
 import {
   ColCpuReservation,
   ColImage,

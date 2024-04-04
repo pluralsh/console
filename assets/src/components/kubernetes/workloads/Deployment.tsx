@@ -37,7 +37,7 @@ import {
 import { NAMESPACE_PARAM } from '../Kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { PodInfo } from '../common/PodInfo'
-import { SubTitle } from '../../cluster/nodes/SubTitle'
+import { SubTitle } from '../../utils/SubTitle'
 import { useEventsColumns } from '../cluster/Events'
 import { ResourceList } from '../ResourceList'
 import { LabelSelector } from '../common/LabelSelector'

@@ -39,7 +39,7 @@ import { useEventsColumns } from '../cluster/Events'
 
 import { ResourceList } from '../ResourceList'
 
-import { SubTitle } from '../../cluster/nodes/SubTitle'
+import { SubTitle } from '../../utils/SubTitle'
 
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 
@@ -104,6 +104,9 @@ export default function Ingress(): ReactElement {
               emptyState={<div>None</div>}
             />
           </SidecarItem>
+          <SidecarItem heading="Ingress class name">
+            {ingress?.spec.ingressClassName}
+          </SidecarItem>
         </MetadataSidecar>
       }
     >
@@ -114,22 +117,50 @@ export default function Ingress(): ReactElement {
 
 export function IngressInfo(): ReactElement {
   const theme = useTheme()
-  const _ingress = useOutletContext() as IngressT
+  const ingress = useOutletContext() as IngressT
+  const backend = ingress.spec.defaultBackend
 
   return (
-    <section>
-      <SubTitle>Ingress information</SubTitle>
-      <Card
-        css={{
-          display: 'flex',
-          gap: theme.spacing.large,
-          padding: theme.spacing.medium,
-          flexWrap: 'wrap',
-        }}
-      >
-        <ResourceInfoCardEntry heading="...">...</ResourceInfoCardEntry>
-      </Card>
-    </section>
+    <>
+      {backend && (
+        <section>
+          <SubTitle>Default backend</SubTitle>
+          <Card
+            css={{
+              display: 'flex',
+              gap: theme.spacing.large,
+              padding: theme.spacing.medium,
+              flexWrap: 'wrap',
+            }}
+          >
+            {backend.service && (
+              <ResourceInfoCardEntry heading="Service name">
+                {backend.service.name}
+              </ResourceInfoCardEntry>
+            )}
+            {backend.service?.port && (
+              <ResourceInfoCardEntry heading="Service port name">
+                {backend.service.port.name}
+              </ResourceInfoCardEntry>
+            )}
+            {backend.service?.port?.number && (
+              <ResourceInfoCardEntry heading="Service port number">
+                {backend.service.port.number}
+              </ResourceInfoCardEntry>
+            )}
+            {backend.resource && (
+              <ResourceInfoCardEntry heading={backend.resource.kind}>
+                {backend.resource.name}
+              </ResourceInfoCardEntry>
+            )}
+          </Card>
+        </section>
+      )}
+      <section>
+        <SubTitle>Rules</SubTitle>
+        {JSON.stringify(ingress.spec.rules)}
+      </section>
+    </>
   )
 }
 

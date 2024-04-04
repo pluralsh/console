@@ -22,7 +22,7 @@ import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { ResourceList } from '../ResourceList'
-import { SubTitle } from '../../cluster/nodes/SubTitle'
+import { SubTitle } from '../../utils/SubTitle'
 
 import { getBreadcrumbs } from './Namespaces'
 import { NamespacePhaseChip } from './utils'

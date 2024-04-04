@@ -17,7 +17,7 @@ import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
 
 import { TooltipTime } from 'components/utils/TooltipTime'
 
-import { SubTitle } from '../../cluster/nodes/SubTitle'
+import { SubTitle } from '../../utils/SubTitle'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
 import { ClusterConditions } from '../clusters/ClusterConditions'
 import { getServiceDetailsPath } from '../../../routes/cdRoutesConsts'

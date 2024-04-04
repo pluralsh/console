@@ -37,7 +37,7 @@ import {
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { ResourceList } from '../ResourceList'
-import { SubTitle } from '../../cluster/nodes/SubTitle'
+import { SubTitle } from '../../utils/SubTitle'
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 import { GaugeWrap } from '../../cluster/Gauges'
 import { usePodColumns } from '../workloads/Pods'
