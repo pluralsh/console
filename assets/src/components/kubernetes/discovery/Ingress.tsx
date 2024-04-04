@@ -6,10 +6,13 @@ import {
   Card,
   ChipList,
   SidecarItem,
+  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
+
+import { createColumnHelper } from '@tanstack/react-table'
 
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { MetadataSidecar, useKubernetesCluster } from '../utils'
@@ -19,6 +22,7 @@ import {
   IngressEventsQuery,
   IngressEventsQueryVariables,
   IngressQueryVariables,
+  V1_IngressRule as IngressRuleT,
   Ingress_IngressDetail as IngressT,
   useIngressEventsQuery,
   useIngressQuery,
@@ -115,6 +119,16 @@ export default function Ingress(): ReactElement {
   )
 }
 
+const columnHelper = createColumnHelper<IngressRuleT>()
+
+const columns = [
+  columnHelper.accessor((rule) => rule?.host, {
+    id: 'host',
+    header: 'Host',
+    cell: ({ getValue }) => getValue(),
+  }),
+]
+
 export function IngressInfo(): ReactElement {
   const theme = useTheme()
   const ingress = useOutletContext() as IngressT
@@ -158,7 +172,14 @@ export function IngressInfo(): ReactElement {
       )}
       <section>
         <SubTitle>Rules</SubTitle>
-        {JSON.stringify(ingress.spec.rules)}
+        <Table
+          data={ingress.spec.rules ?? []}
+          columns={columns}
+          css={{
+            maxHeight: '500px',
+            height: '100%',
+          }}
+        />
       </section>
     </>
   )
