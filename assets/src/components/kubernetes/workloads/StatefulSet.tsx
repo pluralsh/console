@@ -25,7 +25,7 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import {
-  DEPLOYMENTS_REL_PATH,
+  STATEFUL_SETS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
@@ -33,7 +33,6 @@ import { NAMESPACE_PARAM } from '../Kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { useEventsColumns } from '../cluster/Events'
 import { ResourceList } from '../ResourceList'
-
 import { PodInfo } from '../common/PodInfo'
 
 import { getBreadcrumbs } from './StatefulSets'
@@ -66,7 +65,7 @@ export default function StatefulSet(): ReactElement {
           label: namespace ?? '',
           url: `${getWorkloadsAbsPath(
             clusterId
-          )}/${DEPLOYMENTS_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
+          )}/${STATEFUL_SETS_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
         },
         {
           label: name ?? '',

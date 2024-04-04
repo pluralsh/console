@@ -12,10 +12,10 @@ query ReplicationControllers(
     itemsPerPage: $itemsPerPage
     page: $page
   )
-    @rest(
-      type: "replicationcontroller_ReplicationControllerList"
-      path: "replicationcontroller/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-    ) {
+  @rest(
+    type: "replicationcontroller_ReplicationControllerList"
+    path: "replicationcontroller/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+  ) {
     ...ReplicationControllerList
   }
 }
@@ -39,13 +39,13 @@ query ReplicationController(
 query ReplicationControllerEvents(
   $namespace: String!
   $name: String!
-) @rest(
-  type: "common_EventList"
-  path: "replicationcontroller/{args.namespace}/{args.statefulset}/event"
-){
+) {
   handleGetReplicationControllerEvents(
     namespace: $namespace
     replicationController: $name
+  ) @rest(
+    type: "common_EventList"
+    path: "replicationcontroller/{args.namespace}/{args.replicationController}/event"
   ) {
     ...EventList
   }
@@ -54,13 +54,13 @@ query ReplicationControllerEvents(
 query ReplicationControllerPods(
   $namespace: String!
   $name: String!
-) @rest(
-  type: "pod_PodList"
-  path: "replicationcontroller/{args.namespace}/{args.statefulset}/pod"
-){
+) {
   handleGetReplicationControllerPods(
     namespace: $namespace
     replicationController: $name
+  ) @rest(
+    type: "pod_PodList"
+    path: "replicationcontroller/{args.namespace}/{args.replicationController}/pod"
   ) {
     ...PodList
   }
@@ -69,13 +69,13 @@ query ReplicationControllerPods(
 query ReplicationControllerServices(
   $namespace: String!
   $name: String!
-) @rest(
-  type: "service_ServiceList"
-  path: "replicationcontroller/{args.namespace}/{args.statefulset}/services"
-){
+) {
   handleGetReplicationControllerServices(
     namespace: $namespace
     replicationController: $name
+  ) @rest(
+    type: "service_ServiceList"
+    path: "replicationcontroller/{args.namespace}/{args.replicationController}/service"
   ) {
     ...ServiceList
   }

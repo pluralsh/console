@@ -10083,11 +10083,11 @@ export type ReplicationControllerLazyQueryHookResult = ReturnType<typeof useRepl
 export type ReplicationControllerSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerSuspenseQuery>;
 export type ReplicationControllerQueryResult = Apollo.QueryResult<ReplicationControllerQuery, ReplicationControllerQueryVariables>;
 export const ReplicationControllerEventsDocument = gql`
-    query ReplicationControllerEvents($namespace: String!, $name: String!) @rest(type: "common_EventList", path: "replicationcontroller/{args.namespace}/{args.statefulset}/event") {
+    query ReplicationControllerEvents($namespace: String!, $name: String!) {
   handleGetReplicationControllerEvents(
     namespace: $namespace
     replicationController: $name
-  ) {
+  ) @rest(type: "common_EventList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/event") {
     ...EventList
   }
 }
@@ -10127,11 +10127,11 @@ export type ReplicationControllerEventsLazyQueryHookResult = ReturnType<typeof u
 export type ReplicationControllerEventsSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerEventsSuspenseQuery>;
 export type ReplicationControllerEventsQueryResult = Apollo.QueryResult<ReplicationControllerEventsQuery, ReplicationControllerEventsQueryVariables>;
 export const ReplicationControllerPodsDocument = gql`
-    query ReplicationControllerPods($namespace: String!, $name: String!) @rest(type: "pod_PodList", path: "replicationcontroller/{args.namespace}/{args.statefulset}/pod") {
+    query ReplicationControllerPods($namespace: String!, $name: String!) {
   handleGetReplicationControllerPods(
     namespace: $namespace
     replicationController: $name
-  ) {
+  ) @rest(type: "pod_PodList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/pod") {
     ...PodList
   }
 }
@@ -10171,11 +10171,11 @@ export type ReplicationControllerPodsLazyQueryHookResult = ReturnType<typeof use
 export type ReplicationControllerPodsSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerPodsSuspenseQuery>;
 export type ReplicationControllerPodsQueryResult = Apollo.QueryResult<ReplicationControllerPodsQuery, ReplicationControllerPodsQueryVariables>;
 export const ReplicationControllerServicesDocument = gql`
-    query ReplicationControllerServices($namespace: String!, $name: String!) @rest(type: "service_ServiceList", path: "replicationcontroller/{args.namespace}/{args.statefulset}/services") {
+    query ReplicationControllerServices($namespace: String!, $name: String!) {
   handleGetReplicationControllerServices(
     namespace: $namespace
     replicationController: $name
-  ) {
+  ) @rest(type: "service_ServiceList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/service") {
     ...ServiceList
   }
 }
@@ -10222,7 +10222,7 @@ export const StatefulSetsDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(type: "statefulset_StatefulSet", path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+  ) @rest(type: "statefulset_StatefulSetList", path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...StatefulSetList
   }
 }
@@ -10306,8 +10306,8 @@ export type StatefulSetLazyQueryHookResult = ReturnType<typeof useStatefulSetLaz
 export type StatefulSetSuspenseQueryHookResult = ReturnType<typeof useStatefulSetSuspenseQuery>;
 export type StatefulSetQueryResult = Apollo.QueryResult<StatefulSetQuery, StatefulSetQueryVariables>;
 export const StatefulSetEventsDocument = gql`
-    query StatefulSetEvents($namespace: String!, $name: String!) @rest(type: "common_EventList", path: "statefulset/{args.namespace}/{args.statefulset}/event") {
-  handleGetStatefulSetEvents(namespace: $namespace, statefulset: $name) {
+    query StatefulSetEvents($namespace: String!, $name: String!) {
+  handleGetStatefulSetEvents(namespace: $namespace, statefulset: $name) @rest(type: "common_EventList", path: "statefulset/{args.namespace}/{args.statefulset}/event") {
     ...EventList
   }
 }

@@ -34,7 +34,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   },
   {
     label: 'replication controllers',
-    url: `${getConfigurationAbsPath(
+    url: `${getWorkloadsAbsPath(
       cluster?.id
     )}/${REPLICATION_CONTROLLERS_REL_PATH}`,
   },

@@ -13,7 +13,7 @@ query StatefulSets(
     page: $page
   )
   @rest(
-    type: "statefulset_StatefulSet"
+    type: "statefulset_StatefulSetList"
     path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
   ) {
     ...StatefulSetList
@@ -38,13 +38,13 @@ query StatefulSet(
 query StatefulSetEvents(
   $namespace: String!
   $name: String!
-) @rest(
-  type: "common_EventList"
-  path: "statefulset/{args.namespace}/{args.statefulset}/event"
-){
+) {
   handleGetStatefulSetEvents(
     namespace: $namespace
     statefulset: $name
+  ) @rest(
+    type: "common_EventList"
+    path: "statefulset/{args.namespace}/{args.statefulset}/event"
   ) {
     ...EventList
   }
