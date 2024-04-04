@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
+import { Button, FormField, ListBoxItem, Select } from '@pluralsh/design-system'
 import { useJobGateLogsQuery } from 'generated/graphql'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -66,6 +66,23 @@ export default function PipelineJobLogs() {
     <ScrollablePage
       heading="Logs"
       scrollable={false}
+      headingContent={
+        <div
+          css={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: theme.spacing.medium,
+          }}
+        >
+          <Button onClick={() => null}>Mark Successful</Button>
+          <Button
+            secondary
+            onClick={() => null}
+          >
+            Cancel
+          </Button>
+        </div>
+      }
     >
       <div
         css={{
