@@ -5832,7 +5832,7 @@ ${RollingUpdateStrategyFragmentDoc}
 ${StatusInfoFragmentDoc}`;
 export const JobStatusFragmentDoc = gql`
     fragment JobStatus on job_JobStatus {
-  conditions {
+  conditions @type(name: "common_Condition") {
     ...Condition
   }
   message

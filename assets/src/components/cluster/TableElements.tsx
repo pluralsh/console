@@ -17,6 +17,8 @@ import {
   readinessToSeverity,
 } from 'utils/status'
 
+import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
+
 import { roundToTwoPlaces } from './utils'
 
 const isNullishIsh = (val: any) => {
@@ -62,11 +64,21 @@ export const ContainerStatusChip = styled(
   )
 )((_) => ({}))
 
-export const StatusChip = styled(({ readiness }: { readiness: ReadinessT }) => (
-  <Chip severity={readinessToSeverity[readiness]}>
-    {readinessToLabel[readiness]}
-  </Chip>
-))((_) => ({}))
+export const StatusChip = styled(
+  ({
+    readiness,
+    ...props
+  }: {
+    readiness: ReadinessT
+  } & ChipProps) => (
+    <Chip
+      severity={readinessToSeverity[readiness]}
+      {...props}
+    >
+      {readinessToLabel[readiness]}
+    </Chip>
+  )
+)((_) => ({}))
 
 export function UsageUnstyled({
   used,

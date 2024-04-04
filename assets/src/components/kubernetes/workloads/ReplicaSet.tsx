@@ -45,7 +45,7 @@ import {
 import { NAMESPACE_PARAM } from '../Kubernetes'
 
 import { getBreadcrumbs } from './ReplicaSets'
-import { usePodColumns } from './Pods'
+import { usePodsColumns } from './Pods'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -171,7 +171,7 @@ export function ReplicaSetEvents(): ReactElement {
 
 export function ReplicaSetPods(): ReactElement {
   const { name, namespace } = useParams()
-  const columns = usePodColumns()
+  const columns = usePodsColumns()
 
   return (
     <ResourceList<

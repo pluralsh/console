@@ -36,7 +36,7 @@ import { ResourceList } from '../ResourceList'
 import { PodInfo } from '../common/PodInfo'
 
 import { getBreadcrumbs } from './StatefulSets'
-import { usePodColumns } from './Pods'
+import { usePodsColumns } from './Pods'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -117,7 +117,7 @@ export default function StatefulSet(): ReactElement {
 
 export function StatefulSetPods(): ReactElement {
   const { name, namespace } = useParams()
-  const columns = usePodColumns()
+  const columns = usePodsColumns()
 
   return (
     <ResourceList<
