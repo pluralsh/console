@@ -59,7 +59,9 @@ defmodule ConsoleWeb.Router do
 
   forward "/graphiql", Absinthe.Plug.GraphiQL,
     schema: Console.GraphQl,
-    interface: :advanced
+    interface: :playground,
+    default_url: {Console, :graphql_endpoint},
+    socket_url: {Console, :socket_endpoint}
 
   scope "/" do
     pipe_through [:auth]
@@ -67,6 +69,7 @@ defmodule ConsoleWeb.Router do
     scope "/v1", ConsoleWeb do
       get "/logs/:repo/download", LogController, :download
       get "/git/tarballs", GitController, :tarball
+      get "/git/stacks/tarballs", GitController, :stack_tarball
     end
 
     forward "/gql", Absinthe.Plug,

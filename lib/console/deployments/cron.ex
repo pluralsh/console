@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Cron do
   use Console.Services.Base
-  alias Console.Deployments.{Services, Clusters, Global}
+  alias Console.Deployments.{Services, Clusters, Global, Stacks}
   alias Console.Services.Users
   alias Console.Schema.{
     Cluster,
@@ -10,7 +10,8 @@ defmodule Console.Deployments.Cron do
     PipelineStage,
     PipelinePromotion,
     AgentMigration,
-    ManagedNamespace
+    ManagedNamespace,
+    Stack
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -203,5 +204,23 @@ defmodule Console.Deployments.Cron do
       Discovery.context(stage)
     end)
     |> Stream.run()
+  end
+
+  def poll_stacks() do
+    Stack.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn stack ->
+      Logger.info "polling stack repository #{stack.id}"
+      Stacks.poll(stack)
+    end)
+  end
+
+  def dequeue_stacks() do
+    Stack.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn stack ->
+      Logger.info "dequeuing eligible stack runs #{stack.id}"
+      Stacks.dequeue(stack)
+    end)
   end
 end

@@ -21,6 +21,11 @@ defmodule Console.Deployments.Git.Discovery do
       do: Agent.fetch(pid, ref)
   end
 
+  def sha(%GitRepository{} = repo, ref) do
+    with {:ok, pid} <- find(repo),
+      do: Agent.sha(pid, ref)
+  end
+
   @spec docs(Service.t) :: {:ok, File.t} | error
   def docs(%Service{} = svc) do
     %{repository: repo} = Console.Repo.preload(svc, [:repository])

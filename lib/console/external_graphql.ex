@@ -99,6 +99,7 @@ defmodule Console.ExternalGraphQl do
     import_fields :public_pipeline_queries
     import_fields :public_backup_queries
     import_fields :public_global_queries
+    import_fields :public_stack_queries
   end
 
   mutation do
@@ -107,6 +108,7 @@ defmodule Console.ExternalGraphQl do
     import_fields :public_pipeline_mutations
     import_fields :public_backup_mutations
     import_fields :public_policy_mutations
+    import_fields :public_stack_mutations
   end
 
 

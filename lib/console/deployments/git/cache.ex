@@ -53,7 +53,7 @@ defmodule Console.Deployments.Git.Cache do
     end
   end
 
-  defp commit(%__MODULE__{heads: heads}, ref) do
+  def commit(%__MODULE__{heads: heads}, ref) do
     case sha?(ref) do
       true -> {:ok, ref}
       false -> find_head(heads, ref)

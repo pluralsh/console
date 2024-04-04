@@ -44,7 +44,15 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ManagedNamespace,
     NamespaceInstance,
     NamespaceCluster,
-    ServiceTemplate
+    ServiceTemplate,
+    Stack,
+    StackRun,
+    RunStep,
+    RunLog,
+    StackEnvironment,
+    StackFile,
+    StackOutput,
+    StackState
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -87,6 +95,14 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(NamespaceInstance, _), do: NamespaceInstance
   def query(NamespaceCluster, _), do: NamespaceCluster
   def query(ServiceTemplate, _), do: ServiceTemplate
+  def query(Stack, _), do: Stack
+  def query(StackRun, _), do: StackRun
+  def query(RunStep, _), do: RunStep
+  def query(RunLog, _), do: RunLog
+  def query(StackEnvironment, _), do: StackEnvironment
+  def query(StackFile, _), do: StackFile
+  def query(StackOutput, _), do: StackOutput
+  def query(StackState, _), do: StackState
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -98,6 +114,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Policy
   delegates Console.GraphQl.Resolvers.Deployments.Observability
   delegates Console.GraphQl.Resolvers.Deployments.Global
+  delegates Console.GraphQl.Resolvers.Deployments.Stack
 
   def list_addons(_, _), do: AddOns.addons()
 
