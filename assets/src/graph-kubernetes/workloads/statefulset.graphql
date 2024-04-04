@@ -12,24 +12,55 @@ query StatefulSets(
     itemsPerPage: $itemsPerPage
     page: $page
   )
-    @rest(
-      path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-    ) {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    statefulSets {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      podInfo @type(name: "common_PodInfo") {
-        ...PodInfo
-      }
-      initContainerImages
-      containerImages
-    }
+  @rest(
+    type: "statefulset_StatefulSetList"
+    path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+  ) {
+    ...StatefulSetList
+  }
+}
+
+query StatefulSet(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetStatefulSetDetail(
+    namespace: $namespace
+    statefulset: $name
+  ) @rest(
+    type: "statefulset_StatefulSetDetail"
+    path: "statefulset/{args.namespace}/{args.statefulset}"
+  ){
+    ...StatefulSetDetail
+  }
+}
+
+query StatefulSetEvents(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetStatefulSetEvents(
+    namespace: $namespace
+    statefulset: $name
+  ) @rest(
+    type: "common_EventList"
+    path: "statefulset/{args.namespace}/{args.statefulset}/event"
+  ) {
+    ...EventList
+  }
+}
+
+query StatefulSetPods(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetStatefulSetPods(
+    namespace: $namespace
+    statefulset: $name
+  ) @rest(
+    type: "pod_PodList"
+    path: "statefulset/{args.namespace}/{args.statefulset}/pod"
+  ) {
+    ...PodList
   }
 }

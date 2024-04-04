@@ -34,7 +34,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   },
   {
     label: 'cron jobs',
-    url: `${getConfigurationAbsPath(cluster?.id)}/${CRON_JOBS_REL_PATH}`,
+    url: `${getWorkloadsAbsPath(cluster?.id)}/${CRON_JOBS_REL_PATH}`,
   },
 ]
 

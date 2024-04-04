@@ -76,7 +76,10 @@ import ReplicaSet, {
   ReplicaSetPods,
   ReplicaSetServices,
 } from '../components/kubernetes/workloads/ReplicaSet'
-import StatefulSet from '../components/kubernetes/workloads/StatefulSet'
+import StatefulSet, {
+  StatefulSetEvents,
+  StatefulSetPods,
+} from '../components/kubernetes/workloads/StatefulSet'
 import DaemonSet from '../components/kubernetes/workloads/DaemonSet'
 import Job from '../components/kubernetes/workloads/Job'
 import CronJob from '../components/kubernetes/workloads/CronJob'
@@ -84,6 +87,16 @@ import ReplicationController from '../components/kubernetes/workloads/Replicatio
 import Ingress, {
   IngressInfo,
 } from '../components/kubernetes/discovery/Ingress'
+import CronJob, {
+  CronJobEvents,
+  CronJobJobs,
+} from '../components/kubernetes/workloads/CronJob'
+import ReplicationController, {
+  ReplicationControllerEvents,
+  ReplicationControllerPods,
+  ReplicationControllerServices,
+} from '../components/kubernetes/workloads/ReplicationController'
+import Ingress from '../components/kubernetes/discovery/Ingress'
 import IngressClass from '../components/kubernetes/discovery/IngressClass'
 import NetworkPolicy from '../components/kubernetes/discovery/NetworkPolicy'
 import PersistentVolumeClaim from '../components/kubernetes/storage/PersistentVolumeClaim'
@@ -440,10 +453,31 @@ export const kubernetesRoutes = [
     />
   </Route>,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${STATEFUL_SETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<StatefulSet />}
-  />,
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="pods"
+        />
+      }
+    />
+    <Route
+      path="pods"
+      element={<StatefulSetPods />}
+    />
+    <Route
+      path="events"
+      element={<StatefulSetEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     index
     path={`${KUBERNETES_ABS_PATH}/${DAEMON_SETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
@@ -455,15 +489,61 @@ export const kubernetesRoutes = [
     element={<Job />}
   />,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${CRON_JOBS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<CronJob />}
-  />,
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="jobs"
+        />
+      }
+    />
+    <Route
+      path="jobs"
+      element={<CronJobJobs />}
+    />
+    <Route
+      path="events"
+      element={<CronJobEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${REPLICATION_CONTROLLERS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<ReplicationController />}
-  />,
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="pods"
+        />
+      }
+    />
+    <Route
+      path="pods"
+      element={<ReplicationControllerPods />}
+    />
+    <Route
+      path="services"
+      element={<ReplicationControllerServices />}
+    />
+    <Route
+      path="events"
+      element={<ReplicationControllerEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   // Discovery
   <Route
     path={`${KUBERNETES_ABS_PATH}/${SERVICES_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}

@@ -19,7 +19,6 @@ import { UsageText } from '../../cluster/TableElements'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   STATEFUL_SETS_REL_PATH,
-  getConfigurationAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
@@ -35,7 +34,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   },
   {
     label: 'stateful sets',
-    url: `${getConfigurationAbsPath(cluster?.id)}/${STATEFUL_SETS_REL_PATH}`,
+    url: `${getWorkloadsAbsPath(cluster?.id)}/${STATEFUL_SETS_REL_PATH}`,
   },
 ]
 
