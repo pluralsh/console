@@ -1880,6 +1880,60 @@ export type HttpIngressRule = {
   paths?: Maybe<Array<Maybe<IngressPath>>>;
 };
 
+export type InfrastructureStack = {
+  __typename?: 'InfrastructureStack';
+  /** whether to require approval */
+  approval?: Maybe<Scalars['Boolean']['output']>;
+  /** the cluster this stack runs on */
+  cluster?: Maybe<Cluster>;
+  /** version/image config for the tool you're using */
+  configuration: StackConfiguration;
+  /** environment variables for this stack */
+  environment?: Maybe<Array<Maybe<StackEnvironment>>>;
+  /** files bound to a run of this stack */
+  files?: Maybe<Array<Maybe<StackFile>>>;
+  /** reference w/in the repository where the IaC lives */
+  git: GitRef;
+  id?: Maybe<Scalars['ID']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** optional k8s job configuration for the job that will apply this stack */
+  jobSpec?: Maybe<JobGateSpec>;
+  /** the name of the stack */
+  name: Scalars['String']['output'];
+  /** the most recent output for this stack */
+  output?: Maybe<Array<Maybe<StackOutput>>>;
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the git repository you're sourcing IaC from */
+  repository?: Maybe<GitRepository>;
+  runs?: Maybe<StackRunConnection>;
+  /** the most recent state of this stack */
+  state?: Maybe<StackState>;
+  /** A type for the stack, specifies the tool to use to apply it */
+  type: StackType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+export type InfrastructureStackRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type InfrastructureStackConnection = {
+  __typename?: 'InfrastructureStackConnection';
+  edges?: Maybe<Array<Maybe<InfrastructureStackEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type InfrastructureStackEdge = {
+  __typename?: 'InfrastructureStackEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<InfrastructureStack>;
+};
+
 export type Ingress = {
   __typename?: 'Ingress';
   certificates?: Maybe<Array<Maybe<Certificate>>>;
@@ -3643,12 +3697,15 @@ export type RollingUpdate = {
 
 export type RootMutationType = {
   __typename?: 'RootMutationType';
+  addRunLogs?: Maybe<RunLogs>;
   approveBuild?: Maybe<Build>;
   /** approves an approval pipeline gate */
   approveGate?: Maybe<PipelineGate>;
+  approveStackRun?: Maybe<StackRun>;
   cancelBuild?: Maybe<Build>;
   /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
   cloneService?: Maybe<ServiceDeployment>;
+  completeStackRun?: Maybe<StackRun>;
   configureBackups?: Maybe<Cluster>;
   createAccessToken?: Maybe<AccessToken>;
   createAgentMigration?: Maybe<AgentMigration>;
@@ -3681,6 +3738,7 @@ export type RootMutationType = {
   createServiceAccount?: Maybe<User>;
   createServiceAccountToken?: Maybe<AccessToken>;
   createServiceDeployment?: Maybe<ServiceDeployment>;
+  createStack?: Maybe<InfrastructureStack>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
   deleteAccessToken?: Maybe<AccessToken>;
@@ -3708,6 +3766,7 @@ export type RootMutationType = {
   deleteScmConnection?: Maybe<ScmConnection>;
   deleteServiceContext?: Maybe<ServiceContext>;
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
+  deleteStack?: Maybe<InfrastructureStack>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteWebhook?: Maybe<Webhook>;
@@ -3769,16 +3828,25 @@ export type RootMutationType = {
   /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
   updateRole?: Maybe<Role>;
+  updateRunStep?: Maybe<RunStep>;
   updateScmConnection?: Maybe<ScmConnection>;
   updateServiceAccount?: Maybe<User>;
   /** updates only the components of a given service, to be sent after deploy operator syncs */
   updateServiceComponents?: Maybe<ServiceDeployment>;
   updateServiceDeployment?: Maybe<ServiceDeployment>;
   updateSmtp?: Maybe<Smtp>;
+  updateStack?: Maybe<InfrastructureStack>;
+  updateStackRun?: Maybe<StackRun>;
   updateUser?: Maybe<User>;
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
+};
+
+
+export type RootMutationTypeAddRunLogsArgs = {
+  attributes: RunLogAttributes;
+  stepId: Scalars['ID']['input'];
 };
 
 
@@ -3788,6 +3856,11 @@ export type RootMutationTypeApproveBuildArgs = {
 
 
 export type RootMutationTypeApproveGateArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeApproveStackRunArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -3803,6 +3876,12 @@ export type RootMutationTypeCloneServiceArgs = {
   clusterId: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeCompleteStackRunArgs = {
+  attributes: StackRunAttributes;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3966,6 +4045,11 @@ export type RootMutationTypeCreateServiceDeploymentArgs = {
 };
 
 
+export type RootMutationTypeCreateStackArgs = {
+  attributes: StackAttributes;
+};
+
+
 export type RootMutationTypeCreateUpgradePolicyArgs = {
   attributes: UpgradePolicyAttributes;
 };
@@ -4103,6 +4187,11 @@ export type RootMutationTypeDeleteServiceContextArgs = {
 
 
 export type RootMutationTypeDeleteServiceDeploymentArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteStackArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -4389,6 +4478,12 @@ export type RootMutationTypeUpdateRoleArgs = {
 };
 
 
+export type RootMutationTypeUpdateRunStepArgs = {
+  attributes: RunStepAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateScmConnectionArgs = {
   attributes: ScmConnectionAttributes;
   id: Scalars['ID']['input'];
@@ -4418,6 +4513,18 @@ export type RootMutationTypeUpdateServiceDeploymentArgs = {
 
 export type RootMutationTypeUpdateSmtpArgs = {
   smtp: SmtpInput;
+};
+
+
+export type RootMutationTypeUpdateStackArgs = {
+  attributes: StackAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateStackRunArgs = {
+  attributes: StackRunAttributes;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -4475,6 +4582,7 @@ export type RootQueryType = {
   clusterRestores?: Maybe<ClusterRestoreConnection>;
   /** the services deployed in the current cluster, to be polled by the deploy operator */
   clusterServices?: Maybe<Array<Maybe<ServiceDeployment>>>;
+  clusterStackRuns?: Maybe<StackRunConnection>;
   /** gets summary information for all healthy/unhealthy clusters in your fleet */
   clusterStatuses?: Maybe<Array<Maybe<ClusterStatusInfo>>>;
   /** a relay connection of all clusters visible to the current user */
@@ -4505,6 +4613,8 @@ export type RootQueryType = {
   groups?: Maybe<GroupConnection>;
   helmRepositories?: Maybe<Array<Maybe<HelmRepository>>>;
   helmRepository?: Maybe<HelmRepository>;
+  infrastructureStack?: Maybe<InfrastructureStack>;
+  infrastructureStacks?: Maybe<InfrastructureStackConnection>;
   ingress?: Maybe<Ingress>;
   installations?: Maybe<InstallationConnection>;
   invite?: Maybe<Invite>;
@@ -4580,6 +4690,7 @@ export type RootQueryType = {
   serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
+  stackRun?: Maybe<StackRun>;
   statefulSet?: Maybe<StatefulSet>;
   /** adds the ability to search/filter through all tag name/value pairs */
   tagPairs?: Maybe<TagConnection>;
@@ -4729,6 +4840,14 @@ export type RootQueryTypeClusterRestoresArgs = {
 };
 
 
+export type RootQueryTypeClusterStackRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypeClusterStatusesArgs = {
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
@@ -4871,6 +4990,19 @@ export type RootQueryTypeGroupsArgs = {
 export type RootQueryTypeHelmRepositoryArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeInfrastructureStackArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeInfrastructureStacksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -5317,6 +5449,11 @@ export type RootQueryTypeStackArgs = {
 };
 
 
+export type RootQueryTypeStackRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootQueryTypeStatefulSetArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -5424,6 +5561,36 @@ export type RouterFilterAttributes = {
 
 export type RouterSinkAttributes = {
   sinkId: Scalars['ID']['input'];
+};
+
+export type RunLogAttributes = {
+  logs: Scalars['String']['input'];
+};
+
+export type RunLogs = {
+  __typename?: 'RunLogs';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  logs: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type RunStep = {
+  __typename?: 'RunStep';
+  args?: Maybe<Array<Scalars['String']['output']>>;
+  cmd: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  index: Scalars['Int']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  logs?: Maybe<Array<Maybe<RunLogs>>>;
+  name: Scalars['String']['output'];
+  stage: StepStage;
+  status: StepStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type RunStepAttributes = {
+  status: StepStatus;
 };
 
 export type Runbook = {
@@ -6058,6 +6225,200 @@ export type Stack = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+export type StackAttributes = {
+  /** whether to require approval */
+  approval?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The cluster on which the terraform will be applied */
+  clusterId: Scalars['ID']['input'];
+  /** version/image config for the tool you're using */
+  configuration: StackConfigurationAttributes;
+  environemnt?: InputMaybe<Array<InputMaybe<StackEnvironmentAttributes>>>;
+  files?: InputMaybe<Array<InputMaybe<StackFileAttributes>>>;
+  /** reference w/in the repository where the IaC lives */
+  git: GitRefAttributes;
+  /** optional k8s job configuration for the job that will apply this stack */
+  jobSpec?: InputMaybe<GateJobAttributes>;
+  /** the name of the stack */
+  name: Scalars['String']['input'];
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  /** The repository to source IaC from */
+  repositoryId: Scalars['ID']['input'];
+  /** A type for the stack, specifies the tool to use to apply it */
+  type: StackType;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type StackConfiguration = {
+  __typename?: 'StackConfiguration';
+  /** optional custom image you might want to use */
+  image?: Maybe<Scalars['String']['output']>;
+  /** the semver of the tool you wish to use */
+  version: Scalars['String']['output'];
+};
+
+export type StackConfigurationAttributes = {
+  /** optional custom image you might want to use */
+  image?: InputMaybe<Scalars['String']['input']>;
+  /** the semver of the tool you wish to use */
+  version: Scalars['String']['input'];
+};
+
+export type StackEnvironment = {
+  __typename?: 'StackEnvironment';
+  name: Scalars['String']['output'];
+  secret?: Maybe<Scalars['Boolean']['output']>;
+  value: Scalars['String']['output'];
+};
+
+export type StackEnvironmentAttributes = {
+  name: Scalars['String']['input'];
+  secret?: InputMaybe<Scalars['Boolean']['input']>;
+  value: Scalars['String']['input'];
+};
+
+export type StackFile = {
+  __typename?: 'StackFile';
+  content: Scalars['String']['output'];
+  path: Scalars['String']['output'];
+};
+
+export type StackFileAttributes = {
+  content: Scalars['String']['input'];
+  path: Scalars['String']['input'];
+};
+
+export type StackOutput = {
+  __typename?: 'StackOutput';
+  name: Scalars['String']['output'];
+  secret?: Maybe<Scalars['Boolean']['output']>;
+  value: Scalars['String']['output'];
+};
+
+export type StackOutputAttributes = {
+  name: Scalars['String']['input'];
+  secret?: InputMaybe<Scalars['Boolean']['input']>;
+  value: Scalars['String']['input'];
+};
+
+export type StackRun = {
+  __typename?: 'StackRun';
+  /** whether to require approval */
+  approval?: Maybe<Scalars['Boolean']['output']>;
+  /** when this run was approved */
+  approvedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the approver of this job */
+  approver?: Maybe<User>;
+  /** the cluster this stack runs on */
+  cluster?: Maybe<Cluster>;
+  /** version/image config for the tool you're using */
+  configuration: StackConfiguration;
+  /** environment variables for this stack */
+  environment?: Maybe<Array<Maybe<StackEnvironment>>>;
+  /** a list of errors generated by the deployment operator */
+  errors?: Maybe<Array<Maybe<ServiceError>>>;
+  /** files bound to a run of this stack */
+  files?: Maybe<Array<Maybe<StackFile>>>;
+  /** reference w/in the repository where the IaC lives */
+  git: GitRef;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** optional k8s job configuration for the job that will apply this stack */
+  jobSpec?: Maybe<JobGateSpec>;
+  /** the name of the stack */
+  name: Scalars['String']['output'];
+  /** the most recent output for this stack */
+  output?: Maybe<Array<Maybe<StackOutput>>>;
+  /** the git repository you're sourcing IaC from */
+  repository?: Maybe<GitRepository>;
+  /** the most recent state of this stack */
+  state?: Maybe<StackState>;
+  /** The status of this run */
+  status: StackStatus;
+  /** The steps to perform when running this stack */
+  steps?: Maybe<Array<Maybe<RunStep>>>;
+  /** https url to fetch the latest tarball of stack IaC */
+  tarball: Scalars['String']['output'];
+  /** A type for the stack, specifies the tool to use to apply it */
+  type: StackType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type StackRunAttributes = {
+  /** Any errors detected when trying to run this stack */
+  errors?: InputMaybe<Array<InputMaybe<ServiceErrorAttributes>>>;
+  /** output generated by this run */
+  output?: InputMaybe<Array<InputMaybe<StackOutputAttributes>>>;
+  /** the state from this runs plan or apply */
+  state?: InputMaybe<StackStateAttributes>;
+  /** The status of this run */
+  status: StackStatus;
+};
+
+export type StackRunConnection = {
+  __typename?: 'StackRunConnection';
+  edges?: Maybe<Array<Maybe<StackRunEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type StackRunEdge = {
+  __typename?: 'StackRunEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<StackRun>;
+};
+
+export type StackState = {
+  __typename?: 'StackState';
+  id: Scalars['ID']['output'];
+  plan?: Maybe<Scalars['String']['output']>;
+  state?: Maybe<Array<Maybe<StackStateResource>>>;
+};
+
+export type StackStateAttributes = {
+  plan?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Array<InputMaybe<StackStateResourceAttributes>>>;
+};
+
+export type StackStateResource = {
+  __typename?: 'StackStateResource';
+  /** arbitrary configuration used to create the resource */
+  configuration?: Maybe<Scalars['Json']['output']>;
+  /** a string identifier for this resource, different tools will have different conventions */
+  identifier: Scalars['String']['output'];
+  /** identifiers this resource is linked to for graphing in the UI */
+  links?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the name of the resource within that type */
+  name: Scalars['String']['output'];
+  /** a string name of the resource type */
+  resource: Scalars['String']['output'];
+};
+
+export type StackStateResourceAttributes = {
+  /** arbitrary configuration used to create the resource */
+  configuration?: InputMaybe<Scalars['Json']['input']>;
+  /** a string identifier for this resource, different tools will have different conventions */
+  identifier: Scalars['String']['input'];
+  /** identifiers this resource is linked to for graphing in the UI */
+  links?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** the name of the resource within that type */
+  name: Scalars['String']['input'];
+  /** a string name of the resource type */
+  resource: Scalars['String']['input'];
+};
+
+export enum StackStatus {
+  Cancelled = 'CANCELLED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Queued = 'QUEUED',
+  Running = 'RUNNING',
+  Successful = 'SUCCESSFUL'
+}
+
+export enum StackType {
+  Ansible = 'ANSIBLE',
+  Terraform = 'TERRAFORM'
+}
+
 /** the configuration of a service within a pipeline stage, including optional promotion criteria */
 export type StageService = {
   __typename?: 'StageService';
@@ -6129,6 +6490,19 @@ export type StatusCondition = {
   status: Scalars['String']['output'];
   type: Scalars['String']['output'];
 };
+
+export enum StepStage {
+  Apply = 'APPLY',
+  Plan = 'PLAN',
+  Verify = 'VERIFY'
+}
+
+export enum StepStatus {
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Running = 'RUNNING',
+  Successful = 'SUCCESSFUL'
+}
 
 /** Advanced configuration of how to sync resources */
 export type SyncConfig = {

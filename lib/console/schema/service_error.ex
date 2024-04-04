@@ -1,13 +1,14 @@
 defmodule Console.Schema.ServiceError do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, Cluster}
+  alias Console.Schema.{Service, Cluster, StackRun}
 
   schema "service_errors" do
     field :source,  :string
     field :message, :binary
 
-    belongs_to :cluster, Cluster
-    belongs_to :service, Service
+    belongs_to :cluster,   Cluster
+    belongs_to :service,   Service
+    belongs_to :stack_run, StackRun
 
     timestamps()
   end

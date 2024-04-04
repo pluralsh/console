@@ -3,6 +3,7 @@ defmodule Console.Deployments.PubSub.RecurseTest do
   use Mimic
   alias Console.PubSub
   alias Console.Deployments.{Clusters, Services, Global}
+  alias Console.Deployments.Git.Discovery
   alias Console.PubSub.Consumers.Recurse
 
   describe "ServiceComponentsUpdated" do
@@ -350,6 +351,53 @@ defmodule Console.Deployments.PubSub.RecurseTest do
 
       assert stage.applied_context_id == ctx.id
       assert Console.Repo.get_by(Console.Schema.PipelinePullRequest, context_id: ctx.id, service_id: svc.id)
+    end
+  end
+
+  describe "StackCreated" do
+    test "it will poll the stack" do
+      stack = insert(:stack)
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+
+      event = %PubSub.StackCreated{item: stack}
+      {:ok, run} = Recurse.handle_event(event)
+
+      assert run.stack_id == stack.id
+      assert run.status == :queued
+      assert run.cluster_id == stack.cluster_id
+      assert run.repository_id == stack.repository_id
+      assert run.git.ref == "new-sha"
+    end
+  end
+
+  describe "StackUpdated" do
+    test "it will poll the stack" do
+      stack = insert(:stack)
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+
+      event = %PubSub.StackUpdated{item: stack}
+      {:ok, run} = Recurse.handle_event(event)
+
+      assert run.stack_id == stack.id
+      assert run.status == :queued
+      assert run.cluster_id == stack.cluster_id
+      assert run.repository_id == stack.repository_id
+      assert run.git.ref == "new-sha"
+    end
+  end
+
+  describe "StackRunCompleted" do
+    test "it can dequeue a stack run" do
+      stack = insert(:stack)
+      completed = insert(:stack_run, stack: stack, status: :successful)
+      :timer.sleep(1)
+      run = insert(:stack_run, stack: stack, status: :queued)
+
+      event = %PubSub.StackRunCompleted{item: completed}
+      {:ok, dequeued} = Recurse.handle_event(event)
+
+      assert dequeued.id == run.id
+      assert dequeued.status == :pending
     end
   end
 end
