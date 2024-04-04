@@ -3,6 +3,7 @@ import { Navigate, Route } from 'react-router-dom'
 import Service, {
   ServiceEvents,
   ServiceInfo,
+  ServiceIngresses,
   ServicePods,
 } from 'components/kubernetes/discovery/Service'
 import PersistentVolume, {
@@ -469,6 +470,10 @@ export const kubernetesRoutes = [
     <Route
       path=""
       element={<ServiceInfo />}
+    />
+    <Route
+      path="ingresses"
+      element={<ServiceIngresses />}
     />
     <Route
       path="pods"

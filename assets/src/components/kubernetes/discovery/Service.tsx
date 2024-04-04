@@ -14,15 +14,20 @@ import {
   Endpoint_Endpoint as EndpointT,
   Common_EventList as EventListT,
   Common_Event as EventT,
+  Ingress_IngressList as IngressListT,
+  Ingress_Ingress as IngressT,
   Pod_PodList as PodListT,
   Pod_Pod as PodT,
   ServiceEventsQuery,
   ServiceEventsQueryVariables,
+  ServiceIngressesQuery,
+  ServiceIngressesQueryVariables,
   ServicePodsQuery,
   ServicePodsQueryVariables,
   ServiceQueryVariables,
   Service_ServiceDetail as ServiceT,
   useServiceEventsQuery,
+  useServiceIngressesQuery,
   useServicePodsQuery,
   useServiceQuery,
 } from '../../../generated/graphql-kubernetes'
@@ -49,9 +54,11 @@ import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 
 import { getBreadcrumbs } from './Services'
 import { Endpoints } from './utils'
+import { useIngressesColumns } from './Ingresses'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
+  { path: 'ingresses', label: 'Ingresses' },
   { path: 'pods', label: 'Pods' },
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
@@ -186,6 +193,30 @@ export function ServiceInfo(): ReactElement {
         />
       </section>
     </>
+  )
+}
+
+export function ServiceIngresses(): ReactElement {
+  const { name, namespace } = useParams()
+  const columns = useIngressesColumns()
+
+  return (
+    <ResourceList<
+      IngressListT,
+      IngressT,
+      ServiceIngressesQuery,
+      ServiceIngressesQueryVariables
+    >
+      namespaced
+      columns={columns}
+      query={useServiceIngressesQuery}
+      queryOptions={{
+        variables: { namespace, name } as ServiceIngressesQueryVariables,
+      }}
+      queryName="handleGetServiceIngressList"
+      itemsKey="items"
+      disableOnRowClick
+    />
   )
 }
 

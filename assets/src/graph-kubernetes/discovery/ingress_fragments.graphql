@@ -1,0 +1,17 @@
+fragment IngressList on ingress_IngressList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  items {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    endpoints @type(name: "common_Endpoint") {
+      ...Endpoint
+    }
+    hosts
+  }
+}

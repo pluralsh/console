@@ -58,14 +58,11 @@ const colHosts = columnHelper.accessor((ingress) => ingress?.hosts, {
   },
 })
 
-export default function Ingresses() {
-  const { cluster } = useKubernetesContext()
-
-  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
-
+export function useIngressesColumns(): Array<object> {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
-  const columns = useMemo(
+
+  return useMemo(
     () => [
       colName,
       colNamespace,
@@ -76,6 +73,14 @@ export default function Ingresses() {
     ],
     [colName, colNamespace, colLabels, colCreationTimestamp]
   )
+}
+
+export default function Ingresses() {
+  const { cluster } = useKubernetesContext()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
+
+  const columns = useIngressesColumns()
 
   return (
     <ResourceList<

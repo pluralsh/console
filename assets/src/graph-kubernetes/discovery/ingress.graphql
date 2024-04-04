@@ -13,23 +13,10 @@ query Ingresses(
     page: $page
   )
     @rest(
+      type: "ingress_IngressList"
       path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      endpoints @type(name: "common_Endpoint") {
-        ...Endpoint
-      }
-      hosts
-    }
+    ...IngressList
   }
 }
 
