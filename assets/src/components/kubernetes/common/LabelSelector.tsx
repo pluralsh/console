@@ -13,6 +13,7 @@ export function LabelSelector({ selector }: LabelSelectorProps): ReactNode {
     <ChipList
       size="small"
       values={Object.entries(selector?.matchLabels ?? {})}
+      transformValue={(label) => label.join(': ')}
       limit={3}
     />
   )

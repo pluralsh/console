@@ -10,6 +10,7 @@ import {
   DeploymentQueryVariables,
   Common_EventList as EventListT,
   Common_Event as EventT,
+  V1_LabelSelector as LabelSelectorT,
   Pod_PodList as PodListT,
   Pod_Pod as PodT,
   ReplicationControllerEventsQuery,
@@ -40,6 +41,8 @@ import { PodInfo } from '../common/PodInfo'
 import { ResourceList } from '../ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import { useServicesColumns } from '../discovery/Services'
+
+import { LabelSelector } from '../common/LabelSelector'
 
 import { getBreadcrumbs } from './ReplicationControllers'
 import { usePodColumns } from './Pods'
@@ -88,7 +91,7 @@ export default function ReplicationController(): ReactElement {
     )
   )
 
-  const statefulSet =
+  const rc =
     data?.handleGetReplicationControllerDetail as ReplicationControllerT
 
   if (loading) {
@@ -99,13 +102,18 @@ export default function ReplicationController(): ReactElement {
     <ResourceDetails
       tabs={directory}
       sidecar={
-        <MetadataSidecar resource={statefulSet}>
+        <MetadataSidecar resource={rc}>
+          <SidecarItem heading="Selector">
+            <LabelSelector
+              selector={{ matchLabels: rc?.labelSelector } as LabelSelectorT}
+            />
+          </SidecarItem>
           <SidecarItem heading="Images">
             <ChipList
               size="small"
               limit={3}
-              values={(statefulSet?.containerImages ?? []).concat(
-                statefulSet?.initContainerImages ?? []
+              values={(rc?.containerImages ?? []).concat(
+                rc?.initContainerImages ?? []
               )}
               emptyState={<div>None</div>}
               truncateWidth={300}
@@ -113,12 +121,12 @@ export default function ReplicationController(): ReactElement {
             />
           </SidecarItem>
           <SidecarItem heading="Status">
-            <PodInfo info={statefulSet?.podInfo} />
+            <PodInfo info={rc?.podInfo} />
           </SidecarItem>
         </MetadataSidecar>
       }
     >
-      <Outlet context={statefulSet} />
+      <Outlet context={rc} />
     </ResourceDetails>
   )
 }
