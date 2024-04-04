@@ -81,7 +81,9 @@ import DaemonSet from '../components/kubernetes/workloads/DaemonSet'
 import Job from '../components/kubernetes/workloads/Job'
 import CronJob from '../components/kubernetes/workloads/CronJob'
 import ReplicationController from '../components/kubernetes/workloads/ReplicationController'
-import Ingress from '../components/kubernetes/discovery/Ingress'
+import Ingress, {
+  IngressInfo,
+} from '../components/kubernetes/discovery/Ingress'
 import IngressClass from '../components/kubernetes/discovery/IngressClass'
 import NetworkPolicy from '../components/kubernetes/discovery/NetworkPolicy'
 import PersistentVolumeClaim from '../components/kubernetes/storage/PersistentVolumeClaim'
@@ -489,10 +491,22 @@ export const kubernetesRoutes = [
     />
   </Route>,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${INGRESSES_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<Ingress />}
-  />,
+  >
+    <Route
+      path=""
+      element={<IngressInfo />}
+    />
+    <Route
+      path="events"
+      element={<ServiceEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     path={`${KUBERNETES_ABS_PATH}/${INGRESS_CLASSES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<IngressClass />}
