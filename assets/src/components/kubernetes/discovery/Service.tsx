@@ -3,13 +3,15 @@ import {
   Card,
   ChipList,
   SidecarItem,
+  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
-
 import { useTheme } from 'styled-components'
+import { createColumnHelper } from '@tanstack/react-table'
 
 import {
+  Endpoint_Endpoint as EndpointT,
   Common_EventList as EventListT,
   Common_Event as EventT,
   Pod_PodList as PodListT,
@@ -105,38 +107,81 @@ export default function Service(): ReactElement {
   )
 }
 
+const columnHelper = createColumnHelper<EndpointT>()
+
+const columns = [
+  columnHelper.accessor((endpoint) => endpoint?.host, {
+    id: 'host',
+    header: 'Host',
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor((endpoint) => endpoint?.ports, {
+    id: 'ports',
+    header: 'Ports',
+    cell: ({ getValue }) =>
+      getValue()?.map((port) => (
+        <div>
+          {port?.name} {port?.port} {port?.protocol} {port?.appProtocol}
+        </div>
+      )),
+  }),
+  columnHelper.accessor((endpoint) => endpoint?.nodeName, {
+    id: 'node',
+    header: 'Node',
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor((endpoint) => endpoint?.ready, {
+    id: 'ready',
+    header: 'Ready',
+    cell: ({ getValue }) => (getValue() ? 'True' : 'False'),
+  }),
+]
+
 export function ServiceInfo(): ReactElement {
   const theme = useTheme()
   const service = useOutletContext() as ServiceT
 
   return (
-    <section>
-      <SubTitle>Service information</SubTitle>
-      <Card
-        css={{
-          display: 'flex',
-          gap: theme.spacing.large,
-          padding: theme.spacing.medium,
-          flexWrap: 'wrap',
-        }}
-      >
-        <ResourceInfoCardEntry heading="Internal endpoints">
-          <Endpoints endpoints={[service.internalEndpoint]} />
-        </ResourceInfoCardEntry>
-        <ResourceInfoCardEntry heading="External endpoints">
-          <Endpoints endpoints={service.externalEndpoints} />
-        </ResourceInfoCardEntry>
-        <ResourceInfoCardEntry heading="Selector">
-          <ChipList
-            size="small"
-            limit={3}
-            values={Object.entries(service.selector)}
-            transformValue={(label) => label.join(': ')}
-            emptyState={<div>None</div>}
-          />
-        </ResourceInfoCardEntry>
-      </Card>
-    </section>
+    <>
+      <section>
+        <SubTitle>Service information</SubTitle>
+        <Card
+          css={{
+            display: 'flex',
+            gap: theme.spacing.large,
+            padding: theme.spacing.medium,
+            flexWrap: 'wrap',
+          }}
+        >
+          <ResourceInfoCardEntry heading="Internal endpoints">
+            <Endpoints endpoints={[service.internalEndpoint]} />
+          </ResourceInfoCardEntry>
+          <ResourceInfoCardEntry heading="External endpoints">
+            <Endpoints endpoints={service.externalEndpoints} />
+          </ResourceInfoCardEntry>
+          <ResourceInfoCardEntry heading="Selector">
+            <ChipList
+              size="small"
+              limit={3}
+              values={Object.entries(service.selector)}
+              transformValue={(label) => label.join(': ')}
+              emptyState={<div>None</div>}
+            />
+          </ResourceInfoCardEntry>
+        </Card>
+      </section>
+      <section>
+        <SubTitle>Endpoints</SubTitle>
+        <Table
+          data={service.endpointList.endpoints}
+          columns={columns}
+          css={{
+            maxHeight: '500px',
+            height: '100%',
+          }}
+        />
+      </section>
+    </>
   )
 }
 

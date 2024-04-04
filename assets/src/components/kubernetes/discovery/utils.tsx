@@ -40,8 +40,10 @@ export function TableEndpoints({
 export function Endpoints({ endpoints }: { endpoints: Maybe<EndpointT>[] }) {
   const theme = useTheme()
 
+  if (isEmpty(endpoints)) return 'None'
+
   return (
-    <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+    <div css={{ display: 'flex', gap: theme.spacing.xsmall, flexWrap: 'wrap' }}>
       {endpoints.map((endpoint) =>
         isEmpty(endpoint?.ports) ? (
           <Chip size="small">{endpoint?.host}</Chip>
