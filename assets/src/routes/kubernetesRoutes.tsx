@@ -76,7 +76,10 @@ import ReplicaSet, {
   ReplicaSetPods,
   ReplicaSetServices,
 } from '../components/kubernetes/workloads/ReplicaSet'
-import StatefulSet from '../components/kubernetes/workloads/StatefulSet'
+import StatefulSet, {
+  StatefulSetEvents,
+  StatefulSetPods,
+} from '../components/kubernetes/workloads/StatefulSet'
 import DaemonSet from '../components/kubernetes/workloads/DaemonSet'
 import Job from '../components/kubernetes/workloads/Job'
 import CronJob from '../components/kubernetes/workloads/CronJob'
@@ -438,10 +441,31 @@ export const kubernetesRoutes = [
     />
   </Route>,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${STATEFUL_SETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<StatefulSet />}
-  />,
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="pods"
+        />
+      }
+    />
+    <Route
+      path="pods"
+      element={<StatefulSetPods />}
+    />
+    <Route
+      path="events"
+      element={<StatefulSetEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     index
     path={`${KUBERNETES_ABS_PATH}/${DAEMON_SETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
