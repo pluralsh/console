@@ -84,7 +84,8 @@ export default function PipelineJobLogs() {
       heading="Logs"
       scrollable={false}
       headingContent={
-        jobGateState === 'RUNNING' || jobGateState === 'PENDING' ? (
+        jobGateState === GateState.Running ||
+        jobGateState === GateState.Pending ? (
           <div
             css={{
               display: 'flex',
