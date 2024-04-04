@@ -28,6 +28,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Global do
     |> paginate(args)
   end
 
+  def template_configuration(template, _, ctx) do
+    with {:ok, _} <- allow(template, actor(ctx), :write),
+         {:ok, secrets} <- Global.configuration(template) do
+      {:ok, Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)}
+    end
+  end
+
   def create_global_service(%{cluster: _, name: _, attributes: attrs} = args, %{context: %{current_user: user}}) do
     svc = fetch_service(args)
     Global.create(attrs, svc.id, user)

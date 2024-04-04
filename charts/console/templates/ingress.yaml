@@ -25,9 +25,9 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: console-dashboard
+            name: {{ template "kubernetes-dashboard.fullname" .Subcharts.dashboard }}-{{ .Values.dashboard.api.role }}
             port:
-              name: {{ .Values.dashboardapi.role }}
+              name: {{ .Values.dashboard.api.role }}
       {{ end }}
       - path: /
         pathType: Prefix
@@ -67,7 +67,7 @@ spec:
         backend:
           service:
             name: console-kas-service
-            port: 
+            port:
               number: 8154
       - path: /ext/kas(/|$)(.*)
         pathType: ImplementationSpecific
@@ -141,6 +141,6 @@ spec:
         backend:
           service:
             name: console-kas-service
-            port: 
+            port:
               number: 8150
 {{ end }}

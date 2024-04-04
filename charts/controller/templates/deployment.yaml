@@ -89,5 +89,5 @@ spec:
       terminationGracePeriodSeconds: 10
       {{ if .Values.global.additionalVolumes }}
       volumes:
-      {{ toYaml .Valuess.global.additionalVolumes | nindent 6 }}
+      {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
       {{ end }}

@@ -51,6 +51,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.ClusterCreated, Console.Pub
     cluster = Repo.preload(cluster, [:tags])
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
     GlobalService.stream()
+    |> GlobalService.preloaded()
     |> Repo.stream(method: :keyset)
     |> Stream.filter(&Global.match?(&1, cluster))
     |> Stream.each(&Global.add_to_cluster(&1, cluster))

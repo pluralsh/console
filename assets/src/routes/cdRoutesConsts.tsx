@@ -75,6 +75,7 @@ export const SERVICE_POD_ABS_PATH = getServicePodDetailsPath({
 })
 
 export const SERVICE_PARAM_ID = 'serviceId' as const
+export const GLOBAL_SERVICE_PARAM_ID = 'globalServiceId' as const
 export const SERVICE_PARAM_CLUSTER_ID = 'clusterId' as const
 export const SERVICE_REL_PATH = getServiceDetailsPath({
   isRelative: true,
@@ -96,6 +97,7 @@ export const SERVICE_COMPONENT_PATH_MATCHER_REL = getServiceComponentPath({
 })
 export const SERVICE_COMPONENT_PATH_MATCHER_ABS = `${CD_ABS_PATH}/${SERVICE_COMPONENT_PATH_MATCHER_REL}`
 export const ADDONS_REL_PATH = 'addons'
+export const GLOBAL_SERVICES_REL_PATH = 'global-services'
 export const GLOBAL_SETTINGS_REL_PATH = `settings`
 export const GLOBAL_SETTINGS_ABS_PATH = `${CD_ABS_PATH}/${GLOBAL_SETTINGS_REL_PATH}`
 
@@ -122,6 +124,16 @@ export function getServiceDetailsPath({
     clusterId,
     isRelative,
   })}/${SERVICES_REL_PATH}/${encodeSlashes(serviceId || '')}`
+}
+
+export function getGlobalServiceDetailsPath({
+  serviceId,
+}: {
+  serviceId: string | null | undefined
+}) {
+  return `${CD_ABS_PATH}/${GLOBAL_SERVICES_REL_PATH}/${encodeSlashes(
+    serviceId || ''
+  )}`
 }
 
 export function getClusterAddOnDetailsPath({

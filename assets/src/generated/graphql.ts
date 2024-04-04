@@ -623,6 +623,8 @@ export type Cluster = {
   objectStore?: Maybe<ObjectStore>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** custom resources with dedicated views for this cluster */
+  pinnedCustomResources?: Maybe<Array<Maybe<PinnedCustomResource>>>;
   /** lists OPA constraints registered in this cluster */
   policyConstraints?: Maybe<PolicyConstraintConnection>;
   /** pr automations that are relevant to managing this cluster */
@@ -2645,6 +2647,27 @@ export type PersonaSidebarAttributes = {
   stacks?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** A reference to a custom resource you want to be displayed in the k8s dashboard */
+export type PinnedCustomResource = {
+  __typename?: 'PinnedCustomResource';
+  cluster?: Maybe<Cluster>;
+  displayName: Scalars['String']['output'];
+  group: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  kind: Scalars['String']['output'];
+  namespaced?: Maybe<Scalars['Boolean']['output']>;
+  version: Scalars['String']['output'];
+};
+
+export type PinnedCustomResourceAttributes = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  displayName: Scalars['String']['input'];
+  group: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  namespaced?: InputMaybe<Scalars['Boolean']['input']>;
+  version: Scalars['String']['input'];
+};
+
 /** a release pipeline, composed of multiple stages each with potentially multiple services */
 export type Pipeline = {
   __typename?: 'Pipeline';
@@ -3644,6 +3667,7 @@ export type RootMutationType = {
   createObjectStore?: Maybe<ObjectStore>;
   createPeer?: Maybe<WireguardPeer>;
   createPersona?: Maybe<Persona>;
+  createPinnedCustomResource?: Maybe<PinnedCustomResource>;
   /** creates a new pipeline context and binds it to the beginning stage */
   createPipelineContext?: Maybe<PipelineContext>;
   createPrAutomation?: Maybe<PrAutomation>;
@@ -3675,6 +3699,7 @@ export type RootMutationType = {
   deleteObjectStore?: Maybe<ObjectStore>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePersona?: Maybe<Persona>;
+  deletePinnedCustomResource?: Maybe<PinnedCustomResource>;
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
   deletePrAutomation?: Maybe<PrAutomation>;
@@ -3873,6 +3898,11 @@ export type RootMutationTypeCreatePersonaArgs = {
 };
 
 
+export type RootMutationTypeCreatePinnedCustomResourceArgs = {
+  attributes: PinnedCustomResourceAttributes;
+};
+
+
 export type RootMutationTypeCreatePipelineContextArgs = {
   attributes: PipelineContextAttributes;
   pipelineId: Scalars['ID']['input'];
@@ -4026,6 +4056,11 @@ export type RootMutationTypeDeletePeerArgs = {
 
 
 export type RootMutationTypeDeletePersonaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeletePinnedCustomResourceArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -5911,6 +5946,8 @@ export type ServiceStatusCount = {
 /** Attributes for configuring a service in something like a managed namespace */
 export type ServiceTemplate = {
   __typename?: 'ServiceTemplate';
+  /** possibly secret configuration for all spawned services, don't query this in list endpoints */
+  configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
   /** a list of context ids to add to this service */
   contexts?: Maybe<Array<Maybe<Scalars['ID']['output']>>>;
   /** settings to configure git for a service */
@@ -5919,13 +5956,21 @@ export type ServiceTemplate = {
   helm?: Maybe<HelmSpec>;
   /** settings for service kustomization */
   kustomize?: Maybe<Kustomize>;
+  /** the name for this service (optional for managed namespaces) */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the namespace for this service (optional for managed namespaces) */
+  namespace?: Maybe<Scalars['String']['output']>;
   /** the id of a repository to source manifests for this service */
   repositoryId?: Maybe<Scalars['ID']['output']>;
+  /** specification of how the templated service will be synced */
+  syncConfig?: Maybe<SyncConfig>;
   templated?: Maybe<Scalars['Boolean']['output']>;
 };
 
 /** Attributes for configuring a service in something like a managed namespace */
 export type ServiceTemplateAttributes = {
+  /** a list of secure configuration that will be added to any services created by this template */
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   /** a list of context ids to add to this service */
   contexts?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   /** settings to configure git for a service */
@@ -5934,8 +5979,14 @@ export type ServiceTemplateAttributes = {
   helm?: InputMaybe<HelmConfigAttributes>;
   /** settings for service kustomization */
   kustomize?: InputMaybe<KustomizeAttributes>;
+  /** the name for this service (optional for managed namespaces) */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the namespace for this service (optional for managed namespaces) */
+  namespace?: InputMaybe<Scalars['String']['input']>;
   /** the id of a repository to source manifests for this service */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  /** attributes to configure sync settings for this service */
+  syncConfig?: InputMaybe<SyncConfigAttributes>;
   templated?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -6917,7 +6968,7 @@ export type UpdateGitRepositoryMutationVariables = Exact<{
 
 export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null };
 
-export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
+export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
 
 export type CreateGlobalServiceMutationVariables = Exact<{
   attributes: GlobalServiceAttributes;
@@ -6927,7 +6978,7 @@ export type CreateGlobalServiceMutationVariables = Exact<{
 }>;
 
 
-export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
 
 export type DeleteGlobalServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6935,6 +6986,23 @@ export type DeleteGlobalServiceMutationVariables = Exact<{
 
 
 export type DeleteGlobalServiceMutation = { __typename?: 'RootMutationType', deleteGlobalService?: { __typename?: 'GlobalService', id: string } | null };
+
+export type GetGlobalServicesQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetGlobalServicesQuery = { __typename?: 'RootQueryType', globalServices?: { __typename?: 'GlobalServiceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GlobalServiceEdge', node?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null } | null> | null } | null };
+
+export type GetServiceDataQueryVariables = Exact<{
+  serviceId: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetServiceDataQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, insertedAt?: string | null, updatedAt?: string | null, services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
 
 export type HttpConnectionFragment = { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null };
 
@@ -8382,6 +8450,7 @@ export const HelmChartVersionFragmentDoc = gql`
 export const GlobalServiceFragmentDoc = gql`
     fragment GlobalService on GlobalService {
   id
+  distro
   name
   provider {
     id
@@ -12045,6 +12114,109 @@ export function useDeleteGlobalServiceMutation(baseOptions?: Apollo.MutationHook
 export type DeleteGlobalServiceMutationHookResult = ReturnType<typeof useDeleteGlobalServiceMutation>;
 export type DeleteGlobalServiceMutationResult = Apollo.MutationResult<DeleteGlobalServiceMutation>;
 export type DeleteGlobalServiceMutationOptions = Apollo.BaseMutationOptions<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>;
+export const GetGlobalServicesDocument = gql`
+    query GetGlobalServices($first: Int, $after: String) {
+  globalServices(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...GlobalService
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${GlobalServiceFragmentDoc}`;
+
+/**
+ * __useGetGlobalServicesQuery__
+ *
+ * To run a query within a React component, call `useGetGlobalServicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGlobalServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetGlobalServicesQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useGetGlobalServicesQuery(baseOptions?: Apollo.QueryHookOptions<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>(GetGlobalServicesDocument, options);
+      }
+export function useGetGlobalServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>(GetGlobalServicesDocument, options);
+        }
+export function useGetGlobalServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>(GetGlobalServicesDocument, options);
+        }
+export type GetGlobalServicesQueryHookResult = ReturnType<typeof useGetGlobalServicesQuery>;
+export type GetGlobalServicesLazyQueryHookResult = ReturnType<typeof useGetGlobalServicesLazyQuery>;
+export type GetGlobalServicesSuspenseQueryHookResult = ReturnType<typeof useGetGlobalServicesSuspenseQuery>;
+export type GetGlobalServicesQueryResult = Apollo.QueryResult<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>;
+export const GetServiceDataDocument = gql`
+    query GetServiceData($serviceId: ID!, $first: Int, $after: String) {
+  globalService(id: $serviceId) {
+    ...GlobalService
+    services(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ServiceDeploymentsRow
+        }
+      }
+    }
+  }
+}
+    ${GlobalServiceFragmentDoc}
+${PageInfoFragmentDoc}
+${ServiceDeploymentsRowFragmentDoc}`;
+
+/**
+ * __useGetServiceDataQuery__
+ *
+ * To run a query within a React component, call `useGetServiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetServiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetServiceDataQuery({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useGetServiceDataQuery(baseOptions: Apollo.QueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+      }
+export function useGetServiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+        }
+export function useGetServiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+        }
+export type GetServiceDataQueryHookResult = ReturnType<typeof useGetServiceDataQuery>;
+export type GetServiceDataLazyQueryHookResult = ReturnType<typeof useGetServiceDataLazyQuery>;
+export type GetServiceDataSuspenseQueryHookResult = ReturnType<typeof useGetServiceDataSuspenseQuery>;
+export type GetServiceDataQueryResult = Apollo.QueryResult<GetServiceDataQuery, GetServiceDataQueryVariables>;
 export const UpdateDeploymentSettingsDocument = gql`
     mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
   updateDeploymentSettings(attributes: $attributes) {
@@ -15559,6 +15731,8 @@ export const namedOperations = {
     HelmRepositories: 'HelmRepositories',
     HelmRepository: 'HelmRepository',
     GitRepository: 'GitRepository',
+    GetGlobalServices: 'GetGlobalServices',
+    GetServiceData: 'GetServiceData',
     DeploymentSettings: 'DeploymentSettings',
     Pipelines: 'Pipelines',
     JobGate: 'JobGate',
