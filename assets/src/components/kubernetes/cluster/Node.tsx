@@ -40,7 +40,7 @@ import { ResourceList } from '../ResourceList'
 import { SubTitle } from '../../utils/SubTitle'
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 import { GaugeWrap } from '../../cluster/Gauges'
-import { usePodColumns } from '../workloads/Pods'
+import { usePodsColumns } from '../workloads/Pods'
 import Conditions from '../common/Conditions'
 import RadialBarChart from '../../utils/RadialBarChart'
 import { cpuFmt, roundToTwoPlaces } from '../../cluster/utils'
@@ -305,7 +305,7 @@ export function NodeContainerImages(): ReactElement {
 }
 export function NodePods(): ReactElement {
   const { name } = useParams()
-  const columns = usePodColumns()
+  const columns = usePodsColumns()
 
   // TODO: Pagination etc.
   return (

@@ -1,6 +1,11 @@
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  ChipList,
+  SidecarItem,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import moment from 'moment/moment'
 
 import {
   CronJobEventsQuery,
@@ -29,6 +34,7 @@ import { NAMESPACE_PARAM } from '../Kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResourceList } from '../ResourceList'
 import { useEventsColumns } from '../cluster/Events'
+import { SubTitle } from '../../cluster/nodes/SubTitle'
 
 import { getBreadcrumbs } from './CronJobs'
 import { useJobsColumns } from './Jobs'
@@ -80,7 +86,32 @@ export default function CronJob(): ReactElement {
   return (
     <ResourceDetails
       tabs={directory}
-      sidecar={<MetadataSidecar resource={cronJob} />}
+      sidecar={
+        <MetadataSidecar resource={cronJob}>
+          <SidecarItem heading="Images">
+            <ChipList
+              size="small"
+              limit={3}
+              values={cronJob?.containerImages ?? []}
+              emptyState={<div>None</div>}
+            />
+          </SidecarItem>
+          <SidecarItem heading="Schedule">{cronJob?.schedule}</SidecarItem>
+          <SidecarItem heading="Last schedule">
+            {moment(cronJob?.lastSchedule).format('lll')}
+          </SidecarItem>
+          <SidecarItem heading="Active jobs">{cronJob?.active}</SidecarItem>
+          <SidecarItem heading="Suspended">
+            {cronJob?.suspend ? 'true' : 'false'}
+          </SidecarItem>
+          <SidecarItem heading="Concurrency policy">
+            {cronJob?.concurrencyPolicy}
+          </SidecarItem>
+          <SidecarItem heading="Starting deadline seconds">
+            {cronJob?.startingDeadlineSeconds ?? 0}
+          </SidecarItem>
+        </MetadataSidecar>
+      }
     >
       <Outlet context={cronJob} />
     </ResourceDetails>
@@ -92,19 +123,52 @@ export function CronJobJobs(): ReactElement {
   const columns = useJobsColumns()
 
   return (
-    <ResourceList<JobListT, JobT, CronJobJobsQuery, CronJobJobsQueryVariables>
-      namespaced
-      columns={columns}
-      query={useCronJobJobsQuery}
-      queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as CronJobJobsQueryVariables,
-      }}
-      queryName="handleGetCronJobJobs"
-      itemsKey="jobs"
-    />
+    <>
+      <section>
+        <SubTitle>Active Jobs</SubTitle>
+        <ResourceList<
+          JobListT,
+          JobT,
+          CronJobJobsQuery,
+          CronJobJobsQueryVariables
+        >
+          namespaced
+          columns={columns}
+          query={useCronJobJobsQuery}
+          queryOptions={{
+            variables: {
+              namespace,
+              name,
+              active: 'true',
+            } as CronJobJobsQueryVariables,
+          }}
+          queryName="handleGetCronJobJobs"
+          itemsKey="jobs"
+        />
+      </section>
+      <section>
+        <SubTitle>Inactive Jobs</SubTitle>
+        <ResourceList<
+          JobListT,
+          JobT,
+          CronJobJobsQuery,
+          CronJobJobsQueryVariables
+        >
+          namespaced
+          columns={columns}
+          query={useCronJobJobsQuery}
+          queryOptions={{
+            variables: {
+              namespace,
+              name,
+              active: 'false',
+            } as CronJobJobsQueryVariables,
+          }}
+          queryName="handleGetCronJobJobs"
+          itemsKey="jobs"
+        />
+      </section>
+    </>
   )
 }
 

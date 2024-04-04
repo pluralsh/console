@@ -84,7 +84,7 @@ const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {
   cell: ({ getValue }) => getValue(),
 })
 
-export function usePodColumns(): Array<object> {
+export function usePodsColumns(): Array<object> {
   const { colName, colNamespace, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
 
@@ -105,7 +105,7 @@ export function usePodColumns(): Array<object> {
 
 export default function Pods() {
   const { cluster } = useKubernetesContext()
-  const columns = usePodColumns()
+  const columns = usePodsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

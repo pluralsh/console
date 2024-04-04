@@ -44,7 +44,7 @@ import { useServicesColumns } from '../discovery/Services'
 import { LabelSelector } from '../common/LabelSelector'
 
 import { getBreadcrumbs } from './ReplicationControllers'
-import { usePodColumns } from './Pods'
+import { usePodsColumns } from './Pods'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -132,7 +132,7 @@ export default function ReplicationController(): ReactElement {
 
 export function ReplicationControllerPods(): ReactElement {
   const { name, namespace } = useParams()
-  const columns = usePodColumns()
+  const columns = usePodsColumns()
 
   return (
     <ResourceList<

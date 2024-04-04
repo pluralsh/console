@@ -45,7 +45,7 @@ import {
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
-import { usePodColumns } from '../workloads/Pods'
+import { usePodsColumns } from '../workloads/Pods'
 import { ResourceList } from '../ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import { SubTitle } from '../../utils/SubTitle'
@@ -222,7 +222,7 @@ export function ServiceIngresses(): ReactElement {
 
 export function ServicePods(): ReactElement {
   const { name, namespace } = useParams()
-  const columns = usePodColumns()
+  const columns = usePodsColumns()
 
   return (
     <ResourceList<PodListT, PodT, ServicePodsQuery, ServicePodsQueryVariables>

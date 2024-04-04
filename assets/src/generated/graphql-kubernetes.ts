@@ -5091,6 +5091,7 @@ export type CronJobEventsQuery = { __typename?: 'Query', handleGetCronJobEvents?
 export type CronJobJobsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  active?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5831,7 +5832,7 @@ ${RollingUpdateStrategyFragmentDoc}
 ${StatusInfoFragmentDoc}`;
 export const JobStatusFragmentDoc = gql`
     fragment JobStatus on job_JobStatus {
-  conditions {
+  conditions @type(name: "common_Condition") {
     ...Condition
   }
   message
@@ -9003,8 +9004,8 @@ export type CronJobEventsLazyQueryHookResult = ReturnType<typeof useCronJobEvent
 export type CronJobEventsSuspenseQueryHookResult = ReturnType<typeof useCronJobEventsSuspenseQuery>;
 export type CronJobEventsQueryResult = Apollo.QueryResult<CronJobEventsQuery, CronJobEventsQueryVariables>;
 export const CronJobJobsDocument = gql`
-    query CronJobJobs($namespace: String!, $name: String!) {
-  handleGetCronJobJobs(namespace: $namespace, name: $name) @rest(type: "job_JobList", path: "cronjob/{args.namespace}/{args.name}/job") {
+    query CronJobJobs($namespace: String!, $name: String!, $active: String) {
+  handleGetCronJobJobs(namespace: $namespace, name: $name, active: $active) @rest(type: "job_JobList", path: "cronjob/{args.namespace}/{args.name}/job?active={args.active}") {
     ...JobList
   }
 }
@@ -9024,6 +9025,7 @@ export const CronJobJobsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      active: // value for 'active'
  *   },
  * });
  */

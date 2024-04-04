@@ -53,14 +53,15 @@ query CronJobEvents(
 query CronJobJobs(
   $namespace: String!
   $name: String!
-  $active: Boolean
+  $active: String
 ) {
   handleGetCronJobJobs(
     namespace: $namespace
     name: $name
+    active: $active
   ) @rest(
     type: "job_JobList"
-    path: "cronjob/{args.namespace}/{args.name}/job"
+    path: "cronjob/{args.namespace}/{args.name}/job?active={args.active}"
   ) {
     ...JobList
   }
