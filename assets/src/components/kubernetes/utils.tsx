@@ -1,11 +1,13 @@
 import uniqWith from 'lodash/uniqWith'
 import { ReactNode, useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
-import { ChipList, Sidecar, SidecarItem } from '@pluralsh/design-system'
+import { Chip, ChipList, Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Link, useParams } from 'react-router-dom'
 import moment from 'moment/moment'
 
 import yaml from 'js-yaml'
+
+import { capitalize } from 'lodash'
 
 import {
   Types_ListMeta as ListMetaT,
@@ -105,6 +107,32 @@ export function useDefaultColumns<
       ),
     }),
     [columnHelper]
+  )
+}
+
+const resourceConditionSeverity = {
+  true: 'success',
+  false: 'error',
+  unknown: 'warning',
+}
+
+export function ResourceReadyChip({
+  ready,
+}: {
+  ready: string | boolean | undefined
+}) {
+  if (ready === undefined) return undefined
+
+  const r = ready.toString()
+  const severity = resourceConditionSeverity[r.toLowerCase()] ?? 'info'
+
+  return (
+    <Chip
+      size="small"
+      severity={severity}
+    >
+      {capitalize(r)}
+    </Chip>
   )
 }
 

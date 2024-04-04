@@ -28,7 +28,11 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import {
+  MetadataSidecar,
+  ResourceReadyChip,
+  useKubernetesCluster,
+} from '../utils'
 import { NAMESPACE_PARAM } from '../Kubernetes'
 import {
   SERVICES_REL_PATH,
@@ -133,7 +137,7 @@ const columns = [
   columnHelper.accessor((endpoint) => endpoint?.ready, {
     id: 'ready',
     header: 'Ready',
-    cell: ({ getValue }) => (getValue() ? 'True' : 'False'),
+    cell: ({ getValue }) => <ResourceReadyChip ready={getValue()} />,
   }),
 ]
 

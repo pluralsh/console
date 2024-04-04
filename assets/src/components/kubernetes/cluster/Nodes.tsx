@@ -12,7 +12,11 @@ import {
   NodesQueryVariables,
   useNodesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
+import {
+  ResourceReadyChip,
+  getBaseBreadcrumbs,
+  useDefaultColumns,
+} from '../utils'
 import { ResourceList } from '../ResourceList'
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { Usage } from '../../cluster/TableElements'
@@ -23,8 +27,6 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { useKubernetesContext } from '../Kubernetes'
-
-import { NodeReadyChip } from './utils'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -43,7 +45,7 @@ const columnHelper = createColumnHelper<NodeT>()
 const colReady = columnHelper.accessor((node) => node?.ready, {
   id: 'ready',
   header: 'Ready',
-  cell: ({ getValue }) => <NodeReadyChip ready={getValue()} />,
+  cell: ({ getValue }) => <ResourceReadyChip ready={getValue()} />,
 })
 
 const colCpu = columnHelper.accessor((node) => node?.allocatedResources, {

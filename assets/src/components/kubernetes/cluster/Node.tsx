@@ -29,7 +29,11 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import {
+  MetadataSidecar,
+  ResourceReadyChip,
+  useKubernetesCluster,
+} from '../utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { ResourceList } from '../ResourceList'
@@ -45,7 +49,6 @@ import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
 import { getBreadcrumbs } from './Nodes'
 import { useEventsColumns } from './Events'
-import { NodeReadyChip } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -92,7 +95,7 @@ export default function Node(): ReactElement {
         <MetadataSidecar resource={node}>
           <SidecarItem heading="Ready">
             {/* TODO: Fix on the API side? It works in the list view. */}
-            <NodeReadyChip ready={node?.ready} />
+            <ResourceReadyChip ready={node?.ready} />
           </SidecarItem>
           {/* TODO: Fix on the API side? */}
           <SidecarItem heading="Phase">{node?.phase}</SidecarItem>
