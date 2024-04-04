@@ -5052,6 +5052,36 @@ export type CronJobsQueryVariables = Exact<{
 
 export type CronJobsQuery = { __typename?: 'Query', handleGetCronJobList?: { __typename?: 'cronjob_CronJobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type CronJobQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type CronJobQuery = { __typename?: 'Query', handleGetCronJobDetail?: { __typename?: 'cronjob_CronJobDetail', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, concurrencyPolicy: string, startingDeadlineSeconds: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
+
+export type CronJobEventsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type CronJobEventsQuery = { __typename?: 'Query', handleGetCronJobEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type CronJobJobsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type CronJobJobsQuery = { __typename?: 'Query', handleGetCronJobJobs?: { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> } | null };
+
+export type CronJobListFragment = { __typename?: 'cronjob_CronJobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
+
+export type CronJobFragment = { __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } };
+
+export type CronJobDetailFragment = { __typename?: 'cronjob_CronJobDetail', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, concurrencyPolicy: string, startingDeadlineSeconds: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } };
+
 export type DaemonSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5062,6 +5092,44 @@ export type DaemonSetsQueryVariables = Exact<{
 
 
 export type DaemonSetsQuery = { __typename?: 'Query', handleGetDaemonSetList?: { __typename?: 'daemonset_DaemonSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, daemonSets: Array<{ __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
+
+export type DaemonSetQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type DaemonSetQuery = { __typename?: 'Query', handleGetDaemonSetDetail?: { __typename?: 'daemonset_DaemonSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null } | null };
+
+export type DaemonSetEventsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type DaemonSetEventsQuery = { __typename?: 'Query', handleGetDaemonSetEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type DaemonSetPodsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type DaemonSetPodsQuery = { __typename?: 'Query', handleGetDaemonSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+
+export type DaemonSetServicesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type DaemonSetServicesQuery = { __typename?: 'Query', handleGetDaemonSetServices?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
+
+export type DaemonSetListFragment = { __typename?: 'daemonset_DaemonSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, daemonSets: Array<{ __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
+
+export type DaemonSetFragment = { __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
+
+export type DaemonSetDetailFragment = { __typename?: 'daemonset_DaemonSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null };
 
 export type DeploymentsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5125,7 +5193,39 @@ export type JobsQueryVariables = Exact<{
 }>;
 
 
-export type JobsQuery = { __typename?: 'Query', handleGetJobList?: { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
+export type JobsQuery = { __typename?: 'Query', handleGetJobList?: { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> } | null };
+
+export type JobQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type JobQuery = { __typename?: 'Query', handleGetJobDetail?: { __typename?: 'job_JobDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, completions: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null };
+
+export type JobEventsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type JobEventsQuery = { __typename?: 'Query', handleGetJobEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type JobPodsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type JobPodsQuery = { __typename?: 'Query', handleGetJobPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+
+export type JobListFragment = { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> };
+
+export type JobFragment = { __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } };
+
+export type JobDetailFragment = { __typename?: 'job_JobDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, completions: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } };
+
+export type JobStatusFragment = { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> };
 
 export type PodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5228,6 +5328,44 @@ export type ReplicationControllersQueryVariables = Exact<{
 
 export type ReplicationControllersQuery = { __typename?: 'Query', handleGetReplicationControllerList?: { __typename?: 'replicationcontroller_ReplicationControllerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
+export type ReplicationControllerQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ReplicationControllerQuery = { __typename?: 'Query', handleGetReplicationControllerDetail?: { __typename?: 'replicationcontroller_ReplicationControllerDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, labelSelector: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null };
+
+export type ReplicationControllerEventsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ReplicationControllerEventsQuery = { __typename?: 'Query', handleGetReplicationControllerEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type ReplicationControllerPodsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ReplicationControllerPodsQuery = { __typename?: 'Query', handleGetReplicationControllerPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+
+export type ReplicationControllerServicesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ReplicationControllerServicesQuery = { __typename?: 'Query', handleGetReplicationControllerServices?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
+
+export type ReplicationControllerListFragment = { __typename?: 'replicationcontroller_ReplicationControllerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
+
+export type ReplicationControllerFragment = { __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
+
+export type ReplicationControllerDetailFragment = { __typename?: 'replicationcontroller_ReplicationControllerDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, labelSelector: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
+
 export type StatefulSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5238,6 +5376,36 @@ export type StatefulSetsQueryVariables = Exact<{
 
 
 export type StatefulSetsQuery = { __typename?: 'Query', handleGetStatefulSetList?: { __typename?: 'statefulset_StatefulSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
+
+export type StatefulSetQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type StatefulSetQuery = { __typename?: 'Query', handleGetStatefulSetDetail?: { __typename?: 'statefulset_StatefulSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null };
+
+export type StatefulSetEventsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type StatefulSetEventsQuery = { __typename?: 'Query', handleGetStatefulSetEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type StatefulSetPodsQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type StatefulSetPodsQuery = { __typename?: 'Query', handleGetStatefulSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+
+export type StatefulSetListFragment = { __typename?: 'statefulset_StatefulSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
+
+export type StatefulSetFragment = { __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
+
+export type StatefulSetDetailFragment = { __typename?: 'statefulset_StatefulSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
 export const ListMetaFragmentDoc = gql`
     fragment ListMeta on types_ListMeta {
@@ -5430,6 +5598,110 @@ export const PersistentVolumeClaimListFragmentDoc = gql`
 }
     ${ListMetaFragmentDoc}
 ${PersistentVolumeClaimFragmentDoc}`;
+export const CronJobFragmentDoc = gql`
+    fragment CronJob on cronjob_CronJob {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  containerImages
+  schedule
+  suspend
+  active
+  lastSchedule
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+export const CronJobListFragmentDoc = gql`
+    fragment CronJobList on cronjob_CronJobList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  items @type(name: "cronjob_CronJob") {
+    ...CronJob
+  }
+}
+    ${ListMetaFragmentDoc}
+${CronJobFragmentDoc}`;
+export const CronJobDetailFragmentDoc = gql`
+    fragment CronJobDetail on cronjob_CronJobDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  containerImages
+  schedule
+  suspend
+  active
+  lastSchedule
+  concurrencyPolicy
+  startingDeadlineSeconds
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+export const DaemonSetFragmentDoc = gql`
+    fragment DaemonSet on daemonset_DaemonSet {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}`;
+export const DaemonSetListFragmentDoc = gql`
+    fragment DaemonSetList on daemonset_DaemonSetList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  daemonSets @type(name: "daemonset_DaemonSet") {
+    ...DaemonSet
+  }
+}
+    ${ListMetaFragmentDoc}
+${DaemonSetFragmentDoc}`;
+export const SelectorFragmentDoc = gql`
+    fragment Selector on v1_LabelSelector {
+  matchLabels
+  matchExpressions {
+    key
+    operator
+    values
+  }
+}
+    `;
+export const DaemonSetDetailFragmentDoc = gql`
+    fragment DaemonSetDetail on daemonset_DaemonSetDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  labelSelector {
+    ...Selector
+  }
+  initContainerImages
+  containerImages
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}
+${SelectorFragmentDoc}`;
 export const DeploymentFragmentDoc = gql`
     fragment Deployment on deployment_Deployment {
   typeMeta @type(name: "types_TypeMeta") {
@@ -5515,6 +5787,71 @@ ${PodInfoFragmentDoc}
 ${ConditionFragmentDoc}
 ${RollingUpdateStrategyFragmentDoc}
 ${StatusInfoFragmentDoc}`;
+export const JobStatusFragmentDoc = gql`
+    fragment JobStatus on job_JobStatus {
+  conditions {
+    ...Condition
+  }
+  message
+  status
+}
+    ${ConditionFragmentDoc}`;
+export const JobFragmentDoc = gql`
+    fragment Job on job_Job {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  jobStatus @type(name: "job_JobStatus") {
+    ...JobStatus
+  }
+  initContainerImages
+  containerImages
+  parallelism
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}
+${JobStatusFragmentDoc}`;
+export const JobListFragmentDoc = gql`
+    fragment JobList on job_JobList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  jobs @type(name: "job_Job") {
+    ...Job
+  }
+}
+    ${ListMetaFragmentDoc}
+${JobFragmentDoc}`;
+export const JobDetailFragmentDoc = gql`
+    fragment JobDetail on job_JobDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  jobStatus @type(name: "job_JobStatus") {
+    ...JobStatus
+  }
+  initContainerImages
+  containerImages
+  parallelism
+  completions
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}
+${JobStatusFragmentDoc}`;
 export const SecurityContextFragmentDoc = gql`
     fragment SecurityContext on v1_SecurityContext {
   windowsOptions {
@@ -5700,16 +6037,6 @@ export const ReplicaSetListFragmentDoc = gql`
 }
     ${ListMetaFragmentDoc}
 ${ReplicaSetFragmentDoc}`;
-export const SelectorFragmentDoc = gql`
-    fragment Selector on v1_LabelSelector {
-  matchLabels
-  matchExpressions {
-    key
-    operator
-    values
-  }
-}
-    `;
 export const HorizontalPodAutoscalerFragmentDoc = gql`
     fragment HorizontalPodAutoscaler on horizontalpodautoscaler_HorizontalPodAutoscaler {
   typeMeta @type(name: "types_TypeMeta") {
@@ -5765,6 +6092,97 @@ ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}
 ${SelectorFragmentDoc}
 ${HorizontalPodAutoscalerListFragmentDoc}`;
+export const ReplicationControllerFragmentDoc = gql`
+    fragment ReplicationController on replicationcontroller_ReplicationController {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}`;
+export const ReplicationControllerListFragmentDoc = gql`
+    fragment ReplicationControllerList on replicationcontroller_ReplicationControllerList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  replicationControllers @type(name: "replicationcontroller_ReplicationController") {
+    ...ReplicationController
+  }
+}
+    ${ListMetaFragmentDoc}
+${ReplicationControllerFragmentDoc}`;
+export const ReplicationControllerDetailFragmentDoc = gql`
+    fragment ReplicationControllerDetail on replicationcontroller_ReplicationControllerDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+  labelSelector
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}`;
+export const StatefulSetFragmentDoc = gql`
+    fragment StatefulSet on statefulset_StatefulSet {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}`;
+export const StatefulSetListFragmentDoc = gql`
+    fragment StatefulSetList on statefulset_StatefulSetList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  statefulSets @type(name: "statefulset_StatefulSet") {
+    ...StatefulSet
+  }
+}
+    ${ListMetaFragmentDoc}
+${StatefulSetFragmentDoc}`;
+export const StatefulSetDetailFragmentDoc = gql`
+    fragment StatefulSetDetail on statefulset_StatefulSetDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${PodInfoFragmentDoc}`;
 export const ClusterRolesDocument = gql`
     query ClusterRoles($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetClusterRoleList(
@@ -8353,28 +8771,11 @@ export const CronJobsDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "cronjob/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      containerImages
-      schedule
-      suspend
-      active
-      lastSchedule
-    }
+  ) @rest(type: "cronjob_CronJobList", path: "cronjob/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...CronJobList
   }
 }
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
+    ${CronJobListFragmentDoc}`;
 
 /**
  * __useCronJobsQuery__
@@ -8412,6 +8813,129 @@ export type CronJobsQueryHookResult = ReturnType<typeof useCronJobsQuery>;
 export type CronJobsLazyQueryHookResult = ReturnType<typeof useCronJobsLazyQuery>;
 export type CronJobsSuspenseQueryHookResult = ReturnType<typeof useCronJobsSuspenseQuery>;
 export type CronJobsQueryResult = Apollo.QueryResult<CronJobsQuery, CronJobsQueryVariables>;
+export const CronJobDocument = gql`
+    query CronJob($namespace: String!, $name: String!) {
+  handleGetCronJobDetail(namespace: $namespace, name: $name) @type(type: "cronjob_CronJobDetail", path: "cronjob/{args.namespace}/{args.name}") {
+    ...CronJobDetail
+  }
+}
+    ${CronJobDetailFragmentDoc}`;
+
+/**
+ * __useCronJobQuery__
+ *
+ * To run a query within a React component, call `useCronJobQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCronJobQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCronJobQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCronJobQuery(baseOptions: Apollo.QueryHookOptions<CronJobQuery, CronJobQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CronJobQuery, CronJobQueryVariables>(CronJobDocument, options);
+      }
+export function useCronJobLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CronJobQuery, CronJobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CronJobQuery, CronJobQueryVariables>(CronJobDocument, options);
+        }
+export function useCronJobSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CronJobQuery, CronJobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CronJobQuery, CronJobQueryVariables>(CronJobDocument, options);
+        }
+export type CronJobQueryHookResult = ReturnType<typeof useCronJobQuery>;
+export type CronJobLazyQueryHookResult = ReturnType<typeof useCronJobLazyQuery>;
+export type CronJobSuspenseQueryHookResult = ReturnType<typeof useCronJobSuspenseQuery>;
+export type CronJobQueryResult = Apollo.QueryResult<CronJobQuery, CronJobQueryVariables>;
+export const CronJobEventsDocument = gql`
+    query CronJobEvents($namespace: String!, $name: String!) {
+  handleGetCronJobEvents(namespace: $namespace, name: $name) @type(type: "common_EventList", path: "cronjob/{args.namespace}/{args.name}/event") {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useCronJobEventsQuery__
+ *
+ * To run a query within a React component, call `useCronJobEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCronJobEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCronJobEventsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCronJobEventsQuery(baseOptions: Apollo.QueryHookOptions<CronJobEventsQuery, CronJobEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CronJobEventsQuery, CronJobEventsQueryVariables>(CronJobEventsDocument, options);
+      }
+export function useCronJobEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CronJobEventsQuery, CronJobEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CronJobEventsQuery, CronJobEventsQueryVariables>(CronJobEventsDocument, options);
+        }
+export function useCronJobEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CronJobEventsQuery, CronJobEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CronJobEventsQuery, CronJobEventsQueryVariables>(CronJobEventsDocument, options);
+        }
+export type CronJobEventsQueryHookResult = ReturnType<typeof useCronJobEventsQuery>;
+export type CronJobEventsLazyQueryHookResult = ReturnType<typeof useCronJobEventsLazyQuery>;
+export type CronJobEventsSuspenseQueryHookResult = ReturnType<typeof useCronJobEventsSuspenseQuery>;
+export type CronJobEventsQueryResult = Apollo.QueryResult<CronJobEventsQuery, CronJobEventsQueryVariables>;
+export const CronJobJobsDocument = gql`
+    query CronJobJobs($namespace: String!, $name: String!) {
+  handleGetCronJobJobs(namespace: $namespace, name: $name) @type(type: "job_JobList", path: "cronjob/{args.namespace}/{args.name}/job") {
+    ...JobList
+  }
+}
+    ${JobListFragmentDoc}`;
+
+/**
+ * __useCronJobJobsQuery__
+ *
+ * To run a query within a React component, call `useCronJobJobsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCronJobJobsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCronJobJobsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCronJobJobsQuery(baseOptions: Apollo.QueryHookOptions<CronJobJobsQuery, CronJobJobsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CronJobJobsQuery, CronJobJobsQueryVariables>(CronJobJobsDocument, options);
+      }
+export function useCronJobJobsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CronJobJobsQuery, CronJobJobsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CronJobJobsQuery, CronJobJobsQueryVariables>(CronJobJobsDocument, options);
+        }
+export function useCronJobJobsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CronJobJobsQuery, CronJobJobsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CronJobJobsQuery, CronJobJobsQueryVariables>(CronJobJobsDocument, options);
+        }
+export type CronJobJobsQueryHookResult = ReturnType<typeof useCronJobJobsQuery>;
+export type CronJobJobsLazyQueryHookResult = ReturnType<typeof useCronJobJobsLazyQuery>;
+export type CronJobJobsSuspenseQueryHookResult = ReturnType<typeof useCronJobJobsSuspenseQuery>;
+export type CronJobJobsQueryResult = Apollo.QueryResult<CronJobJobsQuery, CronJobJobsQueryVariables>;
 export const DaemonSetsDocument = gql`
     query DaemonSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetDaemonSetList(
@@ -8420,29 +8944,11 @@ export const DaemonSetsDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "daemonset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    daemonSets {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      podInfo @type(name: "common_PodInfo") {
-        ...PodInfo
-      }
-      initContainerImages
-      containerImages
-    }
+  ) @rest(type: "daemonset_DaemonSetList", path: "daemonset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...DaemonSetList
   }
 }
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}`;
+    ${DaemonSetListFragmentDoc}`;
 
 /**
  * __useDaemonSetsQuery__
@@ -8480,6 +8986,170 @@ export type DaemonSetsQueryHookResult = ReturnType<typeof useDaemonSetsQuery>;
 export type DaemonSetsLazyQueryHookResult = ReturnType<typeof useDaemonSetsLazyQuery>;
 export type DaemonSetsSuspenseQueryHookResult = ReturnType<typeof useDaemonSetsSuspenseQuery>;
 export type DaemonSetsQueryResult = Apollo.QueryResult<DaemonSetsQuery, DaemonSetsQueryVariables>;
+export const DaemonSetDocument = gql`
+    query DaemonSet($namespace: String!, $name: String!) {
+  handleGetDaemonSetDetail(namespace: $namespace, daemonSet: $name) @rest(type: "daemonset_DaemonSetDetail", path: "daemonset/{args.namespace}/{args.daemonSet}") {
+    ...DaemonSetDetail
+  }
+}
+    ${DaemonSetDetailFragmentDoc}`;
+
+/**
+ * __useDaemonSetQuery__
+ *
+ * To run a query within a React component, call `useDaemonSetQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDaemonSetQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDaemonSetQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useDaemonSetQuery(baseOptions: Apollo.QueryHookOptions<DaemonSetQuery, DaemonSetQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DaemonSetQuery, DaemonSetQueryVariables>(DaemonSetDocument, options);
+      }
+export function useDaemonSetLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DaemonSetQuery, DaemonSetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DaemonSetQuery, DaemonSetQueryVariables>(DaemonSetDocument, options);
+        }
+export function useDaemonSetSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DaemonSetQuery, DaemonSetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DaemonSetQuery, DaemonSetQueryVariables>(DaemonSetDocument, options);
+        }
+export type DaemonSetQueryHookResult = ReturnType<typeof useDaemonSetQuery>;
+export type DaemonSetLazyQueryHookResult = ReturnType<typeof useDaemonSetLazyQuery>;
+export type DaemonSetSuspenseQueryHookResult = ReturnType<typeof useDaemonSetSuspenseQuery>;
+export type DaemonSetQueryResult = Apollo.QueryResult<DaemonSetQuery, DaemonSetQueryVariables>;
+export const DaemonSetEventsDocument = gql`
+    query DaemonSetEvents($namespace: String!, $name: String!) {
+  handleGetDaemonSetEvents(namespace: $namespace, daemonSet: $name) @rest(type: "common_EventList", path: "daemonset/{args.namespace}/{args.daemonSet}/event") {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useDaemonSetEventsQuery__
+ *
+ * To run a query within a React component, call `useDaemonSetEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDaemonSetEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDaemonSetEventsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useDaemonSetEventsQuery(baseOptions: Apollo.QueryHookOptions<DaemonSetEventsQuery, DaemonSetEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DaemonSetEventsQuery, DaemonSetEventsQueryVariables>(DaemonSetEventsDocument, options);
+      }
+export function useDaemonSetEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DaemonSetEventsQuery, DaemonSetEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DaemonSetEventsQuery, DaemonSetEventsQueryVariables>(DaemonSetEventsDocument, options);
+        }
+export function useDaemonSetEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DaemonSetEventsQuery, DaemonSetEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DaemonSetEventsQuery, DaemonSetEventsQueryVariables>(DaemonSetEventsDocument, options);
+        }
+export type DaemonSetEventsQueryHookResult = ReturnType<typeof useDaemonSetEventsQuery>;
+export type DaemonSetEventsLazyQueryHookResult = ReturnType<typeof useDaemonSetEventsLazyQuery>;
+export type DaemonSetEventsSuspenseQueryHookResult = ReturnType<typeof useDaemonSetEventsSuspenseQuery>;
+export type DaemonSetEventsQueryResult = Apollo.QueryResult<DaemonSetEventsQuery, DaemonSetEventsQueryVariables>;
+export const DaemonSetPodsDocument = gql`
+    query DaemonSetPods($namespace: String!, $name: String!) {
+  handleGetDaemonSetPods(namespace: $namespace, daemonSet: $name) @rest(type: "pod_PodList", path: "daemonset/{args.namespace}/{args.daemonSet}/pod") {
+    ...PodList
+  }
+}
+    ${PodListFragmentDoc}`;
+
+/**
+ * __useDaemonSetPodsQuery__
+ *
+ * To run a query within a React component, call `useDaemonSetPodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDaemonSetPodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDaemonSetPodsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useDaemonSetPodsQuery(baseOptions: Apollo.QueryHookOptions<DaemonSetPodsQuery, DaemonSetPodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DaemonSetPodsQuery, DaemonSetPodsQueryVariables>(DaemonSetPodsDocument, options);
+      }
+export function useDaemonSetPodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DaemonSetPodsQuery, DaemonSetPodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DaemonSetPodsQuery, DaemonSetPodsQueryVariables>(DaemonSetPodsDocument, options);
+        }
+export function useDaemonSetPodsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DaemonSetPodsQuery, DaemonSetPodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DaemonSetPodsQuery, DaemonSetPodsQueryVariables>(DaemonSetPodsDocument, options);
+        }
+export type DaemonSetPodsQueryHookResult = ReturnType<typeof useDaemonSetPodsQuery>;
+export type DaemonSetPodsLazyQueryHookResult = ReturnType<typeof useDaemonSetPodsLazyQuery>;
+export type DaemonSetPodsSuspenseQueryHookResult = ReturnType<typeof useDaemonSetPodsSuspenseQuery>;
+export type DaemonSetPodsQueryResult = Apollo.QueryResult<DaemonSetPodsQuery, DaemonSetPodsQueryVariables>;
+export const DaemonSetServicesDocument = gql`
+    query DaemonSetServices($namespace: String!, $name: String!) {
+  handleGetDaemonSetServices(namespace: $namespace, daemonSet: $name) @rest(type: "service_ServiceList", path: "daemonset/{args.namespace}/{args.daemonSet}/service") {
+    ...ServiceList
+  }
+}
+    ${ServiceListFragmentDoc}`;
+
+/**
+ * __useDaemonSetServicesQuery__
+ *
+ * To run a query within a React component, call `useDaemonSetServicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDaemonSetServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDaemonSetServicesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useDaemonSetServicesQuery(baseOptions: Apollo.QueryHookOptions<DaemonSetServicesQuery, DaemonSetServicesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DaemonSetServicesQuery, DaemonSetServicesQueryVariables>(DaemonSetServicesDocument, options);
+      }
+export function useDaemonSetServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DaemonSetServicesQuery, DaemonSetServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DaemonSetServicesQuery, DaemonSetServicesQueryVariables>(DaemonSetServicesDocument, options);
+        }
+export function useDaemonSetServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DaemonSetServicesQuery, DaemonSetServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DaemonSetServicesQuery, DaemonSetServicesQueryVariables>(DaemonSetServicesDocument, options);
+        }
+export type DaemonSetServicesQueryHookResult = ReturnType<typeof useDaemonSetServicesQuery>;
+export type DaemonSetServicesLazyQueryHookResult = ReturnType<typeof useDaemonSetServicesLazyQuery>;
+export type DaemonSetServicesSuspenseQueryHookResult = ReturnType<typeof useDaemonSetServicesSuspenseQuery>;
+export type DaemonSetServicesQueryResult = Apollo.QueryResult<DaemonSetServicesQuery, DaemonSetServicesQueryVariables>;
 export const DeploymentsDocument = gql`
     query Deployments($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetDeployments(
@@ -8702,29 +9372,11 @@ export const JobsDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "job/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    jobs {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      initContainerImages
-      containerImages
-      podInfo @type(name: "common_PodInfo") {
-        ...PodInfo
-      }
-    }
+  ) @rest(type: "job_JobList", path: "job/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...JobList
   }
 }
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}`;
+    ${JobListFragmentDoc}`;
 
 /**
  * __useJobsQuery__
@@ -8762,6 +9414,129 @@ export type JobsQueryHookResult = ReturnType<typeof useJobsQuery>;
 export type JobsLazyQueryHookResult = ReturnType<typeof useJobsLazyQuery>;
 export type JobsSuspenseQueryHookResult = ReturnType<typeof useJobsSuspenseQuery>;
 export type JobsQueryResult = Apollo.QueryResult<JobsQuery, JobsQueryVariables>;
+export const JobDocument = gql`
+    query Job($namespace: String!, $name: String!) {
+  handleGetJobDetail(namespace: $namespace, name: $name) @rest(type: "job_JobDetail", path: "job/{args.namespace}/{args.name}") {
+    ...JobDetail
+  }
+}
+    ${JobDetailFragmentDoc}`;
+
+/**
+ * __useJobQuery__
+ *
+ * To run a query within a React component, call `useJobQuery` and pass it any options that fit your needs.
+ * When your component renders, `useJobQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useJobQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useJobQuery(baseOptions: Apollo.QueryHookOptions<JobQuery, JobQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<JobQuery, JobQueryVariables>(JobDocument, options);
+      }
+export function useJobLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<JobQuery, JobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<JobQuery, JobQueryVariables>(JobDocument, options);
+        }
+export function useJobSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<JobQuery, JobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<JobQuery, JobQueryVariables>(JobDocument, options);
+        }
+export type JobQueryHookResult = ReturnType<typeof useJobQuery>;
+export type JobLazyQueryHookResult = ReturnType<typeof useJobLazyQuery>;
+export type JobSuspenseQueryHookResult = ReturnType<typeof useJobSuspenseQuery>;
+export type JobQueryResult = Apollo.QueryResult<JobQuery, JobQueryVariables>;
+export const JobEventsDocument = gql`
+    query JobEvents($namespace: String!, $name: String!) {
+  handleGetJobEvents(namespace: $namespace, name: $name) @rest(type: "common_EventList", path: "job/{args.namespace}/{args.name}/event") {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useJobEventsQuery__
+ *
+ * To run a query within a React component, call `useJobEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useJobEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useJobEventsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useJobEventsQuery(baseOptions: Apollo.QueryHookOptions<JobEventsQuery, JobEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<JobEventsQuery, JobEventsQueryVariables>(JobEventsDocument, options);
+      }
+export function useJobEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<JobEventsQuery, JobEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<JobEventsQuery, JobEventsQueryVariables>(JobEventsDocument, options);
+        }
+export function useJobEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<JobEventsQuery, JobEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<JobEventsQuery, JobEventsQueryVariables>(JobEventsDocument, options);
+        }
+export type JobEventsQueryHookResult = ReturnType<typeof useJobEventsQuery>;
+export type JobEventsLazyQueryHookResult = ReturnType<typeof useJobEventsLazyQuery>;
+export type JobEventsSuspenseQueryHookResult = ReturnType<typeof useJobEventsSuspenseQuery>;
+export type JobEventsQueryResult = Apollo.QueryResult<JobEventsQuery, JobEventsQueryVariables>;
+export const JobPodsDocument = gql`
+    query JobPods($namespace: String!, $name: String!) {
+  handleGetJobPods(namespace: $namespace, name: $name) @rest(type: "pod_PodList", path: "job/{args.namespace}/{args.name}/pod") {
+    ...PodList
+  }
+}
+    ${PodListFragmentDoc}`;
+
+/**
+ * __useJobPodsQuery__
+ *
+ * To run a query within a React component, call `useJobPodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useJobPodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useJobPodsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useJobPodsQuery(baseOptions: Apollo.QueryHookOptions<JobPodsQuery, JobPodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<JobPodsQuery, JobPodsQueryVariables>(JobPodsDocument, options);
+      }
+export function useJobPodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<JobPodsQuery, JobPodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<JobPodsQuery, JobPodsQueryVariables>(JobPodsDocument, options);
+        }
+export function useJobPodsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<JobPodsQuery, JobPodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<JobPodsQuery, JobPodsQueryVariables>(JobPodsDocument, options);
+        }
+export type JobPodsQueryHookResult = ReturnType<typeof useJobPodsQuery>;
+export type JobPodsLazyQueryHookResult = ReturnType<typeof useJobPodsLazyQuery>;
+export type JobPodsSuspenseQueryHookResult = ReturnType<typeof useJobPodsSuspenseQuery>;
+export type JobPodsQueryResult = Apollo.QueryResult<JobPodsQuery, JobPodsQueryVariables>;
 export const PodsDocument = gql`
     query Pods($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetPods(
@@ -9165,29 +9940,11 @@ export const ReplicationControllersDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "replicationcontroller/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    replicationControllers {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      initContainerImages
-      containerImages
-      podInfo @type(name: "common_PodInfo") {
-        ...PodInfo
-      }
-    }
+  ) @rest(type: "replicationcontroller_ReplicationControllerList", path: "replicationcontroller/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...ReplicationControllerList
   }
 }
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}`;
+    ${ReplicationControllerListFragmentDoc}`;
 
 /**
  * __useReplicationControllersQuery__
@@ -9225,6 +9982,182 @@ export type ReplicationControllersQueryHookResult = ReturnType<typeof useReplica
 export type ReplicationControllersLazyQueryHookResult = ReturnType<typeof useReplicationControllersLazyQuery>;
 export type ReplicationControllersSuspenseQueryHookResult = ReturnType<typeof useReplicationControllersSuspenseQuery>;
 export type ReplicationControllersQueryResult = Apollo.QueryResult<ReplicationControllersQuery, ReplicationControllersQueryVariables>;
+export const ReplicationControllerDocument = gql`
+    query ReplicationController($namespace: String!, $name: String!) {
+  handleGetReplicationControllerDetail(
+    namespace: $namespace
+    replicationController: $name
+  ) @rest(type: "replicationcontroller_ReplicationControllerDetail", path: "replicationcontroller/{args.namespace}/{args.replicationController}") {
+    ...ReplicationControllerDetail
+  }
+}
+    ${ReplicationControllerDetailFragmentDoc}`;
+
+/**
+ * __useReplicationControllerQuery__
+ *
+ * To run a query within a React component, call `useReplicationControllerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReplicationControllerQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReplicationControllerQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useReplicationControllerQuery(baseOptions: Apollo.QueryHookOptions<ReplicationControllerQuery, ReplicationControllerQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ReplicationControllerQuery, ReplicationControllerQueryVariables>(ReplicationControllerDocument, options);
+      }
+export function useReplicationControllerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicationControllerQuery, ReplicationControllerQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ReplicationControllerQuery, ReplicationControllerQueryVariables>(ReplicationControllerDocument, options);
+        }
+export function useReplicationControllerSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicationControllerQuery, ReplicationControllerQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ReplicationControllerQuery, ReplicationControllerQueryVariables>(ReplicationControllerDocument, options);
+        }
+export type ReplicationControllerQueryHookResult = ReturnType<typeof useReplicationControllerQuery>;
+export type ReplicationControllerLazyQueryHookResult = ReturnType<typeof useReplicationControllerLazyQuery>;
+export type ReplicationControllerSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerSuspenseQuery>;
+export type ReplicationControllerQueryResult = Apollo.QueryResult<ReplicationControllerQuery, ReplicationControllerQueryVariables>;
+export const ReplicationControllerEventsDocument = gql`
+    query ReplicationControllerEvents($namespace: String!, $name: String!) @rest(type: "common_EventList", path: "replicationcontroller/{args.namespace}/{args.statefulset}/event") {
+  handleGetReplicationControllerEvents(
+    namespace: $namespace
+    replicationController: $name
+  ) {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useReplicationControllerEventsQuery__
+ *
+ * To run a query within a React component, call `useReplicationControllerEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReplicationControllerEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReplicationControllerEventsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useReplicationControllerEventsQuery(baseOptions: Apollo.QueryHookOptions<ReplicationControllerEventsQuery, ReplicationControllerEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ReplicationControllerEventsQuery, ReplicationControllerEventsQueryVariables>(ReplicationControllerEventsDocument, options);
+      }
+export function useReplicationControllerEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicationControllerEventsQuery, ReplicationControllerEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ReplicationControllerEventsQuery, ReplicationControllerEventsQueryVariables>(ReplicationControllerEventsDocument, options);
+        }
+export function useReplicationControllerEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicationControllerEventsQuery, ReplicationControllerEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ReplicationControllerEventsQuery, ReplicationControllerEventsQueryVariables>(ReplicationControllerEventsDocument, options);
+        }
+export type ReplicationControllerEventsQueryHookResult = ReturnType<typeof useReplicationControllerEventsQuery>;
+export type ReplicationControllerEventsLazyQueryHookResult = ReturnType<typeof useReplicationControllerEventsLazyQuery>;
+export type ReplicationControllerEventsSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerEventsSuspenseQuery>;
+export type ReplicationControllerEventsQueryResult = Apollo.QueryResult<ReplicationControllerEventsQuery, ReplicationControllerEventsQueryVariables>;
+export const ReplicationControllerPodsDocument = gql`
+    query ReplicationControllerPods($namespace: String!, $name: String!) @rest(type: "pod_PodList", path: "replicationcontroller/{args.namespace}/{args.statefulset}/pod") {
+  handleGetReplicationControllerPods(
+    namespace: $namespace
+    replicationController: $name
+  ) {
+    ...PodList
+  }
+}
+    ${PodListFragmentDoc}`;
+
+/**
+ * __useReplicationControllerPodsQuery__
+ *
+ * To run a query within a React component, call `useReplicationControllerPodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReplicationControllerPodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReplicationControllerPodsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useReplicationControllerPodsQuery(baseOptions: Apollo.QueryHookOptions<ReplicationControllerPodsQuery, ReplicationControllerPodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ReplicationControllerPodsQuery, ReplicationControllerPodsQueryVariables>(ReplicationControllerPodsDocument, options);
+      }
+export function useReplicationControllerPodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicationControllerPodsQuery, ReplicationControllerPodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ReplicationControllerPodsQuery, ReplicationControllerPodsQueryVariables>(ReplicationControllerPodsDocument, options);
+        }
+export function useReplicationControllerPodsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicationControllerPodsQuery, ReplicationControllerPodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ReplicationControllerPodsQuery, ReplicationControllerPodsQueryVariables>(ReplicationControllerPodsDocument, options);
+        }
+export type ReplicationControllerPodsQueryHookResult = ReturnType<typeof useReplicationControllerPodsQuery>;
+export type ReplicationControllerPodsLazyQueryHookResult = ReturnType<typeof useReplicationControllerPodsLazyQuery>;
+export type ReplicationControllerPodsSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerPodsSuspenseQuery>;
+export type ReplicationControllerPodsQueryResult = Apollo.QueryResult<ReplicationControllerPodsQuery, ReplicationControllerPodsQueryVariables>;
+export const ReplicationControllerServicesDocument = gql`
+    query ReplicationControllerServices($namespace: String!, $name: String!) @rest(type: "service_ServiceList", path: "replicationcontroller/{args.namespace}/{args.statefulset}/services") {
+  handleGetReplicationControllerServices(
+    namespace: $namespace
+    replicationController: $name
+  ) {
+    ...ServiceList
+  }
+}
+    ${ServiceListFragmentDoc}`;
+
+/**
+ * __useReplicationControllerServicesQuery__
+ *
+ * To run a query within a React component, call `useReplicationControllerServicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReplicationControllerServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReplicationControllerServicesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useReplicationControllerServicesQuery(baseOptions: Apollo.QueryHookOptions<ReplicationControllerServicesQuery, ReplicationControllerServicesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ReplicationControllerServicesQuery, ReplicationControllerServicesQueryVariables>(ReplicationControllerServicesDocument, options);
+      }
+export function useReplicationControllerServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicationControllerServicesQuery, ReplicationControllerServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ReplicationControllerServicesQuery, ReplicationControllerServicesQueryVariables>(ReplicationControllerServicesDocument, options);
+        }
+export function useReplicationControllerServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicationControllerServicesQuery, ReplicationControllerServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ReplicationControllerServicesQuery, ReplicationControllerServicesQueryVariables>(ReplicationControllerServicesDocument, options);
+        }
+export type ReplicationControllerServicesQueryHookResult = ReturnType<typeof useReplicationControllerServicesQuery>;
+export type ReplicationControllerServicesLazyQueryHookResult = ReturnType<typeof useReplicationControllerServicesLazyQuery>;
+export type ReplicationControllerServicesSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerServicesSuspenseQuery>;
+export type ReplicationControllerServicesQueryResult = Apollo.QueryResult<ReplicationControllerServicesQuery, ReplicationControllerServicesQueryVariables>;
 export const StatefulSetsDocument = gql`
     query StatefulSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetStatefulSetList(
@@ -9233,29 +10166,11 @@ export const StatefulSetsDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    statefulSets {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      podInfo @type(name: "common_PodInfo") {
-        ...PodInfo
-      }
-      initContainerImages
-      containerImages
-    }
+  ) @rest(type: "statefulset_StatefulSet", path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...StatefulSetList
   }
 }
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}`;
+    ${StatefulSetListFragmentDoc}`;
 
 /**
  * __useStatefulSetsQuery__
@@ -9293,3 +10208,126 @@ export type StatefulSetsQueryHookResult = ReturnType<typeof useStatefulSetsQuery
 export type StatefulSetsLazyQueryHookResult = ReturnType<typeof useStatefulSetsLazyQuery>;
 export type StatefulSetsSuspenseQueryHookResult = ReturnType<typeof useStatefulSetsSuspenseQuery>;
 export type StatefulSetsQueryResult = Apollo.QueryResult<StatefulSetsQuery, StatefulSetsQueryVariables>;
+export const StatefulSetDocument = gql`
+    query StatefulSet($namespace: String!, $name: String!) {
+  handleGetStatefulSetDetail(namespace: $namespace, statefulset: $name) @rest(type: "statefulset_StatefulSetDetail", path: "statefulset/{args.namespace}/{args.statefulset}") {
+    ...StatefulSetDetail
+  }
+}
+    ${StatefulSetDetailFragmentDoc}`;
+
+/**
+ * __useStatefulSetQuery__
+ *
+ * To run a query within a React component, call `useStatefulSetQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStatefulSetQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStatefulSetQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useStatefulSetQuery(baseOptions: Apollo.QueryHookOptions<StatefulSetQuery, StatefulSetQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StatefulSetQuery, StatefulSetQueryVariables>(StatefulSetDocument, options);
+      }
+export function useStatefulSetLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StatefulSetQuery, StatefulSetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StatefulSetQuery, StatefulSetQueryVariables>(StatefulSetDocument, options);
+        }
+export function useStatefulSetSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StatefulSetQuery, StatefulSetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StatefulSetQuery, StatefulSetQueryVariables>(StatefulSetDocument, options);
+        }
+export type StatefulSetQueryHookResult = ReturnType<typeof useStatefulSetQuery>;
+export type StatefulSetLazyQueryHookResult = ReturnType<typeof useStatefulSetLazyQuery>;
+export type StatefulSetSuspenseQueryHookResult = ReturnType<typeof useStatefulSetSuspenseQuery>;
+export type StatefulSetQueryResult = Apollo.QueryResult<StatefulSetQuery, StatefulSetQueryVariables>;
+export const StatefulSetEventsDocument = gql`
+    query StatefulSetEvents($namespace: String!, $name: String!) @rest(type: "common_EventList", path: "statefulset/{args.namespace}/{args.statefulset}/event") {
+  handleGetStatefulSetEvents(namespace: $namespace, statefulset: $name) {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useStatefulSetEventsQuery__
+ *
+ * To run a query within a React component, call `useStatefulSetEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStatefulSetEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStatefulSetEventsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useStatefulSetEventsQuery(baseOptions: Apollo.QueryHookOptions<StatefulSetEventsQuery, StatefulSetEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StatefulSetEventsQuery, StatefulSetEventsQueryVariables>(StatefulSetEventsDocument, options);
+      }
+export function useStatefulSetEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StatefulSetEventsQuery, StatefulSetEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StatefulSetEventsQuery, StatefulSetEventsQueryVariables>(StatefulSetEventsDocument, options);
+        }
+export function useStatefulSetEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StatefulSetEventsQuery, StatefulSetEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StatefulSetEventsQuery, StatefulSetEventsQueryVariables>(StatefulSetEventsDocument, options);
+        }
+export type StatefulSetEventsQueryHookResult = ReturnType<typeof useStatefulSetEventsQuery>;
+export type StatefulSetEventsLazyQueryHookResult = ReturnType<typeof useStatefulSetEventsLazyQuery>;
+export type StatefulSetEventsSuspenseQueryHookResult = ReturnType<typeof useStatefulSetEventsSuspenseQuery>;
+export type StatefulSetEventsQueryResult = Apollo.QueryResult<StatefulSetEventsQuery, StatefulSetEventsQueryVariables>;
+export const StatefulSetPodsDocument = gql`
+    query StatefulSetPods($namespace: String!, $name: String!) {
+  handleGetStatefulSetPods(namespace: $namespace, statefulset: $name) @rest(type: "pod_PodList", path: "statefulset/{args.namespace}/{args.statefulset}/pod") {
+    ...PodList
+  }
+}
+    ${PodListFragmentDoc}`;
+
+/**
+ * __useStatefulSetPodsQuery__
+ *
+ * To run a query within a React component, call `useStatefulSetPodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStatefulSetPodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStatefulSetPodsQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useStatefulSetPodsQuery(baseOptions: Apollo.QueryHookOptions<StatefulSetPodsQuery, StatefulSetPodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StatefulSetPodsQuery, StatefulSetPodsQueryVariables>(StatefulSetPodsDocument, options);
+      }
+export function useStatefulSetPodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StatefulSetPodsQuery, StatefulSetPodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StatefulSetPodsQuery, StatefulSetPodsQueryVariables>(StatefulSetPodsDocument, options);
+        }
+export function useStatefulSetPodsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StatefulSetPodsQuery, StatefulSetPodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StatefulSetPodsQuery, StatefulSetPodsQueryVariables>(StatefulSetPodsDocument, options);
+        }
+export type StatefulSetPodsQueryHookResult = ReturnType<typeof useStatefulSetPodsQuery>;
+export type StatefulSetPodsLazyQueryHookResult = ReturnType<typeof useStatefulSetPodsLazyQuery>;
+export type StatefulSetPodsSuspenseQueryHookResult = ReturnType<typeof useStatefulSetPodsSuspenseQuery>;
+export type StatefulSetPodsQueryResult = Apollo.QueryResult<StatefulSetPodsQuery, StatefulSetPodsQueryVariables>;

@@ -1,0 +1,37 @@
+fragment ReplicationControllerList on replicationcontroller_ReplicationControllerList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  replicationControllers @type(name: "replicationcontroller_ReplicationController") {
+    ...ReplicationController
+  }
+}
+
+fragment ReplicationController on replicationcontroller_ReplicationController {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}
+
+fragment ReplicationControllerDetail on replicationcontroller_ReplicationControllerDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+  labelSelector
+}

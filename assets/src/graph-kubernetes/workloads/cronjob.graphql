@@ -13,23 +13,54 @@ query CronJobs(
     page: $page
   )
     @rest(
+      type: "cronjob_CronJobList"
       path: "cronjob/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      containerImages
-      schedule
-      suspend
-      active
-      lastSchedule
-    }
+    ...CronJobList
+  }
+}
+
+query CronJob(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetCronJobDetail(
+    namespace: $namespace
+    name: $name
+  ) @type(
+    type: "cronjob_CronJobDetail"
+    path: "cronjob/{args.namespace}/{args.name}"
+  ) {
+    ...CronJobDetail
+  }
+}
+
+query CronJobEvents(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetCronJobEvents(
+    namespace: $namespace
+    name: $name
+  ) @type(
+    type: "common_EventList"
+    path: "cronjob/{args.namespace}/{args.name}/event"
+  ) {
+    ...EventList
+  }
+}
+
+query CronJobJobs(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetCronJobJobs(
+    namespace: $namespace
+    name: $name
+  ) @type(
+    type: "job_JobList"
+    path: "cronjob/{args.namespace}/{args.name}/job"
+  ) {
+    ...JobList
   }
 }

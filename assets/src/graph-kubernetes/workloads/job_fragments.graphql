@@ -1,0 +1,53 @@
+fragment JobList on job_JobList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  jobs @type(name: "job_Job") {
+    ...Job
+  }
+}
+
+fragment Job on job_Job {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  jobStatus @type(name: "job_JobStatus") {
+    ...JobStatus
+  }
+  initContainerImages
+  containerImages
+  parallelism
+}
+
+fragment JobDetail on job_JobDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  jobStatus @type(name: "job_JobStatus") {
+    ...JobStatus
+  }
+  initContainerImages
+  containerImages
+  parallelism
+  completions
+}
+
+fragment JobStatus on job_JobStatus {
+  conditions {
+    ...Condition
+  }
+  message
+  status
+}

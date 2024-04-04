@@ -13,23 +13,54 @@ query Jobs(
     page: $page
   )
     @rest(
+      type: "job_JobList"
       path: "job/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    jobs {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      initContainerImages
-      containerImages
-      podInfo @type(name: "common_PodInfo") {
-        ...PodInfo
-      }
-    }
+    ...JobList
+  }
+}
+
+query Job(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetJobDetail(
+    namespace: $namespace
+    name: $name
+  ) @rest(
+    type: "job_JobDetail"
+    path: "job/{args.namespace}/{args.name}"
+  ) {
+    ...JobDetail
+  }
+}
+
+query JobEvents(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetJobEvents(
+    namespace: $namespace
+    name: $name
+  ) @rest(
+    type: "common_EventList"
+    path: "job/{args.namespace}/{args.name}/event"
+  ) {
+    ...EventList
+  }
+}
+
+query JobPods(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetJobPods(
+    namespace: $namespace
+    name: $name
+  ) @rest(
+    type: "pod_PodList"
+    path: "job/{args.namespace}/{args.name}/pod"
+  ) {
+    ...PodList
   }
 }

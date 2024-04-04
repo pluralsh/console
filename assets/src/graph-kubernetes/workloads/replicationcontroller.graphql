@@ -13,23 +13,70 @@ query ReplicationControllers(
     page: $page
   )
     @rest(
+      type: "replicationcontroller_ReplicationControllerList"
       path: "replicationcontroller/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    replicationControllers {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      initContainerImages
-      containerImages
-      podInfo @type(name: "common_PodInfo") {
-        ...PodInfo
-      }
-    }
+    ...ReplicationControllerList
+  }
+}
+
+query ReplicationController(
+  $namespace: String!
+  $name: String!
+) {
+  handleGetReplicationControllerDetail(
+    namespace: $namespace
+    replicationController: $name
+  )
+  @rest(
+    type: "replicationcontroller_ReplicationControllerDetail"
+    path: "replicationcontroller/{args.namespace}/{args.replicationController}"
+  ) {
+    ...ReplicationControllerDetail
+  }
+}
+
+query ReplicationControllerEvents(
+  $namespace: String!
+  $name: String!
+) @rest(
+  type: "common_EventList"
+  path: "replicationcontroller/{args.namespace}/{args.statefulset}/event"
+){
+  handleGetReplicationControllerEvents(
+    namespace: $namespace
+    replicationController: $name
+  ) {
+    ...EventList
+  }
+}
+
+query ReplicationControllerPods(
+  $namespace: String!
+  $name: String!
+) @rest(
+  type: "pod_PodList"
+  path: "replicationcontroller/{args.namespace}/{args.statefulset}/pod"
+){
+  handleGetReplicationControllerPods(
+    namespace: $namespace
+    replicationController: $name
+  ) {
+    ...PodList
+  }
+}
+
+query ReplicationControllerServices(
+  $namespace: String!
+  $name: String!
+) @rest(
+  type: "service_ServiceList"
+  path: "replicationcontroller/{args.namespace}/{args.statefulset}/services"
+){
+  handleGetReplicationControllerServices(
+    namespace: $namespace
+    replicationController: $name
+  ) {
+    ...ServiceList
   }
 }
