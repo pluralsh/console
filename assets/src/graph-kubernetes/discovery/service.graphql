@@ -81,3 +81,13 @@ query ServicePods($namespace: String!, $name: String!) {
     ...PodList
   }
 }
+
+query ServiceIngresses($namespace: String!, $name: String!) {
+  handleGetServiceIngressList(namespace: $namespace, service: $name)
+    @rest(
+      type: "ingress_IngressList"
+      path: "service/{args.namespace}/{args.service}/ingress"
+    ) {
+    ...IngressList
+  }
+}

@@ -4898,6 +4898,8 @@ export type IngressQueryVariables = Exact<{
 
 export type IngressQuery = { __typename?: 'Query', handleGetIngressDetail?: { __typename?: 'ingress_IngressDetail', hosts: Array<string | null>, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null>, spec: { __typename?: 'v1_IngressSpec', ingressClassName?: string | null, tls?: Array<{ __typename?: 'v1_IngressTLS', hosts?: Array<string | null> | null, secretName?: string | null } | null> | null, defaultBackend?: { __typename?: 'v1_IngressBackend', service?: { __typename?: 'v1_IngressServiceBackend', name: string, port?: { __typename?: 'v1_ServiceBackendPort', name?: string | null, number?: number | null } | null } | null, resource?: { __typename?: 'v1_TypedLocalObjectReference', name: string, apiGroup: string, kind: string } | null } | null, rules?: Array<{ __typename?: 'v1_IngressRule', host?: string | null, http?: { __typename?: 'v1_HTTPIngressRuleValue', paths: Array<{ __typename?: 'v1_HTTPIngressPath', path?: string | null, pathType: string, backend: { __typename?: 'v1_IngressBackend', service?: { __typename?: 'v1_IngressServiceBackend', name: string, port?: { __typename?: 'v1_ServiceBackendPort', name?: string | null, number?: number | null } | null } | null, resource?: { __typename?: 'v1_TypedLocalObjectReference', name: string, kind: string, apiGroup: string } | null } } | null> } | null } | null> | null }, status: { __typename?: 'v1_IngressStatus', loadBalancer?: { __typename?: 'v1_IngressLoadBalancerStatus', ingress?: Array<{ __typename?: 'v1_IngressLoadBalancerIngress', ports?: Array<{ __typename?: 'v1_IngressPortStatus', port: number, protocol: string, error?: string | null } | null> | null } | null> | null } | null } } | null };
 
+export type IngressListFragment = { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> };
+
 export type IngressClassesQueryVariables = Exact<{
   filterBy?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
@@ -4968,6 +4970,14 @@ export type ServicePodsQueryVariables = Exact<{
 
 
 export type ServicePodsQuery = { __typename?: 'Query', handleGetServicePods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+
+export type ServiceIngressesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ServiceIngressesQuery = { __typename?: 'Query', handleGetServiceIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
 
 export type ServiceListFragment = { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> };
 
@@ -5531,6 +5541,28 @@ export const EndpointFragmentDoc = gql`
   }
 }
     `;
+export const IngressListFragmentDoc = gql`
+    fragment IngressList on ingress_IngressList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  items {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    endpoints @type(name: "common_Endpoint") {
+      ...Endpoint
+    }
+    hosts
+  }
+}
+    ${ListMetaFragmentDoc}
+${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${EndpointFragmentDoc}`;
 export const ServiceListFragmentDoc = gql`
     fragment ServiceList on service_ServiceList {
   listMeta @type(name: "types_ListMeta") {
@@ -7736,28 +7768,11 @@ export const IngressesDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      endpoints @type(name: "common_Endpoint") {
-        ...Endpoint
-      }
-      hosts
-    }
+  ) @rest(type: "ingress_IngressList", path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...IngressList
   }
 }
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${EndpointFragmentDoc}`;
+    ${IngressListFragmentDoc}`;
 
 /**
  * __useIngressesQuery__
@@ -8377,6 +8392,47 @@ export type ServicePodsQueryHookResult = ReturnType<typeof useServicePodsQuery>;
 export type ServicePodsLazyQueryHookResult = ReturnType<typeof useServicePodsLazyQuery>;
 export type ServicePodsSuspenseQueryHookResult = ReturnType<typeof useServicePodsSuspenseQuery>;
 export type ServicePodsQueryResult = Apollo.QueryResult<ServicePodsQuery, ServicePodsQueryVariables>;
+export const ServiceIngressesDocument = gql`
+    query ServiceIngresses($namespace: String!, $name: String!) {
+  handleGetServiceIngressList(namespace: $namespace, service: $name) @rest(type: "ingress_IngressList", path: "service/{args.namespace}/{args.service}/ingress") {
+    ...IngressList
+  }
+}
+    ${IngressListFragmentDoc}`;
+
+/**
+ * __useServiceIngressesQuery__
+ *
+ * To run a query within a React component, call `useServiceIngressesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceIngressesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceIngressesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useServiceIngressesQuery(baseOptions: Apollo.QueryHookOptions<ServiceIngressesQuery, ServiceIngressesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceIngressesQuery, ServiceIngressesQueryVariables>(ServiceIngressesDocument, options);
+      }
+export function useServiceIngressesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceIngressesQuery, ServiceIngressesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceIngressesQuery, ServiceIngressesQueryVariables>(ServiceIngressesDocument, options);
+        }
+export function useServiceIngressesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceIngressesQuery, ServiceIngressesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceIngressesQuery, ServiceIngressesQueryVariables>(ServiceIngressesDocument, options);
+        }
+export type ServiceIngressesQueryHookResult = ReturnType<typeof useServiceIngressesQuery>;
+export type ServiceIngressesLazyQueryHookResult = ReturnType<typeof useServiceIngressesLazyQuery>;
+export type ServiceIngressesSuspenseQueryHookResult = ReturnType<typeof useServiceIngressesSuspenseQuery>;
+export type ServiceIngressesQueryResult = Apollo.QueryResult<ServiceIngressesQuery, ServiceIngressesQueryVariables>;
 export const PersistentVolumesDocument = gql`
     query PersistentVolumes($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetPersistentVolumeList(

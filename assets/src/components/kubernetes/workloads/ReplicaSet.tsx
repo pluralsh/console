@@ -1,5 +1,5 @@
 import { ReactElement, useMemo } from 'react'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { Outlet, useParams } from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,

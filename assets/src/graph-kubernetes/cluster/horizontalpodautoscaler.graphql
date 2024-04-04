@@ -13,10 +13,11 @@ query HorizontalPodAutoscalers(
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(
-    type: "horizontalpodautoscaler_HorizontalPodAutoscalerList"
-    path: "horizontalpodautoscaler/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-  ) {
+  )
+    @rest(
+      type: "horizontalpodautoscaler_HorizontalPodAutoscalerList"
+      path: "horizontalpodautoscaler/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
     ...HorizontalPodAutoscalerList
   }
 }
@@ -38,10 +39,11 @@ query HorizontalPodAutoscalersForResource(
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(
-    type: "horizontalpodautoscaler_HorizontalPodAutoscalerList"
-    path: "{args.kind}/{args.namespace}/{args.name}/horizontalpodautoscaler?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-  ) {
+  )
+    @rest(
+      type: "horizontalpodautoscaler_HorizontalPodAutoscalerList"
+      path: "{args.kind}/{args.namespace}/{args.name}/horizontalpodautoscaler?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
     ...HorizontalPodAutoscalerList
   }
 }

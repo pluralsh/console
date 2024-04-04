@@ -35,7 +35,7 @@ fragment ReplicaSetDetail on replicaset_ReplicaSetDetail {
     ...Selector
   }
   horizontalPodAutoscalerList
-  @type(name: "horizontalpodautoscaler_HorizontalPodAutoscalerList") {
+    @type(name: "horizontalpodautoscaler_HorizontalPodAutoscalerList") {
     ...HorizontalPodAutoscalerList
   }
   initContainerImages
