@@ -134,6 +134,11 @@ function useDirectory({ filtered = true }: { filtered?: boolean } = {}) {
         enabled: personaConfiguration?.all || config?.services,
       },
       {
+        path: GLOBAL_SERVICES_REL_PATH,
+        label: 'Global Services',
+        enabled: personaConfiguration?.all || config?.services,
+      },
+      {
         path: REPOS_REL_PATH,
         label: 'Repositories',
         enabled: personaConfiguration?.all || config?.repositories,
@@ -152,11 +157,6 @@ function useDirectory({ filtered = true }: { filtered?: boolean } = {}) {
         path: ADDONS_REL_PATH,
         label: 'Add-ons',
         enabled: personaConfiguration?.all || config?.addOns,
-      },
-      {
-        path: GLOBAL_SERVICES_REL_PATH,
-        label: 'Global Services',
-        enabled: personaConfiguration?.all || config?.services,
       },
     ]
 
