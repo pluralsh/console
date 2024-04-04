@@ -1,6 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
@@ -14,14 +13,12 @@ import {
 import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
 import { ResourceList } from '../ResourceList'
 import { UsageText } from '../../cluster/TableElements'
-
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   JOBS_REL_PATH,
   getConfigurationAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-
 import { useKubernetesContext } from '../Kubernetes'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
@@ -34,7 +31,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   },
   {
     label: 'jobs',
-    url: `${getConfigurationAbsPath(cluster?.id)}/${JOBS_REL_PATH}`,
+    url: `${getWorkloadsAbsPath(cluster?.id)}/${JOBS_REL_PATH}`,
   },
 ]
 
@@ -74,14 +71,11 @@ const colStatus = columnHelper.accessor((job) => job.podInfo, {
   cell: ({ getValue }) => <WorkloadStatusChip podInfo={getValue()} />,
 })
 
-export default function CronJobs() {
-  const { cluster } = useKubernetesContext()
-
-  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
-
+export function useJobsColumns(): Array<object> {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
-  const columns = useMemo(
+
+  return useMemo(
     () => [
       colName,
       colNamespace,
@@ -93,6 +87,13 @@ export default function CronJobs() {
     ],
     [colName, colNamespace, colLabels, colCreationTimestamp]
   )
+}
+
+export default function Jobs() {
+  const { cluster } = useKubernetesContext()
+  const columns = useJobsColumns()
+
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
     <ResourceList<JobListT, JobT, JobsQuery, JobsQueryVariables>

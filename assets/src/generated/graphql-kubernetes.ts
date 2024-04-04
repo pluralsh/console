@@ -8871,7 +8871,7 @@ export type CronJobsSuspenseQueryHookResult = ReturnType<typeof useCronJobsSuspe
 export type CronJobsQueryResult = Apollo.QueryResult<CronJobsQuery, CronJobsQueryVariables>;
 export const CronJobDocument = gql`
     query CronJob($namespace: String!, $name: String!) {
-  handleGetCronJobDetail(namespace: $namespace, name: $name) @type(type: "cronjob_CronJobDetail", path: "cronjob/{args.namespace}/{args.name}") {
+  handleGetCronJobDetail(namespace: $namespace, name: $name) @rest(type: "cronjob_CronJobDetail", path: "cronjob/{args.namespace}/{args.name}") {
     ...CronJobDetail
   }
 }
@@ -8912,7 +8912,7 @@ export type CronJobSuspenseQueryHookResult = ReturnType<typeof useCronJobSuspens
 export type CronJobQueryResult = Apollo.QueryResult<CronJobQuery, CronJobQueryVariables>;
 export const CronJobEventsDocument = gql`
     query CronJobEvents($namespace: String!, $name: String!) {
-  handleGetCronJobEvents(namespace: $namespace, name: $name) @type(type: "common_EventList", path: "cronjob/{args.namespace}/{args.name}/event") {
+  handleGetCronJobEvents(namespace: $namespace, name: $name) @rest(type: "common_EventList", path: "cronjob/{args.namespace}/{args.name}/event") {
     ...EventList
   }
 }
@@ -8953,7 +8953,7 @@ export type CronJobEventsSuspenseQueryHookResult = ReturnType<typeof useCronJobE
 export type CronJobEventsQueryResult = Apollo.QueryResult<CronJobEventsQuery, CronJobEventsQueryVariables>;
 export const CronJobJobsDocument = gql`
     query CronJobJobs($namespace: String!, $name: String!) {
-  handleGetCronJobJobs(namespace: $namespace, name: $name) @type(type: "job_JobList", path: "cronjob/{args.namespace}/{args.name}/job") {
+  handleGetCronJobJobs(namespace: $namespace, name: $name) @rest(type: "job_JobList", path: "cronjob/{args.namespace}/{args.name}/job") {
     ...JobList
   }
 }

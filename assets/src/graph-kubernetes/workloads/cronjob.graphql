@@ -27,7 +27,7 @@ query CronJob(
   handleGetCronJobDetail(
     namespace: $namespace
     name: $name
-  ) @type(
+  ) @rest(
     type: "cronjob_CronJobDetail"
     path: "cronjob/{args.namespace}/{args.name}"
   ) {
@@ -42,7 +42,7 @@ query CronJobEvents(
   handleGetCronJobEvents(
     namespace: $namespace
     name: $name
-  ) @type(
+  ) @rest(
     type: "common_EventList"
     path: "cronjob/{args.namespace}/{args.name}/event"
   ) {
@@ -53,11 +53,12 @@ query CronJobEvents(
 query CronJobJobs(
   $namespace: String!
   $name: String!
+  $active: Boolean
 ) {
   handleGetCronJobJobs(
     namespace: $namespace
     name: $name
-  ) @type(
+  ) @rest(
     type: "job_JobList"
     path: "cronjob/{args.namespace}/{args.name}/job"
   ) {

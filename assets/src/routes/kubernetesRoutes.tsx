@@ -82,7 +82,10 @@ import StatefulSet, {
 } from '../components/kubernetes/workloads/StatefulSet'
 import DaemonSet from '../components/kubernetes/workloads/DaemonSet'
 import Job from '../components/kubernetes/workloads/Job'
-import CronJob from '../components/kubernetes/workloads/CronJob'
+import CronJob, {
+  CronJobEvents,
+  CronJobJobs,
+} from '../components/kubernetes/workloads/CronJob'
 import ReplicationController, {
   ReplicationControllerEvents,
   ReplicationControllerPods,
@@ -481,10 +484,31 @@ export const kubernetesRoutes = [
     element={<Job />}
   />,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${CRON_JOBS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<CronJob />}
-  />,
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="jobs"
+        />
+      }
+    />
+    <Route
+      path="jobs"
+      element={<CronJobJobs />}
+    />
+    <Route
+      path="events"
+      element={<CronJobEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     path={`${KUBERNETES_ABS_PATH}/${REPLICATION_CONTROLLERS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<ReplicationController />}

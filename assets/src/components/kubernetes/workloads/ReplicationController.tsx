@@ -41,7 +41,6 @@ import { PodInfo } from '../common/PodInfo'
 import { ResourceList } from '../ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import { useServicesColumns } from '../discovery/Services'
-
 import { LabelSelector } from '../common/LabelSelector'
 
 import { getBreadcrumbs } from './ReplicationControllers'
