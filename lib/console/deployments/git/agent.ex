@@ -30,6 +30,8 @@ defmodule Console.Deployments.Git.Agent do
 
   def addons(pid), do: GenServer.call(pid, :addons, 30_000)
 
+  def sha(pid, ref), do: GenServer.call(pid, {:sha, ref}, 30_000)
+
   def kick(pid), do: send(pid, :pull)
 
   def start(%GitRepository{} = repo) do
@@ -76,6 +78,10 @@ defmodule Console.Deployments.Git.Agent do
     {:reply, {:ok, common ++ Enum.sort(rest)}, state}
   end
   def handle_call(:refs, _, state), do: {:reply, {:ok, []}, state}
+
+  def handle_call({:sha, ref}, _, %State{cache: cache} = state) do
+    {:reply, Cache.commit(cache, ref), state}
+  end
 
   def handle_call({:fetch, %Service.Git{ref: ref, folder: path}}, _, %State{cache: cache} = state) do
     case Cache.fetch(cache, ref, path) do

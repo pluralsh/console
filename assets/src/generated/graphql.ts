@@ -1880,6 +1880,60 @@ export type HttpIngressRule = {
   paths?: Maybe<Array<Maybe<IngressPath>>>;
 };
 
+export type InfrastructureStack = {
+  __typename?: 'InfrastructureStack';
+  /** whether to require approval */
+  approval?: Maybe<Scalars['Boolean']['output']>;
+  /** the cluster this stack runs on */
+  cluster?: Maybe<Cluster>;
+  /** version/image config for the tool you're using */
+  configuration: StackConfiguration;
+  /** environment variables for this stack */
+  environment?: Maybe<Array<Maybe<StackEnvironment>>>;
+  /** files bound to a run of this stack */
+  files?: Maybe<Array<Maybe<StackFile>>>;
+  /** reference w/in the repository where the IaC lives */
+  git: GitRef;
+  id?: Maybe<Scalars['ID']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** optional k8s job configuration for the job that will apply this stack */
+  jobSpec?: Maybe<JobGateSpec>;
+  /** the name of the stack */
+  name: Scalars['String']['output'];
+  /** the most recent output for this stack */
+  output?: Maybe<Array<Maybe<StackOutput>>>;
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the git repository you're sourcing IaC from */
+  repository?: Maybe<GitRepository>;
+  runs?: Maybe<StackRunConnection>;
+  /** the most recent state of this stack */
+  state?: Maybe<StackState>;
+  /** A type for the stack, specifies the tool to use to apply it */
+  type: StackType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+export type InfrastructureStackRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type InfrastructureStackConnection = {
+  __typename?: 'InfrastructureStackConnection';
+  edges?: Maybe<Array<Maybe<InfrastructureStackEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type InfrastructureStackEdge = {
+  __typename?: 'InfrastructureStackEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<InfrastructureStack>;
+};
+
 export type Ingress = {
   __typename?: 'Ingress';
   certificates?: Maybe<Array<Maybe<Certificate>>>;
@@ -3643,12 +3697,15 @@ export type RollingUpdate = {
 
 export type RootMutationType = {
   __typename?: 'RootMutationType';
+  addRunLogs?: Maybe<RunLogs>;
   approveBuild?: Maybe<Build>;
   /** approves an approval pipeline gate */
   approveGate?: Maybe<PipelineGate>;
+  approveStackRun?: Maybe<StackRun>;
   cancelBuild?: Maybe<Build>;
   /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
   cloneService?: Maybe<ServiceDeployment>;
+  completeStackRun?: Maybe<StackRun>;
   configureBackups?: Maybe<Cluster>;
   createAccessToken?: Maybe<AccessToken>;
   createAgentMigration?: Maybe<AgentMigration>;
@@ -3681,6 +3738,7 @@ export type RootMutationType = {
   createServiceAccount?: Maybe<User>;
   createServiceAccountToken?: Maybe<AccessToken>;
   createServiceDeployment?: Maybe<ServiceDeployment>;
+  createStack?: Maybe<InfrastructureStack>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
   deleteAccessToken?: Maybe<AccessToken>;
@@ -3708,6 +3766,7 @@ export type RootMutationType = {
   deleteScmConnection?: Maybe<ScmConnection>;
   deleteServiceContext?: Maybe<ServiceContext>;
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
+  deleteStack?: Maybe<InfrastructureStack>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteWebhook?: Maybe<Webhook>;
@@ -3769,16 +3828,25 @@ export type RootMutationType = {
   /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
   updateRole?: Maybe<Role>;
+  updateRunStep?: Maybe<RunStep>;
   updateScmConnection?: Maybe<ScmConnection>;
   updateServiceAccount?: Maybe<User>;
   /** updates only the components of a given service, to be sent after deploy operator syncs */
   updateServiceComponents?: Maybe<ServiceDeployment>;
   updateServiceDeployment?: Maybe<ServiceDeployment>;
   updateSmtp?: Maybe<Smtp>;
+  updateStack?: Maybe<InfrastructureStack>;
+  updateStackRun?: Maybe<StackRun>;
   updateUser?: Maybe<User>;
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
+};
+
+
+export type RootMutationTypeAddRunLogsArgs = {
+  attributes: RunLogAttributes;
+  stepId: Scalars['ID']['input'];
 };
 
 
@@ -3788,6 +3856,11 @@ export type RootMutationTypeApproveBuildArgs = {
 
 
 export type RootMutationTypeApproveGateArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeApproveStackRunArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -3803,6 +3876,12 @@ export type RootMutationTypeCloneServiceArgs = {
   clusterId: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeCompleteStackRunArgs = {
+  attributes: StackRunAttributes;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3966,6 +4045,11 @@ export type RootMutationTypeCreateServiceDeploymentArgs = {
 };
 
 
+export type RootMutationTypeCreateStackArgs = {
+  attributes: StackAttributes;
+};
+
+
 export type RootMutationTypeCreateUpgradePolicyArgs = {
   attributes: UpgradePolicyAttributes;
 };
@@ -4103,6 +4187,11 @@ export type RootMutationTypeDeleteServiceContextArgs = {
 
 
 export type RootMutationTypeDeleteServiceDeploymentArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteStackArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -4389,6 +4478,12 @@ export type RootMutationTypeUpdateRoleArgs = {
 };
 
 
+export type RootMutationTypeUpdateRunStepArgs = {
+  attributes: RunStepAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateScmConnectionArgs = {
   attributes: ScmConnectionAttributes;
   id: Scalars['ID']['input'];
@@ -4418,6 +4513,18 @@ export type RootMutationTypeUpdateServiceDeploymentArgs = {
 
 export type RootMutationTypeUpdateSmtpArgs = {
   smtp: SmtpInput;
+};
+
+
+export type RootMutationTypeUpdateStackArgs = {
+  attributes: StackAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateStackRunArgs = {
+  attributes: StackRunAttributes;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -4475,6 +4582,7 @@ export type RootQueryType = {
   clusterRestores?: Maybe<ClusterRestoreConnection>;
   /** the services deployed in the current cluster, to be polled by the deploy operator */
   clusterServices?: Maybe<Array<Maybe<ServiceDeployment>>>;
+  clusterStackRuns?: Maybe<StackRunConnection>;
   /** gets summary information for all healthy/unhealthy clusters in your fleet */
   clusterStatuses?: Maybe<Array<Maybe<ClusterStatusInfo>>>;
   /** a relay connection of all clusters visible to the current user */
@@ -4505,6 +4613,8 @@ export type RootQueryType = {
   groups?: Maybe<GroupConnection>;
   helmRepositories?: Maybe<Array<Maybe<HelmRepository>>>;
   helmRepository?: Maybe<HelmRepository>;
+  infrastructureStack?: Maybe<InfrastructureStack>;
+  infrastructureStacks?: Maybe<InfrastructureStackConnection>;
   ingress?: Maybe<Ingress>;
   installations?: Maybe<InstallationConnection>;
   invite?: Maybe<Invite>;
@@ -4580,6 +4690,7 @@ export type RootQueryType = {
   serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
+  stackRun?: Maybe<StackRun>;
   statefulSet?: Maybe<StatefulSet>;
   /** adds the ability to search/filter through all tag name/value pairs */
   tagPairs?: Maybe<TagConnection>;
@@ -4729,6 +4840,14 @@ export type RootQueryTypeClusterRestoresArgs = {
 };
 
 
+export type RootQueryTypeClusterStackRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypeClusterStatusesArgs = {
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
@@ -4871,6 +4990,19 @@ export type RootQueryTypeGroupsArgs = {
 export type RootQueryTypeHelmRepositoryArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeInfrastructureStackArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeInfrastructureStacksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -5317,6 +5449,11 @@ export type RootQueryTypeStackArgs = {
 };
 
 
+export type RootQueryTypeStackRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootQueryTypeStatefulSetArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -5424,6 +5561,36 @@ export type RouterFilterAttributes = {
 
 export type RouterSinkAttributes = {
   sinkId: Scalars['ID']['input'];
+};
+
+export type RunLogAttributes = {
+  logs: Scalars['String']['input'];
+};
+
+export type RunLogs = {
+  __typename?: 'RunLogs';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  logs: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type RunStep = {
+  __typename?: 'RunStep';
+  args?: Maybe<Array<Scalars['String']['output']>>;
+  cmd: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  index: Scalars['Int']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  logs?: Maybe<Array<Maybe<RunLogs>>>;
+  name: Scalars['String']['output'];
+  stage: StepStage;
+  status: StepStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type RunStepAttributes = {
+  status: StepStatus;
 };
 
 export type Runbook = {
@@ -6058,6 +6225,200 @@ export type Stack = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+export type StackAttributes = {
+  /** whether to require approval */
+  approval?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The cluster on which the terraform will be applied */
+  clusterId: Scalars['ID']['input'];
+  /** version/image config for the tool you're using */
+  configuration: StackConfigurationAttributes;
+  environemnt?: InputMaybe<Array<InputMaybe<StackEnvironmentAttributes>>>;
+  files?: InputMaybe<Array<InputMaybe<StackFileAttributes>>>;
+  /** reference w/in the repository where the IaC lives */
+  git: GitRefAttributes;
+  /** optional k8s job configuration for the job that will apply this stack */
+  jobSpec?: InputMaybe<GateJobAttributes>;
+  /** the name of the stack */
+  name: Scalars['String']['input'];
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  /** The repository to source IaC from */
+  repositoryId: Scalars['ID']['input'];
+  /** A type for the stack, specifies the tool to use to apply it */
+  type: StackType;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type StackConfiguration = {
+  __typename?: 'StackConfiguration';
+  /** optional custom image you might want to use */
+  image?: Maybe<Scalars['String']['output']>;
+  /** the semver of the tool you wish to use */
+  version: Scalars['String']['output'];
+};
+
+export type StackConfigurationAttributes = {
+  /** optional custom image you might want to use */
+  image?: InputMaybe<Scalars['String']['input']>;
+  /** the semver of the tool you wish to use */
+  version: Scalars['String']['input'];
+};
+
+export type StackEnvironment = {
+  __typename?: 'StackEnvironment';
+  name: Scalars['String']['output'];
+  secret?: Maybe<Scalars['Boolean']['output']>;
+  value: Scalars['String']['output'];
+};
+
+export type StackEnvironmentAttributes = {
+  name: Scalars['String']['input'];
+  secret?: InputMaybe<Scalars['Boolean']['input']>;
+  value: Scalars['String']['input'];
+};
+
+export type StackFile = {
+  __typename?: 'StackFile';
+  content: Scalars['String']['output'];
+  path: Scalars['String']['output'];
+};
+
+export type StackFileAttributes = {
+  content: Scalars['String']['input'];
+  path: Scalars['String']['input'];
+};
+
+export type StackOutput = {
+  __typename?: 'StackOutput';
+  name: Scalars['String']['output'];
+  secret?: Maybe<Scalars['Boolean']['output']>;
+  value: Scalars['String']['output'];
+};
+
+export type StackOutputAttributes = {
+  name: Scalars['String']['input'];
+  secret?: InputMaybe<Scalars['Boolean']['input']>;
+  value: Scalars['String']['input'];
+};
+
+export type StackRun = {
+  __typename?: 'StackRun';
+  /** whether to require approval */
+  approval?: Maybe<Scalars['Boolean']['output']>;
+  /** when this run was approved */
+  approvedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the approver of this job */
+  approver?: Maybe<User>;
+  /** the cluster this stack runs on */
+  cluster?: Maybe<Cluster>;
+  /** version/image config for the tool you're using */
+  configuration: StackConfiguration;
+  /** environment variables for this stack */
+  environment?: Maybe<Array<Maybe<StackEnvironment>>>;
+  /** a list of errors generated by the deployment operator */
+  errors?: Maybe<Array<Maybe<ServiceError>>>;
+  /** files bound to a run of this stack */
+  files?: Maybe<Array<Maybe<StackFile>>>;
+  /** reference w/in the repository where the IaC lives */
+  git: GitRef;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** optional k8s job configuration for the job that will apply this stack */
+  jobSpec?: Maybe<JobGateSpec>;
+  /** the name of the stack */
+  name: Scalars['String']['output'];
+  /** the most recent output for this stack */
+  output?: Maybe<Array<Maybe<StackOutput>>>;
+  /** the git repository you're sourcing IaC from */
+  repository?: Maybe<GitRepository>;
+  /** the most recent state of this stack */
+  state?: Maybe<StackState>;
+  /** The status of this run */
+  status: StackStatus;
+  /** The steps to perform when running this stack */
+  steps?: Maybe<Array<Maybe<RunStep>>>;
+  /** https url to fetch the latest tarball of stack IaC */
+  tarball: Scalars['String']['output'];
+  /** A type for the stack, specifies the tool to use to apply it */
+  type: StackType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type StackRunAttributes = {
+  /** Any errors detected when trying to run this stack */
+  errors?: InputMaybe<Array<InputMaybe<ServiceErrorAttributes>>>;
+  /** output generated by this run */
+  output?: InputMaybe<Array<InputMaybe<StackOutputAttributes>>>;
+  /** the state from this runs plan or apply */
+  state?: InputMaybe<StackStateAttributes>;
+  /** The status of this run */
+  status: StackStatus;
+};
+
+export type StackRunConnection = {
+  __typename?: 'StackRunConnection';
+  edges?: Maybe<Array<Maybe<StackRunEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type StackRunEdge = {
+  __typename?: 'StackRunEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<StackRun>;
+};
+
+export type StackState = {
+  __typename?: 'StackState';
+  id: Scalars['ID']['output'];
+  plan?: Maybe<Scalars['String']['output']>;
+  state?: Maybe<Array<Maybe<StackStateResource>>>;
+};
+
+export type StackStateAttributes = {
+  plan?: InputMaybe<Scalars['String']['input']>;
+  state?: InputMaybe<Array<InputMaybe<StackStateResourceAttributes>>>;
+};
+
+export type StackStateResource = {
+  __typename?: 'StackStateResource';
+  /** arbitrary configuration used to create the resource */
+  configuration?: Maybe<Scalars['Json']['output']>;
+  /** a string identifier for this resource, different tools will have different conventions */
+  identifier: Scalars['String']['output'];
+  /** identifiers this resource is linked to for graphing in the UI */
+  links?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the name of the resource within that type */
+  name: Scalars['String']['output'];
+  /** a string name of the resource type */
+  resource: Scalars['String']['output'];
+};
+
+export type StackStateResourceAttributes = {
+  /** arbitrary configuration used to create the resource */
+  configuration?: InputMaybe<Scalars['Json']['input']>;
+  /** a string identifier for this resource, different tools will have different conventions */
+  identifier: Scalars['String']['input'];
+  /** identifiers this resource is linked to for graphing in the UI */
+  links?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** the name of the resource within that type */
+  name: Scalars['String']['input'];
+  /** a string name of the resource type */
+  resource: Scalars['String']['input'];
+};
+
+export enum StackStatus {
+  Cancelled = 'CANCELLED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Queued = 'QUEUED',
+  Running = 'RUNNING',
+  Successful = 'SUCCESSFUL'
+}
+
+export enum StackType {
+  Ansible = 'ANSIBLE',
+  Terraform = 'TERRAFORM'
+}
+
 /** the configuration of a service within a pipeline stage, including optional promotion criteria */
 export type StageService = {
   __typename?: 'StageService';
@@ -6129,6 +6490,19 @@ export type StatusCondition = {
   status: Scalars['String']['output'];
   type: Scalars['String']['output'];
 };
+
+export enum StepStage {
+  Apply = 'APPLY',
+  Plan = 'PLAN',
+  Verify = 'VERIFY'
+}
+
+export enum StepStatus {
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Running = 'RUNNING',
+  Successful = 'SUCCESSFUL'
+}
 
 /** Advanced configuration of how to sync resources */
 export type SyncConfig = {
@@ -6968,7 +7342,7 @@ export type UpdateGitRepositoryMutationVariables = Exact<{
 
 export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null };
 
-export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
+export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
 
 export type CreateGlobalServiceMutationVariables = Exact<{
   attributes: GlobalServiceAttributes;
@@ -6978,7 +7352,7 @@ export type CreateGlobalServiceMutationVariables = Exact<{
 }>;
 
 
-export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
 
 export type DeleteGlobalServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6986,6 +7360,23 @@ export type DeleteGlobalServiceMutationVariables = Exact<{
 
 
 export type DeleteGlobalServiceMutation = { __typename?: 'RootMutationType', deleteGlobalService?: { __typename?: 'GlobalService', id: string } | null };
+
+export type GetGlobalServicesQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetGlobalServicesQuery = { __typename?: 'RootQueryType', globalServices?: { __typename?: 'GlobalServiceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GlobalServiceEdge', node?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, insertedAt?: string | null, updatedAt?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null } | null> | null } | null };
+
+export type GetServiceDataQueryVariables = Exact<{
+  serviceId: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetServiceDataQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, insertedAt?: string | null, updatedAt?: string | null, services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
 
 export type HttpConnectionFragment = { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null };
 
@@ -7106,6 +7497,14 @@ export type CreatePipelineContextMutationVariables = Exact<{
 
 
 export type CreatePipelineContextMutation = { __typename?: 'RootMutationType', createPipelineContext?: { __typename?: 'PipelineContext', id: string, context: Record<string, unknown>, insertedAt?: string | null, updatedAt?: string | null, pipeline?: { __typename?: 'Pipeline', id: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, pipelinePullRequests?: Array<{ __typename?: 'PipelinePullRequest', id: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
+
+export type ForceGateMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  state?: InputMaybe<GateState>;
+}>;
+
+
+export type ForceGateMutation = { __typename?: 'RootMutationType', forceGate?: { __typename?: 'PipelineGate', id: string, name: string, state: GateState, type: GateType, insertedAt?: string | null, updatedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, spec?: { __typename?: 'GateSpec', job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null };
 
 export type ProviderCredentialFragment = { __typename?: 'ProviderCredential', id: string, insertedAt?: string | null, kind: string, name: string, namespace: string, updatedAt?: string | null };
 
@@ -8433,6 +8832,7 @@ export const HelmChartVersionFragmentDoc = gql`
 export const GlobalServiceFragmentDoc = gql`
     fragment GlobalService on GlobalService {
   id
+  distro
   name
   provider {
     id
@@ -12096,6 +12496,109 @@ export function useDeleteGlobalServiceMutation(baseOptions?: Apollo.MutationHook
 export type DeleteGlobalServiceMutationHookResult = ReturnType<typeof useDeleteGlobalServiceMutation>;
 export type DeleteGlobalServiceMutationResult = Apollo.MutationResult<DeleteGlobalServiceMutation>;
 export type DeleteGlobalServiceMutationOptions = Apollo.BaseMutationOptions<DeleteGlobalServiceMutation, DeleteGlobalServiceMutationVariables>;
+export const GetGlobalServicesDocument = gql`
+    query GetGlobalServices($first: Int, $after: String) {
+  globalServices(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...GlobalService
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${GlobalServiceFragmentDoc}`;
+
+/**
+ * __useGetGlobalServicesQuery__
+ *
+ * To run a query within a React component, call `useGetGlobalServicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGlobalServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetGlobalServicesQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useGetGlobalServicesQuery(baseOptions?: Apollo.QueryHookOptions<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>(GetGlobalServicesDocument, options);
+      }
+export function useGetGlobalServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>(GetGlobalServicesDocument, options);
+        }
+export function useGetGlobalServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>(GetGlobalServicesDocument, options);
+        }
+export type GetGlobalServicesQueryHookResult = ReturnType<typeof useGetGlobalServicesQuery>;
+export type GetGlobalServicesLazyQueryHookResult = ReturnType<typeof useGetGlobalServicesLazyQuery>;
+export type GetGlobalServicesSuspenseQueryHookResult = ReturnType<typeof useGetGlobalServicesSuspenseQuery>;
+export type GetGlobalServicesQueryResult = Apollo.QueryResult<GetGlobalServicesQuery, GetGlobalServicesQueryVariables>;
+export const GetServiceDataDocument = gql`
+    query GetServiceData($serviceId: ID!, $first: Int, $after: String) {
+  globalService(id: $serviceId) {
+    ...GlobalService
+    services(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ServiceDeploymentsRow
+        }
+      }
+    }
+  }
+}
+    ${GlobalServiceFragmentDoc}
+${PageInfoFragmentDoc}
+${ServiceDeploymentsRowFragmentDoc}`;
+
+/**
+ * __useGetServiceDataQuery__
+ *
+ * To run a query within a React component, call `useGetServiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetServiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetServiceDataQuery({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useGetServiceDataQuery(baseOptions: Apollo.QueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+      }
+export function useGetServiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+        }
+export function useGetServiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+        }
+export type GetServiceDataQueryHookResult = ReturnType<typeof useGetServiceDataQuery>;
+export type GetServiceDataLazyQueryHookResult = ReturnType<typeof useGetServiceDataLazyQuery>;
+export type GetServiceDataSuspenseQueryHookResult = ReturnType<typeof useGetServiceDataSuspenseQuery>;
+export type GetServiceDataQueryResult = Apollo.QueryResult<GetServiceDataQuery, GetServiceDataQueryVariables>;
 export const UpdateDeploymentSettingsDocument = gql`
     mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
   updateDeploymentSettings(attributes: $attributes) {
@@ -12545,6 +13048,40 @@ export function useCreatePipelineContextMutation(baseOptions?: Apollo.MutationHo
 export type CreatePipelineContextMutationHookResult = ReturnType<typeof useCreatePipelineContextMutation>;
 export type CreatePipelineContextMutationResult = Apollo.MutationResult<CreatePipelineContextMutation>;
 export type CreatePipelineContextMutationOptions = Apollo.BaseMutationOptions<CreatePipelineContextMutation, CreatePipelineContextMutationVariables>;
+export const ForceGateDocument = gql`
+    mutation ForceGate($id: ID!, $state: GateState) {
+  forceGate(id: $id, state: $state) {
+    ...PipelineGate
+  }
+}
+    ${PipelineGateFragmentDoc}`;
+export type ForceGateMutationFn = Apollo.MutationFunction<ForceGateMutation, ForceGateMutationVariables>;
+
+/**
+ * __useForceGateMutation__
+ *
+ * To run a mutation, you first call `useForceGateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useForceGateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [forceGateMutation, { data, loading, error }] = useForceGateMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      state: // value for 'state'
+ *   },
+ * });
+ */
+export function useForceGateMutation(baseOptions?: Apollo.MutationHookOptions<ForceGateMutation, ForceGateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ForceGateMutation, ForceGateMutationVariables>(ForceGateDocument, options);
+      }
+export type ForceGateMutationHookResult = ReturnType<typeof useForceGateMutation>;
+export type ForceGateMutationResult = Apollo.MutationResult<ForceGateMutation>;
+export type ForceGateMutationOptions = Apollo.BaseMutationOptions<ForceGateMutation, ForceGateMutationVariables>;
 export const ClusterProvidersDocument = gql`
     query ClusterProviders {
   clusterProviders(first: 100) {
@@ -15610,6 +16147,8 @@ export const namedOperations = {
     HelmRepositories: 'HelmRepositories',
     HelmRepository: 'HelmRepository',
     GitRepository: 'GitRepository',
+    GetGlobalServices: 'GetGlobalServices',
+    GetServiceData: 'GetServiceData',
     DeploymentSettings: 'DeploymentSettings',
     Pipelines: 'Pipelines',
     JobGate: 'JobGate',
@@ -15691,6 +16230,7 @@ export const namedOperations = {
     deletePipeline: 'deletePipeline',
     ApproveGate: 'ApproveGate',
     CreatePipelineContext: 'CreatePipelineContext',
+    ForceGate: 'ForceGate',
     CreateClusterProvider: 'CreateClusterProvider',
     UpdateClusterProvider: 'UpdateClusterProvider',
     DeleteClusterProvider: 'DeleteClusterProvider',

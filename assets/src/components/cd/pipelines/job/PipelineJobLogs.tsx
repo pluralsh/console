@@ -1,6 +1,17 @@
 import { useMemo, useState } from 'react'
-import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
-import { useJobGateLogsQuery } from 'generated/graphql'
+import {
+  Banner,
+  Button,
+  FormField,
+  ListBoxItem,
+  Select,
+} from '@pluralsh/design-system'
+import {
+  GateState,
+  useForceGateMutation,
+  useJobGateLogsQuery,
+  useJobGateQuery,
+} from 'generated/graphql'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -40,7 +51,13 @@ export default function PipelineJobLogs() {
   const [selectedContainer, setSelectedContainer] = useState<string>(
     containers?.[0]?.name || ''
   )
+  const { data: jobGateData } = useJobGateQuery({
+    variables: { id },
+  })
+  const jobGateState = jobGateData?.pipelineGate?.state
 
+  const [forceGate, { loading: loadingForceGate, error: errorForceGate }] =
+    useForceGateMutation()
   const {
     data: currentData,
     previousData,
@@ -66,6 +83,46 @@ export default function PipelineJobLogs() {
     <ScrollablePage
       heading="Logs"
       scrollable={false}
+      headingContent={
+        jobGateState === GateState.Running ||
+        jobGateState === GateState.Pending ? (
+          <div
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: theme.spacing.medium,
+            }}
+          >
+            <Button
+              disabled={loadingForceGate}
+              onClick={() =>
+                forceGate({
+                  variables: {
+                    id,
+                    state: GateState.Open,
+                  },
+                })
+              }
+            >
+              Mark Successful
+            </Button>
+            <Button
+              disabled={loadingForceGate}
+              secondary
+              onClick={() =>
+                forceGate({
+                  variables: {
+                    id,
+                    state: GateState.Closed,
+                  },
+                })
+              }
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : null
+      }
     >
       <div
         css={{
@@ -75,6 +132,18 @@ export default function PipelineJobLogs() {
           height: '100%',
         }}
       >
+        {errorForceGate && (
+          <Banner
+            heading="Error forcing gate"
+            severity="error"
+            position="fixed"
+            top={80}
+            right={50}
+            zIndex={100}
+          >
+            {errorForceGate.message}
+          </Banner>
+        )}
         <div
           css={{
             display: 'flex',

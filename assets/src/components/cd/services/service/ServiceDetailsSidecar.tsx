@@ -8,13 +8,17 @@ import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { useMemo } from 'react'
 import {
+  AppIcon,
   Chip,
   DryRunIcon,
   ErrorIcon,
+  GitHubLogoIcon,
   Sidecar,
   SidecarItem,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
+
+import { getProviderIconUrl } from 'components/utils/Provider'
 
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
@@ -37,7 +41,17 @@ export function ServiceDetailsSidecar({
   if (!serviceDeployment) {
     return null
   }
-  const { id, name, status, cluster, git, helm } = serviceDeployment
+  const {
+    id,
+    name,
+    status,
+    cluster,
+    git,
+    helm,
+    namespace,
+    repository,
+    helmRepository,
+  } = serviceDeployment
 
   return (
     <div
@@ -62,6 +76,9 @@ export function ServiceDetailsSidecar({
       </div>
       <Sidecar>
         {name && <SidecarItem heading="Service name"> {name}</SidecarItem>}
+        {namespace && (
+          <SidecarItem heading="Service namespace"> {namespace}</SidecarItem>
+        )}
         <SidecarItem heading="Status">
           <div
             css={{
@@ -92,6 +109,25 @@ export function ServiceDetailsSidecar({
             <Chip severity="success">None</Chip>
           )}
         </SidecarItem>
+        {helmRepository && (
+          <SidecarItem heading="Helm Repository">
+            <div
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: theme.spacing.xsmall,
+              }}
+            >
+              <AppIcon
+                spacing="padding"
+                size="xxsmall"
+                icon={helm ? undefined : <GitHubLogoIcon />}
+                url={helm ? getProviderIconUrl('byok', theme.mode) : undefined}
+              />
+              {helmRepository.spec.url}
+            </div>
+          </SidecarItem>
+        )}
         {helm && <SidecarItem heading="Helm Chart">{helm.chart}</SidecarItem>}
         {helm && (
           <SidecarItem
@@ -101,6 +137,24 @@ export function ServiceDetailsSidecar({
             }}
           >
             {helm.version}
+          </SidecarItem>
+        )}
+        {repository && (
+          <SidecarItem heading="Git repository">
+            <div
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: theme.spacing.xsmall,
+              }}
+            >
+              <AppIcon
+                spacing="padding"
+                size="xxsmall"
+                icon={<GitHubLogoIcon />}
+              />
+              {repository.url}
+            </div>
           </SidecarItem>
         )}
         {git && <SidecarItem heading="Git folder">{git.folder}</SidecarItem>}

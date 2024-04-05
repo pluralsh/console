@@ -3,7 +3,18 @@ defmodule Console.Deployments.Policies do
   import Console.Deployments.Policies.Rbac, only: [rbac: 3]
   alias Console.Repo
   alias Console.Deployments.{Services, Clusters, Global}
-  alias Console.Schema.{User, Cluster, Service, PipelineGate, ClusterBackup, ClusterRestore, ManagedNamespace}
+  alias Console.Schema.{
+    User,
+    Cluster,
+    Service,
+    PipelineGate,
+    ClusterBackup,
+    ClusterRestore,
+    ManagedNamespace,
+    StackRun,
+    RunStep,
+    RunLog
+  }
 
   def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
     res = resource(res)
@@ -34,6 +45,18 @@ defmodule Console.Deployments.Policies do
       true -> :pass
       _ -> {:error, "this namespace is not bound to the cluster"}
     end
+  end
+
+  def can?(%Cluster{id: id}, %StackRun{cluster_id: id}, _), do: :pass
+
+  def can?(%Cluster{} = cluster, %RunStep{} = step, action) do
+    %{run: run} = Repo.preload(step, [:run])
+    can?(cluster, run, action)
+  end
+
+  def can?(%Cluster{} = cluster, %RunLog{} = step, action) do
+    %{step: step} = Repo.preload(step, [step: :run])
+    can?(cluster, step, action)
   end
 
   def can?(%Cluster{id: id}, %PipelineGate{cluster_id: id}, :read),

@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Global do
   use Console.Services.Base
   import Console.Deployments.Policies
+  import Console, only: [clean: 1]
   alias Console.PubSub
   alias Console.Deployments.Services
   alias Console.Services.Users
@@ -419,11 +420,6 @@ defmodule Console.Deployments.Global do
       d = Map.get(dest, key)
       clean(s) != clean(d)
     end)
-  end
-
-  defp clean(val) do
-    Console.mapify(val)
-    |> Console.remove_ids()
   end
 
   def notify({:ok, %GlobalService{} = svc}, :create, user),

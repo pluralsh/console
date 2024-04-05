@@ -511,6 +511,44 @@ defmodule Console.Factory do
     }
   end
 
+  def stack_factory do
+    %Schema.Stack{
+      name: sequence(:stacks, & "stack-#{&1}"),
+      status: :queued,
+      type: :terraform,
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+      git: %{ref: "main", folder: "terraform"},
+      repository: build(:git_repository),
+      cluster: build(:cluster),
+    }
+  end
+
+  def stack_run_factory do
+    %Schema.StackRun{
+      id: Piazza.Ecto.UUID.generate_monotonic(),
+      status: :queued,
+      type: :terraform,
+      dry_run: false,
+      git: %{ref: "main", folder: "terraform"},
+      repository: build(:git_repository),
+      cluster: build(:cluster),
+      stack: build(:stack),
+    }
+  end
+
+  def run_step_factory do
+    %Schema.RunStep{
+      name: sequence(:run_step, & "step-#{&1}"),
+      status: :pending,
+      stage: :plan,
+      cmd: "terraform",
+      args: ["plan"],
+      index: 0,
+      run: build(:stack_run)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

@@ -37,6 +37,18 @@ defmodule ConsoleWeb.GitControllerTest do
     end
   end
 
+  describe "#stack_tarball/2" do
+    test "it will download stack git content for valid deploy tokens", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      run = insert(:stack_run, repository: git, git: %{ref: "master", folder: "bin"})
+
+      conn
+      |> add_auth_headers(run.cluster)
+      |> get("/v1/git/stacks/tarballs", %{id: run.id})
+      |> response(200)
+    end
+  end
+
   describe "#proceed" do
     test "if a service has been marked it will 200", %{conn: conn} do
       svc = insert(:service, promotion: :proceed)

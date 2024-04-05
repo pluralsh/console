@@ -308,3 +308,9 @@ mutation CreatePipelineContext(
     }
   }
 }
+
+mutation ForceGate($id: ID!, $state: GateState) {
+  forceGate(id: $id, state: $state) {
+    ...PipelineGate
+  }
+}

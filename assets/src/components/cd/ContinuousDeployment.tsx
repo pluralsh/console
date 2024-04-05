@@ -18,6 +18,7 @@ import {
   CD_DEFAULT_ABS_PATH,
   CD_DEFAULT_REL_PATH,
   CLUSTERS_REL_PATH,
+  GLOBAL_SERVICES_REL_PATH,
   PIPELINES_REL_PATH,
   PROVIDERS_REL_PATH,
   REPOS_REL_PATH,
@@ -130,6 +131,11 @@ function useDirectory({ filtered = true }: { filtered?: boolean } = {}) {
       {
         path: SERVICES_REL_PATH,
         label: 'Services',
+        enabled: personaConfiguration?.all || config?.services,
+      },
+      {
+        path: GLOBAL_SERVICES_REL_PATH,
+        label: 'Global Services',
         enabled: personaConfiguration?.all || config?.services,
       },
       {

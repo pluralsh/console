@@ -130,3 +130,18 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.PipelineStageUpdated do
 
   def process(%{item: stage}), do: Pipelines.apply_pipeline_context(stage)
 end
+
+defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackCreated, Console.PubSub.StackUpdated] do
+  alias Console.Deployments.Stacks
+
+  def process(%{item: stack}), do: Stacks.poll(stack)
+end
+
+defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
+  alias Console.Deployments.Stacks
+
+  def process(%{item: run}) do
+    Stacks.get_stack!(run.stack_id)
+    |> Stacks.dequeue()
+  end
+end
