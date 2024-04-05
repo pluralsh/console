@@ -80,7 +80,11 @@ import StatefulSet, {
   StatefulSetEvents,
   StatefulSetPods,
 } from '../components/kubernetes/workloads/StatefulSet'
-import DaemonSet from '../components/kubernetes/workloads/DaemonSet'
+import DaemonSet, {
+  DaemonSetEvents,
+  DaemonSetPods,
+  DaemonSetServices,
+} from '../components/kubernetes/workloads/DaemonSet'
 import Job, {
   JobConditions,
   JobEvents,
@@ -482,10 +486,35 @@ export const kubernetesRoutes = [
     />
   </Route>,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${DAEMON_SETS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<DaemonSet />}
-  />,
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="pods"
+        />
+      }
+    />
+    <Route
+      path="pods"
+      element={<DaemonSetPods />}
+    />
+    <Route
+      path="services"
+      element={<DaemonSetServices />}
+    />
+    <Route
+      path="events"
+      element={<DaemonSetEvents />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   <Route
     path={`${KUBERNETES_ABS_PATH}/${JOBS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<Job />}

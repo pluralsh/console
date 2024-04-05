@@ -5,7 +5,7 @@ import { ChipList } from '@pluralsh/design-system'
 import { V1_LabelSelector as LabelSelectorT } from '../../../generated/graphql-kubernetes'
 
 interface LabelSelectorProps {
-  selector: LabelSelectorT
+  selector: Nullable<LabelSelectorT>
 }
 
 export function LabelSelector({ selector }: LabelSelectorProps): ReactNode {

@@ -1,5 +1,7 @@
 import { ReactElement } from 'react'
 
+import { Chip } from '@pluralsh/design-system'
+
 import {
   Pod_Container as ContainerT,
   Maybe,
@@ -45,7 +47,7 @@ function Container({ container }: ContainerProps): ReactElement {
     <ResourceInfoCard title={container.name}>
       <ResourceInfoCardSection>
         <ResourceInfoCardEntry heading="Image">
-          {container.image}
+          <Chip size="small">{container.image}</Chip>
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Container ID">
           {container.status?.containerID}

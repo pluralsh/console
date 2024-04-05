@@ -94,7 +94,16 @@ export function Pod(): ReactElement {
             </Link>
           </SidecarItem>
           <SidecarItem heading="Service account">
-            {pod?.serviceAccountName}
+            <Link
+              to={getResourceDetailsAbsPath(
+                clusterId,
+                'serviceaccount',
+                pod?.serviceAccountName,
+                pod?.objectMeta?.namespace
+              )}
+            >
+              <InlineLink>{pod?.serviceAccountName}</InlineLink>
+            </Link>
           </SidecarItem>
           <SidecarItem heading="Restart Count">
             {`${pod?.restartCount ?? 0}`}
