@@ -26,20 +26,20 @@ export type ReadinessT = (typeof Readiness)[ReadinessI]
 
 export const readinessToLabel = {
   [Readiness.Ready]: 'Ready',
+  [Readiness.Running]: 'Running',
   [Readiness.InProgress]: 'Pending',
   [Readiness.Failed]: 'Failed',
   [Readiness.Complete]: 'Complete',
   [Readiness.Completed]: 'Complete',
-  [Readiness.Running]: 'Ready',
 } as const satisfies Record<ReadinessT, string>
 
 export const readinessToContainerLabel = {
   [Readiness.Ready]: 'Running',
+  [Readiness.Running]: 'Running',
   [Readiness.InProgress]: 'Pending',
   [Readiness.Failed]: 'Failed',
   [Readiness.Complete]: 'Complete',
   [Readiness.Completed]: 'Complete',
-  [Readiness.Running]: 'Ready',
 } as const satisfies Record<ReadinessT, string>
 
 export const readinessToSeverity = {

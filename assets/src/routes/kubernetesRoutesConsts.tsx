@@ -1,4 +1,4 @@
-import * as pluralize from 'pluralize'
+import pluralize from 'pluralize'
 
 export const KUBERNETES_OPTIONAL_PARAM_CLUSTER = ':clusterId?'
 export const KUBERNETES_ABS_PATH = getKubernetesAbsPath(

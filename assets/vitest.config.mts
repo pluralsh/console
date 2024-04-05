@@ -12,6 +12,7 @@ export default defineConfig({
       dir: '../node_modules',
     },
     coverage: {
+      provider: 'istanbul',
       reportsDirectory: '../coverage',
     },
   },

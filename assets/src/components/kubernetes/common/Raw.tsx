@@ -1,7 +1,7 @@
 import { ReactElement, useMemo } from 'react'
 import { useMatch, useParams } from 'react-router-dom'
 import { Code } from '@pluralsh/design-system'
-import * as pluralize from 'pluralize'
+import pluralize from 'pluralize'
 
 import {
   NamespacedResourceQueryVariables,
