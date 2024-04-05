@@ -56,10 +56,14 @@ function Container({ container }: ContainerProps): ReactElement {
           {container.env && container.env.map((e) => <div>{e?.name}</div>)}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Commands">
-          {container.commands && container.commands.map((c) => <div>{c}</div>)}
+          {container.commands ? (
+            <Code>{container.commands.join('\n')}</Code>
+          ) : (
+            'None'
+          )}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Args">
-          {container.args && <Code>{container.args.join('\n')}</Code>}
+          {container.args ? <Code>{container.args.join('\n')}</Code> : 'None'}
         </ResourceInfoCardEntry>
         {/* <Entry heading="Volume mounts">{container.volumeMounts}</Entry> */}
       </ResourceInfoCardSection>
