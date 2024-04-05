@@ -59,9 +59,7 @@ function Container({ container }: ContainerProps): ReactElement {
           {container.commands && container.commands.map((c) => <div>{c}</div>)}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Args">
-          {container.args && (
-            <Code showHeader={false}>{container.args.join('\n')}</Code>
-          )}
+          {container.args && <Code>{container.args.join('\n')}</Code>}
         </ResourceInfoCardEntry>
         {/* <Entry heading="Volume mounts">{container.volumeMounts}</Entry> */}
       </ResourceInfoCardSection>
