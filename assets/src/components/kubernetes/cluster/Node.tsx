@@ -9,7 +9,6 @@ import {
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { filesize } from 'filesize'
-
 import { createColumnHelper } from '@tanstack/react-table'
 
 import {
@@ -44,7 +43,6 @@ import { usePodsColumns } from '../workloads/Pods'
 import Conditions from '../common/Conditions'
 import RadialBarChart from '../../utils/RadialBarChart'
 import { cpuFmt, roundToTwoPlaces } from '../../cluster/utils'
-
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
 import { getBreadcrumbs } from './Nodes'
