@@ -2,7 +2,8 @@ fragment ReplicationControllerList on replicationcontroller_ReplicationControlle
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
-  replicationControllers @type(name: "replicationcontroller_ReplicationController") {
+  replicationControllers
+    @type(name: "replicationcontroller_ReplicationController") {
     ...ReplicationController
   }
 }

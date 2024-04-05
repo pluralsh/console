@@ -18,7 +18,6 @@ import { UsageText } from '../../cluster/TableElements'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   REPLICATION_CONTROLLERS_REL_PATH,
-  getConfigurationAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 

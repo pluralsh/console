@@ -16,7 +16,6 @@ import { UsageText } from '../../cluster/TableElements'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   JOBS_REL_PATH,
-  getConfigurationAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useKubernetesContext } from '../Kubernetes'

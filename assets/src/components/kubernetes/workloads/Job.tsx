@@ -33,13 +33,8 @@ import { NAMESPACE_PARAM } from '../Kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResourceList } from '../ResourceList'
 import { useEventsColumns } from '../cluster/Events'
-
-import { PodInfo } from '../common/PodInfo'
-
 import Conditions from '../common/Conditions'
-
 import { ReadinessT } from '../../../utils/status'
-
 import { StatusChip } from '../../cluster/TableElements'
 
 import { getBreadcrumbs } from './Jobs'
