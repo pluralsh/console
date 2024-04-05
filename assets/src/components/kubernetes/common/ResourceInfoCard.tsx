@@ -167,17 +167,13 @@ export function ResourceInfoCardSection({
   }
 
   return (
-    <div
-      css={{
-        marginBottom: theme.spacing.medium,
-      }}
-    >
+    <div css={{ marginBottom: theme.spacing.medium }}>
       {heading && (
         <div
           css={{
-            ...theme.partials.text.subtitle1,
-            color: theme.colors['text-xlight'],
-            marginBottom: theme.spacing.medium,
+            ...theme.partials.text.subtitle2,
+            color: theme.colors['text-light'],
+            marginBottom: theme.spacing.small,
           }}
         >
           {heading}
