@@ -19,8 +19,6 @@ import Containers from '../common/Containers'
 import Conditions from '../common/Conditions'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { MetadataSidecar, useKubernetesCluster } from '../utils'
-import { StatusChip } from '../../cluster/TableElements'
-import { ReadinessT } from '../../../utils/status'
 import { ResourceList } from '../ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import { usePersistentVolumeClaimListColumns } from '../storage/PersistentVolumeClaims'
@@ -32,9 +30,7 @@ import {
 import { InlineLink } from '../../utils/typography/InlineLink'
 import ResourceOwner from '../common/ResourceOwner'
 import { NAMESPACE_PARAM } from '../Kubernetes'
-
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
-
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 
 import { getBreadcrumbs } from './Pods'

@@ -21,13 +21,11 @@ import {
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useKubernetesContext } from '../Kubernetes'
-
 import { numishSort } from '../../cluster/TableElements'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
-
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
 
-import { PodStatusChip, WorkloadImages, toReadiness } from './utils'
+import { WorkloadImages, toReadiness } from './utils'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -49,20 +47,21 @@ const colImages = columnHelper.accessor((pod) => pod?.containerImages, {
   cell: ({ getValue }) => <WorkloadImages images={getValue()} />,
 })
 
-const colStatus = columnHelper.accessor((pod) => pod, {
-  id: 'status',
-  header: 'Status',
-  cell: ({ getValue }) => {
-    const { status, warnings } = getValue()
-
-    return (
-      <PodStatusChip
-        status={status}
-        warnings={warnings}
-      />
-    )
-  },
-})
+// TODO: Remove?
+// const colStatus = columnHelper.accessor((pod) => pod, {
+//   id: 'status',
+//   header: 'Status',
+//   cell: ({ getValue }) => {
+//     const { status, warnings } = getValue()
+//
+//     return (
+//       <PodStatusChip
+//         status={status}
+//         warnings={warnings}
+//       />
+//     )
+//   },
+// })
 
 const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
   id: 'node',
