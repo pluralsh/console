@@ -3,7 +3,7 @@ name: console
 description: >-
   deploys the plural console and additional dependencies, for use in bring-your-own-kube setups
 appVersion: 0.9.2
-version: 0.2.0
+version: 0.3.0
 dependencies:
   - name: kas
     version: 0.0.6
@@ -13,7 +13,7 @@ dependencies:
     repository: file://../controller
   - name: kubernetes-dashboard
     alias: dashboard
-    version: 7.1.2
+    version: 7.2.0
     repository: https://kubernetes.github.io/dashboard
     condition: dashboard.enabled
   - name: flux2
