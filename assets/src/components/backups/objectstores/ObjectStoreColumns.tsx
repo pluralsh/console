@@ -14,6 +14,8 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { Confirm } from 'components/utils/Confirm'
 
+import { ColWithIcon } from 'components/utils/table/ColWithIcon'
+
 import {
   ObjectStore,
   useDeleteObjectStoreMutation,
@@ -21,8 +23,41 @@ import {
 import { Edge } from '../../../utils/graphql'
 
 import SaveObjectStoreModal from './SaveObjectStoreModal'
+import {
+  ObjectStoreCloudIcon,
+  getObjectStoreCloud,
+  objectStoreCloudToDisplayName,
+} from './utils'
 
 const columnHelper = createColumnHelper<Edge<ObjectStore>>()
+
+export const ColProvider = columnHelper.accessor(({ node }) => node, {
+  id: 'provider',
+  header: 'Provider',
+  meta: { gridTemplate: `240px` },
+  cell: ({ getValue }) => {
+    const cloud = getObjectStoreCloud(getValue())
+
+    if (!cloud) return null
+
+    return (
+      <ColWithIcon
+        truncateLeft
+        icon={<ObjectStoreCloudIcon cloud={cloud} />}
+      >
+        {objectStoreCloudToDisplayName[cloud]}
+      </ColWithIcon>
+    )
+  },
+})
+
+export const ColName = columnHelper.accessor(({ node }) => node?.name, {
+  id: 'name',
+  header: 'Storage name',
+  enableSorting: true,
+  enableGlobalFilter: true,
+  cell: ({ getValue }) => getValue(),
+})
 
 export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
   id: 'actions',
