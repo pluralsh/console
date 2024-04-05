@@ -85,6 +85,7 @@ export default function LogsDownloader({ query, repo }) {
         }
       >
         <FormField label="Time frame">
+          {/* @ts-ignore */}
           <Select
             aria-label="durations"
             selectedKey={selectedKey}

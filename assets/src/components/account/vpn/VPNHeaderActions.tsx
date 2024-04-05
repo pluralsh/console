@@ -101,10 +101,12 @@ function HeaderActionsUnstyled({
         <Select
           isDisabled={!isAvailable}
           label="All users"
+          // @ts-ignore
           selectionMode="multiple"
           selectedKeys={selectedKeys}
           isOpen={open}
           onOpenChange={(open) => setOpen(open)}
+          // @ts-ignore
           onSelectionChange={(selectedKeys) => setSelectedKeys(selectedKeys)}
           dropdownFooterFixed={
             <SelectAllFooterButton

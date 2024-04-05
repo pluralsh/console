@@ -145,6 +145,7 @@ function NodeGroup({
           required
           width="100%"
         >
+          {/* @ts-ignore */}
           <Select
             aria-label="node type"
             selectedKey={selectedRegion}

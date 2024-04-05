@@ -23,8 +23,8 @@ export function PluralErrorBoundary(
   props: Partial<ComponentProps<typeof ErrorBoundary>>
 ) {
   return (
-    // @ts-ignore
     <ErrorBoundary
+      // @ts-ignore
       onError={logError}
       {...props}
       {...(!props.fallbackRender && !props.fallback && !props.FallbackComponent

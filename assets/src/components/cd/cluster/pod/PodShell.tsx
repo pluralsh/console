@@ -71,6 +71,7 @@ export default function PodShell() {
         }}
       >
         <FormField label="Container">
+          {/* @ts-ignore */}
           <Select
             selectedKey={selected}
             onSelectionChange={(key) => setSelected(key)}

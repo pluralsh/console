@@ -21,6 +21,7 @@ export default function RangePicker({ duration, setDuration }: any) {
       stateRef={tabStateRef}
       stateProps={{
         orientation: 'horizontal',
+        // @ts-ignore
         selectedKey,
         onSelectionChange: setSelectedKey,
       }}

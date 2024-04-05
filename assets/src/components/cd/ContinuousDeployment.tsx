@@ -97,7 +97,6 @@ export const CD_BASE_CRUMBS = [
 
 function useCurrentTab() {
   const pathMatch = useMatch(`${CD_ABS_PATH}/:tab/*`)
-  // @ts-expect-error
   const tab = pathMatch?.params?.tab || ''
 
   return tab

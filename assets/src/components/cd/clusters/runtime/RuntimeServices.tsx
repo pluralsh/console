@@ -59,6 +59,7 @@ export default function RuntimeServices({
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',
+          // @ts-ignore
           selectedKey: tabKey,
           onSelectionChange: setTabKey,
         }}

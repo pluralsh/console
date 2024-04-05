@@ -130,6 +130,7 @@ export default function Runbook() {
       scrollable={selectedTab !== 'executions'}
       heading={
         <div>
+          {/* @ts-ignore */}
           <Select
             aria-label="dashboards"
             selectedKey={selectedKey}
