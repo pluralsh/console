@@ -136,6 +136,43 @@ const columns = [
     header: 'Host',
     cell: ({ getValue }) => getValue(),
   }),
+  columnHelper.accessor((rule) => rule?.path.path, {
+    id: 'path',
+    header: 'Path',
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor((rule) => rule?.path.pathType, {
+    id: 'pathType',
+    header: 'Path type',
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor((rule) => rule?.path.backend.service?.name, {
+    id: 'service',
+    header: 'Service',
+    cell: ({ getValue }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { clusterId, namespace } = useParams()
+
+      return (
+        <Link
+          to={getResourceDetailsAbsPath(
+            clusterId,
+            'service',
+            getValue() ?? '',
+            namespace
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <InlineLink>{getValue()}</InlineLink>
+        </Link>
+      )
+    },
+  }),
+  columnHelper.accessor((rule) => rule?.path.backend.service?.port, {
+    id: 'servicePort',
+    header: 'Service port',
+    cell: ({ getValue }) => Object.values(getValue() ?? {}).join(' '),
+  }),
   columnHelper.accessor((rule) => rule?.tlsSecretName, {
     id: 'tleSecret',
     header: 'TLS secret',
