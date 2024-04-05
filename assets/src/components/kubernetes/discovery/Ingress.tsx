@@ -1,6 +1,6 @@
 import React, { ReactElement, useMemo } from 'react'
 
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
 
 import {
   Card,
@@ -19,6 +19,7 @@ import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import {
   Common_EventList as EventListT,
   Common_Event as EventT,
+  V1_HttpIngressPath as HTTPIngressPathT,
   IngressEventsQuery,
   IngressEventsQueryVariables,
   IngressQueryVariables,
@@ -46,6 +47,8 @@ import { ResourceList } from '../ResourceList'
 import { SubTitle } from '../../utils/SubTitle'
 
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
+
+import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { getBreadcrumbs } from './Ingresses'
 import { Endpoints } from './utils'
@@ -119,7 +122,13 @@ export default function Ingress(): ReactElement {
   )
 }
 
-const columnHelper = createColumnHelper<IngressRuleT>()
+type IngressRuleFlatT = {
+  host?: string
+  path: HTTPIngressPathT
+  tlsSecretName?: string
+}
+
+const columnHelper = createColumnHelper<IngressRuleFlatT>()
 
 const columns = [
   columnHelper.accessor((rule) => rule?.host, {
@@ -127,12 +136,65 @@ const columns = [
     header: 'Host',
     cell: ({ getValue }) => getValue(),
   }),
+  columnHelper.accessor((rule) => rule?.tlsSecretName, {
+    id: 'tleSecret',
+    header: 'TLS secret',
+    cell: ({ getValue }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { clusterId, namespace } = useParams()
+
+      return (
+        <Link
+          to={getResourceDetailsAbsPath(
+            clusterId,
+            'secret',
+            getValue() ?? '',
+            namespace
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <InlineLink>{getValue()}</InlineLink>
+        </Link>
+      )
+    },
+  }),
 ]
 
 export function IngressInfo(): ReactElement {
   const theme = useTheme()
   const ingress = useOutletContext() as IngressT
   const backend = ingress.spec.defaultBackend
+
+  const tls = useMemo(() => {
+    const map = new Map<string, string | undefined>()
+
+    ingress.spec.tls?.forEach(
+      (spec) =>
+        spec?.hosts?.forEach((host) => {
+          if (host) map.set(host, spec.secretName ?? undefined)
+        })
+    )
+
+    return map
+  }, [ingress.spec.tls])
+
+  const rules = useMemo(
+    () =>
+      (ingress.spec.rules ?? [])
+        .map(
+          (rule) =>
+            rule?.http?.paths.map(
+              (specPath) =>
+                ({
+                  host: rule.host || '',
+                  path: specPath,
+                  tlsSecretName: rule.host ? tls.get(rule.host) || '' : '',
+                }) as IngressRuleFlatT
+            )
+        )
+        .flat(),
+    [ingress.spec.rules, tls]
+  )
 
   return (
     <>
@@ -173,7 +235,7 @@ export function IngressInfo(): ReactElement {
       <section>
         <SubTitle>Rules</SubTitle>
         <Table
-          data={ingress.spec.rules ?? []}
+          data={rules ?? []}
           columns={columns}
           css={{
             maxHeight: '500px',
