@@ -13,7 +13,13 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNullish } from '@apollo/client/cache/inmemory/helpers'
-import { Card } from '@pluralsh/design-system'
+import {
+  Card,
+  CheckIcon,
+  Chip,
+  CloseIcon,
+  IconFrame,
+} from '@pluralsh/design-system'
 import isArray from 'lodash/isArray'
 
 const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
@@ -239,7 +245,12 @@ export function ResourceInfoCardEntry({
           },
         }}
       >
-        {isBoolean && (children ? 'true' : 'false')}
+        {isBoolean && (
+          <IconFrame
+            size="small"
+            icon={children ? <CheckIcon /> : <CloseIcon />}
+          />
+        )}
         {!isBoolean && children}
       </span>
     </div>
