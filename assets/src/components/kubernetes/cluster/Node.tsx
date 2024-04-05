@@ -71,7 +71,7 @@ export default function Node(): ReactElement {
     } as NodeQueryVariables,
   })
 
-  const node = data?.handleGetNodeDetail
+  const node = data?.handleGetNodeDetail as NodeT
 
   useSetBreadcrumbs(
     useMemo(
@@ -97,8 +97,6 @@ export default function Node(): ReactElement {
             {/* TODO: Fix on the API side? It works in the list view. */}
             <ResourceReadyChip ready={node?.ready} />
           </SidecarItem>
-          {/* TODO: Fix on the API side? */}
-          <SidecarItem heading="Phase">{node?.phase}</SidecarItem>
           <SidecarItem heading="Unschedulable">
             {node?.unschedulable ? 'True' : 'False'}
           </SidecarItem>
