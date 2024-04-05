@@ -103,7 +103,9 @@ import CronJob, {
   CronJobJobs,
 } from '../components/kubernetes/workloads/CronJob'
 import IngressClass from '../components/kubernetes/discovery/IngressClass'
-import NetworkPolicy from '../components/kubernetes/discovery/NetworkPolicy'
+import NetworkPolicy, {
+  NetworkPolicyInfo,
+} from '../components/kubernetes/discovery/NetworkPolicy'
 import PersistentVolumeClaim from '../components/kubernetes/storage/PersistentVolumeClaim'
 import StorageClass, {
   StorageClassPersistentVolumes,
@@ -653,10 +655,18 @@ export const kubernetesRoutes = [
     />
   </Route>,
   <Route
-    index
     path={`${KUBERNETES_ABS_PATH}/${NETWORK_POLICIES_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
     element={<NetworkPolicy />}
-  />,
+  >
+    <Route
+      path=""
+      element={<NetworkPolicyInfo />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
   // Storage
   <Route
     path={`${KUBERNETES_ABS_PATH}/${PERSISTENT_VOLUME_CLAIMS_REL_PATH}/${NAMESPACED_RESOURCE_DETAILS_REL_PATH}`}
