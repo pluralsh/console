@@ -14,7 +14,7 @@ import {
   usePodQuery,
 } from '../../../generated/graphql-kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { SubTitle } from '../../cluster/nodes/SubTitle'
+import { SubTitle } from '../../utils/SubTitle'
 import Containers from '../common/Containers'
 import Conditions from '../common/Conditions'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'

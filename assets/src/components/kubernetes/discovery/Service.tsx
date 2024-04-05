@@ -48,7 +48,7 @@ import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { usePodsColumns } from '../workloads/Pods'
 import { ResourceList } from '../ResourceList'
 import { useEventsColumns } from '../cluster/Events'
-import { SubTitle } from '../../cluster/nodes/SubTitle'
+import { SubTitle } from '../../utils/SubTitle'
 
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 

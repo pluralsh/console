@@ -34,7 +34,8 @@ import { NAMESPACE_PARAM } from '../Kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResourceList } from '../ResourceList'
 import { useEventsColumns } from '../cluster/Events'
-import { SubTitle } from '../../cluster/nodes/SubTitle'
+
+import { SubTitle } from '../../utils/SubTitle'
 
 import { getBreadcrumbs } from './CronJobs'
 import { useJobsColumns } from './Jobs'
