@@ -23,7 +23,6 @@ import {
   IngressEventsQuery,
   IngressEventsQueryVariables,
   IngressQueryVariables,
-  V1_IngressRule as IngressRuleT,
   Ingress_IngressDetail as IngressT,
   useIngressEventsQuery,
   useIngressQuery,

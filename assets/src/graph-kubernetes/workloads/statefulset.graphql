@@ -12,55 +12,40 @@ query StatefulSets(
     itemsPerPage: $itemsPerPage
     page: $page
   )
-  @rest(
-    type: "statefulset_StatefulSetList"
-    path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-  ) {
+    @rest(
+      type: "statefulset_StatefulSetList"
+      path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
     ...StatefulSetList
   }
 }
 
-query StatefulSet(
-  $namespace: String!
-  $name: String!
-) {
-  handleGetStatefulSetDetail(
-    namespace: $namespace
-    statefulset: $name
-  ) @rest(
-    type: "statefulset_StatefulSetDetail"
-    path: "statefulset/{args.namespace}/{args.statefulset}"
-  ){
+query StatefulSet($namespace: String!, $name: String!) {
+  handleGetStatefulSetDetail(namespace: $namespace, statefulset: $name)
+    @rest(
+      type: "statefulset_StatefulSetDetail"
+      path: "statefulset/{args.namespace}/{args.statefulset}"
+    ) {
     ...StatefulSetDetail
   }
 }
 
-query StatefulSetEvents(
-  $namespace: String!
-  $name: String!
-) {
-  handleGetStatefulSetEvents(
-    namespace: $namespace
-    statefulset: $name
-  ) @rest(
-    type: "common_EventList"
-    path: "statefulset/{args.namespace}/{args.statefulset}/event"
-  ) {
+query StatefulSetEvents($namespace: String!, $name: String!) {
+  handleGetStatefulSetEvents(namespace: $namespace, statefulset: $name)
+    @rest(
+      type: "common_EventList"
+      path: "statefulset/{args.namespace}/{args.statefulset}/event"
+    ) {
     ...EventList
   }
 }
 
-query StatefulSetPods(
-  $namespace: String!
-  $name: String!
-) {
-  handleGetStatefulSetPods(
-    namespace: $namespace
-    statefulset: $name
-  ) @rest(
-    type: "pod_PodList"
-    path: "statefulset/{args.namespace}/{args.statefulset}/pod"
-  ) {
+query StatefulSetPods($namespace: String!, $name: String!) {
+  handleGetStatefulSetPods(namespace: $namespace, statefulset: $name)
+    @rest(
+      type: "pod_PodList"
+      path: "statefulset/{args.namespace}/{args.statefulset}/pod"
+    ) {
     ...PodList
   }
 }

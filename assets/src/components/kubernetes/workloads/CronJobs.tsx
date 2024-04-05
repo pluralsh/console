@@ -18,7 +18,6 @@ import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   CRON_JOBS_REL_PATH,
-  getConfigurationAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 

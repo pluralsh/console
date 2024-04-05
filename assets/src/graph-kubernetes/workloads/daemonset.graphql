@@ -20,62 +20,42 @@ query DaemonSets(
   }
 }
 
-query DaemonSet(
-  $namespace: String!
-  $name: String!
-) {
-  handleGetDaemonSetDetail(
-    namespace: $namespace
-    daemonSet: $name
-  ) @rest(
-    type: "daemonset_DaemonSetDetail"
-    path: "daemonset/{args.namespace}/{args.daemonSet}"
-  ) {
+query DaemonSet($namespace: String!, $name: String!) {
+  handleGetDaemonSetDetail(namespace: $namespace, daemonSet: $name)
+    @rest(
+      type: "daemonset_DaemonSetDetail"
+      path: "daemonset/{args.namespace}/{args.daemonSet}"
+    ) {
     ...DaemonSetDetail
   }
 }
 
-query DaemonSetEvents(
-  $namespace: String!
-  $name: String!
-) {
-  handleGetDaemonSetEvents(
-    namespace: $namespace
-    daemonSet: $name
-  ) @rest(
-    type: "common_EventList"
-    path: "daemonset/{args.namespace}/{args.daemonSet}/event"
-  ) {
+query DaemonSetEvents($namespace: String!, $name: String!) {
+  handleGetDaemonSetEvents(namespace: $namespace, daemonSet: $name)
+    @rest(
+      type: "common_EventList"
+      path: "daemonset/{args.namespace}/{args.daemonSet}/event"
+    ) {
     ...EventList
   }
 }
 
-query DaemonSetPods(
-  $namespace: String!
-  $name: String!
-) {
-  handleGetDaemonSetPods(
-    namespace: $namespace
-    daemonSet: $name
-  ) @rest(
-    type: "pod_PodList"
-    path: "daemonset/{args.namespace}/{args.daemonSet}/pod"
-  ) {
+query DaemonSetPods($namespace: String!, $name: String!) {
+  handleGetDaemonSetPods(namespace: $namespace, daemonSet: $name)
+    @rest(
+      type: "pod_PodList"
+      path: "daemonset/{args.namespace}/{args.daemonSet}/pod"
+    ) {
     ...PodList
   }
 }
 
-query DaemonSetServices(
-  $namespace: String!
-  $name: String!
-) {
-  handleGetDaemonSetServices(
-    namespace: $namespace
-    daemonSet: $name
-  ) @rest(
-    type: "service_ServiceList"
-    path: "daemonset/{args.namespace}/{args.daemonSet}/service"
-  ) {
+query DaemonSetServices($namespace: String!, $name: String!) {
+  handleGetDaemonSetServices(namespace: $namespace, daemonSet: $name)
+    @rest(
+      type: "service_ServiceList"
+      path: "daemonset/{args.namespace}/{args.daemonSet}/service"
+    ) {
     ...ServiceList
   }
 }

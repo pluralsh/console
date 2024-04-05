@@ -101,10 +101,10 @@ query Ingress($name: String!, $namespace: String!) {
 
 query IngressEvents($namespace: String!, $name: String!) {
   handleGetIngressEvent(namespace: $namespace, ingress: $name)
-  @rest(
-    type: "common_EventList"
-    path: "ingress/{args.namespace}/{args.ingress}/event"
-  ) {
+    @rest(
+      type: "common_EventList"
+      path: "ingress/{args.namespace}/{args.ingress}/event"
+    ) {
     ...EventList
   }
 }

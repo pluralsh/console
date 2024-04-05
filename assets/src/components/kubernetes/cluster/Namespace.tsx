@@ -1,5 +1,10 @@
 import { ReactElement, useMemo } from 'react'
-import { SidecarItem, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  Code,
+  SidecarItem,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
@@ -95,7 +100,7 @@ const rqColumns = [
   rqColumnHelper.accessor((rq) => rq?.statusList, {
     id: 'statusList',
     header: 'Status list',
-    cell: ({ getValue }) => JSON.stringify(getValue()),
+    cell: ({ getValue }) => <Code>{JSON.stringify(getValue())}</Code>,
   }),
 ]
 

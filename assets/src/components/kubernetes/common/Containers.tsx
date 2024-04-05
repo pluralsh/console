@@ -1,6 +1,6 @@
 import { ReactElement } from 'react'
 
-import { Chip } from '@pluralsh/design-system'
+import { Chip, Code } from '@pluralsh/design-system'
 
 import {
   Pod_Container as ContainerT,
@@ -56,10 +56,14 @@ function Container({ container }: ContainerProps): ReactElement {
           {container.env && container.env.map((e) => <div>{e?.name}</div>)}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Commands">
-          {container.commands && container.commands.map((c) => <div>{c}</div>)}
+          {container.commands ? (
+            <Code>{container.commands.join('\n')}</Code>
+          ) : (
+            'None'
+          )}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Args">
-          {container.args && container.args.map((arg) => <div>{arg}</div>)}
+          {container.args ? <Code>{container.args.join('\n')}</Code> : 'None'}
         </ResourceInfoCardEntry>
         {/* <Entry heading="Volume mounts">{container.volumeMounts}</Entry> */}
       </ResourceInfoCardSection>

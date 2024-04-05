@@ -1,33 +1,20 @@
 import React, { ReactElement, useMemo } from 'react'
 import {
-  Card,
   ChipList,
   Code,
   SidecarItem,
-  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
-import { useTheme } from 'styled-components'
-
-import { omitBy } from 'lodash'
-
-import isNil from 'lodash/isNil'
 
 import {
-  Endpoint_Endpoint as EndpointT,
   NetworkPolicyQueryVariables,
   Networkpolicy_NetworkPolicyDetail as NetworkPolicyT,
   useNetworkPolicyQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import {
-  MetadataSidecar,
-  ResourceReadyChip,
-  useCodeTabs,
-  useKubernetesCluster,
-} from '../utils'
+import { MetadataSidecar, useCodeTabs, useKubernetesCluster } from '../utils'
 import { NAMESPACE_PARAM } from '../Kubernetes'
 import {
   NETWORK_POLICIES_REL_PATH,
@@ -37,12 +24,7 @@ import {
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 import { SubTitle } from '../../utils/SubTitle'
 
-import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
-
-import { MetadataItem } from '../../utils/Metadata'
-
 import { getBreadcrumbs } from './Services'
-import { Endpoints } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },

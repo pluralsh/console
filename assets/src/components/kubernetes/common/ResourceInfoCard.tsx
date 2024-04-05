@@ -13,7 +13,13 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNullish } from '@apollo/client/cache/inmemory/helpers'
-import { Card } from '@pluralsh/design-system'
+import {
+  Card,
+  CheckIcon,
+  Chip,
+  CloseIcon,
+  IconFrame,
+} from '@pluralsh/design-system'
 import isArray from 'lodash/isArray'
 
 const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
@@ -167,17 +173,13 @@ export function ResourceInfoCardSection({
   }
 
   return (
-    <div
-      css={{
-        marginBottom: theme.spacing.medium,
-      }}
-    >
+    <div css={{ marginBottom: theme.spacing.medium }}>
       {heading && (
         <div
           css={{
-            ...theme.partials.text.subtitle1,
-            color: theme.colors['text-xlight'],
-            marginBottom: theme.spacing.medium,
+            ...theme.partials.text.subtitle2,
+            color: theme.colors['text-light'],
+            marginBottom: theme.spacing.small,
           }}
         >
           {heading}
@@ -243,7 +245,12 @@ export function ResourceInfoCardEntry({
           },
         }}
       >
-        {isBoolean && (children ? 'true' : 'false')}
+        {isBoolean && (
+          <IconFrame
+            size="small"
+            icon={children ? <CheckIcon /> : <CloseIcon />}
+          />
+        )}
         {!isBoolean && children}
       </span>
     </div>
