@@ -123,6 +123,11 @@ fragment PodList on pod_PodList {
     objectMeta @type(name: "types_ObjectMeta") {
       ...ObjectMeta
     }
+    containerStatuses {
+      name
+      ready
+      state
+    }
     status
     containerImages
     nodeName

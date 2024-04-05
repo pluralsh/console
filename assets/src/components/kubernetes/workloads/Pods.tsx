@@ -22,7 +22,12 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { useKubernetesContext } from '../Kubernetes'
 
-import { PodStatusChip, WorkloadImages } from './utils'
+import { numishSort } from '../../cluster/TableElements'
+import { ContainerStatuses } from '../../cluster/ContainerStatuses'
+
+import { ContainerStatusT } from '../../cluster/pods/PodsList'
+
+import { PodStatusChip, WorkloadImages, toReadiness } from './utils'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -84,6 +89,29 @@ const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {
   cell: ({ getValue }) => getValue(),
 })
 
+const colContainers = columnHelper.accessor(
+  (row) => row?.containerStatuses?.length,
+  {
+    id: 'containers',
+    enableSorting: true,
+    sortingFn: numishSort,
+    cell: ({ row: { original } }) => (
+      <ContainerStatuses
+        statuses={
+          original?.containerStatuses?.map(
+            (c) =>
+              ({
+                name: c?.name,
+                readiness: toReadiness(c!),
+              }) as ContainerStatusT
+          ) ?? []
+        }
+      />
+    ),
+    header: 'Containers',
+  }
+)
+
 export function usePodsColumns(): Array<object> {
   const { colName, colNamespace, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
@@ -96,7 +124,7 @@ export function usePodsColumns(): Array<object> {
       colImages,
       colRestarts,
       // TODO: Add CPU and memory.
-      colStatus,
+      colContainers,
       colCreationTimestamp,
     ],
     [colName, colNamespace, colCreationTimestamp]

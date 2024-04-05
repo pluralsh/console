@@ -1,11 +1,12 @@
 import { ReactElement } from 'react'
-
 import { Chip, Code } from '@pluralsh/design-system'
 
 import {
   Pod_Container as ContainerT,
   Maybe,
 } from '../../../generated/graphql-kubernetes'
+import { ContainerStatus } from '../../cluster/ContainerStatuses'
+import { toReadiness } from '../workloads/utils'
 
 import ResourceInfoCard, {
   ResourceInfoCardEntry,
@@ -44,7 +45,25 @@ interface ContainerProps {
 
 function Container({ container }: ContainerProps): ReactElement {
   return (
-    <ResourceInfoCard title={container.name}>
+    <ResourceInfoCard
+      title={
+        <div
+          css={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
+          <ContainerStatus
+            status={{
+              name: '',
+              readiness: toReadiness(container.status),
+            }}
+          />
+          <span>{container.name}</span>
+        </div>
+      }
+    >
       <ResourceInfoCardSection>
         <ResourceInfoCardEntry heading="Image">
           <Chip size="small">{container.image}</Chip>
@@ -65,18 +84,10 @@ function Container({ container }: ContainerProps): ReactElement {
         <ResourceInfoCardEntry heading="Args">
           {container.args ? <Code>{container.args.join('\n')}</Code> : 'None'}
         </ResourceInfoCardEntry>
-        {/* <Entry heading="Volume mounts">{container.volumeMounts}</Entry> */}
-      </ResourceInfoCardSection>
-      <ResourceInfoCardSection heading="Status">
-        <ResourceInfoCardEntry heading="Started">
-          {container.status?.started}
-        </ResourceInfoCardEntry>
-        <ResourceInfoCardEntry heading="Ready">
-          {container.status?.ready}
-        </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Restarts">
           {container.status?.restartCount}
         </ResourceInfoCardEntry>
+        {/* <Entry heading="Volume mounts">{container.volumeMounts}</Entry> */}
       </ResourceInfoCardSection>
 
       <ResourceInfoCardSection heading="Security context">

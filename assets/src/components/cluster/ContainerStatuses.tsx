@@ -3,7 +3,9 @@ import { Div, Flex, Span } from 'honorable'
 import styled from 'styled-components'
 import { Readiness, ReadinessT, readinessToContainerLabel } from 'utils/status'
 
-import { ContainerStatus } from './pods/PodsList'
+import { ReactElement } from 'react'
+
+import { ContainerStatusT } from './pods/PodsList'
 
 const iconBaseProps = {
   borderRadius: 3,
@@ -35,48 +37,64 @@ const CompleteIcon = styled.div(({ theme }) => ({
 
 export const readinessToIcon = {
   [Readiness.Ready]: <ReadyIcon />,
+  [Readiness.Running]: <ReadyIcon />,
   [Readiness.InProgress]: <PendingIcon />,
   [Readiness.Failed]: <FailedIcon />,
   [Readiness.Complete]: <CompleteIcon />,
+  [Readiness.Completed]: <CompleteIcon />,
 } as const satisfies Record<ReadinessT, JSX.Element>
 
 export const readinessToTooltipColor = {
   [Readiness.Ready]: 'text-success-light',
+  [Readiness.Running]: 'text-success-light',
   [Readiness.InProgress]: 'text-warning-light',
   [Readiness.Failed]: 'text-danger-light',
   [Readiness.Complete]: 'text-xlight',
+  [Readiness.Completed]: 'text-xlight',
 } as const satisfies Record<ReadinessT, string>
 
 export function ContainerStatuses({
   statuses = [],
 }: {
-  statuses: ContainerStatus[]
+  statuses: ContainerStatusT[]
 }) {
   return (
     <Flex gap="xxxsmall">
       {statuses.map(({ name, readiness }) => (
-        <Tooltip
-          label={
-            <>
-              <span>{name}:&nbsp;</span>
-              <Span
-                color={readinessToTooltipColor[readiness]}
-                fontWeight={600}
-              >
-                {readinessToContainerLabel[readiness]}
-              </Span>
-            </>
-          }
-        >
-          <Div
-            borderRadius={3}
-            padding={4}
-            _hover={{ backgroundColor: 'fill-two-hover' }}
-          >
-            {readinessToIcon[readiness]}
-          </Div>
-        </Tooltip>
+        <ContainerStatus status={{ name, readiness }} />
       ))}
     </Flex>
+  )
+}
+
+export function ContainerStatus({
+  status,
+}: {
+  status: ContainerStatusT
+}): ReactElement {
+  const { name, readiness } = status
+
+  return (
+    <Tooltip
+      label={
+        <>
+          {name && <span>{name}:&nbsp;</span>}
+          <Span
+            color={readinessToTooltipColor[readiness]}
+            fontWeight={600}
+          >
+            {readinessToContainerLabel[readiness]}
+          </Span>
+        </>
+      }
+    >
+      <Div
+        borderRadius={3}
+        padding={4}
+        _hover={{ backgroundColor: 'fill-two-hover' }}
+      >
+        {readinessToIcon[readiness]}
+      </Div>
+    </Tooltip>
   )
 }

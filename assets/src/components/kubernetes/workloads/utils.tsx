@@ -3,10 +3,13 @@ import { ComponentProps } from 'react'
 import { isEmpty } from 'lodash'
 
 import {
+  Pod_ContainerStatus as ContainerStatusT,
+  V1_ContainerStatus as ContainerStatusV1T,
   Common_Event as EventT,
   Maybe,
   Common_PodInfo as PodInfoT,
 } from '../../../generated/graphql-kubernetes'
+import { Readiness, ReadinessT } from '../../../utils/status'
 
 const podStatusSeverity = {
   Running: 'success',
@@ -134,4 +137,26 @@ export function WorkloadImages({ images }: { images: Maybe<string>[] }) {
       ))}
     </div>
   )
+}
+
+export enum ContainerState {
+  Waiting = 'Waiting',
+  Running = 'Running',
+  Terminated = 'Terminated',
+  Unknown = 'Unknown',
+}
+
+export function toReadiness(
+  status: ContainerStatusT | ContainerStatusV1T
+): ReadinessT {
+  switch (status?.state) {
+    case ContainerState.Running:
+      return Readiness.Running
+    case ContainerState.Waiting:
+      return Readiness.InProgress
+    case ContainerState.Terminated:
+      return Readiness.Complete
+  }
+
+  return status?.ready ? Readiness.Ready : Readiness.Failed
 }

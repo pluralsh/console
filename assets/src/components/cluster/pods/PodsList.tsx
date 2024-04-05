@@ -88,7 +88,7 @@ function DeletePod({
   )
 }
 
-export type ContainerStatus = { name: string; readiness: ReadinessT }
+export type ContainerStatusT = { name: string; readiness: ReadinessT }
 
 type PodTableRow = {
   name?: string
@@ -107,7 +107,7 @@ type PodTableRow = {
   containers?: {
     ready?: number
     total?: number
-    statuses?: ContainerStatus[]
+    statuses?: ContainerStatusT[]
   }
   images?: string[]
 }

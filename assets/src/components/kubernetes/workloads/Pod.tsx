@@ -33,7 +33,12 @@ import { InlineLink } from '../../utils/typography/InlineLink'
 import ResourceOwner from '../common/ResourceOwner'
 import { NAMESPACE_PARAM } from '../Kubernetes'
 
+import { ContainerStatusT } from '../../cluster/pods/PodsList'
+
+import { ContainerStatuses } from '../../cluster/ContainerStatuses'
+
 import { getBreadcrumbs } from './Pods'
+import { toReadiness } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -109,8 +114,18 @@ export function Pod(): ReactElement {
             {`${pod?.restartCount ?? 0}`}
           </SidecarItem>
           <SidecarItem heading="QOS Class">{pod?.qosClass}</SidecarItem>
-          <SidecarItem heading="Status">
-            <StatusChip readiness={pod?.podPhase as ReadinessT} />
+          <SidecarItem heading="Containers">
+            <ContainerStatuses
+              statuses={
+                pod?.initContainers?.concat(pod?.containers)?.map(
+                  (c) =>
+                    ({
+                      name: c?.name,
+                      readiness: toReadiness(c!.status!),
+                    }) as ContainerStatusT
+                ) ?? []
+              }
+            />
           </SidecarItem>
           <SidecarItem heading="Pod Phase">{pod?.podPhase}</SidecarItem>
         </MetadataSidecar>
