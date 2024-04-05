@@ -2360,6 +2360,13 @@ export type Pod_Container = {
   volumeMounts: Array<Maybe<Pod_VolumeMount>>;
 };
 
+export type Pod_ContainerStatus = {
+  __typename?: 'pod_ContainerStatus';
+  name: Scalars['String']['output'];
+  ready: Scalars['Boolean']['output'];
+  state: Scalars['String']['output'];
+};
+
 export type Pod_EnvVar = {
   __typename?: 'pod_EnvVar';
   name: Scalars['String']['output'];
@@ -2370,6 +2377,7 @@ export type Pod_EnvVar = {
 export type Pod_Pod = {
   __typename?: 'pod_Pod';
   containerImages: Array<Maybe<Scalars['String']['output']>>;
+  containerStatuses: Array<Maybe<Pod_ContainerStatus>>;
   metrics: Pod_PodMetrics;
   nodeName: Scalars['String']['output'];
   objectMeta: Types_ObjectMeta;
@@ -5006,7 +5014,7 @@ export type PersistentVolumeQueryVariables = Exact<{
 }>;
 
 
-export type PersistentVolumeQuery = { __typename?: 'Query', handleGetPersistentVolumeDetail?: { __typename?: 'persistentvolume_PersistentVolumeDetail', status: string, claim: string, storageClass: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
+export type PersistentVolumeQuery = { __typename?: 'Query', handleGetPersistentVolumeDetail?: { __typename?: 'persistentvolume_PersistentVolumeDetail', status: string, claim: string, storageClass: string, reason: string, message: string, mountOptions: Array<string | null>, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
 
 export type PersistentVolumeClaimsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -8564,6 +8572,8 @@ export const PersistentVolumeDocument = gql`
     claim
     storageClass
     reason
+    message
+    mountOptions
     reclaimPolicy
     accessModes
   }

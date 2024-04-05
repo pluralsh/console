@@ -1,4 +1,4 @@
-import { ReactElement, useMemo } from 'react'
+import React, { ReactElement, useMemo } from 'react'
 import {
   ChipList,
   SidecarItem,
@@ -97,6 +97,19 @@ export default function PersistentVolume(): ReactElement {
               values={Object.entries(pv?.accessModes || {})}
               transformValue={(accessModes) => accessModes.join(': ')}
               emptyState={null}
+            />
+          </SidecarItem>
+          <SidecarItem heading="Reclaim policy">
+            {pv?.reclaimPolicy}
+          </SidecarItem>
+          <SidecarItem heading="Reason">{pv?.reason || 'None'}</SidecarItem>
+          <SidecarItem heading="Message">{pv?.message || 'None'}</SidecarItem>
+          <SidecarItem heading="Mount options">
+            <ChipList
+              size="small"
+              limit={1}
+              values={pv?.mountOptions ?? []}
+              emptyState={<div>None</div>}
             />
           </SidecarItem>
         </MetadataSidecar>

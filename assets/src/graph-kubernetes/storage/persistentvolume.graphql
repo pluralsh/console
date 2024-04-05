@@ -46,6 +46,8 @@ query PersistentVolume($name: String!) {
     claim
     storageClass
     reason
+    message
+    mountOptions
     reclaimPolicy
     accessModes
   }
