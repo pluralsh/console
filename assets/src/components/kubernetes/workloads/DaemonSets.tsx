@@ -35,7 +35,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   },
   {
     label: 'daemon sets',
-    url: `${getConfigurationAbsPath(cluster?.id)}/${DAEMON_SETS_REL_PATH}`,
+    url: `${getWorkloadsAbsPath(cluster?.id)}/${DAEMON_SETS_REL_PATH}`,
   },
 ]
 

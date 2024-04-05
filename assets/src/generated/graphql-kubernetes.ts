@@ -5735,7 +5735,7 @@ export const DaemonSetDetailFragmentDoc = gql`
   podInfo @type(name: "common_PodInfo") {
     ...PodInfo
   }
-  labelSelector {
+  labelSelector @type(name: "v1_LabelSelector") {
     ...Selector
   }
   initContainerImages

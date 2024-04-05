@@ -51,8 +51,6 @@ export default function Conditions({
   conditions,
   maxHeight = '500px',
 }: ConditionsProps): ReactElement {
-  console.log(conditions)
-
   return (
     <Table
       data={conditions}
