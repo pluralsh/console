@@ -303,7 +303,6 @@ export function NodePods(): ReactElement {
   const { name } = useParams()
   const columns = usePodsColumns()
 
-  // TODO: Pagination etc.
   return (
     <ResourceList<PodListT, PodT, NodePodsQuery, NodePodsQueryVariables>
       namespaced

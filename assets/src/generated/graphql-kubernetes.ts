@@ -5014,7 +5014,7 @@ export type PersistentVolumeQueryVariables = Exact<{
 }>;
 
 
-export type PersistentVolumeQuery = { __typename?: 'Query', handleGetPersistentVolumeDetail?: { __typename?: 'persistentvolume_PersistentVolumeDetail', status: string, claim: string, storageClass: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
+export type PersistentVolumeQuery = { __typename?: 'Query', handleGetPersistentVolumeDetail?: { __typename?: 'persistentvolume_PersistentVolumeDetail', status: string, claim: string, storageClass: string, reason: string, message: string, mountOptions: Array<string | null>, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
 
 export type PersistentVolumeClaimsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -8577,6 +8577,8 @@ export const PersistentVolumeDocument = gql`
     claim
     storageClass
     reason
+    message
+    mountOptions
     reclaimPolicy
     accessModes
   }
