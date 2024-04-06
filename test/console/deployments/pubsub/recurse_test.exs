@@ -2,7 +2,7 @@ defmodule Console.Deployments.PubSub.RecurseTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.PubSub
-  alias Console.Deployments.{Clusters, Services, Global}
+  alias Console.Deployments.{Clusters, Services, Global, Stacks}
   alias Console.Deployments.Git.Discovery
   alias Console.PubSub.Consumers.Recurse
 
@@ -386,6 +386,28 @@ defmodule Console.Deployments.PubSub.RecurseTest do
     end
   end
 
+  describe "StackDeleted" do
+    test "it will create a delete run" do
+      stack = insert(:stack, deleted_at: Timex.now(), sha: "last-sha")
+
+      event = %PubSub.StackDeleted{item: stack}
+      {:ok, run} = Recurse.handle_event(event)
+
+      assert run.git.ref == "last-sha"
+      assert run.stack_id == stack.id
+
+      %{steps: steps} = Console.Repo.preload(run, [:steps])
+      %{"init" => init, "destroy" => destroy} = Map.new(steps, & {&1.name, &1})
+      assert init.cmd == "terraform"
+      assert init.args == ["init", "-upgrade"]
+
+      assert destroy.cmd == "terraform"
+      assert destroy.args == ["destroy", "-auto-approve"]
+
+      assert refetch(stack).delete_run_id == run.id
+    end
+  end
+
   describe "StackRunCompleted" do
     test "it can dequeue a stack run" do
       stack = insert(:stack)
@@ -398,6 +420,18 @@ defmodule Console.Deployments.PubSub.RecurseTest do
 
       assert dequeued.id == run.id
       assert dequeued.status == :pending
+    end
+
+    test "it can delete a stack if it is in deleting stack" do
+      stack = insert(:stack, deleted_at: Timex.now(), sha: "last-sha")
+
+      {:ok, run} = Stacks.create_run(stack, stack.sha)
+
+      event = %PubSub.StackRunCompleted{item: %{run | status: :successful}}
+      {:ok, deleted} = Recurse.handle_event(event)
+
+      assert deleted.id == stack.id
+      refute refetch(stack)
     end
   end
 end

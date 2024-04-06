@@ -10,6 +10,13 @@ defmodule Console.Deployments.Stacks.Commands do
     ])
   end
 
+  defp terraform_commands(%Stack{deleted_at: d}, _) when not is_nil(d) do
+    indexed([
+      cmd("init", "terraform", ["init", "-upgrade"], :plan),
+      cmd("destroy", "terraform", ["destroy", "-auto-approve"], :apply)
+    ])
+  end
+
   defp terraform_commands(%Stack{}, _) do
     indexed([
       cmd("init", "terraform", ["init", "-upgrade"], :plan),

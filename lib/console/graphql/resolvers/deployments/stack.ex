@@ -44,6 +44,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   def delete_stack(%{id: id}, %{context: %{current_user: user}}),
     do: Stacks.delete_stack(id, user)
 
+  def detach_stack(%{id: id}, %{context: %{current_user: user}}),
+    do: Stacks.detach_stack(id, user)
+
   def update_stack_run(%{id: id, attributes: attrs}, ctx),
     do: Stacks.update_stack_run(attrs, id, actor(ctx))
 

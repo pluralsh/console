@@ -24,6 +24,25 @@ defmodule Console.Deployments.Git.AgentTest do
       assert Process.alive?(pid)
     end
 
+    test "it can fetch constraints from the bootstrap repo" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/bootstrap.git")
+      svc = insert(:service, repository: git, git: %{ref: "main", folder: "resources/policy/constraints"})
+
+      {:ok, pid} = Discovery.start(git)
+
+      {:ok, f} = Agent.fetch(pid, svc)
+      {:ok, tmp} = Briefly.create()
+
+      IO.binstream(f, 1024)
+      |> Enum.into(File.stream!(tmp))
+      File.close(f)
+
+      {:ok, res} = :erl_tar.extract(tmp, [:compressed, :memory])
+      files = Enum.into(res, %{}, fn {name, content} -> {to_string(name), to_string(content)} end)
+      IO.inspect(files)
+      assert map_size(files) > 0
+    end
+
     test "busted credentials fail as expected" do
       git = insert(:git_repository, auth_method: :ssh, url: "git@github.com:pluralsh/test-repo.git", private_key: "busted")
 

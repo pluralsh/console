@@ -54,6 +54,7 @@ defmodule Console.PubSub.ManagedNamespaceDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.StackDetached, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.StackRunCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackRunUpdated, do: use Piazza.PubSub.Event
