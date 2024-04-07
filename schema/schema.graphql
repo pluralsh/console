@@ -691,6 +691,8 @@ type RootMutationType {
 
   deleteStack(id: ID!): InfrastructureStack
 
+  detachStack(id: ID!): InfrastructureStack
+
   approveStackRun(id: ID!): StackRun
 
   "a reusable mutation for updating rbac settings on core services"
@@ -986,6 +988,9 @@ type InfrastructureStack {
 
   "whether to require approval"
   approval: Boolean
+
+  "whether this stack was previously deleted and is pending cleanup"
+  deletedAt: DateTime
 
   runs(after: String, first: Int, before: String, last: Int): StackRunConnection
 

@@ -318,6 +318,7 @@ defmodule Console.Deployments.Global do
          {:ok, dest_secrets} <- Services.configuration(dest),
          {:diff, true} <- {:diff, diff?(source, dest, source_secrets, dest_secrets)} do
       Services.update_service(%{
+        templated: source.templated,
         namespace: source.namespace,
         configuration: Enum.map(Map.merge(dest_secrets, source_secrets), fn {k, v} -> %{name: k, value: v} end),
         repository_id: source.repository_id,
@@ -373,7 +374,7 @@ defmodule Console.Deployments.Global do
   def diff?(_, _), do: false
 
   defp diff?(%Service{} = s, %Service{} = d, source, dest) do
-    missing_source?(source, dest) || specs_different?(s, d) || s.repository_id != d.repository_id || s.namespace != d.namespace
+    missing_source?(source, dest) || specs_different?(s, d) || s.repository_id != d.repository_id || s.namespace != d.namespace || s.templated != d.templated
   end
 
   defp ensure_revision(%ServiceTemplate{} = template, config) do

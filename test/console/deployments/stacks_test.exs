@@ -109,7 +109,7 @@ defmodule Console.Deployments.StacksTest do
       {:ok, deleted} = Stacks.delete_stack(stack.id, user)
 
       assert deleted.id == stack.id
-      refute refetch(stack)
+      assert deleted.deleted_at
 
       assert_receive {:event, %PubSub.StackDeleted{item: ^deleted}}
     end
@@ -118,6 +118,26 @@ defmodule Console.Deployments.StacksTest do
       stack = insert(:stack)
 
       {:error, _} = Stacks.delete_stack(stack.id, insert(:user))
+    end
+  end
+
+  describe "#detach_stack/2" do
+    test "stack writers can delete" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+
+      {:ok, deleted} = Stacks.detach_stack(stack.id, user)
+
+      assert deleted.id == stack.id
+      refute refetch(stack)
+
+      assert_receive {:event, %PubSub.StackDetached{item: ^deleted}}
+    end
+
+    test "random users cannot delete" do
+      stack = insert(:stack)
+
+      {:error, _} = Stacks.detach_stack(stack.id, insert(:user))
     end
   end
 
