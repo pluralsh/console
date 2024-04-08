@@ -1,5 +1,4 @@
 import {
-  Chip,
   EmptyState,
   LoopingLogo,
   Table,
@@ -7,26 +6,18 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { ComponentProps, useCallback, useMemo, useState } from 'react'
-import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { useParams } from 'react-router-dom'
 import { VirtualItem } from '@tanstack/react-virtual'
 
 import {
-  ClusterBackup,
-  ClusterBasicFragment,
   useClusterBackupsQuery,
   useClusterBasicQuery,
 } from '../../../../generated/graphql'
 import { GqlError } from '../../../utils/Alert'
 import { FullHeightTableWrap } from '../../../utils/layout/FullHeightTableWrap'
-import { Edge, extendConnection } from '../../../../utils/graphql'
+import { extendConnection } from '../../../../utils/graphql'
 import { BACKUPS_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
-import { DateTimeCol } from '../../../utils/table/DateTimeCol'
-import { DynamicClusterIcon } from '../../../cd/clusters/DynamicClusterIcon'
-import { ColClusterContentSC } from '../../../cd/clusters/ClustersColumns'
-import { BasicLink } from '../../../utils/typography/BasicLink'
-import { StackedText } from '../../../utils/table/StackedText'
 import { useSlicePolling } from '../../../utils/tableFetchHelpers'
 
 import {
@@ -34,7 +25,13 @@ import {
   getBackupsClusterAbsPath,
 } from '../../../../routes/backupRoutesConsts'
 
-import { RestoreClusterBackup } from './RestoreClusterBackup'
+import {
+  ColActions,
+  ColBackupDate,
+  ColBackupId,
+  ColCluster,
+  ColStatus,
+} from './BackupsColumns'
 
 const POLL_INTERVAL = 10 * 1000
 const QUERY_PAGE_SIZE = 100
@@ -45,74 +42,7 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-const columnHelper = createColumnHelper<Edge<ClusterBackup>>()
-
-const columns = [
-  columnHelper.accessor(({ node }) => node?.id, {
-    id: 'cluster',
-    header: 'Cluster',
-    cell: ({ table }) => {
-      const { cluster } = table.options.meta as {
-        cluster?: ClusterBasicFragment
-      }
-
-      return (
-        <ColClusterContentSC>
-          <DynamicClusterIcon
-            deleting={!!cluster?.deletedAt}
-            protect={!!cluster?.protect}
-            self={!!cluster?.self}
-          />
-          <StackedText
-            first={
-              <BasicLink css={{ whiteSpace: 'nowrap' }}>
-                {cluster?.name}
-              </BasicLink>
-            }
-            second={`handle: ${cluster?.handle}`}
-          />
-        </ColClusterContentSC>
-      )
-    },
-  }),
-  columnHelper.accessor(({ node }) => node?.id, {
-    id: 'id',
-    header: 'Backup ID',
-    enableSorting: true,
-    enableGlobalFilter: true,
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor(({ node }) => node?.insertedAt, {
-    id: 'date',
-    header: 'Backup date',
-    enableSorting: true,
-    enableGlobalFilter: true,
-    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
-  }),
-  columnHelper.accessor(({ node }) => node?.garbageCollected, {
-    id: 'status',
-    header: 'Status',
-    enableSorting: true,
-    enableGlobalFilter: true,
-    cell: ({ getValue }) =>
-      getValue() ? (
-        <Chip severity="danger">Garbage collected</Chip>
-      ) : (
-        <Chip severity="success">Ready</Chip>
-      ),
-  }),
-  columnHelper.accessor(({ node }) => node, {
-    id: 'actions',
-    header: '',
-    meta: { gridTemplate: `fit-content(100px)` },
-    cell: ({ getValue }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const backup = getValue()
-
-      return <RestoreClusterBackup backup={backup} />
-    },
-  }),
-]
+const columns = [ColCluster, ColBackupId, ColBackupDate, ColStatus, ColActions]
 
 export default function Backups() {
   const theme = useTheme()

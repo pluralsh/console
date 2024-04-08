@@ -1,17 +1,14 @@
 import {
-  ArrowTopRightIcon,
   Breadcrumb,
   EmptyState,
-  IconFrame,
   LoopingLogo,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { ComponentProps, useCallback, useMemo, useState } from 'react'
-import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { VirtualItem } from '@tanstack/react-virtual'
 
 import {
@@ -19,28 +16,15 @@ import {
   CLUSTERS_REL_PATH,
   getBackupsClusterAbsPath,
 } from '../../../routes/backupRoutesConsts'
-import {
-  ClustersObjectStoresFragment,
-  useClustersObjectStoresQuery,
-} from '../../../generated/graphql'
+import { useClustersObjectStoresQuery } from '../../../generated/graphql'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { GqlError } from '../../utils/Alert'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
-import {
-  ObjectStoreCloudIcon,
-  getObjectStoreCloud,
-  objectStoreCloudToDisplayName,
-} from '../objectstores/utils'
-import { ColWithIcon } from '../../utils/table/ColWithIcon'
-import { DynamicClusterIcon } from '../../cd/clusters/DynamicClusterIcon'
-import { ColClusterContentSC } from '../../cd/clusters/ClustersColumns'
 import { useSlicePolling } from '../../utils/tableFetchHelpers'
-import { Edge, extendConnection } from '../../../utils/graphql'
-import { StackedText } from '../../utils/table/StackedText'
-import { BasicLink } from '../../utils/typography/BasicLink'
+import { extendConnection } from '../../../utils/graphql'
 
 import ConfigureClusterBackups from './ConfigureClusterBackups'
-import { DeleteClusterBackups } from './DeleteClusterBackups'
+import { ColActions, ColCluster, ColName, ColProvider } from './ClusterColumns'
 
 const POLL_INTERVAL = 10 * 1000
 const QUERY_PAGE_SIZE = 100
@@ -59,101 +43,7 @@ export const BACKUPS_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   },
 ]
 
-const columnHelper = createColumnHelper<Edge<ClustersObjectStoresFragment>>()
-
-const columns = [
-  columnHelper.accessor(({ node }) => node?.name, {
-    id: 'cluster',
-    header: 'Cluster',
-    enableSorting: true,
-    enableGlobalFilter: true,
-    cell: ({
-      row: {
-        original: { node: cluster },
-      },
-    }) => (
-      <ColClusterContentSC>
-        <DynamicClusterIcon
-          deleting={!!cluster?.deletedAt}
-          protect={!!cluster?.protect}
-          self={!!cluster?.self}
-        />
-        <StackedText
-          first={
-            <BasicLink css={{ whiteSpace: 'nowrap' }}>
-              {cluster?.name}
-            </BasicLink>
-          }
-          second={`handle: ${cluster?.handle}`}
-        />
-      </ColClusterContentSC>
-    ),
-  }),
-  columnHelper.accessor(({ node }) => node?.objectStore, {
-    id: 'provider',
-    header: 'Storage provider',
-    cell: ({ getValue }) => {
-      const cloud = getObjectStoreCloud(getValue())
-
-      if (!cloud) return null
-
-      return (
-        <ColWithIcon
-          truncateLeft
-          icon={<ObjectStoreCloudIcon cloud={cloud} />}
-        >
-          {objectStoreCloudToDisplayName[cloud]}
-        </ColWithIcon>
-      )
-    },
-  }),
-  columnHelper.accessor(({ node }) => node?.objectStore?.name, {
-    id: 'name',
-    header: 'Storage name',
-    enableSorting: true,
-    enableGlobalFilter: true,
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor(({ node }) => node?.id, {
-    id: 'actions',
-    header: '',
-    meta: { gridTemplate: `fit-content(100px)` },
-    cell: ({
-      table,
-      row: {
-        original: { node },
-      },
-      getValue,
-    }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const theme = useTheme()
-      const { refetch } = table.options.meta as { refetch?: () => void }
-
-      return (
-        <div
-          css={{
-            display: 'flex',
-            flexGrow: 0,
-            gap: theme.spacing.medium,
-            alignItems: 'center',
-            alignSelf: 'end',
-          }}
-        >
-          <DeleteClusterBackups
-            cluster={node}
-            refetch={refetch}
-          />
-          <IconFrame
-            type="tertiary"
-            icon={<ArrowTopRightIcon />}
-            as={Link}
-            to={getBackupsClusterAbsPath(getValue())}
-          />
-        </div>
-      )
-    },
-  }),
-]
+const columns = [ColCluster, ColProvider, ColName, ColActions]
 
 export default function Clusters() {
   const theme = useTheme()
