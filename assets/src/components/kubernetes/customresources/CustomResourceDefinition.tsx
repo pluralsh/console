@@ -8,7 +8,11 @@ import {
 
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import {
+  MetadataSidecar,
+  useDefaultColumns,
+  useKubernetesCluster,
+} from '../utils'
 import {
   CustomResourceDefinitionQueryVariables,
   Types_CustomResourceDefinitionDetail as CustomResourceDefinitionT,
@@ -94,18 +98,16 @@ export default function CustomResourceDefinition(): ReactElement {
 
 const columnHelper = createColumnHelper<CustomResourceT>()
 
-const columns = [
-  columnHelper.accessor((cr) => cr?.objectMeta.name, {
-    id: 'name',
-    header: 'Name',
-    enableSorting: true,
-    meta: { truncate: true },
-    cell: ({ getValue }) => getValue(),
-  }),
-]
-
 export function CustomRersourceDefinitionObjects(): ReactElement {
-  const { name, namespace } = useParams()
+  // TODO: Add namespace selector.
+  // TODO: Show namespace column only if scope is namespaced.
+  const { name, namespace = ' ' } = useParams() // ' ' selects all namespaces.
+  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+    useDefaultColumns(columnHelper)
+  const columns = useMemo(
+    () => [colName, colNamespace, colLabels, colCreationTimestamp],
+    [colName, colNamespace, colLabels, colCreationTimestamp]
+  )
 
   return (
     <ResourceList<

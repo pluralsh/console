@@ -68,9 +68,22 @@ query CustomResourceDefinition($name: String!) {
   }
 }
 
-query CustomResources($namespace: String!, $name: String!) {
-  handleGetCustomResourceObjectList(namespace: $namespace, crd: $name)
-    @rest(path: "crd/{args.crd}/{args.crd}/object") {
+query CustomResources(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetCustomResourceObjectList(
+    namespace: $namespace
+    crd: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "crd/{args.namespace}/{args.crd}/object") {
     listMeta {
       totalItems
     }

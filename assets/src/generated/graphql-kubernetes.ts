@@ -4899,6 +4899,10 @@ export type CustomResourceDefinitionQuery = { __typename?: 'Query', handleGetCus
 export type CustomResourcesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -7864,8 +7868,15 @@ export type CustomResourceDefinitionLazyQueryHookResult = ReturnType<typeof useC
 export type CustomResourceDefinitionSuspenseQueryHookResult = ReturnType<typeof useCustomResourceDefinitionSuspenseQuery>;
 export type CustomResourceDefinitionQueryResult = Apollo.QueryResult<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>;
 export const CustomResourcesDocument = gql`
-    query CustomResources($namespace: String!, $name: String!) {
-  handleGetCustomResourceObjectList(namespace: $namespace, crd: $name) @rest(path: "crd/{args.crd}/{args.crd}/object") {
+    query CustomResources($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetCustomResourceObjectList(
+    namespace: $namespace
+    crd: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "crd/{args.namespace}/{args.crd}/object") {
     listMeta {
       totalItems
     }
@@ -7896,6 +7907,10 @@ ${ObjectMetaFragmentDoc}`;
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
