@@ -1174,6 +1174,8 @@ input GlobalServiceAttributes {
 
   "cluster api provider to target"
   providerId: ID
+
+  template: ServiceTemplateAttributes
 }
 
 "Attributes for configuring a managed namespace"
@@ -1253,6 +1255,9 @@ type GlobalService {
   "the kubernetes distribution to target with this global service"
   distro: ClusterDistro
 
+  "the service template used to spawn services"
+  template: ServiceTemplate
+
   "the service to replicate across clusters"
   service: ServiceDeployment
 
@@ -1314,6 +1319,8 @@ type ServiceTemplate {
 
   "a list of context ids to add to this service"
   contexts: [ID]
+
+  repository: GitRepository
 
   "possibly secret configuration for all spawned services, don't query this in list endpoints"
   configuration: [ServiceConfiguration]
