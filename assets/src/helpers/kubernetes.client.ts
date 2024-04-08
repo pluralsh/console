@@ -7,6 +7,8 @@ import { fetchToken } from './auth'
 
 const K8S_API_URL = '/api/v1/'
 const CLIENT_MAP = new Map<string, ApolloClient<any>>()
+// Ref: https://github.com/apollographql/apollo-link-rest/issues/107
+const RAW_EMPTY_RESPONSE_ERROR = 'Unexpected end of JSON input'
 
 function KubernetesClient(clusterID: string): ApolloClient<any> | undefined {
   if (!clusterID) {
@@ -28,13 +30,27 @@ function buildClient({ clusterID, fetchToken }) {
   const restLink = new RestLink({
     uri: K8S_API_URL,
     responseTransformer: async (response: Response) => {
-      const body = await (response as Response).json()
+      const isRawUrl = response.url.includes(`${K8S_API_URL}_raw`)
+      let body: any = {}
 
-      if (response.url.includes(`${K8S_API_URL}_raw`)) {
-        return { Object: body } as UnstructuredT
+      try {
+        body = await (response as Response).json()
+      } catch (e) {
+        const err = e as Error
+
+        if (
+          !isRawUrl ||
+          (isRawUrl && !err?.message?.includes(RAW_EMPTY_RESPONSE_ERROR))
+        ) {
+          throw e
+        }
+
+        if (err?.message?.includes(RAW_EMPTY_RESPONSE_ERROR)) {
+          return null
+        }
       }
 
-      return body
+      return isRawUrl ? ({ Object: body } as UnstructuredT) : body
     },
   })
 

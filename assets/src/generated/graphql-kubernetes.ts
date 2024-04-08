@@ -24,6 +24,8 @@ export type Scalars = {
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSON: { input: any; output: any; }
   ObjMap: { input: any; output: any; }
+  /** Represents empty values */
+  Void: { input: any; output: any; }
 };
 
 export enum HttpMethod {
@@ -45,7 +47,7 @@ export type Mutation = {
   /** create a Namespace */
   handleCreateNamespace: Namespace_NamespaceSpec;
   /** deletes a resource from a namespace */
-  handleDeleteResource?: Maybe<Scalars['JSON']['output']>;
+  handleDeleteResource?: Maybe<Scalars['Void']['output']>;
   /** creates an application based on provided deployment.AppDeploymentSpec */
   handleDeploy: Deployment_AppDeploymentSpec;
   /** create an application from file */
@@ -65,7 +67,7 @@ export type Mutation = {
   /** checks if provided service protocol is valid */
   handleProtocolValidity?: Maybe<Validation_ProtocolValidity>;
   /** creates a resource in a namespace */
-  handlePutResource: Runtime_Unknown;
+  handlePutResource?: Maybe<Scalars['Void']['output']>;
   /** scales a non-namespaced resource */
   handleScaleResource?: Maybe<Scaling_ReplicaCounts>;
   /** triggers a Job based on CronJob */
@@ -217,7 +219,7 @@ export type MutationHandleProtocolValidityArgs = {
 export type MutationHandlePutResourceArgs = {
   aggregations?: InputMaybe<Scalars['String']['input']>;
   filterBy?: InputMaybe<Scalars['String']['input']>;
-  input: Runtime_Unknown_Input;
+  input: Scalars['JSON']['input'];
   itemsPerPage?: InputMaybe<Scalars['String']['input']>;
   kind: Scalars['String']['input'];
   metricNames?: InputMaybe<Scalars['String']['input']>;
@@ -2759,21 +2761,6 @@ export type Rolebinding_RoleBindingList = {
   listMeta: Types_ListMeta;
 };
 
-export type Runtime_Unknown = {
-  __typename?: 'runtime_Unknown';
-  ContentEncoding: Scalars['String']['output'];
-  ContentType: Scalars['String']['output'];
-  apiVersion?: Maybe<Scalars['String']['output']>;
-  kind?: Maybe<Scalars['String']['output']>;
-};
-
-export type Runtime_Unknown_Input = {
-  ContentEncoding: Scalars['String']['input'];
-  ContentType: Scalars['String']['input'];
-  apiVersion?: InputMaybe<Scalars['String']['input']>;
-  kind?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type Scaling_ReplicaCounts = {
   __typename?: 'scaling_ReplicaCounts';
   actualReplicas: Scalars['Int']['output'];
@@ -4840,6 +4827,25 @@ export type ResourceQueryVariables = Exact<{
 
 
 export type ResourceQuery = { __typename?: 'Query', handleGetResource?: { __typename?: 'unstructured_Unstructured', Object: any } | null };
+
+export type NamespacedResourceUpdateMutationVariables = Exact<{
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  input: Scalars['JSON']['input'];
+}>;
+
+
+export type NamespacedResourceUpdateMutation = { __typename?: 'Mutation', handlePutResource?: any | null };
+
+export type ResourceUpdateMutationVariables = Exact<{
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  input: Scalars['JSON']['input'];
+}>;
+
+
+export type ResourceUpdateMutation = { __typename?: 'Mutation', handlePutResource?: any | null };
 
 export type ConfigMapsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -7510,6 +7516,78 @@ export type ResourceQueryHookResult = ReturnType<typeof useResourceQuery>;
 export type ResourceLazyQueryHookResult = ReturnType<typeof useResourceLazyQuery>;
 export type ResourceSuspenseQueryHookResult = ReturnType<typeof useResourceSuspenseQuery>;
 export type ResourceQueryResult = Apollo.QueryResult<ResourceQuery, ResourceQueryVariables>;
+export const NamespacedResourceUpdateDocument = gql`
+    mutation NamespacedResourceUpdate($kind: String!, $name: String!, $namespace: String!, $input: JSON!) {
+  handlePutResource(
+    kind: $kind
+    name: $name
+    namespace: $namespace
+    input: $input
+  ) @rest(type: "Void", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}", method: "PUT")
+}
+    `;
+export type NamespacedResourceUpdateMutationFn = Apollo.MutationFunction<NamespacedResourceUpdateMutation, NamespacedResourceUpdateMutationVariables>;
+
+/**
+ * __useNamespacedResourceUpdateMutation__
+ *
+ * To run a mutation, you first call `useNamespacedResourceUpdateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useNamespacedResourceUpdateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [namespacedResourceUpdateMutation, { data, loading, error }] = useNamespacedResourceUpdateMutation({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useNamespacedResourceUpdateMutation(baseOptions?: Apollo.MutationHookOptions<NamespacedResourceUpdateMutation, NamespacedResourceUpdateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<NamespacedResourceUpdateMutation, NamespacedResourceUpdateMutationVariables>(NamespacedResourceUpdateDocument, options);
+      }
+export type NamespacedResourceUpdateMutationHookResult = ReturnType<typeof useNamespacedResourceUpdateMutation>;
+export type NamespacedResourceUpdateMutationResult = Apollo.MutationResult<NamespacedResourceUpdateMutation>;
+export type NamespacedResourceUpdateMutationOptions = Apollo.BaseMutationOptions<NamespacedResourceUpdateMutation, NamespacedResourceUpdateMutationVariables>;
+export const ResourceUpdateDocument = gql`
+    mutation ResourceUpdate($kind: String!, $name: String!, $input: JSON!) {
+  handlePutResource(kind: $kind, name: $name, namespace: "", input: $input) @rest(type: "Void", path: "_raw/{args.kind}/name/{args.name}", method: "PUT")
+}
+    `;
+export type ResourceUpdateMutationFn = Apollo.MutationFunction<ResourceUpdateMutation, ResourceUpdateMutationVariables>;
+
+/**
+ * __useResourceUpdateMutation__
+ *
+ * To run a mutation, you first call `useResourceUpdateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useResourceUpdateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [resourceUpdateMutation, { data, loading, error }] = useResourceUpdateMutation({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      name: // value for 'name'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useResourceUpdateMutation(baseOptions?: Apollo.MutationHookOptions<ResourceUpdateMutation, ResourceUpdateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ResourceUpdateMutation, ResourceUpdateMutationVariables>(ResourceUpdateDocument, options);
+      }
+export type ResourceUpdateMutationHookResult = ReturnType<typeof useResourceUpdateMutation>;
+export type ResourceUpdateMutationResult = Apollo.MutationResult<ResourceUpdateMutation>;
+export type ResourceUpdateMutationOptions = Apollo.BaseMutationOptions<ResourceUpdateMutation, ResourceUpdateMutationVariables>;
 export const ConfigMapsDocument = gql`
     query ConfigMaps($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetConfigMapList(
