@@ -72,9 +72,11 @@ spec:
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
+        {{ if not .Values.disableAdditionalVolumes }}
         {{ if .Values.global.additionalVolumeMounts }}
         volumeMounts:
         {{ toYaml .Values.global.additionalVolumeMounts | nindent 8 }}
+        {{ end }}
         {{ end }}
         resources: {{- toYaml .Values.controllerManager.manager.resources | nindent 10
           }}
