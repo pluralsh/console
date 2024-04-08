@@ -28,7 +28,7 @@ defmodule Console.Deployments.Global do
   @doc """
   Creates a new global service and defers syncing clusters through the pubsub broadcaster
   """
-  @spec create(map, binary, User.t) :: global_resp
+  @spec create(map, binary | nil, User.t) :: global_resp
   def create(attrs, service_id, %User{} = user) do
     start_transaction()
     |> add_operation(:global, fn _ ->
@@ -46,6 +46,8 @@ defmodule Console.Deployments.Global do
     |> when_ok(&Repo.preload(&1, [:template], force: true))
     |> notify(:create, user)
   end
+
+  def create(attrs, %User{} = user), do: create(attrs, nil, user)
 
 
   @doc """
@@ -318,6 +320,7 @@ defmodule Console.Deployments.Global do
          {:ok, dest_secrets} <- Services.configuration(dest),
          {:diff, true} <- {:diff, diff?(source, dest, source_secrets, dest_secrets)} do
       Services.update_service(%{
+        templated: source.templated,
         namespace: source.namespace,
         configuration: Enum.map(Map.merge(dest_secrets, source_secrets), fn {k, v} -> %{name: k, value: v} end),
         repository_id: source.repository_id,
@@ -373,7 +376,7 @@ defmodule Console.Deployments.Global do
   def diff?(_, _), do: false
 
   defp diff?(%Service{} = s, %Service{} = d, source, dest) do
-    missing_source?(source, dest) || specs_different?(s, d) || s.repository_id != d.repository_id || s.namespace != d.namespace
+    missing_source?(source, dest) || specs_different?(s, d) || s.repository_id != d.repository_id || s.namespace != d.namespace || s.templated != d.templated
   end
 
   defp ensure_revision(%ServiceTemplate{} = template, config) do

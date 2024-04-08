@@ -62,11 +62,23 @@ defmodule Console.Deployments.Stacks do
   @doc """
   It can delete a stack if the user has write perms
   """
-  @spec delete_stack(binary, User.t) :: stack_resp
-  def delete_stack(id, %User{} = user) do
+  @spec detach_stack(binary, User.t) :: stack_resp
+  def detach_stack(id, %User{} = user) do
     get_stack!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
+    |> notify(:detach, user)
+  end
+
+  @doc """
+  Schedules a stack to be destroyed
+  """
+  @spec delete_stack(binary, User.t) :: stack_resp
+  def delete_stack(id, %User{} = user) do
+    get_stack!(id)
+    |> Stack.delete_changeset(%{deleted_at: Timex.now()})
+    |> allow(user, :write)
+    |> when_ok(:update)
     |> notify(:delete, user)
   end
 
@@ -164,6 +176,9 @@ defmodule Console.Deployments.Stacks do
   Polls a stack's git repo and creates a run if there's a new commit
   """
   @spec poll(Stack.t) :: run_resp
+  def poll(%Stack{delete_run_id: id}) when is_binary(id),
+    do: {:error, "stack is deleting"}
+
   def poll(%Stack{sha: sha} = stack) do
     %{repository: repo} = stack = Repo.preload(stack, [:repository, :environment])
     case Discovery.sha(repo, stack.git.ref) do
@@ -182,8 +197,8 @@ defmodule Console.Deployments.Stacks do
     |> add_operation(:run, fn _ ->
       %StackRun{stack_id: stack.id, status: :queued}
       |> StackRun.changeset(
-        stack
-        |> Map.take(~w(approval configuration type environment job_spec repository_id cluster_id)a)
+        Repo.preload(stack, [:environment, :files])
+        |> Map.take(~w(approval configuration type environment files job_spec repository_id cluster_id)a)
         |> Console.clean()
         |> Map.put(:git, %{ref: sha, folder: stack.git.folder})
         |> Map.put(:steps, commands(stack, !!attrs[:dry_run]))
@@ -191,13 +206,18 @@ defmodule Console.Deployments.Stacks do
       )
       |> Repo.insert()
     end)
-    |> add_operation(:stack, fn _ ->
+    |> add_operation(:stack, fn %{run: run} ->
       Ecto.Changeset.change(stack, %{sha: sha})
+      |> Stack.delete_changeset(delete_run(stack, run))
       |> Repo.update()
     end)
     |> execute(extract: :run)
     |> notify(:create)
   end
+
+  defp delete_run(%Stack{deleted_at: d}, %{id: id}) when not is_nil(d),
+    do: %{delete_run_id: id}
+  defp delete_run(_, _), do: %{}
 
   @doc """
   Fetches a file handle to the tarball for a stack run
@@ -261,6 +281,8 @@ defmodule Console.Deployments.Stacks do
     do: handle_notify(PubSub.StackUpdated, stack, actor: actor)
   defp notify({:ok, %Stack{} = stack}, :delete, actor),
     do: handle_notify(PubSub.StackDeleted, stack, actor: actor)
+  defp notify({:ok, %Stack{} = stack}, :detach, actor),
+    do: handle_notify(PubSub.StackDetached, stack, actor: actor)
   defp notify(pass, _, _), do: pass
 
   defp notify({:ok, %StackRun{} = stack}, :create),

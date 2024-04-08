@@ -40,6 +40,7 @@ defmodule Console.Schema.Stack do
     field :approval,        :boolean
     field :sha,             :string
     field :last_successful, :string
+    field :deleted_at,      :utc_datetime_usec
 
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
@@ -50,6 +51,7 @@ defmodule Console.Schema.Stack do
 
     belongs_to :repository, GitRepository
     belongs_to :cluster,    Cluster
+    belongs_to :delete_run, StackRun
 
     has_one :state, StackState, on_replace: :update
 
@@ -113,5 +115,10 @@ defmodule Console.Schema.Stack do
     |> cast_assoc(:output)
     |> cast_assoc(:state)
     |> validate_required(~w(status)a)
+  end
+
+  def delete_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(deleted_at delete_run_id)a)
   end
 end

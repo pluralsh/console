@@ -137,11 +137,21 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackCreated, Console.PubSu
   def process(%{item: stack}), do: Stacks.poll(stack)
 end
 
-defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
+defimpl Console.PubSub.Recurse, for: Console.PubSub.StackDeleted do
   alias Console.Deployments.Stacks
 
-  def process(%{item: run}) do
-    Stacks.get_stack!(run.stack_id)
-    |> Stacks.dequeue()
+  def process(%{item: stack}), do: Stacks.create_run(stack, stack.sha)
+end
+
+defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
+  alias Console.Schema.{Stack, StackRun}
+  alias Console.Deployments.Stacks
+
+  def process(%{item: %{id: id} = run}) do
+    case {Stacks.get_stack!(run.stack_id), run} do
+      {%Stack{delete_run_id: ^id} = stack, %StackRun{status: :successful}} ->
+        Console.Repo.delete(stack)
+      {stack, _} -> Stacks.dequeue(stack)
+    end
   end
 end

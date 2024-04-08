@@ -41,6 +41,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Global do
   end
   def create_global_service(%{service_id: sid, attributes: attrs}, %{context: %{current_user: user}}),
     do: Global.create(attrs, sid, user)
+  def create_global_service(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Global.create(attrs, user)
 
   def update_global_service(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Global.update(attrs, id, user)
