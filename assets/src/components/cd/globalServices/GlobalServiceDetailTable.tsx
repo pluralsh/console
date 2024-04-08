@@ -1,5 +1,12 @@
 import { useCallback, useRef } from 'react'
-import { Card, EmptyState, TabPanel, Table } from '@pluralsh/design-system'
+import {
+  AppIcon,
+  Card,
+  EmptyState,
+  GlobeIcon,
+  TabPanel,
+  Table,
+} from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
@@ -14,6 +21,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+
+import { getDistroProviderIconUrl } from 'components/utils/ClusterDistro'
 
 import {
   SERVICES_QUERY_PAGE_SIZE,
@@ -98,7 +107,29 @@ export function GlobalServiceDetailTable({
       >
         <div css={{ flexGrow: 1 }}>
           <Body2BoldP>Distribution</Body2BoldP>
-          <Body2P>{globalService?.distro || 'All distribution'}</Body2P>
+          <Body2P
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: theme.spacing.small,
+            }}
+          >
+            <AppIcon
+              spacing="padding"
+              size="xxsmall"
+              icon={globalService?.distro ? undefined : <GlobeIcon size={16} />}
+              url={
+                globalService?.distro
+                  ? getDistroProviderIconUrl({
+                      distro: globalService?.distro,
+                      provider: globalService?.provider?.cloud,
+                      mode: theme.mode,
+                    })
+                  : undefined
+              }
+            />
+            {globalService?.distro || 'All distribution'}
+          </Body2P>
         </div>
         <div css={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           <Body2BoldP>Tags</Body2BoldP>
