@@ -7595,7 +7595,9 @@ export type ServiceDeploymentsQueryVariables = Exact<{
 
 export type ServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
 
-export type ServiceDeploymentsTinyQueryVariables = Exact<{ [key: string]: never; }>;
+export type ServiceDeploymentsTinyQueryVariables = Exact<{
+  clusterId: Scalars['ID']['input'];
+}>;
 
 
 export type ServiceDeploymentsTinyQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null } | null> | null } | null };
@@ -13395,8 +13397,8 @@ export type ServiceDeploymentsLazyQueryHookResult = ReturnType<typeof useService
 export type ServiceDeploymentsSuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentsSuspenseQuery>;
 export type ServiceDeploymentsQueryResult = Apollo.QueryResult<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>;
 export const ServiceDeploymentsTinyDocument = gql`
-    query ServiceDeploymentsTiny {
-  serviceDeployments(first: 100) {
+    query ServiceDeploymentsTiny($clusterId: ID!) {
+  serviceDeployments(first: 100, clusterId: $clusterId) {
     pageInfo {
       ...PageInfo
     }
@@ -13422,10 +13424,11 @@ ${ServiceDeploymentTinyFragmentDoc}`;
  * @example
  * const { data, loading, error } = useServiceDeploymentsTinyQuery({
  *   variables: {
+ *      clusterId: // value for 'clusterId'
  *   },
  * });
  */
-export function useServiceDeploymentsTinyQuery(baseOptions?: Apollo.QueryHookOptions<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>) {
+export function useServiceDeploymentsTinyQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>(ServiceDeploymentsTinyDocument, options);
       }
