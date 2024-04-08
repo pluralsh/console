@@ -1,10 +1,13 @@
 import React, { ReactElement, useMemo } from 'react'
 import {
+  Card,
   ChipList,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
+
+import { useTheme } from 'styled-components'
 
 import {
   ConfigMapQueryVariables,
@@ -13,15 +16,19 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import { MetadataSidecar, ResourceLink, useKubernetesCluster } from '../utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 
 import { InlineLink } from '../../utils/typography/InlineLink'
 
-import { getBreadcrumbs } from './PersistentVolumes'
+import { SubTitle } from '../../utils/SubTitle'
+
+import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
+
 import { PVStatusChip } from './utils'
+import { getBreadcrumbs } from './PersistentVolumes'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -121,7 +128,210 @@ export default function PersistentVolume(): ReactElement {
 }
 
 export function PersistentVolumeInfo(): ReactElement {
-  const _pv = useOutletContext() as PersistentVolumeT
+  const theme = useTheme()
+  const pv = useOutletContext() as PersistentVolumeT
+  const source = pv?.persistentVolumeSource
 
-  return <section>TODO</section>
+  return (
+    <section>
+      {/* TODO: Handle all sources. */}
+      <SubTitle>Source</SubTitle>
+      <Card
+        css={{
+          display: 'flex',
+          gap: theme.spacing.large,
+          padding: theme.spacing.medium,
+          flexWrap: 'wrap',
+        }}
+      >
+        {source?.awsElasticBlockStore && (
+          <>
+            <ResourceInfoCardEntry heading="Type">
+              AWS Elastic Block Store
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Filesystem type">
+              {source.awsElasticBlockStore.fsType}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Readonly">
+              {source.awsElasticBlockStore.readOnly}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Volume ID">
+              {source.awsElasticBlockStore.volumeID}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Partition">
+              {source.awsElasticBlockStore.partition}
+            </ResourceInfoCardEntry>
+          </>
+        )}
+        {source?.cinder && (
+          <>
+            <ResourceInfoCardEntry heading="Type">Cinder</ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Filesystem type">
+              {source.cinder.fsType}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Readonly">
+              {source.cinder.readOnly}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Volume ID">
+              {source.cinder.volumeID}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Secret">
+              <ResourceLink
+                kind="secret"
+                name={source.cinder.secretRef?.name}
+                namespace={source.cinder.secretRef.namespace}
+              />
+            </ResourceInfoCardEntry>
+          </>
+        )}
+        {source?.csi && (
+          <>
+            <ResourceInfoCardEntry heading="Type">CSI</ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Filesystem type">
+              {source.csi.fsType}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Readonly">
+              {source.csi.readOnly}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Driver">
+              {source.csi.driver}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Volume handle">
+              {source.csi.volumeHandle}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Controller expand secret">
+              <ResourceLink
+                kind="secret"
+                name={source.csi.controllerExpandSecretRef?.name}
+                namespace={source.csi.controllerExpandSecretRef?.namespace}
+              />
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Controller publish secret">
+              <ResourceLink
+                kind="secret"
+                name={source.csi.controllerPublishSecretRef?.name}
+                namespace={source.csi.controllerPublishSecretRef?.namespace}
+              />
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Node expand secret">
+              <ResourceLink
+                kind="node"
+                name={source.csi.nodeExpandSecretRef?.name}
+                namespace={source.csi.nodeExpandSecretRef?.namespace}
+              />
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Node publish secret">
+              <ResourceLink
+                kind="node"
+                name={source.csi.nodePublishSecretRef?.name}
+                namespace={source.csi.nodePublishSecretRef?.namespace}
+              />
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Node stage secret">
+              <ResourceLink
+                kind="node"
+                name={source.csi.nodeStageSecretRef?.name}
+                namespace={source.csi.nodeStageSecretRef?.namespace}
+              />
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Volume attributes">
+              <ChipList
+                size="small"
+                values={Object.entries(source.csi.volumeAttributes)}
+                transformValue={(label) => label.join(': ')}
+                limit={5}
+              />
+            </ResourceInfoCardEntry>
+          </>
+        )}
+        {source?.fc && (
+          <>
+            <ResourceInfoCardEntry heading="Type">
+              Fibre Channel
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Filesystem type">
+              {source.fc.fsType}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Readonly">
+              {source.fc.readOnly}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Lun number">
+              {source.fc.lun}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Target World Wide Names">
+              <ChipList
+                size="small"
+                values={source.fc.targetWWNs}
+                limit={5}
+              />
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="World Wide IDs">
+              <ChipList
+                size="small"
+                values={source.fc.wwids}
+                limit={5}
+              />
+            </ResourceInfoCardEntry>
+          </>
+        )}
+        {source?.flocker && (
+          <>
+            <ResourceInfoCardEntry heading="Type">
+              Flocker
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Dataset name">
+              {source.flocker.datasetName}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Dataset UUID">
+              {source.flocker.datasetUUID}
+            </ResourceInfoCardEntry>
+          </>
+        )}
+        {source?.gcePersistentDisk && (
+          <>
+            <ResourceInfoCardEntry heading="Type">
+              GCE Persistent Disk
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Filesystem type">
+              {source.gcePersistentDisk.fsType}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Readonly">
+              {source.gcePersistentDisk.readOnly}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Persistent disk name">
+              {source.gcePersistentDisk.pdName}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Partition">
+              {source.gcePersistentDisk.partition}
+            </ResourceInfoCardEntry>
+          </>
+        )}
+        {source?.local && (
+          <>
+            <ResourceInfoCardEntry heading="Type">Local</ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Filesystem type">
+              {source.local.fsType}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Path">
+              {source.local.path}
+            </ResourceInfoCardEntry>
+          </>
+        )}
+        {source?.nfs && (
+          <>
+            <ResourceInfoCardEntry heading="Type">NFS</ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Filesystem type">
+              {source.nfs.fsType}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Server">
+              {source.nfs.server}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Path">
+              {source.nfs.path}
+            </ResourceInfoCardEntry>
+          </>
+        )}
+      </Card>
+    </section>
+  )
 }

@@ -5014,7 +5014,7 @@ export type PersistentVolumeQueryVariables = Exact<{
 }>;
 
 
-export type PersistentVolumeQuery = { __typename?: 'Query', handleGetPersistentVolumeDetail?: { __typename?: 'persistentvolume_PersistentVolumeDetail', status: string, claim: string, storageClass: string, reason: string, message: string, mountOptions: Array<string | null>, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
+export type PersistentVolumeQuery = { __typename?: 'Query', handleGetPersistentVolumeDetail?: { __typename?: 'persistentvolume_PersistentVolumeDetail', status: string, claim: string, storageClass: string, reason: string, message: string, mountOptions: Array<string | null>, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, persistentVolumeSource: { __typename?: 'v1_PersistentVolumeSource', portworxVolume?: { __typename?: 'v1_PortworxVolumeSource', fsType?: string | null, readOnly?: boolean | null, volumeID: string } | null, awsElasticBlockStore?: { __typename?: 'v1_AWSElasticBlockStoreVolumeSource', volumeID: string, readOnly?: boolean | null, fsType?: string | null, partition?: number | null } | null, azureDisk?: { __typename?: 'v1_AzureDiskVolumeSource', fsType?: string | null, readOnly?: boolean | null, kind?: string | null, cachingMode?: string | null, diskName: string, diskURI: string } | null, azureFile?: { __typename?: 'v1_AzureFilePersistentVolumeSource', readOnly?: boolean | null, secretName: string, secretNamespace: string, shareName: string } | null, cephfs?: { __typename?: 'v1_CephFSPersistentVolumeSource', readOnly?: boolean | null, path?: string | null, monitors: Array<string | null>, secretFile?: string | null, user?: string | null, secretRef?: { __typename?: 'v1_SecretReference', name?: string | null, namespace?: string | null } | null } | null, cinder?: { __typename?: 'v1_CinderPersistentVolumeSource', readOnly?: boolean | null, fsType?: string | null, volumeID: string, secretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null } | null, csi?: { __typename?: 'v1_CSIPersistentVolumeSource', fsType?: string | null, readOnly?: boolean | null, driver: string, volumeAttributes?: any | null, volumeHandle: string, controllerExpandSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, controllerPublishSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, nodeExpandSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, nodePublishSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, nodeStageSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null } | null, fc?: { __typename?: 'v1_FCVolumeSource', readOnly?: boolean | null, fsType?: string | null, lun?: number | null, targetWWNs?: Array<string | null> | null, wwids?: Array<string | null> | null } | null, flexVolume?: { __typename?: 'v1_FlexPersistentVolumeSource', fsType?: string | null, readOnly?: boolean | null, driver: string, options?: any | null, secretRef?: { __typename?: 'v1_SecretReference', name?: string | null, namespace?: string | null } | null } | null, flocker?: { __typename?: 'v1_FlockerVolumeSource', datasetName?: string | null, datasetUUID?: string | null } | null, gcePersistentDisk?: { __typename?: 'v1_GCEPersistentDiskVolumeSource', readOnly?: boolean | null, fsType?: string | null, partition?: number | null, pdName: string } | null, glusterfs?: { __typename?: 'v1_GlusterfsPersistentVolumeSource', readOnly?: boolean | null, path: string, endpoints: string, endpointsNamespace?: string | null } | null, hostPath?: { __typename?: 'v1_HostPathVolumeSource', path: string, type?: string | null } | null, iscsi?: { __typename?: 'v1_ISCSIPersistentVolumeSource', readOnly?: boolean | null, fsType?: string | null, lun: number, chapAuthDiscovery?: boolean | null, chapAuthSession?: boolean | null, initiatorName?: string | null, iqn: string, iscsiInterface?: string | null, portals?: Array<string | null> | null, targetPortal: string, secretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null } | null, local?: { __typename?: 'v1_LocalVolumeSource', fsType?: string | null, path: string } | null, nfs?: { __typename?: 'v1_NFSVolumeSource', path: string, readOnly?: boolean | null, server: string } | null, photonPersistentDisk?: { __typename?: 'v1_PhotonPersistentDiskVolumeSource', fsType?: string | null, pdID: string } | null, quobyte?: { __typename?: 'v1_QuobyteVolumeSource', readOnly?: boolean | null, user?: string | null, volume: string, registry: string, group?: string | null, tenant?: string | null } | null, rbd?: { __typename?: 'v1_RBDPersistentVolumeSource', user?: string | null, readOnly?: boolean | null, fsType?: string | null, monitors: Array<string | null>, image: string, keyring?: string | null, pool?: string | null, secretRef?: { __typename?: 'v1_SecretReference', name?: string | null, namespace?: string | null } | null } | null, scaleIO?: { __typename?: 'v1_ScaleIOPersistentVolumeSource', fsType?: string | null, readOnly?: boolean | null, gateway: string, protectionDomain?: string | null, sslEnabled?: boolean | null, storageMode?: string | null, storagePool?: string | null, system: string, volumeName?: string | null, secretRef: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } } | null, storageos?: { __typename?: 'v1_StorageOSPersistentVolumeSource', volumeName?: string | null, volumeNamespace?: string | null, fsType?: string | null, readOnly?: boolean | null, secretRef?: { __typename?: 'v1_ObjectReference', name?: string | null, namespace?: string | null, kind?: string | null, uid?: string | null, apiVersion?: string | null, fieldPath?: string | null, resourceVersion?: string | null } | null } | null, vsphereVolume?: { __typename?: 'v1_VsphereVirtualDiskVolumeSource', fsType?: string | null, storagePolicyID?: string | null, storagePolicyName?: string | null, volumePath: string } | null }, capacity: { __typename?: 'query_handleGetPersistentVolumeDetail_capacity', additionalProperties?: Array<{ __typename?: 'resource_Quantity2_entry', key: string, value?: { __typename?: 'resource_Quantity2', Format: string, s: string, d: { __typename?: 'resource_infDecAmount', Dec: { __typename?: 'inf_Dec', scale: number, unscaled: { __typename?: 'big_Int', abs: Array<number | null>, neg: boolean } } }, i: { __typename?: 'resource_int64Amount', scale: number, value: any } } | null } | null> | null } } | null };
 
 export type PersistentVolumeClaimsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -8581,6 +8581,225 @@ export const PersistentVolumeDocument = gql`
     mountOptions
     reclaimPolicy
     accessModes
+    persistentVolumeSource {
+      portworxVolume {
+        fsType
+        readOnly
+        volumeID
+      }
+      awsElasticBlockStore {
+        volumeID
+        readOnly
+        fsType
+        partition
+      }
+      azureDisk {
+        fsType
+        readOnly
+        kind
+        cachingMode
+        diskName
+        diskURI
+      }
+      azureFile {
+        readOnly
+        secretName
+        secretNamespace
+        shareName
+      }
+      cephfs {
+        readOnly
+        path
+        monitors
+        secretFile
+        secretRef {
+          name
+          namespace
+        }
+        user
+      }
+      cinder {
+        secretRef {
+          namespace
+          name
+        }
+        readOnly
+        fsType
+        volumeID
+      }
+      csi {
+        fsType
+        readOnly
+        controllerExpandSecretRef {
+          namespace
+          name
+        }
+        controllerPublishSecretRef {
+          namespace
+          name
+        }
+        driver
+        nodeExpandSecretRef {
+          namespace
+          name
+        }
+        nodePublishSecretRef {
+          namespace
+          name
+        }
+        nodeStageSecretRef {
+          namespace
+          name
+        }
+        volumeAttributes
+        volumeHandle
+      }
+      fc {
+        readOnly
+        fsType
+        lun
+        targetWWNs
+        wwids
+      }
+      flexVolume {
+        fsType
+        readOnly
+        driver
+        secretRef {
+          name
+          namespace
+        }
+        options
+      }
+      flocker {
+        datasetName
+        datasetUUID
+      }
+      gcePersistentDisk {
+        readOnly
+        fsType
+        partition
+        pdName
+      }
+      glusterfs {
+        readOnly
+        path
+        endpoints
+        endpointsNamespace
+      }
+      hostPath {
+        path
+        type
+      }
+      iscsi {
+        readOnly
+        fsType
+        secretRef {
+          namespace
+          name
+        }
+        lun
+        chapAuthDiscovery
+        chapAuthSession
+        initiatorName
+        iqn
+        iscsiInterface
+        portals
+        targetPortal
+      }
+      local {
+        fsType
+        path
+      }
+      nfs {
+        path
+        readOnly
+        server
+      }
+      photonPersistentDisk {
+        fsType
+        pdID
+      }
+      quobyte {
+        readOnly
+        user
+        volume
+        registry
+        group
+        tenant
+      }
+      rbd {
+        user
+        readOnly
+        fsType
+        secretRef {
+          name
+          namespace
+        }
+        monitors
+        image
+        keyring
+        pool
+      }
+      scaleIO {
+        secretRef {
+          namespace
+          name
+        }
+        fsType
+        readOnly
+        gateway
+        protectionDomain
+        sslEnabled
+        storageMode
+        storagePool
+        system
+        volumeName
+      }
+      storageos {
+        volumeName
+        volumeNamespace
+        fsType
+        secretRef {
+          name
+          namespace
+          kind
+          uid
+          apiVersion
+          fieldPath
+          resourceVersion
+        }
+        readOnly
+      }
+      vsphereVolume {
+        fsType
+        storagePolicyID
+        storagePolicyName
+        volumePath
+      }
+    }
+    capacity {
+      additionalProperties {
+        key
+        value {
+          Format
+          d {
+            Dec {
+              scale
+              unscaled {
+                abs
+                neg
+              }
+            }
+          }
+          i {
+            scale
+            value
+          }
+          s
+        }
+      }
+    }
   }
 }
     ${TypeMetaFragmentDoc}

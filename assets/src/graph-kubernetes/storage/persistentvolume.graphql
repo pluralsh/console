@@ -50,5 +50,224 @@ query PersistentVolume($name: String!) {
     mountOptions
     reclaimPolicy
     accessModes
+    persistentVolumeSource {
+      portworxVolume {
+        fsType
+        readOnly
+        volumeID
+      }
+      awsElasticBlockStore {
+        volumeID
+        readOnly
+        fsType
+        partition
+      }
+      azureDisk {
+        fsType
+        readOnly
+        kind
+        cachingMode
+        diskName
+        diskURI
+      }
+      azureFile {
+        readOnly
+        secretName
+        secretNamespace
+        shareName
+      }
+      cephfs {
+        readOnly
+        path
+        monitors
+        secretFile
+        secretRef {
+          name
+          namespace
+        }
+        user
+      }
+      cinder {
+        secretRef {
+          namespace
+          name
+        }
+        readOnly
+        fsType
+        volumeID
+      }
+      csi {
+        fsType
+        readOnly
+        controllerExpandSecretRef {
+          namespace
+          name
+        }
+        controllerPublishSecretRef {
+          namespace
+          name
+        }
+        driver
+        nodeExpandSecretRef {
+          namespace
+          name
+        }
+        nodePublishSecretRef {
+          namespace
+          name
+        }
+        nodeStageSecretRef {
+          namespace
+          name
+        }
+        volumeAttributes
+        volumeHandle
+      }
+      fc {
+        readOnly
+        fsType
+        lun
+        targetWWNs
+        wwids
+      }
+      flexVolume {
+        fsType
+        readOnly
+        driver
+        secretRef {
+          name
+          namespace
+        }
+        options
+      }
+      flocker {
+        datasetName
+        datasetUUID
+      }
+      gcePersistentDisk {
+        readOnly
+        fsType
+        partition
+        pdName
+      }
+      glusterfs {
+        readOnly
+        path
+        endpoints
+        endpointsNamespace
+      }
+      hostPath {
+        path
+        type
+      }
+      iscsi {
+        readOnly
+        fsType
+        secretRef {
+          namespace
+          name
+        }
+        lun
+        chapAuthDiscovery
+        chapAuthSession
+        initiatorName
+        iqn
+        iscsiInterface
+        portals
+        targetPortal
+      }
+      local {
+        fsType
+        path
+      }
+      nfs {
+        path
+        readOnly
+        server
+      }
+      photonPersistentDisk {
+        fsType
+        pdID
+      }
+      quobyte {
+        readOnly
+        user
+        volume
+        registry
+        group
+        tenant
+      }
+      rbd {
+        user
+        readOnly
+        fsType
+        secretRef {
+          name
+          namespace
+        }
+        monitors
+        image
+        keyring
+        pool
+      }
+      scaleIO {
+        secretRef {
+          namespace
+          name
+        }
+        fsType
+        readOnly
+        gateway
+        protectionDomain
+        sslEnabled
+        storageMode
+        storagePool
+        system
+        volumeName
+      }
+      storageos {
+        volumeName
+        volumeNamespace
+        fsType
+        secretRef {
+          name
+          namespace
+          kind
+          uid
+          apiVersion
+          fieldPath
+          resourceVersion
+        }
+        readOnly
+      }
+      vsphereVolume {
+        fsType
+        storagePolicyID
+        storagePolicyName
+        volumePath
+      }
+    }
+    capacity {
+      additionalProperties {
+        key
+        value {
+          Format
+          d {
+            Dec {
+              scale
+              unscaled {
+                abs
+                neg
+              }
+            }
+          }
+          i {
+            scale
+            value
+          }
+          s
+        }
+      }
+    }
   }
 }
