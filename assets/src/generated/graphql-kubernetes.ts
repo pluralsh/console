@@ -4895,6 +4895,21 @@ export type CustomResourceDefinitionsQueryVariables = Exact<{
 
 export type CustomResourceDefinitionsQuery = { __typename?: 'Query', handleGetCustomResourceDefinitionList?: { __typename?: 'types_CustomResourceDefinitionList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'types_CustomResourceDefinition', established: string, group: string, scope: string, version?: string | null, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, names: { __typename?: 'types_CustomResourceDefinitionNames', categories?: Array<string | null> | null, kind: string, listKind?: string | null, plural: string, shortNames?: Array<string | null> | null, singular?: string | null } } | null> } | null };
 
+export type CustomResourceDefinitionQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+
+export type CustomResourceDefinitionQuery = { __typename?: 'Query', handleGetCustomResourceDefinitionDetail?: { __typename?: 'types_CustomResourceDefinitionDetail', group: string, version?: string | null, established: string, subresources: Array<string | null>, scope: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, names: { __typename?: 'types_CustomResourceDefinitionNames', kind: string, categories?: Array<string | null> | null, shortNames?: Array<string | null> | null, listKind?: string | null, singular?: string | null, plural: string } } | null };
+
+export type CustomResourcesQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type CustomResourcesQuery = { __typename?: 'Query', handleGetCustomResourceObjectList?: { __typename?: 'types_CustomResourceObjectList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'types_CustomResourceObject', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export type IngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5020,7 +5035,7 @@ export type PersistentVolumeQueryVariables = Exact<{
 }>;
 
 
-export type PersistentVolumeQuery = { __typename?: 'Query', handleGetPersistentVolumeDetail?: { __typename?: 'persistentvolume_PersistentVolumeDetail', status: string, claim: string, storageClass: string, reason: string, message: string, mountOptions: Array<string | null>, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
+export type PersistentVolumeQuery = { __typename?: 'Query', handleGetPersistentVolumeDetail?: { __typename?: 'persistentvolume_PersistentVolumeDetail', status: string, claim: string, storageClass: string, reason: string, message: string, mountOptions: Array<string | null>, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, persistentVolumeSource: { __typename?: 'v1_PersistentVolumeSource', portworxVolume?: { __typename?: 'v1_PortworxVolumeSource', fsType?: string | null, readOnly?: boolean | null, volumeID: string } | null, awsElasticBlockStore?: { __typename?: 'v1_AWSElasticBlockStoreVolumeSource', volumeID: string, readOnly?: boolean | null, fsType?: string | null, partition?: number | null } | null, azureDisk?: { __typename?: 'v1_AzureDiskVolumeSource', fsType?: string | null, readOnly?: boolean | null, kind?: string | null, cachingMode?: string | null, diskName: string, diskURI: string } | null, azureFile?: { __typename?: 'v1_AzureFilePersistentVolumeSource', readOnly?: boolean | null, secretName: string, secretNamespace: string, shareName: string } | null, cephfs?: { __typename?: 'v1_CephFSPersistentVolumeSource', readOnly?: boolean | null, path?: string | null, monitors: Array<string | null>, secretFile?: string | null, user?: string | null, secretRef?: { __typename?: 'v1_SecretReference', name?: string | null, namespace?: string | null } | null } | null, cinder?: { __typename?: 'v1_CinderPersistentVolumeSource', readOnly?: boolean | null, fsType?: string | null, volumeID: string, secretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null } | null, csi?: { __typename?: 'v1_CSIPersistentVolumeSource', fsType?: string | null, readOnly?: boolean | null, driver: string, volumeAttributes?: any | null, volumeHandle: string, controllerExpandSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, controllerPublishSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, nodeExpandSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, nodePublishSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, nodeStageSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null } | null, fc?: { __typename?: 'v1_FCVolumeSource', readOnly?: boolean | null, fsType?: string | null, lun?: number | null, targetWWNs?: Array<string | null> | null, wwids?: Array<string | null> | null } | null, flexVolume?: { __typename?: 'v1_FlexPersistentVolumeSource', fsType?: string | null, readOnly?: boolean | null, driver: string, options?: any | null, secretRef?: { __typename?: 'v1_SecretReference', name?: string | null, namespace?: string | null } | null } | null, flocker?: { __typename?: 'v1_FlockerVolumeSource', datasetName?: string | null, datasetUUID?: string | null } | null, gcePersistentDisk?: { __typename?: 'v1_GCEPersistentDiskVolumeSource', readOnly?: boolean | null, fsType?: string | null, partition?: number | null, pdName: string } | null, glusterfs?: { __typename?: 'v1_GlusterfsPersistentVolumeSource', readOnly?: boolean | null, path: string, endpoints: string, endpointsNamespace?: string | null } | null, hostPath?: { __typename?: 'v1_HostPathVolumeSource', path: string, type?: string | null } | null, iscsi?: { __typename?: 'v1_ISCSIPersistentVolumeSource', readOnly?: boolean | null, fsType?: string | null, lun: number, chapAuthDiscovery?: boolean | null, chapAuthSession?: boolean | null, initiatorName?: string | null, iqn: string, iscsiInterface?: string | null, portals?: Array<string | null> | null, targetPortal: string, secretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null } | null, local?: { __typename?: 'v1_LocalVolumeSource', fsType?: string | null, path: string } | null, nfs?: { __typename?: 'v1_NFSVolumeSource', path: string, readOnly?: boolean | null, server: string } | null, photonPersistentDisk?: { __typename?: 'v1_PhotonPersistentDiskVolumeSource', fsType?: string | null, pdID: string } | null, quobyte?: { __typename?: 'v1_QuobyteVolumeSource', readOnly?: boolean | null, user?: string | null, volume: string, registry: string, group?: string | null, tenant?: string | null } | null, rbd?: { __typename?: 'v1_RBDPersistentVolumeSource', user?: string | null, readOnly?: boolean | null, fsType?: string | null, monitors: Array<string | null>, image: string, keyring?: string | null, pool?: string | null, secretRef?: { __typename?: 'v1_SecretReference', name?: string | null, namespace?: string | null } | null } | null, scaleIO?: { __typename?: 'v1_ScaleIOPersistentVolumeSource', fsType?: string | null, readOnly?: boolean | null, gateway: string, protectionDomain?: string | null, sslEnabled?: boolean | null, storageMode?: string | null, storagePool?: string | null, system: string, volumeName?: string | null, secretRef: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } } | null, storageos?: { __typename?: 'v1_StorageOSPersistentVolumeSource', volumeName?: string | null, volumeNamespace?: string | null, fsType?: string | null, readOnly?: boolean | null, secretRef?: { __typename?: 'v1_ObjectReference', name?: string | null, namespace?: string | null, kind?: string | null, uid?: string | null, apiVersion?: string | null, fieldPath?: string | null, resourceVersion?: string | null } | null } | null, vsphereVolume?: { __typename?: 'v1_VsphereVirtualDiskVolumeSource', fsType?: string | null, storagePolicyID?: string | null, storagePolicyName?: string | null, volumePath: string } | null }, capacity: { __typename?: 'query_handleGetPersistentVolumeDetail_capacity', additionalProperties?: Array<{ __typename?: 'resource_Quantity2_entry', key: string, value?: { __typename?: 'resource_Quantity2', Format: string, s: string, d: { __typename?: 'resource_infDecAmount', Dec: { __typename?: 'inf_Dec', scale: number, unscaled: { __typename?: 'big_Int', abs: Array<number | null>, neg: boolean } } }, i: { __typename?: 'resource_int64Amount', scale: number, value: any } } | null } | null> | null } } | null };
 
 export type PersistentVolumeClaimsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -7862,6 +7877,122 @@ export type CustomResourceDefinitionsQueryHookResult = ReturnType<typeof useCust
 export type CustomResourceDefinitionsLazyQueryHookResult = ReturnType<typeof useCustomResourceDefinitionsLazyQuery>;
 export type CustomResourceDefinitionsSuspenseQueryHookResult = ReturnType<typeof useCustomResourceDefinitionsSuspenseQuery>;
 export type CustomResourceDefinitionsQueryResult = Apollo.QueryResult<CustomResourceDefinitionsQuery, CustomResourceDefinitionsQueryVariables>;
+export const CustomResourceDefinitionDocument = gql`
+    query CustomResourceDefinition($name: String!) {
+  handleGetCustomResourceDefinitionDetail(crd: $name) @rest(path: "crd/{args.crd}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    conditions @type(name: "common_Condition") {
+      ...Condition
+    }
+    names {
+      kind
+      categories
+      shortNames
+      listKind
+      singular
+      plural
+    }
+    group
+    version
+    established
+    subresources
+    scope
+    errors
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${ConditionFragmentDoc}`;
+
+/**
+ * __useCustomResourceDefinitionQuery__
+ *
+ * To run a query within a React component, call `useCustomResourceDefinitionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCustomResourceDefinitionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCustomResourceDefinitionQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCustomResourceDefinitionQuery(baseOptions: Apollo.QueryHookOptions<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>(CustomResourceDefinitionDocument, options);
+      }
+export function useCustomResourceDefinitionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>(CustomResourceDefinitionDocument, options);
+        }
+export function useCustomResourceDefinitionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>(CustomResourceDefinitionDocument, options);
+        }
+export type CustomResourceDefinitionQueryHookResult = ReturnType<typeof useCustomResourceDefinitionQuery>;
+export type CustomResourceDefinitionLazyQueryHookResult = ReturnType<typeof useCustomResourceDefinitionLazyQuery>;
+export type CustomResourceDefinitionSuspenseQueryHookResult = ReturnType<typeof useCustomResourceDefinitionSuspenseQuery>;
+export type CustomResourceDefinitionQueryResult = Apollo.QueryResult<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>;
+export const CustomResourcesDocument = gql`
+    query CustomResources($namespace: String!, $name: String!) {
+  handleGetCustomResourceObjectList(namespace: $namespace, crd: $name) @rest(path: "crd/{args.crd}/{args.crd}/object") {
+    listMeta {
+      totalItems
+    }
+    items {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useCustomResourcesQuery__
+ *
+ * To run a query within a React component, call `useCustomResourcesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCustomResourcesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCustomResourcesQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCustomResourcesQuery(baseOptions: Apollo.QueryHookOptions<CustomResourcesQuery, CustomResourcesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CustomResourcesQuery, CustomResourcesQueryVariables>(CustomResourcesDocument, options);
+      }
+export function useCustomResourcesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CustomResourcesQuery, CustomResourcesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CustomResourcesQuery, CustomResourcesQueryVariables>(CustomResourcesDocument, options);
+        }
+export function useCustomResourcesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CustomResourcesQuery, CustomResourcesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CustomResourcesQuery, CustomResourcesQueryVariables>(CustomResourcesDocument, options);
+        }
+export type CustomResourcesQueryHookResult = ReturnType<typeof useCustomResourcesQuery>;
+export type CustomResourcesLazyQueryHookResult = ReturnType<typeof useCustomResourcesLazyQuery>;
+export type CustomResourcesSuspenseQueryHookResult = ReturnType<typeof useCustomResourcesSuspenseQuery>;
+export type CustomResourcesQueryResult = Apollo.QueryResult<CustomResourcesQuery, CustomResourcesQueryVariables>;
 export const IngressesDocument = gql`
     query Ingresses($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetIngressList(
@@ -8659,6 +8790,225 @@ export const PersistentVolumeDocument = gql`
     mountOptions
     reclaimPolicy
     accessModes
+    persistentVolumeSource {
+      portworxVolume {
+        fsType
+        readOnly
+        volumeID
+      }
+      awsElasticBlockStore {
+        volumeID
+        readOnly
+        fsType
+        partition
+      }
+      azureDisk {
+        fsType
+        readOnly
+        kind
+        cachingMode
+        diskName
+        diskURI
+      }
+      azureFile {
+        readOnly
+        secretName
+        secretNamespace
+        shareName
+      }
+      cephfs {
+        readOnly
+        path
+        monitors
+        secretFile
+        secretRef {
+          name
+          namespace
+        }
+        user
+      }
+      cinder {
+        secretRef {
+          namespace
+          name
+        }
+        readOnly
+        fsType
+        volumeID
+      }
+      csi {
+        fsType
+        readOnly
+        controllerExpandSecretRef {
+          namespace
+          name
+        }
+        controllerPublishSecretRef {
+          namespace
+          name
+        }
+        driver
+        nodeExpandSecretRef {
+          namespace
+          name
+        }
+        nodePublishSecretRef {
+          namespace
+          name
+        }
+        nodeStageSecretRef {
+          namespace
+          name
+        }
+        volumeAttributes
+        volumeHandle
+      }
+      fc {
+        readOnly
+        fsType
+        lun
+        targetWWNs
+        wwids
+      }
+      flexVolume {
+        fsType
+        readOnly
+        driver
+        secretRef {
+          name
+          namespace
+        }
+        options
+      }
+      flocker {
+        datasetName
+        datasetUUID
+      }
+      gcePersistentDisk {
+        readOnly
+        fsType
+        partition
+        pdName
+      }
+      glusterfs {
+        readOnly
+        path
+        endpoints
+        endpointsNamespace
+      }
+      hostPath {
+        path
+        type
+      }
+      iscsi {
+        readOnly
+        fsType
+        secretRef {
+          namespace
+          name
+        }
+        lun
+        chapAuthDiscovery
+        chapAuthSession
+        initiatorName
+        iqn
+        iscsiInterface
+        portals
+        targetPortal
+      }
+      local {
+        fsType
+        path
+      }
+      nfs {
+        path
+        readOnly
+        server
+      }
+      photonPersistentDisk {
+        fsType
+        pdID
+      }
+      quobyte {
+        readOnly
+        user
+        volume
+        registry
+        group
+        tenant
+      }
+      rbd {
+        user
+        readOnly
+        fsType
+        secretRef {
+          name
+          namespace
+        }
+        monitors
+        image
+        keyring
+        pool
+      }
+      scaleIO {
+        secretRef {
+          namespace
+          name
+        }
+        fsType
+        readOnly
+        gateway
+        protectionDomain
+        sslEnabled
+        storageMode
+        storagePool
+        system
+        volumeName
+      }
+      storageos {
+        volumeName
+        volumeNamespace
+        fsType
+        secretRef {
+          name
+          namespace
+          kind
+          uid
+          apiVersion
+          fieldPath
+          resourceVersion
+        }
+        readOnly
+      }
+      vsphereVolume {
+        fsType
+        storagePolicyID
+        storagePolicyName
+        volumePath
+      }
+    }
+    capacity {
+      additionalProperties {
+        key
+        value {
+          Format
+          d {
+            Dec {
+              scale
+              unscaled {
+                abs
+                neg
+              }
+            }
+          }
+          i {
+            scale
+            value
+          }
+          s
+        }
+      }
+    }
   }
 }
     ${TypeMetaFragmentDoc}

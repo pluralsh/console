@@ -1,5 +1,5 @@
 import uniqWith from 'lodash/uniqWith'
-import { ReactNode, useMemo, useState } from 'react'
+import React, { ReactNode, useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
 import { Chip, ChipList, Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Link, useParams } from 'react-router-dom'
@@ -133,6 +133,32 @@ export function ResourceReadyChip({
     >
       {capitalize(r)}
     </Chip>
+  )
+}
+
+export function ResourceLink({
+  name,
+  namespace,
+  kind,
+  emptyState = 'None',
+}: {
+  name?: Maybe<string>
+  namespace?: Maybe<string>
+  kind: string
+  emptyState?: string
+}) {
+  const { clusterId } = useParams()
+
+  if (!name) return emptyState
+
+  return (
+    <Link to={getResourceDetailsAbsPath(clusterId, kind, name, namespace)}>
+      <InlineLink>
+        {namespace}
+        {namespace && '/'}
+        {name}
+      </InlineLink>
+    </Link>
   )
 }
 
