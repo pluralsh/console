@@ -82,6 +82,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :job_spec,       :job_gate_spec, description: "optional k8s job configuration for the job that will apply this stack"
     field :configuration,  non_null(:stack_configuration), description: "version/image config for the tool you're using"
     field :approval,       :boolean, description: "whether to require approval"
+    field :deleted_at,     :datetime, description: "whether this stack was previously deleted and is pending cleanup"
 
     connection field :runs, node_type: :stack_run do
       resolve &Deployments.list_stack_runs/3
@@ -279,6 +280,13 @@ defmodule Console.GraphQl.Deployments.Stack do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_stack/2
+    end
+
+    field :detach_stack, :infrastructure_stack do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.detach_stack/2
     end
 
     field :approve_stack_run, :stack_run do

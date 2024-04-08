@@ -276,7 +276,7 @@ defmodule Console.Deployments.Services do
         do: {:ok, merge_configuration(secrets, attrs[:configuration])}
     end)
     |> add_operation(:create, fn %{source: source, config: config} ->
-      Map.take(source, [:repository_id, :sha, :name, :namespace])
+      Map.take(source, [:repository_id, :sha, :name, :namespace, :templated])
       |> Console.dedupe(:git, Console.mapify(source.git))
       |> Console.dedupe(:helm, Console.mapify(source.helm))
       |> Console.dedupe(:kustomize, Console.mapify(source.kustomize))

@@ -39,7 +39,8 @@ defmodule Console.Schema.GlobalService do
     |> unique_constraint(:name)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:provider_id)
-    |> validate_required(~w(name service_id)a)
+    |> validate_required(~w(name)a)
+    |> validate_one_present([:service_id, :template])
   end
 
   def tag_changeset(model, attrs \\ %{}) do

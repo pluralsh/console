@@ -74,17 +74,35 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
     end
   end
 
+  describe "detachStack" do
+    test "it can detach a stack" do
+      stack = insert(:stack)
+
+      {:ok, %{data: %{"detachStack" => found}}} = run_query("""
+        mutation Delete($id: ID!) {
+          detachStack(id: $id) { id }
+        }
+      """, %{"id" => stack.id}, %{current_user: admin_user()})
+
+      assert found["id"] == stack.id
+    end
+  end
+
   describe "deleteStack" do
     test "it can delete a stack" do
       stack = insert(:stack)
 
       {:ok, %{data: %{"deleteStack" => found}}} = run_query("""
         mutation Delete($id: ID!) {
-          deleteStack(id: $id) { id }
+          deleteStack(id: $id) {
+            id
+            deletedAt
+          }
         }
       """, %{"id" => stack.id}, %{current_user: admin_user()})
 
       assert found["id"] == stack.id
+      assert found["deletedAt"]
     end
   end
 

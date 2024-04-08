@@ -87,6 +87,7 @@ function getMenuItems({
       text: 'Kubernetes',
       icon: <ClusterIcon />,
       path: '/kubernetes',
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
       text: 'Builds',
@@ -98,12 +99,14 @@ function getMenuItems({
       text: 'Nodes',
       icon: <ServersIcon />,
       path: '/nodes',
+      plural: true,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
       text: 'Pods',
       icon: <ApiIcon />,
       path: '/pods',
+      plural: true,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {

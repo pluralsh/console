@@ -1685,6 +1685,8 @@ export type GlobalService = {
   services?: Maybe<ServiceDeploymentConnection>;
   /** a set of tags to select clusters for this global service */
   tags?: Maybe<Array<Maybe<Tag>>>;
+  /** the service template used to spawn services */
+  template?: Maybe<ServiceTemplate>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -1708,6 +1710,7 @@ export type GlobalServiceAttributes = {
   providerId?: InputMaybe<Scalars['ID']['input']>;
   /** the cluster tags to target */
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
+  template?: InputMaybe<ServiceTemplateAttributes>;
 };
 
 export type GlobalServiceConnection = {
@@ -1888,6 +1891,8 @@ export type InfrastructureStack = {
   cluster?: Maybe<Cluster>;
   /** version/image config for the tool you're using */
   configuration: StackConfiguration;
+  /** whether this stack was previously deleted and is pending cleanup */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** environment variables for this stack */
   environment?: Maybe<Array<Maybe<StackEnvironment>>>;
   /** files bound to a run of this stack */
@@ -3775,6 +3780,7 @@ export type RootMutationType = {
   detachCluster?: Maybe<Cluster>;
   /** removes a service from storage, but bypasses waiting for the agent to fully drain it from its hosting cluster */
   detachServiceDeployment?: Maybe<ServiceDeployment>;
+  detachStack?: Maybe<InfrastructureStack>;
   enableDeployments?: Maybe<DeploymentSettings>;
   executeRunbook?: Maybe<RunbookActionResponse>;
   /** forces a pipeline gate to be in open state */
@@ -4222,6 +4228,11 @@ export type RootMutationTypeDetachClusterArgs = {
 
 
 export type RootMutationTypeDetachServiceDeploymentArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDetachStackArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -6127,6 +6138,7 @@ export type ServiceTemplate = {
   name?: Maybe<Scalars['String']['output']>;
   /** the namespace for this service (optional for managed namespaces) */
   namespace?: Maybe<Scalars['String']['output']>;
+  repository?: Maybe<GitRepository>;
   /** the id of a repository to source manifests for this service */
   repositoryId?: Maybe<Scalars['ID']['output']>;
   /** specification of how the templated service will be synced */
