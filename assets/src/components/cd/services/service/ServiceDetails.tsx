@@ -151,15 +151,13 @@ function ServiceDetailsBase() {
   const logsEnabled = useLogsEnabled()
 
   const { data: serviceListData } = useServiceDeploymentsTinyQuery({
+    variables: { clusterId },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
   const serviceList = useMemo(
-    () =>
-      mapExistingNodes(serviceListData?.serviceDeployments).filter(
-        (node) => node.cluster?.id === clusterId
-      ),
-    [serviceListData?.serviceDeployments, clusterId]
+    () => mapExistingNodes(serviceListData?.serviceDeployments),
+    [serviceListData?.serviceDeployments]
   )
 
   const { data: serviceData, error: serviceError } = useServiceDeploymentQuery({
