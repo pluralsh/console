@@ -163,6 +163,51 @@ export function PersistentVolumeInfo(): ReactElement {
             </ResourceInfoCardEntry>
           </>
         )}
+        {source?.azureDisk && (
+          <>
+            <ResourceInfoCardEntry heading="Type">
+              Azure disk
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Filesystem type">
+              {source.azureDisk.fsType}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Readonly">
+              {source.azureDisk.readOnly}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Disk name">
+              {source.azureDisk.diskName}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Disk URI">
+              {source.azureDisk.diskURI}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Kind">
+              {source.azureDisk.kind}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Caching mode">
+              {source.azureDisk.cachingMode}
+            </ResourceInfoCardEntry>
+          </>
+        )}
+        {source?.azureFile && (
+          <>
+            <ResourceInfoCardEntry heading="Type">
+              Azure file
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Share name">
+              {source.azureFile.shareName}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Readonly">
+              {source.azureFile.readOnly}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Secret">
+              <ResourceLink
+                kind="secret"
+                name={source.azureFile.secretName}
+                namespace={source.azureFile.secretNamespace}
+              />
+            </ResourceInfoCardEntry>
+          </>
+        )}
         {source?.cinder && (
           <>
             <ResourceInfoCardEntry heading="Type">Cinder</ResourceInfoCardEntry>
@@ -175,13 +220,15 @@ export function PersistentVolumeInfo(): ReactElement {
             <ResourceInfoCardEntry heading="Volume ID">
               {source.cinder.volumeID}
             </ResourceInfoCardEntry>
-            <ResourceInfoCardEntry heading="Secret">
-              <ResourceLink
-                kind="secret"
-                name={source.cinder.secretRef?.name}
-                namespace={source.cinder.secretRef.namespace}
-              />
-            </ResourceInfoCardEntry>
+            {source.cinder.secretRef && (
+              <ResourceInfoCardEntry heading="Secret">
+                <ResourceLink
+                  kind="secret"
+                  name={source.cinder.secretRef?.name}
+                  namespace={source.cinder.secretRef.namespace}
+                />
+              </ResourceInfoCardEntry>
+            )}
           </>
         )}
         {source?.csi && (
@@ -199,41 +246,51 @@ export function PersistentVolumeInfo(): ReactElement {
             <ResourceInfoCardEntry heading="Volume handle">
               {source.csi.volumeHandle}
             </ResourceInfoCardEntry>
-            <ResourceInfoCardEntry heading="Controller expand secret">
-              <ResourceLink
-                kind="secret"
-                name={source.csi.controllerExpandSecretRef?.name}
-                namespace={source.csi.controllerExpandSecretRef?.namespace}
-              />
-            </ResourceInfoCardEntry>
-            <ResourceInfoCardEntry heading="Controller publish secret">
-              <ResourceLink
-                kind="secret"
-                name={source.csi.controllerPublishSecretRef?.name}
-                namespace={source.csi.controllerPublishSecretRef?.namespace}
-              />
-            </ResourceInfoCardEntry>
-            <ResourceInfoCardEntry heading="Node expand secret">
-              <ResourceLink
-                kind="node"
-                name={source.csi.nodeExpandSecretRef?.name}
-                namespace={source.csi.nodeExpandSecretRef?.namespace}
-              />
-            </ResourceInfoCardEntry>
-            <ResourceInfoCardEntry heading="Node publish secret">
-              <ResourceLink
-                kind="node"
-                name={source.csi.nodePublishSecretRef?.name}
-                namespace={source.csi.nodePublishSecretRef?.namespace}
-              />
-            </ResourceInfoCardEntry>
-            <ResourceInfoCardEntry heading="Node stage secret">
-              <ResourceLink
-                kind="node"
-                name={source.csi.nodeStageSecretRef?.name}
-                namespace={source.csi.nodeStageSecretRef?.namespace}
-              />
-            </ResourceInfoCardEntry>
+            {source.csi.controllerExpandSecretRef && (
+              <ResourceInfoCardEntry heading="Controller expand secret">
+                <ResourceLink
+                  kind="secret"
+                  name={source.csi.controllerExpandSecretRef?.name}
+                  namespace={source.csi.controllerExpandSecretRef?.namespace}
+                />
+              </ResourceInfoCardEntry>
+            )}
+            {source.csi.controllerPublishSecretRef && (
+              <ResourceInfoCardEntry heading="Controller publish secret">
+                <ResourceLink
+                  kind="secret"
+                  name={source.csi.controllerPublishSecretRef?.name}
+                  namespace={source.csi.controllerPublishSecretRef?.namespace}
+                />
+              </ResourceInfoCardEntry>
+            )}
+            {source.csi.nodeExpandSecretRef && (
+              <ResourceInfoCardEntry heading="Node expand secret">
+                <ResourceLink
+                  kind="node"
+                  name={source.csi.nodeExpandSecretRef?.name}
+                  namespace={source.csi.nodeExpandSecretRef?.namespace}
+                />
+              </ResourceInfoCardEntry>
+            )}
+            {source.csi.nodePublishSecretRef && (
+              <ResourceInfoCardEntry heading="Node publish secret">
+                <ResourceLink
+                  kind="node"
+                  name={source.csi.nodePublishSecretRef?.name}
+                  namespace={source.csi.nodePublishSecretRef?.namespace}
+                />
+              </ResourceInfoCardEntry>
+            )}
+            {source.csi.nodeStageSecretRef && (
+              <ResourceInfoCardEntry heading="Node stage secret">
+                <ResourceLink
+                  kind="node"
+                  name={source.csi.nodeStageSecretRef?.name}
+                  namespace={source.csi.nodeStageSecretRef?.namespace}
+                />
+              </ResourceInfoCardEntry>
+            )}
             <ResourceInfoCardEntry heading="Volume attributes">
               <ChipList
                 size="small"
@@ -306,6 +363,19 @@ export function PersistentVolumeInfo(): ReactElement {
             </ResourceInfoCardEntry>
           </>
         )}
+        {source?.hostPath && (
+          <>
+            <ResourceInfoCardEntry heading="Type">
+              Host path
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Host path type">
+              {source.hostPath.type}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Path">
+              {source.hostPath.path}
+            </ResourceInfoCardEntry>
+          </>
+        )}
         {source?.local && (
           <>
             <ResourceInfoCardEntry heading="Type">Local</ResourceInfoCardEntry>
@@ -328,6 +398,25 @@ export function PersistentVolumeInfo(): ReactElement {
             </ResourceInfoCardEntry>
             <ResourceInfoCardEntry heading="Path">
               {source.nfs.path}
+            </ResourceInfoCardEntry>
+          </>
+        )}
+        {source?.vsphereVolume && (
+          <>
+            <ResourceInfoCardEntry heading="Type">
+              vSphere volume
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Filesystem type">
+              {source.vsphereVolume.fsType}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Volume path">
+              {source.vsphereVolume.volumePath}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Storage policy ID">
+              {source.vsphereVolume.storagePolicyID}
+            </ResourceInfoCardEntry>
+            <ResourceInfoCardEntry heading="Storage policy name">
+              {source.vsphereVolume.storagePolicyName}
             </ResourceInfoCardEntry>
           </>
         )}
