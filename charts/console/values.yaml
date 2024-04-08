@@ -6,6 +6,8 @@ global:
   additionalVolumes: ~
   additionalVolumeMounts: ~
 
+disableAdditionalVolumes: false
+
 replicaCount: 2
 
 homeDir: /root

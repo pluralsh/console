@@ -2,6 +2,8 @@ global:
   additionalVolumes: ~
   additionalVolumeMounts: ~
 
+disableAdditionalVolumes: false
+
 consoleUrl: ~
 fullnameOverride: console-operator
 tokenSecretRef:
