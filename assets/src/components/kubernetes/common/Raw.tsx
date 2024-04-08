@@ -3,9 +3,7 @@ import { useMatch, useParams } from 'react-router-dom'
 import { CodeEditor } from '@pluralsh/design-system'
 import pluralize from 'pluralize'
 import yaml from 'js-yaml'
-
 import { ApolloError } from '@apollo/client'
-
 import { useTheme } from 'styled-components'
 
 import {
@@ -45,7 +43,7 @@ export default function Raw(): ReactElement {
   const { data, loading, refetch } = resourceQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'no-cache',
     variables: {
       kind,
       name,
@@ -54,13 +52,15 @@ export default function Raw(): ReactElement {
     onCompleted: (data) =>
       setCurrent(yaml.dump(data?.handleGetResource?.Object)),
   })
-  const [mutation, { loading: saving, error, called: saved }] = updateMutation({
+  const [mutation, { loading: saving, error }] = updateMutation({
     client: KubernetesClient(clusterId ?? ''),
-    onCompleted: refetch,
-  })
+    onCompleted: async () => {
+      setCurrent(undefined)
+      const result = await refetch()
 
-  const object = data?.handleGetResource?.Object
-  const value = useMemo(() => current ?? yaml.dump(object), [current, object])
+      setCurrent(yaml.dump(result?.data.handleGetResource?.Object))
+    },
+  })
 
   useEffect(() => {
     if (error) {
@@ -70,9 +70,10 @@ export default function Raw(): ReactElement {
     setUpdateError(error)
   }, [error])
 
-  if (loading && !saved) return <LoadingIndicator />
+  if (loading || saving || !current) return <LoadingIndicator />
 
-  if (!object) return <GqlError error="Could not fetch resource" />
+  if (!data?.handleGetResource?.Object)
+    return <GqlError error="Could not fetch resource" />
 
   return (
     <>
@@ -90,11 +91,11 @@ export default function Raw(): ReactElement {
       )}
       <CodeEditor
         language="yaml"
-        value={value}
+        value={current}
         save
         saving={saving}
         saveLabel="Update"
-        onSave={(v) => {
+        onSave={(v) =>
           mutation({
             variables: {
               kind,
@@ -102,8 +103,8 @@ export default function Raw(): ReactElement {
               namespace: namespace ?? '',
               input: yaml.load(v),
             },
-          }).then(() => setCurrent(v))
-        }}
+          })
+        }
         options={{
           // TODO: add to design system to as a workaround for cursor position issue
           fontLigatures: '',
