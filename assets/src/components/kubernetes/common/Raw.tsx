@@ -21,12 +21,12 @@ import { GqlError } from '../../utils/Alert'
 
 export default function Raw(): ReactElement {
   const theme = useTheme()
-  const { clusterId, name, namespace } = useParams()
+  const { clusterId, name, namespace, crd } = useParams()
   const pathMatch = useMatch(`${getKubernetesAbsPath(clusterId)}/:kind/*`)
   const [current, setCurrent] = useState<string>()
   const [updateError, setUpdateError] = useState<ApolloError>()
   const kind = useMemo(
-    () => pluralize(pathMatch?.params?.kind || '', 1),
+    () => crd ?? pluralize(pathMatch?.params?.kind || '', 1),
     [pathMatch?.params?.kind]
   )
   const resourceQuery = useMemo(
