@@ -2,7 +2,6 @@ import React, { ReactElement, useMemo } from 'react'
 import {
   Card,
   ChipList,
-  Code,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -17,12 +16,7 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import {
-  MetadataSidecar,
-  ResourceLink,
-  useCodeTabs,
-  useKubernetesCluster,
-} from '../utils'
+import { MetadataSidecar, ResourceLink, useKubernetesCluster } from '../utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
@@ -137,7 +131,6 @@ export function PersistentVolumeInfo(): ReactElement {
   const theme = useTheme()
   const pv = useOutletContext() as PersistentVolumeT
   const source = pv?.persistentVolumeSource
-  const capacityTabs = useCodeTabs(pv.capacity)
 
   return (
     <>
@@ -328,14 +321,14 @@ export function PersistentVolumeInfo(): ReactElement {
               <ResourceInfoCardEntry heading="Target World Wide Names">
                 <ChipList
                   size="small"
-                  values={source.fc.targetWWNs}
+                  values={source.fc.targetWWNs ?? []}
                   limit={5}
                 />
               </ResourceInfoCardEntry>
               <ResourceInfoCardEntry heading="World Wide IDs">
                 <ChipList
                   size="small"
-                  values={source.fc.wwids}
+                  values={source.fc.wwids ?? []}
                   limit={5}
                 />
               </ResourceInfoCardEntry>
@@ -402,8 +395,8 @@ export function PersistentVolumeInfo(): ReactElement {
           {source?.nfs && (
             <>
               <ResourceInfoCardEntry heading="Type">NFS</ResourceInfoCardEntry>
-              <ResourceInfoCardEntry heading="Filesystem type">
-                {source.nfs.fsType}
+              <ResourceInfoCardEntry heading="Readonly">
+                {source.nfs.readOnly}
               </ResourceInfoCardEntry>
               <ResourceInfoCardEntry heading="Server">
                 {source.nfs.server}

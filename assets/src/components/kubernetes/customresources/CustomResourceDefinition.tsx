@@ -6,11 +6,18 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 
+import { createColumnHelper } from '@tanstack/react-table'
+
 import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import {
   CustomResourceDefinitionQueryVariables,
   Types_CustomResourceDefinitionDetail as CustomResourceDefinitionT,
+  Types_CustomResourceObjectList as CustomResourceListT,
+  Types_CustomResourceObjectDetail as CustomResourceT,
+  CustomResourcesQuery,
+  CustomResourcesQueryVariables,
   useCustomResourceDefinitionQuery,
+  useCustomResourcesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 
@@ -19,6 +26,8 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 
 import Conditions from '../common/Conditions'
+
+import { ResourceList } from '../ResourceList'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 
@@ -83,8 +92,42 @@ export default function CustomResourceDefinition(): ReactElement {
   )
 }
 
-export function CustomRersourceDefinitionObjects() {
-  return 'Custom resources'
+const columnHelper = createColumnHelper<CustomResourceT>()
+
+const columns = [
+  columnHelper.accessor((cr) => cr?.objectMeta.name, {
+    id: 'name',
+    header: 'Name',
+    enableSorting: true,
+    meta: { truncate: true },
+    cell: ({ getValue }) => getValue(),
+  }),
+]
+
+export function CustomRersourceDefinitionObjects(): ReactElement {
+  const { name, namespace } = useParams()
+
+  return (
+    <ResourceList<
+      CustomResourceListT,
+      CustomResourceT,
+      CustomResourcesQuery,
+      CustomResourcesQueryVariables
+    >
+      namespaced
+      columns={columns}
+      query={useCustomResourcesQuery}
+      queryOptions={{
+        variables: {
+          namespace,
+          name,
+        } as CustomResourcesQueryVariables,
+      }}
+      queryName="handleGetCustomResourceObjectList"
+      itemsKey="items"
+      disableOnRowClick
+    />
+  )
 }
 
 export function CustomResourceDefinitionConditions(): ReactElement {

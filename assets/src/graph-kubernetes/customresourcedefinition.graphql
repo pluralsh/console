@@ -41,7 +41,7 @@ query CustomResourceDefinitions(
 
 query CustomResourceDefinition($name: String!) {
   handleGetCustomResourceDefinitionDetail(crd: $name)
-  @rest(path: "crd/{args.crd}") {
+    @rest(path: "crd/{args.crd}") {
     typeMeta @type(name: "types_TypeMeta") {
       ...TypeMeta
     }
@@ -65,5 +65,22 @@ query CustomResourceDefinition($name: String!) {
     subresources
     scope
     errors
+  }
+}
+
+query CustomResources($namespace: String!, $name: String!) {
+  handleGetCustomResourceObjectList(namespace: $namespace, crd: $name)
+    @rest(path: "crd/{args.crd}/{args.crd}/object") {
+    listMeta {
+      totalItems
+    }
+    items {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
   }
 }
