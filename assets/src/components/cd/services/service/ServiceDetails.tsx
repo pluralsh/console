@@ -155,8 +155,11 @@ function ServiceDetailsBase() {
     fetchPolicy: 'cache-and-network',
   })
   const serviceList = useMemo(
-    () => mapExistingNodes(serviceListData?.serviceDeployments),
-    [serviceListData?.serviceDeployments]
+    () =>
+      mapExistingNodes(serviceListData?.serviceDeployments).filter(
+        (node) => node.cluster?.id === clusterId
+      ),
+    [serviceListData?.serviceDeployments, clusterId]
   )
 
   const { data: serviceData, error: serviceError } = useServiceDeploymentQuery({
