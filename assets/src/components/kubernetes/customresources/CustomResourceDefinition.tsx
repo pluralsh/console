@@ -1,10 +1,11 @@
 import React, { ReactElement, useMemo } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import {
   CustomResourceDefinitionQueryVariables,
+  Types_CustomResourceDefinitionDetail as CustomResourceDefinitionT,
   useCustomResourceDefinitionQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
@@ -13,10 +14,13 @@ import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConst
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
 
+import Conditions from '../common/Conditions'
+
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Objects' },
+  { path: 'conditions', label: 'Conditions' },
   { path: 'raw', label: 'Raw' },
 ] as const
 
@@ -65,4 +69,10 @@ export default function CustomResourceDefinition(): ReactElement {
 
 export function CustomRersourceDefinitionObjects() {
   return 'Custom resources'
+}
+
+export function CustomResourceDefinitionConditions(): ReactElement {
+  const { conditions } = useOutletContext() as CustomResourceDefinitionT
+
+  return <Conditions conditions={conditions} />
 }

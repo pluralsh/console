@@ -20,6 +20,7 @@ import ClusterRoleBinding, {
 } from 'components/kubernetes/access/ClusterRoleBinding'
 import CustomResourceDefinition, {
   CustomRersourceDefinitionObjects,
+  CustomResourceDefinitionConditions,
 } from 'components/kubernetes/customresources/CustomResourceDefinition'
 
 import {
@@ -870,6 +871,10 @@ export const kubernetesRoutes = [
       index
       path=""
       element={<CustomRersourceDefinitionObjects />}
+    />
+    <Route
+      path="conditions"
+      element={<CustomResourceDefinitionConditions />}
     />
     <Route
       path="raw"
