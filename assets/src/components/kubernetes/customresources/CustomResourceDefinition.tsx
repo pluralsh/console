@@ -1,6 +1,10 @@
 import React, { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
-import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  ChipList,
+  SidecarItem,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 
 import { MetadataSidecar, useKubernetesCluster } from '../utils'
 import {
@@ -58,7 +62,19 @@ export default function CustomResourceDefinition(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={crd}>
-          <SidecarItem heading="Claim">test</SidecarItem>
+          <SidecarItem heading="Group">{crd?.group}</SidecarItem>
+          <SidecarItem heading="Version">{crd?.version}</SidecarItem>
+          <SidecarItem heading="Kind">{crd?.names.kind}</SidecarItem>
+          <SidecarItem heading="Scope">{crd?.scope}</SidecarItem>
+          <SidecarItem heading="Established">{crd?.established}</SidecarItem>
+          <SidecarItem heading="Subresources">
+            <ChipList
+              size="small"
+              limit={5}
+              values={crd?.subresources ?? []}
+              emptyState={<div>None</div>}
+            />
+          </SidecarItem>
         </MetadataSidecar>
       }
     >
