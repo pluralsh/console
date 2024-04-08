@@ -4889,6 +4889,13 @@ export type CustomResourceDefinitionsQueryVariables = Exact<{
 
 export type CustomResourceDefinitionsQuery = { __typename?: 'Query', handleGetCustomResourceDefinitionList?: { __typename?: 'types_CustomResourceDefinitionList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'types_CustomResourceDefinition', established: string, group: string, scope: string, version?: string | null, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, names: { __typename?: 'types_CustomResourceDefinitionNames', categories?: Array<string | null> | null, kind: string, listKind?: string | null, plural: string, shortNames?: Array<string | null> | null, singular?: string | null } } | null> } | null };
 
+export type CustomResourceDefinitionQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+
+export type CustomResourceDefinitionQuery = { __typename?: 'Query', handleGetCustomResourceDefinitionDetail?: { __typename?: 'types_CustomResourceDefinitionDetail', group: string, version?: string | null, established: string, subresources: Array<string | null>, scope: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, names: { __typename?: 'types_CustomResourceDefinitionNames', kind: string, categories?: Array<string | null> | null, shortNames?: Array<string | null> | null, listKind?: string | null, singular?: string | null, plural: string } } | null };
+
 export type IngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -7784,6 +7791,70 @@ export type CustomResourceDefinitionsQueryHookResult = ReturnType<typeof useCust
 export type CustomResourceDefinitionsLazyQueryHookResult = ReturnType<typeof useCustomResourceDefinitionsLazyQuery>;
 export type CustomResourceDefinitionsSuspenseQueryHookResult = ReturnType<typeof useCustomResourceDefinitionsSuspenseQuery>;
 export type CustomResourceDefinitionsQueryResult = Apollo.QueryResult<CustomResourceDefinitionsQuery, CustomResourceDefinitionsQueryVariables>;
+export const CustomResourceDefinitionDocument = gql`
+    query CustomResourceDefinition($name: String!) {
+  handleGetCustomResourceDefinitionDetail(crd: $name) @rest(path: "crd/{args.crd}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    conditions @type(name: "common_Condition") {
+      ...Condition
+    }
+    names {
+      kind
+      categories
+      shortNames
+      listKind
+      singular
+      plural
+    }
+    group
+    version
+    established
+    subresources
+    scope
+    errors
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}
+${ConditionFragmentDoc}`;
+
+/**
+ * __useCustomResourceDefinitionQuery__
+ *
+ * To run a query within a React component, call `useCustomResourceDefinitionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCustomResourceDefinitionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCustomResourceDefinitionQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCustomResourceDefinitionQuery(baseOptions: Apollo.QueryHookOptions<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>(CustomResourceDefinitionDocument, options);
+      }
+export function useCustomResourceDefinitionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>(CustomResourceDefinitionDocument, options);
+        }
+export function useCustomResourceDefinitionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>(CustomResourceDefinitionDocument, options);
+        }
+export type CustomResourceDefinitionQueryHookResult = ReturnType<typeof useCustomResourceDefinitionQuery>;
+export type CustomResourceDefinitionLazyQueryHookResult = ReturnType<typeof useCustomResourceDefinitionLazyQuery>;
+export type CustomResourceDefinitionSuspenseQueryHookResult = ReturnType<typeof useCustomResourceDefinitionSuspenseQuery>;
+export type CustomResourceDefinitionQueryResult = Apollo.QueryResult<CustomResourceDefinitionQuery, CustomResourceDefinitionQueryVariables>;
 export const IngressesDocument = gql`
     query Ingresses($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetIngressList(

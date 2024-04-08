@@ -18,7 +18,9 @@ import ClusterRole from 'components/kubernetes/access/ClusterRole'
 import ClusterRoleBinding, {
   ClusterRoleBindingSubjects,
 } from 'components/kubernetes/access/ClusterRoleBinding'
-import CustomResourceDefinition from 'components/kubernetes/customresources/CustomResourceDefinition'
+import CustomResourceDefinition, {
+  CustomRersourceDefinitionObjects,
+} from 'components/kubernetes/customresources/CustomResourceDefinition'
 
 import {
   Pod,
@@ -863,5 +865,15 @@ export const kubernetesRoutes = [
   <Route
     path={`${KUBERNETES_ABS_PATH}/${CUSTOM_RESOURCES_REL_PATH}/${RESOURCE_DETAILS_REL_PATH}`}
     element={<CustomResourceDefinition />}
-  />,
+  >
+    <Route
+      index
+      path=""
+      element={<CustomRersourceDefinitionObjects />}
+    />
+    <Route
+      path="raw"
+      element={<Raw />}
+    />
+  </Route>,
 ]

@@ -38,3 +38,32 @@ query CustomResourceDefinitions(
     }
   }
 }
+
+query CustomResourceDefinition($name: String!) {
+  handleGetCustomResourceDefinitionDetail(crd: $name)
+  @rest(path: "crd/{args.crd}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    conditions @type(name: "common_Condition") {
+      ...Condition
+    }
+    names {
+      kind
+      categories
+      shortNames
+      listKind
+      singular
+      plural
+    }
+    group
+    version
+    established
+    subresources
+    scope
+    errors
+  }
+}
