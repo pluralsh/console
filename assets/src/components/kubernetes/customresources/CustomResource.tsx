@@ -41,8 +41,8 @@ export default function CustomResource(): ReactElement {
           label: crd ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'customresourcedefinitions',
-            name
+            'customresourcedefinition',
+            crd
           ),
         },
         {
@@ -52,7 +52,7 @@ export default function CustomResource(): ReactElement {
           label: name ?? '',
         },
       ],
-      [cluster, clusterId, name]
+      [cluster, clusterId, crd]
     )
   )
 

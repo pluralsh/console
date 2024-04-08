@@ -63,7 +63,7 @@ export default function CustomResourceDefinition(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'customresourcedefinitions',
+            'customresourcedefinition',
             name
           ),
         },
@@ -121,6 +121,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
       CustomResourcesQueryVariables
     >
       namespaced // TODO
+      customResource
       columns={columns}
       query={useCustomResourcesQuery}
       queryOptions={{

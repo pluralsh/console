@@ -92,3 +92,14 @@ export function getResourceDetailsAbsPath(
     ? `/kubernetes/${clusterId}/${pluralize(kind)}/${namespace}/${name}`
     : `/kubernetes/${clusterId}/${pluralize(kind)}/${name}`
 }
+
+export function getCustomResourceDetailsAbsPath(
+  clusterId: Nullable<string>,
+  kind: Nullable<string>,
+  name: Nullable<string>,
+  namespace?: Nullable<string>
+): string {
+  return namespace
+    ? `/kubernetes/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}/${kind}/${namespace}/${name}`
+    : `/kubernetes/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}/${kind}/${name}`
+}

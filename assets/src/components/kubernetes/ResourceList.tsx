@@ -25,7 +25,10 @@ import {
   Types_TypeMeta as TypeMetaT,
 } from '../../generated/graphql-kubernetes'
 import { FullHeightTableWrap } from '../utils/layout/FullHeightTableWrap'
-import { getResourceDetailsAbsPath } from '../../routes/kubernetesRoutesConsts'
+import {
+  getCustomResourceDetailsAbsPath,
+  getResourceDetailsAbsPath,
+} from '../../routes/kubernetesRoutesConsts'
 
 import {
   DEFAULT_DATA_SELECT,
@@ -84,6 +87,7 @@ interface ResourceListProps<
   queryName: QueryName<TQuery>
   itemsKey: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
+  customResource?: boolean
   disableOnRowClick?: boolean
 }
 
@@ -127,6 +131,7 @@ export function ResourceList<
   query,
   queryOptions,
   namespaced = false,
+  customResource = false,
   queryName,
   itemsKey,
   disableOnRowClick,
@@ -205,12 +210,19 @@ export function ResourceList<
             ? undefined
             : (_, row: Row<ResourceT>) => {
                 navigate(
-                  getResourceDetailsAbsPath(
-                    cluster?.id,
-                    row.original.typeMeta.kind!,
-                    row.original.objectMeta.name!,
-                    row.original.objectMeta.namespace
-                  )
+                  customResource
+                    ? getCustomResourceDetailsAbsPath(
+                        cluster?.id,
+                        row.original.typeMeta.kind!,
+                        row.original.objectMeta.name!,
+                        row.original.objectMeta.namespace
+                      )
+                    : getResourceDetailsAbsPath(
+                        cluster?.id,
+                        row.original.typeMeta.kind!,
+                        row.original.objectMeta.name!,
+                        row.original.objectMeta.namespace
+                      )
                 )
               }
         }
