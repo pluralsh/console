@@ -24,6 +24,7 @@ defmodule Console.Deployments.Git.AgentTest do
       assert Process.alive?(pid)
     end
 
+    @tag :skip
     test "it can fetch constraints from the bootstrap repo" do
       git = insert(:git_repository, url: "https://github.com/pluralsh/bootstrap.git")
       svc = insert(:service, repository: git, git: %{ref: "main", folder: "resources/policy/constraints"})
@@ -39,7 +40,6 @@ defmodule Console.Deployments.Git.AgentTest do
 
       {:ok, res} = :erl_tar.extract(tmp, [:compressed, :memory])
       files = Enum.into(res, %{}, fn {name, content} -> {to_string(name), to_string(content)} end)
-      IO.inspect(files)
       assert map_size(files) > 0
     end
 

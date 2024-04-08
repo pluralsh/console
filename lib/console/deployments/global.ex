@@ -28,7 +28,7 @@ defmodule Console.Deployments.Global do
   @doc """
   Creates a new global service and defers syncing clusters through the pubsub broadcaster
   """
-  @spec create(map, binary, User.t) :: global_resp
+  @spec create(map, binary | nil, User.t) :: global_resp
   def create(attrs, service_id, %User{} = user) do
     start_transaction()
     |> add_operation(:global, fn _ ->
@@ -46,6 +46,8 @@ defmodule Console.Deployments.Global do
     |> when_ok(&Repo.preload(&1, [:template], force: true))
     |> notify(:create, user)
   end
+
+  def create(attrs, %User{} = user), do: create(attrs, nil, user)
 
 
   @doc """

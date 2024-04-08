@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :tags,        list_of(:tag_attributes), description: "the cluster tags to target"
     field :distro,      :cluster_distro, description: "kubernetes distribution to target"
     field :provider_id, :id, description: "cluster api provider to target"
+    field :template,    :service_template_attributes
   end
 
   @desc "Attributes for configuring a managed namespace"
@@ -49,6 +50,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :tags,   list_of(:tag), description: "a set of tags to select clusters for this global service"
     field :distro, :cluster_distro, description: "the kubernetes distribution to target with this global service"
 
+    field :template, :service_template,   resolve: dataloader(Deployments), description: "the service template used to spawn services"
     field :service,  :service_deployment, resolve: dataloader(Deployments), description: "the service to replicate across clusters"
     field :provider, :cluster_provider,   resolve: dataloader(Deployments), description: "whether to only apply to clusters with this provider"
 
@@ -85,6 +87,8 @@ defmodule Console.GraphQl.Deployments.Global do
     field :templated,     :boolean
     field :repository_id, :id, description: "the id of a repository to source manifests for this service"
     field :contexts,      list_of(:id), description: "a list of context ids to add to this service"
+
+    field :repository, :git_repository, resolve: dataloader(Deployments)
 
     field :configuration, list_of(:service_configuration),
       resolve: &Deployments.template_configuration/3,
