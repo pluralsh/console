@@ -17,6 +17,7 @@ query Resource($kind: String!, $name: String!) {
 mutation NamespacedResourceUpdate($kind: String!, $name: String!, $namespace: String!, $input: JSON!) {
   handlePutResource(kind: $kind, name: $name, namespace: $namespace, input: $input)
   @rest(
+    type: "Void"
     path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}"
     method: "PUT"
   )
@@ -25,6 +26,7 @@ mutation NamespacedResourceUpdate($kind: String!, $name: String!, $namespace: St
 mutation ResourceUpdate($kind: String!, $name: String!, $input: JSON!) {
   handlePutResource(kind: $kind, name: $name, namespace: "", input: $input)
   @rest(
+    type: "Void"
     path: "_raw/{args.kind}/name/{args.name}"
     method: "PUT"
   )

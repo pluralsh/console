@@ -7504,7 +7504,7 @@ export const NamespacedResourceUpdateDocument = gql`
     name: $name
     namespace: $namespace
     input: $input
-  ) @rest(path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}", method: "PUT")
+  ) @rest(type: "Void", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}", method: "PUT")
 }
     `;
 export type NamespacedResourceUpdateMutationFn = Apollo.MutationFunction<NamespacedResourceUpdateMutation, NamespacedResourceUpdateMutationVariables>;
@@ -7538,7 +7538,7 @@ export type NamespacedResourceUpdateMutationResult = Apollo.MutationResult<Names
 export type NamespacedResourceUpdateMutationOptions = Apollo.BaseMutationOptions<NamespacedResourceUpdateMutation, NamespacedResourceUpdateMutationVariables>;
 export const ResourceUpdateDocument = gql`
     mutation ResourceUpdate($kind: String!, $name: String!, $input: JSON!) {
-  handlePutResource(kind: $kind, name: $name, namespace: "", input: $input) @rest(path: "_raw/{args.kind}/name/{args.name}", method: "PUT")
+  handlePutResource(kind: $kind, name: $name, namespace: "", input: $input) @rest(type: "Void", path: "_raw/{args.kind}/name/{args.name}", method: "PUT")
 }
     `;
 export type ResourceUpdateMutationFn = Apollo.MutationFunction<ResourceUpdateMutation, ResourceUpdateMutationVariables>;

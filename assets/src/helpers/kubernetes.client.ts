@@ -31,7 +31,7 @@ function buildClient({ clusterID, fetchToken }) {
     uri: K8S_API_URL,
     responseTransformer: async (response: Response) => {
       const isRawUrl = response.url.includes(`${K8S_API_URL}_raw`)
-      let body: any
+      let body: any = {}
 
       try {
         body = await (response as Response).json()
@@ -43,6 +43,10 @@ function buildClient({ clusterID, fetchToken }) {
           (isRawUrl && !err?.message?.includes(RAW_EMPTY_RESPONSE_ERROR))
         ) {
           throw e
+        }
+
+        if (err?.message?.includes(RAW_EMPTY_RESPONSE_ERROR)) {
+          return null
         }
       }
 
