@@ -129,6 +129,8 @@ import ServiceAccount from '../components/kubernetes/access/ServiceAccount'
 
 import HorizontalPodAutoscalers from '../components/kubernetes/cluster/HorizontalPodAutoscalers'
 
+import CustomResource from '../components/kubernetes/customresources/CustomResource'
+
 import {
   ACCESS_REL_PATH,
   CLUSTER_REL_PATH,
@@ -878,6 +880,17 @@ export const kubernetesRoutes = [
     />
     <Route
       path="raw"
+      element={<Raw />}
+    />
+  </Route>,
+  // Custom Resources
+  <Route
+    path={`${KUBERNETES_ABS_PATH}/${CUSTOM_RESOURCES_REL_PATH}/:crd/:namespace?/:name`}
+    element={<CustomResource />}
+  >
+    <Route
+      index
+      path=""
       element={<Raw />}
     />
   </Route>,

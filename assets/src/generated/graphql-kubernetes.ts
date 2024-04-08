@@ -4914,6 +4914,15 @@ export type CustomResourcesQueryVariables = Exact<{
 
 export type CustomResourcesQuery = { __typename?: 'Query', handleGetCustomResourceObjectList?: { __typename?: 'types_CustomResourceObjectList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'types_CustomResourceObject', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type CustomResourceQueryVariables = Exact<{
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  crd: Scalars['String']['input'];
+}>;
+
+
+export type CustomResourceQuery = { __typename?: 'Query', handleGetCustomResourceObjectDetail?: { __typename?: 'types_CustomResourceObjectDetail', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
+
 export type IngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -8008,6 +8017,58 @@ export type CustomResourcesQueryHookResult = ReturnType<typeof useCustomResource
 export type CustomResourcesLazyQueryHookResult = ReturnType<typeof useCustomResourcesLazyQuery>;
 export type CustomResourcesSuspenseQueryHookResult = ReturnType<typeof useCustomResourcesSuspenseQuery>;
 export type CustomResourcesQueryResult = Apollo.QueryResult<CustomResourcesQuery, CustomResourcesQueryVariables>;
+export const CustomResourceDocument = gql`
+    query CustomResource($namespace: String!, $name: String!, $crd: String!) {
+  handleGetCustomResourceObjectDetail(
+    namespace: $namespace
+    crd: $crd
+    object: $name
+  ) @rest(path: "crd/{args.namespace}/{args.crd}/{args.object}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+  }
+}
+    ${TypeMetaFragmentDoc}
+${ObjectMetaFragmentDoc}`;
+
+/**
+ * __useCustomResourceQuery__
+ *
+ * To run a query within a React component, call `useCustomResourceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCustomResourceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCustomResourceQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *      crd: // value for 'crd'
+ *   },
+ * });
+ */
+export function useCustomResourceQuery(baseOptions: Apollo.QueryHookOptions<CustomResourceQuery, CustomResourceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CustomResourceQuery, CustomResourceQueryVariables>(CustomResourceDocument, options);
+      }
+export function useCustomResourceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CustomResourceQuery, CustomResourceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CustomResourceQuery, CustomResourceQueryVariables>(CustomResourceDocument, options);
+        }
+export function useCustomResourceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CustomResourceQuery, CustomResourceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CustomResourceQuery, CustomResourceQueryVariables>(CustomResourceDocument, options);
+        }
+export type CustomResourceQueryHookResult = ReturnType<typeof useCustomResourceQuery>;
+export type CustomResourceLazyQueryHookResult = ReturnType<typeof useCustomResourceLazyQuery>;
+export type CustomResourceSuspenseQueryHookResult = ReturnType<typeof useCustomResourceSuspenseQuery>;
+export type CustomResourceQueryResult = Apollo.QueryResult<CustomResourceQuery, CustomResourceQueryVariables>;
 export const IngressesDocument = gql`
     query Ingresses($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetIngressList(

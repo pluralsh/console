@@ -97,3 +97,18 @@ query CustomResources(
     }
   }
 }
+
+query CustomResource($namespace: String!, $name: String!, $crd: String!) {
+  handleGetCustomResourceObjectDetail(
+    namespace: $namespace
+    crd: $crd
+    object: $name
+  ) @rest(path: "crd/{args.namespace}/{args.crd}/{args.object}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+  }
+}

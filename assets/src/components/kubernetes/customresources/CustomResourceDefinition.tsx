@@ -61,7 +61,11 @@ export default function CustomResourceDefinition(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'persistentvolume', name),
+          url: getResourceDetailsAbsPath(
+            clusterId,
+            'customresourcedefinitions',
+            name
+          ),
         },
       ],
       [cluster, clusterId, name]
@@ -116,7 +120,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
       CustomResourcesQuery,
       CustomResourcesQueryVariables
     >
-      namespaced
+      namespaced // TODO
       columns={columns}
       query={useCustomResourcesQuery}
       queryOptions={{
@@ -127,7 +131,6 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
       }}
       queryName="handleGetCustomResourceObjectList"
       itemsKey="items"
-      disableOnRowClick
     />
   )
 }
