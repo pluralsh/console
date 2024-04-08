@@ -13,3 +13,19 @@ query Resource($kind: String!, $name: String!) {
     Object
   }
 }
+
+mutation NamespacedResourceUpdate($kind: String!, $name: String!, $namespace: String!, $input: JSON!) {
+  handlePutResource(kind: $kind, name: $name, namespace: $namespace, input: $input)
+  @rest(
+    path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}"
+    method: "PUT"
+  )
+}
+
+mutation ResourceUpdate($kind: String!, $name: String!, $input: JSON!) {
+  handlePutResource(kind: $kind, name: $name, namespace: "", input: $input)
+  @rest(
+    path: "_raw/{args.kind}/name/{args.name}"
+    method: "PUT"
+  )
+}

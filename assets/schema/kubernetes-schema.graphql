@@ -5281,10 +5281,10 @@ type Mutation {
     metricNames: String
     """Aggregations to be performed for each metric (default: sum)"""
     aggregations: String
-    input: runtime_Unknown_Input!
+    input: JSON!
     """namespace of the resource"""
     namespace: String!
-  ): runtime_Unknown! @httpOperation(subgraph: "api", path: "/api/v1/_raw/{args.kind}/name/{args.name}", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: PUT, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}") @httpOperation(subgraph: "api", path: "/api/v1/_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: PUT, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
+  ): Void @httpOperation(subgraph: "api", path: "/api/v1/_raw/{args.kind}/name/{args.name}", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: PUT, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}") @httpOperation(subgraph: "api", path: "/api/v1/_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: PUT, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
   """deletes a resource from a namespace"""
   handleDeleteResource(
     """kind of the resource"""
@@ -5307,7 +5307,7 @@ type Mutation {
     aggregations: String
     """namespace of the resource"""
     namespace: String!
-  ): JSON @httpOperation(subgraph: "api", path: "/api/v1/_raw/{args.kind}/name/{args.name}", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: DELETE, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}") @httpOperation(subgraph: "api", path: "/api/v1/_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: DELETE, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
+  ): Void @httpOperation(subgraph: "api", path: "/api/v1/_raw/{args.kind}/name/{args.name}", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: DELETE, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}") @httpOperation(subgraph: "api", path: "/api/v1/_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: DELETE, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
   """creates an application based on provided deployment.AppDeploymentSpec"""
   handleDeploy(
     """
@@ -5587,19 +5587,8 @@ type Mutation {
   ): secret_Secret @httpOperation(subgraph: "api", path: "/api/v1/secret", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: POST, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
 }
 
-type runtime_Unknown {
-  ContentEncoding: String!
-  ContentType: String!
-  apiVersion: String
-  kind: String
-}
-
-input runtime_Unknown_Input {
-  ContentEncoding: String!
-  ContentType: String!
-  apiVersion: String
-  kind: String
-}
+"""Represents empty values"""
+scalar Void
 
 type deployment_AppDeploymentSpec {
   containerCommand: String!
