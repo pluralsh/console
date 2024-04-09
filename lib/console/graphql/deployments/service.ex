@@ -56,6 +56,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :protect,          :boolean
     field :dry_run,          :boolean
     field :interval,         :string
+    field :sync_config,      :sync_config_attributes
     field :templated,        :boolean, description: "if you should apply liquid templating to raw yaml files, defaults to true"
     field :git,              :git_ref_attributes
     field :helm,             :helm_config_attributes

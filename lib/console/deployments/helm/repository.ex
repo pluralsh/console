@@ -12,6 +12,8 @@ defmodule Console.Deployments.Helm.Repository do
   Gets the current status of this repository object
   """
   @spec status(HelmRepository.t) :: {:ok, %{ready: boolean, message: binary}} | Console.error
+  def status(%HelmRepository{spec: %HelmRepository.Spec{type: "oci"}}),
+    do: {:ok, %{ready: true, message: "oci repositories are ready by default"}}
   def status(%HelmRepository{status: %HelmRepository.Status{conditions: [_ | _] = conditions}}) do
     case Enum.find(conditions, & &1.type == "Ready") do
       %{status: status, message: message} -> {:ok, %{ready: status == "True", message: message}}

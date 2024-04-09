@@ -1154,6 +1154,7 @@ export type ConsoleConfiguration = {
   isDemoProject?: Maybe<Scalars['Boolean']['output']>;
   isSandbox?: Maybe<Scalars['Boolean']['output']>;
   manifest?: Maybe<PluralManifest>;
+  oidcName?: Maybe<Scalars['String']['output']>;
   pluralLogin?: Maybe<Scalars['Boolean']['output']>;
   vpnEnabled?: Maybe<Scalars['Boolean']['output']>;
 };
@@ -2179,6 +2180,7 @@ export type LogStream = {
 export type LoginInfo = {
   __typename?: 'LoginInfo';
   external?: Maybe<Scalars['Boolean']['output']>;
+  oidcName?: Maybe<Scalars['String']['output']>;
   oidcUri?: Maybe<Scalars['String']['output']>;
 };
 
@@ -6179,6 +6181,7 @@ export type ServiceUpdateAttributes = {
   kustomize?: InputMaybe<KustomizeAttributes>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  syncConfig?: InputMaybe<SyncConfigAttributes>;
   /** if you should apply liquid templating to raw yaml files, defaults to true */
   templated?: InputMaybe<Scalars['Boolean']['input']>;
   version?: InputMaybe<Scalars['String']['input']>;
