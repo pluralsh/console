@@ -41,6 +41,7 @@ import { DeleteGlobalService } from './DeleteGlobalService'
 import { ServiceSettings } from './ServiceSettings'
 import { ServiceUpdateHelmValues } from './ServiceUpdateHelmValues'
 import { DetachService } from './DetachService'
+import { ServicesResyncDeployment } from './ServicesResyncDeployment'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -282,6 +283,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
             refetch={refetch}
             serviceDeployment={serviceDeployment}
           />
+          <ServicesResyncDeployment serviceDeployment={serviceDeployment} />
           <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
             {!node?.globalService?.id && (
               <ListBoxItem
