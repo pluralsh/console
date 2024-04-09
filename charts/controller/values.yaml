@@ -2,6 +2,8 @@ global:
   additionalVolumes: ~
   additionalVolumeMounts: ~
 
+disableAdditionalVolumes: false
+
 consoleUrl: ~
 fullnameOverride: console-operator
 tokenSecretRef:
@@ -49,10 +51,10 @@ controllerManager:
     resources:
       limits:
         cpu: 500m
-        memory: 500Mi
+        memory: 1.5Gi
       requests:
-        cpu: 10m
-        memory: 64Mi
+        cpu: 50m
+        memory: 200Mi
   replicas: 1
   serviceAccount:
     annotations: {}

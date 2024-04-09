@@ -151,6 +151,7 @@ function ServiceDetailsBase() {
   const logsEnabled = useLogsEnabled()
 
   const { data: serviceListData } = useServiceDeploymentsTinyQuery({
+    variables: { clusterId },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
