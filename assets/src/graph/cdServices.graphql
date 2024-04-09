@@ -165,7 +165,7 @@ query ServiceDeployments(
   }
 }
 
-query ServiceDeploymentsTiny($clusterId: ID!) {
+query ServiceDeploymentsTiny($clusterId: ID) {
   serviceDeployments(first: 100, clusterId: $clusterId) {
     pageInfo {
       ...PageInfo
