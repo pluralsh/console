@@ -67,6 +67,11 @@ var _ = Describe("Service Controller", Ordered, func() {
 						Version:       lo.ToPtr("1.24"),
 						ClusterRef:    corev1.ObjectReference{Name: clusterName, Namespace: namespace},
 						RepositoryRef: &corev1.ObjectReference{Name: repoName, Namespace: namespace},
+						SyncConfig: &v1alpha1.SyncConfigAttributes{
+							CreateNamespace: lo.ToPtr(true),
+							Labels:          map[string]string{"a": "a"},
+							Annotations:     map[string]string{"b": "b"},
+						},
 					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())

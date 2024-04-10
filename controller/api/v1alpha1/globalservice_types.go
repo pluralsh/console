@@ -44,6 +44,8 @@ type GlobalServiceSpec struct {
 	// ProviderRef apply to clusters with this provider
 	// +kubebuilder:validation:Optional
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
+	// +kubebuilder:validation:Optional
+	Template *ServiceTemplate `json:"template,omitempty"`
 }
 
 // GlobalService is the Schema for the globalservices API

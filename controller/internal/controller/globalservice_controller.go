@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -125,6 +126,19 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		Distro:     globalService.Spec.Distro,
 		ProviderID: provider.Status.ID,
 	}
+	if globalService.Spec.Template != nil {
+		namespace := globalService.GetNamespace()
+		repository, err := r.getRepository(ctx, globalService)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		st, err := genServiceTemplate(ctx, r.Client, namespace, globalService.Spec.Template, repository.Status.ID)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		attr.Template = st
+	}
+
 	if globalService.Spec.Tags != nil {
 		attr.Tags = genGlobalServiceTags(globalService.Spec.Tags)
 	}
@@ -210,4 +224,20 @@ func (r *GlobalServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&v1alpha1.GlobalService{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
+}
+
+func (r *GlobalServiceReconciler) getRepository(ctx context.Context, ns *v1alpha1.GlobalService) (*v1alpha1.GitRepository, error) {
+	repository := &v1alpha1.GitRepository{}
+	if ns.Spec.Template.RepositoryRef != nil {
+		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.Template.RepositoryRef.Name, Namespace: ns.Spec.Template.RepositoryRef.Namespace}, repository); err != nil {
+			return nil, err
+		}
+		if repository.Status.ID == nil {
+			return nil, fmt.Errorf("repository %s is not ready", repository.Name)
+		}
+		if repository.Status.Health == v1alpha1.GitHealthFailed {
+			return nil, fmt.Errorf("repository %s is not healthy", repository.Name)
+		}
+	}
+	return repository, nil
 }

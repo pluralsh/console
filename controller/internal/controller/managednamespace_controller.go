@@ -28,7 +28,6 @@ import (
 	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -36,7 +35,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/yaml"
 )
 
 const ManagedNamespaceFinalizer = "deployments.plural.sh/managed-namespace-protection"
@@ -222,124 +220,15 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		if err != nil {
 			return nil, err
 		}
-		attr.Service = &console.ServiceTemplateAttributes{
-			Name:         srv.Name,
-			Namespace:    srv.Namespace,
-			Templated:    lo.ToPtr(true),
-			RepositoryID: repository.Status.ID,
-		}
-		if srv.Templated != nil {
-			attr.Service.Templated = srv.Templated
-		}
-		if srv.Contexts != nil {
-			attr.Service.Contexts = make([]*string, 0)
-			attr.Service.Contexts = algorithms.Map(srv.Contexts,
-				func(b string) *string { return &b })
-		}
-		if srv.Git != nil {
-			attr.Service.Git = &console.GitRefAttributes{
-				Ref:    srv.Git.Ref,
-				Folder: srv.Git.Folder,
-			}
-		}
-		if srv.Helm != nil {
-			attr.Service.Helm = &console.HelmConfigAttributes{
-				ValuesFiles: ns.Spec.Service.Helm.ValuesFiles,
-				Version:     ns.Spec.Service.Helm.Version,
-			}
-			if srv.Helm.Repository != nil {
-				attr.Service.Helm.Repository = &console.NamespacedName{
-					Name:      ns.Spec.Service.Helm.Repository.Name,
-					Namespace: ns.Spec.Service.Helm.Repository.Namespace,
-				}
-			}
-			if srv.Helm.ValuesConfigMapRef != nil {
-				val, err := utils.GetConfigMapData(ctx, r.Client, ns.GetNamespace(), srv.Helm.ValuesConfigMapRef)
-				if err != nil {
-					return nil, err
-				}
-				attr.Service.Helm.Values = &val
-			}
-
-			if srv.Helm.ValuesFrom != nil || srv.Helm.Values != nil {
-				values, err := r.MergeHelmValues(ctx, ns.Spec.Service.Helm.ValuesFrom, ns.Spec.Service.Helm.Values)
-				if err != nil {
-					return nil, err
-				}
-				attr.Service.Helm.Values = values
-			}
-
-			if srv.Helm.Chart != nil {
-				attr.Service.Helm.Chart = srv.Helm.Chart
-			}
-		}
-		if srv.Kustomize != nil {
-			attr.Service.Kustomize = &console.KustomizeAttributes{
-				Path: srv.Kustomize.Path,
-			}
-		}
-		if srv.SyncConfig != nil {
-			var annotations *string
-			var labels *string
-			if srv.SyncConfig.Annotations != nil {
-				result, err := json.Marshal(ns.Spec.Service.SyncConfig.Annotations)
-				if err != nil {
-					return nil, err
-				}
-				rawAnnotations := string(result)
-				annotations = &rawAnnotations
-			}
-			if srv.SyncConfig.Labels != nil {
-				result, err := json.Marshal(ns.Spec.Service.SyncConfig.Labels)
-				if err != nil {
-					return nil, err
-				}
-				rawLabels := string(result)
-				labels = &rawLabels
-			}
-			attr.Service.SyncConfig = &console.SyncConfigAttributes{
-				NamespaceMetadata: &console.MetadataAttributes{
-					Labels:      labels,
-					Annotations: annotations,
-				},
-			}
-		}
-	}
-
-	return attr, nil
-}
-
-func (r *ManagedNamespaceReconciler) MergeHelmValues(ctx context.Context, secretRef *corev1.SecretReference, values *runtime.RawExtension) (*string, error) {
-	valuesFromMap := map[string]interface{}{}
-	valuesMap := map[string]interface{}{}
-
-	if secretRef != nil {
-		valuesFromSecret, err := utils.GetSecret(ctx, r.Client, secretRef)
+		namespace := ns.GetNamespace()
+		st, err := genServiceTemplate(ctx, r.Client, namespace, srv, repository.Status.ID)
 		if err != nil {
 			return nil, err
 		}
-
-		for _, vals := range valuesFromSecret.Data {
-			current := map[string]interface{}{}
-			if err := yaml.Unmarshal(vals, &current); err != nil {
-				continue
-			}
-			valuesFromMap = algorithms.Merge(valuesFromMap, current)
-		}
+		attr.Service = st
 	}
 
-	if values != nil {
-		if err := yaml.Unmarshal(values.Raw, &valuesMap); err != nil {
-			return nil, err
-		}
-	}
-
-	result := algorithms.Merge(valuesMap, valuesFromMap)
-	out, err := yaml.Marshal(result)
-	if err != nil {
-		return nil, err
-	}
-	return lo.ToPtr(string(out)), nil
+	return attr, nil
 }
 
 func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*v1alpha1.GitRepository, error) {
