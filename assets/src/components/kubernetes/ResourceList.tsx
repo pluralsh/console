@@ -15,7 +15,7 @@ import type {
 } from '@apollo/client/react/types/types'
 import { Table } from '@pluralsh/design-system'
 import styled from 'styled-components'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Row } from '@tanstack/react-table'
 
 import { KubernetesClient } from '../../helpers/kubernetes.client'
@@ -38,11 +38,7 @@ import {
   usePageInfo,
   useSortedTableOptions,
 } from './utils'
-import {
-  FILTER_PARAM,
-  NAMESPACE_PARAM,
-  useKubernetesContext,
-} from './Kubernetes'
+import { useKubernetesContext } from './Kubernetes'
 
 export type ResourceListContextT = {
   setNamespaced: Dispatch<SetStateAction<boolean>>
