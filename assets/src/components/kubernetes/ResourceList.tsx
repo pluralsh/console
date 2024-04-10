@@ -199,7 +199,6 @@ export function ResourceList<
 
   return (
     <FullHeightTableWrap>
-      {namespace}
       <Table
         data={items}
         columns={columnsData}

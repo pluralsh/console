@@ -209,6 +209,16 @@ export default function Kubernetes() {
   )
 
   useEffect(() => {
+    if (isEmpty(filter)) searchParams.delete(FILTER_PARAM)
+    else searchParams.set(FILTER_PARAM, filter)
+
+    if (isEmpty(namespace)) searchParams.delete(NAMESPACE_PARAM)
+    else searchParams.set(NAMESPACE_PARAM, namespace)
+
+    setSearchParams(searchParams)
+  }, [namespace, filter, pathname, searchParams, setSearchParams])
+
+  useEffect(() => {
     if (!isEmpty(clusters) && !cluster) {
       const mgmtCluster = clusters.find(({ self }) => !!self)
 
@@ -270,21 +280,13 @@ export default function Kubernetes() {
           >
             <NameFilter
               value={filter}
-              onChange={(e) => {
-                setFilter(e)
-                searchParams.set(FILTER_PARAM, e as string)
-                setSearchParams(searchParams)
-              }}
+              onChange={setFilter}
             />
             {namespaced && (
               <NamespaceFilter
                 namespaces={namespaces}
                 namespace={namespace}
-                onChange={(ns) => {
-                  setNamespace(ns)
-                  searchParams.set(NAMESPACE_PARAM, ns)
-                  setSearchParams(searchParams)
-                }}
+                onChange={setNamespace}
               />
             )}
           </div>
