@@ -33,6 +33,7 @@ const LOGIN_INFO = gql`
     loginInfo(redirect: $redirect) {
       oidcUri
       external
+      oidcName
     }
   }
 `
@@ -218,7 +219,7 @@ export function EnsureLogin({ children }) {
   )
 }
 
-function OIDCLogin({ oidcUri, external }) {
+function OIDCLogin({ oidcUri, external, oidcName }) {
   return (
     <LoginPortal>
       <Flex
@@ -246,7 +247,7 @@ function OIDCLogin({ oidcUri, external }) {
             window.location = oidcUri
           }}
         >
-          Log in with {external ? 'OIDC' : 'Plural'}
+          Log in with {external ? oidcName || 'OIDC' : 'Plural'}
         </Button>
       </Flex>
     </LoginPortal>
@@ -282,11 +283,12 @@ export default function Login() {
     window.location = '/' as any as Location
   }
 
-  if (loginData && loginData.loginInfo && loginData.loginInfo.oidcUri) {
+  if (loginData?.loginInfo?.oidcUri) {
     return (
       <OIDCLogin
         oidcUri={loginData.loginInfo.oidcUri}
         external={loginData.loginInfo.external}
+        oidcName={loginData.loginInfo.oidcName}
       />
     )
   }

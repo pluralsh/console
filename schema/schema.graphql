@@ -2213,6 +2213,8 @@ input ServiceUpdateAttributes {
 
   interval: String
 
+  syncConfig: SyncConfigAttributes
+
   "if you should apply liquid templating to raw yaml files, defaults to true"
   templated: Boolean
 
@@ -5203,6 +5205,7 @@ type RoleBinding {
 type LoginInfo {
   oidcUri: String
   external: Boolean
+  oidcName: String
 }
 
 type Notification {
@@ -5392,6 +5395,7 @@ type ConsoleConfiguration {
   vpnEnabled: Boolean
   byok: Boolean
   externalOidc: Boolean
+  oidcName: String
   features: AvailableFeatures
   manifest: PluralManifest
   gitStatus: GitStatus

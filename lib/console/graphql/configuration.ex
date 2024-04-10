@@ -48,6 +48,7 @@ defmodule Console.GraphQl.Configuration do
     field :vpn_enabled,     :boolean
     field :byok,            :boolean, resolve: fn _, _, _ -> {:ok, Console.byok?()} end
     field :external_oidc,   :boolean, resolve: fn _, _, _ -> {:ok, !!Console.conf(:oidc_login)} end
+    field :oidc_name,       :string,  resolve: fn _, _, _ -> {:ok, Console.conf(:oidc_name)} end
     field :features,        :available_features
 
     field :manifest,        :plural_manifest, resolve: fn
