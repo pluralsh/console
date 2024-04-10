@@ -1,0 +1,66 @@
+query PersistentVolumeClaims(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetPersistentVolumeClaimList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "persistentvolumeclaim_PersistentVolumeClaimList"
+      path: "persistentvolumeclaim/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...PersistentVolumeClaimList
+  }
+}
+
+query PersistentVolumeClaim($name: String!, $namespace: String!) {
+  handleGetPersistentVolumeClaimDetail(namespace: $namespace, name: $name)
+    @rest(
+      type: "persistentvolumeclaim_PersistentVolumeClaimDetail"
+      path: "persistentvolumeclaim/{args.namespace}/{args.name}"
+    ) {
+    ...PersistentVolumeClaimDetail
+  }
+}
+
+fragment PersistentVolumeClaim on persistentvolumeclaim_PersistentVolumeClaim {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  status
+  volume
+  storageClass
+  accessModes
+}
+
+fragment PersistentVolumeClaimDetail on persistentvolumeclaim_PersistentVolumeClaimDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  status
+  volume
+  storageClass
+  accessModes
+}
+
+fragment PersistentVolumeClaimList on persistentvolumeclaim_PersistentVolumeClaimList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  items @type(name: "persistentvolumeclaim_PersistentVolumeClaim") {
+    ...PersistentVolumeClaim
+  }
+}

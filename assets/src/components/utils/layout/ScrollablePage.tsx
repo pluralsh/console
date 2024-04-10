@@ -9,35 +9,44 @@ const ScrollablePageContent = styled.div<{
   extraStyles?: CSSProperties
   maxContentWidth?: number
   fullWidth?: boolean
-}>(({ theme, scrollable, extraStyles, maxContentWidth, fullWidth }) => ({
-  position: 'relative',
-  height: '100%',
-  maxHeight: '100%',
-  width: '100%',
-  overflowY: scrollable ? 'auto' : 'hidden',
-  overflowX: 'hidden',
-  paddingRight: scrollable ? theme.spacing.small : 0,
-  ...(scrollable ? { scrollbarGutter: 'stable' } : {}),
-  ...(scrollable && fullWidth
-    ? {
-        paddingRight: theme.spacing.large - 6,
-      }
-    : {}),
-  '& > .widthLimiter': {
+  noPadding?: boolean
+}>(
+  ({
+    theme,
+    scrollable,
+    extraStyles,
+    maxContentWidth,
+    fullWidth,
+    noPadding,
+  }) => ({
+    position: 'relative',
+    height: '100%',
+    maxHeight: '100%',
     width: '100%',
-    paddingTop: theme.spacing.medium,
-    paddingBottom: scrollable ? theme.spacing.xxlarge : theme.spacing.large,
-    ...(!scrollable
+    overflowY: scrollable ? 'auto' : 'hidden',
+    overflowX: 'hidden',
+    paddingRight: scrollable ? theme.spacing.small : 0,
+    ...(scrollable ? { scrollbarGutter: 'stable' } : {}),
+    ...(scrollable && fullWidth
       ? {
-          height: '100%',
+          paddingRight: theme.spacing.large - 6,
         }
       : {}),
-    ...(maxContentWidth
-      ? { maxWidth: maxContentWidth, marginLeft: 'auto', marginRight: 'auto' }
-      : {}),
-    ...(extraStyles ?? {}),
-  },
-}))
+    '& > .widthLimiter': {
+      width: '100%',
+      height: '100%',
+      ...(!noPadding && {
+        paddingTop: theme.spacing.medium,
+        paddingBottom: scrollable ? theme.spacing.xxlarge : theme.spacing.large,
+      }),
+
+      ...(maxContentWidth
+        ? { maxWidth: maxContentWidth, marginLeft: 'auto', marginRight: 'auto' }
+        : {}),
+      ...(extraStyles ?? {}),
+    },
+  })
+)
 
 const ScrollShadow = styled.div(({ theme }) => ({
   content: '""',
@@ -60,6 +69,7 @@ export function ScrollablePage({
   maxContentWidth,
   fullWidth,
   scrollRef,
+  noPadding = false,
   ...props
 }: {
   heading?: ReactNode
@@ -70,6 +80,7 @@ export function ScrollablePage({
   maxContentWidth?: number
   fullWidth?: boolean
   scrollRef?: Ref<any>
+  noPadding?: boolean
 } & FlexProps) {
   return (
     <>
@@ -98,6 +109,7 @@ export function ScrollablePage({
         maxContentWidth={maxContentWidth}
         fullWidth={fullWidth}
         ref={scrollRef}
+        noPadding={noPadding}
       >
         <div className="widthLimiter">{children}</div>
       </ScrollablePageContent>

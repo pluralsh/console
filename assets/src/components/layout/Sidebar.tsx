@@ -13,9 +13,10 @@ import {
   GitHubLogoIcon,
   GitPullIcon,
   HistoryIcon,
+  KubernetesIcon,
+  LightningIcon,
   ListIcon,
   LogoutIcon,
-  MegaphoneIcon,
   PeopleIcon,
   PersonIcon,
   PrOpenIcon,
@@ -83,6 +84,12 @@ function getMenuItems({
       ignoreRegexp: /^\/cd\/settings.*$/,
     },
     {
+      text: 'Kubernetes',
+      icon: <KubernetesIcon />,
+      path: '/kubernetes',
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
+    },
+    {
       text: 'Builds',
       icon: <BuildIcon />,
       plural: true,
@@ -92,12 +99,14 @@ function getMenuItems({
       text: 'Nodes',
       icon: <ServersIcon />,
       path: '/nodes',
+      plural: true,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
       text: 'Pods',
       icon: <ApiIcon />,
       path: '/pods',
+      plural: true,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
@@ -135,7 +144,7 @@ function getMenuItems({
     },
     {
       text: 'Notifications',
-      icon: <MegaphoneIcon />,
+      icon: <LightningIcon />,
       path: '/notifications',
       enabled: isCDEnabled,
     },

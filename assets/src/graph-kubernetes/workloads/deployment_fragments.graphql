@@ -1,0 +1,61 @@
+fragment DeploymentList on deployment_DeploymentList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  deployments @type(name: "deployment_Deployment") {
+    ...Deployment
+  }
+}
+
+fragment Deployment on deployment_Deployment {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  pods @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}
+
+fragment DeploymentDetail on deployment_DeploymentDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  pods @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  conditions @type(name: "common_Condition") {
+    ...Condition
+  }
+  rollingUpdateStrategy @type(name: "deployment_RollingUpdateStrategy") {
+    ...RollingUpdateStrategy
+  }
+  statusInfo @type(name: "deployment_StatusInfo") {
+    ...StatusInfo
+  }
+  selector
+  initContainerImages
+  containerImages
+  minReadySeconds
+  revisionHistoryLimit
+  strategy
+}
+
+fragment RollingUpdateStrategy on deployment_RollingUpdateStrategy {
+  maxSurge
+  maxUnavailable
+}
+
+fragment StatusInfo on deployment_StatusInfo {
+  available
+  replicas
+  unavailable
+  updated
+}

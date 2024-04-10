@@ -1,0 +1,114 @@
+query CustomResourceDefinitions(
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetCustomResourceDefinitionList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      path: "crd?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    listMeta {
+      totalItems
+    }
+    items {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+      established
+      group
+      names {
+        categories
+        kind
+        listKind
+        plural
+        shortNames
+        singular
+      }
+      scope
+      version
+    }
+  }
+}
+
+query CustomResourceDefinition($name: String!) {
+  handleGetCustomResourceDefinitionDetail(crd: $name)
+    @rest(path: "crd/{args.crd}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    conditions @type(name: "common_Condition") {
+      ...Condition
+    }
+    names {
+      kind
+      categories
+      shortNames
+      listKind
+      singular
+      plural
+    }
+    group
+    version
+    established
+    subresources
+    scope
+    errors
+  }
+}
+
+query CustomResources(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetCustomResourceObjectList(
+    namespace: $namespace
+    crd: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "crd/{args.namespace}/{args.crd}/object") {
+    listMeta {
+      totalItems
+    }
+    items {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+
+query CustomResource($namespace: String!, $name: String!, $crd: String!) {
+  handleGetCustomResourceObjectDetail(
+    namespace: $namespace
+    crd: $crd
+    object: $name
+  ) @rest(path: "crd/{args.namespace}/{args.crd}/{args.object}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+  }
+}

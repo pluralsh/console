@@ -99,6 +99,7 @@ export default function Dashboard() {
     <ScrollablePage
       heading={
         <div>
+          {/* @ts-ignore */}
           <Select
             aria-label="dashboards"
             selectedKey={selectedKey}

@@ -1,0 +1,47 @@
+query Roles(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetRoleList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "role_RoleList"
+      path: "role/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    items {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+
+query Role($name: String!, $namespace: String!) {
+  handleGetRoleDetail(namespace: $namespace, name: $name)
+    @rest(path: "role/{args.namespace}/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    rules @type(name: "v1_PolicyRule") {
+      ...PolicyRule
+    }
+    errors
+  }
+}

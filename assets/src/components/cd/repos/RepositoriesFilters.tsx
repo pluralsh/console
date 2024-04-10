@@ -110,6 +110,7 @@ export function RepositoriesFilters({
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',
+          // @ts-ignore
           selectedKey: statusFilterKey,
           onSelectionChange: (key) => {
             setStatusFilterKey(key)

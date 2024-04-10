@@ -85,6 +85,7 @@ export default function Configuration() {
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',
+              // @ts-ignore
               selectedKey: view,
               onSelectionChange: setView,
             }}

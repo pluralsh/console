@@ -5,7 +5,7 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { ContainerStatus, Maybe, Pod } from 'generated/graphql'
 import { asQuery } from 'components/utils/query'
 
-import { SubTitle } from '../nodes/SubTitle'
+import { SubTitle } from '../../utils/SubTitle'
 import { ContainersList } from '../containers/ContainersList'
 import { useNamespaceIsApp } from '../../hooks/useNamespaceIsApp'
 

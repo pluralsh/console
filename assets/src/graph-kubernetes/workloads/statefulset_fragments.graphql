@@ -1,0 +1,36 @@
+fragment StatefulSetList on statefulset_StatefulSetList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  statefulSets @type(name: "statefulset_StatefulSet") {
+    ...StatefulSet
+  }
+}
+
+fragment StatefulSet on statefulset_StatefulSet {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}
+
+fragment StatefulSetDetail on statefulset_StatefulSetDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}

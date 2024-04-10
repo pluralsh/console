@@ -1,0 +1,73 @@
+query ReplicationControllers(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetReplicationControllerList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "replicationcontroller_ReplicationControllerList"
+      path: "replicationcontroller/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...ReplicationControllerList
+  }
+}
+
+query ReplicationController($namespace: String!, $name: String!) {
+  handleGetReplicationControllerDetail(
+    namespace: $namespace
+    replicationController: $name
+  )
+    @rest(
+      type: "replicationcontroller_ReplicationControllerDetail"
+      path: "replicationcontroller/{args.namespace}/{args.replicationController}"
+    ) {
+    ...ReplicationControllerDetail
+  }
+}
+
+query ReplicationControllerEvents($namespace: String!, $name: String!) {
+  handleGetReplicationControllerEvents(
+    namespace: $namespace
+    replicationController: $name
+  )
+    @rest(
+      type: "common_EventList"
+      path: "replicationcontroller/{args.namespace}/{args.replicationController}/event"
+    ) {
+    ...EventList
+  }
+}
+
+query ReplicationControllerPods($namespace: String!, $name: String!) {
+  handleGetReplicationControllerPods(
+    namespace: $namespace
+    replicationController: $name
+  )
+    @rest(
+      type: "pod_PodList"
+      path: "replicationcontroller/{args.namespace}/{args.replicationController}/pod"
+    ) {
+    ...PodList
+  }
+}
+
+query ReplicationControllerServices($namespace: String!, $name: String!) {
+  handleGetReplicationControllerServices(
+    namespace: $namespace
+    replicationController: $name
+  )
+    @rest(
+      type: "service_ServiceList"
+      path: "replicationcontroller/{args.namespace}/{args.replicationController}/service"
+    ) {
+    ...ServiceList
+  }
+}

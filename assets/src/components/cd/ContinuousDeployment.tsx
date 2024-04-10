@@ -96,8 +96,7 @@ export const CD_BASE_CRUMBS = [
 ] as const satisfies readonly Breadcrumb[]
 
 function useCurrentTab() {
-  const pathMatch = useMatch(`${CD_ABS_PATH}/:tab*`)
-  // @ts-expect-error
+  const pathMatch = useMatch(`${CD_ABS_PATH}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
 
   return tab

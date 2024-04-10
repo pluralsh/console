@@ -1,0 +1,50 @@
+query ClusterRoleBindings(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetClusterRoleBindingList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      path: "clusterrolebinding?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    items {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+    }
+  }
+}
+
+query ClusterRoleBinding($name: String!) {
+  handleGetClusterRoleBindingDetail(name: $name)
+    @rest(path: "clusterrolebinding/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    subjects @type(name: "v1_Subject") {
+      ...Subject
+    }
+    roleRef {
+      name
+      kind
+      apiGroup
+    }
+    errors
+  }
+}

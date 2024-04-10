@@ -1,0 +1,39 @@
+fragment DaemonSetList on daemonset_DaemonSetList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  daemonSets @type(name: "daemonset_DaemonSet") {
+    ...DaemonSet
+  }
+}
+
+fragment DaemonSet on daemonset_DaemonSet {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  initContainerImages
+  containerImages
+}
+
+fragment DaemonSetDetail on daemonset_DaemonSetDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  podInfo @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+  labelSelector @type(name: "v1_LabelSelector") {
+    ...Selector
+  }
+  initContainerImages
+  containerImages
+}

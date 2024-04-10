@@ -59,6 +59,7 @@ export default function Audits() {
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',
+              // @ts-ignore
               selectedKey: view,
               onSelectionChange: (view) => {
                 setView(view)

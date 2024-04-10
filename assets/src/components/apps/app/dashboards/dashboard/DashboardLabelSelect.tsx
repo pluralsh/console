@@ -11,6 +11,7 @@ export default function DashboardLabelSelect({ label, onSelect }) {
 
   return (
     <Div width={250}>
+      {/* @ts-ignore */}
       <Select
         aria-label={label.name}
         leftContent={

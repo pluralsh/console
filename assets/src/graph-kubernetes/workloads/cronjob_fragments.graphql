@@ -1,0 +1,38 @@
+fragment CronJobList on cronjob_CronJobList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  items @type(name: "cronjob_CronJob") {
+    ...CronJob
+  }
+}
+
+fragment CronJob on cronjob_CronJob {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  containerImages
+  schedule
+  suspend
+  active
+  lastSchedule
+}
+
+fragment CronJobDetail on cronjob_CronJobDetail {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  containerImages
+  schedule
+  suspend
+  active
+  lastSchedule
+  concurrencyPolicy
+  startingDeadlineSeconds
+}

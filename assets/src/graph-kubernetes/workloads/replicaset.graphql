@@ -1,0 +1,61 @@
+query ReplicaSets(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetReplicaSets(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "replicaset_ReplicaSetList"
+      path: "replicaset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...ReplicaSetList
+  }
+}
+
+query ReplicaSet($namespace: String!, $name: String!) {
+  handleGetReplicaSetDetail(namespace: $namespace, replicaSet: $name)
+    @rest(
+      type: "replicaset_ReplicaSetDetail"
+      path: "replicaset/{args.namespace}/{args.replicaSet}"
+    ) {
+    ...ReplicaSetDetail
+  }
+}
+
+query ReplicaSetEvents($namespace: String!, $name: String!) {
+  handleGetReplicaSetEvents(namespace: $namespace, replicaSet: $name)
+    @rest(
+      type: "common_EventList"
+      path: "replicaset/{args.namespace}/{args.replicaSet}/event"
+    ) {
+    ...EventList
+  }
+}
+
+query ReplicaSetPods($namespace: String!, $name: String!) {
+  handleGetReplicaSetPods(namespace: $namespace, replicaSet: $name)
+    @rest(
+      type: "pod_PodList"
+      path: "replicaset/{args.namespace}/{args.replicaSet}/pod"
+    ) {
+    ...PodList
+  }
+}
+
+query ReplicaSetServices($namespace: String!, $name: String!) {
+  handleGetReplicaSetServices(namespace: $namespace, replicaSet: $name)
+    @rest(
+      type: "service_ServiceList"
+      path: "replicaset/{args.namespace}/{args.replicaSet}/service"
+    ) {
+    ...ServiceList
+  }
+}

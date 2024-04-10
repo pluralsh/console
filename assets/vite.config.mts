@@ -5,7 +5,7 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import pluginRewriteAll from 'vite-plugin-rewrite-all'
 import { VitePWA } from 'vite-plugin-pwa'
 
-import vitestConfig from './vitest.config'
+import vitestConfig from './vitest.config.mjs'
 
 const API_URL = process.env.BASE_URL
   ? `https://${process.env.BASE_URL}`
@@ -41,6 +41,17 @@ export default defineConfig(() =>
       proxy: {
         '/v1': API_URL,
         '/gql': API_URL,
+        '/api/v1': API_URL,
+        '/socket': WS_URL,
+      },
+    },
+    preview: {
+      port: 3000,
+      https: true,
+      proxy: {
+        '/v1': API_URL,
+        '/gql': API_URL,
+        '/api/v1': API_URL,
         '/socket': WS_URL,
       },
     },

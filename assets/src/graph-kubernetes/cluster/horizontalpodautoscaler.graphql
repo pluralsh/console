@@ -1,0 +1,49 @@
+query HorizontalPodAutoscalers(
+  $kind: String!
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetHorizontalPodAutoscalerList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "horizontalpodautoscaler_HorizontalPodAutoscalerList"
+      path: "horizontalpodautoscaler/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...HorizontalPodAutoscalerList
+  }
+}
+
+query HorizontalPodAutoscalersForResource(
+  $kind: String!
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetHorizontalPodAutoscalerListForResource(
+    kind: $kind
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "horizontalpodautoscaler_HorizontalPodAutoscalerList"
+      path: "{args.kind}/{args.namespace}/{args.name}/horizontalpodautoscaler?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...HorizontalPodAutoscalerList
+  }
+}

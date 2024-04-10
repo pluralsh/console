@@ -147,6 +147,7 @@ export default function CreateBuild() {
                     />
                   ) : undefined
                 }
+                // @ts-ignore
                 selectedKey={selectedApp}
                 maxHeight={200}
               >
@@ -168,6 +169,7 @@ export default function CreateBuild() {
               </ComboBox>
             </FormField>
             <FormField label="Type of build">
+              {/* @ts-ignore */}
               <Select
                 aria-label="type"
                 label="Choose build type"

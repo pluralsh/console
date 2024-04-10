@@ -35,6 +35,7 @@ export default function Changelog() {
   )
 
   const [tool, setTool] = useState<Key>(initialTool)
+  // @ts-ignore
   const tools = useMemo(() => grouped[repo] || [], [grouped, repo])
   const currentTool = useMemo(
     () => tools.find(({ tool: t }) => t === tool),
@@ -46,6 +47,7 @@ export default function Changelog() {
       scrollable={false}
       heading="Changelog"
       headingContent={
+        // @ts-ignore
         <Select
           aria-label="app"
           label="Choose an app"
@@ -88,6 +90,7 @@ export default function Changelog() {
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',
+              // @ts-ignore
               selectedKey: tool,
               onSelectionChange: setTool,
             }}

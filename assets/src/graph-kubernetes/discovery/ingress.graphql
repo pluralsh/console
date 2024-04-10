@@ -1,0 +1,110 @@
+query Ingresses(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetIngressList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "ingress_IngressList"
+      path: "ingress/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...IngressList
+  }
+}
+
+query Ingress($name: String!, $namespace: String!) {
+  handleGetIngressDetail(namespace: $namespace, name: $name)
+    @rest(path: "ingress/{args.namespace}/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    endpoints @type(name: "common_Endpoint") {
+      ...Endpoint
+    }
+    spec {
+      ingressClassName
+      tls {
+        hosts
+        secretName
+      }
+      defaultBackend {
+        service {
+          name
+          port {
+            name
+            number
+          }
+        }
+        resource {
+          name
+          apiGroup
+          kind
+        }
+      }
+      rules {
+        host
+        http {
+          paths {
+            path
+            pathType
+            backend {
+              service {
+                name
+                port {
+                  name
+                  number
+                }
+              }
+              resource {
+                name
+                kind
+                apiGroup
+              }
+              service {
+                name
+                port {
+                  name
+                  number
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    status {
+      loadBalancer {
+        ingress {
+          ports {
+            port
+            protocol
+            error
+          }
+        }
+      }
+    }
+    hosts
+    errors
+  }
+}
+
+query IngressEvents($namespace: String!, $name: String!) {
+  handleGetIngressEvent(namespace: $namespace, ingress: $name)
+    @rest(
+      type: "common_EventList"
+      path: "ingress/{args.namespace}/{args.ingress}/event"
+    ) {
+    ...EventList
+  }
+}

@@ -1,0 +1,51 @@
+query CronJobs(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetCronJobList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "cronjob_CronJobList"
+      path: "cronjob/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...CronJobList
+  }
+}
+
+query CronJob($namespace: String!, $name: String!) {
+  handleGetCronJobDetail(namespace: $namespace, name: $name)
+    @rest(
+      type: "cronjob_CronJobDetail"
+      path: "cronjob/{args.namespace}/{args.name}"
+    ) {
+    ...CronJobDetail
+  }
+}
+
+query CronJobEvents($namespace: String!, $name: String!) {
+  handleGetCronJobEvents(namespace: $namespace, name: $name)
+    @rest(
+      type: "common_EventList"
+      path: "cronjob/{args.namespace}/{args.name}/event"
+    ) {
+    ...EventList
+  }
+}
+
+query CronJobJobs($namespace: String!, $name: String!, $active: String) {
+  handleGetCronJobJobs(namespace: $namespace, name: $name, active: $active)
+    @rest(
+      type: "job_JobList"
+      path: "cronjob/{args.namespace}/{args.name}/job?active={args.active}"
+    ) {
+    ...JobList
+  }
+}

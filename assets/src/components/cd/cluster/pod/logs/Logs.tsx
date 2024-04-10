@@ -80,6 +80,7 @@ function Logs(): ReactElement {
           }}
         >
           <FormField label="Container">
+            {/* @ts-ignore */}
             <Select
               selectedKey={selected}
               onSelectionChange={(key) => setSelected(key)}
@@ -110,7 +111,7 @@ function Logs(): ReactElement {
         </div>
         <ContainerLogs
           container={selected as string}
-          sinceSeconds={+sinceSeconds}
+          sinceSeconds={+(sinceSeconds as number)}
         />
       </div>
     </ScrollablePage>

@@ -1,0 +1,61 @@
+query DaemonSets(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetDaemonSetList(
+    namespace: $namespace
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "daemonset_DaemonSetList"
+      path: "daemonset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...DaemonSetList
+  }
+}
+
+query DaemonSet($namespace: String!, $name: String!) {
+  handleGetDaemonSetDetail(namespace: $namespace, daemonSet: $name)
+    @rest(
+      type: "daemonset_DaemonSetDetail"
+      path: "daemonset/{args.namespace}/{args.daemonSet}"
+    ) {
+    ...DaemonSetDetail
+  }
+}
+
+query DaemonSetEvents($namespace: String!, $name: String!) {
+  handleGetDaemonSetEvents(namespace: $namespace, daemonSet: $name)
+    @rest(
+      type: "common_EventList"
+      path: "daemonset/{args.namespace}/{args.daemonSet}/event"
+    ) {
+    ...EventList
+  }
+}
+
+query DaemonSetPods($namespace: String!, $name: String!) {
+  handleGetDaemonSetPods(namespace: $namespace, daemonSet: $name)
+    @rest(
+      type: "pod_PodList"
+      path: "daemonset/{args.namespace}/{args.daemonSet}/pod"
+    ) {
+    ...PodList
+  }
+}
+
+query DaemonSetServices($namespace: String!, $name: String!) {
+  handleGetDaemonSetServices(namespace: $namespace, daemonSet: $name)
+    @rest(
+      type: "service_ServiceList"
+      path: "daemonset/{args.namespace}/{args.daemonSet}/service"
+    ) {
+    ...ServiceList
+  }
+}

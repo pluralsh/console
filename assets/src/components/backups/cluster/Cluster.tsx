@@ -57,8 +57,7 @@ export default function Cluster() {
   )
 
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${CLUSTER_ABS_PATH}/:tab*`)
-  // @ts-expect-error
+  const pathMatch = useMatch(`${CLUSTER_ABS_PATH}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path.includes(tab))
 

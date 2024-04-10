@@ -1,0 +1,123 @@
+query Nodes(
+  $namespace: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetNodeList(
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      path: "node?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    listMeta @type(name: "types_ListMeta") {
+      ...ListMeta
+    }
+    nodes {
+      typeMeta @type(name: "types_TypeMeta") {
+        ...TypeMeta
+      }
+      objectMeta @type(name: "types_ObjectMeta") {
+        ...ObjectMeta
+      }
+      ready
+      allocatedResources {
+        cpuRequests
+        cpuRequestsFraction
+        cpuCapacity
+        memoryRequests
+        memoryRequestsFraction
+        memoryCapacity
+        allocatedPods
+        podFraction
+        podCapacity
+      }
+    }
+  }
+}
+
+query Node($name: String!) {
+  handleGetNodeDetail(name: $name) @rest(path: "node/{args.name}") {
+    typeMeta @type(name: "types_TypeMeta") {
+      ...TypeMeta
+    }
+    objectMeta @type(name: "types_ObjectMeta") {
+      ...ObjectMeta
+    }
+    conditions @type(name: "common_Condition") {
+      ...Condition
+    }
+    allocatedResources {
+      cpuRequests
+      cpuRequestsFraction
+      cpuCapacity
+      memoryRequests
+      memoryRequestsFraction
+      memoryCapacity
+      allocatedPods
+      podFraction
+      podCapacity
+    }
+    nodeInfo {
+      architecture
+      bootID
+      containerRuntimeVersion
+      kernelVersion
+      kubeletVersion
+      kubeProxyVersion
+      machineID
+      operatingSystem
+      osImage
+      systemUUID
+    }
+    addresses {
+      type
+      address
+    }
+    taints {
+      key
+      value
+      effect
+    }
+    providerID
+    containerImages
+    podCIDR
+    phase
+    unschedulable
+    ready
+    errors
+  }
+}
+
+query NodePods($namespace: String!, $name: String!) {
+  handleGetNodePods(name: $name)
+    @rest(type: "pod_PodList", path: "node/{args.name}/pod") {
+    ...PodList
+  }
+}
+
+query NodeEvents(
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetNodeEvents(
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "common_EventList"
+      path: "node/{args.name}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...EventList
+  }
+}

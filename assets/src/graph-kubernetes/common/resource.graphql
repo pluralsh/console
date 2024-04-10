@@ -1,0 +1,43 @@
+query NamespacedResource($kind: String!, $name: String!, $namespace: String!) {
+  handleGetResource(kind: $kind, name: $name, namespace: $namespace)
+    @rest(
+      path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}"
+    ) {
+    Object
+  }
+}
+
+query Resource($kind: String!, $name: String!) {
+  handleGetResource(kind: $kind, name: $name, namespace: "")
+    @rest(path: "_raw/{args.kind}/name/{args.name}") {
+    Object
+  }
+}
+
+mutation NamespacedResourceUpdate(
+  $kind: String!
+  $name: String!
+  $namespace: String!
+  $input: JSON!
+) {
+  handlePutResource(
+    kind: $kind
+    name: $name
+    namespace: $namespace
+    input: $input
+  )
+    @rest(
+      type: "Void"
+      path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}"
+      method: "PUT"
+    )
+}
+
+mutation ResourceUpdate($kind: String!, $name: String!, $input: JSON!) {
+  handlePutResource(kind: $kind, name: $name, namespace: "", input: $input)
+    @rest(
+      type: "Void"
+      path: "_raw/{args.kind}/name/{args.name}"
+      method: "PUT"
+    )
+}

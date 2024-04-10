@@ -1,0 +1,136 @@
+fragment ListMeta on types_ListMeta {
+  totalItems
+}
+
+fragment TypeMeta on types_TypeMeta {
+  kind
+  restartable
+  scalable
+}
+
+fragment ObjectMeta on types_ObjectMeta {
+  uid
+  name
+  namespace
+  labels
+  annotations
+  creationTimestamp
+}
+
+fragment Condition on common_Condition {
+  message
+  type
+  status
+  lastProbeTime
+  lastTransitionTime
+  reason
+}
+
+fragment Probe on v1_Probe {
+  exec {
+    command
+  }
+  failureThreshold
+  initialDelaySeconds
+  periodSeconds
+  successThreshold
+  terminationGracePeriodSeconds
+  timeoutSeconds
+}
+
+fragment Endpoint on common_Endpoint {
+  host
+  ports {
+    port
+    nodePort
+    protocol
+  }
+}
+
+fragment NetworkPolicyPort on v1_NetworkPolicyPort {
+  port
+  endPort
+  protocol
+}
+
+fragment IPBlock on v1_IPBlock {
+  except
+  cidr
+}
+
+fragment PolicyRule on v1_PolicyRule {
+  apiGroups
+  nonResourceURLs
+  resourceNames
+  verbs
+  resources
+}
+
+fragment Subject on v1_Subject {
+  apiGroup
+  kind
+  name
+  namespace
+}
+
+fragment PodInfo on common_PodInfo {
+  current
+  desired
+  failed
+  pending
+  running
+  succeeded
+  warnings {
+    ...Event
+  }
+}
+
+fragment ResourceOwner on controller_ResourceOwner {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  containerImages
+  initContainerImages
+  pods @type(name: "common_PodInfo") {
+    ...PodInfo
+  }
+}
+
+fragment Selector on v1_LabelSelector {
+  matchLabels
+  matchExpressions {
+    key
+    operator
+    values
+  }
+}
+
+fragment HorizontalPodAutoscalerList on horizontalpodautoscaler_HorizontalPodAutoscalerList {
+  listMeta @type(name: "types_ListMeta") {
+    ...ListMeta
+  }
+  horizontalpodautoscalers
+    @type(name: "horizontalpodautoscaler_HorizontalPodAutoscaler") {
+    ...HorizontalPodAutoscaler
+  }
+}
+
+fragment HorizontalPodAutoscaler on horizontalpodautoscaler_HorizontalPodAutoscaler {
+  typeMeta @type(name: "types_TypeMeta") {
+    ...TypeMeta
+  }
+  objectMeta @type(name: "types_ObjectMeta") {
+    ...ObjectMeta
+  }
+  currentCPUUtilizationPercentage
+  maxReplicas
+  minReplicas
+  targetCPUUtilizationPercentage
+  scaleTargetRef {
+    name
+    kind
+  }
+}

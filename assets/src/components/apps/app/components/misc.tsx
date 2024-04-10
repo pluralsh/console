@@ -16,23 +16,29 @@ import { ComponentProps } from 'react'
 
 export const statusToBorder = {
   [Readiness.Ready]: '',
+  [Readiness.Running]: '',
   [Readiness.InProgress]: 'border-warning',
   [Readiness.Failed]: 'border-error',
   [Readiness.Complete]: '',
+  [Readiness.Completed]: '',
 } as const satisfies Record<ReadinessT, string>
 
 export const statusToSeverity = {
   [Readiness.Ready]: 'success',
+  [Readiness.Running]: 'success',
   [Readiness.InProgress]: 'warning',
   [Readiness.Failed]: 'danger',
   [Readiness.Complete]: 'success',
+  [Readiness.Completed]: 'success',
 } as const satisfies Record<ReadinessT, ComponentProps<typeof Chip>['severity']>
 
 const statusToDisplay = {
   [Readiness.Ready]: 'Ready',
+  [Readiness.Running]: 'Ready',
   [Readiness.InProgress]: 'In progress',
   [Readiness.Failed]: 'Failed',
   [Readiness.Complete]: 'Complete',
+  [Readiness.Completed]: 'Complete',
 } as const satisfies Record<ReadinessT, string>
 
 const stateToDisplay = {

@@ -22,17 +22,29 @@ generates:
     schema: 'https://raw.githubusercontent.com/pluralsh/plural/master/schema/schema.graphql'
     documents: './src/graph-plural/**/*.graphql'
     plugins:
-      - 'typescript'
-      - 'typescript-operations'
-      - 'typescript-react-apollo'
-      - 'named-operations-object'
-      - add:
-          content:
-            - '/* eslint-disable */'
-            - '/* prettier-ignore */'
+    - 'typescript'
+    - 'typescript-operations'
+    - 'typescript-react-apollo'
+    - 'named-operations-object'
+    - add:
+        content:
+        - '/* eslint-disable */'
+        - '/* prettier-ignore */'
+  src/generated/graphql-kubernetes.ts:
+    schema: 'schema/kubernetes-schema.graphql'
+    documents: './src/graph-kubernetes/**/*.graphql'
+    plugins:
+    - 'typescript'
+    - 'typescript-operations'
+    - 'typescript-react-apollo'
+    - add:
+        content:
+        - '/* eslint-disable */'
+        - '/* prettier-ignore */'
 config:
   scalars:
     Map: Record<string, unknown>
     UploadOrUrl: string
     DateTime: string
     Yaml: unknown
+    Json: unknown
