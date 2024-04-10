@@ -321,8 +321,8 @@ __metadata:
   linkType: hard
 
 "@apollo/client@npm:^3.0.0":
-  version: 3.9.10
-  resolution: "@apollo/client@npm:3.9.10"
+  version: 3.9.11
+  resolution: "@apollo/client@npm:3.9.11"
   dependencies:
     "@graphql-typed-document-node/core": ^3.1.1
     "@wry/caches": ^1.0.0
@@ -353,7 +353,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: 4299d998d4a9085b67f8c0e622b14e5ba998260ecc46315a434facfe6d2e6ec68aeb1ee6420ec37f69868235c7e1c6cafc54a3d0d039d578efc58d351bcbebe1
+  checksum: 503dde039d9701eeb3c8113494e5b568dad63d70d06a5b37af142cc57f96db436d7b175b4b556f00123f07ba7f1542ca51f4ea108a2cd66bcabfba5e5e4ccc94
   languageName: node
   linkType: hard
 
@@ -4315,7 +4315,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:^3.28.0":
+"@pluralsh/design-system@npm:3.28.0":
   version: 3.28.0
   resolution: "@pluralsh/design-system@npm:3.28.0"
   dependencies:
@@ -9554,7 +9554,7 @@ __metadata:
     "@nivo/pie": 0.83.0
     "@nivo/radial-bar": 0.83.0
     "@nivo/tooltip": 0.83.0
-    "@pluralsh/design-system": ^3.28.0
+    "@pluralsh/design-system": 3.28.0
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0
@@ -10723,9 +10723,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.4.668":
-  version: 1.4.731
-  resolution: "electron-to-chromium@npm:1.4.731"
-  checksum: f5ec068ae0616e2c3b68d66ce253a673de65b22ab3bea7e70dc16db7b7c683ca65f7d5c3b7276dd1f837a9c513ef435a53475b69a5df5eb581736d69b713ba3e
+  version: 1.4.732
+  resolution: "electron-to-chromium@npm:1.4.732"
+  checksum: 717c59afe215a60de86a696228f521eaa3f005617c1291207a748e4d4bd540486954e5fc4b949fac95437ee545da8c4cb6f006423eeeda7d777e5de2f1312975
   languageName: node
   linkType: hard
 
