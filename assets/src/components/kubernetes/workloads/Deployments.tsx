@@ -29,7 +29,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
     url: getWorkloadsAbsPath(cluster?.id),
   },
   {
-    label: ' deployments',
+    label: 'deployments',
     url: `${getWorkloadsAbsPath(cluster?.id)}/${DEPLOYMENTS_REL_PATH}`,
   },
 ]
