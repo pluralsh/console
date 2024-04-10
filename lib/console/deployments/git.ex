@@ -149,7 +149,7 @@ defmodule Console.Deployments.Git do
     |> add_operation(:hook, fn _ ->
       %ScmWebhook{type: conn.type}
       |> ScmWebhook.changeset(%{owner: owner})
-      |> Repo.insert_or_update()
+      |> Repo.insert()
     end)
     |> add_operation(:remote, fn %{hook: hook} ->
       case Dispatcher.webhook(conn, hook) do
@@ -158,6 +158,17 @@ defmodule Console.Deployments.Git do
       end
     end)
     |> execute(extract: :hook)
+  end
+
+  @doc """
+  Creates a new webhook for your console instance
+  """
+  @spec create_webhook(map, User.t) :: webhook_resp
+  def create_webhook(attrs, %User{} = user) do
+    %ScmWebhook{}
+    |> ScmWebhook.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
   end
 
   @doc """

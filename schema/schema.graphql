@@ -460,6 +460,9 @@ type RootMutationType {
 
   createScmWebhook(connectionId: ID!, owner: String!): ScmWebhook
 
+  "creates a webhook reference in our system but doesn't attempt to create it in your upstream provider"
+  createScmWebhookPointer(attributes: ScmWebhookAttributes!): ScmWebhook
+
   createPrAutomation(attributes: PrAutomationAttributes!): PrAutomation
 
   updatePrAutomation(id: ID!, attributes: PrAutomationAttributes!): PrAutomation
@@ -2658,6 +2661,9 @@ input ClusterAttributes {
 
   cloudSettings: CloudSettingsAttributes
 
+  "status of the upgrade plan for this cluster"
+  upgradePlan: UpgradePlanAttributes
+
   nodePools: [NodePoolAttributes]
 
   readBindings: [PolicyBindingAttributes]
@@ -2693,6 +2699,9 @@ input ClusterUpdateAttributes {
   "pass a kubeconfig for this cluster (DEPRECATED)"
   kubeconfig: KubeconfigAttributes
 
+  "status of the upgrade plan for this cluster"
+  upgradePlan: UpgradePlanAttributes
+
   protect: Boolean
 
   distro: ClusterDistro
@@ -2708,6 +2717,17 @@ input ClusterServiceAttributes {
   id: ID!
   repositoryId: ID
   git: GitRefAttributes!
+}
+
+input UpgradePlanAttributes {
+  "whether all compatibilities for a cluster upgrade have been cleared"
+  compatibilities: Boolean
+
+  "whether all incompatibilities w\/in runtime components have been cleared"
+  incompatibilities: Boolean
+
+  "whether all deprecated apis for a cluster have been cleared"
+  deprecations: Boolean
 }
 
 input NodePoolAttributes {
@@ -2915,6 +2935,9 @@ type Cluster {
   "the cloud settings for this cluster (for instance its aws region)"
   settings: CloudSettings
 
+  "Checklist of tasks to complete to safely upgrade this cluster"
+  upgradePlan: ClusterUpgradePlan
+
   "the url of the kas server you can access this cluster from"
   kasUrl: String
 
@@ -3019,6 +3042,18 @@ type Cluster {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"A consolidated checklist of tasks that need to be completed to upgrade this cluster"
+type ClusterUpgradePlan {
+  "whether api compatibilities with all addons and kubernetes are satisfied"
+  compatibilities: Boolean
+
+  "whether mutual api incompatibilities with all addons and kubernetes have been satisfied"
+  incompatibilities: Boolean
+
+  "whether all api deprecations have been cleared for the target version"
+  deprecations: Boolean
 }
 
 "a historical revision of a cluster, including version, cloud and node group configuration"
@@ -3521,6 +3556,18 @@ input PullRequestAttributes {
   clusterId: ID
   service: NamespacedName
   cluster: NamespacedName
+}
+
+"The attributes to configure a new webhook for a SCM provider"
+input ScmWebhookAttributes {
+  "the secret token for authenticating this webhook via hmac signature"
+  hmac: String!
+
+  "the type of webhook to create"
+  type: ScmType!
+
+  "the owner for this webhook in your SCM, eg a github org or gitlab group"
+  owner: String!
 }
 
 "a git repository available for deployments"

@@ -1,9 +1,6 @@
 import pluralize from 'pluralize'
 
 export const KUBERNETES_OPTIONAL_PARAM_CLUSTER = ':clusterId?'
-export const KUBERNETES_ABS_PATH = getKubernetesAbsPath(
-  KUBERNETES_OPTIONAL_PARAM_CLUSTER
-)
 
 export const WORKLOADS_REL_PATH = 'workloads'
 export const DEPLOYMENTS_REL_PATH = 'deployments'
@@ -47,6 +44,10 @@ export const CUSTOM_RESOURCES_REL_PATH = 'customresourcedefinitions'
 
 export const NAMESPACED_RESOURCE_DETAILS_REL_PATH = ':namespace/:name'
 export const RESOURCE_DETAILS_REL_PATH = ':name'
+
+export const KUBERNETES_ABS_PATH = getKubernetesAbsPath(
+  KUBERNETES_OPTIONAL_PARAM_CLUSTER
+)
 
 export function getKubernetesAbsPath(clusterId: string | null | undefined) {
   return `/kubernetes/${clusterId}`

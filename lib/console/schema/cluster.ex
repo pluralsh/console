@@ -100,6 +100,10 @@ defmodule Console.Schema.Cluster do
     field :distro_changed,  :boolean, default: false, virtual: true
     field :token_readable,  :boolean, default: false, virtual: true
 
+    embeds_one :upgrade_plan, UpgradePlan, on_replace: :update do
+      boolean_fields [:deprecations, :compatibilities, :incompatibilties]
+    end
+
     embeds_one :resource,       NamespacedName
     embeds_one :kubeconfig,     Kubeconfig, on_replace: :update
     embeds_one :cloud_settings, CloudSettings, on_replace: :update
@@ -128,6 +132,8 @@ defmodule Console.Schema.Cluster do
 
     timestamps()
   end
+
+  defp upgrade_plan_fields(), do: __MODULE__.UpgradePlan.__schema__(:fields) -- [:id]
 
   def search(query \\ __MODULE__, sq) do
     from(c in query, where: ilike(c.name, ^"#{sq}%"))
@@ -287,6 +293,7 @@ defmodule Console.Schema.Cluster do
     |> cast_embed(:kubeconfig)
     |> cast_embed(:resource)
     |> cast_embed(:cloud_settings)
+    |> cast_embed(:upgrade_plan, with: &upgrade_plan_cs/2)
     |> cast_assoc(:node_pools)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
@@ -326,6 +333,11 @@ defmodule Console.Schema.Cluster do
     |> cast(attrs, [])
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+  end
+
+  defp upgrade_plan_cs(model, attrs) do
+    model
+    |> cast(attrs, upgrade_plan_fields())
   end
 
   defp backfill_handle(cs) do

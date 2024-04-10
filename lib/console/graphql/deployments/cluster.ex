@@ -21,6 +21,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :protect,        :boolean
     field :kubeconfig,     :kubeconfig_attributes
     field :cloud_settings, :cloud_settings_attributes
+    field :upgrade_plan,   :upgrade_plan_attributes, description: "status of the upgrade plan for this cluster"
     field :node_pools,     list_of(:node_pool_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
@@ -42,21 +43,28 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :cluster_update_attributes do
-    field :version,    :string
-    field :handle,     :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
-    field :service,    :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
-    field :kubeconfig, :kubeconfig_attributes, description: "pass a kubeconfig for this cluster (DEPRECATED)"
-    field :protect,    :boolean
-    field :distro,     :cluster_distro
-    field :metadata,   :json
-    field :node_pools, list_of(:node_pool_attributes)
-    field :tags,       list_of(:tag_attributes)
+    field :version,      :string
+    field :handle,       :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
+    field :service,      :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
+    field :kubeconfig,   :kubeconfig_attributes, description: "pass a kubeconfig for this cluster (DEPRECATED)"
+    field :upgrade_plan, :upgrade_plan_attributes, description: "status of the upgrade plan for this cluster"
+    field :protect,      :boolean
+    field :distro,       :cluster_distro
+    field :metadata,     :json
+    field :node_pools,   list_of(:node_pool_attributes)
+    field :tags,         list_of(:tag_attributes)
   end
 
   input_object :cluster_service_attributes do
     field :id,            non_null(:id)
     field :repository_id, :id
     field :git,           non_null(:git_ref_attributes)
+  end
+
+  input_object :upgrade_plan_attributes do
+    field :compatibilities,   :boolean, description: "whether all compatibilities for a cluster upgrade have been cleared"
+    field :incompatibilities, :boolean, description: "whether all incompatibilities w/in runtime components have been cleared"
+    field :deprecations,      :boolean, description: "whether all deprecated apis for a cluster have been cleared"
   end
 
   input_object :node_pool_attributes do
@@ -218,6 +226,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :installed,       :boolean, description: "whether the deploy operator has been registered for this cluster"
     field :settings,        :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
+    field :upgrade_plan,    :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
     field :kas_url, :string, description: "the url of the kas server you can access this cluster from", resolve: fn
       _, _, _ -> {:ok, Console.Deployments.Clusters.kas_proxy_url()}
     end
@@ -294,6 +303,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this cluster"
 
     timestamps()
+  end
+
+  @desc "A consolidated checklist of tasks that need to be completed to upgrade this cluster"
+  object :cluster_upgrade_plan do
+    field :compatibilities,   :boolean, description: "whether api compatibilities with all addons and kubernetes are satisfied"
+    field :incompatibilities, :boolean, description: "whether mutual api incompatibilities with all addons and kubernetes have been satisfied"
+    field :deprecations,      :boolean, description: "whether all api deprecations have been cleared for the target version"
   end
 
   @desc "a historical revision of a cluster, including version, cloud and node group configuration"
