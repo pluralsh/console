@@ -6,7 +6,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
-
 import { useTheme } from 'styled-components'
 
 import {
@@ -18,13 +17,9 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { MetadataSidecar, ResourceLink, useKubernetesCluster } from '../utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-
 import ResourceDetails, { TabEntry } from '../ResourceDetails'
-
 import { InlineLink } from '../../utils/typography/InlineLink'
-
 import { SubTitle } from '../../utils/SubTitle'
-
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 
 import { PVStatusChip } from './utils'
@@ -379,6 +374,50 @@ export function PersistentVolumeInfo(): ReactElement {
               </ResourceInfoCardEntry>
             </>
           )}
+          {source?.iscsi && (
+            <>
+              <ResourceInfoCardEntry heading="Type">
+                iSCSI
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Filesystem type">
+                {source.iscsi.fsType}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Readonly">
+                {source.iscsi.readOnly}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Target portal">
+                {source.iscsi.targetPortal}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Target lun number">
+                {source.iscsi.lun}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Qualified name">
+                {source.iscsi.iqn}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Discovery CHAP authentication">
+                {source.iscsi.chapAuthDiscovery}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Session CHAP authentication">
+                {source.iscsi.chapAuthSession}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Initiator name">
+                {source.iscsi.initiatorName}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Interface name">
+                {source.iscsi.iscsiInterface}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Target portal">
+                {source.iscsi.targetPortal}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Portals">
+                <ChipList
+                  size="small"
+                  values={source.iscsi.portals ?? []}
+                  limit={5}
+                />
+              </ResourceInfoCardEntry>
+            </>
+          )}
           {source?.local && (
             <>
               <ResourceInfoCardEntry heading="Type">
@@ -403,6 +442,161 @@ export function PersistentVolumeInfo(): ReactElement {
               </ResourceInfoCardEntry>
               <ResourceInfoCardEntry heading="Path">
                 {source.nfs.path}
+              </ResourceInfoCardEntry>
+            </>
+          )}
+          {source?.photonPersistentDisk && (
+            <>
+              <ResourceInfoCardEntry heading="Type">
+                Photon OS persistent disk
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Filesystem type">
+                {source.photonPersistentDisk.fsType}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Persistent disk ID">
+                {source.photonPersistentDisk.pdID}
+              </ResourceInfoCardEntry>
+            </>
+          )}
+          {source?.portworxVolume && (
+            <>
+              <ResourceInfoCardEntry heading="Type">
+                Portworx volume
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Filesystem type">
+                {source.portworxVolume.fsType}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Readonly">
+                {source.portworxVolume.readOnly}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Volume ID">
+                {source.portworxVolume.volumeID}
+              </ResourceInfoCardEntry>
+            </>
+          )}
+          {source?.quobyte && (
+            <>
+              <ResourceInfoCardEntry heading="Type">
+                Quobyte
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Readonly">
+                {source.quobyte.readOnly}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Volume">
+                {source.quobyte.volume}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="User">
+                {source.quobyte.user}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Group">
+                {source.quobyte.group}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Registry">
+                {source.quobyte.registry}
+              </ResourceInfoCardEntry>
+            </>
+          )}
+          {source?.rbd && (
+            <>
+              <ResourceInfoCardEntry heading="Type">RBD</ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Filesystem type">
+                {source.rbd.fsType}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Readonly">
+                {source.rbd.readOnly}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Image">
+                {source.rbd.image}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Keyring">
+                {source.rbd.keyring}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Pool">
+                {source.rbd.pool}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="User">
+                {source.rbd.user}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Monitors">
+                <ChipList
+                  size="small"
+                  values={source.rbd.monitors ?? []}
+                  limit={5}
+                />
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Secret">
+                <ResourceLink
+                  kind="secret"
+                  name={source.rbd.secretRef?.name}
+                  namespace={source.rbd.secretRef?.namespace}
+                />
+              </ResourceInfoCardEntry>
+            </>
+          )}
+          {source?.scaleIO && (
+            <>
+              <ResourceInfoCardEntry heading="Type">
+                ScaleIO
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Filesystem type">
+                {source.scaleIO.fsType}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Readonly">
+                {source.scaleIO.readOnly}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Volume name">
+                {source.scaleIO.volumeName}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Gateway">
+                {source.scaleIO.gateway}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Protection domain">
+                {source.scaleIO.protectionDomain}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="SSL enabled">
+                {source.scaleIO.sslEnabled}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Storage mode">
+                {source.scaleIO.storageMode}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Storage pool">
+                {source.scaleIO.storagePool}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="System">
+                {source.scaleIO.system}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Secret">
+                <ResourceLink
+                  kind="secret"
+                  name={source.scaleIO.secretRef?.name}
+                  namespace={source.scaleIO.secretRef?.namespace}
+                />
+              </ResourceInfoCardEntry>
+            </>
+          )}
+          {source?.storageos && (
+            <>
+              <ResourceInfoCardEntry heading="Type">
+                StorageOS
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Filesystem type">
+                {source.storageos.fsType}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Readonly">
+                {source.storageos.readOnly}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Volume name">
+                {source.storageos.volumeName}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Volume namespace">
+                {source.storageos.volumeNamespace}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Secret">
+                <ResourceLink
+                  kind="secret"
+                  name={source.storageos.secretRef?.name}
+                  namespace={source.storageos.secretRef?.namespace}
+                />
               </ResourceInfoCardEntry>
             </>
           )}
