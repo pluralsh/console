@@ -196,12 +196,7 @@ export default function Kubernetes() {
     [clusterId, clusters]
   )
 
-  const pageHeaderContext = useMemo(
-    () => ({
-      setHeaderContent,
-    }),
-    []
-  )
+  const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 
   const resourceListContext = useMemo(
     () => ({ setNamespaced }) as ResourceListContextT,

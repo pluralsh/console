@@ -1,4 +1,4 @@
-import { Outlet, useMatch } from 'react-router-dom'
+import { Outlet, useLocation, useMatch } from 'react-router-dom'
 import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { Suspense, useMemo, useRef, useState } from 'react'
 
@@ -44,6 +44,7 @@ export default function Storage() {
   const pathMatch = useMatch(`${getStorageAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
+  const { search } = useLocation()
 
   const headerContent = useMemo(
     () => (
@@ -63,7 +64,7 @@ export default function Storage() {
             subTab
             key={path}
             textValue={label}
-            to={`${getStorageAbsPath(cluster?.id)}/${path}`}
+            to={`${getStorageAbsPath(cluster?.id)}/${path}${search}`}
           >
             <SubTab
               key={path}
@@ -75,7 +76,7 @@ export default function Storage() {
         ))}
       </TabList>
     ),
-    [cluster, currentTab]
+    [cluster?.id, currentTab?.path, search]
   )
 
   useSetPageHeaderContent(headerContent)

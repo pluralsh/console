@@ -1,6 +1,6 @@
 import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { Suspense, useMemo, useRef, useState } from 'react'
-import { Outlet, useMatch } from 'react-router-dom'
+import { Outlet, useLocation, useMatch } from 'react-router-dom'
 
 import {
   CRON_JOBS_REL_PATH,
@@ -37,18 +37,12 @@ const directory = [
 export default function Workloads() {
   const { cluster } = useKubernetesContext()
   const [scrollable, setScrollable] = useState(false)
-
-  const pageScrollableContext = useMemo(
-    () => ({
-      setScrollable,
-    }),
-    []
-  )
-
+  const pageScrollableContext = useMemo(() => ({ setScrollable }), [])
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${getWorkloadsAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
+  const { search } = useLocation()
 
   const headerContent = useMemo(
     () => (
@@ -68,7 +62,7 @@ export default function Workloads() {
             subTab
             key={path}
             textValue={label}
-            to={`${getWorkloadsAbsPath(cluster?.id)}/${path}`}
+            to={`${getWorkloadsAbsPath(cluster?.id)}/${path}${search}`}
           >
             <SubTab
               key={path}
@@ -80,7 +74,7 @@ export default function Workloads() {
         ))}
       </TabList>
     ),
-    [cluster, currentTab]
+    [cluster?.id, currentTab?.path, search]
   )
 
   useSetPageHeaderContent(headerContent)
