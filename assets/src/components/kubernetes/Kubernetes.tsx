@@ -132,13 +132,14 @@ const KubernetesContext = createContext<KubernetesContextT | undefined>(
 export const useKubernetesContext = () => {
   const ctx = useContext(KubernetesContext)
 
-  if (!ctx) {
-    throw Error(
-      'useKubernetesContext() must be used within a KubernetesContext'
-    )
-  }
+  // TODO: Refactor it.
+  // if (!ctx) {
+  //   throw Error(
+  //     'useKubernetesContext() must be used within a KubernetesContext'
+  //   )
+  // }
 
-  return ctx
+  return ctx ?? {}
 }
 
 export const NAMESPACE_PARAM = 'namespace'
