@@ -47,12 +47,15 @@ export default function Access() {
   const headerContent = useMemo(
     () => (
       <TabList
+        scrollable
         gap="xxsmall"
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',
           selectedKey: currentTab?.path,
         }}
+        marginRight="medium"
+        paddingBottom="xxsmall"
       >
         {directory.map(({ label, path }) => (
           <LinkTabWrap
