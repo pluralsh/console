@@ -132,10 +132,7 @@ export function JobPods(): ReactElement {
       columns={columns}
       query={useJobPodsQuery}
       queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as JobPodsQueryVariables,
+        variables: { namespace, name } as JobPodsQueryVariables,
       }}
       queryName="handleGetJobPods"
       itemsKey="pods"
@@ -153,10 +150,7 @@ export function JobEvents(): ReactElement {
       columns={columns}
       query={useJobEventsQuery}
       queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as JobEventsQueryVariables,
+        variables: { namespace, name } as JobEventsQueryVariables,
       }}
       queryName="handleGetJobEvents"
       itemsKey="events"

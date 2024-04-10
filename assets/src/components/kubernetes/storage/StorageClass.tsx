@@ -50,9 +50,7 @@ export default function StorageClass(): ReactElement {
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     pollInterval: 30_000,
-    variables: {
-      name,
-    } as ConfigMapQueryVariables,
+    variables: { name } as ConfigMapQueryVariables,
   })
 
   const sc = data?.handleGetStorageClass

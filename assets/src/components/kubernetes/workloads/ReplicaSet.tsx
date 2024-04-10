@@ -188,10 +188,7 @@ export function ReplicaSetPods(): ReactElement {
       columns={columns}
       query={useReplicaSetPodsQuery}
       queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as ReplicaSetPodsQueryVariables,
+        variables: { namespace, name } as ReplicaSetPodsQueryVariables,
       }}
       queryName="handleGetReplicaSetPods"
       itemsKey="pods"
@@ -215,10 +212,7 @@ export function ReplicaSetServices(): ReactElement {
       columns={columns}
       query={useReplicaSetServicesQuery}
       queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as ReplicaSetServicesQueryVariables,
+        variables: { namespace, name } as ReplicaSetServicesQueryVariables,
       }}
       queryName="handleGetReplicaSetServices"
       itemsKey="services"

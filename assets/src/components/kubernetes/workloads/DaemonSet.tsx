@@ -143,10 +143,7 @@ export function DaemonSetPods(): ReactElement {
       columns={columns}
       query={useDaemonSetPodsQuery}
       queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as DaemonSetPodsQueryVariables,
+        variables: { namespace, name } as DaemonSetPodsQueryVariables,
       }}
       queryName="handleGetDaemonSetPods"
       itemsKey="pods"
@@ -169,10 +166,7 @@ export function DaemonSetServices(): ReactElement {
       columns={columns}
       query={useDaemonSetServicesQuery}
       queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as DaemonSetServicesQueryVariables,
+        variables: { namespace, name } as DaemonSetServicesQueryVariables,
       }}
       queryName="handleGetDaemonSetServices"
       itemsKey="services"
@@ -195,10 +189,7 @@ export function DaemonSetEvents(): ReactElement {
       columns={columns}
       query={useDaemonSetEventsQuery}
       queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as DaemonSetEventsQueryVariables,
+        variables: { namespace, name } as DaemonSetEventsQueryVariables,
       }}
       queryName="handleGetDaemonSetEvents"
       itemsKey="events"

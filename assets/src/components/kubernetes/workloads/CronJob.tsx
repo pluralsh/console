@@ -188,10 +188,7 @@ export function CronJobEvents(): ReactElement {
       columns={columns}
       query={useCronJobEventsQuery}
       queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as CronJobEventsQueryVariables,
+        variables: { namespace, name } as CronJobEventsQueryVariables,
       }}
       queryName="handleGetCronJobEvents"
       itemsKey="events"

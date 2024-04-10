@@ -134,10 +134,7 @@ export function StatefulSetPods(): ReactElement {
       columns={columns}
       query={useStatefulSetPodsQuery}
       queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as StatefulSetPodsQueryVariables,
+        variables: { namespace, name } as StatefulSetPodsQueryVariables,
       }}
       queryName="handleGetStatefulSetPods"
       itemsKey="pods"
@@ -160,10 +157,7 @@ export function StatefulSetEvents(): ReactElement {
       columns={columns}
       query={useStatefulSetEventsQuery}
       queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as StatefulSetEventsQueryVariables,
+        variables: { namespace, name } as StatefulSetEventsQueryVariables,
       }}
       queryName="handleGetStatefulSetEvents"
       itemsKey="events"

@@ -202,10 +202,7 @@ export function PodEvents(): ReactElement {
       columns={columns}
       query={usePodEventsQuery}
       queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as PodEventsQueryVariables,
+        variables: { namespace, name } as PodEventsQueryVariables,
       }}
       queryName="handleGetPodEvents"
       itemsKey="events"
