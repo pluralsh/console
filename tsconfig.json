@@ -10,7 +10,10 @@
     "noImplicitAny": true,
     "sourceMap": true,
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDirs": [
+      "src",
+      ".storybook"
+    ],
     "moduleResolution": "node",
     "resolveJsonModule": true
   },
