@@ -34,6 +34,7 @@ import Conditions from '../common/Conditions'
 import { ResourceList } from '../ResourceList'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
+import { CRDEstablishedChip } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Objects' },
@@ -83,7 +84,9 @@ export default function CustomResourceDefinition(): ReactElement {
           <SidecarItem heading="Version">{crd?.version}</SidecarItem>
           <SidecarItem heading="Kind">{crd?.names.kind}</SidecarItem>
           <SidecarItem heading="Scope">{crd?.scope}</SidecarItem>
-          <SidecarItem heading="Established">{crd?.established}</SidecarItem>
+          <SidecarItem heading="Established">
+            <CRDEstablishedChip established={crd?.established} />
+          </SidecarItem>
           <SidecarItem heading="Subresources">
             <ChipList
               size="small"
