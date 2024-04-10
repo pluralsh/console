@@ -157,7 +157,7 @@ const directory: Directory = [
 export default function Kubernetes() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
   const { clusterId } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
   const [filter, setFilter] = useState(searchParams.get(FILTER_PARAM) ?? '')
@@ -213,10 +213,10 @@ export default function Kubernetes() {
       const mgmtCluster = clusters.find(({ self }) => !!self)
 
       if (mgmtCluster) {
-        navigate(getKubernetesAbsPath(mgmtCluster.id))
+        navigate(getKubernetesAbsPath(mgmtCluster.id) + search)
       }
     }
-  }, [cluster, clusters, navigate])
+  }, [cluster, clusters, navigate, search])
 
   if (!cluster) return <LoadingIndicator />
 
@@ -236,7 +236,7 @@ export default function Kubernetes() {
             clusters={clusters}
             selectedKey={clusterId}
             onSelectionChange={
-              (id) => navigate(getKubernetesAbsPath(id as string)) // TODO: Keep current view if possible when switching clusters. Keep search params as well.
+              (id) => navigate(getKubernetesAbsPath(id as string) + search) // TODO: Keep current view when switching clusters.
             }
             withoutTitleContent
           />
