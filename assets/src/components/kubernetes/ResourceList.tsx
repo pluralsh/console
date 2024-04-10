@@ -38,7 +38,11 @@ import {
   usePageInfo,
   useSortedTableOptions,
 } from './utils'
-import { FILTER_PARAM, NAMESPACE_PARAM } from './Kubernetes'
+import {
+  FILTER_PARAM,
+  NAMESPACE_PARAM,
+  useKubernetesContext,
+} from './Kubernetes'
 
 export type ResourceListContextT = {
   setNamespaced: Dispatch<SetStateAction<boolean>>
@@ -138,9 +142,7 @@ export function ResourceList<
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
   const navigate = useNavigate()
   const cluster = useKubernetesCluster()
-  const [searchParams] = useSearchParams()
-  const filter = searchParams.get(FILTER_PARAM) ?? ''
-  const namespace = searchParams.get(NAMESPACE_PARAM) ?? ''
+  const { namespace, filter } = useKubernetesContext()
   const { sortBy, reactTableOptions } = useSortedTableOptions({
     meta: { cluster },
   })
@@ -197,6 +199,7 @@ export function ResourceList<
 
   return (
     <FullHeightTableWrap>
+      {namespace}
       <Table
         data={items}
         columns={columnsData}
