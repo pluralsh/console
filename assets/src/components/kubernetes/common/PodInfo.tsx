@@ -18,23 +18,23 @@ export function PodInfo({ info }: PodInfoProps): ReactNode {
     let result = ''
 
     if (running > 0) {
-      result += `${running} Running /`
+      result += `${running} running /`
     }
 
     if (succeeded > 0) {
-      result += `${succeeded} Succeeded / `
+      result += `${succeeded} succeeded / `
     }
 
     if (pending > 0) {
-      result += `${pending} Pending / `
+      result += `${pending} pending / `
     }
 
     if (failed > 0) {
-      result += `${failed} Failed / `
+      result += `${failed} failed / `
     }
 
-    result += ` ${current} Current / `
-    result += ` ${desired} Desired`
+    result += ` ${current} current / `
+    result += ` ${desired} desired`
 
     return result
   }, [info])
