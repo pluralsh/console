@@ -51,6 +51,7 @@ import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscal
 
 import { getBreadcrumbs } from './Deployments'
 import { useReplicaSetsColumns } from './ReplicaSets'
+import { WorkloadStatusChip } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: 'replicasets', label: 'Replica Sets' },
@@ -107,10 +108,11 @@ export default function Deployment(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={deployment}>
-          <SidecarItem heading="Selector">
-            <LabelSelector
-              selector={{ matchLabels: deployment?.selector } as LabelSelectorT}
-            />
+          <SidecarItem heading="Status">
+            <WorkloadStatusChip podInfo={deployment?.pods} />
+          </SidecarItem>
+          <SidecarItem heading="Pods">
+            <PodInfo info={deployment?.pods} />
           </SidecarItem>
           <SidecarItem heading="Images">
             <ChipList
@@ -122,8 +124,10 @@ export default function Deployment(): ReactElement {
               emptyState={<div>None</div>}
             />
           </SidecarItem>
-          <SidecarItem heading="Status">
-            <PodInfo info={deployment?.pods} />
+          <SidecarItem heading="Selector">
+            <LabelSelector
+              selector={{ matchLabels: deployment?.selector } as LabelSelectorT}
+            />
           </SidecarItem>
         </MetadataSidecar>
       }

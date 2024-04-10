@@ -86,8 +86,21 @@ export function Pod(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={pod}>
-          <SidecarItem heading="IP">{pod?.podIP}</SidecarItem>
-          <SidecarItem heading="Parent node">
+          <SidecarItem heading="Containers">
+            <ContainerStatuses
+              statuses={
+                pod?.initContainers?.concat(pod?.containers)?.map(
+                  (c) =>
+                    ({
+                      name: c?.name,
+                      readiness: toReadiness(c!.status!),
+                    }) as ContainerStatusT
+                ) ?? []
+              }
+            />
+          </SidecarItem>
+          <SidecarItem heading="Phase">{pod?.podPhase}</SidecarItem>
+          <SidecarItem heading="Node">
             <Link
               to={getResourceDetailsAbsPath(clusterId, 'node', pod?.nodeName)}
             >
@@ -106,24 +119,11 @@ export function Pod(): ReactElement {
               <InlineLink>{pod?.serviceAccountName}</InlineLink>
             </Link>
           </SidecarItem>
+          <SidecarItem heading="IP">{pod?.podIP}</SidecarItem>
           <SidecarItem heading="Restart Count">
             {`${pod?.restartCount ?? 0}`}
           </SidecarItem>
           <SidecarItem heading="QOS Class">{pod?.qosClass}</SidecarItem>
-          <SidecarItem heading="Containers">
-            <ContainerStatuses
-              statuses={
-                pod?.initContainers?.concat(pod?.containers)?.map(
-                  (c) =>
-                    ({
-                      name: c?.name,
-                      readiness: toReadiness(c!.status!),
-                    }) as ContainerStatusT
-                ) ?? []
-              }
-            />
-          </SidecarItem>
-          <SidecarItem heading="Pod Phase">{pod?.podPhase}</SidecarItem>
         </MetadataSidecar>
       }
     >

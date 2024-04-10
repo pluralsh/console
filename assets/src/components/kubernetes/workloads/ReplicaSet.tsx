@@ -46,6 +46,7 @@ import { NAMESPACE_PARAM } from '../Kubernetes'
 
 import { getBreadcrumbs } from './ReplicaSets'
 import { usePodsColumns } from './Pods'
+import { WorkloadStatusChip } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -103,8 +104,11 @@ export default function ReplicaSet(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={rs}>
-          <SidecarItem heading="Selector">
-            <LabelSelector selector={rs?.selector} />
+          <SidecarItem heading="Status">
+            <WorkloadStatusChip podInfo={rs?.podInfo} />
+          </SidecarItem>
+          <SidecarItem heading="Pods">
+            <PodInfo info={rs?.podInfo} />
           </SidecarItem>
           <SidecarItem heading="Images">
             <ChipList
@@ -116,8 +120,8 @@ export default function ReplicaSet(): ReactElement {
               emptyState={<div>None</div>}
             />
           </SidecarItem>
-          <SidecarItem heading="Status">
-            <PodInfo info={rs?.podInfo} />
+          <SidecarItem heading="Selector">
+            <LabelSelector selector={rs?.selector} />
           </SidecarItem>
         </MetadataSidecar>
       }

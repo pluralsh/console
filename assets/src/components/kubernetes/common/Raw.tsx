@@ -27,7 +27,7 @@ export default function Raw(): ReactElement {
   const [updateError, setUpdateError] = useState<ApolloError>()
   const kind = useMemo(
     () => crd ?? pluralize(pathMatch?.params?.kind || '', 1),
-    [pathMatch?.params?.kind]
+    [pathMatch?.params?.kind, crd]
   )
   const resourceQuery = useMemo(
     () => (namespace ? useNamespacedResourceQuery : useResourceQuery),

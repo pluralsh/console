@@ -90,6 +90,12 @@ export default function Job(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={job}>
+          <SidecarItem heading="Status">
+            <StatusChip
+              readiness={job?.jobStatus?.status as ReadinessT}
+              size="small"
+            />
+          </SidecarItem>
           <SidecarItem heading="Images">
             <ChipList
               size="small"
@@ -102,12 +108,6 @@ export default function Job(): ReactElement {
           </SidecarItem>
           <SidecarItem heading="Completions">{job?.completions}</SidecarItem>
           <SidecarItem heading="Parallelism">{job?.parallelism}</SidecarItem>
-          <SidecarItem heading="Status">
-            <StatusChip
-              readiness={job?.jobStatus?.status as ReadinessT}
-              size="small"
-            />
-          </SidecarItem>
         </MetadataSidecar>
       }
     >

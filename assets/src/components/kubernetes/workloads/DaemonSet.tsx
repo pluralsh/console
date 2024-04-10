@@ -46,6 +46,7 @@ import { PodInfo } from '../common/PodInfo'
 
 import { getBreadcrumbs } from './DaemonSets'
 import { usePodsColumns } from './Pods'
+import { WorkloadStatusChip } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -102,10 +103,13 @@ export default function DaemonSet(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={daemonSet}>
+          <SidecarItem heading="Status">
+            <WorkloadStatusChip podInfo={daemonSet?.podInfo} />
+          </SidecarItem>
+          <SidecarItem heading="Pods">
+            <PodInfo info={daemonSet?.podInfo} />
+          </SidecarItem>
           <SidecarItem heading="Images">
-            <SidecarItem heading="Selector">
-              <LabelSelector selector={daemonSet?.labelSelector} />
-            </SidecarItem>
             <ChipList
               size="small"
               limit={3}
@@ -113,8 +117,8 @@ export default function DaemonSet(): ReactElement {
               emptyState={<div>None</div>}
             />
           </SidecarItem>
-          <SidecarItem heading="Status">
-            <PodInfo info={daemonSet?.podInfo} />
+          <SidecarItem heading="Selector">
+            <LabelSelector selector={daemonSet?.labelSelector} />
           </SidecarItem>
         </MetadataSidecar>
       }

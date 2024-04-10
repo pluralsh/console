@@ -90,7 +90,7 @@ export function ContainerStatus({
     >
       <Div
         borderRadius={3}
-        padding={4}
+        padding={2}
         _hover={{ backgroundColor: 'fill-two-hover' }}
       >
         {readinessToIcon[readiness]}

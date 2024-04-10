@@ -45,6 +45,7 @@ import { LabelSelector } from '../common/LabelSelector'
 
 import { getBreadcrumbs } from './ReplicationControllers'
 import { usePodsColumns } from './Pods'
+import { WorkloadStatusChip } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -102,10 +103,11 @@ export default function ReplicationController(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={rc}>
-          <SidecarItem heading="Selector">
-            <LabelSelector
-              selector={{ matchLabels: rc?.labelSelector } as LabelSelectorT}
-            />
+          <SidecarItem heading="Status">
+            <WorkloadStatusChip podInfo={rc?.podInfo} />
+          </SidecarItem>
+          <SidecarItem heading="Pods">
+            <PodInfo info={rc?.podInfo} />
           </SidecarItem>
           <SidecarItem heading="Images">
             <ChipList
@@ -119,8 +121,10 @@ export default function ReplicationController(): ReactElement {
               tooltip
             />
           </SidecarItem>
-          <SidecarItem heading="Status">
-            <PodInfo info={rc?.podInfo} />
+          <SidecarItem heading="Selector">
+            <LabelSelector
+              selector={{ matchLabels: rc?.labelSelector } as LabelSelectorT}
+            />
           </SidecarItem>
         </MetadataSidecar>
       }

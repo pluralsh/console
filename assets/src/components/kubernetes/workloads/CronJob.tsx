@@ -103,7 +103,7 @@ export default function CronJob(): ReactElement {
           </SidecarItem>
           <SidecarItem heading="Active jobs">{cronJob?.active}</SidecarItem>
           <SidecarItem heading="Suspended">
-            {cronJob?.suspend ? 'true' : 'false'}
+            {cronJob?.suspend ? 'True' : 'False'}
           </SidecarItem>
           <SidecarItem heading="Concurrency policy">
             {cronJob?.concurrencyPolicy}

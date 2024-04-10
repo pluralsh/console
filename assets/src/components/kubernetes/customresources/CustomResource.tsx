@@ -52,7 +52,7 @@ export default function CustomResource(): ReactElement {
           label: name ?? '',
         },
       ],
-      [cluster, clusterId, crd]
+      [cluster, clusterId, crd, name, namespace]
     )
   )
 

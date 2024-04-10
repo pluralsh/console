@@ -37,6 +37,7 @@ import { PodInfo } from '../common/PodInfo'
 
 import { getBreadcrumbs } from './StatefulSets'
 import { usePodsColumns } from './Pods'
+import { WorkloadStatusChip } from './utils'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -92,6 +93,12 @@ export default function StatefulSet(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={statefulSet}>
+          <SidecarItem heading="Status">
+            <WorkloadStatusChip podInfo={statefulSet?.podInfo} />
+          </SidecarItem>
+          <SidecarItem heading="Pods">
+            <PodInfo info={statefulSet?.podInfo} />
+          </SidecarItem>
           <SidecarItem heading="Images">
             <ChipList
               size="small"
@@ -103,9 +110,6 @@ export default function StatefulSet(): ReactElement {
               truncateWidth={300}
               tooltip
             />
-          </SidecarItem>
-          <SidecarItem heading="Status">
-            <PodInfo info={statefulSet?.podInfo} />
           </SidecarItem>
         </MetadataSidecar>
       }
