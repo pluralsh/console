@@ -67,16 +67,20 @@ export default function PersistentVolume(): ReactElement {
       sidecar={
         <MetadataSidecar resource={pv}>
           <SidecarItem heading="Claim">
-            <Link
-              to={getResourceDetailsAbsPath(
-                cluster?.id,
-                'persistentvolumeclaim',
-                claimName ?? '',
-                claimNamespace
-              )}
-            >
-              <InlineLink>{pv?.claim}</InlineLink>
-            </Link>
+            {pv?.claim ? (
+              <Link
+                to={getResourceDetailsAbsPath(
+                  cluster?.id,
+                  'persistentvolumeclaim',
+                  claimName ?? '',
+                  claimNamespace
+                )}
+              >
+                <InlineLink>{pv?.claim}</InlineLink>
+              </Link>
+            ) : (
+              'None'
+            )}
           </SidecarItem>
           <SidecarItem heading="Storage class">
             <Link
@@ -200,6 +204,39 @@ export function PersistentVolumeInfo(): ReactElement {
                   kind="secret"
                   name={source.azureFile.secretName}
                   namespace={source.azureFile.secretNamespace}
+                />
+              </ResourceInfoCardEntry>
+            </>
+          )}
+          {source?.cephfs && (
+            <>
+              <ResourceInfoCardEntry heading="Type">
+                Ceph Storage Cluster
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Readonly">
+                {source.cephfs.readOnly}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Path">
+                {source.cephfs.path}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="User">
+                {source.cephfs.user}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Monitors">
+                <ChipList
+                  size="small"
+                  values={source.cephfs.monitors ?? []}
+                  limit={5}
+                />
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Secret file">
+                {source.cephfs.secretFile}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Secret">
+                <ResourceLink
+                  kind="secret"
+                  name={source.cephfs.secretRef?.name}
+                  namespace={source.cephfs.secretRef?.namespace}
                 />
               </ResourceInfoCardEntry>
             </>
@@ -329,6 +366,32 @@ export function PersistentVolumeInfo(): ReactElement {
               </ResourceInfoCardEntry>
             </>
           )}
+          {source?.flexVolume && (
+            <>
+              <ResourceInfoCardEntry heading="Type">
+                Flex Volume
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Filesystem type">
+                {source.flexVolume.fsType}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Readonly">
+                {source.flexVolume.readOnly}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Driver">
+                {source.flexVolume.driver}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Driver">
+                {source.flexVolume.options}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Secret">
+                <ResourceLink
+                  kind="secret"
+                  name={source.flexVolume.secretRef?.name}
+                  namespace={source.flexVolume.secretRef?.namespace}
+                />
+              </ResourceInfoCardEntry>
+            </>
+          )}
           {source?.flocker && (
             <>
               <ResourceInfoCardEntry heading="Type">
@@ -358,6 +421,25 @@ export function PersistentVolumeInfo(): ReactElement {
               </ResourceInfoCardEntry>
               <ResourceInfoCardEntry heading="Partition">
                 {source.gcePersistentDisk.partition}
+              </ResourceInfoCardEntry>
+            </>
+          )}
+          {source?.glusterfs && (
+            <>
+              <ResourceInfoCardEntry heading="Type">
+                Gluster
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Readonly">
+                {source.glusterfs.readOnly}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Path">
+                {source.glusterfs.path}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Endpoints">
+                {source.glusterfs.endpoints}
+              </ResourceInfoCardEntry>
+              <ResourceInfoCardEntry heading="Endpoints namespace">
+                {source.glusterfs.endpointsNamespace}
               </ResourceInfoCardEntry>
             </>
           )}
