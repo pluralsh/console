@@ -139,7 +139,7 @@ export const useKubernetesContext = () => {
   //   )
   // }
 
-  return ctx ?? {}
+  return ctx ?? {cluster: null, namespace: '', filter: ''}
 }
 
 export const NAMESPACE_PARAM = 'namespace'
