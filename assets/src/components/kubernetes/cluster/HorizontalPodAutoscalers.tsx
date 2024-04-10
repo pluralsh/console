@@ -27,12 +27,12 @@ const COLUMNS = [
   }),
   columnHelper.accessor((hpa) => hpa?.minReplicas, {
     id: 'minreplicas',
-    header: 'Min Replicas',
+    header: 'Min replicas',
     cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor((hpa) => hpa?.maxReplicas, {
     id: 'maxreplicas',
-    header: 'Max Replicas',
+    header: 'Max replicas',
     cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor((hpa) => hpa, {
