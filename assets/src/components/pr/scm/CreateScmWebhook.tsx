@@ -21,6 +21,8 @@ import { Flex } from 'honorable'
 
 import { GqlError } from 'components/utils/Alert'
 
+import { Body2P } from 'components/utils/typography/Text'
+
 import GitProviderSelect from './GitProviderSelect'
 
 const DEFAULT_ATTRIBUTES: Partial<ScmWebhookAttributes> = {
@@ -117,6 +119,10 @@ export function CreateScmWebhookModal({
         )}
         {newWebHook && !error && (
           <>
+            <Body2P>
+              Add a new webhook in your source control provider with the
+              following url and validation secret
+            </Body2P>
             <FormField label="Webhook URL">
               <Codeline>{newWebHook.url}</Codeline>
             </FormField>
