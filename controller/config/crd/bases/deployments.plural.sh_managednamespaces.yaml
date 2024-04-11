@@ -236,6 +236,8 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      createNamespace:
+                        type: boolean
                       labels:
                         additionalProperties:
                           type: string

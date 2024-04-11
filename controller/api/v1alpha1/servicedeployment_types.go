@@ -43,6 +43,9 @@ type ServiceHelm struct {
 
 type SyncConfigAttributes struct {
 	// +kubebuilder:validation:Optional
+	CreateNamespace *bool `json:"createNamespace,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// +kubebuilder:validation:Optional

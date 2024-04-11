@@ -162,6 +162,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		WriteBindings:   attr.WriteBindings,
 		ContextBindings: attr.ContextBindings,
 		Templated:       attr.Templated,
+		SyncConfig:      attr.SyncConfig,
 	}
 
 	sha, err := utils.HashObject(updater)
@@ -326,6 +327,11 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 	if service.Spec.SyncConfig != nil {
 		var annotations *string
 		var labels *string
+		createNamespace := true
+		if service.Spec.SyncConfig.CreateNamespace != nil {
+			createNamespace = *service.Spec.SyncConfig.CreateNamespace
+		}
+
 		if service.Spec.SyncConfig.Annotations != nil {
 			result, err := json.Marshal(service.Spec.SyncConfig.Annotations)
 			if err != nil {
@@ -343,6 +349,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			labels = &rawLabels
 		}
 		attr.SyncConfig = &console.SyncConfigAttributes{
+			CreateNamespace: &createNamespace,
 			NamespaceMetadata: &console.MetadataAttributes{
 				Labels:      labels,
 				Annotations: annotations,

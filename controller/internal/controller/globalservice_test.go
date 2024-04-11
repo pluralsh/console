@@ -105,6 +105,13 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 						Name:      providerName,
 						Namespace: namespace,
 					},
+					Template: &v1alpha1.ServiceTemplate{
+						SyncConfig: &v1alpha1.SyncConfigAttributes{
+							CreateNamespace: lo.ToPtr(false),
+							Labels:          map[string]string{"a": "a"},
+							Annotations:     map[string]string{"b": "b"},
+						},
+					},
 				},
 			}, nil)).To(Succeed())
 
@@ -133,7 +140,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("WAXTBLTM6PFWW6BBRLCPV2ILX2J4EOHQKDISWH4QAM5IODNRMBJQ===="),
+					SHA: lo.ToPtr("UGRGWOH2SGNMBJCLILLWETDKRMFIDDZ4NAVFMY7MW76QTW7QDTYQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:   v1alpha1.SynchronizedConditionType.String(),
