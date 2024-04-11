@@ -1,5 +1,11 @@
 import { useCallback, useState } from 'react'
-import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
+import {
+  Button,
+  Codeline,
+  FormField,
+  Input2,
+  Modal,
+} from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import {
@@ -12,6 +18,8 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { Flex } from 'honorable'
+
+import { GqlError } from 'components/utils/Alert'
 
 import GitProviderSelect from './GitProviderSelect'
 
@@ -34,12 +42,15 @@ export function CreateScmWebhookModal({
   const { state: formState, update: updateFormState } =
     useUpdateState<Partial<ScmWebhookAttributes>>(DEFAULT_ATTRIBUTES)
 
-  const [mutation, { loading }] = useCreateScmWebhookPointerMutation({
-    onCompleted: () => {
-      onClose?.()
-      refetch?.()
-    },
-  })
+  const [mutation, { data, loading, error }] =
+    useCreateScmWebhookPointerMutation({
+      onCompleted: () => {
+        onClose?.()
+        refetch?.()
+      },
+    })
+
+  const newWebHook = data?.createScmWebhookPointer
   const { hmac, owner, type } = formState
   const allowSubmit = hmac && owner && type
   const onSubmit = useCallback(
@@ -64,7 +75,7 @@ export function CreateScmWebhookModal({
       portal
       open={open}
       onClose={onClose || undefined}
-      asForm
+      asForm={!newWebHook}
       onSubmit={onSubmit}
       header="Create a new webhook"
       actions={
@@ -75,19 +86,21 @@ export function CreateScmWebhookModal({
             gap: theme.spacing.small,
           }}
         >
-          <Button
-            loading={loading}
-            primary
-            disabled={!allowSubmit}
-            type="submit"
-          >
-            Create
-          </Button>
+          {!newWebHook && (
+            <Button
+              loading={loading}
+              primary
+              disabled={!allowSubmit}
+              type="submit"
+            >
+              Create
+            </Button>
+          )}
           <Button
             secondary
             onClick={() => onClose?.()}
           >
-            Cancel
+            {newWebHook || error ? 'Close' : 'Cancel'}
           </Button>
         </div>
       }
@@ -96,28 +109,48 @@ export function CreateScmWebhookModal({
         flexDirection="column"
         gap="large"
       >
-        <GitProviderSelect
-          selectedKey={formState.type}
-          updateSelectedKey={(type) => updateFormState({ type })}
-        />
-        <FormField
-          label={formState?.type === ScmType.Gitlab ? `Group` : 'Owner'}
-          required
-        >
-          <Input2
-            value={formState.owner}
-            onChange={(e) => updateFormState({ owner: e.target.value })}
+        {error && (
+          <GqlError
+            header="Something went wrong"
+            error={error}
           />
-        </FormField>
-        <FormField
-          label="Secret"
-          required
-        >
-          <Input2
-            value={formState.hmac}
-            onChange={(e) => updateFormState({ hmac: e.target.value })}
-          />
-        </FormField>
+        )}
+        {newWebHook && !error && (
+          <>
+            <FormField label="Webhook URL">
+              <Codeline>{newWebHook.url}</Codeline>
+            </FormField>
+            <FormField label="Secret">
+              <Codeline>{hmac}</Codeline>
+            </FormField>
+          </>
+        )}
+        {!newWebHook && !error && (
+          <>
+            <GitProviderSelect
+              selectedKey={formState.type}
+              updateSelectedKey={(type) => updateFormState({ type })}
+            />
+            <FormField
+              label={formState?.type === ScmType.Gitlab ? `Group` : 'Owner'}
+              required
+            >
+              <Input2
+                value={formState.owner}
+                onChange={(e) => updateFormState({ owner: e.target.value })}
+              />
+            </FormField>
+            <FormField
+              label="Secret"
+              required
+            >
+              <Input2
+                value={formState.hmac}
+                onChange={(e) => updateFormState({ hmac: e.target.value })}
+              />
+            </FormField>
+          </>
+        )}
       </Flex>
     </Modal>
   )
