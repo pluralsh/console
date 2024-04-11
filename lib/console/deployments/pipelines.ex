@@ -292,7 +292,7 @@ defmodule Console.Deployments.Pipelines do
       |> Enum.filter(fn {_, r} -> r end)
       |> ok()
     end)
-    |> add_operation(:build, fn %{services: svcs, stage: %{promotion: promo}} ->
+    |> add_operation(:build, fn %{services: svcs, stage: %{promotion: promo} = stage} ->
       old = extant(promo)
             |> Map.drop(Enum.map(svcs, fn {%{id: id}, _} -> id end))
             |> Map.values()
@@ -302,7 +302,7 @@ defmodule Console.Deployments.Pipelines do
         nil -> %PipelinePromotion{stage_id: id}
         %PipelinePromotion{} = promo -> promo
       end
-      |> PipelinePromotion.changeset(add_revised(%{services: old ++ new}, diff?(svcs, promo)))
+      |> PipelinePromotion.changeset(add_revised(%{services: old ++ new}, diff?(stage, svcs, promo)))
       |> PipelinePromotion.changeset(%{context_id: stage.context_id})
       |> Repo.insert_or_update()
     end)
@@ -408,8 +408,10 @@ defmodule Console.Deployments.Pipelines do
   defp add_revised(attrs, true), do: Map.merge(attrs, %{revised_at: Timex.now(), revised: true})
   defp add_revised(attrs, _), do: attrs
 
-  defp diff?([], _), do: false
-  defp diff?(svcs, %PipelinePromotion{services: [_ | _]} = promo) do
+  defp diff?(%PipelineStage{context_id: ctx1}, _, %PipelinePromotion{context_id: ctx2}) when is_binary(ctx1),
+    do: ctx1 != ctx2
+  defp diff?(_, [], _), do: false
+  defp diff?(_, svcs, %PipelinePromotion{services: [_ | _]} = promo) do
     by_id = extant(promo)
     Enum.any?(svcs, fn {%{sha: sha} = svc, %{id: r}} ->
       case by_id[svc.id] do
@@ -419,7 +421,7 @@ defmodule Console.Deployments.Pipelines do
       end
     end)
   end
-  defp diff?(_, _), do: true
+  defp diff?(_, _, _), do: true
 
   defp send_updates(gates) do
     Enum.each(gates, &handle_notify(PubSub.PipelineGateUpdated, &1))
