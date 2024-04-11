@@ -1,12 +1,5 @@
 import { type ComponentProps, useCallback } from 'react'
-import {
-  Accordion,
-  Button,
-  FormField,
-  ListBoxItem,
-  Modal,
-  Select,
-} from '@pluralsh/design-system'
+import { Accordion, Button, FormField, Modal } from '@pluralsh/design-system'
 import Input2 from '@pluralsh/design-system/dist/components/Input2'
 import { useTheme } from 'styled-components'
 import pick from 'lodash/pick'
@@ -14,7 +7,6 @@ import pick from 'lodash/pick'
 import {
   ScmConnectionAttributes,
   ScmConnectionFragment,
-  ScmType,
   useUpdateScmConnectionMutation,
 } from 'generated/graphql'
 
@@ -25,7 +17,7 @@ import { GqlError } from 'components/utils/Alert'
 
 import { ApolloError } from '@apollo/client'
 
-import { scmTypeToIcon, scmTypeToLabel } from './PrScmConnectionsColumns'
+import GitProviderSelect from './GitProviderSelect'
 
 function EditScmConnectionModalBase({
   open,
@@ -144,27 +136,10 @@ export function ScmConnectionForm({
         gap: theme.spacing.medium,
       }}
     >
-      <FormField
-        label="Provider type"
-        required
-      >
-        <Select
-          selectedKey={formState.type}
-          leftContent={
-            !formState.type ? undefined : scmTypeToIcon[formState.type || '']
-          }
-          label="Select provider type"
-          onSelectionChange={(key) => updateFormState({ type: key as ScmType })}
-        >
-          {[ScmType.Github, ScmType.Gitlab].map((type) => (
-            <ListBoxItem
-              key={type}
-              leftContent={scmTypeToIcon[type]}
-              label={scmTypeToLabel[type]}
-            />
-          ))}
-        </Select>
-      </FormField>
+      <GitProviderSelect
+        selectedKey={formState.type}
+        updateSelectedKey={(type) => updateFormState({ type })}
+      />
       <FormField
         label="Name"
         required

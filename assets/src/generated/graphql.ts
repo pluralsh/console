@@ -7017,6 +7017,13 @@ export type CreateScmWebhookMutationVariables = Exact<{
 
 export type CreateScmWebhookMutation = { __typename?: 'RootMutationType', createScmWebhook?: { __typename?: 'ScmWebhook', id: string, name: string, owner: string, type: ScmType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
 
+export type CreateScmWebhookPointerMutationVariables = Exact<{
+  attributes: ScmWebhookAttributes;
+}>;
+
+
+export type CreateScmWebhookPointerMutation = { __typename?: 'RootMutationType', createScmWebhookPointer?: { __typename?: 'ScmWebhook', id: string, name: string, owner: string, type: ScmType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+
 export type ObjectStoreFragment = { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null };
 
 export type ClustersObjectStoresFragment = { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, objectStore?: { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
@@ -10748,6 +10755,39 @@ export function useCreateScmWebhookMutation(baseOptions?: Apollo.MutationHookOpt
 export type CreateScmWebhookMutationHookResult = ReturnType<typeof useCreateScmWebhookMutation>;
 export type CreateScmWebhookMutationResult = Apollo.MutationResult<CreateScmWebhookMutation>;
 export type CreateScmWebhookMutationOptions = Apollo.BaseMutationOptions<CreateScmWebhookMutation, CreateScmWebhookMutationVariables>;
+export const CreateScmWebhookPointerDocument = gql`
+    mutation CreateScmWebhookPointer($attributes: ScmWebhookAttributes!) {
+  createScmWebhookPointer(attributes: $attributes) {
+    ...ScmWebhook
+  }
+}
+    ${ScmWebhookFragmentDoc}`;
+export type CreateScmWebhookPointerMutationFn = Apollo.MutationFunction<CreateScmWebhookPointerMutation, CreateScmWebhookPointerMutationVariables>;
+
+/**
+ * __useCreateScmWebhookPointerMutation__
+ *
+ * To run a mutation, you first call `useCreateScmWebhookPointerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateScmWebhookPointerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createScmWebhookPointerMutation, { data, loading, error }] = useCreateScmWebhookPointerMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateScmWebhookPointerMutation(baseOptions?: Apollo.MutationHookOptions<CreateScmWebhookPointerMutation, CreateScmWebhookPointerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateScmWebhookPointerMutation, CreateScmWebhookPointerMutationVariables>(CreateScmWebhookPointerDocument, options);
+      }
+export type CreateScmWebhookPointerMutationHookResult = ReturnType<typeof useCreateScmWebhookPointerMutation>;
+export type CreateScmWebhookPointerMutationResult = Apollo.MutationResult<CreateScmWebhookPointerMutation>;
+export type CreateScmWebhookPointerMutationOptions = Apollo.BaseMutationOptions<CreateScmWebhookPointerMutation, CreateScmWebhookPointerMutationVariables>;
 export const ObjectStoresDocument = gql`
     query ObjectStores($after: String, $first: Int = 100, $before: String, $last: Int) {
   objectStores(after: $after, first: $first, before: $before, last: $last) {
@@ -16269,6 +16309,7 @@ export const namedOperations = {
     DeleteScmConnection: 'DeleteScmConnection',
     SetupRenovate: 'SetupRenovate',
     CreateScmWebhook: 'CreateScmWebhook',
+    CreateScmWebhookPointer: 'CreateScmWebhookPointer',
     CreateObjectStore: 'CreateObjectStore',
     UpdateObjectStore: 'UpdateObjectStore',
     DeleteObjectStore: 'DeleteObjectStore',

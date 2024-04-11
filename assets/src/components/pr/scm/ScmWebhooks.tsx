@@ -9,11 +9,15 @@ import { extendConnection } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { GqlError } from 'components/utils/Alert'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import {
+  POLL_INTERVAL,
+  useSetPageHeaderContent,
+} from 'components/cd/ContinuousDeployment'
 
 import { PR_BASE_CRUMBS, PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/prRoutesConsts'
 
 import { columns } from './ScmWebhooksColumns'
+import { CreateScmWebhook } from './CreateScmWebhook'
 
 export const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -82,6 +86,17 @@ export default function ScmWebhooks() {
         extendConnection(prev, fetchMoreResult.scmWebhooks, 'scmWebhooks'),
     })
   }, [fetchMore, pageInfo?.endCursor])
+
+  useSetPageHeaderContent(
+    <div
+      css={{
+        display: 'flex',
+        gap: theme.spacing.small,
+      }}
+    >
+      <CreateScmWebhook refetch={refetch} />
+    </div>
+  )
 
   if (error) {
     return <GqlError error={error} />

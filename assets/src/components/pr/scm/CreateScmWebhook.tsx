@@ -1,70 +1,74 @@
-import { ComponentProps, useCallback, useState } from 'react'
-import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
+import { useCallback, useState } from 'react'
+import {
+  Button,
+  Codeline,
+  FormField,
+  Input2,
+  Modal,
+} from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { useNavigate } from 'react-router-dom'
 
 import {
-  ScmConnectionFragment,
   ScmType,
-  ScmWebhooksDocument,
-  useCreateScmWebhookMutation,
+  ScmWebhookAttributes,
+  useCreateScmWebhookPointerMutation,
 } from 'generated/graphql'
-import { appendConnectionToEnd, updateCache } from 'utils/graphql'
 
-import { PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/prRoutesConsts'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { Flex } from 'honorable'
+
 import { GqlError } from 'components/utils/Alert'
-import { Body1P } from 'components/utils/typography/Text'
 
-import { SCM_WEBHOOKS_Q_VARS } from './ScmWebhooks'
-import { scmTypeToLabel } from './PrScmConnectionsColumns'
+import { Body2P } from 'components/utils/typography/Text'
 
-export function CreateScmWebhookModalBase({
-  connection,
+import GitProviderSelect from './GitProviderSelect'
+
+const DEFAULT_ATTRIBUTES: Partial<ScmWebhookAttributes> = {
+  hmac: '',
+  type: ScmType.Github,
+  owner: '',
+}
+
+export function CreateScmWebhookModal({
+  refetch,
   open,
   onClose,
 }: {
-  connection: ScmConnectionFragment
+  refetch: Nullable<() => void>
   open: boolean
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const navigate = useNavigate()
-  const [success, setSuccess] = useState(false)
-  const { state: formState, update: updateFormState } = useUpdateState<{
-    owner: string
-  }>({ owner: '' })
+  const { state: formState, update: updateFormState } =
+    useUpdateState<Partial<ScmWebhookAttributes>>(DEFAULT_ATTRIBUTES)
 
-  const [mutation, { loading, error }] = useCreateScmWebhookMutation({
-    update: (cache, { data }) =>
-      updateCache(cache, {
-        variables: SCM_WEBHOOKS_Q_VARS,
-        query: ScmWebhooksDocument,
-        update: (prev) =>
-          appendConnectionToEnd(prev, data?.createScmWebhook, 'scmWebhooks'),
-      }),
-    onCompleted: () => {
-      setSuccess(true)
-    },
-  })
-  const { owner } = formState
-  const allowSubmit = owner && connection?.id
+  const [mutation, { data, loading, error }] =
+    useCreateScmWebhookPointerMutation({
+      onCompleted: () => {
+        refetch?.()
+      },
+    })
+
+  const newWebHook = data?.createScmWebhookPointer
+  const { hmac, owner, type } = formState
+  const allowSubmit = hmac && owner && type
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault()
-      if (success) {
-        navigate(PR_SCM_WEBHOOKS_ABS_PATH)
 
-        return
-      }
       if (allowSubmit) {
-        mutation({
-          variables: { connectionId: connection?.id, owner: owner.trim() },
-        })
+        const attributes: ScmWebhookAttributes = {
+          hmac,
+          owner,
+          type,
+        }
+
+        mutation({ variables: { attributes } })
       }
     },
-    [allowSubmit, connection?.id, mutation, navigate, owner, success]
+    [hmac, owner, type, allowSubmit, mutation]
   )
 
   return (
@@ -72,11 +76,9 @@ export function CreateScmWebhookModalBase({
       portal
       open={open}
       onClose={onClose || undefined}
-      asForm
+      asForm={!newWebHook}
       onSubmit={onSubmit}
-      header={`Create a new ${
-        scmTypeToLabel[connection.type || ''] || 'SCM'
-      } webhook for ${connection.name}`}
+      header="Create a new webhook"
       actions={
         <div
           css={{
@@ -85,16 +87,7 @@ export function CreateScmWebhookModalBase({
             gap: theme.spacing.small,
           }}
         >
-          {success ? (
-            <Button
-              loading={loading}
-              primary
-              disabled={!allowSubmit}
-              type="submit"
-            >
-              View webhooks
-            </Button>
-          ) : (
+          {!newWebHook && (
             <Button
               loading={loading}
               primary
@@ -108,75 +101,88 @@ export function CreateScmWebhookModalBase({
             secondary
             onClick={() => onClose?.()}
           >
-            {success ? 'Close' : 'Cancel'}
+            {newWebHook || error ? 'Close' : 'Cancel'}
           </Button>
         </div>
       }
     >
-      {success ? (
-        <Body1P>Successfully created webhook for {connection.name}</Body1P>
-      ) : (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.medium,
-          }}
-        >
-          <ScmWebhookForm
-            {...{
-              type: 'create',
-              connection,
-              formState,
-              updateFormState,
-              error,
-            }}
+      <Flex
+        flexDirection="column"
+        gap="large"
+      >
+        {error && (
+          <GqlError
+            header="Something went wrong"
+            error={error}
           />
-          {error && <GqlError error={error} />}
-        </div>
-      )}
+        )}
+        {newWebHook && !error && (
+          <>
+            <Body2P>
+              Add a new webhook in your source control provider with the
+              following url and validation secret
+            </Body2P>
+            <FormField label="Webhook URL">
+              <Codeline>{newWebHook.url}</Codeline>
+            </FormField>
+            <FormField label="Secret">
+              <Codeline>{hmac}</Codeline>
+            </FormField>
+          </>
+        )}
+        {!newWebHook && !error && (
+          <>
+            <GitProviderSelect
+              selectedKey={formState.type}
+              updateSelectedKey={(type) => updateFormState({ type })}
+            />
+            <FormField
+              label={formState?.type === ScmType.Gitlab ? `Group` : 'Owner'}
+              required
+            >
+              <Input2
+                value={formState.owner}
+                onChange={(e) => updateFormState({ owner: e.target.value })}
+              />
+            </FormField>
+            <FormField
+              label="Secret"
+              required
+            >
+              <Input2
+                value={formState.hmac}
+                onChange={(e) => updateFormState({ hmac: e.target.value })}
+              />
+            </FormField>
+          </>
+        )}
+      </Flex>
     </Modal>
   )
 }
 
-export function CreateScmWebhookModal(
-  props: ComponentProps<typeof CreateScmWebhookModalBase>
-) {
-  return (
-    <ModalMountTransition open={props.open}>
-      <CreateScmWebhookModalBase {...props} />
-    </ModalMountTransition>
-  )
-}
-
-type ScmWebhookVars = {
-  owner: string
-}
-
-export function ScmWebhookForm({
-  connection,
-  formState,
-  updateFormState,
+export function CreateScmWebhook({
+  refetch,
 }: {
-  connection: Nullable<ScmConnectionFragment>
-  formState: Partial<ScmWebhookVars>
-  updateFormState: (update: Partial<ScmWebhookVars>) => void
+  refetch: Nullable<() => void>
 }) {
+  const [open, setOpen] = useState(false)
+
   return (
-    <FormField
-      label={
-        connection?.type === ScmType.Github
-          ? (`${scmTypeToLabel[connection.type]} organization` as const)
-          : connection?.type === ScmType.Gitlab
-          ? (`${scmTypeToLabel[connection.type]} group` as const)
-          : 'Owner'
-      }
-      required
-    >
-      <Input2
-        value={formState.owner}
-        onChange={(e) => updateFormState({ owner: e.target.value })}
-      />
-    </FormField>
+    <>
+      <Button
+        primary
+        onClick={() => setOpen(true)}
+      >
+        Create webhook
+      </Button>
+      <ModalMountTransition open={open}>
+        <CreateScmWebhookModal
+          open={open}
+          refetch={refetch}
+          onClose={() => setOpen(false)}
+        />
+      </ModalMountTransition>
+    </>
   )
 }
