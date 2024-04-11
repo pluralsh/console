@@ -162,6 +162,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		WriteBindings:   attr.WriteBindings,
 		ContextBindings: attr.ContextBindings,
 		Templated:       attr.Templated,
+		SyncConfig:      attr.SyncConfig,
 	}
 
 	sha, err := utils.HashObject(updater)

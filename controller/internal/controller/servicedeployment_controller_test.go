@@ -43,7 +43,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 			namespace   = "default"
 			id          = "123"
 			repoUrl     = "https://test"
-			sha         = "RJ4MMHJS33KWZKJTVNAGHXEEEHLMTEM5EQGPT37JCTRRZCDLSY7Q===="
+			sha         = "3J6U6HYLPSVVQDIMOHFVRQVA624SIRDAYIKOEPGJQYOVUSPIX5NA===="
 		)
 
 		ctx := context.Background()
@@ -53,29 +53,30 @@ var _ = Describe("Service Controller", Ordered, func() {
 			Namespace: namespace,
 		}
 
-		service := &v1alpha1.ServiceDeployment{}
 		BeforeAll(func() {
 			By("creating the custom resource for the Kind ServiceDeployment")
-			err := k8sClient.Get(ctx, typeNamespacedName, service)
-			if err != nil && errors.IsNotFound(err) {
-				resource := &v1alpha1.ServiceDeployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      serviceName,
-						Namespace: namespace,
-					},
-					Spec: v1alpha1.ServiceSpec{
-						Version:       lo.ToPtr("1.24"),
-						ClusterRef:    corev1.ObjectReference{Name: clusterName, Namespace: namespace},
-						RepositoryRef: &corev1.ObjectReference{Name: repoName, Namespace: namespace},
-						SyncConfig: &v1alpha1.SyncConfigAttributes{
-							CreateNamespace: lo.ToPtr(true),
-							Labels:          map[string]string{"a": "a"},
-							Annotations:     map[string]string{"b": "b"},
-						},
-					},
-				}
-				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+			service := &v1alpha1.ServiceDeployment{}
+			if err := k8sClient.Get(ctx, typeNamespacedName, service); err == nil {
+				Expect(k8sClient.Delete(ctx, service)).To(Succeed())
 			}
+			resource := &v1alpha1.ServiceDeployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      serviceName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.ServiceSpec{
+					Version:       lo.ToPtr("1.24"),
+					ClusterRef:    corev1.ObjectReference{Name: clusterName, Namespace: namespace},
+					RepositoryRef: &corev1.ObjectReference{Name: repoName, Namespace: namespace},
+					SyncConfig: &v1alpha1.SyncConfigAttributes{
+						CreateNamespace: lo.ToPtr(true),
+						Labels:          map[string]string{"a": "a"},
+						Annotations:     map[string]string{"b": "b"},
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+
 			By("creating the custom resource for the Kind Cluster")
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{Name: clusterName, Namespace: namespace},
@@ -101,15 +102,18 @@ var _ = Describe("Service Controller", Ordered, func() {
 			resource := &v1alpha1.Cluster{}
 			err := k8sClient.Get(ctx, types.NamespacedName{Name: clusterName, Namespace: namespace}, resource)
 			Expect(err).NotTo(HaveOccurred())
-
 			By("Cleanup the specific resource instance Cluster")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 			repo := &v1alpha1.GitRepository{}
 			err = k8sClient.Get(ctx, types.NamespacedName{Name: repoName, Namespace: namespace}, repo)
 			Expect(err).NotTo(HaveOccurred())
-
 			By("Cleanup the specific resource instance Repository")
 			Expect(k8sClient.Delete(ctx, repo)).To(Succeed())
+			service := &v1alpha1.ServiceDeployment{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: serviceName, Namespace: namespace}, service); err == nil {
+				By("Cleanup the specific resource instance ServiceDeployment")
+				Expect(k8sClient.Delete(ctx, service)).To(Succeed())
+			}
 		})
 
 		It("should successfully reconcile the resource", func() {
