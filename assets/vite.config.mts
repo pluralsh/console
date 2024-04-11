@@ -1,4 +1,4 @@
-import {defineConfig, mergeConfig} from 'vite'
+import {defineConfig, mergeConfig, splitVendorChunkPlugin} from 'vite'
 import react from '@vitejs/plugin-react'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import tsconfigPaths from 'vite-tsconfig-paths'
@@ -34,7 +34,7 @@ export default defineConfig(() =>
       }),
       tsconfigPaths(),
       pluginRewriteAll(), // Fix 404 error for urls with dots in their path
-      // splitVendorChunkPlugin(),
+      splitVendorChunkPlugin(),
     ],
     server: {
       port: 3000,
@@ -62,20 +62,20 @@ export default defineConfig(() =>
     build: {
       chunkSizeWarningLimit: '2048',
       outDir: 'build',
-      sourcemap: true, //process.env.NODE_ENV !== 'production', // Seems to cause JavaScript heap out of memory errors on build
-      // rollupOptions: {
-      //   output: {
-      // manualChunks(id: string) {
-      //   if(id.includes('moment')) {
-      //     return 'moment'
-      //   }
-      //
-      //   if(id.includes('lodash')) {
-      //     return 'lodash'
-      //   }
-      // }
-      // }
-      // }
+      sourcemap: process.env.NODE_ENV !== 'production', // Seems to cause JavaScript heap out of memory errors on build
+      rollupOptions: {
+        output: {
+          manualChunks(id: string) {
+            if (id.includes('moment')) {
+              return 'moment'
+            }
+
+            if (id.includes('lodash')) {
+              return 'lodash'
+            }
+          }
+        }
+      }
     },
   })
 )
