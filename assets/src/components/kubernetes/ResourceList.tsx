@@ -200,9 +200,11 @@ export default function ResourceList() {
     else params.set(NAMESPACE_PARAM, namespace)
 
     setParams(params)
-    // Only want to run it when namespace or filter values have changed.
+
+    // TODO: Keeping pathname breaks breadcrumb nav but without it
+    //  params get lost on category change, i.e. during discovery -> storage navigation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [namespace, filter])
+  }, [namespace, filter, pathname])
 
   if (!cluster) return <LoadingIndicator />
 
