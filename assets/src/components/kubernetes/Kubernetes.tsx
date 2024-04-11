@@ -34,6 +34,7 @@ import {
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
   getKubernetesAbsPath,
+  getWorkloadsAbsPath,
 } from '../../routes/kubernetesRoutesConsts'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
@@ -139,7 +140,7 @@ export const useKubernetesContext = () => {
   //   )
   // }
 
-  return ctx ?? {cluster: null, namespace: '', filter: ''}
+  return ctx ?? { cluster: null, namespace: '', filter: '' }
 }
 
 export const NAMESPACE_PARAM = 'namespace'
@@ -224,7 +225,7 @@ export default function Kubernetes() {
       const mgmtCluster = clusters.find(({ self }) => !!self)
 
       if (mgmtCluster) {
-        navigate(getKubernetesAbsPath(mgmtCluster.id) + search)
+        navigate(getWorkloadsAbsPath(mgmtCluster.id) + search)
       }
     }
   }, [cluster, clusters, navigate, search])

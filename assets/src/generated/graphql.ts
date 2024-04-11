@@ -656,6 +656,8 @@ export type Cluster = {
   /** key/value tags to filter clusters */
   tags?: Maybe<Array<Maybe<Tag>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Checklist of tasks to complete to safely upgrade this cluster */
+  upgradePlan?: Maybe<ClusterUpgradePlan>;
   /** desired k8s version for the cluster */
   version?: Maybe<Scalars['String']['output']>;
   /** Computes a list of statistics for OPA constraint violations w/in this cluster */
@@ -727,6 +729,8 @@ export type ClusterAttributes = {
   providerId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
+  /** status of the upgrade plan for this cluster */
+  upgradePlan?: InputMaybe<UpgradePlanAttributes>;
   version?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
@@ -962,7 +966,20 @@ export type ClusterUpdateAttributes = {
   /** if you optionally want to reconfigure the git repository for the cluster service */
   service?: InputMaybe<ClusterServiceAttributes>;
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
+  /** status of the upgrade plan for this cluster */
+  upgradePlan?: InputMaybe<UpgradePlanAttributes>;
   version?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** A consolidated checklist of tasks that need to be completed to upgrade this cluster */
+export type ClusterUpgradePlan = {
+  __typename?: 'ClusterUpgradePlan';
+  /** whether api compatibilities with all addons and kubernetes are satisfied */
+  compatibilities?: Maybe<Scalars['Boolean']['output']>;
+  /** whether all api deprecations have been cleared for the target version */
+  deprecations?: Maybe<Scalars['Boolean']['output']>;
+  /** whether mutual api incompatibilities with all addons and kubernetes have been satisfied */
+  incompatibilities?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type Command = {
@@ -3742,6 +3759,8 @@ export type RootMutationType = {
   createRole?: Maybe<Role>;
   createScmConnection?: Maybe<ScmConnection>;
   createScmWebhook?: Maybe<ScmWebhook>;
+  /** creates a webhook reference in our system but doesn't attempt to create it in your upstream provider */
+  createScmWebhookPointer?: Maybe<ScmWebhook>;
   createServiceAccount?: Maybe<User>;
   createServiceAccountToken?: Maybe<AccessToken>;
   createServiceDeployment?: Maybe<ServiceDeployment>;
@@ -4032,6 +4051,11 @@ export type RootMutationTypeCreateScmConnectionArgs = {
 export type RootMutationTypeCreateScmWebhookArgs = {
   connectionId: Scalars['ID']['input'];
   owner: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeCreateScmWebhookPointerArgs = {
+  attributes: ScmWebhookAttributes;
 };
 
 
@@ -5836,6 +5860,16 @@ export type ScmWebhook = {
   url: Scalars['String']['output'];
 };
 
+/** The attributes to configure a new webhook for a SCM provider */
+export type ScmWebhookAttributes = {
+  /** the secret token for authenticating this webhook via hmac signature */
+  hmac: Scalars['String']['input'];
+  /** the owner for this webhook in your SCM, eg a github org or gitlab group */
+  owner: Scalars['String']['input'];
+  /** the type of webhook to create */
+  type: ScmType;
+};
+
 export type ScmWebhookConnection = {
   __typename?: 'ScmWebhookConnection';
   edges?: Maybe<Array<Maybe<ScmWebhookEdge>>>;
@@ -6609,6 +6643,15 @@ export type UpgradePlan = {
   raw: Scalars['String']['output'];
   spec: UpgradePlanSpec;
   status: UpgradePlanStatus;
+};
+
+export type UpgradePlanAttributes = {
+  /** whether all compatibilities for a cluster upgrade have been cleared */
+  compatibilities?: InputMaybe<Scalars['Boolean']['input']>;
+  /** whether all deprecated apis for a cluster have been cleared */
+  deprecations?: InputMaybe<Scalars['Boolean']['input']>;
+  /** whether all incompatibilities w/in runtime components have been cleared */
+  incompatibilities?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type UpgradePlanSpec = {

@@ -125,6 +125,13 @@ defmodule Console.GraphQl.Deployments.Git do
     field :cluster,    :namespaced_name
   end
 
+  @desc "The attributes to configure a new webhook for a SCM provider"
+  input_object :scm_webhook_attributes do
+    field :hmac,  non_null(:string), description: "the secret token for authenticating this webhook via hmac signature"
+    field :type,  non_null(:scm_type), description: "the type of webhook to create"
+    field :owner, non_null(:string), description: "the owner for this webhook in your SCM, eg a github org or gitlab group"
+  end
+
   @desc "a git repository available for deployments"
   object :git_repository do
     field :id,           non_null(:id), description: "internal id of this repository"
@@ -470,6 +477,14 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :owner,         non_null(:string)
 
       safe_resolve &Deployments.create_webhook_for_connection/2
+    end
+
+    @desc "creates a webhook reference in our system but doesn't attempt to create it in your upstream provider"
+    field :create_scm_webhook_pointer, :scm_webhook do
+      middleware Authenticated
+      arg :attributes, non_null(:scm_webhook_attributes)
+
+      resolve &Deployments.create_webhook/2
     end
 
     field :create_pr_automation, :pr_automation do

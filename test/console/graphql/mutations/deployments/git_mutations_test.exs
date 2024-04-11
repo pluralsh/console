@@ -218,4 +218,43 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
       assert pr["url"] == "https://github.com/some/repo"
     end
   end
+
+  describe "createScmWebhookPointer" do
+    test "admins can create webhook pointers" do
+      {:ok, %{data: %{"createScmWebhookPointer" => hook}}} = run_query("""
+        mutation Create($attrs: ScmWebhookAttributes!) {
+          createScmWebhookPointer(attributes: $attrs) {
+            type
+            url
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "owner" => "pluralsh",
+          "hmac" => "super secret",
+          "type" => "GITHUB"
+        }
+      }, %{current_user: admin_user()})
+
+      assert hook["url"]
+      assert hook["type"] == "GITHUB"
+    end
+
+    test "nonadmins cannot create webhook pointers" do
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Create($attrs: ScmWebhookAttributes!) {
+          createScmWebhookPointer(attributes: $attrs) {
+            type
+            url
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "owner" => "pluralsh",
+          "hmac" => "super secret",
+          "type" => "GITHUB"
+        }
+      }, %{current_user: insert(:user)})
+    end
+  end
 end
