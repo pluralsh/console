@@ -159,3 +159,9 @@ mutation CreateScmWebhook($connectionId: ID!, $owner: String!) {
     ...ScmWebhook
   }
 }
+
+mutation CreateScmWebhookPointer($attributes: ScmWebhookAttributes!) {
+  createScmWebhookPointer(attributes: $attributes) {
+    ...ScmWebhook
+  }
+}
