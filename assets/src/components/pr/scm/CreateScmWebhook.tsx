@@ -1,0 +1,150 @@
+import { useCallback, useState } from 'react'
+import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
+
+import {
+  ScmType,
+  ScmWebhookAttributes,
+  useCreateScmWebhookPointerMutation,
+} from 'generated/graphql'
+
+import { useUpdateState } from 'components/hooks/useUpdateState'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { Flex } from 'honorable'
+
+import GitProviderSelect from './GitProviderSelect'
+
+const DEFAULT_ATTRIBUTES: Partial<ScmWebhookAttributes> = {
+  hmac: '',
+  type: ScmType.Github,
+  owner: '',
+}
+
+export function CreateScmWebhookModal({
+  refetch,
+  open,
+  onClose,
+}: {
+  refetch: Nullable<() => void>
+  open: boolean
+  onClose: Nullable<() => void>
+}) {
+  const theme = useTheme()
+  const { state: formState, update: updateFormState } =
+    useUpdateState<Partial<ScmWebhookAttributes>>(DEFAULT_ATTRIBUTES)
+
+  const [mutation, { loading }] = useCreateScmWebhookPointerMutation({
+    onCompleted: () => {
+      onClose?.()
+      refetch?.()
+    },
+  })
+  const { hmac, owner, type } = formState
+  const allowSubmit = hmac && owner && type
+  const onSubmit = useCallback(
+    (e) => {
+      e.preventDefault()
+
+      if (allowSubmit) {
+        const attributes: ScmWebhookAttributes = {
+          hmac,
+          owner,
+          type,
+        }
+
+        mutation({ variables: { attributes } })
+      }
+    },
+    [hmac, owner, type, allowSubmit, mutation]
+  )
+
+  return (
+    <Modal
+      portal
+      open={open}
+      onClose={onClose || undefined}
+      asForm
+      onSubmit={onSubmit}
+      header="Create a new webhook"
+      actions={
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'row-reverse',
+            gap: theme.spacing.small,
+          }}
+        >
+          <Button
+            loading={loading}
+            primary
+            disabled={!allowSubmit}
+            type="submit"
+          >
+            Create
+          </Button>
+          <Button
+            secondary
+            onClick={() => onClose?.()}
+          >
+            Cancel
+          </Button>
+        </div>
+      }
+    >
+      <Flex
+        flexDirection="column"
+        gap="large"
+      >
+        <GitProviderSelect
+          selectedKey={formState.type}
+          updateSelectedKey={(type) => updateFormState({ type })}
+        />
+        <FormField
+          label={formState?.type === ScmType.Gitlab ? `Group` : 'Owner'}
+          required
+        >
+          <Input2
+            value={formState.owner}
+            onChange={(e) => updateFormState({ owner: e.target.value })}
+          />
+        </FormField>
+        <FormField
+          label="Secret"
+          required
+        >
+          <Input2
+            value={formState.hmac}
+            onChange={(e) => updateFormState({ hmac: e.target.value })}
+          />
+        </FormField>
+      </Flex>
+    </Modal>
+  )
+}
+
+export function CreateScmWebhook({
+  refetch,
+}: {
+  refetch: Nullable<() => void>
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        primary
+        onClick={() => setOpen(true)}
+      >
+        Create webhook
+      </Button>
+      <ModalMountTransition open={open}>
+        <CreateScmWebhookModal
+          open={open}
+          refetch={refetch}
+          onClose={() => setOpen(false)}
+        />
+      </ModalMountTransition>
+    </>
+  )
+}
