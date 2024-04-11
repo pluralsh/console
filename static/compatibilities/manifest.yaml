@@ -10,3 +10,4 @@ names:
 - velero
 - rook
 - jaeger
+- flux
