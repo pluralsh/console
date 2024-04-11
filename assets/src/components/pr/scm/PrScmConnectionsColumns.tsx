@@ -26,7 +26,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { EditScmConnectionModal } from './EditScmConnection'
-import { CreateScmWebhookModal } from './CreateScmWebhook'
+import { CreateScmConnectionWebhookModal } from './CreateScmConnectionWebhook'
 
 enum MenuItemKey {
   Edit = 'edit',
@@ -207,7 +207,7 @@ export const ColActions = columnHelper.display({
           />
         </MoreMenu>
         {/* Modals */}
-        <CreateScmWebhookModal
+        <CreateScmConnectionWebhookModal
           connection={scmConnection}
           open={menuKey === MenuItemKey.CreateWebhook}
           onClose={() => setMenuKey('')}

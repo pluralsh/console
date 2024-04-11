@@ -20,7 +20,7 @@ import { Body1P } from 'components/utils/typography/Text'
 import { SCM_WEBHOOKS_Q_VARS } from './ScmWebhooks'
 import { scmTypeToLabel } from './PrScmConnectionsColumns'
 
-export function CreateScmWebhookModalBase({
+export function CreateScmConectionWebhookModalBase({
   connection,
   open,
   onClose,
@@ -123,7 +123,7 @@ export function CreateScmWebhookModalBase({
             gap: theme.spacing.medium,
           }}
         >
-          <ScmWebhookForm
+          <ScmConnectionWebhookForm
             {...{
               type: 'create',
               connection,
@@ -139,12 +139,12 @@ export function CreateScmWebhookModalBase({
   )
 }
 
-export function CreateScmWebhookModal(
-  props: ComponentProps<typeof CreateScmWebhookModalBase>
+export function CreateScmConnectionWebhookModal(
+  props: ComponentProps<typeof CreateScmConectionWebhookModalBase>
 ) {
   return (
     <ModalMountTransition open={props.open}>
-      <CreateScmWebhookModalBase {...props} />
+      <CreateScmConectionWebhookModalBase {...props} />
     </ModalMountTransition>
   )
 }
@@ -153,7 +153,7 @@ type ScmWebhookVars = {
   owner: string
 }
 
-export function ScmWebhookForm({
+export function ScmConnectionWebhookForm({
   connection,
   formState,
   updateFormState,
