@@ -10,15 +10,15 @@ import {
   ReplicaSetsQueryVariables,
   useReplicaSetsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { ResourceList } from '../ResourceList'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
+import { ResourceList } from '../common/ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
 import { UsageText } from '../../cluster/TableElements'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   REPLICA_SETS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 
@@ -89,7 +89,7 @@ export function useReplicaSetsColumns(): Array<object> {
 }
 
 export default function ReplicaSets() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
   const columns = useReplicaSetsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))

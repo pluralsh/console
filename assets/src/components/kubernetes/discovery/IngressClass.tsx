@@ -8,16 +8,18 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import { MetadataSidecar } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+
+import { useClusterContext } from '../Cluster'
 
 import { getBreadcrumbs } from './IngressClasses'
 
 const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
 
 export default function IngressClass(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const { cluster } = useClusterContext()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useIngressClassQuery({
     client: KubernetesClient(clusterId ?? ''),

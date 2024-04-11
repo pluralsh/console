@@ -1,234 +1,278 @@
 import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
+import { useTheme } from 'styled-components'
+import {
   Dispatch,
-  ReactElement,
+  ReactNode,
   SetStateAction,
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
+  useState,
 } from 'react'
-import type { OperationVariables } from '@apollo/client/core'
-import type {
-  QueryHookOptions,
-  QueryResult,
-} from '@apollo/client/react/types/types'
-import { Table } from '@pluralsh/design-system'
-import styled from 'styled-components'
-import { useNavigate } from 'react-router-dom'
-import { Row } from '@tanstack/react-table'
+import { isEmpty } from 'lodash'
+import Fuse from 'fuse.js'
+import {
+  ComboBox,
+  Input,
+  ListBoxItem,
+  SearchIcon,
+} from '@pluralsh/design-system'
 
-import { KubernetesClient } from '../../helpers/kubernetes.client'
 import {
-  Types_ListMeta as ListMetaT,
-  Types_ObjectMeta as ObjectMetaT,
-  Types_TypeMeta as TypeMetaT,
-} from '../../generated/graphql-kubernetes'
-import { FullHeightTableWrap } from '../utils/layout/FullHeightTableWrap'
-import {
-  getCustomResourceDetailsAbsPath,
-  getResourceDetailsAbsPath,
+  ACCESS_REL_PATH,
+  CLUSTER_REL_PATH,
+  CONFIGURATION_REL_PATH,
+  CUSTOM_RESOURCES_REL_PATH,
+  DISCOVERY_REL_PATH,
+  STORAGE_REL_PATH,
+  WORKLOADS_REL_PATH,
+  getKubernetesAbsPath,
 } from '../../routes/kubernetesRoutesConsts'
+import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
+import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
+import { Directory, SideNavEntries } from '../layout/SideNavEntries'
+import { ClusterSelect } from '../cd/addOns/ClusterSelect'
+import LoadingIndicator from '../utils/LoadingIndicator'
+import { PageHeaderContext } from '../cd/ContinuousDeployment'
+import { KubernetesClient } from '../../helpers/kubernetes.client'
+import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
+import { NamespaceListFooter } from '../cluster/pods/Pods'
 
-import {
-  DEFAULT_DATA_SELECT,
-  ITEMS_PER_PAGE,
-  extendConnection,
-  useKubernetesCluster,
-  usePageInfo,
-  useSortedTableOptions,
-} from './utils'
-import { useKubernetesContext } from './Kubernetes'
+import { useCluster, useClusters } from './Cluster'
 
-export type ResourceListContextT = {
-  setNamespaced: Dispatch<SetStateAction<boolean>>
-}
-
-export const ResourceListContext = createContext<
-  ResourceListContextT | undefined
->(undefined)
-
-interface DataSelectVariables extends OperationVariables {
-  filterBy?: Nullable<string>
-  sortBy?: Nullable<string>
-  itemsPerPage?: Nullable<string>
-  page?: Nullable<string>
-}
-
-interface ResourceVariables extends DataSelectVariables {
-  namespace?: Nullable<string>
-}
-
-interface ResourceListT {
-  listMeta: ListMetaT
-}
-
-export interface ResourceT {
-  objectMeta: ObjectMetaT
-  typeMeta: TypeMetaT
-}
-
-type QueryName<TQuery> = Exclude<Extract<keyof TQuery, string>, '__typename'>
-type ResourceListItemsKey<TResourceList> = Exclude<
-  Extract<keyof TResourceList, string>,
-  '__typename' | 'listMeta' | 'errors' | 'status' | 'cumulativeMetrics'
->
-
-interface ResourceListProps<
-  TResourceList,
-  TQuery,
-  TVariables extends ResourceVariables,
-> {
-  columns: Array<object>
-  query: (
-    baseOptions: QueryHookOptions<TQuery, TVariables>
-  ) => QueryResult<TQuery, TVariables>
-  queryOptions?: QueryHookOptions<TQuery, TVariables>
-  queryName: QueryName<TQuery>
-  itemsKey: ResourceListItemsKey<TResourceList>
-  namespaced?: boolean
-  customResource?: boolean
-  disableOnRowClick?: boolean
-}
-
-const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
-  '@keyframes moving-gradient': {
-    '0%': { backgroundPosition: '-250px 0' },
-    '100%': { backgroundPosition: '250px 0' },
-  },
-
-  maxWidth: '400px',
-  width: '100%',
-
-  span: {
-    borderRadius: theme.borderRadiuses.medium,
-    maxWidth: '400px',
-    width: 'unset',
-    minWidth: '150px',
-    display: 'block',
-    height: '12px',
-    background: `linear-gradient(to right, ${theme.colors.border} 20%, ${theme.colors['border-fill-two']} 50%, ${theme.colors.border} 80%)`,
-    backgroundSize: '500px 100px',
-    animation: 'moving-gradient 2s infinite linear forwards',
-  },
-}))
-
-function SkeletonUnstyled({ ...props }): ReactElement {
+function NameFilter({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: Dispatch<SetStateAction<string>>
+}) {
   return (
-    <div {...props}>
-      <span />
-    </div>
+    <Input
+      height="fit-content"
+      startIcon={<SearchIcon />}
+      placeholder="Filter by name"
+      value={value}
+      onChange={(e) => onChange(e.currentTarget.value)}
+      width={300}
+    />
   )
 }
 
-export function ResourceList<
-  TResourceList extends ResourceListT,
-  TResource extends ResourceT,
-  TQuery,
-  TVariables extends ResourceVariables,
->({
-  columns,
-  query,
-  queryOptions,
-  namespaced = false,
-  customResource = false,
-  queryName,
-  itemsKey,
-  disableOnRowClick,
-}: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
-  const navigate = useNavigate()
-  const cluster = useKubernetesCluster()
-  const { namespace, filter } = useKubernetesContext()
-  const { sortBy, reactTableOptions } = useSortedTableOptions({
-    meta: { cluster },
-  })
+function NamespaceFilter({
+  namespaces,
+  namespace,
+  onChange,
+}: {
+  namespaces: string[]
+  namespace: string
+  onChange: (arg: any) => any
+}) {
+  const [value, setValue] = useState(namespace)
+
+  const filteredNamespaces = useMemo(() => {
+    const fuse = new Fuse(namespaces, { threshold: 0.25 })
+
+    return value ? fuse.search(value).map(({ item }) => item) : namespaces
+  }, [namespaces, value])
+
+  return (
+    <ComboBox
+      inputProps={{ placeholder: 'Filter by namespace' }}
+      inputValue={value}
+      onInputChange={setValue}
+      selectedKey={namespace}
+      onSelectionChange={(key) => {
+        onChange(key)
+        setValue(key as string)
+      }}
+      dropdownFooterFixed={
+        <NamespaceListFooter
+          onClick={() => {
+            setValue('')
+            onChange('')
+          }}
+        />
+      }
+      aria-label="namespace"
+    >
+      {filteredNamespaces.map((namespace) => (
+        <ListBoxItem
+          key={namespace}
+          textValue={namespace}
+          label={namespace}
+        />
+      ))}
+    </ComboBox>
+  )
+}
+
+export const NAMESPACE_PARAM = 'namespace'
+export const FILTER_PARAM = 'search'
+
+const directory: Directory = [
+  { path: WORKLOADS_REL_PATH, label: 'Workloads' },
+  { path: DISCOVERY_REL_PATH, label: 'Discovery' },
+  { path: STORAGE_REL_PATH, label: 'Storage' },
+  { path: CONFIGURATION_REL_PATH, label: 'Configuration' },
+  { path: ACCESS_REL_PATH, label: 'Access' },
+  { path: CLUSTER_REL_PATH, label: 'Cluster' },
+  { path: CUSTOM_RESOURCES_REL_PATH, label: 'Custom resources' },
+] as const
+
+type ResourceListContextT = {
+  setNamespaced: Dispatch<SetStateAction<boolean>>
+  namespace: string
+  setNamespace: Dispatch<SetStateAction<string>>
+  filter: string
+  setFilter: Dispatch<SetStateAction<string>>
+}
+
+const ResourceListContext = createContext<ResourceListContextT | undefined>(
+  undefined
+)
+
+export const useResourceListContext = () => {
   const ctx = useContext(ResourceListContext)
 
-  const { data, loading, fetchMore } = query({
-    client: KubernetesClient(cluster?.id ?? ''),
-    skip: !cluster,
-    pollInterval: 30_000,
-    variables: {
-      ...(namespaced ? { namespace } : {}),
-      ...(queryOptions?.variables ?? {}),
-      ...DEFAULT_DATA_SELECT,
-      filterBy: `name,${filter}`,
-      sortBy,
-    } as TVariables,
+  if (!ctx) {
+    throw Error(
+      'useResourceListContext() must be used within a ResourceListContext'
+    )
+  }
+
+  return ctx
+}
+
+export default function ResourceList() {
+  const theme = useTheme()
+  const navigate = useNavigate()
+  const { pathname, search } = useLocation()
+  const { clusterId } = useParams()
+  const clusters = useClusters()
+  const cluster = useCluster()
+  const [params, setParams] = useSearchParams()
+  const [filter, setFilter] = useState(params.get(FILTER_PARAM) ?? '')
+  const [namespace, setNamespace] = useState(params.get(NAMESPACE_PARAM) ?? '')
+  const [headerContent, setHeaderContent] = useState<ReactNode>()
+  const [namespaced, setNamespaced] = useState<boolean>(false)
+  const pathPrefix = getKubernetesAbsPath(clusterId)
+
+  const { data } = useNamespacesQuery({
+    client: KubernetesClient(clusterId!),
+    skip: !clusterId,
   })
 
-  const resourceList = data?.[queryName] as TResourceList
-  const items = useMemo(
+  const namespaces = useMemo(
     () =>
-      loading
-        ? Array(ITEMS_PER_PAGE - 1).fill({})
-        : (resourceList?.[itemsKey] as Array<TResource>) ?? [],
-    [itemsKey, loading, resourceList]
-  )
-  const { page, hasNextPage } = usePageInfo(items, resourceList?.listMeta)
-
-  const columnsData = useMemo(
-    () =>
-      loading
-        ? columns.map((col) => ({
-            ...col,
-            cell: <Skeleton />,
-          }))
-        : columns,
-    [columns, loading]
+      (data?.handleGetNamespaces?.namespaces ?? [])
+        .map((namespace) => namespace?.objectMeta?.name)
+        .filter((namespace): namespace is string => !isEmpty(namespace)),
+    [data?.handleGetNamespaces?.namespaces]
   )
 
-  const fetchNextPage = useCallback(() => {
-    if (!hasNextPage) return
-    fetchMore({
-      variables: { page: page + 1 },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(prev, fetchMoreResult, queryName, itemsKey),
-    })
-  }, [fetchMore, hasNextPage, page, queryName, itemsKey])
+  const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
+
+  const resourceListContext = useMemo(
+    () =>
+      ({
+        setNamespaced,
+        namespace,
+        setNamespace,
+        filter,
+        setFilter,
+      }) as ResourceListContextT,
+    [setNamespaced, namespace, setNamespace, filter, setFilter]
+  )
 
   useEffect(() => {
-    if (!ctx) return
+    if (isEmpty(filter)) params.delete(FILTER_PARAM)
+    else params.set(FILTER_PARAM, filter)
 
-    ctx.setNamespaced(namespaced)
-  }, [ctx, namespaced])
+    if (isEmpty(namespace)) params.delete(NAMESPACE_PARAM)
+    else params.set(NAMESPACE_PARAM, namespace)
+
+    setParams(params)
+    // Only want to run it when namespace or filter values have changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [namespace, filter])
+
+  if (!cluster) return <LoadingIndicator />
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        data={items}
-        columns={columnsData}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        reactTableOptions={reactTableOptions}
-        virtualizeRows
-        onRowClick={
-          disableOnRowClick || loading
-            ? undefined
-            : (_, row: Row<ResourceT>) => {
-                navigate(
-                  customResource
-                    ? getCustomResourceDetailsAbsPath(
-                        cluster?.id,
-                        row.original.typeMeta.kind!,
-                        row.original.objectMeta.name!,
-                        row.original.objectMeta.namespace
-                      )
-                    : getResourceDetailsAbsPath(
-                        cluster?.id,
-                        row.original.typeMeta.kind!,
-                        row.original.objectMeta.name!,
-                        row.original.objectMeta.namespace
-                      )
-                )
-              }
-        }
+    <ResponsiveLayoutPage>
+      <ResponsiveLayoutSidenavContainer>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            overflowY: 'auto',
+            paddingBottom: theme.spacing.medium,
+            gap: theme.spacing.large,
+          }}
+        >
+          <ClusterSelect
+            clusters={clusters}
+            selectedKey={clusterId}
+            onSelectionChange={
+              (id) => navigate(getKubernetesAbsPath(id as string) + search) // TODO: Keep current view when switching clusters.
+            }
+            withoutTitleContent
+          />
+          <SideNavEntries
+            directory={directory}
+            pathname={pathname}
+            pathPrefix={pathPrefix}
+          />
+        </div>
+      </ResponsiveLayoutSidenavContainer>
+      <div
         css={{
-          maxHeight: 'unset',
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+          flexShrink: 1,
           height: '100%',
+          width: '100%',
+          overflow: 'hidden',
         }}
-      />
-    </FullHeightTableWrap>
+      >
+        <div css={{ display: 'flex' }}>
+          {headerContent}
+          <div
+            css={{
+              display: 'flex',
+              flexGrow: 1,
+              gap: theme.spacing.medium,
+              justifyContent: 'flex-end',
+            }}
+          >
+            <NameFilter
+              value={filter}
+              onChange={setFilter}
+            />
+            {namespaced && (
+              <NamespaceFilter
+                namespaces={namespaces}
+                namespace={namespace}
+                onChange={setNamespace}
+              />
+            )}
+          </div>
+        </div>
+        <PageHeaderContext.Provider value={pageHeaderContext}>
+          <ResourceListContext.Provider value={resourceListContext}>
+            <Outlet />
+          </ResourceListContext.Provider>
+        </PageHeaderContext.Provider>
+      </div>
+    </ResponsiveLayoutPage>
   )
 }

@@ -3,8 +3,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 import {
   Maybe,
   Secret_SecretList as SecretListT,
@@ -18,7 +18,7 @@ import {
   SECRETS_REL_PATH,
   getConfigurationAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -41,7 +41,7 @@ const colType = columnHelper.accessor((secret) => secret.type, {
 })
 
 export default function Secrets() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

@@ -11,15 +11,17 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../ResourceList'
 import {
   CONFIG_MAPS_REL_PATH,
   getConfigurationAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+
+import { useClusterContext } from '../Cluster'
 
 import { getBreadcrumbs } from './ConfigMaps'
 
@@ -29,7 +31,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function ConfigMap(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const { cluster } = useClusterContext()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useConfigMapQuery({
     client: KubernetesClient(clusterId ?? ''),

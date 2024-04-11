@@ -14,15 +14,17 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar, useCodeTabs, useKubernetesCluster } from '../utils'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { MetadataSidecar, useCodeTabs } from '../common/utils'
+import { NAMESPACE_PARAM } from '../ResourceList'
 import {
   NETWORK_POLICIES_REL_PATH,
   getDiscoveryAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { SubTitle } from '../../utils/SubTitle'
+
+import { useClusterContext } from '../Cluster'
 
 import { getBreadcrumbs } from './Services'
 
@@ -32,7 +34,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function NetworkPolicy(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const { cluster } = useClusterContext()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useNetworkPolicyQuery({
     client: KubernetesClient(clusterId ?? ''),

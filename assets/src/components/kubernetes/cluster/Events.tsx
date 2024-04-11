@@ -11,7 +11,7 @@ import {
   Maybe,
   useEventsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
@@ -20,8 +20,8 @@ import {
   getClusterAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useKubernetesContext } from '../Kubernetes'
-import { getBaseBreadcrumbs } from '../utils'
+import { useClusterContext } from '../Cluster'
+import { getBaseBreadcrumbs } from '../common/utils'
 
 import { EventTypeChip } from './utils'
 
@@ -135,7 +135,7 @@ export function useEventsColumns(): Array<object> {
 }
 
 export default function Events() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
   const columns = useEventsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))

@@ -11,15 +11,15 @@ import {
   Networkpolicy_NetworkPolicy as NetworkPolicyT,
   useNetworkPoliciesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
 
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   NETWORK_POLICIES_REL_PATH,
   getDiscoveryAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -36,7 +36,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
 const columnHelper = createColumnHelper<NetworkPolicyT>()
 
 export default function NetworkPolicies() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

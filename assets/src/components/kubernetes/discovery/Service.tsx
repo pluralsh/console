@@ -33,24 +33,22 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import {
-  MetadataSidecar,
-  ResourceReadyChip,
-  useKubernetesCluster,
-} from '../utils'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
+import { NAMESPACE_PARAM } from '../ResourceList'
 import {
   SERVICES_REL_PATH,
   getDiscoveryAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { usePodsColumns } from '../workloads/Pods'
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import { SubTitle } from '../../utils/SubTitle'
 
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
+
+import { useClusterContext } from '../Cluster'
 
 import { getBreadcrumbs } from './Services'
 import { Endpoints } from './utils'
@@ -65,7 +63,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Service(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const { cluster } = useClusterContext()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useServiceQuery({
     client: KubernetesClient(clusterId ?? ''),

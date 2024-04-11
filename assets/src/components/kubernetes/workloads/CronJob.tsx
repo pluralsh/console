@@ -23,19 +23,21 @@ import {
   useCronJobQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import { MetadataSidecar } from '../common/utils'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
   CRON_JOBS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../ResourceList'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 
 import { SubTitle } from '../../utils/SubTitle'
+
+import { useClusterContext } from '../Cluster'
 
 import { getBreadcrumbs } from './CronJobs'
 import { useJobsColumns } from './Jobs'
@@ -47,7 +49,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function CronJob(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const { cluster } = useClusterContext()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useCronJobQuery({
     client: KubernetesClient(clusterId ?? ''),

@@ -15,12 +15,14 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar, ResourceLink, useKubernetesCluster } from '../utils'
+import { MetadataSidecar, ResourceLink } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { SubTitle } from '../../utils/SubTitle'
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
+
+import { useClusterContext } from '../Cluster'
 
 import { PVStatusChip } from './utils'
 import { getBreadcrumbs } from './PersistentVolumes'
@@ -31,7 +33,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function PersistentVolume(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const { cluster } = useClusterContext()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = usePersistentVolumeQuery({
     client: KubernetesClient(clusterId ?? ''),

@@ -4,8 +4,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 import {
   Configmap_ConfigMapList as ConfigMapListT,
   Configmap_ConfigMap as ConfigMapT,
@@ -19,7 +19,7 @@ import {
   getConfigurationAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { ClusterTinyFragment } from '../../../generated/graphql'
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -36,7 +36,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
 const columnHelper = createColumnHelper<ConfigMapT>()
 
 export default function ConfigMaps() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

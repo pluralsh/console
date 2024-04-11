@@ -10,15 +10,15 @@ import {
   Maybe,
   useDeploymentsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { ResourceList } from '../ResourceList'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
+import { ResourceList } from '../common/ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
 import { UsageText } from '../../cluster/TableElements'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   DEPLOYMENTS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 
@@ -71,7 +71,7 @@ const colStatus = columnHelper.accessor((deployment) => deployment.pods, {
 })
 
 export default function Deployments() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

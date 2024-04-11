@@ -17,7 +17,7 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 
 const directory = [
   { path: CONFIG_MAPS_REL_PATH, label: 'Config maps' },
@@ -25,7 +25,7 @@ const directory = [
 ] as const
 
 export default function Configuration() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(

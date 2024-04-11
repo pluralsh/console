@@ -2,7 +2,7 @@ import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import { MetadataSidecar } from '../common/utils'
 import {
   ServiceAccountQueryVariables,
   useServiceAccountQuery,
@@ -13,16 +13,18 @@ import {
   getAccessAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../ResourceList'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+
+import { useClusterContext } from '../Cluster'
 
 import { getBreadcrumbs } from './ServiceAccounts'
 
 const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
 
 export default function ServiceAccount(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const { cluster } = useClusterContext()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useServiceAccountQuery({
     client: KubernetesClient(clusterId ?? ''),

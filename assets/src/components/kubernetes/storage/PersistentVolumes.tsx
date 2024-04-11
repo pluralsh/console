@@ -11,8 +11,8 @@ import {
   PersistentVolumesQueryVariables,
   usePersistentVolumesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
@@ -22,7 +22,7 @@ import {
   getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 
 import { PVStatusChip } from './utils'
 
@@ -124,7 +124,7 @@ export const colAccessModes = columnHelper.accessor((pv) => pv.accessModes, {
 })
 
 export default function PersistentVolumes() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

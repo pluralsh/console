@@ -16,8 +16,8 @@ import {
   ResourceReadyChip,
   getBaseBreadcrumbs,
   useDefaultColumns,
-} from '../utils'
-import { ResourceList } from '../ResourceList'
+} from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { Usage } from '../../cluster/TableElements'
 import { ClusterTinyFragment } from '../../../generated/graphql'
@@ -26,7 +26,7 @@ import {
   getClusterAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -112,7 +112,7 @@ const colPods = columnHelper.accessor((node) => node?.allocatedResources, {
 })
 
 export default function Nodes() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

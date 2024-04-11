@@ -11,8 +11,8 @@ import {
   PodsQueryVariables,
   usePodsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
@@ -20,7 +20,7 @@ import {
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 import { numishSort } from '../../cluster/TableElements'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
@@ -131,7 +131,7 @@ export function usePodsColumns(): Array<object> {
 }
 
 export default function Pods() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
   const columns = usePodsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))

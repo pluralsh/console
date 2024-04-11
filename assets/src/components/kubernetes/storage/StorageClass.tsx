@@ -18,16 +18,14 @@ import {
   useStorageClassPersistentVolumesQuery,
   useStorageClassQuery,
 } from '../../../generated/graphql-kubernetes'
-import {
-  MetadataSidecar,
-  useDefaultColumns,
-  useKubernetesCluster,
-} from '../utils'
+import { MetadataSidecar, useDefaultColumns } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
+
+import { useClusterContext } from '../Cluster'
 
 import { getBreadcrumbs } from './StorageClasses'
 import {
@@ -44,7 +42,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function StorageClass(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const { cluster } = useClusterContext()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useStorageClassQuery({
     client: KubernetesClient(clusterId ?? ''),

@@ -11,13 +11,13 @@ import {
   Maybe,
   useCustomResourceDefinitionsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { getCustomResourcesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 
 import { CRDEstablishedChip } from './utils'
 
@@ -92,7 +92,7 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
 
 export default function CustomResourceDefinitions() {
   const theme = useTheme()
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

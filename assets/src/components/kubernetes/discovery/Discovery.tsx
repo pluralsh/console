@@ -19,7 +19,7 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 
 const directory = [
   { path: SERVICES_REL_PATH, label: 'Services' },
@@ -29,7 +29,7 @@ const directory = [
 ] as const
 
 export default function Discovery() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(

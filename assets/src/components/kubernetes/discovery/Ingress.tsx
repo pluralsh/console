@@ -14,8 +14,8 @@ import { useTheme } from 'styled-components'
 
 import { createColumnHelper } from '@tanstack/react-table'
 
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { MetadataSidecar } from '../common/utils'
 import {
   Common_EventList as EventListT,
   Common_Event as EventT,
@@ -35,19 +35,21 @@ import {
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../ResourceList'
 
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { useEventsColumns } from '../cluster/Events'
 
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
 
 import { SubTitle } from '../../utils/SubTitle'
 
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 
 import { InlineLink } from '../../utils/typography/InlineLink'
+
+import { useClusterContext } from '../Cluster'
 
 import { getBreadcrumbs } from './Ingresses'
 import { Endpoints } from './utils'
@@ -59,7 +61,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Ingress(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const { cluster } = useClusterContext()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useIngressQuery({
     client: KubernetesClient(clusterId ?? ''),

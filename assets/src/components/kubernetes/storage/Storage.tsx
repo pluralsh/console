@@ -18,7 +18,7 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useClusterContext } from '../Cluster'
 
 const directory = [
   {
@@ -30,7 +30,7 @@ const directory = [
 ] as const
 
 export default function Storage() {
-  const { cluster } = useKubernetesContext()
+  const { cluster } = useClusterContext()
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(

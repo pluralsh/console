@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
 import {
   Horizontalpodautoscaler_HorizontalPodAutoscalerList as HorizontalPodAutoscalerListT,
   Horizontalpodautoscaler_HorizontalPodAutoscaler as HorizontalPodAutoscalerT,

@@ -22,20 +22,22 @@ import {
   useJobQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import { MetadataSidecar } from '../common/utils'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
   JOBS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../ResourceList'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import Conditions from '../common/Conditions'
 import { ReadinessT } from '../../../utils/status'
 import { StatusChip } from '../../cluster/TableElements'
+
+import { useClusterContext } from '../Cluster'
 
 import { getBreadcrumbs } from './Jobs'
 import { usePodsColumns } from './Pods'
@@ -48,7 +50,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Job(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const { cluster } = useClusterContext()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useJobQuery({
     client: KubernetesClient(clusterId ?? ''),
