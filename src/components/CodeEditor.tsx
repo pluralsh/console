@@ -1,5 +1,5 @@
 import { type Dispatch, useEffect, useState } from 'react'
-import { Button, Flex, P } from 'honorable'
+import { Button, Div, Flex, P } from 'honorable'
 import { useTheme } from 'styled-components'
 
 import Editor, { useMonaco } from '@monaco-editor/react'
@@ -89,7 +89,7 @@ export default function CodeEditor({
       height={height}
       {...props}
     >
-      <div
+      <Div
         css={{
           display: 'flex',
           flexDirection: 'column',
@@ -107,7 +107,7 @@ export default function CodeEditor({
           options={merge(defaultOptions, options)}
           theme={theme.mode === 'light' ? 'plural-light' : 'plural-dark'}
         />
-      </div>
+      </Div>
       {save && (
         <Flex
           align="center"

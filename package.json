@@ -35,7 +35,7 @@
     "@monaco-editor/react": "4.6.0",
     "@react-aria/utils": "3.23.0",
     "@react-hooks-library/core": "0.6.0",
-    "@react-spring/web": "^9.7.3",
+    "@react-spring/web": "9.7.3",
     "@react-stately/utils": "3.9.0",
     "@react-types/shared": "3.22.0",
     "@tanstack/match-sorter-utils": "8.8.4",

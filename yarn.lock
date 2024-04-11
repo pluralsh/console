@@ -2899,7 +2899,7 @@ __metadata:
     "@pluralsh/eslint-config-typescript": 2.5.147
     "@react-aria/utils": 3.23.0
     "@react-hooks-library/core": 0.6.0
-    "@react-spring/web": ^9.7.3
+    "@react-spring/web": 9.7.3
     "@react-stately/utils": 3.9.0
     "@react-types/shared": 3.22.0
     "@storybook/addon-actions": 7.6.5
@@ -4485,7 +4485,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/web@npm:^9.7.3":
+"@react-spring/web@npm:9.7.3":
   version: 9.7.3
   resolution: "@react-spring/web@npm:9.7.3"
   dependencies:
