@@ -20,7 +20,7 @@ import {
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 import { numishSort } from '../../cluster/TableElements'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
@@ -131,7 +131,7 @@ export function usePodsColumns(): Array<object> {
 }
 
 export default function Pods() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const columns = usePodsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))

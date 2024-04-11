@@ -21,7 +21,7 @@ import {
   getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { PVCStatusChip } from './utils'
 
@@ -124,7 +124,7 @@ export const usePersistentVolumeClaimListColumns = () => {
 }
 
 export default function PersistentVolumeClaims() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const columns = usePersistentVolumeClaimListColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))

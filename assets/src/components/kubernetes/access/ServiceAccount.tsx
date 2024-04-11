@@ -17,14 +17,14 @@ import { NAMESPACE_PARAM } from '../ResourceList'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './ServiceAccounts'
 
 const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
 
 export default function ServiceAccount(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useServiceAccountQuery({
     client: KubernetesClient(clusterId ?? ''),

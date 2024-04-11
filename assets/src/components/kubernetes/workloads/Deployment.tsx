@@ -49,7 +49,7 @@ import Annotations from '../common/Annotations'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscalers'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Deployments'
 import { useReplicaSetsColumns } from './ReplicaSets'
@@ -63,7 +63,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Deployment(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useDeploymentQuery({
     client: KubernetesClient(clusterId ?? ''),

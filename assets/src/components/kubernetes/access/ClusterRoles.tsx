@@ -18,7 +18,7 @@ import {
   CLUSTER_ROLES_REL_PATH,
   getAccessAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -35,7 +35,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
 const columnHelper = createColumnHelper<ClusterRoleT>()
 
 export default function ClusterRoles() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

@@ -18,8 +18,7 @@ import {
   useSetPageHeaderContent,
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 const directory = [
   { path: SERVICES_REL_PATH, label: 'Services' },
@@ -29,7 +28,7 @@ const directory = [
 ] as const
 
 export default function Discovery() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(

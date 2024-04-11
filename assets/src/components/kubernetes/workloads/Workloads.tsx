@@ -21,7 +21,7 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 const directory = [
   { path: DEPLOYMENTS_REL_PATH, label: 'Deployments' },
@@ -35,7 +35,7 @@ const directory = [
 ] as const
 
 export default function Workloads() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const [scrollable, setScrollable] = useState(false)
   const pageScrollableContext = useMemo(() => ({ setScrollable }), [])
   const tabStateRef = useRef<any>(null)

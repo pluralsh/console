@@ -20,7 +20,7 @@ import {
   getDiscoveryAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { TableEndpoints, serviceTypeDisplayName } from './utils'
 
@@ -89,7 +89,7 @@ export function useServicesColumns(): Array<object> {
 }
 
 export default function Services() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const columns = useServicesColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))

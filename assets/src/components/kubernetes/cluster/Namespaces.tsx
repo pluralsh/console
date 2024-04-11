@@ -20,7 +20,7 @@ import {
   getClusterAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { NamespacePhaseChip } from './utils'
 
@@ -45,7 +45,7 @@ const colPhase = columnHelper.accessor((namespace) => namespace?.phase, {
 })
 
 export default function Namespaces() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

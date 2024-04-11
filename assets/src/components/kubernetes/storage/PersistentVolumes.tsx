@@ -22,7 +22,7 @@ import {
   getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { PVStatusChip } from './utils'
 
@@ -124,7 +124,7 @@ export const colAccessModes = columnHelper.accessor((pv) => pv.accessModes, {
 })
 
 export default function PersistentVolumes() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

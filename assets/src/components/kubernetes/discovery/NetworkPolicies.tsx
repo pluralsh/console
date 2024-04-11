@@ -19,7 +19,7 @@ import {
   NETWORK_POLICIES_REL_PATH,
   getDiscoveryAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -36,7 +36,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
 const columnHelper = createColumnHelper<NetworkPolicyT>()
 
 export default function NetworkPolicies() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

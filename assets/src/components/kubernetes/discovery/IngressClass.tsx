@@ -12,14 +12,14 @@ import { MetadataSidecar } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './IngressClasses'
 
 const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
 
 export default function IngressClass(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useIngressClassQuery({
     client: KubernetesClient(clusterId ?? ''),

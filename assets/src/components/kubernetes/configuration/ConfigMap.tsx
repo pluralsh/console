@@ -21,7 +21,7 @@ import {
 
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './ConfigMaps'
 
@@ -31,7 +31,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function ConfigMap(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useConfigMapQuery({
     client: KubernetesClient(clusterId ?? ''),

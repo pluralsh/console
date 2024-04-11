@@ -35,7 +35,7 @@ import { useEventsColumns } from '../cluster/Events'
 import { ResourceList } from '../common/ResourceList'
 import { PodInfo } from '../common/PodInfo'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './StatefulSets'
 import { usePodsColumns } from './Pods'
@@ -48,7 +48,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function StatefulSet(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useStatefulSetQuery({
     client: KubernetesClient(clusterId ?? ''),

@@ -44,7 +44,7 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../ResourceList'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster, useClusterContext } from '../Cluster'
 
 import { getBreadcrumbs } from './ReplicaSets'
 import { usePodsColumns } from './Pods'
@@ -59,7 +59,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function ReplicaSet(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useReplicaSetQuery({
     client: KubernetesClient(clusterId ?? ''),

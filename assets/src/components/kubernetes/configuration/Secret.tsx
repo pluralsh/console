@@ -29,7 +29,7 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Secrets'
 
@@ -39,7 +39,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Secret(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useSecretQuery({
     client: KubernetesClient(clusterId ?? ''),

@@ -44,7 +44,7 @@ import { LabelSelector } from '../common/LabelSelector'
 
 import { PodInfo } from '../common/PodInfo'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './DaemonSets'
 import { usePodsColumns } from './Pods'
@@ -58,7 +58,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function DaemonSet(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useDaemonSetQuery({
     client: KubernetesClient(clusterId ?? ''),

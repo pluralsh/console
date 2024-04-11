@@ -17,7 +17,7 @@ import { ResourceList } from '../common/ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { getCustomResourcesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { CRDEstablishedChip } from './utils'
 
@@ -92,7 +92,7 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
 
 export default function CustomResourceDefinitions() {
   const theme = useTheme()
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

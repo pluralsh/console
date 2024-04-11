@@ -41,7 +41,7 @@ import RadialBarChart from '../../utils/RadialBarChart'
 import { cpuFmt, roundToTwoPlaces } from '../../cluster/utils'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
 
@@ -58,7 +58,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Node(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useNodeQuery({
     client: KubernetesClient(clusterId ?? ''),

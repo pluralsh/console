@@ -18,7 +18,8 @@ import {
   REPLICA_SETS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useClusterContext } from '../Cluster'
+
+import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 
@@ -89,7 +90,7 @@ export function useReplicaSetsColumns(): Array<object> {
 }
 
 export default function ReplicaSets() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const columns = useReplicaSetsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))

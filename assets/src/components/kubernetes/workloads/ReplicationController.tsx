@@ -43,7 +43,7 @@ import { useEventsColumns } from '../cluster/Events'
 import { useServicesColumns } from '../discovery/Services'
 import { LabelSelector } from '../common/LabelSelector'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './ReplicationControllers'
 import { usePodsColumns } from './Pods'
@@ -57,7 +57,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function ReplicationController(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useReplicationControllerQuery({
     client: KubernetesClient(clusterId ?? ''),

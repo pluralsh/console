@@ -29,7 +29,7 @@ import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { ResourceList } from '../common/ResourceList'
 import { SubTitle } from '../../utils/SubTitle'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Namespaces'
 import { NamespacePhaseChip } from './utils'
@@ -42,7 +42,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Namespace(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useNamespaceQuery({
     client: KubernetesClient(clusterId ?? ''),

@@ -49,7 +49,7 @@ import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 
 import { InlineLink } from '../../utils/typography/InlineLink'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Ingresses'
 import { Endpoints } from './utils'
@@ -61,7 +61,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Ingress(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useIngressQuery({
     client: KubernetesClient(clusterId ?? ''),

@@ -33,7 +33,7 @@ import { NAMESPACE_PARAM } from '../ResourceList'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Pods'
 import { toReadiness } from './utils'
@@ -46,7 +46,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export function Pod(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = usePodQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -135,7 +135,7 @@ export function Pod(): ReactElement {
 }
 
 export function PodInfo(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const pod = useOutletContext() as PodT
   const conditions = pod?.conditions
   const pvcList = pod?.persistentVolumeClaimList

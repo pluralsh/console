@@ -19,7 +19,7 @@ import {
   getConfigurationAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { ClusterTinyFragment } from '../../../generated/graphql'
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -36,7 +36,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
 const columnHelper = createColumnHelper<ConfigMapT>()
 
 export default function ConfigMaps() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

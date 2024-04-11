@@ -37,7 +37,7 @@ import Conditions from '../common/Conditions'
 import { ReadinessT } from '../../../utils/status'
 import { StatusChip } from '../../cluster/TableElements'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Jobs'
 import { usePodsColumns } from './Pods'
@@ -50,7 +50,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Job(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useJobQuery({
     client: KubernetesClient(clusterId ?? ''),

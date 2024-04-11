@@ -26,7 +26,7 @@ import {
   getClusterAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -112,7 +112,7 @@ const colPods = columnHelper.accessor((node) => node?.allocatedResources, {
 })
 
 export default function Nodes() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

@@ -18,7 +18,7 @@ import {
   SECRETS_REL_PATH,
   getConfigurationAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -41,7 +41,7 @@ const colType = columnHelper.accessor((secret) => secret.type, {
 })
 
 export default function Secrets() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

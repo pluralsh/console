@@ -26,7 +26,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { InlineLink } from '../../utils/typography/InlineLink'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './PersistentVolumeClaims'
 import { PVCStatusChip } from './utils'
@@ -34,7 +34,7 @@ import { PVCStatusChip } from './utils'
 const directory: Array<TabEntry> = [{ path: '', label: 'Raw' }] as const
 
 export default function PersistentVolumeClaim(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = usePersistentVolumeClaimQuery({
     client: KubernetesClient(clusterId ?? ''),

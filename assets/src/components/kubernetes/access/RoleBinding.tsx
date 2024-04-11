@@ -21,7 +21,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import Subjects from '../common/Subjects'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './RoleBindings'
 
@@ -31,7 +31,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function RoleBinding(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useRoleBindingQuery({
     client: KubernetesClient(clusterId ?? ''),

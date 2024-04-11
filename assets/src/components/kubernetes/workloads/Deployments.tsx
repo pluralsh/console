@@ -18,7 +18,8 @@ import {
   DEPLOYMENTS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useClusterContext } from '../Cluster'
+
+import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 
@@ -71,7 +72,7 @@ const colStatus = columnHelper.accessor((deployment) => deployment.pods, {
 })
 
 export default function Deployments() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

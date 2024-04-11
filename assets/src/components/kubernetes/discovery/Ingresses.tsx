@@ -22,7 +22,7 @@ import {
   getDiscoveryAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { TableEndpoints } from './utils'
 
@@ -76,7 +76,7 @@ export function useIngressesColumns(): Array<object> {
 }
 
 export default function Ingresses() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

@@ -18,7 +18,7 @@ import {
   INGRESS_CLASSES_REL_PATH,
   getDiscoveryAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -44,7 +44,7 @@ const colController = columnHelper.accessor(
 )
 
 export default function IngressClasses() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

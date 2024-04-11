@@ -21,7 +21,7 @@ import {
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { CronJobSuspendChip, WorkloadImages } from './utils'
 
@@ -70,7 +70,7 @@ const colLastSchedule = columnHelper.accessor((cj) => cj.lastSchedule, {
 })
 
 export default function CronJobs() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

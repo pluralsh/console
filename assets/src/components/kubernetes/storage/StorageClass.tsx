@@ -25,7 +25,7 @@ import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
 import { ResourceList } from '../common/ResourceList'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './StorageClasses'
 import {
@@ -42,7 +42,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function StorageClass(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useStorageClassQuery({
     client: KubernetesClient(clusterId ?? ''),

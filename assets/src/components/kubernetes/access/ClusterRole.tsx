@@ -17,7 +17,7 @@ import PolicyRules from '../common/PolicyRules'
 
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './ClusterRoles'
 
@@ -27,7 +27,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function ClusterRole(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useClusterRoleQuery({
     client: KubernetesClient(clusterId ?? ''),

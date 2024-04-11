@@ -25,11 +25,7 @@ export default function CustomResource(): ReactElement {
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-      crd,
-    } as CustomResourceQueryVariables,
+    variables: { name, namespace, crd } as CustomResourceQueryVariables,
   })
 
   const cr = data?.handleGetCustomResourceObjectDetail

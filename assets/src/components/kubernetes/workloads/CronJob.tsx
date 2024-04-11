@@ -37,7 +37,7 @@ import { useEventsColumns } from '../cluster/Events'
 
 import { SubTitle } from '../../utils/SubTitle'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './CronJobs'
 import { useJobsColumns } from './Jobs'
@@ -49,7 +49,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function CronJob(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useCronJobQuery({
     client: KubernetesClient(clusterId ?? ''),

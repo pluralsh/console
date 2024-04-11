@@ -48,7 +48,7 @@ import { SubTitle } from '../../utils/SubTitle'
 
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Services'
 import { Endpoints } from './utils'
@@ -63,7 +63,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Service(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useServiceQuery({
     client: KubernetesClient(clusterId ?? ''),

@@ -18,7 +18,7 @@ import {
   JOBS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 
@@ -89,7 +89,7 @@ export function useJobsColumns(): Array<object> {
 }
 
 export default function Jobs() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const columns = useJobsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))

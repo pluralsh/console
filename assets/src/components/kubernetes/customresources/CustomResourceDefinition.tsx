@@ -29,7 +29,7 @@ import Conditions from '../common/Conditions'
 
 import { ResourceList } from '../common/ResourceList'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'
@@ -41,7 +41,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function CustomResourceDefinition(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useCustomResourceDefinitionQuery({
     client: KubernetesClient(clusterId ?? ''),

@@ -23,7 +23,7 @@ import PolicyRules from '../common/PolicyRules'
 
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Roles'
 
@@ -33,16 +33,13 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Role(): ReactElement {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useRoleQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as RoleQueryVariables,
+    variables: { name, namespace } as RoleQueryVariables,
   })
 
   const role = data?.handleGetRoleDetail

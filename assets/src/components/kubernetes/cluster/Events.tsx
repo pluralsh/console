@@ -20,7 +20,7 @@ import {
   getClusterAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 import { getBaseBreadcrumbs } from '../common/utils'
 
 import { EventTypeChip } from './utils'
@@ -135,7 +135,7 @@ export function useEventsColumns(): Array<object> {
 }
 
 export default function Events() {
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const columns = useEventsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
