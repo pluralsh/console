@@ -3957,8 +3957,8 @@ type v1_ResourceRequirements {
   This field is immutable. It can only be set for containers.
   """
   claims: [v1_ResourceClaim]
-  limits: query_handleGetPodDetail_containers_items_resources_limits
-  requests: query_handleGetPodDetail_containers_items_resources_requests
+  limits: ObjMap
+  requests: ObjMap
 }
 
 """ResourceClaim references one entry in PodSpec.ResourceClaims."""

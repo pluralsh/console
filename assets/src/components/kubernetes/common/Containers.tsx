@@ -1,5 +1,5 @@
 import { ReactElement } from 'react'
-import { Chip, Code } from '@pluralsh/design-system'
+import { Chip, ChipList, CloseIcon, Code } from '@pluralsh/design-system'
 
 import {
   Pod_Container as ContainerT,
@@ -110,6 +110,42 @@ function Container({ container }: ContainerProps): ReactElement {
           {container.securityContext?.readOnlyRootFilesystem}
         </ResourceInfoCardEntry>
 
+        {/* {container.securityContext?.capabilities} */}
+        {/* {container.securityContext?.seLinuxOptions} */}
+        {/* {container.securityContext?.windowsOptions} */}
+        {/* {container.securityContext?.procMount} */}
+        {/* {container.securityContext?.seccompProfile} */}
+      </ResourceInfoCardSection>
+
+      <ResourceInfoCardSection heading="Resources">
+        <ResourceInfoCardEntry heading="Claims">
+          <ChipList
+            size="small"
+            values={Object.entries(
+              container?.resources?.claims?.map((c) => c?.name) ?? []
+            )}
+            limit={3}
+            emptyState={<CloseIcon />}
+          />
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Requests">
+          <ChipList
+            size="small"
+            values={Object.entries(container?.resources?.requests ?? [])}
+            transformValue={(label) => label.join(': ')}
+            limit={3}
+            emptyState={<CloseIcon />}
+          />
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Limits">
+          <ChipList
+            size="small"
+            values={Object.entries(container?.resources?.limits ?? [])}
+            transformValue={(label) => label.join(': ')}
+            limit={3}
+            emptyState={<CloseIcon />}
+          />
+        </ResourceInfoCardEntry>
         {/* {container.securityContext?.capabilities} */}
         {/* {container.securityContext?.seLinuxOptions} */}
         {/* {container.securityContext?.windowsOptions} */}

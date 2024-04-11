@@ -239,12 +239,7 @@ export function ResourceInfoCardEntry({
           },
         }}
       >
-        {isBoolean && (
-          <IconFrame
-            size="small"
-            icon={children ? <CheckIcon /> : <CloseIcon />}
-          />
-        )}
+        {isBoolean && (children ? <CheckIcon /> : <CloseIcon />)}
         {!isBoolean && children}
       </span>
     </div>

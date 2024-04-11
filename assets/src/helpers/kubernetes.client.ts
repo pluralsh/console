@@ -1,6 +1,8 @@
 import { ApolloClient, ApolloLink, InMemoryCache } from '@apollo/client'
 import { RestLink } from 'apollo-link-rest'
 
+import { isEmpty } from 'lodash'
+
 import { Unstructured_Unstructured as UnstructuredT } from '../generated/graphql-kubernetes'
 
 import { fetchToken } from './auth'
@@ -29,26 +31,13 @@ function KubernetesClient(clusterID: string): ApolloClient<any> | undefined {
 function buildClient({ clusterID, fetchToken }) {
   const restLink = new RestLink({
     uri: K8S_API_URL,
-    responseTransformer: async (response: Response) => {
-      const isRawUrl = response.url.includes(`${K8S_API_URL}_raw`)
-      let body: any = {}
-
-      try {
-        body = await (response as Response).json()
-      } catch (e) {
-        const err = e as Error
-
-        if (
-          !isRawUrl ||
-          (isRawUrl && !err?.message?.includes(RAW_EMPTY_RESPONSE_ERROR))
-        ) {
-          throw e
-        }
-
-        if (err?.message?.includes(RAW_EMPTY_RESPONSE_ERROR)) {
-          return null
-        }
+    responseTransformer: async (response: Response, type: any) => {
+      if (type === 'Void') {
+        return null
       }
+
+      const isRawUrl = response?.url?.includes(`${K8S_API_URL}_raw`) ?? false
+      const body = await response?.json()
 
       return isRawUrl ? ({ Object: body } as UnstructuredT) : body
     },
