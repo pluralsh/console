@@ -47,7 +47,6 @@ export function CreateScmWebhookModal({
   const [mutation, { data, loading, error }] =
     useCreateScmWebhookPointerMutation({
       onCompleted: () => {
-        onClose?.()
         refetch?.()
       },
     })
