@@ -46,15 +46,7 @@ query Namespace($name: String!) {
           ...ObjectMeta
         }
         scopes
-        statusList {
-          additionalProperties {
-            value {
-              hard
-              used
-            }
-            key
-          }
-        }
+        statusList
       }
     }
     resourceLimits {
