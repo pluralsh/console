@@ -57,7 +57,7 @@ export default function Raw(): ReactElement {
       input: yaml.load(current ?? '{}'),
     } as ResourceQueryVariables & NamespacedResourceQueryVariables,
   })
-  const [mutation, { error }] = updateMutation({
+  const [mutation] = updateMutation({
     client: KubernetesClient(clusterId ?? ''),
     onCompleted: () => refetch().finally(() => setUpdating(false)),
     onError: (err) => {
