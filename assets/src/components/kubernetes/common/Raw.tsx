@@ -6,6 +6,9 @@ import yaml from 'js-yaml'
 import { ApolloError } from '@apollo/client'
 import { useTheme } from 'styled-components'
 
+import { GraphQLErrors } from '@apollo/client/errors'
+import type { GraphQLError } from 'graphql'
+
 import {
   NamespacedResourceQueryVariables,
   ResourceQueryVariables,
@@ -18,13 +21,16 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { GqlError } from '../../utils/Alert'
+import { hash } from '../../../utils/sha'
 
 export default function Raw(): ReactElement {
   const theme = useTheme()
   const { clusterId, name, namespace, crd } = useParams()
   const pathMatch = useMatch(`${getKubernetesAbsPath(clusterId)}/:kind/*`)
   const [current, setCurrent] = useState<string>()
+  const [sha, setSHA] = useState<string>()
   const [updateError, setUpdateError] = useState<ApolloError>()
+  const [updating, setUpdating] = useState(false)
   const kind = useMemo(
     () => crd ?? pluralize(pathMatch?.params?.kind || '', 1),
     [pathMatch?.params?.kind, crd]
@@ -40,7 +46,7 @@ export default function Raw(): ReactElement {
         : useResourceUpdateMutation,
     [namespace]
   )
-  const { data, loading, refetch } = resourceQuery({
+  const { data, refetch, loading } = resourceQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     fetchPolicy: 'no-cache',
@@ -48,31 +54,45 @@ export default function Raw(): ReactElement {
       kind,
       name,
       namespace,
+      input: yaml.load(current ?? '{}'),
     } as ResourceQueryVariables & NamespacedResourceQueryVariables,
-    onCompleted: (data) =>
-      setCurrent(yaml.dump(data?.handleGetResource?.Object)),
   })
-  const [mutation, { loading: saving, error }] = updateMutation({
+  const [mutation] = updateMutation({
     client: KubernetesClient(clusterId ?? ''),
-    onCompleted: async () => {
-      setCurrent(undefined)
-      const result = await refetch()
-
-      setCurrent(yaml.dump(result?.data.handleGetResource?.Object))
+    onCompleted: () => refetch().finally(() => setUpdating(false)),
+    onError: (err) => {
+      setUpdating(false)
+      setUpdateError(err)
     },
   })
 
   useEffect(() => {
-    if (error) {
-      setTimeout(() => setUpdateError(undefined), 6_000)
+    if (!updateError) {
+      return
     }
 
-    setUpdateError(error)
-  }, [error])
+    // Dismiss error after 6 seconds
+    setTimeout(() => setUpdateError(undefined), 6_000)
+  }, [updateError])
 
-  if (loading || saving || !current) return <LoadingIndicator />
+  useEffect(() => {
+    if (!data) {
+      return
+    }
 
-  if (!data?.handleGetResource?.Object)
+    const current = yaml.dump(data?.handleGetResource?.Object)
+
+    setCurrent(current)
+    calculateSHA(current)
+
+    async function calculateSHA(current: string) {
+      setSHA(await hash(current ?? ''))
+    }
+  }, [data])
+
+  if (!current) return <LoadingIndicator />
+
+  if (!data?.handleGetResource?.Object && !loading)
     return <GqlError error="Could not fetch resource" />
 
   return (
@@ -86,28 +106,39 @@ export default function Raw(): ReactElement {
             zIndex: 1,
           }}
         >
-          <GqlError error="Could not update resource. Make sure that the provided YAML is valid." />
+          <GqlError
+            error={updateError}
+            header="Error updating resource"
+          />
         </div>
       )}
       <CodeEditor
+        key={sha}
         language="yaml"
         value={current}
         save
-        saving={saving}
+        saving={updating}
         saveLabel="Update"
-        onSave={(v) =>
-          mutation({
-            variables: {
-              kind,
-              name: name ?? '',
-              namespace: namespace ?? '',
-              input: yaml.load(v),
-            },
-          })
-        }
-        options={{
-          // TODO: add to design system to as a workaround for cursor position issue
-          fontLigatures: '',
+        onSave={(v) => {
+          try {
+            const input = yaml.load(v)
+
+            setUpdating(true)
+            mutation({
+              variables: {
+                kind,
+                name: name ?? '',
+                namespace: namespace ?? '',
+                input,
+              },
+            })
+          } catch (e) {
+            setUpdateError({
+              graphQLErrors: [
+                { message: (e as any)?.message as string } as GraphQLError,
+              ] as GraphQLErrors,
+            } as ApolloError)
+          }
         }}
       />
     </>

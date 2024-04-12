@@ -247,27 +247,6 @@ query PersistentVolume($name: String!) {
         volumePath
       }
     }
-    capacity {
-      additionalProperties {
-        key
-        value {
-          Format
-          d {
-            Dec {
-              scale
-              unscaled {
-                abs
-                neg
-              }
-            }
-          }
-          i {
-            scale
-            value
-          }
-          s
-        }
-      }
-    }
+    capacity
   }
 }

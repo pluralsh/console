@@ -32,6 +32,13 @@ fragment Container on pod_Container {
       ...State
     }
   }
+  resources {
+    requests
+    limits
+    claims {
+      name
+    }
+  }
 }
 
 fragment State on v1_ContainerState {

@@ -19,7 +19,7 @@ schema @transport(subgraph: "api", kind: "rest") {
 
 directive @dictionary(subgraph: String) on FIELD_DEFINITION
 
-directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: ObjMap, httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean) on FIELD_DEFINITION
+directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: ObjMap, httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean) repeatable on FIELD_DEFINITION
 
 directive @transport(subgraph: String, kind: String, location: String, headers: ObjMap, queryStringOptions: ObjMap, queryParams: ObjMap) on OBJECT
 
@@ -2231,39 +2231,11 @@ type common_Event {
 }
 
 type cronjob_CronJobList {
-  cumulativeMetrics: [api_Metric]!
   errors: [JSON]!
   items: [cronjob_CronJob]!
   listMeta: types_ListMeta!
   status: common_ResourceStatus!
 }
-
-type api_Metric {
-  aggregation: String
-  dataPoints: [api_DataPoint]!
-  metricName: String!
-  metricPoints: [api_MetricPoint]!
-}
-
-type api_DataPoint {
-  x: BigInt!
-  y: BigInt!
-}
-
-"""
-The `BigInt` scalar type represents non-fractional signed whole numeric values.
-"""
-scalar BigInt
-
-type api_MetricPoint {
-  timestamp: DateTime!
-  value: Int!
-}
-
-"""
-A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
-"""
-scalar DateTime
 
 type cronjob_CronJob {
   active: Int!
@@ -2296,6 +2268,11 @@ type cronjob_CronJobDetail {
   typeMeta: types_TypeMeta!
 }
 
+"""
+The `BigInt` scalar type represents non-fractional signed whole numeric values.
+"""
+scalar BigInt
+
 type job_JobList {
   cumulativeMetrics: [api_Metric]!
   errors: [JSON]!
@@ -2303,6 +2280,28 @@ type job_JobList {
   listMeta: types_ListMeta!
   status: common_ResourceStatus!
 }
+
+type api_Metric {
+  aggregation: String
+  dataPoints: [api_DataPoint]!
+  metricName: String!
+  metricPoints: [api_MetricPoint]!
+}
+
+type api_DataPoint {
+  x: BigInt!
+  y: BigInt!
+}
+
+type api_MetricPoint {
+  timestamp: DateTime!
+  value: Int!
+}
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
 
 type job_Job {
   containerImages: [String]!
@@ -2631,10 +2630,10 @@ IngressRule represents the rules mapping the paths under a specified host to the
 type v1_IngressRule {
   """
   host is the fully qualified domain name of a network host, as defined by RFC 3986. Note the following deviations from the "host" part of the URI as defined in RFC 3986: 1. IPs are not allowed. Currently an IngressRuleValue can only apply to
-     the IP in the Spec of the parent Ingress.
+  the IP in the Spec of the parent Ingress.
   2. The `:` delimiter is not respected because ports are not allowed.
-  	  Currently the port of an Ingress is implicitly :80 for http and
-  	  :443 for https.
+  Currently the port of an Ingress is implicitly :80 for http and
+  :443 for https.
   Both these may change in the future. Incoming requests are matched against the host before the IngressRuleValue. If the host is unspecified, the Ingress routes all traffic based on the specified IngressRuleValue.
 
   host can be "precise" which is a domain name without the terminating dot of a network host (e.g. "foo.bar.com") or "wildcard", which is a domain name prefixed with a single wildcard label (e.g. "*.foo.com"). The wildcard character '*' must appear by itself as the first DNS label and matches only a single label. You cannot have a wildcard label by itself (e.g. Host == "*"). Requests will be matched against the Host field in the following way: 1. If host is precise, the request matches this rule if the http host header is equal to Host. 2. If host is a wildcard, then the request matches this rule if the http host header is to equal to the suffix (removing the first label) of the wildcard rule.
@@ -2662,15 +2661,15 @@ type v1_HTTPIngressPath {
   path: String
   """
   pathType determines the interpretation of the path matching. PathType can be one of the following values: * Exact: Matches the URL path exactly. * Prefix: Matches based on a URL path prefix split by '/'. Matching is
-    done on a path element by element basis. A path element refers is the
-    list of labels in the path split by the '/' separator. A request is a
-    match for path p if every p is an element-wise prefix of p of the
-    request path. Note that if the last element of the path is a substring
-    of the last element in request path, it is not a match (e.g. /foo/bar
-    matches /foo/bar/baz, but does not match /foo/barbaz).
+  done on a path element by element basis. A path element refers is the
+  list of labels in the path split by the '/' separator. A request is a
+  match for path p if every p is an element-wise prefix of p of the
+  request path. Note that if the last element of the path is a substring
+  of the last element in request path, it is not a match (e.g. /foo/bar
+  matches /foo/bar/baz, but does not match /foo/barbaz).
   * ImplementationSpecific: Interpretation of the Path matching is up to
-    the IngressClass. Implementations can treat this as a separate PathType
-    or treat it identically to Prefix or Exact path types.
+  the IngressClass. Implementations can treat this as a separate PathType
+  or treat it identically to Prefix or Exact path types.
   Implementations are required to support all path types.
   """
   pathType: String!
@@ -2719,9 +2718,9 @@ type v1_IngressLoadBalancerIngress {
 type v1_IngressPortStatus {
   """
   error is to record the problem with the service port The format of the error shall comply with the following rules: - built-in error values shall be specified in this file and those shall use
-    CamelCase names
+  CamelCase names
   - cloud provider specific error values must have names that comply with the
-    format foo.example.com/CamelCase.
+  format foo.example.com/CamelCase.
   """
   error: String
   """port is the port number of the ingress port."""
@@ -2833,7 +2832,7 @@ type resourcequota_ResourceQuotaDetailList {
 type resourcequota_ResourceQuotaDetail {
   objectMeta: types_ObjectMeta!
   scopes: [String]
-  statusList: query_handleGetNamespaceDetail_resourceQuotaList_items_items_statusList
+  statusList: ObjMap!
   typeMeta: types_TypeMeta!
 }
 
@@ -3057,7 +3056,7 @@ type persistentvolume_PersistentVolumeList {
 
 type persistentvolume_PersistentVolume {
   accessModes: [String]!
-  capacity: query_handleGetPersistentVolumeList_items_items_capacity!
+  capacity: ObjMap!
   claim: String!
   mountOptions: [String]!
   objectMeta: types_ObjectMeta!
@@ -3105,7 +3104,7 @@ type resource_int64Amount {
 
 type persistentvolume_PersistentVolumeDetail {
   accessModes: [String]!
-  capacity: query_handleGetPersistentVolumeDetail_capacity!
+  capacity: ObjMap!
   claim: String!
   message: String!
   mountOptions: [String]!
@@ -3706,7 +3705,7 @@ type persistentvolumeclaim_PersistentVolumeClaimList {
 
 type persistentvolumeclaim_PersistentVolumeClaim {
   accessModes: [String]!
-  capacity: query_handleGetPersistentVolumeClaimList_items_items_capacity!
+  capacity: ObjMap!
   objectMeta: types_ObjectMeta!
   status: String!
   storageClass: String!
@@ -3732,7 +3731,7 @@ type resource_Quantity3 {
 
 type persistentvolumeclaim_PersistentVolumeClaimDetail {
   accessModes: [String]!
-  capacity: query_handleGetPersistentVolumeClaimDetail_capacity!
+  capacity: ObjMap!
   objectMeta: types_ObjectMeta!
   status: String!
   storageClass: String!
@@ -3957,8 +3956,8 @@ type v1_ResourceRequirements {
   This field is immutable. It can only be set for containers.
   """
   claims: [v1_ResourceClaim]
-  limits: query_handleGetPodDetail_containers_items_resources_limits
-  requests: query_handleGetPodDetail_containers_items_resources_requests
+  limits: ObjMap!
+  requests: ObjMap!
 }
 
 """ResourceClaim references one entry in PodSpec.ResourceClaims."""
@@ -4105,7 +4104,7 @@ type v1_WindowsSecurityContextOptions {
 ContainerStatus contains details for the current status of this container.
 """
 type v1_ContainerStatus {
-  allocatedResources: query_handleGetPodDetail_containers_items_status_allocatedResources
+  allocatedResources: ObjMap!
   """
   ContainerID is the ID of the container in the format '<type>://<container_id>'. Where type is a container runtime identifier, returned from Version call of CRI API (for example "containerd").
   """
@@ -4623,8 +4622,8 @@ type v1_TypedObjectReference {
 VolumeResourceRequirements describes the storage resource requirements for a volume.
 """
 type v1_VolumeResourceRequirements {
-  limits: query_handleGetPodDetail_containers_items_volumeMounts_items_volume_ephemeral_volumeClaimTemplate_spec_resources_limits
-  requests: query_handleGetPodDetail_containers_items_volumeMounts_items_volume_ephemeral_volumeClaimTemplate_spec_resources_requests
+  limits: ObjMap!
+  requests: ObjMap!
 }
 
 """
@@ -5186,9 +5185,9 @@ type v1_EndpointPort {
   * Un-prefixed protocol names - reserved for IANA standard service names (as per RFC-6335 and https://www.iana.org/assignments/service-names).
 
   * Kubernetes-defined prefixed names:
-    * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
-    * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
-    * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
+  * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
+  * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
+  * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
 
   * Other protocols should use implementation-defined prefixed names such as mycompany.com/my-custom-protocol.
   """
@@ -5261,7 +5260,7 @@ type storageclass_StorageClass {
 }
 
 type Mutation {
-  """creates a resource in a namespace"""
+  """creates or updates a resource in a namespace"""
   handlePutResource(
     """kind of the resource"""
     kind: String!
@@ -5736,4 +5735,8 @@ enum HTTPMethod {
   OPTIONS
   TRACE
   PATCH
+}
+
+type Map {
+  map: ObjMap!
 }

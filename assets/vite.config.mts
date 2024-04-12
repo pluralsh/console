@@ -1,9 +1,9 @@
-import { defineConfig, mergeConfig } from 'vite'
+import {defineConfig, mergeConfig, splitVendorChunkPlugin} from 'vite'
 import react from '@vitejs/plugin-react'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import pluginRewriteAll from 'vite-plugin-rewrite-all'
-import { VitePWA } from 'vite-plugin-pwa'
+import {VitePWA} from 'vite-plugin-pwa'
 
 import vitestConfig from './vitest.config.mjs'
 
@@ -34,6 +34,7 @@ export default defineConfig(() =>
       }),
       tsconfigPaths(),
       pluginRewriteAll(), // Fix 404 error for urls with dots in their path
+      splitVendorChunkPlugin(),
     ],
     server: {
       port: 3000,
@@ -59,8 +60,22 @@ export default defineConfig(() =>
       'process.env': {}, // Needed otherwise production build will fail with Uncaught ReferenceError: process is not defined. See https://github.com/vitejs/vite/issues/1973
     },
     build: {
+      chunkSizeWarningLimit: '2048',
       outDir: 'build',
       sourcemap: process.env.NODE_ENV !== 'production', // Seems to cause JavaScript heap out of memory errors on build
+      rollupOptions: {
+        output: {
+          manualChunks(id: string) {
+            if (id.includes('moment')) {
+              return 'moment'
+            }
+
+            if (id.includes('lodash')) {
+              return 'lodash'
+            }
+          }
+        }
+      }
     },
   })
 )
