@@ -108,7 +108,7 @@ export default function StatefulSet(): ReactElement {
               values={(statefulSet?.containerImages ?? []).concat(
                 statefulSet?.initContainerImages ?? []
               )}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
               truncateWidth={300}
               tooltip
             />

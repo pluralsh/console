@@ -116,7 +116,7 @@ export default function DaemonSet(): ReactElement {
               size="small"
               limit={3}
               values={daemonSet?.containerImages ?? []}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Selector">

@@ -118,7 +118,7 @@ export default function ReplicationController(): ReactElement {
               values={(rc?.containerImages ?? []).concat(
                 rc?.initContainerImages ?? []
               )}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
               truncateWidth={300}
               tooltip
             />

@@ -137,7 +137,7 @@ export function ResourceLink({
   name,
   namespace,
   kind,
-  emptyState = 'None',
+  emptyState = '-',
 }: {
   name?: Maybe<string>
   namespace?: Maybe<string>

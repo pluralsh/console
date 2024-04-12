@@ -119,7 +119,7 @@ export default function ReplicaSet(): ReactElement {
               values={(rs?.containerImages ?? []).concat(
                 rs?.initContainerImages ?? []
               )}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Selector">

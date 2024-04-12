@@ -40,7 +40,7 @@ export function TableEndpoints({
 export function Endpoints({ endpoints }: { endpoints: Maybe<EndpointT>[] }) {
   const theme = useTheme()
 
-  if (isEmpty(endpoints)) return 'None'
+  if (isEmpty(endpoints)) return '-'
 
   return (
     <div css={{ display: 'flex', gap: theme.spacing.xsmall, flexWrap: 'wrap' }}>

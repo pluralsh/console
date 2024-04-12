@@ -1,6 +1,6 @@
 import pluralize from 'pluralize'
 
-export const KUBERNETES_ROOT_PATH = 'k8s'
+export const KUBERNETES_ROOT_PATH = 'kubernetes'
 export const KUBERNETES_PARAM_CLUSTER = ':clusterId?'
 export const KUBERNETES_ABS_PATH = getKubernetesAbsPath(
   KUBERNETES_PARAM_CLUSTER

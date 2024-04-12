@@ -96,7 +96,7 @@ export default function CronJob(): ReactElement {
               size="small"
               limit={3}
               values={cronJob?.containerImages ?? []}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Schedule">{cronJob?.schedule}</SidecarItem>

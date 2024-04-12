@@ -105,7 +105,7 @@ export default function Job(): ReactElement {
               values={(job?.containerImages ?? []).concat(
                 job?.initContainerImages ?? []
               )}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Completions">{job?.completions}</SidecarItem>

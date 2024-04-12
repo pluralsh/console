@@ -123,7 +123,7 @@ export default function Deployment(): ReactElement {
               values={(deployment?.containerImages ?? []).concat(
                 deployment?.initContainerImages ?? []
               )}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Selector">
@@ -219,7 +219,7 @@ function NewReplicaSet(): ReactElement {
             limit={3}
             values={Object.entries(replicaSet?.objectMeta?.labels || {})}
             transformValue={(label) => label.join(': ')}
-            emptyState={<div>None</div>}
+            emptyState={<div>-</div>}
           />
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Annotations">

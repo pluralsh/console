@@ -78,11 +78,11 @@ function Container({ container }: ContainerProps): ReactElement {
           {container.commands ? (
             <Code>{container.commands.join('\n')}</Code>
           ) : (
-            'None'
+            '-'
           )}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Args">
-          {container.args ? <Code>{container.args.join('\n')}</Code> : 'None'}
+          {container.args ? <Code>{container.args.join('\n')}</Code> : '-'}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Restarts">
           {container.status?.restartCount}

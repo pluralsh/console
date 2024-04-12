@@ -81,7 +81,7 @@ export default function PersistentVolume(): ReactElement {
                 <InlineLink>{pv?.claim}</InlineLink>
               </Link>
             ) : (
-              'None'
+              '-'
             )}
           </SidecarItem>
           <SidecarItem heading="Storage class">
@@ -110,8 +110,8 @@ export default function PersistentVolume(): ReactElement {
           <SidecarItem heading="Reclaim policy">
             {pv?.reclaimPolicy}
           </SidecarItem>
-          <SidecarItem heading="Reason">{pv?.reason || 'None'}</SidecarItem>
-          <SidecarItem heading="Message">{pv?.message || 'None'}</SidecarItem>
+          <SidecarItem heading="Reason">{pv?.reason || '-'}</SidecarItem>
+          <SidecarItem heading="Message">{pv?.message || '-'}</SidecarItem>
           <SidecarItem heading="Mount options">
             <ChipList
               size="small"
