@@ -29,6 +29,7 @@ query PersistentVolumes(
       reason
       reclaimPolicy
       accessModes
+      capacity
     }
   }
 }
@@ -43,6 +44,7 @@ query PersistentVolume($name: String!) {
       ...ObjectMeta
     }
     status
+    capacity
     claim
     storageClass
     reason

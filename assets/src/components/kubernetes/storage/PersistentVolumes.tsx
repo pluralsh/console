@@ -105,6 +105,24 @@ export const colReason = columnHelper.accessor((pv) => pv.reason, {
   cell: ({ getValue }) => getValue(),
 })
 
+export const colCapacity = columnHelper.accessor((pv) => pv.capacity, {
+  id: 'capacity',
+  header: 'Capacity',
+  cell: ({ getValue }) => {
+    const capacity = getValue()
+
+    return (
+      <ChipList
+        size="small"
+        limit={1}
+        values={Object.entries(capacity || {})}
+        transformValue={(capacity) => capacity.join(': ')}
+        emptyState={null}
+      />
+    )
+  },
+})
+
 export const colAccessModes = columnHelper.accessor((pv) => pv.accessModes, {
   id: 'accessModes',
   header: 'Access modes',
@@ -138,7 +156,7 @@ export default function PersistentVolumes() {
       colStorageClass,
       colReclaimPolicy,
       colReason,
-      // TODO: Add capacity after solving type issue.
+      colCapacity,
       colAccessModes,
       colLabels,
       colCreationTimestamp,
