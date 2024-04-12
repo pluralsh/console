@@ -29,7 +29,7 @@ import {
   PodEvents,
   PodInfo,
 } from '../components/kubernetes/workloads/Pod'
-import ResourceList from '../components/kubernetes/ResourceList'
+import Navigation from '../components/kubernetes/Navigation'
 import Workloads from '../components/kubernetes/workloads/Workloads'
 import Discovery from '../components/kubernetes/discovery/Discovery'
 import Services from '../components/kubernetes/discovery/Services'
@@ -179,7 +179,7 @@ export const kubernetesRoute = (
   >
     <Route
       path=""
-      element={<ResourceList />}
+      element={<Navigation />}
     >
       <Route
         index

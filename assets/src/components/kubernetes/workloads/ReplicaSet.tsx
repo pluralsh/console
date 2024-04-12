@@ -42,7 +42,7 @@ import {
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../ResourceList'
+import { NAMESPACE_PARAM } from '../Navigation'
 
 import { useCluster, useClusterContext } from '../Cluster'
 

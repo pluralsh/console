@@ -35,7 +35,7 @@ import {
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../ResourceList'
+import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { PodInfo } from '../common/PodInfo'
 import { ResourceList } from '../common/ResourceList'

@@ -23,7 +23,7 @@ import {
 
 import { useClusterContext } from '../Cluster'
 
-import { useResourceListContext } from '../ResourceList'
+import { useDataSelect } from '../DataSelect'
 
 import {
   DEFAULT_DATA_SELECT,
@@ -123,7 +123,7 @@ export function ResourceList<
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
   const navigate = useNavigate()
   const { cluster } = useClusterContext()
-  const { setNamespaced, namespace, filter } = useResourceListContext()
+  const { setNamespaced, namespace, filter } = useDataSelect()
   const { sortBy, reactTableOptions } = useSortedTableOptions({
     meta: { cluster },
   })

@@ -29,7 +29,7 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import ResourceOwner from '../common/ResourceOwner'
-import { NAMESPACE_PARAM } from '../ResourceList'
+import { NAMESPACE_PARAM } from '../Navigation'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 

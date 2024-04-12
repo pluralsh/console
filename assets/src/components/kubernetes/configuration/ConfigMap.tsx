@@ -12,7 +12,7 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { MetadataSidecar } from '../common/utils'
-import { NAMESPACE_PARAM } from '../ResourceList'
+import { NAMESPACE_PARAM } from '../Navigation'
 import {
   CONFIG_MAPS_REL_PATH,
   getConfigurationAbsPath,

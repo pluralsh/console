@@ -21,7 +21,7 @@ import {
   getResourceDetailsAbsPath,
   getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../ResourceList'
+import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { InlineLink } from '../../utils/typography/InlineLink'

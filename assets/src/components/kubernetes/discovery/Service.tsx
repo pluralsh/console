@@ -34,7 +34,7 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
-import { NAMESPACE_PARAM } from '../ResourceList'
+import { NAMESPACE_PARAM } from '../Navigation'
 import {
   SERVICES_REL_PATH,
   getDiscoveryAbsPath,

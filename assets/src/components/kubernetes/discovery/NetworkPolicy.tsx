@@ -15,7 +15,7 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { MetadataSidecar, useCodeTabs } from '../common/utils'
-import { NAMESPACE_PARAM } from '../ResourceList'
+import { NAMESPACE_PARAM } from '../Navigation'
 import {
   NETWORK_POLICIES_REL_PATH,
   getDiscoveryAbsPath,

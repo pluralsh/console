@@ -10,8 +10,6 @@ import {
   Dispatch,
   ReactNode,
   SetStateAction,
-  createContext,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -46,6 +44,7 @@ import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 import { NamespaceListFooter } from '../cluster/pods/Pods'
 
 import { useCluster, useClusters } from './Cluster'
+import { DataSelect, useDataSelect } from './DataSelect'
 
 function NameFilter({
   value,
@@ -127,31 +126,7 @@ const directory: Directory = [
   { path: CUSTOM_RESOURCES_REL_PATH, label: 'Custom resources' },
 ] as const
 
-type ResourceListContextT = {
-  setNamespaced: Dispatch<SetStateAction<boolean>>
-  namespace: string
-  setNamespace: Dispatch<SetStateAction<string>>
-  filter: string
-  setFilter: Dispatch<SetStateAction<string>>
-}
-
-const ResourceListContext = createContext<ResourceListContextT | undefined>(
-  undefined
-)
-
-export const useResourceListContext = () => {
-  const ctx = useContext(ResourceListContext)
-
-  if (!ctx) {
-    throw Error(
-      'useResourceListContext() must be used within a ResourceListContext'
-    )
-  }
-
-  return ctx
-}
-
-export default function ResourceList() {
+export default function Navigation() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { pathname, search } = useLocation()
@@ -159,11 +134,13 @@ export default function ResourceList() {
   const clusters = useClusters()
   const cluster = useCluster()
   const [params, setParams] = useSearchParams()
-  const [filter, setFilter] = useState(params.get(FILTER_PARAM) ?? '')
-  const [namespace, setNamespace] = useState(params.get(NAMESPACE_PARAM) ?? '')
   const [headerContent, setHeaderContent] = useState<ReactNode>()
-  const [namespaced, setNamespaced] = useState<boolean>(false)
   const pathPrefix = getKubernetesAbsPath(clusterId)
+
+  const dataSelect = useDataSelect({
+    namespace: params.get(NAMESPACE_PARAM) ?? '',
+    filter: params.get(FILTER_PARAM) ?? '',
+  })
 
   const { data } = useNamespacesQuery({
     client: KubernetesClient(clusterId!),
@@ -180,31 +157,19 @@ export default function ResourceList() {
 
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 
-  const resourceListContext = useMemo(
-    () =>
-      ({
-        setNamespaced,
-        namespace,
-        setNamespace,
-        filter,
-        setFilter,
-      }) as ResourceListContextT,
-    [setNamespaced, namespace, setNamespace, filter, setFilter]
-  )
-
   useEffect(() => {
-    if (isEmpty(filter)) params.delete(FILTER_PARAM)
-    else params.set(FILTER_PARAM, filter)
+    if (isEmpty(dataSelect.filter)) params.delete(FILTER_PARAM)
+    else params.set(FILTER_PARAM, dataSelect.filter)
 
-    if (isEmpty(namespace)) params.delete(NAMESPACE_PARAM)
-    else params.set(NAMESPACE_PARAM, namespace)
+    if (isEmpty(dataSelect.namespace)) params.delete(NAMESPACE_PARAM)
+    else params.set(NAMESPACE_PARAM, dataSelect.namespace)
 
     setParams(params)
 
     // TODO: Keeping pathname breaks breadcrumb nav but without it
     //  params get lost on category change, i.e. during discovery -> storage navigation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [namespace, filter, pathname])
+  }, [dataSelect, pathname])
 
   if (!cluster) return <LoadingIndicator />
 
@@ -257,22 +222,22 @@ export default function ResourceList() {
             }}
           >
             <NameFilter
-              value={filter}
-              onChange={setFilter}
+              value={dataSelect.filter}
+              onChange={dataSelect.setFilter}
             />
-            {namespaced && (
+            {dataSelect.namespaced && (
               <NamespaceFilter
                 namespaces={namespaces}
-                namespace={namespace}
-                onChange={setNamespace}
+                namespace={dataSelect.namespace}
+                onChange={dataSelect.setNamespace}
               />
             )}
           </div>
         </div>
         <PageHeaderContext.Provider value={pageHeaderContext}>
-          <ResourceListContext.Provider value={resourceListContext}>
+          <DataSelect.Provider value={dataSelect}>
             <Outlet />
-          </ResourceListContext.Provider>
+          </DataSelect.Provider>
         </PageHeaderContext.Provider>
       </div>
     </ResponsiveLayoutPage>
