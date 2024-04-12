@@ -60,16 +60,11 @@ export default function Raw(): ReactElement {
   const [mutation, { error }] = updateMutation({
     client: KubernetesClient(clusterId ?? ''),
     onCompleted: () => refetch().finally(() => setUpdating(false)),
-    onError: () => setUpdating(false),
+    onError: (err) => {
+      setUpdating(false)
+      setUpdateError(err)
+    },
   })
-
-  useEffect(() => {
-    if (!error) {
-      return
-    }
-
-    setUpdateError(error)
-  }, [error])
 
   useEffect(() => {
     if (!updateError) {
