@@ -44,7 +44,7 @@ import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 import { NamespaceListFooter } from '../cluster/pods/Pods'
 
 import { useCluster, useClusters } from './Cluster'
-import { DataSelect, useDataSelect } from './DataSelect'
+import { DataSelect, useDataSelect } from './common/DataSelect'
 
 function NameFilter({
   value,

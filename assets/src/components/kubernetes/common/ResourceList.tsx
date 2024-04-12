@@ -20,10 +20,9 @@ import {
   getCustomResourceDetailsAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-
 import { useClusterContext } from '../Cluster'
 
-import { useDataSelect } from '../DataSelect'
+import { useDataSelect } from './DataSelect'
 
 import {
   DEFAULT_DATA_SELECT,
