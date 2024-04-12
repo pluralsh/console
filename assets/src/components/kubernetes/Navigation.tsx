@@ -187,8 +187,8 @@ export default function Navigation() {
           <ClusterSelect
             clusters={clusters}
             selectedKey={clusterId}
-            onSelectionChange={
-              (id) => navigate(getKubernetesAbsPath(id as string) + search) // TODO: Keep current view when switching clusters.
+            onSelectionChange={(id) =>
+              navigate(pathname.replace(clusterId ?? '', id) + search)
             }
             withoutTitleContent
           />
