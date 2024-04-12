@@ -82,7 +82,7 @@ export default function PersistentVolumeClaim(): ReactElement {
           <SidecarItem heading="Capacity">
             <ChipList
               size="small"
-              limit={1}
+              limit={3}
               values={Object.entries(pvc?.capacity || {})}
               transformValue={(capacity) => capacity.join(': ')}
               emptyState={null}
