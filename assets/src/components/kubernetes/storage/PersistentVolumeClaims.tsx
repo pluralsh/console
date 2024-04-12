@@ -111,7 +111,7 @@ export const usePersistentVolumeClaimListColumns = () => {
               limit={1}
               values={Object.entries(accessModes || {})}
               transformValue={(accessModes) => accessModes.join(': ')}
-              emptyState={<>-</>}
+              emptyState={<div>-</div>}
             />
           )
         },

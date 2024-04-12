@@ -282,7 +282,7 @@ export function MetadataSidecar({
               limit={3}
               values={Object.entries(objectMeta.labels || {})}
               transformValue={(label) => label.join(': ')}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Annotations">

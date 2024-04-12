@@ -90,7 +90,7 @@ export default function CustomResourceDefinition(): ReactElement {
               size="small"
               limit={5}
               values={crd?.subresources ?? []}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
         </MetadataSidecar>

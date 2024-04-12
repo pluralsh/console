@@ -117,7 +117,7 @@ export default function PersistentVolume(): ReactElement {
               size="small"
               limit={1}
               values={pv?.mountOptions ?? []}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
         </MetadataSidecar>

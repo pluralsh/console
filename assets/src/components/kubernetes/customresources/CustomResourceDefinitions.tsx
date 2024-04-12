@@ -84,7 +84,7 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
         size="small"
         limit={1}
         values={categories ?? []}
-        emptyState={<span>-</span>}
+        emptyState={null}
       />
     )
   },

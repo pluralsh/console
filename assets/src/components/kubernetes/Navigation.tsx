@@ -113,8 +113,8 @@ function NamespaceFilter({
   )
 }
 
-export const NAMESPACE_PARAM = 'namespace'
-export const FILTER_PARAM = 'search'
+export const NAMESPACE_PARAM = 'n'
+export const FILTER_PARAM = 's'
 
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },

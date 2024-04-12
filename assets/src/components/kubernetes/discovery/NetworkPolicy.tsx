@@ -85,7 +85,7 @@ export default function NetworkPolicy(): ReactElement {
               limit={3}
               values={Object.entries(np?.podSelector?.matchLabels)}
               transformValue={(label) => label.join(': ')}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Policy types">
@@ -93,7 +93,7 @@ export default function NetworkPolicy(): ReactElement {
               size="small"
               limit={3}
               values={np?.policyTypes ?? []}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
         </MetadataSidecar>

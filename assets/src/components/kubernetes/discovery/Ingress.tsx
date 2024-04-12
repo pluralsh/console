@@ -109,7 +109,7 @@ export default function Ingress(): ReactElement {
               size="small"
               limit={3}
               values={ingress?.hosts ?? []}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Ingress class name">

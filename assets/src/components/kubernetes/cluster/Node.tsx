@@ -242,7 +242,7 @@ export function NodeInfo(): ReactElement {
               limit={5}
               values={node.taints || []}
               transformValue={(t) => `${t?.key}=${t?.value}:${t?.effect}`}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </ResourceInfoCardEntry>
           <ResourceInfoCardEntry heading="Addresses">
@@ -251,7 +251,7 @@ export function NodeInfo(): ReactElement {
               limit={5}
               values={node.addresses || []}
               transformValue={(a) => `${a?.type}: ${a?.address}`}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </ResourceInfoCardEntry>
         </Card>

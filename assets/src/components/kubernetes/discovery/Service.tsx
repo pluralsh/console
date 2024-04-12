@@ -174,7 +174,7 @@ export function ServiceInfo(): ReactElement {
               limit={3}
               values={Object.entries(service.selector)}
               transformValue={(label) => label.join(': ')}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </ResourceInfoCardEntry>
         </Card>
