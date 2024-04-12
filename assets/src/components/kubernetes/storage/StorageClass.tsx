@@ -30,6 +30,7 @@ import { useCluster } from '../Cluster'
 import { getBreadcrumbs } from './StorageClasses'
 import {
   colAccessModes,
+  colCapacity,
   colClaim,
   colReason,
   colReclaimPolicy,
@@ -105,7 +106,7 @@ export function StorageClassPersistentVolumes(): ReactElement {
       colClaim,
       colReclaimPolicy,
       colReason,
-      // TODO: Add capacity after solving type issue.
+      colCapacity,
       colAccessModes,
       colLabels,
       colCreationTimestamp,

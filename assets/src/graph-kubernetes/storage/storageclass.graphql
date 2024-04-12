@@ -75,6 +75,7 @@ query StorageClassPersistentVolumes(
       reason
       reclaimPolicy
       accessModes
+      capacity
     }
   }
 }

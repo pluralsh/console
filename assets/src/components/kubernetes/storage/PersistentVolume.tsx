@@ -68,6 +68,15 @@ export default function PersistentVolume(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={pv}>
+          <SidecarItem heading="Capacity">
+            <ChipList
+              size="small"
+              limit={1}
+              values={Object.entries(pv?.capacity || {})}
+              transformValue={(capacity) => capacity.join(': ')}
+              emptyState={null}
+            />
+          </SidecarItem>
           <SidecarItem heading="Claim">
             {pv?.claim ? (
               <Link
