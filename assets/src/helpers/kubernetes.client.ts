@@ -1,16 +1,12 @@
 import { ApolloClient, ApolloLink, InMemoryCache } from '@apollo/client'
 import { RestLink } from 'apollo-link-rest'
 
-import { isEmpty } from 'lodash'
-
 import { Unstructured_Unstructured as UnstructuredT } from '../generated/graphql-kubernetes'
 
 import { fetchToken } from './auth'
 
 const K8S_API_URL = '/api/v1/'
 const CLIENT_MAP = new Map<string, ApolloClient<any>>()
-// Ref: https://github.com/apollographql/apollo-link-rest/issues/107
-const RAW_EMPTY_RESPONSE_ERROR = 'Unexpected end of JSON input'
 
 function KubernetesClient(clusterID: string): ApolloClient<any> | undefined {
   if (!clusterID) {

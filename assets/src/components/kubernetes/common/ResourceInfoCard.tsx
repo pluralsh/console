@@ -13,7 +13,7 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNullish } from '@apollo/client/cache/inmemory/helpers'
-import { Card, CheckIcon, CloseIcon, IconFrame } from '@pluralsh/design-system'
+import { Card, CheckIcon, CloseIcon } from '@pluralsh/design-system'
 import isArray from 'lodash/isArray'
 
 const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
