@@ -8,11 +8,7 @@ import {
 
 import { createColumnHelper } from '@tanstack/react-table'
 
-import {
-  MetadataSidecar,
-  useDefaultColumns,
-  useKubernetesCluster,
-} from '../utils'
+import { MetadataSidecar, useDefaultColumns } from '../common/utils'
 import {
   CustomResourceDefinitionQueryVariables,
   Types_CustomResourceDefinitionDetail as CustomResourceDefinitionT,
@@ -27,11 +23,13 @@ import { KubernetesClient } from '../../../helpers/kubernetes.client'
 
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
 import Conditions from '../common/Conditions'
 
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'
@@ -43,7 +41,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function CustomResourceDefinition(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useCustomResourceDefinitionQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -92,7 +90,7 @@ export default function CustomResourceDefinition(): ReactElement {
               size="small"
               limit={5}
               values={crd?.subresources ?? []}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
         </MetadataSidecar>

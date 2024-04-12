@@ -11,14 +11,14 @@ import {
   Maybe,
   useIngressClassesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   INGRESS_CLASSES_REL_PATH,
   getDiscoveryAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useKubernetesContext } from '../Kubernetes'
+import { useCluster } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -44,7 +44,7 @@ const colController = columnHelper.accessor(
 )
 
 export default function IngressClasses() {
-  const { cluster } = useKubernetesContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

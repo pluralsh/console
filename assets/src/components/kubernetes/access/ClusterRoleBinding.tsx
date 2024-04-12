@@ -1,26 +1,21 @@
 import { ReactElement, useMemo } from 'react'
-
 import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
-
 import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
-
 import { A } from 'honorable'
 
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { MetadataSidecar } from '../common/utils'
 import {
   ClusterRoleBindingQueryVariables,
   Clusterrolebinding_ClusterRoleBindingDetail as ClusterRoleBindingT,
   useClusterRoleBindingQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-
 import LoadingIndicator from '../../utils/LoadingIndicator'
-
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import Subjects from '../common/Subjects'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './ClusterRoleBindings'
 
@@ -30,7 +25,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function ClusterRoleBinding(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useClusterRoleBindingQuery({
     client: KubernetesClient(clusterId ?? ''),

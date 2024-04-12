@@ -3,12 +3,14 @@ import { SubTab, TabList } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { useMatch, useResolvedPath } from 'react-router-dom'
 
-import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
-import { ResponsiveLayoutHeader } from '../utils/layout/ResponsiveLayoutHeader'
-import { LinkTabWrap } from '../utils/Tabs'
-import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth'
-import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
+
+import { LinkTabWrap } from '../../utils/Tabs'
+import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
+import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
+import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
+
+import { ResponsiveLayoutHeader } from '../../utils/layout/ResponsiveLayoutHeader'
 
 export interface TabEntry {
   label: string

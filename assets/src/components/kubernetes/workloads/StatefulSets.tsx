@@ -11,8 +11,8 @@ import {
   StatefulSetsQueryVariables,
   useStatefulSetsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { ResourceList } from '../ResourceList'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
+import { ResourceList } from '../common/ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
 
 import { UsageText } from '../../cluster/TableElements'
 
@@ -22,7 +22,7 @@ import {
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 
@@ -75,7 +75,7 @@ const colStatus = columnHelper.accessor((ss) => ss.podInfo, {
 })
 
 export default function StatefulSets() {
-  const { cluster } = useKubernetesContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

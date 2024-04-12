@@ -28,13 +28,13 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { MetadataSidecar } from '../common/utils'
 import { SubTitle } from '../../utils/SubTitle'
 import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscalers'
 import { PodInfo } from '../common/PodInfo'
 import { LabelSelector } from '../common/LabelSelector'
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import { useServicesColumns } from '../discovery/Services'
 import {
@@ -42,7 +42,9 @@ import {
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../Navigation'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './ReplicaSets'
 import { usePodsColumns } from './Pods'
@@ -57,7 +59,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function ReplicaSet(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useReplicaSetQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -117,7 +119,7 @@ export default function ReplicaSet(): ReactElement {
               values={(rs?.containerImages ?? []).concat(
                 rs?.initContainerImages ?? []
               )}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Selector">

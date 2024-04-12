@@ -8,8 +8,8 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { MetadataSidecar } from '../common/utils'
 import {
   SecretQueryVariables,
   usePersistentVolumeClaimQuery,
@@ -21,10 +21,12 @@ import {
   getResourceDetailsAbsPath,
   getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { InlineLink } from '../../utils/typography/InlineLink'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './PersistentVolumeClaims'
 import { PVCStatusChip } from './utils'
@@ -32,7 +34,7 @@ import { PVCStatusChip } from './utils'
 const directory: Array<TabEntry> = [{ path: '', label: 'Raw' }] as const
 
 export default function PersistentVolumeClaim(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = usePersistentVolumeClaimQuery({
     client: KubernetesClient(clusterId ?? ''),

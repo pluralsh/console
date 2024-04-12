@@ -1,6 +1,10 @@
 import pluralize from 'pluralize'
 
-export const KUBERNETES_OPTIONAL_PARAM_CLUSTER = ':clusterId?'
+export const KUBERNETES_ROOT_PATH = 'kubernetes'
+export const KUBERNETES_PARAM_CLUSTER = ':clusterId?'
+export const KUBERNETES_ABS_PATH = getKubernetesAbsPath(
+  KUBERNETES_PARAM_CLUSTER
+)
 
 export const WORKLOADS_REL_PATH = 'workloads'
 export const DEPLOYMENTS_REL_PATH = 'deployments'
@@ -45,42 +49,38 @@ export const CUSTOM_RESOURCES_REL_PATH = 'customresourcedefinitions'
 export const NAMESPACED_RESOURCE_DETAILS_REL_PATH = ':namespace/:name'
 export const RESOURCE_DETAILS_REL_PATH = ':name'
 
-export const KUBERNETES_ABS_PATH = getKubernetesAbsPath(
-  KUBERNETES_OPTIONAL_PARAM_CLUSTER
-)
-
 export function getKubernetesAbsPath(clusterId: string | null | undefined) {
-  return `/kubernetes/${clusterId}`
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}`
 }
 
 export function getWorkloadsAbsPath(clusterId: string | null | undefined) {
-  return `/kubernetes/${clusterId}/${WORKLOADS_REL_PATH}`
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${WORKLOADS_REL_PATH}`
 }
 
 export function getDiscoveryAbsPath(clusterId: string | null | undefined) {
-  return `/kubernetes/${clusterId}/${DISCOVERY_REL_PATH}`
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${DISCOVERY_REL_PATH}`
 }
 
 export function getStorageAbsPath(clusterId: string | null | undefined) {
-  return `/kubernetes/${clusterId}/${STORAGE_REL_PATH}`
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${STORAGE_REL_PATH}`
 }
 
 export function getConfigurationAbsPath(clusterId: string | null | undefined) {
-  return `/kubernetes/${clusterId}/${CONFIGURATION_REL_PATH}`
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${CONFIGURATION_REL_PATH}`
 }
 
 export function getClusterAbsPath(clusterId: string | null | undefined) {
-  return `/kubernetes/${clusterId}/${CLUSTER_REL_PATH}`
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${CLUSTER_REL_PATH}`
 }
 
 export function getAccessAbsPath(clusterId: string | null | undefined) {
-  return `/kubernetes/${clusterId}/${ACCESS_REL_PATH}`
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${ACCESS_REL_PATH}`
 }
 
 export function getCustomResourcesAbsPath(
   clusterId: string | null | undefined
 ) {
-  return `/kubernetes/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}`
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}`
 }
 
 export function getResourceDetailsAbsPath(
@@ -90,8 +90,10 @@ export function getResourceDetailsAbsPath(
   namespace?: Nullable<string>
 ): string {
   return namespace
-    ? `/kubernetes/${clusterId}/${pluralize(kind)}/${namespace}/${name}`
-    : `/kubernetes/${clusterId}/${pluralize(kind)}/${name}`
+    ? `/${KUBERNETES_ROOT_PATH}/${clusterId}/${pluralize(
+        kind
+      )}/${namespace}/${name}`
+    : `/${KUBERNETES_ROOT_PATH}/${clusterId}/${pluralize(kind)}/${name}`
 }
 
 export function getCustomResourceDetailsAbsPath(
@@ -101,6 +103,6 @@ export function getCustomResourceDetailsAbsPath(
   namespace?: Nullable<string>
 ): string {
   return namespace
-    ? `/kubernetes/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}/${kind}/${namespace}/${name}`
-    : `/kubernetes/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}/${kind}/${name}`
+    ? `/${KUBERNETES_ROOT_PATH}/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}/${kind}/${namespace}/${name}`
+    : `/${KUBERNETES_ROOT_PATH}/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}/${kind}/${name}`
 }

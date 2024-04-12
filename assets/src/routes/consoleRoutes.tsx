@@ -36,7 +36,7 @@ import { cdRoutes } from './cdRoutes'
 import { prRoutes } from './prRoutes'
 import { notificationsRoutes } from './notificationsRoutes'
 import { backupsRoutes } from './backupRoutes'
-import { kubernetesRoutes } from './kubernetesRoutes'
+import { kubernetesRoute } from './kubernetesRoute'
 
 const buildsRoutes = [
   <Route
@@ -231,7 +231,7 @@ export const consoleComponentRoutes = [
   ...cdRoutes,
 
   /* KUBERNETES */
-  ...kubernetesRoutes,
+  kubernetesRoute,
 ]
 
 export const consoleRoutes: RouteObject[] = [

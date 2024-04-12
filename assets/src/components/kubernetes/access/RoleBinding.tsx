@@ -9,17 +9,19 @@ import {
   useRoleBindingQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import { MetadataSidecar } from '../common/utils'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
   ROLE_BINDINGS_REL_PATH,
   getAccessAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import Subjects from '../common/Subjects'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './RoleBindings'
 
@@ -29,7 +31,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function RoleBinding(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useRoleBindingQuery({
     client: KubernetesClient(clusterId ?? ''),

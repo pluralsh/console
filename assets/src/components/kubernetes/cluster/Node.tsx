@@ -28,14 +28,10 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import {
-  MetadataSidecar,
-  ResourceReadyChip,
-  useKubernetesCluster,
-} from '../utils'
+
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
-import { ResourceList } from '../ResourceList'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceList } from '../common/ResourceList'
 import { SubTitle } from '../../utils/SubTitle'
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 import { GaugeWrap } from '../../cluster/Gauges'
@@ -44,6 +40,10 @@ import Conditions from '../common/Conditions'
 import RadialBarChart from '../../utils/RadialBarChart'
 import { cpuFmt, roundToTwoPlaces } from '../../cluster/utils'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
+
+import { useCluster } from '../Cluster'
+
+import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
 
 import { getBreadcrumbs } from './Nodes'
 import { useEventsColumns } from './Events'
@@ -58,7 +58,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Node(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useNodeQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -242,7 +242,7 @@ export function NodeInfo(): ReactElement {
               limit={5}
               values={node.taints || []}
               transformValue={(t) => `${t?.key}=${t?.value}:${t?.effect}`}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </ResourceInfoCardEntry>
           <ResourceInfoCardEntry heading="Addresses">
@@ -251,7 +251,7 @@ export function NodeInfo(): ReactElement {
               limit={5}
               values={node.addresses || []}
               transformValue={(a) => `${a?.type}: ${a?.address}`}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </ResourceInfoCardEntry>
         </Card>

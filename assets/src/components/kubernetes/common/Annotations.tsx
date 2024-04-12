@@ -79,7 +79,7 @@ export default function Annotations({
         onClick={(label: [string, string]) =>
           setModal(createAnnotationModal(label))
         }
-        emptyState={<div>None</div>}
+        emptyState={<div>-</div>}
       />
       {open && modal}
     </>

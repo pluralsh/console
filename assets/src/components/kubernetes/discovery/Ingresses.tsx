@@ -12,8 +12,8 @@ import {
   Maybe,
   useIngressesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 import { TableText } from '../../cluster/TableElements'
 
 import { ClusterTinyFragment } from '../../../generated/graphql'
@@ -22,7 +22,7 @@ import {
   getDiscoveryAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useCluster } from '../Cluster'
 
 import { TableEndpoints } from './utils'
 
@@ -76,7 +76,7 @@ export function useIngressesColumns(): Array<object> {
 }
 
 export default function Ingresses() {
-  const { cluster } = useKubernetesContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

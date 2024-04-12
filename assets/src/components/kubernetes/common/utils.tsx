@@ -14,21 +14,18 @@ import {
   Maybe,
   Types_ObjectMeta as ObjectMetaT,
   Types_TypeMeta as TypeMetaT,
-} from '../../generated/graphql-kubernetes'
-import { DateTimeCol } from '../utils/table/DateTimeCol'
-import {
-  ClusterTinyFragment,
-  useClustersTinyQuery,
-} from '../../generated/graphql'
-import { InlineLink } from '../utils/typography/InlineLink'
+} from '../../../generated/graphql-kubernetes'
+import { DateTimeCol } from '../../utils/table/DateTimeCol'
+import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   getKubernetesAbsPath,
   getResourceDetailsAbsPath,
-} from '../../routes/kubernetesRoutesConsts'
-import { mapExistingNodes } from '../../utils/graphql'
+} from '../../../routes/kubernetesRoutesConsts'
+
+import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { ResourceT } from './ResourceList'
-import Annotations from './common/Annotations'
+import Annotations from './Annotations'
 
 export const ITEMS_PER_PAGE = 25
 
@@ -140,7 +137,7 @@ export function ResourceLink({
   name,
   namespace,
   kind,
-  emptyState = 'None',
+  emptyState = '-',
 }: {
   name?: Maybe<string>
   namespace?: Maybe<string>
@@ -214,25 +211,6 @@ export function extendConnection(
   }
 }
 
-export function useKubernetesCluster() {
-  const { clusterId } = useParams()
-
-  const { data } = useClustersTinyQuery({
-    pollInterval: 120_000,
-    fetchPolicy: 'cache-and-network',
-  })
-
-  const clusters = useMemo(
-    () => mapExistingNodes(data?.clusters),
-    [data?.clusters]
-  )
-
-  return useMemo(
-    () => clusters.find(({ id }) => id === clusterId),
-    [clusterId, clusters]
-  )
-}
-
 export const getBaseBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   {
     label: 'kubernetes',
@@ -304,7 +282,7 @@ export function MetadataSidecar({
               limit={3}
               values={Object.entries(objectMeta.labels || {})}
               transformValue={(label) => label.join(': ')}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Annotations">

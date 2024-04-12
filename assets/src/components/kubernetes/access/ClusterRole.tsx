@@ -8,14 +8,16 @@ import {
   Clusterrole_ClusterRoleDetail as ClusterRoleT,
   useClusterRoleQuery,
 } from '../../../generated/graphql-kubernetes'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import { MetadataSidecar } from '../common/utils'
 
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import PolicyRules from '../common/PolicyRules'
 
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './ClusterRoles'
 
@@ -25,7 +27,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function ClusterRole(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useClusterRoleQuery({
     client: KubernetesClient(clusterId ?? ''),

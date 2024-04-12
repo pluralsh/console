@@ -14,15 +14,17 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar, useCodeTabs, useKubernetesCluster } from '../utils'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { MetadataSidecar, useCodeTabs } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
 import {
   NETWORK_POLICIES_REL_PATH,
   getDiscoveryAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { SubTitle } from '../../utils/SubTitle'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Services'
 
@@ -32,7 +34,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function NetworkPolicy(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useNetworkPolicyQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -83,7 +85,7 @@ export default function NetworkPolicy(): ReactElement {
               limit={3}
               values={Object.entries(np?.podSelector?.matchLabels)}
               transformValue={(label) => label.join(': ')}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Policy types">
@@ -91,7 +93,7 @@ export default function NetworkPolicy(): ReactElement {
               size="small"
               limit={3}
               values={np?.policyTypes ?? []}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
         </MetadataSidecar>

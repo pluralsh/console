@@ -11,8 +11,8 @@ import {
   NamespacesQueryVariables,
   useNamespacesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
@@ -20,7 +20,7 @@ import {
   getClusterAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useCluster } from '../Cluster'
 
 import { NamespacePhaseChip } from './utils'
 
@@ -45,7 +45,7 @@ const colPhase = columnHelper.accessor((namespace) => namespace?.phase, {
 })
 
 export default function Namespaces() {
-  const { cluster } = useKubernetesContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

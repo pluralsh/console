@@ -22,18 +22,20 @@ import {
   useStatefulSetQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import { MetadataSidecar } from '../common/utils'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
   STATEFUL_SETS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { useEventsColumns } from '../cluster/Events'
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { PodInfo } from '../common/PodInfo'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './StatefulSets'
 import { usePodsColumns } from './Pods'
@@ -46,7 +48,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function StatefulSet(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useStatefulSetQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -106,7 +108,7 @@ export default function StatefulSet(): ReactElement {
               values={(statefulSet?.containerImages ?? []).concat(
                 statefulSet?.initContainerImages ?? []
               )}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
               truncateWidth={300}
               tooltip
             />

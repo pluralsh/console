@@ -49,7 +49,7 @@ export const useSetPageScrollable = (scrollable: boolean) => {
 
   if (!ctx) {
     console.warn(
-      'useSetPageScrollable() must be used within a PageScrollContext'
+      'useSetPageScrollable() must be used within a PageScrollableContext'
     )
   }
   const { setScrollable } = ctx || {}
@@ -78,7 +78,9 @@ export const useSetPageHeaderContent = (headerContent?: ReactNode) => {
   const ctx = useContext(PageHeaderContext)
 
   if (!ctx) {
-    console.warn('useSetPageHeaderContent() must be used within a CDContext')
+    console.warn(
+      'useSetPageHeaderContent() must be used within a PageHeaderContext'
+    )
   }
   const { setHeaderContent } = ctx || {}
 

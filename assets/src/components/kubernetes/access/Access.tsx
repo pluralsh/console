@@ -18,7 +18,7 @@ import {
   useSetPageHeaderContent,
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { useKubernetesContext } from '../Kubernetes'
+import { useCluster } from '../Cluster'
 
 const directory = [
   { path: ROLES_REL_PATH, label: 'Roles' },
@@ -29,7 +29,7 @@ const directory = [
 ] as const
 
 export default function Access() {
-  const { cluster } = useKubernetesContext()
+  const cluster = useCluster()
   const [scrollable, setScrollable] = useState(false)
 
   const pageScrollableContext = useMemo(

@@ -20,14 +20,16 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
 import {
   SECRETS_REL_PATH,
   getConfigurationAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Secrets'
 
@@ -37,7 +39,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Secret(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useSecretQuery({
     client: KubernetesClient(clusterId ?? ''),

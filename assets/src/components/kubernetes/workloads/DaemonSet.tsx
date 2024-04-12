@@ -27,22 +27,24 @@ import {
   useDaemonSetServicesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import { MetadataSidecar } from '../common/utils'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
   DAEMON_SETS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import { useServicesColumns } from '../discovery/Services'
 
 import { LabelSelector } from '../common/LabelSelector'
 
 import { PodInfo } from '../common/PodInfo'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './DaemonSets'
 import { usePodsColumns } from './Pods'
@@ -56,7 +58,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function DaemonSet(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useDaemonSetQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -114,7 +116,7 @@ export default function DaemonSet(): ReactElement {
               size="small"
               limit={3}
               values={daemonSet?.containerImages ?? []}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
             />
           </SidecarItem>
           <SidecarItem heading="Selector">

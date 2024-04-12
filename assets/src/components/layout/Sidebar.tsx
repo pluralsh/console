@@ -43,6 +43,8 @@ import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 
 import { useLogin } from '../contexts'
 
+import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
+
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 
@@ -86,7 +88,7 @@ function getMenuItems({
     {
       text: 'Kubernetes',
       icon: <KubernetesIcon />,
-      path: '/kubernetes',
+      path: `/${KUBERNETES_ROOT_PATH}`,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {

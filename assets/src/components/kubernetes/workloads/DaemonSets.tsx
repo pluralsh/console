@@ -11,8 +11,8 @@ import {
   Maybe,
   useDaemonSetsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 
 import { UsageText } from '../../cluster/TableElements'
 
@@ -22,7 +22,7 @@ import {
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 
@@ -75,7 +75,7 @@ const colStatus = columnHelper.accessor((ds) => ds.podInfo, {
 })
 
 export default function CronJobs() {
-  const { cluster } = useKubernetesContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

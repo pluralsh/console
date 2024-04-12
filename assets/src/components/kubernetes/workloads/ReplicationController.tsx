@@ -28,20 +28,22 @@ import {
   useReplicationControllerServicesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import { MetadataSidecar } from '../common/utils'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
   REPLICATION_CONTROLLERS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { PodInfo } from '../common/PodInfo'
-import { ResourceList } from '../ResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import { useServicesColumns } from '../discovery/Services'
 import { LabelSelector } from '../common/LabelSelector'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './ReplicationControllers'
 import { usePodsColumns } from './Pods'
@@ -55,7 +57,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function ReplicationController(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = useReplicationControllerQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -116,7 +118,7 @@ export default function ReplicationController(): ReactElement {
               values={(rc?.containerImages ?? []).concat(
                 rc?.initContainerImages ?? []
               )}
-              emptyState={<div>None</div>}
+              emptyState={<div>-</div>}
               truncateWidth={300}
               tooltip
             />

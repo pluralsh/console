@@ -10,9 +10,7 @@ import {
   Dispatch,
   ReactNode,
   SetStateAction,
-  createContext,
-  useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
 } from 'react'
@@ -34,24 +32,19 @@ import {
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
   getKubernetesAbsPath,
-  getWorkloadsAbsPath,
 } from '../../routes/kubernetesRoutesConsts'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 import { Directory, SideNavEntries } from '../layout/SideNavEntries'
-import {
-  ClusterTinyFragment,
-  useClustersTinyQuery,
-} from '../../generated/graphql'
 import { ClusterSelect } from '../cd/addOns/ClusterSelect'
-import { mapExistingNodes } from '../../utils/graphql'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
 import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 import { NamespaceListFooter } from '../cluster/pods/Pods'
 
-import { ResourceListContext, ResourceListContextT } from './ResourceList'
+import { useCluster, useClusters } from './Cluster'
+import { DataSelect, useDataSelect } from './common/DataSelect'
 
 function NameFilter({
   value,
@@ -120,31 +113,8 @@ function NamespaceFilter({
   )
 }
 
-type KubernetesContextT = {
-  cluster?: ClusterTinyFragment // Currently selected cluster.
-  namespace: string // Namespace filter.
-  filter: string // Name filter.
-}
-
-const KubernetesContext = createContext<KubernetesContextT | undefined>(
-  undefined
-)
-
-export const useKubernetesContext = () => {
-  const ctx = useContext(KubernetesContext)
-
-  // TODO: Refactor it.
-  // if (!ctx) {
-  //   throw Error(
-  //     'useKubernetesContext() must be used within a KubernetesContext'
-  //   )
-  // }
-
-  return ctx ?? { cluster: null, namespace: '', filter: '' }
-}
-
 export const NAMESPACE_PARAM = 'namespace'
-export const FILTER_PARAM = 'search'
+export const FILTER_PARAM = 'filter'
 
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
@@ -156,79 +126,48 @@ const directory: Directory = [
   { path: CUSTOM_RESOURCES_REL_PATH, label: 'Custom resources' },
 ] as const
 
-export default function Kubernetes() {
+export default function Navigation() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { pathname, search } = useLocation()
-  const { clusterId } = useParams()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [filter, setFilter] = useState(searchParams.get(FILTER_PARAM) ?? '')
-  const [namespace, setNamespace] = useState(
-    searchParams.get(NAMESPACE_PARAM) ?? ''
-  )
+  const { clusterId = '' } = useParams()
+  const clusters = useClusters()
+  const cluster = useCluster()
+  const [params, setParams] = useSearchParams()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
-  const [namespaced, setNamespaced] = useState<boolean>(false)
   const pathPrefix = getKubernetesAbsPath(clusterId)
 
-  const { data: namespacesData } = useNamespacesQuery({
+  const dataSelect = useDataSelect({
+    namespace: params.get(NAMESPACE_PARAM) ?? '',
+    filter: params.get(FILTER_PARAM) ?? '',
+  })
+
+  const { data } = useNamespacesQuery({
     client: KubernetesClient(clusterId!),
     skip: !clusterId,
   })
 
   const namespaces = useMemo(
     () =>
-      (namespacesData?.handleGetNamespaces?.namespaces ?? [])
+      (data?.handleGetNamespaces?.namespaces ?? [])
         .map((namespace) => namespace?.objectMeta?.name)
         .filter((namespace): namespace is string => !isEmpty(namespace)),
-    [namespacesData?.handleGetNamespaces?.namespaces]
-  )
-
-  const { data } = useClustersTinyQuery({
-    pollInterval: 120_000,
-    fetchPolicy: 'cache-and-network',
-  })
-
-  const clusters = useMemo(
-    () => mapExistingNodes(data?.clusters),
-    [data?.clusters]
-  )
-
-  const cluster = useMemo(
-    () => clusters.find(({ id }) => id === clusterId),
-    [clusterId, clusters]
+    [data?.handleGetNamespaces?.namespaces]
   )
 
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 
-  const resourceListContext = useMemo(
-    () => ({ setNamespaced }) as ResourceListContextT,
-    []
-  )
+  useLayoutEffect(() => {
+    if (isEmpty(dataSelect.filter)) params.delete(FILTER_PARAM)
+    else params.set(FILTER_PARAM, dataSelect.filter)
 
-  const kubernetesContext = useMemo(
-    () => ({ cluster, namespace, filter }) as KubernetesContextT,
-    [cluster, namespace, filter]
-  )
+    if (isEmpty(dataSelect.namespace)) params.delete(NAMESPACE_PARAM)
+    else params.set(NAMESPACE_PARAM, dataSelect.namespace)
 
-  useEffect(() => {
-    if (isEmpty(filter)) searchParams.delete(FILTER_PARAM)
-    else searchParams.set(FILTER_PARAM, filter)
+    setParams(params)
 
-    if (isEmpty(namespace)) searchParams.delete(NAMESPACE_PARAM)
-    else searchParams.set(NAMESPACE_PARAM, namespace)
-
-    setSearchParams(searchParams)
-  }, [namespace, filter, pathname, searchParams, setSearchParams])
-
-  useEffect(() => {
-    if (!isEmpty(clusters) && !cluster) {
-      const mgmtCluster = clusters.find(({ self }) => !!self)
-
-      if (mgmtCluster) {
-        navigate(getWorkloadsAbsPath(mgmtCluster.id) + search)
-      }
-    }
-  }, [cluster, clusters, navigate, search])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataSelect, pathname])
 
   if (!cluster) return <LoadingIndicator />
 
@@ -247,8 +186,8 @@ export default function Kubernetes() {
           <ClusterSelect
             clusters={clusters}
             selectedKey={clusterId}
-            onSelectionChange={
-              (id) => navigate(getKubernetesAbsPath(id as string) + search) // TODO: Keep current view when switching clusters.
+            onSelectionChange={(id) =>
+              navigate(pathname.replace(clusterId, id as string) + search)
             }
             withoutTitleContent
           />
@@ -281,24 +220,22 @@ export default function Kubernetes() {
             }}
           >
             <NameFilter
-              value={filter}
-              onChange={setFilter}
+              value={dataSelect.filter}
+              onChange={dataSelect.setFilter}
             />
-            {namespaced && (
+            {dataSelect.namespaced && (
               <NamespaceFilter
                 namespaces={namespaces}
-                namespace={namespace}
-                onChange={setNamespace}
+                namespace={dataSelect.namespace}
+                onChange={dataSelect.setNamespace}
               />
             )}
           </div>
         </div>
         <PageHeaderContext.Provider value={pageHeaderContext}>
-          <ResourceListContext.Provider value={resourceListContext}>
-            <KubernetesContext.Provider value={kubernetesContext}>
-              <Outlet />
-            </KubernetesContext.Provider>
-          </ResourceListContext.Provider>
+          <DataSelect.Provider value={dataSelect}>
+            <Outlet />
+          </DataSelect.Provider>
         </PageHeaderContext.Provider>
       </div>
     </ResponsiveLayoutPage>

@@ -11,8 +11,8 @@ import {
   ServicesQueryVariables,
   useServicesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
@@ -20,7 +20,7 @@ import {
   getDiscoveryAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useCluster } from '../Cluster'
 
 import { TableEndpoints, serviceTypeDisplayName } from './utils'
 
@@ -89,7 +89,7 @@ export function useServicesColumns(): Array<object> {
 }
 
 export default function Services() {
-  const { cluster } = useKubernetesContext()
+  const cluster = useCluster()
   const columns = useServicesColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))

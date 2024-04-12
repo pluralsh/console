@@ -1,13 +1,4 @@
-import {
-  Dispatch,
-  ReactElement,
-  SetStateAction,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-} from 'react'
+import { ReactElement, useCallback, useEffect, useMemo } from 'react'
 import type { OperationVariables } from '@apollo/client/core'
 import type {
   QueryHookOptions,
@@ -18,35 +9,28 @@ import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { Row } from '@tanstack/react-table'
 
-import { KubernetesClient } from '../../helpers/kubernetes.client'
+import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
   Types_ListMeta as ListMetaT,
   Types_ObjectMeta as ObjectMetaT,
   Types_TypeMeta as TypeMetaT,
-} from '../../generated/graphql-kubernetes'
-import { FullHeightTableWrap } from '../utils/layout/FullHeightTableWrap'
+} from '../../../generated/graphql-kubernetes'
+import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
   getCustomResourceDetailsAbsPath,
   getResourceDetailsAbsPath,
-} from '../../routes/kubernetesRoutesConsts'
+} from '../../../routes/kubernetesRoutesConsts'
+import { useCluster } from '../Cluster'
+
+import { useDataSelect } from './DataSelect'
 
 import {
   DEFAULT_DATA_SELECT,
   ITEMS_PER_PAGE,
   extendConnection,
-  useKubernetesCluster,
   usePageInfo,
   useSortedTableOptions,
 } from './utils'
-import { useKubernetesContext } from './Kubernetes'
-
-export type ResourceListContextT = {
-  setNamespaced: Dispatch<SetStateAction<boolean>>
-}
-
-export const ResourceListContext = createContext<
-  ResourceListContextT | undefined
->(undefined)
 
 interface DataSelectVariables extends OperationVariables {
   filterBy?: Nullable<string>
@@ -137,12 +121,11 @@ export function ResourceList<
   disableOnRowClick,
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
   const navigate = useNavigate()
-  const cluster = useKubernetesCluster()
-  const { namespace, filter } = useKubernetesContext()
+  const cluster = useCluster()
+  const { setNamespaced, namespace, filter } = useDataSelect()
   const { sortBy, reactTableOptions } = useSortedTableOptions({
     meta: { cluster },
   })
-  const ctx = useContext(ResourceListContext)
 
   const { data, loading, fetchMore } = query({
     client: KubernetesClient(cluster?.id ?? ''),
@@ -188,10 +171,8 @@ export function ResourceList<
   }, [fetchMore, hasNextPage, page, queryName, itemsKey])
 
   useEffect(() => {
-    if (!ctx) return
-
-    ctx.setNamespaced(namespaced)
-  }, [ctx, namespaced])
+    setNamespaced(namespaced)
+  }, [setNamespaced, namespaced])
 
   return (
     <FullHeightTableWrap>

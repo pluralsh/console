@@ -49,7 +49,7 @@ export default function ResourceOwner({
             limit={3}
             values={Object.entries(owner?.objectMeta?.labels || {})}
             transformValue={(label) => label.join(': ')}
-            emptyState={<div>None</div>}
+            emptyState={<div>-</div>}
           />
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Annotations">
@@ -62,7 +62,7 @@ export default function ResourceOwner({
             values={(owner?.containerImages ?? []).concat(
               owner?.initContainerImages ?? []
             )}
-            emptyState={<div>None</div>}
+            emptyState={<div>-</div>}
           />
         </ResourceInfoCardEntry>
       </ResourceInfoCardSection>

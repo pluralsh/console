@@ -11,14 +11,14 @@ import {
   RoleBindingsQueryVariables,
   useRoleBindingsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   ROLE_BINDINGS_REL_PATH,
   getAccessAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useKubernetesContext } from '../Kubernetes'
+import { useCluster } from '../Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -35,7 +35,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
 const columnHelper = createColumnHelper<RoleBindingT>()
 
 export default function RoleBindings() {
-  const { cluster } = useKubernetesContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 

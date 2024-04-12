@@ -2,7 +2,7 @@ import { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import { MetadataSidecar } from '../common/utils'
 import {
   RoleQueryVariables,
   Role_RoleDetail as RoleT,
@@ -15,13 +15,15 @@ import {
   getAccessAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
 import PolicyRules from '../common/PolicyRules'
 
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Roles'
 
@@ -31,16 +33,13 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Role(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name = '', namespace = '' } = useParams()
   const { data, loading } = useRoleQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as RoleQueryVariables,
+    variables: { name, namespace } as RoleQueryVariables,
   })
 
   const role = data?.handleGetRoleDetail

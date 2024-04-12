@@ -23,11 +23,13 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
+import { MetadataSidecar } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
-import { ResourceList } from '../ResourceList'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { ResourceList } from '../common/ResourceList'
 import { SubTitle } from '../../utils/SubTitle'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Namespaces'
 import { NamespacePhaseChip } from './utils'
@@ -40,7 +42,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function Namespace(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useNamespaceQuery({
     client: KubernetesClient(clusterId ?? ''),

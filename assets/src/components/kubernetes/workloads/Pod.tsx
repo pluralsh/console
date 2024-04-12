@@ -17,9 +17,9 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { SubTitle } from '../../utils/SubTitle'
 import Containers from '../common/Containers'
 import Conditions from '../common/Conditions'
-import ResourceDetails, { TabEntry } from '../ResourceDetails'
-import { MetadataSidecar, useKubernetesCluster } from '../utils'
-import { ResourceList } from '../ResourceList'
+import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
+import { MetadataSidecar } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import { usePersistentVolumeClaimListColumns } from '../storage/PersistentVolumeClaims'
 import {
@@ -29,9 +29,11 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import ResourceOwner from '../common/ResourceOwner'
-import { NAMESPACE_PARAM } from '../Kubernetes'
+import { NAMESPACE_PARAM } from '../Navigation'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
+
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Pods'
 import { toReadiness } from './utils'
@@ -44,7 +46,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export function Pod(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
   const { data, loading } = usePodQuery({
     client: KubernetesClient(clusterId ?? ''),
@@ -133,7 +135,7 @@ export function Pod(): ReactElement {
 }
 
 export function PodInfo(): ReactElement {
-  const cluster = useKubernetesCluster()
+  const cluster = useCluster()
   const pod = useOutletContext() as PodT
   const conditions = pod?.conditions
   const pvcList = pod?.persistentVolumeClaimList

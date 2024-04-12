@@ -11,8 +11,8 @@ import {
   Maybe,
   useCronJobsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../utils'
-import { ResourceList } from '../ResourceList'
+import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { ResourceList } from '../common/ResourceList'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
 import { ClusterTinyFragment } from '../../../generated/graphql'
@@ -21,7 +21,7 @@ import {
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { useKubernetesContext } from '../Kubernetes'
+import { useCluster } from '../Cluster'
 
 import { CronJobSuspendChip, WorkloadImages } from './utils'
 
@@ -70,7 +70,7 @@ const colLastSchedule = columnHelper.accessor((cj) => cj.lastSchedule, {
 })
 
 export default function CronJobs() {
-  const { cluster } = useKubernetesContext()
+  const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
