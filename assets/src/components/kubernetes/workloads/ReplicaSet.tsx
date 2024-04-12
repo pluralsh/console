@@ -44,7 +44,7 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
 
-import { useCluster, useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './ReplicaSets'
 import { usePodsColumns } from './Pods'

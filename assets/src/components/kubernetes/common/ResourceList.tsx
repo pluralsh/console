@@ -20,7 +20,7 @@ import {
   getCustomResourceDetailsAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { useClusterContext } from '../Cluster'
+import { useCluster } from '../Cluster'
 
 import { useDataSelect } from './DataSelect'
 
@@ -121,7 +121,7 @@ export function ResourceList<
   disableOnRowClick,
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
   const navigate = useNavigate()
-  const { cluster } = useClusterContext()
+  const cluster = useCluster()
   const { setNamespaced, namespace, filter } = useDataSelect()
   const { sortBy, reactTableOptions } = useSortedTableOptions({
     meta: { cluster },

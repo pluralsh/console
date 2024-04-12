@@ -10,7 +10,6 @@ import {
   Dispatch,
   ReactNode,
   SetStateAction,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useState,
@@ -131,7 +130,7 @@ export default function Navigation() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { pathname, search } = useLocation()
-  const { clusterId } = useParams()
+  const { clusterId = '' } = useParams()
   const clusters = useClusters()
   const cluster = useCluster()
   const [params, setParams] = useSearchParams()
@@ -188,7 +187,7 @@ export default function Navigation() {
             clusters={clusters}
             selectedKey={clusterId}
             onSelectionChange={(id) =>
-              navigate(pathname.replace(clusterId ?? '', id) + search)
+              navigate(pathname.replace(clusterId, id as string) + search)
             }
             withoutTitleContent
           />
