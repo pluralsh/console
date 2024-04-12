@@ -11,6 +11,7 @@ import {
   ReactNode,
   SetStateAction,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
 } from 'react'
@@ -157,7 +158,7 @@ export default function Navigation() {
 
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isEmpty(dataSelect.filter)) params.delete(FILTER_PARAM)
     else params.set(FILTER_PARAM, dataSelect.filter)
 
@@ -166,8 +167,6 @@ export default function Navigation() {
 
     setParams(params)
 
-    // TODO: Keeping pathname breaks breadcrumb nav but without it
-    //  params get lost on category change, i.e. during discovery -> storage navigation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSelect, pathname])
 
