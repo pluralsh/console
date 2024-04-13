@@ -13,11 +13,12 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Any do
 end
 
 defmodule Console.Deployments.Notifications.Utils do
-  alias Console.Schema.{Service, Cluster, Pipeline, PullRequest}
+  alias Console.Schema.{Service, Cluster, Pipeline, PullRequest, StackRun}
   def filters(%Service{id: id, cluster_id: cid}), do: [service_id: id, cluster_id: cid]
   def filters(%Cluster{id: id}), do: [cluster_id: id]
   def filters(%Pipeline{id: id}), do: [pipeline_id: id]
   def filters(%PullRequest{url: url}), do: [regex: url]
+  def filters(%StackRun{stack_id: id}), do: [stack_id: id]
   def filters(_), do: []
 end
 
@@ -72,4 +73,13 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.PipelineGateU
     end
   end
   def message(_), do: :ok
+end
+
+defimpl Console.Deployments.PubSub.Notifiable, for: [Console.PubSub.StackRunCreated, Console.PubSub.StackRunUpdated, Console.PubSub.StackRunDeleted] do
+  alias Console.Deployments.Notifications.Utils
+
+  def message(%{item: run}) do
+    run = Console.Repo.preload(run, [:stack])
+    {"stack.run", Utils.filters(run), %{stack_run: run}}
+  end
 end
