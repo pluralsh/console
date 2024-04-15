@@ -108,37 +108,29 @@ export const colReason = columnHelper.accessor((pv) => pv.reason, {
 export const colCapacity = columnHelper.accessor((pv) => pv.capacity, {
   id: 'capacity',
   header: 'Capacity',
-  cell: ({ getValue }) => {
-    const capacity = getValue()
-
-    return (
-      <ChipList
-        size="small"
-        limit={1}
-        values={Object.entries(capacity || {})}
-        transformValue={(capacity) => capacity.join(': ')}
-        emptyState={null}
-      />
-    )
-  },
+  cell: ({ getValue }) => (
+    <ChipList
+      size="small"
+      limit={1}
+      values={Object.entries(getValue() || {})}
+      transformValue={(capacity) => capacity.join(': ')}
+      emptyState={null}
+    />
+  ),
 })
 
 export const colAccessModes = columnHelper.accessor((pv) => pv.accessModes, {
   id: 'accessModes',
   header: 'Access modes',
-  cell: ({ getValue }) => {
-    const accessModes = getValue()
-
-    return (
-      <ChipList
-        size="small"
-        limit={1}
-        values={Object.entries(accessModes || {})}
-        transformValue={(accessModes) => accessModes.join(': ')}
-        emptyState={null}
-      />
-    )
-  },
+  cell: ({ getValue }) => (
+    <ChipList
+      size="small"
+      limit={1}
+      values={Object.entries(getValue() || {})}
+      transformValue={(accessModes) => accessModes.join(': ')}
+      emptyState={null}
+    />
+  ),
 })
 
 export default function PersistentVolumes() {
