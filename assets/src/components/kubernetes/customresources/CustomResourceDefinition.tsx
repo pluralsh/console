@@ -30,7 +30,7 @@ import { useCluster } from '../Cluster'
 
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 
-import { NamespaceFilter } from '../NamespaceFilter'
+import { NamespaceFilter } from '../common/NamespaceFilter'
 
 import { useDataSelect } from '../common/DataSelect'
 

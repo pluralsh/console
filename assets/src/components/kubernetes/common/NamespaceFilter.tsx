@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
 import { ComboBox, ListBoxItem } from '@pluralsh/design-system'
 
-import { NamespaceListFooter } from '../cluster/pods/Pods'
+import { NamespaceListFooter } from '../../cluster/pods/Pods'
 
 export function NamespaceFilter({
   namespaces,

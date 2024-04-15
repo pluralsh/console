@@ -6,16 +6,8 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import {
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { ReactNode, useLayoutEffect, useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
-import { Input, SearchIcon } from '@pluralsh/design-system'
 
 import {
   ACCESS_REL_PATH,
@@ -38,26 +30,8 @@ import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 
 import { useCluster, useClusters } from './Cluster'
 import { DataSelect, useDataSelect } from './common/DataSelect'
-import { NamespaceFilter } from './NamespaceFilter'
-
-function NameFilter({
-  value,
-  onChange,
-}: {
-  value: string
-  onChange: Dispatch<SetStateAction<string>>
-}) {
-  return (
-    <Input
-      height="fit-content"
-      startIcon={<SearchIcon />}
-      placeholder="Filter by name"
-      value={value}
-      onChange={(e) => onChange(e.currentTarget.value)}
-      width={300}
-    />
-  )
-}
+import { NamespaceFilter } from './common/NamespaceFilter'
+import { NameFilter } from './common/NameFilter'
 
 export const NAMESPACE_PARAM = 'namespace'
 export const FILTER_PARAM = 'filter'
