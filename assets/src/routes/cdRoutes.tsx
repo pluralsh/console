@@ -45,6 +45,10 @@ import GlobalServices from 'components/cd/globalServices/GlobalService'
 
 import GlobalServiceDetailView from 'components/cd/globalServices/GlobalServiceDetailView'
 
+import Namespaces from 'components/cd/namespaces/Namespaces'
+
+import NamespacesDetailView from 'components/cd/namespaces/NamespacesDetailView'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -89,6 +93,8 @@ import {
   GLOBAL_SERVICES_REL_PATH,
   GLOBAL_SERVICE_PARAM_ID,
   GLOBAL_SETTINGS_REL_PATH,
+  NAMESPACES_PARAM_ID,
+  NAMESPACES_REL_PATH,
   NODE_REL_PATH,
   PIPELINES_REL_PATH,
   POD_REL_PATH,
@@ -193,6 +199,10 @@ const mainRoutes = (
       element={<Providers />}
     />
     <Route
+      path={NAMESPACES_REL_PATH}
+      element={<Namespaces />}
+    />
+    <Route
       path={ADDONS_REL_PATH}
       element={<AddOns />}
     />
@@ -207,6 +217,13 @@ const globalServiceRoutes = (
   <Route
     path={`${GLOBAL_SERVICES_REL_PATH}/:${GLOBAL_SERVICE_PARAM_ID}?`}
     element={<GlobalServiceDetailView />}
+  />
+)
+
+const namespacesRoutes = (
+  <Route
+    path={`${NAMESPACES_REL_PATH}/:${NAMESPACES_PARAM_ID}?`}
+    element={<NamespacesDetailView />}
   />
 )
 
@@ -483,5 +500,6 @@ export const cdRoutes = [
     {componentRoutes}
     {pipelineRoutes}
     {globalServiceRoutes}
+    {namespacesRoutes}
   </Route>,
 ]
