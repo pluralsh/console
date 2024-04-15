@@ -4,6 +4,7 @@ import { Namespace } from 'generated/graphql'
 import { toDateOrUndef } from 'utils/date'
 
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+import { Chip } from '@pluralsh/design-system'
 
 const columnHelper = createColumnHelper<Namespace>()
 
@@ -35,8 +36,20 @@ export const ColStatus = columnHelper.accessor((namespace) => namespace, {
   meta: { truncate: true, gridTemplate: 'minmax(180px,300px)' },
   cell: function Cell({ getValue }) {
     const namespace = getValue()
+    const namespacePhaseSeverity = {
+      active: 'success',
+      terminating: 'error',
+    }
+    const phase = namespace?.status.phase?.toLowerCase() || 'Unknown'
 
-    return namespace ? namespace.status.phase : '--'
+    return (
+      <Chip
+        severity={namespacePhaseSeverity[phase]}
+        css={{ width: 'fit-content' }}
+      >
+        {namespace.status.phase}
+      </Chip>
+    )
   },
 })
 
