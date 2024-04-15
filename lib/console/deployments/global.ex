@@ -366,7 +366,7 @@ defmodule Console.Deployments.Global do
     with {:ok, source_secrets} <- configuration(spec),
          {:ok, dest_secrets} <- Services.configuration(dest),
       do: (spec.repository_id != dest.repository_id || spec.templated != dest.templated ||
-            specs_different?(spec, dest) || contexts_different?(spec, dest) ||
+            specs_different?(spec, dest) || !contexts_equal?(spec, dest) ||
             missing_source?(source_secrets, dest_secrets))
   end
 
@@ -415,8 +415,8 @@ defmodule Console.Deployments.Global do
     Enum.any?(source, fn {k, v} -> dest[k] != v end)
   end
 
-  defp contexts_different?(%ServiceTemplate{contexts: ctxs}, svc) do
-    MapSet.new(svc.context_bindings, & &1.context_id)
+  defp contexts_equal?(%ServiceTemplate{contexts: ctxs}, svc) do
+    MapSet.new(svc.context_bindings || [], & &1.context_id)
     |> MapSet.equal?(MapSet.new(ctxs || []))
   end
 

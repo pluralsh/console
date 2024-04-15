@@ -393,4 +393,22 @@ defmodule Console.Deployments.GlobalTest do
       {:error, _} = Global.delete_managed_namespace(ns.id, insert(:user))
     end
   end
+
+  describe "#diff/2" do
+    test "it returns false if targets have all the same relevant config" do
+      svc = insert(:service,
+        helm: %{chart: "test", version: "0.4.0", repository: %{name: "chart", namespace: "infra"}},
+        templated: true
+      )
+
+      template = insert(:service_template,
+        repository: svc.repository,
+        helm: %{chart: "test", version: "0.4.0", repository: %{name: "chart", namespace: "infra"}},
+        templated: true,
+        git: svc.git
+      )
+
+      refute Global.diff?(template, Console.Repo.preload(svc, [:contexts]))
+    end
+  end
 end
