@@ -64,12 +64,21 @@ defmodule Console.Schema.Service do
           _ -> []
         end
       end)
+      |> ensure_chart()
     end
 
     def set_changeset(model, attrs \\ %{}) do
       model
       |> cast(attrs, ~w(name value)a)
       |> validate_required(~w(name value)a)
+      |> ensure_chart()
+    end
+
+    defp ensure_chart(cs) do
+      case get_field(cs, :repository) do
+        %{} -> validate_required(cs, ~w(chart version)a)
+        _ -> cs
+      end
     end
   end
 
