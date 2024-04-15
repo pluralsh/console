@@ -154,23 +154,3 @@ export function toReadiness(state: ContainerState): ReadinessT {
   // TODO: Should default to unknown?
   return Readiness.Failed
 }
-
-function toContainerState(state: Nullable<ContainerStateV1T>): ContainerState {
-  if (!state) {
-    return ContainerState.Unknown
-  }
-
-  if (state?.running) {
-    return ContainerState.Running
-  }
-
-  if (state?.terminated) {
-    return ContainerState.Terminated
-  }
-
-  if (state?.waiting) {
-    return ContainerState.Waiting
-  }
-
-  return ContainerState.Unknown
-}
