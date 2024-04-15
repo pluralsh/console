@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
 import { ComboBox, ListBoxItem } from '@pluralsh/design-system'
 
@@ -13,7 +13,9 @@ export function NamespaceFilter({
   namespace: string
   onChange: (arg: any) => any
 }) {
-  const [value, setValue] = useState(namespace)
+  const [value, setValue] = useState('')
+
+  useEffect(() => setValue(namespace), [namespace])
 
   const filteredNamespaces = useMemo(() => {
     const fuse = new Fuse(namespaces, { threshold: 0.25 })

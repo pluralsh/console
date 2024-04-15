@@ -1,5 +1,10 @@
-import React, { ReactElement, useMemo } from 'react'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import React, { ReactElement, useEffect, useMemo } from 'react'
+import {
+  Outlet,
+  useOutletContext,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,
@@ -31,6 +36,8 @@ import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { NamespaceFilter } from '../common/NamespaceFilter'
 import { useDataSelect } from '../common/DataSelect'
 import { NameFilter } from '../common/NameFilter'
+
+import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'
@@ -111,6 +118,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
   const namespaces = useNamespaces()
   const { filter, setFilter, namespace, setNamespace } = useDataSelect()
   const { name } = useParams()
+  const [params] = useSearchParams()
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
@@ -121,6 +129,11 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
       colCreationTimestamp,
     ],
     [namespaced, colName, colNamespace, colLabels, colCreationTimestamp]
+  )
+
+  useEffect(
+    () => setNamespace(params.get(NAMESPACE_PARAM) ?? ''),
+    [setNamespace, params]
   )
 
   const headerContent = useMemo(
