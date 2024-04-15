@@ -112,3 +112,13 @@ query CustomResource($namespace: String!, $name: String!, $crd: String!) {
     }
   }
 }
+
+query CustomResourceEvents($crd: String!, $namespace: String!, $name: String!) {
+  handleGetCustomResourceObjectEvents(namespace: $namespace, object: $name, crd: $crd)
+  @rest(
+    type: "common_EventList"
+    path: "crd/{args.namespace}/{args.crd}/{args.object}/event"
+  ) {
+    ...EventList
+  }
+}

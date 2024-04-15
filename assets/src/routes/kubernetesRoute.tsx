@@ -129,7 +129,9 @@ import ServiceAccount from '../components/kubernetes/access/ServiceAccount'
 
 import HorizontalPodAutoscalers from '../components/kubernetes/cluster/HorizontalPodAutoscalers'
 
-import CustomResource from '../components/kubernetes/customresources/CustomResource'
+import CustomResource, {
+  CustomResourceEvents,
+} from '../components/kubernetes/customresources/CustomResource'
 
 import Root from '../components/kubernetes/Cluster'
 
@@ -892,6 +894,10 @@ export const kubernetesRoute = (
         index
         path=""
         element={<Raw />}
+      />
+      <Route
+        path="events"
+        element={<CustomResourceEvents />}
       />
     </Route>
   </Route>
