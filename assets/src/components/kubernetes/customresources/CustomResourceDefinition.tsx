@@ -128,11 +128,13 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
 
   useEffect(
     () => dataSelect.setNamespaced(namespaced),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataSelect.setNamespaced, namespaced]
   )
 
   useEffect(
     () => dataSelect.setNamespace(params.get(NAMESPACE_PARAM) ?? ''),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataSelect.setNamespace, params]
   )
 
