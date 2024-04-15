@@ -59,7 +59,7 @@ function Container({ container }: ContainerProps): ReactElement {
           <ContainerStatus
             status={{
               name: '',
-              readiness: toReadiness(container.status),
+              readiness: toReadiness(container?.state),
             }}
           />
           <span>{container.name}</span>
@@ -78,7 +78,17 @@ function Container({ container }: ContainerProps): ReactElement {
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Commands">
           {container.commands ? (
-            <Code>{container.commands.join('\n')}</Code>
+            // @ts-ignore
+            <Code
+              css={{
+                pre: {
+                  whiteSpace: 'break-spaces',
+                  wordBreak: 'break-word',
+                },
+              }}
+            >
+              {container.commands.join('\n')}
+            </Code>
           ) : (
             '-'
           )}

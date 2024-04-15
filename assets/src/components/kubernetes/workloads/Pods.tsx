@@ -101,7 +101,7 @@ const colContainers = columnHelper.accessor(
             (c) =>
               ({
                 name: c?.name,
-                readiness: toReadiness(c!),
+                readiness: toReadiness(c!.state),
               }) as ContainerStatusT
           ) ?? []
         }

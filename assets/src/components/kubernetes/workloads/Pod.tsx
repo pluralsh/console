@@ -95,7 +95,7 @@ export function Pod(): ReactElement {
                   (c) =>
                     ({
                       name: c?.name,
-                      readiness: toReadiness(c!.status!),
+                      readiness: toReadiness(c!.state),
                     }) as ContainerStatusT
                 ) ?? []
               }
