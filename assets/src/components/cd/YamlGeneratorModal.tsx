@@ -345,7 +345,7 @@ function getYaml(
     defaultObj.spec.tags = tags
   }
 
-  if (distro !== '') {
+  if (distro) {
     defaultObj.spec.distro = distro
   }
 
