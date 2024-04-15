@@ -2412,7 +2412,7 @@ type pod_Pod {
 type pod_ContainerStatus {
   name: String!
   ready: Boolean!
-  state: String!
+  state: ContainerState!
 }
 
 type pod_PodMetrics {
@@ -3787,6 +3787,7 @@ type pod_Container {
   resources: v1_ResourceRequirements
   securityContext: v1_SecurityContext!
   startupProbe: v1_Probe!
+  state: ContainerState!
   status: v1_ContainerStatus!
   volumeMounts: [pod_VolumeMount]!
 }
@@ -5737,6 +5738,18 @@ enum HTTPMethod {
   PATCH
 }
 
+enum ContainerState {
+  Waiting
+  Running
+  Terminated
+  Failed
+  Unknown
+}
+
 type Map {
   map: ObjMap!
+}
+
+type StateWrapper {
+  state: ContainerState!
 }
