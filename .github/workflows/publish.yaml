@@ -144,6 +144,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         generate_release_notes: true
+        draft: false
   bump:
     name: Bump Chart Version
     runs-on: ubuntu-20.04
