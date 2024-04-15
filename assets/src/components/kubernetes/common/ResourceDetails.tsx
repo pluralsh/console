@@ -117,14 +117,7 @@ export default function ResourceDetails({
           paddingBottom: theme.spacing.large,
         }}
       >
-        <div
-          css={{
-            height: '100%',
-            overflowY: 'auto',
-          }}
-        >
-          {sidecar}
-        </div>
+        <div css={{ height: '100%', overflowY: 'auto' }}>{sidecar}</div>
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>
   )
