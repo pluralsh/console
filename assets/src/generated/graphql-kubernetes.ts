@@ -4927,6 +4927,15 @@ export type CustomResourceQueryVariables = Exact<{
 
 export type CustomResourceQuery = { __typename?: 'Query', handleGetCustomResourceObjectDetail?: { __typename?: 'types_CustomResourceObjectDetail', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
 
+export type CustomResourceEventsQueryVariables = Exact<{
+  crd: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type CustomResourceEventsQuery = { __typename?: 'Query', handleGetCustomResourceObjectEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export type IngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -7968,7 +7977,7 @@ export const CustomResourcesDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "crd/{args.namespace}/{args.crd}/object") {
+  ) @rest(path: "crd/{args.namespace}/{args.crd}/object?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     listMeta {
       totalItems
     }
@@ -8074,6 +8083,52 @@ export type CustomResourceQueryHookResult = ReturnType<typeof useCustomResourceQ
 export type CustomResourceLazyQueryHookResult = ReturnType<typeof useCustomResourceLazyQuery>;
 export type CustomResourceSuspenseQueryHookResult = ReturnType<typeof useCustomResourceSuspenseQuery>;
 export type CustomResourceQueryResult = Apollo.QueryResult<CustomResourceQuery, CustomResourceQueryVariables>;
+export const CustomResourceEventsDocument = gql`
+    query CustomResourceEvents($crd: String!, $namespace: String!, $name: String!) {
+  handleGetCustomResourceObjectEvents(
+    namespace: $namespace
+    object: $name
+    crd: $crd
+  ) @rest(type: "common_EventList", path: "crd/{args.namespace}/{args.crd}/{args.object}/event") {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useCustomResourceEventsQuery__
+ *
+ * To run a query within a React component, call `useCustomResourceEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCustomResourceEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCustomResourceEventsQuery({
+ *   variables: {
+ *      crd: // value for 'crd'
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCustomResourceEventsQuery(baseOptions: Apollo.QueryHookOptions<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>(CustomResourceEventsDocument, options);
+      }
+export function useCustomResourceEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>(CustomResourceEventsDocument, options);
+        }
+export function useCustomResourceEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>(CustomResourceEventsDocument, options);
+        }
+export type CustomResourceEventsQueryHookResult = ReturnType<typeof useCustomResourceEventsQuery>;
+export type CustomResourceEventsLazyQueryHookResult = ReturnType<typeof useCustomResourceEventsLazyQuery>;
+export type CustomResourceEventsSuspenseQueryHookResult = ReturnType<typeof useCustomResourceEventsSuspenseQuery>;
+export type CustomResourceEventsQueryResult = Apollo.QueryResult<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>;
 export const IngressesDocument = gql`
     query Ingresses($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetIngressList(

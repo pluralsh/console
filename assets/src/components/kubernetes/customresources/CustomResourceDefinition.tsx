@@ -1,12 +1,17 @@
-import React, { ReactElement, useMemo } from 'react'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import React, { ReactElement, useEffect, useMemo } from 'react'
+import {
+  Outlet,
+  useOutletContext,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-
 import { createColumnHelper } from '@tanstack/react-table'
+import { isEmpty } from 'lodash'
 
 import { MetadataSidecar, useDefaultColumns } from '../common/utils'
 import {
@@ -20,16 +25,16 @@ import {
   useCustomResourcesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-
 import Conditions from '../common/Conditions'
-
 import { ResourceList } from '../common/ResourceList'
-
 import { useCluster } from '../Cluster'
+import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
+import { DataSelectInputs, useDataSelect } from '../common/DataSelect'
+
+import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'
@@ -104,15 +109,42 @@ export default function CustomResourceDefinition(): ReactElement {
 const columnHelper = createColumnHelper<CustomResourceT>()
 
 export function CustomRersourceDefinitionObjects(): ReactElement {
-  // TODO: Add namespace selector.
-  // TODO: Show namespace column only if scope is namespaced.
-  const { name, namespace = ' ' } = useParams() // ' ' selects all namespaces.
+  const crd = useOutletContext() as CustomResourceDefinitionT
+  const namespaced = crd.scope.toLowerCase() === 'namespaced'
+  const dataSelect = useDataSelect()
+  const { name } = useParams()
+  const [params] = useSearchParams()
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    () => [
+      colName,
+      ...(namespaced ? [colNamespace] : []),
+      colLabels,
+      colCreationTimestamp,
+    ],
+    [namespaced, colName, colNamespace, colLabels, colCreationTimestamp]
   )
+
+  useEffect(
+    () => dataSelect.setNamespaced(namespaced),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dataSelect.setNamespaced, namespaced]
+  )
+
+  // TODO: Update param when namespace changes.
+  useEffect(
+    () => dataSelect.setNamespace(params.get(NAMESPACE_PARAM) ?? ''),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dataSelect.setNamespace, params]
+  )
+
+  const headerContent = useMemo(
+    () => <DataSelectInputs dataSelect={dataSelect} />,
+    [dataSelect]
+  )
+
+  useSetPageHeaderContent(headerContent)
 
   return (
     <ResourceList<
@@ -121,13 +153,14 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
       CustomResourcesQuery,
       CustomResourcesQueryVariables
     >
-      namespaced // TODO
+      namespaced={namespaced}
       customResource
       columns={columns}
       query={useCustomResourcesQuery}
       queryOptions={{
         variables: {
-          namespace,
+          filterBy: `name,${dataSelect.filter}`,
+          namespace: isEmpty(dataSelect.namespace) ? ' ' : dataSelect.namespace, // ' ' selects all namespaces.
           name,
         } as CustomResourcesQueryVariables,
       }}

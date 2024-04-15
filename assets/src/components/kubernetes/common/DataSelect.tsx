@@ -1,4 +1,4 @@
-import {
+import React, {
   Dispatch,
   SetStateAction,
   createContext,
@@ -6,6 +6,13 @@ import {
   useMemo,
   useState,
 } from 'react'
+
+import { useTheme } from 'styled-components'
+
+import { useNamespaces } from '../Cluster'
+
+import { NameFilter } from './NameFilter'
+import { NamespaceFilter } from './NamespaceFilter'
 
 export type DataSelectT = {
   namespace: string
@@ -50,5 +57,38 @@ export function useDataSelect(defaults?: DataSelectT) {
       filter,
       setFilter,
     ]
+  )
+}
+
+export function DataSelectInputs({
+  dataSelect,
+}: {
+  dataSelect: DataSelectContextT
+}) {
+  const theme = useTheme()
+  const namespaces = useNamespaces()
+  const { namespaced, namespace, setNamespace, filter, setFilter } = dataSelect
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexGrow: 1,
+        gap: theme.spacing.medium,
+        justifyContent: 'flex-end',
+      }}
+    >
+      <NameFilter
+        value={filter}
+        onChange={setFilter}
+      />
+      {namespaced && (
+        <NamespaceFilter
+          namespaces={namespaces}
+          namespace={namespace}
+          onChange={setNamespace}
+        />
+      )}
+    </div>
   )
 }

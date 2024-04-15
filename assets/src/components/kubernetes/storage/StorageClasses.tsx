@@ -49,19 +49,15 @@ const colParameters = columnHelper.accessor(
   {
     id: 'parameters',
     header: 'Parameters',
-    cell: ({ getValue }) => {
-      const params = getValue()
-
-      return (
-        <ChipList
-          size="small"
-          limit={1}
-          values={Object.entries(params || {})}
-          transformValue={(params) => params.join(': ')}
-          emptyState={null}
-        />
-      )
-    },
+    cell: ({ getValue }) => (
+      <ChipList
+        size="small"
+        limit={1}
+        values={Object.entries(getValue() || {})}
+        transformValue={(params) => params.join(': ')}
+        emptyState={null}
+      />
+    ),
   }
 )
 
