@@ -34,9 +34,7 @@ import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResourceList } from '../common/ResourceList'
 import { useEventsColumns } from '../cluster/Events'
-
 import { SubTitle } from '../../utils/SubTitle'
-
 import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './CronJobs'

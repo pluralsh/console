@@ -213,7 +213,6 @@ export function ServiceIngresses(): ReactElement {
       }}
       queryName="handleGetServiceIngressList"
       itemsKey="items"
-      disableOnRowClick
     />
   )
 }
@@ -232,7 +231,6 @@ export function ServicePods(): ReactElement {
       }}
       queryName="handleGetServicePods"
       itemsKey="pods"
-      disableOnRowClick
     />
   )
 }

@@ -1,6 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
@@ -13,15 +12,12 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../common/ResourceList'
 import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
-
 import { UsageText } from '../../cluster/TableElements'
-
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   STATEFUL_SETS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-
 import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'

@@ -99,6 +99,7 @@ import ReplicationController, {
   ReplicationControllerServices,
 } from '../components/kubernetes/workloads/ReplicationController'
 import Ingress, {
+  IngressEvents,
   IngressInfo,
 } from '../components/kubernetes/discovery/Ingress'
 import CronJob, {
@@ -648,7 +649,7 @@ export const kubernetesRoute = (
       />
       <Route
         path="events"
-        element={<ServiceEvents />}
+        element={<IngressEvents />}
       />
       <Route
         path="raw"

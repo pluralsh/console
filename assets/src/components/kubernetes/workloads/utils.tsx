@@ -3,9 +3,7 @@ import { ComponentProps } from 'react'
 import { isEmpty } from 'lodash'
 
 import {
-  V1_ContainerState as ContainerStateV1T,
-  Pod_ContainerStatus as ContainerStatusT,
-  V1_ContainerStatus as ContainerStatusV1T,
+  ContainerState,
   Common_Event as EventT,
   Maybe,
   Common_PodInfo as PodInfoT,
@@ -140,52 +138,18 @@ export function WorkloadImages({ images }: { images: Maybe<string>[] }) {
   )
 }
 
-export enum ContainerState {
-  Waiting = 'Waiting',
-  Running = 'Running',
-  Terminated = 'Terminated',
-  Unknown = 'Unknown',
-}
-
-export function toReadiness(
-  status: ContainerStatusT | ContainerStatusV1T
-): ReadinessT {
-  let state = ''
-
-  if (typeof status?.state === 'object') {
-    state = toContainerState(status?.state)
-  } else {
-    state = status?.state ?? ContainerState.Unknown
-  }
-
+export function toReadiness(state: ContainerState): ReadinessT {
   switch (state) {
     case ContainerState.Running:
       return Readiness.Running
     case ContainerState.Waiting:
       return Readiness.InProgress
+    case ContainerState.Failed:
+      return Readiness.Failed
     case ContainerState.Terminated:
       return Readiness.Complete
   }
 
-  return status?.ready ? Readiness.Ready : Readiness.Failed
-}
-
-function toContainerState(state: Nullable<ContainerStateV1T>): ContainerState {
-  if (!state) {
-    return ContainerState.Unknown
-  }
-
-  if (state?.running) {
-    return ContainerState.Running
-  }
-
-  if (state?.terminated) {
-    return ContainerState.Terminated
-  }
-
-  if (state?.waiting) {
-    return ContainerState.Waiting
-  }
-
-  return ContainerState.Unknown
+  // TODO: Should default to unknown?
+  return Readiness.Failed
 }
