@@ -19,12 +19,6 @@ import { useTheme } from 'styled-components'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
-import {
-  ColDistribution,
-  ColLastActivity,
-  ColServiceName,
-  ColTags,
-} from './NamespacesColumns'
 import { GlobalServiceDetailTable } from './NamespacesDetailTable'
 
 const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
@@ -50,13 +44,6 @@ export const GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 >['reactVirtualOptions'] = {
   overscan: 10,
 }
-
-export const columns = [
-  ColServiceName,
-  ColDistribution,
-  ColTags,
-  ColLastActivity,
-]
 
 const getServiceNameQuery = gql`
   query GetServiceName($serviceId: ID!) {
