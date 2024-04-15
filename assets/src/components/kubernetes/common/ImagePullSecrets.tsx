@@ -1,13 +1,8 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { ReactElement } from 'react'
 import { Table } from '@pluralsh/design-system'
-
 import { Link } from 'react-router-dom'
 
-import {
-  V1_LocalObjectReference as LocalObjectReferenceT,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
 
