@@ -549,6 +549,12 @@ defmodule Console.Factory do
     }
   end
 
+  def service_template_factory do
+    %Schema.ServiceTemplate{
+      name: sequence(:service_template, & "tpl-#{&1}")
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

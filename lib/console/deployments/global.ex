@@ -289,13 +289,16 @@ defmodule Console.Deployments.Global do
     |> Cluster.target(global)
     |> Repo.all()
     |> Enum.each(fn %{id: cluster_id} = cluster ->
-      case Services.get_service_by_name(cluster_id, svc.name) do
+      case Services.get_service_by_name(cluster_id, svc_name(global)) do
         %Service{owner_id: ^gid} = dest -> sync_service(global, dest, bot)
         %Service{} -> :ok # ignore if the service was created out of band
         nil -> add_to_cluster(global, cluster, bot)
       end
     end)
   end
+
+  defp svc_name(%GlobalService{service: %Service{name: name}}), do: name
+  defp svc_name(%GlobalService{template: %ServiceTemplate{name: name}}), do: name
 
   defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 

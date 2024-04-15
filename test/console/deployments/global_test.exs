@@ -263,6 +263,38 @@ defmodule Console.Deployments.GlobalTest do
         refute Services.get_service_by_name(cluster.id, "source")
       end
     end
+
+    test "it can sync template global services" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository)
+      cluster = insert(:cluster)
+
+      global = insert(:global_service,
+        template: build(:service_template,
+          repository_id: git.id,
+          name: "source",
+          namespace: "my-service",
+          git: %{ref: "main", folder: "k8s"},
+          configuration: [%{name: "name", value: "value"}]
+        ),
+        tags: [%{name: "sync", value: "test"}]
+      )
+      sync = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      sync2 = insert(:cluster, provider: cluster.provider)
+      sync3 = insert(:cluster, tags: [%{name: "sync", value: "test2"}])
+
+      :ok = Global.sync_clusters(global)
+
+      svc = Services.get_service_by_name(sync.id, "source")
+
+      assert svc.git.ref == "main"
+      assert svc.git.folder == "k8s"
+      assert svc.namespace == "my-service"
+
+      for cluster <- [sync2, sync3] do
+        refute Services.get_service_by_name(cluster.id, "source")
+      end
+    end
   end
 
   describe "#create_managed_namespace/2" do
