@@ -9,6 +9,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { isEmpty } from 'lodash'
 
+import { useTheme } from 'styled-components'
+
 import { MetadataSidecar, useDefaultColumns } from '../common/utils'
 import {
   CustomResourceDefinitionQueryVariables,
@@ -107,6 +109,7 @@ export default function CustomResourceDefinition(): ReactElement {
 const columnHelper = createColumnHelper<CustomResourceT>()
 
 export function CustomRersourceDefinitionObjects(): ReactElement {
+  const theme = useTheme()
   const crd = useOutletContext() as CustomResourceDefinitionT
   const namespaced = crd.scope.toLowerCase() === 'namespaced'
   const namespaces = useNamespaces()
@@ -127,13 +130,22 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
   const headerContent = useMemo(
     () =>
       namespaced && (
-        <NamespaceFilter
-          namespaces={namespaces}
-          namespace={namespace}
-          onChange={setNamespace}
-        />
+        <div
+          css={{
+            display: 'flex',
+            flexGrow: 1,
+            gap: theme.spacing.medium,
+            justifyContent: 'flex-end',
+          }}
+        >
+          <NamespaceFilter
+            namespaces={namespaces}
+            namespace={namespace}
+            onChange={setNamespace}
+          />
+        </div>
       ),
-    [namespaced, namespace, setNamespace]
+    [namespaced, theme, namespaces, namespace, setNamespace]
   )
 
   useSetPageHeaderContent(headerContent)

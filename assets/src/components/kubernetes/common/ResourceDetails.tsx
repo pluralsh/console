@@ -59,15 +59,7 @@ export default function ResourceDetails({
             overflow: 'hidden',
           }}
         >
-          <div
-            css={{
-              height: '100%',
-              width: '100%',
-              maxWidth: theme.breakpoints.desktopLarge,
-              marginRight: 'auto',
-              marginLeft: 'auto',
-            }}
-          >
+          <div css={{ maxWidth: theme.breakpoints.desktopLarge }}>
             <TabList
               scrollable
               gap="xxsmall"
