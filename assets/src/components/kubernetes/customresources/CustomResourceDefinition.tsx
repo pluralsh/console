@@ -137,27 +137,28 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
   )
 
   const headerContent = useMemo(
-    () =>
-      namespaced && (
-        <div
-          css={{
-            display: 'flex',
-            flexGrow: 1,
-            gap: theme.spacing.medium,
-            justifyContent: 'flex-end',
-          }}
-        >
-          <NameFilter
-            value={filter}
-            onChange={setFilter}
-          />
+    () => (
+      <div
+        css={{
+          display: 'flex',
+          flexGrow: 1,
+          gap: theme.spacing.medium,
+          justifyContent: 'flex-end',
+        }}
+      >
+        <NameFilter
+          value={filter}
+          onChange={setFilter}
+        />
+        {namespaced && (
           <NamespaceFilter
             namespaces={namespaces}
             namespace={namespace}
             onChange={setNamespace}
           />
-        </div>
-      ),
+        )}
+      </div>
+    ),
     [namespaced, theme, filter, setFilter, namespaces, namespace, setNamespace]
   )
 
