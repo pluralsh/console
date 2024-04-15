@@ -4,7 +4,6 @@ import { isEmpty } from 'lodash'
 
 import {
   ContainerState,
-  V1_ContainerState as ContainerStateV1T,
   Common_Event as EventT,
   Maybe,
   Common_PodInfo as PodInfoT,
