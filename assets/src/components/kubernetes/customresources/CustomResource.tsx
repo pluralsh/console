@@ -22,6 +22,8 @@ import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
 import { ResourceList } from '../common/ResourceList'
 
+import { NAMESPACE_PARAM } from '../Navigation'
+
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 
 const directory: Array<TabEntry> = [
@@ -53,7 +55,18 @@ export default function CustomResource(): ReactElement {
             crd
           ),
         },
-        ...(namespace ? [{ label: namespace }] : []),
+        ...(namespace
+          ? [
+              {
+                label: namespace,
+                url: `${getResourceDetailsAbsPath(
+                  clusterId,
+                  'customresourcedefinition',
+                  crd
+                )}?${NAMESPACE_PARAM}=${namespace}`,
+              },
+            ]
+          : []),
         { label: name ?? '' },
       ],
       [cluster, clusterId, crd, name, namespace]
