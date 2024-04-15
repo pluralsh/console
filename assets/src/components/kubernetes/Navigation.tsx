@@ -25,10 +25,8 @@ import { Directory, SideNavEntries } from '../layout/SideNavEntries'
 import { ClusterSelect } from '../cd/addOns/ClusterSelect'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
-import { KubernetesClient } from '../../helpers/kubernetes.client'
-import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 
-import { useCluster, useClusters } from './Cluster'
+import { useCluster, useClusters, useNamespaces } from './Cluster'
 import { DataSelect, useDataSelect } from './common/DataSelect'
 import { NamespaceFilter } from './common/NamespaceFilter'
 import { NameFilter } from './common/NameFilter'
@@ -53,6 +51,7 @@ export default function Navigation() {
   const { clusterId = '' } = useParams()
   const clusters = useClusters()
   const cluster = useCluster()
+  const namespaces = useNamespaces()
   const [params, setParams] = useSearchParams()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const pathPrefix = getKubernetesAbsPath(clusterId)
@@ -61,19 +60,6 @@ export default function Navigation() {
     namespace: params.get(NAMESPACE_PARAM) ?? '',
     filter: params.get(FILTER_PARAM) ?? '',
   })
-
-  const { data } = useNamespacesQuery({
-    client: KubernetesClient(clusterId!),
-    skip: !clusterId,
-  })
-
-  const namespaces = useMemo(
-    () =>
-      (data?.handleGetNamespaces?.namespaces ?? [])
-        .map((namespace) => namespace?.objectMeta?.name)
-        .filter((namespace): namespace is string => !isEmpty(namespace)),
-    [data?.handleGetNamespaces?.namespaces]
-  )
 
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 

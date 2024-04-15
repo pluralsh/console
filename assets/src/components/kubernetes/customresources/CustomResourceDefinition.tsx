@@ -26,7 +26,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import Conditions from '../common/Conditions'
 import { ResourceList } from '../common/ResourceList'
-import { useCluster } from '../Cluster'
+import { useCluster, useNamespaces } from '../Cluster'
 
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 
@@ -109,6 +109,7 @@ const columnHelper = createColumnHelper<CustomResourceT>()
 export function CustomRersourceDefinitionObjects(): ReactElement {
   const crd = useOutletContext() as CustomResourceDefinitionT
   const namespaced = crd.scope.toLowerCase() === 'namespaced'
+  const namespaces = useNamespaces()
   const { namespace, setNamespace } = useDataSelect()
   const { name } = useParams()
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
@@ -127,7 +128,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
     () =>
       namespaced && (
         <NamespaceFilter
-          namespaces={[]}
+          namespaces={namespaces}
           namespace={namespace}
           onChange={setNamespace}
         />
