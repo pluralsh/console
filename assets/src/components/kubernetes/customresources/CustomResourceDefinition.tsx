@@ -128,7 +128,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
 
   useEffect(
     () => dataSelect.setNamespace(params.get(NAMESPACE_PARAM) ?? ''),
-    [dataSelect.setNamespace, params]
+    [dataSelect, params]
   )
 
   const headerContent = useMemo(
