@@ -55,6 +55,9 @@ export default function ImagePullSecrets({
         height: '100%',
         ...(maxHeight ? { maxHeight } : {}),
       }}
+      emptyStateProps={{
+        message: 'No Image Pull Secrets found.',
+      }}
     />
   )
 }

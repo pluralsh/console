@@ -48,7 +48,6 @@ import ResourceInfoCard, {
 import Annotations from '../common/Annotations'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscalers'
-
 import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Deployments'
@@ -168,7 +167,6 @@ export function DeploymentReplicaSets(): ReactElement {
           }}
           queryName="handleGetDeploymentOldReplicaSets"
           itemsKey="replicaSets"
-          disableOnRowClick
         />
       </section>
     </>
