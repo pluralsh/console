@@ -27,15 +27,33 @@ fragment Condition on common_Condition {
 }
 
 fragment Probe on v1_Probe {
-  exec {
-    command
-  }
   failureThreshold
   initialDelaySeconds
   periodSeconds
   successThreshold
   terminationGracePeriodSeconds
   timeoutSeconds
+  tcpSocket {
+    host
+    port
+  }
+  grpc {
+    service
+    port
+  }
+  httpGet {
+    host
+    port
+    scheme
+    path
+    httpHeaders {
+      name
+      value
+    }
+  }
+  exec {
+    command
+  }
 }
 
 fragment Endpoint on common_Endpoint {

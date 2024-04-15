@@ -32,8 +32,8 @@ import ResourceOwner from '../common/ResourceOwner'
 import { NAMESPACE_PARAM } from '../Navigation'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
-
 import { useCluster } from '../Cluster'
+import ImagePullSecrets from '../common/ImagePullSecrets'
 
 import { getBreadcrumbs } from './Pods'
 import { toReadiness } from './utils'
@@ -139,19 +139,19 @@ export function PodInfo(): ReactElement {
   const pod = useOutletContext() as PodT
   const conditions = pod?.conditions
   const pvcList = pod?.persistentVolumeClaimList
-  // TODO: handle pull secrets
-  // const imagePullSecrets = pod?.imagePullSecrets
   const pvcListColumns = usePersistentVolumeClaimListColumns()
 
   return (
     <>
-      <section>
-        <SubTitle>Owner</SubTitle>
-        <ResourceOwner
-          clusterId={cluster?.id}
-          owner={pod?.controller}
-        />
-      </section>
+      {pod?.controller?.objectMeta?.name && (
+        <section>
+          <SubTitle>Owner</SubTitle>
+          <ResourceOwner
+            clusterId={cluster?.id}
+            owner={pod?.controller}
+          />
+        </section>
+      )}
       <section>
         <SubTitle>Conditions</SubTitle>
         <Conditions conditions={conditions} />
@@ -169,6 +169,19 @@ export function PodInfo(): ReactElement {
           emptyStateProps={{
             message: 'No Persistent Volume Claims found.',
           }}
+        />
+      </section>
+      <section>
+        <SubTitle>Image Pull Secrets</SubTitle>
+        <ImagePullSecrets
+          imagePullSecrets={
+            pod?.imagePullSecrets?.map((ref) => ({
+              clusterId: cluster?.id ?? '',
+              name: ref?.name ?? '',
+              namespace: pod?.objectMeta?.namespace ?? '',
+            })) ?? []
+          }
+          maxHeight="500px"
         />
       </section>
     </>
