@@ -5,8 +5,9 @@ import {
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-
 import { createColumnHelper } from '@tanstack/react-table'
+
+import { isEmpty } from 'lodash'
 
 import { MetadataSidecar, useDefaultColumns } from '../common/utils'
 import {
@@ -20,16 +21,18 @@ import {
   useCustomResourcesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-
 import Conditions from '../common/Conditions'
-
 import { ResourceList } from '../common/ResourceList'
-
 import { useCluster } from '../Cluster'
+
+import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
+
+import { NamespaceFilter } from '../NamespaceFilter'
+
+import { useDataSelect } from '../common/DataSelect'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'
@@ -104,15 +107,35 @@ export default function CustomResourceDefinition(): ReactElement {
 const columnHelper = createColumnHelper<CustomResourceT>()
 
 export function CustomRersourceDefinitionObjects(): ReactElement {
-  // TODO: Add namespace selector.
-  // TODO: Show namespace column only if scope is namespaced.
-  const { name, namespace = ' ' } = useParams() // ' ' selects all namespaces.
+  const crd = useOutletContext() as CustomResourceDefinitionT
+  const namespaced = crd.scope.toLowerCase() === 'namespaced'
+  const { namespace, setNamespace } = useDataSelect()
+  const { name } = useParams()
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    () => [
+      colName,
+      ...(namespaced ? [colNamespace] : []),
+      colLabels,
+      colCreationTimestamp,
+    ],
+    [namespaced, colName, colNamespace, colLabels, colCreationTimestamp]
   )
+
+  const headerContent = useMemo(
+    () =>
+      namespaced && (
+        <NamespaceFilter
+          namespaces={[]}
+          namespace={namespace}
+          onChange={setNamespace}
+        />
+      ),
+    [namespaced, namespace, setNamespace]
+  )
+
+  useSetPageHeaderContent(headerContent)
 
   return (
     <ResourceList<
@@ -121,13 +144,13 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
       CustomResourcesQuery,
       CustomResourcesQueryVariables
     >
-      namespaced // TODO
+      namespaced={namespaced}
       customResource
       columns={columns}
       query={useCustomResourcesQuery}
       queryOptions={{
         variables: {
-          namespace,
+          namespace: isEmpty(namespace) ? ' ' : namespace, // ' ' selects all namespaces.
           name,
         } as CustomResourcesQueryVariables,
       }}

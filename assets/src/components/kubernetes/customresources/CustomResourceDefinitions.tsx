@@ -76,18 +76,14 @@ const colEstablished = columnHelper.accessor((crd) => crd?.established, {
 const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
   id: 'categories',
   header: 'Categories',
-  cell: ({ getValue }) => {
-    const categories = getValue()
-
-    return (
-      <ChipList
-        size="small"
-        limit={1}
-        values={categories ?? []}
-        emptyState={null}
-      />
-    )
-  },
+  cell: ({ getValue }) => (
+    <ChipList
+      size="small"
+      limit={1}
+      values={getValue() ?? []}
+      emptyState={null}
+    />
+  ),
 })
 
 export default function CustomResourceDefinitions() {
