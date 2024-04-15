@@ -7459,6 +7459,15 @@ export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
+export type NamespacesFragment = { __typename?: 'Namespace', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, count?: number | null, eventTime?: string | null, lastTimestamp?: string | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', creationTimestamp?: string | null, name: string, namespace?: string | null, uid?: string | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NamespaceSpec', finalizers?: Array<string | null> | null }, status: { __typename?: 'NamespaceStatus', phase?: string | null } };
+
+export type NamespacesQueryVariables = Exact<{
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type NamespacesQuery = { __typename?: 'RootQueryType', namespaces?: Array<{ __typename?: 'Namespace', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, count?: number | null, eventTime?: string | null, lastTimestamp?: string | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', creationTimestamp?: string | null, name: string, namespace?: string | null, uid?: string | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'NamespaceSpec', finalizers?: Array<string | null> | null }, status: { __typename?: 'NamespaceStatus', phase?: string | null } } | null> | null };
+
 export type PipelineServiceDeploymentFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null };
 
 export type ContainerSpecFragment = { __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null };
@@ -8978,6 +8987,40 @@ export const DeploymentSettingsFragmentDoc = gql`
     ${HttpConnectionFragmentDoc}
 ${GitRepositoryFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const NamespacesFragmentDoc = gql`
+    fragment Namespaces on Namespace {
+  events {
+    action
+    count
+    eventTime
+    lastTimestamp
+    message
+    reason
+    type
+  }
+  metadata {
+    annotations {
+      name
+      value
+    }
+    creationTimestamp
+    labels {
+      name
+      value
+    }
+    name
+    namespace
+    uid
+  }
+  raw
+  spec {
+    finalizers
+  }
+  status {
+    phase
+  }
+}
+    `;
 export const PersonaConfigurationFragmentDoc = gql`
     fragment PersonaConfiguration on PersonaConfiguration {
   all
@@ -12771,6 +12814,46 @@ export type DeploymentSettingsQueryHookResult = ReturnType<typeof useDeploymentS
 export type DeploymentSettingsLazyQueryHookResult = ReturnType<typeof useDeploymentSettingsLazyQuery>;
 export type DeploymentSettingsSuspenseQueryHookResult = ReturnType<typeof useDeploymentSettingsSuspenseQuery>;
 export type DeploymentSettingsQueryResult = Apollo.QueryResult<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>;
+export const NamespacesDocument = gql`
+    query Namespaces($clusterId: ID) {
+  namespaces(clusterId: $clusterId) {
+    ...Namespaces
+  }
+}
+    ${NamespacesFragmentDoc}`;
+
+/**
+ * __useNamespacesQuery__
+ *
+ * To run a query within a React component, call `useNamespacesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNamespacesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNamespacesQuery({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useNamespacesQuery(baseOptions?: Apollo.QueryHookOptions<NamespacesQuery, NamespacesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NamespacesQuery, NamespacesQueryVariables>(NamespacesDocument, options);
+      }
+export function useNamespacesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NamespacesQuery, NamespacesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NamespacesQuery, NamespacesQueryVariables>(NamespacesDocument, options);
+        }
+export function useNamespacesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NamespacesQuery, NamespacesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NamespacesQuery, NamespacesQueryVariables>(NamespacesDocument, options);
+        }
+export type NamespacesQueryHookResult = ReturnType<typeof useNamespacesQuery>;
+export type NamespacesLazyQueryHookResult = ReturnType<typeof useNamespacesLazyQuery>;
+export type NamespacesSuspenseQueryHookResult = ReturnType<typeof useNamespacesSuspenseQuery>;
+export type NamespacesQueryResult = Apollo.QueryResult<NamespacesQuery, NamespacesQueryVariables>;
 export const PipelinesDocument = gql`
     query Pipelines($q: String, $first: Int = 50, $after: String) {
   pipelines(q: $q, first: $first, after: $after) {
@@ -16251,6 +16334,7 @@ export const namedOperations = {
     GetGlobalServices: 'GetGlobalServices',
     GetServiceData: 'GetServiceData',
     DeploymentSettings: 'DeploymentSettings',
+    Namespaces: 'Namespaces',
     Pipelines: 'Pipelines',
     JobGate: 'JobGate',
     JobGateLogs: 'JobGateLogs',
@@ -16407,6 +16491,7 @@ export const namedOperations = {
     GlobalService: 'GlobalService',
     HttpConnection: 'HttpConnection',
     DeploymentSettings: 'DeploymentSettings',
+    Namespaces: 'Namespaces',
     PipelineServiceDeployment: 'PipelineServiceDeployment',
     ContainerSpec: 'ContainerSpec',
     JobGateSpec: 'JobGateSpec',
