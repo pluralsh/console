@@ -7968,7 +7968,7 @@ export const CustomResourcesDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "crd/{args.namespace}/{args.crd}/object") {
+  ) @rest(path: "crd/{args.namespace}/{args.crd}/object?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     listMeta {
       totalItems
     }
