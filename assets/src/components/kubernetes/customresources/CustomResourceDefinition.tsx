@@ -132,6 +132,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
     [dataSelect.setNamespaced, namespaced]
   )
 
+  // TODO: Update param when namespace changes.
   useEffect(
     () => dataSelect.setNamespace(params.get(NAMESPACE_PARAM) ?? ''),
     // eslint-disable-next-line react-hooks/exhaustive-deps
