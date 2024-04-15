@@ -126,10 +126,15 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
     [namespaced, colName, colNamespace, colLabels, colCreationTimestamp]
   )
 
-  useEffect(() => {
-    dataSelect.setNamespaced(namespaced)
-    dataSelect.setNamespace(params.get(NAMESPACE_PARAM) ?? '')
-  }, [dataSelect, namespaced, params])
+  useEffect(
+    () => dataSelect.setNamespaced(namespaced),
+    [dataSelect.setNamespaced, namespaced]
+  )
+
+  useEffect(
+    () => dataSelect.setNamespace(params.get(NAMESPACE_PARAM) ?? ''),
+    [dataSelect.setNamespace, params]
+  )
 
   const headerContent = useMemo(
     () => <DataSelectInputs dataSelect={dataSelect} />,
