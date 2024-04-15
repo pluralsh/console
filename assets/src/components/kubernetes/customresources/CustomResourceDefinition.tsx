@@ -12,7 +12,6 @@ import {
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
-import { useTheme } from 'styled-components'
 
 import { MetadataSidecar, useDefaultColumns } from '../common/utils'
 import {
@@ -31,11 +30,9 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import Conditions from '../common/Conditions'
 import { ResourceList } from '../common/ResourceList'
-import { useCluster, useNamespaces } from '../Cluster'
+import { useCluster } from '../Cluster'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
-import { NamespaceFilter } from '../common/NamespaceFilter'
-import { useDataSelect } from '../common/DataSelect'
-import { NameFilter } from '../common/NameFilter'
+import { DataSelectInputs, useDataSelect } from '../common/DataSelect'
 
 import { NAMESPACE_PARAM } from '../Navigation'
 
@@ -112,11 +109,9 @@ export default function CustomResourceDefinition(): ReactElement {
 const columnHelper = createColumnHelper<CustomResourceT>()
 
 export function CustomRersourceDefinitionObjects(): ReactElement {
-  const theme = useTheme()
   const crd = useOutletContext() as CustomResourceDefinitionT
   const namespaced = crd.scope.toLowerCase() === 'namespaced'
-  const namespaces = useNamespaces()
-  const { filter, setFilter, namespace, setNamespace } = useDataSelect()
+  const dataSelect = useDataSelect()
   const { name } = useParams()
   const [params] = useSearchParams()
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
@@ -132,34 +127,13 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
   )
 
   useEffect(
-    () => setNamespace(params.get(NAMESPACE_PARAM) ?? ''),
-    [setNamespace, params]
+    () => dataSelect.setNamespace(params.get(NAMESPACE_PARAM) ?? ''),
+    [dataSelect.setNamespace, params]
   )
 
   const headerContent = useMemo(
-    () => (
-      <div
-        css={{
-          display: 'flex',
-          flexGrow: 1,
-          gap: theme.spacing.medium,
-          justifyContent: 'flex-end',
-        }}
-      >
-        <NameFilter
-          value={filter}
-          onChange={setFilter}
-        />
-        {namespaced && (
-          <NamespaceFilter
-            namespaces={namespaces}
-            namespace={namespace}
-            onChange={setNamespace}
-          />
-        )}
-      </div>
-    ),
-    [namespaced, theme, filter, setFilter, namespaces, namespace, setNamespace]
+    () => <DataSelectInputs dataSelect={dataSelect} />,
+    [dataSelect]
   )
 
   useSetPageHeaderContent(headerContent)
@@ -177,8 +151,8 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
       query={useCustomResourcesQuery}
       queryOptions={{
         variables: {
-          filterBy: `name,${filter}`,
-          namespace: isEmpty(namespace) ? ' ' : namespace, // ' ' selects all namespaces.
+          filterBy: `name,${dataSelect.filter}`,
+          namespace: isEmpty(dataSelect.namespace) ? ' ' : dataSelect.namespace, // ' ' selects all namespaces.
           name,
         } as CustomResourcesQueryVariables,
       }}

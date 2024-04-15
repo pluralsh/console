@@ -26,10 +26,12 @@ import { ClusterSelect } from '../cd/addOns/ClusterSelect'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
 
-import { useCluster, useClusters, useNamespaces } from './Cluster'
-import { DataSelect, useDataSelect } from './common/DataSelect'
-import { NamespaceFilter } from './common/NamespaceFilter'
-import { NameFilter } from './common/NameFilter'
+import { useCluster, useClusters } from './Cluster'
+import {
+  DataSelect,
+  DataSelectInputs,
+  useDataSelect,
+} from './common/DataSelect'
 
 export const NAMESPACE_PARAM = 'namespace'
 export const FILTER_PARAM = 'filter'
@@ -51,7 +53,6 @@ export default function Navigation() {
   const { clusterId = '' } = useParams()
   const clusters = useClusters()
   const cluster = useCluster()
-  const namespaces = useNamespaces()
   const [params, setParams] = useSearchParams()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const pathPrefix = getKubernetesAbsPath(clusterId)
@@ -117,26 +118,7 @@ export default function Navigation() {
       >
         <div css={{ display: 'flex' }}>
           {headerContent}
-          <div
-            css={{
-              display: 'flex',
-              flexGrow: 1,
-              gap: theme.spacing.medium,
-              justifyContent: 'flex-end',
-            }}
-          >
-            <NameFilter
-              value={dataSelect.filter}
-              onChange={dataSelect.setFilter}
-            />
-            {dataSelect.namespaced && (
-              <NamespaceFilter
-                namespaces={namespaces}
-                namespace={dataSelect.namespace}
-                onChange={dataSelect.setNamespace}
-              />
-            )}
-          </div>
+          <DataSelectInputs dataSelect={dataSelect} />
         </div>
         <PageHeaderContext.Provider value={pageHeaderContext}>
           <DataSelect.Provider value={dataSelect}>
