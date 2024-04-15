@@ -9,11 +9,8 @@ import {
   CustomResourceQueryVariables,
   Common_EventList as EventListT,
   Common_Event as EventT,
-  NamespaceEventsQuery,
-  NamespaceEventsQueryVariables,
   useCustomResourceEventsQuery,
   useCustomResourceQuery,
-  useNamespaceEventsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 
@@ -34,7 +31,7 @@ const directory: Array<TabEntry> = [
 
 export default function CustomResource(): ReactElement {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '', crd = '' } = useParams()
+  const { clusterId, name = '', namespace, crd = '' } = useParams()
   const { data, loading } = useCustomResourceQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
@@ -56,7 +53,7 @@ export default function CustomResource(): ReactElement {
             crd
           ),
         },
-        { label: namespace ?? '' },
+        ...(namespace ? [{ label: namespace }] : []),
         { label: name ?? '' },
       ],
       [cluster, clusterId, crd, name, namespace]
