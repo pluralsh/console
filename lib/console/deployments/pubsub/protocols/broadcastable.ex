@@ -40,3 +40,7 @@ defimpl Console.Deployments.PubSub.Broadcastable, for: [Console.PubSub.PipelineG
     do: {"cluster:#{cid}", "gate.event", %{"id" => id}}
   def message(_), do: :ok
 end
+
+defimpl Console.Deployments.PubSub.Broadcastable, for: [Console.PubSub.StackRunCreated, Console.PubSub.StackRunUpdated, Console.PubSub.StackRunDeleted] do
+  def message(%{item: %{cluster_id: cid, id: id}}), do: {"cluster:#{cid}", "stack.run.event", %{"id" => id}}
+end

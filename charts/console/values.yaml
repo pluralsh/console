@@ -163,11 +163,23 @@ monitoring:
   enabled: false
 
 dashboard:
-  enabled: false
+  enabled: true
   app:
     mode: 'api'
   kong:
     enabled: false
+  api:
+    containers:
+      args:
+      - --act-as-proxy
+      - --apiserver-host=https://$(KAS_HOST)/k8s-proxy
+      - --apiserver-skip-tls-verify
+      env:
+      - name: KAS_HOST
+        valueFrom:
+          secretKeyRef:
+            name: console-env
+            key: KAS_HOST
 
 provider: custom
 

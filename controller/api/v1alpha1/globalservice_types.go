@@ -35,12 +35,12 @@ type GlobalServiceSpec struct {
 
 	// Distro of kubernetes this cluster is running
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S
 	Distro *console.ClusterDistro `json:"distro,omitempty"`
 
 	// ServiceRef to replicate across clusters
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Service is immutable"
-	ServiceRef corev1.ObjectReference `json:"serviceRef"`
+	// +kubebuilder:validation:Optional
+	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
 	// ProviderRef apply to clusters with this provider
 	// +kubebuilder:validation:Optional
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`

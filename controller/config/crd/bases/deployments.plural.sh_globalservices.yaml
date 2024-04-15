@@ -46,6 +46,13 @@ spec:
             properties:
               distro:
                 description: Distro of kubernetes this cluster is running
+                enum:
+                - GENERIC
+                - EKS
+                - AKS
+                - GKE
+                - RKE
+                - K3S
                 type: string
               providerRef:
                 description: ProviderRef apply to clusters with this provider
@@ -135,9 +142,6 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
-                x-kubernetes-validations:
-                - message: Service is immutable
-                  rule: self == oldSelf
               tags:
                 additionalProperties:
                   type: string
@@ -326,8 +330,6 @@ spec:
                   templated:
                     type: boolean
                 type: object
-            required:
-            - serviceRef
             type: object
           status:
             properties:
