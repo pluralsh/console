@@ -1,4 +1,4 @@
-import { ReactElement, useMemo } from 'react'
+import React, { ReactElement, useMemo } from 'react'
 
 import { Link, Outlet, useParams } from 'react-router-dom'
 
@@ -79,6 +79,15 @@ export default function PersistentVolumeClaim(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={pvc}>
+          <SidecarItem heading="Capacity">
+            <ChipList
+              size="small"
+              limit={3}
+              values={Object.entries(pvc?.capacity || {})}
+              transformValue={(capacity) => capacity.join(': ')}
+              emptyState={null}
+            />
+          </SidecarItem>
           <SidecarItem heading="Volume">
             <Link
               to={getResourceDetailsAbsPath(

@@ -41,6 +41,7 @@ fragment PersistentVolumeClaim on persistentvolumeclaim_PersistentVolumeClaim {
   volume
   storageClass
   accessModes
+  capacity
 }
 
 fragment PersistentVolumeClaimDetail on persistentvolumeclaim_PersistentVolumeClaimDetail {
@@ -54,6 +55,7 @@ fragment PersistentVolumeClaimDetail on persistentvolumeclaim_PersistentVolumeCl
   volume
   storageClass
   accessModes
+  capacity
 }
 
 fragment PersistentVolumeClaimList on persistentvolumeclaim_PersistentVolumeClaimList {

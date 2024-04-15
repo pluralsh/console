@@ -1,0 +1,25 @@
+{
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "0076D7",
+    "summary": "A cluster has been added to your fleet",
+    "sections": [{
+        "activityTitle": "Cluster <%= @cluster.name %> has been added to your fleet",
+        "activitySubtitle": "Go to the cluster page to see additional details",
+        "facts": [
+            {
+                "name": "Url",
+                "value": "<%= Console.url("/cd/clusters/#{@cluster.id}/services") %>"
+            }
+        ],
+        "markdown": true
+    }],
+    "potentialAction": [{
+        "@type": "OpenUri",
+        "name": "Go to URL",
+        "targets": [{
+            "os": "default",
+            "uri": "<%= Console.url("/cd/clusters/#{@cluster.id}/services") %>"
+        }]
+    }]
+}

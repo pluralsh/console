@@ -97,7 +97,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 				ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: namespace},
 				Spec: v1alpha1.GlobalServiceSpec{
 					Distro: lo.ToPtr(gqlclient.ClusterDistroGeneric),
-					ServiceRef: corev1.ObjectReference{
+					ServiceRef: &corev1.ObjectReference{
 						Name:      serviceName,
 						Namespace: namespace,
 					},

@@ -57,11 +57,11 @@ defmodule Console.Deployments.Compatibilities.AddOn do
   end
 
   def find_version([%{version: version} = found | _], version), do: found
-  def find_version([%{version: version} = found], %{major: m, minor: minor}) do
-    clean_version(version)
-    |> Version.parse()
-    |> case do
-      {:ok, %{major: ^m, minor: ^minor}} -> found
+  def find_version([%{version: version} = found], tgt) do
+    with {:ok, vsn} <- Version.parse(version),
+         :gt <- Version.compare(tgt, vsn) do
+      found
+    else
       _ -> nil
     end
   end

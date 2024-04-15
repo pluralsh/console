@@ -41,7 +41,24 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
 
 const columnHelper = createColumnHelper<PersistentVolumeClaimT>()
 
-// TODO: add capacity after solving type issues
+export const colCapacity = columnHelper.accessor((pvc) => pvc.capacity, {
+  id: 'capacity',
+  header: 'Capacity',
+  cell: ({ getValue }) => {
+    const capacity = getValue()
+
+    return (
+      <ChipList
+        size="small"
+        limit={1}
+        values={Object.entries(capacity || {})}
+        transformValue={(capacity) => capacity.join(': ')}
+        emptyState={null}
+      />
+    )
+  },
+})
+
 export const usePersistentVolumeClaimListColumns = () => {
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
@@ -116,6 +133,7 @@ export const usePersistentVolumeClaimListColumns = () => {
           )
         },
       }),
+      colCapacity,
       colLabels,
       colCreationTimestamp,
     ],

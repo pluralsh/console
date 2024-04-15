@@ -109,7 +109,7 @@ function ChartVersion({
 }) {
   return (
     <VersionSC>
-      <TableText>{runtimeService?.addonVersion?.version}</TableText>
+      <TableText>{runtimeService?.version}</TableText>
       {showLinkOut && clusterId && (
         <VersionArrowLinkSC
           clickable
@@ -128,37 +128,31 @@ function ChartVersion({
     </VersionSC>
   )
 }
-const colVersion = columnHelperRuntime.accessor(
-  (row) => row?.addonVersion?.version,
-  {
-    id: 'version',
-    header: 'Version',
-    cell({ row: { original } }) {
-      return <ChartVersion runtimeService={original} />
+const colVersion = columnHelperRuntime.accessor((row) => row?.version, {
+  id: 'version',
+  header: 'Version',
+  cell({ row: { original } }) {
+    return <ChartVersion runtimeService={original} />
+  },
+})
+const colVersionWithLink = columnHelperRuntime.accessor((row) => row?.version, {
+  id: 'version-with-link',
+  header: 'Version',
+  cell({
+    row: { original },
+    table: {
+      options: { meta },
     },
-  }
-)
-const colVersionWithLink = columnHelperRuntime.accessor(
-  (row) => row?.addonVersion?.version,
-  {
-    id: 'version-with-link',
-    header: 'Version',
-    cell({
-      row: { original },
-      table: {
-        options: { meta },
-      },
-    }) {
-      return (
-        <ChartVersion
-          runtimeService={original}
-          showLinkOut
-          clusterId={(meta as any)?.clusterId}
-        />
-      )
-    },
-  }
-)
+  }) {
+    return (
+      <ChartVersion
+        runtimeService={original}
+        showLinkOut
+        clusterId={(meta as any)?.clusterId}
+      />
+    )
+  },
+})
 
 const colKubVersion = columnHelperRuntime.accessor((row) => row?.addonVersion, {
   id: 'kube-version',

@@ -7,9 +7,11 @@ import (
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
@@ -75,6 +77,10 @@ func (c *Cluster) Attributes(providerId *string) console.ClusterAttributes {
 		attrs.Tags = tags
 	}
 
+	if c.Spec.Metadata != nil {
+		attrs.Metadata = lo.ToPtr(string(c.Spec.Metadata.Raw))
+	}
+
 	if c.Spec.Bindings != nil {
 		attrs.ReadBindings = algorithms.Map(c.Spec.Bindings.Read,
 			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
@@ -95,6 +101,7 @@ func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
 		Protect:   c.Spec.Protect,
 		NodePools: nodePools,
 		Tags:      tagAttr.Tags,
+		Metadata:  tagAttr.Metadata,
 	}
 }
 
@@ -109,9 +116,15 @@ func (c *Cluster) TagUpdateAttributes() console.ClusterUpdateAttributes {
 		}
 		slices.SortFunc(tags, func(a, b *console.TagAttributes) int { return strings.Compare(a.Name, b.Name) })
 	}
+	var metadata *string
+	if c.Spec.Metadata != nil {
+		metadata = lo.ToPtr(string(c.Spec.Metadata.Raw))
+	}
+
 	return console.ClusterUpdateAttributes{
-		Handle: c.Spec.Handle,
-		Tags:   tags,
+		Handle:   c.Spec.Handle,
+		Tags:     tags,
+		Metadata: metadata,
 	}
 }
 
@@ -150,6 +163,10 @@ type ClusterSpec struct {
 	// Tags used to filter clusters.
 	// +kubebuilder:validation:Optional
 	Tags map[string]string `json:"tags,omitempty"`
+
+	// Metadata for the cluster
+	// +kubebuilder:validation:Optional
+	Metadata *runtime.RawExtension `json:"metadata,omitempty"`
 
 	// Bindings contain read and write policies of this cluster
 	// +kubebuilder:validation:Optional
