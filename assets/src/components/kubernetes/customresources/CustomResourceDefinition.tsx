@@ -6,9 +6,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-
 import { isEmpty } from 'lodash'
-
 import { useTheme } from 'styled-components'
 
 import { MetadataSidecar, useDefaultColumns } from '../common/utils'
@@ -29,12 +27,10 @@ import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import Conditions from '../common/Conditions'
 import { ResourceList } from '../common/ResourceList'
 import { useCluster, useNamespaces } from '../Cluster'
-
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
-
 import { NamespaceFilter } from '../common/NamespaceFilter'
-
 import { useDataSelect } from '../common/DataSelect'
+import { NameFilter } from '../common/NameFilter'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'
@@ -113,7 +109,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
   const crd = useOutletContext() as CustomResourceDefinitionT
   const namespaced = crd.scope.toLowerCase() === 'namespaced'
   const namespaces = useNamespaces()
-  const { namespace, setNamespace } = useDataSelect()
+  const { filter, setFilter, namespace, setNamespace } = useDataSelect()
   const { name } = useParams()
   const { colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
@@ -138,6 +134,10 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
             justifyContent: 'flex-end',
           }}
         >
+          <NameFilter
+            value={filter}
+            onChange={setFilter}
+          />
           <NamespaceFilter
             namespaces={namespaces}
             namespace={namespace}
@@ -145,7 +145,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
           />
         </div>
       ),
-    [namespaced, theme, namespaces, namespace, setNamespace]
+    [namespaced, theme, filter, setFilter, namespaces, namespace, setNamespace]
   )
 
   useSetPageHeaderContent(headerContent)
@@ -163,6 +163,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
       query={useCustomResourcesQuery}
       queryOptions={{
         variables: {
+          filterBy: `name,${filter}`,
           namespace: isEmpty(namespace) ? ' ' : namespace, // ' ' selects all namespaces.
           name,
         } as CustomResourcesQueryVariables,
