@@ -17,7 +17,6 @@ import { YamlGeneratorModal } from '../YamlGeneratorModal'
 import {
   ColCreatedAt,
   ColFinalizers,
-  ColName,
   ColNamespace,
   ColStatus,
 } from './NamespacesColumns'
@@ -47,13 +46,7 @@ export const NAMESPACES_REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-export const columns = [
-  ColName,
-  ColNamespace,
-  ColStatus,
-  ColFinalizers,
-  ColCreatedAt,
-]
+export const columns = [ColNamespace, ColStatus, ColFinalizers, ColCreatedAt]
 
 export default function Namespaces() {
   const theme = useTheme()
