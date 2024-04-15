@@ -1,5 +1,11 @@
 import { type ComponentProps, useCallback } from 'react'
-import { Accordion, Button, FormField, Modal } from '@pluralsh/design-system'
+import {
+  Accordion,
+  Button,
+  FormField,
+  Input,
+  Modal,
+} from '@pluralsh/design-system'
 import Input2 from '@pluralsh/design-system/dist/components/Input2'
 import { useTheme } from 'styled-components'
 import pick from 'lodash/pick'
@@ -186,12 +192,12 @@ export function ScmConnectionForm({
             />
           </FormField>
           <FormField label="Signing private key">
-            <InputRevealer
-              defaultRevealed={false}
+            <Input
               value={formState.signingPrivateKey ?? ''}
               onChange={(e) =>
                 updateFormState({ signingPrivateKey: e.target.value })
               }
+              multiline
             />
           </FormField>
         </div>
