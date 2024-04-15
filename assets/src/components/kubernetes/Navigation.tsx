@@ -15,13 +15,7 @@ import {
   useState,
 } from 'react'
 import { isEmpty } from 'lodash'
-import Fuse from 'fuse.js'
-import {
-  ComboBox,
-  Input,
-  ListBoxItem,
-  SearchIcon,
-} from '@pluralsh/design-system'
+import { Input, SearchIcon } from '@pluralsh/design-system'
 
 import {
   ACCESS_REL_PATH,
@@ -41,10 +35,10 @@ import LoadingIndicator from '../utils/LoadingIndicator'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
 import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
-import { NamespaceListFooter } from '../cluster/pods/Pods'
 
 import { useCluster, useClusters } from './Cluster'
 import { DataSelect, useDataSelect } from './common/DataSelect'
+import { NamespaceFilter } from './NamespaceFilter'
 
 function NameFilter({
   value,
@@ -62,54 +56,6 @@ function NameFilter({
       onChange={(e) => onChange(e.currentTarget.value)}
       width={300}
     />
-  )
-}
-
-function NamespaceFilter({
-  namespaces,
-  namespace,
-  onChange,
-}: {
-  namespaces: string[]
-  namespace: string
-  onChange: (arg: any) => any
-}) {
-  const [value, setValue] = useState(namespace)
-
-  const filteredNamespaces = useMemo(() => {
-    const fuse = new Fuse(namespaces, { threshold: 0.25 })
-
-    return value ? fuse.search(value).map(({ item }) => item) : namespaces
-  }, [namespaces, value])
-
-  return (
-    <ComboBox
-      inputProps={{ placeholder: 'Filter by namespace' }}
-      inputValue={value}
-      onInputChange={setValue}
-      selectedKey={namespace}
-      onSelectionChange={(key) => {
-        onChange(key)
-        setValue(key as string)
-      }}
-      dropdownFooterFixed={
-        <NamespaceListFooter
-          onClick={() => {
-            setValue('')
-            onChange('')
-          }}
-        />
-      }
-      aria-label="namespace"
-    >
-      {filteredNamespaces.map((namespace) => (
-        <ListBoxItem
-          key={namespace}
-          textValue={namespace}
-          label={namespace}
-        />
-      ))}
-    </ComboBox>
   )
 }
 
