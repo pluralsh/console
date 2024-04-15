@@ -1,4 +1,4 @@
-import { ReactElement, useRef } from 'react'
+import { ReactElement, ReactNode, useMemo, useRef, useState } from 'react'
 import { SubTab, TabList } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { useMatch, useResolvedPath } from 'react-router-dom'
@@ -11,6 +11,7 @@ import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpace
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
 
 import { ResponsiveLayoutHeader } from '../../utils/layout/ResponsiveLayoutHeader'
+import { PageHeaderContext } from '../../cd/ContinuousDeployment'
 
 export interface TabEntry {
   label: string
@@ -34,6 +35,8 @@ export default function ResourceDetails({
   const tab = pathMatch?.params?.tab || ''
   const tabStateRef = useRef<any>(null)
   const currentTab = tabs.find(({ path }) => path === (tab ?? ''))
+  const [headerContent, setHeaderContent] = useState<ReactNode>()
+  const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 
   return (
     <ResponsiveLayoutPage>
@@ -93,21 +96,24 @@ export default function ResourceDetails({
               ))}
             </TabList>
           </div>
+          {headerContent}
         </ResponsiveLayoutHeader>
         <ResponsivePageFullWidth
           noPadding
           maxContentWidth={theme.breakpoints.desktopLarge}
         >
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%',
-              gap: theme.spacing.large,
-            }}
-          >
-            {children}
-          </div>
+          <PageHeaderContext.Provider value={pageHeaderContext}>
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                gap: theme.spacing.large,
+              }}
+            >
+              {children}
+            </div>
+          </PageHeaderContext.Provider>
         </ResponsivePageFullWidth>
       </ResponsiveLayoutPage>
       <ResponsiveLayoutSpacer />
