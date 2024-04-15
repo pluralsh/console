@@ -577,6 +577,11 @@ func (in *ClusterSpec) DeepCopyInto(out *ClusterSpec) {
 			(*out)[key] = val
 		}
 	}
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = new(runtime.RawExtension)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Bindings != nil {
 		in, out := &in.Bindings, &out.Bindings
 		*out = new(Bindings)
@@ -1026,7 +1031,11 @@ func (in *GlobalServiceSpec) DeepCopyInto(out *GlobalServiceSpec) {
 		*out = new(console_client_go.ClusterDistro)
 		**out = **in
 	}
-	out.ServiceRef = in.ServiceRef
+	if in.ServiceRef != nil {
+		in, out := &in.ServiceRef, &out.ServiceRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
 	if in.ProviderRef != nil {
 		in, out := &in.ProviderRef, &out.ProviderRef
 		*out = new(v1.ObjectReference)

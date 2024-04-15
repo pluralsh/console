@@ -163,6 +163,10 @@ spec:
                   This has to be specified in order to adopt existing cluster.
                 example: myclusterhandle
                 type: string
+              metadata:
+                description: Metadata for the cluster
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
               nodePools:
                 description: NodePools contains specs of node pools managed by this
                   cluster.

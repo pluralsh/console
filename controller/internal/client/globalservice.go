@@ -27,6 +27,18 @@ func (c *client) CreateGlobalService(serviceID string, attributes console.Global
 
 }
 
+func (c *client) CreateGlobalServiceFromTemplate(attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error) {
+	result, err := c.consoleClient.CreateGlobalServiceDeploymentFromTemplate(c.ctx, attributes)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, fmt.Errorf("new created global service %s is nil", attributes.Name)
+	}
+	return result.CreateGlobalService, nil
+
+}
+
 func (c *client) DeleteGlobalService(id string) error {
 	_, err := c.consoleClient.DeleteGlobalServiceDeployment(c.ctx, id)
 	if err != nil {

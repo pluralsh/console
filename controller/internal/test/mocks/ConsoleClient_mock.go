@@ -200,6 +200,64 @@ func (_c *ConsoleClientMock_CreateGlobalService_Call) RunAndReturn(run func(stri
 	return _c
 }
 
+// CreateGlobalServiceFromTemplate provides a mock function with given fields: attributes
+func (_m *ConsoleClientMock) CreateGlobalServiceFromTemplate(attributes gqlclient.GlobalServiceAttributes) (*gqlclient.GlobalServiceFragment, error) {
+	ret := _m.Called(attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateGlobalServiceFromTemplate")
+	}
+
+	var r0 *gqlclient.GlobalServiceFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(gqlclient.GlobalServiceAttributes) (*gqlclient.GlobalServiceFragment, error)); ok {
+		return rf(attributes)
+	}
+	if rf, ok := ret.Get(0).(func(gqlclient.GlobalServiceAttributes) *gqlclient.GlobalServiceFragment); ok {
+		r0 = rf(attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.GlobalServiceFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(gqlclient.GlobalServiceAttributes) error); ok {
+		r1 = rf(attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateGlobalServiceFromTemplate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateGlobalServiceFromTemplate'
+type ConsoleClientMock_CreateGlobalServiceFromTemplate_Call struct {
+	*mock.Call
+}
+
+// CreateGlobalServiceFromTemplate is a helper method to define mock.On call
+//   - attributes gqlclient.GlobalServiceAttributes
+func (_e *ConsoleClientMock_Expecter) CreateGlobalServiceFromTemplate(attributes interface{}) *ConsoleClientMock_CreateGlobalServiceFromTemplate_Call {
+	return &ConsoleClientMock_CreateGlobalServiceFromTemplate_Call{Call: _e.mock.On("CreateGlobalServiceFromTemplate", attributes)}
+}
+
+func (_c *ConsoleClientMock_CreateGlobalServiceFromTemplate_Call) Run(run func(attributes gqlclient.GlobalServiceAttributes)) *ConsoleClientMock_CreateGlobalServiceFromTemplate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(gqlclient.GlobalServiceAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateGlobalServiceFromTemplate_Call) Return(_a0 *gqlclient.GlobalServiceFragment, _a1 error) *ConsoleClientMock_CreateGlobalServiceFromTemplate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateGlobalServiceFromTemplate_Call) RunAndReturn(run func(gqlclient.GlobalServiceAttributes) (*gqlclient.GlobalServiceFragment, error)) *ConsoleClientMock_CreateGlobalServiceFromTemplate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateNamespace provides a mock function with given fields: ctx, attributes
 func (_m *ConsoleClientMock) CreateNamespace(ctx context.Context, attributes gqlclient.ManagedNamespaceAttributes) (*gqlclient.ManagedNamespaceFragment, error) {
 	ret := _m.Called(ctx, attributes)
