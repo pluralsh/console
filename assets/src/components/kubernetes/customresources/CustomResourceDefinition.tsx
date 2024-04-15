@@ -110,7 +110,7 @@ const columnHelper = createColumnHelper<CustomResourceT>()
 
 export function CustomRersourceDefinitionObjects(): ReactElement {
   const crd = useOutletContext() as CustomResourceDefinitionT
-  const namespacedScope = crd.scope.toLowerCase() === 'namespaced'
+  const namespaced = crd.scope.toLowerCase() === 'namespaced'
   const dataSelect = useDataSelect()
   const { name } = useParams()
   const [params] = useSearchParams()
@@ -119,17 +119,17 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
   const columns = useMemo(
     () => [
       colName,
-      ...(namespacedScope ? [colNamespace] : []),
+      ...(namespaced ? [colNamespace] : []),
       colLabels,
       colCreationTimestamp,
     ],
-    [namespacedScope, colName, colNamespace, colLabels, colCreationTimestamp]
+    [namespaced, colName, colNamespace, colLabels, colCreationTimestamp]
   )
 
   useEffect(() => {
-    dataSelect.setNamespaced(namespacedScope)
+    dataSelect.setNamespaced(namespaced)
     dataSelect.setNamespace(params.get(NAMESPACE_PARAM) ?? '')
-  }, [dataSelect, namespacedScope, params])
+  }, [dataSelect, namespaced, params])
 
   const headerContent = useMemo(
     () => <DataSelectInputs dataSelect={dataSelect} />,
@@ -145,7 +145,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
       CustomResourcesQuery,
       CustomResourcesQueryVariables
     >
-      namespaced={dataSelect.namespaced}
+      namespaced={namespaced}
       customResource
       columns={columns}
       query={useCustomResourcesQuery}
