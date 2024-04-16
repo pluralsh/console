@@ -9649,7 +9649,7 @@ export type CronJobJobsSuspenseQueryHookResult = ReturnType<typeof useCronJobJob
 export type CronJobJobsQueryResult = Apollo.QueryResult<CronJobJobsQuery, CronJobJobsQueryVariables>;
 export const CronJobTriggerDocument = gql`
     mutation CronJobTrigger($name: String!, $namespace: String!) {
-  handleTriggerCronJob(name: $name, namespace: $namespace) @rest(type: "Void", path: "/cronjob/{args.namespace}/{args.name}/trigger", method: "PUT")
+  handleTriggerCronJob(name: $name, namespace: $namespace) @rest(type: "Void", path: "/cronjob/{args.namespace}/{args.name}/trigger", method: "PUT", bodyKey: "name")
 }
     `;
 export type CronJobTriggerMutationFn = Apollo.MutationFunction<CronJobTriggerMutation, CronJobTriggerMutationVariables>;

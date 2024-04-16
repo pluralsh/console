@@ -64,7 +64,7 @@ export default function CronJob(): ReactElement {
     client: KubernetesClient(clusterId ?? ''),
     variables: { name, namespace } as CronJobTriggerMutationVariables,
     onCompleted: () => refetch(),
-    onError: (err) => {},
+    onError: (err) => console.error(err),
   })
 
   useSetBreadcrumbs(

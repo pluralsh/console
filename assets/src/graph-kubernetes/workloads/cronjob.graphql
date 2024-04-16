@@ -56,5 +56,6 @@ mutation CronJobTrigger($name: String!, $namespace: String!) {
     type: "Void"
     path: "/cronjob/{args.namespace}/{args.name}/trigger"
     method: "PUT"
+    bodyKey: "name" # Marked as body key to avoid empty body errors.
   )
 }
