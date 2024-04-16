@@ -30,8 +30,22 @@ query CronJob($namespace: String!, $name: String!) {
   }
 }
 
-query CronJobEvents($namespace: String!, $name: String!) {
-  handleGetCronJobEvents(namespace: $namespace, name: $name)
+query CronJobEvents(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetCronJobEvents(
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "common_EventList"
       path: "cronjob/{args.namespace}/{args.name}/event"

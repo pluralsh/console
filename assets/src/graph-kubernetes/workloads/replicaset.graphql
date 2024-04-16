@@ -30,31 +30,73 @@ query ReplicaSet($namespace: String!, $name: String!) {
   }
 }
 
-query ReplicaSetEvents($namespace: String!, $name: String!) {
-  handleGetReplicaSetEvents(namespace: $namespace, replicaSet: $name)
+query ReplicaSetEvents(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetReplicaSetEvents(
+    namespace: $namespace
+    replicaSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "common_EventList"
-      path: "replicaset/{args.namespace}/{args.replicaSet}/event"
+      path: "replicaset/{args.namespace}/{args.replicaSet}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...EventList
   }
 }
 
-query ReplicaSetPods($namespace: String!, $name: String!) {
-  handleGetReplicaSetPods(namespace: $namespace, replicaSet: $name)
+query ReplicaSetPods(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetReplicaSetPods(
+    namespace: $namespace
+    replicaSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "pod_PodList"
-      path: "replicaset/{args.namespace}/{args.replicaSet}/pod"
+      path: "replicaset/{args.namespace}/{args.replicaSet}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...PodList
   }
 }
 
-query ReplicaSetServices($namespace: String!, $name: String!) {
-  handleGetReplicaSetServices(namespace: $namespace, replicaSet: $name)
+query ReplicaSetServices(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetReplicaSetServices(
+    namespace: $namespace
+    replicaSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "service_ServiceList"
-      path: "replicaset/{args.namespace}/{args.replicaSet}/service"
+      path: "replicaset/{args.namespace}/{args.replicaSet}/service?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...ServiceList
   }

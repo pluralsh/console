@@ -30,31 +30,73 @@ query Deployment($namespace: String!, $name: String!) {
   }
 }
 
-query DeploymentEvents($namespace: String!, $name: String!) {
-  handleGetDeploymentEvents(namespace: $namespace, deployment: $name)
+query DeploymentEvents(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetDeploymentEvents(
+    namespace: $namespace
+    deployment: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "common_EventList"
-      path: "deployment/{args.namespace}/{args.deployment}/event"
+      path: "deployment/{args.namespace}/{args.deployment}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...EventList
   }
 }
 
-query DeploymentNewReplicaSet($namespace: String!, $name: String!) {
-  handleGetDeploymentNewReplicaSet(namespace: $namespace, deployment: $name)
+query DeploymentNewReplicaSet(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetDeploymentNewReplicaSet(
+    namespace: $namespace
+    deployment: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "replicaset_ReplicaSet"
-      path: "deployment/{args.namespace}/{args.deployment}/newreplicaset"
+      path: "deployment/{args.namespace}/{args.deployment}/newreplicaset?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...ReplicaSet
   }
 }
 
-query DeploymentOldReplicaSets($namespace: String!, $name: String!) {
-  handleGetDeploymentOldReplicaSets(namespace: $namespace, deployment: $name)
+query DeploymentOldReplicaSets(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetDeploymentOldReplicaSets(
+    namespace: $namespace
+    deployment: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "replicaset_ReplicaSetList"
-      path: "deployment/{args.namespace}/{args.deployment}/oldreplicaset"
+      path: "deployment/{args.namespace}/{args.deployment}/oldreplicaset?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...ReplicaSetList
   }

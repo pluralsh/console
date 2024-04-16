@@ -4783,6 +4783,10 @@ export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typena
 export type NodePodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -4945,6 +4949,10 @@ export type CustomResourceEventsQueryVariables = Exact<{
   crd: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -4972,6 +4980,10 @@ export type IngressQuery = { __typename?: 'Query', handleGetIngressDetail?: { __
 export type IngressEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5037,6 +5049,10 @@ export type ServiceQuery = { __typename?: 'Query', handleGetServiceDetail?: { __
 export type ServiceEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5045,6 +5061,10 @@ export type ServiceEventsQuery = { __typename?: 'Query', handleGetServiceEvent?:
 export type ServicePodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5053,6 +5073,10 @@ export type ServicePodsQuery = { __typename?: 'Query', handleGetServicePods?: { 
 export type ServiceIngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5152,6 +5176,10 @@ export type CronJobQuery = { __typename?: 'Query', handleGetCronJobDetail?: { __
 export type CronJobEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5206,6 +5234,10 @@ export type DaemonSetQuery = { __typename?: 'Query', handleGetDaemonSetDetail?: 
 export type DaemonSetEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5214,6 +5246,10 @@ export type DaemonSetEventsQuery = { __typename?: 'Query', handleGetDaemonSetEve
 export type DaemonSetPodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5222,6 +5258,10 @@ export type DaemonSetPodsQuery = { __typename?: 'Query', handleGetDaemonSetPods?
 export type DaemonSetServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5255,6 +5295,10 @@ export type DeploymentQuery = { __typename?: 'Query', handleGetDeploymentDetail?
 export type DeploymentEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5263,6 +5307,10 @@ export type DeploymentEventsQuery = { __typename?: 'Query', handleGetDeploymentE
 export type DeploymentNewReplicaSetQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5271,6 +5319,10 @@ export type DeploymentNewReplicaSetQuery = { __typename?: 'Query', handleGetDepl
 export type DeploymentOldReplicaSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5308,6 +5360,10 @@ export type JobQuery = { __typename?: 'Query', handleGetJobDetail?: { __typename
 export type JobEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5316,6 +5372,10 @@ export type JobEventsQuery = { __typename?: 'Query', handleGetJobEvents?: { __ty
 export type JobPodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5392,6 +5452,10 @@ export type ReplicaSetQuery = { __typename?: 'Query', handleGetReplicaSetDetail?
 export type ReplicaSetEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5400,6 +5464,10 @@ export type ReplicaSetEventsQuery = { __typename?: 'Query', handleGetReplicaSetE
 export type ReplicaSetPodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5408,6 +5476,10 @@ export type ReplicaSetPodsQuery = { __typename?: 'Query', handleGetReplicaSetPod
 export type ReplicaSetServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5441,6 +5513,10 @@ export type ReplicationControllerQuery = { __typename?: 'Query', handleGetReplic
 export type ReplicationControllerEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5449,6 +5525,10 @@ export type ReplicationControllerEventsQuery = { __typename?: 'Query', handleGet
 export type ReplicationControllerPodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5457,6 +5537,10 @@ export type ReplicationControllerPodsQuery = { __typename?: 'Query', handleGetRe
 export type ReplicationControllerServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5490,6 +5574,10 @@ export type StatefulSetQuery = { __typename?: 'Query', handleGetStatefulSetDetai
 export type StatefulSetEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5498,6 +5586,10 @@ export type StatefulSetEventsQuery = { __typename?: 'Query', handleGetStatefulSe
 export type StatefulSetPodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -7431,8 +7523,14 @@ export type NodeLazyQueryHookResult = ReturnType<typeof useNodeLazyQuery>;
 export type NodeSuspenseQueryHookResult = ReturnType<typeof useNodeSuspenseQuery>;
 export type NodeQueryResult = Apollo.QueryResult<NodeQuery, NodeQueryVariables>;
 export const NodePodsDocument = gql`
-    query NodePods($namespace: String!, $name: String!) {
-  handleGetNodePods(name: $name) @rest(type: "pod_PodList", path: "node/{args.name}/pod") {
+    query NodePods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetNodePods(
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "node/{args.name}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -7452,6 +7550,10 @@ export const NodePodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -8153,12 +8255,16 @@ export type CustomResourceLazyQueryHookResult = ReturnType<typeof useCustomResou
 export type CustomResourceSuspenseQueryHookResult = ReturnType<typeof useCustomResourceSuspenseQuery>;
 export type CustomResourceQueryResult = Apollo.QueryResult<CustomResourceQuery, CustomResourceQueryVariables>;
 export const CustomResourceEventsDocument = gql`
-    query CustomResourceEvents($crd: String!, $namespace: String!, $name: String!) {
+    query CustomResourceEvents($crd: String!, $namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetCustomResourceObjectEvents(
     namespace: $namespace
     object: $name
     crd: $crd
-  ) @rest(type: "common_EventList", path: "crd/{args.namespace}/{args.crd}/{args.object}/event") {
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "crd/{args.namespace}/{args.crd}/{args.object}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -8179,6 +8285,10 @@ export const CustomResourceEventsDocument = gql`
  *      crd: // value for 'crd'
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -8364,8 +8474,15 @@ export type IngressLazyQueryHookResult = ReturnType<typeof useIngressLazyQuery>;
 export type IngressSuspenseQueryHookResult = ReturnType<typeof useIngressSuspenseQuery>;
 export type IngressQueryResult = Apollo.QueryResult<IngressQuery, IngressQueryVariables>;
 export const IngressEventsDocument = gql`
-    query IngressEvents($namespace: String!, $name: String!) {
-  handleGetIngressEvent(namespace: $namespace, ingress: $name) @rest(type: "common_EventList", path: "ingress/{args.namespace}/{args.ingress}/event") {
+    query IngressEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetIngressEvent(
+    namespace: $namespace
+    ingress: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "ingress/{args.namespace}/{args.ingress}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -8385,6 +8502,10 @@ export const IngressEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -8792,8 +8913,15 @@ export type ServiceLazyQueryHookResult = ReturnType<typeof useServiceLazyQuery>;
 export type ServiceSuspenseQueryHookResult = ReturnType<typeof useServiceSuspenseQuery>;
 export type ServiceQueryResult = Apollo.QueryResult<ServiceQuery, ServiceQueryVariables>;
 export const ServiceEventsDocument = gql`
-    query ServiceEvents($namespace: String!, $name: String!) {
-  handleGetServiceEvent(namespace: $namespace, service: $name) @rest(type: "common_EventList", path: "service/{args.namespace}/{args.service}/event") {
+    query ServiceEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetServiceEvent(
+    namespace: $namespace
+    service: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "service/{args.namespace}/{args.service}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -8813,6 +8941,10 @@ export const ServiceEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -8833,8 +8965,15 @@ export type ServiceEventsLazyQueryHookResult = ReturnType<typeof useServiceEvent
 export type ServiceEventsSuspenseQueryHookResult = ReturnType<typeof useServiceEventsSuspenseQuery>;
 export type ServiceEventsQueryResult = Apollo.QueryResult<ServiceEventsQuery, ServiceEventsQueryVariables>;
 export const ServicePodsDocument = gql`
-    query ServicePods($namespace: String!, $name: String!) {
-  handleGetServicePods(namespace: $namespace, service: $name) @rest(type: "pod_PodList", path: "service/{args.namespace}/{args.service}/pod") {
+    query ServicePods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetServicePods(
+    namespace: $namespace
+    service: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "service/{args.namespace}/{args.service}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -8854,6 +8993,10 @@ export const ServicePodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -8874,8 +9017,15 @@ export type ServicePodsLazyQueryHookResult = ReturnType<typeof useServicePodsLaz
 export type ServicePodsSuspenseQueryHookResult = ReturnType<typeof useServicePodsSuspenseQuery>;
 export type ServicePodsQueryResult = Apollo.QueryResult<ServicePodsQuery, ServicePodsQueryVariables>;
 export const ServiceIngressesDocument = gql`
-    query ServiceIngresses($namespace: String!, $name: String!) {
-  handleGetServiceIngressList(namespace: $namespace, service: $name) @rest(type: "ingress_IngressList", path: "service/{args.namespace}/{args.service}/ingress") {
+    query ServiceIngresses($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetServiceIngressList(
+    namespace: $namespace
+    service: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "ingress_IngressList", path: "service/{args.namespace}/{args.service}/ingress?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...IngressList
   }
 }
@@ -8895,6 +9045,10 @@ export const ServiceIngressesDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -9597,8 +9751,15 @@ export type CronJobLazyQueryHookResult = ReturnType<typeof useCronJobLazyQuery>;
 export type CronJobSuspenseQueryHookResult = ReturnType<typeof useCronJobSuspenseQuery>;
 export type CronJobQueryResult = Apollo.QueryResult<CronJobQuery, CronJobQueryVariables>;
 export const CronJobEventsDocument = gql`
-    query CronJobEvents($namespace: String!, $name: String!) {
-  handleGetCronJobEvents(namespace: $namespace, name: $name) @rest(type: "common_EventList", path: "cronjob/{args.namespace}/{args.name}/event") {
+    query CronJobEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetCronJobEvents(
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "cronjob/{args.namespace}/{args.name}/event") {
     ...EventList
   }
 }
@@ -9618,6 +9779,10 @@ export const CronJobEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -9815,8 +9980,15 @@ export type DaemonSetLazyQueryHookResult = ReturnType<typeof useDaemonSetLazyQue
 export type DaemonSetSuspenseQueryHookResult = ReturnType<typeof useDaemonSetSuspenseQuery>;
 export type DaemonSetQueryResult = Apollo.QueryResult<DaemonSetQuery, DaemonSetQueryVariables>;
 export const DaemonSetEventsDocument = gql`
-    query DaemonSetEvents($namespace: String!, $name: String!) {
-  handleGetDaemonSetEvents(namespace: $namespace, daemonSet: $name) @rest(type: "common_EventList", path: "daemonset/{args.namespace}/{args.daemonSet}/event") {
+    query DaemonSetEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDaemonSetEvents(
+    namespace: $namespace
+    daemonSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "daemonset/{args.namespace}/{args.daemonSet}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -9836,6 +10008,10 @@ export const DaemonSetEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -9856,8 +10032,15 @@ export type DaemonSetEventsLazyQueryHookResult = ReturnType<typeof useDaemonSetE
 export type DaemonSetEventsSuspenseQueryHookResult = ReturnType<typeof useDaemonSetEventsSuspenseQuery>;
 export type DaemonSetEventsQueryResult = Apollo.QueryResult<DaemonSetEventsQuery, DaemonSetEventsQueryVariables>;
 export const DaemonSetPodsDocument = gql`
-    query DaemonSetPods($namespace: String!, $name: String!) {
-  handleGetDaemonSetPods(namespace: $namespace, daemonSet: $name) @rest(type: "pod_PodList", path: "daemonset/{args.namespace}/{args.daemonSet}/pod") {
+    query DaemonSetPods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDaemonSetPods(
+    namespace: $namespace
+    daemonSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "daemonset/{args.namespace}/{args.daemonSet}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -9877,6 +10060,10 @@ export const DaemonSetPodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -9897,8 +10084,15 @@ export type DaemonSetPodsLazyQueryHookResult = ReturnType<typeof useDaemonSetPod
 export type DaemonSetPodsSuspenseQueryHookResult = ReturnType<typeof useDaemonSetPodsSuspenseQuery>;
 export type DaemonSetPodsQueryResult = Apollo.QueryResult<DaemonSetPodsQuery, DaemonSetPodsQueryVariables>;
 export const DaemonSetServicesDocument = gql`
-    query DaemonSetServices($namespace: String!, $name: String!) {
-  handleGetDaemonSetServices(namespace: $namespace, daemonSet: $name) @rest(type: "service_ServiceList", path: "daemonset/{args.namespace}/{args.daemonSet}/service") {
+    query DaemonSetServices($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDaemonSetServices(
+    namespace: $namespace
+    daemonSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "service_ServiceList", path: "daemonset/{args.namespace}/{args.daemonSet}/service?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...ServiceList
   }
 }
@@ -9918,6 +10112,10 @@ export const DaemonSetServicesDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10029,8 +10227,15 @@ export type DeploymentLazyQueryHookResult = ReturnType<typeof useDeploymentLazyQ
 export type DeploymentSuspenseQueryHookResult = ReturnType<typeof useDeploymentSuspenseQuery>;
 export type DeploymentQueryResult = Apollo.QueryResult<DeploymentQuery, DeploymentQueryVariables>;
 export const DeploymentEventsDocument = gql`
-    query DeploymentEvents($namespace: String!, $name: String!) {
-  handleGetDeploymentEvents(namespace: $namespace, deployment: $name) @rest(type: "common_EventList", path: "deployment/{args.namespace}/{args.deployment}/event") {
+    query DeploymentEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDeploymentEvents(
+    namespace: $namespace
+    deployment: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "deployment/{args.namespace}/{args.deployment}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -10050,6 +10255,10 @@ export const DeploymentEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10070,8 +10279,15 @@ export type DeploymentEventsLazyQueryHookResult = ReturnType<typeof useDeploymen
 export type DeploymentEventsSuspenseQueryHookResult = ReturnType<typeof useDeploymentEventsSuspenseQuery>;
 export type DeploymentEventsQueryResult = Apollo.QueryResult<DeploymentEventsQuery, DeploymentEventsQueryVariables>;
 export const DeploymentNewReplicaSetDocument = gql`
-    query DeploymentNewReplicaSet($namespace: String!, $name: String!) {
-  handleGetDeploymentNewReplicaSet(namespace: $namespace, deployment: $name) @rest(type: "replicaset_ReplicaSet", path: "deployment/{args.namespace}/{args.deployment}/newreplicaset") {
+    query DeploymentNewReplicaSet($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDeploymentNewReplicaSet(
+    namespace: $namespace
+    deployment: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "replicaset_ReplicaSet", path: "deployment/{args.namespace}/{args.deployment}/newreplicaset?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...ReplicaSet
   }
 }
@@ -10091,6 +10307,10 @@ export const DeploymentNewReplicaSetDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10111,8 +10331,15 @@ export type DeploymentNewReplicaSetLazyQueryHookResult = ReturnType<typeof useDe
 export type DeploymentNewReplicaSetSuspenseQueryHookResult = ReturnType<typeof useDeploymentNewReplicaSetSuspenseQuery>;
 export type DeploymentNewReplicaSetQueryResult = Apollo.QueryResult<DeploymentNewReplicaSetQuery, DeploymentNewReplicaSetQueryVariables>;
 export const DeploymentOldReplicaSetsDocument = gql`
-    query DeploymentOldReplicaSets($namespace: String!, $name: String!) {
-  handleGetDeploymentOldReplicaSets(namespace: $namespace, deployment: $name) @rest(type: "replicaset_ReplicaSetList", path: "deployment/{args.namespace}/{args.deployment}/oldreplicaset") {
+    query DeploymentOldReplicaSets($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDeploymentOldReplicaSets(
+    namespace: $namespace
+    deployment: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "replicaset_ReplicaSetList", path: "deployment/{args.namespace}/{args.deployment}/oldreplicaset?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...ReplicaSetList
   }
 }
@@ -10132,6 +10359,10 @@ export const DeploymentOldReplicaSetsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10243,8 +10474,15 @@ export type JobLazyQueryHookResult = ReturnType<typeof useJobLazyQuery>;
 export type JobSuspenseQueryHookResult = ReturnType<typeof useJobSuspenseQuery>;
 export type JobQueryResult = Apollo.QueryResult<JobQuery, JobQueryVariables>;
 export const JobEventsDocument = gql`
-    query JobEvents($namespace: String!, $name: String!) {
-  handleGetJobEvents(namespace: $namespace, name: $name) @rest(type: "common_EventList", path: "job/{args.namespace}/{args.name}/event") {
+    query JobEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetJobEvents(
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "job/{args.namespace}/{args.name}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -10264,6 +10502,10 @@ export const JobEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10284,8 +10526,15 @@ export type JobEventsLazyQueryHookResult = ReturnType<typeof useJobEventsLazyQue
 export type JobEventsSuspenseQueryHookResult = ReturnType<typeof useJobEventsSuspenseQuery>;
 export type JobEventsQueryResult = Apollo.QueryResult<JobEventsQuery, JobEventsQueryVariables>;
 export const JobPodsDocument = gql`
-    query JobPods($namespace: String!, $name: String!) {
-  handleGetJobPods(namespace: $namespace, name: $name) @rest(type: "pod_PodList", path: "job/{args.namespace}/{args.name}/pod") {
+    query JobPods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetJobPods(
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "job/{args.namespace}/{args.name}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -10305,6 +10554,10 @@ export const JobPodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10597,8 +10850,15 @@ export type ReplicaSetLazyQueryHookResult = ReturnType<typeof useReplicaSetLazyQ
 export type ReplicaSetSuspenseQueryHookResult = ReturnType<typeof useReplicaSetSuspenseQuery>;
 export type ReplicaSetQueryResult = Apollo.QueryResult<ReplicaSetQuery, ReplicaSetQueryVariables>;
 export const ReplicaSetEventsDocument = gql`
-    query ReplicaSetEvents($namespace: String!, $name: String!) {
-  handleGetReplicaSetEvents(namespace: $namespace, replicaSet: $name) @rest(type: "common_EventList", path: "replicaset/{args.namespace}/{args.replicaSet}/event") {
+    query ReplicaSetEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetReplicaSetEvents(
+    namespace: $namespace
+    replicaSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "replicaset/{args.namespace}/{args.replicaSet}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -10618,6 +10878,10 @@ export const ReplicaSetEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10638,8 +10902,15 @@ export type ReplicaSetEventsLazyQueryHookResult = ReturnType<typeof useReplicaSe
 export type ReplicaSetEventsSuspenseQueryHookResult = ReturnType<typeof useReplicaSetEventsSuspenseQuery>;
 export type ReplicaSetEventsQueryResult = Apollo.QueryResult<ReplicaSetEventsQuery, ReplicaSetEventsQueryVariables>;
 export const ReplicaSetPodsDocument = gql`
-    query ReplicaSetPods($namespace: String!, $name: String!) {
-  handleGetReplicaSetPods(namespace: $namespace, replicaSet: $name) @rest(type: "pod_PodList", path: "replicaset/{args.namespace}/{args.replicaSet}/pod") {
+    query ReplicaSetPods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetReplicaSetPods(
+    namespace: $namespace
+    replicaSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "replicaset/{args.namespace}/{args.replicaSet}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -10659,6 +10930,10 @@ export const ReplicaSetPodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10679,8 +10954,15 @@ export type ReplicaSetPodsLazyQueryHookResult = ReturnType<typeof useReplicaSetP
 export type ReplicaSetPodsSuspenseQueryHookResult = ReturnType<typeof useReplicaSetPodsSuspenseQuery>;
 export type ReplicaSetPodsQueryResult = Apollo.QueryResult<ReplicaSetPodsQuery, ReplicaSetPodsQueryVariables>;
 export const ReplicaSetServicesDocument = gql`
-    query ReplicaSetServices($namespace: String!, $name: String!) {
-  handleGetReplicaSetServices(namespace: $namespace, replicaSet: $name) @rest(type: "service_ServiceList", path: "replicaset/{args.namespace}/{args.replicaSet}/service") {
+    query ReplicaSetServices($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetReplicaSetServices(
+    namespace: $namespace
+    replicaSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "service_ServiceList", path: "replicaset/{args.namespace}/{args.replicaSet}/service?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...ServiceList
   }
 }
@@ -10700,6 +10982,10 @@ export const ReplicaSetServicesDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10814,11 +11100,15 @@ export type ReplicationControllerLazyQueryHookResult = ReturnType<typeof useRepl
 export type ReplicationControllerSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerSuspenseQuery>;
 export type ReplicationControllerQueryResult = Apollo.QueryResult<ReplicationControllerQuery, ReplicationControllerQueryVariables>;
 export const ReplicationControllerEventsDocument = gql`
-    query ReplicationControllerEvents($namespace: String!, $name: String!) {
+    query ReplicationControllerEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetReplicationControllerEvents(
     namespace: $namespace
     replicationController: $name
-  ) @rest(type: "common_EventList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/event") {
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -10838,6 +11128,10 @@ export const ReplicationControllerEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10858,11 +11152,15 @@ export type ReplicationControllerEventsLazyQueryHookResult = ReturnType<typeof u
 export type ReplicationControllerEventsSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerEventsSuspenseQuery>;
 export type ReplicationControllerEventsQueryResult = Apollo.QueryResult<ReplicationControllerEventsQuery, ReplicationControllerEventsQueryVariables>;
 export const ReplicationControllerPodsDocument = gql`
-    query ReplicationControllerPods($namespace: String!, $name: String!) {
+    query ReplicationControllerPods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetReplicationControllerPods(
     namespace: $namespace
     replicationController: $name
-  ) @rest(type: "pod_PodList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/pod") {
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -10882,6 +11180,10 @@ export const ReplicationControllerPodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10902,11 +11204,15 @@ export type ReplicationControllerPodsLazyQueryHookResult = ReturnType<typeof use
 export type ReplicationControllerPodsSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerPodsSuspenseQuery>;
 export type ReplicationControllerPodsQueryResult = Apollo.QueryResult<ReplicationControllerPodsQuery, ReplicationControllerPodsQueryVariables>;
 export const ReplicationControllerServicesDocument = gql`
-    query ReplicationControllerServices($namespace: String!, $name: String!) {
+    query ReplicationControllerServices($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetReplicationControllerServices(
     namespace: $namespace
     replicationController: $name
-  ) @rest(type: "service_ServiceList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/service") {
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "service_ServiceList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/service?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...ServiceList
   }
 }
@@ -10926,6 +11232,10 @@ export const ReplicationControllerServicesDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -11037,8 +11347,15 @@ export type StatefulSetLazyQueryHookResult = ReturnType<typeof useStatefulSetLaz
 export type StatefulSetSuspenseQueryHookResult = ReturnType<typeof useStatefulSetSuspenseQuery>;
 export type StatefulSetQueryResult = Apollo.QueryResult<StatefulSetQuery, StatefulSetQueryVariables>;
 export const StatefulSetEventsDocument = gql`
-    query StatefulSetEvents($namespace: String!, $name: String!) {
-  handleGetStatefulSetEvents(namespace: $namespace, statefulset: $name) @rest(type: "common_EventList", path: "statefulset/{args.namespace}/{args.statefulset}/event") {
+    query StatefulSetEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetStatefulSetEvents(
+    namespace: $namespace
+    statefulset: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "statefulset/{args.namespace}/{args.statefulset}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -11058,6 +11375,10 @@ export const StatefulSetEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -11078,8 +11399,15 @@ export type StatefulSetEventsLazyQueryHookResult = ReturnType<typeof useStateful
 export type StatefulSetEventsSuspenseQueryHookResult = ReturnType<typeof useStatefulSetEventsSuspenseQuery>;
 export type StatefulSetEventsQueryResult = Apollo.QueryResult<StatefulSetEventsQuery, StatefulSetEventsQueryVariables>;
 export const StatefulSetPodsDocument = gql`
-    query StatefulSetPods($namespace: String!, $name: String!) {
-  handleGetStatefulSetPods(namespace: $namespace, statefulset: $name) @rest(type: "pod_PodList", path: "statefulset/{args.namespace}/{args.statefulset}/pod") {
+    query StatefulSetPods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetStatefulSetPods(
+    namespace: $namespace
+    statefulset: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "statefulset/{args.namespace}/{args.statefulset}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -11099,6 +11427,10 @@ export const StatefulSetPodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
