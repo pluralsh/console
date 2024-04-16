@@ -21,7 +21,6 @@ import {
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { numishSort } from '../../cluster/TableElements'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
 
