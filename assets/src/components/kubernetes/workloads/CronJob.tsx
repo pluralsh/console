@@ -16,6 +16,7 @@ import {
   CronJobJobsQueryVariables,
   CronJobQueryVariables,
   Cronjob_CronJobDetail as CronJobT,
+  CronJobTriggerMutationVariables,
   Common_EventList as EventListT,
   Common_Event as EventT,
   Job_JobList as JobListT,
@@ -23,6 +24,7 @@ import {
   useCronJobEventsQuery,
   useCronJobJobsQuery,
   useCronJobQuery,
+  useCronJobTriggerMutation,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { MetadataSidecar } from '../common/utils'
@@ -51,14 +53,18 @@ const directory: Array<TabEntry> = [
 export default function CronJob(): ReactElement {
   const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
-  const { data, loading } = useCronJobQuery({
+  const { data, loading, refetch } = useCronJobQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as CronJobQueryVariables,
+    variables: { name, namespace } as CronJobQueryVariables,
+  })
+
+  const [mutation, { loading: mutationLoading }] = useCronJobTriggerMutation({
+    client: KubernetesClient(clusterId ?? ''),
+    variables: { name, namespace } as CronJobTriggerMutationVariables,
+    onCompleted: () => refetch(),
+    onError: (err) => {},
   })
 
   useSetBreadcrumbs(
@@ -93,7 +99,8 @@ export default function CronJob(): ReactElement {
         <Button
           floating
           startIcon={<PlayIcon />}
-          onClick={() => {}}
+          onClick={() => mutation()}
+          loading={mutationLoading}
         >
           Trigger
         </Button>
