@@ -10,32 +10,19 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 
 ### Resource Types
 - [Cluster](#cluster)
-- [ClusterList](#clusterlist)
 - [ClusterRestore](#clusterrestore)
-- [ClusterRestoreList](#clusterrestorelist)
 - [ClusterRestoreTrigger](#clusterrestoretrigger)
-- [ClusterRestoreTriggerList](#clusterrestoretriggerlist)
 - [GitRepository](#gitrepository)
 - [GlobalService](#globalservice)
-- [GlobalServiceList](#globalservicelist)
 - [ManagedNamespace](#managednamespace)
-- [ManagedNamespaceList](#managednamespacelist)
 - [NotificationRouter](#notificationrouter)
-- [NotificationRouterList](#notificationrouterlist)
 - [NotificationSink](#notificationsink)
-- [NotificationSinkList](#notificationsinklist)
 - [Pipeline](#pipeline)
 - [PipelineContext](#pipelinecontext)
-- [PipelineContextList](#pipelinecontextlist)
-- [PipelineList](#pipelinelist)
 - [PrAutomation](#prautomation)
-- [PrAutomationList](#prautomationlist)
 - [PrAutomationTrigger](#prautomationtrigger)
-- [PrAutomationTriggerList](#prautomationtriggerlist)
 - [Provider](#provider)
-- [ProviderList](#providerlist)
 - [ScmConnection](#scmconnection)
-- [ScmConnectionList](#scmconnectionlist)
 - [ServiceDeployment](#servicedeployment)
 
 
@@ -105,9 +92,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `aws` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#secretreference-v1-core)_ |  |  | Optional: {} <br /> |
-| `azure` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#secretreference-v1-core)_ |  |  | Optional: {} <br /> |
-| `gcp` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#secretreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `aws` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `azure` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `gcp` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ |  |  | Optional: {} <br /> |
 
 
 
@@ -120,14 +107,13 @@ Cluster ...
 
 
 
-_Appears in:_
-- [ClusterList](#clusterlist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `Cluster` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[ClusterSpec](#clusterspec)_ |  |  |  |
 
 
@@ -202,24 +188,6 @@ _Appears in:_
 | `region` _string_ | Region in GCP to deploy cluster to. |  | Required: {} <br />Type: string <br /> |
 
 
-#### ClusterList
-
-
-
-ClusterList ...
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `ClusterList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[Cluster](#cluster) array_ |  |  |  |
-
-
 #### ClusterNodePool
 
 
@@ -282,33 +250,14 @@ ClusterRestore is the Schema for the clusterrestores API
 
 
 
-_Appears in:_
-- [ClusterRestoreList](#clusterrestorelist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `ClusterRestore` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[ClusterRestoreSpec](#clusterrestorespec)_ |  |  |  |
-
-
-#### ClusterRestoreList
-
-
-
-ClusterRestoreList contains a list of ClusterRestore
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `ClusterRestoreList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[ClusterRestore](#clusterrestore) array_ |  |  |  |
 
 
 #### ClusterRestoreSpec
@@ -327,7 +276,7 @@ _Appears in:_
 | `backupID` _string_ | BackupID is an ID of the backup to restore.<br />If BackupID is specified, then BackupName, BackupNamespace and BackupClusterRef are not needed. |  | Optional: {} <br />Type: string <br /> |
 | `backupName` _string_ | BackupName is a name of the backup to restore.<br />BackupNamespace and BackupClusterRef have to be specified as well with it.<br />If BackupName, BackupNamespace and BackupCluster are specified, then BackupID is not needed. |  | Optional: {} <br />Type: string <br /> |
 | `backupNamespace` _string_ | BackupNamespace is a namespace of the backup to restore.<br />BackupName and BackupClusterRef have to be specified as well with it.<br />If BackupName, BackupNamespace and BackupCluster are specified, then BackupID is not needed. |  | Optional: {} <br />Type: string <br /> |
-| `backupClusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | BackupClusterID is an ID of a cluster where the backup to restore is located.<br />BackupName and BackupNamespace have to be specified as well with it.<br />If BackupName, BackupNamespace and BackupClusterRef are specified, then BackupID is not needed. |  | Optional: {} <br /> |
+| `backupClusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | BackupClusterID is an ID of a cluster where the backup to restore is located.<br />BackupName and BackupNamespace have to be specified as well with it.<br />If BackupName, BackupNamespace and BackupClusterRef are specified, then BackupID is not needed. |  | Optional: {} <br /> |
 
 
 
@@ -340,33 +289,14 @@ ClusterRestoreTrigger is the Schema for the clusterrestoretriggers API
 
 
 
-_Appears in:_
-- [ClusterRestoreTriggerList](#clusterrestoretriggerlist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `ClusterRestoreTrigger` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[ClusterRestoreTriggerSpec](#clusterrestoretriggerspec)_ |  |  |  |
-
-
-#### ClusterRestoreTriggerList
-
-
-
-ClusterRestoreTriggerList contains a list of ClusterRestoreTrigger
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `ClusterRestoreTriggerList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[ClusterRestoreTrigger](#clusterrestoretrigger) array_ |  |  |  |
 
 
 #### ClusterRestoreTriggerSpec
@@ -382,7 +312,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `clusterRestoreRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | ClusterRestoreRef pointing to source ClusterRestore. |  | Optional: {} <br /> |
+| `clusterRestoreRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRestoreRef pointing to source ClusterRestore. |  | Optional: {} <br /> |
 
 
 
@@ -402,11 +332,11 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `handle` _string_ | Handle is a short, unique human-readable name used to identify this cluster.<br />Does not necessarily map to the cloud resource name.<br />This has to be specified in order to adopt existing cluster. |  | Optional: {} <br />Type: string <br /> |
 | `version` _string_ | Version of Kubernetes to use for this cluster. Can be skipped only for BYOK. |  | Optional: {} <br />Type: string <br /> |
-| `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | ProviderRef references provider to use for this cluster. Can be skipped only for BYOK. |  | Optional: {} <br /> |
+| `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProviderRef references provider to use for this cluster. Can be skipped only for BYOK. |  | Optional: {} <br /> |
 | `cloud` _string_ | Cloud provider to use for this cluster. |  | Enum: [aws azure gcp byok] <br />Optional: {} <br />Type: string <br /> |
 | `protect` _boolean_ | Protect cluster from being deleted. |  | Optional: {} <br /> |
 | `tags` _object (keys:string, values:string)_ | Tags used to filter clusters. |  | Optional: {} <br /> |
-| `metadata` _[RawExtension](#rawextension)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  | Optional: {} <br /> |
+| `metadata` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
 | `cloudSettings` _[ClusterCloudSettings](#clustercloudsettings)_ | CloudSettings contains cloud-specific settings for this cluster. |  | Optional: {} <br /> |
 | `nodePools` _[ClusterNodePool](#clusternodepool) array_ | NodePools contains specs of node pools managed by this cluster. |  | Optional: {} <br /> |
@@ -429,7 +359,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `tags` _object (keys:string, values:string)_ | Tags the cluster tags to target |  | Optional: {} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | Distro kubernetes distribution to target |  | Optional: {} <br /> |
-| `clusterRefs` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core) array_ |  |  |  |
+| `clusterRefs` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ |  |  |  |
 
 
 #### ComponentState
@@ -582,17 +512,14 @@ _Appears in:_
 
 
 
-_Appears in:_
-- [GitRepositoryList](#gitrepositorylist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `GitRepository` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[GitRepositorySpec](#gitrepositoryspec)_ |  |  |  |
-
-
 
 
 #### GitRepositorySpec
@@ -609,7 +536,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `url` _string_ |  |  |  |
-| `credentialsRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#secretreference-v1-core)_ | CredentialsRef is a secret reference which should contain privateKey, passphrase, username and password. |  | Optional: {} <br /> |
+| `credentialsRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | CredentialsRef is a secret reference which should contain privateKey, passphrase, username and password. |  | Optional: {} <br /> |
 
 
 
@@ -622,33 +549,14 @@ GlobalService is the Schema for the globalservices API
 
 
 
-_Appears in:_
-- [GlobalServiceList](#globalservicelist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `GlobalService` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[GlobalServiceSpec](#globalservicespec)_ |  |  |  |
-
-
-#### GlobalServiceList
-
-
-
-GlobalServiceList contains a list of GlobalService
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `GlobalServiceList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[GlobalService](#globalservice) array_ |  |  |  |
 
 
 #### GlobalServiceSpec
@@ -666,8 +574,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `tags` _object (keys:string, values:string)_ | Tags a set of tags to select clusters for this global service |  | Optional: {} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | Distro of kubernetes this cluster is running |  | Enum: [GENERIC EKS AKS GKE RKE K3S] <br />Optional: {} <br /> |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | ServiceRef to replicate across clusters |  | Optional: {} <br /> |
-| `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | ProviderRef apply to clusters with this provider |  | Optional: {} <br /> |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef to replicate across clusters |  | Optional: {} <br /> |
+| `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProviderRef apply to clusters with this provider |  | Optional: {} <br /> |
 | `template` _[ServiceTemplate](#servicetemplate)_ |  |  | Optional: {} <br /> |
 
 
@@ -681,33 +589,14 @@ ManagedNamespace is the Schema for the managednamespaces API
 
 
 
-_Appears in:_
-- [ManagedNamespaceList](#managednamespacelist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `ManagedNamespace` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[ManagedNamespaceSpec](#managednamespacespec)_ |  |  |  |
-
-
-#### ManagedNamespaceList
-
-
-
-ManagedNamespaceList contains a list of ManagedNamespace
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `ManagedNamespaceList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[ManagedNamespace](#managednamespace) array_ |  |  |  |
 
 
 #### ManagedNamespaceSpec
@@ -760,33 +649,14 @@ NotificationRouter is the Schema for the notificationrouters API
 
 
 
-_Appears in:_
-- [NotificationRouterList](#notificationrouterlist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `NotificationRouter` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[NotificationRouterSpec](#notificationrouterspec)_ |  |  |  |
-
-
-#### NotificationRouterList
-
-
-
-NotificationRouterList contains a list of NotificationRouter
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `NotificationRouterList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[NotificationRouter](#notificationrouter) array_ |  |  |  |
 
 
 #### NotificationRouterSpec
@@ -805,7 +675,7 @@ _Appears in:_
 | `name` _string_ | Name the name of this router, if not provided NotificationRouter's own name from NotificationRouter.ObjectMeta will be used. |  | Optional: {} <br /> |
 | `events` _string array_ | Events the events to trigger, or use * for any |  |  |
 | `filters` _[RouterFilters](#routerfilters) array_ | Filters filters by object type |  | Optional: {} <br /> |
-| `sinks` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core) array_ | Sinks notification sinks to deliver notifications to |  | Optional: {} <br /> |
+| `sinks` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Sinks notification sinks to deliver notifications to |  | Optional: {} <br /> |
 
 
 #### NotificationSink
@@ -816,33 +686,14 @@ NotificationSink is the Schema for the notificationsinks API
 
 
 
-_Appears in:_
-- [NotificationSinkList](#notificationsinklist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `NotificationSink` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[NotificationSinkSpec](#notificationsinkspec)_ |  |  |  |
-
-
-#### NotificationSinkList
-
-
-
-NotificationSinkList contains a list of NotificationSink
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `NotificationSinkList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[NotificationSink](#notificationsink) array_ |  |  |  |
 
 
 #### NotificationSinkSpec
@@ -871,14 +722,13 @@ Pipeline is the Schema for the pipelines API
 
 
 
-_Appears in:_
-- [PipelineList](#pipelinelist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `Pipeline` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[PipelineSpec](#pipelinespec)_ |  |  |  |
 
 
@@ -890,33 +740,14 @@ PipelineContext is the Schema for the pipelinecontexts API
 
 
 
-_Appears in:_
-- [PipelineContextList](#pipelinecontextlist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `PipelineContext` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[PipelineContextSpec](#pipelinecontextspec)_ |  |  |  |
-
-
-#### PipelineContextList
-
-
-
-PipelineContextList contains a list of PipelineContext
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `PipelineContextList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[PipelineContext](#pipelinecontext) array_ |  |  |  |
 
 
 #### PipelineContextSpec
@@ -932,8 +763,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `pipelineRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | PipelineRef pointing to source Pipeline. |  | Optional: {} <br /> |
-| `context` _[RawExtension](#rawextension)_ | Context is a Pipeline context |  |  |
+| `pipelineRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PipelineRef pointing to source Pipeline. |  | Optional: {} <br /> |
+| `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Context is a Pipeline context |  |  |
 
 
 #### PipelineEdge
@@ -971,26 +802,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this gate. |  | Required: {} <br />Type: string <br /> |
 | `type` _[GateType](#gatetype)_ | Type of gate this is. |  | Enum: [APPROVAL WINDOW JOB] <br />Required: {} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | ClusterRef of a Cluster this gate will execute on. |  | Optional: {} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef of a Cluster this gate will execute on. |  | Optional: {} <br /> |
 | `spec` _[GateSpec](#gatespec)_ | Spec contains specification for more complex gate types. |  | Optional: {} <br /> |
-
-
-#### PipelineList
-
-
-
-PipelineList contains a list of Pipeline
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `PipelineList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[Pipeline](#pipeline) array_ |  |  |  |
 
 
 #### PipelineSpec
@@ -1041,7 +854,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ |  |  |  |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  |  |
 | `criteria` _[PipelineStageServicePromotionCriteria](#pipelinestageservicepromotioncriteria)_ |  |  | Optional: {} <br /> |
 
 
@@ -1058,8 +871,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | ServiceRef pointing to source service to promote from. |  | Optional: {} <br /> |
-| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | PrAutomationRef pointing to source PR automation to promote from. |  | Optional: {} <br /> |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef pointing to source service to promote from. |  | Optional: {} <br /> |
+| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to source PR automation to promote from. |  | Optional: {} <br /> |
 | `secrets` _string array_ | Secrets to copy over in a promotion. |  | Optional: {} <br /> |
 
 
@@ -1073,14 +886,13 @@ PrAutomation ...
 
 
 
-_Appears in:_
-- [PrAutomationList](#prautomationlist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `PrAutomation` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[PrAutomationSpec](#prautomationspec)_ | Spec ... |  | Required: {} <br /> |
 
 
@@ -1141,24 +953,6 @@ _Appears in:_
 | `templates` _[PrAutomationTemplate](#prautomationtemplate) array_ | Templates ... |  | Optional: {} <br /> |
 
 
-#### PrAutomationList
-
-
-
-PrAutomationList ...
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `PrAutomationList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[PrAutomation](#prautomation) array_ |  |  |  |
-
-
 #### PrAutomationSpec
 
 
@@ -1179,10 +973,10 @@ _Appears in:_
 | `message` _string_ | Message ... |  | Optional: {} <br /> |
 | `name` _string_ | Name ... |  | Optional: {} <br /> |
 | `title` _string_ | Title... |  | Optional: {} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | ClusterRef ... |  | Optional: {} <br /> |
-| `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | ScmConnectionRef ... |  | Required: {} <br /> |
-| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | RepositoryRef ... |  | Optional: {} <br /> |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | ServiceRef ... |  | Optional: {} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef ... |  | Optional: {} <br /> |
+| `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef ... |  | Required: {} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef ... |  | Optional: {} <br /> |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef ... |  | Optional: {} <br /> |
 | `bindings` _[PrAutomationBindings](#prautomationbindings)_ | Bindings contain read and write policies of pr automation |  | Optional: {} <br /> |
 | `configuration` _[PrAutomationConfiguration](#prautomationconfiguration) array_ | Configuration ... |  | Optional: {} <br /> |
 | `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Creates ... |  | Optional: {} <br /> |
@@ -1215,33 +1009,14 @@ PrAutomationTrigger is the Schema for the prautomationtriggers API
 
 
 
-_Appears in:_
-- [PrAutomationTriggerList](#prautomationtriggerlist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `PrAutomationTrigger` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[PrAutomationTriggerSpec](#prautomationtriggerspec)_ |  |  |  |
-
-
-#### PrAutomationTriggerList
-
-
-
-PrAutomationTriggerList contains a list of PrAutomationTrigger
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `PrAutomationTriggerList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[PrAutomationTrigger](#prautomationtrigger) array_ |  |  |  |
 
 
 #### PrAutomationTriggerSpec
@@ -1257,8 +1032,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | PrAutomationRef pointing to source PrAutomation. |  | Optional: {} <br /> |
-| `context` _[RawExtension](#rawextension)_ | Context is a PrAutomation context |  |  |
+| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to source PrAutomation. |  | Optional: {} <br /> |
+| `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Context is a PrAutomation context |  |  |
 
 
 #### PrAutomationUpdateConfiguration
@@ -1290,33 +1065,14 @@ Provider ...
 
 
 
-_Appears in:_
-- [ProviderList](#providerlist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `Provider` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[ProviderSpec](#providerspec)_ |  |  | Required: {} <br /> |
-
-
-#### ProviderList
-
-
-
-ProviderList ...
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `ProviderList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[Provider](#provider) array_ |  |  |  |
 
 
 #### ProviderSpec
@@ -1371,9 +1127,9 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `regex` _string_ | Regex a regex for filtering by things like pr url |  | Optional: {} <br /> |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | ServiceRef whether to enable delivery for events associated with this service |  | Optional: {} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | ClusterRef whether to enable delivery for events associated with this cluster |  | Optional: {} <br /> |
-| `pipelineRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ | PipelineRef whether to enable delivery for events associated with this pipeline |  | Optional: {} <br /> |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef whether to enable delivery for events associated with this service |  | Optional: {} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef whether to enable delivery for events associated with this cluster |  | Optional: {} <br /> |
+| `pipelineRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PipelineRef whether to enable delivery for events associated with this pipeline |  | Optional: {} <br /> |
 
 
 #### ScmConnection
@@ -1384,33 +1140,14 @@ ScmConnection ...
 
 
 
-_Appears in:_
-- [ScmConnectionList](#scmconnectionlist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `ScmConnection` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[ScmConnectionSpec](#scmconnectionspec)_ |  |  | Required: {} <br /> |
-
-
-#### ScmConnectionList
-
-
-
-ScmConnectionList ...
-
-
-
-
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
-| `kind` _string_ | `ScmConnectionList` | | |
-| `metadata` _[ListMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#listmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `items` _[ScmConnection](#scmconnection) array_ |  |  |  |
 
 
 #### ScmConnectionSpec
@@ -1428,7 +1165,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name is a human-readable name of the ScmConnection. |  | Required: {} <br /> |
 | `type` _[ScmType](#scmtype)_ | Type is the name of the scm service for the ScmConnection.<br />One of (ScmType): [github, gitlab] |  | Enum: [GITHUB GITLAB] <br />Required: {} <br />Type: string <br /> |
-| `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#secretreference-v1-core)_ | Token ... |  | Optional: {} <br /> |
+| `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | Token ... |  | Optional: {} <br /> |
 | `username` _string_ | Username ... |  | Optional: {} <br /> |
 | `baseUrl` _string_ | BaseUrl is a base URL for Git clones for self-hosted versions. |  | Optional: {} <br /> |
 | `apiUrl` _string_ | APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl. |  | Optional: {} <br /> |
@@ -1465,17 +1202,14 @@ _Appears in:_
 
 
 
-_Appears in:_
-- [ServiceDeploymentList](#servicedeploymentlist)
+
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
 | `kind` _string_ | `ServiceDeployment` | | |
-| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[ServiceSpec](#servicespec)_ |  |  | Required: {} <br /> |
-
-
 
 
 #### ServiceError
@@ -1509,9 +1243,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `valuesFrom` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#secretreference-v1-core)_ | Fetches the helm values from a secret in this cluster, will consider any key with yaml data a values file and merge them iteratively |  | Optional: {} <br /> |
-| `valuesConfigMapRef` _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#configmapkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
-| `values` _[RawExtension](#rawextension)_ |  |  | Optional: {} <br /> |
+| `valuesFrom` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | Fetches the helm values from a secret in this cluster, will consider any key with yaml data a values file and merge them iteratively |  | Optional: {} <br /> |
+| `valuesConfigMapRef` _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#configmapkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
+| `values` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ |  |  | Optional: {} <br /> |
 | `valuesFiles` _string array_ |  |  | Optional: {} <br /> |
 | `chart` _string_ |  |  | Optional: {} <br /> |
 | `version` _string_ |  |  | Optional: {} <br /> |
@@ -1557,11 +1291,11 @@ _Appears in:_
 | `git` _[GitRef](#gitref)_ |  |  | Optional: {} <br /> |
 | `helm` _[ServiceHelm](#servicehelm)_ |  |  | Optional: {} <br /> |
 | `syncConfig` _[SyncConfigAttributes](#syncconfigattributes)_ |  |  | Optional: {} <br /> |
-| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
-| `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#secretreference-v1-core)_ | ConfigurationRef is a secret reference which should contain service configuration. |  | Optional: {} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
+| `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference which should contain service configuration. |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
-| `dependencies` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |
+| `dependencies` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |
 | `contexts` _string array_ | Contexts contain dependent service context names |  | Optional: {} <br /> |
 | `templated` _boolean_ | Templated should apply liquid templating to raw yaml files, defaults to true |  | Optional: {} <br /> |
 
@@ -1585,7 +1319,7 @@ _Appears in:_
 | `name` _string_ | Name the name for this service (optional for managed namespaces) |  | Optional: {} <br /> |
 | `namespace` _string_ | Namespace the namespace for this service (optional for managed namespaces) |  | Optional: {} <br /> |
 | `templated` _boolean_ |  |  | Optional: {} <br /> |
-| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
 | `contexts` _string array_ | a list of context ids to add to this service |  | Optional: {} <br /> |
 | `git` _[GitRef](#gitref)_ | Git settings to configure git for a service |  | Optional: {} <br /> |
 | `helm` _[ServiceHelm](#servicehelm)_ | Helm settings to configure helm for a service |  | Optional: {} <br /> |
@@ -1643,7 +1377,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `id` _string_ | ID of the resource in the Console API. |  | Optional: {} <br />Type: string <br /> |
 | `sha` _string_ | SHA of last applied configuration. |  | Optional: {} <br />Type: string <br /> |
-| `conditions` _[Condition](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#condition-v1-meta) array_ | Represents the observations of a PrAutomation's current state. |  |  |
+| `conditions` _[Condition](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#condition-v1-meta) array_ | Represents the observations of a PrAutomation's current state. |  |  |
 
 
 #### SyncConfigAttributes
