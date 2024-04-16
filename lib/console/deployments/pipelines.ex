@@ -434,6 +434,9 @@ defmodule Console.Deployments.Pipelines do
     do: handle_notify(PubSub.PipelineStageUpdated, stage)
   defp notify(pass, _), do: pass
 
+  defp notify({:ok, %PipelineContext{} = ctx}, :create, user),
+    do: handle_notify(PubSub.PipelineContextCreated, ctx, actor: user)
+
   defp notify({:ok, %Pipeline{} = pipe}, :delete, user),
     do: handle_notify(PubSub.PipelineDeleted, pipe, actor: user)
   defp notify({:ok, %Pipeline{} = pipe}, :create, user),
