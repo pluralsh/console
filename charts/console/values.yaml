@@ -164,6 +164,9 @@ monitoring:
 
 dashboard:
   enabled: true
+  cert-manager:
+    enabled: false
+    installCrds: false
   app:
     mode: 'api'
   kong:

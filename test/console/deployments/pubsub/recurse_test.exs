@@ -344,13 +344,11 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       ss = insert(:stage_service, service: svc, stage: dev)
       insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
 
-      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} -> {:ok, %{title: "some", url: "url"}} end)
-
+      expect(Console.Deployments.Pipelines.Discovery, :context, fn stage -> {:ok, stage} end)
       event = %PubSub.PipelineStageUpdated{item: dev}
-      {:ok, %{stg: stage}} = Recurse.handle_event(event)
+      {:ok, stage} = Recurse.handle_event(event)
 
-      assert stage.applied_context_id == ctx.id
-      assert Console.Repo.get_by(Console.Schema.PipelinePullRequest, context_id: ctx.id, service_id: svc.id)
+      assert stage.id == dev.id
     end
   end
 
