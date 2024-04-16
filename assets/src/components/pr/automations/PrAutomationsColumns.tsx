@@ -65,11 +65,7 @@ const ColRepo = columnHelper.accessor(({ node }) => node?.identifier, {
   header: 'Repo',
   meta: { truncate: true },
   cell: function Cell({ getValue }) {
-    return (
-      <TruncateStart>
-        <span>{getValue()}</span>
-      </TruncateStart>
-    )
+    return <TruncateStart>{getValue()}</TruncateStart>
   },
 })
 

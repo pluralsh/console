@@ -49,11 +49,7 @@ const ColBaseUrl = columnHelper.accessor(({ node }) => node?.baseUrl, {
   header: 'Base url',
   meta: { truncate: true },
   cell: function Cell({ getValue }) {
-    return (
-      <TruncateStart>
-        <span>{getValue()}</span>
-      </TruncateStart>
-    )
+    return <TruncateStart>{getValue()}</TruncateStart>
   },
 })
 
@@ -62,11 +58,7 @@ const ColApiUrl = columnHelper.accessor(({ node }) => node?.apiUrl, {
   header: 'API url',
   meta: { truncate: true },
   cell: function Cell({ getValue }) {
-    return (
-      <TruncateStart>
-        <span>{getValue()}</span>
-      </TruncateStart>
-    )
+    return <TruncateStart>{getValue()}</TruncateStart>
   },
 })
 

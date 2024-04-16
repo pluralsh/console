@@ -9,6 +9,7 @@ import {
   Common_PodInfo as PodInfoT,
 } from '../../../generated/graphql-kubernetes'
 import { Readiness, ReadinessT } from '../../../utils/status'
+import { TruncateStart } from '../../utils/table/TruncateStart'
 
 const podStatusSeverity = {
   Running: 'success',
@@ -124,15 +125,7 @@ export function WorkloadImages({ images }: { images: Maybe<string>[] }) {
       }}
     >
       {images.map((image) => (
-        <span
-          css={{
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {image}
-        </span>
+        <TruncateStart>{image}</TruncateStart>
       ))}
     </div>
   )
