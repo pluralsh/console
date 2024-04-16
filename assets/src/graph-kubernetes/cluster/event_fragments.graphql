@@ -1,4 +1,5 @@
 fragment EventList on common_EventList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

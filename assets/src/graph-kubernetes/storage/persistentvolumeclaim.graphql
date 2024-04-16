@@ -59,6 +59,7 @@ fragment PersistentVolumeClaimDetail on persistentvolumeclaim_PersistentVolumeCl
 }
 
 fragment PersistentVolumeClaimList on persistentvolumeclaim_PersistentVolumeClaimList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

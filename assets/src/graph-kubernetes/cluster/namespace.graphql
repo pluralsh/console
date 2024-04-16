@@ -14,6 +14,7 @@ query Namespaces(
     @rest(
       path: "namespace?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }

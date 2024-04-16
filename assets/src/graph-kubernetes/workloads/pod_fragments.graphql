@@ -121,6 +121,7 @@ fragment SecurityContext on v1_SecurityContext {
 }
 
 fragment PodList on pod_PodList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

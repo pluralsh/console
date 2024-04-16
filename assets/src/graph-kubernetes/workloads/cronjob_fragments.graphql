@@ -1,4 +1,5 @@
 fragment CronJobList on cronjob_CronJobList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

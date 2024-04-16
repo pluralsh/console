@@ -1,4 +1,5 @@
 fragment DaemonSetList on daemonset_DaemonSetList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

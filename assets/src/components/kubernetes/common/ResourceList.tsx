@@ -23,6 +23,8 @@ import {
 import { useCluster } from '../Cluster'
 
 import { useDataSelect } from './DataSelect'
+import type { Error } from './errors'
+import { ErrorToast } from './errors'
 
 import {
   DEFAULT_DATA_SELECT,
@@ -44,6 +46,7 @@ interface ResourceVariables extends DataSelectVariables {
 }
 
 interface ResourceListT {
+  errors: Array<Error>
   listMeta: ListMetaT
 }
 
@@ -177,41 +180,44 @@ export function ResourceList<
   }, [setNamespaced, namespaced])
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        data={items}
-        columns={columnsData}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        reactTableOptions={reactTableOptions}
-        virtualizeRows
-        onRowClick={
-          disableOnRowClick || loading
-            ? undefined
-            : (_, row: Row<ResourceT>) => {
-                navigate(
-                  customResource
-                    ? getCustomResourceDetailsAbsPath(
-                        cluster?.id,
-                        row.original.typeMeta.kind!,
-                        row.original.objectMeta.name!,
-                        row.original.objectMeta.namespace
-                      )
-                    : getResourceDetailsAbsPath(
-                        cluster?.id,
-                        row.original.typeMeta.kind!,
-                        row.original.objectMeta.name!,
-                        row.original.objectMeta.namespace
-                      )
-                )
-              }
-        }
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
-      />
-    </FullHeightTableWrap>
+    <>
+      <ErrorToast errors={resourceList?.errors} />
+      <FullHeightTableWrap>
+        <Table
+          data={items}
+          columns={columnsData}
+          hasNextPage={hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          reactTableOptions={reactTableOptions}
+          virtualizeRows
+          onRowClick={
+            disableOnRowClick || loading
+              ? undefined
+              : (_, row: Row<ResourceT>) => {
+                  navigate(
+                    customResource
+                      ? getCustomResourceDetailsAbsPath(
+                          cluster?.id,
+                          row.original.typeMeta.kind!,
+                          row.original.objectMeta.name!,
+                          row.original.objectMeta.namespace
+                        )
+                      : getResourceDetailsAbsPath(
+                          cluster?.id,
+                          row.original.typeMeta.kind!,
+                          row.original.objectMeta.name!,
+                          row.original.objectMeta.namespace
+                        )
+                  )
+                }
+          }
+          css={{
+            maxHeight: 'unset',
+            height: '100%',
+          }}
+        />
+      </FullHeightTableWrap>
+    </>
   )
 }
