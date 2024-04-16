@@ -86,7 +86,7 @@ export default function CustomResource(): ReactElement {
 }
 
 export function CustomResourceEvents(): ReactElement {
-  const { name } = useParams()
+  const { name, namespace, crd } = useParams()
   const columns = useEventsColumns()
 
   return (
@@ -100,7 +100,11 @@ export function CustomResourceEvents(): ReactElement {
       columns={columns}
       query={useCustomResourceEventsQuery}
       queryOptions={{
-        variables: { name } as CustomResourceEventsQueryVariables,
+        variables: {
+          name,
+          namespace,
+          crd,
+        } as CustomResourceEventsQueryVariables,
       }}
       queryName="handleGetCustomResourceObjectEvents"
       itemsKey="events"
