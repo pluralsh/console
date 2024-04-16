@@ -1,7 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { Link } from 'react-router-dom'
 
 import {
   Maybe,
@@ -14,14 +13,13 @@ import {
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
-import { InlineLink } from '../../utils/typography/InlineLink'
 import {
   PERSISTENT_VOLUMES_REL_PATH,
-  getResourceDetailsAbsPath,
   getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
+import ResourceLink from '../common/ResourceLink'
 
 import { PVStatusChip } from './utils'
 import { getStorageBreadcrumbs } from './Storage'
@@ -45,24 +43,18 @@ export const colStatus = columnHelper.accessor((pv) => pv.status, {
 export const colClaim = columnHelper.accessor((pv) => pv.claim, {
   id: 'claim',
   header: 'Claim',
-  cell: ({ getValue, table }) => {
-    const { cluster } = table.options.meta as {
-      cluster?: ClusterTinyFragment
-    }
+  cell: ({ getValue }) => {
     const [namespace, name] = (getValue() ?? '').split('/')
 
     return (
-      <Link
-        to={getResourceDetailsAbsPath(
-          cluster?.id,
-          Kind.PersistentVolumeClaim,
+      <ResourceLink
+        objectRef={{
+          kind: Kind.PersistentVolumeClaim,
           name,
-          namespace
-        )}
+          namespace,
+        }}
         onClick={(e) => e.stopPropagation()}
-      >
-        <InlineLink>{getValue()}</InlineLink>
-      </Link>
+      />
     )
   },
 })
@@ -70,24 +62,15 @@ export const colClaim = columnHelper.accessor((pv) => pv.claim, {
 const colStorageClass = columnHelper.accessor((pv) => pv.storageClass, {
   id: 'storageClass',
   header: 'Storage class',
-  cell: ({ getValue, table }) => {
-    const { cluster } = table.options.meta as {
-      cluster?: ClusterTinyFragment
-    }
-
-    return (
-      <Link
-        to={getResourceDetailsAbsPath(
-          cluster?.id,
-          Kind.StorageClass,
-          getValue()
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <InlineLink>{getValue()}</InlineLink>
-      </Link>
-    )
-  },
+  cell: ({ getValue }) => (
+    <ResourceLink
+      objectRef={{
+        kind: Kind.StorageClass,
+        name: getValue(),
+      }}
+      onClick={(e) => e.stopPropagation()}
+    />
+  ),
 })
 
 export const colReclaimPolicy = columnHelper.accessor(

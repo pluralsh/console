@@ -4,9 +4,9 @@ import { Link, useParams } from 'react-router-dom'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
 
-import { ObjectReference } from './types'
+import type { ObjectReference, UnknownProps } from './types'
 
-interface ResourceLinkProps {
+interface ResourceLinkProps extends UnknownProps {
   objectRef: ObjectReference
   emptyState?: string
   // Displays only a name as a link message
@@ -20,6 +20,7 @@ export default function ResourceLink({
   emptyState = '-',
   short = false,
   full = false,
+  ...props
 }: ResourceLinkProps): ReactNode {
   const { clusterId } = useParams()
   const message = useMemo(() => {
@@ -53,6 +54,7 @@ export default function ResourceLink({
         objectRef?.name,
         objectRef?.namespace
       )}
+      {...props}
     >
       <InlineLink>{message}</InlineLink>
     </Link>

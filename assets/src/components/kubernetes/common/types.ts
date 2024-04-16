@@ -69,8 +69,8 @@ enum Kind {
   // Access
   Role = 'role',
   RoleBinding = 'rolebinding',
-  ClusterRole = 'clusterole',
-  ClusterRoleBinding = 'clusterolebinding',
+  ClusterRole = 'clusterrole',
+  ClusterRoleBinding = 'clusterrolebinding',
   ServiceAccount = 'serviceaccount',
   // Cluster
   Node = 'node',
@@ -86,6 +86,10 @@ interface ObjectReference {
   kind: Kind
   namespace?: Nullable<string>
   name: Nullable<string>
+}
+
+interface UnknownProps {
+  [key: string]: unknown
 }
 
 function toKind(kind: Nullable<string>): Kind {
@@ -118,6 +122,7 @@ export type {
   QueryName,
   ResourceListItemsKey,
   ObjectReference,
+  UnknownProps,
 }
 
 export { fromResource, toKind, Kind }

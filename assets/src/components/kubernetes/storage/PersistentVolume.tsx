@@ -5,7 +5,7 @@ import {
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import {
@@ -18,7 +18,6 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { MetadataSidecar } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { InlineLink } from '../../utils/typography/InlineLink'
 import { SubTitle } from '../../utils/SubTitle'
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 import { useCluster } from '../Cluster'
@@ -83,31 +82,21 @@ export default function PersistentVolume(): ReactElement {
             />
           </SidecarItem>
           <SidecarItem heading="Claim">
-            {pv?.claim ? (
-              <Link
-                to={getResourceDetailsAbsPath(
-                  cluster?.id,
-                  Kind.PersistentVolumeClaim,
-                  claimName ?? '',
-                  claimNamespace
-                )}
-              >
-                <InlineLink>{pv?.claim}</InlineLink>
-              </Link>
-            ) : (
-              '-'
-            )}
+            <ResourceLink
+              objectRef={{
+                kind: Kind.PersistentVolumeClaim,
+                name: claimName,
+                namespace: claimNamespace,
+              }}
+            />
           </SidecarItem>
           <SidecarItem heading="Storage class">
-            <Link
-              to={getResourceDetailsAbsPath(
-                cluster?.id,
-                Kind.StorageClass,
-                pv?.storageClass ?? ''
-              )}
-            >
-              <InlineLink>{pv?.storageClass}</InlineLink>
-            </Link>
+            <ResourceLink
+              objectRef={{
+                kind: Kind.StorageClass,
+                name: pv?.storageClass,
+              }}
+            />
           </SidecarItem>
           <SidecarItem heading="Status">
             <PVStatusChip status={pv?.status} />

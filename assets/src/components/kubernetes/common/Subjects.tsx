@@ -1,4 +1,4 @@
-import { ReactElement } from 'react'
+import React, { ReactElement } from 'react'
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Link, useParams } from 'react-router-dom'
@@ -8,9 +8,9 @@ import {
   V1_Subject as SubjectT,
 } from '../../../generated/graphql-kubernetes'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { Kind } from './types'
+import ResourceLink from './ResourceLink'
 
 const columnHelper = createColumnHelper<SubjectT>()
 
@@ -24,20 +24,16 @@ const columns = [
     id: 'namespace',
     header: 'Namespace',
     cell: ({ getValue }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { clusterId } = useParams()
-
       const namespace = getValue()
 
-      if (!namespace) return null
-
       return (
-        <Link
-          to={getResourceDetailsAbsPath(clusterId, Kind.Namespace, getValue())}
+        <ResourceLink
+          objectRef={{
+            kind: Kind.Namespace,
+            name: namespace,
+          }}
           onClick={(e) => e.stopPropagation()}
-        >
-          <InlineLink>{namespace}</InlineLink>
-        </Link>
+        />
       )
     },
   }),
