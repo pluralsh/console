@@ -11,3 +11,4 @@ names:
 - rook
 - jaeger
 - flux
+- opentelemetry
