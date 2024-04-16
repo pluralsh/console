@@ -13,15 +13,12 @@ import {
   useCustomResourceQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { useCluster } from '../Cluster'
-
 import { useEventsColumns } from '../cluster/Events'
 import { ResourceList } from '../common/ResourceList'
-
 import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
