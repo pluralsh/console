@@ -75,7 +75,7 @@ export default function ResourceDetails({
                 selectedKey: currentTab?.path,
               }}
               marginRight="medium"
-              paddingTop="xxsmall"
+              paddingTop="xsmall"
               paddingBottom="xxsmall"
             >
               {tabs.map(({ label, path }) => (

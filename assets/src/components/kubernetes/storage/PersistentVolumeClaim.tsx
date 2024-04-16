@@ -1,7 +1,5 @@
 import React, { ReactElement, useMemo } from 'react'
-
 import { Link, Outlet, useParams } from 'react-router-dom'
-
 import {
   ChipList,
   SidecarItem,
@@ -15,7 +13,6 @@ import {
   usePersistentVolumeClaimQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-
 import {
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
   getResourceDetailsAbsPath,
@@ -23,10 +20,9 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-
 import { InlineLink } from '../../utils/typography/InlineLink'
-
 import { useCluster } from '../Cluster'
+import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './PersistentVolumeClaims'
 import { PVCStatusChip } from './utils'
@@ -62,7 +58,7 @@ export default function PersistentVolumeClaim(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'persistentvolumeclaim',
+            Kind.PersistentVolumeClaim,
             name,
             namespace
           ),
@@ -92,7 +88,7 @@ export default function PersistentVolumeClaim(): ReactElement {
             <Link
               to={getResourceDetailsAbsPath(
                 cluster?.id,
-                'persistentvolume',
+                Kind.PersistentVolume,
                 pvc?.volume ?? ''
               )}
             >
@@ -103,7 +99,7 @@ export default function PersistentVolumeClaim(): ReactElement {
             <Link
               to={getResourceDetailsAbsPath(
                 cluster?.id,
-                'storageclass',
+                Kind.StorageClass,
                 pvc?.storageClass ?? ''
               )}
             >

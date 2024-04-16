@@ -1,41 +1,36 @@
 import { ReactElement } from 'react'
 import moment from 'moment'
 import { ChipList } from '@pluralsh/design-system'
-import { Link } from 'react-router-dom'
 
 import { Controller_ResourceOwner as ResourceOwnerT } from '../../../generated/graphql-kubernetes'
-import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import { InlineLink } from '../../utils/typography/InlineLink'
 
 import ResourceInfoCard, {
   ResourceInfoCardEntry,
   ResourceInfoCardSection,
 } from './ResourceInfoCard'
 import Annotations from './Annotations'
+import ResourceLink from './ResourceLink'
+import { toKind } from './types'
 
 interface ResourceOwnerProps {
   owner: Nullable<ResourceOwnerT>
-  clusterId: Nullable<string>
 }
 
 export default function ResourceOwner({
   owner,
-  clusterId,
 }: ResourceOwnerProps): ReactElement {
   return (
     <ResourceInfoCard title={`Controlled By ${owner?.typeMeta?.kind}`}>
       <ResourceInfoCardSection>
         <ResourceInfoCardEntry heading="Name">
-          <Link
-            to={getResourceDetailsAbsPath(
-              clusterId,
-              owner?.typeMeta?.kind,
-              owner?.objectMeta?.name,
-              owner?.objectMeta?.namespace
-            )}
-          >
-            <InlineLink>{owner?.objectMeta?.name}</InlineLink>
-          </Link>
+          <ResourceLink
+            short
+            objectRef={{
+              kind: toKind(owner?.typeMeta?.kind),
+              namespace: owner?.objectMeta?.namespace,
+              name: owner?.objectMeta?.name,
+            }}
+          />
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Pods">
           {owner?.pods?.running} / {owner?.pods?.desired}

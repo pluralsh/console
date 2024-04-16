@@ -95,10 +95,10 @@ export function WorkloadStatusChip({ podInfo }: { podInfo: PodInfoT }) {
 
   return (
     <WrapWithIf
-      condition={podInfo.warnings?.length > 0}
+      condition={podInfo?.warnings?.length > 0}
       wrapper={
         <Tooltip
-          label={podInfo.warnings?.map((ev) => ev?.message)?.join(', ')}
+          label={podInfo?.warnings?.map((ev) => ev?.message)?.join(', ')}
           placement="bottom"
         />
       }

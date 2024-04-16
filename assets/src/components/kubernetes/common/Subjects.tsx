@@ -10,6 +10,8 @@ import {
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
 
+import { Kind } from './types'
+
 const columnHelper = createColumnHelper<SubjectT>()
 
 const columns = [
@@ -31,7 +33,7 @@ const columns = [
 
       return (
         <Link
-          to={getResourceDetailsAbsPath(clusterId, 'namespace', getValue())}
+          to={getResourceDetailsAbsPath(clusterId, Kind.Namespace, getValue())}
           onClick={(e) => e.stopPropagation()}
         >
           <InlineLink>{namespace}</InlineLink>

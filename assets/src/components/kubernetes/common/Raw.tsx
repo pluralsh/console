@@ -46,7 +46,7 @@ export default function Raw(): ReactElement {
         : useResourceUpdateMutation,
     [namespace]
   )
-  const { data, refetch, loading } = resourceQuery({
+  const { data, refetch, loading, error } = resourceQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     fetchPolicy: 'no-cache',
@@ -90,7 +90,7 @@ export default function Raw(): ReactElement {
     }
   }, [data])
 
-  if (!current) return <LoadingIndicator />
+  if (!current && !error) return <LoadingIndicator />
 
   if (!data?.handleGetResource?.Object && !loading)
     return <GqlError error="Could not fetch resource" />

@@ -22,6 +22,8 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { EventTypeChip } from './utils'
 import { getClusterBreadcrumbs } from './Cluster'
 
@@ -57,7 +59,7 @@ const colObjectNamespace = columnHelper.accessor(
 
       return (
         <Link
-          to={getResourceDetailsAbsPath(cluster?.id, 'namespace', namespace)}
+          to={getResourceDetailsAbsPath(cluster?.id, Kind.Namespace, namespace)}
           onClick={(e) => e.stopPropagation()}
         >
           <InlineLink>{getValue()}</InlineLink>

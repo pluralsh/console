@@ -38,6 +38,8 @@ import { ReadinessT } from '../../../utils/status'
 import { StatusChip } from '../../cluster/TableElements'
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './Jobs'
 import { usePodsColumns } from './Pods'
 
@@ -73,7 +75,7 @@ export default function Job(): ReactElement {
         },
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'job', name, namespace),
+          url: getResourceDetailsAbsPath(clusterId, Kind.Job, name, namespace),
         },
       ],
       [cluster, clusterId, name, namespace]

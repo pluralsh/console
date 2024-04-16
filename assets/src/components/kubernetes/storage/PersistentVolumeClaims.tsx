@@ -23,6 +23,8 @@ import {
 
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { PVCStatusChip } from './utils'
 import { getStorageBreadcrumbs } from './Storage'
 
@@ -77,7 +79,7 @@ export const usePersistentVolumeClaimListColumns = () => {
             <Link
               to={getResourceDetailsAbsPath(
                 cluster?.id,
-                'persistentvolume',
+                Kind.PersistentVolume,
                 getValue()
               )}
               onClick={(e) => e.stopPropagation()}
@@ -99,7 +101,7 @@ export const usePersistentVolumeClaimListColumns = () => {
             <Link
               to={getResourceDetailsAbsPath(
                 cluster?.id,
-                'storageclass',
+                Kind.StorageClass,
                 getValue()
               )}
               onClick={(e) => e.stopPropagation()}

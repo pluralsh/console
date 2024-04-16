@@ -16,6 +16,8 @@ import { ClusterTinyFragment } from '../../../generated/graphql'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
+import { toKind } from '../common/types'
+import ResourceLink from '../common/ResourceLink'
 
 const columnHelper = createColumnHelper<HorizontalPodAutoscalerT>()
 
@@ -38,26 +40,19 @@ const COLUMNS = [
   columnHelper.accessor((hpa) => hpa, {
     id: 'reference',
     header: 'Reference',
-    cell: ({ getValue, table }) => {
-      const { cluster } = table.options.meta as {
-        cluster?: ClusterTinyFragment
-      }
+    cell: ({ getValue }) => {
       const hpa = getValue()
       const ref = hpa?.scaleTargetRef
 
       return (
-        <Link
-          to={getResourceDetailsAbsPath(
-            cluster?.id,
-            ref?.kind?.toLowerCase(),
-            ref?.name,
-            hpa?.objectMeta?.namespace
-          )}
-        >
-          <InlineLink>
-            {ref?.kind?.toLowerCase()}/{ref?.name}
-          </InlineLink>
-        </Link>
+        <ResourceLink
+          full
+          objectRef={{
+            kind: toKind(ref?.kind),
+            namespace: hpa?.objectMeta?.namespace,
+            name: ref?.name,
+          }}
+        />
       )
     },
   }),

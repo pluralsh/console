@@ -5,7 +5,6 @@ import {
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
@@ -22,10 +21,9 @@ import { MetadataSidecar, useDefaultColumns } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-
 import { ResourceList } from '../common/ResourceList'
-
 import { useCluster } from '../Cluster'
+import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './StorageClasses'
 import {
@@ -60,7 +58,7 @@ export default function StorageClass(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'storageclass', name),
+          url: getResourceDetailsAbsPath(clusterId, Kind.StorageClass, name),
         },
       ],
       [cluster, clusterId, name]

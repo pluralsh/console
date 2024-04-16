@@ -9,15 +9,13 @@ import {
   useClusterRoleQuery,
 } from '../../../generated/graphql-kubernetes'
 import { MetadataSidecar } from '../common/utils'
-
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import PolicyRules from '../common/PolicyRules'
-
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
-
 import { useCluster } from '../Cluster'
+import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './ClusterRoles'
 
@@ -47,7 +45,7 @@ export default function ClusterRole(): ReactElement {
 
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'clusterrole', name),
+          url: getResourceDetailsAbsPath(clusterId, Kind.ClusterRole, name),
         },
       ],
       [cluster, clusterId, name]

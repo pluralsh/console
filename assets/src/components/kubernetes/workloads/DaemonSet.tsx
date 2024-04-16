@@ -43,6 +43,8 @@ import { LabelSelector } from '../common/LabelSelector'
 import { PodInfo } from '../common/PodInfo'
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './DaemonSets'
 import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
@@ -81,7 +83,7 @@ export default function DaemonSet(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'daemonset',
+            Kind.DaemonSet,
             name,
             namespace
           ),

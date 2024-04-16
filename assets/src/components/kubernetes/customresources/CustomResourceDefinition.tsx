@@ -35,6 +35,8 @@ import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { DataSelectInputs, useDataSelect } from '../common/DataSelect'
 import { NAMESPACE_PARAM } from '../Navigation'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'
 
@@ -66,7 +68,7 @@ export default function CustomResourceDefinition(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'customresourcedefinition',
+            Kind.CustomResourceDefinition,
             name
           ),
         },

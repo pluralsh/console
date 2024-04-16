@@ -34,6 +34,7 @@ import { ContainerStatusT } from '../../cluster/pods/PodsList'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { useCluster } from '../Cluster'
 import ImagePullSecrets from '../common/ImagePullSecrets'
+import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Pods'
 import { toReadiness } from './utils'
@@ -70,7 +71,7 @@ export function Pod(): ReactElement {
         },
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'pod', name, namespace),
+          url: getResourceDetailsAbsPath(clusterId, Kind.Pod, name, namespace),
         },
       ],
       [cluster, clusterId, name, namespace]
@@ -104,7 +105,11 @@ export function Pod(): ReactElement {
           <SidecarItem heading="Phase">{pod?.podPhase}</SidecarItem>
           <SidecarItem heading="Node">
             <Link
-              to={getResourceDetailsAbsPath(clusterId, 'node', pod?.nodeName)}
+              to={getResourceDetailsAbsPath(
+                clusterId,
+                Kind.Node,
+                pod?.nodeName
+              )}
             >
               <InlineLink>{pod?.nodeName}</InlineLink>
             </Link>
@@ -113,7 +118,7 @@ export function Pod(): ReactElement {
             <Link
               to={getResourceDetailsAbsPath(
                 clusterId,
-                'serviceaccount',
+                Kind.ServiceAccount,
                 pod?.serviceAccountName,
                 pod?.objectMeta?.namespace
               )}
@@ -146,10 +151,7 @@ export function PodInfo(): ReactElement {
       {pod?.controller?.objectMeta?.name && (
         <section>
           <SubTitle>Owner</SubTitle>
-          <ResourceOwner
-            clusterId={cluster?.id}
-            owner={pod?.controller}
-          />
+          <ResourceOwner owner={pod?.controller} />
         </section>
       )}
       <section>

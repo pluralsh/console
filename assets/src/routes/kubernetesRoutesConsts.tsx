@@ -1,5 +1,7 @@
 import pluralize from 'pluralize'
 
+import { Kind } from '../components/kubernetes/common/types'
+
 export const KUBERNETES_ROOT_PATH = 'kubernetes'
 export const KUBERNETES_PARAM_CLUSTER = ':clusterId?'
 export const KUBERNETES_ABS_PATH = getKubernetesAbsPath(
@@ -85,7 +87,7 @@ export function getCustomResourcesAbsPath(
 
 export function getResourceDetailsAbsPath(
   clusterId: Nullable<string>,
-  kind: Nullable<string>,
+  kind: Nullable<Kind>,
   name: Nullable<string>,
   namespace?: Nullable<string>
 ): string {

@@ -15,14 +15,15 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar, ResourceLink } from '../common/utils'
+import { MetadataSidecar } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { SubTitle } from '../../utils/SubTitle'
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
-
 import { useCluster } from '../Cluster'
+import ResourceLink from '../common/ResourceLink'
+import { Kind } from '../common/types'
 
 import { PVStatusChip } from './utils'
 import { getBreadcrumbs } from './PersistentVolumes'
@@ -52,7 +53,11 @@ export default function PersistentVolume(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'persistentvolume', name),
+          url: getResourceDetailsAbsPath(
+            clusterId,
+            Kind.PersistentVolume,
+            name
+          ),
         },
       ],
       [cluster, clusterId, name]
@@ -82,7 +87,7 @@ export default function PersistentVolume(): ReactElement {
               <Link
                 to={getResourceDetailsAbsPath(
                   cluster?.id,
-                  'persistentvolumeclaim',
+                  Kind.PersistentVolumeClaim,
                   claimName ?? '',
                   claimNamespace
                 )}
@@ -97,7 +102,7 @@ export default function PersistentVolume(): ReactElement {
             <Link
               to={getResourceDetailsAbsPath(
                 cluster?.id,
-                'storageclass',
+                Kind.StorageClass,
                 pv?.storageClass ?? ''
               )}
             >
@@ -210,9 +215,11 @@ export function PersistentVolumeInfo(): ReactElement {
             </ResourceInfoCardEntry>
             <ResourceInfoCardEntry heading="Secret">
               <ResourceLink
-                kind="secret"
-                name={source.azureFile.secretName}
-                namespace={source.azureFile.secretNamespace}
+                objectRef={{
+                  kind: Kind.Secret,
+                  namespace: source?.azureFile?.secretNamespace,
+                  name: source?.azureFile?.secretName,
+                }}
               />
             </ResourceInfoCardEntry>
           </>
@@ -243,9 +250,11 @@ export function PersistentVolumeInfo(): ReactElement {
             </ResourceInfoCardEntry>
             <ResourceInfoCardEntry heading="Secret">
               <ResourceLink
-                kind="secret"
-                name={source.cephfs.secretRef?.name}
-                namespace={source.cephfs.secretRef?.namespace}
+                objectRef={{
+                  kind: Kind.Secret,
+                  namespace: source.cephfs.secretRef?.namespace,
+                  name: source.cephfs.secretRef?.name,
+                }}
               />
             </ResourceInfoCardEntry>
           </>
@@ -265,9 +274,11 @@ export function PersistentVolumeInfo(): ReactElement {
             {source.cinder.secretRef && (
               <ResourceInfoCardEntry heading="Secret">
                 <ResourceLink
-                  kind="secret"
-                  name={source.cinder.secretRef?.name}
-                  namespace={source.cinder.secretRef.namespace}
+                  objectRef={{
+                    kind: Kind.Secret,
+                    namespace: source.cinder.secretRef?.namespace,
+                    name: source.cinder.secretRef?.name,
+                  }}
                 />
               </ResourceInfoCardEntry>
             )}
@@ -291,45 +302,55 @@ export function PersistentVolumeInfo(): ReactElement {
             {source.csi.controllerExpandSecretRef && (
               <ResourceInfoCardEntry heading="Controller expand secret">
                 <ResourceLink
-                  kind="secret"
-                  name={source.csi.controllerExpandSecretRef?.name}
-                  namespace={source.csi.controllerExpandSecretRef?.namespace}
+                  objectRef={{
+                    kind: Kind.Secret,
+                    namespace: source.csi.controllerExpandSecretRef?.namespace,
+                    name: source.csi.controllerExpandSecretRef?.name,
+                  }}
                 />
               </ResourceInfoCardEntry>
             )}
             {source.csi.controllerPublishSecretRef && (
               <ResourceInfoCardEntry heading="Controller publish secret">
                 <ResourceLink
-                  kind="secret"
-                  name={source.csi.controllerPublishSecretRef?.name}
-                  namespace={source.csi.controllerPublishSecretRef?.namespace}
+                  objectRef={{
+                    kind: Kind.Secret,
+                    namespace: source.csi.controllerPublishSecretRef?.namespace,
+                    name: source.csi.controllerPublishSecretRef?.name,
+                  }}
                 />
               </ResourceInfoCardEntry>
             )}
             {source.csi.nodeExpandSecretRef && (
               <ResourceInfoCardEntry heading="Node expand secret">
                 <ResourceLink
-                  kind="node"
-                  name={source.csi.nodeExpandSecretRef?.name}
-                  namespace={source.csi.nodeExpandSecretRef?.namespace}
+                  objectRef={{
+                    kind: Kind.Secret,
+                    namespace: source.csi.nodeExpandSecretRef?.namespace,
+                    name: source.csi.nodeExpandSecretRef?.name,
+                  }}
                 />
               </ResourceInfoCardEntry>
             )}
             {source.csi.nodePublishSecretRef && (
               <ResourceInfoCardEntry heading="Node publish secret">
                 <ResourceLink
-                  kind="node"
-                  name={source.csi.nodePublishSecretRef?.name}
-                  namespace={source.csi.nodePublishSecretRef?.namespace}
+                  objectRef={{
+                    kind: Kind.Secret,
+                    namespace: source.csi.nodePublishSecretRef?.namespace,
+                    name: source.csi.nodePublishSecretRef?.name,
+                  }}
                 />
               </ResourceInfoCardEntry>
             )}
             {source.csi.nodeStageSecretRef && (
               <ResourceInfoCardEntry heading="Node stage secret">
                 <ResourceLink
-                  kind="node"
-                  name={source.csi.nodeStageSecretRef?.name}
-                  namespace={source.csi.nodeStageSecretRef?.namespace}
+                  objectRef={{
+                    kind: Kind.Secret,
+                    namespace: source.csi.nodeStageSecretRef?.namespace,
+                    name: source.csi.nodeStageSecretRef?.name,
+                  }}
                 />
               </ResourceInfoCardEntry>
             )}
@@ -392,9 +413,11 @@ export function PersistentVolumeInfo(): ReactElement {
             </ResourceInfoCardEntry>
             <ResourceInfoCardEntry heading="Secret">
               <ResourceLink
-                kind="secret"
-                name={source.flexVolume.secretRef?.name}
-                namespace={source.flexVolume.secretRef?.namespace}
+                objectRef={{
+                  kind: Kind.Secret,
+                  namespace: source.flexVolume.secretRef?.namespace,
+                  name: source.flexVolume.secretRef?.name,
+                }}
               />
             </ResourceInfoCardEntry>
           </>
@@ -611,9 +634,11 @@ export function PersistentVolumeInfo(): ReactElement {
             </ResourceInfoCardEntry>
             <ResourceInfoCardEntry heading="Secret">
               <ResourceLink
-                kind="secret"
-                name={source.rbd.secretRef?.name}
-                namespace={source.rbd.secretRef?.namespace}
+                objectRef={{
+                  kind: Kind.Secret,
+                  namespace: source.rbd.secretRef?.namespace,
+                  name: source.rbd.secretRef?.name,
+                }}
               />
             </ResourceInfoCardEntry>
           </>
@@ -652,9 +677,11 @@ export function PersistentVolumeInfo(): ReactElement {
             </ResourceInfoCardEntry>
             <ResourceInfoCardEntry heading="Secret">
               <ResourceLink
-                kind="secret"
-                name={source.scaleIO.secretRef?.name}
-                namespace={source.scaleIO.secretRef?.namespace}
+                objectRef={{
+                  kind: Kind.Secret,
+                  namespace: source.scaleIO.secretRef?.namespace,
+                  name: source.scaleIO.secretRef?.name,
+                }}
               />
             </ResourceInfoCardEntry>
           </>
@@ -678,9 +705,11 @@ export function PersistentVolumeInfo(): ReactElement {
             </ResourceInfoCardEntry>
             <ResourceInfoCardEntry heading="Secret">
               <ResourceLink
-                kind="secret"
-                name={source.storageos.secretRef?.name}
-                namespace={source.storageos.secretRef?.namespace}
+                objectRef={{
+                  kind: Kind.Secret,
+                  namespace: source.storageos.secretRef?.namespace,
+                  name: source.storageos.secretRef?.name,
+                }}
               />
             </ResourceInfoCardEntry>
           </>

@@ -6,6 +6,9 @@ import { Link } from 'react-router-dom'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
 
+import { Kind } from './types'
+import ResourceLink from './ResourceLink'
+
 const columnHelper = createColumnHelper<SecretReference>()
 
 interface SecretReference {
@@ -25,14 +28,17 @@ const columns = [
     id: 'name',
     header: 'Name',
     cell: ({ getValue }) => {
-      const { clusterId, name, namespace } = getValue()
+      const { name, namespace } = getValue()
 
       return (
-        <Link
-          to={getResourceDetailsAbsPath(clusterId, 'secret', name, namespace)}
-        >
-          <InlineLink>{name}</InlineLink>
-        </Link>
+        <ResourceLink
+          short
+          objectRef={{
+            kind: Kind.Secret,
+            namespace,
+            name,
+          }}
+        />
       )
     },
   }),

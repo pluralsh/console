@@ -14,6 +14,8 @@ import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './IngressClasses'
 
 const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
@@ -38,7 +40,7 @@ export default function IngressClass(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'ingressclass', name),
+          url: getResourceDetailsAbsPath(clusterId, Kind.IngressClass, name),
         },
       ],
       [cluster, clusterId, name]

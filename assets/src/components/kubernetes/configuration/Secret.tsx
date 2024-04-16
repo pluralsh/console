@@ -32,6 +32,8 @@ import { useCluster } from '../Cluster'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './Secrets'
 
 const directory: Array<TabEntry> = [
@@ -66,7 +68,12 @@ export default function Secret(): ReactElement {
         },
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'secret', name, namespace),
+          url: getResourceDetailsAbsPath(
+            clusterId,
+            Kind.Secret,
+            name,
+            namespace
+          ),
         },
       ],
       [cluster, clusterId, name, namespace]

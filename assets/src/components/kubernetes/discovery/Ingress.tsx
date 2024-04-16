@@ -51,6 +51,8 @@ import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './Ingresses'
 import { Endpoints } from './utils'
 
@@ -87,7 +89,12 @@ export default function Ingress(): ReactElement {
         },
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'ingress', name, namespace),
+          url: getResourceDetailsAbsPath(
+            clusterId,
+            Kind.Ingress,
+            name,
+            namespace
+          ),
         },
       ],
       [cluster, clusterId, name, namespace]
@@ -158,7 +165,7 @@ const columns = [
         <Link
           to={getResourceDetailsAbsPath(
             clusterId,
-            'service',
+            Kind.Service,
             getValue() ?? '',
             namespace
           )}
@@ -185,7 +192,7 @@ const columns = [
         <Link
           to={getResourceDetailsAbsPath(
             clusterId,
-            'secret',
+            Kind.Secret,
             getValue() ?? '',
             namespace
           )}

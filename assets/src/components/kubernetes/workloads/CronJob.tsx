@@ -41,6 +41,8 @@ import { useEventsColumns } from '../cluster/Events'
 import { SubTitle } from '../../utils/SubTitle'
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './CronJobs'
 import { useJobsColumns } from './Jobs'
 
@@ -79,7 +81,12 @@ export default function CronJob(): ReactElement {
         },
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'cronjob', name, namespace),
+          url: getResourceDetailsAbsPath(
+            clusterId,
+            Kind.CronJob,
+            name,
+            namespace
+          ),
         },
       ],
       [cluster, clusterId, name, namespace]

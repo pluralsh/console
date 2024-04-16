@@ -13,7 +13,6 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import {
@@ -21,8 +20,8 @@ import {
   getResourceDetailsAbsPath,
   getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-
 import { useCluster } from '../Cluster'
+import { Kind } from '../common/types'
 
 import { PVStatusChip } from './utils'
 import { getStorageBreadcrumbs } from './Storage'
@@ -56,7 +55,7 @@ export const colClaim = columnHelper.accessor((pv) => pv.claim, {
       <Link
         to={getResourceDetailsAbsPath(
           cluster?.id,
-          'persistentvolumeclaim',
+          Kind.PersistentVolumeClaim,
           name,
           namespace
         )}
@@ -78,7 +77,11 @@ const colStorageClass = columnHelper.accessor((pv) => pv.storageClass, {
 
     return (
       <Link
-        to={getResourceDetailsAbsPath(cluster?.id, 'storageclass', getValue())}
+        to={getResourceDetailsAbsPath(
+          cluster?.id,
+          Kind.StorageClass,
+          getValue()
+        )}
         onClick={(e) => e.stopPropagation()}
       >
         <InlineLink>{getValue()}</InlineLink>

@@ -2,11 +2,9 @@ import uniqWith from 'lodash/uniqWith'
 import React, { ReactNode, useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
 import { Chip, ChipList, Sidecar, SidecarItem } from '@pluralsh/design-system'
-import { Link, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import moment from 'moment/moment'
-
 import yaml from 'js-yaml'
-
 import { capitalize } from 'lodash'
 
 import {
@@ -21,11 +19,11 @@ import {
   getKubernetesAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-
 import { InlineLink } from '../../utils/typography/InlineLink'
 
-import { ResourceT } from './ResourceList'
+import { Kind, Resource } from './types'
 import Annotations from './Annotations'
+import ResourceLink from './ResourceLink'
 
 export const ITEMS_PER_PAGE = 25
 
@@ -66,7 +64,7 @@ export function useDefaultColumns<
             <Link
               to={getResourceDetailsAbsPath(
                 cluster?.id,
-                'namespace',
+                Kind.Namespace,
                 row.original.objectMeta.namespace!
               )}
               onClick={(e) => e.stopPropagation()}
@@ -130,32 +128,6 @@ export function ResourceReadyChip({
     >
       {capitalize(r)}
     </Chip>
-  )
-}
-
-export function ResourceLink({
-  name,
-  namespace,
-  kind,
-  emptyState = '-',
-}: {
-  name?: Maybe<string>
-  namespace?: Maybe<string>
-  kind: string
-  emptyState?: string
-}) {
-  const { clusterId } = useParams()
-
-  if (!name) return emptyState
-
-  return (
-    <Link to={getResourceDetailsAbsPath(clusterId, kind, name, namespace)}>
-      <InlineLink>
-        {namespace}
-        {namespace && '/'}
-        {name}
-      </InlineLink>
-    </Link>
   )
 }
 
@@ -257,7 +229,7 @@ export function MetadataSidecar({
   resource,
   children,
 }: {
-  resource?: Maybe<ResourceT>
+  resource?: Maybe<Resource>
   children?: ReactNode
 }) {
   const objectMeta = resource?.objectMeta
@@ -270,7 +242,12 @@ export function MetadataSidecar({
           <SidecarItem heading="Name">{objectMeta.name}</SidecarItem>
           {objectMeta.namespace && (
             <SidecarItem heading="Namespace">
-              {objectMeta.namespace}
+              <ResourceLink
+                objectRef={{
+                  kind: Kind.Namespace,
+                  name: objectMeta?.namespace,
+                }}
+              />
             </SidecarItem>
           )}
           <SidecarItem heading="UID">{objectMeta.uid}</SidecarItem>

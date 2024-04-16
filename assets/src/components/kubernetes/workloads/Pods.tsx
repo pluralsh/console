@@ -25,6 +25,8 @@ import { numishSort } from '../../cluster/TableElements'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
 
+import { Kind } from '../common/types'
+
 import { WorkloadImages, toReadiness } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
 
@@ -70,7 +72,7 @@ const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
 
     return (
       <Link
-        to={getResourceDetailsAbsPath(cluster?.id, 'node', getValue())}
+        to={getResourceDetailsAbsPath(cluster?.id, Kind.Node, getValue())}
         onClick={(e) => e.stopPropagation()}
       >
         <InlineLink>{getValue()}</InlineLink>

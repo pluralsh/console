@@ -252,6 +252,7 @@ export type MutationHandleScaleResourceArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   page?: InputMaybe<Scalars['String']['input']>;
+  scaleBy?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -4865,6 +4866,16 @@ export type ResourceUpdateMutationVariables = Exact<{
 
 export type ResourceUpdateMutation = { __typename?: 'Mutation', handlePutResource?: any | null };
 
+export type ResourceScaleMutationVariables = Exact<{
+  kind: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  scaleBy: Scalars['String']['input'];
+}>;
+
+
+export type ResourceScaleMutation = { __typename?: 'Mutation', handleScaleResource?: { __typename?: 'scaling_ReplicaCounts', actualReplicas: number, desiredReplicas: number } | null };
+
 export type ConfigMapsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -7676,6 +7687,48 @@ export function useResourceUpdateMutation(baseOptions?: Apollo.MutationHookOptio
 export type ResourceUpdateMutationHookResult = ReturnType<typeof useResourceUpdateMutation>;
 export type ResourceUpdateMutationResult = Apollo.MutationResult<ResourceUpdateMutation>;
 export type ResourceUpdateMutationOptions = Apollo.BaseMutationOptions<ResourceUpdateMutation, ResourceUpdateMutationVariables>;
+export const ResourceScaleDocument = gql`
+    mutation ResourceScale($kind: String!, $namespace: String!, $name: String!, $scaleBy: String!) {
+  handleScaleResource(
+    kind: $kind
+    namespace: $namespace
+    name: $name
+    scaleBy: $scaleBy
+  ) @rest(type: "Void", path: "scale/{args.kind}/{args.namespace}/{args.name}?scaleBy={args.scaleBy}", method: "PUT", bodyKey: "scaleBy") {
+    actualReplicas
+    desiredReplicas
+  }
+}
+    `;
+export type ResourceScaleMutationFn = Apollo.MutationFunction<ResourceScaleMutation, ResourceScaleMutationVariables>;
+
+/**
+ * __useResourceScaleMutation__
+ *
+ * To run a mutation, you first call `useResourceScaleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useResourceScaleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [resourceScaleMutation, { data, loading, error }] = useResourceScaleMutation({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *      scaleBy: // value for 'scaleBy'
+ *   },
+ * });
+ */
+export function useResourceScaleMutation(baseOptions?: Apollo.MutationHookOptions<ResourceScaleMutation, ResourceScaleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ResourceScaleMutation, ResourceScaleMutationVariables>(ResourceScaleDocument, options);
+      }
+export type ResourceScaleMutationHookResult = ReturnType<typeof useResourceScaleMutation>;
+export type ResourceScaleMutationResult = Apollo.MutationResult<ResourceScaleMutation>;
+export type ResourceScaleMutationOptions = Apollo.BaseMutationOptions<ResourceScaleMutation, ResourceScaleMutationVariables>;
 export const ConfigMapsDocument = gql`
     query ConfigMaps($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetConfigMapList(

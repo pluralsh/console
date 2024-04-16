@@ -50,6 +50,8 @@ import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './Services'
 import { Endpoints, serviceTypeDisplayName } from './utils'
 import { useIngressesColumns } from './Ingresses'
@@ -89,7 +91,12 @@ export default function Service(): ReactElement {
         },
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'service', name, namespace),
+          url: getResourceDetailsAbsPath(
+            clusterId,
+            Kind.Service,
+            name,
+            namespace
+          ),
         },
       ],
       [cluster, clusterId, name, namespace]

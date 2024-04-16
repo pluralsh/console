@@ -1,5 +1,4 @@
 import { ReactElement, useCallback, useEffect, useMemo } from 'react'
-import type { OperationVariables } from '@apollo/client/core'
 import type {
   QueryHookOptions,
   QueryResult,
@@ -10,11 +9,6 @@ import { useNavigate } from 'react-router-dom'
 import { Row, SortingState } from '@tanstack/react-table'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import {
-  Types_ListMeta as ListMetaT,
-  Types_ObjectMeta as ObjectMetaT,
-  Types_TypeMeta as TypeMetaT,
-} from '../../../generated/graphql-kubernetes'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
   getCustomResourceDetailsAbsPath,
@@ -23,7 +17,14 @@ import {
 import { useCluster } from '../Cluster'
 
 import { useDataSelect } from './DataSelect'
-import type { Error } from './errors'
+import {
+  QueryName,
+  ResourceListItemsKey,
+  ResourceList as ResourceListT,
+  Resource as ResourceT,
+  ResourceVariables,
+  toKind,
+} from './types'
 import { ErrorToast } from './errors'
 
 import {
@@ -33,33 +34,6 @@ import {
   usePageInfo,
   useSortedTableOptions,
 } from './utils'
-
-interface DataSelectVariables extends OperationVariables {
-  filterBy?: Nullable<string>
-  sortBy?: Nullable<string>
-  itemsPerPage?: Nullable<string>
-  page?: Nullable<string>
-}
-
-interface ResourceVariables extends DataSelectVariables {
-  namespace?: Nullable<string>
-}
-
-interface ResourceListT {
-  errors: Array<Error>
-  listMeta: ListMetaT
-}
-
-export interface ResourceT {
-  objectMeta: ObjectMetaT
-  typeMeta: TypeMetaT
-}
-
-type QueryName<TQuery> = Exclude<Extract<keyof TQuery, string>, '__typename'>
-type ResourceListItemsKey<TResourceList> = Exclude<
-  Extract<keyof TResourceList, string>,
-  '__typename' | 'listMeta' | 'errors' | 'status' | 'cumulativeMetrics'
->
 
 interface ResourceListProps<
   TResourceList,
@@ -207,7 +181,7 @@ export function ResourceList<
                         )
                       : getResourceDetailsAbsPath(
                           cluster?.id,
-                          row.original.typeMeta.kind!,
+                          toKind(row.original.typeMeta.kind!),
                           row.original.objectMeta.name!,
                           row.original.objectMeta.namespace
                         )

@@ -3,16 +3,7 @@ import { GraphQLToast } from '@pluralsh/design-system'
 
 import { hash } from '../../../utils/sha'
 
-interface ErrorStatus {
-  code: number
-  message: string
-  reason: string
-  status: string
-}
-
-interface Error {
-  ErrStatus: ErrorStatus
-}
+import type { Error } from './types'
 
 interface ErrorToastProps {
   errors: Nullable<Array<Error>>
@@ -60,5 +51,4 @@ function ErrorToast({ errors }: ErrorToastProps): Nullable<ReactElement> {
   )
 }
 
-export type { Error }
 export { ErrorToast }

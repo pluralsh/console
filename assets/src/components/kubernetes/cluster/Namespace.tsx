@@ -31,6 +31,8 @@ import { SubTitle } from '../../utils/SubTitle'
 
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './Namespaces'
 import { NamespacePhaseChip } from './utils'
 import { useEventsColumns } from './Events'
@@ -61,7 +63,7 @@ export default function Namespace(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'namespace', name),
+          url: getResourceDetailsAbsPath(clusterId, Kind.Namespace, name),
         },
       ],
       [cluster, clusterId, name]
