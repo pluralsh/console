@@ -2,7 +2,6 @@ import uniqWith from 'lodash/uniqWith'
 import React, { ReactNode, useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
 import { Chip, ChipList, Sidecar, SidecarItem } from '@pluralsh/design-system'
-import { Link } from 'react-router-dom'
 import moment from 'moment/moment'
 import yaml from 'js-yaml'
 import { capitalize } from 'lodash'
@@ -15,11 +14,7 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { ClusterTinyFragment } from '../../../generated/graphql'
-import {
-  getKubernetesAbsPath,
-  getResourceDetailsAbsPath,
-} from '../../../routes/kubernetesRoutesConsts'
-import { InlineLink } from '../../utils/typography/InlineLink'
+import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 
 import { Kind, Resource } from './types'
 import Annotations from './Annotations'
@@ -51,26 +46,17 @@ export function useDefaultColumns<
         id: 'namespace',
         header: 'Namespace',
         enableSorting: true,
-        cell: ({ getValue, table, row }) => {
+        cell: ({ getValue }) => {
           const namespace = getValue()
 
-          if (!namespace) return null
-
-          const { cluster } = table.options.meta as {
-            cluster?: ClusterTinyFragment
-          }
-
           return (
-            <Link
-              to={getResourceDetailsAbsPath(
-                cluster?.id,
-                Kind.Namespace,
-                row.original.objectMeta.namespace!
-              )}
+            <ResourceLink
+              objectRef={{
+                kind: Kind.Namespace,
+                name: namespace,
+              }}
               onClick={(e) => e.stopPropagation()}
-            >
-              <InlineLink>{getValue()}</InlineLink>
-            </Link>
+            />
           )
         },
       }),

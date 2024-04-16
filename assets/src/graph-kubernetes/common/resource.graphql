@@ -42,14 +42,24 @@ mutation ResourceUpdate($kind: String!, $name: String!, $input: JSON!) {
     )
 }
 
-mutation ResourceScale($kind: String!, $namespace: String!, $name: String!, $scaleBy: String!) {
-  handleScaleResource(kind: $kind, namespace: $namespace, name: $name, scaleBy: $scaleBy)
-  @rest(
-    type: "Void"
-    path: "scale/{args.kind}/{args.namespace}/{args.name}?scaleBy={args.scaleBy}"
-    method: "PUT"
-    bodyKey: "scaleBy"
-  ) {
+mutation ResourceScale(
+  $kind: String!
+  $namespace: String!
+  $name: String!
+  $scaleBy: String!
+) {
+  handleScaleResource(
+    kind: $kind
+    namespace: $namespace
+    name: $name
+    scaleBy: $scaleBy
+  )
+    @rest(
+      type: "Void"
+      path: "scale/{args.kind}/{args.namespace}/{args.name}?scaleBy={args.scaleBy}"
+      method: "PUT"
+      bodyKey: "scaleBy"
+    ) {
     actualReplicas
     desiredReplicas
   }

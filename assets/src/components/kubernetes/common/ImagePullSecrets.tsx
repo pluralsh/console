@@ -1,10 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { ReactElement } from 'react'
 import { Table } from '@pluralsh/design-system'
-import { Link } from 'react-router-dom'
-
-import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { Kind } from './types'
 import ResourceLink from './ResourceLink'

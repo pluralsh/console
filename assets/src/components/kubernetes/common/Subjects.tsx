@@ -1,13 +1,11 @@
 import React, { ReactElement } from 'react'
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { Link, useParams } from 'react-router-dom'
 
 import {
   Maybe,
   V1_Subject as SubjectT,
 } from '../../../generated/graphql-kubernetes'
-import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 
 import { Kind } from './types'
 import ResourceLink from './ResourceLink'

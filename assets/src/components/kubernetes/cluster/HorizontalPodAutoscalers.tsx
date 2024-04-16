@@ -1,7 +1,4 @@
 import { ReactElement } from 'react'
-
-import { Link } from 'react-router-dom'
-
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { ResourceList } from '../common/ResourceList'
@@ -12,9 +9,6 @@ import {
   HorizontalPodAutoscalersQueryVariables,
   useHorizontalPodAutoscalersQuery,
 } from '../../../generated/graphql-kubernetes'
-import { ClusterTinyFragment } from '../../../generated/graphql'
-import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import { InlineLink } from '../../utils/typography/InlineLink'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { toKind } from '../common/types'
 import ResourceLink from '../common/ResourceLink'

@@ -1,6 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useMemo } from 'react'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
@@ -13,11 +12,9 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import { InlineLink } from '../../utils/typography/InlineLink'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
   PODS_REL_PATH,
-  getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
@@ -25,6 +22,8 @@ import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
 
 import { Kind } from '../common/types'
+
+import ResourceLink from '../common/ResourceLink'
 
 import { WorkloadImages, toReadiness } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
@@ -64,20 +63,15 @@ const colImages = columnHelper.accessor((pod) => pod?.containerImages, {
 const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
   id: 'node',
   header: 'Node',
-  cell: ({ getValue, table }) => {
-    const { cluster } = table.options.meta as {
-      cluster?: ClusterTinyFragment
-    }
-
-    return (
-      <Link
-        to={getResourceDetailsAbsPath(cluster?.id, Kind.Node, getValue())}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <InlineLink>{getValue()}</InlineLink>
-      </Link>
-    )
-  },
+  cell: ({ getValue }) => (
+    <ResourceLink
+      objectRef={{
+        kind: Kind.Node,
+        name: getValue(),
+      }}
+      onClick={(e) => e.stopPropagation()}
+    />
+  ),
 })
 
 const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {
