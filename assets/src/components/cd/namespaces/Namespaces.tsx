@@ -1,24 +1,17 @@
-import { ComponentProps, useMemo, useState } from 'react'
-import { Button, Chip, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { ComponentProps, useMemo } from 'react'
+import { Chip, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { AuthMethod } from 'generated/graphql'
 import { CD_REL_PATH, NAMESPACES_REL_PATH } from 'routes/cdRoutesConsts'
 import { createMapperWithFallback } from 'utils/mapping'
 
-import { useTheme } from 'styled-components'
+import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 import {
-  CD_BASE_CRUMBS,
-  useSetPageHeaderContent,
-} from '../ContinuousDeployment'
-
-import { YamlGeneratorModal } from '../YamlGeneratorModal'
-
-import {
-  ColCreatedAt,
-  ColFinalizers,
-  ColNamespace,
-  ColStatus,
+  ColAnnotations,
+  ColLabels,
+  ColLastActivity,
+  ColName,
 } from './NamespacesColumns'
 import { NamespacesTable } from './NamespacesTable'
 
@@ -46,12 +39,9 @@ export const NAMESPACES_REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-export const columns = [ColNamespace, ColStatus, ColFinalizers, ColCreatedAt]
+export const columns = [ColName, ColAnnotations, ColLabels, ColLastActivity]
 
 export default function Namespaces() {
-  const theme = useTheme()
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
   useSetBreadcrumbs(
     useMemo(
       () => [
@@ -62,29 +52,6 @@ export default function Namespaces() {
         },
       ],
       []
-    )
-  )
-
-  useSetPageHeaderContent(
-    useMemo(
-      () => (
-        <div
-          css={{
-            display: 'flex',
-            justifyContent: 'end',
-            gap: theme.spacing.small,
-          }}
-        >
-          <Button onClick={() => setIsModalOpen(true)}>New namespace</Button>
-          <YamlGeneratorModal
-            open={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            header="Create global service"
-            kind="GlobalService"
-          />
-        </div>
-      ),
-      [theme.spacing.small, isModalOpen]
     )
   )
 
