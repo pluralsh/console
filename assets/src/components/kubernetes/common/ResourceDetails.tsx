@@ -18,12 +18,14 @@ export interface TabEntry {
 
 interface ResourceDetailsProps {
   tabs: Array<TabEntry>
+  additionalHeaderContent?: Array<ReactElement> | ReactElement
   sidecar: ReactElement
   children?: Array<ReactElement> | ReactElement
 }
 
 export default function ResourceDetails({
   tabs,
+  additionalHeaderContent,
   sidecar,
   children,
 }: ResourceDetailsProps): ReactElement {
@@ -93,6 +95,7 @@ export default function ResourceDetails({
             </TabList>
           </div>
           {headerContent}
+          {additionalHeaderContent}
         </ResponsiveLayoutHeader>
         <ResponsivePageFullWidth
           noPadding

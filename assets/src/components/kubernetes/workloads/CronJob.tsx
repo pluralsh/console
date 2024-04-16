@@ -1,7 +1,9 @@
-import { ReactElement, useMemo } from 'react'
+import React, { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import {
+  Button,
   ChipList,
+  PlayIcon,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -87,6 +89,15 @@ export default function CronJob(): ReactElement {
   return (
     <ResourceDetails
       tabs={directory}
+      additionalHeaderContent={
+        <Button
+          floating
+          startIcon={<PlayIcon />}
+          onClick={() => {}}
+        >
+          Trigger
+        </Button>
+      }
       sidecar={
         <MetadataSidecar resource={cronJob}>
           <SidecarItem heading="Images">
