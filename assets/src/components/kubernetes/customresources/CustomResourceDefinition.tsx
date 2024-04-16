@@ -33,8 +33,7 @@ import { ResourceList } from '../common/ResourceList'
 import { useCluster } from '../Cluster'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { DataSelectInputs, useDataSelect } from '../common/DataSelect'
-
-import { FILTER_PARAM, NAMESPACE_PARAM } from '../Navigation'
+import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'

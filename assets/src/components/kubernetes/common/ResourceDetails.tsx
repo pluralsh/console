@@ -53,11 +53,17 @@ export default function ResourceDetails({
       >
         <ResponsiveLayoutHeader
           css={{
-            paddingRight: theme.spacing.xlarge,
+            paddingRight: theme.spacing.large,
             overflow: 'hidden',
           }}
         >
-          <div css={{ maxWidth: theme.breakpoints.desktopLarge }}>
+          <div
+            css={{
+              display: 'flex',
+              flexGrow: 1,
+              maxWidth: theme.breakpoints.desktopLarge,
+            }}
+          >
             <TabList
               scrollable
               gap="xxsmall"
