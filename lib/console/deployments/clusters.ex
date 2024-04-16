@@ -307,11 +307,19 @@ defmodule Console.Deployments.Clusters do
       end
     end)
     |> add_operation(:rewire, fn
-      %{cluster_service: %Cluster{} = cluster} -> {:ok, cluster}
+      %{cluster_service: %Cluster{} = cluster} ->
+        cluster = Repo.preload(cluster, [:write_bindings])
+        Cluster.changeset(cluster, %{
+          write_bindings: add_binding(cluster.write_bindings, :user_id, user.id)
+        })
+        |> Repo.update()
       %{cluster_service: %Service{id: id}, cluster: cluster} ->
-        Console.Repo.preload(cluster, [:write_bindings])
-        |> Cluster.changeset(%{service_id: id, write_bindings: [%{user_id: user.id}]})
-        |> Console.Repo.update()
+        cluster = Repo.preload(cluster, [:write_bindings])
+        Cluster.changeset(cluster, %{
+          service_id: id,
+          write_bindings: add_binding(cluster.write_bindings, :user_id, user.id)
+        })
+        |> Repo.update()
     end)
     |> execute(extract: :rewire)
     |> when_ok(& %{&1 | token_readable: true})

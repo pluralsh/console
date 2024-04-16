@@ -72,6 +72,40 @@ defmodule Console.Deployments.ClustersTest do
       assert length(revision.node_pools) == length(cluster.node_pools)
     end
 
+    test "it can create a new byok cluster record" do
+      user = admin_user()
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        write_bindings: [%{group_id: insert(:group).id}]
+      }, user)
+
+      assert cluster.name == "test"
+      assert cluster.deploy_token
+      assert cluster.token_readable
+
+      assert_receive {:event, %PubSub.ClusterCreated{item: ^cluster}}
+
+      %{write_bindings: [userb, group]} = Console.Repo.preload(cluster, [:write_bindings])
+
+      assert group.group_id
+      assert userb.user_id == user.id
+
+      [svc] = Clusters.services(cluster)
+
+      assert svc.repository_id == git.id
+      assert svc.git.ref == Console.Deployments.Settings.agent_ref()
+      assert svc.git.folder == "charts/deployment-operator"
+      assert svc.templated
+
+      {:ok, %{"deployToken" => token, "url" => url} = secrets} = Services.configuration(svc)
+      assert token == cluster.deploy_token
+      assert url == Path.join(Console.conf(:ext_url), "ext/gql")
+      assert secrets["clusterId"] == cluster.id
+      assert secrets["kasAddress"] == "wss://kas.example.com"
+    end
+
     test "it can create a gcp cluster with cloud specific configs" do
       user = admin_user()
       provider = insert(:cluster_provider, cloud: "gcp")
