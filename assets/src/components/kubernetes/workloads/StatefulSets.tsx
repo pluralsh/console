@@ -11,7 +11,7 @@ import {
   useStatefulSetsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../common/ResourceList'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { UsageText } from '../../cluster/TableElements'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
@@ -21,13 +21,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
+import { getWorkloadsBreadcrumbs } from './Workloads'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'workloads',
-    url: getWorkloadsAbsPath(cluster?.id),
-  },
+  ...getWorkloadsBreadcrumbs(cluster),
   {
     label: 'stateful sets',
     url: `${getWorkloadsAbsPath(cluster?.id)}/${STATEFUL_SETS_REL_PATH}`,

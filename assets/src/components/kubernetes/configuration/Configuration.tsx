@@ -18,6 +18,19 @@ import {
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { useCluster } from '../Cluster'
+import { Maybe } from '../../../generated/graphql-kubernetes'
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import { getBaseBreadcrumbs } from '../common/utils'
+
+export const getConfigurationBreadcrumbs = (
+  cluster?: Maybe<ClusterTinyFragment>
+) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'configuration',
+    url: getConfigurationAbsPath(cluster?.id),
+  },
+]
 
 const directory = [
   { path: CONFIG_MAPS_REL_PATH, label: 'Config maps' },

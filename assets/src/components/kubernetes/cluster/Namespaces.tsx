@@ -11,7 +11,7 @@ import {
   NamespacesQueryVariables,
   useNamespacesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 
 import { ClusterTinyFragment } from '../../../generated/graphql'
@@ -23,13 +23,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { NamespacePhaseChip } from './utils'
+import { getClusterBreadcrumbs } from './Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'cluster',
-    url: getClusterAbsPath(cluster?.id),
-  },
+  ...getClusterBreadcrumbs(cluster),
   {
     label: 'namespaces',
     url: `${getClusterAbsPath(cluster?.id)}/${NAMESPACES_REL_PATH}`,

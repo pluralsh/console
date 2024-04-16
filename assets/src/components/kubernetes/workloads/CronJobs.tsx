@@ -11,7 +11,7 @@ import {
   Maybe,
   useCronJobsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
@@ -24,13 +24,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { CronJobSuspendChip, WorkloadImages } from './utils'
+import { getWorkloadsBreadcrumbs } from './Workloads'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'workloads',
-    url: getWorkloadsAbsPath(cluster?.id),
-  },
+  ...getWorkloadsBreadcrumbs(cluster),
   {
     label: 'cron jobs',
     url: `${getWorkloadsAbsPath(cluster?.id)}/${CRON_JOBS_REL_PATH}`,

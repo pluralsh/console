@@ -25,13 +25,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { PVStatusChip } from './utils'
+import { getStorageBreadcrumbs } from './Storage'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'storage',
-    url: getStorageAbsPath(cluster?.id),
-  },
+  ...getStorageBreadcrumbs(cluster),
   {
     label: 'persistent volumes',
     url: `${getStorageAbsPath(cluster?.id)}/${PERSISTENT_VOLUMES_REL_PATH}`,

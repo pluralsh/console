@@ -18,6 +18,17 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { useCluster } from '../Cluster'
+import { Maybe } from '../../../generated/graphql-kubernetes'
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import { getBaseBreadcrumbs } from '../common/utils'
+
+export const getClusterBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'cluster',
+    url: getClusterAbsPath(cluster?.id),
+  },
+]
 
 const directory = [
   { path: NODES_REL_PATH, label: 'Nodes' },

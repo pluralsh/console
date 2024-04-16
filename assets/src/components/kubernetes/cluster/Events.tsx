@@ -21,16 +21,12 @@ import {
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { getBaseBreadcrumbs } from '../common/utils'
 
 import { EventTypeChip } from './utils'
+import { getClusterBreadcrumbs } from './Cluster'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'cluster',
-    url: getClusterAbsPath(cluster?.id),
-  },
+  ...getClusterBreadcrumbs(cluster),
   {
     label: 'events',
     url: `${getClusterAbsPath(cluster?.id)}/${EVENTS_REL_PATH}`,

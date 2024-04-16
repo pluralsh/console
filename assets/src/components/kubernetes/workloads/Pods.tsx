@@ -11,7 +11,7 @@ import {
   PodsQueryVariables,
   usePodsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { ClusterTinyFragment } from '../../../generated/graphql'
@@ -26,13 +26,10 @@ import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
 
 import { WorkloadImages, toReadiness } from './utils'
+import { getWorkloadsBreadcrumbs } from './Workloads'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'workloads',
-    url: getWorkloadsAbsPath(cluster?.id),
-  },
+  ...getWorkloadsBreadcrumbs(cluster),
   {
     label: 'pods',
     url: `${getWorkloadsAbsPath(cluster?.id)}/${PODS_REL_PATH}`,

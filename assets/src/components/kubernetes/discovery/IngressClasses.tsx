@@ -11,7 +11,7 @@ import {
   Maybe,
   useIngressClassesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
@@ -20,12 +20,10 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
+import { getDiscoveryBreadcrumbs } from './Discovery'
+
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'discovery',
-    url: getDiscoveryAbsPath(cluster?.id),
-  },
+  ...getDiscoveryBreadcrumbs(cluster),
   {
     label: 'ingress classes',
     url: `${getDiscoveryAbsPath(cluster?.id)}/${INGRESS_CLASSES_REL_PATH}`,

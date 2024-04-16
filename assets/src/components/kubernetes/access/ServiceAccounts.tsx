@@ -10,7 +10,7 @@ import {
   ServiceAccountsQueryVariables,
   useServiceAccountsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
@@ -19,12 +19,10 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
+import { getAccessBreadcrumbs } from './Access'
+
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'access',
-    url: getAccessAbsPath(cluster?.id),
-  },
+  ...getAccessBreadcrumbs(cluster),
   {
     label: 'service accounts',
     url: `${getAccessAbsPath(cluster?.id)}/${SERVICE_ACCOUNTS_REL_PATH}`,

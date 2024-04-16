@@ -28,12 +28,8 @@ import {
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-
 import { useCluster } from '../Cluster'
-
-import { DataSelectInputs } from '../common/DataSelect'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
-
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
 import { getBreadcrumbs } from './Secrets'

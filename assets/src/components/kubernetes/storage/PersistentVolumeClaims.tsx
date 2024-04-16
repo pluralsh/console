@@ -11,7 +11,7 @@ import {
   PersistentVolumeClaimsQueryVariables,
   usePersistentVolumeClaimsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { InlineLink } from '../../utils/typography/InlineLink'
@@ -24,13 +24,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { PVCStatusChip } from './utils'
+import { getStorageBreadcrumbs } from './Storage'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'storage',
-    url: getStorageAbsPath(cluster?.id),
-  },
+  ...getStorageBreadcrumbs(cluster),
   {
     label: 'persistent volume claims',
     url: `${getStorageAbsPath(

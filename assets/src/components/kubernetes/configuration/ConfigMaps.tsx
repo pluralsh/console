@@ -4,7 +4,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import {
   Configmap_ConfigMapList as ConfigMapListT,
@@ -21,12 +21,10 @@ import {
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import { useCluster } from '../Cluster'
 
+import { getConfigurationBreadcrumbs } from './Configuration'
+
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'configuration',
-    url: getConfigurationAbsPath(cluster?.id),
-  },
+  ...getConfigurationBreadcrumbs(cluster),
   {
     label: 'config maps',
     url: `${getConfigurationAbsPath(cluster?.id)}/${CONFIG_MAPS_REL_PATH}`,

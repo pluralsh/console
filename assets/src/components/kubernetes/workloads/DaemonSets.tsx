@@ -11,7 +11,7 @@ import {
   Maybe,
   useDaemonSetsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 
 import { UsageText } from '../../cluster/TableElements'
@@ -25,13 +25,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
+import { getWorkloadsBreadcrumbs } from './Workloads'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'workloads',
-    url: getWorkloadsAbsPath(cluster?.id),
-  },
+  ...getWorkloadsBreadcrumbs(cluster),
   {
     label: 'daemon sets',
     url: `${getWorkloadsAbsPath(cluster?.id)}/${DAEMON_SETS_REL_PATH}`,

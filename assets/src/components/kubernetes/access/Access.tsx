@@ -19,6 +19,17 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { useCluster } from '../Cluster'
+import { Maybe } from '../../../generated/graphql-kubernetes'
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import { getBaseBreadcrumbs } from '../common/utils'
+
+export const getAccessBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'access',
+    url: getAccessAbsPath(cluster?.id),
+  },
+]
 
 const directory = [
   { path: ROLES_REL_PATH, label: 'Roles' },

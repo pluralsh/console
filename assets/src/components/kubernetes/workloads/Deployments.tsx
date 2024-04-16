@@ -11,7 +11,7 @@ import {
   useDeploymentsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../common/ResourceList'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { UsageText } from '../../cluster/TableElements'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
@@ -22,13 +22,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
+import { getWorkloadsBreadcrumbs } from './Workloads'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'workloads',
-    url: getWorkloadsAbsPath(cluster?.id),
-  },
+  ...getWorkloadsBreadcrumbs(cluster),
   {
     label: 'deployments',
     url: `${getWorkloadsAbsPath(cluster?.id)}/${DEPLOYMENTS_REL_PATH}`,

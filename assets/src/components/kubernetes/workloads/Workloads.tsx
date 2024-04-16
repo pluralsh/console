@@ -22,6 +22,9 @@ import {
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { useCluster } from '../Cluster'
+import { Maybe } from '../../../generated/graphql-kubernetes'
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import { getBaseBreadcrumbs } from '../common/utils'
 
 const directory = [
   { path: DEPLOYMENTS_REL_PATH, label: 'Deployments' },
@@ -33,6 +36,16 @@ const directory = [
   { path: CRON_JOBS_REL_PATH, label: 'Cron jobs' },
   { path: REPLICATION_CONTROLLERS_REL_PATH, label: 'Replication controllers' },
 ] as const
+
+export const getWorkloadsBreadcrumbs = (
+  cluster?: Maybe<ClusterTinyFragment>
+) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'workloads',
+    url: getWorkloadsAbsPath(cluster?.id),
+  },
+]
 
 export default function Workloads() {
   const cluster = useCluster()

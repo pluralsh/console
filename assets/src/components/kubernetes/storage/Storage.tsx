@@ -19,6 +19,17 @@ import {
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { useCluster } from '../Cluster'
+import { Maybe } from '../../../generated/graphql-kubernetes'
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import { getBaseBreadcrumbs } from '../common/utils'
+
+export const getStorageBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'storage',
+    url: getStorageAbsPath(cluster?.id),
+  },
+]
 
 const directory = [
   {

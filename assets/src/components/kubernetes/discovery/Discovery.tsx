@@ -19,6 +19,19 @@ import {
 } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { useCluster } from '../Cluster'
+import { Maybe } from '../../../generated/graphql-kubernetes'
+import { ClusterTinyFragment } from '../../../generated/graphql'
+import { getBaseBreadcrumbs } from '../common/utils'
+
+export const getDiscoveryBreadcrumbs = (
+  cluster?: Maybe<ClusterTinyFragment>
+) => [
+  ...getBaseBreadcrumbs(cluster),
+  {
+    label: 'discovery',
+    url: getDiscoveryAbsPath(cluster?.id),
+  },
+]
 
 const directory = [
   { path: SERVICES_REL_PATH, label: 'Services' },

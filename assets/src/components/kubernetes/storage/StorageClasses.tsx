@@ -12,7 +12,7 @@ import {
   StorageClassesQueryVariables,
   useStorageClassesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { ClusterTinyFragment } from '../../../generated/graphql'
 import {
@@ -21,12 +21,10 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
+import { getStorageBreadcrumbs } from './Storage'
+
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'storage',
-    url: getStorageAbsPath(cluster?.id),
-  },
+  ...getStorageBreadcrumbs(cluster),
   {
     label: 'storage classes',
     url: `${getStorageAbsPath(cluster?.id)}/${STORAGE_CLASSES_REL_PATH}`,

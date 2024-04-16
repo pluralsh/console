@@ -11,7 +11,7 @@ import {
   ServicesQueryVariables,
   useServicesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 
 import { ClusterTinyFragment } from '../../../generated/graphql'
@@ -23,13 +23,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { TableEndpoints, serviceTypeDisplayName } from './utils'
+import { getDiscoveryBreadcrumbs } from './Discovery'
 
 export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'discovery',
-    url: getDiscoveryAbsPath(cluster?.id),
-  },
+  ...getDiscoveryBreadcrumbs(cluster),
   {
     label: 'services',
     url: `${getDiscoveryAbsPath(cluster?.id)}/${SERVICES_REL_PATH}`,
