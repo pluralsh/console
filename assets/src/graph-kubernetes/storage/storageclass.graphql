@@ -13,6 +13,7 @@ query StorageClasses(
     @rest(
       path: "storageclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }

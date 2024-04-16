@@ -7,7 +7,6 @@ import {
   useClustersTinyQuery,
 } from '../../generated/graphql'
 import { mapExistingNodes } from '../../utils/graphql'
-
 import { getWorkloadsAbsPath } from '../../routes/kubernetesRoutesConsts'
 import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../helpers/kubernetes.client'

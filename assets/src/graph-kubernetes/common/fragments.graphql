@@ -127,6 +127,7 @@ fragment Selector on v1_LabelSelector {
 }
 
 fragment HorizontalPodAutoscalerList on horizontalpodautoscaler_HorizontalPodAutoscalerList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

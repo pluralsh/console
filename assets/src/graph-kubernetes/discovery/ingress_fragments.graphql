@@ -1,4 +1,5 @@
 fragment IngressList on ingress_IngressList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

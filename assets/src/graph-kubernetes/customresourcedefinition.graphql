@@ -13,6 +13,7 @@ query CustomResourceDefinitions(
     @rest(
       path: "crd?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
+    errors
     listMeta {
       totalItems
     }
@@ -87,6 +88,7 @@ query CustomResources(
     @rest(
       path: "crd/{args.namespace}/{args.crd}/object?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
+    errors
     listMeta {
       totalItems
     }
