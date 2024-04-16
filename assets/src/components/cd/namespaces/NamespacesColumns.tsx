@@ -1,82 +1,70 @@
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { Namespace } from 'generated/graphql'
+import { ManagedNamespace } from 'generated/graphql'
 import { toDateOrUndef } from 'utils/date'
 
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { Chip } from '@pluralsh/design-system'
+import { Edge } from 'utils/graphql'
 
-const columnHelper = createColumnHelper<Namespace>()
+const columnHelper = createColumnHelper<Edge<ManagedNamespace>>()
 
-export const ColName = columnHelper.accessor((namespace) => namespace, {
-  id: 'name',
-  header: 'Name',
-  meta: { truncate: true, gridTemplate: 'minmax(180px,300px)' },
-  cell: function Cell({ getValue }) {
-    const namespace = getValue()
+export const ColName = columnHelper.accessor(
+  (namespace) => namespace.node?.name,
+  {
+    id: 'name',
+    header: 'Name',
+    meta: { truncate: true, gridTemplate: 'minmax(180px,1fr)' },
+    cell: function Cell({ getValue }) {
+      return getValue()
+    },
+  }
+)
 
-    return namespace ? namespace.metadata.name : '--'
+export const ColLastActivity = columnHelper.accessor(
+  (namespace) => {
+    const updatedAt = toDateOrUndef(namespace?.node?.updatedAt)
+    const insertedAt = toDateOrUndef(namespace?.node?.insertedAt)
+
+    return updatedAt || insertedAt || undefined
   },
-})
+  {
+    id: 'lastUpdated',
+    header: 'Last Updated ',
+    sortingFn: 'datetime',
+    cell: ({ getValue }) => <DateTimeCol date={getValue()?.toISOString()} />,
+  }
+)
 
-export const ColNamespace = columnHelper.accessor((namespace) => namespace, {
-  id: 'namespace',
-  header: 'Namespace',
-  meta: { truncate: true, gridTemplate: 'minmax(180px,300px)' },
-  cell: function Cell({ getValue }) {
-    const namespace = getValue()
-
-    return namespace ? namespace.metadata.name : '--'
-  },
-})
-
-export const ColStatus = columnHelper.accessor((namespace) => namespace, {
-  id: 'status',
-  header: 'Status',
-  meta: { truncate: true, gridTemplate: 'minmax(180px,300px)' },
-  cell: function Cell({ getValue }) {
-    const namespace = getValue()
-    const namespacePhaseSeverity = {
-      active: 'success',
-      terminating: 'error',
-    }
-    const phase = namespace?.status.phase?.toLowerCase() || 'Unknown'
-
-    return (
-      <Chip
-        severity={namespacePhaseSeverity[phase]}
-        css={{ width: 'fit-content' }}
-      >
-        {namespace.status.phase}
-      </Chip>
-    )
-  },
-})
-
-export const ColFinalizers = columnHelper.accessor((namespace) => namespace, {
-  id: 'finalizers',
-  header: 'Finalizers',
+export const ColLabels = columnHelper.accessor(({ node }) => node, {
+  id: 'labels',
+  header: 'Labels',
   meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
   cell: ({ getValue }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const namespace = getValue()
 
-    const finalizers = namespace?.spec.finalizers?.join(', ')
+    const labels = Object.keys(namespace?.labels || {})
+      ?.map((label) => `${label}: ${namespace?.labels?.[label]}`)
+      .join(', ')
 
-    return finalizers || ''
+    return labels || ''
   },
 })
 
-export const ColCreatedAt = columnHelper.accessor(
-  (namespace) => {
-    const insertedAt = toDateOrUndef(namespace?.metadata.creationTimestamp)
+export const ColAnnotations = columnHelper.accessor(({ node }) => node, {
+  id: 'annotations',
+  header: 'Annotations',
+  meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
+  cell: ({ getValue }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const namespace = getValue()
 
-    return insertedAt || undefined
+    const annotations = Object.keys(namespace?.annotations || {})
+      ?.map(
+        (annotation) => `${annotation}: ${namespace?.annotations?.[annotation]}`
+      )
+      .join(', ')
+
+    return annotations || ''
   },
-  {
-    id: 'createdAt',
-    header: 'Created at',
-    sortingFn: 'datetime',
-    cell: ({ getValue }) => <DateTimeCol date={getValue()?.toISOString()} />,
-  }
-)
+})
